@@ -1,16 +1,16 @@
 import { Idl } from '@coral-xyz/anchor';
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 
 import { getIdlSpecType } from '@/app/utils/convertLegacyIdl';
 
 import { DownloadableButton } from '../common/Downloadable';
 import { IDLBadge } from '../common/IDLBadge';
-import dynamic from 'next/dynamic';
 
 // Necessary to avoid hydration errors
 const ReactJson = dynamic(() => import('react-json-view'), {
-    ssr: false,
     loading: () => <div>Loading IDL...</div>,
+    ssr: false,
 });
 
 interface Props {

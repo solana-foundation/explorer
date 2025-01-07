@@ -1,12 +1,12 @@
 import { Idl } from '@coral-xyz/anchor';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { useMemo } from 'react';
 import * as elfy from 'elfy';
-import { useAccountInfo, useFetchAccountInfo } from './accounts';
 import pako from 'pako';
-import useSWR from 'swr';
+import { useMemo } from 'react';
 import { useEffect } from 'react';
+import useSWR from 'swr';
 
+import { useAccountInfo, useFetchAccountInfo } from './accounts';
 import { fetchIdlFromMetadataProgram } from './program-metadata';
 
 export function useIdlFromMetadataProgram(programAddress: string, url: string, useSuspense = true): Idl | null {
