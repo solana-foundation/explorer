@@ -50,7 +50,6 @@ import { Address } from 'web3js-experimental';
 
 import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
-import { useIdlFromProgramMetadataProgram } from '@/app/providers/idl';
 import { useProgramMetadata } from '@/app/providers/program-metadata';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
@@ -790,13 +789,13 @@ function ProgramMetaDataLink({ tab, address, pubkey }: { tab: Tab; address: stri
 
 function IdlDataLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
     const { url } = useCluster();
-    const { idl: anchorIdl } = useAnchorProgram(pubkey.toString(), url);
-    const { idl: metadataIdl } = useIdlFromProgramMetadataProgram(pubkey.toString(), url);
+    const { idl } = useAnchorProgram(pubkey.toString(), url);
     const path = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
 
-    if (!anchorIdl && !metadataIdl) {
+    // Will be null if no anchor and no program metadata IDL
+    if (!idl) {
         return null;
     }
 

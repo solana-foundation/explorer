@@ -1,5 +1,6 @@
+import { Idl } from '@coral-xyz/anchor';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { fetchProgramMetadata, ProgramMetaData } from 'solana-program-metadata';
+import { fetchIDL, fetchProgramMetadata, ProgramMetaData } from 'solana-program-metadata';
 
 const cachedLogoProgramPromises: Record<
     string,
@@ -55,7 +56,13 @@ export function useProgramMetadata(programAddress: string, url: string): Program
     return programMetaData;
 }
 
-export type AnchorAccount = {
-    layout: string;
-    account: object;
-};
+export async function fetchIdlFromMetadataProgram(programAddress: string, connection: Connection): Promise<Idl | null> {
+    const result = await fetchIDL(new PublicKey(programAddress), connection.rpcEndpoint);
+
+    if (!result) {
+        return null;
+    }
+
+    const idl = JSON.parse(result);
+    return idl;
+}

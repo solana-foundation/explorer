@@ -1,13 +1,17 @@
-'use client';
-
 import { Idl } from '@coral-xyz/anchor';
 import { useState } from 'react';
-import ReactJson from 'react-json-view';
 
 import { getIdlSpecType } from '@/app/utils/convertLegacyIdl';
 
 import { DownloadableButton } from '../common/Downloadable';
 import { IDLBadge } from '../common/IDLBadge';
+import dynamic from 'next/dynamic';
+
+// Necessary to avoid hydration errors
+const ReactJson = dynamic(() => import('react-json-view'), {
+    ssr: false,
+    loading: () => <div>Loading IDL...</div>,
+});
 
 interface Props {
     idl: Idl;
@@ -15,13 +19,13 @@ interface Props {
     title?: string;
 }
 
-export function IdlCard({ idl, programId, title = "Program IDL" }: Props) {
+export function IdlCard({ idl, programId, title = 'Program IDL' }: Props) {
     const [collapsedValue, setCollapsedValue] = useState<boolean | number>(1);
 
     if (!idl) {
-        console.log('No IDL found');
         return null;
     }
+
     const spec = getIdlSpecType(idl);
 
     return (

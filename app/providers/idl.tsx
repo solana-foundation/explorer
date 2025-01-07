@@ -1,86 +1,95 @@
-import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
-import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
-import { Connection, Keypair, PublicKey } from '@solana/web3.js';
+import { Idl } from '@coral-xyz/anchor';
+import { Connection, PublicKey } from '@solana/web3.js';
 import { useMemo } from 'react';
-import { fetchIDL } from 'solana-program-metadata';
+import * as elfy from 'elfy';
+import { useAccountInfo, useFetchAccountInfo } from './accounts';
+import pako from 'pako';
+import useSWR from 'swr';
+import { useEffect } from 'react';
 
-import { formatIdl } from '../utils/convertLegacyIdl';
+import { fetchIdlFromMetadataProgram } from './program-metadata';
 
-const cachedIdlPromises: Record<
-    string,
-    void | { __type: 'promise'; promise: Promise<void> } | { __type: 'result'; result: Idl | null }
-> = {};
+export function useIdlFromMetadataProgram(programAddress: string, url: string, useSuspense = true): Idl | null {
+    const { data: idl } = useSWR(
+        [`program-metadata-idl`, programAddress, url],
+        async () => {
+            try {
+                const connection = new Connection(url);
+                return await fetchIdlFromMetadataProgram(programAddress, connection);
+            } catch (error) {
+                return null;
+            }
+        },
+        {
+            revalidateOnFocus: false,
+            suspense: useSuspense,
+        }
+    );
 
-async function fetchIdlFromMetadataProgram(programAddress: string, connection: Connection): Promise<Idl | null> {
-    const result = await fetchIDL(new PublicKey(programAddress), connection.rpcEndpoint);
+    return idl ?? null;
+}
 
-    if (!result) {
-        console.error('IDL not found!');
+function parseIdlFromElf(elfBuffer: any) {
+    const elf = elfy.parse(elfBuffer);
+    const solanaIdlSection = elf.body.sections.find((section: any) => section.name === '.solana.idl');
+    if (!solanaIdlSection) {
+        throw new Error('.solana.idl section not found');
+    }
+
+    // Extract the section data
+    const solanaIdlData = solanaIdlSection.data;
+
+    // Parse the section data
+    solanaIdlData.readUInt32LE(4);
+    const ptr = solanaIdlData.readUInt32LE(4);
+    const size = solanaIdlData.readBigUInt64LE(8);
+
+    // Get the compressed bytes
+    const byteRange = elfBuffer.slice(ptr, ptr + Number(size));
+
+    // Decompress the IDL
+    try {
+        const inflatedIdl = JSON.parse(new TextDecoder().decode(pako.inflate(byteRange)));
+        return inflatedIdl;
+    } catch (err) {
+        console.error('Failed to decompress data:', err);
         return null;
     }
-
-    const idl = JSON.parse(result);
-    return idl;
 }
 
-function useIdlFromMetadataProgram(programAddress: string, url: string): Idl | null {
-    const key = `${programAddress}-${url}`;
-    const cacheEntry = cachedIdlPromises[key];
+// Unused
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function useIdlFromSolanaProgramBinary(programAddress: string): Idl | null {
+    const fetchAccountInfo = useFetchAccountInfo();
+    const programInfo = useAccountInfo(programAddress);
+    const programDataAddress: string | undefined = programInfo?.data?.data.parsed?.parsed.info['programData'];
+    const programDataInfo = useAccountInfo(programDataAddress);
 
-    // If there's no cached entry, start fetching the IDL
-    if (cacheEntry === undefined) {
-        const connection = new Connection(url);
-        const promise = fetchIdlFromMetadataProgram(programAddress, connection)
-            .then(idl => {
-                cachedIdlPromises[key] = {
-                    __type: 'result',
-                    result: idl,
-                };
-            })
-            .catch(err => {
-                console.error('Error fetching IDL:', err);
-                cachedIdlPromises[key] = { __type: 'result', result: null };
-            });
-        cachedIdlPromises[key] = {
-            __type: 'promise',
-            promise,
-        };
-        throw promise; // Throw the promise for React Suspense
-    }
-
-    // If the cache has a pending promise, throw it
-    if (cacheEntry.__type === 'promise') {
-        throw cacheEntry.promise;
-    }
-
-    // Return the cached result
-    return cacheEntry.result;
-}
-
-function getProvider(url: string) {
-    return new AnchorProvider(new Connection(url), new NodeWallet(Keypair.generate()), {});
-}
-
-export function useIdlFromProgramMetadataProgram(
-    programAddress: string,
-    url: string
-): { program: Program | null; idl: Idl | null } {
-    const idlFromProgramMetadataProgram = useIdlFromMetadataProgram(programAddress, url);
-    const idl = idlFromProgramMetadataProgram;
-    const program: Program<Idl> | null = useMemo(() => {
-        if (!idl) return null;
-        try {
-            const program = new Program(formatIdl(idl, programAddress), getProvider(url));
-            return program;
-        } catch (e) {
-            console.error('Error creating anchor program for', programAddress, e, { idl });
-            return null;
+    useEffect(() => {
+        if (!programInfo) {
+            fetchAccountInfo(new PublicKey(programAddress), 'parsed');
         }
-    }, [idl, programAddress, url]);
-    return { idl, program };
-}
+    }, [programAddress, fetchAccountInfo, programInfo]);
 
-export type AnchorAccount = {
-    layout: string;
-    account: object;
-};
+    useEffect(() => {
+        if (programDataAddress && !programDataInfo) {
+            fetchAccountInfo(new PublicKey(programDataAddress), 'raw');
+        }
+    }, [programDataAddress, fetchAccountInfo, programDataInfo]);
+
+    const param = useMemo(() => {
+        if (programDataInfo && programDataInfo.data && programDataInfo.data.data.raw) {
+            const offset =
+                (programInfo?.data?.owner.toString() ?? '') === 'BPFLoaderUpgradeab1e11111111111111111111111' ? 45 : 0;
+            const raw = Buffer.from(programDataInfo.data.data.raw.slice(offset));
+
+            try {
+                return parseIdlFromElf(raw);
+            } catch (e) {
+                return null;
+            }
+        }
+        return null;
+    }, [programDataInfo, programInfo]);
+    return param;
+}
