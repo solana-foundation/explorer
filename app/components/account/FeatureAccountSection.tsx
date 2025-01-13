@@ -32,7 +32,6 @@ const FeatureCard = ({ account }: Props) => {
             </tr>
         );
     }
-    console.log(feature);
 
     return (
         <div className="card">
