@@ -1,6 +1,7 @@
 'use client';
 
 import { useCluster } from '@providers/cluster';
+import { VersionedMessage } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import bs58 from 'bs58';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -13,8 +14,6 @@ import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
 import { searchTokens } from '../utils/token-search';
 import { MIN_MESSAGE_LENGTH } from './inspector/RawInputCard';
-import { VersionedMessage } from '@solana/web3.js';
-import base58 from 'bs58';
 
 interface SearchOptions {
     label: string;
@@ -366,7 +365,7 @@ function decodeTransactionFromBase64(base64String: string): {
             for (let i = 0; i < numSignatures; i++) {
                 const sigBytes = buffer.subarray(offset, offset + 64);
                 if (sigBytes.length !== 64) return null;
-                signatures.push(base58.encode(sigBytes));
+                signatures.push(bs58.encode(sigBytes));
                 offset += 64;
             }
 
