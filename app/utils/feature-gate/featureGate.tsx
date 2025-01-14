@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Address } from '@/app/components/common/Address';
 import { useCluster } from '@/app/providers/cluster';
 
-import { Cluster } from '../cluster';
+import { Cluster, clusterName } from '../cluster';
 
 // feature gate, simd PR, activation devnet, activation testnet
 export type FeatureInfoType = {
@@ -223,7 +223,7 @@ export function UpcomingFeatures() {
     const filteredFeatures = FEATURES.filter(feature => {
         switch (cluster) {
             case Cluster.MainnetBeta:
-                // Show features activated on devnet or testnet
+                // Show features activated on devnet and testnet
                 return feature.devnetActivationEpoch !== null && feature.testnetActivationEpoch !== null;
             case Cluster.Devnet:
                 // Show features activated on testnet, mark if already activated on devnet
@@ -245,7 +245,7 @@ export function UpcomingFeatures() {
             <div className="card-header">
                 <h3 className="card-header-title">
                     <span className="me-2">🚀</span>
-                    Upcoming Protocol Features
+                    Upcoming {clusterName(cluster)} Features
                 </h3>
             </div>
             <div className="card-body">
@@ -314,18 +314,6 @@ export function UpcomingFeatures() {
                     ))}
                 </div>
             </div>
-
-            <style jsx>{`
-                .feature-card {
-                    transition: transform 0.2s;
-                }
-                .feature-card:hover {
-                    transform: translateY(-5px);
-                }
-                .feature-icon {
-                    font-size: 1.5rem;
-                }
-            `}</style>
         </div>
     );
 }

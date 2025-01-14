@@ -484,3 +484,16 @@ pre {
 .metadata-json-viewer .string-value {
     word-break: break-all;
 }
+
+.feature-card {
+    transition: transform 0.2s;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.5); // Add green glow using Bootstrap's success color
+}
+
+.feature-icon {
+    font-size: 1.5rem;
+}
