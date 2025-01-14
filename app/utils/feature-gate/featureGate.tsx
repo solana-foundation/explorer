@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { Address } from '@/app/components/common/Address';
 import { useCluster } from '@/app/providers/cluster';
+
 import { Cluster } from '../cluster';
 
 // feature gate, simd PR, activation devnet, activation testnet
@@ -79,7 +80,7 @@ export const FEATURES: FeatureInfoType[] = [
     },
     {
         description: 'Enable new voting instruction',
-        devnetActivationEpoch: 812,
+        devnetActivationEpoch: 813,
         key: 'tSynMCspg4xFiCj1v3TDb4c7crMR5tSBhLz4sF7rrNA',
         simd: {
             link: 'https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0138-deprecate-legacy-vote-instructions.md',
@@ -223,7 +224,7 @@ export function UpcomingFeatures() {
         switch (cluster) {
             case Cluster.MainnetBeta:
                 // Show features activated on devnet or testnet
-                return feature.devnetActivationEpoch !== null || feature.testnetActivationEpoch !== null;
+                return feature.devnetActivationEpoch !== null && feature.testnetActivationEpoch !== null;
             case Cluster.Devnet:
                 // Show features activated on testnet, mark if already activated on devnet
                 return feature.testnetActivationEpoch !== null;
