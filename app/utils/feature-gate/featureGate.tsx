@@ -58,7 +58,7 @@ export const FEATURES: FeatureInfoType[] = [
         title: 'Disable account loader special case',
     },
     {
-        description: '',
+        description: 'Removing legacy floating number arithmetic operation in fee calculation, make it integer-based',
         devnetActivationEpoch: 802,
         key: 'BtVN7YjDzNE6Dk7kTT7YTDgMNUZTNgiSJgsdzAeTg2jF',
         simd: null,
@@ -78,7 +78,7 @@ export const FEATURES: FeatureInfoType[] = [
         title: 'Enable sol_get_sysvar',
     },
     {
-        description: 'Disables legacy voting instructions',
+        description: 'Enable new voting instruction',
         devnetActivationEpoch: 812,
         key: 'tSynMCspg4xFiCj1v3TDb4c7crMR5tSBhLz4sF7rrNA',
         simd: {
@@ -135,47 +135,63 @@ export const FEATURES: FeatureInfoType[] = [
     },
     // Upcoming Testnet features
     {
-        description: '',
+        description: 'Disables rent collection for accounts, to be activated when all rent-paying accounts are gone',
         devnetActivationEpoch: null,
         key: 'CJzY83ggJHqPGDq8VisV3U91jDJLuEaALZooBrXtnnLU',
-        simd: null,
+        simd: {
+            link: 'https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0084-disable-rent-fees-collection.md',
+            number: 84,
+        },
         testnetActivationEpoch: null,
         title: 'Disable rent fees collection',
     },
     {
-        description: '',
+        description: 'Enable on-chain verification of Passkeys and the WebAuthn Standard (secp256r1) signatures',
         devnetActivationEpoch: null,
         key: 'sr11RdZWgbHTHxSroPALe6zgaT5A1K9LcE4nfsZS4gi',
-        simd: null,
+        simd: {
+            link: 'https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0075-precompile-for-secp256r1-sigverify.md',
+            number: 75,
+        },
         testnetActivationEpoch: null,
         title: 'Enable secp256r1 precompile',
     },
     {
-        description: '',
+        description: 'Migrate the Address Lookup Table to a BPF program',
         devnetActivationEpoch: null,
         key: 'C97eKZygrkU4JxJsZdjgbUY7iQR7rKTr4NyDWo2E5pRm',
-        simd: null,
+        simd: {
+            link: 'https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0128-migrate-address-lookup-table-to-core-bpf.md',
+            number: 128,
+        },
         testnetActivationEpoch: null,
         title: 'Address Lookup Table to Core BPF',
     },
     {
-        description: '',
+        description: 'Add a new syscall to get the epoch stake',
         devnetActivationEpoch: null,
         key: 'FKe75t4LXxGaQnVHdUKM6DSFifVVraGZ8LyNo7oPwy1Z',
-        simd: null,
+        simd: {
+            link: 'https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0133-syscall-get-epoch-stake.md',
+            number: 133,
+        },
         testnetActivationEpoch: null,
         title: 'GetEpochStake',
     },
     {
-        description: '',
+        description:
+            'Removes pitfalls and foot-guns from the virtual machine and syscalls by enabling account data direct mapping',
         devnetActivationEpoch: null,
         key: 'GJVDwRkUPNdk9QaK4VsU4g1N41QNxhy1hevjf8kz45Mq',
-        simd: null,
+        simd: {
+            link: 'https://github.com/solana-foundation/solana-improvement-documents/pull/219',
+            number: 219,
+        },
         testnetActivationEpoch: null,
-        title: 'Enable account data direct mapping',
+        title: 'Stricter VM verification constraints',
     },
     {
-        description: '',
+        description: 'Only vote for blocks with sufficiently sized fec sets',
         devnetActivationEpoch: null,
         key: 'ffecLRhhakKSGhMuc6Fz2Lnfq4uT9q3iu9ZsNaPLxPc',
         simd: null,
