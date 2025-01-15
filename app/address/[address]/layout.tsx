@@ -44,7 +44,7 @@ import React, { PropsWithChildren } from 'react';
 import useSWRImmutable from 'swr/immutable';
 import { Base58EncodedAddress } from 'web3js-experimental';
 
-import { CoreAssetHeader } from '@/app/components/account/mplCore/CoreAssetHeader';
+import { CoreAccountHeader } from '@/app/components/account/mplCore/CoreAccountHeader';
 import { isCoreAccount } from '@/app/components/account/mplCore/isCoreAccount';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 
@@ -242,7 +242,8 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
     }
 
     if (account && isCoreAccount(account)) {
-        return <CoreAssetHeader account={account} />;
+        console.log("Core Account");
+        return <CoreAccountHeader account={account} />;
     }
 
     const nftokenNFT = account && isNFTokenAccount(account);

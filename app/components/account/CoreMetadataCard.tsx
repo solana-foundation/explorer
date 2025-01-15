@@ -1,7 +1,7 @@
-import { AssetV1 } from '@metaplex-foundation/mpl-core';
+import { AssetV1, CollectionV1 } from '@metaplex-foundation/mpl-core';
 import ReactJson from 'react-json-view';
 
-export function CoreMetadataCard({ asset }: { asset: AssetV1 | null }) {
+export function CoreMetadataCard({ asset }: { asset: AssetV1 | CollectionV1 | null }) {
     // Here we grossly stringify and parse the metadata to avoid the bigints which ReactJsonView does not support.
     const json = JSON.parse(JSON.stringify(asset, (_, v) => typeof v === 'bigint' ? v.toString() : v));
     return (
