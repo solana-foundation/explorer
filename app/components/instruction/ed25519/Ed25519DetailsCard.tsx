@@ -138,7 +138,17 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                         </tr>
                         <tr>
                             <td>Message</td>
-                            <td className="text-lg-end font-monospace">
+                            <td
+                                className="text-lg-end"
+                                style={{
+                                    fontSize: '0.85rem',
+                                    lineHeight: '1.2',
+                                    maxWidth: '100%',
+                                    overflowWrap: 'break-word',
+                                    whiteSpace: 'normal',
+                                    wordBreak: 'break-all',
+                                }}
+                            >
                                 <Copyable text={Buffer.from(message).toString('base64')}>
                                     <span className="font-monospace">{Buffer.from(message).toString('base64')}</span>
                                 </Copyable>
