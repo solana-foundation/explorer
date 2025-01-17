@@ -43,8 +43,6 @@ import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
-import { Ed25519DetailsCard } from '../instruction/ed25519/Ed25519DetailsCard';
-import { isEd25519Instruction } from '../instruction/ed25519/types';
 import { LighthouseDetailsCard } from '../instruction/lighthouse/LighthouseDetailsCard';
 import { isLighthouseInstruction } from '../instruction/lighthouse/types';
 import { isMangoInstruction } from '../instruction/mango/types';
@@ -168,7 +166,6 @@ function InstructionCard({
     const key = `${index}-${childIndex}`;
     const { program: anchorProgram } = useAnchorProgram(ix.programId.toString(), url);
 
-    console.log('ix', ix);
     if ('parsed' in ix) {
         const props = {
             childIndex,
@@ -222,8 +219,6 @@ function InstructionCard({
 
     if (isAddressLookupTableInstruction(transactionIx)) {
         return <AddressLookupTableDetailsCard key={key} {...props} />;
-    } else if (isEd25519Instruction(transactionIx)) {
-        return <Ed25519DetailsCard key={key} {...props} tx={tx} />;
     } else if (isMangoInstruction(transactionIx)) {
         return <MangoDetailsCard key={key} {...props} />;
     } else if (isSerumInstruction(transactionIx)) {
