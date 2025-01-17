@@ -436,14 +436,19 @@ export function getIdlSpecType(idl: any): IdlSpec {
 
 export type IdlSpec = '0.1.0' | 'legacy';
 
-export function formatIdl(idl: any, programAddress?: string): Idl {
+export function formatIdl(idl: any, programAddress?: string, removeTypes = true): Idl {
     const spec = getIdlSpecType(idl);
 
     switch (spec) {
         case '0.1.0':
             return idl as Idl;
-        case 'legacy':
-            return removeUnusedTypes(convertLegacyIdl(idl as LegacyIdl, programAddress));
+        case 'legacy': {
+            let converted = convertLegacyIdl(idl as LegacyIdl, programAddress);
+            if (removeTypes) {
+                converted = removeUnusedTypes(converted);
+            }
+            return converted;
+        }
         default:
             throw new Error(`IDL spec not supported: ${spec}`);
     }

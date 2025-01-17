@@ -120,8 +120,20 @@ export function useAnchorProgram(programAddress: string, url: string): { program
     const program: Program<Idl> | null = useMemo(() => {
         if (!idl) return null;
         try {
-            const program = new Program(formatIdl(idl, programAddress), getProvider(url));
-            return program;
+            try {
+                const program = new Program(idl, getProvider(url));
+                return program;
+            } catch (e) {
+                // If raw IDL fails, try with formatted IDL
+                try {
+                    const program = new Program(formatIdl(idl, programAddress, false), getProvider(url));
+                    console.log('idl', formatIdl(idl, programAddress, false));
+                    return program;
+                } catch (e) {
+                    // Try again with types removed
+                    return new Program(formatIdl(idl, programAddress, true), getProvider(url));
+                }
+            }
         } catch (e) {
             console.error('Error creating anchor program for', programAddress, e, { idl });
             return null;
