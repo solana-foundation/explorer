@@ -33,7 +33,7 @@ interface Ed25519SignatureOffsets {
 }
 
 // See https://docs.anza.xyz/runtime/programs/#ed25519-program
-function decodeEd25519Instruction(data: Buffer): { count: number; offsets: Ed25519SignatureOffsets[] } {
+function decodeEd25519Instruction(data: Buffer): Ed25519SignatureOffsets[] {
     const count = data.readUInt8(0);
     const offsets: Ed25519SignatureOffsets[] = [];
 
@@ -50,16 +50,16 @@ function decodeEd25519Instruction(data: Buffer): { count: number; offsets: Ed255
             signatureOffset: data.readUInt16LE(cursor),
         };
         offsets.push(offset);
-        cursor += 14; // Size of one Ed25519SignatureOffsets struct
+        cursor += 14; // Number of bytes in one Ed25519SignatureOffsets struct
     }
 
-    return { count, offsets };
+    return offsets;
 }
 
 export function Ed25519DetailsCard(props: DetailsProps) {
     const { tx, ix, index, result, innerCards, childIndex } = props;
 
-    const parsed = decodeEd25519Instruction(ix.data);
+    const offsets = decodeEd25519Instruction(ix.data);
 
     return (
         <InstructionCard
@@ -77,7 +77,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                 </td>
             </tr>
 
-            {parsed.offsets.map((offset, index) => {
+            {offsets.map((offset, index) => {
                 const signatureIx = tx.message.instructions[
                     offset.signatureInstructionIndex
                 ] as PartiallyDecodedInstruction;
