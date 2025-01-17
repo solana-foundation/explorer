@@ -56,6 +56,25 @@ function decodeEd25519Instruction(data: Buffer): Ed25519SignatureOffsets[] {
     return offsets;
 }
 
+const extractData = (
+    tx: ParsedTransaction,
+    instructionIndex: number,
+    sourceData: Buffer,
+    dataOffset: number,
+    dataLength: number
+): Uint8Array | null => {
+    if (instructionIndex === 65535) {
+        return sourceData.slice(dataOffset, dataOffset + dataLength);
+    }
+
+    const targetIx = tx.message.instructions[instructionIndex] as PartiallyDecodedInstruction;
+    try {
+        return bs58.decode(targetIx.data).slice(dataOffset, dataOffset + dataLength);
+    } catch (err) {
+        return null;
+    }
+};
+
 export function Ed25519DetailsCard(props: DetailsProps) {
     const { tx, ix, index, result, innerCards, childIndex } = props;
 
@@ -78,22 +97,22 @@ export function Ed25519DetailsCard(props: DetailsProps) {
             </tr>
 
             {offsets.map((offset, index) => {
-                const signatureIx = tx.message.instructions[
-                    offset.signatureInstructionIndex
-                ] as PartiallyDecodedInstruction;
-                const signature = signatureIx.data.slice(offset.signatureOffset, offset.signatureOffset + 64);
+                const signature = extractData(
+                    tx,
+                    offset.signatureInstructionIndex,
+                    ix.data,
+                    offset.signatureOffset,
+                    64
+                );
 
-                const pubkeyIx = tx.message.instructions[
-                    offset.publicKeyInstructionIndex
-                ] as PartiallyDecodedInstruction;
-                const pubkey = bs58.decode(pubkeyIx.data).slice(offset.publicKeyOffset, offset.publicKeyOffset + 32);
+                const pubkey = extractData(tx, offset.publicKeyInstructionIndex, ix.data, offset.publicKeyOffset, 32);
 
-                const messageIx = tx.message.instructions[
-                    offset.messageInstructionIndex
-                ] as PartiallyDecodedInstruction;
-                const message = messageIx.data.slice(
+                const message = extractData(
+                    tx,
+                    offset.messageInstructionIndex,
+                    ix.data,
                     offset.messageDataOffset,
-                    offset.messageDataOffset + offset.messageDataSize
+                    offset.messageDataSize
                 );
 
                 return (
@@ -106,34 +125,55 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                         <tr>
                             <td>Signature Reference</td>
                             <td className="text-lg-end">
-                                Instruction {offset.signatureInstructionIndex}, Offset {offset.signatureOffset}
+                                {offset.signatureInstructionIndex === 65535
+                                    ? 'This instruction'
+                                    : `Instruction ${offset.signatureInstructionIndex}`}
+                                {', '}
+                                Offset {offset.signatureOffset}
                             </td>
                         </tr>
                         <tr>
                             <td>Signature</td>
-                            <td className="text-lg-end font-monospace">
-                                <Copyable text={Buffer.from(signature).toString('base64')}>
-                                    <span className="font-monospace">{Buffer.from(signature).toString('base64')}</span>
-                                </Copyable>
+                            <td className="text-lg-end">
+                                {signature ? (
+                                    <Copyable text={Buffer.from(signature).toString('base64')}>
+                                        <span className="font-monospace">
+                                            {Buffer.from(signature).toString('base64')}
+                                        </span>
+                                    </Copyable>
+                                ) : (
+                                    'Invalid reference'
+                                )}
                             </td>
                         </tr>
                         <tr>
                             <td>Public Key Reference</td>
                             <td className="text-lg-end">
-                                Instruction {offset.publicKeyInstructionIndex}, Offset {offset.publicKeyOffset}
+                                {offset.publicKeyInstructionIndex === 65535
+                                    ? 'This instruction'
+                                    : `Instruction ${offset.publicKeyInstructionIndex}`}
+                                {', '}
+                                Offset {offset.publicKeyOffset}
                             </td>
                         </tr>
                         <tr>
                             <td>Public Key</td>
                             <td className="text-lg-end">
-                                <Address pubkey={new PublicKey(pubkey)} alignRight link />
+                                {pubkey ? (
+                                    <Address pubkey={new PublicKey(pubkey)} alignRight link />
+                                ) : (
+                                    'Invalid reference'
+                                )}
                             </td>
                         </tr>
                         <tr>
                             <td>Message Reference</td>
                             <td className="text-lg-end">
-                                Instruction {offset.messageInstructionIndex}, Offset {offset.messageDataOffset}, Size{' '}
-                                {offset.messageDataSize}
+                                {offset.messageInstructionIndex === 65535
+                                    ? 'This instruction'
+                                    : `Instruction ${offset.messageInstructionIndex}`}
+                                {', '}
+                                Offset {offset.messageDataOffset}, Size {offset.messageDataSize}
                             </td>
                         </tr>
                         <tr>
@@ -149,9 +189,15 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                                     wordBreak: 'break-all',
                                 }}
                             >
-                                <Copyable text={Buffer.from(message).toString('base64')}>
-                                    <span className="font-monospace">{Buffer.from(message).toString('base64')}</span>
-                                </Copyable>
+                                {message ? (
+                                    <Copyable text={Buffer.from(message).toString('base64')}>
+                                        <span className="font-monospace">
+                                            {Buffer.from(message).toString('base64')}
+                                        </span>
+                                    </Copyable>
+                                ) : (
+                                    'Invalid reference'
+                                )}
                             </td>
                         </tr>
                     </React.Fragment>
