@@ -113,7 +113,7 @@ describe('Ed25519DetailsCard', () => {
         expect(card).toHaveTextContent('Signature Reference');
         expect(card).toHaveTextContent('Instruction 1, Offset 12');
         expect(card).toHaveTextContent(
-            'UkJHZjY1ZHVSWUI4Q1Z3QXZUTTlGdThFNWlVNXpyZFQybnhoYjhzOVBpdlNzcHJZUVRyOHByRmZaVHNtVVV4Vg=='
+            'N9as9LPJYos0hfOY7XuqIMN8Tf+Ovuk3RWreoQDSfJI+CXyw9Byf91Lvx+0G2zwovPhn88ogPN6SIuctHpPVAw=='
         );
 
         // Check public key details
@@ -125,7 +125,53 @@ describe('Ed25519DetailsCard', () => {
         expect(card).toHaveTextContent('Message Reference');
         expect(card).toHaveTextContent('Instruction 1, Offset 110, Size 138');
         expect(card).toHaveTextContent(
-            'Q1Z4RTlQZ1NIa29XbnluQUM2MkdZMnNnanVCSGtEdXZGOU5BVng2MlY2V0xFQlR2Y0pWUTdzWWY0RG9jQlg4am1CTjFqNXRUTERwTlp2Vzc5eE5wU0xKUDJnb3RGNW1pWWprQ2JMb1NRaWhRWEw2OXlvMmgyeTIxZTc4WEJ0cXFVSmdCbk1YUnhN'
+            'MDAwMTAxMDA0MDQyMGYwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAxMDAwMDAwMDAwMDAwMDAwMDAxYzgwMTk5NTI1ZTczMTcwMDAwMDAwMTMwZGRlZDM3MTcwMDAwMDAwMDAwYzhmNzFlMTUwMDAwMDAwMDM0NzM3MDQxNTQzNDUzNDgwMDAw'
         );
+    });
+
+    it('renders basic Ed25519 verification instruction with self-contained single signature', () => {
+        // XBHwdBYNu8J326yKeHiRyEudMaFVhz3Pb6ahgcfceRLV6kbmd14Z8vE6YnV4zu5WWNESmvhxmjUj4CpoQmwwhLJ
+
+        // Example of single signature verification
+        const ed25519x = {
+            data: Buffer.from(
+                '01003000ffff1000ffff70002000ffff8f2ed8bcd09b724040a0fc59ce9b5ea78525b6054def83d68f3a3930aa76e5bd4c105e1989c4d276372c97a5efb79d89bcc78f094f155be1b369e62e8b7eb42f42b3341f6be3b5c6f13a176fd7ca32323bf759c547126117365dccdae56e180f07932bbeab087035132975788c9af2a2c1a63e371e0866efcdb5a1952a1d2422',
+                'hex'
+            ),
+            keys: [],
+            programId: new PublicKey('Ed25519SigVerify111111111111111111111111111'),
+        };
+
+        const tx = {
+            message: {
+                accountKeys: [],
+                instructions: [ed25519x],
+                recentBlockhash: '11111111111111111111111111111111',
+            },
+            signatures: [],
+        } as unknown as ParsedTransaction;
+
+        render(<Ed25519DetailsCard tx={tx} ix={ed25519x} {...defaultProps} />);
+
+        const card = screen.getByTestId('instruction-card');
+
+        // Check title
+        expect(card).toHaveTextContent('Ed25519: Verify Signature');
+        expect(card).toHaveTextContent('Signature #1');
+        expect(card).toHaveTextContent('Signature Reference');
+        expect(card).toHaveTextContent('This instruction, Offset 48');
+        expect(card).toHaveTextContent(
+            'TBBeGYnE0nY3LJel77edibzHjwlPFVvhs2nmLot+tC9CszQfa+O1xvE6F2/XyjIyO/dZxUcSYRc2Xcza5W4YDw=='
+        );
+
+        // Check public key details
+        expect(card).toHaveTextContent('Public Key Reference');
+        expect(card).toHaveTextContent('This instruction, Offset 16');
+        expect(card).toHaveTextContent('AdvjU3gzNNXxASXEKBHovk3xAjFxQVn1UX6fUdgSvnS8');
+
+        // Check message details
+        expect(card).toHaveTextContent('Message Reference');
+        expect(card).toHaveTextContent('This instruction, Offset 112, Size 32');
+        expect(card).toHaveTextContent('B5MrvqsIcDUTKXV4jJryosGmPjceCGbvzbWhlSodJCI=');
     });
 });
