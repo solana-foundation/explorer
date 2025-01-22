@@ -13,6 +13,8 @@ import { Copyable } from '../../common/Copyable';
 import { InstructionCard } from '../InstructionCard';
 import { PROGRAM_ID as ED25519_PROGRAM_ID } from './types';
 
+const ED25519_SELF_REFERENCE_INSTRUCTION_INDEX = 65535;
+
 type DetailsProps = {
     tx: ParsedTransaction;
     ix: TransactionInstruction;
@@ -63,7 +65,7 @@ const extractData = (
     dataOffset: number,
     dataLength: number
 ): Uint8Array | null => {
-    if (instructionIndex === 65535) {
+    if (instructionIndex === ED25519_SELF_REFERENCE_INSTRUCTION_INDEX) {
         return sourceData.slice(dataOffset, dataOffset + dataLength);
     }
 
@@ -125,7 +127,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                         <tr>
                             <td>Signature Reference</td>
                             <td className="text-lg-end">
-                                {offset.signatureInstructionIndex === 65535
+                                {offset.signatureInstructionIndex === ED25519_SELF_REFERENCE_INSTRUCTION_INDEX
                                     ? 'This instruction'
                                     : `Instruction ${offset.signatureInstructionIndex}`}
                                 {', '}
@@ -149,7 +151,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                         <tr>
                             <td>Public Key Reference</td>
                             <td className="text-lg-end">
-                                {offset.publicKeyInstructionIndex === 65535
+                                {offset.publicKeyInstructionIndex === ED25519_SELF_REFERENCE_INSTRUCTION_INDEX
                                     ? 'This instruction'
                                     : `Instruction ${offset.publicKeyInstructionIndex}`}
                                 {', '}
@@ -169,7 +171,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                         <tr>
                             <td>Message Reference</td>
                             <td className="text-lg-end">
-                                {offset.messageInstructionIndex === 65535
+                                {offset.messageInstructionIndex === ED25519_SELF_REFERENCE_INSTRUCTION_INDEX
                                     ? 'This instruction'
                                     : `Instruction ${offset.messageInstructionIndex}`}
                                 {', '}
