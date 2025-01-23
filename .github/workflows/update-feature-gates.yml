@@ -1,0 +1,34 @@
+name: Update Feature Gates
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install requests beautifulsoup4
+
+      - name: Scrape and generate features
+        run: python scripts/parse_feature_gates.py
+
+      - name: Update featureGate.tsx
+        run: node scripts/updateFeatureGates.mjs
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add app/utils/feature-gate/constants.ts
+          git commit -m "Update feature gates from Agave wiki" || exit 0
+          git push
