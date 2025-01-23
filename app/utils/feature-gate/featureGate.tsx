@@ -34,7 +34,7 @@ export const FEATURES: FeatureInfoType[] = [
         description: 'Enable confidential token transfers',
         devnetActivationEpoch: 801,
         key: 'zkhiy5oLowR7HY4zogXjCjeMXyruLqBwSWH21qcFtnv',
-        mainnetActivationEpoch: null,
+        mainnetActivationEpoch: 731,
         simd: {
             link: 'https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0153-elgamal-proof-program.md',
             number: 153,
@@ -58,7 +58,7 @@ export const FEATURES: FeatureInfoType[] = [
         description: 'Simplify account loading',
         devnetActivationEpoch: 800,
         key: 'EQUMpNFr7Nacb1sva56xn1aLfBxppEoSBH8RRVdkcD1x',
-        mainnetActivationEpoch: null,
+        mainnetActivationEpoch: 728,
         simd: null,
         testnetActivationEpoch: 713,
         title: 'Disable account loader special case',
