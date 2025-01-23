@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: '0 0 * * *' # Daily at midnight
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -22,10 +26,15 @@ jobs:
       - name: Scrape and generate features
         run: python scripts/parse_feature_gates.py
 
-      - name: Commit and push changes
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add app/utils/feature-gate/featureGates.json
-          git commit -m "Update feature gates from Agave wiki" || exit 0
-          git push
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch-token: ${{ secrets.GITHUB_TOKEN }}
+          sign-commits: true
+          commit-message: 'Update feature gates from Agave wiki'
+          title: 'Automated Feature Gates Update'
+          body: 'Auto-generated PR from daily feature gates check'
+          branch: 'feature-gates-update'
+          base: main
+          maintainer-can-modify: true
+          delete-branch: true
