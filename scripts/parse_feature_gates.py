@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import json
 import os
 
+FEATURE_GATES_PATH = 'app/utils/feature-gate/featureGates.json'
+
 def parse_wiki():
     url = "https://github.com/anza-xyz/agave/wiki/Feature-Gate-Tracker-Schedule"
     proposals_url = "https://github.com/solana-foundation/solana-improvement-documents/tree/main/proposals"
@@ -42,10 +44,10 @@ def parse_wiki():
                         "key": cols[0],
                         "simd": str(int(simd)) if simd and simd.isdigit() else "",
                         "version": cols[2],
-                        "testnet": cols[3],
-                        "devnet": cols[4],
+                        "testnetActivationEpoch": int(cols[3]) if cols[3].isdigit() else None,
+                        "devnetActivationEpoch": int(cols[4]) if cols[4].isdigit() else None,
                         # Has to be updated via script
-                        "mainnet": None,
+                        "mainnetActivationEpoch": None,
                         "title": cols[5],
                         # Has to be manually updated
                         "description": None,
@@ -55,10 +57,11 @@ def parse_wiki():
                     # Generate enhanced description
                     features.append(feature)
     
+
     # Load existing features if file exists
     existing_features = []
-    if os.path.exists('features.json'):
-        with open('features.json', 'r') as f:
+    if os.path.exists(FEATURE_GATES_PATH):
+        with open(FEATURE_GATES_PATH, 'r') as f:
             existing_features = json.load(f)
     
     # Update existing features and add new ones
@@ -67,8 +70,8 @@ def parse_wiki():
         if existing['key'] in features_by_key:
             # Only update devnet and testnet epochs
             new_feature = features_by_key[existing['key']]
-            existing_features[i]['devnet'] = new_feature['devnet']
-            existing_features[i]['testnet'] = new_feature['testnet']
+            existing_features[i]['devnetActivationEpoch'] = new_feature['devnetActivationEpoch']
+            existing_features[i]['testnetActivationEpoch'] = new_feature['testnetActivationEpoch']
             del features_by_key[existing['key']]
     
     new_features = list(features_by_key.values())
@@ -80,7 +83,7 @@ def parse_wiki():
     # Combine existing and new features
     all_features = existing_features + new_features
     
-    with open('app/utils/feature-gate/featureGates.json', 'w') as f:
+    with open(FEATURE_GATES_PATH, 'w') as f:
         json.dump(all_features, f, indent=2)
 
 if __name__ == "__main__":
