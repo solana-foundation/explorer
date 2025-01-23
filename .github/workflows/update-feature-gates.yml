@@ -22,13 +22,10 @@ jobs:
       - name: Scrape and generate features
         run: python scripts/parse_feature_gates.py
 
-      - name: Update featureGate.tsx
-        run: node scripts/updateFeatureGates.mjs
-
       - name: Commit and push changes
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add app/utils/feature-gate/constants.ts
+          git add app/utils/feature-gate/featureGates.json
           git commit -m "Update feature gates from Agave wiki" || exit 0
           git push

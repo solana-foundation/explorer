@@ -5,7 +5,8 @@ import { Address } from '@/app/components/common/Address';
 import { useCluster } from '@/app/providers/cluster';
 
 import { Cluster, clusterName } from '../cluster';
-import { FEATURES } from './constants';
+import FEATURES from './featureGates.json';
+import { FeatureInfoType } from './types';
 
 export function UpcomingFeatures() {
     const { cluster } = useCluster();
@@ -15,7 +16,7 @@ export function UpcomingFeatures() {
         return null;
     }
 
-    const filteredFeatures = FEATURES.filter(feature => {
+    const filteredFeatures = (FEATURES as FeatureInfoType[]).filter((feature: FeatureInfoType) => {
         switch (cluster) {
             case Cluster.MainnetBeta:
                 // Show features activated on devnet and testnet
@@ -108,14 +109,14 @@ export function UpcomingFeatures() {
                                             link
                                             truncateChars={feature.simd ? 12 : 20}
                                         />
-                                        {feature.simd && (
+                                        {feature.simd && feature.simd_link && (
                                             <a
-                                                href={feature.simd.link}
+                                                href={feature.simd_link}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="btn btn-sm btn-outline-primary"
                                             >
-                                                See SIMD {feature.simd.number} →
+                                                See SIMD {feature.simd} →
                                             </a>
                                         )}
                                     </div>

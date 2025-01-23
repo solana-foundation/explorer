@@ -80,7 +80,7 @@ def parse_wiki():
     # Combine existing and new features
     all_features = existing_features + new_features
     
-    with open('features.json', 'w') as f:
+    with open('app/utils/feature-gate/featureGates.json', 'w') as f:
         json.dump(all_features, f, indent=2)
 
 if __name__ == "__main__":
