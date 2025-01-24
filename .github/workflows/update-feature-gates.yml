@@ -35,6 +35,6 @@ jobs:
           title: 'Automated Feature Gates Update'
           body: 'Auto-generated PR from daily feature gates check'
           branch: 'feature-gates-update'
-          base: main
+          base: master
           maintainer-can-modify: true
           delete-branch: true
