@@ -1,63 +1,99 @@
 import requests
-from bs4 import BeautifulSoup
 import json
 import os
+import re
 
 FEATURE_GATES_PATH = 'app/utils/feature-gate/featureGates.json'
 
+def get_markdown_tables(markdown_text):
+    """Get all markdown tables from the text"""
+    table_pattern = r'\|([^\n]+)\|\n\|(?:[: -]+\|)+\n((?:\|[^\n]+\|\n)*)'
+    tables = re.findall(table_pattern, markdown_text)
+    return tables
+
+
+def parse_markdown_tables(table):
+    """Parse a markdown table and return list of rows"""
+    header_row, content = table
+
+    # Parse header
+    headers = [h.strip() for h in header_row.split('|') if h.strip()]
+    
+    # Parse rows
+    rows = []
+    for line in content.strip().split('\n'):
+        if not line.strip():
+            continue
+        row_data = [cell.strip() for cell in line.split('|')[1:-1]]  # Skip first and last empty cells
+        if row_data:
+            row_dict = dict(zip(headers, row_data))
+            rows.append(row_dict)
+            
+    return rows
+
+
+def get_proposals_data():
+    """Fetch SIMD proposals data from GitHub API"""
+    proposals_url = "https://api.github.com/repos/solana-foundation/solana-improvement-documents/contents/proposals"
+    response = requests.get(proposals_url)
+    if response.status_code != 200:
+        print(f"Failed to fetch proposals: {response.status_code}")
+        return {}
+    
+    proposals = {}
+    for item in response.json():
+        if item['name'].endswith('.md') and item['name'][:4].isdigit():
+            simd_number = item['name'][:4]
+            proposals[simd_number] = item['html_url']
+    
+    return proposals
+
+
 def parse_wiki():
-    url = "https://github.com/anza-xyz/agave/wiki/Feature-Gate-Tracker-Schedule"
-    proposals_url = "https://github.com/solana-foundation/solana-improvement-documents/tree/main/proposals"
-    
-    # Get main wiki page
+    # Fetch markdown content
+    url = "https://raw.githubusercontent.com/wiki/anza-xyz/agave/Feature-Gate-Tracker-Schedule.md"
     response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
+    if response.status_code != 200:
+        print(f"Failed to fetch wiki: {response.status_code}")
+        return
     
-    # Get proposals directory listing
-    proposals_response = requests.get(proposals_url)
-    proposals_soup = BeautifulSoup(proposals_response.text, 'html.parser')
-    proposal_files = [a.find('a')['title'] for a in proposals_soup.find_all('tr', {'class': 'react-directory-row'}) 
-                     if a.find('a') and a.find('a')['title'].startswith(tuple('0123456789')) 
-                     and len(a.find('a')['title'].split('-')[0]) == 4 
-                     and a.find('a')['title'].endswith('.md')]
+    markdown_content = response.text
+    tables = get_markdown_tables(markdown_content)
+    
+    # Get SIMD proposals data
+    proposals = get_proposals_data()
     
     features = []
     
-    # Parse all feature tables
-    tables = soup.find_all('table')
-    for table in tables[1:]: # Skip first table
-        if 'Pending' in table.find_previous('h3').text:
-            for row in table.find_all('tr')[1:]:  # Skip header
-                cols = [col.get_text(strip=True) for col in row.find_all('td')]
-                if len(cols) >= 6:
-                    simd = cols[1].strip() if cols[1].strip() != 'v2.0.0' else None
-                    
-                    # Find matching proposal file if SIMD exists
-                    simd_link = None
-                    if simd and simd.isdigit():
-                        simd_prefix = simd.zfill(4)
-                        matching_files = [f for f in proposal_files if f.startswith(simd_prefix)]
-                        if matching_files:
-                            simd_link = f"https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/{matching_files[0]}"
-                    
-                    feature = {
-                        "key": cols[0],
-                        "simd": str(int(simd)) if simd and simd.isdigit() else "",
-                        "version": cols[2],
-                        "testnetActivationEpoch": int(cols[3]) if cols[3].isdigit() else None,
-                        "devnetActivationEpoch": int(cols[4]) if cols[4].isdigit() else None,
-                        # Has to be updated via script
-                        "mainnetActivationEpoch": None,
-                        "title": cols[5],
-                        # Has to be manually updated
-                        "description": None,
-                        "simd_link": simd_link
-                    }
-                    
-                    # Generate enhanced description
-                    features.append(feature)
+    # Parse pending mainnet, devnet and testnet tables (indexes 1, 2 and 3 in the markdown)
+    for table_index in [1, 2, 3]:
+        rows = parse_markdown_tables(tables[table_index])
+        
+        for row in rows:
+            if len(row) >= 6:  # Ensure we have enough columns
+                simd = row['SIMD']
+                
+                # Clean up SIMD number and find matching proposal
+                simd = simd.strip()
+                simd_link = None
+                if simd and simd.isdigit():
+                    simd_number = simd.zfill(4)
+                    simd_link = proposals.get(simd_number)
+                
+                feature = {
+                    "key": row['Key'],
+                    "simd": row['SIMD'],
+                    "version": row['Version'],
+                    "testnetActivationEpoch": int(row['Testnet']) if row['Testnet'] and row['Testnet'].isdigit() else None,
+                    "devnetActivationEpoch": int(row['Devnet']) if row['Devnet'] and row['Devnet'].isdigit() else None,
+                    "mainnetActivationEpoch": None,  # Has to be updated via script
+                    "title": row['Description'],
+                    "description": None,  # Has to be manually updated
+                    "simd_link": simd_link
+                }
+                
+                features.append(feature)
     
-
     # Load existing features if file exists
     existing_features = []
     if os.path.exists(FEATURE_GATES_PATH):
@@ -74,8 +110,9 @@ def parse_wiki():
             existing_features[i]['testnetActivationEpoch'] = new_feature['testnetActivationEpoch']
             del features_by_key[existing['key']]
     
+    # Print new features that were found
     new_features = list(features_by_key.values())
-    if len(new_features) > 0:
+    if new_features:
         print("New features:")
         for f in new_features:
             print(f"{f['key']} - {f['title']}")
@@ -83,8 +120,10 @@ def parse_wiki():
     # Combine existing and new features
     all_features = existing_features + new_features
     
+    # Write updated features to file
     with open(FEATURE_GATES_PATH, 'w') as f:
         json.dump(all_features, f, indent=2)
+
 
 if __name__ == "__main__":
     parse_wiki() 
