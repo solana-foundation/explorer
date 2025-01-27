@@ -118,6 +118,9 @@ importers:
       next:
         specifier: 14.2.5
         version: 14.2.5(@babel/core@7.21.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.53.0)
+      node-fetch:
+        specifier: ^2.6.9
+        version: 2.6.9
       p-limit:
         specifier: ^3.1.0
         version: 3.1.0
@@ -206,6 +209,9 @@ importers:
       '@types/node':
         specifier: 18.16.3
         version: 18.16.3
+      '@types/node-fetch':
+        specifier: ^2.6.12
+        version: 2.6.12
       '@types/pako':
         specifier: ^2.0.3
         version: 2.0.3
@@ -1832,6 +1838,9 @@ packages:
 
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
+
+  '@types/node-fetch@2.6.12':
+    resolution: {integrity: sha512-8nneRWKCg3rMtF69nLQJnOYUcbafYeFSjqkw3jCRLsqkWFlHaoQrr5mXmofFGOx3DKn7UfmBMyov8ySvLRVldA==}
 
   '@types/node@11.11.6':
     resolution: {integrity: sha512-Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==}
@@ -7831,6 +7840,11 @@ snapshots:
   '@types/json-schema@7.0.11': {}
 
   '@types/json5@0.0.29': {}
+
+  '@types/node-fetch@2.6.12':
+    dependencies:
+      '@types/node': 18.16.3
+      form-data: 4.0.0
 
   '@types/node@11.11.6': {}
 

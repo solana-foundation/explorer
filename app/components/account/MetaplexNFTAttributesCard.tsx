@@ -5,6 +5,9 @@ import React from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
+import { clusterSlug } from '@/app/utils/cluster';
+
+import fetchMetadata from './metadata/metadata';
 
 interface Attribute {
     trait_type: string;
@@ -26,12 +29,13 @@ export function MetaplexNFTAttributesCard({ account, onNotFound }: { account?: A
 }
 
 function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: string }) {
+    const { cluster } = useCluster();
     const [attributes, setAttributes] = React.useState<Attribute[]>([]);
     const [status, setStatus] = React.useState<'loading' | 'success' | 'error'>('loading');
 
     async function fetchMetadataAttributes() {
         try {
-            const response = await fetch(metadataUri);
+            const response = await fetchMetadata(clusterSlug(cluster), metadataUri);
             const metadata = await response.json();
 
             // Verify if the attributes value is an array
