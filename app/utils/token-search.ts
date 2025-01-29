@@ -48,7 +48,7 @@ export async function searchTokens(search: string, cluster: Cluster): Promise<Se
 
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
         const apiResponse = await fetch(
             `https://token-list-api.solana.cloud/v1/search?query=${encodeURIComponent(
                 search
