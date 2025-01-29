@@ -49,6 +49,7 @@ export function NFTokenCollectionNFTGrid({ collection }: { collection: string })
 
 function Nft({ nft }: { nft: NftokenTypes.NftInfo }) {
     const nftPath = useClusterPath({ pathname: `/address/${nft.address}` });
+
     return (
         <div
             style={{

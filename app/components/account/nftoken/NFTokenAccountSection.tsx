@@ -5,6 +5,8 @@ import { PublicKey } from '@solana/web3.js';
 import { Suspense, useState } from 'react';
 import { RefreshCw } from 'react-feather';
 
+import { getProxiedUri } from '@/app/features/metadata/utils';
+
 import { UnknownAccountCard } from '../UnknownAccountCard';
 import { parseNFTokenCollectionAccount, parseNFTokenNFTAccount } from './isNFTokenAccount';
 import { useCollectionNfts } from './nftoken-hooks';
@@ -104,7 +106,7 @@ export const NftokenImage = ({ url, size }: { url: string | undefined; size: num
                     onLoad={() => {
                         setIsLoading(false);
                     }}
-                    src={url}
+                    src={url ? getProxiedUri(url) : url}
                     width={size}
                 />
             </div>
