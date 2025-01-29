@@ -17,11 +17,19 @@ jest.mock('node-fetch', () => {
 /**
  *  mock valid response
  */
-function mockFetchOnce(data: any = {}){
+function mockFetchOnce(data: any = {}, headers: Headers = new Headers()) {
     // @ts-expect-error fetch does not have mocked fn
     fetch.mockResolvedValueOnce({
-        headers: new Headers(),
+        headers,
         json: async () => data
+    });
+}
+
+function mockFetchbinaryOnce(data: any = {}, headers: Headers = new Headers()) {
+    // @ts-expect-error fetch does not have mocked fn
+    fetch.mockResolvedValueOnce({
+        arrayBuffer: async () => Buffer.from(data),
+        headers
     });
 }
 
@@ -42,12 +50,28 @@ describe('fetchResource', () => {
     })
 
     it('should be called with proper arguments', async () => {
-        mockFetchOnce();
+        mockFetchOnce({}, new Headers({ 'Content-Type': 'application/json, charset=utf-8' }));
 
         const resource = await fetchResource(uri, headers, 100, 100);
 
         expect(fetch).toHaveBeenCalledWith(uri, expect.anything());
         expect(resource.data).toEqual({});
+    })
+
+    it('should throw exception for unsupported media', async () => {
+        mockFetchOnce();
+
+        expect(() => {
+            return fetchResource(uri, headers, 100, 100);
+        }).rejects.toThrowError('Unsupported Media Type');
+    })
+
+    it('should throw exception upon exceeded size', async () => {
+        mockRejectOnce(new Error('FetchError: content size at https://path/to/resour.ce over limit: 100'));
+
+        expect(() => {
+            return fetchResource(uri, headers, 100, 100);
+        }).rejects.toThrowError('Max Content Size Exceeded');
     })
 
     it('should handle AbortSignal', async () => {
@@ -61,7 +85,7 @@ describe('fetchResource', () => {
 
         expect(() => {
             return fetchResource(uri, headers, 100, 100);
-        }).rejects.toThrowError('Request Timeout')
+        }).rejects.toThrowError('Gateway Timeout')
     })
 
     it('should handle size overflow', async () => {
@@ -69,7 +93,7 @@ describe('fetchResource', () => {
 
         expect(() => {
             return fetchResource(uri, headers, 100, 100);
-        }).rejects.toThrowError('Max content size exceeded')
+        }).rejects.toThrowError('Max Content Size Exceeded')
     })
 
     it('should handle unexpected result', async () => {
