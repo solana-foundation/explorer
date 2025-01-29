@@ -3,11 +3,9 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { Account, isTokenProgramData } from '@providers/accounts';
 import React from 'react';
 
+import { getProxiedUri } from '@/app/features/metadata/utils';
 import { useCluster } from '@/app/providers/cluster';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
-import { clusterSlug } from '@/app/utils/cluster';
-
-import fetchMetadata from './metadata/metadata';
 
 interface Attribute {
     trait_type: string;
@@ -29,13 +27,12 @@ export function MetaplexNFTAttributesCard({ account, onNotFound }: { account?: A
 }
 
 function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: string }) {
-    const { cluster } = useCluster();
     const [attributes, setAttributes] = React.useState<Attribute[]>([]);
     const [status, setStatus] = React.useState<'loading' | 'success' | 'error'>('loading');
 
     async function fetchMetadataAttributes() {
         try {
-            const response = await fetchMetadata(clusterSlug(cluster), metadataUri);
+            const response = await fetch(getProxiedUri(metadataUri));
             const metadata = await response.json();
 
             // Verify if the attributes value is an array

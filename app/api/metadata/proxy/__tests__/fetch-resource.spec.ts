@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import fetch, { Headers } from 'node-fetch';
+
 import { fetchResource } from '../feature';
 
 jest.mock('node-fetch', () => {

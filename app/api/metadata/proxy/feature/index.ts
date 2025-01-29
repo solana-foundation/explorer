@@ -19,6 +19,7 @@ export async function fetchResource(uri: string, headers: Headers, timeout: numb
             size,
         })
         responseHeaders = response?.headers;
+
         data = await response.json();
     } catch(e) {
         if (e instanceof Error && e.name === 'TimeoutError') {

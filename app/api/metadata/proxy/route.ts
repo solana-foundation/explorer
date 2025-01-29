@@ -4,20 +4,16 @@ import { Headers } from 'node-fetch';
 import { fetchResource, StatusError } from './feature';
 
 type Params = {
-    params: {
-        // bypass network as we might apply caching strategy according the target chain later
-        network: string
-    }
+    params: {}
 }
 
 const USER_AGENT = process.env.NEXT_PUBLIC_METADATA_USER_AGENT ?? 'Solana Explorer';
 const MAX_SIZE = process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE ? Number(process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE) : 100_000; // 100 000 bytes
 const TIMEOUT = process.env.NEXT_PUBLIC_METADATA_TIMEOUT ? Number(process.env.NEXT_PUBLIC_METADATA_TIMEOUT) : 10_000; // 10s
 
-
 export async function GET(
     request: Request,
-    { params: { network: _network } }: Params,
+    { params: _params }: Params,
 ) {
     const isProxyEnabled = process.env.NEXT_PUBLIC_METADATA_ENABLED === 'true';
 
@@ -53,7 +49,7 @@ export async function GET(
         data = response.data;
         responseHeaders = response.headers;
     } catch(e: unknown) {
-        let status = (e as StatusError)?.status;
+        const status = (e as StatusError)?.status;
         switch(status) {
             case 413: {
                 return NextResponse.json({ error: 'Max content size exceeded' }, { status })

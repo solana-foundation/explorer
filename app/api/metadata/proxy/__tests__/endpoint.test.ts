@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import fetch, { Headers } from 'node-fetch';
+
 import { GET } from '../route';
 
 function setEnvironment(key: string, value: string) {
@@ -65,7 +66,7 @@ describe('metadata/[network] endpoint', () => {
     });
 
     it('should handle valid response successfully', async () => {
-        await mockFileResponseOnce({ name: "NFT", attributes: [] }, new Headers({
+        await mockFileResponseOnce({ attributes: [], name: "NFT" }, new Headers({
             'Cache-Control': 'no-cache',
             'Content-Length': '140',
             'Content-Type': 'application/json',
