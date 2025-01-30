@@ -114,6 +114,7 @@ describe('fetchResource', () => {
 
     it('should handle malformed JSON response gracefully', async () => {
         // Mock fetch to return a response with invalid JSON
+        // @ts-expect-error fetch does not have mocked fn
         fetch.mockResolvedValueOnce({
             headers: new Headers({ 'Content-Type': 'application/json' }),
             // Simulate malformed JSON by rejecting during json parsing
