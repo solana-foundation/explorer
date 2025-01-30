@@ -34,6 +34,11 @@ export async function GET(
         }
 
         uriParam = decodeURI(queryParam);
+
+        const uriProtocol = new URL(uriParam).protocol;
+        if (uriProtocol !== 'http:' && uriProtocol !== 'https:') {
+            return NextResponse.json({ error: 'Unsupported URI protocol' }, { status: 400 });
+        }
     } catch(_error) {
         return NextResponse.json({ error: errors[400].message }, { status: 400 })
     }

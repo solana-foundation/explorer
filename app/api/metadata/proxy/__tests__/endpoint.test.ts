@@ -35,6 +35,7 @@ function requestFactory(uri?: string) {
 
 describe('metadata/[network] endpoint', () => {
     const validUrl = encodeURI('http://external.resource/file.json');
+    const unsupportedUri = encodeURI('ftp://unsupported.resource/file.json');
 
     afterEach(() => {
         jest.clearAllMocks();
@@ -46,6 +47,14 @@ describe('metadata/[network] endpoint', () => {
         const { request, nextParams } = requestFactory();
         const response = await GET(request, nextParams);
         expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for URIs with unsupported protocols', async () => {
+        setEnvironment('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+
+        const request = requestFactory(unsupportedUri);
+        const response = await GET(request.request, request.nextParams);
+        expect(response.status).toBe(400);
     });
 
     it('should return proper status upon processig data', async () => {
