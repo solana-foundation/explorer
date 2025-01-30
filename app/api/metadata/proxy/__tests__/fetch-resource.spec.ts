@@ -111,4 +111,15 @@ describe('fetchResource', () => {
             expect(e.status).toEqual(500)
         }
     })
+
+    it('should handle malformed JSON response gracefully', async () => {
+        // Mock fetch to return a response with invalid JSON
+        fetch.mockResolvedValueOnce({
+            headers: new Headers({ 'Content-Type': 'application/json' }),
+            // Simulate malformed JSON by rejecting during json parsing
+            json: async () => { throw new SyntaxError('Unexpected token < in JSON at position 0') }
+        });
+
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Invalid JSON response');
+    });
 })
