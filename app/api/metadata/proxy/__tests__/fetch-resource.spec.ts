@@ -121,6 +121,6 @@ describe('fetchResource', () => {
             json: async () => { throw new SyntaxError('Unexpected token < in JSON at position 0') }
         });
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Invalid JSON response');
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Unsupported Media Type');
     });
 })

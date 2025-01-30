@@ -38,6 +38,9 @@ export async function processJson(data: fetch.Response){
     } catch(error) {
         if (matchMaxSizeError(error)) {
             throw errors[413];
+        } else if (error instanceof SyntaxError) {
+            // Handle JSON syntax errors specifically
+            throw errors[415];
         } else {
             // inform about any unexpected error.
             // might be a good one to track by Sentry, for example
