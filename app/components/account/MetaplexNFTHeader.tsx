@@ -44,7 +44,6 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
         },
         [dropdownRef]
     );
-
     return (
         <div className="row">
             <div className="col-auto ms-2 d-flex align-items-center">
