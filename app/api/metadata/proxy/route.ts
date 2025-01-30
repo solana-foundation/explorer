@@ -33,7 +33,7 @@ export async function GET(
             throw new Error('Absent URI');
         }
 
-        uriParam = decodeURI(queryParam);
+        uriParam = decodeURIComponent(queryParam);
 
         const uriProtocol = new URL(uriParam).protocol;
         if (uriProtocol !== 'http:' && uriProtocol !== 'https:') {

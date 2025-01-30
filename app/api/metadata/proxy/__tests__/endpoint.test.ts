@@ -34,8 +34,8 @@ function requestFactory(uri?: string) {
 }
 
 describe('metadata/[network] endpoint', () => {
-    const validUrl = encodeURI('http://external.resource/file.json');
-    const unsupportedUri = encodeURI('ftp://unsupported.resource/file.json');
+    const validUrl = encodeURIComponent('http://external.resource/file.json');
+    const unsupportedUri = encodeURIComponent('ftp://unsupported.resource/file.json');
 
     afterEach(() => {
         jest.clearAllMocks();
