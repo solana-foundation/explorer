@@ -25,14 +25,6 @@ function mockFetchOnce(data: any = {}, headers: Headers = new Headers()) {
     });
 }
 
-function mockFetchbinaryOnce(data: any = {}, headers: Headers = new Headers()) {
-    // @ts-expect-error fetch does not have mocked fn
-    fetch.mockResolvedValueOnce({
-        arrayBuffer: async () => Buffer.from(data),
-        headers
-    });
-}
-
 /**
  *  mock error during process
  */

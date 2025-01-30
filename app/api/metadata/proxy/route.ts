@@ -3,6 +3,7 @@ import { Headers } from 'node-fetch';
 
 import { fetchResource, StatusError } from './feature';
 import { errors } from './feature/errors';
+import { checkURLForPrivateIP, isHTTPProtocol } from './feature/ip';
 
 type Params = { params: {} }
 
@@ -14,6 +15,13 @@ const TIMEOUT = process.env.NEXT_PUBLIC_METADATA_TIMEOUT
     ? Number(process.env.NEXT_PUBLIC_METADATA_TIMEOUT)
     : 10_000; // 10s
 
+/**
+ *  Respond with error in a JSON format
+ */
+function respondWithError(status: keyof typeof errors, message?: string){
+    return NextResponse.json({ error: message ?? errors[status].message }, { status });
+}
+
 export async function GET(
     request: Request,
     { params: _params }: Params,
@@ -21,7 +29,7 @@ export async function GET(
     const isProxyEnabled = process.env.NEXT_PUBLIC_METADATA_ENABLED === 'true';
 
     if (!isProxyEnabled) {
-        return NextResponse.json({ error: errors[404].message }, { status: 404 });
+        return respondWithError(404)
     }
 
     let uriParam: string;
@@ -35,12 +43,19 @@ export async function GET(
 
         uriParam = decodeURIComponent(queryParam);
 
-        const uriProtocol = new URL(uriParam).protocol;
-        if (uriProtocol !== 'http:' && uriProtocol !== 'https:') {
-            return NextResponse.json({ error: 'Unsupported URI protocol' }, { status: 400 });
+        const parsedUrl = new URL(uriParam);
+
+        // check that uri has supported protocol despite of any other checks
+        if (!isHTTPProtocol(parsedUrl)) {
+            return respondWithError(400);
         }
-    } catch(_error) {
-        return NextResponse.json({ error: errors[400].message }, { status: 400 })
+
+        const isPrivate = await checkURLForPrivateIP(parsedUrl);
+        if (isPrivate) {
+            return respondWithError(403);
+        }
+    } catch (_error) {
+        return respondWithError(400);
     }
 
     const headers = new Headers({
@@ -56,32 +71,27 @@ export async function GET(
 
         data = response.data;
         resourceHeaders = response.headers;
-    } catch(e) {
+    } catch (e) {
         const status = (e as StatusError)?.status;
-        switch(status) {
-            case 413: {
-                return NextResponse.json({ error: errors[413].message }, { status });
-            }
-            case 415: {
-                return NextResponse.json({ error: errors[415].message });
-            }
-            case 504: {
-                return NextResponse.json({ error: errors[504].message }, { status });
-            }
+        switch (status) {
+            case 413:
+            case 415:
             case 500:
+            case 504: {
+                return respondWithError(status);
+            }
             default:
-                return NextResponse.json({ error: errors[500].message }, { status });
+                return respondWithError(500);
         }
-
     }
 
     // preserve original cache-control headers
     const responseHeaders = {
         'Cache-Control': resourceHeaders.get('cache-control') ?? 'no-cache',
-        'Content-Length': resourceHeaders.get('content-length') as string, // cast type as there is no chance at this point content-length be absent,
+        'Content-Length': resourceHeaders.get('content-length') as string,
         'Content-Type': resourceHeaders.get('content-type') ?? 'application/json, charset=utf-8',
         Etag: resourceHeaders.get('etag') ?? 'no-etag',
-    }
+    };
 
     if (data instanceof ArrayBuffer) {
         return new NextResponse(data, {
@@ -92,8 +102,6 @@ export async function GET(
             headers: responseHeaders,
         });
     } else {
-        return NextResponse.json({
-            error: errors[415].message,
-        }, { status: 415 });
+        return respondWithError(415);
     }
 }

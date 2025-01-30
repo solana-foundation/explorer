@@ -2,8 +2,11 @@
  * @jest-environment node
  */
 import fetch, { Headers } from 'node-fetch';
+import _dns from 'dns';
 
 import { GET } from '../route';
+
+const dns = _dns.promises;
 
 function setEnvironment(key: string, value: string) {
     Object.assign(process.env, { ...process.env, [key]: value });
@@ -16,6 +19,18 @@ jest.mock('node-fetch', () => {
     Object.assign(mockFn, originalFetch);
 
     return mockFn
+});
+
+jest.mock('dns', () => {
+    const originalDns = jest.requireActual('dns');
+    const lookupFn = jest.fn();
+    return {
+        ...originalDns,
+        promises: {
+            ...originalDns.promises,
+            lookup: lookupFn,
+        }
+    };
 });
 
 async function mockFileResponseOnce(data: any, headers: Headers){
@@ -71,7 +86,7 @@ describe('metadata/[network] endpoint', () => {
         // fail due to unexpected error
         const request3 = requestFactory(validUrl);
         const result = await GET(request3.request, request3.nextParams);
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(403);
     });
 
     it('should handle valid response successfully', async () => {
@@ -81,6 +96,8 @@ describe('metadata/[network] endpoint', () => {
             'Content-Type': 'application/json',
             'Etag': 'random-etag',
         }));
+        // @ts-expect-error lookup does not have mocked fn
+        dns.lookup.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
 
         const request = requestFactory(validUrl);
         expect((await GET(request.request, request.nextParams)).status).toBe(200);
