@@ -218,10 +218,10 @@ async function fetchMultipleAccounts({
 
     const BATCH_SIZE = 100;
     const connection = new Connection(url, 'confirmed');
+
     let nextBatchStart = 0;
     while (nextBatchStart < pubkeys.length) {
         const batch = pubkeys.slice(nextBatchStart, nextBatchStart + BATCH_SIZE);
-
         nextBatchStart += BATCH_SIZE;
 
         try {
