@@ -216,7 +216,7 @@
     "devnetActivationEpoch": null,
     "mainnetActivationEpoch": null,
     "title": "Snapshots use Accounts Lattice Hash",
-    "description": null,
+    "description": "Improve validator performance by using Accounts Lattice Hash for snapshots instead of the Merkle-based account hash",
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0220-snapshots-use-accounts-lattice-hash.md"
   },
   {
@@ -227,7 +227,7 @@
     "devnetActivationEpoch": null,
     "mainnetActivationEpoch": null,
     "title": "Reserve minimal CUs for builtins",
-    "description": null,
+    "description": "Allocate 3,000 compute units for builtins, instead of normal 200,000 compute units",
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0170-builtin-instruction-cost-and-budget.md"
   },
   {
@@ -249,7 +249,7 @@
     "devnetActivationEpoch": null,
     "mainnetActivationEpoch": null,
     "title": "Relax Precompile Failure Constraint",
-    "description": null,
+    "description": "Charge transactions with precompile signature verification failures normal inclusion fees",
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0159-relax-precompile-failure-constraint.md"
   },
   {
@@ -260,7 +260,7 @@
     "devnetActivationEpoch": null,
     "mainnetActivationEpoch": null,
     "title": "Remove accounts executable flag checks",
-    "description": null,
+    "description": "Rewrite internal logic for loading programs to pave the way for loader-v4",
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0162-remove-accounts-executable-flag-checks.md"
   },
   {
@@ -271,7 +271,7 @@
     "devnetActivationEpoch": null,
     "mainnetActivationEpoch": null,
     "title": "Lift CPI Caller Restriction",
-    "description": null,
+    "description": "CPIs no longer require the callee program instruction account",
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0163-lift-cpi-caller-restriction.md"
   }
 ]
