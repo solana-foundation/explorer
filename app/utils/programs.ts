@@ -31,6 +31,7 @@ export enum PROGRAM_NAMES {
     // other
     ACUMEN = 'Acumen Program',
     BREAK_SOLANA = 'Break Solana Program',
+    CHAINLINK_DATA_STREAMS_VERIFIER = 'Chainlink Data Streams Verifier Program',
     CHAINLINK_ORACLE = 'Chainlink OCR2 Oracle Program',
     CHAINLINK_STORE = 'Chainlink Store Program',
     CLOCKWORK_1 = 'Clockwork Thread Program v1',
@@ -270,6 +271,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     GqTPL6qRf5aUuqscLh8Rg2HTxPUXfhhAXDptTLhp1t2J: {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.MANGO_GOVERNANCE,
+    },
+    Gt9S41PtjR58CbG9JhJ3J6vxesqrNAswbWYbLNTMZA3c: {
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.CHAINLINK_DATA_STREAMS_VERIFIER,
     },
     HEvSKofvBgfaexv23kMabbYqxasxU3mQ4ibBMEmJWHny: {
         deployments: [Cluster.Devnet, Cluster.MainnetBeta],
