@@ -1,8 +1,8 @@
 /**
  * @jest-environment node
  */
-import fetch, { Headers } from 'node-fetch';
 import _dns from 'dns';
+import fetch, { Headers } from 'node-fetch';
 
 import { GET } from '../route';
 
