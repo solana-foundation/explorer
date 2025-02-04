@@ -33,6 +33,8 @@ import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
 
+import { getProxiedUri } from '@/app/features/metadata/utils';
+
 import { HistoryProvider } from './history';
 import { RewardsProvider } from './rewards';
 import { TokensProvider } from './tokens';
@@ -451,7 +453,7 @@ const getMetaDataJSON = async (
         };
 
         try {
-            fetch(uri)
+            fetch(getProxiedUri(uri))
                 .then(async _ => {
                     try {
                         const data = await _.json();
