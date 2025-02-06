@@ -42,15 +42,17 @@ import { useClusterPath } from '@utils/url';
 import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension';
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
-import React, { PropsWithChildren, Suspense, useMemo } from 'react';
+import React, { PropsWithChildren, Suspense, useEffect, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'superstruct';
 import useSWRImmutable from 'swr/immutable';
 import { Address } from 'web3js-experimental';
 
 import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
+import { getProxiedUri } from '@/app/features/metadata/utils';
 import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
+import { useMetadataExtensionSimulation } from '@/app/providers/token22Metadata';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
 
@@ -370,25 +372,61 @@ function Token22MintHeader({
     metadataPointerExtension: { extension: 'metadataPointer'; state?: any };
 }) {
     const tokenMetadata = create(metadataExtension.state, TokenMetadata);
-    const { metadataAddress } = create(metadataPointerExtension.state, MetadataPointer);
-    const metadata = useMetadataJsonLink(tokenMetadata.uri, { suspense: true });
+    const metadata = useMetadataJsonLink(getProxiedUri(tokenMetadata.uri), { suspense: true });
 
-    if (!metadata) {
-        throw new Error(`Could not load metadata from given URI: ${tokenMetadata.uri}`);
+    if (!tokenMetadata.uri || !metadata) {
+        return <MetadataExtensionHeaderCard metadataPointerExtension={metadataPointerExtension} />;
     }
 
-    // Handles the basic case where MetadataPointer is referencing the Token Metadata extension directly
-    // Does not handle the case where MetadataPointer is pointing at a separate account.
-    if (metadataAddress?.toString() === address) {
+    return (
+        <TokenMintHeaderCard
+            address={address}
+            token={{ logoURI: metadata.image, name: metadata.name }}
+            unverified={false}
+        />
+    );
+}
+
+function MetadataExtensionHeaderCard({
+    metadataPointerExtension,
+}: {
+    metadataPointerExtension: { extension: 'metadataPointer'; state?: any };
+}) {
+    const fetchAccount = useFetchAccountInfo();
+    const { url } = useCluster();
+
+    const { metadataAddress: address } = create(metadataPointerExtension.state, MetadataPointer);
+
+    const account = useAccountInfo(address?.toBase58());
+
+    const { data: simulationMetadata, isLoading } = useMetadataExtensionSimulation(
+        address?.toBase58(),
+        account?.data?.owner?.toBase58(),
+        url
+    );
+    const metadata = useMetadataJsonLink(simulationMetadata?.uri ? getProxiedUri(simulationMetadata?.uri) : '', {
+        suspense: false,
+    });
+
+    useEffect(() => {
+        if (address && !account) {
+            fetchAccount(address, 'raw');
+        }
+    }, [address, account, fetchAccount]);
+
+    if (!isLoading && simulationMetadata && address && metadata) {
         return (
             <TokenMintHeaderCard
-                address={address}
-                token={{ logoURI: metadata.image, name: metadata.name }}
-                unverified={false}
+                token={{ logoURI: metadata.uri, name: simulationMetadata.name }}
+                address={address?.toBase58()}
+                unverified={true}
             />
         );
+    } else if (isLoading) {
+        return <LoadingCard />;
+    } else {
+        throw new Error('Could not load metadata for token 2022 program');
     }
-    throw new Error('Metadata loading for non-token 2022 programs is not yet supported');
 }
 
 function TokenMintHeaderCard({
