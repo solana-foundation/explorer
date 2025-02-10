@@ -1,5 +1,6 @@
-import { BorshTypesCoder } from '@coral-xyz/anchor/dist/cjs/coder/borsh/types';
-import { hash } from '@coral-xyz/anchor/dist/cjs/utils/sha256';
+import { Program } from '@coral-xyz/anchor';
+import { IdlType } from '@coral-xyz/anchor/dist/cjs/idl';
+import { sha256 } from '@noble/hashes/sha256';
 import {
     ParsedTransaction,
     PartiallyDecodedInstruction,
@@ -12,13 +13,12 @@ import React, { useMemo } from 'react';
 
 import { useAnchorProgram } from '@/app/providers/anchor';
 import { useCluster } from '@/app/providers/cluster';
-import { mapField, mapIxArgsToRows } from '@/app/utils/anchor';
+import { mapField } from '@/app/utils/anchor';
 
 import { Address } from '../../common/Address';
 import { Copyable } from '../../common/Copyable';
 import { InstructionCard } from '../InstructionCard';
 import { PROGRAM_ID as ED25519_PROGRAM_ID } from './types';
-import { Idl, Program } from '@coral-xyz/anchor';
 
 const ED25519_SELF_REFERENCE_INSTRUCTION_INDEX = 65535;
 
@@ -86,40 +86,26 @@ const extractData = (
 
 function decodeMessageFromAnchorProgram(
     anchorProgram: Program,
-    anchorIdl: Idl,
     message: Uint8Array
 ): { name: string; data: any } | null {
+    const messageDisc = Buffer.from(message.slice(0, 8)).toString('hex');
     const coder = anchorProgram.coder.types;
-
     for (const [_, typeLayouts] of Object.entries(anchorProgram.coder.types)) {
-        (typeLayouts as Map<string, any>).forEach((layout, name) => {
+        for (const [name] of typeLayouts.entries()) {
             try {
-                const disc = Buffer.from(hash(`global:${name}`)).slice(0, 4);
-                // .toString('base64');
+                const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+                const disc = Buffer.from(sha256(`global:${capitalizedName}`).slice(0, 8)).toString('hex');
 
-                if (name === 'swiftOrderParamsMessage') {
-                    console.log('message', name, disc);
-                    console.log('layout', layout);
-                    console.log('reg', layout.registry);
-                    console.log('disc', layout.discriminator);
-
-                    // layout.fields.forEach((field: any) => {
-                    //     console.log('field', field, 'reg', field.registry);
-                    // });
-                    // layout.property = '';
-
-                    // const decoded = coder.decode('swiftOrderParamsMessage', Buffer.from(message));
-                    const decoded = layout.decode(Buffer.concat([disc, Buffer.from(message)]));
-                    console.log('decoded', decoded);
+                if (disc === messageDisc) {
+                    const decoded = coder.decode(name, Buffer.from(message.slice(8)));
                     if (decoded) {
-                        console.log('decoded', name, decoded);
-                        return { data: decoded, name: name };
+                        return { data: decoded, name };
                     }
                 }
             } catch (e) {
-                console.log('error', e);
+                console.log('Error decoding message with anchor program', e);
             }
-        });
+        }
     }
     return null;
 }
@@ -134,28 +120,20 @@ function SignatureDetails({
 }: {
     index: number;
     offset: Ed25519SignatureOffsets;
-    signature: Uint8Array;
-    pubkey: Uint8Array;
+    signature: Uint8Array | null;
+    pubkey: Uint8Array | null;
     message: Uint8Array;
     messageIx: PartiallyDecodedInstruction;
 }) {
     const { url } = useCluster();
     const anchorProgram = useAnchorProgram(messageIx.programId.toBase58(), url);
 
-    // const decodedMessage = useMemo(() => {
-    //     if (!anchorProgram?.idl || !anchorProgram?.program) {
-    //         return null;
-    //     }
-    //     return decodeMessageFromAnchorProgram(anchorProgram.program, anchorProgram.idl, message);
-    // }, [anchorProgram, message]);
-    const decodedMessage =
-        anchorProgram?.program && anchorProgram?.idl
-            ? decodeMessageFromAnchorProgram(anchorProgram.program, anchorProgram.idl, message)
-            : null;
-
-    if (decodedMessage) {
-        console.log('decodedMessage', decodedMessage);
-    }
+    const decodedMessage = useMemo(() => {
+        if (!anchorProgram?.idl || !anchorProgram?.program) {
+            return null;
+        }
+        return decodeMessageFromAnchorProgram(anchorProgram.program, Buffer.from(message.toString(), 'hex'));
+    }, [anchorProgram, message]);
 
     const messageRow = useMemo(() => {
         if (!decodedMessage || !anchorProgram?.idl || !anchorProgram?.program) {
@@ -181,57 +159,95 @@ function SignatureDetails({
             );
         }
 
-        return mapField(
-            decodedMessage.name!,
-            decodedMessage.data!,
-            anchorProgram.idl.types.find(t => t.name === decodedMessage.name),
-            anchorProgram.idl
+        const name = decodedMessage.name;
+        const data = decodedMessage.data;
+
+        if (!name || !data) {
+            return null;
+        }
+
+        const type: IdlType = { defined: { name } };
+
+        return (
+            <React.Fragment>
+                <tr className="table-sep">
+                    <td colSpan={1} className="text-lg-start" align="left">
+                        Message Payload
+                    </td>
+                    <td colSpan={1} className="text-lg-start" align="left">
+                        Payload Type
+                    </td>
+                    <td colSpan={1} className="text-lg-end">
+                        Value
+                    </td>
+                </tr>
+                {mapField(name, data, type, anchorProgram.program.idl, 'sigverify-message', 0)}
+            </React.Fragment>
         );
-    }, [decodedMessage, message, anchorProgram?.idl]);
+    }, [decodedMessage, message, anchorProgram?.idl, anchorProgram?.program]);
 
     return (
         <React.Fragment>
             <tr className="table-sep">
-                <td colSpan={2} className="text-lg-start" align="left">
+                <td colSpan={3} className="text-lg-start" align="left">
                     Signature #{index + 1}
                 </td>
             </tr>
             <tr>
-                <td>Signature Reference</td>
-                <td className="text-lg-end">
+                <td colSpan={1}>Signature Reference</td>
+                <td colSpan={2} className="text-lg-end">
                     Instruction {offset.signatureInstructionIndex}, Offset {offset.signatureOffset}
                 </td>
             </tr>
             <tr>
-                <td>Signature</td>
-                <td className="text-lg-end font-monospace">
-                    <Copyable text={Buffer.from(signature).toString('base64')}>
-                        <span className="font-monospace">{Buffer.from(signature).toString('base64')}</span>
-                    </Copyable>
+                <td colSpan={1}>Signature</td>
+                <td
+                    colSpan={2}
+                    className="text-lg-end font-monospace"
+                    style={{
+                        fontSize: '0.85rem',
+                        lineHeight: '1.2',
+                        maxWidth: '100%',
+                        overflowWrap: 'break-word',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-all',
+                    }}
+                >
+                    {signature ? (
+                        <Copyable text={Buffer.from(signature).toString('base64')}>
+                            <span className="font-monospace">{Buffer.from(signature).toString('base64')}</span>
+                        </Copyable>
+                    ) : (
+                        <span className="font-monospace">Invalid Reference</span>
+                    )}
                 </td>
             </tr>
             <tr>
-                <td>Public Key Reference</td>
-                <td className="text-lg-end">
+                <td colSpan={1}>Public Key Reference</td>
+                <td colSpan={2} className="text-lg-end">
                     Instruction {offset.publicKeyInstructionIndex}, Offset {offset.publicKeyOffset}
                 </td>
             </tr>
             <tr>
-                <td>Public Key</td>
-                <td className="text-lg-end">
-                    <Address pubkey={new PublicKey(pubkey)} alignRight link />
+                <td colSpan={1}>Public Key</td>
+                <td colSpan={2} className="text-lg-end">
+                    {pubkey ? (
+                        <Address pubkey={new PublicKey(pubkey)} alignRight link />
+                    ) : (
+                        <span className="font-monospace">Invalid Reference</span>
+                    )}
                 </td>
             </tr>
             <tr>
-                <td>Message Reference</td>
-                <td className="text-lg-end">
+                <td colSpan={1}>Message Reference</td>
+                <td colSpan={2} className="text-lg-end">
                     Instruction {offset.messageInstructionIndex}, Offset {offset.messageDataOffset}, Size{' '}
                     {offset.messageDataSize}
                 </td>
             </tr>
             <tr>
-                <td>Message Program</td>
-                <td className="text-lg-end">
+                <td colSpan={1}>Message Program</td>
+                <td colSpan={2} className="text-lg-end">
                     <Address pubkey={messageIx.programId} alignRight link />
                 </td>
             </tr>
@@ -260,7 +276,6 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                     <Address pubkey={ED25519_PROGRAM_ID} alignRight link />
                 </td>
             </tr>
-
             {offsets.map((offset, index) => {
                 const signature = extractData(
                     tx,
@@ -275,6 +290,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                 const messageIx = tx.message.instructions[
                     offset.messageInstructionIndex
                 ] as PartiallyDecodedInstruction;
+
                 const message = bs58
                     .decode(messageIx.data)
                     .slice(offset.messageDataOffset, offset.messageDataOffset + offset.messageDataSize);

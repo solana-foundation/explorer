@@ -192,8 +192,8 @@ function traverseIdlFields(fields: IdlDefinedFields, refs: Set<string>) {
         typeof field === 'string'
             ? traverseType(field, refs)
             : typeof field === 'object' && 'type' in field
-            ? traverseType(field.type, refs)
-            : traverseType(field, refs)
+                ? traverseType(field.type, refs)
+                : traverseType(field, refs)
     );
 }
 

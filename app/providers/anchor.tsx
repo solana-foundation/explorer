@@ -4,14 +4,10 @@ import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import * as elfy from 'elfy';
 import pako from 'pako';
 import { useEffect, useMemo } from 'react';
+import useSWR from 'swr';
 
 import { formatIdl } from '../utils/convertLegacyIdl';
 import { useAccountInfo, useFetchAccountInfo } from './accounts';
-
-const cachedAnchorProgramPromises: Record<
-    string,
-    void | { __type: 'promise'; promise: Promise<void> } | { __type: 'result'; result: Idl | null }
-> = {};
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function useIdlFromSolanaProgramBinary(programAddress: string): Idl | null {
@@ -81,65 +77,46 @@ function getProvider(url: string) {
     return new AnchorProvider(new Connection(url), new NodeWallet(Keypair.generate()), {});
 }
 
-function useIdlFromAnchorProgramSeed(programAddress: string, url: string): Idl | null {
-    const key = `${programAddress}-${url}`;
-    const cacheEntry = cachedAnchorProgramPromises[key];
+function getProgram(idl: Idl, programAddress: string, url: string) {
+    const provider = getProvider(url);
 
-    if (cacheEntry === undefined) {
-        const programId = new PublicKey(programAddress);
-        const promise = Program.fetchIdl<Idl>(programId, getProvider(url))
-            .then(idl => {
-                if (!idl) {
-                    throw new Error(`IDL not found for program: ${programAddress.toString()}`);
-                }
-
-                cachedAnchorProgramPromises[key] = {
-                    __type: 'result',
-                    result: idl,
-                };
-            })
-            .catch(_ => {
-                cachedAnchorProgramPromises[key] = { __type: 'result', result: null };
-            });
-        cachedAnchorProgramPromises[key] = {
-            __type: 'promise',
-            promise,
-        };
-        throw promise;
-    } else if (cacheEntry.__type === 'promise') {
-        throw cacheEntry.promise;
+    try {
+        try {
+            // Try using the uploaded IDL
+            return new Program(idl, provider);
+        } catch (e) {
+            // If raw IDL fails, try with formatted IDL
+            try {
+                const unprunedIdl = formatIdl(idl, programAddress, false);
+                return new Program(unprunedIdl, provider);
+            } catch (e) {
+                // Try again with types removed
+                const prunedIdl = formatIdl(idl, programAddress, true);
+                return new Program(prunedIdl, provider);
+            }
+        }
+    } catch (e) {
+        console.error('Error creating anchor program for', programAddress, e, { idl });
+        return null;
     }
-    return cacheEntry.result;
 }
 
 export function useAnchorProgram(programAddress: string, url: string): { program: Program | null; idl: Idl | null } {
-    // TODO(ngundotra): Rewrite this to be more efficient
-    // const idlFromBinary = useIdlFromSolanaProgramBinary(programAddress);
-    const idlFromAnchorProgram = useIdlFromAnchorProgramSeed(programAddress, url);
-    const idl = idlFromAnchorProgram;
-    const program: Program<Idl> | null = useMemo(() => {
-        if (!idl) return null;
+    const { data } = useSWR([programAddress, url], async () => {
         try {
-            try {
-                const program = new Program(idl, getProvider(url));
-                return program;
-            } catch (e) {
-                // If raw IDL fails, try with formatted IDL
-                try {
-                    const program = new Program(formatIdl(idl, programAddress, false), getProvider(url));
-                    console.log('idl', formatIdl(idl, programAddress, false));
-                    return program;
-                } catch (e) {
-                    // Try again with types removed
-                    return new Program(formatIdl(idl, programAddress, true), getProvider(url));
-                }
+            const programId = new PublicKey(programAddress);
+            const idl = await Program.fetchIdl<Idl>(programId, getProvider(url));
+            if (!idl) {
+                throw new Error(`IDL not found for program: ${programAddress}`);
             }
+            return { idl, program: getProgram(idl, programAddress, url) };
         } catch (e) {
-            console.error('Error creating anchor program for', programAddress, e, { idl });
+            console.error('Error fetching IDL:', e);
             return null;
         }
-    }, [idl, programAddress, url]);
-    return { idl, program };
+    });
+
+    return data ?? { idl: null, program: null };
 }
 
 export type AnchorAccount = {
