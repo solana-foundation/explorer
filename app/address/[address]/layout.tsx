@@ -242,7 +242,6 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
     }
 
     if (account && isCoreAccount(account)) {
-        console.log("Core Account");
         return <CoreAccountHeader account={account} />;
     }
 

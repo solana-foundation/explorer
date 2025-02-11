@@ -5,8 +5,9 @@ import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer
 import { AssetV1, CollectionV1, deserializeAssetV1, deserializeCollectionV1, Key } from '@metaplex-foundation/mpl-core';
 import { lamports, RpcAccount } from '@metaplex-foundation/umi';
 import { fromWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
-// import { isTokenProgramData } from '@providers/accounts';
 import React, { useEffect } from 'react';
+
+import { ErrorCard } from '@/app/components/common/ErrorCard';
 
 type Props = Readonly<{
     params: {
@@ -16,11 +17,8 @@ type Props = Readonly<{
 
 function CoreMetadataCardRenderer({
     account,
-    // onNotFound,
 }: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
     const [asset, setAsset] = React.useState<AssetV1 | CollectionV1 | null>(null);
-    // const [parsedData, setParsedData] = React.useState<any | null>(null);
-    // const [json, setJson] = React.useState<any | null>(null);
 
     useEffect(() => {
         if (!account) {
@@ -42,7 +40,13 @@ function CoreMetadataCardRenderer({
         }
     }, [account]);
 
-    return <CoreMetadataCard asset={asset} />;
+    if (!account) {
+        return <ErrorCard text="Account is undefined" />;
+    } else if (!asset) {
+        return <ErrorCard text="Asset is undefined" />;
+    } else {
+        return <CoreMetadataCard asset={asset} />;
+    }
 }
 
 export default function MetaplexNFTMetadataPageClient({ params: { address } }: Props) {

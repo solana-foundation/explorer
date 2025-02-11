@@ -4,6 +4,7 @@ import { fromWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
 import { Account } from '@providers/accounts';
 import React, { useEffect } from 'react';
 
+import { ErrorCard } from '../../common/ErrorCard';
 import { CoreAssetHeader } from './CoreAssetHeader';
 import { CoreCollectionHeader } from './CoreCollectionHeader';
 
@@ -27,6 +28,6 @@ export function CoreAccountHeader({ account }: { account: Account }) {
     } else if (umiAccount && umiAccount.data[0] === Key.CollectionV1) {
         return <CoreCollectionHeader account={account} />
     } else {
-        return <div>Invalid Core Account</div>
+        return <ErrorCard text="Invalid Core Account" />
     }
 }
