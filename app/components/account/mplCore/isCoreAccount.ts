@@ -5,7 +5,6 @@ import { fromWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
 import { Account } from '../../../providers/accounts';
 
 export function isCoreAccount(account: Account): boolean {
-    console.log("Checking for Core account");
     return Boolean(account.owner.toString() === MPL_CORE_PROGRAM_ID.toString() && account.data.raw);
 }
 
@@ -15,7 +14,7 @@ export const parseCoreNFTAccount = (account: Account): AssetV1 | null => {
     }
 
     try {
-        if (account.data.raw && account.data.raw[0] !== Key.AssetV1) {
+        if (account.data.raw && account.data.raw[0] === Key.AssetV1) {
             const rpcAccount: RpcAccount = {
                 data: Uint8Array.from(account.data.raw),
                 executable: account.executable,
@@ -40,7 +39,7 @@ export const parseCoreCollectionAccount = (account: Account): CollectionV1 | nul
     }
 
     try {
-        if (account.data.raw && account.data.raw[0] !== Key.CollectionV1) {
+        if (account.data.raw && account.data.raw[0] === Key.CollectionV1) {
             const rpcAccount: RpcAccount = {
                 data: Uint8Array.from(account.data.raw),
                 executable: account.executable,
