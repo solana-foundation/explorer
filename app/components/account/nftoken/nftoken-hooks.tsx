@@ -4,7 +4,7 @@ import useSWR, { SWRResponse } from 'swr';
 import { NftokenFetcher } from './nftoken';
 import { NftokenTypes } from './nftoken-types';
 
-const getCollectionNftsFetcher = async (_method: string, collectionAddress: string, url: string) => {
+const getCollectionNftsFetcher = async ([_method, collectionAddress, url]: [string, string, string]) => {
     return await NftokenFetcher.getNftsInCollection({
         collection: collectionAddress,
         rpcUrl: url,

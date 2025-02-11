@@ -35,9 +35,12 @@ import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
 
+import { getProxiedUri } from '@/app/features/metadata/utils';
+
 import { HistoryProvider } from './history';
 import { RewardsProvider } from './rewards';
 import { TokensProvider } from './tokens';
+import { getStakeActivation } from './utils/stake';
 export { useAccountHistory } from './history';
 
 export type StakeProgramData = {
@@ -338,10 +341,17 @@ async function handleParsedAccountData(
         case 'stake': {
             const parsed = create(info, StakeAccount);
             const isDelegated = parsed.type === 'delegated';
-            const activation = isDelegated ? await connection.getStakeActivation(accountKey) : undefined;
 
+            // TODO(ngundotra): replace with web3.js fix when live
+            const activation = isDelegated ? await getStakeActivation(connection, accountKey) : undefined;
             return {
-                activation,
+                activation: activation
+                    ? {
+                          active: Number(activation.active),
+                          inactive: Number(activation.inactive),
+                          state: activation.status as any,
+                      }
+                    : undefined,
                 parsed,
                 program: accountData.program,
             };
@@ -445,7 +455,7 @@ const getMetaDataJSON = async (
         };
 
         try {
-            fetch(uri)
+            fetch(getProxiedUri(uri))
                 .then(async _ => {
                     try {
                         const data = await _.json();

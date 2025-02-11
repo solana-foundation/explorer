@@ -43,6 +43,10 @@ import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
+import { Ed25519DetailsCard } from '../instruction/ed25519/Ed25519DetailsCard';
+import { isEd25519Instruction } from '../instruction/ed25519/types';
+import { LighthouseDetailsCard } from '../instruction/lighthouse/LighthouseDetailsCard';
+import { isLighthouseInstruction } from '../instruction/lighthouse/types';
 import { isMangoInstruction } from '../instruction/mango/types';
 
 export type InstructionDetailsProps = {
@@ -162,7 +166,7 @@ function InstructionCard({
     url: string;
 }) {
     const key = `${index}-${childIndex}`;
-    const anchorProgram = useAnchorProgram(ix.programId.toString(), url);
+    const { program: anchorProgram } = useAnchorProgram(ix.programId.toString(), url);
 
     if ('parsed' in ix) {
         const props = {
@@ -217,6 +221,8 @@ function InstructionCard({
 
     if (isAddressLookupTableInstruction(transactionIx)) {
         return <AddressLookupTableDetailsCard key={key} {...props} />;
+    } else if (isEd25519Instruction(transactionIx)) {
+        return <Ed25519DetailsCard key={key} {...props} tx={tx} />;
     } else if (isMangoInstruction(transactionIx)) {
         return <MangoDetailsCard key={key} {...props} />;
     } else if (isSerumInstruction(transactionIx)) {
@@ -231,6 +237,8 @@ function InstructionCard({
         return <PythDetailsCard key={key} {...props} />;
     } else if (ComputeBudgetProgram.programId.equals(transactionIx.programId)) {
         return <ComputeBudgetDetailsCard key={key} {...props} />;
+    } else if (isLighthouseInstruction(transactionIx)) {
+        return <LighthouseDetailsCard key={key} {...props} />;
     } else if (anchorProgram) {
         return (
             <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>

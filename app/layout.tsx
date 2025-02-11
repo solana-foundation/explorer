@@ -7,6 +7,7 @@ import { Navbar } from '@components/Navbar';
 import { SearchBar } from '@components/SearchBar';
 import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
+import type { Viewport } from 'next';
 import { Rubik } from 'next/font/google';
 import { Metadata } from 'next/types';
 
@@ -14,11 +15,12 @@ export const metadata: Metadata = {
     description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',
     manifest: '/manifest.json',
     title: 'Explorer | Solana',
-    viewport: {
-        initialScale: 1,
-        maximumScale: 1,
-        width: 'device-width',
-    },
+};
+
+export const viewport: Viewport = {
+    initialScale: 1,
+    maximumScale: 1,
+    width: 'device-width',
 };
 
 const rubikFont = Rubik({
@@ -37,6 +39,11 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en" className={`${rubikFont.variable}`}>
+            <head>
+                <link rel="icon" href="/favicon.png" type="image/png" />
+                <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+                <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+            </head>
             <body>
                 <ScrollAnchorProvider>
                     <ClusterProvider>

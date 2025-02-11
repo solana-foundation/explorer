@@ -215,8 +215,9 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
             if (cluster === Cluster.MainnetBeta) {
                 errorLink = err.errorLink;
             } else {
-                errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''
-                    }`;
+                errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${
+                    cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''
+                }`;
             }
         }
     }
@@ -318,7 +319,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                     </tr>
                 )}
 
-                {fee && (
+                {fee !== undefined && (
                     <tr>
                         <td>Fee (SOL)</td>
                         <td className="text-lg-end">
