@@ -747,6 +747,25 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
         tab: accountDataTab,
     });
 
+    // Feature-specific information
+    if (account.owner.toBase58() === FEATURE_PROGRAM_ID) {
+        const featureInfoTab = {
+            path: 'feature-info',
+            slug: 'feature-info',
+            title: 'Feature Info'
+        } 
+        tabComponents.push({
+            component: (
+                <React.Suspense key={featureInfoTab.slug} fallback={<></>}>
+                    <FeatureInfoLink tab={featureInfoTab} address={pubkey.toString()} />
+                </React.Suspense>
+            ),
+            tab: featureInfoTab,
+        });
+    }
+
+    console.log({ tabComponents }, account.owner.toBase58() === FEATURE_PROGRAM_ID)
+
     return tabComponents;
 }
 
@@ -778,6 +797,25 @@ function AccountDataLink({ address, tab, programId }: { address: string; tab: Ta
     if (!accountAnchorProgram) {
         return null;
     }
+
+    return (
+        <li key={tab.slug} className="nav-item">
+            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={accountDataPath}>
+                {tab.title}
+            </Link>
+        </li>
+    );
+}
+//!!!
+function FeatureInfoLink({ address, tab, programId }: { address: string; tab: Tab; programId: PublicKey }) {
+    const { url } = useCluster();
+    //const { program: accountAnchorProgram } = useAnchorProgram(programId.toString(), url);
+    const accountDataPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
+    const selectedLayoutSegment = useSelectedLayoutSegment();
+    const isActive = selectedLayoutSegment === tab.path;
+    //if (!accountAnchorProgram) {
+        //return null;
+    //}
 
     return (
         <li key={tab.slug} className="nav-item">
