@@ -16,7 +16,7 @@ export function CoreMetadataCard({ asset }: { asset: AssetV1 | CollectionV1 | nu
                 </div>
 
                 <div className="card metadata-json-viewer m-4">
-                    <ReactJson src={json} theme={'solarized'} style={{ padding: 25 }} />
+                    <ReactJson name={false} src={json} theme={'solarized'} style={{ padding: 25 }} />
                 </div>
             </div>
         </>
