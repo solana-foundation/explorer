@@ -51,6 +51,7 @@ import { Address } from 'web3js-experimental';
 import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
+import {useFeatureInfo} from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
 
@@ -564,7 +565,8 @@ export type MoreTabs =
     | 'concurrent-merkle-tree'
     | 'compression'
     | 'verified-build'
-    | 'program-multisig';
+    | 'program-multisig'
+    | 'feature-gate';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -749,22 +751,20 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
 
     // Feature-specific information
     if (account.owner.toBase58() === FEATURE_PROGRAM_ID) {
-        const featureInfoTab = {
-            path: 'feature-info',
-            slug: 'feature-info',
-            title: 'Feature Info'
-        } 
+        const featureInfoTab: Tab = {
+            path: 'feature-gate',
+            slug: 'feature-gate',
+            title: 'Feature Gate',
+        }
         tabComponents.push({
             component: (
                 <React.Suspense key={featureInfoTab.slug} fallback={<></>}>
-                    <FeatureInfoLink tab={featureInfoTab} address={pubkey.toString()} />
+                    <FeatureGateLink tab={featureInfoTab} address={pubkey.toString()} />
                 </React.Suspense>
             ),
             tab: featureInfoTab,
         });
     }
-
-    console.log({ tabComponents }, account.owner.toBase58() === FEATURE_PROGRAM_ID)
 
     return tabComponents;
 }
@@ -806,16 +806,16 @@ function AccountDataLink({ address, tab, programId }: { address: string; tab: Ta
         </li>
     );
 }
-//!!!
-function FeatureInfoLink({ address, tab, programId }: { address: string; tab: Tab; programId: PublicKey }) {
-    const { url } = useCluster();
-    //const { program: accountAnchorProgram } = useAnchorProgram(programId.toString(), url);
+
+function FeatureGateLink({ address, tab }: { address: string; tab: Tab }) {
     const accountDataPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
-    //if (!accountAnchorProgram) {
-        //return null;
-    //}
+    const featureInfo = useFeatureInfo({ address });
+    // Do not render "Feature Gate" tab on absent simd_link
+    if (!featureInfo?.simd_link) {
+        return null;
+    }
 
     return (
         <li key={tab.slug} className="nav-item">

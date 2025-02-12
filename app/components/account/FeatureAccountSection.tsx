@@ -59,7 +59,7 @@ const FeatureCard = ({ account }: Props) => {
             <tr>
                 <td>SIMD</td>
                 <td>
-                    {featureInfo.simd && featureInfo.simd_link && (
+                    {featureInfo.simd && featureInfo.simd_link ? (
                         <a
                             href={featureInfo.simd_link}
                             target="_blank"
@@ -68,6 +68,8 @@ const FeatureCard = ({ account }: Props) => {
                         >
                             See SIMD {featureInfo.simd}
                         </a>
+                    ) : (
+                        <code>No link</code>
                     )}
 
                 </td>
@@ -170,13 +172,13 @@ function FeatureActivatedAtCluster({ featureInfo, cluster }: { featureInfo: Feat
     return (
         <>
             {cluster === Cluster.MainnetBeta && featureInfo.mainnetActivationEpoch && (
-                <span className="badge bg-success ms-2">Active on Mainnet</span>
+                <span className="badge bg-success">Active on Mainnet</span>
             )}
             {cluster === Cluster.Devnet && featureInfo.devnetActivationEpoch && (
-                <span className="badge bg-success ms-2">Active on Devnet</span>
+                <span className="badge bg-success">Active on Devnet</span>
             )}
             {cluster === Cluster.Testnet && featureInfo.testnetActivationEpoch && (
-                <span className="badge bg-success ms-2">Active on Testnet</span>
+                <span className="badge bg-success">Active on Testnet</span>
             )}
         </>
     )
