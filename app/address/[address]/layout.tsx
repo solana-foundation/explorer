@@ -47,7 +47,8 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'superstruct';
 import useSWRImmutable from 'swr/immutable';
 import { Address } from 'web3js-experimental';
-
+import { CoreAccountHeader } from '@/app/components/account/mplCore/CoreAccountHeader';
+import { isCoreAccount } from '@/app/components/account/mplCore/isCoreAccount';
 import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
@@ -272,6 +273,10 @@ function AccountHeader({
 
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
+    }
+
+    if (account && isCoreAccount(account)) {
+        return <CoreAccountHeader account={account} />;
     }
 
     const nftokenNFT = account && isNFTokenAccount(account);
@@ -663,6 +668,15 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
             path: 'domains',
             slug: 'domains',
             title: 'Domains',
+        });
+    }
+
+    const isCoreAsset = account && isCoreAccount(account);
+    if (isCoreAsset) {
+        tabs.push({
+            path: 'core-metadata',
+            slug: 'metadata',
+            title: 'Metadata',
         });
     }
 

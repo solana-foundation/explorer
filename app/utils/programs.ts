@@ -44,6 +44,7 @@ export enum PROGRAM_NAMES {
     MARINADE = 'Marinade Staking Program',
     MERCURIAL = 'Mercurial Stable Swap Program',
     METAPLEX = 'Metaplex Program',
+    METAPLEX_CORE = 'Metaplex Core Program',
     NFT_AUCTION = 'NFT Auction Program',
     NFT_CANDY_MACHINE = 'NFT Candy Machine Program',
     NFT_CANDY_MACHINE_V2 = 'NFT Candy Machine Program V2',
@@ -219,6 +220,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     ComputeBudget111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.COMPUTE_BUDGET,
+    },
+    CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d: {
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.METAPLEX_CORE,
     },
     Config1111111111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
@@ -429,7 +434,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.PYTH_DEVNET,
     },
     metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s: {
-        deployments: LIVE_CLUSTERS,
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
         name: PROGRAM_NAMES.TOKEN_METADATA,
     },
     mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68: {

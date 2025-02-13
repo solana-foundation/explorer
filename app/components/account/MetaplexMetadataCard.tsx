@@ -8,6 +8,7 @@ import { CompressedNft, useCompressedNft, useMetadataJsonLink } from '@/app/prov
 export function MetaplexMetadataCard({ account, onNotFound }: { account?: Account; onNotFound: () => never }) {
     const { url } = useCluster();
     const compressedNft = useCompressedNft({ address: account?.pubkey.toString() ?? '', url });
+    console.log(compressedNft);
 
     const parsedData = account?.data?.parsed;
     if (!parsedData || !isTokenProgramData(parsedData) || parsedData.parsed.type !== 'mint' || !parsedData.nftData) {
@@ -16,10 +17,14 @@ export function MetaplexMetadataCard({ account, onNotFound }: { account?: Accoun
         }
         return onNotFound();
     }
-    return <NormalMetadataCard nftData={parsedData.nftData} />;
+
+    // Here we grossly stringify and parse the metadata to avoid the bigints which ReactJsonView does not support.
+    const json = JSON.parse(JSON.stringify(parsedData.nftData.metadata, (_, v) => typeof v === 'bigint' ? v.toString() : v));
+
+    return <NormalMetadataCard json={json} />;
 }
 
-function NormalMetadataCard({ nftData }: { nftData: NFTData }) {
+function NormalMetadataCard({ json }: { json: any }) {
     return (
         <>
             <div className="card">
@@ -32,7 +37,7 @@ function NormalMetadataCard({ nftData }: { nftData: NFTData }) {
                 </div>
 
                 <div className="card metadata-json-viewer m-4">
-                    <ReactJson src={nftData.metadata} theme={'solarized'} style={{ padding: 25 }} />
+                    <ReactJson src={json} theme={'solarized'} style={{ padding: 25 }} />
                 </div>
             </div>
         </>
@@ -40,7 +45,9 @@ function NormalMetadataCard({ nftData }: { nftData: NFTData }) {
 }
 
 function CompressedMetadataCard({ compressedNft }: { compressedNft: CompressedNft }) {
+    console.log("is compressed", compressedNft.compression.compressed);
     const metadataJson = useMetadataJsonLink(compressedNft.content.json_uri);
+    console.log("metadata json", metadataJson);
     return (
         <>
             <div className="card">
