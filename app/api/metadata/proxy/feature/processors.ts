@@ -12,7 +12,7 @@ export async function processBinary(data: fetch.Response){
         // request binary data to check for max-size excess
         const buffer = await data.arrayBuffer();
 
-        return { data: buffer, headers }
+        return { data: buffer, headers };
     } catch(error) {
         if (matchMaxSizeError(error)) {
             throw errors[413];
@@ -34,7 +34,7 @@ export async function processJson(data: fetch.Response){
     try{
         const json = await data.json();
 
-        return { data: json, headers }
+        return { data: json, headers };
     } catch(error) {
         if (matchMaxSizeError(error)) {
             throw errors[413];

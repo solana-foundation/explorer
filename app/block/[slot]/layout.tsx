@@ -181,7 +181,7 @@ export default function BlockLayout({ children, params }: Props) {
         <BlockProvider>
             <BlockLayoutInner params={params}>{children}</BlockLayoutInner>
         </BlockProvider>
-    )
+    );
 }
 
 const TABS: Tab[] = [

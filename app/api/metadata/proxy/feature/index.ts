@@ -79,5 +79,5 @@ export async function fetchResource(
     if (isImage) return processBinary(response);
 
     // otherwise we throw error as we getting unexpected content
-    throw unsupportedMediaError
+    throw unsupportedMediaError;
 }

@@ -29,7 +29,7 @@ export async function GET(
     const isProxyEnabled = process.env.NEXT_PUBLIC_METADATA_ENABLED === 'true';
 
     if (!isProxyEnabled) {
-        return respondWithError(404)
+        return respondWithError(404);
     }
 
     let uriParam: string;

@@ -83,15 +83,15 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
                 logoURI: t.logoURI,
                 name: t.name,
                 symbol: t.symbol
-            }]))
+            }]));
             tokens.forEach(t => {
-                const tokenInfo = mappedTokenInfos[t.info.mint.toString()]
+                const tokenInfo = mappedTokenInfos[t.info.mint.toString()];
                 if (tokenInfo) {
                     t.logoURI = tokenInfo.logoURI ?? undefined;
                     t.symbol = tokenInfo.symbol;
                     t.name = tokenInfo.name;
                 }
-            })
+            });
         }
 
         data = {

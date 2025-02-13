@@ -104,7 +104,7 @@ function useSimulator(message: VersionedMessage) {
                         key: addressTableLookupKeys[index],
                         state: AddressLookupTableAccount.deserialize(addressTableLookup.data)
                     });
-                })
+                });
 
                 // Fetch all the accounts before simulating
                 const accountKeys = message.getAccountKeys({
@@ -128,7 +128,7 @@ function useSimulator(message: VersionedMessage) {
                     accountKeys,
                     parsedAccountsPre.value,
                     resp.value.accounts as SimulatedTransactionAccountInfo[],
-                )
+                );
 
                 const preTokenBalances: TokenBalance[] = [];
                 const postTokenBalances: TokenBalance[] = [];

@@ -40,7 +40,7 @@ export function TokenBalancesCard({ signature }: SignatureProps) {
         return null;
     }
 
-    return <TokenBalancesCardInner rows={rows} />
+    return <TokenBalancesCardInner rows={rows} />;
 }
 
 export type TokenBalancesCardInnerProps = {
@@ -61,7 +61,7 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
                 setTokenInfosLoading(false);
             }
         });
-    }, [])
+    }, []);
 
     const accountRows = rows.map(({ account, delta, balance, mint }) => {
         const key = account.toBase58() + mint;

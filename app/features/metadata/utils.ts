@@ -8,4 +8,4 @@ export const getProxiedUri = (uri: string): string => {
     if (!["http:", "https:"].includes(url.protocol)) return uri;
 
     return `/api/metadata/proxy?uri=${encodeURIComponent(uri)}`;
-}
+};

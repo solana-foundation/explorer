@@ -46,7 +46,7 @@ export type CoinGeckoResult = {
 };
 
 export function useCoinGecko(coinId?: string): CoinGeckoResult | undefined {
-    const { cluster } = useCluster()
+    const { cluster } = useCluster();
     const [coinInfo, setCoinInfo] = React.useState<CoinGeckoResult>();
     const { visible: isTabVisible } = useTabVisibility();
     React.useEffect(() => {

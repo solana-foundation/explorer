@@ -92,11 +92,11 @@ export async function getTokenInfoWithoutOnChainFallback(
             "Content-Type": "application/json",
         },
         method: 'POST',
-    })
+    });
 
     if (response.status >= 400) {
         console.error(`Error calling UTL API for address ${address} on chain ID ${chainId}. Status ${response.status}`);
-        return undefined
+        return undefined;
     }
 
     const fetchedData = await response.json() as UtlApiResponse;
