@@ -48,17 +48,15 @@ const FeatureCard = ({ account }: Props) => {
         clusterActivation = (
             <tr>
                 <td className="text-nowrap">Cluster Activation</td>
-                <td>
-                    <div className="d-flex gap-2" >
-                        <ClusterActivationEpochAtCluster featureInfo={featureInfo} cluster={cluster} />
-                    </div>
+                <td className="text-lg-end">
+                    <ClusterActivationEpochAtCluster featureInfo={featureInfo} cluster={cluster} />
                 </td>
             </tr>
         )
         simdLink = (
             <tr>
                 <td>SIMD</td>
-                <td>
+                <td className="text-lg-end">
                     {featureInfo.simd && featureInfo.simd_link ? (
                         <a
                             href={featureInfo.simd_link}
@@ -86,7 +84,7 @@ const FeatureCard = ({ account }: Props) => {
             <TableCardBody layout="expanded">
                 <tr>
                     <td>Address</td>
-                    <td className="text-lg-end">
+                    <td>
                         <Address pubkey={new PublicKey(feature.address)} alignRight raw />
                     </td>
                 </tr>
@@ -94,7 +92,7 @@ const FeatureCard = ({ account }: Props) => {
                 {featureInfo ? (
                     <tr>
                         <td className="text-nowrap">Activated At</td>
-                        <td>
+                        <td className="text-lg-end">
                             <FeatureActivatedAtCluster featureInfo={featureInfo} cluster={cluster} />
                         </td>
                     </tr>
@@ -114,7 +112,7 @@ const FeatureCard = ({ account }: Props) => {
                 {featureInfo?.description && (
                     <tr>
                         <td>Description</td>
-                        <td>{featureInfo?.description}</td>
+                        <td className="text-lg-end">{featureInfo?.description}</td>
                     </tr>
                 )}
 

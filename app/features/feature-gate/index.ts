@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 import { FeatureInfoType } from '@/app/utils/feature-gate/types';
 
-// Good candidate to move to environment variables, but at the moment repository is public, so we leave them hardcoded (could be changed later). 
+// Good candidate to move to environment variables, but at the moment repository is public, so we leave them hardcoded (could be changed later)
 const OWNER = 'solana-foundation'
 const REPO = 'solana-improvement-documents'
 const BRANCH = 'main'
@@ -25,7 +25,7 @@ export async function fetchFeatureGateInformation(featureInfo?: FeatureInfoType)
 
     if (fileName === null) return empty;
 
-    const link = getLink(fileName) 
+    const link = getLink(fileName)
     try {
         const resp = await fetch(link, { method: 'GET' })
 
