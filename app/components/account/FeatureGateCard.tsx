@@ -10,5 +10,5 @@ export function FeatureGateCard({ children }: { children: React.ReactNode }) {
                 </div>
             </div>
         </div>
-    )
+    );
 }

@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkGFM from 'remark-gfm';
 
-import { fetchFeatureGateInformation } from '@/app/features/feature-gate'
+import { fetchFeatureGateInformation } from '@/app/features/feature-gate';
 import { getFeatureInfo } from '@/app/utils/feature-gate/utils';
 
 type Props = Readonly<{
@@ -22,7 +22,7 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
 }
 
 export default async function FeatureGatePage({ params: { address } }: Props) {
-    const feature = getFeatureInfo(address)
+    const feature = getFeatureInfo(address);
     const data = await fetchFeatureGateInformation(feature);
 
     // remark-gfm won't handle github-flavoured-markdown with a table present at it

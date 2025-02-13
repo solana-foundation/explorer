@@ -755,7 +755,7 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
             path: 'feature-gate',
             slug: 'feature-gate',
             title: 'Feature Gate',
-        }
+        };
         tabComponents.push({
             component: (
                 <React.Suspense key={featureInfoTab.slug} fallback={<></>}>

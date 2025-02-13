@@ -29,7 +29,7 @@ type Props = Readonly<{
 const FeatureCard = ({ account }: Props) => {
     const { cluster } = useCluster();
     const feature = parseFeatureAccount(account);
-    const featureInfo = useMemo(() => getFeatureInfo(feature.address), [feature.address])
+    const featureInfo = useMemo(() => getFeatureInfo(feature.address), [feature.address]);
 
     let activatedAtSlot;
     let clusterActivation;
@@ -52,7 +52,7 @@ const FeatureCard = ({ account }: Props) => {
                     <ClusterActivationEpochAtCluster featureInfo={featureInfo} cluster={cluster} />
                 </td>
             </tr>
-        )
+        );
         simdLink = (
             <tr>
                 <td>SIMD</td>
@@ -72,7 +72,7 @@ const FeatureCard = ({ account }: Props) => {
 
                 </td>
             </tr>
-        )
+        );
     }
 
     return (
@@ -161,11 +161,11 @@ function ClusterActivationEpochAtCluster({ featureInfo, cluster }: {
                 </div>
             )}
         </>
-    )
+    );
 }
 
 function FeatureActivatedAtCluster({ featureInfo, cluster }: { featureInfo: FeatureInfoType, cluster: Cluster }) {
-    if (cluster === Cluster.Custom) return null
+    if (cluster === Cluster.Custom) return null;
 
     return (
         <>
@@ -179,5 +179,5 @@ function FeatureActivatedAtCluster({ featureInfo, cluster }: { featureInfo: Feat
                 <span className="badge bg-success">Active on Testnet</span>
             )}
         </>
-    )
+    );
 }
