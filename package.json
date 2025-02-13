@@ -68,7 +68,6 @@
         "swr": "^2.2.0",
         "tweetnacl": "^1.0.3",
         "typescript": "5.0.4",
-        "unified": "^11.0.5",
         "use-async-effect": "^2.2.7",
         "use-tab-visibility": "^1.0.9",
         "web3js-experimental": "npm:@solana/web3.js@2.0.0"
