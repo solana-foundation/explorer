@@ -44,9 +44,8 @@ export function TokenBalancesCard({ signature }: SignatureProps) {
 }
 
 export type TokenBalancesCardInnerProps = {
-    rows: TokenBalanceRow[]
-}
-
+    rows: TokenBalanceRow[];
+};
 
 export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     const { cluster, url } = useCluster();

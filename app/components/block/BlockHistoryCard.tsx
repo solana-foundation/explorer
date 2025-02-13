@@ -296,13 +296,13 @@ export function BlockHistoryCard({ block }: { block: VersionedBlockResponse }) {
                                             {tx.invocations.size === 0
                                                 ? 'NA'
                                                 : entries.map(([programId, count], i) => {
-                                                    return (
-                                                        <div key={i} className="d-flex align-items-center">
-                                                            <Address pubkey={new PublicKey(programId)} link />
-                                                            <span className="ms-2 text-muted">{`(${count})`}</span>
-                                                        </div>
-                                                    );
-                                                })}
+                                                      return (
+                                                          <div key={i} className="d-flex align-items-center">
+                                                              <Address pubkey={new PublicKey(programId)} link />
+                                                              <span className="ms-2 text-muted">{`(${count})`}</span>
+                                                          </div>
+                                                      );
+                                                  })}
                                         </td>
                                     </tr>
                                 );

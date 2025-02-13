@@ -97,23 +97,26 @@ const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
     const [data, setData] = useState<programs.metadata.MetadataData>();
     const { url } = useCluster();
 
-    useAsyncEffect(async isMounted => {
-        if (!useMetadata) return;
-        if (pubkey && !data) {
-            try {
-                const pda = await programs.metadata.Metadata.getPDA(pubkey);
-                const connection = new Connection(url);
-                const metadata = await programs.metadata.Metadata.load(connection, pda);
-                if (isMounted()) {
-                    setData(metadata.data);
-                }
-            } catch {
-                if (isMounted()) {
-                    setData(undefined);
+    useAsyncEffect(
+        async isMounted => {
+            if (!useMetadata) return;
+            if (pubkey && !data) {
+                try {
+                    const pda = await programs.metadata.Metadata.getPDA(pubkey);
+                    const connection = new Connection(url);
+                    const metadata = await programs.metadata.Metadata.load(connection, pda);
+                    if (isMounted()) {
+                        setData(metadata.data);
+                    }
+                } catch {
+                    if (isMounted()) {
+                        setData(undefined);
+                    }
                 }
             }
-        }
-    }, [useMetadata, pubkey, url, data, setData]);
+        },
+        [useMetadata, pubkey, url, data, setData]
+    );
     return { data };
 };
 
@@ -121,21 +124,24 @@ const useTokenInfo = (fetchTokenLabelInfo: boolean | undefined, pubkey: string) 
     const [info, setInfo] = useState<TokenLabelInfo>();
     const { cluster, url } = useCluster();
 
-    useAsyncEffect(async isMounted => {
-        if (!fetchTokenLabelInfo) return;
-        if (!info) {
-            try {
-                const token = await getTokenInfoWithoutOnChainFallback(new PublicKey(pubkey), cluster);
-                if (isMounted()) {
-                    setInfo(token);
-                }
-            } catch {
-                if (isMounted()) {
-                    setInfo(undefined);
+    useAsyncEffect(
+        async isMounted => {
+            if (!fetchTokenLabelInfo) return;
+            if (!info) {
+                try {
+                    const token = await getTokenInfoWithoutOnChainFallback(new PublicKey(pubkey), cluster);
+                    if (isMounted()) {
+                        setInfo(token);
+                    }
+                } catch {
+                    if (isMounted()) {
+                        setInfo(undefined);
+                    }
                 }
             }
-        }
-    }, [fetchTokenLabelInfo, pubkey, cluster, url, info, setInfo]);
+        },
+        [fetchTokenLabelInfo, pubkey, cluster, url, info, setInfo]
+    );
 
     return info;
 };

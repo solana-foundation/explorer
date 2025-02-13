@@ -24,11 +24,11 @@ export enum DashboardInfoActionType {
 }
 
 export type EpochInfo = {
-    absoluteSlot: bigint,
-    blockHeight: bigint,
-    epoch: bigint,
-    slotIndex: bigint,
-    slotsInEpoch: bigint,
+    absoluteSlot: bigint;
+    blockHeight: bigint;
+    epoch: bigint;
+    slotIndex: bigint;
+    slotsInEpoch: bigint;
 };
 
 export type DashboardInfoActionSetPerfSamples = {
@@ -94,7 +94,8 @@ export function dashboardInfoReducer(state: DashboardInfo, action: DashboardInfo
                     return sum + cur;
                 }, 0) / samplesInHour;
 
-            const status = state.epochInfo.absoluteSlot !== BigInt(0) ? ClusterStatsStatus.Ready : ClusterStatsStatus.Loading;
+            const status =
+                state.epochInfo.absoluteSlot !== BigInt(0) ? ClusterStatsStatus.Ready : ClusterStatsStatus.Loading;
 
             return {
                 ...state,
@@ -115,9 +116,11 @@ export function dashboardInfoReducer(state: DashboardInfo, action: DashboardInfo
                 state.avgSlotTime_1h !== 0 &&
                 action.data.absoluteSlot >= state.lastBlockTime.slot
             ) {
-                blockTime =
-                    Number(BigInt(state.lastBlockTime.blockTime) +
-                        (action.data.absoluteSlot - state.lastBlockTime.slot) * BigInt(Math.floor(state.avgSlotTime_1h * 1000)));
+                blockTime = Number(
+                    BigInt(state.lastBlockTime.blockTime) +
+                        (action.data.absoluteSlot - state.lastBlockTime.slot) *
+                            BigInt(Math.floor(state.avgSlotTime_1h * 1000))
+                );
             }
 
             return {

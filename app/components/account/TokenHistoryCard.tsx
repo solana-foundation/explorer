@@ -298,9 +298,7 @@ const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
                             className={`dropdown-item${filterOption === filter ? ' active' : ''}`}
                             onClick={toggle}
                         >
-                            {filterOption === ALL_TOKENS
-                                ? 'All Tokens'
-                                : nameLookup.get(filterOption) || filterOption}
+                            {filterOption === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filterOption) || filterOption}
                         </Link>
                     );
                 })}
