@@ -51,7 +51,7 @@ import { Address } from 'web3js-experimental';
 import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
-import {useFeatureInfo} from '@/app/utils/feature-gate/utils';
+import { useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
 
