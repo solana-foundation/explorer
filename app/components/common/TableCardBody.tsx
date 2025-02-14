@@ -1,17 +1,17 @@
 import { cva, VariantProps } from 'class-variance-authority';
 import React from 'react';
 
-const tableVariants = cva(["table table-sm card-table"], {
+const tableVariants = cva(['table table-sm card-table'], {
     defaultVariants: {
-        layout: "compact"
+        layout: 'compact',
     },
     variants: {
         layout: {
-            "compact": ["table-nowrap"],
-            "expanded": []
-        }
-    }
-})
+            compact: ['table-nowrap'],
+            expanded: [],
+        },
+    },
+});
 
 export interface TableCardBodyProps extends VariantProps<typeof tableVariants>, React.PropsWithChildren {}
 

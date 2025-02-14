@@ -6,7 +6,7 @@ import { parseFeatureAccount } from '@utils/parseFeatureAccount';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { ExternalLink as ExternalLinkIcon } from'react-feather';
+import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
 import { useCluster } from '@/app/providers/cluster';
 import { Cluster } from '@/app/utils/cluster';
@@ -59,18 +59,12 @@ const FeatureCard = ({ account }: Props) => {
                 <td>SIMD</td>
                 <td className="text-lg-end">
                     {featureInfo.simd && featureInfo.simd_link ? (
-                        <a
-                            href={featureInfo.simd_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className=""
-                        >
+                        <a href={featureInfo.simd_link} target="_blank" rel="noopener noreferrer" className="">
                             SIMD {featureInfo.simd} <ExternalLinkIcon className="align-text-top" size={13} />
                         </a>
                     ) : (
                         <code>No link</code>
                     )}
-
                 </td>
             </tr>
         );
@@ -79,7 +73,9 @@ const FeatureCard = ({ account }: Props) => {
     return (
         <div className="card">
             <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">{featureInfo?.title ?? 'Feature Activation'}</h3>
+                <h3 className="card-header-title mb-0 d-flex align-items-center">
+                    {featureInfo?.title ?? 'Feature Activation'}
+                </h3>
             </div>
 
             <TableCardBody layout="expanded">
@@ -123,40 +119,28 @@ const FeatureCard = ({ account }: Props) => {
     );
 };
 
-function ClusterActivationEpochAtCluster({ featureInfo, cluster }: {
-    featureInfo: FeatureInfoType,
-    cluster: Cluster
-}){
+function ClusterActivationEpochAtCluster({ featureInfo, cluster }: { featureInfo: FeatureInfoType; cluster: Cluster }) {
     if (cluster === Cluster.Custom) return null;
 
     return (
         <>
             {featureInfo.mainnetActivationEpoch && cluster === Cluster.MainnetBeta && (
                 <div>
-                    <Link
-                        href={`/epoch/${featureInfo.mainnetActivationEpoch}?cluster=mainnet`}
-                        className="epoch-link"
-                    >
+                    <Link href={`/epoch/${featureInfo.mainnetActivationEpoch}?cluster=mainnet`} className="epoch-link">
                         Mainnet Epoch {featureInfo.mainnetActivationEpoch}
                     </Link>
                 </div>
             )}
             {featureInfo.devnetActivationEpoch && cluster === Cluster.Devnet && (
                 <div>
-                    <Link
-                        href={`/epoch/${featureInfo.devnetActivationEpoch}?cluster=devnet`}
-                        className="epoch-link"
-                    >
+                    <Link href={`/epoch/${featureInfo.devnetActivationEpoch}?cluster=devnet`} className="epoch-link">
                         Devnet Epoch {featureInfo.devnetActivationEpoch}
                     </Link>
                 </div>
             )}
             {featureInfo.testnetActivationEpoch && cluster === Cluster.Testnet && (
                 <div>
-                    <Link
-                        href={`/epoch/${featureInfo.testnetActivationEpoch}?cluster=testnet`}
-                        className="epoch-link"
-                    >
+                    <Link href={`/epoch/${featureInfo.testnetActivationEpoch}?cluster=testnet`} className="epoch-link">
                         Testnet Epoch {featureInfo.testnetActivationEpoch}
                     </Link>
                 </div>
@@ -165,7 +149,7 @@ function ClusterActivationEpochAtCluster({ featureInfo, cluster }: {
     );
 }
 
-function FeatureActivatedAtCluster({ featureInfo, cluster }: { featureInfo: FeatureInfoType, cluster: Cluster }) {
+function FeatureActivatedAtCluster({ featureInfo, cluster }: { featureInfo: FeatureInfoType; cluster: Cluster }) {
     if (cluster === Cluster.Custom) return null;
 
     return (
