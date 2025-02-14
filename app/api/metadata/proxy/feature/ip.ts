@@ -12,14 +12,14 @@ const privateIPv4CIDRs = [
     '169.254.0.0/16',
     '100.64.0.0/10',
     '0.0.0.0/8',
-]
+];
 
 const privateIPv6CIDRs = [
     '::1/128',
     'fc00::/7',
     'fe80::/10',
     '::ffff:0:0/96'
-]
+];
 
 /**
  *  Check if an IP is in a CIDR block
@@ -34,7 +34,7 @@ function ipInRange(ip: Address.IPv4 | Address.IPv6, cidr: string) {
  *  Check if an IP falls within a private range
  */
 export function isPrivateIP(ip: string) {
-    const isIPv4 = Address.IPv4.isIPv4(ip)
+    const isIPv4 = Address.IPv4.isIPv4(ip);
     const normalizedIP = parse(ip);
 
     let isMatchedRanges: boolean;
@@ -60,7 +60,7 @@ export function isLocalhost(url: URL) {
  */
 export async function checkURLForPrivateIP(uri: URL | string) {
     try {
-        let url: URL
+        let url: URL;
         if (uri instanceof URL) {
             url = uri;
         } else {

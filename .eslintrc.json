@@ -1,6 +1,12 @@
 {
     "extends": ["next/core-web-vitals", "@solana/eslint-config-solana"],
     "plugins": ["testing-library"],
+    "rules": {
+        "semi": ["error", "always"],
+        // Temporary rule to ignore any explicit any type warnings in TypeScript files
+        "@typescript-eslint/no-explicit-any": "off",
+        "object-curly-spacing": ["error", "always"]
+    },
     "overrides": [
         // Only uses Testing Library lint rules in test files
         {

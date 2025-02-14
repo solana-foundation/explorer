@@ -28,7 +28,7 @@ export const errors = {
     415: unsupportedMediaError,
     500: generalError,
     504: gatewayTimeoutError,
-}
+};
 
 export function matchAbortError(error: unknown): error is Error {
     return Boolean(error instanceof Error && error.name === 'AbortError');

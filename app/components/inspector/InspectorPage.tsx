@@ -128,7 +128,13 @@ function decodeUrlParams(params: URLSearchParams): [TransactionData | string, UR
     }
 }
 
-export function TransactionInspectorPage({ signature, showTokenBalanceChanges }: { signature?: string; showTokenBalanceChanges: boolean }) {
+export function TransactionInspectorPage({
+    signature,
+    showTokenBalanceChanges,
+}: {
+    signature?: string;
+    showTokenBalanceChanges: boolean;
+}) {
     const [transaction, setTransaction] = React.useState<TransactionData>();
     const currentSearchParams = useSearchParams();
     const currentPathname = usePathname();
@@ -198,7 +204,11 @@ export function TransactionInspectorPage({ signature, showTokenBalanceChanges }:
             {signature ? (
                 <PermalinkView signature={signature} reset={reset} showTokenBalanceChanges={showTokenBalanceChanges} />
             ) : transaction ? (
-                <LoadedView transaction={transaction} onClear={reset} showTokenBalanceChanges={showTokenBalanceChanges} />
+                <LoadedView
+                    transaction={transaction}
+                    onClear={reset}
+                    showTokenBalanceChanges={showTokenBalanceChanges}
+                />
             ) : (
                 <RawInput value={paramString} setTransactionData={setTransaction} />
             )}
@@ -206,7 +216,14 @@ export function TransactionInspectorPage({ signature, showTokenBalanceChanges }:
     );
 }
 
-function PermalinkView({ signature, showTokenBalanceChanges }: { signature: string; reset: () => void; showTokenBalanceChanges: boolean }) {
+function PermalinkView({
+    signature,
+    showTokenBalanceChanges,
+}: {
+    signature: string;
+    reset: () => void;
+    showTokenBalanceChanges: boolean;
+}) {
     const details = useRawTransactionDetails(signature);
     const fetchTransaction = useFetchRawTransaction();
     const refreshTransaction = () => fetchTransaction(signature);
@@ -236,7 +253,15 @@ function PermalinkView({ signature, showTokenBalanceChanges }: { signature: stri
     return <LoadedView transaction={tx} onClear={reset} showTokenBalanceChanges={showTokenBalanceChanges} />;
 }
 
-function LoadedView({ transaction, onClear, showTokenBalanceChanges }: { transaction: TransactionData; onClear: () => void; showTokenBalanceChanges: boolean }) {
+function LoadedView({
+    transaction,
+    onClear,
+    showTokenBalanceChanges,
+}: {
+    transaction: TransactionData;
+    onClear: () => void;
+    showTokenBalanceChanges: boolean;
+}) {
     const { message, rawMessage, signatures } = transaction;
 
     const fetchAccountInfo = useFetchAccountInfo();

@@ -138,11 +138,11 @@ function HoldingsDetailTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
 
 function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     type MappedToken = {
-        amount: string,
-        logoURI?: string,
-        symbol?: string,
-        name?: string
-    }
+        amount: string;
+        logoURI?: string;
+        symbol?: string;
+        name?: string;
+    };
     const mappedTokens = new Map<string, MappedToken>();
     for (const { info: token, logoURI, symbol, name } of tokens) {
         const mintAddress = token.mint.toBase58();
@@ -157,7 +157,7 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
             amount,
             logoURI,
             name,
-            symbol
+            symbol,
         });
     }
 

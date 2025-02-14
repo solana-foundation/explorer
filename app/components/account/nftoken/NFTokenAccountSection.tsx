@@ -111,7 +111,7 @@ export const NftokenImage = ({ url, size }: { url: string | undefined; size: num
                 />
             </div>
         </>
-    )
+    );
 };
 
 const CollectionCard = ({ collection }: { collection: NftokenTypes.CollectionAccount }) => {

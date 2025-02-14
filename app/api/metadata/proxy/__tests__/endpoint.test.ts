@@ -13,12 +13,12 @@ function setEnvironment(key: string, value: string) {
 }
 
 jest.mock('node-fetch', () => {
-    const originalFetch = jest.requireActual('node-fetch')
+    const originalFetch = jest.requireActual('node-fetch');
     const mockFn = jest.fn();
 
     Object.assign(mockFn, originalFetch);
 
-    return mockFn
+    return mockFn;
 });
 
 jest.mock('dns', () => {
@@ -54,7 +54,7 @@ describe('metadata/[network] endpoint', () => {
 
     afterEach(() => {
         jest.clearAllMocks();
-    })
+    });
 
     it('should return status when disabled', async () => {
         setEnvironment('NEXT_PUBLIC_METADATA_ENABLED', 'false');
@@ -73,7 +73,7 @@ describe('metadata/[network] endpoint', () => {
     });
 
     it('should return proper status upon processig data', async () => {
-        setEnvironment('NEXT_PUBLIC_METADATA_ENABLED', 'true')
+        setEnvironment('NEXT_PUBLIC_METADATA_ENABLED', 'true');
 
         const { request, nextParams } = requestFactory();
         const response = await GET(request, nextParams);
@@ -101,5 +101,5 @@ describe('metadata/[network] endpoint', () => {
 
         const request = requestFactory(validUrl);
         expect((await GET(request.request, request.nextParams)).status).toBe(200);
-    })
+    });
 });

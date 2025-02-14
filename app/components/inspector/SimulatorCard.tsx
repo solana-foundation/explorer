@@ -1,17 +1,44 @@
 import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { useCluster } from '@providers/cluster';
-import { AccountLayout, MintLayout } from "@solana/spl-token";
-import { AccountInfo, AddressLookupTableAccount, Connection, MessageAddressTableLookup, ParsedAccountData, ParsedMessageAccount, SimulatedTransactionAccountInfo, TokenBalance, VersionedMessage, VersionedTransaction } from '@solana/web3.js';
+import { AccountLayout, MintLayout } from '@solana/spl-token';
+import {
+    AccountInfo,
+    AddressLookupTableAccount,
+    Connection,
+    MessageAddressTableLookup,
+    ParsedAccountData,
+    ParsedMessageAccount,
+    SimulatedTransactionAccountInfo,
+    TokenBalance,
+    VersionedMessage,
+    VersionedTransaction,
+} from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
 import { InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
 
-import { generateTokenBalanceRows,TokenBalancesCardInner, TokenBalancesCardInnerProps } from '../transaction/TokenBalancesCard';
+import {
+    generateTokenBalanceRows,
+    TokenBalancesCardInner,
+    TokenBalancesCardInnerProps,
+} from '../transaction/TokenBalancesCard';
 
-export function SimulatorCard({ message, showTokenBalanceChanges }: { message: VersionedMessage; showTokenBalanceChanges: boolean }) {
+export function SimulatorCard({
+    message,
+    showTokenBalanceChanges,
+}: {
+    message: VersionedMessage;
+    showTokenBalanceChanges: boolean;
+}) {
     const { cluster, url } = useCluster();
-    const { simulate, simulating, simulationLogs: logs, simulationError, simulationTokenBalanceRows } = useSimulator(message);
+    const {
+        simulate,
+        simulating,
+        simulationLogs: logs,
+        simulationError,
+        simulationTokenBalanceRows,
+    } = useSimulator(message);
     if (simulating) {
         return (
             <div className="card">
@@ -64,7 +91,10 @@ export function SimulatorCard({ message, showTokenBalanceChanges }: { message: V
                 </div>
                 <ProgramLogsCardBody message={message} logs={logs} cluster={cluster} url={url} />
             </div>
-            {showTokenBalanceChanges && simulationTokenBalanceRows && !simulationError && simulationTokenBalanceRows.rows.length ? (
+            {showTokenBalanceChanges &&
+            simulationTokenBalanceRows &&
+            !simulationError &&
+            simulationTokenBalanceRows.rows.length ? (
                 <TokenBalancesCardInner rows={simulationTokenBalanceRows.rows} />
             ) : null}
         </>
@@ -93,18 +123,25 @@ function useSimulator(message: VersionedMessage) {
         (async () => {
             try {
                 const addressTableLookups: MessageAddressTableLookup[] = message.addressTableLookups;
-                const addressTableLookupKeys: PublicKey[] = addressTableLookups.map((addressTableLookup: MessageAddressTableLookup) => {
-                    return addressTableLookup.accountKey;
-                });
-                const addressTableLookupsFetched: (AccountInfo<Buffer> | null)[] = await connection.getMultipleAccountsInfo(addressTableLookupKeys);
-                const nonNullAddressTableLookups: AccountInfo<Buffer>[] = addressTableLookupsFetched.filter((o): o is AccountInfo<Buffer> => !!o);
+                const addressTableLookupKeys: PublicKey[] = addressTableLookups.map(
+                    (addressTableLookup: MessageAddressTableLookup) => {
+                        return addressTableLookup.accountKey;
+                    }
+                );
+                const addressTableLookupsFetched: (AccountInfo<Buffer> | null)[] =
+                    await connection.getMultipleAccountsInfo(addressTableLookupKeys);
+                const nonNullAddressTableLookups: AccountInfo<Buffer>[] = addressTableLookupsFetched.filter(
+                    (o): o is AccountInfo<Buffer> => !!o
+                );
 
-                const addressLookupTablesParsed: AddressLookupTableAccount[] = nonNullAddressTableLookups.map((addressTableLookup: AccountInfo<Buffer>, index) => {
-                    return new AddressLookupTableAccount({
-                        key: addressTableLookupKeys[index],
-                        state: AddressLookupTableAccount.deserialize(addressTableLookup.data)
-                    });
-                })
+                const addressLookupTablesParsed: AddressLookupTableAccount[] = nonNullAddressTableLookups.map(
+                    (addressTableLookup: AccountInfo<Buffer>, index) => {
+                        return new AddressLookupTableAccount({
+                            key: addressTableLookupKeys[index],
+                            state: AddressLookupTableAccount.deserialize(addressTableLookup.data),
+                        });
+                    }
+                );
 
                 // Fetch all the accounts before simulating
                 const accountKeys = message.getAccountKeys({
@@ -124,11 +161,11 @@ function useSimulator(message: VersionedMessage) {
                     replaceRecentBlockhash: true,
                 });
 
-                const mintToDecimals: { [mintPk: string]: number} =  getMintDecimals(
+                const mintToDecimals: { [mintPk: string]: number } = getMintDecimals(
                     accountKeys,
                     parsedAccountsPre.value,
-                    resp.value.accounts as SimulatedTransactionAccountInfo[],
-                )
+                    resp.value.accounts as SimulatedTransactionAccountInfo[]
+                );
 
                 const preTokenBalances: TokenBalance[] = [];
                 const postTokenBalances: TokenBalance[] = [];
@@ -244,7 +281,7 @@ function getMintDecimals(
     accountKeys: PublicKey[],
     parsedAccountsPre: (AccountInfo<ParsedAccountData | Buffer> | null)[],
     accountDatasPost: SimulatedTransactionAccountInfo[]
-): { [mintPk: string]: number} {
+): { [mintPk: string]: number } {
     const mintToDecimals: { [mintPk: string]: number } = {};
     // Get all the necessary mint decimals by looking at parsed token accounts
     // and mints before, as well as mints after.
@@ -274,7 +311,11 @@ function getMintDecimals(
         // Token account after
         const accountDataPost = accountDatasPost.at(index)?.data[0];
         const accountOwnerPost = accountDatasPost.at(index)?.owner;
-        if (accountOwnerPost && isTokenProgramBase58(accountOwnerPost) && Buffer.from(accountDataPost!, 'base64').length === 82) {
+        if (
+            accountOwnerPost &&
+            isTokenProgramBase58(accountOwnerPost) &&
+            Buffer.from(accountDataPost!, 'base64').length === 82
+        ) {
             const accountParsedPost = MintLayout.decode(Buffer.from(accountDataPost!, 'base64'));
             mintToDecimals[key.toBase58()] = accountParsedPost.decimals;
         }

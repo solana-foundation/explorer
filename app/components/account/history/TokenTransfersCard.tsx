@@ -30,7 +30,7 @@ type IndexedTransfer = {
 };
 
 async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
-    return await getTokenInfo(new PublicKey(address), cluster, url)
+    return await getTokenInfo(new PublicKey(address), cluster, url);
 }
 
 export function TokenTransfersCard({ address }: { address: string }) {

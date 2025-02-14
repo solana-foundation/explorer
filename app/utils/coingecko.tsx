@@ -46,7 +46,7 @@ export type CoinGeckoResult = {
 };
 
 export function useCoinGecko(coinId?: string): CoinGeckoResult | undefined {
-    const { cluster } = useCluster()
+    const { cluster } = useCluster();
     const [coinInfo, setCoinInfo] = React.useState<CoinGeckoResult>();
     const { visible: isTabVisible } = useTabVisibility();
     React.useEffect(() => {
@@ -71,14 +71,14 @@ export function useCoinGecko(coinId?: string): CoinGeckoResult | undefined {
                 try {
                     const response = await fetch(
                         `https://api.coingecko.com/api/v3/coins/${coinId}?` +
-                        [
-                            'community_data=false',
-                            'developer_data=false',
-                            'localization=false',
-                            'market_data=true',
-                            'sparkline=false',
-                            'tickers=false',
-                        ].join('&')
+                            [
+                                'community_data=false',
+                                'developer_data=false',
+                                'localization=false',
+                                'market_data=true',
+                                'sparkline=false',
+                                'tickers=false',
+                            ].join('&')
                     );
                     if (stale) {
                         return;
