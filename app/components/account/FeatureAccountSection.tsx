@@ -6,6 +6,7 @@ import { parseFeatureAccount } from '@utils/parseFeatureAccount';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+import { ExternalLink as ExternalLinkIcon } from'react-feather';
 
 import { useCluster } from '@/app/providers/cluster';
 import { Cluster } from '@/app/utils/cluster';
@@ -64,7 +65,7 @@ const FeatureCard = ({ account }: Props) => {
                             rel="noopener noreferrer"
                             className=""
                         >
-                            See SIMD {featureInfo.simd}
+                            SIMD {featureInfo.simd} <ExternalLinkIcon className="align-text-top" size={13} />
                         </a>
                     ) : (
                         <code>No link</code>
