@@ -51,9 +51,10 @@ import { Address } from 'web3js-experimental';
 import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
-import { useFeatureInfo } from '@/app/utils/feature-gate/utils';
+import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
+import { fetchFeatureGateInformation } from '@/app/features/feature-gate';
 
 const IDENTICON_WIDTH = 64;
 
@@ -750,18 +751,14 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
     });
 
     // Feature-specific information
-    if (account.owner.toBase58() === FEATURE_PROGRAM_ID) {
+    if (getFeatureInfo(pubkey.toBase58())) {
         const featureInfoTab: Tab = {
             path: 'feature-gate',
             slug: 'feature-gate',
             title: 'Feature Gate',
         };
         tabComponents.push({
-            component: (
-                <React.Suspense key={featureInfoTab.slug} fallback={<></>}>
-                    <FeatureGateLink tab={featureInfoTab} address={pubkey.toString()} />
-                </React.Suspense>
-            ),
+            component: <FeatureGateLink tab={featureInfoTab} address={pubkey.toString()} />,
             tab: featureInfoTab,
         });
     }

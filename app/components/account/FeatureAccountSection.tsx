@@ -14,6 +14,7 @@ import { FeatureInfoType } from '@/app/utils/feature-gate/types';
 import { getFeatureInfo } from '@/app/utils/feature-gate/utils';
 
 import { UnknownAccountCard } from './UnknownAccountCard';
+import { Slot } from '../common/Slot';
 
 export function FeatureAccountSection({ account }: { account: Account }) {
     return (
@@ -40,7 +41,7 @@ const FeatureCard = ({ account }: Props) => {
             <tr>
                 <td className="text-nowrap">Activated At Slot</td>
                 <td className="text-lg-end">
-                    <code>{feature.activatedAt}</code>
+                    <Slot slot={feature.activatedAt} link />
                 </td>
             </tr>
         );
@@ -86,21 +87,16 @@ const FeatureCard = ({ account }: Props) => {
                     </td>
                 </tr>
 
-                {featureInfo ? (
-                    <tr>
-                        <td className="text-nowrap">Activated At</td>
-                        <td className="text-lg-end">
+                <tr>
+                    <td className="text-nowrap">Activated?</td>
+                    <td className="text-lg-end">
+                        {featureInfo ? (
                             <FeatureActivatedAtCluster featureInfo={featureInfo} cluster={cluster} />
-                        </td>
-                    </tr>
-                ) : (
-                    <tr>
-                        <td>Activated?</td>
-                        <td className="text-lg-end">
+                        ) : (
                             <code>{feature.activatedAt === null ? 'No' : 'Yes'}</code>
-                        </td>
-                    </tr>
-                )}
+                        )}
+                    </td>
+                </tr>
 
                 {activatedAtSlot}
 
