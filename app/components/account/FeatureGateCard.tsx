@@ -4,7 +4,9 @@ export function FeatureGateCard({ children }: { children: React.ReactNode }) {
             <div className="card-header align-items-center">
                 <h3 className="card-header-title">Feature Information</h3>
             </div>
-            <div className="card-footer">{children}</div>
+            <div className="card-footer">
+                <div className="text-muted">{children}</div>
+            </div>
         </div>
     );
 }
