@@ -1,23 +1,31 @@
-'use client';
-
-import { useAnchorProgram } from '@providers/anchor';
-import { useCluster } from '@providers/cluster';
+import { Idl } from '@coral-xyz/anchor';
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
-import ReactJson from 'react-json-view';
 
 import { getIdlSpecType } from '@/app/utils/convertLegacyIdl';
 
 import { DownloadableButton } from '../common/Downloadable';
 import { IDLBadge } from '../common/IDLBadge';
 
-export function AnchorProgramCard({ programId }: { programId: string }) {
-    const { url } = useCluster();
-    const { idl } = useAnchorProgram(programId, url);
+// Necessary to avoid hydration errors
+const ReactJson = dynamic(() => import('react-json-view'), {
+    loading: () => <div>Loading IDL...</div>,
+    ssr: false,
+});
+
+interface Props {
+    idl: Idl;
+    programId: string;
+    title?: string;
+}
+
+export function IdlCard({ idl, programId, title = 'Program IDL' }: Props) {
     const [collapsedValue, setCollapsedValue] = useState<boolean | number>(1);
 
     if (!idl) {
         return null;
     }
+
     const spec = getIdlSpecType(idl);
 
     return (
@@ -25,7 +33,7 @@ export function AnchorProgramCard({ programId }: { programId: string }) {
             <div className="card-header">
                 <div className="row align-items-center">
                     <div className="col">
-                        <h3 className="card-header-title">Anchor IDL</h3>
+                        <h3 className="card-header-title">{title}</h3>
                     </div>
                     <div className="col-auto btn btn-sm btn-primary d-flex align-items-center">
                         <DownloadableButton
