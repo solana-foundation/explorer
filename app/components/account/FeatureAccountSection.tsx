@@ -1,8 +1,9 @@
 import { Address } from '@components/common/Address';
+import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import { parseFeatureAccount } from '@utils/parseFeatureAccount';
+import { parseFeatureAccount, useFeatureAccount } from '@utils/parseFeatureAccount';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -14,12 +15,25 @@ import { FeatureInfoType } from '@/app/utils/feature-gate/types';
 import { getFeatureInfo } from '@/app/utils/feature-gate/utils';
 
 import { UnknownAccountCard } from './UnknownAccountCard';
-import { Slot } from '../common/Slot';
 
 export function FeatureAccountSection({ account }: { account: Account }) {
+    const address = account.pubkey.toBase58();
+
+    // Making decision about card rendering upon these factors:
+    //  - assume that account could be parsed by its signs
+    //  - address matches feature that is present at featureGates.json
+    const { isFeature } = useFeatureAccount(account);
+    const maybeFeatureInfo = useMemo(() => getFeatureInfo(address), [address]);
+
     return (
         <ErrorBoundary fallback={<UnknownAccountCard account={account} />}>
-            <FeatureCard account={account} />
+            {isFeature ? (
+                // use account-specific card that able to parse account' data
+                <FeatureCard account={account} />
+            ) : (
+                // feature that is preset at JSON would not have data about slot. leave it as null
+                <BaseFeatureCard activatedAt={null} address={address} featureInfo={maybeFeatureInfo} />
+            )}
         </ErrorBoundary>
     );
 }
@@ -29,24 +43,33 @@ type Props = Readonly<{
 }>;
 
 const FeatureCard = ({ account }: Props) => {
-    const { cluster } = useCluster();
     const feature = parseFeatureAccount(account);
     const featureInfo = useMemo(() => getFeatureInfo(feature.address), [feature.address]);
+
+    return <BaseFeatureCard address={feature.address} activatedAt={feature.activatedAt} featureInfo={featureInfo} />;
+};
+
+const BaseFeatureCard = ({
+    activatedAt,
+    address,
+    featureInfo,
+}: ReturnType<typeof parseFeatureAccount> & { featureInfo?: FeatureInfoType }) => {
+    const { cluster } = useCluster();
 
     let activatedAtSlot;
     let clusterActivation;
     let simdLink;
-    if (feature.activatedAt) {
+    if (activatedAt) {
         activatedAtSlot = (
             <tr>
                 <td className="text-nowrap">Activated At Slot</td>
                 <td className="text-lg-end">
-                    <Slot slot={feature.activatedAt} link />
+                    <Slot slot={activatedAt} link />
                 </td>
             </tr>
         );
     }
-    if (feature.activatedAt && featureInfo) {
+    if (featureInfo) {
         clusterActivation = (
             <tr>
                 <td className="text-nowrap">Cluster Activation</td>
@@ -83,7 +106,7 @@ const FeatureCard = ({ account }: Props) => {
                 <tr>
                     <td>Address</td>
                     <td>
-                        <Address pubkey={new PublicKey(feature.address)} alignRight raw />
+                        <Address pubkey={new PublicKey(address)} alignRight raw />
                     </td>
                 </tr>
 
@@ -93,7 +116,7 @@ const FeatureCard = ({ account }: Props) => {
                         {featureInfo ? (
                             <FeatureActivatedAtCluster featureInfo={featureInfo} cluster={cluster} />
                         ) : (
-                            <code>{feature.activatedAt === null ? 'No' : 'Yes'}</code>
+                            <code>{activatedAt === null ? 'No' : 'Yes'}</code>
                         )}
                     </td>
                 </tr>
@@ -118,23 +141,28 @@ const FeatureCard = ({ account }: Props) => {
 function ClusterActivationEpochAtCluster({ featureInfo, cluster }: { featureInfo: FeatureInfoType; cluster: Cluster }) {
     if (cluster === Cluster.Custom) return null;
 
+    const { mainnetActivationEpoch, devnetActivationEpoch, testnetActivationEpoch } = featureInfo;
+
+    // Show empty state unless there is any info about Activation
+    if (!mainnetActivationEpoch && !devnetActivationEpoch && !testnetActivationEpoch) return <code>No Epoch</code>;
+
     return (
         <>
-            {featureInfo.mainnetActivationEpoch && cluster === Cluster.MainnetBeta && (
+            {mainnetActivationEpoch && cluster === Cluster.MainnetBeta && (
                 <div>
                     <Link href={`/epoch/${featureInfo.mainnetActivationEpoch}?cluster=mainnet`} className="epoch-link">
                         Mainnet Epoch {featureInfo.mainnetActivationEpoch}
                     </Link>
                 </div>
             )}
-            {featureInfo.devnetActivationEpoch && cluster === Cluster.Devnet && (
+            {devnetActivationEpoch && cluster === Cluster.Devnet && (
                 <div>
                     <Link href={`/epoch/${featureInfo.devnetActivationEpoch}?cluster=devnet`} className="epoch-link">
                         Devnet Epoch {featureInfo.devnetActivationEpoch}
                     </Link>
                 </div>
             )}
-            {featureInfo.testnetActivationEpoch && cluster === Cluster.Testnet && (
+            {testnetActivationEpoch && cluster === Cluster.Testnet && (
                 <div>
                     <Link href={`/epoch/${featureInfo.testnetActivationEpoch}?cluster=testnet`} className="epoch-link">
                         Testnet Epoch {featureInfo.testnetActivationEpoch}
@@ -148,15 +176,20 @@ function ClusterActivationEpochAtCluster({ featureInfo, cluster }: { featureInfo
 function FeatureActivatedAtCluster({ featureInfo, cluster }: { featureInfo: FeatureInfoType; cluster: Cluster }) {
     if (cluster === Cluster.Custom) return null;
 
+    const { mainnetActivationEpoch, devnetActivationEpoch, testnetActivationEpoch } = featureInfo;
+
+    // Show empty state unless there is any info about Activation
+    if (!mainnetActivationEpoch && !devnetActivationEpoch && !testnetActivationEpoch) return <code>Not activated</code>;
+
     return (
         <>
-            {cluster === Cluster.MainnetBeta && featureInfo.mainnetActivationEpoch && (
+            {cluster === Cluster.MainnetBeta && mainnetActivationEpoch && (
                 <span className="badge bg-success">Active on Mainnet</span>
             )}
-            {cluster === Cluster.Devnet && featureInfo.devnetActivationEpoch && (
+            {cluster === Cluster.Devnet && devnetActivationEpoch && (
                 <span className="badge bg-success">Active on Devnet</span>
             )}
-            {cluster === Cluster.Testnet && featureInfo.testnetActivationEpoch && (
+            {cluster === Cluster.Testnet && testnetActivationEpoch && (
                 <span className="badge bg-success">Active on Testnet</span>
             )}
         </>

@@ -54,7 +54,6 @@ import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
-import { fetchFeatureGateInformation } from '@/app/features/feature-gate';
 
 const IDENTICON_WIDTH = 64;
 
@@ -483,6 +482,9 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
     const parsedData = account.data.parsed;
     const rawData = account.data.raw;
 
+    // get feature data from featureGates.json
+    const featureInfo = useFeatureInfo({ address: account.pubkey.toBase58() });
+
     if (parsedData && parsedData.program === 'bpf-upgradeable-loader') {
         return (
             <UpgradeableLoaderAccountSection
@@ -520,7 +522,7 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
         return <AddressLookupTableAccountSection account={account} lookupTableAccount={parsedData.parsed.info} />;
     } else if (rawData && isAddressLookupTableAccount(account.owner.toBase58() as Address, rawData)) {
         return <AddressLookupTableAccountSection account={account} data={rawData} />;
-    } else if (account.owner.toBase58() === FEATURE_PROGRAM_ID) {
+    } else if (featureInfo || account.owner.toBase58() === FEATURE_PROGRAM_ID) {
         return <FeatureAccountSection account={account} />;
     } else {
         const fallback = <UnknownAccountCard account={account} />;
@@ -809,8 +811,8 @@ function FeatureGateLink({ address, tab }: { address: string; tab: Tab }) {
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
     const featureInfo = useFeatureInfo({ address });
-    // Do not render "Feature Gate" tab on absent simd_link
-    if (!featureInfo?.simd_link) {
+    // Do not render "Feature Gate" tab on absent feature data
+    if (!featureInfo) {
         return null;
     }
 
