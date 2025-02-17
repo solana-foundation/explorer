@@ -760,7 +760,7 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
             title: 'Feature Gate',
         };
         tabComponents.push({
-            component: <FeatureGateLink tab={featureInfoTab} address={pubkey.toString()} />,
+            component: <FeatureGateLink key={featureInfoTab.slug} tab={featureInfoTab} address={pubkey.toString()} />,
             tab: featureInfoTab,
         });
     }
