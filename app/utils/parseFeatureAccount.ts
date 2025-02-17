@@ -16,8 +16,8 @@ export const useFeatureAccount = (account: Account) => {
     const isFeature = isFeatureAccount(account);
 
     // allow to retreive sign of a Feature Account
-    return { isFeature }
-}
+    return { isFeature };
+};
 
 export const parseFeatureAccount = (account: Account): FeatureAccount => {
     if (!isFeatureAccount(account) || account.data.raw == null) {
