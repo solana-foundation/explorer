@@ -97,8 +97,8 @@ export enum PROGRAM_NAMES {
     LIGHTHOUSE_PROGRAM = 'Lighthouse Program',
 
     //Xendex
-    XENDEX_AMM = 'Xendex Swap Program',
-    XENDEX_STAKING = 'Xendex Staking Program',
+    XENDEX_AMM = 'XenDEX AMM Program',
+    XENDEX_STAKING = 'XenDEX Staking Program',
 }
 
 const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
