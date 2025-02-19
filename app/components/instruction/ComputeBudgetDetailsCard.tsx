@@ -24,6 +24,7 @@ export function ComputeBudgetDetailsCard({
     signature,
     innerCards,
     childIndex,
+    InstructionCardComponent = InstructionCard,
 }: {
     ix: TransactionInstruction;
     index: number;
@@ -31,8 +32,10 @@ export function ComputeBudgetDetailsCard({
     signature: string;
     innerCards?: JSX.Element[];
     childIndex?: number;
+    InstructionCardComponent?: React.FC<Parameters<typeof InstructionCard>[0]>;
 }) {
     const { url } = useCluster();
+
     try {
         const type = identifyComputeBudgetInstruction(ix);
         switch (type) {
@@ -44,7 +47,7 @@ export function ComputeBudgetDetailsCard({
                     programAddress: address(ix.programId.toBase58()),
                 });
                 return (
-                    <InstructionCard
+                    <InstructionCardComponent
                         ix={ix}
                         index={index}
                         result={result}
@@ -72,7 +75,7 @@ export function ComputeBudgetDetailsCard({
                                 <SolBalance lamports={additionalFee} />
                             </td>
                         </tr>
-                    </InstructionCard>
+                    </InstructionCardComponent>
                 );
             }
             case ComputeBudgetInstruction.RequestHeapFrame: {
@@ -80,7 +83,7 @@ export function ComputeBudgetDetailsCard({
                     data: { bytes },
                 } = parseRequestHeapFrameInstruction({ ...ix, programAddress: address(ix.programId.toBase58()) });
                 return (
-                    <InstructionCard
+                    <InstructionCardComponent
                         ix={ix}
                         index={index}
                         result={result}
@@ -101,7 +104,7 @@ export function ComputeBudgetDetailsCard({
                                 {new Intl.NumberFormat('en-US').format(bytes)}
                             </td>
                         </tr>
-                    </InstructionCard>
+                    </InstructionCardComponent>
                 );
             }
             case ComputeBudgetInstruction.SetComputeUnitLimit: {
@@ -109,7 +112,7 @@ export function ComputeBudgetDetailsCard({
                     data: { units },
                 } = parseSetComputeUnitLimitInstruction({ ...ix, programAddress: address(ix.programId.toBase58()) });
                 return (
-                    <InstructionCard
+                    <InstructionCardComponent
                         ix={ix}
                         index={index}
                         result={result}
@@ -130,7 +133,7 @@ export function ComputeBudgetDetailsCard({
                                 units
                             )} compute units`}</td>
                         </tr>
-                    </InstructionCard>
+                    </InstructionCardComponent>
                 );
             }
             case ComputeBudgetInstruction.SetComputeUnitPrice: {
@@ -141,7 +144,7 @@ export function ComputeBudgetDetailsCard({
                     programAddress: address(ix.programId.toBase58()),
                 });
                 return (
-                    <InstructionCard
+                    <InstructionCardComponent
                         ix={ix}
                         index={index}
                         result={result}
@@ -162,7 +165,7 @@ export function ComputeBudgetDetailsCard({
                                 microLamports
                             )} lamports per compute unit`}</td>
                         </tr>
-                    </InstructionCard>
+                    </InstructionCardComponent>
                 );
             }
             case ComputeBudgetInstruction.SetLoadedAccountsDataSizeLimit: {
@@ -173,7 +176,7 @@ export function ComputeBudgetDetailsCard({
                     programAddress: address(ix.programId.toBase58()),
                 });
                 return (
-                    <InstructionCard
+                    <InstructionCardComponent
                         ix={ix}
                         index={index}
                         result={result}
@@ -192,7 +195,7 @@ export function ComputeBudgetDetailsCard({
                             <td>Account Data Size Limit</td>
                             <td className="text-lg-end font-monospace">{`${accountDataSizeLimit} bytes`}</td>
                         </tr>
-                    </InstructionCard>
+                    </InstructionCardComponent>
                 );
             }
         }
@@ -204,7 +207,7 @@ export function ComputeBudgetDetailsCard({
     }
 
     return (
-        <InstructionCard
+        <InstructionCardComponent
             ix={ix}
             index={index}
             result={result}
