@@ -1,4 +1,8 @@
+import { Address } from '@components/common/Address';
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
+import { BaseRawDetails as RawDetails } from '@components/common/BaseRawDetails';
+import { BaseRawParsedDetails as RawParsedDetails } from '@components/common/BaseRawParsedDetails';
+import { useScrollAnchor } from '@providers/scroll-anchor';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React, { useCallback, useContext } from 'react';
