@@ -1,12 +1,12 @@
 import { ParsedInstruction } from '@solana/web3.js';
 import React from 'react';
 
-export function RawParsedDetails({ ix, children }: { ix: ParsedInstruction; children?: React.ReactNode }) {
+export function BaseRawParsedDetails({ ix, children }: { ix: ParsedInstruction; children?: React.ReactNode }) {
     return (
         <>
             {children}
 
-            <tr>
+            <tr className="grid grid-flow-col grid-rows-1 gap-4">
                 <td>
                     Instruction Data <span className="text-muted">(JSON)</span>
                 </td>

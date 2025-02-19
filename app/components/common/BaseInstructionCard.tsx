@@ -1,14 +1,12 @@
 import { Address } from '@components/common/Address';
-import { BaseRawDetails as RawDetails } from '@components/common/BaseRawDetails';
-import { BaseRawParsedDetails as RawParsedDetails } from '@components/common/BaseRawParsedDetails';
 import { useScrollAnchor } from '@providers/scroll-anchor';
-import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Code } from 'react-feather';
 
-import { SignatureContext } from './SignatureContext';
+import { BaseRawDetails } from './BaseRawDetails';
+import { BaseRawParsedDetails } from './BaseRawParsedDetails';
 
 type InstructionProps = {
     title: string;
@@ -19,9 +17,13 @@ type InstructionProps = {
     defaultRaw?: boolean;
     innerCards?: JSX.Element[];
     childIndex?: number;
+    // raw can be used to display raw instruction information
+    raw?: TransactionInstruction;
+    // will be triggered on requesting raw data for instruction, if present
+    onRequestRaw?: () => void;
 };
 
-export function InstructionCard({
+export function BaseInstructionCard({
     title,
     children,
     result,
@@ -30,23 +32,15 @@ export function InstructionCard({
     defaultRaw,
     innerCards,
     childIndex,
+    raw,
+    onRequestRaw,
 }: InstructionProps) {
     const [resultClass] = ixResult(result, index);
     const [showRaw, setShowRaw] = React.useState(defaultRaw || false);
-    const signature = useContext(SignatureContext);
-    const rawDetails = useRawTransactionDetails(signature);
-
-    let raw: TransactionInstruction | undefined = undefined;
-    if (rawDetails && childIndex === undefined) {
-        raw = rawDetails?.data?.raw?.transaction.instructions[index];
-    }
-
-    const fetchRaw = useFetchRawTransaction();
-    const fetchRawTrigger = () => fetchRaw(signature);
-
     const rawClickHandler = () => {
         if (!defaultRaw && !showRaw && !raw) {
-            fetchRawTrigger();
+            // trigger handler to simulate behaviour for the InstructionCard for the transcation which contains logic in it to fetch raw transaction data
+            onRequestRaw?.();
         }
 
         return setShowRaw(r => !r);
@@ -85,9 +79,11 @@ export function InstructionCard({
                                     </td>
                                 </tr>
                                 {'parsed' in ix ? (
-                                    <RawParsedDetails ix={ix}>{raw ? <RawDetails ix={raw} /> : null}</RawParsedDetails>
+                                    <BaseRawParsedDetails ix={ix}>
+                                        {raw ? <BaseRawDetails ix={raw} /> : null}
+                                    </BaseRawParsedDetails>
                                 ) : (
-                                    <RawDetails ix={ix} />
+                                    <BaseRawDetails ix={ix} />
                                 )}
                             </>
                         ) : (
