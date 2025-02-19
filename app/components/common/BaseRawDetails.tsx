@@ -25,7 +25,7 @@ export function BaseRawDetails({ ix }: { ix: TransactionInstruction }) {
                     Instruction Data <span className="text-muted">(Hex)</span>
                 </td>
                 <td className="text-lg-end">
-                    <HexData raw={Buffer.from(ix.data)} />
+                    <HexData raw={ix.data} />
                 </td>
             </tr>
         </>

@@ -6,7 +6,7 @@ export function BaseRawParsedDetails({ ix, children }: { ix: ParsedInstruction; 
         <>
             {children}
 
-            <tr className="grid grid-flow-col grid-rows-1 gap-4">
+            <tr>
                 <td>
                     Instruction Data <span className="text-muted">(JSON)</span>
                 </td>
