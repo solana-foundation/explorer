@@ -51,6 +51,7 @@ import { Address } from 'web3js-experimental';
 import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
+import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
 
@@ -481,6 +482,9 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
     const parsedData = account.data.parsed;
     const rawData = account.data.raw;
 
+    // get feature data from featureGates.json
+    const featureInfo = useFeatureInfo({ address: account.pubkey.toBase58() });
+
     if (parsedData && parsedData.program === 'bpf-upgradeable-loader') {
         return (
             <UpgradeableLoaderAccountSection
@@ -518,7 +522,7 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
         return <AddressLookupTableAccountSection account={account} lookupTableAccount={parsedData.parsed.info} />;
     } else if (rawData && isAddressLookupTableAccount(account.owner.toBase58() as Address, rawData)) {
         return <AddressLookupTableAccountSection account={account} data={rawData} />;
-    } else if (account.owner.toBase58() === FEATURE_PROGRAM_ID) {
+    } else if (featureInfo || account.owner.toBase58() === FEATURE_PROGRAM_ID) {
         return <FeatureAccountSection account={account} />;
     } else {
         const fallback = <UnknownAccountCard account={account} />;
@@ -564,7 +568,8 @@ export type MoreTabs =
     | 'concurrent-merkle-tree'
     | 'compression'
     | 'verified-build'
-    | 'program-multisig';
+    | 'program-multisig'
+    | 'feature-gate';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -747,6 +752,19 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
         tab: accountDataTab,
     });
 
+    // Feature-specific information
+    if (getFeatureInfo(pubkey.toBase58())) {
+        const featureInfoTab: Tab = {
+            path: 'feature-gate',
+            slug: 'feature-gate',
+            title: 'Feature Gate',
+        };
+        tabComponents.push({
+            component: <FeatureGateLink key={featureInfoTab.slug} tab={featureInfoTab} address={pubkey.toString()} />,
+            tab: featureInfoTab,
+        });
+    }
+
     return tabComponents;
 }
 
@@ -776,6 +794,25 @@ function AccountDataLink({ address, tab, programId }: { address: string; tab: Ta
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
     if (!accountAnchorProgram) {
+        return null;
+    }
+
+    return (
+        <li key={tab.slug} className="nav-item">
+            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={accountDataPath}>
+                {tab.title}
+            </Link>
+        </li>
+    );
+}
+
+function FeatureGateLink({ address, tab }: { address: string; tab: Tab }) {
+    const accountDataPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
+    const selectedLayoutSegment = useSelectedLayoutSegment();
+    const isActive = selectedLayoutSegment === tab.path;
+    const featureInfo = useFeatureInfo({ address });
+    // Do not render "Feature Gate" tab on absent feature data
+    if (!featureInfo) {
         return null;
     }
 
