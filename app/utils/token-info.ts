@@ -67,7 +67,6 @@ export async function getTokenInfo(
     cluster: Cluster,
     connectionString: string
 ): Promise<Token | undefined> {
-
     const client = makeUtlClient(cluster, connectionString);
     if (!client) return undefined;
 
