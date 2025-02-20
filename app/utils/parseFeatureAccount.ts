@@ -12,6 +12,13 @@ function isFeatureAccount(account: Account): boolean {
     return account.owner.toBase58() === FEATURE_PROGRAM_ID && account.data.raw != null;
 }
 
+export const useFeatureAccount = (account: Account) => {
+    const isFeature = isFeatureAccount(account);
+
+    // allow to retreive sign of a Feature Account
+    return { isFeature };
+};
+
 export const parseFeatureAccount = (account: Account): FeatureAccount => {
     if (!isFeatureAccount(account) || account.data.raw == null) {
         throw new Error(`Failed to parse ${account} as a feature account`);
