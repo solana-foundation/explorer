@@ -153,6 +153,7 @@ export async function getFullTokenInfo(
             }
             : undefined;
     }
+
     // Merge the fields, prioritising the sdk ones which are more up to date
     let tags: string[] = [];
     if (sdkTokenInfo.tags) tags = Array.from(sdkTokenInfo.tags);
