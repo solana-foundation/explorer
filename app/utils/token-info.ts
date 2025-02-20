@@ -49,12 +49,10 @@ function getChainId(cluster: Cluster): ChainId | undefined {
 function makeUtlClient(cluster: Cluster, connectionString: string): Client | undefined {
     const chainId = getChainId(cluster);
     if (!chainId) return undefined;
-
     const config: UtlConfig = new UtlConfig({
         chainId,
         connection: new Connection(connectionString),
     });
-
     return new Client(config);
 }
 
@@ -67,9 +65,17 @@ export async function getTokenInfo(
     cluster: Cluster,
     connectionString: string
 ): Promise<Token | undefined> {
+
     const client = makeUtlClient(cluster, connectionString);
     if (!client) return undefined;
-    const token = await client.fetchMint(address);
+
+    let token;
+    try {
+        token = await client.fetchMint(address);
+    } catch (error){ 
+        console.error(error);
+    }
+
     return token;
 }
 
@@ -110,12 +116,14 @@ async function getFullLegacyTokenInfoUsingCdn(
     const tokenListResponse = await fetch(
         'https://cdn.jsdelivr.net/gh/solana-labs/token-list@latest/src/tokens/solana.tokenlist.json'
     );
+    
     if (tokenListResponse.status >= 400) {
         console.error(new Error('Error fetching token list from CDN'));
         return undefined;
     }
     const { tokens } = (await tokenListResponse.json()) as FullLegacyTokenInfoList;
     const tokenInfo = tokens.find(t => t.address === address.toString() && t.chainId === chainId);
+
     return tokenInfo;
 }
 
@@ -131,6 +139,7 @@ export async function getFullTokenInfo(
     connectionString: string
 ): Promise<FullTokenInfo | undefined> {
     const chainId = getChainId(cluster);
+
     if (!chainId) return undefined;
 
     const [legacyCdnTokenInfo, sdkTokenInfo] = await Promise.all([
@@ -146,7 +155,6 @@ export async function getFullTokenInfo(
             }
             : undefined;
     }
-
     // Merge the fields, prioritising the sdk ones which are more up to date
     let tags: string[] = [];
     if (sdkTokenInfo.tags) tags = Array.from(sdkTokenInfo.tags);
