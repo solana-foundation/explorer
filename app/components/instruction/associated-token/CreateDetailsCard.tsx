@@ -10,16 +10,18 @@ export function CreateDetailsCard({
     result,
     innerCards,
     childIndex,
+    InstructionCardComponent = InstructionCard,
 }: {
     ix: ParsedInstruction;
     index: number;
     result: SignatureResult;
     innerCards?: JSX.Element[];
     childIndex?: number;
+    InstructionCardComponent?: React.FC<Parameters<typeof InstructionCard>[0]>;
 }) {
     const info = ix.parsed.info;
     return (
-        <InstructionCard
+        <InstructionCardComponent
             ix={ix}
             index={index}
             result={result}
@@ -54,6 +56,6 @@ export function CreateDetailsCard({
                     <Address pubkey={new PublicKey(info.wallet)} alignRight link />
                 </td>
             </tr>
-        </InstructionCard>
+        </InstructionCardComponent>
     );
 }

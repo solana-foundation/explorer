@@ -1,4 +1,5 @@
 import { useCluster } from '@providers/cluster';
+import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { ComputeBudgetProgram, MessageCompiledInstruction, VersionedMessage } from '@solana/web3.js';
 import { getProgramName } from '@utils/tx';
 import React from 'react';
@@ -7,6 +8,7 @@ import { useAnchorProgram } from '@/app/providers/anchor';
 
 import { BaseInstructionCard } from '../common/BaseInstructionCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
+import { AssociatedTokenDetailsCard } from '../instruction/associated-token/AssociatedTokenDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
 import { intoTransactionInstructionFromVersionedMessage } from './utils';
@@ -37,6 +39,8 @@ function InspectorInstructionCard({
 
     const transactionInstruction = intoTransactionInstructionFromVersionedMessage(ix, message, programId);
 
+    console.log('6660', ix, { transactionInstruction }, transactionInstruction.programId.toBase58());
+
     if (anchorProgram.program) {
         return AnchorDetailsCard({
             anchorProgram: anchorProgram.program,
@@ -63,6 +67,20 @@ function InspectorInstructionCard({
     const result = { err: null };
     const signature = '';
     switch (transactionInstruction?.programId.toString()) {
+        case ASSOCIATED_TOKEN_PROGRAM_ID.toString(): {
+            console.log(6667, 'AToken', transactionInstruction);
+            //return (
+            //<AssociatedTokenDetailsCard
+            //key={index}
+            //ix={transactionInstruction}
+            //index={index}
+            //result={result}
+            //signature={signature}
+            ////InstructionCardComponent={BaseInstructionCard}
+            ///>
+            //);
+            break;
+        }
         case ComputeBudgetProgram.programId.toString(): {
             return (
                 <ComputeBudgetDetailsCard

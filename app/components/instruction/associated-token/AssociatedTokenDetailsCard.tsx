@@ -3,6 +3,7 @@ import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
 
+import { InstructionCard } from '../InstructionCard';
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
 import { CreateDetailsCard } from './CreateDetailsCard';
 import { CreateIdempotentDetailsCard } from './CreateIdempotentDetailsCard';
@@ -16,10 +17,12 @@ type DetailsProps = {
     index: number;
     innerCards?: JSX.Element[];
     childIndex?: number;
+    InstructionCardComponent?: React.FC<Parameters<typeof InstructionCard>[0]>;
 };
 
 export function AssociatedTokenDetailsCard(props: DetailsProps) {
     try {
+        console.log('666', props.ix.parsed);
         const parsed = create(props.ix.parsed, ParsedInfo);
         switch (parsed.type) {
             case 'create': {
