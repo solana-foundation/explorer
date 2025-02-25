@@ -223,7 +223,7 @@
     "key": "C9oAhLxDBm3ssWtJx1yBGzPY55r2rArHmN1pbQn6HogH",
     "simd": "0170",
     "version": "v2.1.10",
-    "testnetActivationEpoch": null,
+    "testnetActivationEpoch": 750,
     "devnetActivationEpoch": null,
     "mainnetActivationEpoch": null,
     "title": "Reserve minimal CUs for builtins",
@@ -279,7 +279,7 @@
     "simd": "0191",
     "version": "v2.1.0",
     "testnetActivationEpoch": 748,
-    "devnetActivationEpoch": null,
+    "devnetActivationEpoch": 839,
     "mainnetActivationEpoch": null,
     "title": "Feature Gate: Charge fees for transactions that fail to load",
     "description": null,
@@ -317,5 +317,60 @@
     "title": "Removes Accounts Delta Hash",
     "description": null,
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0223-removes-accounts-delta-hash.md"
+  },
+  {
+    "key": "JE86WkYvTrzW8HgNmrHY7dFYpCmSptUpKupbo2AdQ9cG",
+    "simd": "0166",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Enables deployment and execution of SBPFv1 programs",
+    "description": null,
+    "simd_link": null
+  },
+  {
+    "key": "F6UVKh1ujTEFK3en2SyAL3cdVnqko1FVEXWhmdLRu6WP",
+    "simd": "0173, 0174",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Enables deployment and execution of SBPFv2 programs",
+    "description": null,
+    "simd_link": null
+  },
+  {
+    "key": "C8XZNs1bfzaiT3YDeXZJ7G5swQWQv7tVzDnCxtHvnSpw",
+    "simd": "0178, 0179, 0189",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Enables deployment and execution of SBPFv3 programs",
+    "description": null,
+    "simd_link": null
+  },
+  {
+    "key": "8Cb77yHjPWe9wuWUfXeh6iszFGCDGNCoFk3tprViYHNm",
+    "simd": "0167",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Enable loader-v4",
+    "description": null,
+    "simd_link": null
+  },
+  {
+    "key": "EmhbpdVtZ2hWRGFWBDjn2i3SJD8Z36z4mpMcZJEnebnP",
+    "simd": "0167",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Disable new loader-v3 deployments",
+    "description": null,
+    "simd_link": null
   }
 ]
