@@ -72,7 +72,7 @@ describe('metadata/[network] endpoint', () => {
         expect(response.status).toBe(400);
     });
 
-    it('should return proper status upon processig data', async () => {
+    it('should return proper status upon processing data', async () => {
         setEnvironment('NEXT_PUBLIC_METADATA_ENABLED', 'true');
 
         const { request, nextParams } = requestFactory();
