@@ -15,7 +15,7 @@ function isFeatureAccount(account: Account): boolean {
 export const useFeatureAccount = (account: Account) => {
     const isFeature = isFeatureAccount(account);
 
-    // allow to retreive sign of a Feature Account
+    // allow to retrieve sign of a Feature Account
     return { isFeature };
 };
 
