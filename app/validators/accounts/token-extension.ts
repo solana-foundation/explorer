@@ -26,7 +26,7 @@ const ExtensionType = enums([
     'groupMemberPointer',
     'tokenGroup',
     'tokenGroupMember',
-    'unparsableExtension',
+    'unparseableExtension',
 ]);
 
 export type TokenExtension = Infer<typeof TokenExtension>;
