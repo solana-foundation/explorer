@@ -503,6 +503,6 @@ function typeDisplayName(
             if ('option' in type) return `${typeDisplayName(type.option)} (optional)`;
             if ('vec' in type) return `${typeDisplayName(type.vec)}[]`;
             if ('array' in type) return `${typeDisplayName(type.array[0])}[${type.array[1]}]`;
-            return 'unkonwn';
+            return 'unknown';
     }
 }
