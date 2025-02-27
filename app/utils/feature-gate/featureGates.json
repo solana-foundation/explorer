@@ -238,7 +238,7 @@
     "devnetActivationEpoch": null,
     "mainnetActivationEpoch": null,
     "title": "Consume requested CUs for sBPF failures",
-    "description": null,
+    "description": "Charge allocated compute units for sBPF failures instead of consumed compute units",
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0182-conditional-cu-metering.md"
   },
   {
@@ -281,7 +281,7 @@
     "testnetActivationEpoch": 748,
     "devnetActivationEpoch": 839,
     "mainnetActivationEpoch": null,
-    "title": "Feature Gate: Charge fees for transactions that fail to load",
+    "title": "Charge fees for transactions that fail to load",
     "description": null,
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0191-enable-transaction-loading-failure-fees.md"
   },
