@@ -16,21 +16,43 @@ export function UpcomingFeatures() {
         return null;
     }
 
-    const filteredFeatures = (FEATURES as FeatureInfoType[]).filter((feature: FeatureInfoType) => {
-        switch (cluster) {
-            case Cluster.MainnetBeta:
-                // Show features activated on devnet and testnet
-                return feature.devnetActivationEpoch !== null && feature.testnetActivationEpoch !== null;
-            case Cluster.Devnet:
-                // Show features activated on testnet, mark if already activated on devnet
-                return feature.testnetActivationEpoch !== null;
-            case Cluster.Testnet:
-                // Only show features not yet activated on testnet
-                return feature.testnetActivationEpoch === null;
-            default:
-                return false;
-        }
-    });
+    const filteredFeatures = (FEATURES as FeatureInfoType[])
+        .filter((feature: FeatureInfoType) => {
+            switch (cluster) {
+                case Cluster.MainnetBeta:
+                    // Show features activated on devnet and testnet
+                    return feature.devnetActivationEpoch !== null && feature.testnetActivationEpoch !== null;
+                case Cluster.Devnet:
+                    // Show features activated on testnet, mark if already activated on devnet
+                    return feature.testnetActivationEpoch !== null;
+                case Cluster.Testnet:
+                    // Only show features not yet activated on testnet
+                    return feature.testnetActivationEpoch === null;
+                default:
+                    return false;
+            }
+        })
+        .sort((a, b) => {
+            // Helper function to check if a feature is activated on current cluster
+            const isActivated = (feature: FeatureInfoType) => {
+                switch (cluster) {
+                    case Cluster.MainnetBeta:
+                        return feature.mainnetActivationEpoch !== null;
+                    case Cluster.Devnet:
+                        return feature.devnetActivationEpoch !== null;
+                    case Cluster.Testnet:
+                        return feature.testnetActivationEpoch !== null;
+                    default:
+                        return false;
+                }
+            };
+
+            // Sort activated features to end while preserving existing ordering
+            const aActivated = isActivated(a);
+            const bActivated = isActivated(b);
+            if (aActivated === bActivated) return 0;
+            return aActivated ? 1 : -1;
+        });
 
     if (filteredFeatures.length === 0) {
         return null;
