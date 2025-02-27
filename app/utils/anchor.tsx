@@ -155,7 +155,14 @@ export function mapAccountToRows(accountData: any, accountType: IdlTypeDef, idl:
     });
 }
 
-function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: any, nestingLevel = 0): ReactNode {
+export function mapField(
+    key: string,
+    value: any,
+    type: IdlType,
+    idl: Idl,
+    keySuffix?: any,
+    nestingLevel = 0
+): ReactNode {
     let itemKey = key;
     if (/^-?\d+$/.test(keySuffix)) {
         itemKey = `#${keySuffix}`;
