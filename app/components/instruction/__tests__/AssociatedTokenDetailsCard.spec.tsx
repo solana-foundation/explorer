@@ -4,6 +4,7 @@ import * as spl from '@solana/spl-token';
 import {
     clusterApiUrl,
     Connection,
+    Keypair,
     MessageCompiledInstruction,
     MessageV0,
     PublicKey,
@@ -12,6 +13,7 @@ import {
     VersionedTransaction,
 } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
+import bs58 from 'bs58';
 import { useSearchParams } from 'next/navigation';
 
 import { ClusterProvider } from '@/app/providers/cluster';
@@ -19,7 +21,6 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { clusterUrl } from '@/app/utils/cluster';
 
 import * as mock from '../../inspector/__tests__/mocks';
-import {bs58} from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 //import { AssociatedTokenDetailsCard } from '../associated-token/AssociatedTokenDetailsCard';
 
 jest.mock('next/navigation');
@@ -30,51 +31,56 @@ useSearchParams.mockReturnValue({
     toString: () => '',
 });
 
+const originalDecode = bs58.decode;
+// @ts-expect-error expect error as Uint8Array might not satisfy original type
+jest.spyOn(bs58, 'decode').mockImplementation((input: string): Uint8Array => {
+    const original = originalDecode(input);
+
+    return new Uint8Array(original);
+});
+
 describe('AssociatedTokenDetailsCard', () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
 
     test('should render ""', async () => {
-        const compiledInstruction: MessageCompiledInstruction = {
-            accountKeyIndexes: [],
-            data: new Uint8Array([3, 100, 173, 109, 0, 0, 0, 0, 0]),
-            programIdIndex: 6,
-        };
+        const compiledInstruction = mock.deserializeInstruction(mock.instruction2);
 
+        console.log({ compiledInstruction });
+
+        const m = mock.deserializeMessageV0(mock.message2);
         const ti = intoTransactionInstructionFromVersionedMessage(
             compiledInstruction,
-            mock.deserialize(mock.message1),
+            m,
             spl.ASSOCIATED_TOKEN_PROGRAM_ID
         );
 
-        const c = new Connection(clusterApiUrl('devnet'));
-        const m = mock.deserialize(mock.message1);
+        const c = new Connection(clusterApiUrl('mainnet-beta'));
 
-        const vm = new MessageV0({
-            addressTableLookups: m.addressTableLookups.map(atl => {
-                return {
-                    accountKey: new PublicKey(atl.accountKey),
-                    readonlyIndexes: atl.readonlyIndexes,
-                    writableIndexes: atl.writableIndexes,
-                };
-            }),
-            compiledInstructions: m.compiledInstructions.map(ci => {
-                return {
-                    accountKeyIndexes: ci.accountKeyIndexes,
-                    data: new Uint8Array([...Object.values(ci.data)]),
-                    programIdIndex: ci.programIdIndex,
-                };
-            }),
-            header: m.header,
-            recentBlockhash: Buffer.from((m.recentBlockhash)),
-            staticAccountKeys: m.staticAccountKeys.map(sak => new PublicKey(sak)),
+        const vt = new VersionedTransaction(m);
+
+        //vt.recentBlockhash = (await c.getLatestBlockhash()).blockhash
+
+        //console.log(vt, { vm }, 'LENGTH:', m.recentBlockhash.length);
+
+        console.log({ vm: m, vt });
+
+        const sim = await c.simulateTransaction(vt, {
+            accounts: {
+                addresses: [spl.ASSOCIATED_TOKEN_PROGRAM_ID.toBase58()],//m.staticAccountKeys.map(ak => ak.toBase58()),
+                encoding: 'base64',
+            },
+            innerInstructions: false,
+            replaceRecentBlockhash: true,
+            sigVerify: false,
         });
-        const vt = new VersionedTransaction(vm);
 
-        console.log({ vm });
+        const ins = sim?.value.innerInstructions?.reduce((acc, n) => acc.concat(n?.instructions || []), []);
 
-        console.log(6, await c.simulateTransaction(vt, { replaceRecentBlockhash: true, sigVerify: false }));
+        console.log({ sim }, sim?.value?.err, sim?.value.accounts, sim?.value.innerInstructions, 'I', ins);
+
+        console.log(bs58.decode(ins[0].data));
 
         expect(ti).not.toBeUndefined();
         expect(ti?.programId).toBe(spl.ASSOCIATED_TOKEN_PROGRAM_ID);

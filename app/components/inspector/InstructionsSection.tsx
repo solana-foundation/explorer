@@ -14,6 +14,9 @@ import { UnknownDetailsCard } from './UnknownDetailsCard';
 import { intoTransactionInstructionFromVersionedMessage } from './utils';
 
 export function InstructionsSection({ message }: { message: VersionedMessage }) {
+    // @ts-expect-error
+    globalThis.window.__txm = message;
+    console.log(6661, message.serialize());
     return (
         <>
             {message.compiledInstructions.map((ix, index) => {

@@ -1,7 +1,9 @@
 import {
     AccountMeta,
+    Message,
     MessageAddressTableLookup,
     MessageCompiledInstruction,
+    MessageV0,
     PublicKey,
     TransactionInstruction,
     VersionedMessage,
@@ -41,6 +43,7 @@ function fillAccountMetas(
         const { lookup } = findLookupAddressByIndex(accountIndex, message, lookupsForAccountKeyIndex);
 
         const isSigner = accountIndex < message.header.numRequiredSignatures;
+        console.log("MMM", message instanceof Message,  { isa: message.isAccountWritable });
         const isWritable = message.isAccountWritable(accountIndex);
         const accountMeta: AccountMeta = {
             isSigner,
