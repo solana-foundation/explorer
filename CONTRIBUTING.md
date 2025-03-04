@@ -135,13 +135,6 @@ pnpm test
 pnpm test:ci
 ```
 
-## Security Features
-
-When working on security-related features, follow these guidelines:
-
-1. **Link to Related Information**: Always include links to relevant security documentation, standards, or specifications
-2. **Security Card Component**: Use the `SecurityCard` component for displaying security information
-
 ## Bug Reporting
 
 ### Security Vulnerabilities
