@@ -43,7 +43,6 @@ function fillAccountMetas(
         const { lookup } = findLookupAddressByIndex(accountIndex, message, lookupsForAccountKeyIndex);
 
         const isSigner = accountIndex < message.header.numRequiredSignatures;
-        console.log("MMM", message instanceof Message,  { isa: message.isAccountWritable });
         const isWritable = message.isAccountWritable(accountIndex);
         const accountMeta: AccountMeta = {
             isSigner,
@@ -82,11 +81,20 @@ export function fillAddressTableLookupsAccounts(addressTableLookups: MessageAddr
 export function intoTransactionInstructionFromVersionedMessage(
     compiledInstruction: MessageCompiledInstruction,
     originalMessage: VersionedMessage,
-    programId: PublicKey
+    _programId?: PublicKey
 ): TransactionInstruction {
     const { accountKeyIndexes, data } = compiledInstruction;
     const { addressTableLookups } = originalMessage;
 
+    let programId;
+if (!_programId) {
+    programId = originalMessage.staticAccountKeys.at(compiledInstruction.programIdIndex);
+    console.log({ compiledInstruction, originalMessage, programId });
+
+    if (!programId) throw new Error("Program ID not found");
+} else {
+    programId = _programId;
+}
     const lookupAccounts = fillAddressTableLookupsAccounts(addressTableLookups);
     const accountMetas = fillAccountMetas(accountKeyIndexes, originalMessage, lookupAccounts);
 

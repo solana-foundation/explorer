@@ -96,6 +96,7 @@
         "eslint-plugin-testing-library": "^5.10.3",
         "jest": "29.5.0",
         "jest-environment-jsdom": "29.5.0",
+        "jest-fetch-mock": "^3.0.3",
         "react-scan": "^0.0.26",
         "sass": "^1.53.0"
     },
