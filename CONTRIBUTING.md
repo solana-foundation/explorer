@@ -52,7 +52,7 @@ Once you have this version of `pnpm`, you can continue with the following steps.
 
 Still can't run the explorer with `pnpm dev`?
 Seeing sass dependency errors?
-Make sure you have `pnpm` version `9.10.0`, `git stash` your changes, then blow reset to master with `rm -rf node_modules && git reset --hard HEAD`.
+Make sure you have `pnpm` version `9.10.0`, `git stash` your changes, then reset to master with `rm -rf node_modules && git reset --hard HEAD`. 
 Now running `pnpm i` followed by `pnpm dev` should work. If it is working, don't forget to reapply your changes with `git stash pop`.
 
 This project uses:
