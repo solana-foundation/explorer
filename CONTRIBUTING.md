@@ -20,7 +20,40 @@ Thank you for your interest in contributing to the Solana Explorer project! This
 3. Install dependencies: `pnpm install`
 4. Create a new branch for your feature: `git checkout -b feature/your-feature-name`
 
+> **Important Note**: We are currently not accepting PRs that add wallet adapter or similar functionality to the Explorer. Please check with maintainers before starting work on such features.
+
 ## Development Environment
+
+Contributing to the Explorer requires `pnpm` version `9.10.0`.
+Once you have this version of `pnpm`, you can continue with the following steps.
+
+-   Copy `.env.example` into `.env` & fill out the fields with custom RPC urls \
+    from a Solana RPC provider. You should not use `https://api.mainnet-beta.solana.com` \
+    or `https://api.devnet.solana.com` or else you will get rate-limited. These are public \
+    endpoints not suitable for application development. You must set these URLs with \
+    endpoints from your own provider.
+
+-   `pnpm i` \
+    Installs all project dependencies using pnpm package manager. This will create a \
+    `node_modules` directory and install all packages specified in `package.json`, \
+    including both dependencies and devDependencies.
+
+-   `pnpm dev` \
+    Runs the app in the development mode. \
+    Open [http://localhost:3000](http://localhost:3000) to view it in the browser. \
+    \
+    The page will reload if you make edits. \
+    You will also see any lint errors in the console.
+
+-   (Optional) `pnpm test` \
+    Launches the test runner in the interactive watch mode.
+
+### Troubleshooting
+
+Still can't run the explorer with `pnpm dev`?
+Seeing sass dependency errors?
+Make sure you have `pnpm` version `9.10.0`, `git stash` your changes, then blow reset to master with `rm -rf node_modules && git reset --hard HEAD`.
+Now running `pnpm i` followed by `pnpm dev` should work. If it is working, don't forget to reapply your changes with `git stash pop`.
 
 This project uses:
 
@@ -29,12 +62,6 @@ This project uses:
 -   TypeScript
 -   Jest for testing
 -   pnpm as the package manager
-
-To start the development server:
-
-```bash
-pnpm dev
-```
 
 ## Testing Protocol Integrations
 
@@ -86,7 +113,7 @@ it('renders Assert Sysvar Clock instruction', () => {
 });
 ```
 
-### Data-Testid Attributes
+#### Data-Testid Attributes
 
 Follow the pattern used in the Lighthouse integration by adding `data-testid` attributes to your components to make them easily selectable in tests, for example:
 
@@ -163,53 +190,3 @@ For non-security bugs, please use GitHub Issues with the following information:
 6. Wait for CI/CD to pass
 7. Include screenshots of protocol screens if applicable
 8. Request review ONLY after CI/CD has passed and screenshots have been uploaded
-
-### PR Description Template
-
-```
-## Description
-Brief description of the changes
-
-## Type of change
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Protocol integration
-- [ ] Documentation update
-
-## Screenshots
-[Include screenshots for UI changes, especially protocol screens]
-
-## Testing
-Describe how you tested your changes
-
-## Checklist
-- [ ] My code follows the project's style guidelines
-- [ ] I have added tests that prove my fix/feature works
-- [ ] All tests pass locally and in CI
-- [ ] I have updated documentation as needed
-- [ ] CI/CD checks pass
-```
-
-## Code Style
-
-This project uses ESLint and Prettier for code formatting. Follow these guidelines:
-
-1. Use TypeScript for all new code
-2. Follow the existing code style patterns
-3. Use meaningful variable and function names
-4. Add comments for complex logic
-5. Use React functional components with hooks
-
-To check code style:
-
-```bash
-# Check formatting
-pnpm format
-
-# Run linter
-pnpm lint
-```
-
----
-
-Thank you for contributing to the Solana Explorer project! Your efforts help improve the experience for all users of the Solana ecosystem.

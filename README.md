@@ -4,40 +4,24 @@
 
 # Solana Explorer
 
-## Development
+The Solana Explorer is a web application that allows users to explore the Solana blockchain. It provides a user-friendly interface to view transactions, accounts, blocks, and other on-chain data. The Explorer supports various protocol integrations, allowing users to inspect and understand different types of transactions and instructions on the Solana network.
 
-Contributing to the Explorer requires `pnpm` version `9.10.0`. 
-Once you have this version of `pnpm`, you can continue with the following steps.
+## Contributing
 
+We welcome contributions to the Solana Explorer! Before submitting a pull request, please:
 
--   Copy `.env.example` into `.env` & fill out the fields with custom RPC urls \
-    from a Solana RPC provider. You should not use `https://api.mainnet-beta.solana.com` \
-    or `https://api.devnet.solana.com` or else you will get rate-limited. These are public \
-    endpoints not suitable for application development. You must set these URLs with \
-    endpoints from your own provider.
+1. Read the [CONTRIBUTING.md](CONTRIBUTING.md) guide for detailed information on our contribution process
+2. Ensure your code includes appropriate tests, especially for protocol integrations
+3. Make sure your PR passes all CI checks before requesting a review
+4. Include screenshots for any UI changes, particularly for protocol screens
 
--   `pnpm i` \
-    Installs all project dependencies using pnpm package manager. This will create a \
-    `node_modules` directory and install all packages specified in `package.json`, \
-    including both dependencies and devDependencies.
+### Creating Issues
 
--   `pnpm dev` \
-    Runs the app in the development mode. \
-    Open [http://localhost:3000](http://localhost:3000) to view it in the browser. \
-    \
-    The page will reload if you make edits. \
-    You will also see any lint errors in the console.
+For bug reports, feature requests, or other issues:
 
--   (Optional) `pnpm test` \
-    Launches the test runner in the interactive watch mode.<br />
-
-## Troubleshooting
-
-Still can't run the explorer with `pnpm dev`? 
-Seeing sass dependency errors?
-Make sure you have `pnpm` version `9.10.0`, `git stash` your changes, then blow reset to master with `rm -rf node_modules && git reset --hard HEAD`.
-Now running `pnpm i` followed by `pnpm dev` should work. If it is working, don't forget to reapply your changes with `git stash pop`.
-
+-   Use GitHub Issues to report non-security bugs
+-   Include clear steps to reproduce, expected vs. actual behavior, and relevant screenshots
+-   For security vulnerabilities, especially those related to Solana Verify (Verified Builds), please email disclosures@solana.org
 
 # Disclaimer
 
