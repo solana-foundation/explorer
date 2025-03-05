@@ -969,10 +969,14 @@ function TokenExtensionRows(
                     <tr>
                         <td>URI</td>
                         <td className="text-lg-end">
-                            <a rel="noopener noreferrer" target="_blank" href={extension.uri}>
-                                {extension.uri}
-                                <ExternalLink className="align-text-top ms-2" size={13} />
-                            </a>
+                            {extension.uri.startsWith('http') ? (
+                                <a rel="noopener noreferrer" target="_blank" href={extension.uri}>
+                                    {extension.uri}
+                                    <ExternalLink className="align-text-top ms-2" size={13} />
+                                </a>
+                            ) : (
+                                extension.uri
+                            )}
                         </td>
                     </tr>
                     {extension.additionalMetadata?.length > 0 && (
