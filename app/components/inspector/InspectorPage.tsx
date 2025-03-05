@@ -9,7 +9,7 @@ import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import usePrevious from '@react-hook/previous';
 import { Connection, Message, PACKET_DATA_SIZE, PublicKey, VersionedMessage } from '@solana/web3.js';
-import { generated } from '@sqds/multisig';
+import { generated, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
 const { VaultTransaction } = generated;
 
 import { useClusterPath } from '@utils/url';
@@ -95,14 +95,29 @@ function decodeSignatures(signaturesParam: string): (string | null)[] {
 // Decodes url params into transaction data if possible. If decoding fails,
 // URL params are returned as a string that will prefill the transaction
 // message input field for debugging. Returns a tuple of [result, shouldRefreshUrl]
-function decodeUrlParams(params: URLSearchParams): [TransactionData | string, URLSearchParams, boolean] {
+function decodeUrlParams(
+    params: URLSearchParams
+): [TransactionData | string | SquadsProposalAccountData, URLSearchParams, boolean] {
     const messageParam = decodeParam(params, 'message');
     const signaturesParam = decodeParam(params, 'signatures');
+    const squadsTxParam = decodeParam(params, 'squadsTx');
 
     let refreshUrl = false;
     if (signaturesParam === true) {
         params.delete('signatures');
         refreshUrl = true;
+    }
+
+    // Check for Squads transaction parameter
+    if (typeof squadsTxParam === 'string') {
+        try {
+            // Validate that it's a valid public key
+            new PublicKey(squadsTxParam);
+            return [{ account: squadsTxParam }, params, refreshUrl];
+        } catch (err) {
+            params.delete('squadsTx');
+            refreshUrl = true;
+        }
     }
 
     if (typeof messageParam === 'boolean') {
@@ -151,6 +166,20 @@ function SquadsProposalInspectorCard({ account, onClear }: { account: string; on
     const fetcher = React.useCallback(async () => {
         const connection = new Connection(url);
         try {
+            // First check if the account exists and is owned by the Squads program
+            const accountInfo = await connection.getAccountInfo(new PublicKey(account), 'confirmed');
+
+            if (!accountInfo) {
+                throw new Error('Account not found');
+            }
+
+            // Check if the account is owned by the Squads program
+            const isSquadsAccount = accountInfo.owner.toString() === SQUADS_V4_PROGRAM_ADDRESS.toString();
+
+            if (!isSquadsAccount) {
+                throw new Error(`Account ${account} is not a valid Squads transaction account`);
+            }
+
             return await VaultTransaction.fromAccountAddress(connection, new PublicKey(account), 'confirmed');
         } catch (err) {
             throw err instanceof Error ? err : new Error('Failed to fetch account data');
@@ -172,7 +201,9 @@ function SquadsProposalInspectorCard({ account, onClear }: { account: string; on
     }
 
     if (error || !vaultTransaction) {
-        return <ErrorCard text={`Error loading vault transaction: ${error?.message}`} />;
+        return (
+            <ErrorCard text={`Error loading vault transaction: ${error?.message}`} retry={onClear} retryText="Clear" />
+        );
     }
 
     // Convert VaultTransactionMessage to a format compatible with Message
@@ -235,9 +266,17 @@ export function TransactionInspectorPage({
         if (signature) return;
         if (inspectorData && inspectorData !== prevInspectorData) {
             if (isSquadsProposalAccountData(inspectorData)) {
-                // TODO: Implement accounts URL params handling
+                // Handle Squads proposal URL params
+                const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
+                nextQueryParams.set('squadsTx', inspectorData.account);
+                // Remove any other transaction params that might exist
+                nextQueryParams.delete('message');
+                nextQueryParams.delete('signatures');
+                const queryString = nextQueryParams.toString();
+                router.replace(`${currentPathname}?${queryString}`);
                 return;
             }
+
             let nextQueryParams;
 
             if (inspectorData.signatures !== undefined) {
@@ -265,6 +304,7 @@ export function TransactionInspectorPage({
         const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
         nextQueryParams.delete('message');
         nextQueryParams.delete('signatures');
+        nextQueryParams.delete('squadsTx');
         const queryString = nextQueryParams?.toString();
         router.push(`${currentPathname}${queryString ? `?${queryString}` : ''}`);
     }, [currentPathname, currentSearchParams, router]);
