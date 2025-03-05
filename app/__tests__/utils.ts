@@ -1,10 +1,11 @@
 import { useSearchParams } from 'next/navigation';
 
-jest.mock('next/navigation');
-
 // stub a test to not allow passing without tests
 test('stub', () => expect(true).toBeTruthy());
 
+//!!!
+
+jest.mock('next/navigation');
 export function mockUseSearchParams(cluster = 'mainnet-beta', customUrl?: string) {
     // @ts-expect-error mockReturnValue is not present
     useSearchParams.mockReturnValue({

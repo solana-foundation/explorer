@@ -1,11 +1,13 @@
-import { ComputeBudgetProgram, MessageCompiledInstruction } from '@solana/web3.js';
+import { ComputeBudgetProgram, MessageCompiledInstruction, PublicKey } from '@solana/web3.js';
+
+import * as stubs from '@/app/__tests__/mock-stubs';
+import * as mock from '@/app/__tests__/mocks';
 
 import {
     fillAddressTableLookupsAccounts,
     findLookupAddress,
     intoTransactionInstructionFromVersionedMessage,
 } from '../utils';
-import * as mock from './mocks';
 
 /**
  * These tests cover examples from the devnet
@@ -15,15 +17,14 @@ describe('intoTransactionInstructionFromVersionedMessage', () => {
         const compiledInstruction: MessageCompiledInstruction = {
             accountKeyIndexes: [],
             data: new Uint8Array([3, 100, 173, 109, 0, 0, 0, 0, 0]),
-            programIdIndex: 6, // index taken from data at mock.message1
+            programIdIndex: 6, // index taken from data at stubs.computeBudgetMsg
         };
 
         const ti = intoTransactionInstructionFromVersionedMessage(
             compiledInstruction,
-            mock.deserialize(mock.message1),
-            ComputeBudgetProgram.programId
+            mock.deserializeMessageV0(stubs.computeBudgetMsg)
         );
-        expect(ti.programId).toBe(ComputeBudgetProgram.programId);
+        expect(ti.programId.equals(ComputeBudgetProgram.programId)).toBeTruthy();
         expect(ti.keys).toEqual([]);
         expect(ti.data).toEqual(Buffer.from(compiledInstruction.data));
     });
@@ -31,7 +32,7 @@ describe('intoTransactionInstructionFromVersionedMessage', () => {
 
 describe('fillAddressTableLookupsAccounts', () => {
     test('should return flatten addressTableLookups from message', () => {
-        const message = mock.deserialize(mock.message1);
+        const message = mock.deserializeMessageV0(stubs.computeBudgetMsg);
 
         expect(fillAddressTableLookupsAccounts(message.addressTableLookups)).toHaveLength(10);
     });
@@ -39,19 +40,22 @@ describe('fillAddressTableLookupsAccounts', () => {
 
 describe('findLookupAddress', () => {
     test('should return lookup data for a specific index', () => {
-        const message = mock.deserialize(mock.message1);
+        const message = mock.deserializeMessageV0(stubs.computeBudgetMsg);
 
         // pick each different variant of index in addressTableLookups
         const lookups = fillAddressTableLookupsAccounts(message.addressTableLookups);
         let lookup = findLookupAddress(0, message, lookups);
-        expect(lookup.lookup).toEqual('kFVZ5bdn3c9tMoY4ibqsLDNd6vxt3HwHVcZC5b6ra1y');
+        expect(lookup.lookup.equals(new PublicKey('kFVZ5bdn3c9tMoY4ibqsLDNd6vxt3HwHVcZC5b6ra1y'))).toBeTruthy();
         expect(lookup.dynamicLookups).toStrictEqual({ isStatic: true, lookups: undefined });
 
         lookup = findLookupAddress(12, message, lookups);
-        expect(lookup.lookup).toEqual('GDLpHg53y5sufRSftvZscFMwdSqP8kHaLwhsT4ZwYSaV');
+        expect(lookup.lookup.equals(new PublicKey('GDLpHg53y5sufRSftvZscFMwdSqP8kHaLwhsT4ZwYSaV'))).toBeTruthy();
         expect(lookup.dynamicLookups).toStrictEqual({
             isStatic: false,
-            lookups: { lookupTableIndex: 31, lookupTableKey: 'GDLpHg53y5sufRSftvZscFMwdSqP8kHaLwhsT4ZwYSaV' },
+            lookups: {
+                lookupTableIndex: 31,
+                lookupTableKey: new PublicKey('GDLpHg53y5sufRSftvZscFMwdSqP8kHaLwhsT4ZwYSaV'),
+            },
         });
     });
 });
