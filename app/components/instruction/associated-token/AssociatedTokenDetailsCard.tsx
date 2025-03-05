@@ -22,7 +22,6 @@ type DetailsProps = {
 
 export function AssociatedTokenDetailsCard(props: DetailsProps) {
     try {
-        console.log('666', props.ix, 'AToken');
         const parsed = create(props.ix.parsed, ParsedInfo);
         switch (parsed.type) {
             case 'create': {

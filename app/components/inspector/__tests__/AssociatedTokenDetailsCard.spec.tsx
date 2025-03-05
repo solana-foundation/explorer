@@ -1,7 +1,6 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
 import * as spl from '@solana/spl-token';
-import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
@@ -14,7 +13,7 @@ import { AssociatedTokenDetailsCard } from '../associated-token/AssociatedTokenD
 
 jest.mock('next/navigation');
 
-describe('instruction::AssociatedTokenDetailsCard', () => {
+describe('inspector::AssociatedTokenDetailsCard', () => {
     beforeEach(() => {
         mock.mockUseSearchParams();
     });
@@ -31,17 +30,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
         const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
-        const parsed = {
-            account: new PublicKey('Fv8YYjF2DUqj9RZhyXNzXa4yR9nHHwjg5bFjA82UidF1'),
-            mint: new PublicKey('74SBV4zDXxTRgv1pEMoECskKBkZHc2yGPnc7GYVepump'),
-            source: new PublicKey('EzdQH5zUfTMGb3vwU4oumxjVcxKMDpJ6dB78pbjfHmmb'),
-            systemProgram: new PublicKey('11111111111111111111111111111111'),
-            tokenProgram: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-            wallet: new PublicKey('EzdQH5zUfTMGb3vwU4oumxjVcxKMDpJ6dB78pbjfHmmb'),
-        };
-
-        const ix = factory.intoParsedInstruction(ti, parsed);
-        const tx = factory.intoParsedTransaction(ti, m);
+        const ix = factory.intoParsedInstruction(ti);
 
         // check that component is rendered properly
         render(
@@ -49,9 +38,9 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                 <ClusterProvider>
                     <AssociatedTokenDetailsCard
                         ix={ix}
+                        raw={ti}
                         index={index}
                         result={{ err: null }}
-                        tx={tx}
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>

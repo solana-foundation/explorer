@@ -12,11 +12,12 @@ export function RecoverNestedDetailsCard(props: {
     info: RecoverNestedInfo;
     innerCards?: JSX.Element[];
     childIndex?: number;
+    InstructionCardComponent?: React.FC<Parameters<typeof InstructionCard>[0]>;
 }) {
-    const { ix, index, result, info, innerCards, childIndex } = props;
+    const { ix, index, result, info, innerCards, childIndex, InstructionCardComponent = InstructionCard } = props;
 
     return (
-        <InstructionCard
+        <InstructionCardComponent
             ix={ix}
             index={index}
             result={result}
@@ -72,6 +73,6 @@ export function RecoverNestedDetailsCard(props: {
                     <Address pubkey={info.tokenProgram} alignRight link />
                 </td>
             </tr>
-        </InstructionCard>
+        </InstructionCardComponent>
     );
 }

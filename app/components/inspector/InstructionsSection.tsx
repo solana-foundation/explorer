@@ -1,3 +1,4 @@
+import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { useCluster } from '@providers/cluster';
 import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { ComputeBudgetProgram, MessageCompiledInstruction, VersionedMessage } from '@solana/web3.js';
@@ -6,17 +7,13 @@ import React from 'react';
 
 import { useAnchorProgram } from '@/app/providers/anchor';
 
-import { BaseInstructionCard } from '../common/BaseInstructionCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
-import { AssociatedTokenDetailsCard } from '../instruction/associated-token/AssociatedTokenDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
+import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
-import { intoTransactionInstructionFromVersionedMessage } from './utils';
+import { intoTransactionInstructionFromVersionedMessage, ParsedInstructionFactory } from './utils';
 
 export function InstructionsSection({ message }: { message: VersionedMessage }) {
-    // @ts-expect-error
-    globalThis.window.__txm = message;
-    console.log(6661, message.serialize());
     return (
         <>
             {message.compiledInstructions.map((ix, index) => {
@@ -40,9 +37,7 @@ function InspectorInstructionCard({
     const programName = getProgramName(programId.toBase58(), cluster);
     const anchorProgram = useAnchorProgram(programId.toString(), url);
 
-    const transactionInstruction = intoTransactionInstructionFromVersionedMessage(ix, message, programId);
-
-    console.log('6660', ix, { transactionInstruction }, transactionInstruction.programId.toBase58());
+    const transactionInstruction = intoTransactionInstructionFromVersionedMessage(ix, message);
 
     if (anchorProgram.program) {
         return AnchorDetailsCard({
@@ -69,20 +64,19 @@ function InspectorInstructionCard({
     //  - result is `err: null` as at this point there should not be errors
     const result = { err: null };
     const signature = '';
+    const factory = ParsedInstructionFactory();
     switch (transactionInstruction?.programId.toString()) {
         case ASSOCIATED_TOKEN_PROGRAM_ID.toString(): {
-            console.log(6667, 'AToken', transactionInstruction);
-            //return (
-            //<AssociatedTokenDetailsCard
-            //key={index}
-            //ix={transactionInstruction}
-            //index={index}
-            //result={result}
-            //signature={signature}
-            ////InstructionCardComponent={BaseInstructionCard}
-            ///>
-            //);
-            break;
+            return (
+                <AssociatedTokenDetailsCard
+                    key={index}
+                    ix={factory.intoParsedInstruction(transactionInstruction)}
+                    raw={transactionInstruction}
+                    index={index}
+                    result={result}
+                    InstructionCardComponent={BaseInstructionCard}
+                />
+            );
         }
         case ComputeBudgetProgram.programId.toString(): {
             return (

@@ -1,9 +1,12 @@
+import * as spl from '@solana/spl-token';
 import {
     AccountMeta,
-    Message,
     MessageAddressTableLookup,
     MessageCompiledInstruction,
-    MessageV0,
+    ParsedInstruction,
+    ParsedMessage,
+    ParsedMessageAccount,
+    ParsedTransaction,
     PublicKey,
     TransactionInstruction,
     VersionedMessage,
@@ -81,20 +84,14 @@ export function fillAddressTableLookupsAccounts(addressTableLookups: MessageAddr
 export function intoTransactionInstructionFromVersionedMessage(
     compiledInstruction: MessageCompiledInstruction,
     originalMessage: VersionedMessage,
-    _programId?: PublicKey
 ): TransactionInstruction {
     const { accountKeyIndexes, data } = compiledInstruction;
     const { addressTableLookups } = originalMessage;
 
-    let programId;
-if (!_programId) {
-    programId = originalMessage.staticAccountKeys.at(compiledInstruction.programIdIndex);
-    console.log({ compiledInstruction, originalMessage, programId });
+    const programId = originalMessage.staticAccountKeys.at(compiledInstruction.programIdIndex);
 
     if (!programId) throw new Error("Program ID not found");
-} else {
-    programId = _programId;
-}
+
     const lookupAccounts = fillAddressTableLookupsAccounts(addressTableLookups);
     const accountMetas = fillAccountMetas(accountKeyIndexes, originalMessage, lookupAccounts);
 
@@ -105,4 +102,101 @@ if (!_programId) {
     });
 
     return transactionInstruction;
+}
+
+/**
+ * entity that performs conversion from TransactionInstruction that is created from VersionedMessage into ParsedInstruction.
+ *
+ *  That is needed for backward compatibility with existing InstructionCards that expect ParsedInstruction for rendering.
+ *
+ *  This is temporary solution to reuse existing cards at the Inspector. Might pivot to a better solution in future.
+ */
+export function ParsedInstructionFactory(){
+    function intoProgramName(programId: PublicKey): string | undefined {
+        if (programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)) {
+            return 'associated-token-program';
+        }
+    }
+
+    function intoParsedData(instruction: TransactionInstruction, parsed: any): any{
+        const { programId, data } = instruction;
+        const info = parsed ?? {};
+
+        // Temporary keep enums hardcoded.
+        // TODO: find better way to keep these enums in sync with core repositories
+        const CREATE_BUFFER = Buffer.from('\x00');
+        const CREATE_IDEMPOTENT_BUFFER = Buffer.from('\x01');
+        const CREATE_RECOVER_NESTED_BUFFER = Buffer.from('\x02');
+
+        if (programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)) {
+            let type;
+            if (data.equals(CREATE_BUFFER)) type = 'create';
+            else if (data.equals(CREATE_IDEMPOTENT_BUFFER)) type = 'createIdempotent';
+            else if (data.equals(CREATE_RECOVER_NESTED_BUFFER)) type ='recoverNested';
+            else type = '';
+
+            return {
+                info,
+                type
+            };
+        }
+
+        return {
+            info,
+            type: '' // empty string represents that the program was unknown
+        };
+    }
+
+    function getInstructionData(instruction: TransactionInstruction, data: any){
+        const program = intoProgramName(instruction.programId);
+        const parsed = intoParsedData(instruction, data);
+
+        return { parsed, program };
+    }
+
+    function convertAccountKeysToParsedMessageAccounts(keys: AccountMeta[]): ParsedMessageAccount[]{
+        const accountKeys= keys.map((key): ParsedMessageAccount => {
+            return {
+                pubkey: key.pubkey,
+                signer: key.isSigner,
+                source: 'lookupTable',
+                writable: key.isWritable
+            };
+        });
+
+        return accountKeys;
+    }
+
+    return {
+        /**
+         * parsed - allow to pass any data as we can not recover parsed data
+         */
+        intoParsedInstruction(transactionInstruction: TransactionInstruction, data: any = {}): ParsedInstruction {
+            const { programId } = transactionInstruction;
+            const { program, parsed } = getInstructionData(transactionInstruction, data);
+
+            return {
+                parsed,
+                program: program ?? '',
+                programId
+            };
+        },
+        intoParsedTransaction(transactionInstruction: TransactionInstruction, versionedMessage: VersionedMessage): ParsedTransaction {
+            const { keys } = transactionInstruction;
+            const { addressTableLookups, recentBlockhash } = versionedMessage;
+
+            const parsedMessage: ParsedMessage = {
+                accountKeys: convertAccountKeysToParsedMessageAccounts(keys),
+                addressTableLookups,
+                // at this moment we do not parse instructions as they are not required to represent the transaction. that's why array is empty
+                instructions: [],
+                recentBlockhash
+            };
+
+            return {
+                message: parsedMessage,
+                signatures: [],
+            };
+        }
+    };
 }
