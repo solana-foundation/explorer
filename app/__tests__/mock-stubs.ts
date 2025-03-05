@@ -1,5 +1,5 @@
 /**
- * Contains servialized VersionedMessages which can be viewed at the inspector by related URLs
+ * Contains serialized VersionedMessages which can be viewed at the inspector by related URLs
  */
 
 // stub a test to not allow passing without tests
