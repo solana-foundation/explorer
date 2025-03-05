@@ -178,7 +178,7 @@ export function RawInput({
         }
     }, [value, onInput]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const placeholder = 'Paste a raw base64 encoded transaction message or Squads transaction proposal account';
+    const placeholder = 'Paste a raw base64 encoded transaction message or Squads vault transaction account';
     return (
         <div className="card">
             <div className="card-header">
@@ -226,8 +226,10 @@ export function RawInput({
                         <code>console.log(tx.serializeMessage().toString(&quot;base64&quot;));</code>
                     </li>
                     <li>
-                        <strong>Squads: </strong>Add <code>proposal_account</code> from{' '}
-                        <code>https://app.squads.so/squads/&lt;squad_id&gt;/transactions/&lt;proposal_account&gt;</code>
+                        <strong>Squads: </strong>Add <code>vault_transaction</code> from{' '}
+                        <code>
+                            https://app.squads.so/squads/&lt;squad_id&gt;/transactions/&lt;vault_transaction&gt;
+                        </code>
                     </li>
                 </ul>
             </div>
