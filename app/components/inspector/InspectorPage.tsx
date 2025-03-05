@@ -13,7 +13,6 @@ import { generated, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/m
 const { VaultTransaction } = generated;
 
 import { useClusterPath } from '@utils/url';
-import base58 from 'bs58';
 import bs58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { Suspense } from 'react';
