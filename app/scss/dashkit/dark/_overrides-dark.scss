@@ -30,6 +30,10 @@
     }
 }
 
+.btn-black.active {
+  box-shadow: 0 0 0 .15rem #33a382 !important;
+}
+
 // Dropzone
 
 .dz-message {
