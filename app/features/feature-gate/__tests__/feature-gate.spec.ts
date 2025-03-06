@@ -62,7 +62,6 @@ describe('fetchFeatureGateInformation', () => {
         const data = await fetchFeatureGateInformation(FEATURE);
 
         expect(fetch).toHaveBeenCalledWith(getLink(FEATURE.simd_link), { method: 'GET' });
-        console.log({ data });
         expect(data).toEqual("# Summary");
     });
 });
