@@ -93,7 +93,7 @@ export async function checkURLForPrivateIP(uri: URL | string) {
               }
             }
         } else {
-            let singleResult = addresses as unknown as LookupAddressResult;
+            const singleResult = addresses as unknown as LookupAddressResult;
             return isPrivateIP(singleResult.address);
         }
 

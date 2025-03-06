@@ -33,7 +33,7 @@ function mockLookupOnce(addresses: LookupAddress | LookupAddress[] | undefined) 
 describe('ip::checkURLForPrivateIP', () => {
     beforeEach(() => {
         jest.clearAllMocks();
-    })
+    });
 
     // do not throw exceptions forinvalid input to not break the execution flow
     test('should handle invalid URL gracefully', async () => {
@@ -95,7 +95,7 @@ describe('ip::checkURLForPrivateIP with single resolved address', () => {
         mockLookupOnce({ address: '76.76.21.21' });
         await expect(checkURLForPrivateIP('http://solana.com')).resolves.toBe(false);
     });
-})
+});
 
 // move case for localhost to a separate test case as it's a special case and doesn't require DNS resolution
 describe('ip::checkURLForPrivateIP with localhost', () => {
@@ -106,4 +106,4 @@ describe('ip::checkURLForPrivateIP with localhost', () => {
     test('should block localhost', async () => {
         await expect(checkURLForPrivateIP('http://localhost')).resolves.toBe(true);
     });
-})
+});
