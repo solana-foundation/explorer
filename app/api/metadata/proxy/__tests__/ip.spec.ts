@@ -27,6 +27,16 @@ function mockLookupOnce(addresses: { address: string }[]) {
     dns.lookup.mockResolvedValueOnce(addresses);
 }
 
+function mockLookupAsSignleOnce(addresses: { address: string }) {
+    // @ts-expect-error lookup does not have mocked fn
+    dns.lookup.mockResolvedValueOnce(addresses);
+}
+
+function mockLookupAsNeverOnce() {
+    // @ts-expect-error lookup does not have mocked fn
+    dns.lookup.mockResolvedValueOnce(undefined);
+}
+
 describe('ip::checkURLForPrivateIP', () => {
     afterEach(() => {
         jest.clearAllMocks();
@@ -74,6 +84,16 @@ describe('ip::checkURLForPrivateIP', () => {
     test('should block cloud metadata IP', async () => {
         mockLookupOnce([{ address: '169.254.169.254' }]);
         await expect(checkURLForPrivateIP('http://169.254.169.254')).resolves.toBe(true);
+    });
+
+    test('should handle single address positively', async () => {
+        mockLookupAsSignleOnce({ address: '8.8.8.8' });
+        await expect(checkURLForPrivateIP('http://google.com')).resolves.toBe(true);
+    });
+
+    test('should handle absent address negatively', async () => {
+        mockLookupAsNeverOnce();
+        await expect(checkURLForPrivateIP('http://google.com')).resolves.toBe(false);
     });
 
     test('should handle DNS resolution failure gracefully', async () => {
