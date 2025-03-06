@@ -1,5 +1,5 @@
-import { Headers } from 'node-fetch';
 import { NextResponse } from 'next/server';
+import { Headers } from 'node-fetch';
 
 import { fetchResource, StatusError } from './feature';
 import { errors } from './feature/errors';
