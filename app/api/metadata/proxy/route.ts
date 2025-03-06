@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { Headers } from 'node-fetch';
 
 import { fetchResource, StatusError } from './feature';
@@ -6,6 +5,29 @@ import { errors } from './feature/errors';
 import { checkURLForPrivateIP, isHTTPProtocol } from './feature/ip';
 
 type Params = { params: object }
+
+/**
+ * Replacement that behaves similar to next.js's NextResponse which was broken after update to 14.2.21
+ *
+ * Here is the reference: https://github.com/vercel/next.js/issues/48524
+ */
+type JsonBody = any;
+class NextResponse extends Response {
+    constructor(data: any, init?: ResponseInit) {
+        super(data, init);
+    }
+
+    static json(body: JsonBody, init?: ResponseInit) {
+        const responseInit = init || {};
+        return new Response(JSON.stringify(body), {
+            ...responseInit,
+            headers: {
+                'Content-Type': 'application/json',
+                ...(responseInit.headers || {})
+            }
+        });
+    }
+}
 
 const USER_AGENT = process.env.NEXT_PUBLIC_METADATA_USER_AGENT ?? 'Solana Explorer';
 const MAX_SIZE = process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE
