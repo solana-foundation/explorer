@@ -84,7 +84,7 @@ export async function checkURLForPrivateIP(uri: URL | string) {
         type LookupAddressResult = Awaited<ReturnType<typeof dns.lookup>>
         const addresses: LookupAddressResult | LookupAddressResult[] | undefined = await dns.lookup(hostname, { all: true });
 
-        if (!addresses) return true;
+        if (addresses === undefined) return true;
 
         if (Array.isArray(addresses)) {
             for (const address of addresses) {
@@ -92,10 +92,9 @@ export async function checkURLForPrivateIP(uri: URL | string) {
                     return true;
               }
             }
-        }
-
-        if (!Array.isArray(addresses)) {
-            return isPrivateIP((addresses as LookupAddressResult).address);
+        } else {
+            let singleResult = addresses as unknown as LookupAddressResult;
+            return isPrivateIP(singleResult.address);
         }
 
         return false;
