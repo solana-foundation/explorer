@@ -112,6 +112,9 @@
             "supports bigint"
         ]
     },
+    "engines": {
+        "node": "v20.17"
+    },
     "pnpm": {
         "overrides": {
             "avsc": "git://github.com/Irys-xyz/avsc#a730cc8018b79e114b6a3381bbb57760a24c6cef",
