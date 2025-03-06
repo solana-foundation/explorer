@@ -27,7 +27,7 @@ function mockLookupOnce(addresses: { address: string }[]) {
     dns.lookup.mockResolvedValueOnce(addresses);
 }
 
-function mockLookupAsSignleOnce(addresses: { address: string }) {
+function mockLookupAsSingleOnce(addresses: { address: string }) {
     // @ts-expect-error lookup does not have mocked fn
     dns.lookup.mockResolvedValueOnce(addresses);
 }
@@ -87,7 +87,7 @@ describe('ip::checkURLForPrivateIP', () => {
     });
 
     test('should handle single address positively', async () => {
-        mockLookupAsSignleOnce({ address: '8.8.8.8' });
+        mockLookupAsSingleOnce({ address: '8.8.8.8' });
         await expect(checkURLForPrivateIP('http://google.com')).resolves.toBe(true);
     });
 
