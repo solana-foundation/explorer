@@ -630,7 +630,6 @@ packages:
 
   '@bundlr-network/client@0.7.17':
     resolution: {integrity: sha512-1qTDrwgmgeh0pO24JbeGt2W8GlpWYkVnQ8AhEZ02Lm00J7RALSyma3C5pNlKuvAQBczL1r9KhLr9KHK1og3J0g==}
-    deprecated: Bundlr is now Irys - please switch to @irys/sdk - this package will remain compatible with Irys for the foreseeable future.
     hasBin: true
 
   '@clack/core@0.3.5':
@@ -817,7 +816,6 @@ packages:
   '@humanwhocodes/config-array@0.11.8':
     resolution: {integrity: sha512-UybHIJzJnR5Qc/MsD9Kr+RpO2h+/P1GhOwdiLPXK5TWk5sgTdu88bTD9UP+CKbPPh5Rni1u0GjAdYQLemG8g+g==}
     engines: {node: '>=10.10.0'}
-    deprecated: Use @eslint/config-array instead
 
   '@humanwhocodes/module-importer@1.0.1':
     resolution: {integrity: sha512-bxveV4V8v5Yb4ncFTT3rPSgZBOpCkjfK0y4oVVVJwIuDVBRMDXrPyXRL988i5ap9m9bnyEEjWfm5WkBmtffLfA==}
@@ -825,7 +823,6 @@ packages:
 
   '@humanwhocodes/object-schema@1.2.1':
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
-    deprecated: Use @eslint/object-schema instead
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -971,7 +968,6 @@ packages:
   '@metaplex-foundation/js@0.11.7':
     resolution: {integrity: sha512-zL3Ac++8lUOoKjjhDArdNSimvVYcOqg4uhxfBVRKLV6H8q6E/sOepXuzYSLXxzYWdvapYWEPKFdEDFluYzk7DA==}
     engines: {node: ^14.0 || >=16.0}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   '@metaplex-foundation/mpl-auction-house@2.5.1':
     resolution: {integrity: sha512-O+IAdYVaoOvgACB8pm+1lF5BNEjl0COkqny2Ho8KQZwka6aC/vHbZ239yRwAMtJhf5992BPFdT4oifjyE0O+Mw==}
@@ -2019,7 +2015,6 @@ packages:
 
   abab@2.0.6:
     resolution: {integrity: sha512-j2afSsaIENvHZN2B8GOpF566vZ5WVk5opAiMTvWgaQT8DkbOqsTfvNAvHoRGU2zzP8cPoqys+xHTRDWW8L+/BA==}
-    deprecated: Use your platform's native atob() and btoa() methods instead
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -2738,7 +2733,6 @@ packages:
   domexception@4.0.0:
     resolution: {integrity: sha512-A2is4PLG+eeSfoTMA95/s4pvAoSo2mKtiM5jlHkAVewmiO8ISFTFKZjH7UAM1Atli/OT/7JHOrJRJiMKUZKYBw==}
     engines: {node: '>=12'}
-    deprecated: Use your platform's native DOMException instead
 
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
@@ -2972,7 +2966,6 @@ packages:
   eslint@8.39.0:
     resolution: {integrity: sha512-mwiok6cy7KTW7rBpo05k6+p4YVZByLNjAZ/ACB9DRCu4YDRwjXI01tWHp6KAUWelsBetTxKK/2sHB0vdS8Z2Og==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   espree@6.2.1:
@@ -3236,7 +3229,6 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
 
   globals@11.12.0:
     resolution: {integrity: sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==}
@@ -3399,7 +3391,6 @@ packages:
 
   inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
-    deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
@@ -4689,7 +4680,6 @@ packages:
 
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
-    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   ripemd160@2.0.2:
@@ -9404,7 +9394,7 @@ snapshots:
       debug: 4.3.4
       enhanced-resolve: 5.13.0
       eslint: 8.39.0
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@5.59.2(eslint@8.39.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.5(@typescript-eslint/parser@5.59.2(eslint@8.39.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.39.0))(eslint@8.39.0)
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@5.59.2(eslint@8.39.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.5)(eslint@8.39.0)
       eslint-plugin-import: 2.29.1(@typescript-eslint/parser@5.59.2(eslint@8.39.0)(typescript@5.0.4))(eslint-import-resolver-typescript@3.5.5)(eslint@8.39.0)
       get-tsconfig: 4.5.0
       globby: 13.1.4
@@ -9417,7 +9407,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-module-utils@2.8.0(@typescript-eslint/parser@5.59.2(eslint@8.39.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.5(@typescript-eslint/parser@5.59.2(eslint@8.39.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.39.0))(eslint@8.39.0):
+  eslint-module-utils@2.8.0(@typescript-eslint/parser@5.59.2(eslint@8.39.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.5)(eslint@8.39.0):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -9438,7 +9428,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.39.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@5.59.2(eslint@8.39.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.5(@typescript-eslint/parser@5.59.2(eslint@8.39.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.39.0))(eslint@8.39.0)
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@5.59.2(eslint@8.39.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.5)(eslint@8.39.0)
       hasown: 2.0.2
       is-core-module: 2.15.1
       is-glob: 4.0.3
