@@ -3,7 +3,7 @@
  *
  * The main difference is that we omit parsed data. Transaction created from VersionedMessage that is used at inspector does not have parsed data which is present at transaction fetched from blockchain by its signature.
  */
-import { BaseInstructionCard as InstructionCard } from '@components/common/BaseInstructionCard';
+import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { BaseCreateDetailsCard as CreateDetailsCard } from '@components/common/instruction/associated-token/BaseCreateDetailsCard';
 import { BaseCreateIdempotentDetailsCard as CreateIdempotentDetailsCard } from '@components/common/instruction/associated-token/BaseCreateIdempotentDetailsCard';
 import { BaseRecoverNestedDetailsCard as RecoverNestedDetailsCard } from '@components/common/instruction/associated-token/BaseRecoverNestedDetailsCard';
@@ -20,7 +20,7 @@ type DetailsProps = {
     index: number;
     innerCards?: JSX.Element[];
     childIndex?: number;
-    InstructionCardComponent?: React.FC<Parameters<typeof InstructionCard>[0]>;
+    InstructionCardComponent?: React.FC<Parameters<typeof BaseInstructionCard>[0]>;
 };
 
 export function AssociatedTokenDetailsCard(props: DetailsProps) {

@@ -36,13 +36,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         render(
             <ScrollAnchorProvider>
                 <ClusterProvider>
-                    <AssociatedTokenDetailsCard
-                        ix={ix}
-                        raw={ti}
-                        index={index}
-                        result={{ err: null }}
-                        InstructionCardComponent={BaseInstructionCard}
-                    />
+                    <AssociatedTokenDetailsCard ix={ix} raw={ti} index={index} result={{ err: null }} />
                 </ClusterProvider>
             </ScrollAnchorProvider>
         );
@@ -61,13 +55,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         render(
             <ScrollAnchorProvider>
                 <ClusterProvider>
-                    <AssociatedTokenDetailsCard
-                        ix={ix}
-                        raw={ti}
-                        index={index}
-                        result={{ err: null }}
-                        InstructionCardComponent={BaseInstructionCard}
-                    />
+                    <AssociatedTokenDetailsCard ix={ix} raw={ti} index={index} result={{ err: null }} />
                 </ClusterProvider>
             </ScrollAnchorProvider>
         );
@@ -86,13 +74,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         render(
             <ScrollAnchorProvider>
                 <ClusterProvider>
-                    <AssociatedTokenDetailsCard
-                        ix={ix}
-                        raw={ti}
-                        index={index}
-                        result={{ err: null }}
-                        InstructionCardComponent={BaseInstructionCard}
-                    />
+                    <AssociatedTokenDetailsCard ix={ix} raw={ti} index={index} result={{ err: null }} />
                 </ClusterProvider>
             </ScrollAnchorProvider>
         );
@@ -123,13 +105,7 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
         render(
             <ScrollAnchorProvider>
                 <ClusterProvider>
-                    <AssociatedTokenDetailsCard
-                        ix={ix}
-                        raw={ti}
-                        index={index}
-                        result={{ err: null }}
-                        InstructionCardComponent={BaseInstructionCard}
-                    />
+                    <AssociatedTokenDetailsCard ix={ix} raw={ti} index={index} result={{ err: null }} />
                 </ClusterProvider>
             </ScrollAnchorProvider>
         );
