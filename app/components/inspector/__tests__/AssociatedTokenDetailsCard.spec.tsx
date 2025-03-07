@@ -1,6 +1,7 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
 import * as spl from '@solana/spl-token';
+import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
@@ -24,9 +25,9 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
 
     const factory = ParsedInstructionFactory();
 
-    test('should render "CreateIdempotentDetailsCard"', async () => {
+    test('should render "CreateIdempotent" card', async () => {
         const index = 1;
-        const m = mock.deserializeMessageV0(stubs.aTokenMsg);
+        const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
         const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
@@ -47,5 +48,92 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
+    });
+
+    test('should render "Create" card', async () => {
+        const index = 2;
+        const m = mock.deserializeMessage(stubs.aTokenCreateMsgWithInnerCards);
+        const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
+        expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
+
+        const ix = factory.intoParsedInstruction(ti);
+
+        // check that component is rendered properly
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <AssociatedTokenDetailsCard
+                        ix={ix}
+                        raw={ti}
+                        index={index}
+                        result={{ err: null }}
+                        InstructionCardComponent={BaseInstructionCard}
+                    />
+                </ClusterProvider>
+            </ScrollAnchorProvider>
+        );
+        expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
+    });
+
+    test('should render "RecoverNested" card', async () => {
+        const index = 0;
+        const m = mock.deserializeMessage(stubs.aTokenRecoverNestedMsg);
+        const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
+        expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
+
+        const ix = factory.intoParsedInstruction(ti);
+
+        // check that component is rendered properly
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <AssociatedTokenDetailsCard
+                        ix={ix}
+                        raw={ti}
+                        index={index}
+                        result={{ err: null }}
+                        InstructionCardComponent={BaseInstructionCard}
+                    />
+                </ClusterProvider>
+            </ScrollAnchorProvider>
+        );
+        expect(screen.getByText(/Associated Token Program: Recover Nested/)).toBeInTheDocument();
+    });
+});
+
+describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
+    beforeEach(() => {
+        mock.mockUseSearchParams();
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    const factory = ParsedInstructionFactory();
+
+    test('should render "CreateIdempotentDetailsCard"', async () => {
+        const index = 1;
+        const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsgWithInnerCards);
+        const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
+        expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
+
+        const ix = factory.intoParsedInstruction(ti);
+
+        // check that component is rendered properly
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <AssociatedTokenDetailsCard
+                        ix={ix}
+                        raw={ti}
+                        index={index}
+                        result={{ err: null }}
+                        InstructionCardComponent={BaseInstructionCard}
+                    />
+                </ClusterProvider>
+            </ScrollAnchorProvider>
+        );
+        expect(screen.queryByText(/Inner Instructions/)).not.toBeInTheDocument();
     });
 });

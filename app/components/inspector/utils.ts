@@ -114,7 +114,7 @@ export function intoTransactionInstructionFromVersionedMessage(
 export function ParsedInstructionFactory(){
     function intoProgramName(programId: PublicKey): string | undefined {
         if (programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)) {
-            return 'associated-token-program';
+            return 'spl-associated-token-account';
         }
     }
 
@@ -124,6 +124,7 @@ export function ParsedInstructionFactory(){
 
         // Temporary keep enums hardcoded.
         // TODO: find better way to keep these enums in sync with core repositories
+        const CREATE_BUFFER_EMPTY = Buffer.from('');
         const CREATE_BUFFER = Buffer.from('\x00');
         const CREATE_IDEMPOTENT_BUFFER = Buffer.from('\x01');
         const CREATE_RECOVER_NESTED_BUFFER = Buffer.from('\x02');
@@ -131,6 +132,7 @@ export function ParsedInstructionFactory(){
         if (programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)) {
             let type;
             if (data.equals(CREATE_BUFFER)) type = 'create';
+            else if (data.equals(CREATE_BUFFER_EMPTY)) type = 'create';
             else if (data.equals(CREATE_IDEMPOTENT_BUFFER)) type = 'createIdempotent';
             else if (data.equals(CREATE_RECOVER_NESTED_BUFFER)) type ='recoverNested';
             else type = '';

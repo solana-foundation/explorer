@@ -1,4 +1,4 @@
-import { MessageCompiledInstruction, MessageV0, PublicKey, VersionedMessage } from "@solana/web3.js";
+import { Message, MessageArgs, MessageCompiledInstruction, MessageV0, MessageV0Args,PublicKey, VersionedMessage } from "@solana/web3.js";
 import { useSearchParams } from 'next/navigation';
 
 // stub a test to not allow passing without tests
@@ -27,10 +27,17 @@ export function mockUseSearchParams(cluster = 'mainnet-beta', customUrl?: string
     });
 }
 
+export function deserializeMessage(message: string): VersionedMessage {
+    const m = JSON.parse(message) as MessageArgs;
+    const vm = new Message(m);
+
+    return vm;
+}
+
 export function deserializeMessageV0(message: string): VersionedMessage {
     const m = JSON.parse(message);
-    const vm = new MessageV0({
-        addressTableLookups: m.addressTableLookups.map((atl: {
+    const messageArgs: MessageV0Args = {
+        addressTableLookups: m.addressTableLookups?.map((atl: {
             accountKey: string,
             writableIndexes: number[],
             readonlyIndexes: number[],
@@ -40,7 +47,7 @@ export function deserializeMessageV0(message: string): VersionedMessage {
                 readonlyIndexes: atl.readonlyIndexes,
                 writableIndexes: atl.writableIndexes,
             };
-        }),
+        }) ?? [],
         compiledInstructions: m.compiledInstructions.map((ci: {
             programIdIndex: number,
             accountKeyIndexes: number[],
@@ -62,7 +69,8 @@ export function deserializeMessageV0(message: string): VersionedMessage {
         header: m.header,
         recentBlockhash: m.recentBlockhash,
         staticAccountKeys: m.staticAccountKeys.map((sak: string) => new PublicKey(sak)),
-    });
+    };
+    const vm = new MessageV0(messageArgs);
 
     return vm;
 }

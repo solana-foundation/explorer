@@ -20,7 +20,7 @@ describe('BaseInstructionCard', () => {
 
     test('should render "BaseInstructionCard"', async () => {
         const index = 1;
-        const m = mock.deserializeMessageV0(stubs.aTokenMsg);
+        const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
         const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
         expect(ti.programId.equals(ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
@@ -38,7 +38,7 @@ describe('BaseInstructionCard', () => {
 
     test('should render "BaseInstructionCard" with raw data', async () => {
         const index = 1;
-        const m = mock.deserializeMessageV0(stubs.aTokenMsg);
+        const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
         const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
         expect(ti.programId.equals(ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 

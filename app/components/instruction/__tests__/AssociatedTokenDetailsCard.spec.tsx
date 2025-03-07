@@ -27,7 +27,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
 
     test('should render "CreateIdempotentDetailsCard"', async () => {
         const index = 1;
-        const m = mock.deserializeMessageV0(stubs.aTokenMsg);
+        const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
         const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
