@@ -1,7 +1,6 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
 import * as spl from '@solana/spl-token';
-import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 
 import * as stubs from '@/app/__tests__/mock-stubs';

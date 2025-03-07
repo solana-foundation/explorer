@@ -11,6 +11,7 @@ import {
     TransactionInstruction,
     VersionedMessage,
 } from '@solana/web3.js';
+import { CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR, CREATE_ASSOCIATED_TOKEN_IDEMPOTENT_DISCRIMINATOR, RECOVER_NESTED_ASSOCIATED_TOKEN_DISCRIMINATOR } from '@solana-program/token';
 
 type LookupsForAccountKeyIndex = { lookupTableIndex: number, lookupTableKey: PublicKey }
 
@@ -112,6 +113,10 @@ export function intoTransactionInstructionFromVersionedMessage(
  *  This is temporary solution to reuse existing cards at the Inspector. Might pivot to a better solution in future.
  */
 export function ParsedInstructionFactory(){
+    function discriminatorToBuffer(discrimnator: number): Buffer{
+        return Buffer.from(Uint8Array.from([discrimnator]));
+    }
+
     function intoProgramName(programId: PublicKey): string | undefined {
         if (programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)) {
             return 'spl-associated-token-account';
@@ -122,19 +127,12 @@ export function ParsedInstructionFactory(){
         const { programId, data } = instruction;
         const info = parsed ?? {};
 
-        // Temporary keep enums hardcoded.
-        // TODO: find better way to keep these enums in sync with core repositories
-        const CREATE_BUFFER_EMPTY = Buffer.from('');
-        const CREATE_BUFFER = Buffer.from('\x00');
-        const CREATE_IDEMPOTENT_BUFFER = Buffer.from('\x01');
-        const CREATE_RECOVER_NESTED_BUFFER = Buffer.from('\x02');
-
         if (programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)) {
             let type;
-            if (data.equals(CREATE_BUFFER)) type = 'create';
-            else if (data.equals(CREATE_BUFFER_EMPTY)) type = 'create';
-            else if (data.equals(CREATE_IDEMPOTENT_BUFFER)) type = 'createIdempotent';
-            else if (data.equals(CREATE_RECOVER_NESTED_BUFFER)) type ='recoverNested';
+            if (data.equals(Buffer.alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) type = 'create';
+            else if (data.equals(discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) type = 'create';
+            else if (data.equals(discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_IDEMPOTENT_DISCRIMINATOR))) type = 'createIdempotent';
+            else if (data.equals(discriminatorToBuffer(RECOVER_NESTED_ASSOCIATED_TOKEN_DISCRIMINATOR))) type ='recoverNested';
             else type = '';
 
             return {
