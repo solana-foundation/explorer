@@ -1,4 +1,6 @@
+import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { useCluster } from '@providers/cluster';
+import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { ComputeBudgetProgram, MessageCompiledInstruction, VersionedMessage } from '@solana/web3.js';
 import { getProgramName } from '@utils/tx';
 import React from 'react';
@@ -6,11 +8,11 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import { useAnchorProgram } from '@/app/providers/anchor';
 
-import { BaseInstructionCard } from '../common/BaseInstructionCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
+import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
-import { intoTransactionInstructionFromVersionedMessage } from './utils';
+import { intoTransactionInstructionFromVersionedMessage, ParsedInstructionFactory } from './utils';
 
 export function InstructionsSection({ message }: { message: VersionedMessage }) {
     console.log('num ixs', message.compiledInstructions.length);
@@ -37,7 +39,7 @@ function InspectorInstructionCard({
     const programName = getProgramName(programId.toBase58(), cluster);
     const anchorProgram = useAnchorProgram(programId.toString(), url);
 
-    const transactionInstruction = intoTransactionInstructionFromVersionedMessage(ix, message, programId);
+    const transactionInstruction = intoTransactionInstructionFromVersionedMessage(ix, message);
 
     if (anchorProgram.program) {
         return (
@@ -72,7 +74,21 @@ function InspectorInstructionCard({
     //  - result is `err: null` as at this point there should not be errors
     const result = { err: null };
     const signature = '';
+    const factory = ParsedInstructionFactory();
     switch (transactionInstruction?.programId.toString()) {
+        case ASSOCIATED_TOKEN_PROGRAM_ID.toString(): {
+            // NOTE: current limitation is that innerInstructions won't be present at the AssociatedTokenDetailsCard. For that purpose we might need to simulateTransactions to get them.
+            return (
+                <AssociatedTokenDetailsCard
+                    key={index}
+                    ix={factory.intoParsedInstruction(transactionInstruction)}
+                    raw={transactionInstruction}
+                    index={index}
+                    result={result}
+                    InstructionCardComponent={BaseInstructionCard}
+                />
+            );
+        }
         case ComputeBudgetProgram.programId.toString(): {
             return (
                 <ComputeBudgetDetailsCard
