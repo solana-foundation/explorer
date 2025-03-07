@@ -54,7 +54,18 @@ export function getAnchorNameForInstruction(ix: TransactionInstruction, program:
     }
 
     const coder = new BorshInstructionCoder(program.idl);
-    const decodedIx = coder.decode(ix.data);
+    let decodedIx = null;
+    try {
+        decodedIx = coder.decode(ix.data);
+    } catch (error) {
+        console.log(
+            'Error while decoding instruction for program',
+            program.programId.toString(),
+            'with 8 byte discriminator',
+            ix.data.slice(0, 8),
+            error
+        );
+    }
 
     if (!decodedIx) {
         return null;
