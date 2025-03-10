@@ -15,9 +15,12 @@ import {
     TransactionInstruction,
     VersionedMessage,
 } from '@solana/web3.js';
+import { parseCreateAssociatedTokenIdempotentInstruction } from '@solana-program/token';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
+
+import { intoInstructionData } from '../into-parsed-data';
 
 type DetailsProps = {
     childIndex?: number;
@@ -34,12 +37,16 @@ type DetailsProps = {
 export function AssociatedTokenDetailsCard(props: DetailsProps) {
     try {
         const parsed = create(props.ix.parsed, ParsedInfo);
+        const instructionData = intoInstructionData(props.raw);
         switch (parsed.type) {
             case 'create': {
                 return <CreateDetailsCard {...props} />;
             }
             case 'createIdempotent': {
-                return <CreateIdempotentDetailsCard {...props} />;
+                const info = parseCreateAssociatedTokenIdempotentInstruction(instructionData);
+                console.log({ info });
+
+                return <CreateIdempotentDetailsCard {...props} info={info} />;
             }
             case 'recoverNested': {
                 return <RecoverNestedDetailsCard {...props} />;

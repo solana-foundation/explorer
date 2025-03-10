@@ -1,6 +1,8 @@
+import { IAccountMeta, TAccount } from '@solana/kit';
 import * as spl from '@solana/spl-token';
 import {
     AccountMeta,
+    MessageCompiledInstruction,
     ParsedInstruction,
     ParsedMessage,
     ParsedMessageAccount,
@@ -101,3 +103,24 @@ export function intoParsedTransaction(transactionInstruction: TransactionInstruc
     };
 }
 
+export function intoInstructionData(instruction: TransactionInstruction | MessageCompiledInstruction){
+    let instructionData;
+    if ('accountKeyIndexes' in instruction) {
+        instructionData = {
+            accounts: instruction.accountKeyIndexes.map(a => a.toString()),
+            data: instruction.data,
+            programAddress: instruction.programIdIndex
+        };
+    } else {
+        instructionData = {
+            accounts: instruction.keys,
+            data: instruction.data,
+            programAddress: instruction.programId.toString(),
+        };
+    }
+    return instructionData as unknown as {
+        accounts: IAccountMeta[];
+        data: Uint8Array;
+        programAddress: TAccount<string>
+    };
+}

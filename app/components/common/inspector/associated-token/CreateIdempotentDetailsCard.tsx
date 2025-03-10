@@ -6,14 +6,14 @@ import {
     TransactionInstruction,
     VersionedMessage,
 } from '@solana/web3.js';
+import { ParsedCreateAssociatedTokenIdempotentInstruction } from '@solana-program/token';
 import React from 'react';
-
-import { BaseRawDetails } from '../../BaseRawDetails';
 
 export function CreateIdempotentDetailsCard(props: {
     childIndex?: number;
     children?: React.ReactNode;
     index: number;
+    info: ParsedCreateAssociatedTokenIdempotentInstruction;
     innerCards?: JSX.Element[];
     ix: ParsedInstruction;
     message?: VersionedMessage;
@@ -24,6 +24,7 @@ export function CreateIdempotentDetailsCard(props: {
     const {
         ix,
         index,
+        info,
         raw,
         message,
         result,
@@ -44,7 +45,47 @@ export function CreateIdempotentDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            {children ? children : <BaseRawDetails ix={raw} message={message} />}
+            <tr>
+                <td>Source</td>
+                <td className="text-lg-end">
+                    <Address pubkey={info.source} alignRight link />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Account</td>
+                <td className="text-lg-end">
+                    <Address pubkey={info.account} alignRight link />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Wallet</td>
+                <td className="text-lg-end">
+                    <Address pubkey={info.wallet} alignRight link />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Mint</td>
+                <td className="text-lg-end">
+                    <Address pubkey={info.mint} alignRight link />
+                </td>
+            </tr>
+
+            <tr>
+                <td>System Program</td>
+                <td className="text-lg-end">
+                    <Address pubkey={info.systemProgram} alignRight link />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Token Program</td>
+                <td className="text-lg-end">
+                    <Address pubkey={info.tokenProgram} alignRight link />
+                </td>
+            </tr>
         </InstructionCardComponent>
     );
 }
