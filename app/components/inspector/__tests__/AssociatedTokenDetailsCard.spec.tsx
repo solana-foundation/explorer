@@ -1,4 +1,3 @@
-import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
 import * as spl from '@solana/spl-token';
 import { render, screen } from '@testing-library/react';
@@ -8,7 +7,7 @@ import * as mock from '@/app/__tests__/mocks';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 
-import { ParsedInstructionFactory } from '../../inspector/utils';
+import { intoParsedInstruction } from '../../inspector/into-parsed-data';
 import { AssociatedTokenDetailsCard } from '../associated-token/AssociatedTokenDetailsCard';
 
 jest.mock('next/navigation');
@@ -22,15 +21,13 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         jest.clearAllMocks();
     });
 
-    const factory = ParsedInstructionFactory();
-
     test('should render "CreateIdempotent" card', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
         const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
-        const ix = factory.intoParsedInstruction(ti);
+        const ix = intoParsedInstruction(ti);
 
         // check that component is rendered properly
         render(
@@ -49,7 +46,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
-        const ix = factory.intoParsedInstruction(ti);
+        const ix = intoParsedInstruction(ti);
 
         // check that component is rendered properly
         render(
@@ -68,7 +65,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
-        const ix = factory.intoParsedInstruction(ti);
+        const ix = intoParsedInstruction(ti);
 
         // check that component is rendered properly
         render(
@@ -91,15 +88,13 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
         jest.clearAllMocks();
     });
 
-    const factory = ParsedInstructionFactory();
-
     test('should render "CreateIdempotentDetailsCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsgWithInnerCards);
         const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
-        const ix = factory.intoParsedInstruction(ti);
+        const ix = intoParsedInstruction(ti);
 
         // check that component is rendered properly
         render(

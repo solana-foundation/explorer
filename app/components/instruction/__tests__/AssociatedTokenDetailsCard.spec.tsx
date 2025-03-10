@@ -9,7 +9,7 @@ import * as mock from '@/app/__tests__/mocks';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 
-import { ParsedInstructionFactory } from '../../inspector/utils';
+import { intoParsedInstruction, intoParsedTransaction } from '../../inspector/into-parsed-data';
 import { AssociatedTokenDetailsCard } from '../associated-token/AssociatedTokenDetailsCard';
 
 jest.mock('next/navigation');
@@ -22,8 +22,6 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
-
-    const factory = ParsedInstructionFactory();
 
     test('should render "CreateIdempotentDetailsCard"', async () => {
         const index = 1;
@@ -40,8 +38,8 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
             wallet: new PublicKey('EzdQH5zUfTMGb3vwU4oumxjVcxKMDpJ6dB78pbjfHmmb'),
         };
 
-        const ix = factory.intoParsedInstruction(ti, parsed);
-        const tx = factory.intoParsedTransaction(ti, m);
+        const ix = intoParsedInstruction(ti, parsed);
+        const tx = intoParsedTransaction(ti, m);
 
         // check that component is rendered properly
         render(

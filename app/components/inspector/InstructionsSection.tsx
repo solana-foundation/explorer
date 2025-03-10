@@ -10,8 +10,9 @@ import { useAnchorProgram } from '@/app/providers/anchor';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
+import { intoParsedInstruction } from './into-parsed-data';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
-import { intoTransactionInstructionFromVersionedMessage, ParsedInstructionFactory } from './utils';
+import { intoTransactionInstructionFromVersionedMessage } from './utils';
 
 export function InstructionsSection({ message }: { message: VersionedMessage }) {
     return (
@@ -64,12 +65,11 @@ function InspectorInstructionCard({
     //  - result is `err: null` as at this point there should not be errors
     const result = { err: null };
     const signature = '';
-    const factory = ParsedInstructionFactory();
     switch (transactionInstruction?.programId.toString()) {
         case ASSOCIATED_TOKEN_PROGRAM_ID.toString(): {
             // NOTE: current limitation is that innerInstructions won't be present at the AssociatedTokenDetailsCard. For that purpose we might need to simulateTransactions to get them.
 
-            const asParsedInstruction = factory.intoParsedInstruction(transactionInstruction);
+            const asParsedInstruction = intoParsedInstruction(transactionInstruction);
             return (
                 <AssociatedTokenDetailsCard
                     key={index}
