@@ -49,7 +49,7 @@ export function AddressFromLookupTableWithContext({
     } else {
         const pubkey = lookupTable.state.addresses[lookupTableIndex];
         return (
-            <div className="d-flex align-items-end flex-column">
+            <div className="d-flex align-items-lg-end flex-column">
                 <Address pubkey={pubkey} link />
                 <AccountInfo pubkey={pubkey} />
             </div>
@@ -59,7 +59,7 @@ export function AddressFromLookupTableWithContext({
 
 export function AddressWithContext({ pubkey, validator }: { pubkey: PublicKey; validator?: AccountValidator }) {
     return (
-        <div className="d-flex align-items-end flex-column">
+        <div className="d-flex align-items-lg-end flex-column">
             <Address pubkey={pubkey} link />
             <AccountInfo pubkey={pubkey} validator={validator} />
         </div>

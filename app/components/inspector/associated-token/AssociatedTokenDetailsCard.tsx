@@ -3,25 +3,32 @@
  *
  * The main difference is that we omit parsed data. Transaction created from VersionedMessage that is used at inspector does not have parsed data which is present at transaction fetched from blockchain by its signature.
  */
-import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
-import { BaseCreateDetailsCard as CreateDetailsCard } from '@components/common/instruction/associated-token/BaseCreateDetailsCard';
-import { BaseCreateIdempotentDetailsCard as CreateIdempotentDetailsCard } from '@components/common/instruction/associated-token/BaseCreateIdempotentDetailsCard';
-import { BaseRecoverNestedDetailsCard as RecoverNestedDetailsCard } from '@components/common/instruction/associated-token/BaseRecoverNestedDetailsCard';
-import { BaseUnknownDetailsCard as UnknownDetailsCard } from '@components/common/instruction/BaseUnknownDetailsCard';
-import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import { CreateDetailsCard } from '@components/common/inspector/associated-token/CreateDetailsCard';
+import { CreateIdempotentDetailsCard } from '@components/common/inspector/associated-token/CreateIdempotentDetailsCard';
+import { RecoverNestedDetailsCard } from '@components/common/inspector/associated-token/RecoverNestedDetailsCard';
+import { UnknownDetailsCard } from '@components/common/inspector/UnknownDetailsCard';
+import { InspectorInstructionCard } from '@components/common/InspectorInstructionCard';
+import {
+    MessageCompiledInstruction,
+    ParsedInstruction,
+    SignatureResult,
+    TransactionInstruction,
+    VersionedMessage,
+} from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
 
 type DetailsProps = {
-    raw: TransactionInstruction;
-    ix: ParsedInstruction;
-    result: SignatureResult;
+    childIndex?: number;
+    children?: React.ReactNode;
     index: number;
     innerCards?: JSX.Element[];
-    childIndex?: number;
-    children: React.ReactNode;
-    InstructionCardComponent?: React.FC<Parameters<typeof BaseInstructionCard>[0]>;
+    ix: ParsedInstruction;
+    message?: VersionedMessage;
+    raw: TransactionInstruction | MessageCompiledInstruction;
+    result: SignatureResult;
+    InstructionCardComponent?: React.FC<Parameters<typeof InspectorInstructionCard>[0]>;
 };
 
 export function AssociatedTokenDetailsCard(props: DetailsProps) {
@@ -32,10 +39,10 @@ export function AssociatedTokenDetailsCard(props: DetailsProps) {
                 return <CreateDetailsCard {...props} />;
             }
             case 'createIdempotent': {
-                return <CreateIdempotentDetailsCard info={parsed.info} {...props} />;
+                return <CreateIdempotentDetailsCard {...props} />;
             }
             case 'recoverNested': {
-                return <RecoverNestedDetailsCard info={parsed.info} {...props} />;
+                return <RecoverNestedDetailsCard {...props} />;
             }
             default:
                 return <UnknownDetailsCard {...props} />;

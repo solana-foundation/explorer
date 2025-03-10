@@ -10,7 +10,6 @@ import { useAnchorProgram } from '@/app/providers/anchor';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
-import { BaseAddressLookupDetails } from './BaseAddressLookupDetails';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
 import { intoTransactionInstructionFromVersionedMessage, ParsedInstructionFactory } from './utils';
 
@@ -38,7 +37,6 @@ function InspectorInstructionCard({
     const programName = getProgramName(programId.toBase58(), cluster);
     const anchorProgram = useAnchorProgram(programId.toString(), url);
 
-    console.log('IX', ix);
     const transactionInstruction = intoTransactionInstructionFromVersionedMessage(ix, message);
 
     if (anchorProgram.program) {
@@ -70,19 +68,17 @@ function InspectorInstructionCard({
     switch (transactionInstruction?.programId.toString()) {
         case ASSOCIATED_TOKEN_PROGRAM_ID.toString(): {
             // NOTE: current limitation is that innerInstructions won't be present at the AssociatedTokenDetailsCard. For that purpose we might need to simulateTransactions to get them.
-            console.log({ transactionInstruction });
 
             const asParsedInstruction = factory.intoParsedInstruction(transactionInstruction);
             return (
                 <AssociatedTokenDetailsCard
                     key={index}
                     ix={asParsedInstruction}
-                    raw={transactionInstruction}
+                    raw={ix}
+                    message={message}
                     index={index}
                     result={result}
-                    InstructionCardComponent={BaseInstructionCard}
-                >
-                </AssociatedTokenDetailsCard>
+                />
             );
         }
         case ComputeBudgetProgram.programId.toString(): {
