@@ -82,7 +82,7 @@
     "version": "v2.1.6",
     "testnetActivationEpoch": 746,
     "devnetActivationEpoch": 816,
-    "mainnetActivationEpoch": null,
+    "mainnetActivationEpoch": 753,
     "title": "Programify Feature Gate",
     "description": "Turn feature gate syscall into a BPF program, enabling revocation of pending features.",
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0089-programify-feature-gate-program.md"
@@ -93,7 +93,7 @@
     "version": "v2.1.6",
     "testnetActivationEpoch": 746,
     "devnetActivationEpoch": 817,
-    "mainnetActivationEpoch": null,
+    "mainnetActivationEpoch": 754,
     "title": "Migrate config program to Core BPF",
     "description": "Migrate the config program to a BPF program",
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0140-migrate-config-to-core-bpf.md"
@@ -245,7 +245,7 @@
     "key": "9ypxGLzkMxi89eDerRKXWDXe44UY2z4hBig4mDhNq5Dp",
     "simd": "0159",
     "version": "v2.1.0",
-    "testnetActivationEpoch": null,
+    "testnetActivationEpoch": 755,
     "devnetActivationEpoch": null,
     "mainnetActivationEpoch": null,
     "title": "Relax Precompile Failure Constraint",

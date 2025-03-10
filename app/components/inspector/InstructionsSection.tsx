@@ -17,6 +17,7 @@ import { UnknownDetailsCard } from './UnknownDetailsCard';
 import { intoTransactionInstructionFromVersionedMessage } from './utils';
 
 export function InstructionsSection({ message }: { message: VersionedMessage }) {
+    console.log('num ixs', message.compiledInstructions.length);
     return (
         <>
             {message.compiledInstructions.map((ix, index) => {
@@ -52,7 +53,6 @@ function InspectorInstructionCard({
             >
                 <AnchorDetailsCard
                     anchorProgram={anchorProgram.program}
-                    childIndex={undefined}
                     index={index}
                     // Inner cards and child are not used since we do not know what CPIs
                     // will be called until simulation happens, and even then, all we

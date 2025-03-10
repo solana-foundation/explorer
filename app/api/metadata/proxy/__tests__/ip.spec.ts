@@ -22,13 +22,16 @@ jest.mock('dns', () => {
 /**
  *  mock valid response
  */
-function mockLookupOnce(addresses: { address: string }[]) {
+
+type LookupAddress = { address: string };
+
+function mockLookupOnce(addresses: LookupAddress | LookupAddress[] | undefined) {
     // @ts-expect-error lookup does not have mocked fn
     dns.lookup.mockResolvedValueOnce(addresses);
 }
 
 describe('ip::checkURLForPrivateIP', () => {
-    afterEach(() => {
+    beforeEach(() => {
         jest.clearAllMocks();
     });
 
@@ -56,11 +59,6 @@ describe('ip::checkURLForPrivateIP', () => {
         await expect(checkURLForPrivateIP('http://192.168.1.1')).resolves.toBe(true);
     });
 
-    test('should block localhost', async () => {
-        mockLookupOnce([{ address: '127.0.0.1' }]);
-        await expect(checkURLForPrivateIP('http://localhost')).resolves.toBe(true);
-    });
-
     test('should block decimal-encoded private IP', async () => {
         mockLookupOnce([{ address: '192.168.1.1' }]);
         await expect(checkURLForPrivateIP('http://3232235777')).resolves.toBe(true);
@@ -76,9 +74,36 @@ describe('ip::checkURLForPrivateIP', () => {
         await expect(checkURLForPrivateIP('http://169.254.169.254')).resolves.toBe(true);
     });
 
+    test('should handle absent address negatively', async () => {
+        mockLookupOnce(undefined);
+        await expect(checkURLForPrivateIP('http://hello.world')).resolves.toBe(true);
+    });
+
     test('should handle DNS resolution failure gracefully', async () => {
         // @ts-expect-error fetch does not have mocked fn
         dns.lookup.mockRejectedValueOnce(new Error('DNS resolution failed'));
         await expect(checkURLForPrivateIP('http://unknown.domain')).resolves.toBe(true);
+    });
+});
+
+describe('ip::checkURLForPrivateIP with single resolved address', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    test('should handle single address positively', async () => {
+        mockLookupOnce({ address: '76.76.21.21' });
+        await expect(checkURLForPrivateIP('http://solana.com')).resolves.toBe(false);
+    });
+});
+
+// move case for localhost to a separate test case as it's a special case and doesn't require DNS resolution
+describe('ip::checkURLForPrivateIP with localhost', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    test('should block localhost', async () => {
+        await expect(checkURLForPrivateIP('http://localhost')).resolves.toBe(true);
     });
 });
