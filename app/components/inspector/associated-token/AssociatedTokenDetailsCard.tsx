@@ -20,6 +20,7 @@ type DetailsProps = {
     index: number;
     innerCards?: JSX.Element[];
     childIndex?: number;
+    children: React.ReactNode;
     InstructionCardComponent?: React.FC<Parameters<typeof BaseInstructionCard>[0]>;
 };
 
