@@ -1,4 +1,3 @@
-import { HexData } from '@components/common/HexData';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useScrollAnchor } from '@providers/scroll-anchor';
 import { MessageCompiledInstruction, VersionedMessage } from '@solana/web3.js';
@@ -6,8 +5,8 @@ import React from 'react';
 
 import getInstructionCardScrollAnchorId from '@/app/utils/get-instruction-card-scroll-anchor-id';
 
-import { AddressFromLookupTableWithContext, AddressWithContext, programValidator } from './AddressWithContext';
-import { fillAddressTableLookupsAccounts, findLookupAddress } from './utils';
+import { BaseRawDetails } from '../common/BaseRawDetails';
+import { AddressWithContext, programValidator } from './AddressWithContext';
 
 export function UnknownDetailsCard({
     index,
@@ -23,8 +22,6 @@ export function UnknownDetailsCard({
     const [expanded, setExpanded] = React.useState(false);
 
     const scrollAnchorRef = useScrollAnchor(getInstructionCardScrollAnchorId([index + 1]));
-
-    const lookupsForAccountKeyIndex = fillAddressTableLookupsAccounts(message.addressTableLookups);
 
     return (
         <div className="card" ref={scrollAnchorRef}>
@@ -52,49 +49,7 @@ export function UnknownDetailsCard({
                             />
                         </td>
                     </tr>
-                    {ix.accountKeyIndexes.map((accountIndex, index) => {
-                        const { lookup, dynamicLookups } = findLookupAddress(
-                            accountIndex,
-                            message,
-                            lookupsForAccountKeyIndex
-                        );
-
-                        return (
-                            <tr key={index}>
-                                <td>
-                                    <div className="d-flex align-items-start flex-column">
-                                        Account #{index + 1}
-                                        <span className="mt-1">
-                                            {accountIndex < message.header.numRequiredSignatures && (
-                                                <span className="badge bg-info-soft me-2">Signer</span>
-                                            )}
-                                            {message.isAccountWritable(accountIndex) && (
-                                                <span className="badge bg-danger-soft me-2">Writable</span>
-                                            )}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td className="text-lg-end">
-                                    {dynamicLookups.isStatic ? (
-                                        <AddressWithContext pubkey={lookup} />
-                                    ) : (
-                                        <AddressFromLookupTableWithContext
-                                            lookupTableKey={dynamicLookups.lookups.lookupTableKey}
-                                            lookupTableIndex={dynamicLookups.lookups.lookupTableIndex}
-                                        />
-                                    )}
-                                </td>
-                            </tr>
-                        );
-                    })}
-                    <tr>
-                        <td>
-                            Instruction Data <span className="text-muted">(Hex)</span>
-                        </td>
-                        <td className="text-lg-end">
-                            <HexData raw={Buffer.from(ix.data)} />
-                        </td>
-                    </tr>
+                    <BaseRawDetails ix={ix} message={message} />
                 </TableCardBody>
             )}
         </div>

@@ -47,6 +47,10 @@ function fillAccountMetas(
             isWritable,
             pubkey: lookup,
         };
+
+        //if (!dynamicLookups.isStatic) {
+            //console.log("AToken1112",dynamicLookups.isStatic,lookup.toBase58(),{ dynamicLookups,lookup });
+        //}
         return accountMeta;
     });
 
@@ -79,10 +83,13 @@ export function fillAddressTableLookupsAccounts(addressTableLookups: MessageAddr
 export function intoTransactionInstructionFromVersionedMessage(
     compiledInstruction: MessageCompiledInstruction,
     originalMessage: VersionedMessage,
-    programId: PublicKey
 ): TransactionInstruction {
     const { accountKeyIndexes, data } = compiledInstruction;
     const { addressTableLookups } = originalMessage;
+
+    const programId = originalMessage.staticAccountKeys.at(compiledInstruction.programIdIndex);
+
+    if (!programId) throw new Error("Program ID not found");
 
     const lookupAccounts = fillAddressTableLookupsAccounts(addressTableLookups);
     const accountMetas = fillAccountMetas(accountKeyIndexes, originalMessage, lookupAccounts);
