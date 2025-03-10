@@ -72,7 +72,6 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
             } else {
                 coder = new BorshInstructionCoder(anchorProgram.idl);
                 decodedIxData = coder.decode(ix.data);
-
                 if (decodedIxData) {
                     ixDef = anchorProgram.idl.instructions.find(ixDef => ixDef.name === decodedIxData?.name);
                     if (ixDef) {
