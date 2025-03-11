@@ -43,10 +43,10 @@ export function AssociatedTokenDetailsCard(props: DetailsProps) {
                 return <CreateDetailsCard {...props} />;
             }
             case 'createIdempotent': {
-                const info = parseCreateAssociatedTokenIdempotentInstruction(instructionData);
-                //console.log({ info });
+                ///const info = parseCreateAssociatedTokenIdempotentInstruction(instructionData);
+                console.log({ instructionData });
 
-                return <CreateIdempotentDetailsCard {...props} info={info} />;
+                return <CreateIdempotentDetailsCard {...props} info={parsed.info} />;
             }
             case 'recoverNested': {
                 return <RecoverNestedDetailsCard {...props} />;

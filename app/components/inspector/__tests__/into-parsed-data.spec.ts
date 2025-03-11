@@ -12,7 +12,7 @@ describe('intoParsedData', () => {
         const index = 2;
         const message = mock.deserializeMessage(stubs.aTokenCreateMsgWithInnerCards);
         const instruction = intoTransactionInstructionFromVersionedMessage(message.compiledInstructions[index], message);
-        const data = privateIntoParsedData(instruction, {});
+        const data = privateIntoParsedData(instruction);
         expect(data.type).toBe('create');
         expect(data.info.data).toEqual({ discriminator: 0 });
         expect(data.info.programAddress).toEqual(spl.ASSOCIATED_TOKEN_PROGRAM_ID.toString());
@@ -34,7 +34,7 @@ describe('intoParsedData', () => {
         const index = 1;
         const message = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
         const instruction = intoTransactionInstructionFromVersionedMessage(message.compiledInstructions[index], message);
-        const data = privateIntoParsedData(instruction, {});
+        const data = privateIntoParsedData(instruction);
         expect(data.type).toBe('createIdempotent');
         expect(data.info.data).toEqual({ discriminator: 1 });
         expect(data.info.programAddress).toEqual(spl.ASSOCIATED_TOKEN_PROGRAM_ID.toString());
@@ -56,7 +56,7 @@ describe('intoParsedData', () => {
         const index = 0;
         const message = mock.deserializeMessage(stubs.aTokenRecoverNestedMsg);
         const instruction = intoTransactionInstructionFromVersionedMessage(message.compiledInstructions[index], message);
-        const data = privateIntoParsedData(instruction, {});
+        const data = privateIntoParsedData(instruction);
         expect(data.type).toBe('recoverNested');
         expect(data.info.data).toEqual({ discriminator: 2 });
         expect(data.info.programAddress).toEqual(spl.ASSOCIATED_TOKEN_PROGRAM_ID.toString());

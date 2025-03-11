@@ -28,6 +28,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
         const ix = intoParsedInstruction(ti);
+        console.log(777, ix.parsed);
 
         // check that component is rendered properly
         render(
@@ -38,6 +39,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
+        expect(screen.getByText(/Wallet/)).toBeInTheDocument();
     });
 
     test('should render "Create" card', async () => {

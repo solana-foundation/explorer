@@ -41,7 +41,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
         const ix = intoParsedInstruction(ti, parsed);
         const tx = intoParsedTransaction(ti, m);
 
-        console.log({ix}, tx)
+        console.log({ ix }, tx);
 
         // check that component is rendered properly
         render(
