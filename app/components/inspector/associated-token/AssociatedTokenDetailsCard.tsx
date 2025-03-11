@@ -44,7 +44,7 @@ export function AssociatedTokenDetailsCard(props: DetailsProps) {
             }
             case 'createIdempotent': {
                 const info = parseCreateAssociatedTokenIdempotentInstruction(instructionData);
-                console.log({ info });
+                //console.log({ info });
 
                 return <CreateIdempotentDetailsCard {...props} info={info} />;
             }

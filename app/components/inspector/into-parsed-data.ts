@@ -11,7 +11,7 @@ import {
     TransactionInstruction,
     VersionedMessage,
 } from '@solana/web3.js';
-import { CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR, CREATE_ASSOCIATED_TOKEN_IDEMPOTENT_DISCRIMINATOR, RECOVER_NESTED_ASSOCIATED_TOKEN_DISCRIMINATOR } from '@solana-program/token';
+import { CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR, CREATE_ASSOCIATED_TOKEN_IDEMPOTENT_DISCRIMINATOR, parseCreateAssociatedTokenIdempotentInstruction, parseCreateAssociatedTokenInstruction, parseRecoverNestedAssociatedTokenInstruction,RECOVER_NESTED_ASSOCIATED_TOKEN_DISCRIMINATOR } from '@solana-program/token';
 
 function discriminatorToBuffer(discrimnator: number): Buffer{
     return Buffer.from(Uint8Array.from([discrimnator]));
@@ -21,19 +21,36 @@ function intoProgramName(programId: PublicKey): string | undefined {
     if (programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)) {
         return 'spl-associated-token-account';
     }
+    /* add other variants here */
 }
 
 function intoParsedData(instruction: TransactionInstruction, parsed: any): any{
     const { programId, data } = instruction;
-    const info = parsed ?? {};
+    const UNKNOWN_PROGRAM_TYPE = ''; // empty string represents that the program is unknown
+    let info = parsed ?? {};
 
     if (programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)) {
         let type;
-        if (data.equals(Buffer.alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) type = 'create';
-        else if (data.equals(discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) type = 'create';
-        else if (data.equals(discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_IDEMPOTENT_DISCRIMINATOR))) type = 'createIdempotent';
-        else if (data.equals(discriminatorToBuffer(RECOVER_NESTED_ASSOCIATED_TOKEN_DISCRIMINATOR))) type ='recoverNested';
-        else type = '';
+        //console.log("PARSED", data, data.equals(discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_IDEMPOTENT_DISCRIMINATOR)))
+        if (data.equals(Buffer.alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
+            type = 'create';
+            instruction.data = discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR);
+            info = parseCreateAssociatedTokenInstruction(intoInstructionData(instruction));
+        }
+        else if (data.equals(discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
+            type = 'create';
+            info = parseCreateAssociatedTokenInstruction(intoInstructionData(instruction));
+        }
+        else if (data.equals(discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_IDEMPOTENT_DISCRIMINATOR))) {
+            type = 'createIdempotent';
+            info = parseCreateAssociatedTokenIdempotentInstruction(intoInstructionData(instruction));
+            console.log({ info });
+        }
+        else if (data.equals(discriminatorToBuffer(RECOVER_NESTED_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
+            type ='recoverNested';
+            info = parseRecoverNestedAssociatedTokenInstruction(intoInstructionData(instruction));
+        }
+        else type = UNKNOWN_PROGRAM_TYPE;
 
         return {
             info,
@@ -41,9 +58,11 @@ function intoParsedData(instruction: TransactionInstruction, parsed: any): any{
         };
     }
 
+    /* add other variants here */
+
     return {
         info,
-        type: '' // empty string represents that the program was unknown
+        type: UNKNOWN_PROGRAM_TYPE,
     };
 }
 
@@ -56,7 +75,7 @@ function getInstructionData(instruction: TransactionInstruction, data: any){
 
 
 function convertAccountKeysToParsedMessageAccounts(keys: AccountMeta[]): ParsedMessageAccount[]{
-    const accountKeys= keys.map((key): ParsedMessageAccount => {
+    const accountKeys = keys.map((key): ParsedMessageAccount => {
         return {
             pubkey: key.pubkey,
             signer: key.isSigner,
@@ -103,6 +122,10 @@ export function intoParsedTransaction(transactionInstruction: TransactionInstruc
     };
 }
 
+/**
+ * Wrap instruction into format compatible with @solana-program/token library' parsers.
+ *
+ */
 export function intoInstructionData(instruction: TransactionInstruction | MessageCompiledInstruction){
     let instructionData;
     if ('accountKeyIndexes' in instruction) {
@@ -118,9 +141,12 @@ export function intoInstructionData(instruction: TransactionInstruction | Messag
             programAddress: instruction.programId.toString(),
         };
     }
+    console.log({ instructionData })
     return instructionData as unknown as {
         accounts: IAccountMeta[];
         data: Uint8Array;
         programAddress: TAccount<string>
     };
 }
+
+export const privateIntoParsedData = intoParsedData;

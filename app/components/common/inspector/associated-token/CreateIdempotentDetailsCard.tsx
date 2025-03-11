@@ -44,48 +44,6 @@ export function CreateIdempotentDetailsCard(props: {
             title="Associated Token Program: Create Idempotent"
             innerCards={innerCards}
             childIndex={childIndex}
-        >
-            <tr>
-                <td>Source</td>
-                <td className="text-lg-end">
-                    <Address pubkey={info.source} alignRight link />
-                </td>
-            </tr>
-
-            <tr>
-                <td>Account</td>
-                <td className="text-lg-end">
-                    <Address pubkey={info.account} alignRight link />
-                </td>
-            </tr>
-
-            <tr>
-                <td>Wallet</td>
-                <td className="text-lg-end">
-                    <Address pubkey={info.wallet} alignRight link />
-                </td>
-            </tr>
-
-            <tr>
-                <td>Mint</td>
-                <td className="text-lg-end">
-                    <Address pubkey={info.mint} alignRight link />
-                </td>
-            </tr>
-
-            <tr>
-                <td>System Program</td>
-                <td className="text-lg-end">
-                    <Address pubkey={info.systemProgram} alignRight link />
-                </td>
-            </tr>
-
-            <tr>
-                <td>Token Program</td>
-                <td className="text-lg-end">
-                    <Address pubkey={info.tokenProgram} alignRight link />
-                </td>
-            </tr>
-        </InstructionCardComponent>
+        ></InstructionCardComponent>
     );
 }
