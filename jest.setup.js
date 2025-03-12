@@ -4,3 +4,7 @@
 // Used for __tests__/testing-library.js
 // Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+
+// Polyfill for @sqds/multisig
+import { TextEncoder } from 'util';
+global.TextEncoder = TextEncoder;

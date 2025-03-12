@@ -13,7 +13,6 @@ import { UnknownDetailsCard } from './UnknownDetailsCard';
 import { intoTransactionInstructionFromVersionedMessage } from './utils';
 
 export function InstructionsSection({ message }: { message: VersionedMessage }) {
-    console.log('num ixs', message.compiledInstructions.length);
     return (
         <>
             {message.compiledInstructions.map((ix, index) => {

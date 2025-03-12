@@ -81,7 +81,7 @@ function decodeSignatures(signaturesParam: string): (string | null)[] {
         }
 
         try {
-            base58.decode(signature);
+            bs58.decode(signature);
             validSignatures.push(signature);
         } catch (err) {
             throw new Error('Signature is not valid base58');
@@ -179,7 +179,7 @@ function SquadsProposalInspectorCard({ account, onClear }: { account: string; on
                 throw new Error(`Account ${account} is not a valid Squads transaction account`);
             }
 
-            return await VaultTransaction.fromAccountAddress(connection, new PublicKey(account), 'confirmed');
+            return VaultTransaction.fromAccountInfo(accountInfo)[0];
         } catch (err) {
             throw err instanceof Error ? err : new Error('Failed to fetch account data');
         }
