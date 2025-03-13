@@ -44,23 +44,29 @@ function intoParsedData(instruction: TransactionInstruction, parsed?: any): any{
         }
 
         const instructionType = identifyAssociatedTokenInstruction({ data: instructionData });
-
-        if (instructionType === AssociatedTokenInstruction.CreateAssociatedToken) {
-            type = 'create';
-            const idata = intoInstructionData(instruction);
-            info = parseCreateAssociatedTokenInstruction(idata);
+        switch (instructionType) {
+            case AssociatedTokenInstruction.CreateAssociatedToken: {
+                type = 'create';
+                const idata = intoInstructionData(instruction);
+                info = parseCreateAssociatedTokenInstruction(idata);
+                break;
+            }
+            case AssociatedTokenInstruction.CreateAssociatedTokenIdempotent: {
+                type = 'createIdempotent';
+                const idata = intoInstructionData(instruction);
+                info = parseCreateAssociatedTokenIdempotentInstruction(idata);
+                break;
+            }
+            case AssociatedTokenInstruction.RecoverNestedAssociatedToken: {
+                type ='recoverNested';
+                const idata = intoInstructionData(instruction);
+                info = parseRecoverNestedAssociatedTokenInstruction(idata);
+                break;
+            }
+            default: {
+                type = UNKNOWN_PROGRAM_TYPE;
+            }
         }
-        else if (instructionType === AssociatedTokenInstruction.CreateAssociatedTokenIdempotent) {
-            type = 'createIdempotent';
-            const idata = intoInstructionData(instruction);
-            info = parseCreateAssociatedTokenIdempotentInstruction(idata);
-        }
-        else if (instructionType === AssociatedTokenInstruction.RecoverNestedAssociatedToken) {
-            type ='recoverNested';
-            const idata = intoInstructionData(instruction);
-            info = parseRecoverNestedAssociatedTokenInstruction(idata);
-        }
-        else type = UNKNOWN_PROGRAM_TYPE;
 
         return {
             info: parsed ?? info, // allow for "parsed" to take priority over "info"
