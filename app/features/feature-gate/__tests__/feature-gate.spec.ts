@@ -15,8 +15,10 @@ const FEATURE = {
     "title": "MoveStake and MoveLamports"
 };
 
-vi.mock('node-fetch', () => {
+vi.mock('node-fetch', async () => {
+    const actual = await vi.importActual('node-fetch');
     return {
+        ...actual,
         default: vi.fn()
     };
 });
