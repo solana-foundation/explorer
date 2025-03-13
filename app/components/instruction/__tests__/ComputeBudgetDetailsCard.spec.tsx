@@ -2,6 +2,8 @@ import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
 import { ComputeBudgetProgram, MessageCompiledInstruction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
+import { useSearchParams } from 'next/navigation';
+import { vi } from 'vitest';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
@@ -10,7 +12,13 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 
 import { ComputeBudgetDetailsCard } from '../ComputeBudgetDetailsCard';
 
-jest.mock('next/navigation');
+vi.mock('next/navigation');
+// @ts-expect-error does not contain `mockReturnValue`
+useSearchParams.mockReturnValue({
+    get: () => 'devnet',
+    has: (_query?: string) => false,
+    toString: () => '',
+});
 
 describe('instruction::ComputeBudgetDetailsCard', () => {
     beforeEach(() => {
@@ -18,7 +26,7 @@ describe('instruction::ComputeBudgetDetailsCard', () => {
     });
 
     afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     test('should render "SetComputeUnitPrice"', async () => {
