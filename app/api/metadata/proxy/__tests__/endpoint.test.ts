@@ -1,8 +1,6 @@
-/**
- * @jest-environment node
- */
 import _dns from 'dns';
 import fetch, { Headers } from 'node-fetch';
+import { vi } from 'vitest';
 
 import { GET } from '../route';
 
@@ -12,28 +10,31 @@ function setEnvironment(key: string, value: string) {
     Object.assign(process.env, { ...process.env, [key]: value });
 }
 
-jest.mock('node-fetch', () => {
-    const originalFetch = jest.requireActual('node-fetch');
-    const mockFn = jest.fn();
-
-    Object.assign(mockFn, originalFetch);
-
-    return mockFn;
+vi.mock('node-fetch', async () => {
+    const actual = await vi.importActual('node-fetch');
+    return {
+        ...actual,
+        default: vi.fn()
+    };
 });
 
-jest.mock('dns', () => {
-    const originalDns = jest.requireActual('dns');
-    const lookupFn = jest.fn();
+vi.mock('dns', async () => {
+    const originalDns = await vi.importActual('dns');
+    const lookupFn = vi.fn();
     return {
         ...originalDns,
+        default: {
+            promises: {
+                lookup: lookupFn,
+            }
+        },
         promises: {
-            ...originalDns.promises,
             lookup: lookupFn,
         }
     };
 });
 
-async function mockFileResponseOnce(data: any, headers: Headers){
+async function mockFileResponseOnce(data: any, headers: Headers) {
     // @ts-expect-error unavailable mock method for fetch
     fetch.mockResolvedValueOnce({ headers, json: async () => data });
 }
@@ -53,7 +54,7 @@ describe('metadata/[network] endpoint', () => {
     const unsupportedUri = encodeURIComponent('ftp://unsupported.resource/file.json');
 
     afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     it('should return status when disabled', async () => {
