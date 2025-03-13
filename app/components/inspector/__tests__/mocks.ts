@@ -2,8 +2,9 @@
  * Contains servialized VersionedMessages which can be viewed at the inspector by related URLs
  */
 import { VersionedMessage } from "@solana/web3.js";
+import { expect, test } from 'vitest';
 
-export function deserialize(message: string): VersionedMessage{
+export function deserialize(message: string): VersionedMessage {
     return JSON.parse(message);
 }
 

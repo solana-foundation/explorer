@@ -1,11 +1,12 @@
 import { ParsedTransaction, PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import bs58 from 'bs58';
+import { describe, expect, test, vi } from 'vitest';
 
 import { Ed25519DetailsCard } from '../Ed25519DetailsCard';
 
 // Mock the dependencies
-jest.mock('../../../common/Address', () => ({
+vi.mock('../../../common/Address', () => ({
     Address: ({ pubkey, alignRight, link }: { pubkey: PublicKey; alignRight?: boolean; link?: boolean }) => (
         <div data-testid="address" className={`${alignRight ? 'text-end' : ''} ${link ? 'text-link' : ''}`}>
             {pubkey.toBase58()}
@@ -13,7 +14,7 @@ jest.mock('../../../common/Address', () => ({
     ),
 }));
 
-jest.mock('../../../common/Copyable', () => ({
+vi.mock('../../../common/Copyable', () => ({
     Copyable: ({ text, children }: { text: string; children: React.ReactNode }) => (
         <div data-testid="copyable" data-text={text}>
             {children}
@@ -21,7 +22,7 @@ jest.mock('../../../common/Copyable', () => ({
     ),
 }));
 
-jest.mock('../../InstructionCard', () => ({
+vi.mock('../../InstructionCard', () => ({
     InstructionCard: ({ children, title }: { children: React.ReactNode; title: string }) => (
         <div data-testid="instruction-card">
             <div>{title}</div>
@@ -40,7 +41,7 @@ describe('Ed25519DetailsCard', () => {
         result: { err: null },
     };
 
-    it('renders basic Ed25519 verification instruction with single signature', () => {
+    test('renders basic Ed25519 verification instruction with single signature', () => {
         // 56JcSVYUPr8hdg8q2bfDhiPm5W9XQtr45VEevK9ye6Ec7DcyvD9CvnDgUoQhL3eQEmz32RRtLcaRdU9xyaDyCLiT (devnet)
 
         // Example of single signature verification
@@ -129,7 +130,7 @@ describe('Ed25519DetailsCard', () => {
         );
     });
 
-    it('renders basic Ed25519 verification instruction with self-contained single signature', () => {
+    test('renders basic Ed25519 verification instruction with self-contained single signature', () => {
         // XBHwdBYNu8J326yKeHiRyEudMaFVhz3Pb6ahgcfceRLV6kbmd14Z8vE6YnV4zu5WWNESmvhxmjUj4CpoQmwwhLJ
 
         // Example of single signature verification
@@ -175,7 +176,7 @@ describe('Ed25519DetailsCard', () => {
         expect(card).toHaveTextContent('B5MrvqsIcDUTKXV4jJryosGmPjceCGbvzbWhlSodJCI=');
     });
 
-    it('renders card even when Ed25519 instruction contains invalid references', () => {
+    test('renders card even when Ed25519 instruction contains invalid references', () => {
         // faked from XBHwdBYNu8J326yKeHiRyEudMaFVhz3Pb6ahgcfceRLV6kbmd14Z8vE6YnV4zu5WWNESmvhxmjUj4CpoQmwwhLJ
 
         // Example of failed single signature verification

@@ -1,4 +1,5 @@
 import { ComputeBudgetProgram, MessageCompiledInstruction } from '@solana/web3.js';
+import { describe, expect, test } from 'vitest';
 
 import {
     fillAddressTableLookupsAccounts,

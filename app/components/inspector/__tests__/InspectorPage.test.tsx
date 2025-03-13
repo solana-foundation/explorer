@@ -1,15 +1,15 @@
 import { AccountInfo } from '@solana/web3.js';
 import { generated, PROGRAM_ID } from '@sqds/multisig';
 const { VaultTransaction } = generated;
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
 
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
+import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 
 import { TransactionInspectorPage } from '../InspectorPage';
-import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 
 // Create mocks for the required dependencies
 const mockUseSearchParams = () => {
@@ -36,9 +36,14 @@ vi.mock('swr', () => ({
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
-    useSearchParams: vi.fn(),
-    useRouter: vi.fn(),
     usePathname: vi.fn(),
+    useRouter: vi.fn(),
+    useSearchParams: vi.fn(),
+}));
+
+vi.mock('next/link', () => ({
+    __esModule: true,
+    default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
 }));
 
 // Simple test to verify our mocks
@@ -83,9 +88,12 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
 
         // Initially it should show loading
         expect(screen.getByText(/Loading proposal data/i)).not.toBeNull();
-        await waitFor(() => {
-            expect(screen.queryByText(/Loading proposal data/i)).toBeNull();
-        });
+        await vi.waitFor(
+            () => {
+                expect(screen.queryByText(/Loading proposal data/i)).toBeNull();
+            },
+            { timeout: 10000, interval: 50 }
+        );
         // Check that the td with text Fee Payer has the text F3S4PD17Eo3FyCMropzDLCpBFuQuBmufUVBBdKEHbQFT
         const feePayerRow = screen.getByText(/Fee Payer/i).closest('tr');
         expect(feePayerRow).not.toBeNull();
