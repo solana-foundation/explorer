@@ -1,9 +1,9 @@
 import { Address } from '@components/common/Address';
+import { AddressFromLookupTableWithContext, AddressWithContext } from '@components/inspector/AddressWithContext';
+import { fillAddressTableLookupsAccounts, findLookupAddress } from '@components/inspector/utils';
 import { MessageCompiledInstruction, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
-import { AddressFromLookupTableWithContext, AddressWithContext } from '../../inspector/AddressWithContext';
-import { fillAddressTableLookupsAccounts, findLookupAddress } from '../../inspector/utils';
 import { HexData } from '../HexData';
 
 export function BaseRawDetails({

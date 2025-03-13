@@ -1,4 +1,5 @@
 import { Address } from '@components/common/Address';
+import { AddressTableLookupAddress } from '@components/common/inspector/AddressTableLookupAddress';
 import { InspectorInstructionCard } from '@components/common/InspectorInstructionCard';
 import {
     MessageCompiledInstruction,
@@ -9,11 +10,8 @@ import {
 } from '@solana/web3.js';
 import React from 'react';
 
-import { BaseRawDetails } from '../../BaseRawDetails';
-
 export function CreateDetailsCard({
     childIndex,
-    children,
     index,
     innerCards,
     ix,
@@ -23,7 +21,6 @@ export function CreateDetailsCard({
     InstructionCardComponent = InspectorInstructionCard,
 }: {
     childIndex?: number;
-    children?: React.ReactNode;
     index: number;
     innerCards?: JSX.Element[];
     ix: ParsedInstruction;
@@ -32,6 +29,11 @@ export function CreateDetailsCard({
     result: SignatureResult;
     InstructionCardComponent?: React.FC<Parameters<typeof InspectorInstructionCard>[0]>;
 }) {
+    let accountKeys;
+    if ('accountKeyIndexes' in raw) {
+        accountKeys = raw.accountKeyIndexes;
+    }
+
     return (
         <InstructionCardComponent
             ix={ix}
@@ -49,7 +51,58 @@ export function CreateDetailsCard({
                     <Address pubkey={ix.programId} alignRight link />
                 </td>
             </tr>
-            {children ? children : <BaseRawDetails ix={raw} message={message} />}
+            <tr>
+                <td>Payer</td>
+                <td className="text-lg-end">
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[0]} message={message} hideInfo />
+                    ) : null}
+                </td>
+            </tr>
+            <tr>
+                <td>Account</td>
+                <td className="text-lg-end">
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[1]} message={message} hideInfo />
+                    ) : null}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Wallet</td>
+                <td className="text-lg-end">
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[2]} message={message} hideInfo />
+                    ) : null}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Mint</td>
+                <td className="text-lg-end">
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[3]} message={message} hideInfo />
+                    ) : null}
+                </td>
+            </tr>
+
+            <tr>
+                <td>System Program</td>
+                <td className="text-lg-end">
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[4]} message={message} hideInfo />
+                    ) : null}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Token Program</td>
+                <td className="text-lg-end">
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[5]} message={message} hideInfo />
+                    ) : null}
+                </td>
+            </tr>
         </InstructionCardComponent>
     );
 }

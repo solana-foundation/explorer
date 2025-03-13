@@ -39,7 +39,9 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
-        expect(screen.getByText(/Wallet/)).toBeInTheDocument();
+        [/Payer/, /Account/, /Wallet/, /Mint/, /^System Program/, /^Token Program/].forEach(pattern => {
+            expect(screen.getByText(pattern)).toBeInTheDocument();
+        });
     });
 
     test('should render "Create" card', async () => {
@@ -59,6 +61,9 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
+        [/Payer/, /Account/, /Wallet/, /Mint/, /^System Program/, /^Token Program/].forEach(pattern => {
+            expect(screen.getByText(pattern)).toBeInTheDocument();
+        });
     });
 
     test('should render "RecoverNested" card', async () => {
@@ -78,6 +83,9 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/Associated Token Program: Recover Nested/)).toBeInTheDocument();
+        [/Destination/, /Nested Mint/, /Nested Owner/, /Nested Source/, /Owner Mint/, /^Owner$/].forEach(pattern => {
+            expect(screen.getByText(pattern)).toBeInTheDocument();
+        });
     });
 });
 

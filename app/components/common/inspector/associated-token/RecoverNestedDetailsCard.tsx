@@ -1,3 +1,5 @@
+import { Address } from '@components/common/Address';
+import { AddressTableLookupAddress } from '@components/common/inspector/AddressTableLookupAddress';
 import { InspectorInstructionCard } from '@components/common/InspectorInstructionCard';
 import {
     MessageCompiledInstruction,
@@ -8,11 +10,8 @@ import {
 } from '@solana/web3.js';
 import React from 'react';
 
-import { BaseRawDetails } from '../../BaseRawDetails';
-
 export function RecoverNestedDetailsCard(props: {
     childIndex?: number;
-    children?: React.ReactNode;
     index: number;
     innerCards?: JSX.Element[];
     ix: ParsedInstruction;
@@ -27,11 +26,15 @@ export function RecoverNestedDetailsCard(props: {
         raw,
         message,
         result,
-        children,
         innerCards,
         childIndex,
         InstructionCardComponent = InspectorInstructionCard,
     } = props;
+
+    let accountKeys;
+    if ('accountKeyIndexes' in raw) {
+        accountKeys = raw.accountKeyIndexes;
+    }
 
     return (
         <InstructionCardComponent
@@ -44,7 +47,68 @@ export function RecoverNestedDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            {children ? children : <BaseRawDetails ix={raw} message={message} />}
+            <tr>
+                <td>Program</td>
+                <td className="text-lg-end">
+                    <Address pubkey={ix.programId} alignRight link />
+                </td>
+            </tr>
+            <tr>
+                <td>Destination</td>
+                <td className="text-lg-end">
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[2]} message={message} hideInfo />
+                    ) : null}
+                </td>
+            </tr>
+            <tr>
+                <td>Nested Mint</td>
+                <td className="text-lg-end">
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[1]} message={message} hideInfo />
+                    ) : null}
+                </td>
+            </tr>
+            <tr>
+                <td>Nested Owner</td>
+                <td className="text-lg-end">
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[3]} message={message} hideInfo />
+                    ) : null}
+                </td>
+            </tr>
+            <tr>
+                <td>Nested Source</td>
+                <td className="text-lg-end">
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[0]} message={message} hideInfo />
+                    ) : null}
+                </td>
+            </tr>
+            <tr>
+                <td>Owner Mint</td>
+                <td className="text-lg-end">
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[4]} message={message} hideInfo />
+                    ) : null}
+                </td>
+            </tr>
+            <tr>
+                <td>Owner</td>
+                <td className="text-lg-end">
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[5]} message={message} hideInfo />
+                    ) : null}
+                </td>
+            </tr>
+            <tr>
+                <td>Token Program</td>
+                <td className="text-lg-end">
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[6]} message={message} hideInfo />
+                    ) : null}
+                </td>
+            </tr>
         </InstructionCardComponent>
     );
 }

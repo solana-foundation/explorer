@@ -5,6 +5,7 @@ import React from 'react';
 import { AddressFromLookupTableWithContext, AddressWithContext } from '../inspector/AddressWithContext';
 import { fillAddressTableLookupsAccounts, findLookupAddress } from '../inspector/utils';
 import { HexData } from './HexData';
+import { AddressTableLookupAddress } from './inspector/AddressTableLookupAddress';
 
 export function BaseRawDetails({
     ix,
