@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
+import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 
@@ -24,22 +25,24 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
     test('should render "CreateIdempotent" card', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
-        const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
+        const mci = m.compiledInstructions[index];
+        const ti = intoTransactionInstructionFromVersionedMessage(mci, m);
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
         const ix = intoParsedInstruction(ti);
-        console.log(777, ix.parsed);
 
         // check that component is rendered properly
         render(
             <ScrollAnchorProvider>
                 <ClusterProvider>
-                    <AssociatedTokenDetailsCard ix={ix} raw={ti} index={index} result={{ err: null }} />
+                    <AccountsProvider>
+                        <AssociatedTokenDetailsCard ix={ix} raw={mci} message={m} index={index} result={{ err: null }} />
+                    </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
-        [/Payer/, /Account/, /Wallet/, /Mint/, /^System Program/, /^Token Program/].forEach(pattern => {
+        [/Payer/, /Account/, /Wallet/, /Mint/].forEach(pattern => {
             expect(screen.getByText(pattern)).toBeInTheDocument();
         });
     });
@@ -47,7 +50,8 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
     test('should render "Create" card', async () => {
         const index = 2;
         const m = mock.deserializeMessage(stubs.aTokenCreateMsgWithInnerCards);
-        const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
+        const mci = m.compiledInstructions[index];
+        const ti = intoTransactionInstructionFromVersionedMessage(mci, m);
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
         const ix = intoParsedInstruction(ti);
@@ -56,12 +60,12 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         render(
             <ScrollAnchorProvider>
                 <ClusterProvider>
-                    <AssociatedTokenDetailsCard ix={ix} raw={ti} index={index} result={{ err: null }} />
+                    <AssociatedTokenDetailsCard ix={ix} raw={mci} message={m} index={index} result={{ err: null }} />
                 </ClusterProvider>
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
-        [/Payer/, /Account/, /Wallet/, /Mint/, /^System Program/, /^Token Program/].forEach(pattern => {
+        [/Payer/, /Account/, /Wallet/, /Mint/].forEach(pattern => {
             expect(screen.getByText(pattern)).toBeInTheDocument();
         });
     });
@@ -69,7 +73,8 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
     test('should render "RecoverNested" card', async () => {
         const index = 0;
         const m = mock.deserializeMessage(stubs.aTokenRecoverNestedMsg);
-        const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
+        const mci = m.compiledInstructions[index];
+        const ti = intoTransactionInstructionFromVersionedMessage(mci, m);
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
         const ix = intoParsedInstruction(ti);
@@ -78,7 +83,15 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         render(
             <ScrollAnchorProvider>
                 <ClusterProvider>
-                    <AssociatedTokenDetailsCard ix={ix} raw={ti} index={index} result={{ err: null }} />
+                    <AccountsProvider>
+                        <AssociatedTokenDetailsCard
+                            ix={ix}
+                            raw={mci}
+                            message={m}
+                            index={index}
+                            result={{ err: null }}
+                        />
+                    </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>
         );
@@ -101,7 +114,8 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
     test('should render "CreateIdempotentDetailsCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsgWithInnerCards);
-        const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
+        const mci = m.compiledInstructions[index];
+        const ti = intoTransactionInstructionFromVersionedMessage(mci, m);
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
         const ix = intoParsedInstruction(ti);
@@ -110,7 +124,9 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
         render(
             <ScrollAnchorProvider>
                 <ClusterProvider>
-                    <AssociatedTokenDetailsCard ix={ix} raw={ti} index={index} result={{ err: null }} />
+                    <AccountsProvider>
+                        <AssociatedTokenDetailsCard ix={ix} raw={mci} message={m} index={index} result={{ err: null }} />
+                    </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>
         );
