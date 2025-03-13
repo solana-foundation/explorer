@@ -1,8 +1,7 @@
-import { IAccountMeta, IInstruction, TAccount } from '@solana/kit';
+import { AccountRole, address, IAccountMeta, IInstruction, IInstructionWithAccounts, IInstructionWithData } from '@solana/kit';
 import * as spl from '@solana/spl-token';
 import {
     AccountMeta,
-    MessageCompiledInstruction,
     ParsedInstruction,
     ParsedMessage,
     ParsedMessageAccount,
@@ -11,7 +10,7 @@ import {
     TransactionInstruction,
     VersionedMessage,
 } from '@solana/web3.js';
-import { CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR, CREATE_ASSOCIATED_TOKEN_IDEMPOTENT_DISCRIMINATOR, parseCreateAssociatedTokenIdempotentInstruction, parseCreateAssociatedTokenInstruction, parseRecoverNestedAssociatedTokenInstruction,RECOVER_NESTED_ASSOCIATED_TOKEN_DISCRIMINATOR } from '@solana-program/token';
+import { AssociatedTokenInstruction, CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR, identifyAssociatedTokenInstruction, parseCreateAssociatedTokenIdempotentInstruction, parseCreateAssociatedTokenInstruction, parseRecoverNestedAssociatedTokenInstruction } from '@solana-program/token';
 
 function discriminatorToBuffer(discrimnator: number): Buffer{
     return Buffer.from(Uint8Array.from([discrimnator]));
@@ -25,7 +24,6 @@ function intoProgramName(programId: PublicKey): string | undefined {
 }
 
 function isDataEqual(data1: Buffer, data2: Buffer): boolean {
-    console.log({ data2 });
     // Browser will fail if data2 is created with Uint8Array.from
     return data1.equals(data2);
 }
@@ -37,24 +35,30 @@ function intoParsedData(instruction: TransactionInstruction, parsed?: any): any{
 
     if (programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)) {
         let type;
-        //console.log("PARSED", data, data.equals(discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_IDEMPOTENT_DISCRIMINATOR)))
+        let instructionData = data;
+
+        // workaround for "create" instructions
         if (isDataEqual(data, Buffer.alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
-            type = 'create';
-            instruction.data = discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR);
-            info = parseCreateAssociatedTokenInstruction(intoInstructionData(instruction));
+            instructionData = discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR);
+            instruction.data = instructionData; // overwrite original data with the modified one
         }
-        else if (isDataEqual(data, discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
+
+        const instructionType = identifyAssociatedTokenInstruction({ data: instructionData });
+
+        if (instructionType === AssociatedTokenInstruction.CreateAssociatedToken) {
             type = 'create';
-            info = parseCreateAssociatedTokenInstruction(intoInstructionData(instruction));
+            const idata = intoInstructionData(instruction);
+            info = parseCreateAssociatedTokenInstruction(idata);
         }
-        else if (isDataEqual(data, discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_IDEMPOTENT_DISCRIMINATOR))) {
+        else if (instructionType === AssociatedTokenInstruction.CreateAssociatedTokenIdempotent) {
             type = 'createIdempotent';
-            info = parseCreateAssociatedTokenIdempotentInstruction(intoInstructionData(instruction));
-            console.log(444, { info }, instruction, intoInstructionData(instruction) );
+            const idata = intoInstructionData(instruction);
+            info = parseCreateAssociatedTokenIdempotentInstruction(idata);
         }
-        else if (isDataEqual(data, discriminatorToBuffer(RECOVER_NESTED_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
+        else if (instructionType === AssociatedTokenInstruction.RecoverNestedAssociatedToken) {
             type ='recoverNested';
-            info = parseRecoverNestedAssociatedTokenInstruction(intoInstructionData(instruction));
+            const idata = intoInstructionData(instruction);
+            info = parseRecoverNestedAssociatedTokenInstruction(idata);
         }
         else type = UNKNOWN_PROGRAM_TYPE;
 
@@ -132,29 +136,33 @@ export function intoParsedTransaction(transactionInstruction: TransactionInstruc
 
 /**
  * Wrap instruction into format compatible with @solana-program/token library' parsers.
- *
  */
-export function intoInstructionData(instruction: TransactionInstruction | MessageCompiledInstruction): IInstruction {
-    let instructionData;
-    if ('accountKeyIndexes' in instruction) {
-        instructionData = {
-            accounts: instruction.accountKeyIndexes.map(a => a.toString()),
-            data: instruction.data,
-            programAddress: instruction.programIdIndex
-        };
-    } else {
-        instructionData = {
-            accounts: instruction.keys,
-            data: instruction.data,
-            programAddress: instruction.programId.toString(),
+type TAccount = NonNullable<IAccountMeta>
+type TInstruction = IInstruction<string> & IInstructionWithAccounts<readonly TAccount[]> & IInstructionWithData<Uint8Array>;
+export function intoInstructionData(instruction: TransactionInstruction): TInstruction {
+    function intoAccountMeta({ pubkey, isSigner, isWritable }: AccountMeta): IAccountMeta {
+        return {
+            address: address(pubkey.toBase58()),
+            role: (
+                (isSigner && isWritable)
+                    ? AccountRole.WRITABLE_SIGNER
+                    : (isSigner && !isWritable
+                       ? AccountRole.READONLY_SIGNER
+                       : (isWritable
+                          ? AccountRole.WRITABLE
+                          : AccountRole.READONLY)
+                      )
+            )
         };
     }
-    console.log("IInstruction",{ instructionData });
-    return instructionData as unknown as {
-        accounts: IAccountMeta[];
-        data: Uint8Array;
-        programAddress: TAccount<string>
-    };
+
+    const instructionData = {
+            accounts: instruction.keys.map((account) => intoAccountMeta(account)),
+            data: instruction.data,
+            programAddress: address(instruction.programId.toString()),
+        };
+
+    return instructionData;
 }
 
 export const privateIntoParsedData = intoParsedData;

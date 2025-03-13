@@ -36,7 +36,13 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard ix={ix} raw={mci} message={m} index={index} result={{ err: null }} />
+                        <AssociatedTokenDetailsCard
+                            ix={ix}
+                            raw={mci}
+                            message={m}
+                            index={index}
+                            result={{ err: null }}
+                        />
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>
@@ -60,7 +66,15 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         render(
             <ScrollAnchorProvider>
                 <ClusterProvider>
-                    <AssociatedTokenDetailsCard ix={ix} raw={mci} message={m} index={index} result={{ err: null }} />
+                    <AccountsProvider>
+                        <AssociatedTokenDetailsCard
+                            ix={ix}
+                            raw={mci}
+                            message={m}
+                            index={index}
+                            result={{ err: null }}
+                        />
+                    </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>
         );
@@ -125,7 +139,13 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard ix={ix} raw={mci} message={m} index={index} result={{ err: null }} />
+                        <AssociatedTokenDetailsCard
+                            ix={ix}
+                            raw={mci}
+                            message={m}
+                            index={index}
+                            result={{ err: null }}
+                        />
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>

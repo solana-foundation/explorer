@@ -59,8 +59,6 @@ export function InspectorInstructionCard({
         getInstructionCardScrollAnchorId(childIndex != null ? [index + 1, childIndex + 1] : [index + 1])
     );
 
-    console.log(8888, { ix, message, p: ix?.parsed, raw });
-
     return (
         <div className="card" ref={scrollAnchorRef}>
             <div className="card-header">

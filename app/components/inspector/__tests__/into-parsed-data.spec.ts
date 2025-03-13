@@ -24,8 +24,8 @@ describe('intoParsedData', () => {
             new PublicKey('11111111111111111111111111111111'),
             new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
         ];
-        Object.values(data.info.accounts).forEach((account, index) => {
-            expect((account as { pubkey: PublicKey }).pubkey.equals(expectedAccounts[index]));
+        Object.values(data.info.accounts as { address: string, role: number }[]).forEach((account, index) => {
+            expect(new PublicKey(account.address).equals(expectedAccounts[index])).toBeTruthy();
         });
         expect(Object.keys(data.info.accounts)).toEqual(['payer', 'ata', 'owner', 'mint', 'systemProgram', 'tokenProgram']);
     });
@@ -46,8 +46,8 @@ describe('intoParsedData', () => {
             new PublicKey('11111111111111111111111111111111'),
             new PublicKey('EDDSpjZHrsFKYTMJDcBqXAjkLcu9EKdvrQR4XnqsXErH'),
         ];
-        Object.values(data.info.accounts).forEach((account, index) => {
-            expect((account as { pubkey: PublicKey }).pubkey.equals(expectedAccounts[index]));
+        Object.values(data.info.accounts as { address: string, role: number }[]).forEach((account, index) => {
+            expect(new PublicKey(account.address).equals(expectedAccounts[index])).toBeTruthy();
         });
         expect(Object.keys(data.info.accounts)).toEqual(['payer', 'ata', 'owner', 'mint', 'systemProgram', 'tokenProgram']);
     });
@@ -69,8 +69,8 @@ describe('intoParsedData', () => {
             new PublicKey('3UgveoWTHgDWH4DC8NUoYcQc11vJ8xzk2hCge2ZWPDSL'),
             new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
         ];
-        Object.values(data.info.accounts).forEach((account, index) => {
-            expect((account as { pubkey: PublicKey }).pubkey.equals(expectedAccounts[index]));
+        Object.values(data.info.accounts as { address: string, role: number }[]).forEach((account, index) => {
+            expect(new PublicKey(account.address).equals(expectedAccounts[index])).toBeTruthy();
         });
         expect(Object.keys(data.info.accounts)).toEqual(['nestedAssociatedAccountAddress', 'nestedTokenMintAddress', 'destinationAssociatedAccountAddress', 'ownerAssociatedAccountAddress', 'ownerTokenMintAddress', 'walletAddress', 'tokenProgram']);
     });

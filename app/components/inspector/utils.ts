@@ -48,9 +48,6 @@ function fillAccountMetas(
             pubkey: lookup,
         };
 
-        //if (!dynamicLookups.isStatic) {
-            //console.log("AToken1112",dynamicLookups.isStatic,lookup.toBase58(),{ dynamicLookups,lookup });
-        //}
         return accountMeta;
     });
 

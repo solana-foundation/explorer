@@ -28,9 +28,7 @@ export function AssociatedTokenDetailsCard(props: DetailsProps) {
                 return <CreateDetailsCard {...props} />;
             }
             case 'createIdempotent': {
-                console.log('INFO PRE', parsed.info);
                 const info = create(parsed.info, CreateIdempotentInfo);
-                console.log('INFO POST', info);
                 return <CreateIdempotentDetailsCard info={info} {...props} />;
             }
             case 'recoverNested': {
