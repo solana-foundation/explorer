@@ -41,7 +41,7 @@ export function CreateDetailsCard({
                 </td>
             </tr>
             <tr>
-                <td>Payer</td>
+                <td>Source</td>
                 <td className="text-lg-end">
                     <AddressTableLookupAddress accountIndex={raw.accountKeyIndexes[0]} message={message} hideInfo />
                 </td>

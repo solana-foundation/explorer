@@ -48,7 +48,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
-        [/Payer/, /Account/, /Wallet/, /Mint/].forEach(pattern => {
+        [/Source/, /Account/, /Wallet/, /Mint/].forEach(pattern => {
             expect(screen.getByText(pattern)).toBeInTheDocument();
         });
     });
@@ -79,7 +79,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
-        [/Payer/, /Account/, /Wallet/, /Mint/].forEach(pattern => {
+        [/Source/, /Account/, /Wallet/, /Mint/].forEach(pattern => {
             expect(screen.getByText(pattern)).toBeInTheDocument();
         });
     });
