@@ -1,14 +1,15 @@
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import * as lighthouseSdk from 'lighthouse-sdk';
+import { vi } from 'vitest';
 
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
 
-jest.mock('react-feather', () => ({
+vi.mock('react-feather', () => ({
     CornerDownRight: () => <div data-testid="corner-down-right" />,
 }));
 
-jest.mock('../../InstructionCard', () => ({
+vi.mock('../../InstructionCard', () => ({
     InstructionCard: ({ children, title }: { children: React.ReactNode; title: string }) => (
         <div data-testid="instruction-card" className="card">
             <div className="card-header">
@@ -23,11 +24,11 @@ jest.mock('../../InstructionCard', () => ({
     ),
 }));
 
-jest.mock('../../../common/Address', () => ({
+vi.mock('../../../common/Address', () => ({
     Address: ({ pubkey }: { pubkey: PublicKey }) => <div data-testid="address">{pubkey.toBase58()}</div>,
 }));
 
-jest.mock('../../../../utils/anchor', () => ({
+vi.mock('../../../../utils/anchor', () => ({
     ExpandableRow: ({
         fieldName,
         fieldType,
@@ -51,7 +52,7 @@ jest.mock('../../../../utils/anchor', () => ({
     ),
 }));
 
-jest.mock('change-case', () => ({
+vi.mock('change-case', () => ({
     split: jest.fn(() => 'mocked-split'),
 }));
 
@@ -63,12 +64,8 @@ describe('LighthouseDetailsCard', () => {
         result: { err: null },
     };
 
-    beforeEach(() => {
-        jest.spyOn(lighthouseSdk, 'identifyLighthouseInstruction');
-    });
-
     afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     describe('Assert Instructions', () => {
