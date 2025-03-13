@@ -1,6 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
-import * as lighthouseSdk from 'lighthouse-sdk';
 import { vi } from 'vitest';
 
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
@@ -63,10 +62,6 @@ describe('LighthouseDetailsCard', () => {
         innerCards: undefined,
         result: { err: null },
     };
-
-    afterEach(() => {
-        vi.clearAllMocks();
-    });
 
     describe('Assert Instructions', () => {
         it('renders Assert Sysvar Clock instruction', () => {
