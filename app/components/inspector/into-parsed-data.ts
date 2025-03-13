@@ -1,4 +1,4 @@
-import { IAccountMeta, TAccount } from '@solana/kit';
+import { IAccountMeta, IInstruction, TAccount } from '@solana/kit';
 import * as spl from '@solana/spl-token';
 import {
     AccountMeta,
@@ -24,6 +24,12 @@ function intoProgramName(programId: PublicKey): string | undefined {
     /* add other variants here */
 }
 
+function isDataEqual(data1: Buffer, data2: Buffer): boolean {
+    console.log({ data2 });
+    // Browser will fail if data2 is created with Uint8Array.from
+    return data1.equals(data2);
+}
+
 function intoParsedData(instruction: TransactionInstruction, parsed?: any): any{
     const { programId, data } = instruction;
     const UNKNOWN_PROGRAM_TYPE = ''; // empty string represents that the program is unknown
@@ -32,21 +38,21 @@ function intoParsedData(instruction: TransactionInstruction, parsed?: any): any{
     if (programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)) {
         let type;
         //console.log("PARSED", data, data.equals(discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_IDEMPOTENT_DISCRIMINATOR)))
-        if (data.equals(Uint8Array.from(Buffer.alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR)))) {
+        if (isDataEqual(data, Buffer.alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
             type = 'create';
             instruction.data = discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR);
             info = parseCreateAssociatedTokenInstruction(intoInstructionData(instruction));
         }
-        else if (data.equals(Uint8Array.from(discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR)))) {
+        else if (isDataEqual(data, discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
             type = 'create';
             info = parseCreateAssociatedTokenInstruction(intoInstructionData(instruction));
         }
-        else if (data.equals(Uint8Array.from(discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_IDEMPOTENT_DISCRIMINATOR)))) {
+        else if (isDataEqual(data, discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_IDEMPOTENT_DISCRIMINATOR))) {
             type = 'createIdempotent';
             info = parseCreateAssociatedTokenIdempotentInstruction(intoInstructionData(instruction));
-            console.log({ info });
+            console.log(444, { info }, instruction, intoInstructionData(instruction) );
         }
-        else if (data.equals(Uint8Array.from(discriminatorToBuffer(RECOVER_NESTED_ASSOCIATED_TOKEN_DISCRIMINATOR)))) {
+        else if (isDataEqual(data, discriminatorToBuffer(RECOVER_NESTED_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
             type ='recoverNested';
             info = parseRecoverNestedAssociatedTokenInstruction(intoInstructionData(instruction));
         }
@@ -91,7 +97,7 @@ function convertAccountKeysToParsedMessageAccounts(keys: AccountMeta[]): ParsedM
  * functions that perform conversion from TransactionInstruction (created from VersionedMessage) into ParsedInstruction.
  *
  *  That is needed to keep similarity with existing InstructionCards that expect ParsedInstruction for rendering.
- * 
+ *
  * @param data - parsed data that should be returned as parsed
  */
 
@@ -128,7 +134,7 @@ export function intoParsedTransaction(transactionInstruction: TransactionInstruc
  * Wrap instruction into format compatible with @solana-program/token library' parsers.
  *
  */
-export function intoInstructionData(instruction: TransactionInstruction | MessageCompiledInstruction){
+export function intoInstructionData(instruction: TransactionInstruction | MessageCompiledInstruction): IInstruction {
     let instructionData;
     if ('accountKeyIndexes' in instruction) {
         instructionData = {
@@ -143,7 +149,7 @@ export function intoInstructionData(instruction: TransactionInstruction | Messag
             programAddress: instruction.programId.toString(),
         };
     }
-    console.log({ instructionData });
+    console.log("IInstruction",{ instructionData });
     return instructionData as unknown as {
         accounts: IAccountMeta[];
         data: Uint8Array;

@@ -1,9 +1,7 @@
-import { Address } from '@components/common/Address';
 import { InspectorInstructionCard } from '@components/common/InspectorInstructionCard';
 import {
     MessageCompiledInstruction,
     ParsedInstruction,
-    PublicKey,
     SignatureResult,
     TransactionInstruction,
     VersionedMessage,
@@ -38,7 +36,12 @@ export function CreateIdempotentDetailsCard(props: {
         InstructionCardComponent = InspectorInstructionCard,
     } = props;
 
-    console.log(8989, info, raw?.keys, raw?.accountKeyIndexes)
+    console.log(8989, info, message, raw?.keys, raw?.accountKeyIndexes);
+
+    let accountKeys;
+    if ('accountKeyIndexes' in raw) {
+        accountKeys = raw.accountKeyIndexes;
+    }
 
     return (
         <InstructionCardComponent
@@ -51,68 +54,77 @@ export function CreateIdempotentDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-           <tr>
+            <tr>
                 <td>Payer</td>
                 <td className="text-lg-end">
-                    {message && <AddressTableLookupAddress accountIndex={raw.accountKeyindexes[0]} message={message} />}
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[0]} message={message} />
+                    ) : null}
                 </td>
             </tr>
-{/*
             <tr>
                 <td>Account</td>
                 <td className="text-lg-end">
-                    <Address pubkey={info.account} alignRight link />
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[1]} message={message} />
+                    ) : null}
                 </td>
             </tr>
 
             <tr>
                 <td>Wallet</td>
                 <td className="text-lg-end">
-                    <Address pubkey={info.wallet} alignRight link />
+                     {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[2]} message={message} />
+                    ) : null}
                 </td>
             </tr>
 
             <tr>
                 <td>Mint</td>
                 <td className="text-lg-end">
-                    <Address pubkey={info.mint} alignRight link />
+                     {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[3]} message={message} />
+                    ) : null}
                 </td>
             </tr>
 
             <tr>
                 <td>System Program</td>
                 <td className="text-lg-end">
-                    <Address pubkey={info.systemProgram} alignRight link />
+                     {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[4]} message={message} />
+                    ) : null}
                 </td>
             </tr>
 
             <tr>
                 <td>Token Program</td>
                 <td className="text-lg-end">
-                    <Address pubkey={info.tokenProgram} alignRight link />
+                    {message && accountKeys ? (
+                        <AddressTableLookupAddress accountIndex={accountKeys[5]} message={message} />
+                    ) : null}
                 </td>
-            </tr>*/}
+            </tr>
         </InstructionCardComponent>
     );
 }
 
-function AddressTableLookupAddress({ accountIndex, message}: {
-    accountIndex: number;
-    message: VersionedMessage;
-}){
+function AddressTableLookupAddress({ accountIndex, message }: { accountIndex: number; message: VersionedMessage }) {
     const lookupsForAccountKeyIndex = fillAddressTableLookupsAccounts(message.addressTableLookups);
     const { lookup, dynamicLookups } = findLookupAddress(accountIndex, message, lookupsForAccountKeyIndex);
 
     return (
         <>
             {dynamicLookups.isStatic ? (
-                <AddressWithContext pubkey={lookup} />
+                <AddressWithContext pubkey={lookup} hideInfo />
             ) : (
                 <AddressFromLookupTableWithContext
                     lookupTableKey={dynamicLookups.lookups.lookupTableKey}
                     lookupTableIndex={dynamicLookups.lookups.lookupTableIndex}
+                    hideInfo
                 />
             )}
         </>
-    )
+    );
 }

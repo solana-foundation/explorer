@@ -29,9 +29,11 @@ export const programValidator = (account: Account): string | undefined => {
 export function AddressFromLookupTableWithContext({
     lookupTableKey,
     lookupTableIndex,
+    hideInfo = false,
 }: {
     lookupTableKey: PublicKey;
     lookupTableIndex: number;
+    hideInfo?: boolean;
 }) {
     const lookupTableInfo = useAddressLookupTable(lookupTableKey.toBase58());
     const lookupTable = lookupTableInfo && lookupTableInfo[0];
@@ -51,17 +53,25 @@ export function AddressFromLookupTableWithContext({
         return (
             <div className="d-flex align-items-lg-end flex-column">
                 <Address pubkey={pubkey} link />
-                <AccountInfo pubkey={pubkey} />
+                {hideInfo ? null : <AccountInfo pubkey={pubkey} />}
             </div>
         );
     }
 }
 
-export function AddressWithContext({ pubkey, validator }: { pubkey: PublicKey; validator?: AccountValidator }) {
+export function AddressWithContext({
+    pubkey,
+    validator,
+    hideInfo = false,
+}: {
+    pubkey: PublicKey;
+    validator?: AccountValidator;
+    hideInfo?: boolean;
+}) {
     return (
         <div className="d-flex align-items-lg-end flex-column">
             <Address pubkey={pubkey} link />
-            <AccountInfo pubkey={pubkey} validator={validator} />
+            {hideInfo ? null : <AccountInfo pubkey={pubkey} validator={validator} />}
         </div>
     );
 }
