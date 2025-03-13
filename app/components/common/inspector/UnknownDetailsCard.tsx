@@ -24,7 +24,7 @@ export function UnknownDetailsCard({
     index: number;
     innerCards?: JSX.Element[];
     ix: TransactionInstruction | ParsedInstruction;
-    message?: VersionedMessage;
+    message: VersionedMessage;
     raw: TransactionInstruction | MessageCompiledInstruction;
     result: SignatureResult;
     InstructionCardComponent?: React.FC<Parameters<typeof InspectorInstructionCard>[0]>;

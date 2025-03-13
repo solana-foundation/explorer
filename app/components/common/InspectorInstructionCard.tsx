@@ -29,7 +29,7 @@ type InstructionProps = {
     raw?: TransactionInstruction | MessageCompiledInstruction;
     // will be triggered on requesting raw data for instruction, if present
     onRequestRaw?: () => void;
-    message?: VersionedMessage;
+    message: VersionedMessage;
 };
 
 export function InspectorInstructionCard({
@@ -58,6 +58,8 @@ export function InspectorInstructionCard({
     const scrollAnchorRef = useScrollAnchor(
         getInstructionCardScrollAnchorId(childIndex != null ? [index + 1, childIndex + 1] : [index + 1])
     );
+
+    console.log(8888, { ix, message, p: ix?.parsed, raw });
 
     return (
         <div className="card" ref={scrollAnchorRef}>
