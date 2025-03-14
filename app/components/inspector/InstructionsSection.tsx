@@ -7,7 +7,6 @@ import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { useAnchorProgram } from '@/app/providers/anchor';
-import { getAnchorProgramName } from '@/app/utils/anchor';
 
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
@@ -43,11 +42,16 @@ function InspectorInstructionCard({
     const transactionInstruction = intoTransactionInstructionFromVersionedMessage(ix, message);
 
     if (anchorProgram.program) {
-        const programName = getAnchorProgramName(anchorProgram.program) ?? 'Unknown Program';
         return (
             <ErrorBoundary
                 fallback={
-                    <UnknownDetailsCard key={index} index={index} ix={ix} message={message} programName={programName} />
+                    <UnknownDetailsCard
+                        key={index}
+                        index={index}
+                        ix={ix}
+                        message={message}
+                        programName="Anchor Program"
+                    />
                 }
             >
                 <AnchorDetailsCard
