@@ -31,6 +31,11 @@ export default defineConfig({
         },
         environment: 'jsdom',
         globals: true,
-        setupFiles: './test-setup.ts'
+        setupFiles: './test-setup.ts',
+        poolOptions: {
+            threads: {
+                useAtomics: true,
+            }
+        }
     }
-}); 
+});
