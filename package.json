@@ -9,7 +9,7 @@
         "scan": "next dev & react-scan localhost:3000",
         "lint": "next lint",
         "format": "prettier **.{ts,tsx} *.json --check",
-        "coverage": "vitest --coverage.enabled",
+        "coverage": "vitest --coverage",
         "test": "vitest --watch",
         "test:ci": "vitest run"
     },
