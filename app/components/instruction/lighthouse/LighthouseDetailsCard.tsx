@@ -25,31 +25,15 @@ import {
 } from 'lighthouse-sdk';
 import React from 'react';
 import { CornerDownRight } from 'react-feather';
-import { AccountRole, Address as TAddress, address, IAccountMeta, IInstruction } from 'web3js-experimental';
+import { AccountRole, Address as TAddress, IAccountMeta, IInstruction } from 'web3js-experimental';
 
 import { camelToTitleCase } from '@/app/utils';
 import { ExpandableRow } from '@/app/utils/anchor';
 
 import { Address } from '../../common/Address';
+import { upcastTransactionInstruction } from '../../inspector/into-parsed-data';
 import { InstructionCard } from '../InstructionCard';
 import { LIGHTHOUSE_ADDRESS } from './types';
-
-function upcastTransactionInstruction(ix: TransactionInstruction) {
-    return {
-        accounts: ix.keys.map(key => ({
-            address: address(key.pubkey.toBase58()),
-            role: key.isSigner
-                ? key.isWritable
-                    ? AccountRole.WRITABLE_SIGNER
-                    : AccountRole.READONLY_SIGNER
-                : key.isWritable
-                ? AccountRole.WRITABLE
-                : AccountRole.READONLY,
-        })),
-        data: ix.data,
-        programAddress: address(ix.programId.toBase58()),
-    };
-}
 
 type ParsedCodamaInstruction = {
     programAddress: TAddress;

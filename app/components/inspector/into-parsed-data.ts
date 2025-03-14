@@ -43,7 +43,8 @@ function intoParsedData(instruction: TransactionInstruction, parsed?: any): any{
             instruction.data = instructionData; // overwrite original data with the modified one
         }
 
-        const instructionType = identifyAssociatedTokenInstruction({ data: instructionData });
+        const instructionType = identifyAssociatedTokenInstruction(instructionData);
+
         switch (instructionType) {
             case AssociatedTokenInstruction.CreateAssociatedToken: {
                 type = 'create';
@@ -140,35 +141,36 @@ export function intoParsedTransaction(transactionInstruction: TransactionInstruc
     };
 }
 
+export function upcastAccountMeta({ pubkey, isSigner, isWritable }: AccountMeta): IAccountMeta {
+    return {
+        address: address(pubkey.toBase58()),
+        role: isSigner
+            ? (isWritable
+              ? AccountRole.WRITABLE_SIGNER
+              : AccountRole.READONLY_SIGNER
+              )
+            : (isWritable
+              ? AccountRole.WRITABLE
+              : AccountRole.READONLY
+            )
+    };
+}
+
+export function upcastTransactionInstruction(ix: TransactionInstruction) {
+    return {
+        accounts: ix.keys.map(upcastAccountMeta),
+        data: ix.data,
+        programAddress: address(ix.programId.toBase58())
+    };
+}
+
 /**
  * Wrap instruction into format compatible with @solana-program/token library' parsers.
  */
 type TAccount = NonNullable<IAccountMeta>
 type TInstruction = IInstruction<string> & IInstructionWithAccounts<readonly TAccount[]> & IInstructionWithData<Uint8Array>;
 export function intoInstructionData(instruction: TransactionInstruction): TInstruction {
-    function intoAccountMeta({ pubkey, isSigner, isWritable }: AccountMeta): IAccountMeta {
-        return {
-            address: address(pubkey.toBase58()),
-            role: (
-                (isSigner && isWritable)
-                    ? AccountRole.WRITABLE_SIGNER
-                    : (isSigner && !isWritable
-                       ? AccountRole.READONLY_SIGNER
-                       : (isWritable
-                          ? AccountRole.WRITABLE
-                          : AccountRole.READONLY)
-                      )
-            )
-        };
-    }
-
-    const instructionData = {
-            accounts: instruction.keys.map((account) => intoAccountMeta(account)),
-            data: instruction.data,
-            programAddress: address(instruction.programId.toString()),
-        };
-
-    return instructionData;
+    return upcastTransactionInstruction(instruction);
 }
 
 export const privateIntoParsedData = intoParsedData;

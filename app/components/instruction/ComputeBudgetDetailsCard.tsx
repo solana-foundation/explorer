@@ -40,12 +40,10 @@ export function ComputeBudgetDetailsCard({
         const type = identifyComputeBudgetInstruction(ix);
         switch (type) {
             case ComputeBudgetInstruction.RequestUnits: {
+                const idata = { ...ix, programAddress: address(ix.programId.toBase58()) };
                 const {
                     data: { units, additionalFee },
-                } = parseRequestUnitsInstruction({
-                    ...ix,
-                    programAddress: address(ix.programId.toBase58()),
-                });
+                } = parseRequestUnitsInstruction(idata);
                 return (
                     <InstructionCardComponent
                         ix={ix}
