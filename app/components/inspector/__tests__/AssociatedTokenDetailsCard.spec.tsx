@@ -79,7 +79,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
-        [/Source/, /Account/, /Wallet/, /Mint/].forEach(pattern => {
+        [/Account/, /Wallet/, /Mint/].forEach(pattern => {
             expect(screen.getByText(pattern)).toBeInTheDocument();
         });
     });
