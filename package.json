@@ -28,7 +28,6 @@
         "@solana-program/compute-budget": "^0.6.1",
         "@solana-program/token": "^0.5.1",
         "@solana/buffer-layout": "^3.0.0",
-        "@solana/kit": "^2.1.0",
         "@solana/spl-account-compression": "^0.1.8",
         "@solana/spl-token": "^0.1.8",
         "@solana/web3.js": "^1.66.6",

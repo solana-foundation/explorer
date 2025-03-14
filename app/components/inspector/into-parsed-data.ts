@@ -1,4 +1,3 @@
-import { AccountRole, address, IAccountMeta, IInstruction, IInstructionWithAccounts, IInstructionWithData } from '@solana/kit';
 import * as spl from '@solana/spl-token';
 import {
     AccountMeta,
@@ -11,6 +10,7 @@ import {
     VersionedMessage,
 } from '@solana/web3.js';
 import { AssociatedTokenInstruction, CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR, identifyAssociatedTokenInstruction, parseCreateAssociatedTokenIdempotentInstruction, parseCreateAssociatedTokenInstruction, parseRecoverNestedAssociatedTokenInstruction } from '@solana-program/token';
+import { AccountRole, address, IAccountMeta, IInstruction, IInstructionWithAccounts, IInstructionWithData } from 'web3js-experimental';
 
 function discriminatorToBuffer(discrimnator: number): Buffer{
     return Buffer.from(Uint8Array.from([discrimnator]));

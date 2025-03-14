@@ -61,9 +61,6 @@ importers:
       '@solana/buffer-layout':
         specifier: ^3.0.0
         version: 3.0.0
-      '@solana/kit':
-        specifier: ^2.1.0
-        version: 2.1.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@7.5.10(bufferutil@4.0.7)(utf-8-validate@5.0.10))
       '@solana/spl-account-compression':
         specifier: ^0.1.8
         version: 0.1.8(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))(bufferutil@4.0.7)(utf-8-validate@5.0.10)
