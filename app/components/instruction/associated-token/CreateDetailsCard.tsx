@@ -37,6 +37,13 @@ export function CreateDetailsCard({
             </tr>
 
             <tr>
+                <td>Source</td>
+                <td className="text-lg-end">
+                    <Address pubkey={new PublicKey(info.source)} alignRight link />
+                </td>
+            </tr>
+
+            <tr>
                 <td>Account</td>
                 <td className="text-lg-end">
                     <Address pubkey={new PublicKey(info.account)} alignRight link />
@@ -54,6 +61,20 @@ export function CreateDetailsCard({
                 <td>Wallet</td>
                 <td className="text-lg-end">
                     <Address pubkey={new PublicKey(info.wallet)} alignRight link />
+                </td>
+            </tr>
+
+            <tr>
+                <td>System Program</td>
+                <td className="text-lg-end">
+                    <Address pubkey={new PublicKey(info.systemProgram)} alignRight link />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Token Program</td>
+                <td className="text-lg-end">
+                    <Address pubkey={new PublicKey(info.tokenProgram)} alignRight link />
                 </td>
             </tr>
         </InstructionCardComponent>

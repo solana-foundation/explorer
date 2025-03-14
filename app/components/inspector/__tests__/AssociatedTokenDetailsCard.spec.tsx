@@ -48,9 +48,11 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
-        [/Source/, /Account/, /Wallet/, /Mint/].forEach(pattern => {
+        [/Source/, /Account/, /Mint/, /Wallet/].forEach(pattern => {
             expect(screen.getByText(pattern)).toBeInTheDocument();
         });
+        expect(screen.queryAllByText(/^System Program$/)).toHaveLength(3);
+        expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(1);
     });
 
     test('should render "Create" card', async () => {
@@ -79,9 +81,11 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
-        [/Account/, /Wallet/, /Mint/].forEach(pattern => {
+        [/Source/, /Account/, /Mint/, /Wallet/].forEach(pattern => {
             expect(screen.getByText(pattern)).toBeInTheDocument();
         });
+        expect(screen.queryAllByText(/^System Program$/)).toHaveLength(3);
+        expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(3);
     });
 
     test('should render "RecoverNested" card', async () => {
@@ -113,6 +117,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         [/Destination/, /Nested Mint/, /Nested Owner/, /Nested Source/, /Owner Mint/, /^Owner$/].forEach(pattern => {
             expect(screen.getByText(pattern)).toBeInTheDocument();
         });
+        expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(3);
     });
 });
 

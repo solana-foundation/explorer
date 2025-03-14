@@ -41,6 +41,12 @@ export function CreateDetailsCard({
                 </td>
             </tr>
             <tr>
+                <td>Source</td>
+                <td className="text-lg-end">
+                    <AddressTableLookupAddress accountIndex={raw.accountKeyIndexes[0]} message={message} hideInfo />
+                </td>
+            </tr>
+            <tr>
                 <td>Account</td>
                 <td className="text-lg-end">
                     <AddressTableLookupAddress accountIndex={raw.accountKeyIndexes[1]} message={message} hideInfo />
@@ -56,6 +62,18 @@ export function CreateDetailsCard({
                 <td>Wallet</td>
                 <td className="text-lg-end">
                     <AddressTableLookupAddress accountIndex={raw.accountKeyIndexes[2]} message={message} hideInfo />
+                </td>
+            </tr>
+            <tr>
+                <td>System Program</td>
+                <td className="text-lg-end">
+                    <AddressTableLookupAddress accountIndex={raw.accountKeyIndexes[4]} message={message} hideInfo />
+                </td>
+            </tr>
+            <tr>
+                <td>Token Program</td>
+                <td className="text-lg-end">
+                    <AddressTableLookupAddress accountIndex={raw.accountKeyIndexes[5]} message={message} hideInfo />
                 </td>
             </tr>
         </InstructionCardComponent>
