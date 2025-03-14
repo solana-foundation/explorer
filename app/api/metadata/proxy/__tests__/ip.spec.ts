@@ -1,19 +1,21 @@
-/**
- * @jest-environment node
- */
 import _dns from 'dns';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { checkURLForPrivateIP } from '../feature/ip';
 
 const dns = _dns.promises;
 
-jest.mock('dns', () => {
-    const originalDns = jest.requireActual('dns');
-    const lookupFn = jest.fn();
+vi.mock('dns', async () => {
+    const originalDns = await vi.importActual('dns');
+    const lookupFn = vi.fn();
     return {
         ...originalDns,
+        default: {
+            promises: {
+                lookup: lookupFn,
+            }
+        },
         promises: {
-            ...originalDns.promises,
             lookup: lookupFn,
         }
     };
@@ -26,13 +28,13 @@ jest.mock('dns', () => {
 type LookupAddress = { address: string };
 
 function mockLookupOnce(addresses: LookupAddress | LookupAddress[] | undefined) {
-    // @ts-expect-error lookup does not have mocked fn
+    // @ts-expect-error lookup does not have mockImplementation
     dns.lookup.mockResolvedValueOnce(addresses);
 }
 
 describe('ip::checkURLForPrivateIP', () => {
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     // do not throw exceptions forinvalid input to not break the execution flow
@@ -80,7 +82,7 @@ describe('ip::checkURLForPrivateIP', () => {
     });
 
     test('should handle DNS resolution failure gracefully', async () => {
-        // @ts-expect-error fetch does not have mocked fn
+        // @ts-expect-error lookup does not have mockImplementation
         dns.lookup.mockRejectedValueOnce(new Error('DNS resolution failed'));
         await expect(checkURLForPrivateIP('http://unknown.domain')).resolves.toBe(true);
     });
@@ -88,7 +90,7 @@ describe('ip::checkURLForPrivateIP', () => {
 
 describe('ip::checkURLForPrivateIP with single resolved address', () => {
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     test('should handle single address positively', async () => {
@@ -100,7 +102,7 @@ describe('ip::checkURLForPrivateIP with single resolved address', () => {
 // move case for localhost to a separate test case as it's a special case and doesn't require DNS resolution
 describe('ip::checkURLForPrivateIP with localhost', () => {
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     test('should block localhost', async () => {

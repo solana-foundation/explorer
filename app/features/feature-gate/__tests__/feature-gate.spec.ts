@@ -1,7 +1,5 @@
-/**
- * @jest-environment node
- */
 import fetch from 'node-fetch';
+import { vi } from 'vitest';
 
 import { fetchFeatureGateInformation, getLink } from '../index';
 
@@ -17,13 +15,12 @@ const FEATURE = {
     "title": "MoveStake and MoveLamports"
 };
 
-jest.mock('node-fetch', () => {
-    const originalFetch = jest.requireActual('node-fetch');
-    const mockFn = jest.fn();
-
-    Object.assign(mockFn, originalFetch);
-
-    return mockFn;
+vi.mock('node-fetch', async () => {
+    const actual = await vi.importActual('node-fetch');
+    return {
+        ...actual,
+        default: vi.fn()
+    };
 });
 
 /**
@@ -47,14 +44,14 @@ function mockRejectOnce<T extends Error>(error: T) {
 
 describe('fetchFeatureGateInformation', () => {
     afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     it('should handle unexpected error while fetching, but react as there was no data', async () => {
-        expect(fetchFeatureGateInformation()).resolves.toEqual('No data');
+        await expect(fetchFeatureGateInformation()).resolves.toEqual('No data');
 
         mockRejectOnce(new Error('Network Error'));
-        expect(fetchFeatureGateInformation(FEATURE)).resolves.toEqual('No data');
+        await expect(fetchFeatureGateInformation(FEATURE)).resolves.toEqual('No data');
     });
 
     it('should return feature info', async () => {

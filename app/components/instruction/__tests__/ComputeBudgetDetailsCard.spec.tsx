@@ -3,6 +3,7 @@ import { intoTransactionInstructionFromVersionedMessage } from '@components/insp
 import { ComputeBudgetProgram, MessageCompiledInstruction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
+import { vi } from 'vitest';
 
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
@@ -10,7 +11,7 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import * as mock from '../../inspector/__tests__/mocks';
 import { ComputeBudgetDetailsCard } from '../ComputeBudgetDetailsCard';
 
-jest.mock('next/navigation');
+vi.mock('next/navigation');
 // @ts-expect-error does not contain `mockReturnValue`
 useSearchParams.mockReturnValue({
     get: () => 'devnet',
@@ -20,7 +21,7 @@ useSearchParams.mockReturnValue({
 
 describe('ComputeBudgetDetailsCard', () => {
     afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     test('should render "SetComputeUnitPrice"', async () => {

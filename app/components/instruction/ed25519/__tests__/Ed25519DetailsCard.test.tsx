@@ -1,11 +1,12 @@
 import { ParsedTransaction, PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import bs58 from 'bs58';
+import { vi } from 'vitest';
 
 import { Ed25519DetailsCard } from '../Ed25519DetailsCard';
 
 // Mock the dependencies
-jest.mock('../../../common/Address', () => ({
+vi.mock('../../../common/Address', () => ({
     Address: ({ pubkey, alignRight, link }: { pubkey: PublicKey; alignRight?: boolean; link?: boolean }) => (
         <div data-testid="address" className={`${alignRight ? 'text-end' : ''} ${link ? 'text-link' : ''}`}>
             {pubkey.toBase58()}
@@ -13,7 +14,7 @@ jest.mock('../../../common/Address', () => ({
     ),
 }));
 
-jest.mock('../../../common/Copyable', () => ({
+vi.mock('../../../common/Copyable', () => ({
     Copyable: ({ text, children }: { text: string; children: React.ReactNode }) => (
         <div data-testid="copyable" data-text={text}>
             {children}
@@ -21,7 +22,7 @@ jest.mock('../../../common/Copyable', () => ({
     ),
 }));
 
-jest.mock('../../InstructionCard', () => ({
+vi.mock('../../InstructionCard', () => ({
     InstructionCard: ({ children, title }: { children: React.ReactNode; title: string }) => (
         <div data-testid="instruction-card">
             <div>{title}</div>
