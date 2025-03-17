@@ -1,7 +1,6 @@
 import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
 import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { render, screen } from '@testing-library/react';
-import { vi } from 'vitest';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
@@ -11,14 +10,6 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { BaseInstructionCard } from '../BaseInstructionCard';
 
 describe('BaseInstructionCard', () => {
-    beforeEach(() => {
-        mock.mockUseSearchParams();
-    });
-
-    afterEach(() => {
-        vi.clearAllMocks();
-    });
-
     test('should render "BaseInstructionCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);

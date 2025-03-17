@@ -1,7 +1,6 @@
 import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
 import * as spl from '@solana/spl-token';
 import { render, screen } from '@testing-library/react';
-import { vi } from 'vitest';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
@@ -12,17 +11,7 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { intoParsedInstruction } from '../../inspector/into-parsed-data';
 import { AssociatedTokenDetailsCard } from '../associated-token/AssociatedTokenDetailsCard';
 
-vi.mock('next/navigation');
-
 describe('inspector::AssociatedTokenDetailsCard', () => {
-    beforeEach(() => {
-        mock.mockUseSearchParams();
-    });
-
-    afterEach(() => {
-        vi.clearAllMocks();
-    });
-
     test('should render "CreateIdempotent" card', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
@@ -123,14 +112,6 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
 });
 
 describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
-    beforeEach(() => {
-        mock.mockUseSearchParams();
-    });
-
-    afterEach(() => {
-        vi.clearAllMocks();
-    });
-
     test('should render "CreateIdempotentDetailsCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsgWithInnerCards);

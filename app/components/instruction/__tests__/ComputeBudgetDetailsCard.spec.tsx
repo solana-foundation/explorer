@@ -21,14 +21,6 @@ useSearchParams.mockReturnValue({
 });
 
 describe('instruction::ComputeBudgetDetailsCard', () => {
-    beforeEach(() => {
-        mock.mockUseSearchParams();
-    });
-
-    afterEach(() => {
-        vi.clearAllMocks();
-    });
-
     test('should render "SetComputeUnitPrice"', async () => {
         const compiledInstruction: MessageCompiledInstruction = {
             accountKeyIndexes: [],
