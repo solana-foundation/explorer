@@ -3,6 +3,7 @@ import { intoTransactionInstructionFromVersionedMessage } from '@components/insp
 import * as spl from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
@@ -12,7 +13,7 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { intoParsedInstruction, intoParsedTransaction } from '../../inspector/into-parsed-data';
 import { AssociatedTokenDetailsCard } from '../associated-token/AssociatedTokenDetailsCard';
 
-jest.mock('next/navigation');
+vi.mock('next/navigation');
 
 describe('instruction::AssociatedTokenDetailsCard', () => {
     beforeEach(() => {
@@ -20,7 +21,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
     });
 
     afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     test('should render "CreateIdempotentDetailsCard"', async () => {

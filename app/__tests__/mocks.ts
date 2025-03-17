@@ -1,10 +1,11 @@
-import { Message, MessageArgs, MessageCompiledInstruction, MessageV0, MessageV0Args,PublicKey, VersionedMessage } from "@solana/web3.js";
+import { Message, MessageArgs, MessageCompiledInstruction, MessageV0, MessageV0Args, PublicKey, VersionedMessage } from "@solana/web3.js";
 import { useSearchParams } from 'next/navigation';
+import { vi } from 'vitest';
 
 // stub a test to not allow passing without tests
 test('stub', () => expect(true).toBeTruthy());
 
-jest.mock('next/navigation');
+vi.mock('next/navigation');
 export function mockUseSearchParams(cluster = 'mainnet-beta', customUrl?: string) {
     // @ts-expect-error mockReturnValue is not present
     useSearchParams.mockReturnValue({
