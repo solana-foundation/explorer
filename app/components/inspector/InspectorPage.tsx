@@ -15,7 +15,7 @@ const { VaultTransaction } = generated;
 import { useClusterPath } from '@utils/url';
 import bs58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { Suspense } from 'react';
+import React from 'react';
 import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';

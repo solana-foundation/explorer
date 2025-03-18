@@ -100,9 +100,9 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
         );
 
         // Check that the td with text Fee Payer has the text F3S4PD17Eo3FyCMropzDLCpBFuQuBmufUVBBdKEHbQFT
-        const feePayerRow = screen.getByText(/Fee Payer/i).closest('tr');
-        expect(feePayerRow).not.toBeNull();
-        expect(feePayerRow?.textContent).toContain('F3S4PD17Eo3FyCMropzDLCpBFuQuBmufUVBBdKEHbQFT');
+        expect(screen.getByRole('row', { name: /Fee Payer/i })).toHaveTextContent(
+            'F3S4PD17Eo3FyCMropzDLCpBFuQuBmufUVBBdKEHbQFT'
+        );
 
         expect(screen.getByText(/Account List \(8\)/i)).not.toBeNull();
         expect(screen.getByText(/BPF Upgradeable Loader Instruction/i)).not.toBeNull();
