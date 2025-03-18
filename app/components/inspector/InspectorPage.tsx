@@ -81,7 +81,7 @@ function decodeSignatures(signaturesParam: string): (string | null)[] {
         }
 
         try {
-            base58.decode(signature);
+            bs58.decode(signature);
             validSignatures.push(signature);
         } catch (err) {
             throw new Error('Signature is not valid base58');
