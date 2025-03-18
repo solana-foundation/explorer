@@ -10,14 +10,6 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { BaseInstructionCard } from '../BaseInstructionCard';
 
 describe('BaseInstructionCard', () => {
-    beforeEach(() => {
-        mock.mockUseSearchParams();
-    });
-
-    afterEach(() => {
-        jest.clearAllMocks();
-    });
-
     test('should render "BaseInstructionCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);

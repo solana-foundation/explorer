@@ -11,14 +11,6 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { AddressTableLookupAddress } from '../inspector/AddressTableLookupAddress';
 
 describe('AddressTableLookupAddress', () => {
-    beforeEach(() => {
-        mock.mockUseSearchParams();
-    });
-
-    afterEach(() => {
-        jest.clearAllMocks();
-    });
-
     test('should render static address', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);

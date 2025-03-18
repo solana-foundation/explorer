@@ -3,6 +3,8 @@ import { intoTransactionInstructionFromVersionedMessage } from '@components/insp
 import * as spl from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
+import { useSearchParams } from 'next/navigation';
+import { vi } from 'vitest';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
@@ -12,17 +14,15 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { intoParsedInstruction, intoParsedTransaction } from '../../inspector/into-parsed-data';
 import { AssociatedTokenDetailsCard } from '../associated-token/AssociatedTokenDetailsCard';
 
-jest.mock('next/navigation');
+vi.mock('next/navigation');
+// @ts-expect-error does not contain `mockReturnValue`
+useSearchParams.mockReturnValue({
+    get: () => 'mainnet-beta',
+    has: (_query?: string) => false,
+    toString: () => '',
+});
 
 describe('instruction::AssociatedTokenDetailsCard', () => {
-    beforeEach(() => {
-        mock.mockUseSearchParams();
-    });
-
-    afterEach(() => {
-        jest.clearAllMocks();
-    });
-
     test('should render "CreateIdempotentDetailsCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);

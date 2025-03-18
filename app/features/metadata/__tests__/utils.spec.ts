@@ -1,10 +1,12 @@
+import { vi } from 'vitest';
+
 import { getProxiedUri } from '../utils';
 
 describe('getProxiedUri', () => {
     const originalEnv = process.env;
 
     beforeEach(() => {
-        jest.resetModules();
+        vi.resetModules();
         process.env = { ...originalEnv };
     });
 

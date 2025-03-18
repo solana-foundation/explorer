@@ -11,17 +11,7 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { intoParsedInstruction } from '../../inspector/into-parsed-data';
 import { AssociatedTokenDetailsCard } from '../associated-token/AssociatedTokenDetailsCard';
 
-jest.mock('next/navigation');
-
 describe('inspector::AssociatedTokenDetailsCard', () => {
-    beforeEach(() => {
-        mock.mockUseSearchParams();
-    });
-
-    afterEach(() => {
-        jest.clearAllMocks();
-    });
-
     test('should render "CreateIdempotent" card', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
@@ -122,14 +112,6 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
 });
 
 describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
-    beforeEach(() => {
-        mock.mockUseSearchParams();
-    });
-
-    afterEach(() => {
-        jest.clearAllMocks();
-    });
-
     test('should render "CreateIdempotentDetailsCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsgWithInnerCards);

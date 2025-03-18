@@ -1,31 +1,40 @@
-import { Message, MessageArgs, MessageCompiledInstruction, MessageV0, MessageV0Args,PublicKey, VersionedMessage } from "@solana/web3.js";
-import { useSearchParams } from 'next/navigation';
+import { Message, MessageArgs, MessageCompiledInstruction, MessageV0, MessageV0Args, PublicKey, VersionedMessage } from "@solana/web3.js";
+import { vi } from 'vitest';
 
 // stub a test to not allow passing without tests
 test('stub', () => expect(true).toBeTruthy());
 
-jest.mock('next/navigation');
-export function mockUseSearchParams(cluster = 'mainnet-beta', customUrl?: string) {
-    // @ts-expect-error mockReturnValue is not present
-    useSearchParams.mockReturnValue({
-        get: (param: string) => {
-            if (param === 'cluster') return cluster;
-            return null;
-        },
-        has: (param: string) => {
-            if (param === 'customUrl' && customUrl) return true;
-            return false;
-        },
-        toString: () => {
-            let clusterString;
-            if (cluster !== 'mainnet-beta') clusterString = `cluster=${cluster}`;
-            if (customUrl) {
-                return `customUrl=${customUrl}${clusterString ? `&${clusterString}` : ''}`;
-            }
-            return clusterString ?? '';
-        },
-    });
-}
+vi.mock("next/navigation", () => {
+    const actual = vi.importActual("next/navigation");
+    const cluster = 'mainnet-beta';
+    const customUrl = undefined;
+
+    return {
+        ...actual,
+        usePathname: vi.fn(),
+        useRouter: vi.fn(() => ({
+            push: vi.fn(),
+        })),
+        useSearchParams: vi.fn(() => ({
+            get: (param: string) => {
+                if (param === 'cluster') return cluster;
+                return null;
+            },
+            has: (param: string) => {
+                if (param === 'customUrl' && customUrl) return true;
+                return false;
+            },
+            toString: () => {
+                let clusterString;
+                if (cluster !== 'mainnet-beta') clusterString = `cluster=${cluster}`;
+                if (customUrl) {
+                    return `customUrl=${customUrl}${clusterString ? `&${clusterString}` : ''}`;
+                }
+                return clusterString ?? '';
+            },
+        })),
+    };
+});
 
 export function deserializeMessage(message: string): VersionedMessage {
     const m = JSON.parse(message) as MessageArgs;

@@ -201,7 +201,7 @@
     "key": "2ry7ygxiYURULZCrypHhveanvP5tzZ4toRwVp89oCNSj",
     "simd": null,
     "version": "v2.0.0",
-    "testnetActivationEpoch": null,
+    "testnetActivationEpoch": 759,
     "devnetActivationEpoch": null,
     "mainnetActivationEpoch": null,
     "title": "Validator applies cost tracker to blocks during replay",
@@ -280,7 +280,7 @@
     "version": "v2.1.0",
     "testnetActivationEpoch": 748,
     "devnetActivationEpoch": 839,
-    "mainnetActivationEpoch": null,
+    "mainnetActivationEpoch": 758,
     "title": "Charge fees for transactions that fail to load",
     "description": null,
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0191-enable-transaction-loading-failure-fees.md"
