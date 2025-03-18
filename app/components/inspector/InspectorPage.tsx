@@ -336,9 +336,7 @@ export function TransactionInspectorPage({
                 <PermalinkView signature={signature} reset={reset} showTokenBalanceChanges={showTokenBalanceChanges} />
             ) : inspectorData ? (
                 isSquadsProposalAccountData(inspectorData) ? (
-                    <Suspense fallback={<LoadingCard message="Loading proposal data..." />}>
-                        <SquadsProposalInspectorCard account={inspectorData.account} onClear={reset} />
-                    </Suspense>
+                    <SquadsProposalInspectorCard account={inspectorData.account} onClear={reset} />
                 ) : (
                     <LoadedView
                         transaction={inspectorData}

@@ -92,11 +92,9 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
             </ScrollAnchorProvider>
         );
 
-        // Initially it should show loading
-        expect(screen.getByText(/Loading proposal data/i)).not.toBeNull();
         await vi.waitFor(
             () => {
-                expect(screen.queryByText(/Loading proposal data/i)).toBeNull();
+                expect(screen.queryByText(/Inspector Input/i)).toBeNull();
             },
             { interval: 50, timeout: 10000 }
         );
