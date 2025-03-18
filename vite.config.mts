@@ -26,8 +26,10 @@ export default defineConfig({
         coverage: {
             provider: 'v8'
         },
-        deps: {
-            inline: ['@noble', 'change-case', '@react-hook/previous']
+        server: {
+            deps: {
+                inline: ['@noble', 'change-case', '@react-hook/previous']
+            },
         },
         environment: 'jsdom',
         globals: true,
