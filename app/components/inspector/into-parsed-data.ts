@@ -10,7 +10,9 @@ import {
     VersionedMessage,
 } from '@solana/web3.js';
 import { AssociatedTokenInstruction, CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR, identifyAssociatedTokenInstruction, parseCreateAssociatedTokenIdempotentInstruction, parseCreateAssociatedTokenInstruction, parseRecoverNestedAssociatedTokenInstruction } from '@solana-program/token';
-import { AccountRole, address, IAccountMeta, IInstruction, IInstructionWithAccounts, IInstructionWithData } from 'web3js-experimental';
+import { IAccountMeta, IInstruction, IInstructionWithAccounts, IInstructionWithData } from 'web3js-experimental';
+
+import { upcastTransactionInstruction } from '@/app/utils/parsed-tx';
 
 function discriminatorToBuffer(discrimnator: number): Buffer{
     return Buffer.from(Uint8Array.from([discrimnator]));
@@ -113,8 +115,12 @@ function convertAccountKeysToParsedMessageAccounts(keys: AccountMeta[]): ParsedM
  */
 
 export function intoParsedInstruction(transactionInstruction: TransactionInstruction, data?: any): ParsedInstruction {
-    const { programId } = transactionInstruction;
-    const { program, parsed } = getInstructionData(transactionInstruction, data);
+    return intoParsedInstructionFromTransactionInstruction(transactionInstruction, data);
+}
+
+export function intoParsedInstructionFromTransactionInstruction(ti: TransactionInstruction, data?: any): ParsedInstruction {
+    const { programId } = ti;
+    const { program, parsed } = getInstructionData(ti, data);
 
     return {
         parsed,
@@ -124,7 +130,11 @@ export function intoParsedInstruction(transactionInstruction: TransactionInstruc
 }
 
 export function intoParsedTransaction(transactionInstruction: TransactionInstruction, versionedMessage: VersionedMessage): ParsedTransaction {
-    const { keys } = transactionInstruction;
+    return intoParsedTransactionFromTransactionInstruction(transactionInstruction, versionedMessage);
+}
+
+export function intoParsedTransactionFromTransactionInstruction(ti: TransactionInstruction, versionedMessage: VersionedMessage): ParsedTransaction {
+    const { keys } = ti;
     const { addressTableLookups, recentBlockhash } = versionedMessage;
 
     const parsedMessage: ParsedMessage = {
@@ -138,29 +148,6 @@ export function intoParsedTransaction(transactionInstruction: TransactionInstruc
     return {
         message: parsedMessage,
         signatures: [],
-    };
-}
-
-export function upcastAccountMeta({ pubkey, isSigner, isWritable }: AccountMeta): IAccountMeta {
-    return {
-        address: address(pubkey.toBase58()),
-        role: isSigner
-            ? (isWritable
-              ? AccountRole.WRITABLE_SIGNER
-              : AccountRole.READONLY_SIGNER
-              )
-            : (isWritable
-              ? AccountRole.WRITABLE
-              : AccountRole.READONLY
-            )
-    };
-}
-
-export function upcastTransactionInstruction(ix: TransactionInstruction) {
-    return {
-        accounts: ix.keys.map(upcastAccountMeta),
-        data: ix.data,
-        programAddress: address(ix.programId.toBase58())
     };
 }
 

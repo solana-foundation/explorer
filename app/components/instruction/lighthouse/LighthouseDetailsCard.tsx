@@ -29,9 +29,9 @@ import { AccountRole, Address as TAddress, IAccountMeta, IInstruction } from 'we
 
 import { camelToTitleCase } from '@/app/utils';
 import { ExpandableRow } from '@/app/utils/anchor';
+import { upcastTransactionInstruction } from '@/app/utils/parsed-tx';
 
 import { Address } from '../../common/Address';
-import { upcastTransactionInstruction } from '../../inspector/into-parsed-data';
 import { InstructionCard } from '../InstructionCard';
 import { LIGHTHOUSE_ADDRESS } from './types';
 

@@ -1,7 +1,7 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { useCluster } from '@providers/cluster';
 import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { ComputeBudgetProgram, MessageCompiledInstruction, VersionedMessage } from '@solana/web3.js';
+import { ComputeBudgetProgram, MessageCompiledInstruction, SystemProgram, VersionedMessage } from '@solana/web3.js';
 import { getProgramName } from '@utils/tx';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -10,6 +10,7 @@ import { useAnchorProgram } from '@/app/providers/anchor';
 
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
+import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
 import { intoParsedInstruction } from './into-parsed-data';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
@@ -92,6 +93,23 @@ function InspectorInstructionCard({
                     message={message}
                     index={index}
                     result={result}
+                />
+            );
+        }
+        case SystemProgram.programId.toString(): {
+            console.log({ transactionInstruction }, message);
+            const asParsedInstruction = intoParsedInstruction(transactionInstruction);
+            //const asParsedTransaction = intoParsedTransaction(tx);
+            break;
+            return (
+                <SystemDetailsCard
+                    key={index}
+                    ix={asParsedInstruction}
+                    tx={asParsedInstruction}
+                    index={index}
+                    result={result}
+                    signature=""
+                    message={transactionInstruction}
                 />
             );
         }
