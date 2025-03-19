@@ -1,6 +1,6 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { useCluster } from '@providers/cluster';
-import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { ComputeBudgetProgram, MessageCompiledInstruction, SystemProgram, VersionedMessage } from '@solana/web3.js';
 import { getProgramName } from '@utils/tx';
 import React from 'react';
@@ -80,6 +80,8 @@ function InspectorInstructionCard({
     //  - result is `err: null` as at this point there should not be errors
     const result = { err: null };
     const signature = '';
+
+    console.log(transactionInstruction?.programId.toString())
     switch (transactionInstruction?.programId.toString()) {
         case ASSOCIATED_TOKEN_PROGRAM_ID.toString(): {
             // NOTE: current limitation is that innerInstructions won't be present at the AssociatedTokenDetailsCard. For that purpose we might need to simulateTransactions to get them.
@@ -93,6 +95,18 @@ function InspectorInstructionCard({
                     message={message}
                     index={index}
                     result={result}
+                />
+            );
+        }
+        case ComputeBudgetProgram.programId.toString(): {
+            return (
+                <ComputeBudgetDetailsCard
+                    key={index}
+                    ix={transactionInstruction}
+                    index={index}
+                    result={result}
+                    signature={signature}
+                    InstructionCardComponent={BaseInstructionCard}
                 />
             );
         }
@@ -113,15 +127,20 @@ function InspectorInstructionCard({
                 />
             );
         }
-        case ComputeBudgetProgram.programId.toString(): {
+        case TOKEN_PROGRAM_ID.toString(): {
+            console.log({ transactionInstruction }, message);
+            const asParsedInstruction = intoParsedInstruction(transactionInstruction);
+            //const asParsedTransaction = intoParsedTransaction(tx);
+            break;
             return (
-                <ComputeBudgetDetailsCard
+                <SystemDetailsCard
                     key={index}
-                    ix={transactionInstruction}
+                    ix={asParsedInstruction}
+                    tx={asParsedInstruction}
                     index={index}
                     result={result}
-                    signature={signature}
-                    InstructionCardComponent={BaseInstructionCard}
+                    signature=""
+                    message={transactionInstruction}
                 />
             );
         }

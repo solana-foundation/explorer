@@ -1,4 +1,4 @@
-import { identifySystemInstruction, parseTransferSolInstruction,SystemInstruction } from '@solana-program/system';
+import { identifySystemInstruction, parseTransferSolInstruction, SystemInstruction } from '@solana-program/system';
 
 import { ITransactionInstructionParser, upcastTransactionInstruction } from '../parsed-tx';
 
