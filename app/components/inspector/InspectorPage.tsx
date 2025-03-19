@@ -8,7 +8,7 @@ import { useFetchAccountInfo } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import usePrevious from '@react-hook/previous';
-import { Connection, Message, PACKET_DATA_SIZE, PublicKey, VersionedMessage } from '@solana/web3.js';
+import { Connection, Message, MessageV0, PACKET_DATA_SIZE, PublicKey, VersionedMessage } from '@solana/web3.js';
 import { generated, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
 const { VaultTransaction } = generated;
 
@@ -208,19 +208,29 @@ function SquadsProposalInspectorCard({ account, onClear }: { account: string; on
     // Convert VaultTransactionMessage to a format compatible with Message
     const convertVaultTransactionToMessage = (vaultTx: typeof VaultTransaction.prototype): VersionedMessage => {
         const { message } = vaultTx;
+        const accountKeys = message.accountKeys;
+        // message.addressTableLookups.forEach(lookup => {
+        //     accountKeys.push(lookup.accountKey);
+        //     // console.log(lookup.accountKey.toBase58());
+        // });
 
         // Create a standard Message object with the necessary fields
-        const solanaMessage = new Message({
-            accountKeys: message.accountKeys,
+        const solanaMessage = new MessageV0({
+            staticAccountKeys: accountKeys,
+            addressTableLookups: message.addressTableLookups.map(x => ({
+                ...x,
+                writableIndexes: Array.from(x.writableIndexes),
+                readonlyIndexes: Array.from(x.readonlyIndexes),
+            })),
             header: {
                 numReadonlySignedAccounts: message.numSigners - message.numWritableSigners,
                 numReadonlyUnsignedAccounts:
                     message.accountKeys.length - message.numSigners - message.numWritableNonSigners,
                 numRequiredSignatures: message.numSigners,
             },
-            instructions: message.instructions.map(instruction => ({
-                accounts: Array.from(instruction.accountIndexes),
-                data: bs58.encode(Buffer.from(instruction.data)),
+            compiledInstructions: message.instructions.map(instruction => ({
+                accountKeyIndexes: Array.from(instruction.accountIndexes),
+                data: Buffer.from(instruction.data),
                 programIdIndex: instruction.programIdIndex,
             })),
             recentBlockhash: bs58.encode(Uint8Array.from(new Array(32).fill(0))),
