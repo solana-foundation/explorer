@@ -8,11 +8,17 @@ import { useFetchAccountInfo } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import usePrevious from '@react-hook/previous';
-import { PACKET_DATA_SIZE, VersionedMessage } from '@solana/web3.js';
+import { Connection, Message, PACKET_DATA_SIZE, PublicKey, VersionedMessage } from '@solana/web3.js';
+import { generated, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
+const { VaultTransaction } = generated;
+
 import { useClusterPath } from '@utils/url';
-import base58 from 'bs58';
+import bs58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
+import useSWR from 'swr';
+
+import { useCluster } from '@/app/providers/cluster';
 
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';
@@ -27,6 +33,16 @@ export type TransactionData = {
     message: VersionedMessage;
     signatures?: (string | null)[];
 };
+
+export type SquadsProposalAccountData = {
+    account: string;
+};
+
+export type InspectorData = TransactionData | SquadsProposalAccountData;
+
+function isSquadsProposalAccountData(data: InspectorData): data is SquadsProposalAccountData {
+    return 'account' in data;
+}
 
 // Decode a url param and return the result. If decoding fails, return whether
 // the param should be deleted.
@@ -65,7 +81,7 @@ function decodeSignatures(signaturesParam: string): (string | null)[] {
         }
 
         try {
-            base58.decode(signature);
+            bs58.decode(signature);
             validSignatures.push(signature);
         } catch (err) {
             throw new Error('Signature is not valid base58');
@@ -78,14 +94,29 @@ function decodeSignatures(signaturesParam: string): (string | null)[] {
 // Decodes url params into transaction data if possible. If decoding fails,
 // URL params are returned as a string that will prefill the transaction
 // message input field for debugging. Returns a tuple of [result, shouldRefreshUrl]
-function decodeUrlParams(params: URLSearchParams): [TransactionData | string, URLSearchParams, boolean] {
+function decodeUrlParams(
+    params: URLSearchParams
+): [TransactionData | string | SquadsProposalAccountData, URLSearchParams, boolean] {
     const messageParam = decodeParam(params, 'message');
     const signaturesParam = decodeParam(params, 'signatures');
+    const squadsTxParam = decodeParam(params, 'squadsTx');
 
     let refreshUrl = false;
     if (signaturesParam === true) {
         params.delete('signatures');
         refreshUrl = true;
+    }
+
+    // Check for Squads transaction parameter
+    if (typeof squadsTxParam === 'string') {
+        try {
+            // Validate that it's a valid public key
+            new PublicKey(squadsTxParam);
+            return [{ account: squadsTxParam }, params, refreshUrl];
+        } catch (err) {
+            params.delete('squadsTx');
+            refreshUrl = true;
+        }
     }
 
     if (typeof messageParam === 'boolean') {
@@ -128,6 +159,93 @@ function decodeUrlParams(params: URLSearchParams): [TransactionData | string, UR
     }
 }
 
+function SquadsProposalInspectorCard({ account, onClear }: { account: string; onClear: () => void }) {
+    const { url } = useCluster();
+
+    const fetcher = React.useCallback(async () => {
+        const connection = new Connection(url);
+        try {
+            // First check if the account exists and is owned by the Squads program
+            const accountInfo = await connection.getAccountInfo(new PublicKey(account), 'confirmed');
+
+            if (!accountInfo) {
+                throw new Error('Account not found');
+            }
+
+            // Check if the account is owned by the Squads program
+            const isSquadsAccount = accountInfo.owner.toString() === SQUADS_V4_PROGRAM_ADDRESS.toString();
+
+            if (!isSquadsAccount) {
+                throw new Error(`Account ${account} is not a valid Squads transaction account`);
+            }
+
+            return await VaultTransaction.fromAccountAddress(connection, new PublicKey(account), 'confirmed');
+        } catch (err) {
+            throw err instanceof Error ? err : new Error('Failed to fetch account data');
+        }
+    }, [account, url]);
+
+    const {
+        data: vaultTransaction,
+        error,
+        isLoading,
+    } = useSWR(['squads-proposal', account, url], fetcher, {
+        revalidateOnFocus: false,
+        shouldRetryOnError: false,
+        suspense: false,
+    });
+
+    if (isLoading) {
+        return <LoadingCard message="Loading Squads transaction..." />;
+    }
+
+    if (error || !vaultTransaction) {
+        return (
+            <ErrorCard text={`Error loading vault transaction: ${error?.message}`} retry={onClear} retryText="Clear" />
+        );
+    }
+
+    // Convert VaultTransactionMessage to a format compatible with Message
+    const convertVaultTransactionToMessage = (vaultTx: typeof VaultTransaction.prototype): VersionedMessage => {
+        const { message } = vaultTx;
+
+        // Create a standard Message object with the necessary fields
+        const solanaMessage = new Message({
+            accountKeys: message.accountKeys,
+            header: {
+                numReadonlySignedAccounts: message.numSigners - message.numWritableSigners,
+                numReadonlyUnsignedAccounts:
+                    message.accountKeys.length - message.numSigners - message.numWritableNonSigners,
+                numRequiredSignatures: message.numSigners,
+            },
+            instructions: message.instructions.map(instruction => ({
+                accounts: Array.from(instruction.accountIndexes),
+                data: bs58.encode(Buffer.from(instruction.data)),
+                programIdIndex: instruction.programIdIndex,
+            })),
+            recentBlockhash: bs58.encode(Uint8Array.from(new Array(32).fill(0))),
+        });
+
+        return solanaMessage;
+    };
+
+    // Create a serialized version of the message for rawMessage
+    const convertedMessage = convertVaultTransactionToMessage(vaultTransaction);
+    const serializedMessage = convertedMessage.serialize();
+
+    return (
+        <LoadedView
+            transaction={{
+                message: convertedMessage,
+                rawMessage: serializedMessage,
+                signatures: undefined,
+            }}
+            onClear={onClear}
+            showTokenBalanceChanges={false}
+        />
+    );
+}
+
 export function TransactionInspectorPage({
     signature,
     showTokenBalanceChanges,
@@ -135,28 +253,40 @@ export function TransactionInspectorPage({
     signature?: string;
     showTokenBalanceChanges: boolean;
 }) {
-    const [transaction, setTransaction] = React.useState<TransactionData>();
+    const [inspectorData, setInspectorData] = React.useState<InspectorData>();
     const currentSearchParams = useSearchParams();
     const currentPathname = usePathname();
     const router = useRouter();
     const [paramString, setParamString] = React.useState<string>();
 
     // Sync message with url search params
-    const prevTransaction = usePrevious(transaction);
+    const prevInspectorData = usePrevious(inspectorData);
     React.useEffect(() => {
         if (signature) return;
-        if (transaction && transaction !== prevTransaction) {
+        if (inspectorData && inspectorData !== prevInspectorData) {
+            if (isSquadsProposalAccountData(inspectorData)) {
+                // Handle Squads proposal URL params
+                const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
+                nextQueryParams.set('squadsTx', inspectorData.account);
+                // Remove any other transaction params that might exist
+                nextQueryParams.delete('message');
+                nextQueryParams.delete('signatures');
+                const queryString = nextQueryParams.toString();
+                router.replace(`${currentPathname}?${queryString}`);
+                return;
+            }
+
             let nextQueryParams;
 
-            if (transaction.signatures !== undefined) {
-                const signaturesParam = encodeURIComponent(JSON.stringify(transaction.signatures));
+            if (inspectorData.signatures !== undefined) {
+                const signaturesParam = encodeURIComponent(JSON.stringify(inspectorData.signatures));
                 if (currentSearchParams.get('signatures') !== signaturesParam) {
                     nextQueryParams ||= new URLSearchParams(currentSearchParams?.toString());
                     nextQueryParams.set('signatures', signaturesParam);
                 }
             }
 
-            const base64 = btoa(String.fromCharCode.apply(null, Array.from(transaction.rawMessage)));
+            const base64 = btoa(String.fromCharCode.apply(null, Array.from(inspectorData.rawMessage)));
             const newParam = encodeURIComponent(base64);
             if (currentSearchParams.get('message') !== newParam) {
                 nextQueryParams ||= new URLSearchParams(currentSearchParams?.toString());
@@ -167,12 +297,13 @@ export function TransactionInspectorPage({
                 router.replace(`${currentPathname}?${queryString.toString()}`);
             }
         }
-    }, [currentPathname, currentSearchParams, prevTransaction, router, signature, transaction]);
+    }, [currentPathname, currentSearchParams, prevInspectorData, router, signature, inspectorData]);
 
     const reset = React.useCallback(() => {
         const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
         nextQueryParams.delete('message');
         nextQueryParams.delete('signatures');
+        nextQueryParams.delete('squadsTx');
         const queryString = nextQueryParams?.toString();
         router.push(`${currentPathname}${queryString ? `?${queryString}` : ''}`);
     }, [currentPathname, currentSearchParams, router]);
@@ -187,10 +318,10 @@ export function TransactionInspectorPage({
 
         if (typeof result === 'string') {
             setParamString(result);
-            setTransaction(undefined);
+            setInspectorData(undefined);
         } else {
             setParamString(undefined);
-            setTransaction(result);
+            setInspectorData(result);
         }
     }, [currentPathname, currentSearchParams, router]);
 
@@ -203,14 +334,18 @@ export function TransactionInspectorPage({
             </div>
             {signature ? (
                 <PermalinkView signature={signature} reset={reset} showTokenBalanceChanges={showTokenBalanceChanges} />
-            ) : transaction ? (
-                <LoadedView
-                    transaction={transaction}
-                    onClear={reset}
-                    showTokenBalanceChanges={showTokenBalanceChanges}
-                />
+            ) : inspectorData ? (
+                isSquadsProposalAccountData(inspectorData) ? (
+                    <SquadsProposalInspectorCard account={inspectorData.account} onClear={reset} />
+                ) : (
+                    <LoadedView
+                        transaction={inspectorData}
+                        onClear={reset}
+                        showTokenBalanceChanges={showTokenBalanceChanges}
+                    />
+                )
             ) : (
-                <RawInput value={paramString} setTransactionData={setTransaction} />
+                <RawInput value={paramString} setTransactionData={setInspectorData} />
             )}
         </div>
     );
