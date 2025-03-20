@@ -236,7 +236,7 @@
     "version": "v2.1.8",
     "testnetActivationEpoch": 752,
     "devnetActivationEpoch": 843,
-    "mainnetActivationEpoch": null,
+    "mainnetActivationEpoch": 760,
     "title": "Consume requested CUs for sBPF failures",
     "description": "Charge allocated compute units for sBPF failures instead of consumed compute units",
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0182-conditional-cu-metering.md"
@@ -317,5 +317,71 @@
     "title": "Removes Accounts Delta Hash",
     "description": null,
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0223-removes-accounts-delta-hash.md"
+  },
+  {
+    "key": "LTHasHQX6661DaDD4S6A2TFi6QBuiwXKv66fB1obfHq",
+    "simd": "0215",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Accounts Lt Hash",
+    "description": null,
+    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0215-accounts-lattice-hash.md"
+  },
+  {
+    "key": "JE86WkYvTrzW8HgNmrHY7dFYpCmSptUpKupbo2AdQ9cG",
+    "simd": "0166",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Enables deployment and execution of SBPFv1 programs",
+    "description": null,
+    "simd_link": null
+  },
+  {
+    "key": "F6UVKh1ujTEFK3en2SyAL3cdVnqko1FVEXWhmdLRu6WP",
+    "simd": "0173, 0174",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Enables deployment and execution of SBPFv2 programs",
+    "description": null,
+    "simd_link": null
+  },
+  {
+    "key": "C8XZNs1bfzaiT3YDeXZJ7G5swQWQv7tVzDnCxtHvnSpw",
+    "simd": "0178, 0179, 0189",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Enables deployment and execution of SBPFv3 programs",
+    "description": null,
+    "simd_link": null
+  },
+  {
+    "key": "8Cb77yHjPWe9wuWUfXeh6iszFGCDGNCoFk3tprViYHNm",
+    "simd": "0167",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Enable loader-v4",
+    "description": null,
+    "simd_link": null
+  },
+  {
+    "key": "EmhbpdVtZ2hWRGFWBDjn2i3SJD8Z36z4mpMcZJEnebnP",
+    "simd": "0167",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Disable new loader-v3 deployments",
+    "description": null,
+    "simd_link": null
   }
 ]
