@@ -20,23 +20,23 @@ describe('intoParsedInstruction', () => {
                     accounts: {
                         destination: {
                             address: '2vPuXtAJLtxmkJRhuEwCuvUKyRemreh7q1DR4ns7wwzL',
-                            role: 1
+                            role: 1,
                         },
                         source: {
                             address: '9yrYKJxZKktutPzhUNgS92bzVjpHkgZPNpZCHRr6M2TC',
-                            role: 3
-                        }
+                            role: 3,
+                        },
                     },
                     data: {
                         amount: 1000000n,
                         discriminator: 2,
                     },
-                    programAddress: SystemProgram.programId.toString()
+                    programAddress: SystemProgram.programId.toString(),
                 },
-                type: 'transfer'
+                type: 'transfer',
             },
             program: 'system',
-            programId: SystemProgram.programId
+            programId: SystemProgram.programId,
         });
     });
 });

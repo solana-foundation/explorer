@@ -27,7 +27,9 @@ type DetailsProps = {
 export function TokenDetailsCard(props: DetailsProps) {
     const parsed = create(props.ix.parsed, ParsedInfo);
     const { type: rawType, info } = parsed;
+    console.log({ rawType }, props);
     const type = create(rawType, TokenInstructionType);
+    console.log(888, { type }, info);
     const title = `${TOKEN_IDS[props.ix.programId.toString()]}: ${IX_TITLES[type]}`;
     const created = create(info, IX_STRUCTS[type] as any);
     return <TokenInstruction title={title} info={created} {...props} />;
@@ -67,8 +69,8 @@ function TokenInstruction(props: InfoProps) {
             tokenAddress,
         };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
     const tokenInfo = useTokenAccountInfo(tokenAddress);
+    console.log(77777, infoMintAddress, "|", tokenAddress, tokenInfo?.mint.toBase58())
     const mintAddress = infoMintAddress || tokenInfo?.mint.toBase58();
     const mintInfo = useMintAccountInfo(mintAddress);
     const fetchAccountInfo = useFetchAccountInfo();
@@ -90,7 +92,7 @@ function TokenInstruction(props: InfoProps) {
         mintAddress ? getTokenInfoSwrKey(mintAddress, cluster, url) : null,
         fetchTokenInfo
     );
-
+    console.log(7777, tokenDetails, mintAddress)
     const attributes: JSX.Element[] = [];
     let decimals = mintInfo?.decimals;
     let tokenSymbol = '';

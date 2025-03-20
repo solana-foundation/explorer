@@ -18,6 +18,7 @@ export function BaseRawDetails({
     ix: TransactionInstruction | MessageCompiledInstruction;
     message?: VersionedMessage;
 }) {
+    console.log(7777, -1, message, ix)
     if (message && 'accountKeyIndexes' in ix) {
         return <BaseMessageCompiledInstructionRawDetails ix={ix} message={message} />;
     } else if ('keys' in ix) {

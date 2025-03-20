@@ -8,7 +8,7 @@
         "start": "next start",
         "scan": "next dev & react-scan localhost:3000",
         "lint": "next lint",
-        "format": "prettier **.{ts,tsx} *.json --check",
+        "format": "prettier **.{ts,tsx} **.spec.{ts,tsx} *.json --check",
         "coverage": "vitest --coverage",
         "test": "vitest --watch",
         "test:ci": "vitest run"

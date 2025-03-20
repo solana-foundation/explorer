@@ -1,16 +1,25 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { useCluster } from '@providers/cluster';
-import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { ComputeBudgetProgram, MessageCompiledInstruction, SystemProgram, VersionedMessage } from '@solana/web3.js';
+import {
+    ComputeBudgetProgram,
+    MessageCompiledInstruction,
+    ParsedInstruction,
+    SystemProgram,
+    VersionedMessage,
+} from '@solana/web3.js';
+import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { getProgramName } from '@utils/tx';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { useAnchorProgram } from '@/app/providers/anchor';
+import { intoPartialParsedTransactionFromTransactionInstruction } from '@/app/utils/parsed-tx';
+import { tokenProgramTransactionInstructionParser } from '@/app/utils/parsers';
 
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
+import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
 import { intoParsedInstruction } from './into-parsed-data';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
@@ -81,9 +90,9 @@ function InspectorInstructionCard({
     const result = { err: null };
     const signature = '';
 
-    console.log(transactionInstruction?.programId.toString())
+    console.log(transactionInstruction?.programId.toString());
     switch (transactionInstruction?.programId.toString()) {
-        case ASSOCIATED_TOKEN_PROGRAM_ID.toString(): {
+        case ASSOCIATED_TOKEN_PROGRAM_ADDRESS.toString(): {
             // NOTE: current limitation is that innerInstructions won't be present at the AssociatedTokenDetailsCard. For that purpose we might need to simulateTransactions to get them.
 
             const asParsedInstruction = intoParsedInstruction(transactionInstruction);
@@ -127,20 +136,26 @@ function InspectorInstructionCard({
                 />
             );
         }
-        case TOKEN_PROGRAM_ID.toString(): {
+        case TOKEN_PROGRAM_ADDRESS.toString(): {
             console.log({ transactionInstruction }, message);
             const asParsedInstruction = intoParsedInstruction(transactionInstruction);
             //const asParsedTransaction = intoParsedTransaction(tx);
-            break;
+            const tx = intoPartialParsedTransactionFromTransactionInstruction(
+                transactionInstruction,
+                message,
+                [],
+                tokenProgramTransactionInstructionParser
+            );
+
+            console.log(888, 9, tx.message.instructions[0]);
+
             return (
-                <SystemDetailsCard
+                <TokenDetailsCard
                     key={index}
-                    ix={asParsedInstruction}
-                    tx={asParsedInstruction}
+                    ix={tx.message.instructions[0] as ParsedInstruction}
+                    tx={tx}
                     index={index}
                     result={result}
-                    signature=""
-                    message={transactionInstruction}
                 />
             );
         }
