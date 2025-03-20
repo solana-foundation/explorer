@@ -3,7 +3,7 @@ import base58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 
-import type { InspectorData } from './InspectorPage';
+import type { TransactionData } from './InspectorPage';
 
 function getMessageDataFromBytes(bytes: Uint8Array): {
     message: VersionedMessage;
@@ -63,14 +63,6 @@ function getTransactionDataFromUserSuppliedBytes(bytes: Uint8Array): {
     }
 }
 
-function parseAccountAddresses(input: string): string[] {
-    // Split by commas, newlines, or spaces and filter out empty strings
-    return input
-        .split(/[\s,]+/)
-        .map(addr => addr.trim())
-        .filter(addr => addr.length > 0);
-}
-
 export const MIN_MESSAGE_LENGTH =
     3 + // header
     1 + // accounts length
@@ -83,117 +75,77 @@ export function RawInput({
     setTransactionData,
 }: {
     value?: string;
-    setTransactionData: (param: InspectorData | undefined) => void;
+    setTransactionData: (param: TransactionData | undefined) => void;
 }) {
-    const rawInput = React.useRef<HTMLTextAreaElement>(null);
+    const rawTransactionInput = React.useRef<HTMLTextAreaElement>(null);
     const [error, setError] = React.useState<string>();
     const [rows, setRows] = React.useState(3);
     const currentPathname = usePathname();
     const currentSearchParams = useSearchParams();
     const router = useRouter();
-
     const onInput = React.useCallback(() => {
-        const input = rawInput.current?.value;
-        if (!input) {
-            setError(undefined);
-            return;
-        }
+        const base64 = rawTransactionInput.current?.value;
+        if (base64) {
+            // Clear url params when input is detected
+            if (currentSearchParams?.get('message')) {
+                const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
+                nextQueryParams.delete('message');
+                const queryString = nextQueryParams.toString();
+                router.push(`${currentPathname}${queryString ? `?${queryString}` : ''}`);
+            } else if (currentSearchParams?.get('transaction')) {
+                const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
+                nextQueryParams.delete('transaction');
+                const queryString = nextQueryParams.toString();
+                router.push(`${currentPathname}${queryString ? `?${queryString}` : ''}`);
+            }
 
-        // Clear url params when input is detected
-        if (currentSearchParams?.get('message')) {
-            const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
-            nextQueryParams.delete('message');
-            const queryString = nextQueryParams.toString();
-            router.push(`${currentPathname}${queryString ? `?${queryString}` : ''}`);
-        } else if (currentSearchParams?.get('transaction')) {
-            const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
-            nextQueryParams.delete('transaction');
-            const queryString = nextQueryParams.toString();
-            router.push(`${currentPathname}${queryString ? `?${queryString}` : ''}`);
-        }
+            // Dynamically expand height based on input length
+            setRows(Math.max(3, Math.min(10, Math.round(base64.length / 150))));
 
-        // Dynamically expand height based on input length
-        setRows(Math.max(3, Math.min(10, Math.round(input.length / 150))));
-
-        let buffer;
-        // First try to parse as an account address
-        try {
-            const accounts = parseAccountAddresses(input);
-            if (accounts.length > 0) {
-                if (accounts.length > 1) {
-                    setError('Please provide only one account address');
-                    return;
-                }
-                setTransactionData({ account: accounts[0] });
-                setError(undefined);
+            let buffer;
+            try {
+                buffer = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+            } catch (err) {
+                console.error(err);
+                setError('Input must be base64 encoded');
                 return;
             }
-        } catch (err) {
-            if (err instanceof Error) setError(err.message);
-        }
 
-        // If not an account address, try to parse as base64 transaction data
-        try {
-            buffer = Uint8Array.from(atob(input), c => c.charCodeAt(0));
-        } catch (err) {
-            console.error(err);
-            setError('Input must be base64 encoded or a valid account address');
-            return;
-        }
-
-        try {
-            if (buffer.length < MIN_MESSAGE_LENGTH) {
-                throw new Error('Input is not long enough to be a valid transaction message.');
+            try {
+                if (buffer.length < MIN_MESSAGE_LENGTH) {
+                    throw new Error('Input is not long enough to be valid.');
+                }
+                const transactionData = getTransactionDataFromUserSuppliedBytes(buffer);
+                setTransactionData(transactionData);
+                setError(undefined);
+                return;
+            } catch (err) {
+                if (err instanceof Error) setError(err.message);
             }
-            const transactionData = getTransactionDataFromUserSuppliedBytes(buffer);
-            setTransactionData(transactionData);
+        } else {
             setError(undefined);
-        } catch (err) {
-            if (err instanceof Error) setError(err.message);
-        }
-    }, [currentSearchParams, router, currentPathname, setTransactionData]);
-
-    const clearInput = React.useCallback(() => {
-        if (rawInput.current) {
-            rawInput.current.value = '';
-            setError(undefined);
-            setTransactionData(undefined);
-        }
-
-        // Clear URL params if they exist
-        if (currentSearchParams?.get('message') || currentSearchParams?.get('transaction')) {
-            const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
-            nextQueryParams.delete('message');
-            nextQueryParams.delete('transaction');
-            const queryString = nextQueryParams.toString();
-            router.push(`${currentPathname}${queryString ? `?${queryString}` : ''}`);
         }
     }, [currentSearchParams, router, currentPathname, setTransactionData]);
 
     React.useEffect(() => {
-        const input = rawInput.current;
+        const input = rawTransactionInput.current;
         if (input && value) {
             input.value = value;
             onInput();
         }
-    }, [value, onInput]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const placeholder = 'Paste a raw base64 encoded transaction message or Squads vault transaction account';
+    const placeholder = 'Paste raw base64 encoded transaction message';
     return (
         <div className="card">
             <div className="card-header">
-                <div className="d-flex justify-content-between align-items-center">
-                    <h3 className="card-header-title">Inspector Input</h3>
-                    <button className="btn btn-sm btn-white" onClick={clearInput} type="button">
-                        Clear
-                    </button>
-                </div>
+                <h3 className="card-header-title">Encoded Transaction Message</h3>
             </div>
             <div className="card-body">
                 <textarea
                     rows={rows}
                     onInput={onInput}
-                    ref={rawInput}
+                    ref={rawTransactionInput}
                     className="form-control form-control-flush form-control-auto font-monospace"
                     placeholder={placeholder}
                 ></textarea>
@@ -224,12 +176,6 @@ export function RawInput({
                     <li>
                         <strong>JavaScript: </strong>Add{' '}
                         <code>console.log(tx.serializeMessage().toString(&quot;base64&quot;));</code>
-                    </li>
-                    <li>
-                        <strong>Squads: </strong>Add <code>vault_transaction</code> from{' '}
-                        <code>
-                            https://app.squads.so/squads/&lt;squad_id&gt;/transactions/&lt;vault_transaction&gt;
-                        </code>
                     </li>
                 </ul>
             </div>
