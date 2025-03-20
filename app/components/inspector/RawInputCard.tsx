@@ -1,4 +1,4 @@
-import { VersionedMessage } from '@solana/web3.js';
+import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import base58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
@@ -124,6 +124,10 @@ export function RawInput({
                     setError('Please provide only one account address');
                     return;
                 }
+
+                // Necessary to validate the account address
+                new PublicKey(accounts[0]);
+
                 setTransactionData({ account: accounts[0] });
                 setError(undefined);
                 return;
@@ -196,6 +200,7 @@ export function RawInput({
                     ref={rawInput}
                     className="form-control form-control-flush form-control-auto font-monospace"
                     placeholder={placeholder}
+                    name="tx-inspector-input"
                 ></textarea>
                 <div className="row align-items-center">
                     <div className="col d-flex align-items-center">
