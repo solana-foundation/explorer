@@ -35,12 +35,11 @@ function InspectorInstructionCard({
     index: number;
 }) {
     const { cluster, url } = useCluster();
-
-    const transactionInstruction = intoTransactionInstructionFromVersionedMessage(ix, message);
-
-    const programId = transactionInstruction.programId;
+    const programId = message.staticAccountKeys[ix.programIdIndex];
     const programName = getProgramName(programId.toBase58(), cluster);
     const anchorProgram = useAnchorProgram(programId.toString(), url);
+
+    const transactionInstruction = intoTransactionInstructionFromVersionedMessage(ix, message);
 
     if (anchorProgram.program) {
         return (
@@ -51,7 +50,7 @@ function InspectorInstructionCard({
                         index={index}
                         ix={ix}
                         message={message}
-                        programName="Unknown Program"
+                        programName="Anchor Program"
                     />
                 }
             >
