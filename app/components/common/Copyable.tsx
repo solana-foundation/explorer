@@ -28,13 +28,13 @@ export function Copyable({
 
     function CopyIcon() {
         if (state === 'copy') {
-            return <Copy className="align-text-top c-pointer" onClick={handleClick} size={13} />;
+            return <Copy className="align-middle c-pointer" onClick={handleClick} size={13} />;
         } else if (state === 'copied') {
-            return <CheckCircle className="align-text-top" size={13} />;
+            return <CheckCircle className="align-middle" size={13} />;
         } else if (state === 'errored') {
             return (
                 <span title="Please check your browser's copy permissions.">
-                    <XCircle className="align-text-top" size={13} />
+                    <XCircle className="align-middle" size={13} />
                 </span>
             );
         }
@@ -53,29 +53,29 @@ export function Copyable({
 
     function PrependCopyIcon() {
         return (
-            <>
-                <span className="font-size-tiny me-2">
+            <div className="d-flex align-items-center">
+                <div className="font-size-tiny me-2">
                     <span className={textColor}>
                         {message !== undefined && <span className="me-2">{message}</span>}
                         <CopyIcon />
                     </span>
-                </span>
-                {children}
-            </>
+                </div>
+                <div>{children}</div>
+            </div>
         );
     }
 
     function ReplaceWithMessage() {
         return (
-            <span className="d-flex flex-column flex-nowrap">
-                <span className="font-size-tiny">
+            <div className="d-flex flex-column flex-nowrap">
+                <div className="font-size-tiny">
                     <span className={textColor}>
                         <CopyIcon />
                         <span className="ms-2">{message}</span>
                     </span>
-                </span>
-                <span className="v-hidden">{children}</span>
-            </span>
+                </div>
+                <div className="v-hidden">{children}</div>
+            </div>
         );
     }
 
