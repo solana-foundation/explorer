@@ -1,6 +1,13 @@
 import { Address } from '@components/common/Address';
+import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { useFetchAccountInfo, useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
-import { ParsedInstruction, ParsedTransaction, PublicKey, SignatureResult } from '@solana/web3.js';
+import {
+    ParsedInstruction,
+    ParsedTransaction,
+    PublicKey,
+    SignatureResult,
+    TransactionInstruction,
+} from '@solana/web3.js';
 import { normalizeTokenAmount } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
@@ -8,6 +15,7 @@ import { create } from 'superstruct';
 import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
+import { CProp, CType } from '@/app/types/generics';
 import { Cluster } from '@/app/utils/cluster';
 import { TOKEN_IDS } from '@/app/utils/programs';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
@@ -15,41 +23,51 @@ import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 import { InstructionCard } from '../InstructionCard';
 import { IX_STRUCTS, IX_TITLES, TokenAmountUi, TokenInstructionType } from './types';
 
-type DetailsProps = {
-    tx: ParsedTransaction;
-    ix: ParsedInstruction;
-    result: SignatureResult;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-};
+//type DetailsProps<D> = Pick<
+//InfoProps<D>,
+//'ix' | 'result' | 'index' | 'innerCards' | 'childIndex' | 'InstructionCardComponent'
+//> & {
+//tx: ParsedTransaction;
+//};
 
-export function TokenDetailsCard(props: DetailsProps) {
+type TokenDetailsCardProps<D extends CType> = {
+    InstructionCardComponent?: D;
+    tx: ParsedTransaction;
+} & Omit<CProp<D>, 'title'> &
+    Omit<InfoProps<D>, 'info' | 'title'>;
+
+export function TokenDetailsCard<D extends CType>(
+    //props: Pick<InfoProps<D>, 'childIndex' | 'index' | 'innerCards' | 'ix' | 'InstructionCardComponent' | 'result'> & {
+    //tx: ParsedTransaction;
+    //}
+    props: TokenDetailsCardProps<D>
+) {
     const parsed = create(props.ix.parsed, ParsedInfo);
     const { type: rawType, info } = parsed;
     console.log({ rawType }, props);
     const type = create(rawType, TokenInstructionType);
     console.log(888, { type }, info);
+    console.log(99, -1, props);
     const title = `${TOKEN_IDS[props.ix.programId.toString()]}: ${IX_TITLES[type]}`;
     const created = create(info, IX_STRUCTS[type] as any);
-    return <TokenInstruction title={title} info={created} {...props} />;
+    return <TokenInstruction<D> title={title} info={created} {...props} />;
 }
 
-type InfoProps = {
-    ix: ParsedInstruction;
+type InfoProps<D extends CType> = {
+    //childIndex?: number;
+    //index: number;
     info: any;
-    result: SignatureResult;
-    index: number;
-    title: string;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-};
+    //innerCards?: JSX.Element[];
+    InstructionCardComponent?: D;
+    ix: TransactionInstruction | ParsedInstruction;
+    //result: SignatureResult;
+} & CProp<D>;
 
 async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
     return await getTokenInfo(new PublicKey(address), cluster, url);
 }
 
-function TokenInstruction(props: InfoProps) {
+function TokenInstruction<D extends CType>({ InstructionCardComponent = InstructionCard, ...props }: InfoProps<D>) {
     const { mintAddress: infoMintAddress, tokenAddress } = React.useMemo(() => {
         let mintAddress: string | undefined;
         let tokenAddress: string | undefined;
@@ -69,8 +87,8 @@ function TokenInstruction(props: InfoProps) {
             tokenAddress,
         };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
-    const tokenInfo = useTokenAccountInfo(tokenAddress);
-    console.log(77777, infoMintAddress, "|", tokenAddress, tokenInfo?.mint.toBase58())
+    const tokenInfo = useTokenAccountInfo(tokenAddress, props.c === 1);
+    console.log(77777, infoMintAddress, '|', tokenAddress, tokenInfo?.mint.toBase58(), tokenInfo);
     const mintAddress = infoMintAddress || tokenInfo?.mint.toBase58();
     const mintInfo = useMintAccountInfo(mintAddress);
     const fetchAccountInfo = useFetchAccountInfo();
@@ -92,7 +110,7 @@ function TokenInstruction(props: InfoProps) {
         mintAddress ? getTokenInfoSwrKey(mintAddress, cluster, url) : null,
         fetchTokenInfo
     );
-    console.log(7777, tokenDetails, mintAddress)
+    console.log(7777, tokenDetails, mintAddress);
     const attributes: JSX.Element[] = [];
     let decimals = mintInfo?.decimals;
     let tokenSymbol = '';
@@ -101,6 +119,9 @@ function TokenInstruction(props: InfoProps) {
         decimals = props.info.tokenAmount.decimals;
     }
 
+    if (props.c == 1) {
+        console.log(666, { tokenAddress, tokenInfo }, mintAddress);
+    }
     if (mintAddress) {
         if (tokenDetails) {
             tokenSymbol = tokenDetails.symbol;
@@ -178,15 +199,17 @@ function TokenInstruction(props: InfoProps) {
     }
 
     return (
-        <InstructionCard
+        <InstructionCardComponent
             ix={props.ix}
             index={props.index}
             result={props.result}
             title={props.title}
             innerCards={props.innerCards}
             childIndex={props.childIndex}
+            raw={props.raw}
+            message={props.message}
         >
             {attributes}
-        </InstructionCard>
+        </InstructionCardComponent>
     );
 }

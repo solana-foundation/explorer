@@ -1,4 +1,5 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
+import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
 import { useCluster } from '@providers/cluster';
 import {
     ComputeBudgetProgram,
@@ -16,10 +17,11 @@ import { useAnchorProgram } from '@/app/providers/anchor';
 import { intoPartialParsedTransactionFromTransactionInstruction } from '@/app/utils/parsed-tx';
 import { tokenProgramTransactionInstructionParser } from '@/app/utils/parsers';
 
+import { InspectorInstructionCard } from '../common/InspectorInstructionCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
+import { InstructionCard } from '../instruction/InstructionCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
-import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
 import { intoParsedInstruction } from './into-parsed-data';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
@@ -29,13 +31,13 @@ export function InstructionsSection({ message }: { message: VersionedMessage }) 
     return (
         <>
             {message.compiledInstructions.map((ix, index) => {
-                return <InspectorInstructionCard key={index} {...{ index, ix, message }} />;
+                return <InstructionsSectionInstructionCard key={index} {...{ index, ix, message }} />;
             })}
         </>
     );
 }
 
-function InspectorInstructionCard({
+function InstructionsSectionInstructionCard({
     message,
     ix,
     index,
@@ -150,12 +152,16 @@ function InspectorInstructionCard({
             console.log(888, 9, tx.message.instructions[0]);
 
             return (
-                <TokenDetailsCard
+                <TokenDetailsCard<typeof InspectorInstructionCard>
                     key={index}
                     ix={tx.message.instructions[0] as ParsedInstruction}
                     tx={tx}
                     index={index}
                     result={result}
+                    InstructionCardComponent={InspectorInstructionCard}
+                    message={message}
+                    raw={ix}
+                    c={1}
                 />
             );
         }
