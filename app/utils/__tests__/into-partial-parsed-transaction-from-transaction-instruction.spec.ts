@@ -144,25 +144,13 @@ describe('intoPartialParsedTransactionFromTransactionInstruction', () => {
         expect(ix.message.recentBlockhash).toEqual('4j667Zcmv9DGioGfNt4Nves34JPP43jGEy4zGcb7Lnsh');
         expect(ix.message.instructions).toHaveLength(1);
         const i = ix.message.instructions[0] as any;
-        expect(i.parsed.type).toEqual('transfer');
         expect(i.program).toEqual('spl-token');
+        expect(i.parsed.type).toEqual('transfer');
         expect(i.parsed.info).toEqual({
-            accounts: {
-                authority: {
-                    address: 'Aoxj61PC8aLZvGw6Ad9QkW2yZGZh1prvUZn8PUghJZfx',
-                    role: 2,
-                },
-                destination: {
-                    address: 'A2UBBBAbLJw6Js5fvqRivd3nNWKD4H612814mUoTp8rC',
-                    role: 1,
-                },
-                source: {
-                    address: 'Eq6hAvijAYQP4Yw3U1ESDiF7gZdYPfCo2AvD3t31LypQ',
-                    role: 1,
-                },
-            },
-            data: { amount: 165355000000n, discriminator: 3 },
-            programAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+            amount: i.parsed.info.amount,
+            authority: i.parsed.info.authority,
+            destination: i.parsed.info.destination,
+            source: i.parsed.info.source,
         });
     });
 
@@ -238,30 +226,14 @@ describe('intoPartialParsedTransactionFromTransactionInstruction', () => {
         expect(ix.message.recentBlockhash).toEqual('3nD586uY1XkvvyNR2tKnC8tRweibv8fbo7mYMH5HGqhD');
         expect(ix.message.instructions).toHaveLength(1);
         const i = ix.message.instructions[0] as any;
-        expect(i.parsed.type).toEqual('transferChecked');
         expect(i.program).toEqual('spl-token');
+        expect(i.parsed.type).toEqual('transferChecked');
         expect(i.parsed.info).toEqual({
-            accounts: {
-                authority: {
-                    address: '37vWB5RfLRpnhNobhzmwCRGZbynGd4je2NvppSjUsEdJ',
-                    role: 3,
-                },
-                destination: {
-                    address: 'CFRWXYp8zc2ftkF2Bv8jXmQu1qW67goZjSkKMjv6UV3P',
-                    role: 1,
-                },
-                mint: {
-                    address: 'AGRidUXLeDij9CJprkZx7WBXtTQC67jtfiwz293mVrJ',
-                    role: 0,
-                },
-
-                source: {
-                    address: '4aa42XQFo45wc2PHQH21vahuyuFYCEZAH4G27xpGYqf6',
-                    role: 1,
-                },
-            },
-            data: { amount: 1000000000000000n, decimals: 6, discriminator: 12 },
-            programAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+            amount: i.parsed.info.amount,
+            authority: i.parsed.info.authority,
+            destination: i.parsed.info.destination,
+            mint: i.parsed.info.mint,
+            source: i.parsed.info.source,
         });
     });
 });

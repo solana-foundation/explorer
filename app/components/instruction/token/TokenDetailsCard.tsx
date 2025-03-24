@@ -1,5 +1,4 @@
 import { Address } from '@components/common/Address';
-import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { useFetchAccountInfo, useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
 import {
     ParsedInstruction,
@@ -15,7 +14,7 @@ import { create } from 'superstruct';
 import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
-import { CProp, CType } from '@/app/types/generics';
+import { CType } from '@/app/types/generics';
 import { Cluster } from '@/app/utils/cluster';
 import { TOKEN_IDS } from '@/app/utils/programs';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
@@ -23,51 +22,50 @@ import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 import { InstructionCard } from '../InstructionCard';
 import { IX_STRUCTS, IX_TITLES, TokenAmountUi, TokenInstructionType } from './types';
 
-//type DetailsProps<D> = Pick<
-//InfoProps<D>,
-//'ix' | 'result' | 'index' | 'innerCards' | 'childIndex' | 'InstructionCardComponent'
-//> & {
-//tx: ParsedTransaction;
-//};
+type TitleInfoLessProps = Omit<InfoProps, 'info' | 'title'>;
 
-type TokenDetailsCardProps<D extends CType> = {
-    InstructionCardComponent?: D;
+type TokenDetailsCardProps<P extends TitleInfoLessProps> = P & {
+    InstructionCardComponent?: CType;
     tx: ParsedTransaction;
-} & Omit<CProp<D>, 'title'> &
-    Omit<InfoProps<D>, 'info' | 'title'>;
+};
 
-export function TokenDetailsCard<D extends CType>(
-    //props: Pick<InfoProps<D>, 'childIndex' | 'index' | 'innerCards' | 'ix' | 'InstructionCardComponent' | 'result'> & {
-    //tx: ParsedTransaction;
-    //}
-    props: TokenDetailsCardProps<D>
-) {
-    const parsed = create(props.ix.parsed, ParsedInfo);
+export function TokenDetailsCard<P extends TitleInfoLessProps>(props: TokenDetailsCardProps<P>) {
+    // @ts-expect-error parsed as absent at TransactionInstruction
+    const parsedData = props.ix?.parsed || {};
+    // NOTE: handle absent parsed for TransactionInstruction
+    const parsed = create(parsedData, ParsedInfo);
     const { type: rawType, info } = parsed;
-    console.log({ rawType }, props);
     const type = create(rawType, TokenInstructionType);
-    console.log(888, { type }, info);
-    console.log(99, -1, props);
     const title = `${TOKEN_IDS[props.ix.programId.toString()]}: ${IX_TITLES[type]}`;
     const created = create(info, IX_STRUCTS[type] as any);
-    return <TokenInstruction<D> title={title} info={created} {...props} />;
+    return <TokenInstruction title={title} info={created} {...props} />;
 }
 
-type InfoProps<D extends CType> = {
-    //childIndex?: number;
-    //index: number;
+type InfoProps = {
+    childIndex?: number;
+    index: number;
     info: any;
-    //innerCards?: JSX.Element[];
-    InstructionCardComponent?: D;
+    innerCards?: JSX.Element[];
+    InstructionCardComponent?: CType;
     ix: TransactionInstruction | ParsedInstruction;
-    //result: SignatureResult;
-} & CProp<D>;
+    result: SignatureResult;
+    title: string;
+};
 
 async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
     return await getTokenInfo(new PublicKey(address), cluster, url);
 }
 
-function TokenInstruction<D extends CType>({ InstructionCardComponent = InstructionCard, ...props }: InfoProps<D>) {
+function TokenInstruction({
+    childIndex,
+    index,
+    innerCards,
+    InstructionCardComponent = InstructionCard,
+    ix,
+    result,
+    title,
+    ...props
+}: InfoProps) {
     const { mintAddress: infoMintAddress, tokenAddress } = React.useMemo(() => {
         let mintAddress: string | undefined;
         let tokenAddress: string | undefined;
@@ -87,8 +85,8 @@ function TokenInstruction<D extends CType>({ InstructionCardComponent = Instruct
             tokenAddress,
         };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
-    const tokenInfo = useTokenAccountInfo(tokenAddress, props.c === 1);
-    console.log(77777, infoMintAddress, '|', tokenAddress, tokenInfo?.mint.toBase58(), tokenInfo);
+    const tokenInfo = useTokenAccountInfo(tokenAddress);
+
     const mintAddress = infoMintAddress || tokenInfo?.mint.toBase58();
     const mintInfo = useMintAccountInfo(mintAddress);
     const fetchAccountInfo = useFetchAccountInfo();
@@ -110,7 +108,6 @@ function TokenInstruction<D extends CType>({ InstructionCardComponent = Instruct
         mintAddress ? getTokenInfoSwrKey(mintAddress, cluster, url) : null,
         fetchTokenInfo
     );
-    console.log(7777, tokenDetails, mintAddress);
     const attributes: JSX.Element[] = [];
     let decimals = mintInfo?.decimals;
     let tokenSymbol = '';
@@ -119,9 +116,6 @@ function TokenInstruction<D extends CType>({ InstructionCardComponent = Instruct
         decimals = props.info.tokenAmount.decimals;
     }
 
-    if (props.c == 1) {
-        console.log(666, { tokenAddress, tokenInfo }, mintAddress);
-    }
     if (mintAddress) {
         if (tokenDetails) {
             tokenSymbol = tokenDetails.symbol;
@@ -200,14 +194,13 @@ function TokenInstruction<D extends CType>({ InstructionCardComponent = Instruct
 
     return (
         <InstructionCardComponent
-            ix={props.ix}
-            index={props.index}
-            result={props.result}
-            title={props.title}
-            innerCards={props.innerCards}
-            childIndex={props.childIndex}
-            raw={props.raw}
-            message={props.message}
+            ix={ix}
+            index={index}
+            result={result}
+            title={title}
+            innerCards={innerCards}
+            childIndex={childIndex}
+            {...props} // card may receive additional props
         >
             {attributes}
         </InstructionCardComponent>

@@ -168,8 +168,6 @@ function InstructionCard({
     const key = `${index}-${childIndex}`;
     const { program: anchorProgram } = useAnchorProgram(ix.programId.toString(), url);
 
-    console.log(7777, 0, 'parsed' in ix);
-
     if ('parsed' in ix) {
         const props = {
             childIndex,

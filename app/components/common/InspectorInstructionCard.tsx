@@ -5,17 +5,22 @@ import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll
 import React from 'react';
 import { Code } from 'react-feather';
 
+import { CProp } from '@/app/types/generics';
+
 import { BaseInstructionCard, BaseProps } from './BaseInstructionCard';
 import { BaseRawDetails } from './BaseRawDetails';
 import { BaseRawParsedDetails } from './BaseRawParsedDetails';
 
-type InspectorInstructionProps = Pick<React.ComponentProps<typeof BaseInstructionCard>, 'onRequestRaw'> &
-    BaseProps & {
+type TitleLessBaseProps = Omit<BaseProps, 'title'>;
+
+type InspectorInstructionProps = Pick<CProp<typeof BaseInstructionCard>, 'onRequestRaw'> &
+    TitleLessBaseProps & {
         // raw can be used to display raw instruction information
         // depends on whether the transaction was received from blockchain (TransactionInstruction)
         // or generated at the inspector (MessageCompiledInstruction)
         raw?: TransactionInstruction | MessageCompiledInstruction;
         message: VersionedMessage;
+        title?: string; // title is optional to allow HOCs that use this card to define title themselves (TokenDetailsCard for ex.)
     };
 
 export function InspectorInstructionCard({
@@ -44,8 +49,6 @@ export function InspectorInstructionCard({
     const scrollAnchorRef = useScrollAnchor(
         getInstructionCardScrollAnchorId(childIndex != null ? [index + 1, childIndex + 1] : [index + 1])
     );
-
-    console.log(99, { defaultRaw, message, onRequestRaw, parsed: ix.parsed, raw, showRaw });
 
     return (
         <div className="card" ref={scrollAnchorRef}>

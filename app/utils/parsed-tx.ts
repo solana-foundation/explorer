@@ -182,7 +182,6 @@ export function intoParsedTransaction(transaction: VersionedTransaction | Transa
         throw new Error('Not implemented');
     } else {
         // VersionedTransaction
-        console.log(123, { transaction });
         const { signatures } = transaction;
 
         if ('accountKeys' in transaction.message) {

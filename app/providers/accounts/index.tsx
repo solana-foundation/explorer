@@ -242,10 +242,6 @@ async function fetchMultipleAccounts({
                 const pubkey = batch[i];
                 const result = results[i];
 
-                if (pubkey.toBase58() === 'Eq6hAvijAYQP4Yw3U1ESDiF7gZdYPfCo2AvD3t31LypQ') {
-                    console.log(6666, 777, dataMode, result?.data, batch.map(pk => pk.toBase58()));
-                }
-
                 let account: Account;
                 if (result === null) {
                     account = {
@@ -259,19 +255,11 @@ async function fetchMultipleAccounts({
                 } else {
                     let space: number | undefined = undefined;
                     let parsedData: ParsedData | undefined;
-if (pubkey.toBase58() === 'Eq6hAvijAYQP4Yw3U1ESDiF7gZdYPfCo2AvD3t31L') {
-
-                    console.log(6666, 777, 88, result.data);
-}
                     if ('parsed' in result.data) {
                         const accountData: ParsedAccountData = result.data;
                         space = result.data.space;
                         try {
                             parsedData = await handleParsedAccountData(connection, pubkey, accountData);
-
-                            if (pubkey.toBase58() === 'Eq6hAvijAYQP4Yw3U1ESDiF7gZdYPfCo2AvD3t31LypQ') {
-                                console.log(6666, 777, 8, parsedData);
-                            }
                         } catch (error) {
                             console.error(error, { address: pubkey.toBase58(), url });
                         }
@@ -283,14 +271,8 @@ if (pubkey.toBase58() === 'Eq6hAvijAYQP4Yw3U1ESDiF7gZdYPfCo2AvD3t31L') {
                     if (!parsedData && !('parsed' in result.data) && dataMode !== 'skip') {
                         space = result.data.length;
                         rawData = result.data;
-                    } else if (!parsedData && ArrayBuffer.isView(result.data)) {
-                        //space = Buffer.from(result.data).length;
-                        //rawData = result.data;
                     }
 
-                    if (pubkey.toBase58() === 'Eq6hAvijAYQP4Yw3U1ESDiF7gZdYPfCo2AvD3t31L') {
-                        console.log(6666, 7, -1, parsedData, result.data, space, rawData);
-                    }
                     account = {
                         data: {
                             parsed: parsedData,
@@ -421,8 +403,6 @@ async function handleParsedAccountData(
                 if (parsed.type === 'mint') {
                     const metadata = await Metadata.load(connection, await Metadata.getPDA(accountKey));
 
-                    console.log(6666, 4, metadata, accountKey, parsed);
-
                     if (metadata) {
                         // We have a valid Metadata account. Try and pull edition data.
                         const editionInfo = await getEditionInfo(metadata, connection);
@@ -514,9 +494,6 @@ export function useAccountInfo(address: string | undefined): Cache.CacheEntry<Ac
     }
     if (address === undefined) return;
 
-    if (address === 'Eq6hAvijAYQP4Yw3U1ESDiF7gZdYPfCo2AvD3t31LypQ') {
-        console.log(666, 2, address, context.entries[address], context.entries);
-    }
     return context.entries[address];
 }
 
@@ -540,11 +517,9 @@ export function useMintAccountInfo(address: string | undefined): MintAccountInfo
     }, [address, accountInfo]);
 }
 
-export function useTokenAccountInfo(address: string | undefined, b): TokenAccountInfo | undefined {
+export function useTokenAccountInfo(address: string | undefined): TokenAccountInfo | undefined {
     const accountInfo = useAccountInfo(address);
-    if (b && address === 'Eq6hAvijAYQP4Yw3U1ESDiF7gZdYPfCo2AvD3t31LypQ') {
-        console.log(666, 'AAAA', accountInfo, address);
-    }
+
     return React.useMemo(() => {
         if (address === undefined || accountInfo?.data === undefined) return;
         const account = accountInfo.data;

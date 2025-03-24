@@ -14,6 +14,7 @@ import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { useAnchorProgram } from '@/app/providers/anchor';
+import { CProp } from '@/app/types/generics';
 import { intoPartialParsedTransactionFromTransactionInstruction } from '@/app/utils/parsed-tx';
 import { tokenProgramTransactionInstructionParser } from '@/app/utils/parsers';
 
@@ -152,7 +153,7 @@ function InstructionsSectionInstructionCard({
             console.log(888, 9, tx.message.instructions[0]);
 
             return (
-                <TokenDetailsCard<typeof InspectorInstructionCard>
+                <TokenDetailsCard<CProp<typeof InspectorInstructionCard>>
                     key={index}
                     ix={tx.message.instructions[0] as ParsedInstruction}
                     tx={tx}
@@ -161,7 +162,6 @@ function InstructionsSectionInstructionCard({
                     InstructionCardComponent={InspectorInstructionCard}
                     message={message}
                     raw={ix}
-                    c={1}
                 />
             );
         }
