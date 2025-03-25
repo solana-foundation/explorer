@@ -1,0 +1,8 @@
+.next/
+.next/**
+.vscode
+.pnpmfile.cjs
+coverage/
+node_modules/
+dist/
+build/
