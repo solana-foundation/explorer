@@ -194,13 +194,22 @@ export function intoParsedTransaction(transaction: VersionedTransaction | Transa
     let parsedTransaction: ParsedTransaction;
     if ('compileMessage' in transaction) {
         // Transaction
-        // NOTE: this branch should be implemented as we'll need implementation for transaction parsing
-
-        //parsedTransaction = {
-            //message: {},
-            //signatures: signatures.map(a => a.signature !== null ? bs58.encode(a.signature) : null).filter<string>((a): a is string => a != null)
-        //};
-        throw new Error('Not implemented');
+        const message = transaction.compileMessage();
+        const accountKeys = intoParsedMessageAccount(message);
+        
+        parsedTransaction = {
+            message: {
+                accountKeys,
+                addressTableLookups: [],
+                instructions: message.instructions.map((ix) => {
+                    return intoPartiallyDecodedInstruction(ix, accountKeys);
+                }),
+                recentBlockhash: message.recentBlockhash
+            },
+            signatures: transaction.signatures
+                .map(a => a.signature !== null ? bs58.encode(a.signature) : null)
+                .filter<string>((a): a is string => a != null)
+        };
     } else {
         // VersionedTransaction
         const { signatures } = transaction;
