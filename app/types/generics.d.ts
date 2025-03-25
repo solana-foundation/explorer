@@ -1,4 +1,4 @@
-import type { ComponentProps, ComponentType, ReactComponentElement } from "react";
+import type { ComponentProps, ComponentType } from "react";
 
 /**
  * Shortcut for defining a component type with props.

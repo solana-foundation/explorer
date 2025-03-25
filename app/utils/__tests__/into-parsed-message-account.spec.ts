@@ -1,4 +1,4 @@
-import { AccountMeta, Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
+import { AccountMeta, Keypair, PublicKey } from '@solana/web3.js';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';

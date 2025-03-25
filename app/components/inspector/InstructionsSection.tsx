@@ -21,8 +21,8 @@ import { tokenProgramTransactionInstructionParser } from '@/app/utils/parsers';
 import { InspectorInstructionCard } from '../common/InspectorInstructionCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
-import { InstructionCard } from '../instruction/InstructionCard';
-import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
+//import { InstructionCard } from '../instruction/InstructionCard';
+//import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
 import { intoParsedInstruction } from './into-parsed-data';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
@@ -124,24 +124,24 @@ function InstructionsSectionInstructionCard({
         }
         case SystemProgram.programId.toString(): {
             console.log({ transactionInstruction }, message);
-            const asParsedInstruction = intoParsedInstruction(transactionInstruction);
+            //const asParsedInstruction = intoParsedInstruction(transactionInstruction);
             //const asParsedTransaction = intoParsedTransaction(tx);
             break;
-            return (
-                <SystemDetailsCard
-                    key={index}
-                    ix={asParsedInstruction}
-                    tx={asParsedInstruction}
-                    index={index}
-                    result={result}
-                    signature=""
-                    message={transactionInstruction}
-                />
-            );
+            //return (
+            //<SystemDetailsCard
+            //key={index}
+            //ix={asParsedInstruction}
+            //tx={asParsedInstruction}
+            //index={index}
+            //result={result}
+            //signature=""
+            //message={transactionInstruction}
+            ///>
+            //);
         }
         case TOKEN_PROGRAM_ADDRESS.toString(): {
             console.log({ transactionInstruction }, message);
-            const asParsedInstruction = intoParsedInstruction(transactionInstruction);
+            //const asParsedInstruction = intoParsedInstruction(transactionInstruction);
             //const asParsedTransaction = intoParsedTransaction(tx);
             const tx = intoPartialParsedTransactionFromTransactionInstruction(
                 transactionInstruction,

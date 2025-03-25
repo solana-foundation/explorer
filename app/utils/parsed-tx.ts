@@ -1,21 +1,20 @@
-import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import {
     AccountMeta,
-    Message,
+    CompiledInstruction,
     MessageCompiledInstruction,
     MessageV0,
     ParsedInstruction,
     ParsedMessage,
     ParsedMessageAccount,
     ParsedTransaction,
+    PartiallyDecodedInstruction,
     PublicKey,
-    SignaturePubkeyPair,
     Transaction,
     TransactionInstruction,
     VersionedMessage,
     VersionedTransaction,
 } from '@solana/web3.js';
-import { isWasm } from 'next/dist/build/swc';
+import bs58 from 'bs58';
 import { AccountRole, address, IAccountMeta } from 'web3js-experimental';
 
 /**
@@ -169,6 +168,28 @@ export function _parseCompiledInstructions(
   });
 }
 
+function intoPartiallyDecodedInstruction(ix: MessageCompiledInstruction | CompiledInstruction, parsedAccounts: ParsedMessageAccount[]): PartiallyDecodedInstruction {
+    if ('accountKeyIndexes' in ix) {
+        return {
+            accounts: ix.accountKeyIndexes.reduce((acc, index) => {
+                acc.push(parsedAccounts[index].pubkey);
+                return acc;
+            }, [] as PublicKey[]),
+            data: bs58.encode(ix.data),
+            programId: parsedAccounts[ix.programIdIndex].pubkey,
+        };
+    } else {
+        return {
+            accounts: ix.accounts.reduce((acc, index) => {
+                acc.push(parsedAccounts[index].pubkey);
+                return acc;
+            }, [] as PublicKey[]),
+            data: ix.data,
+            programId: parsedAccounts[ix.programIdIndex].pubkey
+        };
+    }
+}
+
 export function intoParsedTransaction(transaction: VersionedTransaction | Transaction): ParsedTransaction {
     let parsedTransaction: ParsedTransaction;
     if ('compileMessage' in transaction) {
@@ -186,35 +207,55 @@ export function intoParsedTransaction(transaction: VersionedTransaction | Transa
 
         if ('accountKeys' in transaction.message) {
             const { message } = transaction;
+            const accountKeys = intoParsedMessageAccount(message);
             parsedTransaction = {
                 message: {
-                    accountKeys: intoParsedMessageAccount(message),
+                    accountKeys,
                     addressTableLookups: message.addressTableLookups,
-                    instructions: message.instructions,
+                    instructions: message.instructions.map((ix) => {
+                        return intoPartiallyDecodedInstruction(ix, accountKeys);
+                    }),
                     recentBlockhash: message.recentBlockhash
                 },
                 signatures: signatures.map(bs58.encode)
             };
         } else if (transaction.message.version === 0) {
+            const { message } = transaction;
+            const accountKeys = intoParsedMessageAccount(message);
 
+            parsedTransaction = {
+                message: {
+                    accountKeys,
+                    addressTableLookups: message.addressTableLookups,
+                    instructions: message.compiledInstructions.map((ix) => {
+                        // use  PartiallyDecoded format as Transaction might contain instructions from different programs
+                        // NOTE: might be usefull to adopt parse mechanism in future. skip for now
+                        return intoPartiallyDecodedInstruction(ix, accountKeys);
+                    }),
+                    recentBlockhash:message.recentBlockhash
+                },
+                signatures: signatures.map(bs58.encode)
+            };
         } else {
             throw new Error('Unsupported transaction version');
         }
-
     }
 
     return parsedTransaction;
 }
 
+/**
+ *  Builds ParsedTransaction from single versioned message
+ *  @returns ParsedTransaction
+ */
 export function intoParsedTransactionFromMessage(message: VersionedMessage): ParsedTransaction {
     const vt = new VersionedTransaction(message);
-    const pt = intoParsedTransaction(vt);
-
-    return pt;
+    return intoParsedTransaction(vt);
 }
 
 /**
  * Extracts transaction signatures from VersionedTransaction or Transaction and makes a conversion into string
+ * @returns string[]
  */
 function parseTransactionSignatures(t: VersionedTransaction | Transaction): string[] {
     if ('compileMessage' in t) {

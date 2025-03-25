@@ -526,7 +526,6 @@ export function useTokenAccountInfo(address: string | undefined): TokenAccountIn
 
         try {
             if (!account.data.parsed) {
-                console.log(666, 'AAAAB', account);
                 return;
             }
             const parsedData = account.data.parsed;
