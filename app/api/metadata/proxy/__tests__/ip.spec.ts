@@ -13,11 +13,11 @@ vi.mock('dns', async () => {
         default: {
             promises: {
                 lookup: lookupFn,
-            }
+            },
         },
         promises: {
             lookup: lookupFn,
-        }
+        },
     };
 });
 

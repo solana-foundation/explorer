@@ -1,5 +1,5 @@
 import { getHashedName, getNameAccountKey, getNameOwner } from '@bonfida/spl-name-service';
-import {  getDomainKey as getANSDomainKey, getNameOwner as getANSNameOwner } from '@onsol/tldparser';
+import { getDomainKey as getANSDomainKey, getNameOwner as getANSNameOwner } from '@onsol/tldparser';
 import { Connection, PublicKey } from '@solana/web3.js';
 
 // Address of the SOL TLD
@@ -48,9 +48,9 @@ export async function getANSDomainInfo(domainTld: string, connection: Connection
         const owner = await getANSNameOwner(connection, derivedDomainKey.pubkey);
         return owner
             ? {
-                address: derivedDomainKey.pubkey.toString(),
-                owner: owner.toString(),
-            }
+                  address: derivedDomainKey.pubkey.toString(),
+                  owner: owner.toString(),
+              }
             : null;
     } catch {
         return null;

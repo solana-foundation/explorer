@@ -7,25 +7,31 @@ import {
     VersionedMessage,
 } from '@solana/web3.js';
 
-type LookupsForAccountKeyIndex = { lookupTableIndex: number, lookupTableKey: PublicKey }
+type LookupsForAccountKeyIndex = { lookupTableIndex: number; lookupTableKey: PublicKey };
 
-function findLookupAddressByIndex(accountIndex: number, message: VersionedMessage, lookupsForAccountKeyIndex: LookupsForAccountKeyIndex[]) {
+function findLookupAddressByIndex(
+    accountIndex: number,
+    message: VersionedMessage,
+    lookupsForAccountKeyIndex: LookupsForAccountKeyIndex[]
+) {
     let lookup: PublicKey;
     // dynamic means that lookups are taken based not on staticAccountKeys
-    let dynamicLookups: { isStatic: true, lookups: undefined } | { isStatic: false, lookups: LookupsForAccountKeyIndex };
+    let dynamicLookups:
+        | { isStatic: true; lookups: undefined }
+        | { isStatic: false; lookups: LookupsForAccountKeyIndex };
 
     if (accountIndex >= message.staticAccountKeys.length) {
         const lookupIndex = accountIndex - message.staticAccountKeys.length;
         lookup = lookupsForAccountKeyIndex[lookupIndex].lookupTableKey;
         dynamicLookups = {
             isStatic: false,
-            lookups: lookupsForAccountKeyIndex[lookupIndex]
+            lookups: lookupsForAccountKeyIndex[lookupIndex],
         };
     } else {
         lookup = message.staticAccountKeys[accountIndex];
         dynamicLookups = {
             isStatic: true,
-            lookups: undefined
+            lookups: undefined,
         };
     }
 
@@ -35,9 +41,9 @@ function findLookupAddressByIndex(accountIndex: number, message: VersionedMessag
 function fillAccountMetas(
     accountKeyIndexes: number[],
     message: VersionedMessage,
-    lookupsForAccountKeyIndex: LookupsForAccountKeyIndex[],
+    lookupsForAccountKeyIndex: LookupsForAccountKeyIndex[]
 ) {
-    const accountMetas = accountKeyIndexes.map((accountIndex) => {
+    const accountMetas = accountKeyIndexes.map(accountIndex => {
         const { lookup } = findLookupAddressByIndex(accountIndex, message, lookupsForAccountKeyIndex);
 
         const isSigner = accountIndex < message.header.numRequiredSignatures;
@@ -54,7 +60,11 @@ function fillAccountMetas(
     return accountMetas;
 }
 
-export function findLookupAddress(accountIndex: number, message: VersionedMessage, lookupsForAccountKeyIndex: LookupsForAccountKeyIndex[]) {
+export function findLookupAddress(
+    accountIndex: number,
+    message: VersionedMessage,
+    lookupsForAccountKeyIndex: LookupsForAccountKeyIndex[]
+) {
     return findLookupAddressByIndex(accountIndex, message, lookupsForAccountKeyIndex);
 }
 
@@ -79,7 +89,7 @@ export function fillAddressTableLookupsAccounts(addressTableLookups: MessageAddr
 
 export function intoTransactionInstructionFromVersionedMessage(
     compiledInstruction: MessageCompiledInstruction,
-    originalMessage: VersionedMessage,
+    originalMessage: VersionedMessage
 ): TransactionInstruction {
     const { accountKeyIndexes, data } = compiledInstruction;
     const { addressTableLookups } = originalMessage;
@@ -96,7 +106,7 @@ export function intoTransactionInstructionFromVersionedMessage(
         const lookupIndex = compiledInstruction.programIdIndex - originalMessage.staticAccountKeys.length;
         programId = addressTableLookups[lookupIndex].accountKey;
     }
-    if (!programId) throw new Error("Program ID not found");
+    if (!programId) throw new Error('Program ID not found');
 
     const accountMetas = fillAccountMetas(accountKeyIndexes, originalMessage, lookupAccounts);
 
