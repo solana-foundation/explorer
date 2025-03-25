@@ -9,6 +9,7 @@
         "scan": "next dev & react-scan localhost:3000",
         "lint": "next lint",
         "format": "prettier --config .prettierrc.cjs \"app/**/*.{ts,tsx}\" \"*.{ts,tsx,json,mts,mjs,cjs}\" --check",
+        "format:ci": "pnpm format",
         "coverage": "vitest --coverage",
         "test": "vitest --watch",
         "test:ci": "vitest run"
