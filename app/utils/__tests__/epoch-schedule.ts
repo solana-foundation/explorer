@@ -1,11 +1,11 @@
-import { EpochSchedule, getEpochForSlot, getFirstSlotInEpoch, getLastSlotInEpoch } from "../epoch-schedule";
+import { EpochSchedule, getEpochForSlot, getFirstSlotInEpoch, getLastSlotInEpoch } from '../epoch-schedule';
 
 describe('getEpoch', () => {
     it('returns the correct epoch for a slot after `firstNormalSlot`', () => {
         const schedule: EpochSchedule = {
             firstNormalEpoch: 0n,
             firstNormalSlot: 0n,
-            slotsPerEpoch: 432_000n
+            slotsPerEpoch: 432_000n,
         };
 
         expect(getEpochForSlot(schedule, 1n)).toEqual(0n);
@@ -19,7 +19,7 @@ describe('getEpoch', () => {
         const schedule: EpochSchedule = {
             firstNormalEpoch: 100n,
             firstNormalSlot: 3_200n,
-            slotsPerEpoch: 432_000n
+            slotsPerEpoch: 432_000n,
         };
 
         expect(getEpochForSlot(schedule, 1n)).toEqual(0n);
@@ -33,7 +33,7 @@ describe('getFirstSlotInEpoch', () => {
         const schedule: EpochSchedule = {
             firstNormalEpoch: 0n,
             firstNormalSlot: 0n,
-            slotsPerEpoch: 100n
+            slotsPerEpoch: 100n,
         };
 
         expect(getFirstSlotInEpoch(schedule, 1n)).toEqual(100n);
@@ -45,7 +45,7 @@ describe('getFirstSlotInEpoch', () => {
         const schedule: EpochSchedule = {
             firstNormalEpoch: 100n,
             firstNormalSlot: 100_000n,
-            slotsPerEpoch: 100n
+            slotsPerEpoch: 100n,
         };
 
         expect(getFirstSlotInEpoch(schedule, 0n)).toEqual(0n);
@@ -60,7 +60,7 @@ describe('getLastSlotInEpoch', () => {
         const schedule: EpochSchedule = {
             firstNormalEpoch: 0n,
             firstNormalSlot: 0n,
-            slotsPerEpoch: 100n
+            slotsPerEpoch: 100n,
         };
 
         expect(getLastSlotInEpoch(schedule, 1n)).toEqual(199n);
@@ -72,7 +72,7 @@ describe('getLastSlotInEpoch', () => {
         const schedule: EpochSchedule = {
             firstNormalEpoch: 100n,
             firstNormalSlot: 100_000n,
-            slotsPerEpoch: 100n
+            slotsPerEpoch: 100n,
         };
 
         expect(getLastSlotInEpoch(schedule, 0n)).toEqual(31n);
@@ -81,4 +81,3 @@ describe('getLastSlotInEpoch', () => {
         expect(getLastSlotInEpoch(schedule, 10n)).toEqual(65_503n);
     });
 });
-

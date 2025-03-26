@@ -8,9 +8,9 @@ const REPO = 'solana-improvement-documents';
 const BRANCH = 'main';
 const PATH_COMPONENT = 'proposals';
 
-export function getLink(simdLink: string){
+export function getLink(simdLink: string) {
     // All the READMEs are stored at the same directory. That's why we only need the file name.
-    const components = simdLink.split("/");
+    const components = simdLink.split('/');
     const file = components[components.length - 1];
 
     const uri = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${PATH_COMPONENT}/${file}`;
@@ -32,7 +32,7 @@ export async function fetchFeatureGateInformation(featureInfo?: FeatureInfoType)
         if (!resp.ok) return empty;
 
         return resp.text();
-    } catch (e){
+    } catch (e) {
         console.debug('Can not fetch link:', link);
         return empty;
     }

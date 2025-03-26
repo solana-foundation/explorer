@@ -8,7 +8,8 @@
         "start": "next start",
         "scan": "next dev & react-scan localhost:3000",
         "lint": "next lint",
-        "format": "prettier **.{ts,tsx} *.json --check",
+        "format": "prettier --config .prettierrc.cjs \"app/**/*.{ts,tsx}\" \"*.{ts,tsx,json,mts,mjs,cjs}\" --check",
+        "format:ci": "pnpm format",
         "coverage": "vitest --coverage",
         "test": "vitest --watch",
         "test:ci": "vitest run"
@@ -104,7 +105,6 @@
         "sass": "^1.53.0",
         "vitest": "^3.0.8"
     },
-    "prettier": "@solana/prettier-config-solana",
     "browserslist": {
         "production": [
             ">0.2% and supports bigint and not dead",
