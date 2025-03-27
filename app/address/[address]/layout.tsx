@@ -736,7 +736,7 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
         tabComponents.push({
             component: (
                 <React.Suspense key={extensionsTab.slug} fallback={<></>}>
-                    <ExtensionsLink tab={extensionsTab} address={pubkey.toString()} />
+                    <TokenExtensionsLink tab={extensionsTab} address={pubkey.toString()} />
                 </React.Suspense>
             ),
             tab: extensionsTab,
@@ -894,7 +894,7 @@ function ProgramMultisigLink({
     );
 }
 
-function ExtensionsLink({ address, tab }: { address: string; tab: Tab }) {
+function TokenExtensionsLink({ address, tab }: { address: string; tab: Tab }) {
     const accountDataPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
