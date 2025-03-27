@@ -5,7 +5,9 @@
         "semi": ["error", "always"],
         // Temporary rule to ignore any explicit any type warnings in TypeScript files
         "@typescript-eslint/no-explicit-any": "off",
-        "object-curly-spacing": ["error", "always"]
+        "object-curly-spacing": ["error", "always"],
+        // Do not rely on non-null assertions, please. Make it off to see other errors.
+        "@typescript-eslint/no-non-null-assertion": "off"
     },
     "overrides": [
         // Only uses Testing Library lint rules in test files
