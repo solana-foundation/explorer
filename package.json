@@ -28,6 +28,7 @@
         "@react-hook/previous": "^1.0.1",
         "@solana-program/compute-budget": "^0.6.1",
         "@solana-program/token": "^0.5.1",
+        "@solana-program/token-2022": "^0.4.0",
         "@solana/buffer-layout": "^3.0.0",
         "@solana/spl-account-compression": "^0.1.8",
         "@solana/spl-token": "^0.1.8",

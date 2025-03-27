@@ -5,7 +5,7 @@ import { TextEncoder } from 'util';
 global.TextEncoder = TextEncoder;
 
 if (!AbortSignal.timeout) {
-    AbortSignal.timeout = (ms) => {
+    AbortSignal.timeout = ms => {
         const controller = new AbortController();
         setTimeout(() => controller.abort(), ms);
         return controller.signal;
@@ -17,9 +17,6 @@ if (!AbortSignal.timeout) {
 const originalHasInstance = Uint8Array[Symbol.hasInstance];
 Object.defineProperty(Uint8Array, Symbol.hasInstance, {
     value(potentialInstance: any) {
-        return (
-            originalHasInstance.call(this, potentialInstance) ||
-            Buffer.isBuffer(potentialInstance)
-        );
+        return originalHasInstance.call(this, potentialInstance) || Buffer.isBuffer(potentialInstance);
     },
 });
