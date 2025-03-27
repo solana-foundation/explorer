@@ -12,7 +12,7 @@ import {
 /**
  * These tests cover examples from the devnet
  */
-describe('intoTransactionInstructionFromVersionedMessage', () => {
+describe('inspector utils', () => {
     test('should return ComputeBudget TransactionInstruction', async () => {
         const compiledInstruction: MessageCompiledInstruction = {
             accountKeyIndexes: [],
