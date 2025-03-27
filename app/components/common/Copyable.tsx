@@ -53,7 +53,7 @@ export function Copyable({
 
     function PrependCopyIcon() {
         return (
-            <div className="d-flex align-items-center">
+            <div className="d-flex align-items-center justify-content-end">
                 <div className="font-size-tiny me-2">
                     <span className={textColor}>
                         {message !== undefined && <span className="me-2">{message}</span>}
