@@ -7,7 +7,7 @@
         "baseColor": "neutral",
         "cssVariables": false,
         "prefix": "e-",
-        "version": "v4" 
+        "version": "v4"
     },
     "rsc": false,
     "tsx": true,

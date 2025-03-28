@@ -8,7 +8,7 @@
         "start": "next start",
         "scan": "next dev & react-scan localhost:3000",
         "lint": "next lint",
-        "format": "prettier **.{ts,tsx} *.json --check",
+        "format": "prettier --config .prettierrc.cjs **.{ts,tsx} *.json --check",
         "gen": "pnpx shadcn@2.4.0-canary.17 add",
         "coverage": "vitest --coverage",
         "test": "vitest --watch",
@@ -108,6 +108,7 @@
         "jest-environment-jsdom": "29.5.0",
         "jsdom": "^26.0.0",
         "postcss": "^8.5.3",
+        "prettier-plugin-tailwindcss": "^0.6.11",
         "react-scan": "^0.0.26",
         "sass": "^1.53.0",
         "tailwindcss": "4.0.17",
@@ -135,7 +136,8 @@
             "avsc": "git://github.com/Irys-xyz/avsc#a730cc8018b79e114b6a3381bbb57760a24c6cef",
             "cross-fetch": "^3.1.5",
             "node-fetch": "^2.6.9",
-            "uuid": "^9.0.0"
+            "uuid": "^9.0.0",
+            "prettier": "^3.0"
         }
     },
     "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
