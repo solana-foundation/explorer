@@ -4,5 +4,12 @@ export default {
     theme: {
         extend: {},
     },
+    layers: {
+        theme: false,
+        base: false,
+        utilities: true,
+        components: true
+    },
     plugins: [],
+    prefix: 'e'
 };
