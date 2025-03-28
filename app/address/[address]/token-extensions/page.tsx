@@ -1,3 +1,5 @@
+import './styles.css';
+
 import { TokenExtensionsCard } from '@components/account/TokenExtensionsCard';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
