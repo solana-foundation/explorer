@@ -1,15 +1,28 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
+import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
 import { useCluster } from '@providers/cluster';
-import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { ComputeBudgetProgram, MessageCompiledInstruction, VersionedMessage } from '@solana/web3.js';
+import {
+    ComputeBudgetProgram,
+    MessageCompiledInstruction,
+    ParsedInstruction,
+    SystemProgram,
+    VersionedMessage,
+} from '@solana/web3.js';
+import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { getProgramName } from '@utils/tx';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { useAnchorProgram } from '@/app/providers/anchor';
+import { CProp } from '@/app/types/generics';
+import { intoPartialParsedTransactionFromTransactionInstruction } from '@/app/utils/parsed-tx';
+import { tokenProgramTransactionInstructionParser } from '@/app/utils/parsers';
 
+import { InspectorInstructionCard } from '../common/InspectorInstructionCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
+//import { InstructionCard } from '../instruction/InstructionCard';
+//import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
 import { intoParsedInstruction } from './into-parsed-data';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
@@ -19,13 +32,13 @@ export function InstructionsSection({ message }: { message: VersionedMessage }) 
     return (
         <>
             {message.compiledInstructions.map((ix, index) => {
-                return <InspectorInstructionCard key={index} {...{ index, ix, message }} />;
+                return <InstructionsSectionInstructionCard key={index} {...{ index, ix, message }} />;
             })}
         </>
     );
 }
 
-function InspectorInstructionCard({
+function InstructionsSectionInstructionCard({
     message,
     ix,
     index,
@@ -80,8 +93,10 @@ function InspectorInstructionCard({
     //  - result is `err: null` as at this point there should not be errors
     const result = { err: null };
     const signature = '';
+
+    console.log(transactionInstruction?.programId.toString());
     switch (transactionInstruction?.programId.toString()) {
-        case ASSOCIATED_TOKEN_PROGRAM_ID.toString(): {
+        case ASSOCIATED_TOKEN_PROGRAM_ADDRESS.toString(): {
             // NOTE: current limitation is that innerInstructions won't be present at the AssociatedTokenDetailsCard. For that purpose we might need to simulateTransactions to get them.
 
             const asParsedInstruction = intoParsedInstruction(transactionInstruction);
@@ -105,6 +120,49 @@ function InspectorInstructionCard({
                     result={result}
                     signature={signature}
                     InstructionCardComponent={BaseInstructionCard}
+                />
+            );
+        }
+        case SystemProgram.programId.toString(): {
+            console.log({ transactionInstruction }, message);
+            //const asParsedInstruction = intoParsedInstruction(transactionInstruction);
+            //const asParsedTransaction = intoParsedTransaction(tx);
+            break;
+            //return (
+            //<SystemDetailsCard
+            //key={index}
+            //ix={asParsedInstruction}
+            //tx={asParsedInstruction}
+            //index={index}
+            //result={result}
+            //signature=""
+            //message={transactionInstruction}
+            ///>
+            //);
+        }
+        case TOKEN_PROGRAM_ADDRESS.toString(): {
+            console.log({ transactionInstruction }, message);
+            //const asParsedInstruction = intoParsedInstruction(transactionInstruction);
+            //const asParsedTransaction = intoParsedTransaction(tx);
+            const tx = intoPartialParsedTransactionFromTransactionInstruction(
+                transactionInstruction,
+                message,
+                [],
+                tokenProgramTransactionInstructionParser
+            );
+
+            console.log(888, 9, tx.message.instructions[0]);
+
+            return (
+                <TokenDetailsCard<CProp<typeof InspectorInstructionCard>>
+                    key={index}
+                    ix={tx.message.instructions[0] as ParsedInstruction}
+                    tx={tx}
+                    index={index}
+                    result={result}
+                    InstructionCardComponent={InspectorInstructionCard}
+                    message={message}
+                    raw={ix}
                 />
             );
         }

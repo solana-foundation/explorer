@@ -1,30 +1,21 @@
-import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
+import { BaseInstructionCard, BaseProps } from '@components/common/BaseInstructionCard';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
-import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import { TransactionInstruction } from '@solana/web3.js';
 import React, { useCallback, useContext } from 'react';
 
 import { SignatureContext } from './SignatureContext';
 
-type InstructionProps = {
-    title: string;
-    children?: React.ReactNode;
-    result: SignatureResult;
-    index: number;
-    ix: TransactionInstruction | ParsedInstruction;
-    defaultRaw?: boolean;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-};
+type InstructionProps = BaseProps;
 
 export function InstructionCard({
-    title,
-    children,
-    result,
-    index,
-    ix,
-    defaultRaw,
-    innerCards,
     childIndex,
+    children,
+    defaultRaw,
+    index,
+    innerCards,
+    ix,
+    result,
+    title,
 }: InstructionProps) {
     const signature = useContext(SignatureContext);
     const rawDetails = useRawTransactionDetails(signature);
