@@ -50,7 +50,7 @@ export async function GET(
             console.error('Unsupported protocol', parsedUrl.protocol);
             return respondWithError(400);
         }
-        
+
         const isPrivate = await checkURLForPrivateIP(parsedUrl);
         if (isPrivate) {
             console.error('Private IP detected', parsedUrl.hostname);
@@ -100,7 +100,7 @@ export async function GET(
     if (contentLength) {
         responseHeaders['Content-Length'] = contentLength;
     }
-    
+
     // Validate that all required headers are present
     const hasMissingHeaders = Object.values(responseHeaders).some(value => value == null);
     if (hasMissingHeaders) {
