@@ -90,7 +90,7 @@ export async function checkURLForPrivateIP(uri: URL | string) {
             for (const address of addresses) {
                 if (isPrivateIP(address.address)) {
                     return true;
-              }
+                }
             }
         } else {
             const singleResult = addresses as unknown as LookupAddressResult;
