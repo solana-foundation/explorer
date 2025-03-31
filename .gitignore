@@ -40,3 +40,9 @@ next-env.d.ts
 # vim
 *.sw*
 .editorconfig
+
+# ai
+.aider*
+.cursor
+
+.env
