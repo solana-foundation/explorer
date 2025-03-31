@@ -107,7 +107,7 @@ describe('Metadata Proxy Route', () => {
 
 describe('Metadata Proxy Route :: resource fetching', () => {
     const testUri = 'http://google.com/metadata.json';
-    const testData = { description: "Test Description", name: "Test NFT" }
+    const testData = { description: "Test Description", name: "Test NFT" };
 
     beforeEach(() => {
         process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
