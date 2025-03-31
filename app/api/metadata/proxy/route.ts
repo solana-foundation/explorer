@@ -50,7 +50,7 @@ export async function GET(
             console.error('Unsupported protocol', parsedUrl.protocol);
             return respondWithError(400);
         }
-
+        
         const isPrivate = await checkURLForPrivateIP(parsedUrl);
         if (isPrivate) {
             console.error('Private IP detected', parsedUrl.hostname);
@@ -89,12 +89,23 @@ export async function GET(
     }
 
     // preserve original cache-control headers
-    const responseHeaders = {
+    const contentLength = resourceHeaders.get('content-length');
+    const responseHeaders: Record<string, string> = {
         'Cache-Control': resourceHeaders.get('cache-control') ?? 'no-cache',
-        'Content-Length': resourceHeaders.get('content-length') as string,
-        'Content-Type': resourceHeaders.get('content-type') ?? 'application/json, charset=utf-8',
+        'Content-Type': resourceHeaders.get('content-type') ?? 'application/json; charset=utf-8',
         Etag: resourceHeaders.get('etag') ?? 'no-etag',
     };
+
+    // Only set Content-Length if it exists in the original response
+    if (contentLength) {
+        responseHeaders['Content-Length'] = contentLength;
+    }
+    
+    // Validate that all required headers are present
+    const hasMissingHeaders = Object.values(responseHeaders).some(value => value == null);
+    if (hasMissingHeaders) {
+        return respondWithError(400);
+    }
 
     if (data instanceof ArrayBuffer) {
         return new NextResponse(data, {
