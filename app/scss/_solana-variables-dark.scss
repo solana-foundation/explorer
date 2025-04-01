@@ -18,7 +18,7 @@ $black-dark: #020304 !default;
 $input-placeholder-color: $gray-600 !default;
 
 $primary: #c92f00 !default;
-$success: $primary !default;
+$success: #4BB543 !default;
 $warning: #993618 !default;
 $card-border-color: $gray-700-dark !default;
 $card-outline-color: #111 !default;
@@ -30,7 +30,20 @@ $input-group-addon-color: $white !default;
 $navbar-dark-color: $white !default;
 $navbar-light-color: $white !default;
 
+$bg-soft-scale: 80% !default;
+
 $theme-colors: (
     'black': $black,
     'gray': $gray-900-dark,
+    'success': $success,
+    'warning': $warning,
+    'primary': $primary
 ) !default;
+
+// Soft background colors
+@each $color, $value in $theme-colors {
+    .bg-#{$color}-soft {
+        background-color: rgba($value, 0.15) !important;
+        color: $value !important;
+    }
+}
