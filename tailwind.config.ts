@@ -4,12 +4,9 @@ export default {
     theme: {
         extend: {},
     },
-    layers: {
-        theme: false,
-        base: false,
-        utilities: true,
-        components: true
-    },
+    corePlugins: {
+        preflight: false,
+     },
     plugins: [],
-    prefix: 'e'
+    prefix: 'e',
 };
