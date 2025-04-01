@@ -497,3 +497,7 @@ pre {
 .feature-icon {
     font-size: 1.5rem;
 }
+
+.invert {
+    filter: invert(1) brightness(100);
+}

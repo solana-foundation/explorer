@@ -8,13 +8,14 @@
 $body-bg: #161b19 !default;
 
 $black: #232323;
-$white: #fff !default;
+$white: #ffffff;
 $gray-600: #86b8b6;
-$gray-600-dark: #343a37 !default;
-$gray-700-dark: #282d2b !default;
-$gray-800-dark: #1e2423 !default;
-$black-dark: #141816 !default;
-$input-placeholder-color: #ccc !default;
+$gray-600-dark: #1a2f47 !default;
+$gray-700-dark: #152538 !default;
+$gray-800-dark: #101b29 !default;
+$gray-900-dark: #0b131d !default;
+$black-dark: #070c12 !default;
+$input-placeholder-color: $gray-600 !default;
 
 $primary: #1dd79b !default;
 $success: #26e97e !default;
@@ -22,12 +23,11 @@ $warning: #fa62fc !default;
 $card-border-color: $gray-700-dark !default;
 $card-outline-color: #111 !default;
 
-$input-bg: transparent !default;
-$input-border-color: $gray-600-dark !default;
+$input-bg: $gray-800-dark !default;
+$input-border-color: $gray-700-dark !default;
 $input-group-addon-color: $white !default;
 
 $theme-colors: (
     'black': $black,
-    'gray': $gray-600,
-    'gray-dark': $gray-800-dark,
-);
+    'gray': $gray-900-dark,
+) !default;

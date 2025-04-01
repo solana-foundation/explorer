@@ -21,18 +21,18 @@ $gray-800: #387462;
 $gray-900: #1b4e3f;
 $black: #232323;
 
-$rainbow-1: #fa62fc;
-$rainbow-2: #be84e8;
-$rainbow-3: #79abd2;
-$rainbow-4: #38d0bd;
-$rainbow-5: #1dd79b;
+$rainbow-1: #ff3d00;
+$rainbow-2: #d91772;
+$rainbow-3: #8908c8;
+$rainbow-4: #00ffbd;
+$rainbow-5: #e400ff;
 
-$primary: #42ba96 !default;
-$primary-dark: #33a382 !default;
+$primary: #ff3d00 !default;
+$primary-dark: #e63500 !default;
 $success: #19be56 !default;
 $secondary: $gray-700;
-$danger: #b45be1;
-$warning: #d83aeb !default;
+$danger: #d91772;
+$warning: #8908c8 !default;
 $info: #43b5c5 !default;
 $light: $gray-100;
 $dark: $gray-900;
@@ -49,8 +49,25 @@ $link-color: $primary-dark;
 
 // Global
 
+body.funnel-display {
+    font-family: "Funnel Display", sans-serif !important;
+    font-optical-sizing: auto !important;
+    font-weight: 400 !important;
+    font-style: normal !important;
+}
+
 .display-2 {
-    font-family: Saira, Helvetica, sans-serif;
+    font-family: "Funnel Display", sans-serif !important;
+    font-optical-sizing: auto !important;
+    font-weight: 700 !important;
+    font-style: normal !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Funnel Display", sans-serif !important;
+    font-optical-sizing: auto !important;
+    font-weight: 600 !important;
+    font-style: normal !important;
 }
 
 .text-rainbow {
@@ -65,33 +82,33 @@ $link-color: $primary-dark;
 }
 
 .bg-rainbow-1 {
-    background: #fa62fc;
+    background: #ff3d00;
 }
 .bg-rainbow-2 {
-    background: #be84e8;
+    background: #d91772;
 }
 .bg-rainbow-3 {
-    background: #79abd2;
+    background: #8908c8;
 }
 .bg-rainbow-4 {
-    background: #38d0bd;
+    background: #00ffbd;
 }
 .bg-rainbow-5 {
-    background: #1dd79b;
+    background: #e400ff;
 }
 
 .text-rainbow-1 {
-    color: #fa62fc;
+    color: #ff3d00;
 }
 .text-rainbow-2 {
-    color: #be84e8;
+    color: #d91772;
 }
 .text-rainbow-3 {
-    color: #79abd2;
+    color: #8908c8;
 }
 .text-rainbow-4 {
-    color: #38d0bd;
+    color: #00ffbd;
 }
 .text-rainbow-5 {
-    color: #1dd79b;
+    color: #e400ff;
 }

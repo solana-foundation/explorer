@@ -23,8 +23,6 @@ import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/ind
 import { percentage } from '@utils/math';
 import React from 'react';
 
-import { UpcomingFeatures } from './utils/feature-gate/featureGate';
-
 export default function Page() {
     return (
         <StatsProvider>
@@ -42,7 +40,6 @@ export default function Page() {
                         <StatsCardBody />
                     </div>
                     <LiveTransactionStatsCard />
-                    <UpcomingFeatures />
                 </div>
             </SupplyProvider>
         </StatsProvider>

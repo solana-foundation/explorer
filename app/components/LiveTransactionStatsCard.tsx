@@ -38,18 +38,6 @@ export function LiveTransactionStatsCard() {
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </div>
             <TpsCardBody series={series} setSeries={setSeries} />
-            <div className="card-body text-center">
-                <p className="mb-0">
-                    For transaction confirmation time statistics, please visit{' '}
-                    <a href="https://www.validators.app" target="_blank" rel="noopener noreferrer">
-                        validators.app
-                    </a>{' '}
-                    or{' '}
-                    <a href="https://solscan.io" target="_blank" rel="noopener noreferrer">
-                        solscan.io
-                    </a>
-                </p>
-            </div>
         </div>
     );
 }
