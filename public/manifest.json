@@ -1,6 +1,6 @@
 {
-    "short_name": "Solana Explorer",
-    "name": "Inspect transactions, accounts, blocks, and more on the Solana blockchain",
+    "short_name": "Fogo Explorer",
+    "name": "Inspect transactions, accounts, blocks, and more on the Fogo blockchain",
     "icons": [
         {
             "src": "/icon-192.png",

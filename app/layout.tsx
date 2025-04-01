@@ -11,9 +11,11 @@ import type { Viewport } from 'next';
 import { Metadata } from 'next/types';
 
 export const metadata: Metadata = {
-    description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',
-    manifest: '/manifest.json',
-    title: 'Explorer | Solana',
+    description: 'Inspect transactions, accounts, blocks, and more on the Fogo blockchain',
+    icons: {
+        icon: '/favicon.ico',
+    },
+    title: 'Explorer | Fogo',
 };
 
 export const viewport: Viewport = {
@@ -32,7 +34,6 @@ export default function RootLayout({
             <head>
                 <link rel="icon" href="/favicon.png" type="image/png" />
                 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-                <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
                 <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
