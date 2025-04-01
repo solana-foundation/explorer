@@ -40,7 +40,7 @@ export function clusterName(cluster: Cluster): string {
 }
 
 export const MAINNET_BETA_URL = 'https://api.mainnet-beta.solana.com';
-export const TESTNET_URL = 'https://api.testnet.solana.com';
+export const TESTNET_URL = 'https://testnet.fogo.io';
 export const DEVNET_URL = 'https://api.devnet.solana.com';
 
 export function clusterUrl(cluster: Cluster, customUrl: string): string {
@@ -64,4 +64,4 @@ export function clusterUrl(cluster: Cluster, customUrl: string): string {
     }
 }
 
-export const DEFAULT_CLUSTER = Cluster.MainnetBeta;
+export const DEFAULT_CLUSTER = Cluster.Testnet;

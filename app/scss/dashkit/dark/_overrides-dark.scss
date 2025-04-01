@@ -14,8 +14,10 @@
 // Buttons
 
 .btn-white,
-.btn-light {
-    @include button-variant($gray-800-dark, $gray-600-dark);
+.btn-light,
+.btn-primary {
+    @include button-variant($primary, $primary);
+    color: $white !important;
 
     &:not(:disabled):not(.disabled):hover,
     &:not(:disabled):not(.disabled):focus,
@@ -24,9 +26,9 @@
     &:not(:disabled):not(.disabled):active:focus,
     &:not(:disabled):not(.disabled).active:focus,
     .show > &.dropdown-toggle {
-        background-color: $black-dark;
-        border-color: $gray-700-dark;
-        color: $white;
+        background-color: darken($primary, 10%);
+        border-color: darken($primary, 10%);
+        color: $white !important;
     }
 }
 

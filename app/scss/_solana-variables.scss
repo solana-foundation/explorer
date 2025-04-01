@@ -21,19 +21,19 @@ $gray-800: #387462;
 $gray-900: #1b4e3f;
 $black: #232323;
 
-$rainbow-1: #ff3d00;
-$rainbow-2: #d91772;
+$rainbow-1: #400f00;
+$rainbow-2: #b0340e;
 $rainbow-3: #8908c8;
-$rainbow-4: #00ffbd;
-$rainbow-5: #e400ff;
+$rainbow-4: #00a803;
+$rainbow-5: #cebb0f;
 
-$primary: #ff3d00 !default;
-$primary-dark: #e63500 !default;
-$success: #19be56 !default;
+$primary: #c92f00 !default;
+$primary-dark: #c92f00 !default;
+$success: $primary !default;
 $secondary: $gray-700;
-$danger: #d91772;
-$warning: #8908c8 !default;
-$info: #43b5c5 !default;
+$danger: #ff0000;
+$warning: #993618 !default;
+$info: #cebb0f !default;
 $light: $gray-100;
 $dark: $gray-900;
 
@@ -82,33 +82,33 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bg-rainbow-1 {
-    background: #ff3d00;
+    background: #400f00;
 }
 .bg-rainbow-2 {
-    background: #d91772;
+    background: #b0340e;
 }
 .bg-rainbow-3 {
     background: #8908c8;
 }
 .bg-rainbow-4 {
-    background: #00ffbd;
+    background: #00a803;
 }
 .bg-rainbow-5 {
-    background: #e400ff;
+    background: #cebb0f;
 }
 
 .text-rainbow-1 {
-    color: #ff3d00;
+    color: #400f00;
 }
 .text-rainbow-2 {
-    color: #d91772;
+    color: #b0340e;
 }
 .text-rainbow-3 {
     color: #8908c8;
 }
 .text-rainbow-4 {
-    color: #00ffbd;
+    color: #00a803;
 }
 .text-rainbow-5 {
-    color: #e400ff;
+    color: #cebb0f;
 }
