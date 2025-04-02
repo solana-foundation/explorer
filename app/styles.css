@@ -1,3 +1,9 @@
+@import 'tailwindcss/theme.css' layer(theme) prefix(e);
+
+@layer utilities {
+    @import 'tailwindcss/utilities.css' layer(utilities) prefix(e);
+
+    /* paste custom styles after this line */
+}
+
 @layer theme, utilities;
-@import "tailwindcss/theme.css" layer(theme) prefix(e);
-@import "tailwindcss/utilities.css" layer(utilities) prefix(e);

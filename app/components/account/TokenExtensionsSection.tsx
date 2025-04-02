@@ -1,22 +1,22 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@components/shared/ui/accordion';
+import { Code, ExternalLink } from 'react-feather';
 
+import { StatusBadge } from '@/app/components/shared/StatusBadge';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
-import { StatusBadge } from '@/app/components/shared/StatusBadge';
 
 import { TokenExtension } from './TokenExtensionsCard';
 
 export function TokenExtensionsSection({ extensions }: { extensions: TokenExtension[] }) {
     return (
-        <Accordion type="single" collapsible>
+        <Accordion type="single" collapsible className="e:px-0">
             {extensions.map(ext => (
                 <AccordionItem key={ext.id} value={ext.id}>
                     {/* customize classes to align chevron with inner row */}
-                    <AccordionTrigger className='fs-4 e:items-center' >
+                    <AccordionTrigger className="e:items-center">
                         <ExtensionListItem ext={ext} />
                     </AccordionTrigger>
                     <AccordionContent>
-                        234234
                         {/* Additional details can be added here if needed */}
                     </AccordionContent>
                 </AccordionItem>
@@ -27,30 +27,32 @@ export function TokenExtensionsSection({ extensions }: { extensions: TokenExtens
 
 function ExtensionListItem({ ext }: { ext: TokenExtension }) {
     return (
-        <div className="e:grid e:grid-cols-4 e:gap-4 e:w-100 e:items-center text-white e:text-base">
+        <div className="w-100 e:grid e:grid-cols-12 e:gap-2 e:w-100 e:items-center text-white e:text-base">
             {/* Name */}
-            <span className="font-medium">{ext.name}</span>
-
-            {/* Badge with tooltip */}
-            <div className="">
+            <div className="e:col-span-3 e:flex e:items-center e:gap-4 e:whitespace-nowrap e:text-sm e:font-normal">
+                <div>{ext.name}</div>
                 <Tooltip>
-                    <TooltipTrigger className='badge border-0 bg-transparent'>
+                    {/* might be needed to wrap tooltip into a wrapper that watches window borders to adjust tootip's position */}
+                    <TooltipTrigger className="badge border-0 bg-transparent">
                         <StatusBadge status={ext.status} label={ext.name} className="e:text-14" />
                     </TooltipTrigger>
-                    <TooltipContent>{ext.tooltip}</TooltipContent>
+                    <TooltipContent className="e:w-[220px]">{ext.tooltip}</TooltipContent>
                 </Tooltip>
             </div>
 
             {/* Description */}
-            <span className="text-sm">{ext.description}</span>
+            <span className="e:col-span-7 e:text-[0.75rem] e:text-[#8E9090]">
+                {ext.description}
+            </span>
 
             {/* External links badges */}
-            <div className="flex gap-1">
+            <div className="e:col-span-2 e:flex e:gap-1 text-white">
+                <a key="raw" href="javascript:void(0)" target="_blank" rel="noopener noreferrer">
+                    <Badge variant="transparent" className="text-white e:text-14 e:text-sm e:font-normal"><Code size={16}/> RAW</Badge>
+                </a>
                 {ext.externalLinks.map((link, index) => (
                     <a key={index} href={link.url} target="_blank" rel="noopener noreferrer">
-                        <Badge className="text-[10px]">
-                            {link.label}
-                        </Badge>
+                        <Badge variant="transparent" className="text-white e:text-14 e:text-sm e:font-normal"><ExternalLink size={16} />{link.label}</Badge>
                     </a>
                 ))}
             </div>
