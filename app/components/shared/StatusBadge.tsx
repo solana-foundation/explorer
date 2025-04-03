@@ -52,14 +52,8 @@ const statusBadgeTextVariants = cva('', {
 export function StatusBadge({ status, showIcon = true, className, ...props }: StatusBadgeProps) {
     return (
         <Badge className={cn(statusBadgeVariants({ status }), className)} {...props}>
-            <div className={statusBadgeTextVariants({ status })}>
-                {getStatusLabel(status)}
-            </div>
-            {showIcon && (
-                <span className={statusBadgeIconVariants({ status })}>
-                    {getStatusIcon(status)}
-                </span>
-            )}
+            <div className={statusBadgeTextVariants({ status })}>{getStatusLabel(status)}</div>
+            {showIcon && <span className={statusBadgeIconVariants({ status })}>{getStatusIcon(status)}</span>}
         </Badge>
     );
 }

@@ -12,7 +12,11 @@ function AccordionItem({ className, ...props }: React.ComponentProps<typeof Acco
     return (
         <AccordionPrimitive.Item
             data-slot="accordion-item"
-            className={cn('e-px-4 e-border-[#282d2b] e-border-b e-border-l-0 e-border-r-0 e-border-t-0 e-border-solid last:e-border-b-0', className)}
+            data-value={props.value}
+            className={cn(
+                'e-px-4 e-border-[#282d2b] e-border-b e-border-l-0 e-border-r-0 e-border-t-0 e-border-solid last:e-border-b-0',
+                className,
+            )}
             {...props}
         />
     );

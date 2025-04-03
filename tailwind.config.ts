@@ -1,4 +1,4 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
     content: ['./app/**/*.{ts,tsx}'],
@@ -7,18 +7,18 @@ const config: Config = {
     theme: {
         extend: {},
         screens: {
-            'xs': '576px',
-            'sm': '768px',
-            'md': '992px',
-            'lg': '1200px',
-            'xl': '1400px',
-            'mobile': '576px',
-            'tablet': '768px',
-            'laptop': '992px',
-            'desktop': '1200px',
+            xs: '576px',
+            sm: '768px',
+            md: '992px',
+            lg: '1200px',
+            xl: '1400px',
+            mobile: '576px',
+            tablet: '768px',
+            laptop: '992px',
+            desktop: '1200px',
             'max-xs': '575px',
-            'max-sm': '767px'
-        }
+            'max-sm': '767px',
+        },
     },
 };
 
