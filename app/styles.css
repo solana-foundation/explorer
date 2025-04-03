@@ -1,9 +1,8 @@
-@import 'tailwindcss/theme.css' layer(theme) prefix(e);
+@tailwind components;
+@tailwind utilities;
 
-@layer utilities {
-    @import 'tailwindcss/utilities.css' layer(utilities) prefix(e);
-
-    /* paste custom styles after this line */
+@media (max-width: 575px) {
+    .max-xs\:e-hidden {
+        display: none;
+    }
 }
-
-@layer theme, utilities;

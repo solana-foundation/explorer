@@ -38,11 +38,4 @@ next-env.d.ts
 .swc/
 
 # vim
-*.sw*
 .editorconfig
-
-# ai
-.aider*
-.cursor
-
-.env

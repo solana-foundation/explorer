@@ -22,6 +22,8 @@ export function TokenExtensionsCard({ address }: { address: string }) {
     const accountInfo = useAccountInfo(address);
     const refresh = useFetchAccountInfo();
 
+    console.log({ accountInfo })
+
     if (!accountInfo?.data) return null;
     const account = accountInfo.data;
 

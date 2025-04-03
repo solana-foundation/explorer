@@ -728,6 +728,10 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
 
     // Add extensions tab for Token Extensions program accounts
     if (account.owner.toBase58() === TOKEN_2022_PROGRAM_ADDRESS) {
+        const tokenAccount = account.data.parsed// as TokenProgramData;
+
+        console.log({ tokenAccount })
+
         const extensionsTab: Tab = {
             path: 'token-extensions',
             slug: 'token-extensions',

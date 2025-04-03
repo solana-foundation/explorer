@@ -6,8 +6,8 @@
         "css": "app/styles.css",
         "baseColor": "neutral",
         "cssVariables": false,
-        "prefix": "e:",
-        "version": "v4"
+        "prefix": "e-",
+        "version": "v3"
     },
     "rsc": false,
     "tsx": true,
