@@ -14,7 +14,7 @@ vi.mock('node-fetch', async () => {
     const actual = await vi.importActual('node-fetch');
     return {
         ...actual,
-        default: vi.fn()
+        default: vi.fn(),
     };
 });
 
@@ -26,11 +26,11 @@ vi.mock('dns', async () => {
         default: {
             promises: {
                 lookup: lookupFn,
-            }
+            },
         },
         promises: {
             lookup: lookupFn,
-        }
+        },
     };
 });
 
@@ -91,12 +91,15 @@ describe('Metadata Proxy Route', () => {
     });
 
     it('should handle valid response successfully', async () => {
-        await mockFileResponseOnce({ attributes: [], name: "NFT" }, new Headers({
-            'Cache-Control': 'no-cache',
-            'Content-Length': '140',
-            'Content-Type': 'application/json',
-            'Etag': 'random-etag',
-        }));
+        await mockFileResponseOnce(
+            { attributes: [], name: 'NFT' },
+            new Headers({
+                'Cache-Control': 'no-cache',
+                'Content-Length': '140',
+                'Content-Type': 'application/json',
+                Etag: 'random-etag',
+            })
+        );
         // @ts-expect-error lookup does not have mocked fn
         dns.lookup.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
 
