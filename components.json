@@ -6,7 +6,7 @@
         "css": "app/styles.css",
         "baseColor": "neutral",
         "cssVariables": false,
-        "prefix": "e-",
+        "prefix": "e:",
         "version": "v4"
     },
     "rsc": false,
