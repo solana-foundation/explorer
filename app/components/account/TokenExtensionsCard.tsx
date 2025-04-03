@@ -147,10 +147,10 @@ function populateTokenExtensions(extensions: ParsedExtension[]): ParsedTokenExte
                 // find confidentialTransfer parts by searching for the index. The are not much extensions so it won't be a bottleneck
 
                 if (!acc.has(EXTENSION_NAME)) {
-                    const data = populateConfidentialTransfer(
-                            findExtensionByKeyword('confidentialTransferMint', extensions)?.state ?? {},
-                            findExtensionByKeyword('confidentialTransferFeeConfig', extensions)?.state ?? {},
-                        )
+                    const data = {
+                            confidentialTransferMint:findExtensionByKeyword('confidentialTransferMint', extensions)?.state ?? {},
+                            confidentialTransferFeeConfig:findExtensionByKeyword('confidentialTransferFeeConfig', extensions)?.state ?? {},
+                    }
                     acc.set(EXTENSION_NAME, {
                         id: EXTENSION_NAME,
                         name: 'Confidential Transfer',
@@ -171,10 +171,10 @@ function populateTokenExtensions(extensions: ParsedExtension[]): ParsedTokenExte
                 // find confidentialTransfer parts by searching for the index. The are not much extensions so it won't be a bottleneck
 
                 if (!acc.has(EXTENSION_NAME)) {
-                    const data = populateConfidentialTransfer(
-                            findExtensionByKeyword('metadataPointer', extensions)?.state ?? {},
-                            findExtensionByKeyword('tokenMetadata', extensions)?.state ?? {},
-                        )
+                    const data = {
+                        metadataPointer:findExtensionByKeyword('metadataPointer', extensions)?.state ?? {},
+                        tokenMetadata: findExtensionByKeyword('tokenMetadata', extensions)?.state ?? {},
+                    }
                     acc.set(EXTENSION_NAME, {
                         id: EXTENSION_NAME,
                         name: 'Metadata & Metadata Pointer',
