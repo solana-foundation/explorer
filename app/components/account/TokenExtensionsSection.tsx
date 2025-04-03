@@ -5,9 +5,9 @@ import { StatusBadge } from '@/app/components/shared/StatusBadge';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
 
-import { TokenExtension } from './TokenExtensionsCard';
+import { ParsedTokenExtensionWithRawData } from './TokenExtensionsCard';
 
-export function TokenExtensionsSection({ extensions }: { extensions: TokenExtension[] }) {
+export function TokenExtensionsSection({ extensions }: { extensions: ParsedTokenExtensionWithRawData[] }) {
     return (
         <Accordion type="single" collapsible className="e-px-0">
             {extensions.map(ext => (
@@ -25,24 +25,25 @@ export function TokenExtensionsSection({ extensions }: { extensions: TokenExtens
     );
 }
 
-function ExtensionListItem({ ext }: { ext: TokenExtension }) {
+function ExtensionListItem({ ext }: { ext: ParsedTokenExtensionWithRawData }) {
     return (
         <div className="w-100 e-grid e-grid-cols-12 e-gap-2 e-w-100 e-items-center text-white e-text-base e-text-sm">
             {/* Name */}
             <div className="max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-3 lg:e-col-span-3 e-flex e-items-center e-gap-2 e-whitespace-nowrap e-font-normal xs:e-col-span-6">
                 <div>{ext.name}</div>
-                <Tooltip>
-                    {/* might be needed to wrap tooltip into a wrapper that watches window borders to adjust tootip's position */}
-                    <TooltipTrigger className="badge border-0 bg-transparent">
+                {ext.tooltip && (
+                    <Tooltip>
+                        {/* might be needed to wrap tooltip into a wrapper that watches window borders to adjust tootip's position */}
+                        <TooltipTrigger className="badge border-0 bg-transparent">
                         <StatusBadge status={ext.status} label={ext.name} className="e-text-14" />
                     </TooltipTrigger>
                     <TooltipContent className="e-w-[220px]">{ext.tooltip}</TooltipContent>
-                </Tooltip>
+                </Tooltip>)}
             </div>
 
             {/* Description */}
             <span className="max-md:e-hidden md:e-col-span-7 md:e-pl-4 lg:e-col-span-7 e-text-[0.75rem] e-text-[#8E9090]">
-                {ext.description}
+                {ext.description ?? null}
             </span>
 
             {/* External links badges */}

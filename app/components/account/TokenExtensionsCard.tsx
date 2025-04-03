@@ -1,7 +1,8 @@
 'use client';
 
+import { PublicKey } from '@solana/web3.js';
 import { AccountHeader } from '@components/common/Account';
-import { useAccountInfo, useFetchAccountInfo, useMintAccountInfo } from '@providers/accounts';
+import { useFetchAccountInfo, useMintAccountInfo } from '@providers/accounts';
 
 import { StatusType } from '@/app/components/shared/StatusBadge';
 
@@ -12,49 +13,186 @@ export type ExtensionStatus = StatusType;
 export interface TokenExtension {
     id: string;
     name: string;
-    tooltip: string;
-    description: string;
+    tooltip?: string;
+    description?: string;
     status: ExtensionStatus;
     externalLinks: { label: string; url: string }[];
 }
 
+export type ParsedTokenExtensionWithRawData = TokenExtension & {
+    parsed?: NonNullable<unknown>;
+    raw?: string;
+}
+
 export function TokenExtensionsCard({ address }: { address: string }) {
-    const accountInfo = useAccountInfo(address);
     const refresh = useFetchAccountInfo();
     const mintInfo = useMintAccountInfo(address);
+    console.log({ mintInfo: mintInfo?.extensions }, address)
 
-    console.log({ accountInfo, mintInfo })
+    if (!mintInfo) return null;
 
-    if (!accountInfo?.data) return null;
-    const account = accountInfo.data;
-
-    const extensions: TokenExtension[] = [
-        {
-            description: 'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token, providing centralized administrative control over the token ecosystem.',
-            externalLinks: [{ label: 'Docs', url: 'https://docs.example.com/permanentDelegate' }],
-            id: 'permanent-delegate',
-            name: 'permanentDelegate',
-            status: 'active',
-            tooltip:
-                "Designates an address with unrestricted authority to transfer or burn tokens from any account associated with a specific mint, effectively granting global control over that token's supply.",
-        },
-        {
-            description: 'Implements a configurable fee structure that automatically deducts a percentage during token transfers. Includes parameters for fee calculation, maximum fee limits, and designated authorities for fee collection and management.',
-            externalLinks: [{ label: 'Docs', url: 'https://docs.example.com/transferFeeConfig' }],
-            id: 'transfer-fee-config',
-            name: 'transferFeeConfig',
-            status: 'inactive',
-            tooltip:
-                'Specifies the parameters for charging fees on token transfers, including the percentage fee, the maximum fee, and the authorities responsible for configuring these fees and withdrawing the collected amounts.',
-        },
-    ];
+    const extensions = populateTokenExtensions(mintInfo.extensions ?? []);
 
     return (
         <div className="card">
-            <AccountHeader title="Extensions" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader title="Extensions" refresh={() => refresh(new PublicKey(address), 'parsed')} />
             <div className="card-body p-0">
                 <TokenExtensionsSection extensions={extensions} />
             </div>
         </div>
     );
+}
+
+type ParsedExtension = { extension: string, state?: NonNullable<unknown> }
+
+function populateTokenExtensions(extensions: ParsedExtension[]): ParsedTokenExtensionWithRawData[] {
+    function populateExternalLinks(url: string) {
+        return [{ label: 'Docs', url }]
+    }
+
+    function populateRawData(state?: NonNullable<unknown>) {
+        return state ? JSON.stringify(state, null, 2) : undefined
+    }
+
+    function findExtensionByKeyword(keyword: string, extensions: ParsedExtension[]) {
+        return extensions.find(ext => ext.extension === keyword);
+    }
+
+    function populateConfidentialTransfer(mint: NonNullable<unknown>, feeConfig: NonNullable<unknown>){
+        return {
+            id: 'confidential-transfers',
+            name: 'Confidential Transfer',
+            tooltip: undefined,
+            description: undefined,
+            status: 'active',
+            externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
+            raw: populateRawData({
+                confidentialTransferMint: mint,
+                confidentialTransferFeeConfig: feeConfig,
+            }),
+        }
+    }
+
+    /**
+     * Sample.
+     * TODO: To be removed upon editing all the details for each extension
+
+        id: 'permanent-delegate',
+        name: 'Permanent Delegate',
+        tooltip: 'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token, providing centralized administrative control over the token ecosystem.',
+        description: 'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token, providing centralized administrative control over the token ecosystem.',
+        status: 'active',
+        externalLinks: populateExternalLinks('https://solana.com/developers/guides/token-extensions/permanent-delegate'),
+        parsed: state,
+        raw: populateRawData(state),
+     */
+    const result = extensions.reduce((acc, { extension, state }) => {
+        switch(extension){
+            case 'mintCloseAuthority': {
+                acc.set(extension, {
+                    id: extension,
+                    name: 'Mint Close Authority',
+                    tooltip: undefined,
+                    description: undefined,
+                    status: 'active',
+                    externalLinks: populateExternalLinks('https://solana.com/developers/guides/token-extensions/mint-close-authority'),
+                    parsed: state,
+                    raw: populateRawData(state),
+                });
+                break;
+            }
+            case 'permanentDelegate': {
+                acc.set(extension, {
+                    id: extension,
+                    name: 'Permanent Delegate',
+                    tooltip: 'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token, providing centralized administrative control over the token ecosystem.',
+                    description: 'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token, providing centralized administrative control over the token ecosystem.',
+                    status: 'active',
+                    externalLinks: populateExternalLinks('https://solana.com/developers/guides/token-extensions/permanent-delegate'),
+                    parsed: state,
+                    raw: populateRawData(state),
+                });
+                break;
+            }
+            case 'transferFeeConfig': {
+                acc.set(extension, {
+                    id: extension,
+                    name: 'Transfer Fee',
+                    tooltip: undefined,
+                    description: undefined,
+                    status: 'active',
+                    externalLinks: populateExternalLinks('https://solana.com/developers/guides/token-extensions/transfer-fee'),
+                    parsed: state,
+                    raw: populateRawData(state),
+                });
+                break;
+            }
+            case 'transferHook': {
+                acc.set(extension, {
+                    id: extension,
+                    name: 'Transfer Hook',
+                    tooltip: undefined,
+                    description: undefined,
+                    status: 'active',
+                    externalLinks: populateExternalLinks('https://solana.com/developers/guides/token-extensions/transfer-hook'),
+                    parsed: state,
+                    raw: populateRawData(state),
+                });
+                break;
+            }
+            case 'confidentialTransferMint':
+            case 'confidentialTransferFeeConfig': {
+                const EXTENSION_NAME = 'confidentialTransfer'
+
+                // find confidentialTransfer parts by searching for the index. The are not much extensions so it won't be a bottleneck
+
+                if (!acc.has(EXTENSION_NAME)) {
+                    const data = populateConfidentialTransfer(
+                            findExtensionByKeyword('confidentialTransferMint', extensions)?.state ?? {},
+                            findExtensionByKeyword('confidentialTransferFeeConfig', extensions)?.state ?? {},
+                        )
+                    acc.set(EXTENSION_NAME, {
+                        id: EXTENSION_NAME,
+                        name: 'Confidential Transfer',
+                        tooltip: undefined,
+                        description: undefined,
+                        status: 'active',
+                        externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
+                        parsed: data,
+                        raw: populateRawData(data),
+                    });
+                }
+                break;
+            }
+            case 'metadataPointer':
+            case 'tokenMetadata': {
+                const EXTENSION_NAME = 'metadataPointer'
+
+                // find confidentialTransfer parts by searching for the index. The are not much extensions so it won't be a bottleneck
+
+                if (!acc.has(EXTENSION_NAME)) {
+                    const data = populateConfidentialTransfer(
+                            findExtensionByKeyword('metadataPointer', extensions)?.state ?? {},
+                            findExtensionByKeyword('tokenMetadata', extensions)?.state ?? {},
+                        )
+                    acc.set(EXTENSION_NAME, {
+                        id: EXTENSION_NAME,
+                        name: 'Metadata & Metadata Pointer',
+                        tooltip: undefined,
+                        description: undefined,
+                        status: 'active',
+                        externalLinks: populateExternalLinks('https://solana.com/developers/guides/token-extensions/metadata-pointer'),
+                        parsed: data,
+                        raw: populateRawData(data),
+                    });
+                }
+                break;
+            }
+            default:
+                break;
+        }
+        return acc;
+    }, new Map<string, ParsedTokenExtensionWithRawData>());
+
+    return Array.from(result.values());
 }
