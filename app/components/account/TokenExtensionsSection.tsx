@@ -9,7 +9,7 @@ import { TokenExtension } from './TokenExtensionsCard';
 
 export function TokenExtensionsSection({ extensions }: { extensions: TokenExtension[] }) {
     return (
-        <Accordion type="single" collapsible className="e-px-0 e-pt-8">
+        <Accordion type="single" collapsible className="e-px-0">
             {extensions.map(ext => (
                 <AccordionItem key={ext.id} value={ext.id}>
                     {/* customize classes to align chevron with inner row */}
@@ -29,7 +29,7 @@ function ExtensionListItem({ ext }: { ext: TokenExtension }) {
     return (
         <div className="w-100 e-grid e-grid-cols-12 e-gap-2 e-w-100 e-items-center text-white e-text-base e-text-sm">
             {/* Name */}
-            <div className="xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-3 e-flex e-items-center e-gap-4 e-whitespace-nowrap e-font-normal xs:e-col-span-6">
+            <div className="max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-3 lg:e-col-span-3 e-flex e-items-center e-gap-2 e-whitespace-nowrap e-font-normal xs:e-col-span-6">
                 <div>{ext.name}</div>
                 <Tooltip>
                     {/* might be needed to wrap tooltip into a wrapper that watches window borders to adjust tootip's position */}
@@ -41,12 +41,12 @@ function ExtensionListItem({ ext }: { ext: TokenExtension }) {
             </div>
 
             {/* Description */}
-            <span className="max-sm:e-hidden e-text-[0.75rem] e-text-[#8E9090] xs:e-grid-col-span-0">
+            <span className="max-md:e-hidden md:e-col-span-7 md:e-pl-4 lg:e-col-span-7 e-text-[0.75rem] e-text-[#8E9090]">
                 {ext.description}
             </span>
 
             {/* External links badges */}
-            <div className="xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-2 e-flex e-gap-1 text-white e-justify-end xs:e-grid-col-span-6">
+            <div className="max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-2 lg:e-col-span-2 e-flex e-gap-1 text-white e-justify-end xs:e-grid-col-span-6">
                 <a key="raw" href="javascript:void(0)" target="_blank" rel="noopener noreferrer">
                     <Badge variant="transparent" size='sm' className="text-white e-font-normal"><Code size={16}/> Raw</Badge>
                 </a>

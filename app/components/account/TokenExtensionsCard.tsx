@@ -1,7 +1,7 @@
 'use client';
 
 import { AccountHeader } from '@components/common/Account';
-import { useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
+import { useAccountInfo, useFetchAccountInfo, useMintAccountInfo } from '@providers/accounts';
 
 import { StatusType } from '@/app/components/shared/StatusBadge';
 
@@ -21,8 +21,9 @@ export interface TokenExtension {
 export function TokenExtensionsCard({ address }: { address: string }) {
     const accountInfo = useAccountInfo(address);
     const refresh = useFetchAccountInfo();
+    const mintInfo = useMintAccountInfo(address);
 
-    console.log({ accountInfo })
+    console.log({ accountInfo, mintInfo })
 
     if (!accountInfo?.data) return null;
     const account = accountInfo.data;
