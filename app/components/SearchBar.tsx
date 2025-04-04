@@ -64,46 +64,44 @@ export function SearchBar() {
         }
         const tokenOptionsAppendable = tokenOptions ? [tokenOptions] : [];
         const domainOptions =
-            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? (await buildDomainOptions(search)) ?? [] : [];
+            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta
+                ? ((await buildDomainOptions(search)) ?? [])
+                : [];
 
         return [...localOptions, ...tokenOptionsAppendable, ...domainOptions];
     }
 
     const resetValue = '' as any;
     return (
-        <div className="container my-4">
-            <div className="row align-items-center">
-                <div className="col">
-                    <AsyncSelect
-                        cacheOptions
-                        defaultOptions
-                        loadOptions={performSearch}
-                        autoFocus
-                        inputId={useId()}
-                        ref={selectRef}
-                        noOptionsMessage={() => 'No Results'}
-                        loadingMessage={() => 'loading...'}
-                        placeholder="Search for blocks, accounts, transactions, programs, and tokens"
-                        value={resetValue}
-                        inputValue={search}
-                        blurInputOnSelect
-                        onMenuClose={() => selectRef.current?.blur()}
-                        onChange={onChange}
-                        styles={{
-                            input: style => ({ ...style, width: '100%' }),
-                            /* work around for https://github.com/JedWatson/react-select/issues/3857 */
-                            placeholder: style => ({ ...style, pointerEvents: 'none' }),
-                        }}
-                        onInputChange={onInputChange}
-                        components={{ DropdownIndicator }}
-                        classNamePrefix="search-bar"
-                        /* workaround for https://github.com/JedWatson/react-select/issues/5714 */
-                        onFocus={() => {
-                            selectRef.current?.handleInputChange(search, { action: 'set-value' });
-                        }}
-                    />
-                </div>
-            </div>
+        <div className='w-100'>
+            <AsyncSelect
+                cacheOptions
+                defaultOptions
+                loadOptions={performSearch}
+                autoFocus
+                inputId={useId()}
+                ref={selectRef}
+                noOptionsMessage={() => 'No Results'}
+                loadingMessage={() => 'loading...'}
+                placeholder="Search for blocks, accounts, transactions, programs, and tokens"
+                value={resetValue}
+                inputValue={search}
+                blurInputOnSelect
+                onMenuClose={() => selectRef.current?.blur()}
+                onChange={onChange}
+                styles={{
+                    input: style => ({ ...style, width: '100%' }),
+                    /* work around for https://github.com/JedWatson/react-select/issues/3857 */
+                    placeholder: style => ({ ...style, pointerEvents: 'none' }),
+                }}
+                onInputChange={onInputChange}
+                components={{ DropdownIndicator }}
+                classNamePrefix="search-bar"
+                /* workaround for https://github.com/JedWatson/react-select/issues/5714 */
+                onFocus={() => {
+                    selectRef.current?.handleInputChange(search, { action: 'set-value' });
+                }}
+            />
         </div>
     );
 }

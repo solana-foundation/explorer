@@ -14,9 +14,9 @@
     border-style: solid;
 }
 
-.navbar > [class*='container'] {
-    padding-left: 0;
-    padding-right: 0;
+.navbar > .container {
+   width: 100%;
+   min-width: 100%;
 }
 
 // Navbar dark

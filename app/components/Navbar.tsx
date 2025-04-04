@@ -5,11 +5,15 @@ import { useClusterPath } from '@utils/url';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSelectedLayoutSegment, useSelectedLayoutSegments } from 'next/navigation';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import { ClusterStatusButton } from './ClusterStatusButton';
 
-export function Navbar() {
+export interface INavbarProps {
+    children?: ReactNode;
+}
+
+export function Navbar({ children }: INavbarProps) {
     // TODO: use `collapsing` to animate collapsible navbar
     const [collapse, setCollapse] = React.useState(false);
     const homePath = useClusterPath({ pathname: '/' });
@@ -18,17 +22,19 @@ export function Navbar() {
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const selectedLayoutSegments = useSelectedLayoutSegments();
     return (
-        <nav className="navbar navbar-expand-md navbar-light">
-            <div className="container">
+        <nav className="navbar navbar-expand-lg navbar-light">
+            <div className="container px-4">
                 <Link href={homePath}>
-                    <Image alt="Solana Explorer" height={22} src={Logo} width={250} />
+                    <Image alt="Solana Explorer" height={22} src={Logo} width={214} />
                 </Link>
 
                 <button className="navbar-toggler" type="button" onClick={() => setCollapse(value => !value)}>
                     <span className="navbar-toggler-icon"></span>
                 </button>
 
-                <div className={`collapse navbar-collapse ms-auto me-4 ${collapse ? 'show' : ''}`}>
+                <div className="navbar-children d-flex align-items-center flex-grow-1 w-100 h-100 px-4 d-none d-lg-block">{children}</div>
+
+                <div className={`collapse navbar-collapse ms-auto me-4 ${collapse ? 'show' : ''} flex-shrink-0`}>
                     <ul className="navbar-nav me-auto">
                         <li className="nav-item">
                             <Link
@@ -61,7 +67,7 @@ export function Navbar() {
                     </ul>
                 </div>
 
-                <div className="d-none d-md-block">
+                <div className="d-none d-lg-block flex-shrink-0">
                     <ClusterStatusButton />
                 </div>
             </div>

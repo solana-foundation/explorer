@@ -2,33 +2,14 @@
 
 import { useCluster, useClusterModal } from '@providers/cluster';
 import { Cluster, ClusterStatus } from '@utils/cluster';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { AlertCircle, CheckCircle } from 'react-feather';
 
-export function ClusterStatusBanner() {
-    const [, setShow] = useClusterModal();
-
-    return (
-        <div className="container d-md-none my-4">
-            <div onClick={() => setShow(true)}>
-                <Button />
-            </div>
-        </div>
-    );
-}
-
-export function ClusterStatusButton() {
-    const [, setShow] = useClusterModal();
-
-    return (
-        <div onClick={() => setShow(true)}>
-            <Button />
-        </div>
-    );
-}
-
-function Button() {
+export const ClusterStatusButton = () => {
     const { status, cluster, name, customUrl } = useCluster();
+    const [, setShow] = useClusterModal();
+
+    const onClickHandler = useCallback(() => setShow(true), [setShow]);
     const statusName = cluster !== Cluster.Custom ? `${name}` : `${customUrl}`;
 
     const btnClasses = (variant: string) => {
@@ -40,7 +21,7 @@ function Button() {
     switch (status) {
         case ClusterStatus.Connected:
             return (
-                <span className={btnClasses('primary')}>
+                <span className={btnClasses('primary')} onClick={onClickHandler}>
                     <CheckCircle className="fe me-2" size={15} />
                     {statusName}
                 </span>
@@ -48,7 +29,7 @@ function Button() {
 
         case ClusterStatus.Connecting:
             return (
-                <span className={btnClasses('warning')}>
+                <span className={btnClasses('warning')} onClick={onClickHandler}>
                     <span className={spinnerClasses} role="status" aria-hidden="true"></span>
                     {statusName}
                 </span>
@@ -56,10 +37,10 @@ function Button() {
 
         case ClusterStatus.Failure:
             return (
-                <span className={btnClasses('danger')}>
+                <span className={btnClasses('danger')} onClick={onClickHandler}>
                     <AlertCircle className="me-2" size={15} />
                     {statusName}
                 </span>
             );
     }
-}
+};
