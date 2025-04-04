@@ -131,7 +131,7 @@
         ]
     },
     "engines": {
-        "node": "v20.17"
+        "node": "v20.19"
     },
     "pnpm": {
         "overrides": {
