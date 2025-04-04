@@ -1,14 +1,15 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@components/shared/ui/accordion';
-import { Code, ExternalLink } from 'react-feather';
 import { PublicKey } from '@solana/web3.js';
-import { useCallback, useState, useRef, useEffect, SyntheticEvent } from 'react';
+import { SyntheticEvent, useCallback, useRef, useState } from 'react';
+import { Code, ExternalLink } from 'react-feather';
+import ReactJson from 'react-json-view';
+
 import { StatusBadge } from '@/app/components/shared/StatusBadge';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
-import ReactJson from 'react-json-view';
 
-import { ParsedTokenExtensionWithRawData } from './TokenExtensionsCard';
 import { Address } from '../common/Address';
+import { ParsedTokenExtensionWithRawData } from './TokenExtensionsCard';
 
 export function TokenExtensionsSection({ extensions }: { extensions: ParsedTokenExtensionWithRawData[] }) {
     const [selectedExtension, setSelectedExtension] = useState<string | undefined>(undefined);
@@ -28,7 +29,7 @@ export function TokenExtensionsSection({ extensions }: { extensions: ParsedToken
                 setSelectedExtension(undefined);
             }
         },
-        [onSelect, selectedExtension, setSelectedExtension]
+        [selectedExtension, setSelectedExtension]
     );
 
     return (
@@ -131,10 +132,10 @@ function TokenExtensionParsedData({ data, name }: { data: ParsedTokenExtensionWi
     return (
         <div className="card e-m-4">
             {Array.isArray(data) ? (
-                data.map(([name, data]) => <TokenExtensionParsedDataSection name={name} data={data} />)
-            ) : (
+                data.map(([name, data]) => <TokenExtensionParsedDataSection key={name} name={name} data={data} />)
+            ) : data ? (
                 <TokenExtensionParsedDataSection name={name} data={data} />
-            )}
+            ) : null}
         </div>
     );
 }

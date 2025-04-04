@@ -1,8 +1,8 @@
 'use client';
 
-import { PublicKey } from '@solana/web3.js';
 import { AccountHeader } from '@components/common/Account';
 import { useFetchAccountInfo, useMintAccountInfo } from '@providers/accounts';
+import { PublicKey } from '@solana/web3.js';
 
 import { StatusType } from '@/app/components/shared/StatusBadge';
 
@@ -69,63 +69,63 @@ function populateTokenExtensions(extensions: ParsedExtension[]): ParsedTokenExte
         switch (extension) {
             case 'mintCloseAuthority': {
                 acc.set(extension, {
-                    id: extension,
-                    name: 'Mint Close Authority',
-                    tooltip: undefined,
                     description: undefined,
-                    status: 'active',
                     externalLinks: populateExternalLinks(
                         'https://solana.com/developers/guides/token-extensions/mint-close-authority'
                     ),
+                    id: extension,
+                    name: 'Mint Close Authority',
                     parsed: state,
                     raw: state,
+                    status: 'active',
+                    tooltip: undefined,
                 });
                 break;
             }
             case 'permanentDelegate': {
                 acc.set(extension, {
-                    id: extension,
-                    name: 'Permanent Delegate',
-                    tooltip:
-                        'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token, providing centralized administrative control over the token ecosystem.',
                     description:
                         'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token, providing centralized administrative control over the token ecosystem.',
-                    status: 'active',
                     externalLinks: populateExternalLinks(
                         'https://solana.com/developers/guides/token-extensions/permanent-delegate'
                     ),
+                    id: extension,
+                    name: 'Permanent Delegate',
                     parsed: state,
                     raw: state,
+                    status: 'active',
+                    tooltip:
+                        'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token, providing centralized administrative control over the token ecosystem.',
                 });
                 break;
             }
             case 'transferFeeConfig': {
                 acc.set(extension, {
-                    id: extension,
-                    name: 'Transfer Fee',
-                    tooltip: undefined,
                     description: undefined,
-                    status: 'active',
                     externalLinks: populateExternalLinks(
                         'https://solana.com/developers/guides/token-extensions/transfer-fee'
                     ),
+                    id: extension,
+                    name: 'Transfer Fee',
                     parsed: state,
                     raw: state,
+                    status: 'active',
+                    tooltip: undefined,
                 });
                 break;
             }
             case 'transferHook': {
                 acc.set(extension, {
-                    id: extension,
-                    name: 'Transfer Hook',
-                    tooltip: undefined,
                     description: undefined,
-                    status: 'active',
                     externalLinks: populateExternalLinks(
                         'https://solana.com/developers/guides/token-extensions/transfer-hook'
                     ),
+                    id: extension,
+                    name: 'Transfer Hook',
                     parsed: state,
                     raw: state,
+                    status: 'active',
+                    tooltip: undefined,
                 });
                 break;
             }
@@ -144,14 +144,14 @@ function populateTokenExtensions(extensions: ParsedExtension[]): ParsedTokenExte
                         ],
                     ];
                     acc.set(EXTENSION_NAME, {
+                        description: undefined,
+                        externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
                         id: EXTENSION_NAME,
                         name: 'Confidential Transfer',
-                        tooltip: undefined,
-                        description: undefined,
-                        status: 'active',
-                        externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
                         parsed: data,
                         raw: data,
+                        status: 'active',
+                        tooltip: undefined,
                     });
                 }
                 break;
@@ -169,16 +169,16 @@ function populateTokenExtensions(extensions: ParsedExtension[]): ParsedTokenExte
                     ];
 
                     acc.set(EXTENSION_NAME, {
-                        id: EXTENSION_NAME,
-                        name: 'Metadata & Metadata Pointer',
-                        tooltip: undefined,
                         description: undefined,
-                        status: 'active',
                         externalLinks: populateExternalLinks(
                             'https://solana.com/developers/guides/token-extensions/metadata-pointer'
                         ),
+                        id: EXTENSION_NAME,
+                        name: 'Metadata & Metadata Pointer',
                         parsed: data,
                         raw: data,
+                        status: 'active',
+                        tooltip: undefined,
                     });
                 }
                 break;
