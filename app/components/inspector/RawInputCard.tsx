@@ -89,27 +89,25 @@ function TabInstructions() {
 
     const tabs: TabData[] = [
         {
-            id: 'cli',
-            label: 'CLI',
             content: (
                 <div className="p-3">
                     Use <code>--dump-transaction-message</code> flag
                 </div>
             ),
+            id: 'cli',
+            label: 'CLI',
         },
         {
-            id: 'rust',
-            label: 'Rust',
             content: (
                 <div className="p-3">
                     Add <code>base64</code> crate dependency and{' '}
                     <code>println!(&quot;{}&quot;, base64::encode(&transaction.message_data()));</code>
                 </div>
             ),
+            id: 'rust',
+            label: 'Rust',
         },
         {
-            id: 'ts',
-            label: 'TypeScript',
             content: (
                 <div className="p-3">
                     <div className="mb-3">
@@ -132,16 +130,18 @@ function TabInstructions() {
                     </div>
                 </div>
             ),
+            id: 'ts',
+            label: 'TypeScript',
         },
         {
-            id: 'squads',
-            label: 'Squads',
             content: (
                 <div className="p-3">
                     Add <code>vault_transaction</code> from{' '}
                     <code>https://app.squads.so/squads/&lt;squad_id&gt;/transactions/&lt;vault_transaction&gt;</code>
                 </div>
             ),
+            id: 'squads',
+            label: 'Squads',
         },
     ];
 
