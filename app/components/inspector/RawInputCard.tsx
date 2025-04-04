@@ -147,7 +147,7 @@ function TabInstructions() {
 
     return (
         <div className="instruction-tabs">
-            <div className="nav nav-tabs">
+            <div className="nav nav-tabs" role="tablist">
                 {tabs.map(tab => (
                     <button
                         key={tab.id}
