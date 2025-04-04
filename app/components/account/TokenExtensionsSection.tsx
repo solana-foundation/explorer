@@ -13,26 +13,28 @@ import { Address } from '../common/Address';
 export function TokenExtensionsSection({ extensions }: { extensions: ParsedTokenExtensionWithRawData[] }) {
     const [selectedExtension, setSelectedExtension] = useState<string | undefined>(undefined);
 
-    const onSelect = useCallback((id: string) => {
-        setSelectedExtension(id === selectedExtension ? undefined : id);
-    }, [selectedExtension]);
+    const onSelect = useCallback(
+        (id: string) => {
+            setSelectedExtension(id === selectedExtension ? undefined : id);
+        },
+        [selectedExtension]
+    );
 
     // handle accordion item click to change the selected extension
-    const handleSelect = useCallback((e: SyntheticEvent<HTMLDivElement>) => {
-        const selectedValue = e.currentTarget.dataset.value;
-        if (selectedValue === selectedExtension) {
-            setSelectedExtension(undefined);
-        }
-    },[onSelect, selectedExtension,setSelectedExtension])
+    const handleSelect = useCallback(
+        (e: SyntheticEvent<HTMLDivElement>) => {
+            const selectedValue = e.currentTarget.dataset.value;
+            if (selectedValue === selectedExtension) {
+                setSelectedExtension(undefined);
+            }
+        },
+        [onSelect, selectedExtension, setSelectedExtension]
+    );
 
     return (
         <Accordion type="single" value={selectedExtension} collapsible className="e-px-0">
             {extensions.map(ext => (
-                <AccordionItem
-                    key={ext.id}
-                    value={ext.id}
-                    onClick={handleSelect}
-                >
+                <AccordionItem key={ext.id} value={ext.id} onClick={handleSelect}>
                     <TokenExtensionAccordionItem ext={ext} onSelect={onSelect} />
                 </AccordionItem>
             ))}
@@ -79,7 +81,7 @@ function ExtensionListItem({ ext, onToggleRaw }: { ext: ParsedTokenExtensionWith
             e.stopPropagation();
             onToggleRaw();
         },
-        [onToggleRaw],
+        [onToggleRaw]
     );
 
     return (
@@ -87,13 +89,17 @@ function ExtensionListItem({ ext, onToggleRaw }: { ext: ParsedTokenExtensionWith
             {/* Name */}
             <div className="max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-3 lg:e-col-span-3 e-flex e-items-center e-gap-2 e-whitespace-nowrap e-font-normal xs:e-col-span-6">
                 <div>{ext.name}</div>
-                    <Tooltip>
-                        {/* might be needed to wrap tooltip into a wrapper that watches window borders to adjust tootip's position */}
-                        <TooltipTrigger className="badge border-0 bg-transparent">
-                            <StatusBadge status={ext.status} label={ext.name} className="e-text-14" />
-                        </TooltipTrigger>
-                        {ext.tooltip && <TooltipContent><div className="e-w-[220px]">{ext.tooltip}</div></TooltipContent>}
-                    </Tooltip>
+                <Tooltip>
+                    {/* might be needed to wrap tooltip into a wrapper that watches window borders to adjust tootip's position */}
+                    <TooltipTrigger className="badge border-0 bg-transparent">
+                        <StatusBadge status={ext.status} label={ext.name} className="e-text-14" />
+                    </TooltipTrigger>
+                    {ext.tooltip && (
+                        <TooltipContent>
+                            <div className="e-w-[220px]">{ext.tooltip}</div>
+                        </TooltipContent>
+                    )}
+                </Tooltip>
             </div>
 
             {/* Description */}

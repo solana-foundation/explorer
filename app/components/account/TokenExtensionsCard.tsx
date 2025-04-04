@@ -75,7 +75,7 @@ function populateTokenExtensions(extensions: ParsedExtension[]): ParsedTokenExte
                     description: undefined,
                     status: 'active',
                     externalLinks: populateExternalLinks(
-                        'https://solana.com/developers/guides/token-extensions/mint-close-authority',
+                        'https://solana.com/developers/guides/token-extensions/mint-close-authority'
                     ),
                     parsed: state,
                     raw: state,
@@ -92,7 +92,7 @@ function populateTokenExtensions(extensions: ParsedExtension[]): ParsedTokenExte
                         'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token, providing centralized administrative control over the token ecosystem.',
                     status: 'active',
                     externalLinks: populateExternalLinks(
-                        'https://solana.com/developers/guides/token-extensions/permanent-delegate',
+                        'https://solana.com/developers/guides/token-extensions/permanent-delegate'
                     ),
                     parsed: state,
                     raw: state,
@@ -107,7 +107,7 @@ function populateTokenExtensions(extensions: ParsedExtension[]): ParsedTokenExte
                     description: undefined,
                     status: 'active',
                     externalLinks: populateExternalLinks(
-                        'https://solana.com/developers/guides/token-extensions/transfer-fee',
+                        'https://solana.com/developers/guides/token-extensions/transfer-fee'
                     ),
                     parsed: state,
                     raw: state,
@@ -122,7 +122,7 @@ function populateTokenExtensions(extensions: ParsedExtension[]): ParsedTokenExte
                     description: undefined,
                     status: 'active',
                     externalLinks: populateExternalLinks(
-                        'https://solana.com/developers/guides/token-extensions/transfer-hook',
+                        'https://solana.com/developers/guides/token-extensions/transfer-hook'
                     ),
                     parsed: state,
                     raw: state,
@@ -175,7 +175,7 @@ function populateTokenExtensions(extensions: ParsedExtension[]): ParsedTokenExte
                         description: undefined,
                         status: 'active',
                         externalLinks: populateExternalLinks(
-                            'https://solana.com/developers/guides/token-extensions/metadata-pointer',
+                            'https://solana.com/developers/guides/token-extensions/metadata-pointer'
                         ),
                         parsed: data,
                         raw: data,

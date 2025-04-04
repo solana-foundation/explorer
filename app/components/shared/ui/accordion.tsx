@@ -15,7 +15,7 @@ function AccordionItem({ className, ...props }: React.ComponentProps<typeof Acco
             data-value={props.value}
             className={cn(
                 'e-px-4 e-border-[#282d2b] e-border-b e-border-l-0 e-border-r-0 e-border-t-0 e-border-solid last:e-border-b-0',
-                className,
+                className
             )}
             {...props}
         />
@@ -29,7 +29,7 @@ function AccordionTrigger({ className, children, ...props }: React.ComponentProp
                 data-slot="accordion-trigger"
                 className={cn(
                     'bg-transparent border-0 e-flex e-flex-1 e-items-start e-gap-4 e-rounded-md e-py-4 e-text-left e-text-sm e-font-medium e-outline-none e-transition-all hover:e-underline focus-visible:e-border-neutral-950 focus-visible:e-ring-[3px] focus-visible:e-ring-neutral-950/50 disabled:e-pointer-events-none disabled:e-opacity-50 [&[data-state=open]>svg]:e-rotate-90 dark:focus-visible:e-border-neutral-300 dark:focus-visible:e-ring-neutral-300/50',
-                    className,
+                    className
                 )}
                 {...props}
             >

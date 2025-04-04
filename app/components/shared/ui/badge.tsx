@@ -33,7 +33,7 @@ const badgeVariants = cva(
                     'e-border-transparent e-bg-transparent e-text-neutral-900 [a&]:hover:e-bg-neutral-100/90 dark:e-text-neutral-50 dark:[a&]:hover:e-bg-neutral-800/90',
             },
         },
-    },
+    }
 );
 
 function Badge({

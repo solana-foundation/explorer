@@ -32,7 +32,7 @@ function TooltipContent({
                 sideOffset={sideOffset}
                 className={cn(
                     'e-bg-neutral-900 e-text-neutral-50 e-animate-in e-fade-in-0 e-zoom-in-95 data-[state=closed]:e-animate-out data-[state=closed]:e-fade-out-0 data-[state=closed]:e-zoom-out-95 data-[side=bottom]:e-slide-in-from-top-2 data-[side=left]:e-slide-in-from-right-2 data-[side=right]:e-slide-in-from-left-2 data-[side=top]:e-slide-in-from-bottom-2 e-z-50 e-w-fit e-origin-(--radix-tooltip-content-transform-origin) e-rounded-md e-px-3 e-py-1.5 e-text-xs e-text-balance dark:e-bg-neutral-50 dark:e-text-neutral-900',
-                    className,
+                    className
                 )}
                 {...props}
             >

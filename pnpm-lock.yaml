@@ -10,7 +10,6 @@ overrides:
   cross-fetch: ^3.1.5
   node-fetch: ^2.6.9
   uuid: ^9.0.0
-  prettier: ^3.0
 
 pnpmfileChecksum: vg4cnl3slj2ctz3ln6baqe5c4y
 
@@ -234,7 +233,7 @@ importers:
         version: 1.0.1(@typescript-eslint/eslint-plugin@5.59.2(@typescript-eslint/parser@5.62.0(eslint@8.39.0)(typescript@5.0.4))(eslint@8.39.0)(typescript@5.0.4))(@typescript-eslint/parser@5.62.0(eslint@8.39.0)(typescript@5.0.4))(eslint-plugin-jest@27.2.1(@typescript-eslint/eslint-plugin@5.59.2(@typescript-eslint/parser@5.62.0(eslint@8.39.0)(typescript@5.0.4))(eslint@8.39.0)(typescript@5.0.4))(eslint@8.39.0)(typescript@5.0.4))(eslint-plugin-react-hooks@4.6.0(eslint@8.39.0))(eslint-plugin-simple-import-sort@10.0.0(eslint@8.39.0))(eslint-plugin-sort-keys-fix@1.1.2)(eslint@8.39.0)(typescript@5.0.4)
       '@solana/prettier-config-solana':
         specifier: ^0.0.2
-        version: 0.0.2(prettier@3.5.3)
+        version: 0.0.2(prettier@2.8.8)
       '@testing-library/jest-dom':
         specifier: 5.16.4
         version: 5.16.4
@@ -304,9 +303,6 @@ importers:
       postcss@3.4.17:
         specifier: link:tailwindcss/postcss@3.4.17
         version: link:tailwindcss/postcss@3.4.17
-      prettier-plugin-tailwindcss:
-        specifier: ^0.6.11
-        version: 0.6.11(prettier@3.5.3)
       react-scan:
         specifier: ^0.0.26
         version: 0.0.26
@@ -2506,7 +2502,7 @@ packages:
   '@solana/prettier-config-solana@0.0.2':
     resolution: {integrity: sha512-F/e2UIJwb30Y8QjR9nr/OrJiCc8yjMkiP9Ctk4VYg+8jODNP31dx6s9mn4sbMFVYA0Km5EPZLN2xsZacBy0y/A==}
     peerDependencies:
-      prettier: ^3.0
+      prettier: ^2.8.7
 
   '@solana/programs@2.0.0':
     resolution: {integrity: sha512-JPIKB61pWfODnsvEAaPALc6vR5rn7kmHLpFaviWhBtfUlEVgB8yVTR0MURe4+z+fJCPRV5wWss+svA4EeGDYzQ==}
@@ -5692,64 +5688,9 @@ packages:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
 
-  prettier-plugin-tailwindcss@0.6.11:
-    resolution: {integrity: sha512-YxaYSIvZPAqhrrEpRtonnrXdghZg1irNg4qrjboCXrpybLWVs55cW2N3juhspVJiO0JBvYJT8SYsJpc8OQSnsA==}
-    engines: {node: '>=14.21.3'}
-    peerDependencies:
-      '@ianvs/prettier-plugin-sort-imports': '*'
-      '@prettier/plugin-pug': '*'
-      '@shopify/prettier-plugin-liquid': '*'
-      '@trivago/prettier-plugin-sort-imports': '*'
-      '@zackad/prettier-plugin-twig': '*'
-      prettier: ^3.0
-      prettier-plugin-astro: '*'
-      prettier-plugin-css-order: '*'
-      prettier-plugin-import-sort: '*'
-      prettier-plugin-jsdoc: '*'
-      prettier-plugin-marko: '*'
-      prettier-plugin-multiline-arrays: '*'
-      prettier-plugin-organize-attributes: '*'
-      prettier-plugin-organize-imports: '*'
-      prettier-plugin-sort-imports: '*'
-      prettier-plugin-style-order: '*'
-      prettier-plugin-svelte: '*'
-    peerDependenciesMeta:
-      '@ianvs/prettier-plugin-sort-imports':
-        optional: true
-      '@prettier/plugin-pug':
-        optional: true
-      '@shopify/prettier-plugin-liquid':
-        optional: true
-      '@trivago/prettier-plugin-sort-imports':
-        optional: true
-      '@zackad/prettier-plugin-twig':
-        optional: true
-      prettier-plugin-astro:
-        optional: true
-      prettier-plugin-css-order:
-        optional: true
-      prettier-plugin-import-sort:
-        optional: true
-      prettier-plugin-jsdoc:
-        optional: true
-      prettier-plugin-marko:
-        optional: true
-      prettier-plugin-multiline-arrays:
-        optional: true
-      prettier-plugin-organize-attributes:
-        optional: true
-      prettier-plugin-organize-imports:
-        optional: true
-      prettier-plugin-sort-imports:
-        optional: true
-      prettier-plugin-style-order:
-        optional: true
-      prettier-plugin-svelte:
-        optional: true
-
-  prettier@3.5.3:
-    resolution: {integrity: sha512-QQtaxnoDJeAkDvDKWCLiwIXkTgRhwYDEQCghU9Z6q03iyek/rxRh/2lC3HB7P8sWT2xC/y5JDctPLBIGzHKbhw==}
-    engines: {node: '>=14'}
+  prettier@2.8.8:
+    resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
+    engines: {node: '>=10.13.0'}
     hasBin: true
 
   pretty-format@27.5.1:
@@ -9968,9 +9909,9 @@ snapshots:
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
 
-  '@solana/prettier-config-solana@0.0.2(prettier@3.5.3)':
+  '@solana/prettier-config-solana@0.0.2(prettier@2.8.8)':
     dependencies:
-      prettier: 3.5.3
+      prettier: 2.8.8
 
   '@solana/programs@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)':
     dependencies:
@@ -14113,11 +14054,7 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-plugin-tailwindcss@0.6.11(prettier@3.5.3):
-    dependencies:
-      prettier: 3.5.3
-
-  prettier@3.5.3: {}
+  prettier@2.8.8: {}
 
   pretty-format@27.5.1:
     dependencies:
