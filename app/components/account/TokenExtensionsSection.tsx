@@ -85,9 +85,9 @@ function ExtensionListItem({ ext, onToggleRaw }: { ext: ParsedTokenExtensionWith
     );
 
     return (
-        <div className="w-100 e-grid e-grid-cols-12 e-gap-2 e-w-100 e-items-center text-white e-text-base e-text-sm">
+        <div className="w-100 e-w-100 text-white e-grid e-grid-cols-12 e-items-center e-gap-2 e-text-base e-text-sm">
             {/* Name */}
-            <div className="max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-3 lg:e-col-span-3 e-flex e-items-center e-gap-2 e-whitespace-nowrap e-font-normal xs:e-col-span-6">
+            <div className="e-flex e-items-center e-gap-2 e-whitespace-nowrap e-font-normal max-xs:e-col-span-6 xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-3 lg:e-col-span-3">
                 <div>{ext.name}</div>
                 <Tooltip>
                     {/* might be needed to wrap tooltip into a wrapper that watches window borders to adjust tootip's position */}
@@ -103,12 +103,12 @@ function ExtensionListItem({ ext, onToggleRaw }: { ext: ParsedTokenExtensionWith
             </div>
 
             {/* Description */}
-            <span className="max-md:e-hidden md:e-col-span-7 md:e-pl-4 lg:e-col-span-7 e-text-[0.75rem] e-text-[#8E9090]">
+            <span className="e-text-[0.75rem] e-text-[#8E9090] max-md:e-hidden md:e-col-span-7 md:e-pl-4 lg:e-col-span-7">
                 {ext.description ?? null}
             </span>
 
             {/* External links badges */}
-            <div className="max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-2 lg:e-col-span-2 e-flex e-gap-1 text-white e-justify-end xs:e-grid-col-span-6">
+            <div className="text-white xs:e-grid-col-span-6 e-flex e-justify-end e-gap-1 max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-2 lg:e-col-span-2">
                 <a key="raw" href="javascript:void(0)" onClick={handleToggleRaw}>
                     <Badge variant="transparent" size="sm" className="text-white e-font-normal">
                         <Code size={16} /> Raw
