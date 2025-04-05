@@ -1,0 +1,14 @@
+@tailwind components;
+@tailwind utilities;
+
+@media (max-width: 575px) {
+    .max-xs\:e-hidden {
+        display: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .max-sm\:e-hidden {
+        display: none;
+    }
+}

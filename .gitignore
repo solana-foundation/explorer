@@ -38,5 +38,4 @@ next-env.d.ts
 .swc/
 
 # vim
-*.sw*
 .editorconfig

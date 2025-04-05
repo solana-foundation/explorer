@@ -289,7 +289,7 @@ function FungibleTokenMintAccountCard({
                         </tr>
                     )}
                     {mintExtensions?.map(extension =>
-                        TokenExtensionRows(extension, epoch, mintInfo.decimals, tokenInfo?.symbol)
+                        TokenExtensionRow(extension, epoch, mintInfo.decimals, tokenInfo?.symbol)
                     )}
                 </TableCardBody>
             </div>
@@ -605,7 +605,10 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
     return sortedExtensionTypes.indexOf(a.extension) - sortedExtensionTypes.indexOf(b.extension);
 }
 
-function TokenExtensionRows(
+/* NOTE: do not move component to not affect commit history.
+    Needs to be seaprated at closest refactoring
+*/
+export function TokenExtensionRow(
     tokenExtension: TokenExtension,
     maybeEpoch: bigint | undefined,
     decimals: number,
