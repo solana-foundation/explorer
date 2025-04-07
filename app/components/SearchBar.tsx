@@ -6,11 +6,10 @@ import { VersionedMessage } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import bs58 from 'bs58';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { LegacyRef, MouseEvent, MouseEventHandler, useCallback, useId, useMemo, useRef } from 'react';
+import React, { MouseEvent, MouseEventHandler, useCallback, useId, useMemo, useRef } from 'react';
 import { Search, X } from 'react-feather';
-import { ActionMeta, components, ControlProps, GroupBase, InputActionMeta } from 'react-select';
+import { ActionMeta, components, ControlProps, InputActionMeta, SelectInstance } from 'react-select';
 import AsyncSelect from 'react-select/async';
-import Select from 'react-select/dist/declarations/src/Select';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
@@ -38,7 +37,7 @@ export function SearchBar() {
     const router = useRouter();
     const { cluster, clusterInfo } = useCluster();
     const searchParams = useSearchParams();
-    const selectRef = useRef<Select<any, false, GroupBase<SearchOption>>>();
+    const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
 
     const onChange = (option: SearchOption, meta: ActionMeta<any>) => {
         if (option === null || typeof option?.pathname !== 'string') {
@@ -128,7 +127,7 @@ export function SearchBar() {
                 defaultOptions
                 loadOptions={performSearch}
                 autoFocus
-                ref={selectRef as LegacyRef<Select<any, false, GroupBase<SearchOption>>>}
+                ref={selectRef}
                 inputId={id}
                 noOptionsMessage={noOptionsMessageHandler}
                 loadingMessage={loadingMessageHandler}
