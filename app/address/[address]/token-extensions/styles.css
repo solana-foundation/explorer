@@ -1,1 +1,12 @@
-@import "../../../styles.css";
+@import '../../../styles.css';
+
+/*
+ * Fill default vars for transformations as without them `rotate-N` does not work
+ */
+:root {
+    --tw-translate-x: 0;
+    --tw-skew-x: 0;
+    --tw-skew-y: 0;
+    --tw-scale-x: 1;
+    --tw-scale-y: 1;
+}
