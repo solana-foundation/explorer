@@ -605,14 +605,24 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
     return sortedExtensionTypes.indexOf(a.extension) - sortedExtensionTypes.indexOf(b.extension);
 }
 
-/* NOTE: do not move component to not affect commit history.
-    Needs to be seaprated at closest refactoring
+function HHeader({ name }: { name: string }) {
+    return (
+        <tr>
+            <h4>{name}</h4>
+        </tr>
+    );
+}
+
+/* Do not move component to keep commit history.
+    NOTE: Needs to be seaprated at closest refactoring
+    Also check whether it is needed to keep it as function and not a proper React component
 */
 export function TokenExtensionRow(
     tokenExtension: TokenExtension,
     maybeEpoch: bigint | undefined,
     decimals: number,
-    symbol: string | undefined
+    symbol: string | undefined,
+    headerStyle: 'header' | 'omit' = 'header'
 ) {
     const epoch = maybeEpoch || 0n; // fallback to 0 if not provided
     switch (tokenExtension.extension) {
@@ -648,9 +658,7 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, TransferFeeConfig);
             return (
                 <>
-                    <tr>
-                        <h4>Transfer Fee Config</h4>
-                    </tr>
+                    {headerStyle == 'header' ? <HHeader name="Transfer Fee Config" /> : null}
                     {extension.transferFeeConfigAuthority && (
                         <tr>
                             <td>Transfer Fee Authority</td>
@@ -726,9 +734,7 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, ConfidentialTransferMint);
             return (
                 <>
-                    <tr>
-                        <h4>Confidential Transfer</h4>
-                    </tr>
+                    {headerStyle === 'header' ? <HHeader name="Confidential Transfer" /> : null}
                     {extension.authority && (
                         <tr>
                             <td>Authority</td>
@@ -754,9 +760,7 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, ConfidentialTransferFeeConfig);
             return (
                 <>
-                    <tr>
-                        <h4>Confidential Transfer Fee</h4>
-                    </tr>
+                    {headerStyle === 'header' ? <HHeader name="Confidential Transfer Fee" /> : null}
                     {extension.authority && (
                         <tr>
                             <td>Authority</td>
@@ -803,9 +807,7 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, InterestBearingConfig);
             return (
                 <>
-                    <tr>
-                        <h4>Interest-Bearing</h4>
-                    </tr>
+                    {headerStyle === 'header' ? <HHeader name="Interest-Bearing" /> : null}
                     {extension.rateAuthority && (
                         <tr>
                             <td>Authority</td>
@@ -944,9 +946,7 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, TokenMetadata);
             return (
                 <>
-                    <tr>
-                        <h4>Metadata</h4>
-                    </tr>
+                    {headerStyle === 'header' ? <HHeader name="Metadata" /> : null}
                     <tr>
                         <td>Mint</td>
                         <td className="text-lg-end">
@@ -1011,9 +1011,7 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, ConfidentialTransferAccount);
             return (
                 <>
-                    <tr>
-                        <h4>Confidential Transfer</h4>
-                    </tr>
+                    {headerStyle === 'header' ? <HHeader name="Confidential Transfer" /> : null}
                     <tr>
                         <td>Status</td>
                         <td className="text-lg-end">{!extension.approved && 'not '}approved</td>
@@ -1114,9 +1112,7 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, TokenGroup);
             return (
                 <>
-                    <tr>
-                        <h4>Group</h4>
-                    </tr>
+                    {headerStyle === 'header' ? <HHeader name="Group" /> : null}
                     <tr>
                         <td>Mint</td>
                         <td className="text-lg-end">
@@ -1146,9 +1142,7 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, TokenGroupMember);
             return (
                 <>
-                    <tr>
-                        <h4>Group Member</h4>
-                    </tr>
+                    {headerStyle === 'header' ? <HHeader name="Group Member" /> : null}
                     <tr>
                         <td>Mint</td>
                         <td className="text-lg-end">

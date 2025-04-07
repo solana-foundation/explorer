@@ -1,17 +1,24 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@components/shared/ui/accordion';
-import { PublicKey } from '@solana/web3.js';
-import { SyntheticEvent, useCallback, useRef, useState } from 'react';
+import { SyntheticEvent, useCallback, useMemo, useRef, useState } from 'react';
 import { Code, ExternalLink } from 'react-feather';
 import ReactJson from 'react-json-view';
 
+import { TableCardBodyHeaded } from '@/app/components/common/TableCardBody';
 import { StatusBadge } from '@/app/components/shared/StatusBadge';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
+import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
-import { Address } from '../common/Address';
+import { TokenExtensionRow } from './TokenAccountSection';
 import { ParsedTokenExtensionWithRawData } from './TokenExtensionsCard';
 
-export function TokenExtensionsSection({ extensions }: { extensions: ParsedTokenExtensionWithRawData[] }) {
+export function TokenExtensionsSection({
+    extensions,
+    parsedExtensions,
+}: {
+    extensions: TokenExtension[];
+    parsedExtensions: ParsedTokenExtensionWithRawData[];
+}) {
     const [selectedExtension, setSelectedExtension] = useState<string | undefined>(undefined);
 
     const onSelect = useCallback(
@@ -34,45 +41,76 @@ export function TokenExtensionsSection({ extensions }: { extensions: ParsedToken
 
     return (
         <Accordion type="single" value={selectedExtension} collapsible className="e-px-0">
-            {extensions.map(ext => (
-                <AccordionItem key={ext.id} value={ext.id} onClick={handleSelect}>
-                    <TokenExtensionAccordionItem ext={ext} onSelect={onSelect} />
-                </AccordionItem>
-            ))}
+            {parsedExtensions.map(ext => {
+                const extension = extensions.find(({ extension }) => {
+                    return extension === ext.id;
+                });
+
+                return (
+                    <AccordionItem key={ext.id} value={ext.id} onClick={handleSelect}>
+                        {extension && (
+                            <TokenExtensionAccordionItem
+                                extension={extension}
+                                parsedExtension={ext}
+                                onSelect={onSelect}
+                            />
+                        )}
+                    </AccordionItem>
+                );
+            })}
         </Accordion>
     );
 }
 
 function TokenExtensionAccordionItem({
-    ext,
+    extension,
+    parsedExtension,
     onSelect,
 }: {
-    ext: ParsedTokenExtensionWithRawData;
+    extension: TokenExtension;
+    parsedExtension: ParsedTokenExtensionWithRawData;
     onSelect: (id: string) => void;
 }) {
     const [showRaw, setShowRaw] = useState(false);
     const accordionTriggerRef = useRef<HTMLButtonElement>(null);
 
     const handleToggleRaw = useCallback(() => {
-        onSelect(ext.id);
+        onSelect(parsedExtension.id);
         setShowRaw(!showRaw);
-    }, [showRaw, onSelect, ext.id]);
+    }, [showRaw, onSelect, parsedExtension.id]);
+
+    const tableHeaderComponent = useMemo(() => {
+        return TokenExtensionStateHeader({ name: parsedExtension.name });
+    }, [parsedExtension.name]);
 
     return (
         <>
             <AccordionTrigger className="e-items-center" ref={accordionTriggerRef}>
-                <ExtensionListItem ext={ext} onToggleRaw={handleToggleRaw} />
+                <ExtensionListItem ext={parsedExtension} onToggleRaw={handleToggleRaw} />
             </AccordionTrigger>
             <AccordionContent>
                 {!showRaw ? (
-                    <TokenExtensionParsedData data={ext.parsed} name={ext.name} />
+                    <div className="card e-m-4">
+                        <TableCardBodyHeaded headerComponent={tableHeaderComponent}>
+                            {TokenExtensionRow(extension, undefined, 6, undefined, 'omit')}
+                        </TableCardBodyHeaded>
+                    </div>
                 ) : (
                     <div className="e-p-4">
-                        <ReactJson src={ext.raw || {}} theme={'solarized'} style={{ padding: 25 }} />
+                        <ReactJson src={parsedExtension.parsed || {}} theme={'solarized'} style={{ padding: 25 }} />
                     </div>
                 )}
             </AccordionContent>
         </>
+    );
+}
+
+function TokenExtensionStateHeader({ name }: { name: string }) {
+    return (
+        <tr>
+            <th className="text-muted w-1">{name}</th>
+            <th className="text-muted"></th>
+        </tr>
     );
 }
 
@@ -86,9 +124,9 @@ function ExtensionListItem({ ext, onToggleRaw }: { ext: ParsedTokenExtensionWith
     );
 
     return (
-        <div className="w-100 e-w-100 text-white e-grid e-grid-cols-12 e-items-center e-gap-2 e-text-base e-text-sm">
+        <div className="w-100 e-w-100 text-white e-grid e-grid-cols-12 e-items-center e-gap-2 e-text-sm">
             {/* Name */}
-            <div className="e-flex e-items-center e-gap-2 e-whitespace-nowrap e-font-normal max-xs:e-col-span-6 xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-3 lg:e-col-span-3">
+            <div className="e-flex e-items-center e-gap-2 e-whitespace-nowrap e-font-normal max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-3 lg:e-col-span-3">
                 <div>{ext.name}</div>
                 <Tooltip>
                     {/* might be needed to wrap tooltip into a wrapper that watches window borders to adjust tootip's position */}
@@ -124,56 +162,6 @@ function ExtensionListItem({ ext, onToggleRaw }: { ext: ParsedTokenExtensionWith
                     </a>
                 ))}
             </div>
-        </div>
-    );
-}
-
-function TokenExtensionParsedData({ data, name }: { data: ParsedTokenExtensionWithRawData['parsed']; name: string }) {
-    return (
-        <div className="card e-m-4">
-            {Array.isArray(data) ? (
-                data.map(([name, data]) => <TokenExtensionParsedDataSection key={name} name={name} data={data} />)
-            ) : data ? (
-                <TokenExtensionParsedDataSection name={name} data={data} />
-            ) : null}
-        </div>
-    );
-}
-
-function TokenExtensionParsedDataSection({
-    name,
-    data,
-}: {
-    name: string;
-    data: NonNullable<{ [key: string]: [] | string | number }>;
-}) {
-    return (
-        <div className="table-responsive mb-0">
-            <table className="table table-sm table-nowrap card-table">
-                <thead>
-                    <tr>
-                        <th className="text-muted w-1">{name}</th>
-                        <th className="text-muted"></th>
-                    </tr>
-                </thead>
-                <tbody className="list">
-                    {Object.entries(data).map(([key, value], index) => (
-                        <tr key={key + index}>
-                            <td>{key}</td>
-
-                            <td>
-                                {value instanceof PublicKey ? (
-                                    <Address pubkey={value} link />
-                                ) : value instanceof Object ? (
-                                    <span>{JSON.stringify(value)}</span>
-                                ) : (
-                                    <span>{value}</span>
-                                )}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
         </div>
     );
 }

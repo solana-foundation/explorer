@@ -5,21 +5,19 @@ import { useFetchAccountInfo, useMintAccountInfo } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 
 import { StatusType } from '@/app/components/shared/StatusBadge';
+import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
 import { TokenExtensionsSection } from './TokenExtensionsSection';
 
 export type ExtensionStatus = StatusType;
 
-export interface TokenExtension {
-    id: string;
+export type ParsedTokenExtensionWithRawData = {
+    id: TokenExtension['extension'];
     name: string;
     tooltip?: string;
     description?: string;
     status: ExtensionStatus;
     externalLinks: { label: string; url: string }[];
-}
-
-export type ParsedTokenExtensionWithRawData = TokenExtension & {
     parsed?: NonNullable<unknown> | NonNullable<unknown>[];
     raw?: string;
 };
@@ -37,7 +35,7 @@ export function TokenExtensionsCard({ address }: { address: string }) {
         <div className="card">
             <AccountHeader title="Extensions" refresh={() => refresh(new PublicKey(address), 'parsed')} />
             <div className="card-body p-0">
-                <TokenExtensionsSection extensions={extensions} />
+                <TokenExtensionsSection parsedExtensions={extensions} extensions={mintInfo.extensions} />
             </div>
         </div>
     );
