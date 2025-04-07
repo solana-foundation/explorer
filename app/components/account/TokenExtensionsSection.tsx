@@ -16,10 +16,12 @@ export function TokenExtensionsSection({
     decimals,
     extensions,
     parsedExtensions,
+    symbol,
 }: {
     decimals: number;
     extensions: TokenExtension[];
     parsedExtensions: ParsedTokenExtension[];
+    symbol?: string;
 }) {
     const [selectedExtension, setSelectedExtension] = useState<string | undefined>(undefined);
 
@@ -54,8 +56,9 @@ export function TokenExtensionsSection({
                             <TokenExtensionAccordionItem
                                 decimals={decimals}
                                 extension={extension}
-                                parsedExtension={ext}
                                 onSelect={onSelect}
+                                parsedExtension={ext}
+                                symbol={symbol}
                             />
                         )}
                     </AccordionItem>
@@ -68,13 +71,15 @@ export function TokenExtensionsSection({
 function TokenExtensionAccordionItem({
     decimals,
     extension,
-    parsedExtension,
     onSelect,
+    parsedExtension,
+    symbol,
 }: {
     decimals: number;
     extension: TokenExtension;
-    parsedExtension: ParsedTokenExtension;
     onSelect: (id: string) => void;
+    parsedExtension: ParsedTokenExtension;
+    symbol?: string;
 }) {
     const [showRaw, setShowRaw] = useState(false);
     const accordionTriggerRef = useRef<HTMLButtonElement>(null);
@@ -97,7 +102,7 @@ function TokenExtensionAccordionItem({
                 {!showRaw ? (
                     <div className="card e-m-4">
                         <TableCardBodyHeaded headerComponent={tableHeaderComponent}>
-                            {TokenExtensionRow(extension, undefined, decimals, undefined, 'omit')}
+                            {TokenExtensionRow(extension, undefined, decimals, symbol, 'omit')}
                         </TableCardBodyHeaded>
                     </div>
                 ) : (

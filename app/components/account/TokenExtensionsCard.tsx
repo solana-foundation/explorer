@@ -2,17 +2,29 @@
 
 import { AccountHeader } from '@components/common/Account';
 import { useFetchAccountInfo, useMintAccountInfo } from '@providers/accounts';
+import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
+import { Cluster } from '@utils/cluster';
+import { useMemo } from 'react';
+import useSWR from 'swr';
 
+import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
 import { TokenExtensionType } from './TokenAccountSection';
 import { TokenExtensionsSection } from './TokenExtensionsSection';
 import { ParsedTokenExtension } from './types';
 
+async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
+    return await getTokenInfo(new PublicKey(address), cluster, url);
+}
+
 export function TokenExtensionsCard({ address }: { address: string }) {
+    const { cluster, url } = useCluster();
     const refresh = useFetchAccountInfo();
     const mintInfo = useMintAccountInfo(address);
+    const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, url), [address, cluster, url]);
+    const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
 
     if (!mintInfo || !mintInfo.extensions) return null;
 
@@ -26,6 +38,7 @@ export function TokenExtensionsCard({ address }: { address: string }) {
                     decimals={mintInfo.decimals}
                     extensions={mintInfo.extensions}
                     parsedExtensions={extensions}
+                    symbol={tokenInfo?.symbol}
                 />
             </div>
         </div>

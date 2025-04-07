@@ -428,6 +428,8 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
         } else {
             setSymbol(tokenInfo?.symbol);
         }
+        // TODO: Not sure at this moment whether deps are correct at this case. Figure it out later.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tokenInfo]);
 
     return (
@@ -518,7 +520,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                     </>
                 )}
                 {accountExtensions?.map(extension =>
-                    TokenExtensionRows(extension, epoch, info.tokenAmount.decimals, symbol)
+                    TokenExtensionRow(extension, epoch, info.tokenAmount.decimals, symbol)
                 )}
             </TableCardBody>
         </div>
