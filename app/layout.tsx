@@ -10,13 +10,9 @@ import type { Viewport } from 'next';
 import dynamic from 'next/dynamic';
 import { Rubik } from 'next/font/google';
 import { Metadata } from 'next/types';
-const SearchBar = dynamic(
-    () => import('@components/SearchBar'),
-    {
-      ssr: false,
-    }
-  );
-
+const SearchBar = dynamic(() => import('@components/SearchBar'), {
+    ssr: false,
+});
 
 export const metadata: Metadata = {
     description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',

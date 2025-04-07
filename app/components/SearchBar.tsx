@@ -8,7 +8,7 @@ import bs58 from 'bs58';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { LegacyRef, MouseEvent, MouseEventHandler, useCallback, useId, useMemo, useRef } from 'react';
 import { Search, X } from 'react-feather';
-import { ActionMeta, components, ControlProps, GroupBase,InputActionMeta } from 'react-select';
+import { ActionMeta, components, ControlProps, GroupBase, InputActionMeta } from 'react-select';
 import AsyncSelect from 'react-select/async';
 import Select from 'react-select/dist/declarations/src/Select';
 
@@ -75,37 +75,34 @@ export function SearchBar() {
         }
         const tokenOptionsAppendable = tokenOptions ? [tokenOptions] : [];
         const domainOptions =
-            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta
-                ? ((await buildDomainOptions(search)) ?? [])
-                : [];
+            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? (await buildDomainOptions(search)) ?? [] : [];
 
         return [...localOptions, ...tokenOptionsAppendable, ...domainOptions];
     }
 
-
     // Substitute control component to insert custom clear button (the built in clear button only works with selected option, which is not the case)
-    const Control = useMemo(() => function ControlSubstitute({ children, ...props }: ControlProps<SearchOption, false>) {
-        const onClearHandler = useCallback((e: MouseEvent<HTMLDivElement>) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setSearch('');
-            selectRef.current?.clearValue();
-            selectRef.current?.blur();
-        }, []);
-        const hasValue = Boolean(selectRef.current?.inputRef?.value);
+    const Control = useMemo(
+        () =>
+            function ControlSubstitute({ children, ...props }: ControlProps<SearchOption, false>) {
+                const onClearHandler = useCallback((e: MouseEvent<HTMLDivElement>) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSearch('');
+                    selectRef.current?.clearValue();
+                    selectRef.current?.blur();
+                }, []);
+                const hasValue = Boolean(selectRef.current?.inputRef?.value);
 
-        return (
-          <components.Control {...props}>
-            <Search className="me-3" size={15} />
-            {children}
-            {hasValue ? (
-                <ClearIndicator onClick={onClearHandler} />
-            ) : (
-                <KeyIndicator />
-            )}
-          </components.Control>
-        );
-    }, []);
+                return (
+                    <components.Control {...props}>
+                        <Search className="me-3" size={15} />
+                        {children}
+                        {hasValue ? <ClearIndicator onClick={onClearHandler} /> : <KeyIndicator />}
+                    </components.Control>
+                );
+            },
+        []
+    );
 
     const onHotKeyPressHandler = useCallback(() => {
         selectRef.current?.focus();
@@ -113,16 +110,19 @@ export function SearchBar() {
 
     // Focus search on hotkey press
     useHotkeys(
-        [['/', onHotKeyPressHandler],['mod+k', onHotKeyPressHandler],],
+        [
+            ['/', onHotKeyPressHandler],
+            ['mod+k', onHotKeyPressHandler],
+        ],
         ['INPUT', 'TEXTAREA']
-      );
+    );
 
     const noOptionsMessageHandler = useCallback(() => 'No Results', []);
     const loadingMessageHandler = useCallback(() => 'loading...', []);
     const id = useId();
 
     return (
-        <div className='w-100'>
+        <div className="w-100">
             <AsyncSelect
                 cacheOptions
                 defaultOptions
@@ -438,11 +438,7 @@ function isValidBase64(str: string): boolean {
 }
 
 function KeyIndicator() {
-    return (
-        <div className="key-indicator">
-            /
-        </div>
-    );
+    return <div className="key-indicator">/</div>;
 }
 
 function ClearIndicator({ onClick }: { onClick: MouseEventHandler<HTMLDivElement> }) {
