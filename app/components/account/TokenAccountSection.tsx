@@ -572,9 +572,35 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
     );
 }
 
+export type TokenExtensionType =
+    | 'transferFeeAmount'
+    | 'mintCloseAuthority'
+    | 'defaultAccountState'
+    | 'immutableOwner'
+    | 'memoTransfer'
+    | 'nonTransferable'
+    | 'nonTransferableAccount'
+    | 'cpiGuard'
+    | 'permanentDelegate'
+    | 'transferHook'
+    | 'transferHookAccount'
+    | 'metadataPointer'
+    | 'groupPointer'
+    | 'groupMemberPointer'
+    | 'confidentialTransferAccount'
+    | 'confidentialTransferFeeConfig'
+    | 'confidentialTransferFeeAmount'
+    | 'confidentialTransferMint'
+    | 'interestBearingConfig'
+    | 'transferFeeConfig'
+    | 'tokenGroup'
+    | 'tokenGroupMember'
+    | 'tokenMetadata'
+    | 'unparseableExtension';
+
 function cmpExtension(a: TokenExtension, b: TokenExtension) {
     // be sure that extensions with a header row always come later
-    const sortedExtensionTypes = [
+    const sortedExtensionTypes: TokenExtensionType[] = [
         'transferFeeAmount',
         'mintCloseAuthority',
         'defaultAccountState',

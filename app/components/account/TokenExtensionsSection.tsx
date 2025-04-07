@@ -10,14 +10,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
 import { TokenExtensionRow } from './TokenAccountSection';
-import { ParsedTokenExtensionWithRawData } from './TokenExtensionsCard';
+import { ParsedTokenExtension } from './types';
 
 export function TokenExtensionsSection({
+    decimals,
     extensions,
     parsedExtensions,
 }: {
+    decimals: number;
     extensions: TokenExtension[];
-    parsedExtensions: ParsedTokenExtensionWithRawData[];
+    parsedExtensions: ParsedTokenExtension[];
 }) {
     const [selectedExtension, setSelectedExtension] = useState<string | undefined>(undefined);
 
@@ -43,13 +45,14 @@ export function TokenExtensionsSection({
         <Accordion type="single" value={selectedExtension} collapsible className="e-px-0">
             {parsedExtensions.map(ext => {
                 const extension = extensions.find(({ extension }) => {
-                    return extension === ext.id;
+                    return extension === ext.extension;
                 });
 
                 return (
-                    <AccordionItem key={ext.id} value={ext.id} onClick={handleSelect}>
+                    <AccordionItem key={ext.extension} value={ext.extension} onClick={handleSelect}>
                         {extension && (
                             <TokenExtensionAccordionItem
+                                decimals={decimals}
                                 extension={extension}
                                 parsedExtension={ext}
                                 onSelect={onSelect}
@@ -63,21 +66,23 @@ export function TokenExtensionsSection({
 }
 
 function TokenExtensionAccordionItem({
+    decimals,
     extension,
     parsedExtension,
     onSelect,
 }: {
+    decimals: number;
     extension: TokenExtension;
-    parsedExtension: ParsedTokenExtensionWithRawData;
+    parsedExtension: ParsedTokenExtension;
     onSelect: (id: string) => void;
 }) {
     const [showRaw, setShowRaw] = useState(false);
     const accordionTriggerRef = useRef<HTMLButtonElement>(null);
 
     const handleToggleRaw = useCallback(() => {
-        onSelect(parsedExtension.id);
+        onSelect(parsedExtension.extension);
         setShowRaw(!showRaw);
-    }, [showRaw, onSelect, parsedExtension.id]);
+    }, [showRaw, onSelect, parsedExtension.extension]);
 
     const tableHeaderComponent = useMemo(() => {
         return TokenExtensionStateHeader({ name: parsedExtension.name });
@@ -92,7 +97,7 @@ function TokenExtensionAccordionItem({
                 {!showRaw ? (
                     <div className="card e-m-4">
                         <TableCardBodyHeaded headerComponent={tableHeaderComponent}>
-                            {TokenExtensionRow(extension, undefined, 6, undefined, 'omit')}
+                            {TokenExtensionRow(extension, undefined, decimals, undefined, 'omit')}
                         </TableCardBodyHeaded>
                     </div>
                 ) : (
@@ -114,7 +119,7 @@ function TokenExtensionStateHeader({ name }: { name: string }) {
     );
 }
 
-function ExtensionListItem({ ext, onToggleRaw }: { ext: ParsedTokenExtensionWithRawData; onToggleRaw: () => void }) {
+function ExtensionListItem({ ext, onToggleRaw }: { ext: ParsedTokenExtension; onToggleRaw: () => void }) {
     const handleToggleRaw = useCallback(
         (e: React.MouseEvent<HTMLAnchorElement>) => {
             e.stopPropagation();
