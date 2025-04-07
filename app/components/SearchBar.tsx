@@ -1,40 +1,51 @@
 'use client';
 
+import { useHotkeys } from '@mantine/hooks';
 import { useCluster } from '@providers/cluster';
 import { VersionedMessage } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import bs58 from 'bs58';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useId } from 'react';
-import { Search } from 'react-feather';
-import { ActionMeta, InputActionMeta, ValueType } from 'react-select';
+import React, { LegacyRef, MouseEvent, MouseEventHandler, useCallback, useId, useMemo, useRef } from 'react';
+import { Search, X } from 'react-feather';
+import { ActionMeta, components, ControlProps, GroupBase,InputActionMeta } from 'react-select';
 import AsyncSelect from 'react-select/async';
+import Select from 'react-select/dist/declarations/src/Select';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
 import { searchTokens } from '../utils/token-search';
 import { MIN_MESSAGE_LENGTH } from './inspector/RawInputCard';
 
+interface SearchOption {
+    label: string;
+    value: string[];
+    pathname: string;
+}
 interface SearchOptions {
     label: string;
-    options: {
-        label: string;
-        value: string[];
-        pathname: string;
-    }[];
+    options: SearchOption[];
 }
 
 const hasDomainSyntax = (value: string) => {
     return value.length > 3 && value.split('.').length === 2;
 };
 
+const RESET_VALUE = '' as any;
+
 export function SearchBar() {
     const [search, setSearch] = React.useState('');
-    const selectRef = React.useRef<AsyncSelect<any> | null>(null);
     const router = useRouter();
     const { cluster, clusterInfo } = useCluster();
     const searchParams = useSearchParams();
-    const onChange = ({ pathname }: ValueType<any, false>, meta: ActionMeta<any>) => {
+    const selectRef = useRef<Select<any, false, GroupBase<SearchOption>>>();
+
+    const onChange = (option: SearchOption, meta: ActionMeta<any>) => {
+        if (option === null || typeof option?.pathname !== 'string') {
+            setSearch('');
+            return;
+        }
+        const { pathname } = option;
         if (meta.action === 'select-option') {
             // Always use the pathname directly if it contains query params
             if (pathname.includes('?')) {
@@ -48,11 +59,11 @@ export function SearchBar() {
         }
     };
 
-    const onInputChange = (value: string, { action }: InputActionMeta) => {
+    const onInputChange = useCallback((value: string, { action }: InputActionMeta) => {
         if (action === 'input-change') {
             setSearch(value);
         }
-    };
+    }, []);
 
     async function performSearch(search: string): Promise<SearchOptions[]> {
         const localOptions = buildOptions(search, cluster, clusterInfo?.epochInfo.epoch);
@@ -71,7 +82,45 @@ export function SearchBar() {
         return [...localOptions, ...tokenOptionsAppendable, ...domainOptions];
     }
 
-    const resetValue = '' as any;
+
+    // Substitute control component to insert custom clear button (the built in clear button only works with selected option, which is not the case)
+    const Control = useMemo(() => function ControlSubstitute({ children, ...props }: ControlProps<SearchOption, false>) {
+        const onClearHandler = useCallback((e: MouseEvent<HTMLDivElement>) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setSearch('');
+            selectRef.current?.clearValue();
+            selectRef.current?.blur();
+        }, []);
+        const hasValue = Boolean(selectRef.current?.inputRef?.value);
+
+        return (
+          <components.Control {...props}>
+            <Search className="me-3" size={15} />
+            {children}
+            {hasValue ? (
+                <ClearIndicator onClick={onClearHandler} />
+            ) : (
+                <KeyIndicator />
+            )}
+          </components.Control>
+        );
+    }, []);
+
+    const onHotKeyPressHandler = useCallback(() => {
+        selectRef.current?.focus();
+    }, []);
+
+    // Focus search on hotkey press
+    useHotkeys(
+        [['/', onHotKeyPressHandler],['mod+k', onHotKeyPressHandler],],
+        ['INPUT', 'TEXTAREA']
+      );
+
+    const noOptionsMessageHandler = useCallback(() => 'No Results', []);
+    const loadingMessageHandler = useCallback(() => 'loading...', []);
+    const id = useId();
+
     return (
         <div className='w-100'>
             <AsyncSelect
@@ -79,15 +128,14 @@ export function SearchBar() {
                 defaultOptions
                 loadOptions={performSearch}
                 autoFocus
-                inputId={useId()}
-                ref={selectRef}
-                noOptionsMessage={() => 'No Results'}
-                loadingMessage={() => 'loading...'}
+                ref={selectRef as LegacyRef<Select<any, false, GroupBase<SearchOption>>>}
+                inputId={id}
+                noOptionsMessage={noOptionsMessageHandler}
+                loadingMessage={loadingMessageHandler}
                 placeholder="Search for blocks, accounts, transactions, programs, and tokens"
-                value={resetValue}
+                value={RESET_VALUE}
                 inputValue={search}
                 blurInputOnSelect
-                onMenuClose={() => selectRef.current?.blur()}
                 onChange={onChange}
                 styles={{
                     input: style => ({ ...style, width: '100%' }),
@@ -95,12 +143,8 @@ export function SearchBar() {
                     placeholder: style => ({ ...style, pointerEvents: 'none' }),
                 }}
                 onInputChange={onInputChange}
-                components={{ DropdownIndicator }}
+                components={{ Control, DropdownIndicator: undefined, IndicatorSeparator: undefined }}
                 classNamePrefix="search-bar"
-                /* workaround for https://github.com/JedWatson/react-select/issues/5714 */
-                onFocus={() => {
-                    selectRef.current?.handleInputChange(search, { action: 'set-value' });
-                }}
             />
         </div>
     );
@@ -393,10 +437,20 @@ function isValidBase64(str: string): boolean {
     }
 }
 
-function DropdownIndicator() {
+function KeyIndicator() {
     return (
-        <div className="search-indicator">
-            <Search className="me-2" size={15} />
+        <div className="key-indicator">
+            /
         </div>
     );
 }
+
+function ClearIndicator({ onClick }: { onClick: MouseEventHandler<HTMLDivElement> }) {
+    return (
+        <div className="clear-indicator" onClick={onClick}>
+            <X size={16} />
+        </div>
+    );
+}
+
+export default SearchBar;

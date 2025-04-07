@@ -4,12 +4,19 @@ import { ClusterModal } from '@components/ClusterModal';
 import { ClusterStatusButton } from '@components/ClusterStatusButton';
 import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';
-import { SearchBar } from '@components/SearchBar';
 import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import type { Viewport } from 'next';
+import dynamic from 'next/dynamic';
 import { Rubik } from 'next/font/google';
 import { Metadata } from 'next/types';
+const SearchBar = dynamic(
+    () => import('@components/SearchBar'),
+    {
+      ssr: false,
+    }
+  );
+
 
 export const metadata: Metadata = {
     description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',

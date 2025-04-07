@@ -1,6 +1,7 @@
 'use client';
 
 import Logo from '@img/logos-solana/dark-explorer-logo.svg';
+import { useDisclosure } from '@mantine/hooks';
 import { useClusterPath } from '@utils/url';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,8 +15,7 @@ export interface INavbarProps {
 }
 
 export function Navbar({ children }: INavbarProps) {
-    // TODO: use `collapsing` to animate collapsible navbar
-    const [collapse, setCollapse] = React.useState(false);
+    const [navOpened, navHandlers] = useDisclosure(false);
     const homePath = useClusterPath({ pathname: '/' });
     const supplyPath = useClusterPath({ pathname: '/supply' });
     const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
@@ -28,13 +28,13 @@ export function Navbar({ children }: INavbarProps) {
                     <Image alt="Solana Explorer" height={22} src={Logo} width={214} />
                 </Link>
 
-                <button className="navbar-toggler" type="button" onClick={() => setCollapse(value => !value)}>
+                <button className="navbar-toggler" type="button" onClick={navHandlers.toggle}>
                     <span className="navbar-toggler-icon"></span>
                 </button>
 
-                <div className="navbar-children d-flex align-items-center flex-grow-1 w-100 h-100 px-4 d-none d-lg-block">{children}</div>
+                <div className="navbar-children d-flex align-items-center flex-grow-1 w-100 h-100 d-none d-lg-block">{children}</div>
 
-                <div className={`collapse navbar-collapse ms-auto me-4 ${collapse ? 'show' : ''} flex-shrink-0`}>
+                <div className={`collapse navbar-collapse ms-auto me-4 ${navOpened ? 'show' : ''} flex-shrink-0`}>
                     <ul className="navbar-nav me-auto">
                         <li className="nav-item">
                             <Link
