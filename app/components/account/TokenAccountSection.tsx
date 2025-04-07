@@ -122,8 +122,6 @@ function FungibleTokenMintAccountCard({
     tokenInfo?: FullLegacyTokenInfo;
 }) {
     const fetchInfo = useFetchAccountInfo();
-    const { clusterInfo } = useCluster();
-    const epoch = clusterInfo?.epochInfo.epoch;
     const refresh = () => fetchInfo(account.pubkey, 'parsed');
 
     const bridgeContractAddress = getEthAddress(tokenInfo?.extensions?.bridgeContract);
@@ -287,9 +285,6 @@ function FungibleTokenMintAccountCard({
                                 </Copyable>
                             </td>
                         </tr>
-                    )}
-                    {mintExtensions?.map(extension =>
-                        TokenExtensionRow(extension, epoch, mintInfo.decimals, tokenInfo?.symbol)
                     )}
                 </TableCardBody>
             </div>
