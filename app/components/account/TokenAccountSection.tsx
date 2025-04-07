@@ -637,7 +637,7 @@ function HHeader({ name }: { name: string }) {
 }
 
 /* Do not move component to keep commit history.
-    NOTE: Needs to be seaprated at closest refactoring
+    NOTE: Needs to be separated at closest refactoring
     Also check whether it is needed to keep it as function and not a proper React component
 */
 export function TokenExtensionRow(
