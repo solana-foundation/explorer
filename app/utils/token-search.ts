@@ -26,7 +26,7 @@ type TokenSearchApiResponse = {
     content: TokenSearchApiResponseToken[];
 };
 
-type SearchElement = {
+export type SearchElement = {
     label: string;
     value: string[];
     pathname: string;

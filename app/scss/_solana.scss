@@ -260,10 +260,16 @@ h4.slot-pill {
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        pointer-events: all;
 
         &:hover {
             color: hsl(0, 0%, 40%);
         }
+    }
+
+    .search-bar__input-container {
+        min-width: 50%;
+        flex-shrink: 0;
     }
 
     .search-bar__value-container {

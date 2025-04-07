@@ -4,9 +4,10 @@ import { useHotkeys } from '@mantine/hooks';
 import { useCluster } from '@providers/cluster';
 import { VersionedMessage } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
+import { SearchElement } from '@utils/token-search';
 import bs58 from 'bs58';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { MouseEvent, MouseEventHandler, useCallback, useId, useMemo, useRef } from 'react';
+import React, { MouseEventHandler, TouchEventHandler, useCallback, useId, useMemo, useRef } from 'react';
 import { Search, X } from 'react-feather';
 import { ActionMeta, components, ControlProps, InputActionMeta, SelectInstance } from 'react-select';
 import AsyncSelect from 'react-select/async';
@@ -16,14 +17,9 @@ import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } f
 import { searchTokens } from '../utils/token-search';
 import { MIN_MESSAGE_LENGTH } from './inspector/RawInputCard';
 
-interface SearchOption {
-    label: string;
-    value: string[];
-    pathname: string;
-}
 interface SearchOptions {
     label: string;
-    options: SearchOption[];
+    options: SearchElement[];
 }
 
 const hasDomainSyntax = (value: string) => {
@@ -37,9 +33,9 @@ export function SearchBar() {
     const router = useRouter();
     const { cluster, clusterInfo } = useCluster();
     const searchParams = useSearchParams();
-    const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
+    const selectRef = useRef<SelectInstance<SearchElement> | null>(null);
 
-    const onChange = (option: SearchOption, meta: ActionMeta<any>) => {
+    const onChange = (option: SearchElement, meta: ActionMeta<any>) => {
         if (option === null || typeof option?.pathname !== 'string') {
             setSearch('');
             return;
@@ -82,8 +78,8 @@ export function SearchBar() {
     // Substitute control component to insert custom clear button (the built in clear button only works with selected option, which is not the case)
     const Control = useMemo(
         () =>
-            function ControlSubstitute({ children, ...props }: ControlProps<SearchOption, false>) {
-                const onClearHandler = useCallback((e: MouseEvent<HTMLDivElement>) => {
+            function ControlSubstitute({ children, ...props }: ControlProps<SearchElement, false>) {
+                const clearHandler = useCallback((e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent> | React.TouchEvent<HTMLDivElement>) => {
                     e.preventDefault();
                     e.stopPropagation();
                     setSearch('');
@@ -96,11 +92,11 @@ export function SearchBar() {
                     <components.Control {...props}>
                         <Search className="me-3" size={15} />
                         {children}
-                        {hasValue ? <ClearIndicator onClick={onClearHandler} /> : <KeyIndicator />}
+                        {hasValue ? <ClearIndicator onClick={clearHandler} onTouchStart={clearHandler} /> : <KeyIndicator />}
                     </components.Control>
                 );
             },
-        []
+        [setSearch, selectRef]
     );
 
     const onHotKeyPressHandler = useCallback(() => {
@@ -137,6 +133,7 @@ export function SearchBar() {
                 blurInputOnSelect
                 onChange={onChange}
                 styles={{
+                    control: style => ({ ...style, pointerEvents: 'all' }),
                     input: style => ({ ...style, width: '100%' }),
                     /* work around for https://github.com/JedWatson/react-select/issues/3857 */
                     placeholder: style => ({ ...style, pointerEvents: 'none' }),
@@ -440,9 +437,9 @@ function KeyIndicator() {
     return <div className="key-indicator">/</div>;
 }
 
-function ClearIndicator({ onClick }: { onClick: MouseEventHandler<HTMLDivElement> }) {
+function ClearIndicator({ onClick, onTouchStart }: { onClick: MouseEventHandler<HTMLDivElement>, onTouchStart: TouchEventHandler<HTMLDivElement> }) {
     return (
-        <div className="clear-indicator" onClick={onClick}>
+        <div className="clear-indicator" onClick={onClick} onTouchStart={onTouchStart}>
             <X size={16} />
         </div>
     );
