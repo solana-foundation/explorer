@@ -160,7 +160,7 @@ function ExtensionListItem({
             </div>
 
             {/* Description */}
-            <span className="e-text-[0.75rem] e-text-[#8E9090] max-md:e-hidden md:e-col-span-6 md:e-pl-12 lg:e-col-span-7">
+            <span className="e-text-[0.75rem] e-text-[#8E9090] e-underline e-decoration-[#1e2423] max-md:e-hidden md:e-col-span-6 md:e-pl-12 lg:e-col-span-7">
                 {ext.description ?? null}
             </span>
 
@@ -169,7 +169,7 @@ function ExtensionListItem({
                 <a key="raw" href="javascript:void(0)" onClick={handleToggleRaw}>
                     <Badge
                         className="text-white e-font-normal"
-                        role="link"
+                        as="link"
                         size="sm"
                         status={raw ? 'active' : 'inactive'}
                         variant="transparent"
@@ -179,7 +179,7 @@ function ExtensionListItem({
                 </a>
                 {ext.externalLinks.map((link, index) => (
                     <a key={index} href={link.url} target="_blank" rel="noopener noreferrer">
-                        <Badge variant="transparent" size="sm" role="link" className="text-white e-font-normal">
+                        <Badge variant="transparent" size="sm" as="link" className="text-white e-font-normal">
                             <ExternalLink size={16} />
                             {link.label}
                         </Badge>

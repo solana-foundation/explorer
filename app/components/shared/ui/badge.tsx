@@ -9,34 +9,34 @@ const badgeVariants = cva(
     {
         compoundVariants: [
             {
+                as: 'link',
                 class: 'e-rounded-sm',
-                role: 'link',
                 size: 'xs',
             },
             {
+                as: 'link',
                 class: 'e-py-0.5 e-px-2 e-text-[0.8125rem] e-leading-[1.75] e-rounded',
-                role: 'link',
                 size: 'sm',
             },
             {
+                as: 'link',
                 class: 'e-rounded-md',
-                role: 'link',
                 size: 'md',
             },
             {
+                as: 'link',
                 class: 'e-rounded-md',
-                role: 'link',
                 size: 'lg',
             },
         ],
         defaultVariants: {
-            role: 'badge',
+            as: 'badge',
             size: 'xs',
             status: 'inactive',
             variant: 'default',
         },
         variants: {
-            role: {
+            as: {
                 badge: 'e-rounded',
                 link: '/* no styles except compound variants */',
             },
@@ -70,7 +70,7 @@ const badgeVariants = cva(
 
 function Badge({
     className,
-    role,
+    as,
     size,
     status,
     variant,
@@ -80,7 +80,7 @@ function Badge({
     const Comp = asChild ? Slot : 'span';
 
     return (
-        <Comp data-slot="badge" className={cn(badgeVariants({ role, size, status, variant }), className)} {...props} />
+        <Comp data-slot="badge" className={cn(badgeVariants({ as, size, status, variant }), className)} {...props} />
     );
 }
 
