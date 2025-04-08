@@ -9,9 +9,8 @@ import { useMemo } from 'react';
 import useSWR from 'swr';
 
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
-import { TokenExtension } from '@/app/validators/accounts/token-extension';
+import { TokenExtension, TokenExtensionType } from '@/app/validators/accounts/token-extension';
 
-import { TokenExtensionType } from './TokenAccountSection';
 import { TokenExtensionsSection } from './TokenExtensionsSection';
 import { ParsedTokenExtension } from './types';
 

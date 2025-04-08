@@ -13,6 +13,7 @@ import { displayTimestamp, displayTimestampWithoutDate } from '@utils/date';
 import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
+import { TokenExtensionType } from '@validators/accounts/token-extension';
 import {
     ConfidentialTransferAccount,
     ConfidentialTransferFeeAmount,
@@ -566,32 +567,6 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
         </div>
     );
 }
-
-export type TokenExtensionType =
-    | 'transferFeeAmount'
-    | 'mintCloseAuthority'
-    | 'defaultAccountState'
-    | 'immutableOwner'
-    | 'memoTransfer'
-    | 'nonTransferable'
-    | 'nonTransferableAccount'
-    | 'cpiGuard'
-    | 'permanentDelegate'
-    | 'transferHook'
-    | 'transferHookAccount'
-    | 'metadataPointer'
-    | 'groupPointer'
-    | 'groupMemberPointer'
-    | 'confidentialTransferAccount'
-    | 'confidentialTransferFeeConfig'
-    | 'confidentialTransferFeeAmount'
-    | 'confidentialTransferMint'
-    | 'interestBearingConfig'
-    | 'transferFeeConfig'
-    | 'tokenGroup'
-    | 'tokenGroupMember'
-    | 'tokenMetadata'
-    | 'unparseableExtension';
 
 function cmpExtension(a: TokenExtension, b: TokenExtension) {
     // be sure that extensions with a header row always come later
