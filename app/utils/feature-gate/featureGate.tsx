@@ -66,87 +66,85 @@ export function UpcomingFeatures() {
                     Upcoming {clusterName(cluster)} Features
                 </h3>
             </div>
-            <div className="card-body">
-                <div className="row">
-                    {filteredFeatures.map(feature => (
-                        <div key={feature.key} className="col-12 col-lg-4 mb-4">
-                            <div className="card h-100 feature-card">
-                                <div className="card-body d-flex flex-column">
-                                    <div className="d-flex align-items-center mb-3">
-                                        <h4 className="card-title mb-0 text-decoration-underline">{feature.title}</h4>
-                                    </div>
-
-                                    <p className="card-text flex-grow-1">{feature.description}</p>
-
-                                    <div className="ms-n2 mb-2">
+            <div className="table-responsive">
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Activation Epochs</th>
+                            <th>Feature Gate</th>
+                            <th>SIMD</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredFeatures.map(feature => (
+                            <tr key={feature.key}>
+                                <td>
+                                    <div className="mb-2 d-flex align-items-center">
+                                        <p className="mb-0 me-3 text-decoration-underline">{feature.title}</p>
                                         {cluster === Cluster.MainnetBeta && feature.mainnetActivationEpoch && (
-                                            <span className="badge bg-success ms-2">Active on Mainnet</span>
+                                            <span className="badge bg-success">Active on Mainnet</span>
                                         )}
                                         {cluster === Cluster.Devnet && feature.devnetActivationEpoch && (
-                                            <span className="badge bg-success ms-2">Active on Devnet</span>
+                                            <span className="badge bg-success">Active on Devnet</span>
                                         )}
                                         {cluster === Cluster.Testnet && feature.testnetActivationEpoch && (
-                                            <span className="badge bg-success ms-2">Active on Testnet</span>
+                                            <span className="badge bg-success">Active on Testnet</span>
                                         )}
                                     </div>
-
-                                    <div className="activation-info mb-3">
-                                        <div className="mb-1">Cluster Activations</div>
+                                    <p className="mb-0">{feature.description}</p>
+                                </td>
+                                <td>
+                                    <div className="d-flex flex-column">
                                         {feature.mainnetActivationEpoch && (
-                                            <div className="mb-1">
-                                                <Link
-                                                    href={`/epoch/${feature.mainnetActivationEpoch}?cluster=mainnet`}
-                                                    className="epoch-link"
-                                                >
-                                                    Mainnet Epoch {feature.mainnetActivationEpoch}
-                                                </Link>
-                                            </div>
+                                            <Link
+                                                href={`/epoch/${feature.mainnetActivationEpoch}?cluster=mainnet`}
+                                                className="epoch-link mb-1"
+                                            >
+                                                Mainnet: {feature.mainnetActivationEpoch}
+                                            </Link>
                                         )}
                                         {feature.devnetActivationEpoch && (
-                                            <div className="mb-1">
-                                                <Link
-                                                    href={`/epoch/${feature.devnetActivationEpoch}?cluster=devnet`}
-                                                    className="epoch-link"
-                                                >
-                                                    Devnet Epoch {feature.devnetActivationEpoch}
-                                                </Link>
-                                            </div>
+                                            <Link
+                                                href={`/epoch/${feature.devnetActivationEpoch}?cluster=devnet`}
+                                                className="epoch-link mb-1"
+                                            >
+                                                Devnet: {feature.devnetActivationEpoch}
+                                            </Link>
                                         )}
                                         {feature.testnetActivationEpoch && (
-                                            <div>
-                                                <Link
-                                                    href={`/epoch/${feature.testnetActivationEpoch}?cluster=testnet`}
-                                                    className="epoch-link"
-                                                >
-                                                    Testnet Epoch {feature.testnetActivationEpoch}
-                                                </Link>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div>Feature Gate</div>
-                                    <div className="d-flex justify-content-between align-items-center">
-                                        <Address
-                                            pubkey={new PublicKey(feature.key)}
-                                            link
-                                            truncateChars={feature.simd ? 12 : 20}
-                                        />
-                                        {feature.simd && feature.simd_link && (
-                                            <a
-                                                href={feature.simd_link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="btn btn-sm btn-outline-primary"
+                                            <Link
+                                                href={`/epoch/${feature.testnetActivationEpoch}?cluster=testnet`}
+                                                className="epoch-link"
                                             >
-                                                See SIMD {feature.simd} →
-                                            </a>
+                                                Testnet: {feature.testnetActivationEpoch}
+                                            </Link>
                                         )}
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                                </td>
+                                <td>
+                                    <Address
+                                        pubkey={new PublicKey(feature.key)}
+                                        link
+                                        truncateChars={feature.simd ? 12 : 20}
+                                    />
+                                </td>
+                                <td>
+                                    {feature.simd && feature.simd_link && (
+                                        <a
+                                            href={feature.simd_link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="btn btn-sm btn-outline-primary"
+                                        >
+                                            SIMD {feature.simd}
+                                        </a>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     );
