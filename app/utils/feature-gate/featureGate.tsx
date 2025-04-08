@@ -122,7 +122,7 @@ export function UpcomingFeatures() {
                                         )}
                                     </div>
                                 </td>
-                                <td>
+                                <td className="fs-sm">
                                     <Address
                                         pubkey={new PublicKey(feature.key)}
                                         link
