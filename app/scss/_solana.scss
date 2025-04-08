@@ -191,23 +191,98 @@ h4.slot-pill {
     line-height: 1.5rem;
 }
 
-.search-indicator {
-    color: hsl(0, 0%, 60%);
-    display: flex;
-    padding: 8px 10px;
-    padding-left: 14px;
-    transition: color 150ms;
-    box-sizing: border-box;
-    cursor: pointer;
-
-    &:hover {
-        color: hsl(0, 0%, 40%);
-    }
-}
 
 .search-bar__control {
     border-radius: $border-radius !important;
-    padding: 4px;
+    padding: 2px 16px;
+    margin: 0px;
+
+    .search-bar__placeholder {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .search-indicator {
+        width: 16px;
+        height: 16px;
+        padding: 4px;
+        color: #C9C9C9;
+        display: flex;
+        transition: color 150ms;
+        box-sizing: content-box;
+        border-radius: 3px;
+        border: 1px solid #111312;
+        background: #282D2C;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        &:hover {
+            color: hsl(0, 0%, 40%);
+        }
+    }
+    .key-indicator {
+        width: 16px;
+        height: 16px;
+        padding: 4px;
+        color: #C9C9C9;
+        display: flex;
+        transition: color 150ms;
+        box-sizing: content-box;
+        border-radius: 3px;
+        border: 1px solid #111312;
+        background: #282D2C;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        &:hover {
+            color: hsl(0, 0%, 40%);
+        }
+    }
+
+    .clear-indicator {
+        width: 16px;
+        height: 16px;
+        padding: 4px;
+        color: #C9C9C9;
+        display: flex;
+        transition: color 150ms;
+        box-sizing: content-box;
+        border-radius: 3px;
+        border: 1px solid #111312;
+        background: #282D2C;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        pointer-events: all;
+
+        &:hover {
+            color: hsl(0, 0%, 40%);
+        }
+    }
+
+    .search-bar__input-container {
+        min-width: 50%;
+        flex-shrink: 0;
+    }
+
+    .search-bar__value-container {
+        padding: 0;
+    }
+
+    // work around for https://github.com/JedWatson/react-select/issues/3857
+    .search-bar__input {
+        width: 100% !important;
+        input {
+            width: 100% !important;
+        }
+    }
 }
 
 .search-bar__menu {
@@ -292,14 +367,6 @@ div.inner-cards {
 
     .table td {
         border-top: 1px solid $gray-800-dark;
-    }
-}
-
-// work around for https://github.com/JedWatson/react-select/issues/3857
-.search-bar__input {
-    width: 100% !important;
-    input {
-        width: 100% !important;
     }
 }
 

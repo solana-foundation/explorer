@@ -159,7 +159,7 @@
     "version": "v2.1.6",
     "testnetActivationEpoch": 760,
     "devnetActivationEpoch": 853,
-    "mainnetActivationEpoch": null,
+    "mainnetActivationEpoch": 767,
     "title": "GetEpochStake",
     "description": "Add a new syscall to get the epoch stake",
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0133-syscall-get-epoch-stake.md"
@@ -203,7 +203,7 @@
     "version": "v2.0.0",
     "testnetActivationEpoch": 759,
     "devnetActivationEpoch": 852,
-    "mainnetActivationEpoch": null,
+    "mainnetActivationEpoch": 764,
     "title": "Validator applies cost tracker to blocks during replay",
     "description": null,
     "simd_link": null
@@ -289,8 +289,8 @@
     "key": "5oMCU3JPaFLr8Zr4ct7yFA7jdk6Mw1RmB8K4u9ZbS42z",
     "simd": "0207",
     "version": "v2.1.8",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
+    "testnetActivationEpoch": 764,
+    "devnetActivationEpoch": 857,
     "mainnetActivationEpoch": null,
     "title": "Raise Block Limits to 50M CUs",
     "description": null,
@@ -328,5 +328,16 @@
     "title": "Accounts Lt Hash",
     "description": null,
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0215-accounts-lattice-hash.md"
+  },
+  {
+    "key": "srremy31J5Y25FrAApwVb9kZcfXbusYMMsvTK9aWv5q",
+    "simd": "0075",
+    "version": "v2.3.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Enable secp256r1 precompile",
+    "description": null,
+    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0075-precompile-for-secp256r1-sigverify.md"
   }
 ]

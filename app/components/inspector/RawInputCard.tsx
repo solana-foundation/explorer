@@ -78,6 +78,101 @@ export const MIN_MESSAGE_LENGTH =
     32 + // recent blockhash
     1; // instructions length
 
+type TabData = {
+    id: string;
+    label: string;
+    content: React.ReactNode;
+};
+
+function TabInstructions() {
+    const [activeTab, setActiveTab] = React.useState('cli');
+
+    const tabs: TabData[] = [
+        {
+            content: (
+                <div className="p-3">
+                    Use <code>--dump-transaction-message</code> flag
+                </div>
+            ),
+            id: 'cli',
+            label: 'CLI',
+        },
+        {
+            content: (
+                <div className="p-3">
+                    Add <code>base64</code> crate dependency and{' '}
+                    <code>println!(&quot;{}&quot;, base64::encode(&transaction.message_data()));</code>
+                </div>
+            ),
+            id: 'rust',
+            label: 'Rust',
+        },
+        {
+            content: (
+                <div className="p-3">
+                    <div className="mb-3">
+                        <div className="text-decoration-underline mb-2">@solana/web3.js &lt; 2.0.0</div>
+                        <div className="mb-2">
+                            <div className="mb-1">Legacy Transaction:</div>
+                            <code>console.log(tx.serializeMessage().toString(&quot;base64&quot;));</code>
+                        </div>
+                        <div>
+                            <div className="mb-1">Versioned Transaction:</div>
+                            <code>console.log(Buffer.from(tx.serialize()).toString(&quot;base64&quot;));</code>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="text-decoration-underline mb-2">@solana/web3.js &gt;= 2.0.0</div>
+                        <div>
+                            <div className="mb-1">Legacy Transaction:</div>
+                            <code>console.log(getBase64EncodedWireTransaction(tx));</code>
+                        </div>
+                    </div>
+                </div>
+            ),
+            id: 'ts',
+            label: 'TypeScript',
+        },
+        {
+            content: (
+                <div className="p-3">
+                    Add <code>vault_transaction</code> from{' '}
+                    <code>https://app.squads.so/squads/&lt;squad_id&gt;/transactions/&lt;vault_transaction&gt;</code>
+                </div>
+            ),
+            id: 'squads',
+            label: 'Squads',
+        },
+    ];
+
+    return (
+        <div className="instruction-tabs">
+            <div className="nav nav-tabs" role="tablist">
+                {tabs.map(tab => (
+                    <button
+                        key={tab.id}
+                        className={`me-3 nav-link ${activeTab === tab.id ? 'active' : ''}`}
+                        onClick={() => setActiveTab(tab.id)}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+            <div className="tab-content">
+                {tabs.map(tab => (
+                    <div
+                        key={tab.id}
+                        className={`tab-pane ${activeTab === tab.id ? 'show active' : ''}`}
+                        role="tabpanel"
+                    >
+                        {tab.content}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 export function RawInput({
     value,
     setTransactionData,
@@ -218,25 +313,7 @@ export function RawInput({
             </div>
             <div className="card-footer">
                 <h3>Instructions</h3>
-                <ul>
-                    <li className="mb-2">
-                        <strong>CLI: </strong>Use <code>--dump-transaction-message</code> flag
-                    </li>
-                    <li className="mb-2">
-                        <strong>Rust: </strong>Add <code>base64</code> crate dependency and{' '}
-                        <code>println!(&quot;{}&quot;, base64::encode(&transaction.message_data()));</code>
-                    </li>
-                    <li>
-                        <strong>JavaScript: </strong>Add{' '}
-                        <code>console.log(tx.serializeMessage().toString(&quot;base64&quot;));</code>
-                    </li>
-                    <li>
-                        <strong>Squads: </strong>Add <code>vault_transaction</code> from{' '}
-                        <code>
-                            https://app.squads.so/squads/&lt;squad_id&gt;/transactions/&lt;vault_transaction&gt;
-                        </code>
-                    </li>
-                </ul>
+                <TabInstructions />
             </div>
         </div>
     );

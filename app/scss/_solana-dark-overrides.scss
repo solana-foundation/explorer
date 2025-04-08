@@ -34,7 +34,6 @@ ul.log-messages {
     background-color: $gray-800-dark !important;
     border-color: $card-outline-color !important;
     box-shadow: $card-box-shadow !important;
-    min-height: 52px !important;
 
     .search-bar__input {
         color: $white !important;
@@ -48,7 +47,7 @@ ul.log-messages {
 
     .search-bar__option {
         cursor: pointer;
-    
+
         &.search-bar__option--is-focused,
         &:hover {
             background-color: $gray-700-dark !important;

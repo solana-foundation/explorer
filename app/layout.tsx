@@ -1,15 +1,18 @@
 import './scss/theme-dark.scss';
 
 import { ClusterModal } from '@components/ClusterModal';
-import { ClusterStatusBanner } from '@components/ClusterStatusButton';
+import { ClusterStatusButton } from '@components/ClusterStatusButton';
 import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';
-import { SearchBar } from '@components/SearchBar';
 import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import type { Viewport } from 'next';
+import dynamic from 'next/dynamic';
 import { Rubik } from 'next/font/google';
 import { Metadata } from 'next/types';
+const SearchBar = dynamic(() => import('@components/SearchBar'), {
+    ssr: false,
+});
 
 export const metadata: Metadata = {
     description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',
@@ -49,10 +52,16 @@ export default function RootLayout({
                     <ClusterProvider>
                         <ClusterModal />
                         <div className="main-content pb-4">
-                            <Navbar />
+                            <Navbar>
+                                <SearchBar />
+                            </Navbar>
                             <MessageBanner />
-                            <ClusterStatusBanner />
-                            <SearchBar />
+                            <div className="container my-3 d-lg-none">
+                                <SearchBar />
+                            </div>
+                            <div className="container my-3 d-lg-none">
+                                <ClusterStatusButton />
+                            </div>
                             {children}
                         </div>
                     </ClusterProvider>
