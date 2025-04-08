@@ -1,0 +1,1 @@
+<svg height="100" viewBox="0 0 100 100" width="100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><mask id="a"><path d="m0 0h100v100h-100z" fill="#fff"/><circle cx="125" cy="50" r="55"/><circle cx="-25" cy="50" r="55"/></mask><path d="m0 0h100v100h-100z" fill="#008000" mask="url(#a)"/></svg>

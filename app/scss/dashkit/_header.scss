@@ -22,8 +22,7 @@
     border-bottom: $header-body-border-width solid $header-body-border-color;
 }
 
-.header.bg-dark .header-body,
-.header.bg-hero .header-body {
+.header.bg-dark .header-body {
     border-bottom-color: $header-body-border-color-dark;
 }
 

@@ -43,16 +43,6 @@
     }
 }
 
-// Hero
-
-.bg-hero {
-    background-image: linear-gradient(to bottom, fade-out($black, 0.15), fade-out($black, 0.15)),
-        url(#{$path-to-img}/covers/header-cover.jpg);
-    background-repeat: no-repeat, no-repeat;
-    background-position: center center, center center;
-    background-size: cover, cover;
-}
-
 // Soft colors
 
 @each $color, $value in $theme-colors {
