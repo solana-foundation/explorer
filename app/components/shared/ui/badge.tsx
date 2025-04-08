@@ -5,18 +5,50 @@ import * as React from 'react';
 import { cn } from '@/app/components/shared/utils';
 
 const badgeVariants = cva(
-    'e-inline-flex e-items-center e-justify-center e-rounded-md e-border e-border-neutral-200 e-px-2 e-py-0.5 e-font-medium e-w-fit e-whitespace-nowrap e-shrink-0 [&>svg]:e-size-3 e-gap-1 [&>svg]:e-pointer-events-none focus-visible:e-border-neutral-950 focus-visible:e-ring-neutral-950/50 focus-visible:e-ring-[3px] aria-invalid:e-ring-red-500/20 dark:aria-invalid:e-ring-red-500/40 aria-invalid:e-border-red-500 e-transition-[color,box-shadow] e-overflow-hidden dark:e-border-neutral-800 dark:focus-visible:e-border-neutral-300 dark:focus-visible:e-ring-neutral-300/50 dark:aria-invalid:e-ring-red-900/20 dark:dark:aria-invalid:e-ring-red-900/40 dark:aria-invalid:e-border-red-900',
+    'e-inline-flex e-items-center e-justify-center e-border e-border-neutral-200 e-px-2 e-py-0.5 e-font-medium e-w-fit e-whitespace-nowrap e-shrink-0 [&>svg]:e-size-3 e-gap-1 [&>svg]:e-pointer-events-none focus-visible:e-border-neutral-950 focus-visible:e-ring-neutral-950/50 focus-visible:e-ring-[3px] aria-invalid:e-ring-red-500/20 dark:aria-invalid:e-ring-red-500/40 aria-invalid:e-border-red-500 e-transition-[color,box-shadow] e-overflow-hidden dark:e-border-neutral-800 dark:focus-visible:e-border-neutral-300 dark:focus-visible:e-ring-neutral-300/50 dark:aria-invalid:e-ring-red-900/20 dark:dark:aria-invalid:e-ring-red-900/40 dark:aria-invalid:e-border-red-900',
     {
+        compoundVariants: [
+            {
+                class: 'e-rounded-sm',
+                role: 'link',
+                size: 'xs',
+            },
+            {
+                class: 'e-py-0.5 e-px-2 e-text-[0.8125rem] e-leading-[1.75] e-rounded',
+                role: 'link',
+                size: 'sm',
+            },
+            {
+                class: 'e-rounded-md',
+                role: 'link',
+                size: 'md',
+            },
+            {
+                class: 'e-rounded-md',
+                role: 'link',
+                size: 'lg',
+            },
+        ],
         defaultVariants: {
+            role: 'badge',
             size: 'xs',
+            status: 'inactive',
             variant: 'default',
         },
         variants: {
+            role: {
+                badge: 'e-rounded',
+                link: '/* no styles except compound variants */',
+            },
             size: {
                 lg: 'e-text-lg',
                 md: 'e-text-md',
                 sm: 'e-text-sm',
                 xs: 'e-text-xs',
+            },
+            status: {
+                active: 'e-shadow-active',
+                inactive: '',
             },
             variant: {
                 default:
@@ -38,14 +70,18 @@ const badgeVariants = cva(
 
 function Badge({
     className,
-    variant,
+    role,
     size,
+    status,
+    variant,
     asChild = false,
     ...props
 }: React.ComponentProps<'span'> & VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
     const Comp = asChild ? Slot : 'span';
 
-    return <Comp data-slot="badge" className={cn(badgeVariants({ size, variant }), className)} {...props} />;
+    return (
+        <Comp data-slot="badge" className={cn(badgeVariants({ role, size, status, variant }), className)} {...props} />
+    );
 }
 
 export { Badge, badgeVariants };

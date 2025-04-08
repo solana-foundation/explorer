@@ -33,7 +33,7 @@ export function TokenExtensionsCard({ address }: { address: string }) {
     return (
         <div className="card">
             <AccountHeader title="Extensions" refresh={() => refresh(new PublicKey(address), 'parsed')} />
-            <div className="card-body p-0">
+            <div className="card-body p-0 e-overflow-x-scroll">
                 <TokenExtensionsSection
                     decimals={mintInfo.decimals}
                     extensions={mintInfo.extensions}

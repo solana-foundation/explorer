@@ -5,6 +5,9 @@
     .max-xs\:e-hidden {
         display: none;
     }
+    .max-xs\:e-col-span-6 {
+        grid-column: span 6 / span 6;
+    }
 }
 
 @media (max-width: 767px) {

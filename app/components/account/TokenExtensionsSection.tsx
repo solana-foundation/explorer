@@ -96,7 +96,7 @@ function TokenExtensionAccordionItem({
     return (
         <>
             <AccordionTrigger className="e-items-center" ref={accordionTriggerRef}>
-                <ExtensionListItem ext={parsedExtension} onToggleRaw={handleToggleRaw} />
+                <ExtensionListItem ext={parsedExtension} onToggleRaw={handleToggleRaw} raw={showRaw} />
             </AccordionTrigger>
             <AccordionContent>
                 {!showRaw ? (
@@ -124,7 +124,15 @@ function TokenExtensionStateHeader({ name }: { name: string }) {
     );
 }
 
-function ExtensionListItem({ ext, onToggleRaw }: { ext: ParsedTokenExtension; onToggleRaw: () => void }) {
+function ExtensionListItem({
+    ext,
+    onToggleRaw,
+    raw,
+}: {
+    ext: ParsedTokenExtension;
+    onToggleRaw: () => void;
+    raw: boolean;
+}) {
     const handleToggleRaw = useCallback(
         (e: React.MouseEvent<HTMLAnchorElement>) => {
             e.stopPropagation();
@@ -134,9 +142,9 @@ function ExtensionListItem({ ext, onToggleRaw }: { ext: ParsedTokenExtension; on
     );
 
     return (
-        <div className="w-100 e-w-100 text-white e-grid e-grid-cols-12 e-items-center e-gap-2 e-text-sm">
+        <div className="w-100 e-w-100 text-white e-grid e-grid-cols-12-ext e-items-center e-gap-2 e-text-sm">
             {/* Name */}
-            <div className="e-flex e-items-center e-gap-2 e-whitespace-nowrap e-font-normal max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-3 lg:e-col-span-3">
+            <div className="e-flex e-min-w-80 e-items-center e-gap-2 e-whitespace-nowrap e-font-normal max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-3 lg:e-col-span-3">
                 <div>{ext.name}</div>
                 <Tooltip>
                     {/* might be needed to wrap tooltip into a wrapper that watches window borders to adjust tootip's position */}
@@ -157,15 +165,21 @@ function ExtensionListItem({ ext, onToggleRaw }: { ext: ParsedTokenExtension; on
             </span>
 
             {/* External links badges */}
-            <div className="text-white xs:e-grid-col-span-6 e-flex e-justify-end e-gap-1 max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-2 lg:e-col-span-2">
+            <div className="text-white e-flex e-justify-end e-gap-1 max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-2 lg:e-col-span-2">
                 <a key="raw" href="javascript:void(0)" onClick={handleToggleRaw}>
-                    <Badge variant="transparent" size="sm" className="text-white e-font-normal">
+                    <Badge
+                        className="text-white e-font-normal"
+                        role="link"
+                        size="sm"
+                        status={raw ? 'active' : 'inactive'}
+                        variant="transparent"
+                    >
                         <Code size={16} /> Raw
                     </Badge>
                 </a>
                 {ext.externalLinks.map((link, index) => (
                     <a key={index} href={link.url} target="_blank" rel="noopener noreferrer">
-                        <Badge variant="transparent" size="sm" className="text-white e-font-normal">
+                        <Badge variant="transparent" size="sm" role="link" className="text-white e-font-normal">
                             <ExternalLink size={16} />
                             {link.label}
                         </Badge>

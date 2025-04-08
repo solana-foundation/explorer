@@ -5,7 +5,15 @@ const config: Config = {
     plugins: [],
     prefix: 'e-',
     theme: {
-        extend: {},
+        extend: {
+            boxShadow: {
+                active: '0 0 0 0.15rem #33a382',
+            },
+            gridTemplateColumns: {
+                // Grid template for TokenExtensions
+                '12-ext': 'minmax(22rem, 1fr), repeat(11, minmax(0, 1fr))',
+            },
+        },
         screens: {
             xs: '576px',
             sm: '768px',
