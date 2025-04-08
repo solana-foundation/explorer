@@ -9,7 +9,7 @@
         "scan": "next dev & react-scan localhost:3000",
         "lint": "next lint",
         "format": "prettier --config .prettierrc.cjs **.{ts,tsx} *.json --check",
-        "gen": "pnpx shadcn@2.4.0-canary.17 add",
+        "gen": "pnpx shadcn@^2.4.0 add",
         "coverage": "vitest --coverage",
         "test": "vitest --watch",
         "test:ci": "vitest run"
