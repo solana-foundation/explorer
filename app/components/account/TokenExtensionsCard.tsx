@@ -71,29 +71,27 @@ function populatePartialParsedTokenExtension(
         return [{ label: 'Docs', url }];
     }
 
-    /**
-     * Sample.
-     * TODO: To be removed upon editing all the details for each extension
-        description: 'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token, providing centralized administrative control over the token ecosystem.',
-        externalLinks: populateExternalLinks('https://solana.com/developers/guides/token-extensions/permanent-delegate'),
-        name: 'Permanent Delegate',
-        status: 'active',
-        tooltip: 'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token, providing centralized administrative control over the token ecosystem.',
-     */
     switch (extension) {
         case 'transferFeeAmount': {
+            const description =
+                "Every transfer sets aside a fee in the recipient's Token Account that can only be withdrawn by the Withdraw Authority";
             return {
+                description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('transfer-fee')),
                 name: 'Transfer Fee Amount',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
         case 'mintCloseAuthority': {
+            const description = 'Allows a designated Close Authority to close the mint account if the supply is 0';
             return {
+                description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('mint-close-authority')),
                 name: 'Mint Close Authority',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
@@ -132,7 +130,7 @@ function populatePartialParsedTokenExtension(
         case 'nonTransferableAccount': {
             return {
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('non-transferable-token')),
-                name: "Non-Transferable Token's Account",
+                name: 'Non-Transferable Token Account',
                 status: 'active',
             };
             break;
@@ -146,30 +144,36 @@ function populatePartialParsedTokenExtension(
             break;
         }
         case 'permanentDelegate': {
+            const description =
+                'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token';
             return {
-                description:
-                    'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token, providing centralized administrative control over the token ecosystem.',
+                description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('permanent-delegate')),
                 name: 'Permanent Delegate',
                 status: 'active',
-                tooltip:
-                    'Delegates permanent authority to a specific address that can transfer or burn tokens from any account holding this token, providing centralized administrative control over the token ecosystem.',
+                tooltip: description,
             };
             break;
         }
         case 'transferHook': {
+            const description = 'Allow the token program to execute custom instruction logic on every token transfer';
             return {
+                description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('transfer-hook')),
                 name: 'Transfer Hook',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
         case 'transferHookAccount': {
+            const description = 'List of accounts that the token program requires to execute custom instruction logic';
             return {
+                description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('transfer-hook')),
-                name: "Transfer Hook's Account",
+                name: 'Transfer Hook Account Info',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
@@ -198,25 +202,32 @@ function populatePartialParsedTokenExtension(
             break;
         }
         case 'confidentialTransferAccount': {
+            const description = 'Token amount is only able to be unencrypted by the token holder or auditor key';
             return {
+                description,
                 externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
-                name: "Confidential Transfer's Account",
+                name: 'Confidential Transfer Token Info',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
         case 'confidentialTransferFeeConfig': {
+            const description =
+                'Allow token holders to opt-in to encrypted balances that are accessible only to them and the auditor';
             return {
+                description,
                 externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
-                name: "Confidential Transfer's Fee Config",
+                name: 'Confidential Transfer Fee Config',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
         case 'confidentialTransferFeeAmount': {
             return {
                 externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
-                name: "Confidential Transfer's Fee Amount",
+                name: 'Confidential Transfer Fee Amount',
                 status: 'active',
             };
             break;
@@ -224,7 +235,7 @@ function populatePartialParsedTokenExtension(
         case 'confidentialTransferMint': {
             return {
                 externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
-                name: "Confidential Transfer's Mint",
+                name: 'Confidential Transfer',
                 status: 'active',
             };
             break;
@@ -272,11 +283,9 @@ function populatePartialParsedTokenExtension(
         case 'unparseableExtension':
         default:
             return {
-                description: undefined,
                 externalLinks: [],
-                name: 'Unparseable Extension',
+                name: 'Unknown Extension',
                 status: 'active',
-                tooltip: undefined,
             };
             break;
     }

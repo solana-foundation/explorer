@@ -153,7 +153,7 @@ function ExtensionListItem({
                     </TooltipTrigger>
                     {ext.tooltip && (
                         <TooltipContent>
-                            <div className="e-w-[220px]">{ext.tooltip}</div>
+                            <div className="e-min-w-36 e-max-w-16">{ext.tooltip}</div>
                         </TooltipContent>
                     )}
                 </Tooltip>
