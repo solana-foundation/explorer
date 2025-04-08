@@ -7,11 +7,12 @@ const config: Config = {
     theme: {
         extend: {
             boxShadow: {
+                // border for active states from Dashkit
                 active: '0 0 0 0.15rem #33a382',
             },
             gridTemplateColumns: {
                 // Grid template for TokenExtensions
-                '12-ext': 'minmax(22rem, 1fr), repeat(11, minmax(0, 1fr))',
+                '12-ext': 'repeat(12, minmax(0, 1fr))',
             },
         },
         screens: {

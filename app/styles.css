@@ -8,6 +8,10 @@
     .max-xs\:e-col-span-6 {
         grid-column: span 6 / span 6;
     }
+    /* Adjust template for small displays so columns do not overlap each other */
+    .e-grid-cols-12-ext {
+        grid-template-columns: minmax(22rem, 1fr) repeat(11, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 767px) {

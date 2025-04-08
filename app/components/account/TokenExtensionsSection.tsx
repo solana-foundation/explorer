@@ -144,7 +144,7 @@ function ExtensionListItem({
     return (
         <div className="w-100 e-w-100 text-white e-grid e-grid-cols-12-ext e-items-center e-gap-2 e-text-sm">
             {/* Name */}
-            <div className="e-flex e-min-w-80 e-items-center e-gap-2 e-whitespace-nowrap e-font-normal max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-3 lg:e-col-span-3">
+            <div className="e-flex e-min-w-80 e-items-center e-gap-2 e-whitespace-nowrap e-font-normal max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-4 lg:e-col-span-3">
                 <div>{ext.name}</div>
                 <Tooltip>
                     {/* might be needed to wrap tooltip into a wrapper that watches window borders to adjust tootip's position */}
@@ -160,7 +160,7 @@ function ExtensionListItem({
             </div>
 
             {/* Description */}
-            <span className="e-text-[0.75rem] e-text-[#8E9090] max-md:e-hidden md:e-col-span-7 md:e-pl-4 lg:e-col-span-7">
+            <span className="e-text-[0.75rem] e-text-[#8E9090] max-md:e-hidden md:e-col-span-6 md:e-pl-12 lg:e-col-span-7">
                 {ext.description ?? null}
             </span>
 

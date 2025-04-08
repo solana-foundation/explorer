@@ -734,11 +734,7 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
             title: 'Extensions',
         };
         tabComponents.push({
-            component: (
-                <React.Suspense key={extensionsTab.slug} fallback={<></>}>
-                    <TokenExtensionsLink tab={extensionsTab} address={pubkey.toString()} />
-                </React.Suspense>
-            ),
+            component: <TokenExtensionsLink tab={extensionsTab} address={pubkey.toString()} />,
             tab: extensionsTab,
         });
     }
