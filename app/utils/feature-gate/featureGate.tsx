@@ -61,12 +61,12 @@ export function UpcomingFeatures() {
     return (
         <div className="card">
             <div className="card-header">
-                <h3 className="card-header-title">
+                <h4 className="card-header-title">
                     <span className="me-2">🚀</span>
                     Upcoming {clusterName(cluster)} Features
-                </h3>
+                </h4>
             </div>
-            <div className="table-responsive">
+            <div className="table-responsive small-headers">
                 <table className="table">
                     <thead>
                         <tr>
@@ -81,7 +81,7 @@ export function UpcomingFeatures() {
                             <tr key={feature.key}>
                                 <td>
                                     <div className="mb-2 d-flex align-items-center">
-                                        <p className="mb-0 me-3 text-decoration-underline">{feature.title}</p>
+                                        <p className="mb-0 me-3 text-decoration-underline fs-sm">{feature.title}</p>
                                         {cluster === Cluster.MainnetBeta && feature.mainnetActivationEpoch && (
                                             <span className="badge bg-success">Active on Mainnet</span>
                                         )}
@@ -92,10 +92,10 @@ export function UpcomingFeatures() {
                                             <span className="badge bg-success">Active on Testnet</span>
                                         )}
                                     </div>
-                                    <p className="mb-0">{feature.description}</p>
+                                    <p className="mb-0 fs-sm">{feature.description}</p>
                                 </td>
                                 <td>
-                                    <div className="d-flex flex-column">
+                                    <div className="d-flex flex-column fs-sm">
                                         {feature.mainnetActivationEpoch && (
                                             <Link
                                                 href={`/epoch/${feature.mainnetActivationEpoch}?cluster=mainnet`}
@@ -135,7 +135,7 @@ export function UpcomingFeatures() {
                                             href={feature.simd_link}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="btn btn-sm btn-outline-primary"
+                                            className="btn btn-sm btn-outline-primary fs-sm"
                                         >
                                             SIMD {feature.simd}
                                         </a>
