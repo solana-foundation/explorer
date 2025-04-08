@@ -402,7 +402,8 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
     const { cluster, clusterInfo, url } = useCluster();
     const epoch = clusterInfo?.epochInfo.epoch;
     const label = addressLabel(account.pubkey.toBase58(), cluster);
-    const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, url]);
+    const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, info.mint, url]);
+
     const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
     const [symbol, setSymbol] = useState<string | undefined>(undefined);
     const accountExtensions = info.extensions?.slice();
@@ -423,9 +424,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
         } else {
             setSymbol(tokenInfo?.symbol);
         }
-        // TODO: Not sure at this moment whether deps are correct at this case. Figure it out later.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [tokenInfo]);
+    }, [tokenInfo, info]);
 
     return (
         <div className="card">
@@ -438,7 +437,6 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                     Refresh
                 </button>
             </div>
-
             <TableCardBody>
                 <tr>
                     <td>Address</td>
