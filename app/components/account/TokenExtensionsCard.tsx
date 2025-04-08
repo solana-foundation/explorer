@@ -177,10 +177,13 @@ function populatePartialParsedTokenExtension(
             break;
         }
         case 'metadataPointer': {
+            const description = 'Describes the location of the token metadata';
             return {
-                externalLinks: populateExternalLinks(populateSolanaDevelopersLink('token-extensions-metadata')),
+                description,
+                externalLinks: populateExternalLinks(populateSolanaDevelopersLink('metadata-pointer')),
                 name: 'Metadata Pointer',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
@@ -212,14 +215,10 @@ function populatePartialParsedTokenExtension(
             break;
         }
         case 'confidentialTransferFeeConfig': {
-            const description =
-                'Allow token holders to opt-in to encrypted balances that are accessible only to them and the auditor';
             return {
-                description,
                 externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
                 name: 'Confidential Transfer Fee Config',
                 status: 'active',
-                tooltip: description,
             };
             break;
         }
@@ -232,26 +231,37 @@ function populatePartialParsedTokenExtension(
             break;
         }
         case 'confidentialTransferMint': {
+            const description =
+                'Allow token holders to opt-in to encrypted balances that are accessible only to them and the auditor';
             return {
+                description,
                 externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
                 name: 'Confidential Transfer',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
         case 'interestBearingConfig': {
+            const description = 'Allows the token balance to be displayed with accumulated interest';
             return {
+                description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('interest-bearing-token')),
                 name: 'Interest Bearing Token Configuration',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
         case 'transferFeeConfig': {
+            const description =
+                'Allows a fee to be set aside on every transfer that can only be withdrawn by the Withdraw Authority';
             return {
+                description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('transfer-fee')),
                 name: 'Transfer Fee',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
@@ -272,10 +282,13 @@ function populatePartialParsedTokenExtension(
             break;
         }
         case 'tokenMetadata': {
+            const description = 'Allows metadata to be written directly to the mint account';
             return {
-                externalLinks: populateExternalLinks(populateSolanaDevelopersLink('token-extensions-metadata')),
+                description,
+                externalLinks: populateExternalLinks(populateSolanaDevelopersLink('metadata-pointer')),
                 name: 'Token Metadata',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
@@ -286,5 +299,6 @@ function populatePartialParsedTokenExtension(
                 name: 'Unknown Extension',
                 status: 'active',
             };
+            break;
     }
 }
