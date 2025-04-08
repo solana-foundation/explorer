@@ -286,6 +286,5 @@ function populatePartialParsedTokenExtension(
                 name: 'Unknown Extension',
                 status: 'active',
             };
-            break;
     }
 }
