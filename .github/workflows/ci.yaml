@@ -32,14 +32,15 @@ jobs:
       - name: Evaluate Cache Path
         id: pnpm_cache
         run: |
-          echo "PNPM_CACHE_PATH=$(pnpm store path)" >> $GITHUB_ENV
+          PNPM_CACHE_PATH=$(pnpm store path)
+          echo "PNPM_CACHE_PATH=$PNPM_CACHE_PATH" >> $GITHUB_ENV
           echo "$PNPM_CACHE_PATH"
 
       - name: Setup Cache
         uses: actions/cache@v4
         with:
           path: |
-            $PNPM_CACHE_PATH
+            ${{ env.PNPM_CACHE_PATH }}
             ${{ github.workspace }}/.next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
           restore-keys: |
