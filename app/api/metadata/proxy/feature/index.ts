@@ -1,6 +1,13 @@
 import { default as fetch, Headers } from 'node-fetch';
 
-import { errors, matchAbortError, matchMaxSizeError, matchTimeoutError, StatusError, unsupportedMediaError } from './errors';
+import {
+    errors,
+    matchAbortError,
+    matchMaxSizeError,
+    matchTimeoutError,
+    StatusError,
+    unsupportedMediaError,
+} from './errors';
 import { processBinary, processJson } from './processors';
 
 export { StatusError };
@@ -14,7 +21,7 @@ function handleRequestBasedErrors(error: Error | undefined) {
         return errors[504];
     } else if (matchMaxSizeError(error)) {
         return errors[413];
-    }else if (matchAbortError(error)) {
+    } else if (matchAbortError(error)) {
         return errors[504];
     } else {
         return errors[500];
@@ -22,9 +29,9 @@ function handleRequestBasedErrors(error: Error | undefined) {
 }
 
 async function requestResource(
-    uri: string, 
-    headers: Headers, 
-    timeout: number, 
+    uri: string,
+    headers: Headers,
+    timeout: number,
     size: number
 ): Promise<[Error, void] | [void, fetch.Response]> {
     let response: fetch.Response | undefined;
@@ -44,8 +51,7 @@ async function requestResource(
             // handle any other error as general one and allow to see it at console
             // might be a good one to track with a service like Sentry
             console.debug(e);
-            error = new Error("Cannot fetch resource");
-
+            error = new Error('Cannot fetch resource');
         }
     }
 
@@ -57,12 +63,9 @@ export async function fetchResource(
     headers: Headers,
     timeout: number,
     size: number
-): Promise<Awaited<|
-    ReturnType<typeof processBinary> | 
-    ReturnType<typeof processJson>
->> {
+): Promise<Awaited<ReturnType<typeof processBinary> | ReturnType<typeof processJson>>> {
     const [error, response] = await requestResource(uri, headers, timeout, size);
-    
+
     // check for response to infer proper type for it
     // and throw proper error
     if (error || !response) {
