@@ -19,7 +19,7 @@ function Tooltip({ state }: { state: State }) {
     );
 }
 
-export function TimestampToggle({ unixTimestamp }: { unixTimestamp: number }) {
+export function TimestampToggle({ unixTimestamp, shorter }: { unixTimestamp: number; shorter?: boolean }) {
     const [isTimestampTypeUtc, toggleTimestampType] = useState(true);
     const [showTooltip, toggleTooltip] = useState<State>('hide');
 
@@ -34,7 +34,9 @@ export function TimestampToggle({ unixTimestamp }: { unixTimestamp: number }) {
     return (
         <div className="popover-container w-100" style={tooltipContainer}>
             <span onClick={toggle} onMouseOver={() => toggleTooltip('show')} onMouseOut={() => toggleTooltip('hide')}>
-                {isTimestampTypeUtc === true ? displayTimestampUtc(unixTimestamp) : displayTimestamp(unixTimestamp)}
+                {isTimestampTypeUtc === true
+                    ? displayTimestampUtc(unixTimestamp, shorter)
+                    : displayTimestamp(unixTimestamp, shorter)}
             </span>
             <Tooltip state={showTooltip} />
         </div>

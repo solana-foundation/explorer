@@ -33,23 +33,11 @@ const SERIES_INFO = {
 export function LiveTransactionStatsCard() {
     const [series, setSeries] = React.useState<Series>('short');
     return (
-        <div className="card">
+        <div className="card flex-grow-1 d-flex flex-column">
             <div className="card-header">
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </div>
             <TpsCardBody series={series} setSeries={setSeries} />
-            <div className="card-body text-center">
-                <p className="mb-0">
-                    For transaction confirmation time statistics, please visit{' '}
-                    <a href="https://www.validators.app" target="_blank" rel="noopener noreferrer">
-                        validators.app
-                    </a>{' '}
-                    or{' '}
-                    <a href="https://solscan.io" target="_blank" rel="noopener noreferrer">
-                        solscan.io
-                    </a>
-                </p>
-            </div>
         </div>
     );
 }
@@ -71,6 +59,7 @@ const TPS_CHART_OPTIONS = (historyMaxTps: number): ChartOptions<'bar'> => {
             intersect: false,
             mode: 'index',
         },
+        maintainAspectRatio: false,
         plugins: {
             tooltip: {
                 enabled: false, // Disable the on-canvas tooltip
@@ -183,7 +172,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
     };
 
     return (
-        <>
+        <div className="d-flex flex-column flex-grow-1">
             <TableCardBody>
                 <tr>
                     <td className="w-100">Transaction count</td>
@@ -197,34 +186,43 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
 
             <hr className="my-0" />
 
-            <div className="card-body py-3">
-                <div className="align-box-row align-items-start justify-content-between">
-                    <div className="d-flex justify-content-between w-100">
-                        <span className="mb-0 font-size-sm">TPS history</span>
+            <div className="card-body py-3 d-flex flex-column flex-grow-1">
+                <div className="d-flex justify-content-between w-100">
+                    <span className="mb-0 font-size-sm">TPS history</span>
 
-                        <div className="font-size-sm">
-                            {SERIES.map(key => (
-                                <button
-                                    key={key}
-                                    onClick={() => setSeries(key)}
-                                    className={classNames('btn btn-sm btn-white ms-2', {
-                                        active: series === key,
-                                    })}
-                                >
-                                    {SERIES_INFO[key].interval}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div id="perf-history" className="mt-3 d-flex justify-content-end flex-row w-100">
-                        <div className="w-100">
-                            <Bar data={chartData} options={chartOptions} height={80} />
-                        </div>
+                    <div className="font-size-sm">
+                        {SERIES.map(key => (
+                            <button
+                                key={key}
+                                onClick={() => setSeries(key)}
+                                className={classNames('btn btn-sm btn-white ms-2', {
+                                    active: series === key,
+                                })}
+                            >
+                                {SERIES_INFO[key].interval}
+                            </button>
+                        ))}
                     </div>
                 </div>
+
+                <div id="perf-history" className="mt-3 flex-grow-1" style={{ minHeight: '200px' }}>
+                    <Bar data={chartData} options={chartOptions} style={{ height: '100%' }} />
+                </div>
+
+                <div className="text-center text-muted mt-3">
+                    <p className="mb-0">
+                        For transaction confirmation time statistics, please visit{' '}
+                        <a href="https://www.validators.app" target="_blank" rel="noopener noreferrer">
+                            validators.app
+                        </a>{' '}
+                        or{' '}
+                        <a href="https://solscan.io" target="_blank" rel="noopener noreferrer">
+                            solscan.io
+                        </a>
+                    </p>
+                </div>
             </div>
-        </>
+        </div>
     );
 }
 

@@ -23,7 +23,7 @@ import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/ind
 import { percentage } from '@utils/math';
 import React from 'react';
 
-import { UpcomingFeatures } from './utils/feature-gate/featureGate';
+import { UpcomingFeatures } from './utils/feature-gate/UpcomingFeatures';
 
 export default function Page() {
     return (
@@ -31,17 +31,16 @@ export default function Page() {
             <SupplyProvider>
                 <div className="container mt-4">
                     <StakingComponent />
-                    <div className="card">
-                        <div className="card-header">
-                            <div className="row align-items-center">
-                                <div className="col">
-                                    <h4 className="card-header-title">Live Cluster Stats</h4>
-                                </div>
-                            </div>
+
+                    <div className="row d-flex">
+                        <div className="col-md-6 d-flex">
+                            <StatsCardBody />
                         </div>
-                        <StatsCardBody />
+                        <div className="col-md-6 d-flex">
+                            <LiveTransactionStatsCard />
+                        </div>
                     </div>
-                    <LiveTransactionStatsCard />
+
                     <UpcomingFeatures />
                 </div>
             </SupplyProvider>
@@ -167,51 +166,60 @@ function StatsCardBody() {
     const { blockHeight, absoluteSlot } = epochInfo;
 
     return (
-        <TableCardBody>
-            <tr>
-                <td className="w-100">Slot</td>
-                <td className="text-lg-end font-monospace">
-                    <Slot slot={absoluteSlot} link />
-                </td>
-            </tr>
-            {blockHeight !== undefined && (
+        <div className="card flex-grow-1">
+            <div className="card-header">
+                <div className="row align-items-center">
+                    <div className="col">
+                        <h4 className="card-header-title">Live Cluster Stats</h4>
+                    </div>
+                </div>
+            </div>
+            <TableCardBody>
                 <tr>
-                    <td className="w-100">Block height</td>
+                    <td className="w-100">Slot</td>
                     <td className="text-lg-end font-monospace">
-                        <Slot slot={blockHeight} />
+                        <Slot slot={absoluteSlot} link />
                     </td>
                 </tr>
-            )}
-            {blockTime && (
+                {blockHeight !== undefined && (
+                    <tr>
+                        <td className="w-100">Block height</td>
+                        <td className="text-lg-end font-monospace">
+                            <Slot slot={blockHeight} />
+                        </td>
+                    </tr>
+                )}
+                {blockTime && (
+                    <tr>
+                        <td className="w-100">Cluster time</td>
+                        <td className="text-lg-end font-monospace">
+                            <TimestampToggle unixTimestamp={blockTime} shorter></TimestampToggle>
+                        </td>
+                    </tr>
+                )}
                 <tr>
-                    <td className="w-100">Cluster time</td>
+                    <td className="w-100">Slot time (1min average)</td>
+                    <td className="text-lg-end font-monospace">{averageSlotTime}ms</td>
+                </tr>
+                <tr>
+                    <td className="w-100">Slot time (1hr average)</td>
+                    <td className="text-lg-end font-monospace">{hourlySlotTime}ms</td>
+                </tr>
+                <tr>
+                    <td className="w-100">Epoch</td>
                     <td className="text-lg-end font-monospace">
-                        <TimestampToggle unixTimestamp={blockTime}></TimestampToggle>
+                        <Epoch epoch={epochInfo.epoch} link />
                     </td>
                 </tr>
-            )}
-            <tr>
-                <td className="w-100">Slot time (1min average)</td>
-                <td className="text-lg-end font-monospace">{averageSlotTime}ms</td>
-            </tr>
-            <tr>
-                <td className="w-100">Slot time (1hr average)</td>
-                <td className="text-lg-end font-monospace">{hourlySlotTime}ms</td>
-            </tr>
-            <tr>
-                <td className="w-100">Epoch</td>
-                <td className="text-lg-end font-monospace">
-                    <Epoch epoch={epochInfo.epoch} link />
-                </td>
-            </tr>
-            <tr>
-                <td className="w-100">Epoch progress</td>
-                <td className="text-lg-end font-monospace">{epochProgress}</td>
-            </tr>
-            <tr>
-                <td className="w-100">Epoch time remaining (approx.)</td>
-                <td className="text-lg-end font-monospace">~{epochTimeRemaining}</td>
-            </tr>
-        </TableCardBody>
+                <tr>
+                    <td className="w-100">Epoch progress</td>
+                    <td className="text-lg-end font-monospace">{epochProgress}</td>
+                </tr>
+                <tr>
+                    <td className="w-100">Epoch time remaining (approx.)</td>
+                    <td className="text-lg-end font-monospace">~{epochTimeRemaining}</td>
+                </tr>
+            </TableCardBody>
+        </div>
     );
 }
