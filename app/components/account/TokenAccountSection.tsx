@@ -76,7 +76,7 @@ export function TokenAccountSection({
     tokenInfo?: FullLegacyTokenInfo;
 }) {
     const { cluster } = useCluster();
-
+    console.log({ acc: tokenAccount.type });
     try {
         switch (tokenAccount.type) {
             case 'mint': {

@@ -25,6 +25,8 @@ export function TokenExtensionsCard({ address }: { address: string }) {
     const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, url), [address, cluster, url]);
     const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
 
+    console.log(mintInfo);
+
     if (!mintInfo || !mintInfo.extensions) return null;
 
     const extensions = populateTokenExtensions(mintInfo.extensions);

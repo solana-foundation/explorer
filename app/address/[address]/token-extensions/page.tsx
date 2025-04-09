@@ -1,14 +1,9 @@
 import './styles.css';
 
-import { TokenExtensionsCard } from '@components/account/TokenExtensionsCard';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
-type Props = Readonly<{
-    params: {
-        address: string;
-    };
-}>;
+import TokenExtensionsEntriesPageClient, { Props } from './page-client';
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
     return {
@@ -17,6 +12,6 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
     };
 }
 
-export default function TokenExtensionsPage({ params: { address: _address } }: Props) {
-    return <TokenExtensionsCard address={_address} />;
+export default function TokenExtensionsPage(props: Props) {
+    return <TokenExtensionsEntriesPageClient {...props} />;
 }
