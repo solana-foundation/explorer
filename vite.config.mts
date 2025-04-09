@@ -20,15 +20,15 @@ export default defineConfig({
             '@providers': path.resolve(__dirname, './app/providers'),
             '@utils': path.resolve(__dirname, './app/utils'),
             '@validators': path.resolve(__dirname, './app/validators'),
-        }
+        },
     },
     test: {
         coverage: {
-            provider: 'v8'
+            provider: 'v8',
         },
         server: {
             deps: {
-                inline: ['@noble', 'change-case', '@react-hook/previous']
+                inline: ['@noble', 'change-case', '@react-hook/previous'],
             },
         },
         environment: 'jsdom',
@@ -37,7 +37,7 @@ export default defineConfig({
         poolOptions: {
             threads: {
                 useAtomics: true,
-            }
-        }
-    }
+            },
+        },
+    },
 });

@@ -35,5 +35,8 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Code-style
+        run: pnpm format:ci
+
       - name: Test
         run: pnpm test:ci
