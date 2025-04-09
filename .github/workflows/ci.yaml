@@ -33,7 +33,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ${{ pnpm store path }}
+            ~/.pnpm-store
             ${{ github.workspace }}/.next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
           restore-keys: |
