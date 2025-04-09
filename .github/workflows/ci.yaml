@@ -29,6 +29,16 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
 
+      - name: Setup Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pnpm-store
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
       - name: Install dependencies
         run: pnpm install
 
