@@ -33,12 +33,18 @@ export function TokenExtensionsCard({ address }: { address: string }) {
         <div className="card">
             <AccountHeader title="Extensions" refresh={() => refresh(new PublicKey(address), 'parsed')} />
             <div className="card-body p-0 e-overflow-x-scroll">
-                <TokenExtensionsSection
-                    decimals={mintInfo.decimals}
-                    extensions={mintInfo.extensions}
-                    parsedExtensions={extensions}
-                    symbol={tokenInfo?.symbol}
-                />
+                {extensions.length === 0 ? (
+                    <div className="text-center p-4">No extensions found.</div>
+                ) : (
+                    <>
+                        <TokenExtensionsSection
+                            decimals={mintInfo.decimals}
+                            extensions={mintInfo.extensions}
+                            parsedExtensions={extensions}
+                            symbol={tokenInfo?.symbol}
+                        />
+                    </>
+                )}
             </div>
         </div>
     );
