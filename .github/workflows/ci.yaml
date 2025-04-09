@@ -29,11 +29,17 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
 
+      - name: Evaluate Cache Path
+        id: pnpm_cache
+        run: |
+          echo "PNPM_CACHE_PATH=$(pnpm store path)" >> $GITHUB_ENV
+          echo "${{ env.PNPM_CACHE_PATH }}"
+
       - name: Setup Cache
         uses: actions/cache@v4
         with:
           path: |
-            ~/.pnpm-store
+            ${{ env.PNPM_CACHE_PATH }}
             ${{ github.workspace }}/.next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
           restore-keys: |
