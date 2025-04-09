@@ -14,12 +14,7 @@ const privateIPv4CIDRs = [
     '0.0.0.0/8',
 ];
 
-const privateIPv6CIDRs = [
-    '::1/128',
-    'fc00::/7',
-    'fe80::/10',
-    '::ffff:0:0/96'
-];
+const privateIPv6CIDRs = ['::1/128', 'fc00::/7', 'fe80::/10', '::ffff:0:0/96'];
 
 /**
  *  Check if an IP is in a CIDR block
@@ -81,8 +76,10 @@ export async function checkURLForPrivateIP(uri: URL | string) {
 
         // Resolve DNS and check against private IP ranges
         // Enrich type as there are cases when addresses are undefined which is against the original DNS's types
-        type LookupAddressResult = Awaited<ReturnType<typeof dns.lookup>>
-        const addresses: LookupAddressResult | LookupAddressResult[] | undefined = await dns.lookup(hostname, { all: true });
+        type LookupAddressResult = Awaited<ReturnType<typeof dns.lookup>>;
+        const addresses: LookupAddressResult | LookupAddressResult[] | undefined = await dns.lookup(hostname, {
+            all: true,
+        });
 
         if (addresses === undefined) return true;
 

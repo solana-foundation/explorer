@@ -7,7 +7,7 @@ vi.mock('node-fetch', async () => {
     const actual = await vi.importActual('node-fetch');
     return {
         ...actual,
-        default: vi.fn()
+        default: vi.fn(),
     };
 });
 
@@ -18,7 +18,7 @@ function mockFetchOnce(data: any = {}, headers: Headers = new Headers()) {
     // @ts-expect-error fetch does not have mocked fn
     fetch.mockResolvedValueOnce({
         headers,
-        json: async () => data
+        json: async () => data,
     });
 }
 
@@ -87,7 +87,7 @@ describe('fetchResource', () => {
 
     it('should handle unexpected result', async () => {
         // @ts-expect-error fetch does not have mocked fn
-        fetch.mockRejectedValueOnce({ data: "unexpected exception" });
+        fetch.mockRejectedValueOnce({ data: 'unexpected exception' });
 
         const fn = () => {
             return fetchResource(uri, headers, 100, 100);
@@ -107,7 +107,9 @@ describe('fetchResource', () => {
         fetch.mockResolvedValueOnce({
             headers: new Headers({ 'Content-Type': 'application/json' }),
             // Simulate malformed JSON by rejecting during json parsing
-            json: async () => { throw new SyntaxError('Unexpected token < in JSON at position 0'); }
+            json: async () => {
+                throw new SyntaxError('Unexpected token < in JSON at position 0');
+            },
         });
 
         await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Unsupported Media Type');
