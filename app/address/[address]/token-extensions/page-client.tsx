@@ -6,6 +6,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'superstruct';
 
 import { TokenExtensionsCard } from '@/app/components/account/TokenExtensionsCard';
+import { ErrorCard } from '@/app/components/common/ErrorCard';
 import { MintAccountInfo, TokenAccountInfo } from '@/app/validators/accounts/token';
 
 export type Props = Readonly<{
@@ -13,10 +14,6 @@ export type Props = Readonly<{
         address: string;
     };
 }>;
-
-function NoResults() {
-    return <div className="card text-center p-4">Can not fetch extensions.</div>;
-}
 
 function TokenExtensionsEntriesRenderer({
     account,
@@ -27,27 +24,27 @@ function TokenExtensionsEntriesRenderer({
         const mintInfo = create(parsedData.parsed.info, MintAccountInfo);
         const address = account.pubkey.toBase58();
 
-        if (!mintInfo.extensions?.length) return <NoResults />;
+        if (!mintInfo.extensions?.length) return <ErrorCard text="Can not fetch extensions." />;
 
         return <TokenExtensionsCard address={address} extensions={mintInfo.extensions} />;
     } else if (parsedData && parsedData.parsed.type === 'account') {
         const accountInfo = create(parsedData.parsed.info, TokenAccountInfo);
         const address = accountInfo.mint.toBase58();
 
-        if (!accountInfo.extensions?.length) return <NoResults />;
+        if (!accountInfo.extensions?.length) return <ErrorCard text="Can not fetch extensions." />;
 
         return <TokenExtensionsCard address={address} extensions={accountInfo.extensions} />;
     } else {
         // possible cases:
         // - absent parsed data
         // - multisig type of account
-        return <NoResults />;
+        return <ErrorCard text="Can not fetch extensions." />;
     }
 }
 
 export default function TokenExtensionsEntriesPageClient({ params: { address } }: Props) {
     return (
-        <ErrorBoundary fallback={<NoResults />}>
+        <ErrorBoundary fallback={<ErrorCard text="Can not fetch extensions." />}>
             <ParsedAccountRenderer address={address} renderComponent={TokenExtensionsEntriesRenderer} />
         </ErrorBoundary>
     );
