@@ -34,16 +34,16 @@ jobs:
 
       - name: Build
         env:
-          NEXT_PUBLIC_MAINNET_RPC_URL: ${{ secrets.NEXT_PUBLIC_MAINNET_RPC_URL }}
-          NEXT_PUBLIC_DEVNET_RPC_URL: ${{ secrets.NEXT_PUBLIC_DEVNET_RPC_URL }}
+          NEXT_PUBLIC_MAINNET_RPC_URL: $NEXT_PUBLIC_MAINNET_RPC_URL
+          NEXT_PUBLIC_DEVNET_RPC_URL: $NEXT_PUBLIC_DEVNET_RPC_URL
         run: |
           echo "$NEXT_PUBLIC_MAINNET_RPC_URL"
           pnpm build
 
       - name: Test
         env:
-          NEXT_PUBLIC_MAINNET_RPC_URL: ${{ secrets.NEXT_PUBLIC_MAINNET_RPC_URL }}
-          NEXT_PUBLIC_DEVNET_RPC_URL: ${{ secrets.NEXT_PUBLIC_DEVNET_RPC_URL }}
+          NEXT_PUBLIC_MAINNET_RPC_URL: $NEXT_PUBLIC_MAINNET_RPC_URL
+          NEXT_PUBLIC_DEVNET_RPC_URL: $NEXT_PUBLIC_DEVNET_RPC_URL
         run: |
           echo "$NEXT_PUBLIC_MAINNET_RPC_URL"
           echo "$NEXT_PUBLIC_DEVNET_RPC_URL"
