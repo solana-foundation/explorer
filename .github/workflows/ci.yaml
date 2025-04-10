@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: ['20.x']
 
     steps:
       - name: Checkout
@@ -33,7 +33,13 @@ jobs:
         run: pnpm install
 
       - name: Build
+        env:
+          NEXT_PUBLIC_MAINNET_RPC_URL: ${{ vars.NEXT_PUBLIC_MAINNET_RPC_URL }}
+          NEXT_PUBLIC_DEVNET_RPC_URL: ${{ vars.NEXT_PUBLIC_DEVNET_RPC_URL }}
         run: pnpm build
 
       - name: Test
+        env:
+          NEXT_PUBLIC_MAINNET_RPC_URL: ${{ vars.NEXT_PUBLIC_MAINNET_RPC_URL }}
+          NEXT_PUBLIC_DEVNET_RPC_URL: ${{ vars.NEXT_PUBLIC_DEVNET_RPC_URL }}
         run: pnpm test:ci

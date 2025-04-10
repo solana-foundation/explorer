@@ -181,7 +181,7 @@
     "version": "v2.1.6",
     "testnetActivationEpoch": 763,
     "devnetActivationEpoch": 856,
-    "mainnetActivationEpoch": null,
+    "mainnetActivationEpoch": 770,
     "title": "Vote only on full fec sets",
     "description": "Only vote for blocks with sufficiently sized fec sets",
     "simd_link": null
@@ -339,5 +339,16 @@
     "title": "Enable secp256r1 precompile",
     "description": null,
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0075-precompile-for-secp256r1-sigverify.md"
+  },
+  {
+    "key": "RENtePQcDLrAbxAsP3k8dwVcnNYQ466hi2uKvALjnXx",
+    "simd": "0267",
+    "version": "v2.2.8",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Sets rent_epoch to a constant in the VM",
+    "description": null,
+    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0267-rent-epoch-in-vm-is-a-constant.md"
   }
 ]
