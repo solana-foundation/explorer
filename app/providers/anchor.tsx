@@ -78,7 +78,6 @@ function parseIdlFromElf(elfBuffer: any) {
 }
 
 function getProvider(url: string) {
-    console.log(123, { url });
     return new AnchorProvider(new Connection(url), new NodeWallet(Keypair.generate()), {});
 }
 
