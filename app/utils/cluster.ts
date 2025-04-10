@@ -67,4 +67,4 @@ export function clusterUrl(cluster: Cluster, customUrl: string): string {
     }
 }
 
-export const DEFAULT_CLUSTER = Cluster.MainnetBeta;
+export const DEFAULT_CLUSTER = Cluster.Devnet; // Cluster.MainnetBeta;
