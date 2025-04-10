@@ -11,7 +11,10 @@ export enum Cluster {
     Custom,
 }
 
-export const CLUSTERS = [Cluster.MainnetBeta, Cluster.Testnet, Cluster.Devnet, Cluster.Custom];
+// for now, we only support devnet
+// export const CLUSTERS = [Cluster.MainnetBeta, Cluster.Testnet, Cluster.Devnet, Cluster.Custom];
+export const CLUSTERS = [Cluster.Devnet, Cluster.Custom];
+
 
 export function clusterSlug(cluster: Cluster): string {
     switch (cluster) {
