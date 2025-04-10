@@ -1,7 +1,7 @@
 'use client';
 
 import { AccountHeader } from '@components/common/Account';
-import { useFetchAccountInfo, useMintAccountInfo } from '@providers/accounts';
+import { useFetchAccountInfo } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -11,6 +11,7 @@ import useSWR from 'swr';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 import { TokenExtension, TokenExtensionType } from '@/app/validators/accounts/token-extension';
 
+import { LoadingCard } from '../common/LoadingCard';
 import { TokenExtensionsSection } from './TokenExtensionsSection';
 import { ParsedTokenExtension } from './types';
 
@@ -18,35 +19,37 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
     return await getTokenInfo(new PublicKey(address), cluster, url);
 }
 
-export function TokenExtensionsCard({ address }: { address: string }) {
+export function TokenExtensionsCard({
+    address,
+    extensions: mintExtensions,
+}: {
+    address: string;
+    extensions: TokenExtension[];
+}) {
     const { cluster, url } = useCluster();
     const refresh = useFetchAccountInfo();
-    const mintInfo = useMintAccountInfo(address);
     const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, url), [address, cluster, url]);
-    const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
+    const { data: tokenInfo, isLoading } = useSWR(swrKey, fetchTokenInfo);
 
-    console.log(mintInfo);
+    const extensions = populateTokenExtensions(mintExtensions);
 
-    if (!mintInfo || !mintInfo.extensions) return null;
-
-    const extensions = populateTokenExtensions(mintInfo.extensions);
+    // check for nullish decimals to satisty constraint for required decimals.
+    if (isLoading) {
+        return <LoadingCard />;
+    } else if (!tokenInfo || tokenInfo.decimals === null) {
+        throw new Error('Can not fetch token info.');
+    }
 
     return (
         <div className="card">
             <AccountHeader title="Extensions" refresh={() => refresh(new PublicKey(address), 'parsed')} />
             <div className="card-body p-0 e-overflow-x-scroll">
-                {extensions.length === 0 ? (
-                    <div className="text-center p-4">No extensions found.</div>
-                ) : (
-                    <>
-                        <TokenExtensionsSection
-                            decimals={mintInfo.decimals}
-                            extensions={mintInfo.extensions}
-                            parsedExtensions={extensions}
-                            symbol={tokenInfo?.symbol}
-                        />
-                    </>
-                )}
+                <TokenExtensionsSection
+                    decimals={tokenInfo.decimals}
+                    extensions={mintExtensions}
+                    parsedExtensions={extensions}
+                    symbol={tokenInfo.symbol}
+                />
             </div>
         </div>
     );

@@ -76,7 +76,7 @@ export function TokenAccountSection({
     tokenInfo?: FullLegacyTokenInfo;
 }) {
     const { cluster } = useCluster();
-    console.log({ acc: tokenAccount.type });
+
     try {
         switch (tokenAccount.type) {
             case 'mint': {
@@ -400,8 +400,7 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
 
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useFetchAccountInfo();
-    const { cluster, clusterInfo, url } = useCluster();
-    const epoch = clusterInfo?.epochInfo.epoch;
+    const { cluster, url } = useCluster();
     const label = addressLabel(account.pubkey.toBase58(), cluster);
     const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, info.mint, url]);
 
@@ -512,9 +511,6 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                             </td>
                         </tr>
                     </>
-                )}
-                {accountExtensions?.map(extension =>
-                    TokenExtensionRow(extension, epoch, info.tokenAmount.decimals, symbol)
                 )}
             </TableCardBody>
         </div>

@@ -2,8 +2,11 @@
 
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
 import React from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { create } from 'superstruct';
 
 import { TokenExtensionsCard } from '@/app/components/account/TokenExtensionsCard';
+import { MintAccountInfo, TokenAccountInfo } from '@/app/validators/accounts/token';
 
 export type Props = Readonly<{
     params: {
@@ -11,22 +14,41 @@ export type Props = Readonly<{
     };
 }>;
 
-function TokenExtensionsEntriesRenderer({ account }: any) {
-    //React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
-    const parsedData = account?.data.parsed;
-    const rawData = account?.data.raw;
-    const address = account?.pubkey.toBase58();
-    console.log({ account }, parsedData, rawData);
+function NoResults() {
+    return <div className="card text-center p-4">Can not fetch extensions.</div>;
+}
 
-    if (parsedData.parsed.type === 'mint') return <TokenExtensionsCard address={address} />;
-    else if (parsedData.parsed.type === 'account') {
-        return <TokenExtensionsCard address={address} />;
+function TokenExtensionsEntriesRenderer({
+    account,
+}: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
+    const parsedData = account?.data.parsed;
+
+    if (parsedData && parsedData.parsed.type === 'mint') {
+        const mintInfo = create(parsedData.parsed.info, MintAccountInfo);
+        const address = account.pubkey.toBase58();
+
+        if (!mintInfo.extensions?.length) return <NoResults />;
+
+        return <TokenExtensionsCard address={address} extensions={mintInfo.extensions} />;
+    } else if (parsedData && parsedData.parsed.type === 'account') {
+        const accountInfo = create(parsedData.parsed.info, TokenAccountInfo);
+        const address = accountInfo.mint.toBase58();
+
+        if (!accountInfo.extensions?.length) return <NoResults />;
+
+        return <TokenExtensionsCard address={address} extensions={accountInfo.extensions} />;
     } else {
-        return <div className="text-center p-4">No extensions found.</div>;
+        // possible cases:
+        // - absent parsed data
+        // - multisig type of account
+        return <NoResults />;
     }
-    return null;
 }
 
 export default function TokenExtensionsEntriesPageClient({ params: { address } }: Props) {
-    return <ParsedAccountRenderer address={address} renderComponent={TokenExtensionsEntriesRenderer} />;
+    return (
+        <ErrorBoundary fallback={<NoResults />}>
+            <ParsedAccountRenderer address={address} renderComponent={TokenExtensionsEntriesRenderer} />
+        </ErrorBoundary>
+    );
 }
