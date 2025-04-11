@@ -535,45 +535,49 @@ export function useTokenAccountInfo(address: string | undefined): TokenAccountIn
     }, [address, accountInfo]);
 }
 
+function handleAddressLookupTableAccountInfo(address: string, accountInfo: Cache.CacheEntry<Account> | undefined): [string | AddressLookupTableAccount | undefined, Cache.FetchStatus] | undefined {
+    if (accountInfo === undefined) return;
+    const account = accountInfo.data;
+    if (account === undefined) return [account, accountInfo.status];
+    if (account.lamports === 0) return ['Lookup Table Not Found', accountInfo.status];
+    const { parsed: parsedData, raw: rawData } = account.data;
+
+    const key = new PublicKey(address);
+    if (parsedData && parsedData.program === 'address-lookup-table') {
+        if (parsedData.parsed.type === 'lookupTable') {
+            return [
+                new AddressLookupTableAccount({
+                    key,
+                    state: parsedData.parsed.info,
+                }),
+                accountInfo.status,
+            ];
+        } else if (parsedData.parsed.type === 'uninitialized') {
+            return ['Lookup Table Uninitialized', accountInfo.status];
+        }
+    } else if (rawData && account.owner.equals(AddressLookupTableProgram.programId)) {
+        try {
+            return [
+                new AddressLookupTableAccount({
+                    key,
+                    state: AddressLookupTableAccount.deserialize(rawData),
+                }),
+                accountInfo.status,
+            ];
+        } catch {
+            /* empty */
+        }
+    }
+
+    return ['Invalid Lookup Table', accountInfo.status];
+}
+
 export function useAddressLookupTable(
     address: string
 ): [AddressLookupTableAccount | string | undefined, FetchStatus] | undefined {
     const accountInfo = useAccountInfo(address);
     return React.useMemo(() => {
-        if (accountInfo === undefined) return;
-        const account = accountInfo.data;
-        if (account === undefined) return [account, accountInfo.status];
-        if (account.lamports === 0) return ['Lookup Table Not Found', accountInfo.status];
-        const { parsed: parsedData, raw: rawData } = account.data;
-
-        const key = new PublicKey(address);
-        if (parsedData && parsedData.program === 'address-lookup-table') {
-            if (parsedData.parsed.type === 'lookupTable') {
-                return [
-                    new AddressLookupTableAccount({
-                        key,
-                        state: parsedData.parsed.info,
-                    }),
-                    accountInfo.status,
-                ];
-            } else if (parsedData.parsed.type === 'uninitialized') {
-                return ['Lookup Table Uninitialized', accountInfo.status];
-            }
-        } else if (rawData && account.owner.equals(AddressLookupTableProgram.programId)) {
-            try {
-                return [
-                    new AddressLookupTableAccount({
-                        key,
-                        state: AddressLookupTableAccount.deserialize(rawData),
-                    }),
-                    accountInfo.status,
-                ];
-            } catch {
-                /* empty */
-            }
-        }
-
-        return ['Invalid Lookup Table', accountInfo.status];
+        return handleAddressLookupTableAccountInfo(address, accountInfo);
     }, [address, accountInfo]);
 }
 

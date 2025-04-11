@@ -13,12 +13,12 @@ export function AddressTableLookupAddress({
     hideInfo?: boolean;
 }) {
     const lookupsForAccountKeyIndex = fillAddressTableLookupsAccounts(message.addressTableLookups);
-    const { lookup, dynamicLookups } = findLookupAddress(accountIndex, message, lookupsForAccountKeyIndex);
+    const dynamicLookups = findLookupAddress(accountIndex, message, lookupsForAccountKeyIndex);
 
     return (
         <>
             {dynamicLookups.isStatic ? (
-                <AddressWithContext pubkey={lookup} hideInfo={hideInfo} />
+                <AddressWithContext pubkey={message.staticAccountKeys[accountIndex]} hideInfo={hideInfo} />
             ) : (
                 <AddressFromLookupTableWithContext
                     lookupTableKey={dynamicLookups.lookups.lookupTableKey}

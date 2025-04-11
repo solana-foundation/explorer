@@ -68,7 +68,7 @@ function BaseMessageCompiledInstructionRawDetails({
     return (
         <>
             {ix.accountKeyIndexes.map((accountIndex, index) => {
-                const { lookup, dynamicLookups } = findLookupAddress(accountIndex, message, lookupsForAccountKeyIndex);
+                const dynamicLookups = findLookupAddress(accountIndex, message, lookupsForAccountKeyIndex);
 
                 return (
                     <tr key={index}>
@@ -87,7 +87,7 @@ function BaseMessageCompiledInstructionRawDetails({
                         </td>
                         <td className="text-lg-end">
                             {dynamicLookups.isStatic ? (
-                                <AddressWithContext pubkey={lookup} />
+                                <AddressWithContext pubkey={message.staticAccountKeys[accountIndex]} />
                             ) : (
                                 <AddressFromLookupTableWithContext
                                     lookupTableKey={dynamicLookups.lookups.lookupTableKey}

@@ -1,5 +1,6 @@
 import {
     AccountMeta,
+    MessageAccountKeys,
     MessageAddressTableLookup,
     MessageCompiledInstruction,
     PublicKey,
@@ -7,45 +8,34 @@ import {
     VersionedMessage,
 } from '@solana/web3.js';
 
-type LookupsForAccountKeyIndex = { lookupTableIndex: number, lookupTableKey: PublicKey }
+type LookupsForAccountKeyIndex = { lookupTableIndex: number; lookupTableKey: PublicKey };
+type DynamicLookups = { isStatic: true; lookups: undefined } | { isStatic: false; lookups: LookupsForAccountKeyIndex };
 
-function findLookupAddressByIndex(accountIndex: number, message: VersionedMessage, lookupsForAccountKeyIndex: LookupsForAccountKeyIndex[]) {
-    let lookup: PublicKey;
-    // dynamic means that lookups are taken based not on staticAccountKeys
-    let dynamicLookups: { isStatic: true, lookups: undefined } | { isStatic: false, lookups: LookupsForAccountKeyIndex };
-
+function findLookupAddressByIndex(accountIndex: number, message: VersionedMessage, lookupsForAccountKeyIndex: LookupsForAccountKeyIndex[]): DynamicLookups {
     if (accountIndex >= message.staticAccountKeys.length) {
         const lookupIndex = accountIndex - message.staticAccountKeys.length;
-        lookup = lookupsForAccountKeyIndex[lookupIndex].lookupTableKey;
-        dynamicLookups = {
+
+        return {
             isStatic: false,
-            lookups: lookupsForAccountKeyIndex[lookupIndex]
+            lookups: lookupsForAccountKeyIndex[lookupIndex],
         };
     } else {
-        lookup = message.staticAccountKeys[accountIndex];
-        dynamicLookups = {
+        return {
             isStatic: true,
-            lookups: undefined
+            lookups: undefined,
         };
     }
-
-    return { dynamicLookups, lookup };
 }
 
-function fillAccountMetas(
-    accountKeyIndexes: number[],
-    message: VersionedMessage,
-    lookupsForAccountKeyIndex: LookupsForAccountKeyIndex[],
-) {
-    const accountMetas = accountKeyIndexes.map((accountIndex) => {
-        const { lookup } = findLookupAddressByIndex(accountIndex, message, lookupsForAccountKeyIndex);
-
+function fillAccountMetas(accountKeyIndexes: number[], message: VersionedMessage) {
+    const accountMetas = accountKeyIndexes.map(accountIndex => {
+        const pubkey = messageAccountKeys.get(accountIndex)!;
         const isSigner = accountIndex < message.header.numRequiredSignatures;
         const isWritable = message.isAccountWritable(accountIndex);
         const accountMeta: AccountMeta = {
             isSigner,
             isWritable,
-            pubkey: lookup,
+            pubkey,
         };
 
         return accountMeta;
@@ -79,12 +69,10 @@ export function fillAddressTableLookupsAccounts(addressTableLookups: MessageAddr
 
 export function intoTransactionInstructionFromVersionedMessage(
     compiledInstruction: MessageCompiledInstruction,
-    originalMessage: VersionedMessage,
+    originalMessage: VersionedMessage
 ): TransactionInstruction {
     const { accountKeyIndexes, data } = compiledInstruction;
     const { addressTableLookups } = originalMessage;
-
-    const lookupAccounts = fillAddressTableLookupsAccounts(addressTableLookups);
 
     // When we're deserializing Squads vault transactions, an "outer" programIdIndex can be found in the addressTableLookups
     // (You never need to lookup outer programIds for normal messages)
@@ -96,9 +84,10 @@ export function intoTransactionInstructionFromVersionedMessage(
         const lookupIndex = compiledInstruction.programIdIndex - originalMessage.staticAccountKeys.length;
         programId = addressTableLookups[lookupIndex].accountKey;
     }
-    if (!programId) throw new Error("Program ID not found");
+    if (!programId) throw new Error('Program ID not found');
 
-    const accountMetas = fillAccountMetas(accountKeyIndexes, originalMessage, lookupAccounts);
+    // How do we get the ALTs here? This is not a component
+    const accountMetas = fillAccountMetas(accountKeyIndexes, originalMessage);
 
     const transactionInstruction: TransactionInstruction = new TransactionInstruction({
         data: Buffer.from(data),
