@@ -407,7 +407,26 @@ function TokenMintHeaderCard({
             {unverified && (
                 <div className="alert alert-warning alert-scam" role="alert">
                     Warning! Token names and logos are not unique. This token may have spoofed its name and logo to look
-                    like another token. Verify the token&apos;s mint address to ensure it is correct.
+                    like another token. Verify the token&apos;s mint address to ensure it is correct. If you are the
+                    token creator, please verify your token on{' '}
+                    <a
+                        href="https://support.coingecko.com/hc/en-us/articles/23725417857817-Verification-Guide-for-Listing-Update-Requests-on-CoinGecko"
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ color: 'white', textDecoration: 'underline' }}
+                    >
+                        Coingecko
+                    </a>{' '}
+                    or on{' '}
+                    <a
+                        href="https://verify.jup.ag/"
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ color: 'white', textDecoration: 'underline' }}
+                    >
+                        Jupiter
+                    </a>
+                    .
                 </div>
             )}
             <div className="col-auto">
