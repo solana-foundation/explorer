@@ -67,7 +67,7 @@ export function Navbar({ children }: INavbarProps) {
                             </Link>
                         </li>
                         <li className="nav-item align-items-center justify-content-center pt-2">
-                            <a
+                            <a aria-label="GitHub Repository"
                                 href="https://github.com/solana-foundation/explorer"
                                 target="_blank"
                                 rel="noopener noreferrer"
