@@ -1,8 +1,10 @@
 import { AddressLookupTableProgram } from '@solana/web3.js';
-import { InstructionDetailsProps } from '../../transaction/InstructionsSection';
-import { InstructionCard } from '../InstructionCard';
+
+import { Address } from '@/app/components/common/Address';
+import { InstructionCard } from '@/app/components/instruction/InstructionCard';
+import { InstructionDetailsProps } from '@/app/components/transaction/InstructionsSection';
+
 import { CloseLookupTableInfo } from './types';
-import { Address } from '../../common/Address';
 
 export function CloseLookupTableDetailsCard(props: InstructionDetailsProps & { info: CloseLookupTableInfo }) {
     const { ix, index, result, innerCards, childIndex, info } = props;

@@ -1,6 +1,8 @@
 import { AddressLookupTableProgram, ParsedInstruction, ParsedTransaction, SignatureResult } from '@solana/web3.js';
-import { Address } from '../../common/Address';
-import { InstructionCard } from '../InstructionCard';
+
+import { Address } from '@/app/components/common/Address';
+import { InstructionCard } from '@/app/components/instruction/InstructionCard';
+
 import { FreezeLookupTableInfo } from './types';
 
 type DetailsProps = {

@@ -1,9 +1,11 @@
-import { InstructionCard } from '../InstructionCard';
-import { CreateLookupTableInfo } from './types';
-import { InstructionDetailsProps } from '../../transaction/InstructionsSection';
 import { AddressLookupTableProgram } from '@solana/web3.js';
-import { Address } from '../../common/Address';
-import { Slot } from '../../common/Slot';
+
+import { Address } from '@/app/components/common/Address';
+import { Slot } from '@/app/components/common/Slot';
+import { InstructionCard } from '@/app/components/instruction/InstructionCard';
+import { InstructionDetailsProps } from '@/app/components/transaction/InstructionsSection';
+
+import { CreateLookupTableInfo } from './types';
 
 export function CreateLookupTableDetailsCard(props: InstructionDetailsProps & { info: CreateLookupTableInfo }) {
     const { ix, index, result, innerCards, childIndex, info } = props;
