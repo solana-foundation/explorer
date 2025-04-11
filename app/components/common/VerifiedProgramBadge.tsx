@@ -1,11 +1,11 @@
 import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 
+import { useCluster } from '@/app/providers/cluster';
+import { Cluster } from '@/app/utils/cluster';
 import { useClusterPath } from '@/app/utils/url';
 import { useVerifiedProgram } from '@/app/utils/verified-builds';
 import { ProgramDataAccountInfo } from '@/app/validators/accounts/upgradeable-program';
-import { useCluster } from '@/app/providers/cluster';
-import { Cluster } from '@/app/utils/cluster';
 
 export function VerifiedProgramBadge({
     programData,
