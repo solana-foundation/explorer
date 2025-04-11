@@ -106,26 +106,35 @@ function populatePartialParsedTokenExtension(
             break;
         }
         case 'defaultAccountState': {
+            const description = 'Enables the authority to make new token accounts as frozen by default upon creation';
             return {
+                description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('default-account-state')),
                 name: 'Default Account State',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
         case 'immutableOwner': {
+            const description = 'Prevents the owner from being changed';
             return {
+                description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('immutable-owner')),
                 name: 'Immutable Owner',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
         case 'memoTransfer': {
+            const description = 'Requires all incoming transfers to a token account include a memo';
             return {
+                description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('required-memo')),
                 name: 'Required Memo',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
@@ -146,10 +155,13 @@ function populatePartialParsedTokenExtension(
             break;
         }
         case 'cpiGuard': {
+            const description = 'Prohibits certain actions inside cross-program invocations';
             return {
+                description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('cpi-guard')),
                 name: 'CPI Guard',
                 status: 'active',
+                tooltip: description,
             };
             break;
         }
@@ -177,13 +189,10 @@ function populatePartialParsedTokenExtension(
             break;
         }
         case 'transferHookAccount': {
-            const description = 'List of accounts that the token program requires to execute custom instruction logic';
             return {
-                description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('transfer-hook')),
                 name: 'Transfer Hook Account Info',
                 status: 'active',
-                tooltip: description,
             };
             break;
         }
