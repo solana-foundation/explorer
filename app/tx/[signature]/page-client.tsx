@@ -192,12 +192,19 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
             return false;
         }
 
-        const ix = intoTransactionInstruction(transaction, transaction.message.instructions[0]);
-        return (
-            ix &&
-            SystemProgram.programId.equals(ix.programId) &&
-            SystemInstruction.decodeInstructionType(ix) === 'AdvanceNonceAccount'
-        );
+        try {
+            const ix = intoTransactionInstruction(transaction, transaction.message.instructions[0]);
+            return (
+                ix &&
+                SystemProgram.programId.equals(ix.programId) &&
+                SystemInstruction.decodeInstructionType(ix) === 'AdvanceNonceAccount'
+            );
+        } catch {
+            // If an error is thrown, then it means the tx was not parseable,
+            // probably because the solana programs haven't been deployed to
+            // Fogo yet.  We can safely assume these are not nonces.
+            return false;
+        }
     })();
 
     let statusClass = 'success';
