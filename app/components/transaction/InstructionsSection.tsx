@@ -1,6 +1,5 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
-import { isAddressLookupTableInstruction } from '@components/instruction/address-lookup-table/types';
 import { AddressLookupTableDetailsCard } from '@components/instruction/AddressLookupTableDetailsCard';
 import { AssociatedTokenDetailsCard } from '@components/instruction/associated-token/AssociatedTokenDetailsCard';
 import { BpfLoaderDetailsCard } from '@components/instruction/bpf-loader/BpfLoaderDetailsCard';
@@ -199,6 +198,8 @@ function InstructionCard({
                 return <AssociatedTokenDetailsCard {...props} key={key} />;
             case 'vote':
                 return <VoteDetailsCard {...props} key={key} />;
+            case 'address-lookup-table':
+                return <AddressLookupTableDetailsCard {...props} key={key} />;
             default:
                 return <UnknownDetailsCard {...props} key={key} />;
         }
@@ -219,9 +220,7 @@ function InstructionCard({
         signature,
     };
 
-    if (isAddressLookupTableInstruction(transactionIx)) {
-        return <AddressLookupTableDetailsCard key={key} {...props} />;
-    } else if (isEd25519Instruction(transactionIx)) {
+    if (isEd25519Instruction(transactionIx)) {
         return <Ed25519DetailsCard key={key} {...props} tx={tx} />;
     } else if (isMangoInstruction(transactionIx)) {
         return <MangoDetailsCard key={key} {...props} />;
