@@ -291,7 +291,7 @@
     "version": "v2.1.8",
     "testnetActivationEpoch": 764,
     "devnetActivationEpoch": 857,
-    "mainnetActivationEpoch": null,
+    "mainnetActivationEpoch": 771,
     "title": "Raise Block Limits to 50M CUs",
     "description": null,
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0207-raise-block-limits-to-50M.md"
@@ -350,5 +350,82 @@
     "title": "Sets rent_epoch to a constant in the VM",
     "description": null,
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0267-rent-epoch-in-vm-is-a-constant.md"
+  },
+  {
+    "key": "JE86WkYvTrzW8HgNmrHY7dFYpCmSptUpKupbo2AdQ9cG",
+    "simd": "0166",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Enables deployment and execution of SBPFv1 programs",
+    "description": null,
+    "simd_link": null
+  },
+  {
+    "key": "F6UVKh1ujTEFK3en2SyAL3cdVnqko1FVEXWhmdLRu6WP",
+    "simd": "0173, 0174",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Enables deployment and execution of SBPFv2 programs",
+    "description": null,
+    "simd_link": null
+  },
+  {
+    "key": "C8XZNs1bfzaiT3YDeXZJ7G5swQWQv7tVzDnCxtHvnSpw",
+    "simd": "0178, 0179, 0189",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Enables deployment and execution of SBPFv3 programs",
+    "description": null,
+    "simd_link": null
+  },
+  {
+    "key": "FXs1zh47QbNnhXcnB6YiAQoJ4sGB91tKF3UFHLcKT7PM",
+    "simd": "0162",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Remove accounts executable flag checks",
+    "description": null,
+    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0162-remove-accounts-executable-flag-checks.md"
+  },
+  {
+    "key": "8Cb77yHjPWe9wuWUfXeh6iszFGCDGNCoFk3tprViYHNm",
+    "simd": "0167",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Enable loader-v4",
+    "description": null,
+    "simd_link": null
+  },
+  {
+    "key": "EmhbpdVtZ2hWRGFWBDjn2i3SJD8Z36z4mpMcZJEnebnP",
+    "simd": "0167",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Feature Gate: Disable new loader-v3 deployments",
+    "description": null,
+    "simd_link": null
+  },
+  {
+    "key": "6oMCUgfY6BzZ6jwB681J6ju5Bh6CjVXbd7NeWYqiXBSu",
+    "simd": "0256",
+    "version": "",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Raise Block Limits to 60M CU",
+    "description": null,
+    "simd_link": null
   }
 ]
