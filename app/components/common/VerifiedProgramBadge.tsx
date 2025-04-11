@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useClusterPath } from '@/app/utils/url';
 import { useVerifiedProgram } from '@/app/utils/verified-builds';
 import { ProgramDataAccountInfo } from '@/app/validators/accounts/upgradeable-program';
+import { useCluster } from '@/app/providers/cluster';
+import { Cluster } from '@/app/utils/cluster';
 
 export function VerifiedProgramBadge({
     programData,
@@ -12,6 +14,7 @@ export function VerifiedProgramBadge({
     programData: ProgramDataAccountInfo;
     pubkey: PublicKey;
 }) {
+    const { cluster } = useCluster();
     const { isLoading, data: registryInfo } = useVerifiedProgram({
         programAuthority: programData.authority ? new PublicKey(programData.authority) : null,
         programData: programData,
@@ -19,7 +22,13 @@ export function VerifiedProgramBadge({
     });
     const verifiedBuildTabPath = useClusterPath({ pathname: `/address/${pubkey.toBase58()}/verified-build` });
 
-    if (isLoading) {
+    if (cluster !== Cluster.MainnetBeta) {
+        return (
+            <h3 className="mb-0">
+                <span className="badge bg-warning-soft rank">Verified Builds only available on Mainnet</span>
+            </h3>
+        );
+    } else if (isLoading) {
         return (
             <h3 className="mb-0">
                 <span className="badge">Loading...</span>
