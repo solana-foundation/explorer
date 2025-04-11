@@ -90,3 +90,8 @@ export function deserializeInstruction(instruction: string): MessageCompiledInst
 
     return data;
 }
+
+export async function sleep(ms?: number): Promise<void> {
+    const timeoutMs = ms || (process.env.TEST_SERIAL_TIMEOUT ? Number(process.env.TEST_SERIAL_TIMEOUT.trim()) : 1000);
+    return await new Promise(resolve => setTimeout(resolve, timeoutMs));
+}

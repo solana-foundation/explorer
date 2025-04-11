@@ -5,6 +5,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
 
+import { sleep } from '@/app/__tests__/mocks';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
@@ -69,6 +70,9 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
     ];
 
     beforeEach(async () => {
+        // sleep to allow not facing 429s
+        await sleep();
+
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams();
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
