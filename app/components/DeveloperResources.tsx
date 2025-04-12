@@ -59,17 +59,17 @@ function ResourceCard({
     link: string;
 }) {
     return (
-        <div className="flex flex-col" style={{ width: '250px', height: '200px' }}>
+        <div className="flex flex-col" style={{ height: '200px', width: '250px' }}>
             <div className="w-full mb-3">
                 <a href={link} target="_blank" rel="noopener noreferrer" className="hover:cursor-pointer">
                     <img
                         src={image}
                         alt={`${title} preview`}
                         style={{
-                            width: '250px',
+                            backgroundColor: imageBackground,
                             height: '120px',
                             objectFit: 'cover',
-                            backgroundColor: imageBackground,
+                            width: '250px',
                         }}
                     />
                 </a>

@@ -23,8 +23,8 @@ import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/ind
 import { percentage } from '@utils/math';
 import React from 'react';
 
-import { UpcomingFeatures } from './utils/feature-gate/UpcomingFeatures';
 import { DeveloperResources } from './components/DeveloperResources';
+import { UpcomingFeatures } from './utils/feature-gate/UpcomingFeatures';
 
 export default function Page() {
     return (
