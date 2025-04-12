@@ -16,25 +16,25 @@ export function DeveloperResources() {
                 <div className="d-flex gap-4 pb-3 overflow-auto">
                     <ResourceCard
                         title="Setup Your Solana Environment"
-                        description="Set up your local environment for Solana development"
+                        description="Get started in 5 minutes or less!"
                         image="https://solana.com/opengraph/developers/docs/intro/installation"
                         link="https://solana.com/docs/intro/installation"
                     />
                     <ResourceCard
                         title="Quick Start Guide"
-                        description="A guide to help you get started with Solana development"
+                        description="Hands-on guide to the core concepts for building on Solana"
                         image="https://solana.com/_next/image?url=%2Fassets%2Fdocs%2Fintro%2Fquickstart%2Fpg-not-connected.png&w=1920&q=75"
                         link="https://solana.com/docs/intro/quick-start"
                     />
                     <ResourceCard
                         title="Solana Developer Bootcamp"
-                        description="A comprehensive guide to Solana development"
+                        description="11 hours of video lessons on Solana Development"
                         image="https://i.ytimg.com/vi/amAq-WHAFs8/maxresdefault.jpg"
-                        link="https://www.youtube.com/watch?v=amAq-WHAFs8&list=PLilwLeBwGuK7HN8ZnXpGAD9q6i4syhnVc&ab_channel=Solana"
+                        link="https://www.youtube.com/watch?v=amAq-WHAFs8"
                     />
                     <ResourceCard
-                        title="Solana Tutorial"
-                        description="A comprehensive guide to Solana development"
+                        title="60 Days of Solana"
+                        description="A course designed for EVM developers to learn Solana"
                         image="https://www.rareskills.io/wp-content/uploads/2024/08/og-image-rareskills.png"
                         imageBackground="white"
                         link="https://www.rareskills.io/solana-tutorial"
