@@ -278,6 +278,7 @@ h4.slot-pill {
 
     // work around for https://github.com/JedWatson/react-select/issues/3857
     .search-bar__input {
+        min-width: 200px;
         width: 100% !important;
         input {
             width: 100% !important;
