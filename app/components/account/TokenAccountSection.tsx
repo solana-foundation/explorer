@@ -287,6 +287,7 @@ function FungibleTokenMintAccountCard({
                             </td>
                         </tr>
                     )}
+                    {234}
                 </TableCardBody>
             </div>
         </>
