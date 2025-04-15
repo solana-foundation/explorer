@@ -495,6 +495,14 @@ export function useAccountInfo(address: string | undefined): Cache.CacheEntry<Ac
     return context.entries[address];
 }
 
+export function useAccountInfos(addresses: string[]): Cache.CacheEntry<Account>[] {
+    const context = React.useContext(StateContext);
+    if (!context) {
+        throw new Error(`useAccountInfos must be used within a AccountsProvider`);
+    }
+    return addresses.map(address => context.entries[address]);
+}
+
 export function useMintAccountInfo(address: string | undefined): MintAccountInfo | undefined {
     const accountInfo = useAccountInfo(address);
     return React.useMemo(() => {
@@ -535,46 +543,60 @@ export function useTokenAccountInfo(address: string | undefined): TokenAccountIn
     }, [address, accountInfo]);
 }
 
+function parseAddressLookupTableFromCache(
+    accountInfo: Cache.CacheEntry<Account> | undefined,
+    address: string
+): [AddressLookupTableAccount | string | undefined, FetchStatus] | undefined {
+    if (accountInfo === undefined) return;
+    const account = accountInfo.data;
+    if (account === undefined) return [account, accountInfo.status];
+    if (account.lamports === 0) return ['Lookup Table Not Found', accountInfo.status];
+    const { parsed: parsedData, raw: rawData } = account.data;
+
+    const key = new PublicKey(address);
+    if (parsedData && parsedData.program === 'address-lookup-table') {
+        if (parsedData.parsed.type === 'lookupTable') {
+            return [
+                new AddressLookupTableAccount({
+                    key,
+                    state: parsedData.parsed.info,
+                }),
+                accountInfo.status,
+            ];
+        } else if (parsedData.parsed.type === 'uninitialized') {
+            return ['Lookup Table Uninitialized', accountInfo.status];
+        }
+    } else if (rawData && account.owner.equals(AddressLookupTableProgram.programId)) {
+        try {
+            return [
+                new AddressLookupTableAccount({
+                    key,
+                    state: AddressLookupTableAccount.deserialize(rawData),
+                }),
+                accountInfo.status,
+            ];
+        } catch {
+            /* empty */
+        }
+    }
+
+    return ['Invalid Lookup Table', accountInfo.status];
+}
+
+export function useAddressLookupTables(addresses: string[]) {
+    const accountInfos = useAccountInfos(addresses);
+    return React.useMemo(() => {
+        return accountInfos.map((accountInfo, index) =>
+            parseAddressLookupTableFromCache(accountInfo, addresses[index])
+        );
+    }, [accountInfos, addresses]);
+}
+
 export function useAddressLookupTable(
     address: string
 ): [AddressLookupTableAccount | string | undefined, FetchStatus] | undefined {
     const accountInfo = useAccountInfo(address);
-    return React.useMemo(() => {
-        if (accountInfo === undefined) return;
-        const account = accountInfo.data;
-        if (account === undefined) return [account, accountInfo.status];
-        if (account.lamports === 0) return ['Lookup Table Not Found', accountInfo.status];
-        const { parsed: parsedData, raw: rawData } = account.data;
-
-        const key = new PublicKey(address);
-        if (parsedData && parsedData.program === 'address-lookup-table') {
-            if (parsedData.parsed.type === 'lookupTable') {
-                return [
-                    new AddressLookupTableAccount({
-                        key,
-                        state: parsedData.parsed.info,
-                    }),
-                    accountInfo.status,
-                ];
-            } else if (parsedData.parsed.type === 'uninitialized') {
-                return ['Lookup Table Uninitialized', accountInfo.status];
-            }
-        } else if (rawData && account.owner.equals(AddressLookupTableProgram.programId)) {
-            try {
-                return [
-                    new AddressLookupTableAccount({
-                        key,
-                        state: AddressLookupTableAccount.deserialize(rawData),
-                    }),
-                    accountInfo.status,
-                ];
-            } catch {
-                /* empty */
-            }
-        }
-
-        return ['Invalid Lookup Table', accountInfo.status];
-    }, [address, accountInfo]);
+    return React.useMemo(() => parseAddressLookupTableFromCache(accountInfo, address), [address, accountInfo]);
 }
 
 export function useFetchAccountInfo() {

@@ -1,6 +1,6 @@
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useScrollAnchor } from '@providers/scroll-anchor';
-import { MessageCompiledInstruction, VersionedMessage } from '@solana/web3.js';
+import { TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
 import getInstructionCardScrollAnchorId from '@/app/utils/get-instruction-card-scroll-anchor-id';
@@ -11,12 +11,10 @@ import { AddressWithContext, programValidator } from './AddressWithContext';
 export function UnknownDetailsCard({
     index,
     ix,
-    message,
     programName,
 }: {
     index: number;
-    ix: MessageCompiledInstruction;
-    message: VersionedMessage;
+    ix: TransactionInstruction;
     programName: string;
 }) {
     const [expanded, setExpanded] = React.useState(false);
@@ -43,13 +41,10 @@ export function UnknownDetailsCard({
                     <tr>
                         <td>Program</td>
                         <td className="text-lg-end">
-                            <AddressWithContext
-                                pubkey={message.staticAccountKeys[ix.programIdIndex]}
-                                validator={programValidator}
-                            />
+                            <AddressWithContext pubkey={ix.programId} validator={programValidator} />
                         </td>
                     </tr>
-                    <BaseRawDetails ix={ix} message={message} />
+                    <BaseRawDetails ix={ix} />
                 </TableCardBody>
             )}
         </div>

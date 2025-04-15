@@ -1,5 +1,5 @@
-import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
 import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { AddressLookupTableAccount, clusterApiUrl, Connection, TransactionMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
@@ -13,7 +13,16 @@ describe('BaseInstructionCard', () => {
     test('should render "BaseInstructionCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
-        const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
+        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const lookups = await Promise.all(
+            m.addressTableLookups.map(lookup =>
+                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
+            )
+        );
+        const ti = TransactionMessage.decompile(m, {
+            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+        }).instructions[index];
+
         expect(ti.programId.equals(ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
         // check that component is rendered properly
@@ -31,7 +40,15 @@ describe('BaseInstructionCard', () => {
     test('should render "BaseInstructionCard" with raw data', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
-        const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
+        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const lookups = await Promise.all(
+            m.addressTableLookups.map(lookup =>
+                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
+            )
+        );
+        const ti = TransactionMessage.decompile(m, {
+            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+        }).instructions[index];
         expect(ti.programId.equals(ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
         // check that component is rendered properly

@@ -1,5 +1,5 @@
-import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
 import * as spl from '@solana/spl-token';
+import { AddressLookupTableAccount, clusterApiUrl, Connection, TransactionMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
@@ -15,8 +15,15 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
     test('should render "CreateIdempotent" card', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
-        const mci = m.compiledInstructions[index];
-        const ti = intoTransactionInstructionFromVersionedMessage(mci, m);
+        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const lookups = await Promise.all(
+            m.addressTableLookups.map(lookup =>
+                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
+            )
+        );
+        const ti = TransactionMessage.decompile(m, {
+            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+        }).instructions[index];
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
         const ix = intoParsedInstruction(ti);
@@ -26,13 +33,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard
-                            ix={ix}
-                            raw={mci}
-                            message={m}
-                            index={index}
-                            result={{ err: null }}
-                        />
+                        <AssociatedTokenDetailsCard ix={ix} raw={ti} message={m} index={index} result={{ err: null }} />
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>
@@ -42,14 +43,21 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             expect(screen.getByText(pattern)).toBeInTheDocument();
         });
         expect(screen.queryAllByText(/^System Program$/)).toHaveLength(3);
-        expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(1);
+        expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(3);
     });
 
     test('should render "Create" card', async () => {
         const index = 2;
         const m = mock.deserializeMessage(stubs.aTokenCreateMsgWithInnerCards);
-        const mci = m.compiledInstructions[index];
-        const ti = intoTransactionInstructionFromVersionedMessage(mci, m);
+        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const lookups = await Promise.all(
+            m.addressTableLookups.map(lookup =>
+                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
+            )
+        );
+        const ti = TransactionMessage.decompile(m, {
+            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+        }).instructions[index];
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
         const ix = intoParsedInstruction(ti);
@@ -59,13 +67,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard
-                            ix={ix}
-                            raw={mci}
-                            message={m}
-                            index={index}
-                            result={{ err: null }}
-                        />
+                        <AssociatedTokenDetailsCard ix={ix} raw={ti} message={m} index={index} result={{ err: null }} />
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>
@@ -81,8 +83,15 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
     test('should render "RecoverNested" card', async () => {
         const index = 0;
         const m = mock.deserializeMessage(stubs.aTokenRecoverNestedMsg);
-        const mci = m.compiledInstructions[index];
-        const ti = intoTransactionInstructionFromVersionedMessage(mci, m);
+        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const lookups = await Promise.all(
+            m.addressTableLookups.map(lookup =>
+                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
+            )
+        );
+        const ti = TransactionMessage.decompile(m, {
+            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+        }).instructions[index];
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
         const ix = intoParsedInstruction(ti);
@@ -92,13 +101,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard
-                            ix={ix}
-                            raw={mci}
-                            message={m}
-                            index={index}
-                            result={{ err: null }}
-                        />
+                        <AssociatedTokenDetailsCard ix={ix} raw={ti} message={m} index={index} result={{ err: null }} />
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>
@@ -115,8 +118,16 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
     test('should render "CreateIdempotentDetailsCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsgWithInnerCards);
-        const mci = m.compiledInstructions[index];
-        const ti = intoTransactionInstructionFromVersionedMessage(mci, m);
+        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const lookups = await Promise.all(
+            m.addressTableLookups.map(lookup =>
+                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
+            )
+        );
+        const ti = TransactionMessage.decompile(m, {
+            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+        }).instructions[index];
+
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
         const ix = intoParsedInstruction(ti);
@@ -126,13 +137,7 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard
-                            ix={ix}
-                            raw={mci}
-                            message={m}
-                            index={index}
-                            result={{ err: null }}
-                        />
+                        <AssociatedTokenDetailsCard ix={ix} raw={ti} message={m} index={index} result={{ err: null }} />
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>
