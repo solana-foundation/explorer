@@ -19,7 +19,11 @@ function CompressionCardRenderer({
     onNotFound,
 }: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
     return (
-        <ErrorBoundary fallback={<ErrorCard text="Failed to load compression information" />}>
+        <ErrorBoundary
+            fallbackRender={({ error }) => (
+                <ErrorCard text={`Failed to load compression information: ${error.message}`} />
+            )}
+        >
             <Suspense fallback={<LoadingCard />}>
                 {<CompressedNFTInfoCard account={account} onNotFound={onNotFound} />}
             </Suspense>
