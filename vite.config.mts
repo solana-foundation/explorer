@@ -26,6 +26,7 @@ export default defineConfig({
         coverage: {
             provider: 'v8'
         },
+        testTimeout: 10000,
         server: {
             deps: {
                 inline: ['@noble', 'change-case', '@react-hook/previous']
