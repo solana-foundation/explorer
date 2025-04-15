@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { describe, vi } from 'vitest';
 
+import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
 import { sleep } from '@/app/__tests__/mocks';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
@@ -70,30 +71,13 @@ describe('TokenExtensionRow', () => {
     });
 
     test('should render transferFeeConfig extension', async () => {
-        const data = {
-            extension: 'transferFeeConfig',
-            state: {
-                newerTransferFee: {
-                    epoch: 200,
-                    maximumFee: 2000000,
-                    transferFeeBasisPoints: 200,
-                },
-                olderTransferFee: {
-                    epoch: 100,
-                    maximumFee: 1000000,
-                    transferFeeBasisPoints: 100,
-                },
-                transferFeeConfigAuthority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-                withdrawWithheldAuthority: new PublicKey('3apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-                withheldAmount: 500000,
-            },
-        } as TokenExtension;
-
         render(
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, 150n, 6, 'TEST')}</TableCardBody>
+                        <TableCardBody>
+                            {TokenExtensionRow(mockExtensions.transferFeeConfig0, 150n, 6, 'TEST')}
+                        </TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>

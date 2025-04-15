@@ -1,16 +1,13 @@
-export function TokenExtensionBadges({ token }: { token: any }) {
-    // const { t } = useTranslation();
-    // const { tokenExtensions } = useTokenExtensions(token);
+import { ParsedTokenExtension } from '@/app/components/account/types';
 
-    if (!token) return null;
-    return 234;
-    // return (
-    //     <div className="flex flex-wrap gap-1">
-    //         {tokenExtensions.map(extension => (
-    //             <div key={extension.type} className="bg-gray-200 dark:bg-gray-800 rounded px-2 py-1 text-xs">
-    //                 {t(`tokenExtensions.${extension.type}`)}
-    //             </div>
-    //         ))}
-    //     </div>
-    // );
+import { TokenExtensionBadge } from './TokenExtensionBadge';
+
+export function TokenExtensionBadges({ extensions }: { extensions: ParsedTokenExtension[] }) {
+    return (
+        <div className="flex flex-wrap gap-1">
+            {extensions.map(extension => (
+                <TokenExtensionBadge key={extension.extension} extension={extension} />
+            ))}
+        </div>
+    );
 }

@@ -1,16 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, within } from '@storybook/test';
+import { expect, userEvent, within } from '@storybook/test';
 
 import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
 import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
 
-import { TokenExtensionBadges } from '../TokenExtensionBadges';
+import { TokenExtensionBadge } from '../TokenExtensionBadge';
 
+// More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
-    component: TokenExtensionBadges,
+    component: TokenExtensionBadge,
     tags: ['autodocs'],
-    title: 'Components/Common/TokenExtensionBadges',
-} satisfies Meta<typeof TokenExtensionBadges>;
+    title: 'Components/Common/TokenExtensionBadge',
+} satisfies Meta<typeof TokenExtensionBadge>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -24,11 +25,12 @@ const extension = {
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary: Story = {
     args: {
-        extensions: new Array(5).fill(null).map(() => extension),
+        extension,
     },
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
-        const tooltipButton = canvas.getAllByRole('button');
-        expect(tooltipButton).toHaveLength(5);
+        const tooltipButton = canvas.getByRole('button');
+        expect(tooltipButton).toHaveAttribute('data-slot', 'tooltip-trigger');
+        await userEvent.hover(tooltipButton);
     },
 };

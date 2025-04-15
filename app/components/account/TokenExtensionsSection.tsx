@@ -9,6 +9,7 @@ import { Badge } from '@/app/components/shared/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
+import { TokenExtensionBadge } from '../common/TokenExtensionBadge';
 import { TokenExtensionRow } from './TokenAccountSection';
 import { ParsedTokenExtension } from './types';
 
@@ -146,17 +147,7 @@ function ExtensionListItem({
             {/* Name */}
             <div className="e-flex e-min-w-80 e-items-center e-gap-2 e-whitespace-nowrap e-font-normal max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-4 lg:e-col-span-3">
                 <div>{ext.name}</div>
-                <Tooltip>
-                    {/* might be needed to wrap tooltip into a wrapper that watches window borders to adjust tootip's position */}
-                    <TooltipTrigger className="badge border-0 bg-transparent">
-                        <StatusBadge status={ext.status} label={ext.name} className="e-text-14" />
-                    </TooltipTrigger>
-                    {ext.tooltip && (
-                        <TooltipContent>
-                            <div className="e-min-w-36 e-max-w-16">{ext.tooltip}</div>
-                        </TooltipContent>
-                    )}
-                </Tooltip>
+                <TokenExtensionBadge extension={ext} />
             </div>
 
             {/* Description */}
