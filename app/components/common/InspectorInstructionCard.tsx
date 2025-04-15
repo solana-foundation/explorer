@@ -1,12 +1,6 @@
 import { Address } from '@components/common/Address';
 import { useScrollAnchor } from '@providers/scroll-anchor';
-import {
-    MessageCompiledInstruction,
-    ParsedInstruction,
-    SignatureResult,
-    TransactionInstruction,
-    VersionedMessage,
-} from '@solana/web3.js';
+import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import React from 'react';
 import { Code } from 'react-feather';
@@ -26,7 +20,7 @@ type InstructionProps = {
     // raw can be used to display raw instruction information
     // depends on whether the transaction was received from blockchain (TransactionInstruction)
     // or generated at the inspector (MessageCompiledInstruction)
-    raw?: TransactionInstruction | MessageCompiledInstruction;
+    raw?: TransactionInstruction;
     // will be triggered on requesting raw data for instruction, if present
     onRequestRaw?: () => void;
     message: VersionedMessage;
@@ -43,7 +37,6 @@ export function InspectorInstructionCard({
     childIndex,
     raw,
     onRequestRaw,
-    message,
 }: InstructionProps) {
     const [resultClass] = ixResult(result, index);
     const [showRaw, setShowRaw] = React.useState(defaultRaw || false);
@@ -91,10 +84,10 @@ export function InspectorInstructionCard({
                                 </tr>
                                 {'parsed' in ix ? (
                                     <BaseRawParsedDetails ix={ix}>
-                                        {raw ? <BaseRawDetails ix={raw} message={message} /> : null}
+                                        {raw ? <BaseRawDetails ix={raw} /> : null}
                                     </BaseRawParsedDetails>
                                 ) : (
-                                    <BaseRawDetails ix={raw || ix} message={message} />
+                                    <BaseRawDetails ix={raw || ix} />
                                 )}
                             </>
                         ) : (
