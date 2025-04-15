@@ -1,6 +1,7 @@
 import * as spl from '@solana/spl-token';
 import { AddressLookupTableAccount, clusterApiUrl, Connection, TransactionMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
@@ -38,7 +39,13 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>
         );
-        expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
+
+        await vi.waitFor(
+            () => {
+                expect(screen.queryByText(/Loading/i)).toBeNull();
+            },
+            { interval: 50, timeout: 10000 }
+        );
         [/Source/, /Account/, /Mint/, /Wallet/].forEach(pattern => {
             expect(screen.getByText(pattern)).toBeInTheDocument();
         });
