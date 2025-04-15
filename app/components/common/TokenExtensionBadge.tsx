@@ -17,14 +17,20 @@ const badgeVariants = cva('', {
 
 export function TokenExtensionBadge({
     extension,
+    label,
+    onClick,
     size,
-}: { extension: ParsedTokenExtension } & VariantProps<typeof badgeVariants>) {
-    const { status, tooltip, name } = extension;
+}: {
+    extension: ParsedTokenExtension;
+    label?: string;
+    onClick?: React.ComponentProps<typeof TooltipTrigger>['onClick'];
+} & VariantProps<typeof badgeVariants>) {
+    const { status, tooltip } = extension;
 
     return (
         <Tooltip>
-            <TooltipTrigger className="badge border-0 bg-transparent">
-                <StatusBadge status={status} label={name} className={badgeVariants({ size })} />
+            <TooltipTrigger className="e-border-0 e-bg-transparent e-p-0" onClick={onClick}>
+                <StatusBadge status={status} label={label} className={badgeVariants({ size })} />
             </TooltipTrigger>
             {tooltip && (
                 <TooltipContent>

@@ -4,9 +4,9 @@ import { TokenExtensionBadge } from './TokenExtensionBadge';
 
 export function TokenExtensionBadges({ extensions }: { extensions: ParsedTokenExtension[] }) {
     return (
-        <div className="flex flex-wrap gap-1">
+        <div className="e-flex e-flex-wrap e-gap-2">
             {extensions.map(extension => (
-                <TokenExtensionBadge key={extension.extension} extension={extension} />
+                <TokenExtensionBadge key={extension.extension} extension={extension} label={extension.extension} />
             ))}
         </div>
     );

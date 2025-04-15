@@ -4,9 +4,7 @@ import { Code, ExternalLink } from 'react-feather';
 import ReactJson from 'react-json-view';
 
 import { TableCardBodyHeaded } from '@/app/components/common/TableCardBody';
-import { StatusBadge } from '@/app/components/shared/StatusBadge';
 import { Badge } from '@/app/components/shared/ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
 import { TokenExtensionBadge } from '../common/TokenExtensionBadge';

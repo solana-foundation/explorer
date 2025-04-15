@@ -9,7 +9,7 @@ export type StatusType = 'active' | 'inactive';
 
 interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
     status: StatusType;
-    label: string;
+    label?: string;
     showIcon?: boolean;
 }
 
@@ -49,10 +49,10 @@ const statusBadgeTextVariants = cva('', {
     },
 });
 
-export function StatusBadge({ status, showIcon = true, className, ...props }: StatusBadgeProps) {
+export function StatusBadge({ status, showIcon = true, className, label, ...props }: StatusBadgeProps) {
     return (
         <Badge className={cn(statusBadgeVariants({ status }), className)} {...props}>
-            <div className={statusBadgeTextVariants({ status })}>{getStatusLabel(status)}</div>
+            <div className={statusBadgeTextVariants({ status })}>{label ?? getStatusLabel(status)}</div>
             {showIcon && <span className={statusBadgeIconVariants({ status })}>{getStatusIcon(status)}</span>}
         </Badge>
     );
