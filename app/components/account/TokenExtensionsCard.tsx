@@ -46,6 +46,7 @@ export function TokenExtensionsCard({
             <AccountHeader title="Extensions" refresh={() => refresh(new PublicKey(address), 'parsed')} />
             <div className="card-body p-0 e-overflow-x-scroll">
                 <TokenExtensionsSection
+                    address={address}
                     decimals={tokenInfo.decimals}
                     extensions={mintExtensions}
                     parsedExtensions={extensions}

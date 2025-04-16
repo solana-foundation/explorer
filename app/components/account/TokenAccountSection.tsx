@@ -49,6 +49,9 @@ import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/uti
 import { TokenExtensionsStatusRow } from './token-extensions/TokenExtensionsStatusRow';
 import { UnknownAccountCard } from './UnknownAccountCard';
 
+// !!
+// TODO: import styles for badges to be rendered properly
+
 const getEthAddress = (link?: string) => {
     let address = '';
     if (link) {
@@ -288,7 +291,9 @@ function FungibleTokenMintAccountCard({
                             </td>
                         </tr>
                     )}
-                    {mintExtensions && <TokenExtensionsStatusRow extensions={mintExtensions} />}
+                    {mintExtensions && (
+                        <TokenExtensionsStatusRow address={account.pubkey.toBase58()} extensions={mintExtensions} />
+                    )}
                 </TableCardBody>
             </div>
         </>
@@ -513,6 +518,9 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                             </td>
                         </tr>
                     </>
+                )}
+                {accountExtensions && (
+                    <TokenExtensionsStatusRow address={account.pubkey.toBase58()} extensions={accountExtensions} />
                 )}
             </TableCardBody>
         </div>

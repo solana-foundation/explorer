@@ -5,6 +5,10 @@ import ReactJson from 'react-json-view';
 
 import { TableCardBodyHeaded } from '@/app/components/common/TableCardBody';
 import { Badge } from '@/app/components/shared/ui/badge';
+import {
+    getAnchorId,
+    useTokenExtensionNavigation,
+} from '@/app/features/token-extensions/use-token-extension-navigation';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
 import { TokenExtensionBadge } from '../common/TokenExtensionBadge';
@@ -12,23 +16,26 @@ import { TokenExtensionRow } from './TokenAccountSection';
 import { ParsedTokenExtension } from './types';
 
 export function TokenExtensionsSection({
+    address,
     decimals,
     extensions,
     parsedExtensions,
     symbol,
 }: {
+    address: string;
     decimals: number;
     extensions: TokenExtension[];
     parsedExtensions: ParsedTokenExtension[];
     symbol?: string;
 }) {
-    const [selectedExtension, setSelectedExtension] = useState<string | undefined>(undefined);
+    const { activeExtension: selectedExtension, setActiveExtension: setSelectedExtension } =
+        useTokenExtensionNavigation({ uriComponent: `/address/${address}` });
 
     const onSelect = useCallback(
         (id: string) => {
             setSelectedExtension(id === selectedExtension ? undefined : id);
         },
-        [selectedExtension]
+        [selectedExtension, setSelectedExtension]
     );
 
     // handle accordion item click to change the selected extension
@@ -50,7 +57,12 @@ export function TokenExtensionsSection({
                 });
 
                 return (
-                    <AccordionItem key={ext.extension} value={ext.extension} onClick={handleSelect}>
+                    <AccordionItem
+                        id={getAnchorId(ext)}
+                        key={ext.extension}
+                        value={ext.extension}
+                        onClick={handleSelect}
+                    >
                         {extension && (
                             <TokenExtensionAccordionItem
                                 decimals={decimals}
