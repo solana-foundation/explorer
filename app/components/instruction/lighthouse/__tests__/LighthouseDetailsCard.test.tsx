@@ -27,6 +27,14 @@ vi.mock('../../../common/Address', () => ({
     Address: ({ pubkey }: { pubkey: PublicKey }) => <div data-testid="address">{pubkey.toBase58()}</div>,
 }));
 
+vi.mock('../../../common/Copyable', () => ({
+    Copyable: ({ text, children }: { text: string; children: React.ReactNode }) => (
+        <div data-testid="copyable" data-text={text}>
+            {children}
+        </div>
+    ),
+}));
+
 vi.mock('../../../../utils/anchor', () => ({
     ExpandableRow: ({
         fieldName,
@@ -420,7 +428,7 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs1a).toHaveTextContent('fields');
             expect(ixArgs1a).toHaveTextContent('Array[1]');
 
-            const ixArgs1b = screen.getByTestId('ix-args-1-1-0');
+            const ixArgs1b = screen.getByTestId('ix-args-2-0');
             expect(ixArgs1b).toHaveTextContent('#0');
             expect(ixArgs1b).toHaveTextContent('number');
             expect(ixArgs1b).toHaveTextContent('1');
