@@ -39,6 +39,4 @@ jobs:
         env:
           TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
         run: |
-          pnpx playwright install
-          pnpx playwright install-deps
           pnpm test:ci

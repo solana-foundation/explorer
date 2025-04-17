@@ -8,7 +8,7 @@ import { defineWorkspace } from 'vitest/config';
 const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
 // More info at: https://storybook.js.org/docs/writing-tests/test-addon
-export default defineWorkspace([
+export const config = defineWorkspace([
     'vite.config.mts',
     {
         extends: 'vite.config.mts',
@@ -38,16 +38,15 @@ export default defineWorkspace([
                 // protocolImports: false,
             }),
         ],
-        // TODO: enable playwright at next PR
-        // test: {
-        //     browser: {
-        //         enabled: true,
-        //         headless: true,
-        //         name: 'chromium',
-        //         provider: 'playwright',
-        //     },
-        //     name: 'storybook',
-        //     setupFiles: ['.storybook/vitest.setup.ts'],
-        // },
+        test: {
+            browser: {
+                enabled: true,
+                headless: true,
+                name: 'chromium',
+                provider: 'playwright',
+            },
+            name: 'storybook',
+            setupFiles: ['.storybook/vitest.setup.ts'],
+        },
     },
 ]);
