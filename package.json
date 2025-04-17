@@ -8,7 +8,7 @@
         "start": "next start",
         "scan": "next dev & react-scan localhost:3000",
         "lint": "next lint",
-        "format": "prettier -v && prettier --config .prettierrc.cjs **/*.{ts,tsx,mts,mjs,cjs} *.json --check",
+        "format": "prettier --config .prettierrc.cjs **/*.{ts,tsx,mts,mjs,cjs} *.json --check",
         "format:ci": "pnpm format",
         "gen": "pnpx shadcn@^2.4.0 add",
         "coverage": "vitest --coverage",
