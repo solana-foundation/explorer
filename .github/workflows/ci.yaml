@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  # cash folder for pnpm_store, nextjs and playwright later on
+  PW_CACHE_AFFIX: pw
+  PW_CACHE_FOLDER: ~/.cache/ms-playwright
+
 jobs:
   Build-And-Test:
     runs-on: ubuntu-latest
@@ -29,22 +34,20 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
 
-      - name: Evaluate Cache Path
-        id: pnpm_cache
-        run: |
-          PNPM_CACHE_PATH=$(pnpm store path)
-          echo "PNPM_CACHE_PATH=$PNPM_CACHE_PATH" >> $GITHUB_OUTPUT
-          echo "$PNPM_CACHE_PATH"
+      - name: Setup pnpm config
+        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
 
       - name: Setup Cache
         uses: actions/cache@v4
+        id: pnpm_store_cache
         with:
           path: |
-            ${{ steps.pnpm_cache.outputs.PNPM_CACHE_PATH }}
+            ${{ env.PW_CACHE_FOLDER }}
             ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
+          key: ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-
+            ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
       - name: Install dependencies
         run: pnpm install
