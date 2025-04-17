@@ -1,3 +1,4 @@
+import { ClusterProvider } from '@providers/cluster';
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from '@storybook/test';
 
@@ -8,6 +9,18 @@ import { TokenExtensionsStatusRow } from '../TokenExtensionsStatusRow';
 
 const meta = {
     component: TokenExtensionsStatusRow,
+    decorators: [
+        Story => (
+            <ClusterProvider>
+                <Story />
+            </ClusterProvider>
+        ),
+    ],
+    parameters: {
+        nextjs: {
+            appDirectory: true,
+        },
+    },
     tags: ['autodocs'],
     title: 'Components/Account/token-extensions/TokenExtensionsStatusRow',
 } satisfies Meta<typeof TokenExtensionsStatusRow>;
