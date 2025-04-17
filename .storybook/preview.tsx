@@ -2,7 +2,7 @@ import type { Preview } from '@storybook/react';
 import React from 'react';
 
 import { Rubik } from 'next/font/google';
-import './layout.min.css';
+// import './layout.min.css';
 import '@/app/styles.css';
 
 const rubikFont = Rubik({

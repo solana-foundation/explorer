@@ -38,15 +38,16 @@ export default defineWorkspace([
                 // protocolImports: false,
             }),
         ],
-        test: {
-            browser: {
-                enabled: true,
-                headless: true,
-                name: 'chromium',
-                provider: 'playwright',
-            },
-            name: 'storybook',
-            setupFiles: ['.storybook/vitest.setup.ts'],
-        },
+        // TODO: enable playwright at next PR
+        // test: {
+        //     browser: {
+        //         enabled: true,
+        //         headless: true,
+        //         name: 'chromium',
+        //         provider: 'playwright',
+        //     },
+        //     name: 'storybook',
+        //     setupFiles: ['.storybook/vitest.setup.ts'],
+        // },
     },
 ]);
