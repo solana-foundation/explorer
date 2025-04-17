@@ -43,7 +43,7 @@
         "@solflare-wallet/utl-sdk": "^1.4.0",
         "@sqds/multisig": "^2.1.3",
         "@types/bn.js": "5.1.0",
-        "axios": "^1.8.2",
+        "axios": "^1.8.3",
         "bignumber.js": "^9.0.2",
         "bn.js": "5.2.1",
         "bs58": "^4.0.1",
