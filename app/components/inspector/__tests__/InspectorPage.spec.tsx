@@ -1,7 +1,7 @@
 import { AccountInfo } from '@solana/web3.js';
 import { generated, PROGRAM_ID } from '@sqds/multisig';
 const { VaultTransaction } = generated;
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
 
@@ -110,7 +110,7 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
             </ScrollAnchorProvider>
         );
 
-        await vi.waitFor(
+        await waitFor(
             () => {
                 expect(screen.queryByText(/Inspector Input/i)).toBeNull();
             },
@@ -177,7 +177,7 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
             </ScrollAnchorProvider>
         );
 
-        await vi.waitFor(
+        await waitFor(
             () => {
                 expect(screen.queryByText(/Inspector Input/i)).toBeNull();
             },
