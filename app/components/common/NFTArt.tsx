@@ -35,6 +35,7 @@ export const NFTImageContent = ({ uri }: { uri?: string }) => {
         <div style={{ maxHeight: 200, width: 150 }}>
             {isLoading && <LoadingArtPlaceholder />}
             <div className={`rounded mx-auto ${isLoading ? 'd-none' : 'd-block'}`} style={{ overflow: 'hidden' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img alt="nft" src={uri ? getProxiedUri(uri) : uri} width="100%" onLoad={() => setIsLoading(false)} />
             </div>
             {!isLoading && uri && <ViewOriginalArtContentLink src={uri} />}

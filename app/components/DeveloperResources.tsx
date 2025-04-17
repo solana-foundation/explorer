@@ -62,6 +62,7 @@ function ResourceCard({
         <div className="flex flex-col" style={{ height: '200px', width: '250px' }}>
             <div className="w-full mb-3">
                 <a href={link} target="_blank" rel="noopener noreferrer" className="hover:cursor-pointer">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={image}
                         alt={`${title} preview`}

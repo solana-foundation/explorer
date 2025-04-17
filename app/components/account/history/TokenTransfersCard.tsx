@@ -175,7 +175,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
             detailsList,
             hasTimestamps,
         };
-    }, [history, transactionRows, tokenInfo, pubkey, address, cluster]);
+    }, [history, transactionRows, tokenInfo, pubkey, address, cluster, tokenInfoLoading]);
 
     if (!history) {
         return null;

@@ -90,6 +90,7 @@ function HoldingsDetailTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 {showLogos && (
                     <td className="w-1 p-0 text-center">
                         {tokenAccount.logoURI ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                                 alt="token icon"
                                 className="token-icon rounded-circle border border-4 border-gray-dark"
@@ -169,6 +170,7 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 {showLogos && (
                     <td className="w-1 p-0 text-center">
                         {token.logoURI ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                                 alt="token icon"
                                 className="token-icon rounded-circle border border-4 border-gray-dark"
