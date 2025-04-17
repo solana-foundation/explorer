@@ -191,7 +191,6 @@ h4.slot-pill {
     line-height: 1.5rem;
 }
 
-
 .search-bar__control {
     border-radius: $border-radius !important;
     padding: 2px 16px;
@@ -208,13 +207,13 @@ h4.slot-pill {
         width: 16px;
         height: 16px;
         padding: 4px;
-        color: #C9C9C9;
+        color: #c9c9c9;
         display: flex;
         transition: color 150ms;
         box-sizing: content-box;
         border-radius: 3px;
         border: 1px solid #111312;
-        background: #282D2C;
+        background: #282d2c;
         text-align: center;
         align-items: center;
         justify-content: center;
@@ -228,13 +227,13 @@ h4.slot-pill {
         width: 16px;
         height: 16px;
         padding: 4px;
-        color: #C9C9C9;
+        color: #c9c9c9;
         display: flex;
         transition: color 150ms;
         box-sizing: content-box;
         border-radius: 3px;
         border: 1px solid #111312;
-        background: #282D2C;
+        background: #282d2c;
         text-align: center;
         align-items: center;
         justify-content: center;
@@ -249,13 +248,13 @@ h4.slot-pill {
         width: 16px;
         height: 16px;
         padding: 4px;
-        color: #C9C9C9;
+        color: #c9c9c9;
         display: flex;
         transition: color 150ms;
         box-sizing: content-box;
         border-radius: 3px;
         border: 1px solid #111312;
-        background: #282D2C;
+        background: #282d2c;
         text-align: center;
         align-items: center;
         justify-content: center;
@@ -284,6 +283,13 @@ h4.slot-pill {
             width: 100% !important;
         }
     }
+}
+
+/* duplicate class to increase priority for it above !important at other parts of styles */
+.search-bar__control:focus,
+.search-bar__control--is-focused.search-bar__control--is-focused {
+    box-shadow: 0 0rem 0.4rem $primary !important;
+    transition: box-shadow ease;
 }
 
 .search-bar__menu {
