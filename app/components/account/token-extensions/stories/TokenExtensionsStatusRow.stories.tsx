@@ -1,4 +1,4 @@
-import { ClusterProvider } from '@providers/cluster';
+import { Keypair } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from '@storybook/test';
 
@@ -9,13 +9,6 @@ import { TokenExtensionsStatusRow } from '../TokenExtensionsStatusRow';
 
 const meta = {
     component: TokenExtensionsStatusRow,
-    decorators: [
-        Story => (
-            <ClusterProvider>
-                <Story />
-            </ClusterProvider>
-        ),
-    ],
     parameters: {
         nextjs: {
             appDirectory: true,
@@ -37,6 +30,7 @@ const extension = {
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary: Story = {
     args: {
+        address: Keypair.generate().publicKey.toString(),
         extensions: new Array(5).fill(null).map(() => extension),
     },
     async play({ canvasElement }) {
