@@ -23,7 +23,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'mintCloseAuthority': {
             const description = 'Allows a designated Close Authority to close the mint account if the supply is 0';
@@ -34,7 +33,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'defaultAccountState': {
             const description = 'Enables the authority to make new token accounts as frozen by default upon creation';
@@ -45,7 +43,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'immutableOwner': {
             const description = 'Prevents the owner from being changed';
@@ -56,7 +53,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'memoTransfer': {
             const description = 'Requires all incoming transfers to a token account include a memo';
@@ -67,7 +63,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'nonTransferable': {
             return {
@@ -75,7 +70,6 @@ export function populatePartialParsedTokenExtension(
                 name: 'Non-Transferable Token',
                 status: 'active',
             };
-            break;
         }
         case 'nonTransferableAccount': {
             return {
@@ -83,7 +77,6 @@ export function populatePartialParsedTokenExtension(
                 name: 'Non-Transferable Token Account',
                 status: 'active',
             };
-            break;
         }
         case 'cpiGuard': {
             const description = 'Prohibits certain actions inside cross-program invocations';
@@ -94,7 +87,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'permanentDelegate': {
             const description =
@@ -106,7 +98,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'transferHook': {
             const description = 'Allow the token program to execute custom instruction logic on every token transfer';
@@ -117,7 +108,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'transferHookAccount': {
             return {
@@ -125,7 +115,6 @@ export function populatePartialParsedTokenExtension(
                 name: 'Transfer Hook Account Info',
                 status: 'active',
             };
-            break;
         }
         case 'metadataPointer': {
             const description = 'Describes the location of the token metadata';
@@ -136,7 +125,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'groupPointer': {
             return {
@@ -144,7 +132,6 @@ export function populatePartialParsedTokenExtension(
                 name: 'Group Pointer',
                 status: 'active',
             };
-            break;
         }
         case 'groupMemberPointer': {
             return {
@@ -152,7 +139,6 @@ export function populatePartialParsedTokenExtension(
                 name: 'Group Member Pointer',
                 status: 'active',
             };
-            break;
         }
         case 'confidentialTransferAccount': {
             const description = 'Token amount is only able to be unencrypted by the token holder or auditor key';
@@ -163,7 +149,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'confidentialTransferFeeConfig': {
             return {
@@ -171,7 +156,6 @@ export function populatePartialParsedTokenExtension(
                 name: 'Confidential Transfer Fee Config',
                 status: 'active',
             };
-            break;
         }
         case 'confidentialTransferFeeAmount': {
             return {
@@ -179,7 +163,6 @@ export function populatePartialParsedTokenExtension(
                 name: 'Confidential Transfer Fee Amount',
                 status: 'active',
             };
-            break;
         }
         case 'confidentialTransferMint': {
             const description =
@@ -191,7 +174,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'interestBearingConfig': {
             const description = 'Allows the token balance to be displayed with accumulated interest';
@@ -202,7 +184,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'transferFeeConfig': {
             const description =
@@ -214,7 +195,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'tokenGroup': {
             return {
@@ -222,7 +202,6 @@ export function populatePartialParsedTokenExtension(
                 name: 'Token Group',
                 status: 'active',
             };
-            break;
         }
         case 'tokenGroupMember': {
             return {
@@ -230,7 +209,6 @@ export function populatePartialParsedTokenExtension(
                 name: 'Token Group Member',
                 status: 'active',
             };
-            break;
         }
         case 'tokenMetadata': {
             const description = 'Allows metadata to be written directly to the mint account';
@@ -241,7 +219,6 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
                 tooltip: description,
             };
-            break;
         }
         case 'unparseableExtension':
         default:
@@ -250,6 +227,5 @@ export function populatePartialParsedTokenExtension(
                 name: 'Unknown Extension',
                 status: 'active',
             };
-            break;
     }
 }
