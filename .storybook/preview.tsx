@@ -27,7 +27,7 @@ const preview: Preview = {
     },
     decorators: [
         Story => (
-            <div id="storybook-outer" style={rubikFont.style}>
+            <div id="storybook-outer" className={rubikFont.className}>
                 <Story />
             </div>
         ),
