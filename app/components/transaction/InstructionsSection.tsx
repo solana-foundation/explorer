@@ -1,3 +1,4 @@
+import { parseInstruction } from '@codama/dynamic-parsers';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { AddressLookupTableDetailsCard } from '@components/instruction/AddressLookupTableDetailsCard';
@@ -33,15 +34,21 @@ import {
     ParsedTransaction,
     PartiallyDecodedInstruction,
     SignatureResult,
+    TransactionInstruction,
     TransactionSignature,
 } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT, SignatureProps } from '@utils/index';
 import { intoTransactionInstruction } from '@utils/tx';
+import { RootNode } from 'codama';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
+import PmpCodamaIdl from '@/app/pmp.json';
+
+import { upcastTransactionInstruction } from '../inspector/into-parsed-data';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
+import { CodamaInstructionCard } from '../instruction/codama/CodamaInstructionDetailsCard';
 import { Ed25519DetailsCard } from '../instruction/ed25519/Ed25519DetailsCard';
 import { isEd25519Instruction } from '../instruction/ed25519/types';
 import { LighthouseDetailsCard } from '../instruction/lighthouse/LighthouseDetailsCard';
@@ -238,6 +245,12 @@ function InstructionCard({
         return <ComputeBudgetDetailsCard key={key} {...props} />;
     } else if (isLighthouseInstruction(transactionIx)) {
         return <LighthouseDetailsCard key={key} {...props} />;
+    } else if (isPmpInstruction(transactionIx)) {
+        const parsedIx = parseInstruction(PmpCodamaIdl as any as RootNode, upcastTransactionInstruction(transactionIx));
+        if (!parsedIx) {
+            return <UnknownDetailsCard key={key} {...props} />;
+        }
+        return <CodamaInstructionCard key={key} {...props} parsedIx={parsedIx} />;
     } else if (anchorProgram) {
         return (
             <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
@@ -247,4 +260,8 @@ function InstructionCard({
     } else {
         return <UnknownDetailsCard key={key} {...props} />;
     }
+}
+
+function isPmpInstruction(ix: TransactionInstruction) {
+    return ix.programId.toBase58() === 'ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S';
 }
