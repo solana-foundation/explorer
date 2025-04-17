@@ -1,11 +1,19 @@
-import { Message, MessageArgs, MessageCompiledInstruction, MessageV0, MessageV0Args, PublicKey, VersionedMessage } from "@solana/web3.js";
+import {
+    Message,
+    MessageArgs,
+    MessageCompiledInstruction,
+    MessageV0,
+    MessageV0Args,
+    PublicKey,
+    VersionedMessage,
+} from '@solana/web3.js';
 import { vi } from 'vitest';
 
 // stub a test to not allow passing without tests
 test('stub', () => expect(true).toBeTruthy());
 
-vi.mock("next/navigation", () => {
-    const actual = vi.importActual("next/navigation");
+vi.mock('next/navigation', () => {
+    const actual = vi.importActual('next/navigation');
     const cluster = 'mainnet-beta';
     const customUrl = undefined;
 
@@ -46,35 +54,36 @@ export function deserializeMessage(message: string): VersionedMessage {
 export function deserializeMessageV0(message: string): VersionedMessage {
     const m = JSON.parse(message);
     const messageArgs: MessageV0Args = {
-        addressTableLookups: m.addressTableLookups?.map((atl: {
-            accountKey: string,
-            writableIndexes: number[],
-            readonlyIndexes: number[],
-        }) => {
-            return {
-                accountKey: new PublicKey(atl.accountKey),
-                readonlyIndexes: atl.readonlyIndexes,
-                writableIndexes: atl.writableIndexes,
-            };
-        }) ?? [],
-        compiledInstructions: m.compiledInstructions.map((ci: {
-            programIdIndex: number,
-            accountKeyIndexes: number[],
-            data: { [key: string]: number } | { type: 'Buffer', data: number[] }
-        }) => {
-            let data: Uint8Array;
-            if ('type' in ci.data) {
-                data = Uint8Array.from(ci.data.data as number[]);
-            } else {
-                data = new Uint8Array([...Object.values(ci.data)]);
-            }
+        addressTableLookups:
+            m.addressTableLookups?.map(
+                (atl: { accountKey: string; writableIndexes: number[]; readonlyIndexes: number[] }) => {
+                    return {
+                        accountKey: new PublicKey(atl.accountKey),
+                        readonlyIndexes: atl.readonlyIndexes,
+                        writableIndexes: atl.writableIndexes,
+                    };
+                }
+            ) ?? [],
+        compiledInstructions: m.compiledInstructions.map(
+            (ci: {
+                programIdIndex: number;
+                accountKeyIndexes: number[];
+                data: { [key: string]: number } | { type: 'Buffer'; data: number[] };
+            }) => {
+                let data: Uint8Array;
+                if ('type' in ci.data) {
+                    data = Uint8Array.from(ci.data.data as number[]);
+                } else {
+                    data = new Uint8Array([...Object.values(ci.data)]);
+                }
 
-            return {
-                accountKeyIndexes: ci.accountKeyIndexes,
-                data: data,
-                programIdIndex: ci.programIdIndex,
-            };
-        }),
+                return {
+                    accountKeyIndexes: ci.accountKeyIndexes,
+                    data: data,
+                    programIdIndex: ci.programIdIndex,
+                };
+            }
+        ),
         header: m.header,
         recentBlockhash: m.recentBlockhash,
         staticAccountKeys: m.staticAccountKeys.map((sak: string) => new PublicKey(sak)),

@@ -40,6 +40,12 @@ export const AddressLookupTableInstructionType = enums([
 
 export type AddressLookupTableInstructionInfo = Infer<typeof AddressLookupTableInstructionInfo>;
 export const AddressLookupTableInstructionInfo = type({
-    info: union([CreateLookupTableInfo, FreezeLookupTableInfo, ExtendLookupTableInfo, DeactivateLookupTableInfo, CloseLookupTableInfo]),
+    info: union([
+        CreateLookupTableInfo,
+        FreezeLookupTableInfo,
+        ExtendLookupTableInfo,
+        DeactivateLookupTableInfo,
+        CloseLookupTableInfo,
+    ]),
     type: AddressLookupTableInstructionType,
 });

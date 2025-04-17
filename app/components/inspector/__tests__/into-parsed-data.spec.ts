@@ -11,8 +11,14 @@ describe('intoParsedData', () => {
         const index = 2;
         const message = mock.deserializeMessage(stubs.aTokenCreateMsgWithInnerCards);
         const connection = new Connection(clusterApiUrl('mainnet-beta'));
-        const lookups = await Promise.all(message.addressTableLookups.map(lookup => connection.getAddressLookupTable(lookup.accountKey).then((val) => val.value)));
-        const tx = TransactionMessage.decompile(message, { addressLookupTableAccounts: lookups.filter((x) => x !== null) as AddressLookupTableAccount[] });
+        const lookups = await Promise.all(
+            message.addressTableLookups.map(lookup =>
+                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
+            )
+        );
+        const tx = TransactionMessage.decompile(message, {
+            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+        });
         const ix = tx.instructions[index];
         const data = privateIntoParsedData(ix);
         expect(data.type).toBe('create');
@@ -26,18 +32,31 @@ describe('intoParsedData', () => {
             new PublicKey('11111111111111111111111111111111'),
             new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
         ];
-        Object.values(data.info.accounts as { address: string, role: number }[]).forEach((account, index) => {
+        Object.values(data.info.accounts as { address: string; role: number }[]).forEach((account, index) => {
             expect(new PublicKey(account.address).equals(expectedAccounts[index])).toBeTruthy();
         });
-        expect(Object.keys(data.info.accounts)).toEqual(['payer', 'ata', 'owner', 'mint', 'systemProgram', 'tokenProgram']);
+        expect(Object.keys(data.info.accounts)).toEqual([
+            'payer',
+            'ata',
+            'owner',
+            'mint',
+            'systemProgram',
+            'tokenProgram',
+        ]);
     });
 
     test('should return "createIdempotent" instruction data', async () => {
         const index = 1;
         const message = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
         const connection = new Connection(clusterApiUrl('mainnet-beta'));
-        const lookups = await Promise.all(message.addressTableLookups.map(lookup => connection.getAddressLookupTable(lookup.accountKey).then((val) => val.value)));
-        const tx = TransactionMessage.decompile(message, { addressLookupTableAccounts: lookups.filter((x) => x !== null) as AddressLookupTableAccount[] });
+        const lookups = await Promise.all(
+            message.addressTableLookups.map(lookup =>
+                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
+            )
+        );
+        const tx = TransactionMessage.decompile(message, {
+            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+        });
         const ix = tx.instructions[index];
         const data = privateIntoParsedData(ix);
         expect(data.type).toBe('createIdempotent');
@@ -51,18 +70,31 @@ describe('intoParsedData', () => {
             new PublicKey('11111111111111111111111111111111'),
             new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
         ];
-        Object.values(data.info.accounts as { address: string, role: number }[]).forEach((account, index) => {
+        Object.values(data.info.accounts as { address: string; role: number }[]).forEach((account, index) => {
             expect(account.address).toEqual(expectedAccounts[index].toBase58());
         });
-        expect(Object.keys(data.info.accounts)).toEqual(['payer', 'ata', 'owner', 'mint', 'systemProgram', 'tokenProgram']);
+        expect(Object.keys(data.info.accounts)).toEqual([
+            'payer',
+            'ata',
+            'owner',
+            'mint',
+            'systemProgram',
+            'tokenProgram',
+        ]);
     });
 
     test('should return "recoverNested" instruction data', async () => {
         const index = 0;
         const message = mock.deserializeMessage(stubs.aTokenRecoverNestedMsg);
         const connection = new Connection(clusterApiUrl('mainnet-beta'));
-        const lookups = await Promise.all(message.addressTableLookups.map(lookup => connection.getAddressLookupTable(lookup.accountKey).then((val) => val.value)));
-        const tx = TransactionMessage.decompile(message, { addressLookupTableAccounts: lookups.filter((x) => x !== null) as AddressLookupTableAccount[] });
+        const lookups = await Promise.all(
+            message.addressTableLookups.map(lookup =>
+                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
+            )
+        );
+        const tx = TransactionMessage.decompile(message, {
+            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+        });
         const ix = tx.instructions[index];
         const data = privateIntoParsedData(ix);
         expect(data.type).toBe('recoverNested');
@@ -77,9 +109,17 @@ describe('intoParsedData', () => {
             new PublicKey('3UgveoWTHgDWH4DC8NUoYcQc11vJ8xzk2hCge2ZWPDSL'),
             new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
         ];
-        Object.values(data.info.accounts as { address: string, role: number }[]).forEach((account, index) => {
+        Object.values(data.info.accounts as { address: string; role: number }[]).forEach((account, index) => {
             expect(new PublicKey(account.address).equals(expectedAccounts[index])).toBeTruthy();
         });
-        expect(Object.keys(data.info.accounts)).toEqual(['nestedAssociatedAccountAddress', 'nestedTokenMintAddress', 'destinationAssociatedAccountAddress', 'ownerAssociatedAccountAddress', 'ownerTokenMintAddress', 'walletAddress', 'tokenProgram']);
+        expect(Object.keys(data.info.accounts)).toEqual([
+            'nestedAssociatedAccountAddress',
+            'nestedTokenMintAddress',
+            'destinationAssociatedAccountAddress',
+            'ownerAssociatedAccountAddress',
+            'ownerTokenMintAddress',
+            'walletAddress',
+            'tokenProgram',
+        ]);
     });
 });

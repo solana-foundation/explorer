@@ -14,7 +14,7 @@ vi.mock('node-fetch', async () => {
     const actual = await vi.importActual('node-fetch');
     return {
         ...actual,
-        default: vi.fn()
+        default: vi.fn(),
     };
 });
 
@@ -26,11 +26,11 @@ vi.mock('dns', async () => {
         default: {
             promises: {
                 lookup: lookupFn,
-            }
+            },
         },
         promises: {
             lookup: lookupFn,
-        }
+        },
     };
 });
 
@@ -91,12 +91,15 @@ describe('Metadata Proxy Route', () => {
     });
 
     it('should handle valid response successfully', async () => {
-        await mockFileResponseOnce({ attributes: [], name: "NFT" }, new Headers({
-            'Cache-Control': 'no-cache',
-            'Content-Length': '140',
-            'Content-Type': 'application/json',
-            'Etag': 'random-etag',
-        }));
+        await mockFileResponseOnce(
+            { attributes: [], name: 'NFT' },
+            new Headers({
+                'Cache-Control': 'no-cache',
+                'Content-Length': '140',
+                'Content-Type': 'application/json',
+                Etag: 'random-etag',
+            })
+        );
         // @ts-expect-error lookup does not have mocked fn
         dns.lookup.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
 
@@ -107,7 +110,7 @@ describe('Metadata Proxy Route', () => {
 
 describe('Metadata Proxy Route :: resource fetching', () => {
     const testUri = 'http://google.com/metadata.json';
-    const testData = { description: "Test Description", name: "Test NFT" };
+    const testData = { description: 'Test Description', name: 'Test NFT' };
 
     beforeEach(() => {
         process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
@@ -117,7 +120,7 @@ describe('Metadata Proxy Route :: resource fetching', () => {
         const sourceHeaders = new Headers({
             'Cache-Control': 'max-age=3600',
             'Content-Type': 'application/json',
-            'ETag': 'test-etag',
+            ETag: 'test-etag',
         });
 
         // @ts-expect-error lookup does not have mocked fn
@@ -128,7 +131,7 @@ describe('Metadata Proxy Route :: resource fetching', () => {
         fetch.mockResolvedValueOnce({
             arrayBuffer: async () => new ArrayBuffer(8),
             headers: sourceHeaders,
-            json: async () => testData
+            json: async () => testData,
         });
 
         const request = new Request(`http://localhost:3000/api/metadata/proxy?uri=${encodeURIComponent(testUri)}`);
@@ -151,7 +154,7 @@ describe('Metadata Proxy Route :: resource fetching', () => {
             'Cache-Control': 'max-age=3600',
             'Content-Length': originalContentLength,
             'Content-Type': 'application/json',
-            'ETag': 'test-etag',
+            ETag: 'test-etag',
         });
 
         // @ts-expect-error lookup does not have mocked fn
@@ -162,7 +165,7 @@ describe('Metadata Proxy Route :: resource fetching', () => {
         fetch.mockResolvedValueOnce({
             arrayBuffer: async () => new ArrayBuffer(8),
             headers: sourceHeaders,
-            json: async () => testData
+            json: async () => testData,
         });
 
         const request = new Request(`http://localhost:3000/api/metadata/proxy?uri=${encodeURIComponent(testUri)}`);
