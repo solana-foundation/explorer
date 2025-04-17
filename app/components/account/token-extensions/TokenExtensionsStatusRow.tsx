@@ -34,7 +34,7 @@ export function TokenExtensionsStatusRow({ address, extensions }: { address: str
         <tr>
             <td>Extensions</td>
             <td className="text-lg-end">
-                <TokenExtensionBadges extensions={parsedExtensions} onClick={onClick} />
+                <TokenExtensionBadges className="md:e-justify-end" extensions={parsedExtensions} onClick={onClick} />
             </td>
         </tr>
     );
