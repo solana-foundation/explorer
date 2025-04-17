@@ -1,12 +1,6 @@
 import { InspectorInstructionCard } from '@components/common/InspectorInstructionCard';
 import { useCluster } from '@providers/cluster';
-import {
-    MessageCompiledInstruction,
-    ParsedInstruction,
-    SignatureResult,
-    TransactionInstruction,
-    VersionedMessage,
-} from '@solana/web3.js';
+import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import { getProgramName } from '@utils/tx';
 import React from 'react';
 
@@ -25,7 +19,7 @@ export function UnknownDetailsCard({
     innerCards?: JSX.Element[];
     ix: TransactionInstruction | ParsedInstruction;
     message: VersionedMessage;
-    raw: TransactionInstruction | MessageCompiledInstruction;
+    raw: TransactionInstruction;
     result: SignatureResult;
     InstructionCardComponent?: React.FC<Parameters<typeof InspectorInstructionCard>[0]>;
 }) {

@@ -350,5 +350,16 @@
     "title": "Sets rent_epoch to a constant in the VM",
     "description": null,
     "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0267-rent-epoch-in-vm-is-a-constant.md"
+  },
+  {
+    "key": "FXs1zh47QbNnhXcnB6YiAQoJ4sGB91tKF3UFHLcKT7PM",
+    "simd": "0162",
+    "version": "v2.2.0",
+    "testnetActivationEpoch": null,
+    "devnetActivationEpoch": null,
+    "mainnetActivationEpoch": null,
+    "title": "Remove accounts executable flag checks",
+    "description": null,
+    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0162-remove-accounts-executable-flag-checks.md"
   }
 ]

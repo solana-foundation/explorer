@@ -1,8 +1,9 @@
 import { Address } from '@components/common/Address';
-import { AddressTableLookupAddress } from '@components/common/inspector/AddressTableLookupAddress';
 import { InspectorInstructionCard } from '@components/common/InspectorInstructionCard';
-import { MessageCompiledInstruction, ParsedInstruction, SignatureResult, VersionedMessage } from '@solana/web3.js';
+import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
+
+import { AddressWithContext } from '../AddressWithContext';
 
 export function CreateIdempotentDetailsCard(props: {
     childIndex?: number;
@@ -11,7 +12,7 @@ export function CreateIdempotentDetailsCard(props: {
     innerCards?: JSX.Element[];
     ix: ParsedInstruction;
     message: VersionedMessage;
-    raw: MessageCompiledInstruction;
+    raw: TransactionInstruction;
     result: SignatureResult;
     InstructionCardComponent?: React.FC<Parameters<typeof InspectorInstructionCard>[0]>;
 }) {
@@ -46,37 +47,37 @@ export function CreateIdempotentDetailsCard(props: {
             <tr>
                 <td>Source</td>
                 <td className="text-lg-end">
-                    <AddressTableLookupAddress accountIndex={raw.accountKeyIndexes[0]} message={message} hideInfo />
+                    <AddressWithContext pubkey={raw.keys[0].pubkey} hideInfo />
                 </td>
             </tr>
             <tr>
                 <td>Account</td>
                 <td className="text-lg-end">
-                    <AddressTableLookupAddress accountIndex={raw.accountKeyIndexes[1]} message={message} hideInfo />
+                    <AddressWithContext pubkey={raw.keys[1].pubkey} hideInfo />
                 </td>
             </tr>
             <tr>
                 <td>Wallet</td>
                 <td className="text-lg-end">
-                    <AddressTableLookupAddress accountIndex={raw.accountKeyIndexes[2]} message={message} hideInfo />
+                    <AddressWithContext pubkey={raw.keys[2].pubkey} hideInfo />
                 </td>
             </tr>
             <tr>
                 <td>Mint</td>
                 <td className="text-lg-end">
-                    <AddressTableLookupAddress accountIndex={raw.accountKeyIndexes[3]} message={message} hideInfo />
+                    <AddressWithContext pubkey={raw.keys[3].pubkey} hideInfo />
                 </td>
             </tr>
             <tr>
                 <td>System Program</td>
                 <td className="text-lg-end">
-                    <AddressTableLookupAddress accountIndex={raw.accountKeyIndexes[4]} message={message} hideInfo />
+                    <AddressWithContext pubkey={raw.keys[4].pubkey} hideInfo />
                 </td>
             </tr>
             <tr>
                 <td>Token Program</td>
                 <td className="text-lg-end">
-                    <AddressTableLookupAddress accountIndex={raw.accountKeyIndexes[5]} message={message} hideInfo />
+                    <AddressWithContext pubkey={raw.keys[5].pubkey} hideInfo />
                 </td>
             </tr>
         </InstructionCardComponent>

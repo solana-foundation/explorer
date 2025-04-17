@@ -1,6 +1,11 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
-import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
-import { ComputeBudgetProgram, MessageCompiledInstruction } from '@solana/web3.js';
+import {
+    AddressLookupTableAccount,
+    clusterApiUrl,
+    ComputeBudgetProgram,
+    Connection,
+    TransactionMessage,
+} from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
@@ -22,15 +27,17 @@ useSearchParams.mockReturnValue({
 
 describe('instruction::ComputeBudgetDetailsCard', () => {
     test('should render "SetComputeUnitPrice"', async () => {
-        const compiledInstruction: MessageCompiledInstruction = {
-            accountKeyIndexes: [],
-            data: new Uint8Array([3, 100, 173, 109, 0, 0, 0, 0, 0]),
-            programIdIndex: 6,
-        };
-
         const index = 0;
         const m = mock.deserializeMessageV0(stubs.computeBudgetMsg);
-        const ti = intoTransactionInstructionFromVersionedMessage(compiledInstruction, m);
+        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const lookups = await Promise.all(
+            m.addressTableLookups.map(lookup =>
+                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
+            )
+        );
+        const ti = TransactionMessage.decompile(m, {
+            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+        }).instructions[index];
         expect(ti.programId.equals(ComputeBudgetProgram.programId)).toBeTruthy();
 
         // check that component is rendered properly
@@ -51,15 +58,17 @@ describe('instruction::ComputeBudgetDetailsCard', () => {
     });
 
     test('should render "SetComputeUnitLimit"', async () => {
-        const compiledInstruction: MessageCompiledInstruction = {
-            accountKeyIndexes: [],
-            data: new Uint8Array([2, 18, 96, 2, 0]),
-            programIdIndex: 6,
-        };
-
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.computeBudgetMsg);
-        const ti = intoTransactionInstructionFromVersionedMessage(compiledInstruction, m);
+        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const lookups = await Promise.all(
+            m.addressTableLookups.map(lookup =>
+                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
+            )
+        );
+        const ti = TransactionMessage.decompile(m, {
+            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+        }).instructions[index];
         expect(ti.programId.equals(ComputeBudgetProgram.programId)).toBeTruthy();
 
         // check that component is rendered properly
