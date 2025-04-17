@@ -49,9 +49,6 @@ import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/uti
 import { TokenExtensionsStatusRow } from './token-extensions/TokenExtensionsStatusRow';
 import { UnknownAccountCard } from './UnknownAccountCard';
 
-// !!
-// TODO: import styles for badges to be rendered properly
-
 const getEthAddress = (link?: string) => {
     let address = '';
     if (link) {
