@@ -53,7 +53,7 @@ export function isLocalhost(url: URL) {
 }
 
 /**
- *  Check for IP address to be in private rande
+ *  Check for IP address to be in private range
  */
 export async function checkURLForPrivateIP(uri: URL | string) {
     try {
