@@ -36,6 +36,7 @@ export enum PROGRAM_NAMES {
     CHAINLINK_STORE = 'Chainlink Store Program',
     CLOCKWORK_1 = 'Clockwork Thread Program v1',
     CLOCKWORK_2 = 'Clockwork Thread Program v2',
+    DFLOW_AGGREGATOR_4 = 'DFlow Aggregator v4',
     MANGO_GOVERNANCE = 'Mango Governance Program',
     MANGO_ICO = 'Mango ICO Program',
     MANGO_1 = 'Mango Program v1',
@@ -231,6 +232,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     Crt7UoUR6QgrFrN7j8rmSQpUTNWNSitSwWvsWGf1qZ5t: {
         deployments: [Cluster.Devnet, Cluster.MainnetBeta],
         name: PROGRAM_NAMES.SABER_ROUTER,
+    },
+    DF1ow4tspfHX9JwWJsAb9epbkA8hmpSEAtxXy1V27QBH: {
+        deployments: [Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.DFLOW_AGGREGATOR_4,
     },
     DZnkkTmCiFWfYTfT41X3Rd1kDgozqzxWaHqsw6W4x2oe: {
         deployments: [Cluster.Devnet],
