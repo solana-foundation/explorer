@@ -607,7 +607,10 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
 function HHeader({ name }: { name: string }) {
     return (
         <tr>
-            <h4>{name}</h4>
+            {/*use important here as there is rule from .table-sm that affects all the underline elements*/}
+            <th colSpan={2} className="e-mb-2 !e-p-4 e-text-[15px] e-font-normal">
+                {name}
+            </th>
         </tr>
     );
 }
@@ -657,7 +660,7 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, TransferFeeConfig);
             return (
                 <>
-                    {headerStyle == 'header' ? <HHeader name="Transfer Fee Config" /> : null}
+                    {headerStyle === 'header' ? <HHeader name="Transfer Fee Config" /> : null}
                     {extension.transferFeeConfigAuthority && (
                         <tr>
                             <td>Transfer Fee Authority</td>
@@ -984,7 +987,10 @@ export function TokenExtensionRow(
                     {extension.additionalMetadata?.length > 0 && (
                         <>
                             <tr>
-                                <h5>Additional Metadata</h5>
+                                {/*use important here as there is rule from .table-sm that affects all the underline elements*/}
+                                <th colSpan={2} className="e-mb-2 e-h-5 !e-pl-6 e-font-normal e-italic">
+                                    Additional Metadata
+                                </th>
                             </tr>
                             {extension.additionalMetadata?.map(keyValuePair => (
                                 <tr key="{keyValuePair[0]}">
