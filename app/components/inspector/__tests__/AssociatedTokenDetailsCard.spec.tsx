@@ -1,7 +1,7 @@
 import * as spl from '@solana/spl-token';
 import { AddressLookupTableAccount, clusterApiUrl, Connection, TransactionMessage } from '@solana/web3.js';
-import { render, screen } from '@testing-library/react';
-import { vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { describe } from 'vitest';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
@@ -40,7 +40,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             </ScrollAnchorProvider>
         );
 
-        await vi.waitFor(
+        await waitFor(
             () => {
                 expect(screen.queryByText(/Loading/i)).toBeNull();
             },

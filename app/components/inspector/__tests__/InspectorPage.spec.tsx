@@ -184,7 +184,7 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
             { interval: 50, timeout: 10000 }
         );
 
-        await vi.waitFor(
+        await waitFor(
             () => {
                 expect(screen.queryByText(/Loading/i)).toBeNull();
             },
