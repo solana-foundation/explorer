@@ -22,7 +22,7 @@ export default class StraightforwardLogger {
         if (maybeError instanceof Error) {
             error = maybeError;
         } else {
-            error = new Error('Urecognized error');
+            error = new Error('Unrecognized error');
             isLoggable(3) && console.debug(maybeError);
         }
         isLoggable(0) && console.error(error, ...other);
