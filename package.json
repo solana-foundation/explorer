@@ -86,7 +86,6 @@
         "tweetnacl": "^1.0.3",
         "typescript": "5.0.4",
         "use-async-effect": "^2.2.7",
-        "use-tab-visibility": "^1.0.9",
         "web3js-experimental": "npm:@solana/web3.js@2.0.0"
     },
     "devDependencies": {

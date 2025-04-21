@@ -224,9 +224,6 @@ importers:
       use-async-effect:
         specifier: ^2.2.7
         version: 2.2.7(react@18.3.1)
-      use-tab-visibility:
-        specifier: ^1.0.9
-        version: 1.0.9(react@18.3.1)
       web3js-experimental:
         specifier: npm:@solana/web3.js@2.0.0
         version: '@solana/web3.js@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@7.5.10(bufferutil@4.0.7)(utf-8-validate@5.0.10))'
@@ -7668,11 +7665,6 @@ packages:
     resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
-
-  use-tab-visibility@1.0.9:
-    resolution: {integrity: sha512-zAbkQl36+fXpTErE8/xhDfPQMA79Bzb45VLhrfiewlL7AhwxEnfFbwI6MUMK9XT2ZCN8kiAQo/cbqpB0hQxYaA==}
-    peerDependencies:
-      react: '>=16'
 
   utf-8-validate@5.0.10:
     resolution: {integrity: sha512-Z6czzLq4u8fPOyx7TU6X3dvUZVvoJmxSQ+IcrlmagKhilxlhZgxPK6C5Jqbkw1IDUmFTM+cz9QDnnLTwDz/2gQ==}
@@ -17436,10 +17428,6 @@ snapshots:
       '@types/react': 18.3.3
 
   use-sync-external-store@1.2.0(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-
-  use-tab-visibility@1.0.9(react@18.3.1):
     dependencies:
       react: 18.3.1
 
