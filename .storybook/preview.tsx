@@ -2,7 +2,8 @@ import type { Preview } from '@storybook/react';
 import React from 'react';
 
 import { Rubik } from 'next/font/google';
-// import './layout.min.css';
+import './layout.min.css';
+import './dashkit-polyfill.css';
 import '@/app/styles.css';
 
 const rubikFont = Rubik({
@@ -15,7 +16,7 @@ const rubikFont = Rubik({
 const preview: Preview = {
     parameters: {
         backgrounds: {
-            values: [{ name: 'Dark', value: '#161b19' }],
+            values: [{ name: 'Dark', value: '#161a19' }],
             default: 'Dark',
         },
         controls: {

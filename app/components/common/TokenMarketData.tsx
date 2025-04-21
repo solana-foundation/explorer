@@ -1,10 +1,21 @@
 import { LoadingCard } from '@components/common/LoadingCard';
-import { CoingeckoStatus } from '@utils/coingecko';
-import { displayTimestamp, displayTimestampWithoutDate } from '@utils/date';
-import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
+import { CoinGeckoResult, CoingeckoStatus } from '@utils/coingecko';
+import { displayTimestampWithoutDate } from '@utils/date';
+import { abbreviatedNumber } from '@utils/index';
 
-export function TokenMarketData({ coinInfo, tokenInfo, tokenPriceInfo }) {
-    let tokenPriceDecimals = 2;
+import { FullTokenInfo } from '@/app/utils/token-info';
+
+export function TokenMarketData({
+    coinInfo,
+    tokenInfo,
+    tokenPriceInfo,
+    tokenPriceDecimals = 2,
+}: {
+    coinInfo?: CoinGeckoResult;
+    tokenInfo?: FullTokenInfo;
+    tokenPriceInfo?: any;
+    tokenPriceDecimals: number;
+}) {
     if (coinInfo?.status === CoingeckoStatus.Success) {
         tokenPriceInfo = coinInfo.coinInfo;
         if (tokenPriceInfo && tokenPriceInfo.price < 1) {
