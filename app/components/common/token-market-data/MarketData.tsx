@@ -1,11 +1,13 @@
+import { displayTimestampWithoutDate } from '@utils/date';
 import { cva } from 'class-variance-authority';
 
 type MarketDataProps = {
-    label: string;
-    value: number;
-    rank?: number;
     dynamic?: number;
     dynamicTrend?: 'up' | 'down';
+    label: string;
+    lastUpdatedAt?: Date;
+    rank?: number;
+    value: number;
 };
 
 function isNullish(value: any): value is null | undefined {
@@ -24,7 +26,7 @@ const dynamicVariant = cva('e-text-[10px] e-ml-[3px]', {
     },
 });
 
-export function MarketData({ label, value, rank, dynamic, dynamicTrend }: MarketDataProps) {
+export function MarketData({ label, lastUpdatedAt, value, rank, dynamic, dynamicTrend }: MarketDataProps) {
     return (
         <div className="e-w-[160px] e-rounded e-border e-border-solid e-border-black e-bg-[#1C2120] e-px-3 e-py-2 e-text-sm">
             <div className="e-mb-1 e-flex e-items-center e-gap-1">
@@ -37,14 +39,17 @@ export function MarketData({ label, value, rank, dynamic, dynamicTrend }: Market
                     </span>
                 )}
             </div>
-            <div className="e-flex e-overflow-hidden e-text-base e-font-medium">
+            <div
+                title={lastUpdatedAt ? displayTimestampWithoutDate(lastUpdatedAt.getTime()) : undefined}
+                className="e-flex e-overflow-hidden e-text-base e-font-medium"
+            >
                 <span title={`${value}`} className="e-cursor-help">
                     {value}
                 </span>
                 {!isNullish(dynamic) && dynamicTrend && (
                     <span className={dynamicVariant({ trend: dynamicTrend })}>
-                        {dynamicTrend === 'up' ? '↑' : '↓'}
-                        {dynamic}
+                        {dynamicTrend === 'up' ? '&uarr;' : '&darr;'}
+                        {dynamic.toFixed(2)}
                     </span>
                 )}
             </div>
@@ -54,9 +59,9 @@ export function MarketData({ label, value, rank, dynamic, dynamicTrend }: Market
 
 MarketData.Series = function MarketDataSeries({ data }: { data: MarketDataProps[] }) {
     return (
-        <div className="e-flex e-flex-col e-gap-1 xxs:e-flex-row xs:e-gap-2">
+        <div className="e-flex e-flex-col e-gap-1 xxxs:e-flex-row xs:e-gap-2">
             {data.map((props, index) => (
-                <MarketData key={`data-${index}`} {...props} />
+                <MarketData key={`market-data-${index}`} {...props} />
             ))}
         </div>
     );

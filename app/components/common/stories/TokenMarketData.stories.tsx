@@ -21,12 +21,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// const extension = {
-//     extension: mockExtensions.transferFeeConfig0.extension,
-//     parsed: mockExtensions.transferFeeConfig0,
-//     ...populatePartialParsedTokenExtension(mockExtensions.transferFeeConfig0.extension),
-// };
-
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary: Story = {
     args: {
@@ -34,7 +28,7 @@ export const Primary: Story = {
             coinInfo: mockCoingecko.coinInfo(),
             status: CoingeckoStatus.Success,
         },
-        tokenInfo: {},
+        tokenInfo: mockCoingecko.tokenInfo(),
         tokenPriceInfo: {},
     },
     // async play({ canvasElement }) {

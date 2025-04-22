@@ -1,5 +1,12 @@
 import type { Config } from 'tailwindcss';
 
+const breakpoints = new Map([
+    ['xxxs', 320],
+    ['xxs', 375],
+    ['xs', 576],
+    ['sm', 768],
+]);
+
 const config: Config = {
     content: ['./app/**/*.{ts,tsx}'],
     plugins: [],
@@ -15,10 +22,13 @@ const config: Config = {
                 '12-ext': 'repeat(12, minmax(0, 1fr))',
             },
         },
+        /* eslint-disable sort-keys-fix/sort-keys-fix */
         screens: {
-            xxs: '320px',
-            xs: '576px',
-            sm: '768px',
+            'max-xs': getScreenDim('xs', -1),
+            'max-sm': '767px',
+            xxxs: getScreenDim('xxxs'),
+            xs: getScreenDim('xs'),
+            sm: getScreenDim('sm'),
             md: '992px',
             lg: '1200px',
             xl: '1400px',
@@ -26,10 +36,16 @@ const config: Config = {
             tablet: '768px',
             laptop: '992px',
             desktop: '1200px',
-            'max-xs': '575px',
-            'max-sm': '767px',
         },
+        /* eslint-enable sort-keys-fix/sort-keys-fix */
     },
 };
 
 export default config;
+
+// adjust breakpoint 1px up see previous layout on the "edge"
+function getScreenDim(label: string, shift = 1) {
+    const a = breakpoints.get(label);
+    if (!a) throw new Error(`Unknown breakpoint: ${label}`);
+    return `${a + shift}px`;
+}

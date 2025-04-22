@@ -7,7 +7,7 @@ import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import { CoingeckoStatus, useCoinGecko } from '@utils/coingecko';
+import { CoingeckoStatus, CoinInfo, useCoinGecko } from '@utils/coingecko';
 import { displayTimestamp } from '@utils/date';
 import { normalizeTokenAmount } from '@utils/index';
 import { addressLabel } from '@utils/tx';
@@ -133,20 +133,9 @@ function FungibleTokenMintAccountCard({
     const mintExtensions = mintInfo.extensions?.slice();
     mintExtensions?.sort(cmpExtension);
 
-    let tokenPriceInfo;
-    let tokenPriceDecimals = 2;
-    if (coinInfo?.status === CoingeckoStatus.Success) {
-        tokenPriceInfo = coinInfo.coinInfo;
-        if (tokenPriceInfo && tokenPriceInfo.price < 1) {
-            tokenPriceDecimals = 6;
-        }
-    }
-
-    console.log({ coinInfo, tokenInfo, tokenPriceInfo });
-
     return (
         <>
-            <TokenMarketData coinInfo={coinInfo} tokenInfo={tokenInfo} tokenPriceInfo={tokenPriceInfo} />
+            <TokenMarketData coinInfo={coinInfo} tokenInfo={tokenInfo} />
             <div className="card">
                 <div className="card-header">
                     <h3 className="card-header-title mb-0 d-flex align-items-center">
