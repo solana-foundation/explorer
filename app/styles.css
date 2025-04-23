@@ -2,10 +2,10 @@
 @tailwind utilities;
 
 @media (max-width: 575px) {
-    .max-xs\:e-hidden {
+    .max-sm\:e-hidden {
         display: none;
     }
-    .max-xs\:e-col-span-6 {
+    .max-sm\:e-col-span-6 {
         grid-column: span 6 / span 6;
     }
     /* Adjust template for small displays so columns do not overlap each other */
@@ -15,7 +15,7 @@
 }
 
 @media (max-width: 767px) {
-    .max-sm\:e-hidden {
+    .max-md\:e-hidden {
         display: none;
     }
 }

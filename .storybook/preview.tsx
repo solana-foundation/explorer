@@ -8,6 +8,7 @@ import '@/app/styles.css';
 
 const rubikFont = Rubik({
     display: 'auto',
+    preload: true,
     subsets: ['latin'],
     variable: '--explorer-default-font',
     weight: ['300', '400', '700'],
@@ -27,11 +28,13 @@ const preview: Preview = {
         },
     },
     decorators: [
-        Story => (
-            <div id="storybook-outer" className={rubikFont.className}>
-                <Story />
-            </div>
-        ),
+        Story => {
+            return (
+                <div id="storybook-outer" style={rubikFont.style} className={rubikFont.className}>
+                    <Story />
+                </div>
+            );
+        },
     ],
 };
 

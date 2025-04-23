@@ -2,18 +2,13 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, userEvent, within } from '@storybook/test';
 
 import * as mockCoingecko from '@/app/__tests__/mock-coingecko';
-import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
 import { CoingeckoStatus } from '@/app/utils/coingecko';
-import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
 
-import { TokenMarketData } from '../TokenMarketData';
+import { TokenMarketData, TokenMarketData2 } from '../TokenMarketData';
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
-    args: {
-        // onClick: fn(),
-    },
-    component: TokenMarketData,
+    component: TokenMarketData2,
     tags: ['autodocs'],
     title: 'Components/Common/TokenMarketData',
 } satisfies Meta<typeof TokenMarketData>;

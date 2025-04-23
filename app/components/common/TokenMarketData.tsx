@@ -37,18 +37,24 @@ export function TokenMarketData2({
                     <MarketData.Series
                         data={[
                             {
-                                dynamic: tokenPriceInfo.current.price_change_percentage_24h,
                                 label: 'Price',
                                 rank: tokenPriceInfo.current.market_cap_rank,
-                                value: tokenPriceInfo.current.price,
+                                value: {
+                                    precision: tokenPriceDecimals.current,
+                                    price: tokenPriceInfo.current.price,
+                                    trend: tokenPriceInfo.current.price_change_percentage_24h,
+                                },
                             },
                             {
                                 label: '24 Hour Volume',
-                                value: tokenPriceInfo.current.volume_24h,
+                                value: {
+                                    volume: tokenPriceInfo.current.volume_24,
+                                },
                             },
                             {
                                 label: 'Market Cap',
-                                value: tokenPriceInfo.current.market_cap,
+                                lastUpdatedAt: tokenPriceInfo.current.last_updated,
+                                value: { volume: tokenPriceInfo.current.market_cap },
                             },
                         ]}
                     />

@@ -1,10 +1,13 @@
 import type { Config } from 'tailwindcss';
 
 const breakpoints = new Map([
-    ['xxxs', 320],
-    ['xxs', 375],
-    ['xs', 576],
-    ['sm', 768],
+    ['xxs', 320],
+    ['xs', 375],
+    ['sm', 576],
+    ['md', 768],
+    ['lg', 992],
+    ['xl', 1200],
+    ['xxl', 1400],
 ]);
 
 const config: Config = {
@@ -24,18 +27,19 @@ const config: Config = {
         },
         /* eslint-disable sort-keys-fix/sort-keys-fix */
         screens: {
-            'max-xs': getScreenDim('xs', -1),
-            'max-sm': '767px',
-            xxxs: getScreenDim('xxxs'),
+            'max-sm': getScreenDim('sm', -1),
+            'max-md': getScreenDim('md', -1),
+            xxs: getScreenDim('xxs'),
             xs: getScreenDim('xs'),
             sm: getScreenDim('sm'),
-            md: '992px',
-            lg: '1200px',
-            xl: '1400px',
-            mobile: '576px',
-            tablet: '768px',
-            laptop: '992px',
-            desktop: '1200px',
+            md: getScreenDim('md'),
+            lg: getScreenDim('lg'),
+            xl: getScreenDim('xl'),
+            xxl: getScreenDim('xxl'),
+            mobile: getScreenDim('sm'),
+            tablet: getScreenDim('md'),
+            laptop: getScreenDim('lg'),
+            desktop: getScreenDim('xl'),
         },
         /* eslint-enable sort-keys-fix/sort-keys-fix */
     },

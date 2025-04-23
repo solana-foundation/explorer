@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent, within } from '@storybook/test';
+import { expect, within } from '@storybook/test';
 
 import { MarketData } from '../MarketData';
 
@@ -19,19 +19,39 @@ export const Primary: Story = {
         data: [
             {
                 label: 'Market Cap',
-                value: '$58.8B',
+                lastUpdatedAt: new Date(),
+                value: {
+                    volume: 58_800_000_000,
+                },
             },
             {
-                label: '24H volume',
-                value: '$58',
+                label: '24 Hour Volume',
+                value: { volume: 3_600_000_000 },
             },
             {
-                dynamic: '0.00%',
-                dynamicTrend: 'up',
                 label: 'Price',
                 rank: 1,
-                value: '$0.999887',
+                value: {
+                    precision: 6,
+                    price: 0.999887,
+                    trend: 0.1,
+                },
             },
         ],
+    },
+    async play({ canvasElement }) {
+        const canvas = within(canvasElement);
+        const priceEl = canvas.getByText('Price');
+        expect(priceEl).toBeInTheDocument();
+        const priceValueEl = canvas.getByText('$0.999887');
+        expect(priceValueEl).toBeInTheDocument();
+        const volumeEl = canvas.getByText('24 Hour Volume');
+        expect(volumeEl).toBeInTheDocument();
+        const volumeValueEl = canvas.getByText('$3.6B');
+        expect(volumeValueEl).toBeInTheDocument();
+        const marketCapEl = canvas.getByText('Market Cap');
+        expect(marketCapEl).toBeInTheDocument();
+        const marketCapValueEl = canvas.getByText('$58.8B');
+        expect(marketCapValueEl).toBeInTheDocument();
     },
 };
