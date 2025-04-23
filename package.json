@@ -90,7 +90,6 @@
     },
     "devDependencies": {
         "@chromatic-com/storybook": "^3",
-        "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
         "@solana/eslint-config-solana": "^1.0.1",
         "@solana/prettier-config-solana": "^0.0.2",
         "@storybook/addon-essentials": "^8.6.12",
