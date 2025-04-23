@@ -228,7 +228,7 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
     return (
         <div className="container mt-n3">
             <div className="header">
-                <div className="header-body e-flex e-items-end e-justify-between">
+                <div className="header-body e-flex e-flex-col e-gap-4 md:e-flex-row md:e-items-end  md:e-justify-between md:e-gap-1">
                     <AccountHeader
                         address={address}
                         account={info?.data}

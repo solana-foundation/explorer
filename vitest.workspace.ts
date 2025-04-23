@@ -23,7 +23,7 @@ export const config = defineWorkspace([
                 // ],
                 // Whether to polyfill specific globals.
                 globals: {
-                    Buffer: true, // can also be 'build', 'dev', or false
+                    Buffer: 'dev', // can also be 'build', 'dev', or false
                     global: true,
                     process: true,
                 },
