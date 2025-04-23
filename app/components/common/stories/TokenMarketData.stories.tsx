@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent, within } from '@storybook/test';
+import { expect, within } from '@storybook/test';
 
 import * as mockCoingecko from '@/app/__tests__/mock-coingecko';
 import { CoingeckoStatus } from '@/app/utils/coingecko';
 
-import { TokenMarketData, TokenMarketData2 } from '../TokenMarketData';
+import { TokenMarketData } from '../TokenMarketData';
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
-    component: TokenMarketData2,
+    component: TokenMarketData,
     tags: ['autodocs'],
     title: 'Components/Common/TokenMarketData',
 } satisfies Meta<typeof TokenMarketData>;
@@ -24,14 +24,12 @@ export const Primary: Story = {
             status: CoingeckoStatus.Success,
         },
         tokenInfo: mockCoingecko.tokenInfo(),
-        tokenPriceInfo: {},
     },
-    // async play({ canvasElement }) {
-    //     // const canvas = within(canvasElement);
-    //     // const tooltipButton = canvas.getByRole('button');
-    //     // expect(tooltipButton).toHaveAttribute('data-slot', 'tooltip-trigger');
-    //     // await userEvent.hover(tooltipButton);
-    // },
+    async play({ canvasElement }) {
+        const canvas = within(canvasElement);
+        const tileEl = canvas.queryAllByLabelText('market-data');
+        expect(tileEl).toHaveLength(3);
+    },
 };
 
 export const Loading: Story = {
@@ -40,14 +38,11 @@ export const Loading: Story = {
             coinInfo: undefined,
             status: CoingeckoStatus.Loading,
         },
+        tokenInfo: mockCoingecko.tokenInfo(),
     },
-};
-
-export const FetchingFailed: Story = {
-    args: {
-        coinInfo: {
-            coinInfo: undefined,
-            status: CoingeckoStatus.FetchFailed,
-        },
+    async play({ canvasElement }) {
+        const canvas = within(canvasElement);
+        const loadingEl = canvas.getByText('Loading token price data');
+        expect(loadingEl).toBeInTheDocument();
     },
 };

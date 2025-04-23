@@ -27,8 +27,11 @@ type MarketDataProps = {
 export function MarketData({ label, lastUpdatedAt, value, rank }: MarketDataProps) {
     const trend = 'trend' in value ? getDynamicTrend(value.trend) : undefined;
     return (
-        <div className="e-w-[160px] e-rounded e-border e-border-solid e-border-black e-bg-[#1C2120] e-px-3 e-py-2 e-text-sm">
-            <div className="e-mb-1 e-flex e-items-center e-gap-1">
+        <div
+            aria-label="market-data"
+            className="e-w-[160px] e-rounded e-border e-border-solid e-border-black e-bg-[#1C2120] e-px-3 e-py-2 e-text-sm"
+        >
+            <div className="e-mb-1 e-flex e-items-center e-gap-2">
                 <span
                     title={lastUpdatedAt ? `Updated at ${displayTimestampWithoutDate(lastUpdatedAt.getTime())}` : label}
                     className="e-overflow-hidden e-text-ellipsis e-whitespace-nowrap"

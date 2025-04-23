@@ -51,8 +51,10 @@ import useSWRImmutable from 'swr/immutable';
 import { Address } from 'web3js-experimental';
 
 import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
+import { TokenMarketData } from '@/app/components/common/TokenMarketData';
 import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
+import { useCoinGecko } from '@/app/utils/coingecko';
 import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
@@ -214,6 +216,8 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
         fetchFullTokenInfo
     );
 
+    const coinInfo = useCoinGecko(fullTokenInfo?.extensions?.coingeckoId);
+
     // Fetch account on load
     React.useEffect(() => {
         if (!info && status === ClusterStatus.Connected && pubkey) {
@@ -224,13 +228,14 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
     return (
         <div className="container mt-n3">
             <div className="header">
-                <div className="header-body">
+                <div className="header-body e-flex e-items-end e-justify-between">
                     <AccountHeader
                         address={address}
                         account={info?.data}
                         tokenInfo={fullTokenInfo}
                         isTokenInfoLoading={isFullTokenInfoLoading}
                     />
+                    <TokenMarketData tokenInfo={fullTokenInfo} coinInfo={coinInfo} />
                 </div>
             </div>
             {!pubkey ? (
@@ -287,10 +292,10 @@ function AccountHeader({
     }
 
     const fallback = (
-        <>
+        <div className="e-flex e-flex-col">
             <h6 className="header-pretitle">Details</h6>
             <h2 className="header-title">Account</h2>
-        </>
+        </div>
     );
     if (account) {
         return (
