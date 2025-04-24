@@ -12,6 +12,7 @@
         "gen": "pnpx shadcn@^2.4.0 add",
         "coverage": "vitest --coverage",
         "test": "vitest --project specs --watch",
+        "test:sb": "vitest --project storybook --watch",
         "test:ci": "vitest run",
         "sb": "storybook dev -p 6006",
         "build-sb": "storybook build"
