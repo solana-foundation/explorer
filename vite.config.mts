@@ -36,19 +36,27 @@ export default defineConfig({
         coverage: {
             provider: 'v8',
         },
-        environment: 'jsdom',
-        globals: true,
         poolOptions: {
             threads: {
                 useAtomics: true,
             },
         },
-        server: {
-            deps: {
-                inline: ['@noble', 'change-case', '@react-hook/previous'],
+        workspace: [
+            {
+                extends: true,
+                test: {
+                    environment: 'jsdom',
+                    globals: true,
+                    name: 'specs',
+                    server: {
+                        deps: {
+                            inline: ['@noble', 'change-case', '@react-hook/previous'],
+                        },
+                    },
+                    setupFiles: './test-setup.ts',
+                    testTimeout: 10000,
+                },
             },
-        },
-        setupFiles: './test-setup.ts',
-        testTimeout: 10000,
+        ],
     },
 });
