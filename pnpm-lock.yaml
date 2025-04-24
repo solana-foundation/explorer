@@ -231,6 +231,9 @@ importers:
       '@chromatic-com/storybook':
         specifier: ^3
         version: 3.2.6(react@18.3.1)(storybook@8.6.12(bufferutil@4.0.7)(prettier@2.8.8)(utf-8-validate@5.0.10))
+      '@mdx-js/react':
+        specifier: ^3.1.0
+        version: 3.1.0(@types/react@18.3.3)(react@18.3.1)
       '@solana/eslint-config-solana':
         specifier: ^1.0.1
         version: 1.0.1(@typescript-eslint/eslint-plugin@5.59.2(@typescript-eslint/parser@5.62.0(eslint@8.39.0)(typescript@5.0.4))(eslint@8.39.0)(typescript@5.0.4))(@typescript-eslint/parser@5.62.0(eslint@8.39.0)(typescript@5.0.4))(eslint-plugin-jest@27.2.1(@typescript-eslint/eslint-plugin@5.59.2(@typescript-eslint/parser@5.62.0(eslint@8.39.0)(typescript@5.0.4))(eslint@8.39.0)(typescript@5.0.4))(eslint@8.39.0)(typescript@5.0.4))(eslint-plugin-react-hooks@4.6.0(eslint@8.39.0))(eslint-plugin-simple-import-sort@10.0.0(eslint@8.39.0))(eslint-plugin-sort-keys-fix@1.1.2)(eslint@8.39.0)(typescript@5.0.4)

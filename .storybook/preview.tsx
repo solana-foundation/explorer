@@ -2,7 +2,7 @@ import type { Preview } from '@storybook/react';
 import React from 'react';
 
 import { Rubik } from 'next/font/google';
-import './layout.min.css'; // uncomment this line to see Dashkit styles
+// import './layout.min.css'; // uncomment this line to see Dashkit styles. TODO: remove upon migrating from Dashkit to Tailwind
 import './dashkit-polyfill.css';
 import '@/app/styles.css';
 
