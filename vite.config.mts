@@ -9,7 +9,9 @@ export default defineConfig({
         nodePolyfills({
             globals: {
                 Buffer: true,
+                global: true,
             },
+            protocolImports: true,
         }),
     ],
     resolve: {
