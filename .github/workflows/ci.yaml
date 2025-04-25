@@ -54,7 +54,6 @@ jobs:
         run: pnpm install
 
       - name: Install Playwright dependencies
-        uses: actions/cache/restore@v4
         run: |
           if [[ ! -d ${{ env.PW_CACHE_FOLDER }} ]]; then
             echo "Playwright browsers not found, installing..."
