@@ -1,9 +1,5 @@
 import '@testing-library/jest-dom';
 
-import { TextEncoder } from 'util';
-// Needed for @sqds/multisig
-global.TextEncoder = TextEncoder;
-
 if (!AbortSignal.timeout) {
     AbortSignal.timeout = ms => {
         const controller = new AbortController();
