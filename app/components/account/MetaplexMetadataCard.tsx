@@ -13,11 +13,11 @@ export function MetaplexMetadataCard({ account, onNotFound }: { account?: Accoun
 
     if (!parsedData || !isTokenProgramData(parsedData) || parsedData.parsed.type !== 'mint' || !parsedData.nftData) {
         if (compressedNft && compressedNft.compression.compressed) {
-            return <CompressedMetadataCard compressedNft={compressedNft} />;
+            return <CompressedMetadataCard key="compressedNft" compressedNft={compressedNft} />;
         }
-        // Try to extract metadata for not compresed one, like PayPal USD
+        // Try to extract metadata for not compressed one, like PayPal USD
         if (compressedNft && !compressedNft.compression.compressed) {
-            return <CompressedMetadataCard compressedNft={compressedNft} />;
+            return <CompressedMetadataCard key="notCompressedFungibleToken" compressedNft={compressedNft} />;
         }
         return onNotFound();
     }
