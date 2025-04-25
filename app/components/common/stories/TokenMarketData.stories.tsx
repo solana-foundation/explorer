@@ -26,6 +26,7 @@ export const Primary: Story = {
         tokenInfo: mockCoingecko.tokenInfo(),
     },
     async play({ canvasElement }) {
+        expect.assertions(1);
         const canvas = within(canvasElement);
         const tileEl = canvas.queryAllByLabelText('market-data');
         expect(tileEl).toHaveLength(3);
@@ -41,6 +42,7 @@ export const Loading: Story = {
         tokenInfo: mockCoingecko.tokenInfo(),
     },
     async play({ canvasElement }) {
+        expect.assertions(1);
         const canvas = within(canvasElement);
         const loadingEl = canvas.getByText('Loading token price data');
         expect(loadingEl).toBeInTheDocument();
