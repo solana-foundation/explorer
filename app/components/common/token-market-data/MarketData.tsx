@@ -4,7 +4,7 @@ import { HelpCircle } from 'react-feather';
 
 import { abbreviatedNumber } from '@/app/utils';
 
-const dynamicVariant = cva('e-text-[10px] e-ml-[3px]', {
+const dynamicVariant = cva('e-text-[10px] e-ml-[3px] e-flex e-items-center e-gap-[0.1rem] e-relative e-top-[-1px]', {
     defaultVariants: {
         trend: 'neutral',
     },
@@ -72,9 +72,13 @@ export function MarketData({ label, lastUpdatedAt, value, rank }: MarketDataProp
                         </span>
                         <span className={dynamicVariant({ trend })}>
                             {trend === 'up' ? (
-                                <>&uarr;{value.trend.toFixed(2)}%</>
+                                <>
+                                    <span className="e-text-[8px]">&uarr;</span> {value.trend.toFixed(2)}%
+                                </>
                             ) : trend === 'down' ? (
-                                <>&darr;{value.trend}%</>
+                                <>
+                                    <span className="e-text-[8px]">&darr;</span> {value.trend.toFixed(2)}%
+                                </>
                             ) : (
                                 '0%'
                             )}
