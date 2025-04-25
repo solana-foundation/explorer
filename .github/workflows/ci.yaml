@@ -52,6 +52,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Install Playwright dependencies
+        run: |
+          pnpx playwright install
+          pnpx playwright install-deps
+
       - name: Build
         run: pnpm build
 
@@ -59,4 +64,5 @@ jobs:
         env:
           TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
         run: |
+          pnpm test:sb
           pnpm test:ci
