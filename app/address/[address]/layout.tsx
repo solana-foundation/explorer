@@ -104,6 +104,11 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
             slug: 'instructions',
             title: 'Instructions',
         },
+        {
+            path: 'metadata',
+            slug: 'metadata',
+            title: 'Metadata',
+        },
     ],
     'spl-token-2022:mint:metaplexNFT': [
         {
