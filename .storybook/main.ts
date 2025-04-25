@@ -17,7 +17,7 @@ const config: StorybookConfig = {
         options: {},
     },
     staticDirs: ['../public'],
-    viteFinal: async config => {
+    _viteFinal: async config => {
         return mergeConfig(config, {
             plugins: [
                 nodePolyfills({

@@ -42,9 +42,7 @@ export default defineConfig({
         },
     },
     test: {
-        coverage: {
-            provider: 'v8',
-        },
+        coverage: { provider: 'v8' },
         poolOptions: {
             threads: {
                 useAtomics: true,

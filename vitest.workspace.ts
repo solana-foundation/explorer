@@ -29,18 +29,19 @@ export default defineWorkspace([
             browser: {
                 enabled: true,
                 headless: true,
-                name: 'chromium',
+                // instances: [{ browser: 'chromium' }],
+                // name: 'chromium',
                 provider: 'playwright',
             },
-            environment: 'jsdom',
+            // environment: 'jsdom',
             globals: true,
             name: 'storybook',
-            server: {
-                deps: {
-                    inline: ['@noble', 'change-case', '@react-hook/previous'],
-                },
-            },
-            setupFiles: ['./test-setup.ts', '.storybook/vitest.setup.ts'],
+            // server: {
+            //     deps: {
+            //         inline: ['@noble', 'change-case', '@react-hook/previous'],
+            //     },
+            // },
+            setupFiles: ['.storybook/vitest.setup.ts'],
             testTimeout: 10000,
         },
     },
