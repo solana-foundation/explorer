@@ -70,6 +70,7 @@ jobs:
         env:
           TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
         run: |
+          pnpx playwright install
           pnpm test:ci:sb
 
       - name: Test
