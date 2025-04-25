@@ -54,15 +54,25 @@ jobs:
 
       - name: Install Playwright dependencies
         run: |
-          pnpx playwright install
-          pnpx playwright install-deps
+          if [[ ! -d ${{ env.PW_CACHE_FOLDER }} ]]; then
+            echo "Playwright browsers not found, installing..."
+            pnpx playwright install-deps
+            pnpx playwright-install
+          else
+            echo "Playwright browsers found in cache, skipping install."
+          fi
 
       - name: Build
         run: pnpm build
+
+      - name: Test with Playwright
+        env:
+          TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
+        run: |
+          pnpm test:ci:sb
 
       - name: Test
         env:
           TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
         run: |
-          pnpm test:sb
           pnpm test:ci
