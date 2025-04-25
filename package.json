@@ -13,7 +13,7 @@
         "coverage": "vitest --coverage",
         "test": "vitest --project specs --watch",
         "test:sb": "vitest --project storybook --watch",
-        "test:ci": "vitest run",
+        "test:ci": "vitest --project specs run",
         "sb": "storybook dev -p 6006",
         "build-sb": "storybook build"
     },
