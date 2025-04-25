@@ -137,7 +137,7 @@
         "styled-jsx": "^5.1.6",
         "tailwindcss": "3.4.17",
         "vite-plugin-node-polyfills": "^0.23.0",
-        "vitest": "^3.1.2"
+        "vitest": "^3.0.8"
     },
     "engines": {
         "node": "^18.20 || ^20.19"

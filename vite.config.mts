@@ -1,12 +1,6 @@
-import { fileURLToPath } from 'node:url';
-
-import { storybookTest } from '@storybook/experimental-addon-test/vitest-plugin';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { defineConfig } from 'vitest/config';
-
-const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
 const specWorkspace = (name = 'specs') => ({
     environment: 'jsdom',
@@ -42,7 +36,9 @@ export default defineConfig({
         },
     },
     test: {
-        coverage: { provider: 'v8' },
+        coverage: {
+            provider: 'v8',
+        },
         poolOptions: {
             threads: {
                 useAtomics: true,
