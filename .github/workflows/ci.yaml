@@ -58,7 +58,7 @@ jobs:
           if [[ ! -d ${{ env.PW_CACHE_FOLDER }} ]]; then
             echo "Playwright browsers not found, installing..."
             pnpx playwright install-deps
-            pnpx playwright-install
+            pnpx playwright install
           else
             echo "Playwright browsers found in cache, skipping install."
           fi
