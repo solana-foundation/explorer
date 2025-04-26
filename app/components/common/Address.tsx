@@ -70,9 +70,28 @@ export function Address({
         addressLabel = overrideText;
     }
 
+    const handleMouseEnter = (text: string) => {
+        const elements = document.querySelectorAll(`[data-address="${text}"]`);
+        elements.forEach(el => {
+            (el as HTMLElement).classList.add('address-highlight');
+        });
+    };
+
+    const handleMouseLeave = (text: string) => {
+        const elements = document.querySelectorAll(`[data-address="${text}"]`);
+        elements.forEach(el => {
+            (el as HTMLElement).classList.remove('address-highlight');
+        });
+    };
+
     const content = (
         <Copyable text={address} replaceText={!alignRight}>
-            <span className="font-monospace">
+            <span
+                data-address={address}
+                className="font-monospace"
+                onMouseEnter={() => handleMouseEnter(address)}
+                onMouseLeave={() => handleMouseLeave(address)}
+            >
                 {link ? (
                     <Link className={truncate ? 'text-truncate address-truncate' : ''} href={addressPath}>
                         {addressLabel}
