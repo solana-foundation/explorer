@@ -91,6 +91,7 @@ export default function TransactionDetailsPageClient({ params: { signature: raw 
     }
 
     const status = useTransactionStatus(signature);
+    const clusterStatus = useCluster().status;
     const [zeroConfirmationRetries, setZeroConfirmationRetries] = useState(0);
     const { visible: isTabVisible } = useTabVisibility();
 
@@ -125,6 +126,8 @@ export default function TransactionDetailsPageClient({ params: { signature: raw 
             </div>
             {signature === undefined ? (
                 <ErrorCard text={`Signature "${raw}" is not valid`} />
+            ) : clusterStatus === ClusterStatus.Failure ? (
+                <ErrorCard text="RPC is not responding. Please change your RPC url and try again." />
             ) : (
                 <SignatureContext.Provider value={signature}>
                     <StatusCard signature={signature} autoRefresh={autoRefresh} />
