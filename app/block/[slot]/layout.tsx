@@ -19,6 +19,8 @@ import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
 type Props = PropsWithChildren<{ params: { slot: string } }>;
 
+const MAX_CU_PER_BLOCK = 50_000_000;
+
 function BlockLayoutInner({ children, params: { slot } }: Props) {
     const slotNumber = Number(slot);
     if (isNaN(slotNumber) || slotNumber >= Number.MAX_SAFE_INTEGER || slotNumber % 1 !== 0) {
@@ -43,6 +45,15 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
         content = <ErrorCard retry={refresh} text={`Block ${slotNumber} was not found`} />;
     } else {
         const { block, blockLeader, childSlot, childLeader, parentLeader } = confirmedBlock.data;
+        let successfulCUs = 0;
+        let totalCUs = 0;
+        for (const tx of block.transactions) {
+            const cus = tx.meta?.computeUnitsConsumed ?? 0;
+            if (tx.meta?.err === null) {
+                successfulCUs += cus;
+            }
+            totalCUs += cus;
+        }
         const showSuccessfulCount = block.transactions.every(tx => tx.meta !== null);
         const successfulTxs = block.transactions.filter(tx => tx.meta?.err === null);
         const epoch = clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(slotNumber)) : undefined;
@@ -157,6 +168,24 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
                                 </td>
                             </tr>
                         )}
+                        <tr>
+                            <td className="w-100">Compute Unit Utilization</td>
+                            <td className="text-lg-end font-monospace">
+                                <span>
+                                    {totalCUs.toLocaleString()} / {MAX_CU_PER_BLOCK.toLocaleString()} (
+                                    {Math.round((totalCUs / MAX_CU_PER_BLOCK) * 100)}%)
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td className="w-100">Successful Compute Unit Utilization</td>
+                            <td className="text-lg-end font-monospace">
+                                <span>
+                                    {successfulCUs.toLocaleString()} / {MAX_CU_PER_BLOCK.toLocaleString()} (
+                                    {Math.round((successfulCUs / MAX_CU_PER_BLOCK) * 100)}%)
+                                </span>
+                            </td>
+                        </tr>
                     </TableCardBody>
                 </div>
                 <MoreSection slot={slotNumber}>{children}</MoreSection>
