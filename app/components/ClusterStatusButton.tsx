@@ -5,12 +5,20 @@ import { Cluster, ClusterStatus } from '@utils/cluster';
 import React, { useCallback } from 'react';
 import { AlertCircle, CheckCircle } from 'react-feather';
 
+function getCustomUrlClusterName(customUrl: string) {
+    const url = new URL(customUrl);
+    if (url.hostname === 'localhost') {
+        return customUrl;
+    }
+    return `${url.protocol}//${url.hostname}`;
+}
+
 export const ClusterStatusButton = () => {
     const { status, cluster, name, customUrl } = useCluster();
     const [, setShow] = useClusterModal();
 
     const onClickHandler = useCallback(() => setShow(true), [setShow]);
-    const statusName = cluster !== Cluster.Custom ? `${name}` : `${customUrl}`;
+    const statusName = cluster !== Cluster.Custom ? `${name}` : getCustomUrlClusterName(customUrl);
 
     const btnClasses = (variant: string) => {
         return `btn d-block btn-${variant}`;

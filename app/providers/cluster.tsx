@@ -69,6 +69,11 @@ const ModalContext = createContext<[boolean, SetShowModal] | undefined>(undefine
 const StateContext = createContext<State | undefined>(undefined);
 const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
+const WHITELISTED_RPCS = [
+    // Used for solana.com live code example
+    'engine.mirror.ad',
+];
+
 type ClusterProviderProps = { children: React.ReactNode };
 export function ClusterProvider({ children }: ClusterProviderProps) {
     const [state, dispatch] = useReducer(clusterReducer, {
@@ -79,7 +84,9 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
     const modalState = useState(false);
     const searchParams = useSearchParams();
     const cluster = parseQuery(searchParams);
-    const enableCustomUrl = localStorageIsAvailable() && localStorage.getItem('enableCustomUrl') !== null;
+    const enableCustomUrl =
+        (localStorageIsAvailable() && localStorage.getItem('enableCustomUrl') !== null) ||
+        WHITELISTED_RPCS.includes(new URL(state.customUrl).hostname);
     const customUrl = (enableCustomUrl && searchParams?.get('customUrl')) || state.customUrl;
     const pathname = usePathname();
     const router = useRouter();
