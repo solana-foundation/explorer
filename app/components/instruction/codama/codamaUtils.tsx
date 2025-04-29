@@ -1,11 +1,13 @@
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';
 import { CornerDownRight } from 'react-feather';
+import useSWRImmutable from 'swr/immutable';
 
 import { Address } from '@/app/components/common/Address';
 import { ExpandableRow } from '@/app/utils/anchor';
 
 import { Copyable } from '../../common/Copyable';
+import { Connection } from '@solana/web3.js';
 
 export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
     return Object.entries(data).map(([key, value], index) => {
@@ -137,4 +139,16 @@ function inferType(value: any) {
     } else {
         return typeof value;
     }
+}
+
+export function useCodamaIdl(programAddress: string, url: string) {
+    const { data } = useSWRImmutable(`codama-idl-${programAddress}-${url}`, async () => {
+        const connection = new Connection(url);
+        const pubkey = new PublicKey(programAddress);
+        console.log('fetching metadata', programAddress, url, await connection.getAccountInfo(pubkey));
+        const metadata = await connection.getAccountInfo(pubkey, { commitment: 'confirmed' });
+        console.log('metadata', metadata);
+        return metadata;
+    });
+    return { codamaIdl: data };
 }

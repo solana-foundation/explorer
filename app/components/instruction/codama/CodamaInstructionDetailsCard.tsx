@@ -5,8 +5,6 @@ import React from 'react';
 import { isWritableRole } from 'web3js-experimental';
 import { isSignerRole } from 'web3js-experimental';
 
-import PmpIdl from '@/app/pmp.json';
-
 import { Address } from '../../common/Address';
 import { InstructionCard } from '../InstructionCard';
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
@@ -25,7 +23,6 @@ export function CodamaInstructionCard({
     innerCards?: JSX.Element[];
     parsedIx: ReturnType<typeof parseInstruction>;
 }) {
-    console.log('parsedIx', parsedIx, PmpIdl);
     if (parsedIx?.path[0].kind !== 'rootNode') {
         return <UnknownDetailsCard ix={ix} result={result} index={index} innerCards={innerCards} />;
     }

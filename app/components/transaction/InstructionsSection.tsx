@@ -44,7 +44,7 @@ import { RootNode } from 'codama';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import PmpCodamaIdl from '@/app/pmp.json';
+import { useCodamaIdl } from '@/app/providers/codama';
 
 import { upcastTransactionInstruction } from '../inspector/into-parsed-data';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
@@ -173,6 +173,7 @@ function InstructionCard({
 }) {
     const key = `${index}-${childIndex}`;
     const { program: anchorProgram } = useAnchorProgram(ix.programId.toString(), url);
+    const { codamaIdl } = useCodamaIdl(ix.programId.toString(), url);
 
     if ('parsed' in ix) {
         const props = {
@@ -245,8 +246,8 @@ function InstructionCard({
         return <ComputeBudgetDetailsCard key={key} {...props} />;
     } else if (isLighthouseInstruction(transactionIx)) {
         return <LighthouseDetailsCard key={key} {...props} />;
-    } else if (isPmpInstruction(transactionIx)) {
-        const parsedIx = parseInstruction(PmpCodamaIdl as any as RootNode, upcastTransactionInstruction(transactionIx));
+    } else if (codamaIdl) {
+        const parsedIx = parseInstruction(codamaIdl as RootNode, upcastTransactionInstruction(transactionIx));
         if (!parsedIx) {
             return <UnknownDetailsCard key={key} {...props} />;
         }
