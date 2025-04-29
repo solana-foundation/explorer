@@ -2,8 +2,8 @@
 
 import { useCluster } from '@providers/cluster';
 import { Cluster } from '@utils/cluster';
+import useTabVisibility from '@utils/use-tab-visibility';
 import React from 'react';
-import useTabVisibility from 'use-tab-visibility';
 import { createSolanaRpc } from 'web3js-experimental';
 
 import { DashboardInfo, DashboardInfoActionType, dashboardInfoReducer, EpochInfo } from './solanaDashboardInfo';

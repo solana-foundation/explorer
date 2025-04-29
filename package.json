@@ -11,8 +11,9 @@
         "format": "prettier --config .prettierrc.cjs **.{ts,tsx} *.json --check",
         "gen": "pnpx shadcn@^2.4.0 add",
         "coverage": "vitest --coverage",
-        "test": "vitest --watch",
-        "test:ci": "vitest run",
+        "test": "vitest --project specs --watch",
+        "test:sb": "vitest --project storybook --watch",
+        "test:ci": "vitest --project specs run",
         "sb": "storybook dev -p 6006",
         "build-sb": "storybook build"
     },
@@ -86,11 +87,11 @@
         "tweetnacl": "^1.0.3",
         "typescript": "5.0.4",
         "use-async-effect": "^2.2.7",
-        "use-tab-visibility": "^1.0.9",
         "web3js-experimental": "npm:@solana/web3.js@2.0.0"
     },
     "devDependencies": {
         "@chromatic-com/storybook": "^3",
+        "@mdx-js/react": "^3.1.0",
         "@solana/eslint-config-solana": "^1.0.1",
         "@solana/prettier-config-solana": "^0.0.2",
         "@storybook/addon-essentials": "^8.6.12",
@@ -117,7 +118,7 @@
         "@types/react-dom": "18.3.0",
         "@types/testing-library__jest-dom": "5.14.5",
         "@vitejs/plugin-react": "^4.3.4",
-        "@vitest/browser": "^3.1.1",
+        "@vitest/browser": "^3.0.8",
         "@vitest/coverage-v8": "3.1.1",
         "autoprefixer": "^10.4.21",
         "bootstrap": "^5.1.3",

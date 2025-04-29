@@ -1,6 +1,5 @@
 import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
-import { LoadingCard } from '@components/common/LoadingCard';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { Account, NFTData, TokenProgramData, useFetchAccountInfo } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
@@ -8,9 +7,8 @@ import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import { CoingeckoStatus, useCoinGecko } from '@utils/coingecko';
-import { displayTimestamp, displayTimestampWithoutDate } from '@utils/date';
-import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
+import { displayTimestamp } from '@utils/date';
+import { normalizeTokenAmount } from '@utils/index';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import { TokenExtensionType } from '@validators/accounts/token-extension';
@@ -129,171 +127,105 @@ function FungibleTokenMintAccountCard({
     const bridgeContractAddress = getEthAddress(tokenInfo?.extensions?.bridgeContract);
     const assetContractAddress = getEthAddress(tokenInfo?.extensions?.assetContract);
 
-    const coinInfo = useCoinGecko(tokenInfo?.extensions?.coingeckoId);
     const mintExtensions = mintInfo.extensions?.slice();
     mintExtensions?.sort(cmpExtension);
 
-    let tokenPriceInfo;
-    let tokenPriceDecimals = 2;
-    if (coinInfo?.status === CoingeckoStatus.Success) {
-        tokenPriceInfo = coinInfo.coinInfo;
-        if (tokenPriceInfo && tokenPriceInfo.price < 1) {
-            tokenPriceDecimals = 6;
-        }
-    }
-
     return (
-        <>
-            {tokenInfo?.extensions?.coingeckoId && coinInfo?.status === CoingeckoStatus.Loading && (
-                <LoadingCard message="Loading token price data" />
-            )}
-            {tokenPriceInfo && tokenPriceInfo.price && (
-                <div className="row">
-                    <div className="col-12 col-lg-4 col-xl">
-                        <div className="card">
-                            <div className="card-body">
-                                <h4>
-                                    Price{' '}
-                                    {tokenPriceInfo.market_cap_rank && (
-                                        <span className="ms-2 badge bg-primary rank">
-                                            Rank #{tokenPriceInfo.market_cap_rank}
-                                        </span>
-                                    )}
-                                </h4>
-                                <h1 className="mb-0">
-                                    ${tokenPriceInfo.price.toFixed(tokenPriceDecimals)}{' '}
-                                    {tokenPriceInfo.price_change_percentage_24h > 0 && (
-                                        <small className="change-positive">
-                                            &uarr; {tokenPriceInfo.price_change_percentage_24h.toFixed(2)}%
-                                        </small>
-                                    )}
-                                    {tokenPriceInfo.price_change_percentage_24h < 0 && (
-                                        <small className="change-negative">
-                                            &darr; {tokenPriceInfo.price_change_percentage_24h.toFixed(2)}%
-                                        </small>
-                                    )}
-                                    {tokenPriceInfo.price_change_percentage_24h === 0 && <small>0%</small>}
-                                </h1>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-12 col-lg-4 col-xl">
-                        <div className="card">
-                            <div className="card-body">
-                                <h4>24 Hour Volume</h4>
-                                <h1 className="mb-0">${abbreviatedNumber(tokenPriceInfo.volume_24)}</h1>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-12 col-lg-4 col-xl">
-                        <div className="card">
-                            <div className="card-body">
-                                <h4>Market Cap</h4>
-                                <h1 className="mb-0">${abbreviatedNumber(tokenPriceInfo.market_cap)}</h1>
-                                <p className="updated-time text-muted">
-                                    Updated at {displayTimestampWithoutDate(tokenPriceInfo.last_updated.getTime())}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-            <div className="card">
-                <div className="card-header">
-                    <h3 className="card-header-title mb-0 d-flex align-items-center">
-                        {tokenInfo
-                            ? 'Overview'
-                            : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58()
-                            ? 'Token-2022 Mint'
-                            : 'Token Mint'}
-                    </h3>
-                    <button className="btn btn-white btn-sm" onClick={refresh}>
-                        <RefreshCw className="align-text-top me-2" size={13} />
-                        Refresh
-                    </button>
-                </div>
-                <TableCardBody>
-                    <tr>
-                        <td>Address</td>
-                        <td className="text-lg-end">
-                            <Address pubkey={account.pubkey} alignRight raw />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{mintInfo.mintAuthority === null ? 'Fixed Supply' : 'Current Supply'}</td>
-                        <td className="text-lg-end">
-                            {normalizeTokenAmount(mintInfo.supply, mintInfo.decimals).toLocaleString('en-US', {
-                                maximumFractionDigits: 20,
-                            })}
-                        </td>
-                    </tr>
-                    {tokenInfo?.extensions?.website && (
-                        <tr>
-                            <td>Website</td>
-                            <td className="text-lg-end">
-                                <a rel="noopener noreferrer" target="_blank" href={tokenInfo.extensions.website}>
-                                    {tokenInfo.extensions.website}
-                                    <ExternalLink className="align-text-top ms-2" size={13} />
-                                </a>
-                            </td>
-                        </tr>
-                    )}
-                    {mintInfo.mintAuthority && (
-                        <tr>
-                            <td>Mint Authority</td>
-                            <td className="text-lg-end">
-                                <Address pubkey={mintInfo.mintAuthority} alignRight link />
-                            </td>
-                        </tr>
-                    )}
-                    {mintInfo.freezeAuthority && (
-                        <tr>
-                            <td>Freeze Authority</td>
-                            <td className="text-lg-end">
-                                <Address pubkey={mintInfo.freezeAuthority} alignRight link />
-                            </td>
-                        </tr>
-                    )}
-                    <tr>
-                        <td>Decimals</td>
-                        <td className="text-lg-end">{mintInfo.decimals}</td>
-                    </tr>
-                    {!mintInfo.isInitialized && (
-                        <tr>
-                            <td>Status</td>
-                            <td className="text-lg-end">Uninitialized</td>
-                        </tr>
-                    )}
-                    {tokenInfo?.extensions?.bridgeContract && bridgeContractAddress && (
-                        <tr>
-                            <td>Bridge Contract</td>
-                            <td className="text-lg-end">
-                                <Copyable text={bridgeContractAddress}>
-                                    <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
-                                        {bridgeContractAddress}
-                                    </a>
-                                </Copyable>
-                            </td>
-                        </tr>
-                    )}
-                    {tokenInfo?.extensions?.assetContract && assetContractAddress && (
-                        <tr>
-                            <td>Bridged Asset Contract</td>
-                            <td className="text-lg-end">
-                                <Copyable text={assetContractAddress}>
-                                    <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
-                                        {assetContractAddress}
-                                    </a>
-                                </Copyable>
-                            </td>
-                        </tr>
-                    )}
-                    {mintExtensions && (
-                        <TokenExtensionsStatusRow address={account.pubkey.toBase58()} extensions={mintExtensions} />
-                    )}
-                </TableCardBody>
+        <div className="card">
+            <div className="card-header">
+                <h3 className="card-header-title mb-0 d-flex align-items-center">
+                    {tokenInfo
+                        ? 'Overview'
+                        : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58()
+                        ? 'Token-2022 Mint'
+                        : 'Token Mint'}
+                </h3>
+                <button className="btn btn-white btn-sm" onClick={refresh}>
+                    <RefreshCw className="align-text-top me-2" size={13} />
+                    Refresh
+                </button>
             </div>
-        </>
+            <TableCardBody>
+                <tr>
+                    <td>Address</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={account.pubkey} alignRight raw />
+                    </td>
+                </tr>
+                <tr>
+                    <td>{mintInfo.mintAuthority === null ? 'Fixed Supply' : 'Current Supply'}</td>
+                    <td className="text-lg-end">
+                        {normalizeTokenAmount(mintInfo.supply, mintInfo.decimals).toLocaleString('en-US', {
+                            maximumFractionDigits: 20,
+                        })}
+                    </td>
+                </tr>
+                {tokenInfo?.extensions?.website && (
+                    <tr>
+                        <td>Website</td>
+                        <td className="text-lg-end">
+                            <a rel="noopener noreferrer" target="_blank" href={tokenInfo.extensions.website}>
+                                {tokenInfo.extensions.website}
+                                <ExternalLink className="align-text-top ms-2" size={13} />
+                            </a>
+                        </td>
+                    </tr>
+                )}
+                {mintInfo.mintAuthority && (
+                    <tr>
+                        <td>Mint Authority</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={mintInfo.mintAuthority} alignRight link />
+                        </td>
+                    </tr>
+                )}
+                {mintInfo.freezeAuthority && (
+                    <tr>
+                        <td>Freeze Authority</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={mintInfo.freezeAuthority} alignRight link />
+                        </td>
+                    </tr>
+                )}
+                <tr>
+                    <td>Decimals</td>
+                    <td className="text-lg-end">{mintInfo.decimals}</td>
+                </tr>
+                {!mintInfo.isInitialized && (
+                    <tr>
+                        <td>Status</td>
+                        <td className="text-lg-end">Uninitialized</td>
+                    </tr>
+                )}
+                {tokenInfo?.extensions?.bridgeContract && bridgeContractAddress && (
+                    <tr>
+                        <td>Bridge Contract</td>
+                        <td className="text-lg-end">
+                            <Copyable text={bridgeContractAddress}>
+                                <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
+                                    {bridgeContractAddress}
+                                </a>
+                            </Copyable>
+                        </td>
+                    </tr>
+                )}
+                {tokenInfo?.extensions?.assetContract && assetContractAddress && (
+                    <tr>
+                        <td>Bridged Asset Contract</td>
+                        <td className="text-lg-end">
+                            <Copyable text={assetContractAddress}>
+                                <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
+                                    {assetContractAddress}
+                                </a>
+                            </Copyable>
+                        </td>
+                    </tr>
+                )}
+                {mintExtensions && (
+                    <TokenExtensionsStatusRow address={account.pubkey.toBase58()} extensions={mintExtensions} />
+                )}
+            </TableCardBody>
+        </div>
     );
 }
 

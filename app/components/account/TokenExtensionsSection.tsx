@@ -155,18 +155,18 @@ function ExtensionListItem({
     return (
         <div className="w-100 e-w-100 text-white e-grid e-grid-cols-12-ext e-items-center e-gap-2 e-text-sm">
             {/* Name */}
-            <div className="e-flex e-min-w-80 e-items-center e-gap-2 e-whitespace-nowrap e-font-normal max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-4 lg:e-col-span-3">
+            <div className="e-flex e-min-w-80 e-items-center e-gap-2 e-whitespace-nowrap e-font-normal max-sm:e-col-span-6 sm:e-col-span-6 md:e-col-span-6 lg:e-col-span-4 xl:e-col-span-3">
                 <div>{ext.name}</div>
                 <TokenExtensionBadge extension={ext} />
             </div>
 
             {/* Description */}
-            <span className="e-text-[0.75rem] e-text-[#8E9090] e-underline e-decoration-[#1e2423] max-md:e-hidden md:e-col-span-6 md:e-pl-12 lg:e-col-span-7">
+            <span className="e-text-[0.75rem] e-text-[#8E9090] e-underline e-decoration-[#1e2423] max-lg:e-hidden lg:e-col-span-6 lg:e-pl-12 xl:e-col-span-7">
                 {ext.description ?? null}
             </span>
 
             {/* External links badges */}
-            <div className="text-white e-flex e-justify-end e-gap-1 max-xs:e-col-span-6 xs:e-col-span-6 sm:e-col-span-6 md:e-col-span-2 lg:e-col-span-2">
+            <div className="text-white e-flex e-justify-end e-gap-1 max-sm:e-col-span-6 sm:e-col-span-6 md:e-col-span-6 lg:e-col-span-2 xl:e-col-span-2">
                 <a key="raw" href="javascript:void(0)" onClick={handleToggleRaw}>
                     <Badge
                         className="text-white e-font-normal"

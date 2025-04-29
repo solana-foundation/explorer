@@ -5,10 +5,8 @@ import { AddressLookupTableAccountSection } from '@components/account/address-lo
 import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
 import { ConfigAccountSection } from '@components/account/ConfigAccountSection';
 import { FeatureAccountSection } from '@components/account/FeatureAccountSection';
-import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
 import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/account/nftoken/isNFTokenAccount';
 import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
-import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
 import { NFTokenAccountSection } from '@components/account/nftoken/NFTokenAccountSection';
 import { NonceAccountSection } from '@components/account/NonceAccountSection';
 import { StakeAccountSection } from '@components/account/StakeAccountSection';
@@ -18,8 +16,8 @@ import { UnknownAccountCard } from '@components/account/UnknownAccountCard';
 import { UpgradeableLoaderAccountSection } from '@components/account/UpgradeableLoaderAccountSection';
 import { VoteAccountSection } from '@components/account/VoteAccountSection';
 import { ErrorCard } from '@components/common/ErrorCard';
-import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
+import { Header } from '@components/Header';
 import {
     Account,
     AccountsProvider,
@@ -28,10 +26,8 @@ import {
     UpgradeableLoaderAccountData,
     useAccountInfo,
     useFetchAccountInfo,
-    useMintAccountInfo,
 } from '@providers/accounts';
 import FLAGGED_ACCOUNTS_WARNING from '@providers/accounts/flagged-accounts';
-import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useAnchorProgram } from '@providers/anchor';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
@@ -41,23 +37,18 @@ import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useClusterPath } from '@utils/url';
-import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension';
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
-import React, { PropsWithChildren, Suspense, useMemo } from 'react';
+import React, { PropsWithChildren, Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { create } from 'superstruct';
 import useSWRImmutable from 'swr/immutable';
 import { Address } from 'web3js-experimental';
 
-import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
-import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
+import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
+import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
-import { MintAccountInfo } from '@/app/validators/accounts/token';
-
-const IDENTICON_WIDTH = 64;
 
 const TABS_LOOKUP: { [id: string]: Tab[] } = {
     'address-lookup-table': [
@@ -223,16 +214,12 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
 
     return (
         <div className="container mt-n3">
-            <div className="header">
-                <div className="header-body">
-                    <AccountHeader
-                        address={address}
-                        account={info?.data}
-                        tokenInfo={fullTokenInfo}
-                        isTokenInfoLoading={isFullTokenInfoLoading}
-                    />
-                </div>
-            </div>
+            <Header
+                address={address}
+                account={info?.data}
+                tokenInfo={fullTokenInfo}
+                isTokenInfoLoading={isFullTokenInfoLoading}
+            />
             {!pubkey ? (
                 <ErrorCard text={`Address "${address}" is not valid`} />
             ) : (
@@ -254,208 +241,6 @@ export default function AddressLayout({ children, params }: Props) {
         <AccountsProvider>
             <AddressLayoutInner params={params}>{children}</AddressLayoutInner>
         </AccountsProvider>
-    );
-}
-
-function AccountHeader({
-    address,
-    account,
-    tokenInfo,
-    isTokenInfoLoading,
-}: {
-    address: string;
-    account?: Account;
-    tokenInfo?: FullTokenInfo;
-    isTokenInfoLoading: boolean;
-}) {
-    const mintInfo = useMintAccountInfo(address);
-
-    const parsedData = account?.data.parsed;
-    const isToken = parsedData && isTokenProgramData(parsedData) && parsedData?.parsed.type === 'mint';
-
-    if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
-        return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
-    }
-
-    const nftokenNFT = account && isNFTokenAccount(account);
-    if (nftokenNFT && account) {
-        return <NFTokenAccountHeader account={account} />;
-    }
-
-    if (isToken && !isTokenInfoLoading) {
-        return <TokenMintHeader address={address} mintInfo={mintInfo} parsedData={parsedData} tokenInfo={tokenInfo} />;
-    }
-
-    const fallback = (
-        <>
-            <h6 className="header-pretitle">Details</h6>
-            <h2 className="header-title">Account</h2>
-        </>
-    );
-    if (account) {
-        return (
-            <ErrorBoundary fallback={fallback}>
-                <Suspense fallback={fallback}>
-                    <CompressedNftAccountHeader account={account} />
-                </Suspense>
-            </ErrorBoundary>
-        );
-    }
-    return fallback;
-}
-
-function TokenMintHeader({
-    address,
-    tokenInfo,
-    mintInfo,
-    parsedData,
-}: {
-    address: string;
-    tokenInfo?: FullTokenInfo;
-    mintInfo?: MintAccountInfo;
-    parsedData?: TokenProgramData;
-}): JSX.Element {
-    const metadataExtension = mintInfo?.extensions?.find(
-        ({ extension }: { extension: string }) => extension === 'tokenMetadata'
-    );
-    const metadataPointerExtension = mintInfo?.extensions?.find(
-        ({ extension }: { extension: string }) => extension === 'metadataPointer'
-    );
-
-    const defaultCard = useMemo(
-        () => (
-            <TokenMintHeaderCard
-                token={tokenInfo ? tokenInfo : { logoURI: undefined, name: undefined }}
-                address={address}
-                unverified={tokenInfo ? !tokenInfo.verified : false}
-            />
-        ),
-        [address, tokenInfo]
-    );
-
-    if (metadataPointerExtension && metadataExtension) {
-        return (
-            <>
-                <ErrorBoundary fallback={defaultCard}>
-                    <Suspense fallback={defaultCard}>
-                        <Token22MintHeader
-                            address={address}
-                            metadataExtension={metadataExtension as any}
-                            metadataPointerExtension={metadataPointerExtension as any}
-                        />
-                    </Suspense>
-                </ErrorBoundary>
-            </>
-        );
-    }
-    // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
-    else if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
-        return defaultCard;
-    } else if (parsedData?.nftData) {
-        const token = {
-            logoURI: parsedData?.nftData?.json?.image,
-            name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
-        };
-        return <TokenMintHeaderCard token={token} address={address} unverified={!tokenInfo?.verified} />;
-    } else if (tokenInfo) {
-        return defaultCard;
-    }
-    return defaultCard;
-}
-
-function Token22MintHeader({
-    address,
-    metadataExtension,
-    metadataPointerExtension,
-}: {
-    address: string;
-    metadataExtension: { extension: 'tokenMetadata'; state?: any };
-    metadataPointerExtension: { extension: 'metadataPointer'; state?: any };
-}) {
-    const tokenMetadata = create(metadataExtension.state, TokenMetadata);
-    const { metadataAddress } = create(metadataPointerExtension.state, MetadataPointer);
-    const metadata = useMetadataJsonLink(tokenMetadata.uri, { suspense: true });
-
-    if (!metadata) {
-        throw new Error(`Could not load metadata from given URI: ${tokenMetadata.uri}`);
-    }
-
-    // Handles the basic case where MetadataPointer is referencing the Token Metadata extension directly
-    // Does not handle the case where MetadataPointer is pointing at a separate account.
-    if (metadataAddress?.toString() === address) {
-        return (
-            <TokenMintHeaderCard
-                address={address}
-                token={{ logoURI: metadata.image, name: metadata.name }}
-                unverified={false}
-            />
-        );
-    }
-    throw new Error('Metadata loading for non-token 2022 programs is not yet supported');
-}
-
-function TokenMintHeaderCard({
-    address,
-    token,
-    unverified,
-}: {
-    address: string;
-    token: { name?: string | undefined; logoURI?: string | undefined };
-    unverified: boolean;
-}) {
-    return (
-        <div className="row align-items-end">
-            {unverified && (
-                <div className="alert alert-warning alert-scam" role="alert">
-                    Warning! Token names and logos are not unique. This token may have spoofed its name and logo to look
-                    like another token. Verify the token&apos;s mint address to ensure it is correct. If you are the
-                    token creator, please verify your token on{' '}
-                    <a
-                        href="https://support.coingecko.com/hc/en-us/articles/23725417857817-Verification-Guide-for-Listing-Update-Requests-on-CoinGecko"
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{ color: 'white', textDecoration: 'underline' }}
-                    >
-                        Coingecko
-                    </a>{' '}
-                    or on{' '}
-                    <a
-                        href="https://verify.jup.ag/"
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{ color: 'white', textDecoration: 'underline' }}
-                    >
-                        Jupiter
-                    </a>
-                    .
-                </div>
-            )}
-            <div className="col-auto">
-                <div className="avatar avatar-lg header-avatar-top">
-                    {token?.logoURI ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            alt="token logo"
-                            className="avatar-img rounded-circle border border-4 border-body"
-                            height={16}
-                            src={token.logoURI}
-                            width={16}
-                        />
-                    ) : (
-                        <Identicon
-                            address={address}
-                            className="avatar-img rounded-circle border border-body identicon-wrapper"
-                            style={{ width: IDENTICON_WIDTH }}
-                        />
-                    )}
-                </div>
-            </div>
-
-            <div className="col mb-3 ms-n3 ms-md-n2">
-                <h6 className="header-pretitle">Token</h6>
-                <h2 className="header-title">{token?.name || 'Unknown Token'}</h2>
-            </div>
-        </div>
     );
 }
 
