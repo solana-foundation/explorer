@@ -1,4 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
+import { Connection } from '@solana/web3.js';
 import React from 'react';
 import { CornerDownRight } from 'react-feather';
 import useSWRImmutable from 'swr/immutable';
@@ -7,7 +8,6 @@ import { Address } from '@/app/components/common/Address';
 import { ExpandableRow } from '@/app/utils/anchor';
 
 import { Copyable } from '../../common/Copyable';
-import { Connection } from '@solana/web3.js';
 
 export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
     return Object.entries(data).map(([key, value], index) => {

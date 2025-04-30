@@ -262,7 +262,3 @@ function InstructionCard({
         return <UnknownDetailsCard key={key} {...props} />;
     }
 }
-
-function isPmpInstruction(ix: TransactionInstruction) {
-    return ix.programId.toBase58() === 'ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S';
-}
