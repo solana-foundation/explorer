@@ -1,5 +1,6 @@
-import { getCodamaIdl } from '@/app/components/instruction/codama/codamaUtils';
 import { NextResponse } from 'next/server';
+
+import { getCodamaIdl } from '@/app/components/instruction/codama/codamaUtils';
 
 type Params = {
     params: {
@@ -20,17 +21,17 @@ export async function GET(
     try {
         const codamaIdl = await getCodamaIdl(programAddress, url);
         return NextResponse.json({ codamaIdl }, {
-            status: 200,
             headers: {
                 'Cache-Control': `max-age=${CACHE_DURATION}`,
-            }
+            },
+            status: 200,
         });
     } catch (error) {
         return NextResponse.json({ details: error, error: error instanceof Error ? error.message : 'Unknown error' }, {
-            status: 500,
             headers: {
                 'Cache-Control': `max-age=${CACHE_DURATION}`,
-            }
+            },
+            status: 500,
         });
     }
 }
