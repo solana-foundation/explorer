@@ -8,6 +8,8 @@ type Params = {
     }
 }
 
+const CACHE_DURATION = 30 * 60; // 30 minutes
+
 export async function GET(
     _request: Request,
     { params: { url, programAddress } }: Params
@@ -17,8 +19,18 @@ export async function GET(
     }
     try {
         const codamaIdl = await getCodamaIdl(programAddress, url);
-        return NextResponse.json({ codamaIdl }, { status: 200 });
+        return NextResponse.json({ codamaIdl }, {
+            status: 200,
+            headers: {
+                'Cache-Control': `max-age=${CACHE_DURATION}`,
+            }
+        });
     } catch (error) {
-        return NextResponse.json({ details: error, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
+        return NextResponse.json({ details: error, error: error instanceof Error ? error.message : 'Unknown error' }, {
+            status: 500,
+            headers: {
+                'Cache-Control': `max-age=${CACHE_DURATION}`,
+            }
+        });
     }
 }
