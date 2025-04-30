@@ -1,8 +1,10 @@
 import { PublicKey } from '@solana/web3.js';
-import { Connection } from '@solana/web3.js';
 import React from 'react';
 import { CornerDownRight } from 'react-feather';
 import useSWRImmutable from 'swr/immutable';
+import { address } from 'web3js-experimental';
+import { createSolanaRpc } from 'web3js-experimental';
+import { mainnet } from 'web3js-experimental';
 
 import { Address } from '@/app/components/common/Address';
 import { ExpandableRow } from '@/app/utils/anchor';
@@ -143,12 +145,36 @@ function inferType(value: any) {
 
 export function useCodamaIdl(programAddress: string, url: string) {
     const { data } = useSWRImmutable(`codama-idl-${programAddress}-${url}`, async () => {
-        const connection = new Connection(url);
-        const pubkey = new PublicKey(programAddress);
-        console.log('fetching metadata', programAddress, url, await connection.getAccountInfo(pubkey));
-        const metadata = await connection.getAccountInfo(pubkey, { commitment: 'confirmed' });
-        console.log('metadata', metadata);
-        return metadata;
+        const response = await fetch(`/api/codama/idl?programAddress=${programAddress}&url=${url}`);
+        if (response.ok) {
+            return response.json();
+        } else {
+            return getCodamaIdl(programAddress, url);
+        }
     });
     return { codamaIdl: data };
+}
+
+export async function getCodamaIdl(programAddress: string, url: string) {
+    const rpc = createSolanaRpc(mainnet(url));
+    let metadata;
+
+    try {
+        // @ts-expect-error RPC types mismatch
+        metadata = await fetchMetadataFromSeeds(rpc, {
+            authority: null,
+            program: address(programAddress),
+            seed: 'idl',
+        });
+    } catch (error) {
+        throw new Error('Metadata fetch failed');
+    }
+    try {
+        // @ts-expect-error RPC types mismatch
+        const content = await unpackAndFetchData({ rpc, ...metadata.data });
+        const parsed = JSON.parse(content);
+        return parsed;
+    } catch (error) {
+        throw new Error('JSON parse failed');
+    }
 }
