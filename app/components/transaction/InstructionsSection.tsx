@@ -43,7 +43,7 @@ import { RootNode } from 'codama';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { useCodamaIdl } from '@/app/providers/codama';
+import { useCodamaIdl } from '@/app/providers/useCodamaIdl';
 
 import { upcastTransactionInstruction } from '../inspector/into-parsed-data';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
