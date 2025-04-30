@@ -34,7 +34,6 @@ import {
     ParsedTransaction,
     PartiallyDecodedInstruction,
     SignatureResult,
-    TransactionInstruction,
     TransactionSignature,
 } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
