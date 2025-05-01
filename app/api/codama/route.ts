@@ -27,7 +27,7 @@ export async function GET(
     } catch (error) {
         return NextResponse.json({ details: error, error: error instanceof Error ? error.message : 'Unknown error' }, {
             headers: CACHE_HEADERS,
-            status: 500,
+            status: 200,
         });
     }
 }
