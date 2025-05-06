@@ -56,7 +56,7 @@ describe('fetchFeatureGateInformation', () => {
     });
 
     it('should handle unexpected error while fetching, but react as there was no data', async () => {
-        await expect(fetchFeatureGateInformation()).resolves.toEqual('No data');
+        await expect(fetchFeatureGateInformation()).resolves.toEqual(['No data']);
 
         mockRejectOnce(new Error('Network Error'));
         await expect(fetchFeatureGateInformation(FEATURE)).resolves.toEqual(['No data']);
@@ -67,6 +67,6 @@ describe('fetchFeatureGateInformation', () => {
         const data = await fetchFeatureGateInformation(FEATURE);
 
         expect(fetch).toHaveBeenCalledWith(getLink(FEATURE.simd_link[0]), { method: 'GET' });
-        expect(data).toEqual("# Summary");
+        expect(data).toEqual(["# Summary"]);
     });
 });
