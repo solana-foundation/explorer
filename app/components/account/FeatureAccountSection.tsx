@@ -82,9 +82,9 @@ const BaseFeatureCard = ({
             <tr>
                 <td>SIMD</td>
                 <td className="text-lg-end">
-                    {featureInfo.simd && featureInfo.simd_link ? (
-                        <a href={featureInfo.simd_link} target="_blank" rel="noopener noreferrer" className="">
-                            SIMD {featureInfo.simd} <ExternalLinkIcon className="align-text-top" size={13} />
+                    {featureInfo.simds[0] && featureInfo.simd_link[0] ? (
+                        <a href={featureInfo.simd_link[0]} target="_blank" rel="noopener noreferrer" className="">
+                            SIMD {featureInfo.simds[0]} <ExternalLinkIcon className="align-text-top" size={13} />
                         </a>
                     ) : (
                         <code>No link</code>
