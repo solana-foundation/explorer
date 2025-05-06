@@ -578,24 +578,6 @@
     "description": null
   },
   {
-    "key": "3A9WtMU4aHuryD3VN7SFKdfXto8HStLb1Jj6HjkgfnGL",
-    "title": "Drop unchained Merkle shreds",
-    "simd_link": [],
-    "simds": [],
-    "owners": [],
-    "min_agave_versions": [
-      "v2.2.0"
-    ],
-    "min_fd_versions": [],
-    "min_jito_versions": [],
-    "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
-    "devnet_activation_epoch": null,
-    "comms_required": null,
-    "mainnet_activation_epoch": null,
-    "description": null
-  },
-  {
     "key": "LTdLt9Ycbyoipz5fLysCi1NnDnASsZfmJLJXts5ZxZz",
     "title": "Removes Accounts Delta Hash",
     "simd_link": [
@@ -729,7 +711,7 @@
   },
   {
     "key": "3NKRSwpySNwD3TvP5pHnRmkAQRsdkXWRr1WaQh8p4PWX",
-    "title": "reject callx r10 bpf instructions",
+    "title": "Reject callx r10 bpf instructions",
     "simd_link": [
       ""
     ],
@@ -753,7 +735,7 @@
   },
   {
     "key": "8199Q2gMD2kwgfopK5qqVWuDbegLgpuFUFHCcUJQDN8b",
-    "title": "error on syscall / bpf function hash collisions",
+    "title": "Error on syscall / bpf function hash collisions",
     "simd_link": [
       ""
     ],
@@ -777,12 +759,12 @@
   },
   {
     "key": "HooKD5NC9QNxk25QuzCssB8ecrEzGt6eXEPBUxWp1LaR",
-    "title": "last restart slot sysvar/syscallFeature Gate: ",
+    "title": "Enable last restart slot sysvar/syscall",
     "simd_link": [
       ""
     ],
     "simds": [
-      ""
+      "0047"
     ],
     "owners": [
       "willhickey"
@@ -803,7 +785,7 @@
   },
   {
     "key": "6Uf8S75PVh91MYgPQSHnjRAPQq6an5BDv9vomrCwDqLe",
-    "title": "deprecate unused legacy vote tx plumbing",
+    "title": "Deprecate unused legacy vote tx plumbing",
     "simd_link": [
       ""
     ],
@@ -827,12 +809,12 @@
   },
   {
     "key": "mrkPjRg79B2oK2ZLgd7S3AfEJaX9B6gAF3H9aEykRUS",
-    "title": "generate duplicate proofs for merkle root conflicts",
+    "title": "Generate duplicate proofs for merkle root conflicts",
     "simd_link": [
       ""
     ],
     "simds": [
-      "0047"
+      ""
     ],
     "owners": [],
     "min_agave_versions": [
@@ -851,7 +833,7 @@
   },
   {
     "key": "FNKCMBzYUdjhHyPdsKG2LSmdzH8TCHXn3ytj8RNBS4nG",
-    "title": "notify state machine of duplicate proofs",
+    "title": "Notify state machine of duplicate proofs",
     "simd_link": [
       ""
     ],
@@ -995,9 +977,9 @@
   },
   {
     "key": "FuS3FPfJDKSNot99ECLXtp3rueq36hMNStJkPJwWodLh",
-    "title": "error invalid curve/op id",
+    "title": "Fail transactions when ed25519 precompile receives invalid curve",
     "simd_link": [
-      ""
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0137-curve25519-error.md"
     ],
     "simds": [
       "0137"
@@ -1019,7 +1001,7 @@
   },
   {
     "key": "wLckV1a64ngtcKPRGU4S4grVTestXjmNjxBjaKZrAcn",
-    "title": "cost model uses number of requested write locks",
+    "title": "Update cost model to use number of requested write locks",
     "simd_link": [
       ""
     ],
@@ -1043,7 +1025,7 @@
   },
   {
     "key": "GDH5TVdbTPUpRnXaRyQqiKUa7uZAbZ28Q2N9bhbKoMLm",
-    "title": "loosen cpi restrictions",
+    "title": "Loosen CPI restrictions",
     "simd_link": [
       ""
     ],
@@ -1063,11 +1045,11 @@
     "devnet_activation_epoch": 797,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": null
+    "description": "Increases CPI data size to 10kb"
   },
   {
     "key": "JE86WkYvTrzW8HgNmrHY7dFYpCmSptUpKupbo2AdQ9cG",
-    "title": "Feature Gate: Enables deployment and execution of SBPFv1 programs",
+    "title": "Enables deployment and execution of SBPFv1 programs",
     "simd_link": [
       ""
     ],
@@ -1093,7 +1075,7 @@
   },
   {
     "key": "F6UVKh1ujTEFK3en2SyAL3cdVnqko1FVEXWhmdLRu6WP",
-    "title": "Feature Gate: Enables deployment and execution of SBPFv2 programs",
+    "title": "Enables deployment and execution of SBPFv2 programs",
     "simd_link": [
       ""
     ],
@@ -1120,7 +1102,7 @@
   },
   {
     "key": "C8XZNs1bfzaiT3YDeXZJ7G5swQWQv7tVzDnCxtHvnSpw",
-    "title": "Feature Gate: Enables deployment and execution of SBPFv3 programs",
+    "title": "Enables deployment and execution of SBPFv3 programs",
     "simd_link": [
       ""
     ],
@@ -1148,7 +1130,7 @@
   },
   {
     "key": "8Cb77yHjPWe9wuWUfXeh6iszFGCDGNCoFk3tprViYHNm",
-    "title": "Feature Gate: Enable loader-v4",
+    "title": "Enable loader-v4",
     "simd_link": [
       ""
     ],
@@ -1174,7 +1156,7 @@
   },
   {
     "key": "EmhbpdVtZ2hWRGFWBDjn2i3SJD8Z36z4mpMcZJEnebnP",
-    "title": "Feature Gate: Disable new loader-v3 deployments",
+    "title": "Disable new loader-v3 deployments",
     "simd_link": [
       ""
     ],
@@ -1200,7 +1182,7 @@
   },
   {
     "key": "5KLGJSASDVxKPjLCDWNtnABLpZjsQSrYZ8HKwcEdAMC8",
-    "title": "drop unchained Merkle shreds",
+    "title": "Drop unchained Merkle shreds",
     "simd_link": [
       ""
     ],
@@ -1252,7 +1234,7 @@
   },
   {
     "key": "6M4oQ6eXneVhtLoiAr4yRYQY43eVLjrKbiDZDJc892yk",
-    "title": "Feature Gate: Migrate Stake program to Core BPF",
+    "title": "Migrate stake program to Core BPF",
     "simd_link": [
       "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0196-migrate-stake-to-core-bpf.md"
     ],
@@ -1278,7 +1260,7 @@
   },
   {
     "key": "turbRpTzBzDU6PJmWvRTbcJXXGxUs19CvQamUrRD9bN",
-    "title": "extends Turbine fanout experiment to wider fanout values",
+    "title": "Increase Turbine fanout to wider fanout values",
     "simd_link": [
       ""
     ],
@@ -1304,7 +1286,7 @@
   },
   {
     "key": "51VCKU5eV6mcTc9q9ArfWELU2CqDoi13hdAjr6fHMdtv",
-    "title": "enforce retransmitter signature verification",
+    "title": "Enforce retransmitter signature verification",
     "simd_link": [
       ""
     ],
@@ -1321,30 +1303,6 @@
       ""
     ],
     "planned_testnet_order": 1131,
-    "testnet_activation_epoch": null,
-    "devnet_activation_epoch": null,
-    "comms_required": null,
-    "mainnet_activation_epoch": null,
-    "description": null
-  },
-  {
-    "key": "chaie9S2zVfuxJKNRGkyTDokLwWxx6kD2ZLsqQHaDD8",
-    "title": "Generate duplicate proofs for chained merkle root conflicts",
-    "simd_link": [
-      ""
-    ],
-    "simds": [
-      ""
-    ],
-    "owners": [],
-    "min_agave_versions": [
-      "v1.18.12"
-    ],
-    "min_fd_versions": [],
-    "min_jito_versions": [
-      ""
-    ],
-    "planned_testnet_order": null,
     "testnet_activation_epoch": null,
     "devnet_activation_epoch": null,
     "comms_required": null,
@@ -1401,7 +1359,7 @@
   },
   {
     "key": "2KKG3C6RBnxQo9jVVrbzsoSh41TDXLK7gBc9gduyxSzW",
-    "title": "add Redelegate instruction to stake program",
+    "title": "Add Redelegate instruction to stake program",
     "simd_link": [
       ""
     ],
@@ -1425,7 +1383,7 @@
   },
   {
     "key": "EBq48m8irRKuE7ZnMTLvLg2UuGSqhe8s8oMqnmja1fJw",
-    "title": "enable big modular exponentiation",
+    "title": "Enable big modular exponentiation",
     "simd_link": [
       ""
     ],
@@ -1449,7 +1407,7 @@
   },
   {
     "key": "turbnbNRp22nwZCmgVVXFSshz7H7V23zMzQgA46YpmQ",
-    "title": "experiments different turbine fanouts for propagating shreds",
+    "title": "Experiment with different turbine fanouts for propagating shreds",
     "simd_link": [
       ""
     ],
@@ -1475,9 +1433,9 @@
   },
   {
     "key": "5TuppMutoyzhUSfuYdhgzD47F92GL1g89KpCZQKqedxP",
-    "title": "sol_remaining_compute_units syscall",
+    "title": "Enable sol_remaining_compute_units syscall",
     "simd_link": [
-      ""
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0049-syscall-get-remaining-compute-units.md"
     ],
     "simds": [
       "0049"
@@ -1502,7 +1460,7 @@
   },
   {
     "key": "RfEcA95xnhuwooVAhUUksEJLZBF7xKCLuqrJoqk4Zph",
-    "title": "replay: extend last fec set check for 32+ retransmitter signed shreds",
+    "title": "Extend last fec set check for 32+ retransmitter signed shreds during replay",
     "simd_link": [
       ""
     ],
@@ -1528,7 +1486,7 @@
     "key": "EbAhnReKK8Sf88CvAfAXbgKji8DV48rsp4q2sgHqgWef",
     "title": "Relax intrabatch account locks",
     "simd_link": [
-      "solana-foundation/solana-improvement-documents#83"
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0083-relax-entry-constraints.md"
     ],
     "simds": [
       "0083"
