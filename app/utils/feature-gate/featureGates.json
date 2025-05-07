@@ -1432,33 +1432,6 @@
     "description": null
   },
   {
-    "key": "5TuppMutoyzhUSfuYdhgzD47F92GL1g89KpCZQKqedxP",
-    "title": "Enable sol_remaining_compute_units syscall",
-    "simd_link": [
-      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0049-syscall-get-remaining-compute-units.md"
-    ],
-    "simds": [
-      "0049"
-    ],
-    "owners": [
-      "willhickey"
-    ],
-    "min_agave_versions": [
-      "v2.3.4",
-      "v3.4.5"
-    ],
-    "min_fd_versions": [],
-    "min_jito_versions": [
-      ""
-    ],
-    "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
-    "devnet_activation_epoch": null,
-    "comms_required": null,
-    "mainnet_activation_epoch": null,
-    "description": null
-  },
-  {
     "key": "RfEcA95xnhuwooVAhUUksEJLZBF7xKCLuqrJoqk4Zph",
     "title": "Extend last fec set check for 32+ retransmitter signed shreds during replay",
     "simd_link": [
