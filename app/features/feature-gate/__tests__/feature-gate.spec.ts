@@ -1,26 +1,18 @@
 import fetch from 'node-fetch';
 import { vi } from 'vitest';
 
-import { FeatureInfoType } from '@/app/utils/feature-gate/types';
-
 import { fetchFeatureGateInformation, getLink } from '../index';
 
 // Taken from ../../../utils/feature-gate/featureGates.json
-const FEATURE: FeatureInfoType = {
-    comms_required: null,
+const FEATURE = {
     "description": "Two instructions for moving value between stake accounts without holding Withdrawer",
-    "devnet_activation_epoch": 798,
+    "devnetActivationEpoch": 798,
     "key": "7bTK6Jis8Xpfrs8ZoUfiMDPazTcdPcTWheZFJTA5Z6X4",
-    "mainnet_activation_epoch": 727,
-    min_agave_versions: [],
-    min_fd_versions: [],
-    min_jito_versions: [],
-    owners: [],
-    planned_testnet_order: null,
-    "simd_link": ["https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0148-stake-program-move-instructions.md"],
-    "simds": ["148"],
-    "testnet_activation_epoch": 712,
-    "title": "MoveStake and MoveLamports",
+    "mainnetActivationEpoch": 727,
+    "simd": 148,
+    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0148-stake-program-move-instructions.md",
+    "testnetActivationEpoch": 712,
+    "title": "MoveStake and MoveLamports"
 };
 
 vi.mock('node-fetch', async () => {
@@ -56,17 +48,17 @@ describe('fetchFeatureGateInformation', () => {
     });
 
     it('should handle unexpected error while fetching, but react as there was no data', async () => {
-        await expect(fetchFeatureGateInformation()).resolves.toEqual(['No data']);
+        await expect(fetchFeatureGateInformation()).resolves.toEqual('No data');
 
         mockRejectOnce(new Error('Network Error'));
-        await expect(fetchFeatureGateInformation(FEATURE)).resolves.toEqual(['No data']);
+        await expect(fetchFeatureGateInformation(FEATURE)).resolves.toEqual('No data');
     });
 
     it('should return feature info', async () => {
         mockFetchOnce("# Summary");
         const data = await fetchFeatureGateInformation(FEATURE);
 
-        expect(fetch).toHaveBeenCalledWith(getLink(FEATURE.simd_link[0]), { method: 'GET' });
-        expect(data).toEqual(["# Summary"]);
+        expect(fetch).toHaveBeenCalledWith(getLink(FEATURE.simd_link), { method: 'GET' });
+        expect(data).toEqual("# Summary");
     });
 });

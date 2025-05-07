@@ -21,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install requests beautifulsoup4 solders solana pydantic
+          python -m pip install requests beautifulsoup4 solders solana
 
       - name: Scrape and generate features
         run: python scripts/parse_feature_gates.py
