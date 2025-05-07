@@ -74,6 +74,14 @@ const WHITELISTED_RPCS = [
     'engine.mirror.ad',
 ];
 
+function isWhitelistedRpc(url: string) {
+    try {
+        return WHITELISTED_RPCS.includes(new URL(url).hostname);
+    } catch (e) {
+        return false;
+    }
+}
+
 type ClusterProviderProps = { children: React.ReactNode };
 export function ClusterProvider({ children }: ClusterProviderProps) {
     const [state, dispatch] = useReducer(clusterReducer, {
@@ -86,7 +94,7 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
     const cluster = parseQuery(searchParams);
     const enableCustomUrl =
         (localStorageIsAvailable() && localStorage.getItem('enableCustomUrl') !== null) ||
-        WHITELISTED_RPCS.includes(new URL(state.customUrl).hostname);
+        isWhitelistedRpc(state.customUrl);
     const customUrl = (enableCustomUrl && searchParams?.get('customUrl')) || state.customUrl;
     const pathname = usePathname();
     const router = useRouter();

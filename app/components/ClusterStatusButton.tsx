@@ -6,11 +6,15 @@ import React, { useCallback } from 'react';
 import { AlertCircle, CheckCircle } from 'react-feather';
 
 function getCustomUrlClusterName(customUrl: string) {
-    const url = new URL(customUrl);
-    if (url.hostname === 'localhost') {
+    try {
+        const url = new URL(customUrl);
+        if (url.hostname === 'localhost') {
+            return customUrl;
+        }
+        return `${url.protocol}//${url.hostname}`;
+    } catch (e) {
         return customUrl;
     }
-    return `${url.protocol}//${url.hostname}`;
 }
 
 export const ClusterStatusButton = () => {
