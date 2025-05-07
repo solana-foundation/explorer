@@ -2,6 +2,7 @@ import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 
 import { Address } from '@/app/components/common/Address';
+import { isFeatureActivated } from '@/app/features/feature-gate';
 import { useCluster } from '@/app/providers/cluster';
 
 import { Cluster, clusterName } from '../cluster';
@@ -33,7 +34,7 @@ export function UpcomingFeatures() {
             }
         })
         .filter((feature: FeatureInfoType) => {
-            return !isActivated(feature);
+            return !isFeatureActivated(feature, cluster);
         });
 
     if (filteredFeatures.length === 0) {

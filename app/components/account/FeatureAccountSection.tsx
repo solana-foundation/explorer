@@ -9,13 +9,13 @@ import { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
+import { isFeatureActivated } from '@/app/features/feature-gate';
 import { useCluster } from '@/app/providers/cluster';
 import { Cluster, clusterName } from '@/app/utils/cluster';
 import { FeatureInfoType } from '@/app/utils/feature-gate/types';
 import { getFeatureInfo } from '@/app/utils/feature-gate/utils';
 
 import { UnknownAccountCard } from './UnknownAccountCard';
-import { isFeatureActivated } from '@/app/features/feature-gate';
 
 export function FeatureAccountSection({ account }: { account: Account }) {
     const address = account.pubkey.toBase58();
