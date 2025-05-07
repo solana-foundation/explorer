@@ -1,8 +1,8 @@
 import fetch from 'node-fetch';
 
+import { Cluster } from '@/app/utils/cluster';
 import { FeatureInfoType } from '@/app/utils/feature-gate/types';
 import Logger from '@/app/utils/logger';
-import { Cluster } from '@/app/utils/cluster';
 
 // Good candidate to move to environment variables, but at the moment repository is public, so we leave them hardcoded (could be changed later)
 const OWNER = 'solana-foundation';
@@ -57,4 +57,4 @@ export function isFeatureActivated(feature: FeatureInfoType, cluster: Cluster) {
         default:
             return false;
     }
-};
+}
