@@ -808,30 +808,6 @@
     "description": null
   },
   {
-    "key": "mrkPjRg79B2oK2ZLgd7S3AfEJaX9B6gAF3H9aEykRUS",
-    "title": "Generate duplicate proofs for merkle root conflicts",
-    "simd_link": [
-      ""
-    ],
-    "simds": [
-      ""
-    ],
-    "owners": [],
-    "min_agave_versions": [
-      "v1.18.0"
-    ],
-    "min_fd_versions": [],
-    "min_jito_versions": [
-      ""
-    ],
-    "planned_testnet_order": 200,
-    "testnet_activation_epoch": 672,
-    "devnet_activation_epoch": 731,
-    "comms_required": null,
-    "mainnet_activation_epoch": null,
-    "description": null
-  },
-  {
     "key": "FNKCMBzYUdjhHyPdsKG2LSmdzH8TCHXn3ytj8RNBS4nG",
     "title": "Notify state machine of duplicate proofs",
     "simd_link": [
@@ -1469,6 +1445,30 @@
     ],
     "min_agave_versions": [
       ""
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "chaie9S2zVfuxJKNRGkyTDokLwWxx6kD2ZLsqQHaDD8",
+    "title": "Generate duplicate proofs for chained merkle root conflicts",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v1.18.12"
     ],
     "min_fd_versions": [],
     "min_jito_versions": [
