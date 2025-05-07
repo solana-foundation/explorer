@@ -16,19 +16,6 @@ export function UpcomingFeatures() {
         return null;
     }
 
-    const isActivated = (feature: FeatureInfoType) => {
-        switch (cluster) {
-            case Cluster.MainnetBeta:
-                return feature.mainnet_activation_epoch !== null;
-            case Cluster.Devnet:
-                return feature.devnet_activation_epoch !== null;
-            case Cluster.Testnet:
-                return feature.testnet_activation_epoch !== null;
-            default:
-                return false;
-        }
-    };
-
     const filteredFeatures = (FEATURES as FeatureInfoType[])
         .filter((feature: FeatureInfoType) => {
             switch (cluster) {
