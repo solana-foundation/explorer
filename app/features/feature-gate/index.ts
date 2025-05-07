@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 
 import { FeatureInfoType } from '@/app/utils/feature-gate/types';
 import Logger from '@/app/utils/logger';
+import { Cluster } from '@/app/utils/cluster';
 
 // Good candidate to move to environment variables, but at the moment repository is public, so we leave them hardcoded (could be changed later)
 const OWNER = 'solana-foundation';
@@ -44,3 +45,16 @@ export async function fetchFeatureGateInformation(featureInfo?: FeatureInfoType)
 
     return results;
 }
+
+export function isFeatureActivated(feature: FeatureInfoType, cluster: Cluster) {
+    switch (cluster) {
+        case Cluster.MainnetBeta:
+            return feature.mainnet_activation_epoch !== null;
+        case Cluster.Devnet:
+            return feature.devnet_activation_epoch !== null;
+        case Cluster.Testnet:
+            return feature.testnet_activation_epoch !== null;
+        default:
+            return false;
+    }
+};
