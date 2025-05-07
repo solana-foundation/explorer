@@ -1,376 +1,1484 @@
 [
   {
     "key": "7bTK6Jis8Xpfrs8ZoUfiMDPazTcdPcTWheZFJTA5Z6X4",
-    "simd": "148",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 712,
-    "devnetActivationEpoch": 798,
-    "mainnetActivationEpoch": 727,
     "title": "MoveStake and MoveLamports",
-    "description": "Two new instructions for moving value between stake accounts without holding Withdrawer",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0148-stake-program-move-instructions.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0148-stake-program-move-instructions.md"
+    ],
+    "simds": [
+      "148"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 712,
+    "devnet_activation_epoch": 798,
+    "comms_required": null,
+    "mainnet_activation_epoch": 727,
+    "description": "Two new instructions for moving value between stake accounts without holding Withdrawer"
   },
   {
     "key": "zkhiy5oLowR7HY4zogXjCjeMXyruLqBwSWH21qcFtnv",
-    "simd": "153",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 714,
-    "devnetActivationEpoch": 801,
-    "mainnetActivationEpoch": 731,
     "title": "Enable ZK ElGamal Proof program",
-    "description": "Enable ElGamal proof program",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0153-elgamal-proof-program.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0153-elgamal-proof-program.md"
+    ],
+    "simds": [
+      "153"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 714,
+    "devnet_activation_epoch": 801,
+    "comms_required": null,
+    "mainnet_activation_epoch": 731,
+    "description": "Enable ElGamal proof program"
   },
   {
     "key": "3opE3EzAKnUftUDURkzMgwpNgimBAypW1mNDYH4x4Zg7",
-    "simd": "96",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 716,
-    "devnetActivationEpoch": 805,
-    "mainnetActivationEpoch": 742,
     "title": "Reward full priority fee to validators",
-    "description": "Passes on 100% of priority fee to validators",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0096-reward-collected-priority-fee-in-entirety.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0096-reward-collected-priority-fee-in-entirety.md"
+    ],
+    "simds": [
+      "96"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 716,
+    "devnet_activation_epoch": 805,
+    "comms_required": null,
+    "mainnet_activation_epoch": 742,
+    "description": "Passes on 100% of priority fee to validators"
   },
   {
     "key": "EQUMpNFr7Nacb1sva56xn1aLfBxppEoSBH8RRVdkcD1x",
-    "simd": null,
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 713,
-    "devnetActivationEpoch": 800,
-    "mainnetActivationEpoch": 728,
     "title": "Disable account loader special case",
-    "description": "Simplify account loading",
-    "simd_link": null
+    "simd_link": [],
+    "simds": [],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 713,
+    "devnet_activation_epoch": 800,
+    "comms_required": null,
+    "mainnet_activation_epoch": 728,
+    "description": "Simplify account loading"
   },
   {
     "key": "BtVN7YjDzNE6Dk7kTT7YTDgMNUZTNgiSJgsdzAeTg2jF",
-    "simd": null,
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 715,
-    "devnetActivationEpoch": 802,
-    "mainnetActivationEpoch": 735,
     "title": "Removing unwanted rounding in fee calculation",
-    "description": "Removes legacy floating number arithmetic operation in fee calculation, making it integer-based",
-    "simd_link": null
+    "simd_link": [],
+    "simds": [],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 715,
+    "devnet_activation_epoch": 802,
+    "comms_required": null,
+    "mainnet_activation_epoch": 735,
+    "description": "Removes legacy floating number arithmetic operation in fee calculation, making it integer-based"
   },
   {
     "key": "CLCoTADvV64PSrnR6QXty6Fwrt9Xc6EdxSJE4wLRePjq",
-    "simd": "127",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 746,
-    "devnetActivationEpoch": 806,
-    "mainnetActivationEpoch": 746,
     "title": "Enable sol_get_sysvar",
-    "description": "Unified syscall interface for all sysvars, without needing to include sysvar address in transactions",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0127-get-sysvar-syscall.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0127-get-sysvar-syscall.md"
+    ],
+    "simds": [
+      "127"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 746,
+    "devnet_activation_epoch": 806,
+    "comms_required": null,
+    "mainnet_activation_epoch": 746,
+    "description": "Unified syscall interface for all sysvars, without needing to include sysvar address in transactions"
   },
   {
     "key": "tSynMCspg4xFiCj1v3TDb4c7crMR5tSBhLz4sF7rrNA",
-    "simd": "138",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 746,
-    "devnetActivationEpoch": 813,
-    "mainnetActivationEpoch": 750,
     "title": "Add TowerSync instruction",
-    "description": "Enable new voting instruction",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0138-deprecate-legacy-vote-instructions.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0138-deprecate-legacy-vote-instructions.md"
+    ],
+    "simds": [
+      "138"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 746,
+    "devnet_activation_epoch": 813,
+    "comms_required": null,
+    "mainnet_activation_epoch": 750,
+    "description": "Enable new voting instruction"
   },
   {
     "key": "4eohviozzEeivk1y9UbrnekbAFMDQyJz5JjA9Y6gyvky",
-    "simd": "89",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 746,
-    "devnetActivationEpoch": 816,
-    "mainnetActivationEpoch": 753,
     "title": "Programify Feature Gate",
-    "description": "Turn feature gate syscall into a BPF program, enabling revocation of pending features.",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0089-programify-feature-gate-program.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0089-programify-feature-gate-program.md"
+    ],
+    "simds": [
+      "89"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 746,
+    "devnet_activation_epoch": 816,
+    "comms_required": null,
+    "mainnet_activation_epoch": 753,
+    "description": "Turn feature gate syscall into a BPF program, enabling revocation of pending features."
   },
   {
     "key": "2Fr57nzzkLYXW695UdDxDeR5fhnZWSttZeZYemrnpGFV",
-    "simd": "140",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 746,
-    "devnetActivationEpoch": 817,
-    "mainnetActivationEpoch": 754,
     "title": "Migrate config program to Core BPF",
-    "description": "Migrate the config program to a BPF program",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0140-migrate-config-to-core-bpf.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0140-migrate-config-to-core-bpf.md"
+    ],
+    "simds": [
+      "140"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 746,
+    "devnet_activation_epoch": 817,
+    "comms_required": null,
+    "mainnet_activation_epoch": 754,
+    "description": "Migrate the config program to a BPF program"
   },
   {
     "key": "8U4skmMVnF6k2kMvrWbQuRUT3qQSiTYpSjqmhmgfthZu",
-    "simd": "105",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 745,
-    "devnetActivationEpoch": 820,
-    "mainnetActivationEpoch": 744,
     "title": "Add new unwritable reserved accounts",
-    "description": "Allow core developers to exclude system programs from write-locking transactions",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0105-dynamic-reserved-accounts-set.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0105-dynamic-reserved-accounts-set.md"
+    ],
+    "simds": [
+      "105"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 745,
+    "devnet_activation_epoch": 820,
+    "comms_required": null,
+    "mainnet_activation_epoch": 744,
+    "description": "Allow core developers to exclude system programs from write-locking transactions"
   },
   {
     "key": "CGB2jM8pwZkeeiXQ66kBMyBR6Np61mggL7XUsmLjVcrw",
-    "simd": "183",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 746,
-    "devnetActivationEpoch": 824,
-    "mainnetActivationEpoch": 756,
     "title": "Skip rent writes",
-    "description": "Improve performance of validator performance at epoch boundary by skipping rent collection",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0183-skip-rent-rewrites.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0183-skip-rent-rewrites.md"
+    ],
+    "simds": [
+      "183"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 746,
+    "devnet_activation_epoch": 824,
+    "comms_required": null,
+    "mainnet_activation_epoch": 756,
+    "description": "Improve performance of validator performance at epoch boundary by skipping rent collection"
   },
   {
     "key": "CJzY83ggJHqPGDq8VisV3U91jDJLuEaALZooBrXtnnLU",
-    "simd": "84",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 746,
-    "devnetActivationEpoch": 825,
-    "mainnetActivationEpoch": 757,
     "title": "Disable rent fees collection",
-    "description": "Disables rent collection for accounts, to be activated when all rent-paying accounts are gone",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0084-disable-rent-fees-collection.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0084-disable-rent-fees-collection.md"
+    ],
+    "simds": [
+      "84"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 746,
+    "devnet_activation_epoch": 825,
+    "comms_required": null,
+    "mainnet_activation_epoch": 757,
+    "description": "Disables rent collection for accounts, to be activated when all rent-paying accounts are gone"
   },
   {
     "key": "sr11RdZWgbHTHxSroPALe6zgaT5A1K9LcE4nfsZS4gi",
-    "simd": "75",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
-    "mainnetActivationEpoch": null,
     "title": "Enable secp256r1 precompile",
-    "description": "Enable on-chain verification of Passkeys and the WebAuthn Standard (secp256r1) signatures",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0075-precompile-for-secp256r1-sigverify.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0075-precompile-for-secp256r1-sigverify.md"
+    ],
+    "simds": [
+      "75"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": "Enable on-chain verification of Passkeys and the WebAuthn Standard (secp256r1) signatures"
   },
   {
     "key": "C97eKZygrkU4JxJsZdjgbUY7iQR7rKTr4NyDWo2E5pRm",
-    "simd": "128",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 756,
-    "devnetActivationEpoch": 849,
-    "mainnetActivationEpoch": 763,
     "title": "Address Lookup Table to Core BPF",
-    "description": "Migrate the Address Lookup Table to a BPF program",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0128-migrate-address-lookup-table-to-core-bpf.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0128-migrate-address-lookup-table-to-core-bpf.md"
+    ],
+    "simds": [
+      "128"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 756,
+    "devnet_activation_epoch": 849,
+    "comms_required": null,
+    "mainnet_activation_epoch": 763,
+    "description": "Migrate the Address Lookup Table to a BPF program"
   },
   {
     "key": "FKe75t4LXxGaQnVHdUKM6DSFifVVraGZ8LyNo7oPwy1Z",
-    "simd": "133",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 760,
-    "devnetActivationEpoch": 853,
-    "mainnetActivationEpoch": 767,
     "title": "GetEpochStake",
-    "description": "Add a new syscall to get the epoch stake",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0133-syscall-get-epoch-stake.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0133-syscall-get-epoch-stake.md"
+    ],
+    "simds": [
+      "133"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 760,
+    "devnet_activation_epoch": 853,
+    "comms_required": null,
+    "mainnet_activation_epoch": 767,
+    "description": "Add a new syscall to get the epoch stake"
   },
   {
     "key": "GJVDwRkUPNdk9QaK4VsU4g1N41QNxhy1hevjf8kz45Mq",
-    "simd": "219",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
-    "mainnetActivationEpoch": null,
     "title": "Stricter VM verification constraints",
-    "description": "Removes pitfalls and foot-guns from the virtual machine and syscalls by enabling account data direct mapping",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/pull/219"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/pull/219"
+    ],
+    "simds": [
+      "219"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": "Removes pitfalls and foot-guns from the virtual machine and syscalls by enabling account data direct mapping"
   },
   {
     "key": "ffecLRhhakKSGhMuc6Fz2Lnfq4uT9q3iu9ZsNaPLxPc",
-    "simd": null,
-    "version": "v2.1.6",
-    "testnetActivationEpoch": 763,
-    "devnetActivationEpoch": 856,
-    "mainnetActivationEpoch": 770,
     "title": "Vote only on full fec sets",
-    "description": "Only vote for blocks with sufficiently sized fec sets",
-    "simd_link": null
+    "simd_link": [],
+    "simds": [],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 763,
+    "devnet_activation_epoch": 856,
+    "comms_required": null,
+    "mainnet_activation_epoch": 770,
+    "description": "Only vote for blocks with sufficiently sized fec sets"
   },
   {
     "key": "LtHaSHHsUge7EWTPVrmpuexKz6uVHZXZL6cgJa7W7Zn",
-    "simd": "215",
-    "version": "v2.1.6",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
-    "mainnetActivationEpoch": null,
     "title": "Accounts Lattice Hash",
-    "description": "Faster homomorphic hashing of accounts, enabling account state to be hashed in every block",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0215-accounts-lattice-hash.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0215-accounts-lattice-hash.md"
+    ],
+    "simds": [
+      "215"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": "Faster homomorphic hashing of accounts, enabling account state to be hashed in every block"
   },
   {
     "key": "2ry7ygxiYURULZCrypHhveanvP5tzZ4toRwVp89oCNSj",
-    "simd": null,
-    "version": "v2.0.0",
-    "testnetActivationEpoch": 759,
-    "devnetActivationEpoch": 852,
-    "mainnetActivationEpoch": 764,
     "title": "Validator applies cost tracker to blocks during replay",
-    "description": null,
-    "simd_link": null
+    "simd_link": [],
+    "simds": [],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 759,
+    "devnet_activation_epoch": 852,
+    "comms_required": null,
+    "mainnet_activation_epoch": 764,
+    "description": null
   },
   {
     "key": "LTsNAP8h1voEVVToMNBNqoiNQex4aqfUrbFhRH3mSQ2",
-    "simd": "220",
-    "version": "v2.2.0",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
-    "mainnetActivationEpoch": null,
     "title": "Snapshots use Accounts Lattice Hash",
-    "description": "Improve validator performance by using Accounts Lattice Hash for snapshots instead of the Merkle-based account hash",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0220-snapshots-use-accounts-lattice-hash.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0220-snapshots-use-accounts-lattice-hash.md"
+    ],
+    "simds": [
+      "220"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": "Improve validator performance by using Accounts Lattice Hash for snapshots instead of the Merkle-based account hash"
   },
   {
     "key": "C9oAhLxDBm3ssWtJx1yBGzPY55r2rArHmN1pbQn6HogH",
-    "simd": "0170",
-    "version": "v2.1.10",
-    "testnetActivationEpoch": 750,
-    "devnetActivationEpoch": 842,
-    "mainnetActivationEpoch": 759,
     "title": "Reserve minimal CUs for builtins",
-    "description": "Allocate 3,000 compute units for builtins, instead of normal 200,000 compute units",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0170-builtin-instruction-cost-and-budget.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0170-builtin-instruction-cost-and-budget.md"
+    ],
+    "simds": [
+      "0170"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.10"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 750,
+    "devnet_activation_epoch": 842,
+    "comms_required": null,
+    "mainnet_activation_epoch": 759,
+    "description": "Allocate 3,000 compute units for builtins, instead of normal 200,000 compute units"
   },
   {
     "key": "B7H2caeia4ZFcpE3QcgMqbiWiBtWrdBRBSJ1DY6Ktxbq",
-    "simd": "0182",
-    "version": "v2.1.8",
-    "testnetActivationEpoch": 752,
-    "devnetActivationEpoch": 843,
-    "mainnetActivationEpoch": 760,
     "title": "Consume requested CUs for sBPF failures",
-    "description": "Charge allocated compute units for sBPF failures instead of consumed compute units",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0182-conditional-cu-metering.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0182-conditional-cu-metering.md"
+    ],
+    "simds": [
+      "0182"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.8"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 752,
+    "devnet_activation_epoch": 843,
+    "comms_required": null,
+    "mainnet_activation_epoch": 760,
+    "description": "Charge allocated compute units for sBPF failures instead of consumed compute units"
   },
   {
     "key": "9ypxGLzkMxi89eDerRKXWDXe44UY2z4hBig4mDhNq5Dp",
-    "simd": "0159",
-    "version": "v2.1.0",
-    "testnetActivationEpoch": 755,
-    "devnetActivationEpoch": 847,
-    "mainnetActivationEpoch": 761,
     "title": "Relax Precompile Failure Constraint",
-    "description": "Charge transactions with precompile signature verification failures normal inclusion fees",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0159-relax-precompile-failure-constraint.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0159-relax-precompile-failure-constraint.md"
+    ],
+    "simds": [
+      "0159"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 755,
+    "devnet_activation_epoch": 847,
+    "comms_required": null,
+    "mainnet_activation_epoch": 761,
+    "description": "Charge transactions with precompile signature verification failures normal inclusion fees"
   },
   {
     "key": "FfgtauHUWKeXTzjXkua9Px4tNGBFHKZ9WaigM5VbbzFx",
-    "simd": "0162",
-    "version": "v2.2.0",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
-    "mainnetActivationEpoch": null,
     "title": "Remove accounts executable flag checks",
-    "description": "Rewrite internal logic for loading programs to pave the way for loader-v4",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0162-remove-accounts-executable-flag-checks.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0162-remove-accounts-executable-flag-checks.md"
+    ],
+    "simds": [
+      "0162"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": "Rewrite internal logic for loading programs to pave the way for loader-v4"
   },
   {
     "key": "HcW8ZjBezYYgvcbxNJwqv1t484Y2556qJsfNDWvJGZRH",
-    "simd": "0163",
-    "version": "v2.2.0",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
-    "mainnetActivationEpoch": null,
     "title": "Lift CPI Caller Restriction",
-    "description": "CPIs no longer require the callee program instruction account",
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0163-lift-cpi-caller-restriction.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0163-lift-cpi-caller-restriction.md"
+    ],
+    "simds": [
+      "0163"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": "CPIs no longer require the callee program instruction account"
   },
   {
     "key": "PaymEPK2oqwT9TXAVfadjztH2H6KfLEB9Hhd5Q5frvP",
-    "simd": "0191",
-    "version": "v2.1.0",
-    "testnetActivationEpoch": 748,
-    "devnetActivationEpoch": 839,
-    "mainnetActivationEpoch": 758,
     "title": "Charge fees for transactions that fail to load",
-    "description": null,
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0191-enable-transaction-loading-failure-fees.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0191-enable-transaction-loading-failure-fees.md"
+    ],
+    "simds": [
+      "0191"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 748,
+    "devnet_activation_epoch": 839,
+    "comms_required": null,
+    "mainnet_activation_epoch": 758,
+    "description": null
   },
   {
     "key": "5oMCU3JPaFLr8Zr4ct7yFA7jdk6Mw1RmB8K4u9ZbS42z",
-    "simd": "0207",
-    "version": "v2.1.8",
-    "testnetActivationEpoch": 764,
-    "devnetActivationEpoch": 857,
-    "mainnetActivationEpoch": 771,
     "title": "Raise Block Limits to 50M CUs",
-    "description": null,
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0207-raise-block-limits-to-50M.md"
-  },
-  {
-    "key": "3A9WtMU4aHuryD3VN7SFKdfXto8HStLb1Jj6HjkgfnGL",
-    "simd": "",
-    "version": "v2.2.0",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
-    "mainnetActivationEpoch": null,
-    "title": "Drop unchained Merkle shreds",
-    "description": null,
-    "simd_link": null
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0207-raise-block-limits-to-50M.md"
+    ],
+    "simds": [
+      "0207"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.1.8"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 764,
+    "devnet_activation_epoch": 857,
+    "comms_required": null,
+    "mainnet_activation_epoch": 771,
+    "description": null
   },
   {
     "key": "LTdLt9Ycbyoipz5fLysCi1NnDnASsZfmJLJXts5ZxZz",
-    "simd": "0223",
-    "version": "v2.2.0",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
-    "mainnetActivationEpoch": null,
     "title": "Removes Accounts Delta Hash",
-    "description": null,
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0223-removes-accounts-delta-hash.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0223-removes-accounts-delta-hash.md"
+    ],
+    "simds": [
+      "0223"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
   },
   {
     "key": "LTHasHQX6661DaDD4S6A2TFi6QBuiwXKv66fB1obfHq",
-    "simd": "0215",
-    "version": "v2.2.0",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
-    "mainnetActivationEpoch": null,
     "title": "Accounts Lt Hash",
-    "description": null,
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0215-accounts-lattice-hash.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0215-accounts-lattice-hash.md"
+    ],
+    "simds": [
+      "0215"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
   },
   {
     "key": "srremy31J5Y25FrAApwVb9kZcfXbusYMMsvTK9aWv5q",
-    "simd": "0075",
-    "version": "v2.3.0",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
-    "mainnetActivationEpoch": null,
     "title": "Enable secp256r1 precompile",
-    "description": null,
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0075-precompile-for-secp256r1-sigverify.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0075-precompile-for-secp256r1-sigverify.md"
+    ],
+    "simds": [
+      "0075"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.3.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
   },
   {
     "key": "RENtePQcDLrAbxAsP3k8dwVcnNYQ466hi2uKvALjnXx",
-    "simd": "0267",
-    "version": "v2.2.8",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
-    "mainnetActivationEpoch": null,
     "title": "Sets rent_epoch to a constant in the VM",
-    "description": null,
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0267-rent-epoch-in-vm-is-a-constant.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0267-rent-epoch-in-vm-is-a-constant.md"
+    ],
+    "simds": [
+      "0267"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.8"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
   },
   {
     "key": "FXs1zh47QbNnhXcnB6YiAQoJ4sGB91tKF3UFHLcKT7PM",
-    "simd": "0162",
-    "version": "v2.2.0",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
-    "mainnetActivationEpoch": null,
     "title": "Remove accounts executable flag checks",
-    "description": null,
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0162-remove-accounts-executable-flag-checks.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0162-remove-accounts-executable-flag-checks.md"
+    ],
+    "simds": [
+      "0162"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
   },
   {
     "key": "2B2SBNbUcr438LtGXNcJNBP2GBSxjx81F945SdSkUSfC",
-    "simd": "0175",
-    "version": "v2.2.6",
-    "testnetActivationEpoch": null,
-    "devnetActivationEpoch": null,
-    "mainnetActivationEpoch": null,
     "title": "Disable partitioned rent collection",
-    "description": null,
-    "simd_link": "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0175-disable-partitioned-rent-collection.md"
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0175-disable-partitioned-rent-collection.md"
+    ],
+    "simds": [
+      "0175"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "3NKRSwpySNwD3TvP5pHnRmkAQRsdkXWRr1WaQh8p4PWX",
+    "title": "Reject callx r10 bpf instructions",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      ""
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 668,
+    "devnet_activation_epoch": 502,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "8199Q2gMD2kwgfopK5qqVWuDbegLgpuFUFHCcUJQDN8b",
+    "title": "Error on syscall / bpf function hash collisions",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v1.18.13"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 669,
+    "devnet_activation_epoch": 502,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "HooKD5NC9QNxk25QuzCssB8ecrEzGt6eXEPBUxWp1LaR",
+    "title": "Enable last restart slot sysvar/syscall",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      "0047"
+    ],
+    "owners": [
+      "willhickey"
+    ],
+    "min_agave_versions": [
+      "v1.18.13"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 670,
+    "devnet_activation_epoch": 726,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "6Uf8S75PVh91MYgPQSHnjRAPQq6an5BDv9vomrCwDqLe",
+    "title": "Deprecate unused legacy vote tx plumbing",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v1.18.7"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 100,
+    "testnet_activation_epoch": 671,
+    "devnet_activation_epoch": 730,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "FNKCMBzYUdjhHyPdsKG2LSmdzH8TCHXn3ytj8RNBS4nG",
+    "title": "Notify state machine of duplicate proofs",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v1.18.1"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 300,
+    "testnet_activation_epoch": 673,
+    "devnet_activation_epoch": 733,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "7uZBkJXJ1HkuP6R3MJfZs7mLwymBcDbKdqbF51ZWLier",
+    "title": "Enable chained Merkle shreds",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v1.18.2"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 350,
+    "testnet_activation_epoch": 674,
+    "devnet_activation_epoch": 734,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "tvcF6b1TRz353zKuhBjinZkKzjmihXmBAHJdjNYw1sQ",
+    "title": "Timely vote credits",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v1.18.8"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 400,
+    "testnet_activation_epoch": 675,
+    "devnet_activation_epoch": 735,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "decoMktMcnmiq6t3u7g5BfgcQu91nKZr6RvMYf9z1Jb",
+    "title": "Allow commission decreases at any time",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      "0079"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v1.18.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 600,
+    "testnet_activation_epoch": 676,
+    "devnet_activation_epoch": 737,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "PERzQrt5gBD1XEe2c9XdFWqwgHY3mr7cYWbm5V772V8",
+    "title": "Partitioned Epoch Rewards with snapshot fix",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      "0118"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.0.9"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 725,
+    "testnet_activation_epoch": 706,
+    "devnet_activation_epoch": 790,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "ed9tNscbWLYBooxWA7FE2B5KHWs8A6sxfY8EzezEcoo",
+    "title": "Use verify_strict for signature verification in ed25519 precompile",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.0.4"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 750,
+    "testnet_activation_epoch": 707,
+    "devnet_activation_epoch": 791,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "FuS3FPfJDKSNot99ECLXtp3rueq36hMNStJkPJwWodLh",
+    "title": "Fail transactions when ed25519 precompile receives invalid curve",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0137-curve25519-error.md"
+    ],
+    "simds": [
+      "0137"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 1100,
+    "testnet_activation_epoch": 709,
+    "devnet_activation_epoch": 793,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "wLckV1a64ngtcKPRGU4S4grVTestXjmNjxBjaKZrAcn",
+    "title": "Update cost model to use number of requested write locks",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "1.18"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 1105,
+    "testnet_activation_epoch": 710,
+    "devnet_activation_epoch": 794,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "GDH5TVdbTPUpRnXaRyQqiKUa7uZAbZ28Q2N9bhbKoMLm",
+    "title": "Loosen CPI restrictions",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v1.14"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 1108,
+    "testnet_activation_epoch": 711,
+    "devnet_activation_epoch": 797,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": "Increases CPI data size to 10kb"
+  },
+  {
+    "key": "JE86WkYvTrzW8HgNmrHY7dFYpCmSptUpKupbo2AdQ9cG",
+    "title": "Enables deployment and execution of SBPFv1 programs",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      "0166"
+    ],
+    "owners": [
+      "Lichtso"
+    ],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      "v2.2.0"
+    ],
+    "planned_testnet_order": 4300,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "F6UVKh1ujTEFK3en2SyAL3cdVnqko1FVEXWhmdLRu6WP",
+    "title": "Enables deployment and execution of SBPFv2 programs",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      "0173",
+      "0174"
+    ],
+    "owners": [
+      "Lichtso"
+    ],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      "v2.2.0"
+    ],
+    "planned_testnet_order": 4400,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "C8XZNs1bfzaiT3YDeXZJ7G5swQWQv7tVzDnCxtHvnSpw",
+    "title": "Enables deployment and execution of SBPFv3 programs",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      "0178",
+      "0179",
+      "0189"
+    ],
+    "owners": [
+      "Lichtso"
+    ],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      "v2.2.0"
+    ],
+    "planned_testnet_order": 4500,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "8Cb77yHjPWe9wuWUfXeh6iszFGCDGNCoFk3tprViYHNm",
+    "title": "Enable loader-v4",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      "0167"
+    ],
+    "owners": [
+      "Lichtso"
+    ],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      "v2.2.0"
+    ],
+    "planned_testnet_order": 4800,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "EmhbpdVtZ2hWRGFWBDjn2i3SJD8Z36z4mpMcZJEnebnP",
+    "title": "Disable new loader-v3 deployments",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      "0167"
+    ],
+    "owners": [
+      "Lichtso"
+    ],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 4900,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "5KLGJSASDVxKPjLCDWNtnABLpZjsQSrYZ8HKwcEdAMC8",
+    "title": "Drop unchained Merkle shreds",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [
+      "AshwinSekar"
+    ],
+    "min_agave_versions": [
+      "v2.2.8"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 5000,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "6oMCUgfY6BzZ6jwB681J6ju5Bh6CjVXbd7NeWYqiXBSu",
+    "title": "Raise Block Limits to 60M CU",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      "0256"
+    ],
+    "owners": [
+      "bw-solana"
+    ],
+    "min_agave_versions": [
+      "v2.2.7"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 5100,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "6M4oQ6eXneVhtLoiAr4yRYQY43eVLjrKbiDZDJc892yk",
+    "title": "Migrate stake program to Core BPF",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0196-migrate-stake-to-core-bpf.md"
+    ],
+    "simds": [
+      "0196"
+    ],
+    "owners": [
+      "2501babe"
+    ],
+    "min_agave_versions": [
+      "v2.1.10"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 5200,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "turbRpTzBzDU6PJmWvRTbcJXXGxUs19CvQamUrRD9bN",
+    "title": "Increase Turbine fanout to wider fanout values",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [
+      "bw-solana"
+    ],
+    "min_agave_versions": [
+      "v2.2.8"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 1123,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "51VCKU5eV6mcTc9q9ArfWELU2CqDoi13hdAjr6fHMdtv",
+    "title": "Enforce retransmitter signature verification",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.8",
+      "v2.1.19"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": 1131,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "HTW2pSyErTj4BV6KBM9NZ9VBUJVxt7sacNWcf76wtzb3",
+    "title": "Enable blake3 syscall",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      ""
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "9LZdXeKGeBV6hRLdxS1rHbHoEUsKqesCC2ZAPTPKJAbK",
+    "title": "Increase transaction account lock limit",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      ""
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "2KKG3C6RBnxQo9jVVrbzsoSh41TDXLK7gBc9gduyxSzW",
+    "title": "Add Redelegate instruction to stake program",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      ""
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "EBq48m8irRKuE7ZnMTLvLg2UuGSqhe8s8oMqnmja1fJw",
+    "title": "Enable big modular exponentiation",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      ""
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "turbnbNRp22nwZCmgVVXFSshz7H7V23zMzQgA46YpmQ",
+    "title": "Experiment with different turbine fanouts for propagating shreds",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [
+      "bw-solana"
+    ],
+    "min_agave_versions": [
+      "v2.2.8"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "RfEcA95xnhuwooVAhUUksEJLZBF7xKCLuqrJoqk4Zph",
+    "title": "Extend last fec set check for 32+ retransmitter signed shreds during replay",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      ""
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "EbAhnReKK8Sf88CvAfAXbgKji8DV48rsp4q2sgHqgWef",
+    "title": "Relax intrabatch account locks",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0083-relax-entry-constraints.md"
+    ],
+    "simds": [
+      "0083"
+    ],
+    "owners": [
+      "2501babe"
+    ],
+    "min_agave_versions": [
+      ""
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
+  },
+  {
+    "key": "chaie9S2zVfuxJKNRGkyTDokLwWxx6kD2ZLsqQHaDD8",
+    "title": "Generate duplicate proofs for chained merkle root conflicts",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      ""
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v1.18.12"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [
+      ""
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": null
   }
 ]
