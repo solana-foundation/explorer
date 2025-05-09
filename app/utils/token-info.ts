@@ -69,7 +69,14 @@ export async function getTokenInfo(
 ): Promise<Token | undefined> {
     const client = makeUtlClient(cluster, connectionString);
     if (!client) return undefined;
-    const token = await client.fetchMint(address);
+
+    let token;
+    try {
+        token = await client.fetchMint(address);
+    } catch (error){
+        console.error(error);
+    }
+
     return token;
 }
 
