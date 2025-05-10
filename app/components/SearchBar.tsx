@@ -13,6 +13,7 @@ import { ActionMeta, components, ControlProps, InputActionMeta, SelectInstance }
 import AsyncSelect from 'react-select/async';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
+import { FeatureInfoType } from '../utils/feature-gate/types';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
 import { searchTokens } from '../utils/token-search';
 import { MIN_MESSAGE_LENGTH } from './inspector/RawInputCard';
@@ -62,17 +63,21 @@ export function SearchBar() {
 
     async function performSearch(search: string): Promise<SearchOptions[]> {
         const localOptions = buildOptions(search, cluster, clusterInfo?.epochInfo.epoch);
-        let tokenOptions;
-        try {
-            tokenOptions = await buildTokenOptions(search, cluster);
-        } catch (e) {
-            console.error(`Failed to build token options for search: ${e instanceof Error ? e.message : e}`);
-        }
-        const tokenOptionsAppendable = tokenOptions ? [tokenOptions] : [];
-        const domainOptions =
-            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? (await buildDomainOptions(search)) ?? [] : [];
+        const [
+            tokenOptions,
+            featureOptions,
+            domainOptions,
+        ] = await Promise.allSettled([
+            buildTokenOptions(search, cluster),
+            buildFeatureOptions(search),
+            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? (await buildDomainOptions(search)) : [],
+        ]);
 
-        return [...localOptions, ...tokenOptionsAppendable, ...domainOptions];
+        const tokenOptionsAppendable = buildAppendableSearchOptions(tokenOptions, 'token');
+        const featureOptionsAppendable = buildAppendableSearchOptions(featureOptions, 'feature gates');
+        const domainOptionsAppendable = buildAppendableSearchOptions(domainOptions, 'domain');
+
+        return [...localOptions, ...tokenOptionsAppendable, ...domainOptionsAppendable, ...featureOptionsAppendable];
     }
 
     // Substitute control component to insert custom clear button (the built in clear button only works with selected option, which is not the case)
@@ -235,6 +240,23 @@ async function buildTokenOptions(search: string, cluster: Cluster): Promise<Sear
             label: 'Tokens',
             options: matchedTokens,
         };
+    }
+}
+
+async function buildFeatureOptions(search: string): Promise<SearchOptions[] | undefined> {
+    if (search.length < 2) return;
+    const response = await fetch(`/api/feature-gates?search=${search}`);
+    const featuresList = (await response.json()).features as FeatureInfoType[];
+
+    if (featuresList) {
+        return [{
+        label: 'Feature Gates',
+        options: featuresList.map(feature => ({
+            label: feature.title,
+            pathname: '/address/' + feature.key,
+            value: [search],
+        })),
+        }];
     }
 }
 
@@ -456,6 +478,20 @@ function ClearIndicator({
             <X size={16} />
         </div>
     );
+}
+
+function buildAppendableSearchOptions(
+    searchOptions: PromiseSettledResult<SearchOptions | SearchOptions[] | undefined> | undefined,
+    name: string
+): SearchOptions[] {
+    if (!searchOptions) return [];
+    if (searchOptions.status === 'rejected') {
+        console.error(`Failed to build ${name} options for search: ${searchOptions.reason}`);
+        return [];
+    }
+    return searchOptions.value 
+        ? Array.isArray(searchOptions.value) ? searchOptions.value : [searchOptions.value]
+        : [];
 }
 
 export default SearchBar;
