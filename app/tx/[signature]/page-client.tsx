@@ -55,7 +55,7 @@ type Props = Readonly<{
 
 function getTransactionErrorReason(
     info: TransactionStatusInfo,
-    tx: ParsedTransaction | undefined,
+    tx: ParsedTransaction | undefined
 ): { errorReason: string; errorLink?: string } {
     if (typeof info.result.err === 'string') {
         return { errorReason: `Runtime Error: "${info.result.err}"` };

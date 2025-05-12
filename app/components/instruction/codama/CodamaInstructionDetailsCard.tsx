@@ -57,7 +57,7 @@ export function CodamaInstructionCard({
                 <td className="text-lg-end" colSpan={2}>
                     <Address pubkey={new PublicKey(account.address)} alignRight link />
                 </td>
-            </tr>,
+            </tr>
         );
     }
 
