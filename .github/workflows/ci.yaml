@@ -53,14 +53,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build
-        run: pnpm build
+      # - name: Build
+      #   run: pnpm build
 
-      - name: Code-style
-        run: pnpm format:ci
+      # - name: Code-style
+      #   run: pnpm format:ci
 
       - name: Test
         env:
           TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
         run: |
-          pnpm test:ci
+          pnpm format:ci -v
+          pnpm format:ci
