@@ -1,5 +1,7 @@
 import { default as fetch } from 'node-fetch';
 
+import Logger from '@/app/utils/logger';
+
 import { errors, matchMaxSizeError } from './errors';
 
 /**
@@ -17,9 +19,7 @@ export async function processBinary(data: fetch.Response) {
         if (matchMaxSizeError(error)) {
             throw errors[413];
         } else {
-            // inform about any unexpected error.
-            // might be a good one to track by Sentry, for example
-            console.debug(error);
+            Logger.debug('Debug:', error);
             throw errors[500];
         }
     }
@@ -42,9 +42,7 @@ export async function processJson(data: fetch.Response) {
             // Handle JSON syntax errors specifically
             throw errors[415];
         } else {
-            // inform about any unexpected error.
-            // might be a good one to track by Sentry, for example
-            console.debug(error);
+            Logger.debug('Debug:', error);
             throw errors[500];
         }
     }

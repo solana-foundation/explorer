@@ -1,5 +1,7 @@
 import { default as fetch, Headers } from 'node-fetch';
 
+import Logger from '@/app/utils/logger';
+
 import {
     errors,
     matchAbortError,
@@ -48,9 +50,7 @@ async function requestResource(
         if (e instanceof Error) {
             error = e;
         } else {
-            // handle any other error as general one and allow to see it at console
-            // might be a good one to track with a service like Sentry
-            console.debug(e);
+            Logger.debug('Debug:', e);
             error = new Error('Cannot fetch resource');
         }
     }

@@ -55,9 +55,13 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
                         {lookupRows.length > 0 ? (
                             <tbody className="list">{lookupRows}</tbody>
                         ) : (
-                            <div className="card-footer">
-                                <div className="text-muted text-center">No entries found</div>
-                            </div>
+                            <tbody className="card-footer">
+                                <tr>
+                                    <td colSpan={4}>
+                                        <span className="text-muted text-center">No entries found</span>
+                                    </td>
+                                </tr>
+                            </tbody>
                         )}
                     </table>
                 </div>

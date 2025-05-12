@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 
 import { FeatureInfoType } from '@/app/utils/feature-gate/types';
+import Logger from '@/app/utils/logger';
 
 // Good candidate to move to environment variables, but at the moment repository is public, so we leave them hardcoded (could be changed later)
 const OWNER = 'solana-foundation';
@@ -33,7 +34,7 @@ export async function fetchFeatureGateInformation(featureInfo?: FeatureInfoType)
 
         return resp.text();
     } catch (e) {
-        console.debug('Can not fetch link:', link);
+        Logger.debug('Debug: can not fetch link', link);
         return empty;
     }
 }

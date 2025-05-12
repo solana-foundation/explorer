@@ -14,6 +14,7 @@ env:
 jobs:
   Build-And-Test:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     strategy:
       matrix:

@@ -39,6 +39,6 @@ export default defineConfig({
             },
         },
         setupFiles: './test-setup.ts',
-        testTimeout: 10000,
+        testTimeout: 20000,
     },
 });

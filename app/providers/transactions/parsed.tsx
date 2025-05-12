@@ -75,7 +75,7 @@ export function useFetchTransactionDetails() {
         (signature: TransactionSignature) => {
             url && fetchDetails(dispatch, signature, cluster, url);
         },
-        [dispatch, cluster, url]
+        [dispatch, cluster, url],
     );
 }
 

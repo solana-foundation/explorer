@@ -1,6 +1,8 @@
 # Contributor's Guide
 
-Thank you for your interest in contributing to the Solana Explorer project! This guide will help you understand how to contribute effectively, including testing protocol integrations, ensuring CI/CD passes, and handling security-related features.
+Thank you for your interest in contributing to the Solana Explorer project! This guide will help you understand how to contribute effectively, including testing protocol integrations, ensuring CI/CD passes, and handling security-related features. 
+
+***Please do not submit one line PRs that upgrade CI workflows or dependencies unless they are related to bug fixes or performance improvements.*** If you have small changes you would like to see addressed, please file an issue instead. Thank you.
 
 ## Table of Contents
 

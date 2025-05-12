@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
 
 import { PublicKeyFromString } from '@validators/pubkey';
-import { enums, Infer, number, optional, string, type } from 'superstruct';
+import { enums, Infer, nullable, number, optional, string, type } from 'superstruct';
 
 export type InitializeBufferInfo = Infer<typeof InitializeBufferInfo>;
 export const InitializeBufferInfo = type({
@@ -59,7 +59,7 @@ export const CloseInfo = type({
 export type ExtendProgramInfo = Infer<typeof ExtendProgramInfo>;
 export const ExtendProgramInfo = type({
     additionalBytes: number(),
-    payerAccount: optional(PublicKeyFromString),
+    payerAccount: nullable(PublicKeyFromString),
     programAccount: PublicKeyFromString,
     programDataAccount: PublicKeyFromString,
     systemProgram: optional(PublicKeyFromString),
