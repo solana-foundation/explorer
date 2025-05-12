@@ -57,7 +57,7 @@ jobs:
         run: pnpm build
 
       - name: Code-style
-        run: pnpm format:ci -v
+        run: pnpm format:ci
 
       - name: Test
         env:
