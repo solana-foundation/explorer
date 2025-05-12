@@ -17,6 +17,7 @@ import { FeatureInfoType } from '../utils/feature-gate/types';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
 import { searchTokens } from '../utils/token-search';
 import { MIN_MESSAGE_LENGTH } from './inspector/RawInputCard';
+import { useDebouncedAsync } from '../utils/use-debounce-async';
 
 interface SearchOptions {
     label: string;
@@ -70,7 +71,7 @@ export function SearchBar() {
         ] = await Promise.allSettled([
             buildTokenOptions(search, cluster),
             buildFeatureOptions(search),
-            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? (await buildDomainOptions(search)) : [],
+            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? buildDomainOptions(search) : [],
         ]);
 
         const tokenOptionsAppendable = buildAppendableSearchOptions(tokenOptions, 'token');
@@ -79,6 +80,8 @@ export function SearchBar() {
 
         return [...localOptions, ...tokenOptionsAppendable, ...domainOptionsAppendable, ...featureOptionsAppendable];
     }
+
+    const debouncedPerformSearch = useDebouncedAsync(performSearch, 500);
 
     // Substitute control component to insert custom clear button (the built in clear button only works with selected option, which is not the case)
     const Control = useMemo(
@@ -133,7 +136,7 @@ export function SearchBar() {
             <AsyncSelect
                 cacheOptions
                 defaultOptions
-                loadOptions={performSearch}
+                loadOptions={debouncedPerformSearch}
                 autoFocus
                 ref={selectRef}
                 inputId={id}
@@ -243,20 +246,20 @@ async function buildTokenOptions(search: string, cluster: Cluster): Promise<Sear
     }
 }
 
-async function buildFeatureOptions(search: string): Promise<SearchOptions[] | undefined> {
+async function buildFeatureOptions(search: string): Promise<SearchOptions | undefined> {
     if (search.length < 2) return;
-    const response = await fetch(`/api/feature-gates?search=${search}`);
+    const response = await fetch(`/api/feature-gates?search=${encodeURIComponent(search)}`);
     const featuresList = (await response.json()).features as FeatureInfoType[];
 
     if (featuresList) {
-        return [{
-        label: 'Feature Gates',
-        options: featuresList.map(feature => ({
-            label: feature.title,
-            pathname: '/address/' + feature.key,
-            value: [search],
-        })),
-        }];
+        return {
+            label: 'Feature Gates',
+            options: featuresList.map(feature => ({
+                label: feature.title,
+                pathname: '/address/' + feature.key,
+                value: [feature.key || ''],
+            })),
+        };
     }
 }
 
