@@ -69,7 +69,7 @@ function parseLighthouseInstruction(ix: ReturnType<typeof upcastTransactionInstr
     const subEnum = (pix: ParsedCodamaInstruction, key: string, array = false) => {
         if (array) {
             const assertions = pix.data[key].map((assertion: Parameters<typeof renderEnumsAsStrings>[0]) =>
-                renderEnumsAsStrings(assertion),
+                renderEnumsAsStrings(assertion)
             );
             pix.data[key] = assertions;
         } else {

@@ -134,6 +134,7 @@
         "postcss": "^8.5.3",
         "postcss-import": "^16.1.0",
         "postcss@3.4.17": "link:tailwindcss/postcss@3.4.17",
+        "prettier": "^2.8.7",
         "prettier-plugin-tailwindcss": "~0.4.1",
         "react-scan": "^0.0.26",
         "sass": "^1.53.0",
