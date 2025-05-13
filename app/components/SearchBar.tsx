@@ -16,8 +16,8 @@ import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { FeatureInfoType } from '../utils/feature-gate/types';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
 import { searchTokens } from '../utils/token-search';
-import { MIN_MESSAGE_LENGTH } from './inspector/RawInputCard';
 import { useDebouncedAsync } from '../utils/use-debounce-async';
+import { MIN_MESSAGE_LENGTH } from './inspector/RawInputCard';
 
 interface SearchOptions {
     label: string;
@@ -246,8 +246,9 @@ async function buildTokenOptions(search: string, cluster: Cluster): Promise<Sear
     }
 }
 
-async function buildFeatureOptions(search: string): Promise<SearchOptions | undefined> {
-    if (search.length < 2) return;
+async function buildFeatureOptions(rawSearch: string): Promise<SearchOptions | undefined> {
+    const search = rawSearch.trim();
+    if (search.length === 0) return;
     const response = await fetch(`/api/feature-gates?search=${encodeURIComponent(search)}`);
     const featuresList = (await response.json()).features as FeatureInfoType[];
 
