@@ -11,7 +11,7 @@ overrides:
   node-fetch: ^2.6.9
   uuid: ^9.0.0
 
-pnpmfileChecksum: vg4cnl3slj2ctz3ln6baqe5c4y
+pnpmfileChecksum: eykfbaa3ibmm5bgnhlapvbpjra
 
 importers:
 
@@ -306,6 +306,9 @@ importers:
       '@types/pako':
         specifier: ^2.0.3
         version: 2.0.3
+      '@types/prettier':
+        specifier: '2'
+        version: 2.7.3
       '@types/react':
         specifier: 18.3.3
         version: 18.3.3
@@ -3546,6 +3549,9 @@ packages:
 
   '@types/parse-json@4.0.0':
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==}
+
+  '@types/prettier@2.7.3':
+    resolution: {integrity: sha512-+68kP9yzs4LMp7VNh8gdzMSPZFL44MLGqiHWvttYJe+6qnuVr4Ek9wSBQoveqY/r+LwjCcU29kNVkidwim+kYA==}
 
   '@types/prop-types@15.7.5':
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
@@ -12748,6 +12754,8 @@ snapshots:
   '@types/pako@2.0.3': {}
 
   '@types/parse-json@4.0.0': {}
+
+  '@types/prettier@2.7.3': {}
 
   '@types/prop-types@15.7.5': {}
 
