@@ -23,13 +23,13 @@ function useIdlFromAnchorProgramSeed(programAddress: string, url: string): Idl |
             .then(result => {
                 result
                     .json()
-                    .then(({ codamaIdl, error }) => {
-                        if (!codamaIdl) {
+                    .then(({ idl, error }) => {
+                        if (!idl) {
                             throw new Error(error || `IDL not found for program: ${programAddress.toString()}`);
                         }
                         cachedAnchorProgramPromises[key] = {
                             __type: 'result',
-                            result: codamaIdl,
+                            result: idl,
                         };
                     })
                     .catch(_ => {

@@ -9,10 +9,6 @@ const CACHE_HEADERS = {
     'Cache-Control': `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=60`,
 };
 
-function getProvider(url: string) {
-    return new AnchorProvider(new Connection(url), new NodeWallet(Keypair.generate()), {});
-}
-
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const url = searchParams.get('url');
@@ -24,9 +20,10 @@ export async function GET(request: Request) {
 
     const programId = new PublicKey(programAddress);
     try {
-        const codamaIdl = await Program.fetchIdl<Idl>(programId, getProvider(url));
+        const provider = new AnchorProvider(new Connection(url), new NodeWallet(Keypair.generate()), {});
+        const idl = await Program.fetchIdl<Idl>(programId, provider);
         return NextResponse.json(
-            { codamaIdl },
+            { idl },
             {
                 headers: CACHE_HEADERS,
                 status: 200,
