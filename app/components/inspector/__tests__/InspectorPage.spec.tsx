@@ -6,6 +6,7 @@ import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
 
 import { sleep } from '@/app/__tests__/mocks';
+import { GET } from '@/app/api/codama/anchor/route';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
@@ -60,6 +61,16 @@ vi.mock('next/link', () => ({
     __esModule: true,
     default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
 }));
+
+const originalFetch = global.fetch;
+
+global.fetch = vi.fn(async (input: RequestInfo, init?: RequestInit) => {
+    const target = typeof input === 'string' ? input : (input as Request).url;
+    if (typeof target === 'string' && target.startsWith('/api/codama/anchor')) {
+        return GET({ url: target } as Request);
+    }
+    return originalFetch(input, init);
+}) as unknown as jest.Mock;
 
 // Simple test to verify our mocks
 describe('TransactionInspectorPage with Squads Transaction', () => {
