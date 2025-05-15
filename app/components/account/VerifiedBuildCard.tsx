@@ -18,6 +18,7 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
         programData: data.programData,
         programId: pubkey,
     });
+
     if (!data.programData) {
         return <ErrorCard text="Account has no data" />;
     }
