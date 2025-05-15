@@ -20,8 +20,8 @@ function useIdlFromAnchorProgramSeed(programAddress: string, url: string): Idl |
 
     if (cacheEntry === undefined) {
         const promise = fetch(`/api/codama/anchor?programAddress=${programAddress}&url=${encodeURIComponent(url)}`)
-            .then(result => {
-                result
+            .then(async result => {
+                return result
                     .json()
                     .then(({ idl, error }) => {
                         if (!idl) {

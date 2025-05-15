@@ -64,13 +64,13 @@ vi.mock('next/link', () => ({
 
 const originalFetch = global.fetch;
 
-global.fetch = vi.fn(async (input: RequestInfo, init?: RequestInit) => {
+global.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const target = typeof input === 'string' ? input : (input as Request).url;
     if (typeof target === 'string' && target.startsWith('/api/codama/anchor')) {
         return GET({ url: target } as Request);
     }
     return originalFetch(input, init);
-}) as unknown as jest.Mock;
+});
 
 // Simple test to verify our mocks
 describe('TransactionInspectorPage with Squads Transaction', () => {
