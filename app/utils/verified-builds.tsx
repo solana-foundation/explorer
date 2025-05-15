@@ -95,14 +95,21 @@ export function useIsProgramVerified({
     programData: ProgramDataAccountInfo;
 }) {
     return useSWRImmutable(
-        ['is-program-verified', programId.toBase58(), hashProgramData(programData)],
-        async ([_prefix, programId, hash]) => {
+        ['is-program-verified', programId.toBase58(), hashProgramData(programData), programData.authority],
+        async ([_prefix, programId, hash, authority]) => {
             if (!programId) {
                 return false;
             }
 
             const response = await fetch(`${OSEC_REGISTRY_URL}/status/${programId}`);
             const osecInfo = (await response.json()) as OsecInfo;
+
+            // If the program data is frozen, then we can trust the API
+            if (osecInfo.is_frozen && authority === null) {
+                return osecInfo.is_verified;
+            }
+
+            // Otherwise, let's just double check that the on-chain hash matches the reported hash for verification
             return osecInfo.is_verified && hash === osecInfo['on_chain_hash'];
         }
     );
