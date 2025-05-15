@@ -15,7 +15,11 @@ export function VerifiedProgramBadge({
     pubkey: PublicKey;
 }) {
     const { cluster } = useCluster();
-    const { isLoading, data: isVerified, error } = useIsProgramVerified({
+    const {
+        isLoading,
+        data: isVerified,
+        error,
+    } = useIsProgramVerified({
         programData,
         programId: pubkey,
     });

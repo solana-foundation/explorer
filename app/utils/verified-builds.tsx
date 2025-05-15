@@ -87,7 +87,13 @@ export function useVerifiedProgramRegistry({
     return { data: trustedEntries, isLoading: isRegistryLoading };
 }
 
-export function useIsProgramVerified({ programId, programData }: { programId: PublicKey; programData: ProgramDataAccountInfo }) {
+export function useIsProgramVerified({
+    programId,
+    programData,
+}: {
+    programId: PublicKey;
+    programData: ProgramDataAccountInfo;
+}) {
     return useSWRImmutable(
         ['is-program-verified', programId.toBase58(), hashProgramData(programData)],
         async ([_prefix, programId, hash]) => {
@@ -96,7 +102,7 @@ export function useIsProgramVerified({ programId, programData }: { programId: Pu
             }
 
             const response = await fetch(`${OSEC_REGISTRY_URL}/status/${programId}`);
-            const osecInfo = await response.json() as OsecInfo;
+            const osecInfo = (await response.json()) as OsecInfo;
             return osecInfo.is_verified && hash === osecInfo['on_chain_hash'];
         }
     );
