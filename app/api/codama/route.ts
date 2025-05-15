@@ -8,9 +8,7 @@ const CACHE_HEADERS = {
     'Cache-Control': `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=60`,
 };
 
-export async function GET(
-    request: Request,
-) {
+export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const url = searchParams.get('url');
     const programAddress = searchParams.get('programAddress');
@@ -20,14 +18,20 @@ export async function GET(
     }
     try {
         const codamaIdl = await getCodamaIdl(programAddress, url);
-        return NextResponse.json({ codamaIdl }, {
-            headers: CACHE_HEADERS,
-            status: 200,
-        });
+        return NextResponse.json(
+            { codamaIdl },
+            {
+                headers: CACHE_HEADERS,
+                status: 200,
+            }
+        );
     } catch (error) {
-        return NextResponse.json({ details: error, error: error instanceof Error ? error.message : 'Unknown error' }, {
-            headers: CACHE_HEADERS,
-            status: 200,
-        });
+        return NextResponse.json(
+            { details: error, error: error instanceof Error ? error.message : 'Unknown error' },
+            {
+                headers: CACHE_HEADERS,
+                status: 200,
+            }
+        );
     }
 }

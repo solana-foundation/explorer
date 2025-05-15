@@ -83,7 +83,7 @@ function renderDetails<T extends object>(props: DetailsProps, parsed: ParsedInfo
                     {camelToTitleCase(key)} {key === 'bytes' && <span className="text-muted">(Base 64)</span>}
                 </td>
                 <td className="text-lg-end">{value}</td>
-            </tr>,
+            </tr>
         );
     }
 

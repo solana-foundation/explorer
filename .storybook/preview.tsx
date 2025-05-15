@@ -1,12 +1,15 @@
 import type { Preview } from '@storybook/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { Rubik } from 'next/font/google';
-// import './layout.min.css';
+import './layout.min.css'; // uncomment this line to see Dashkit styles. TODO: remove upon migrating from Dashkit to Tailwind
+import './dashkit-polyfill.css';
 import '@/app/styles.css';
 
+// Load font with display: swap for better loading behavior
 const rubikFont = Rubik({
-    display: 'auto',
+    display: 'swap',
+    preload: true,
     subsets: ['latin'],
     variable: '--explorer-default-font',
     weight: ['300', '400', '700'],
@@ -15,7 +18,7 @@ const rubikFont = Rubik({
 const preview: Preview = {
     parameters: {
         backgrounds: {
-            values: [{ name: 'Dark', value: '#161b19' }],
+            values: [{ name: 'Dark', value: '#161a19' }],
             default: 'Dark',
         },
         controls: {
@@ -26,11 +29,18 @@ const preview: Preview = {
         },
     },
     decorators: [
-        Story => (
-            <div id="storybook-outer" className={rubikFont.className}>
-                <Story />
-            </div>
-        ),
+        Story => {
+            // Add useEffect to ensure font is properly loaded
+            useEffect(() => {
+                document.getElementById('storybook-outer')?.classList.add(rubikFont.className);
+            }, [rubikFont]);
+
+            return (
+                <div id="storybook-outer" className={rubikFont.className}>
+                    <Story />
+                </div>
+            );
+        },
     ],
 };
 
