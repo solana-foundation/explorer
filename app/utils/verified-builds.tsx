@@ -36,6 +36,7 @@ export type OsecInfo = {
     repo_url: string;
     commit: string;
     last_verified_at: string;
+    is_frozen: boolean;
 };
 
 const TRUSTED_SIGNERS: Record<string, string> = {
@@ -84,6 +85,21 @@ export function useVerifiedProgramRegistry({
     });
 
     return { data: trustedEntries, isLoading: isRegistryLoading };
+}
+
+export function useIsProgramVerified({ programId, programData }: { programId: PublicKey; programData: ProgramDataAccountInfo }) {
+    return useSWRImmutable(
+        ['is-program-verified', programId.toBase58(), hashProgramData(programData)],
+        async ([_prefix, programId, hash]) => {
+            if (!programId) {
+                return false;
+            }
+
+            const response = await fetch(`${OSEC_REGISTRY_URL}/status/${programId}`);
+            const osecInfo = await response.json() as OsecInfo;
+            return osecInfo.is_verified && hash === osecInfo['on_chain_hash'];
+        }
+    );
 }
 
 // Method to fetch verified build information for a given program
