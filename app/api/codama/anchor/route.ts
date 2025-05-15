@@ -27,7 +27,7 @@ export async function GET(request: Request) {
             {
                 headers: CACHE_HEADERS,
                 status: 200,
-            },
+            }
         );
     } catch (error) {
         return NextResponse.json(
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
             {
                 headers: CACHE_HEADERS,
                 status: 200,
-            },
+            }
         );
     }
 }
