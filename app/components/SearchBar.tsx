@@ -12,6 +12,8 @@ import { Search, X } from 'react-feather';
 import { ActionMeta, components, ControlProps, InputActionMeta, SelectInstance } from 'react-select';
 import AsyncSelect from 'react-select/async';
 
+import FEATURES from '@/app/utils/feature-gate/featureGates.json';
+
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { FeatureInfoType } from '../utils/feature-gate/types';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
@@ -64,17 +66,17 @@ export function SearchBar() {
 
     async function performSearch(search: string): Promise<SearchOptions[]> {
         const localOptions = buildOptions(search, cluster, clusterInfo?.epochInfo.epoch);
-        const [tokenOptions, featureOptions, domainOptions] = await Promise.allSettled([
+        const [tokenOptions, domainOptions] = await Promise.allSettled([
             buildTokenOptions(search, cluster),
-            buildFeatureOptions(search),
+            // buildFeatureOptions(search),
             hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? buildDomainOptions(search) : [],
         ]);
 
         const tokenOptionsAppendable = buildAppendableSearchOptions(tokenOptions, 'token');
-        const featureOptionsAppendable = buildAppendableSearchOptions(featureOptions, 'feature gates');
+        // const featureOptionsAppendable = buildAppendableSearchOptions(featureOptions, 'feature gates');
         const domainOptionsAppendable = buildAppendableSearchOptions(domainOptions, 'domain');
 
-        return [...localOptions, ...tokenOptionsAppendable, ...domainOptionsAppendable, ...featureOptionsAppendable];
+        return [...localOptions, ...domainOptionsAppendable, ...tokenOptionsAppendable];
     }
 
     const debouncedPerformSearch = useDebouncedAsync(performSearch, 500);
@@ -242,24 +244,6 @@ async function buildTokenOptions(search: string, cluster: Cluster): Promise<Sear
     }
 }
 
-async function buildFeatureOptions(rawSearch: string): Promise<SearchOptions | undefined> {
-    const search = rawSearch.trim();
-    if (search.length === 0) return;
-    const response = await fetch(`/api/feature-gates?search=${encodeURIComponent(search)}`);
-    const featuresList = (await response.json()).features as FeatureInfoType[];
-
-    if (featuresList) {
-        return {
-            label: 'Feature Gates',
-            options: featuresList.map(feature => ({
-                label: feature.title,
-                pathname: '/address/' + feature.key,
-                value: [feature.key || ''],
-            })),
-        };
-    }
-}
-
 async function buildDomainOptions(search: string) {
     const domainInfoResponse = await fetch(`/api/domain-info/${search}`);
     const domainInfo = (await domainInfoResponse.json()) as FetchedDomainInfo;
@@ -290,6 +274,26 @@ async function buildDomainOptions(search: string) {
     }
 }
 
+function buildFeatureGateOptions(search: string) {
+    let features: FeatureInfoType[] = [];
+    if (search) {
+        features = (FEATURES as FeatureInfoType[]).filter(feature =>
+            feature.title.toUpperCase().includes(search.toUpperCase())
+        );
+    }
+
+    if (features.length > 0) {
+        return {
+            label: 'Feature Gates',
+            options: features.map(feature => ({
+                label: feature.title,
+                pathname: '/address/' + feature.key,
+                value: [feature.key || ''],
+            })),
+        };
+    }
+}
+
 // builds local search options
 function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint) {
     const search = rawSearch.trim();
@@ -315,6 +319,11 @@ function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint
     const specialOptions = buildSpecialOptions(search);
     if (specialOptions) {
         options.push(specialOptions);
+    }
+
+    const featureOptions = buildFeatureGateOptions(search);
+    if (featureOptions) {
+        options.push(featureOptions);
     }
 
     if (!isNaN(Number(search))) {
