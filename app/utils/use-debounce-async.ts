@@ -2,7 +2,7 @@ import { useRef } from 'react';
 
 export function useDebouncedAsync<TArgs extends any[], TResult>(
     fn: (...args: TArgs) => Promise<TResult>,
-    delay: number,
+    delay: number
 ): (...args: TArgs) => Promise<TResult> {
     const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
     const pending = useRef<{

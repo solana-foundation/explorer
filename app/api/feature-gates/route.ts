@@ -7,13 +7,8 @@ export async function GET(request: Request) {
     const search = searchParams.get('search')?.toUpperCase();
     let features = [...FEATURES];
     if (search) {
-        features = FEATURES.filter((feature) =>
-            feature.title.toUpperCase().includes(search)
-        );
+        features = FEATURES.filter(feature => feature.title.toUpperCase().includes(search));
     }
 
-    return NextResponse.json(
-        { features },
-        { headers: { 'Cache-Control': 'max-age-86400' }, status: 200 }
-    );
+    return NextResponse.json({ features }, { headers: { 'Cache-Control': 'max-age-86400' }, status: 200 });
 }

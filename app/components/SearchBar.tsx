@@ -64,11 +64,7 @@ export function SearchBar() {
 
     async function performSearch(search: string): Promise<SearchOptions[]> {
         const localOptions = buildOptions(search, cluster, clusterInfo?.epochInfo.epoch);
-        const [
-            tokenOptions,
-            featureOptions,
-            domainOptions,
-        ] = await Promise.allSettled([
+        const [tokenOptions, featureOptions, domainOptions] = await Promise.allSettled([
             buildTokenOptions(search, cluster),
             buildFeatureOptions(search),
             hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? buildDomainOptions(search) : [],
@@ -493,8 +489,10 @@ function buildAppendableSearchOptions(
         console.error(`Failed to build ${name} options for search: ${searchOptions.reason}`);
         return [];
     }
-    return searchOptions.value 
-        ? Array.isArray(searchOptions.value) ? searchOptions.value : [searchOptions.value]
+    return searchOptions.value
+        ? Array.isArray(searchOptions.value)
+            ? searchOptions.value
+            : [searchOptions.value]
         : [];
 }
 
