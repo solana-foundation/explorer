@@ -1,6 +1,6 @@
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
-import { Connection, Keypair } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { useMemo } from 'react';
 
 import { formatIdl } from '../utils/convertLegacyIdl';
@@ -19,22 +19,17 @@ function useIdlFromAnchorProgramSeed(programAddress: string, url: string): Idl |
     const cacheEntry = cachedAnchorProgramPromises[key];
 
     if (cacheEntry === undefined) {
-        const promise = fetch(`/api/codama/anchor?programAddress=${programAddress}&url=${encodeURIComponent(url)}`)
-            .then(async result => {
-                return result
-                    .json()
-                    .then(({ idl, error }) => {
-                        if (!idl) {
-                            throw new Error(error || `IDL not found for program: ${programAddress.toString()}`);
-                        }
-                        cachedAnchorProgramPromises[key] = {
-                            __type: 'result',
-                            result: idl,
-                        };
-                    })
-                    .catch(_ => {
-                        cachedAnchorProgramPromises[key] = { __type: 'result', result: null };
-                    });
+        const programId = new PublicKey(programAddress);
+        const promise = Program.fetchIdl<Idl>(programId, getProvider(url))
+            .then(idl => {
+                if (!idl) {
+                    throw new Error(`IDL not found for program: ${programAddress.toString()}`);
+                }
+
+                cachedAnchorProgramPromises[key] = {
+                    __type: 'result',
+                    result: idl,
+                };
             })
             .catch(_ => {
                 cachedAnchorProgramPromises[key] = { __type: 'result', result: null };
