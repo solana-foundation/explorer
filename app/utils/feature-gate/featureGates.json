@@ -591,7 +591,9 @@
       "v2.2.0"
     ],
     "min_fd_versions": [],
-    "min_jito_versions": ["v2.2.6"],
+    "min_jito_versions": [
+      "v2.2.6"
+    ],
     "planned_testnet_order": null,
     "testnet_activation_epoch": null,
     "devnet_activation_epoch": null,
@@ -635,7 +637,9 @@
       "v2.2.8"
     ],
     "min_fd_versions": [],
-    "min_jito_versions": ["v2.2.8"],
+    "min_jito_versions": [
+      "v2.2.8"
+    ],
     "planned_testnet_order": null,
     "testnet_activation_epoch": null,
     "devnet_activation_epoch": null,

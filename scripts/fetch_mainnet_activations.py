@@ -42,7 +42,7 @@ async def main():
     epoch_schedule = (await connection.get_epoch_schedule()).value
 
     for feature in features:
-        if feature['devnetActivationEpoch'] and feature['testnetActivationEpoch'] and not feature['mainnetActivationEpoch']:
+        if feature['devnet_activation_epoch'] and feature['testnet_activation_epoch'] and not feature['mainnet_activation_epoch']:
             print("Fetching feature gate", feature['key'])
             account = await connection.get_account_info(Pubkey.from_string(feature['key']))
 
@@ -58,7 +58,7 @@ async def main():
                     activation_epoch = get_epoch_for_slot(epoch_schedule, activation_slot) + 1
 
                     print(feature['key'], 'activated at', activation_epoch)
-                    feature['mainnetActivationEpoch'] = activation_epoch
+                    feature['mainnet_activation_epoch'] = activation_epoch
                 else:
                     print(feature['key'], "initialized, but not activated")
 
