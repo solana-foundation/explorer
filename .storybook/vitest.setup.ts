@@ -6,4 +6,9 @@ import * as projectAnnotations from './preview';
 // More info at: https://storybook.js.org/docs/api/portable-stories/portable-stories-vitest#setprojectannotations
 const project = setProjectAnnotations([projectAnnotations]);
 
-beforeAll(project.beforeAll);
+try {
+    beforeAll(project.beforeAll);
+} catch (error) {
+    console.error('Failed to set up beforeAll hook:', error);
+    throw error;
+}

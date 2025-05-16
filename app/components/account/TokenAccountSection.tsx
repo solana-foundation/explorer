@@ -214,7 +214,7 @@ function FungibleTokenMintAccountCard({
                         <td>Bridged Asset Contract</td>
                         <td className="text-lg-end">
                             <Copyable text={assetContractAddress}>
-                                <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
+                                <a href={tokenInfo.extensions.assetContract} target="_blank" rel="noreferrer">
                                     {assetContractAddress}
                                 </a>
                             </Copyable>
