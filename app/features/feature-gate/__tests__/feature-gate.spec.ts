@@ -8,19 +8,21 @@ import { fetchFeatureGateInformation, getLink } from '../index';
 // Taken from ../../../utils/feature-gate/featureGates.json
 const FEATURE: FeatureInfoType = {
     comms_required: null,
-    "description": "Two instructions for moving value between stake accounts without holding Withdrawer",
-    "devnet_activation_epoch": 798,
-    "key": "7bTK6Jis8Xpfrs8ZoUfiMDPazTcdPcTWheZFJTA5Z6X4",
-    "mainnet_activation_epoch": 727,
+    description: 'Two instructions for moving value between stake accounts without holding Withdrawer',
+    devnet_activation_epoch: 798,
+    key: '7bTK6Jis8Xpfrs8ZoUfiMDPazTcdPcTWheZFJTA5Z6X4',
+    mainnet_activation_epoch: 727,
     min_agave_versions: [],
     min_fd_versions: [],
     min_jito_versions: [],
     owners: [],
     planned_testnet_order: null,
-    "simd_link": ["https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0148-stake-program-move-instructions.md"],
-    "simds": ["148"],
-    "testnet_activation_epoch": 712,
-    "title": "MoveStake and MoveLamports",
+    simd_link: [
+        'https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0148-stake-program-move-instructions.md',
+    ],
+    simds: ['148'],
+    testnet_activation_epoch: 712,
+    title: 'MoveStake and MoveLamports',
 };
 
 vi.mock('node-fetch', async () => {
@@ -67,6 +69,6 @@ describe('fetchFeatureGateInformation', () => {
         const data = await fetchFeatureGateInformation(FEATURE);
 
         expect(fetch).toHaveBeenCalledWith(getLink(FEATURE.simd_link[0]), { method: 'GET' });
-        expect(data).toEqual(["# Summary"]);
+        expect(data).toEqual(['# Summary']);
     });
 });

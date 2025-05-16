@@ -28,7 +28,7 @@ export async function fetchFeatureGateInformation(featureInfo?: FeatureInfoType)
     if (fileNames === null) return empty;
 
     const results = await Promise.all(
-        fileNames.map(async (fileName) => {
+        fileNames.map(async fileName => {
             const link = getLink(fileName);
             try {
                 const resp = await fetch(link, { method: 'GET' });
