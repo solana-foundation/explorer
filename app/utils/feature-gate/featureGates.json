@@ -256,28 +256,6 @@
     "description": "Disables rent collection for accounts, to be activated when all rent-paying accounts are gone"
   },
   {
-    "key": "sr11RdZWgbHTHxSroPALe6zgaT5A1K9LcE4nfsZS4gi",
-    "title": "Enable secp256r1 precompile",
-    "simd_link": [
-      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0075-precompile-for-secp256r1-sigverify.md"
-    ],
-    "simds": [
-      "75"
-    ],
-    "owners": [],
-    "min_agave_versions": [
-      "v2.1.6"
-    ],
-    "min_fd_versions": [],
-    "min_jito_versions": [],
-    "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
-    "devnet_activation_epoch": null,
-    "comms_required": null,
-    "mainnet_activation_epoch": null,
-    "description": "Enable on-chain verification of Passkeys and the WebAuthn Standard (secp256r1) signatures"
-  },
-  {
     "key": "C97eKZygrkU4JxJsZdjgbUY7iQR7rKTr4NyDWo2E5pRm",
     "title": "Address Lookup Table to Core BPF",
     "simd_link": [
@@ -613,7 +591,7 @@
       "v2.2.0"
     ],
     "min_fd_versions": [],
-    "min_jito_versions": [],
+    "min_jito_versions": ["v2.2.6"],
     "planned_testnet_order": null,
     "testnet_activation_epoch": null,
     "devnet_activation_epoch": null,
@@ -632,16 +610,16 @@
     ],
     "owners": [],
     "min_agave_versions": [
-      "v2.3.0"
+      "v2.2.6"
     ],
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 783,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": null
+    "description": "Enable on-chain verification of Passkeys and the WebAuthn Standard (secp256r1) signatures"
   },
   {
     "key": "RENtePQcDLrAbxAsP3k8dwVcnNYQ466hi2uKvALjnXx",
@@ -657,7 +635,7 @@
       "v2.2.8"
     ],
     "min_fd_versions": [],
-    "min_jito_versions": [],
+    "min_jito_versions": ["v2.2.8"],
     "planned_testnet_order": null,
     "testnet_activation_epoch": null,
     "devnet_activation_epoch": null,
@@ -710,30 +688,6 @@
     "description": null
   },
   {
-    "key": "3NKRSwpySNwD3TvP5pHnRmkAQRsdkXWRr1WaQh8p4PWX",
-    "title": "Reject callx r10 bpf instructions",
-    "simd_link": [
-      ""
-    ],
-    "simds": [
-      ""
-    ],
-    "owners": [],
-    "min_agave_versions": [
-      ""
-    ],
-    "min_fd_versions": [],
-    "min_jito_versions": [
-      ""
-    ],
-    "planned_testnet_order": null,
-    "testnet_activation_epoch": 668,
-    "devnet_activation_epoch": 502,
-    "comms_required": null,
-    "mainnet_activation_epoch": null,
-    "description": null
-  },
-  {
     "key": "8199Q2gMD2kwgfopK5qqVWuDbegLgpuFUFHCcUJQDN8b",
     "title": "Error on syscall / bpf function hash collisions",
     "simd_link": [
@@ -754,7 +708,7 @@
     "testnet_activation_epoch": 669,
     "devnet_activation_epoch": 502,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 650,
     "description": null
   },
   {
@@ -780,7 +734,7 @@
     "testnet_activation_epoch": 670,
     "devnet_activation_epoch": 726,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 653,
     "description": null
   },
   {
@@ -804,7 +758,7 @@
     "testnet_activation_epoch": 671,
     "devnet_activation_epoch": 730,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 655,
     "description": null
   },
   {
@@ -828,7 +782,7 @@
     "testnet_activation_epoch": 673,
     "devnet_activation_epoch": 733,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 659,
     "description": null
   },
   {
@@ -852,7 +806,7 @@
     "testnet_activation_epoch": 674,
     "devnet_activation_epoch": 734,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 710,
     "description": null
   },
   {
@@ -876,7 +830,7 @@
     "testnet_activation_epoch": 675,
     "devnet_activation_epoch": 735,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 703,
     "description": null
   },
   {
@@ -900,7 +854,7 @@
     "testnet_activation_epoch": 676,
     "devnet_activation_epoch": 737,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 704,
     "description": null
   },
   {
@@ -924,31 +878,7 @@
     "testnet_activation_epoch": 706,
     "devnet_activation_epoch": 790,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
-    "description": null
-  },
-  {
-    "key": "ed9tNscbWLYBooxWA7FE2B5KHWs8A6sxfY8EzezEcoo",
-    "title": "Use verify_strict for signature verification in ed25519 precompile",
-    "simd_link": [
-      ""
-    ],
-    "simds": [
-      ""
-    ],
-    "owners": [],
-    "min_agave_versions": [
-      "v2.0.4"
-    ],
-    "min_fd_versions": [],
-    "min_jito_versions": [
-      ""
-    ],
-    "planned_testnet_order": 750,
-    "testnet_activation_epoch": 707,
-    "devnet_activation_epoch": 791,
-    "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 707,
     "description": null
   },
   {
@@ -972,7 +902,7 @@
     "testnet_activation_epoch": 709,
     "devnet_activation_epoch": 793,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 722,
     "description": null
   },
   {
@@ -996,7 +926,7 @@
     "testnet_activation_epoch": 710,
     "devnet_activation_epoch": 794,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 723,
     "description": null
   },
   {
@@ -1020,7 +950,7 @@
     "testnet_activation_epoch": 711,
     "devnet_activation_epoch": 797,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 724,
     "description": "Increases CPI data size to 10kb"
   },
   {
