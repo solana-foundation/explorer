@@ -189,7 +189,6 @@ def parse_wiki():
                         simd_links.append("")
                 
                 stored_feature = wiki_feature.to_stored_feature(simd_links)
-                print(json.dumps(stored_feature.model_dump(), indent=2))
                 
                 features.append(stored_feature)
     
@@ -226,9 +225,9 @@ def parse_wiki():
     # Combine existing and new features
     all_features = existing_features + [StoredFeature.model_validate(f.model_dump()) for f in new_features]
     
-    # # Write updated features to file
-    # with open(FEATURE_GATES_PATH, 'w') as f:
-    #     json.dump([feat.model_dump() for feat in all_features], f, indent=2)
+    # Write updated features to file
+    with open(FEATURE_GATES_PATH, 'w') as f:
+        json.dump([feat.model_dump() for feat in all_features], f, indent=2)
 
 
 if __name__ == "__main__":

@@ -146,7 +146,7 @@ function FeaturesTable({
                                             rel="noopener noreferrer"
                                             className="btn btn-sm btn-outline-primary fs-sm"
                                         >
-                                            SIMD {feature.simds[0]}
+                                            SIMD {feature.simds[0].replace(/^0+/, '')}
                                         </a>
                                     )}
                                 </td>
