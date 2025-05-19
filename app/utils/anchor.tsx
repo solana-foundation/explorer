@@ -82,11 +82,11 @@ export function getAnchorAccountsFromInstruction(
     program: Program
 ):
     | {
-        name: string;
-        isMut: boolean;
-        isSigner: boolean;
-        pda?: object;
-    }[]
+          name: string;
+          isMut: boolean;
+          isSigner: boolean;
+          pda?: object;
+      }[]
     | null {
     if (decodedIx) {
         // get ix accounts
@@ -485,8 +485,8 @@ function typeDisplayName(
     type:
         | IdlType
         | {
-            enum: string;
-        }
+              enum: string;
+          }
 ): string {
     switch (type) {
         case 'bool':
