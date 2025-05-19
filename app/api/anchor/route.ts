@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 
 import { Cluster, clusterUrl } from '@/app/utils/cluster';
 
-const CACHE_DURATION = 60 * 0; // 60 minutes
+const CACHE_DURATION = 60 * 60; // 60 minutes
 
 const CACHE_HEADERS = {
     'Cache-Control': `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=60`,
