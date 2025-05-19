@@ -17,6 +17,7 @@ export interface INavbarProps {
 export function Navbar({ children }: INavbarProps) {
     const [navOpened, navHandlers] = useDisclosure(false);
     const homePath = useClusterPath({ pathname: '/' });
+    const featureGatesPath = useClusterPath({ pathname: '/feature-gates' });
     const supplyPath = useClusterPath({ pathname: '/supply' });
     const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
     const selectedLayoutSegment = useSelectedLayoutSegment();
@@ -40,10 +41,10 @@ export function Navbar({ children }: INavbarProps) {
                     <ul className="navbar-nav me-auto">
                         <li className="nav-item">
                             <Link
-                                className={`nav-link${selectedLayoutSegment === null ? ' active' : ''}`}
-                                href={homePath}
+                                className={`nav-link${selectedLayoutSegment === 'feature-gates' ? ' active' : ''}`}
+                                href={featureGatesPath}
                             >
-                                Cluster Stats
+                                Feature Gates
                             </Link>
                         </li>
                         <li className="nav-item">
