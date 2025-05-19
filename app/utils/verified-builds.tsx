@@ -215,8 +215,8 @@ function useEnrichedOsecInfo({
     const message = TRUSTED_SIGNERS[osecInfo?.signer || '']
         ? 'Verification information provided by a trusted signer.'
         : osecInfo.is_frozen
-        ? 'Verification information provided by the program deployer.'
-        : 'Verification information provided by the program authority.';
+            ? 'Verification information provided by the program deployer.'
+            : 'Verification information provided by the program authority.';
 
     const enrichedOsecInfo: OsecRegistryInfo = {
         ...osecInfo,
@@ -225,8 +225,8 @@ function useEnrichedOsecInfo({
         verification_status: osecInfo.is_verified
             ? VerificationStatus.Verified
             : pdaData
-            ? VerificationStatus.PdaUploaded
-            : VerificationStatus.NotVerified,
+                ? VerificationStatus.PdaUploaded
+                : VerificationStatus.NotVerified,
         verify_command: '',
     };
     enrichedOsecInfo.repo_url = pdaData.gitUrl;

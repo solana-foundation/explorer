@@ -26,7 +26,11 @@ export function ProgramMultisigCard({ data }: { data: UpgradeableLoaderAccountDa
 function ProgramMultisigCardInner({ programAuthority }: { programAuthority: PublicKey | null | undefined }) {
     const { cluster, url } = useCluster();
     const { data: squadMapInfo } = useSquadsMultisigLookup(programAuthority, cluster);
-    const anchorProgram = useAnchorProgram(squadMapInfo?.version === 'v3' ? SQUADS_V3_ADDRESS : SQUADS_V4_ADDRESS, url);
+    const anchorProgram = useAnchorProgram(
+        squadMapInfo?.version === 'v3' ? SQUADS_V3_ADDRESS : SQUADS_V4_ADDRESS,
+        url,
+        cluster
+    );
     const { data: squadInfo } = useSquadsMultisig(
         anchorProgram.program,
         squadMapInfo?.multisig,

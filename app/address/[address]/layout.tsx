@@ -589,8 +589,8 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
 }
 
 function AnchorProgramIdlLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
-    const { url } = useCluster();
-    const { idl } = useAnchorProgram(pubkey.toString(), url);
+    const { url, cluster } = useCluster();
+    const { idl } = useAnchorProgram(pubkey.toString(), url, cluster);
     const anchorProgramPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
@@ -608,8 +608,8 @@ function AnchorProgramIdlLink({ tab, address, pubkey }: { tab: Tab; address: str
 }
 
 function AccountDataLink({ address, tab, programId }: { address: string; tab: Tab; programId: PublicKey }) {
-    const { url } = useCluster();
-    const { program: accountAnchorProgram } = useAnchorProgram(programId.toString(), url);
+    const { url, cluster } = useCluster();
+    const { program: accountAnchorProgram } = useAnchorProgram(programId.toString(), url, cluster);
     const accountDataPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;

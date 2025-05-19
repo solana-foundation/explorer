@@ -11,8 +11,8 @@ import { DownloadableButton } from '../common/Downloadable';
 import { IDLBadge } from '../common/IDLBadge';
 
 export function AnchorProgramCard({ programId }: { programId: string }) {
-    const { url } = useCluster();
-    const { idl } = useAnchorProgram(programId, url);
+    const { url, cluster } = useCluster();
+    const { idl } = useAnchorProgram(programId, url, cluster);
     const [collapsedValue, setCollapsedValue] = useState<boolean | number>(1);
 
     if (!idl) {

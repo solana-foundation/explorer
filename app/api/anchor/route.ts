@@ -1,9 +1,11 @@
+import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
+import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
+import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 
-import { getCodamaIdl } from '@/app/components/instruction/codama/getCodamaIdl';
 import { Cluster, clusterUrl } from '@/app/utils/cluster';
 
-const CACHE_DURATION = 30 * 60; // 30 minutes
+const CACHE_DURATION = 60 * 0; // 60 minutes
 
 const CACHE_HEADERS = {
     'Cache-Control': `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=60`,
@@ -24,10 +26,12 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Invalid cluster' }, { status: 400 });
     }
 
+    const programId = new PublicKey(programAddress);
     try {
-        const codamaIdl = await getCodamaIdl(programAddress, url);
+        const provider = new AnchorProvider(new Connection(url), new NodeWallet(Keypair.generate()), {});
+        const idl = await Program.fetchIdl<Idl>(programId, provider);
         return NextResponse.json(
-            { codamaIdl },
+            { idl },
             {
                 headers: CACHE_HEADERS,
                 status: 200,

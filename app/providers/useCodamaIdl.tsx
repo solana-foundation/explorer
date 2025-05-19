@@ -2,17 +2,18 @@ import { fetch } from 'cross-fetch';
 import useSWRImmutable from 'swr/immutable';
 
 import { getCodamaIdl } from '../components/instruction/codama/getCodamaIdl';
+import { Cluster } from '../utils/cluster';
 
 const PMP_IDL_ENABLED = process.env.NEXT_PUBLIC_PMP_IDL_ENABLED === 'true';
 
-export function useCodamaIdl(programAddress: string, url: string) {
+export function useCodamaIdl(programAddress: string, url: string, cluster: Cluster) {
     const { data } = useSWRImmutable(`codama-idl-${programAddress}-${url}`, async () => {
         if (!PMP_IDL_ENABLED) {
             return null;
         }
 
         try {
-            const response = await fetch(`/api/codama?programAddress=${programAddress}&url=${encodeURIComponent(url)}`);
+            const response = await fetch(`/api/codama?programAddress=${programAddress}&cluster=${cluster}`);
             if (response.ok) {
                 return response.json().then(data => data.codamaIdl);
             }
