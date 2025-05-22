@@ -3,7 +3,7 @@ import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 
-import { Cluster, clusterUrl } from '@/app/utils/cluster';
+import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
 const CACHE_DURATION = 60 * 60; // 60 minutes
 
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Invalid query params' }, { status: 400 });
     }
 
-    const url = Number(clusterProp) in Cluster && clusterUrl(Number(clusterProp) as Cluster, '');
+    const url = Number(clusterProp) in Cluster && serverClusterUrl(Number(clusterProp) as Cluster, '');
 
     if (!url) {
         return NextResponse.json({ error: 'Invalid cluster' }, { status: 400 });
