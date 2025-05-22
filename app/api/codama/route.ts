@@ -37,7 +37,6 @@ export async function GET(request: Request) {
         return NextResponse.json(
             { details: error, error: error instanceof Error ? error.message : 'Unknown error' },
             {
-                headers: CACHE_HEADERS,
                 status: 200,
             }
         );

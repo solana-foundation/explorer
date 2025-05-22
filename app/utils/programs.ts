@@ -96,6 +96,9 @@ export enum PROGRAM_NAMES {
 
     // Lighthouse
     LIGHTHOUSE_PROGRAM = 'Lighthouse Program',
+
+    // Program Metadata
+    PROGRAM_METADATA = 'Program Metadata Program',
 }
 
 const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
@@ -320,6 +323,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     Port7uDYB3wk6GJAw4KT1WpTeMtSu9bTcChBHkX2LfR: {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.PORT,
+    },
+    ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.PROGRAM_METADATA,
     },
     QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto: {
         deployments: LIVE_CLUSTERS,
