@@ -18,7 +18,7 @@ Thank you for your interest in contributing to the Solana Explorer project! This
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/explorer.git`
+2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/explorer`
 3. Install dependencies: `pnpm install`
 4. Create a new branch for your feature: `git checkout -b feature/your-feature-name`
 
