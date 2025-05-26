@@ -1,4 +1,4 @@
-// import LogRocket from 'logrocket';
+import LogRocket from 'logrocket';
 
 enum LOG_LEVEL {
     ERROR,
@@ -32,11 +32,8 @@ export default class StraightforwardLogger {
     static debug(message: any, ...other: any[]) {
         isLoggable(3) && this.writeLog({ level: 'debug', messages: [message, ...other] });
     }
-    static logError(...messages: any[]) {
-        this.writeLog({ level: 'error', messages });
-    }
     static writeLog({ level = 'debug', messages }: { level: 'debug' | 'error'; messages: any[] }) {
         console[level](...messages);
-        // LogRocket[level](...messages);
+        LogRocket[level](...messages);
     }
 }
