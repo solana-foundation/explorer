@@ -1,6 +1,7 @@
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
+import Logger from '@utils/logger';
 import { useMemo } from 'react';
 
 import { formatIdl } from '../utils/convertLegacyIdl';
@@ -56,7 +57,7 @@ export function useAnchorProgram(programAddress: string, url: string): { program
             const program = new Program(formatIdl(idl, programAddress), getProvider(url));
             return program;
         } catch (e) {
-            console.error('Error creating anchor program for', programAddress, e, { idl });
+            Logger.error('Error creating anchor program for', programAddress, e, { idl });
             return null;
         }
     }, [idl, programAddress, url]);

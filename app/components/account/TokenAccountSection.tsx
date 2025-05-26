@@ -9,6 +9,7 @@ import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { displayTimestamp } from '@utils/date';
 import { normalizeTokenAmount } from '@utils/index';
+import Logger from '@utils/logger';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import { TokenExtensionType } from '@validators/accounts/token-extension';
@@ -104,7 +105,7 @@ export function TokenAccountSection({
         }
     } catch (err) {
         if (cluster !== Cluster.Custom) {
-            console.error(err, {
+            Logger.error(err, {
                 address: account.pubkey.toBase58(),
             });
         }

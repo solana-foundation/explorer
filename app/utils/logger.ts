@@ -1,3 +1,5 @@
+// import LogRocket from 'logrocket';
+
 enum LOG_LEVEL {
     ERROR,
     WARN,
@@ -23,11 +25,18 @@ export default class StraightforwardLogger {
             error = maybeError;
         } else {
             error = new Error('Unrecognized error');
-            isLoggable(3) && console.debug(maybeError);
+            isLoggable(3) && this.writeLog({ level: 'debug', messages: [maybeError] });
         }
-        isLoggable(0) && console.error(error, ...other);
+        isLoggable(0) && this.writeLog({ level: 'error', messages: [error, ...other] });
     }
     static debug(message: any, ...other: any[]) {
-        isLoggable(3) && console.debug(message, ...other);
+        isLoggable(3) && this.writeLog({ level: 'debug', messages: [message, ...other] });
+    }
+    static logError(...messages: any[]) {
+        this.writeLog({ level: 'error', messages });
+    }
+    static writeLog({ level = 'debug', messages }: { level: 'debug' | 'error'; messages: any[] }) {
+        console[level](...messages);
+        // LogRocket[level](...messages);
     }
 }

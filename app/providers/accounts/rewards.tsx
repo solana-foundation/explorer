@@ -6,6 +6,7 @@ import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Connection, InflationReward, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
+import Logger from '@utils/logger';
 import React from 'react';
 
 const REWARDS_AVAILABLE_EPOCH = new Map<Cluster, number>([
@@ -93,7 +94,7 @@ async function fetchRewards(
             fromEpoch = epochInfo.epoch - 1;
         } catch (error) {
             if (cluster !== Cluster.Custom) {
-                console.error(error, { url });
+                Logger.error(error, { url });
             }
 
             return dispatch({
@@ -115,7 +116,7 @@ async function fetchRewards(
             return result[0];
         } catch (error) {
             if (cluster !== Cluster.Custom) {
-                console.error(error, { url });
+                Logger.error(error, { url });
             }
         }
         return null;

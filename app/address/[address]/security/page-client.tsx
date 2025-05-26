@@ -1,5 +1,4 @@
 'use client';
-
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
 import { SecurityCard } from '@components/account/SecurityCard';
 import React from 'react';

@@ -152,6 +152,9 @@ importers:
       lighthouse-sdk:
         specifier: ^2.0.1
         version: 2.0.1(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@7.5.10(bufferutil@4.0.7)(utf-8-validate@5.0.10))
+      logrocket:
+        specifier: ^10.0.0
+        version: 10.0.0
       micromatch:
         specifier: 4.0.8
         version: 4.0.8
@@ -6112,6 +6115,9 @@ packages:
   log-symbols@4.1.0:
     resolution: {integrity: sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg==}
     engines: {node: '>=10'}
+
+  logrocket@10.0.0:
+    resolution: {integrity: sha512-LUTWvqy9Xz+ejbPaPr0vBmlgzGRY5DVO0Kvx3xgo0L77RrRgNzyDBRi/gI4iu6H2xznVuxMAOS3nMwIamjcDwQ==}
 
   longest-streak@3.1.0:
     resolution: {integrity: sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g==}
@@ -15878,6 +15884,8 @@ snapshots:
     dependencies:
       chalk: 4.1.2
       is-unicode-supported: 0.1.0
+
+  logrocket@10.0.0: {}
 
   longest-streak@3.1.0: {}
 

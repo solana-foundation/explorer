@@ -12,6 +12,7 @@ import {
     parseSetLoadedAccountsDataSizeLimitInstruction,
 } from '@solana-program/compute-budget';
 import { microLamportsToLamportsString } from '@utils/index';
+import Logger from '@utils/logger';
 import React from 'react';
 import { address } from 'web3js-experimental';
 
@@ -198,10 +199,7 @@ export function ComputeBudgetDetailsCard({
             }
         }
     } catch (error) {
-        console.error(error, {
-            signature: signature,
-            url: url,
-        });
+        Logger.error(error, { signature: signature, url: url });
     }
 
     return (

@@ -16,6 +16,7 @@ import {
 } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { pubkeyToString } from '@utils/index';
+import Logger from '@utils/logger';
 import { assertIsTokenProgram, TokenProgram } from '@utils/programs';
 import { ParsedAddressLookupTableAccount } from '@validators/accounts/address-lookup-table';
 import { ConfigAccount } from '@validators/accounts/config';
@@ -261,7 +262,7 @@ async function fetchMultipleAccounts({
                         try {
                             parsedData = await handleParsedAccountData(connection, pubkey, accountData);
                         } catch (error) {
-                            console.error(error, { address: pubkey.toBase58(), url });
+                            Logger.error(error, { address: pubkey.toBase58(), url });
                         }
                     }
 
@@ -296,7 +297,7 @@ async function fetchMultipleAccounts({
             }
         } catch (error) {
             if (cluster !== Cluster.Custom) {
-                console.error(error, { url });
+                Logger.error(error, { url });
             }
 
             for (const pubkey of batch) {
@@ -471,7 +472,7 @@ const getMetaDataJSON = async (
                     resolve(undefined);
                 });
         } catch (ex) {
-            console.error(ex);
+            Logger.error(ex);
             resolve(undefined);
         }
     });
@@ -518,7 +519,7 @@ export function useMintAccountInfo(address: string | undefined): MintAccountInfo
 
             return create(parsedData.parsed.info, MintAccountInfo);
         } catch (err) {
-            console.error(err, { address });
+            Logger.error(err, { address });
         }
     }, [address, accountInfo]);
 }
@@ -538,7 +539,7 @@ export function useTokenAccountInfo(address: string | undefined): TokenAccountIn
 
             return create(parsedData.parsed.info, TokenAccountInfo);
         } catch (err) {
-            console.error(err, { address });
+            Logger.error(err, { address });
         }
     }, [address, accountInfo]);
 }

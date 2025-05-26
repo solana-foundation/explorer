@@ -1,4 +1,5 @@
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
+import Logger from '@utils/logger';
 import base58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
@@ -239,7 +240,7 @@ export function RawInput({
             try {
                 buffer = Uint8Array.from(atob(input), c => c.charCodeAt(0));
             } catch (err) {
-                console.error(err);
+                Logger.error(err);
                 setError('Input must be base58/base64 encoded or a valid account address');
                 return;
             }

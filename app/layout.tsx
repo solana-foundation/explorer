@@ -6,6 +6,7 @@ import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';
 import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
+import Logger from '@utils/logger';
 import type { Viewport } from 'next';
 import dynamic from 'next/dynamic';
 import { Rubik } from 'next/font/google';
@@ -36,10 +37,13 @@ const rubikFont = Rubik({
 export default function RootLayout({
     analytics,
     children,
+    logrocket,
 }: {
     analytics?: React.ReactNode;
+    logrocket?: React.ReactNode;
     children: React.ReactNode;
 }) {
+    Logger.logError('RootLayout is being rendered', { analytics, logrocket });
     return (
         <html lang="en" className={`${rubikFont.variable}`}>
             <head>
@@ -67,6 +71,7 @@ export default function RootLayout({
                     </ClusterProvider>
                 </ScrollAnchorProvider>
                 {analytics}
+                {logrocket}
             </body>
         </html>
     );

@@ -64,6 +64,7 @@
         "humanize-duration-ts": "^2.1.1",
         "ipaddr.js": "^2.2.0",
         "lighthouse-sdk": "^2.0.1",
+        "logrocket": "^10.0.0",
         "micromatch": "4.0.8",
         "moment": "^2.29.4",
         "next": "14.2.25",

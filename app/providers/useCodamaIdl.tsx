@@ -1,6 +1,8 @@
 import { fetch } from 'cross-fetch';
 import useSWRImmutable from 'swr/immutable';
 
+import Logger from '@/app/utils/logger';
+
 import { getCodamaIdl } from '../components/instruction/codama/getCodamaIdl';
 
 const PMP_IDL_ENABLED = process.env.NEXT_PUBLIC_PMP_IDL_ENABLED === 'true';
@@ -22,7 +24,7 @@ export function useCodamaIdl(programAddress: string, url: string) {
             }
             return null;
         } catch (error) {
-            console.error('Error fetching codama idl', error);
+            Logger.error('Error fetching codama idl', error);
             return null;
         }
     });

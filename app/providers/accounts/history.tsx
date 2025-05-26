@@ -11,6 +11,7 @@ import {
     TransactionSignature,
 } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
+import Logger from '@utils/logger';
 import React from 'react';
 
 const MAX_TRANSACTION_BATCH_SIZE = 10;
@@ -140,7 +141,7 @@ async function fetchAccountHistory(
         status = FetchStatus.Fetched;
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
+            Logger.error(error, { url });
         }
         status = FetchStatus.FetchFailed;
     }
@@ -152,7 +153,7 @@ async function fetchAccountHistory(
             transactionMap = await fetchParsedTransactions(url, signatures);
         } catch (error) {
             if (cluster !== Cluster.Custom) {
-                console.error(error, { url });
+                Logger.error(error, { url });
             }
             status = FetchStatus.FetchFailed;
         }

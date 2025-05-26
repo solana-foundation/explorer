@@ -4,6 +4,7 @@ import * as Cache from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Connection, PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
+import Logger from '@utils/logger';
 import React from 'react';
 
 export enum FetchStatus {
@@ -106,7 +107,7 @@ export async function fetchBlock(dispatch: Dispatch, url: string, cluster: Clust
     } catch (err) {
         status = FetchStatus.FetchFailed;
         if (cluster !== Cluster.Custom) {
-            console.error(err, { tags: { url } });
+            Logger.error(err, { tags: { url } });
         }
     }
 
