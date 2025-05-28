@@ -221,10 +221,11 @@ export function populatePartialParsedTokenExtension(
             };
         }
         case 'scaledUiAmountConfig': {
-            const description = 'Allows the token program to scale the UI amount of the token by an updatable multiplier';
+            const description =
+                'Allows the token program to scale the UI amount of the token by an updatable multiplier';
             return {
                 description,
-                externalLinks: [{label: 'Docs', url: 'https://solana.com/docs/tokens/extensions/scaled-ui-amount'}],
+                externalLinks: [{ label: 'Docs', url: 'https://solana.com/docs/tokens/extensions/scaled-ui-amount' }],
                 name: 'Scaled UI Amount',
                 status: 'active',
                 tooltip: description,
@@ -234,11 +235,13 @@ export function populatePartialParsedTokenExtension(
             const description = 'Allows the token program to pause all transfers';
             return {
                 description,
-                externalLinks: [{label: 'Docs', url: 'https://www.solana-program.com/docs/token-2022/extensions#pausable'}],
+                externalLinks: [
+                    { label: 'Docs', url: 'https://www.solana-program.com/docs/token-2022/extensions#pausable' },
+                ],
                 name: 'Pausable',
                 status: 'active',
                 tooltip: description,
-            }
+            };
         }
         case 'unparseableExtension':
         default:

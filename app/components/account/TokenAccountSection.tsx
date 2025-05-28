@@ -516,7 +516,6 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
         'nonTransferable',
         'nonTransferableAccount',
         'cpiGuard',
-        'pausableConfig',
         'permanentDelegate',
         'transferHook',
         'transferHookAccount',
@@ -529,6 +528,7 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
         'confidentialTransferFeeAmount',
         'confidentialTransferMint',
         'interestBearingConfig',
+        'pausableConfig',
         'scaledUiAmountConfig',
         'transferFeeConfig',
         'tokenGroup',
@@ -804,20 +804,21 @@ export function TokenExtensionRow(
         case 'pausableConfig': {
             const extension = create(tokenExtension.state, PausableConfig);
             return (
-                <tr>
-                    {extension.authority && (
-                        <>
-                            <td>Authority</td>
-                            <td className="text-lg-end">
-                                <Address pubkey={extension.authority} alignRight link />
-                            </td>
-                        </>
-                    )}
+                <>
+                    {headerStyle === 'header' ? <HHeader name="Pausable" /> : null}
                     <tr>
+                        {extension.authority && (
+                            <>
+                                <td>Authority</td>
+                                <td className="text-lg-end">
+                                    <Address pubkey={extension.authority} alignRight link />
+                                </td>
+                            </>
+                        )}
                         <td>Paused</td>
                         <td className="text-lg-end">{extension.paused ? 'paused' : 'not paused'}</td>
                     </tr>
-                </tr>
+                </>
             );
         }
         case 'permanentDelegate': {

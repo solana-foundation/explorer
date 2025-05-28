@@ -229,7 +229,7 @@ describe('TokenExtensionRow', () => {
                 authority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
                 multiplier: 2,
                 newMultiplier: 4.22,
-                newMultiplierEffectiveTimestamp: 1743000000,
+                newMultiplierEffectiveTimestamp: 1743000000, // 2025-03-26 10:40:00
             },
         } as TokenExtension;
 
@@ -246,7 +246,7 @@ describe('TokenExtensionRow', () => {
         expect(await screen.findByText('Scaled UI Amount')).toBeInTheDocument();
         expect(screen.getByText('2')).toBeInTheDocument();
         expect(screen.getByText('4.22')).toBeInTheDocument();
-        expect(screen.getByText('1743000000')).toBeInTheDocument();
+        expect(screen.getByText('Mar 26, 2025 at 10:40:00 Eastern Daylight Time')).toBeInTheDocument();
     });
 
     test('should render pausableConfig extension', async () => {

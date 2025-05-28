@@ -77,5 +77,4 @@ export function serverClusterUrl(cluster: Cluster, customUrl: string): string {
     }
 }
 
-
 export const DEFAULT_CLUSTER = Cluster.MainnetBeta;
