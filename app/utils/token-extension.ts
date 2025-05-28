@@ -232,7 +232,8 @@ export function populatePartialParsedTokenExtension(
             };
         }
         case 'pausableConfig': {
-            const description = 'Allows the token program to pause all transfers';
+            const description =
+                'Allows the token program to pause all interactions including transfers, mints, and burns';
             return {
                 description,
                 externalLinks: [

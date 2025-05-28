@@ -164,8 +164,8 @@ export const TokenGroupMember = type({
 
 export const ScaledUiAmountConfig = type({
     authority: nullable(PublicKeyFromString),
-    multiplier: number(),
-    newMultiplier: number(),
+    multiplier: string(),
+    newMultiplier: string(),
     newMultiplierEffectiveTimestamp: number(),
 });
 
