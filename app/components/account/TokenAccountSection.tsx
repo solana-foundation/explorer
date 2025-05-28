@@ -806,18 +806,20 @@ export function TokenExtensionRow(
             return (
                 <>
                     {headerStyle === 'header' ? <HHeader name="Pausable" /> : null}
-                    <tr>
+                    <>
                         {extension.authority && (
-                            <>
+                            <tr>
                                 <td>Authority</td>
                                 <td className="text-lg-end">
                                     <Address pubkey={extension.authority} alignRight link />
                                 </td>
-                            </>
+                            </tr>
                         )}
-                        <td>Paused</td>
-                        <td className="text-lg-end">{extension.paused ? 'paused' : 'not paused'}</td>
-                    </tr>
+                        <tr>
+                            <td>Paused</td>
+                            <td className="text-lg-end">{extension.paused ? 'paused' : 'not paused'}</td>
+                        </tr>
+                    </>
                 </>
             );
         }
