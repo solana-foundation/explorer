@@ -25,7 +25,9 @@ import {
     MemoTransfer,
     MetadataPointer,
     MintCloseAuthority,
+    PausableConfig,
     PermanentDelegate,
+    ScaledUiAmountConfig,
     TokenExtension,
     TokenGroup,
     TokenGroupMember,
@@ -34,8 +36,6 @@ import {
     TransferFeeConfig,
     TransferHook,
     TransferHookAccount,
-    ScaledUiAmountConfig,
-    PausableConfig,
 } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { capitalCase } from 'change-case';
