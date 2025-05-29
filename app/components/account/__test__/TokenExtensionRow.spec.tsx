@@ -227,8 +227,8 @@ describe('TokenExtensionRow', () => {
             extension: 'scaledUiAmountConfig',
             state: {
                 authority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-                multiplier: 2,
-                newMultiplier: 4.22,
+                multiplier: '2',
+                newMultiplier: '4.22',
                 newMultiplierEffectiveTimestamp: 1743000000, // 2025-03-26 10:40:00
             },
         } as TokenExtension;
