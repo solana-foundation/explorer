@@ -43,7 +43,8 @@ export function TokenExtensionsCard({
         throw new Error('Can not fetch token info.');
     }
 
-    const symbol = mintExtensions.find(({ extension }) => extension === 'tokenMetadata')?.state.symbol || tokenInfo?.symbol;
+    const symbol =
+        mintExtensions.find(({ extension }) => extension === 'tokenMetadata')?.state.symbol || tokenInfo?.symbol;
 
     return (
         <div className="card">

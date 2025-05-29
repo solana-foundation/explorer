@@ -796,7 +796,9 @@ export function TokenExtensionRow(
                     </tr>
                     <tr>
                         <td>New Multiplier Effective Timestamp</td>
-                        <td className="text-lg-end">{displayTimestamp(extension.newMultiplierEffectiveTimestamp * 1000)}</td>
+                        <td className="text-lg-end">
+                            {displayTimestamp(extension.newMultiplierEffectiveTimestamp * 1000)}
+                        </td>
                     </tr>
                 </>
             );
