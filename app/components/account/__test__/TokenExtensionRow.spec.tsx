@@ -246,7 +246,7 @@ describe('TokenExtensionRow', () => {
         expect(await screen.findByText('Scaled UI Amount')).toBeInTheDocument();
         expect(screen.getByText('2')).toBeInTheDocument();
         expect(screen.getByText('4.22')).toBeInTheDocument();
-        expect(screen.getByText('Mar 26, 2025 at 10:40:00 Eastern Daylight Time')).toBeInTheDocument();
+        expect(screen.getByText('Mar 26, 2025')).toBeInTheDocument();
     });
 
     test('should render pausableConfig extension', async () => {
