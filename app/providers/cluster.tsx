@@ -2,6 +2,7 @@
 
 import { Cluster, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
 import { localStorageIsAvailable } from '@utils/local-storage';
+import Logger from '@utils/logger';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
 import { createSolanaRpc } from 'web3js-experimental';
@@ -162,7 +163,7 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
         });
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            console.error(error, { clusterUrl: clusterUrl(cluster, customUrl) });
+            Logger.error(error, { clusterUrl: clusterUrl(cluster, customUrl) });
         }
         dispatch({
             cluster,

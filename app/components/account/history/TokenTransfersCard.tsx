@@ -13,6 +13,7 @@ import { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstructi
 import { Cluster } from '@utils/cluster';
 import { normalizeTokenAmount } from '@utils/index';
 import { InstructionContainer } from '@utils/instruction';
+import Logger from '@utils/logger';
 import React, { useMemo } from 'react';
 import Moment from 'react-moment';
 import { create } from 'superstruct';
@@ -230,7 +231,7 @@ function getTransfer(
             }
         } catch (error) {
             if (cluster === Cluster.MainnetBeta) {
-                console.error(error, {
+                Logger.error(error, {
                     signature,
                 });
             }

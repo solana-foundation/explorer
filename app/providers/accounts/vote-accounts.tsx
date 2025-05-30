@@ -1,5 +1,6 @@
 import { useCluster } from '@providers/cluster';
 import { Cluster } from '@utils/cluster';
+import Logger from '@utils/logger';
 import React from 'react';
 import { createSolanaRpc } from 'web3js-experimental';
 
@@ -29,7 +30,7 @@ async function fetchVoteAccounts(
         setVoteAccounts(voteAccounts);
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
+            Logger.error(error, { url });
         }
     }
 }

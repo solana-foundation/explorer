@@ -15,6 +15,7 @@ import {
     VersionedTransaction,
 } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
+import Logger from '@utils/logger';
 import { InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
 
@@ -254,7 +255,7 @@ function useSimulator(message: VersionedMessage) {
                     setError('TransactionError');
                 }
             } catch (err) {
-                console.error(err);
+                Logger.error(err);
                 setLogs(null);
                 if (err instanceof Error) {
                     setError(err.message);

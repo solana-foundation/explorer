@@ -1,6 +1,7 @@
 import { Address } from '@components/common/Address';
 import { BPF_LOADER_PROGRAM_ID, ParsedInstruction, ParsedTransaction, SignatureResult } from '@solana/web3.js';
 import { wrap } from '@utils/index';
+import Logger from '@utils/logger';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
@@ -35,9 +36,7 @@ export function BpfLoaderDetailsCard(props: DetailsProps) {
                 return <UnknownDetailsCard {...props} />;
         }
     } catch (error) {
-        console.error(error, {
-            signature: props.tx.signatures[0],
-        });
+        Logger.error(error, { signature: props.tx.signatures[0] });
         return <UnknownDetailsCard {...props} />;
     }
 }

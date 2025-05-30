@@ -9,6 +9,7 @@
 import { Address } from 'web3js-experimental';
 
 import { Cluster } from './cluster';
+import Logger from './logger';
 
 type TokenSearchApiResponseToken = {
     address: Address;
@@ -60,14 +61,14 @@ export async function searchTokens(search: string, cluster: Cluster): Promise<Se
         if (apiResponse.status >= 400) {
             try {
                 const errorJsonBody = await apiResponse.json();
-                console.error(new Error('Error calling token search API'), {
+                Logger.error(new Error('Error calling token search API'), {
                     chainId: chainId.toString(),
                     errorJsonBody,
                     search,
                 });
             } catch {
                 // no JSON body for error
-                console.error(new Error('Error calling token search API'), { chainId: chainId.toString(), search });
+                Logger.error(new Error('Error calling token search API'), { chainId: chainId.toString(), search });
             }
             return [];
         }
@@ -79,7 +80,7 @@ export async function searchTokens(search: string, cluster: Cluster): Promise<Se
             value: [token.name, token.symbol, token.address],
         }));
     } catch (error) {
-        console.error(new Error('Error parsing token search API response'), { chainId: chainId.toString(), search });
+        Logger.error(new Error('Error parsing token search API response'), { chainId: chainId.toString(), search });
         return [];
     }
 }
