@@ -6,6 +6,7 @@ import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
 
 import { sleep } from '@/app/__tests__/mocks';
+import { GET } from '@/app/api/anchor/route';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
@@ -68,6 +69,15 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
         'ASwDJP5mzxV1dfov2eQz5WAVEy833nwK17VLcjsrZsZf',
         'https://api.mainnet-beta.solana.com',
     ];
+    const originalFetch = global.fetch;
+
+    global.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const target = typeof input === 'string' ? input : (input as Request).url;
+        if (typeof target === 'string' && target.startsWith('/api/anchor')) {
+            return GET({ url: target } as Request);
+        }
+        return originalFetch(input, init);
+    });
 
     beforeEach(async () => {
         // sleep to allow not facing 429s

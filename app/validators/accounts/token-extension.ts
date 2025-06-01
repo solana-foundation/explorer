@@ -26,6 +26,8 @@ const ExtensionType = enums([
     'groupMemberPointer',
     'tokenGroup',
     'tokenGroupMember',
+    'scaledUiAmountConfig',
+    'pausableConfig',
     'unparseableExtension',
 ]);
 
@@ -158,4 +160,16 @@ export const TokenGroupMember = type({
     group: PublicKeyFromString,
     memberNumber: number(),
     mint: PublicKeyFromString,
+});
+
+export const ScaledUiAmountConfig = type({
+    authority: nullable(PublicKeyFromString),
+    multiplier: string(),
+    newMultiplier: string(),
+    newMultiplierEffectiveTimestamp: number(),
+});
+
+export const PausableConfig = type({
+    authority: nullable(PublicKeyFromString),
+    paused: boolean(),
 });

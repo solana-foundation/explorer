@@ -9,6 +9,15 @@ import { TokenExtensionsStatusRow } from '../TokenExtensionsStatusRow';
 
 const meta = {
     component: TokenExtensionsStatusRow,
+    decorators: [
+        Story => (
+            <table>
+                <tbody>
+                    <Story />
+                </tbody>
+            </table>
+        ),
+    ],
     parameters: {
         nextjs: {
             appDirectory: true,

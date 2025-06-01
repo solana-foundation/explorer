@@ -222,6 +222,55 @@ describe('TokenExtensionRow', () => {
         expect(screen.getByText('4%')).toBeInTheDocument();
     });
 
+    test('should render scaledUiAmountConfig extension', async () => {
+        const data = {
+            extension: 'scaledUiAmountConfig',
+            state: {
+                authority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+                multiplier: '2',
+                newMultiplier: '4.22',
+                newMultiplierEffectiveTimestamp: 1743000000, // 2025-03-26 10:40:00
+            },
+        } as TokenExtension;
+
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <AccountsProvider>
+                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
+                    </AccountsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>
+        );
+
+        expect(await screen.findByText('Scaled UI Amount')).toBeInTheDocument();
+        expect(screen.getByText('2')).toBeInTheDocument();
+        expect(screen.getByText('4.22')).toBeInTheDocument();
+    });
+
+    test('should render pausableConfig extension', async () => {
+        const data = {
+            extension: 'pausableConfig',
+            state: {
+                authority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+                paused: true,
+            },
+        } as TokenExtension;
+
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <AccountsProvider>
+                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
+                    </AccountsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>
+        );
+
+        expect(await screen.findByText('Pausable')).toBeInTheDocument();
+        expect(screen.getByText('paused')).toBeInTheDocument();
+    });
+
     test('should render permanentDelegate extension', async () => {
         const data = {
             extension: 'permanentDelegate',

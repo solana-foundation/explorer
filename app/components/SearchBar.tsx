@@ -12,9 +12,13 @@ import { Search, X } from 'react-feather';
 import { ActionMeta, components, ControlProps, InputActionMeta, SelectInstance } from 'react-select';
 import AsyncSelect from 'react-select/async';
 
+import FEATURES from '@/app/utils/feature-gate/featureGates.json';
+
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
+import { FeatureInfoType } from '../utils/feature-gate/types';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
 import { searchTokens } from '../utils/token-search';
+import { useDebouncedAsync } from '../utils/use-debounce-async';
 import { MIN_MESSAGE_LENGTH } from './inspector/RawInputCard';
 
 interface SearchOptions {
@@ -62,18 +66,20 @@ export function SearchBar() {
 
     async function performSearch(search: string): Promise<SearchOptions[]> {
         const localOptions = buildOptions(search, cluster, clusterInfo?.epochInfo.epoch);
-        let tokenOptions;
-        try {
-            tokenOptions = await buildTokenOptions(search, cluster);
-        } catch (e) {
-            console.error(`Failed to build token options for search: ${e instanceof Error ? e.message : e}`);
-        }
-        const tokenOptionsAppendable = tokenOptions ? [tokenOptions] : [];
-        const domainOptions =
-            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? (await buildDomainOptions(search)) ?? [] : [];
+        const [tokenOptions, domainOptions] = await Promise.allSettled([
+            buildTokenOptions(search, cluster),
+            // buildFeatureOptions(search),
+            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? buildDomainOptions(search) : [],
+        ]);
 
-        return [...localOptions, ...tokenOptionsAppendable, ...domainOptions];
+        const tokenOptionsAppendable = buildAppendableSearchOptions(tokenOptions, 'token');
+        // const featureOptionsAppendable = buildAppendableSearchOptions(featureOptions, 'feature gates');
+        const domainOptionsAppendable = buildAppendableSearchOptions(domainOptions, 'domain');
+
+        return [...localOptions, ...domainOptionsAppendable, ...tokenOptionsAppendable];
     }
+
+    const debouncedPerformSearch = useDebouncedAsync(performSearch, 500);
 
     // Substitute control component to insert custom clear button (the built in clear button only works with selected option, which is not the case)
     const Control = useMemo(
@@ -128,7 +134,7 @@ export function SearchBar() {
             <AsyncSelect
                 cacheOptions
                 defaultOptions
-                loadOptions={performSearch}
+                loadOptions={debouncedPerformSearch}
                 autoFocus
                 ref={selectRef}
                 inputId={id}
@@ -268,6 +274,26 @@ async function buildDomainOptions(search: string) {
     }
 }
 
+function buildFeatureGateOptions(search: string) {
+    let features: FeatureInfoType[] = [];
+    if (search) {
+        features = (FEATURES as FeatureInfoType[]).filter(feature =>
+            feature.title.toUpperCase().includes(search.toUpperCase())
+        );
+    }
+
+    if (features.length > 0) {
+        return {
+            label: 'Feature Gates',
+            options: features.map(feature => ({
+                label: feature.title,
+                pathname: '/address/' + feature.key,
+                value: [feature.key || ''],
+            })),
+        };
+    }
+}
+
 // builds local search options
 function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint) {
     const search = rawSearch.trim();
@@ -293,6 +319,11 @@ function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint
     const specialOptions = buildSpecialOptions(search);
     if (specialOptions) {
         options.push(specialOptions);
+    }
+
+    const featureOptions = buildFeatureGateOptions(search);
+    if (featureOptions) {
+        options.push(featureOptions);
     }
 
     if (!isNaN(Number(search))) {
@@ -456,6 +487,22 @@ function ClearIndicator({
             <X size={16} />
         </div>
     );
+}
+
+function buildAppendableSearchOptions(
+    searchOptions: PromiseSettledResult<SearchOptions | SearchOptions[] | undefined> | undefined,
+    name: string
+): SearchOptions[] {
+    if (!searchOptions) return [];
+    if (searchOptions.status === 'rejected') {
+        console.error(`Failed to build ${name} options for search: ${searchOptions.reason}`);
+        return [];
+    }
+    return searchOptions.value
+        ? Array.isArray(searchOptions.value)
+            ? searchOptions.value
+            : [searchOptions.value]
+        : [];
 }
 
 export default SearchBar;

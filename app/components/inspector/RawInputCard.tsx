@@ -231,13 +231,18 @@ export function RawInput({
             if (err instanceof Error) setError(err.message);
         }
 
-        // If not an account address, try to parse as base64 transaction data
         try {
-            buffer = Uint8Array.from(atob(input), c => c.charCodeAt(0));
+            // Try base58 decode, use result as Uint8Array
+            buffer = new Uint8Array(base58.decode(input));
         } catch (err) {
-            console.error(err);
-            setError('Input must be base64 encoded or a valid account address');
-            return;
+            // If base58 fails, try base64
+            try {
+                buffer = Uint8Array.from(atob(input), c => c.charCodeAt(0));
+            } catch (err) {
+                console.error(err);
+                setError('Input must be base58/base64 encoded or a valid account address');
+                return;
+            }
         }
 
         try {
@@ -277,7 +282,7 @@ export function RawInput({
         }
     }, [value, onInput]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const placeholder = 'Paste a raw base64 encoded transaction message or Squads vault transaction account';
+    const placeholder = 'Paste a raw base58/base64 encoded transaction message or Squads vault transaction account';
     return (
         <div className="card">
             <div className="card-header">

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useCluster } from '@/app/providers/cluster';
 import { Cluster } from '@/app/utils/cluster';
 import { useClusterPath } from '@/app/utils/url';
-import { useVerifiedProgram } from '@/app/utils/verified-builds';
+import { useIsProgramVerified } from '@/app/utils/verified-builds';
 import { ProgramDataAccountInfo } from '@/app/validators/accounts/upgradeable-program';
 
 export function VerifiedProgramBadge({
@@ -15,9 +15,12 @@ export function VerifiedProgramBadge({
     pubkey: PublicKey;
 }) {
     const { cluster } = useCluster();
-    const { isLoading, data: registryInfo } = useVerifiedProgram({
-        programAuthority: programData.authority ? new PublicKey(programData.authority) : null,
-        programData: programData,
+    const {
+        isLoading,
+        data: isVerified,
+        error,
+    } = useIsProgramVerified({
+        programData,
         programId: pubkey,
     });
     const verifiedBuildTabPath = useClusterPath({ pathname: `/address/${pubkey.toBase58()}/verified-build` });
@@ -34,16 +37,22 @@ export function VerifiedProgramBadge({
                 <span className="badge">Loading...</span>
             </h3>
         );
-    } else if (registryInfo) {
+    } else if (error) {
+        return (
+            <h3 className="mb-0">
+                <span className="badge bg-warning-soft rank">Error fetching verified build information</span>
+            </h3>
+        );
+    } else {
         let badgeClass = '';
         let badgeText = '';
 
-        if (registryInfo.is_verified) {
+        if (isVerified) {
             badgeClass = 'bg-success-soft';
             badgeText = 'Program Source Verified';
         } else {
             badgeClass = 'bg-warning-soft';
-            badgeText = 'Not verified';
+            badgeText = 'Program Not Verified';
         }
 
         return (
@@ -51,14 +60,6 @@ export function VerifiedProgramBadge({
                 <Link className={`c-pointer badge ${badgeClass} rank`} href={verifiedBuildTabPath}>
                     {badgeText}
                 </Link>
-            </h3>
-        );
-    } else {
-        const message =
-            !registryInfo || !registryInfo['repo_url'] ? 'Source Code Not Provided' : 'Program Not Verified';
-        return (
-            <h3 className="mb-0">
-                <span className="badge bg-warning-soft rank">{message}</span>
             </h3>
         );
     }

@@ -21,9 +21,11 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
 }
 
 export function TokenExtensionsCard({
+    decimals,
     address,
     extensions: mintExtensions,
 }: {
+    decimals: number;
     address: string;
     extensions: TokenExtension[];
 }) {
@@ -37,9 +39,12 @@ export function TokenExtensionsCard({
     // check for nullish decimals to satisty constraint for required decimals.
     if (isLoading) {
         return <LoadingCard />;
-    } else if (!tokenInfo || tokenInfo.decimals === null) {
+    } else if (tokenInfo && tokenInfo.decimals !== null && decimals !== tokenInfo.decimals) {
         throw new Error('Can not fetch token info.');
     }
+
+    const symbol =
+        mintExtensions.find(({ extension }) => extension === 'tokenMetadata')?.state.symbol || tokenInfo?.symbol;
 
     return (
         <div className="card">
@@ -47,10 +52,10 @@ export function TokenExtensionsCard({
             <div className="card-body p-0 e-overflow-x-scroll">
                 <TokenExtensionsSection
                     address={address}
-                    decimals={tokenInfo.decimals}
+                    decimals={decimals}
                     extensions={mintExtensions}
                     parsedExtensions={extensions}
-                    symbol={tokenInfo.symbol}
+                    symbol={symbol}
                 />
             </div>
         </div>

@@ -220,6 +220,30 @@ export function populatePartialParsedTokenExtension(
                 tooltip: description,
             };
         }
+        case 'scaledUiAmountConfig': {
+            const description =
+                'Allows the token program to scale the UI amount of the token by an updatable multiplier';
+            return {
+                description,
+                externalLinks: [{ label: 'Docs', url: 'https://solana.com/docs/tokens/extensions/scaled-ui-amount' }],
+                name: 'Scaled UI Amount',
+                status: 'active',
+                tooltip: description,
+            };
+        }
+        case 'pausableConfig': {
+            const description =
+                'Allows the token program to pause all interactions including transfers, mints, and burns';
+            return {
+                description,
+                externalLinks: [
+                    { label: 'Docs', url: 'https://www.solana-program.com/docs/token-2022/extensions#pausable' },
+                ],
+                name: 'Pausable',
+                status: 'active',
+                tooltip: description,
+            };
+        }
         case 'unparseableExtension':
         default:
             return {

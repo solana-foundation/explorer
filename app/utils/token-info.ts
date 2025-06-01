@@ -74,8 +74,8 @@ export async function getTokenInfo(
 }
 
 type UtlApiResponse = {
-    content: Token[]
-}
+    content: Token[];
+};
 
 export async function getTokenInfoWithoutOnChainFallback(
     address: PublicKey,
@@ -89,7 +89,7 @@ export async function getTokenInfoWithoutOnChainFallback(
     const response = await fetch(`https://token-list-api.solana.cloud/v1/mints?chainId=${chainId}`, {
         body: JSON.stringify({ addresses: [address.toBase58()] }),
         headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
         },
         method: 'POST',
     });
@@ -99,7 +99,7 @@ export async function getTokenInfoWithoutOnChainFallback(
         return undefined;
     }
 
-    const fetchedData = await response.json() as UtlApiResponse;
+    const fetchedData = (await response.json()) as UtlApiResponse;
     return fetchedData.content[0];
 }
 
@@ -141,9 +141,9 @@ export async function getFullTokenInfo(
     if (!sdkTokenInfo) {
         return legacyCdnTokenInfo
             ? {
-                ...legacyCdnTokenInfo,
-                verified: true,
-            }
+                  ...legacyCdnTokenInfo,
+                  verified: true,
+              }
             : undefined;
     }
 

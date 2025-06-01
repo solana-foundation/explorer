@@ -2,6 +2,19 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vitest/config';
 
+const specWorkspace = (name = 'specs') => ({
+    environment: 'jsdom',
+    globals: true,
+    name,
+    server: {
+        deps: {
+            inline: ['@noble', 'change-case', '@react-hook/previous'],
+        },
+    },
+    setupFiles: ['./test-setup.ts'],
+    testTimeout: 10000,
+});
+
 export default defineConfig({
     plugins: [react()],
     resolve: {
@@ -26,19 +39,11 @@ export default defineConfig({
         coverage: {
             provider: 'v8',
         },
-        environment: 'jsdom',
-        globals: true,
         poolOptions: {
             threads: {
                 useAtomics: true,
             },
         },
-        server: {
-            deps: {
-                inline: ['@noble', 'change-case', '@react-hook/previous'],
-            },
-        },
-        setupFiles: './test-setup.ts',
-        testTimeout: 20000,
+        ...specWorkspace(),
     },
 });

@@ -26,14 +26,26 @@ function TokenExtensionsEntriesRenderer({
 
         if (!mintInfo.extensions?.length) return <ErrorCard text="Can not fetch extensions." />;
 
-        return <TokenExtensionsCard address={address} extensions={mintInfo.extensions} />;
+        return (
+            <TokenExtensionsCard
+                decimals={Number(mintInfo.decimals)}
+                address={address}
+                extensions={mintInfo.extensions}
+            />
+        );
     } else if (parsedData && parsedData.parsed.type === 'account') {
         const accountInfo = create(parsedData.parsed.info, TokenAccountInfo);
         const address = accountInfo.mint.toBase58();
 
         if (!accountInfo.extensions?.length) return <ErrorCard text="Can not fetch extensions." />;
 
-        return <TokenExtensionsCard address={address} extensions={accountInfo.extensions} />;
+        return (
+            <TokenExtensionsCard
+                decimals={Number(accountInfo.tokenAmount.decimals)}
+                address={address}
+                extensions={accountInfo.extensions}
+            />
+        );
     } else {
         // possible cases:
         // - absent parsed data

@@ -1,0 +1,8 @@
+.next/
+.vscode
+cache/
+coverage/
+node_modules/
+dist/
+build/
+.pnpm-store/

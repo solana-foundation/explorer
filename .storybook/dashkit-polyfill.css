@@ -1,0 +1,19 @@
+:root {
+    --bs-body-bg-rgb: 22, 27, 25;
+    --bs-body-bg: #161a19;
+    --bs-body-color-rgb: 255, 255, 255;
+    --bs-body-color: #fff;
+    --bs-body-font-family: var(--explorer-default-font);
+    --bs-body-font-size: 0.9375rem;
+    --bs-body-font-weight: 400;
+    --bs-body-line-height: 1.5;
+}
+
+body {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    font-family: var(--bs-body-font-family);
+    font-size: var(--bs-body-font-size);
+    font-weight: var(--bs-body-font-weight);
+    line-height: var(--bs-body-line-height);
+}

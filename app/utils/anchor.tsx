@@ -26,12 +26,14 @@ export function AnchorProgramName({
     programId,
     url,
     defaultName = 'Unknown Program',
+    cluster,
 }: {
     programId: PublicKey;
     url: string;
     defaultName?: string;
+    cluster?: Cluster;
 }) {
-    const { program } = useAnchorProgram(programId.toString(), url);
+    const { program } = useAnchorProgram(programId.toString(), url, cluster);
     const programName = getAnchorProgramName(program) || defaultName;
     return <>{programName}</>;
 }
@@ -43,7 +45,7 @@ export function ProgramName({ programId, cluster, url }: { programId: PublicKey;
     }
     return (
         <React.Suspense fallback={<>{defaultProgramName}</>}>
-            <AnchorProgramName programId={programId} url={url} defaultName={defaultProgramName} />
+            <AnchorProgramName programId={programId} url={url} cluster={cluster} defaultName={defaultProgramName} />
         </React.Suspense>
     );
 }

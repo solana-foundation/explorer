@@ -36,6 +36,7 @@ export type OsecInfo = {
     repo_url: string;
     commit: string;
     last_verified_at: string;
+    is_frozen: boolean;
 };
 
 const TRUSTED_SIGNERS: Record<string, string> = {
@@ -73,17 +74,68 @@ export function useVerifiedProgramRegistry({
     }
 
     // Only trust entries that are verified and signed by a trusted signer or the program authority
-    const trustedEntries = registryData.filter(
-        entry => (TRUSTED_SIGNERS[entry.signer] || entry.signer === programAuthority?.toBase58()) && entry.is_verified
+    let orderedVerifiedEntries: OsecInfo[] = [];
+    if (programAuthority) {
+        const trustedEntries = registryData.filter(
+            entry =>
+                (TRUSTED_SIGNERS[entry.signer] || entry.signer === programAuthority?.toBase58()) && entry.is_verified
+        );
+
+        // Update the verification status of the trusted entries based on the on-chain hash
+        const hash = hashProgramData(programData);
+        trustedEntries.forEach(entry => {
+            entry.is_verified = hash === entry['on_chain_hash'];
+        });
+
+        const mappedBySigner: Record<string, OsecInfo> = {};
+
+        // Map the registryData by signer in order to enforce hierarchy of trust
+        trustedEntries.forEach(entry => {
+            mappedBySigner[entry.signer] = entry;
+        });
+
+        // Get the program authority's entry first, then the trusted signers
+        const hierarchy = [...(programAuthority ? [programAuthority.toBase58()] : []), ...Object.keys(TRUSTED_SIGNERS)];
+        for (const signer of hierarchy) {
+            if (mappedBySigner[signer]) {
+                orderedVerifiedEntries.push(mappedBySigner[signer]);
+            }
+        }
+    } else {
+        orderedVerifiedEntries = registryData
+            .filter(entry => entry.is_verified && entry.is_frozen)
+            .sort((a, b) => new Date(a.last_verified_at).getTime() - new Date(b.last_verified_at).getTime());
+    }
+
+    return { data: orderedVerifiedEntries, isLoading: isRegistryLoading };
+}
+
+export function useIsProgramVerified({
+    programId,
+    programData,
+}: {
+    programId: PublicKey;
+    programData: ProgramDataAccountInfo;
+}) {
+    return useSWRImmutable(
+        ['is-program-verified', programId.toBase58(), hashProgramData(programData), programData.authority],
+        async ([_prefix, programId, hash, authority]) => {
+            if (!programId) {
+                return false;
+            }
+
+            const response = await fetch(`${OSEC_REGISTRY_URL}/status/${programId}`);
+            const osecInfo = (await response.json()) as OsecInfo;
+
+            // If the program data is frozen, then we can trust the API
+            if (osecInfo.is_frozen && authority === null) {
+                return osecInfo.is_verified;
+            }
+
+            // Otherwise, let's just double check that the on-chain hash matches the reported hash for verification
+            return osecInfo.is_verified && hash === osecInfo['on_chain_hash'];
+        }
     );
-
-    // Update the verification status of the trusted entries based on the on-chain hash
-    const hash = hashProgramData(programData);
-    trustedEntries.forEach(entry => {
-        entry.is_verified = hash === entry['on_chain_hash'];
-    });
-
-    return { data: trustedEntries, isLoading: isRegistryLoading };
 }
 
 // Method to fetch verified build information for a given program
@@ -99,31 +151,15 @@ export function useVerifiedProgram({
     options?: { suspense: boolean };
     programData?: ProgramDataAccountInfo;
 }) {
-    const { data: registryData } = useVerifiedProgramRegistry({
+    const { data: orderedVerifiedEntries } = useVerifiedProgramRegistry({
         options,
         programAuthority,
         programData,
         programId,
     });
 
-    const mappedBySigner: Record<string, OsecInfo> = {};
-
-    // Map the registryData by signer in order to enforce hierarchy of trust
-    registryData?.forEach(entry => {
-        mappedBySigner[entry.signer] = entry;
-    });
-
-    // Get the program authority's entry first, then the trusted signers
-    const hierarchy = [...(programAuthority ? [programAuthority.toBase58()] : []), ...Object.keys(TRUSTED_SIGNERS)];
-    const orderedVerifiedEntries: OsecInfo[] = [];
-    for (const signer of hierarchy) {
-        if (mappedBySigner[signer]) {
-            orderedVerifiedEntries.push(mappedBySigner[signer]);
-        }
-    }
-
     // Get the first verified entry
-    const verifiedData = orderedVerifiedEntries.find(entry => entry.is_verified);
+    const verifiedData = orderedVerifiedEntries?.find(entry => entry.is_verified);
 
     return useEnrichedOsecInfo({ options, osecInfo: verifiedData, programId });
 }
@@ -178,6 +214,8 @@ function useEnrichedOsecInfo({
 
     const message = TRUSTED_SIGNERS[osecInfo?.signer || '']
         ? 'Verification information provided by a trusted signer.'
+        : osecInfo.is_frozen
+        ? 'Verification information provided by the program deployer.'
         : 'Verification information provided by the program authority.';
 
     const enrichedOsecInfo: OsecRegistryInfo = {

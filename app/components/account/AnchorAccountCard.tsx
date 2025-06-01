@@ -9,8 +9,8 @@ import React, { useMemo } from 'react';
 
 export function AnchorAccountCard({ account }: { account: Account }) {
     const { lamports } = account;
-    const { url } = useCluster();
-    const { program: anchorProgram } = useAnchorProgram(account.owner.toString(), url);
+    const { url, cluster } = useCluster();
+    const { program: anchorProgram } = useAnchorProgram(account.owner.toString(), url, cluster);
     const rawData = account.data.raw;
     const programName = getAnchorProgramName(anchorProgram) || 'Unknown Program';
 

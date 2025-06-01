@@ -1,11 +1,84 @@
 @tailwind components;
 @tailwind utilities;
 
+/* port existing card components as is from Dashkit */
+@layer components {
+    .e-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        word-wrap: break-word;
+        background-color: #1e2423;
+        background-clip: border-box;
+        border: 1px solid #282d2b;
+        border-radius: 0.5rem;
+
+        margin-bottom: 1.5rem;
+        border-color: #111;
+        box-shadow: 0 0.75rem 1.5rem rgba(20, 24, 22, 0.5);
+    }
+    .e-card-body {
+        flex: 1 1 auto;
+        padding: 1.5rem 1.5rem;
+    }
+
+    @keyframes e-spinner-border {
+        to {
+            transform: rotate(360deg) /* rtl:ignore */;
+        }
+    }
+    .e-spinner-border {
+        display: inline-block;
+        width: 2rem;
+        height: 2rem;
+        vertical-align: -0.125em;
+        border: 0.25em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: 0.75s linear infinite spinner-border;
+    }
+    .e-spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.2em;
+    }
+    @keyframes e-spinner-grow {
+        0% {
+            transform: scale(0);
+        }
+        50% {
+            opacity: 1;
+            transform: none;
+        }
+    }
+    .e-spinner-grow {
+        display: inline-block;
+        width: 2rem;
+        height: 2rem;
+        vertical-align: -0.125em;
+        background-color: currentColor;
+        border-radius: 50%;
+        opacity: 0;
+        animation: 0.75s linear infinite spinner-grow;
+    }
+    .e-spinner-grow-sm {
+        width: 1rem;
+        height: 1rem;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .e-spinner-border,
+        .e-spinner-grow {
+            animation-duration: 1.5s;
+        }
+    }
+}
+
 @media (max-width: 575px) {
-    .max-xs\:e-hidden {
+    .max-sm\:e-hidden {
         display: none;
     }
-    .max-xs\:e-col-span-6 {
+    .max-sm\:e-col-span-6 {
         grid-column: span 6 / span 6;
     }
     /* Adjust template for small displays so columns do not overlap each other */
@@ -15,7 +88,7 @@
 }
 
 @media (max-width: 767px) {
-    .max-sm\:e-hidden {
+    .max-md\:e-hidden {
         display: none;
     }
 }

@@ -9,8 +9,9 @@ import { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
+import { isFeatureActivated } from '@/app/features/feature-gate';
 import { useCluster } from '@/app/providers/cluster';
-import { Cluster } from '@/app/utils/cluster';
+import { Cluster, clusterName } from '@/app/utils/cluster';
 import { FeatureInfoType } from '@/app/utils/feature-gate/types';
 import { getFeatureInfo } from '@/app/utils/feature-gate/utils';
 
@@ -82,9 +83,9 @@ const BaseFeatureCard = ({
             <tr>
                 <td>SIMD</td>
                 <td className="text-lg-end">
-                    {featureInfo.simd && featureInfo.simd_link ? (
-                        <a href={featureInfo.simd_link} target="_blank" rel="noopener noreferrer" className="">
-                            SIMD {featureInfo.simd} <ExternalLinkIcon className="align-text-top" size={13} />
+                    {featureInfo.simds[0] && featureInfo.simd_link[0] ? (
+                        <a href={featureInfo.simd_link[0]} target="_blank" rel="noopener noreferrer" className="">
+                            SIMD {featureInfo.simds[0]} <ExternalLinkIcon className="align-text-top" size={13} />
                         </a>
                     ) : (
                         <code>No link</code>
@@ -138,60 +139,37 @@ const BaseFeatureCard = ({
     );
 };
 
+function getClusterActivationEpoch(featureInfo: FeatureInfoType, cluster: Cluster) {
+    if (cluster === Cluster.Custom) return null;
+    if (cluster === Cluster.MainnetBeta) return featureInfo.mainnet_activation_epoch;
+    if (cluster === Cluster.Devnet) return featureInfo.devnet_activation_epoch;
+    if (cluster === Cluster.Testnet) return featureInfo.testnet_activation_epoch;
+    return null;
+}
+
 function ClusterActivationEpochAtCluster({ featureInfo, cluster }: { featureInfo: FeatureInfoType; cluster: Cluster }) {
     if (cluster === Cluster.Custom) return null;
 
-    const { mainnetActivationEpoch, devnetActivationEpoch, testnetActivationEpoch } = featureInfo;
+    const notActivated = <code>No Activation Epoch</code>;
 
-    // Show empty state unless there is any info about Activation
-    if (!mainnetActivationEpoch && !devnetActivationEpoch && !testnetActivationEpoch) return <code>No Epoch</code>;
-
-    return (
-        <>
-            {mainnetActivationEpoch && cluster === Cluster.MainnetBeta && (
-                <div>
-                    <Link href={`/epoch/${featureInfo.mainnetActivationEpoch}?cluster=mainnet`} className="epoch-link">
-                        Mainnet Epoch {featureInfo.mainnetActivationEpoch}
-                    </Link>
-                </div>
-            )}
-            {devnetActivationEpoch && cluster === Cluster.Devnet && (
-                <div>
-                    <Link href={`/epoch/${featureInfo.devnetActivationEpoch}?cluster=devnet`} className="epoch-link">
-                        Devnet Epoch {featureInfo.devnetActivationEpoch}
-                    </Link>
-                </div>
-            )}
-            {testnetActivationEpoch && cluster === Cluster.Testnet && (
-                <div>
-                    <Link href={`/epoch/${featureInfo.testnetActivationEpoch}?cluster=testnet`} className="epoch-link">
-                        Testnet Epoch {featureInfo.testnetActivationEpoch}
-                    </Link>
-                </div>
-            )}
-        </>
+    const clusterActivationEpoch = getClusterActivationEpoch(featureInfo, cluster);
+    return clusterActivationEpoch ? (
+        <Link href={`/epoch/${clusterActivationEpoch}?cluster=${cluster}`} className="epoch-link">
+            {clusterName(cluster)} Epoch {clusterActivationEpoch}
+        </Link>
+    ) : (
+        notActivated
     );
 }
 
 function FeatureActivatedAtCluster({ featureInfo, cluster }: { featureInfo: FeatureInfoType; cluster: Cluster }) {
     if (cluster === Cluster.Custom) return null;
-
-    const { mainnetActivationEpoch, devnetActivationEpoch, testnetActivationEpoch } = featureInfo;
-
     // Show empty state unless there is any info about Activation
-    if (!mainnetActivationEpoch && !devnetActivationEpoch && !testnetActivationEpoch) return <code>Not activated</code>;
+    const notActivated = <code>Not yet activated on {clusterName(cluster)}</code>;
+
+    const isActivated = isFeatureActivated(featureInfo, cluster);
 
     return (
-        <>
-            {cluster === Cluster.MainnetBeta && mainnetActivationEpoch && (
-                <span className="badge bg-success">Active on Mainnet</span>
-            )}
-            {cluster === Cluster.Devnet && devnetActivationEpoch && (
-                <span className="badge bg-success">Active on Devnet</span>
-            )}
-            {cluster === Cluster.Testnet && testnetActivationEpoch && (
-                <span className="badge bg-success">Active on Testnet</span>
-            )}
-        </>
+        <>{isActivated ? <span className="badge bg-success">Active on {clusterName(cluster)}</span> : notActivated}</>
     );
 }

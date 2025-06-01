@@ -76,7 +76,7 @@ function InspectorInstructionCard({
 
     const programId = ix.programId;
     const programName = getProgramName(programId.toBase58(), cluster);
-    const anchorProgram = useAnchorProgram(programId.toString(), url);
+    const anchorProgram = useAnchorProgram(programId.toString(), url, cluster);
 
     if (anchorProgram.program) {
         return (

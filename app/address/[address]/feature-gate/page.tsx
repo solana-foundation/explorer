@@ -29,7 +29,7 @@ export default async function FeatureGatePage({ params: { address } }: Props) {
     // TODO: figure out a configuration to render GFM table correctly
     return (
         <FeatureGateCard>
-            <ReactMarkdown remarkPlugins={[remarkGFM, remarkFrontmatter]}>{data}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGFM, remarkFrontmatter]}>{data[0]}</ReactMarkdown>
         </FeatureGateCard>
     );
 }

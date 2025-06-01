@@ -127,6 +127,7 @@ export function InstructionsSection({ signature }: SignatureProps) {
                                     tx={transaction}
                                     childIndex={childIndex}
                                     url={url}
+                                    cluster={cluster}
                                 />
                             );
                             innerCards.push(res);
@@ -143,6 +144,7 @@ export function InstructionsSection({ signature }: SignatureProps) {
                             tx={transaction}
                             innerCards={innerCards}
                             url={url}
+                            cluster={cluster}
                         />
                     );
                 })}
@@ -160,6 +162,7 @@ function InstructionCard({
     innerCards,
     childIndex,
     url,
+    cluster,
 }: {
     ix: ParsedInstruction | PartiallyDecodedInstruction;
     tx: ParsedTransaction;
@@ -169,10 +172,11 @@ function InstructionCard({
     innerCards?: JSX.Element[];
     childIndex?: number;
     url: string;
+    cluster: Cluster;
 }) {
     const key = `${index}-${childIndex}`;
-    const { program: anchorProgram } = useAnchorProgram(ix.programId.toString(), url);
-    const { codamaIdl } = useCodamaIdl(ix.programId.toString(), url);
+    const { program: anchorProgram } = useAnchorProgram(ix.programId.toString(), url, cluster);
+    const { codamaIdl } = useCodamaIdl(ix.programId.toString(), url, cluster);
 
     if ('parsed' in ix) {
         const props = {
