@@ -10,10 +10,10 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'superstruct';
 
 import { CompressedNftAccountHeader } from '@/app/components/account/CompressedNftCard';
+import { getProxiedUri } from '@/app/features/metadata/utils';
 import { useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { FullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
-import { getProxiedUri } from '@/app/features/metadata/utils';
 
 const IDENTICON_WIDTH = 64;
 
@@ -43,7 +43,6 @@ export function AccountHeader({
     }
 
     if (isToken && !isTokenInfoLoading) {
-        console.log('token', tokenInfo);
         return <TokenMintHeader address={address} mintInfo={mintInfo} parsedData={parsedData} tokenInfo={tokenInfo} />;
     }
 
@@ -95,8 +94,6 @@ function TokenMintHeader({
     );
 
     if (metadataPointerExtension && metadataExtension) {
-        console.log('pointer', metadataPointerExtension);
-        console.log('extension', metadataExtension);
         return (
             <>
                 <ErrorBoundary fallback={defaultCard}>
@@ -135,7 +132,6 @@ function Token22MintHeader({
     metadataExtension: { extension: 'tokenMetadata'; state?: any };
     metadataPointerExtension: { extension: 'metadataPointer'; state?: any };
 }) {
-    console.log('hit');
     const tokenMetadata = create(metadataExtension.state, TokenMetadata);
     const { metadataAddress } = create(metadataPointerExtension.state, MetadataPointer);
     const metadata = useMetadataJsonLink(getProxiedUri(tokenMetadata.uri), { suspense: true });
