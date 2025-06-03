@@ -13,6 +13,7 @@ import { CompressedNftAccountHeader } from '@/app/components/account/CompressedN
 import { useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { FullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
+import { getProxiedUri } from '@/app/features/metadata/utils';
 
 const IDENTICON_WIDTH = 64;
 
@@ -42,6 +43,7 @@ export function AccountHeader({
     }
 
     if (isToken && !isTokenInfoLoading) {
+        console.log('token', tokenInfo);
         return <TokenMintHeader address={address} mintInfo={mintInfo} parsedData={parsedData} tokenInfo={tokenInfo} />;
     }
 
@@ -93,6 +95,8 @@ function TokenMintHeader({
     );
 
     if (metadataPointerExtension && metadataExtension) {
+        console.log('pointer', metadataPointerExtension);
+        console.log('extension', metadataExtension);
         return (
             <>
                 <ErrorBoundary fallback={defaultCard}>
@@ -131,24 +135,23 @@ function Token22MintHeader({
     metadataExtension: { extension: 'tokenMetadata'; state?: any };
     metadataPointerExtension: { extension: 'metadataPointer'; state?: any };
 }) {
+    console.log('hit');
     const tokenMetadata = create(metadataExtension.state, TokenMetadata);
     const { metadataAddress } = create(metadataPointerExtension.state, MetadataPointer);
-    const metadata = useMetadataJsonLink(tokenMetadata.uri, { suspense: true });
+    const metadata = useMetadataJsonLink(getProxiedUri(tokenMetadata.uri), { suspense: true });
 
-    if (!metadata) {
-        throw new Error(`Could not load metadata from given URI: ${tokenMetadata.uri}`);
+    const headerTokenMetadata = {
+        logoURI: '',
+        name: tokenMetadata.name,
+    };
+    if (metadata) {
+        headerTokenMetadata.logoURI = metadata.image;
     }
 
     // Handles the basic case where MetadataPointer is referencing the Token Metadata extension directly
     // Does not handle the case where MetadataPointer is pointing at a separate account.
     if (metadataAddress?.toString() === address) {
-        return (
-            <TokenMintHeaderCard
-                address={address}
-                token={{ logoURI: metadata.image, name: metadata.name }}
-                unverified={false}
-            />
-        );
+        return <TokenMintHeaderCard address={address} token={headerTokenMetadata} unverified={false} />;
     }
     throw new Error('Metadata loading for non-token 2022 programs is not yet supported');
 }
