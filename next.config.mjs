@@ -1,3 +1,9 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const ADDRESS_ALIASES = ['account', 'accounts', 'addresses'];
 const TX_ALIASES = ['txs', 'txn', 'txns', 'transaction', 'transactions'];
 const SUPPLY_ALIASES = ['accounts', 'accounts/top'];
@@ -46,10 +52,16 @@ const nextConfig = {
         ];
     },
     webpack: (config, { isServer }) => {
+        config.resolve.alias = {
+            ...(config.resolve.alias || {}),
+            borsh: path.resolve(__dirname, 'node_modules/borsh'), // force legacy version
+        };
+
         if (!isServer) {
             // Fixes npm packages that depend on `fs` module like `@project-serum/anchor`.
             config.resolve.fallback.fs = false;
         }
+        
         return config;
     },
 };

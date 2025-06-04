@@ -50,6 +50,7 @@
         "axios": "^1.8.2",
         "bignumber.js": "^9.0.2",
         "bn.js": "5.2.1",
+        "borsh": "0.7.0",
         "bs58": "^4.0.1",
         "change-case": "^5.4.4",
         "chart.js": "^4.3.0",
@@ -84,6 +85,7 @@
         "react-select": "^5.10.1",
         "remark-frontmatter": "^4.0.1",
         "remark-gfm": "^3.0.1",
+        "sas-lib": "^1.0.6",
         "superstruct": "^0.15.3",
         "swr": "^2.2.0",
         "tailwind-merge": "^3.0.2",
@@ -155,6 +157,7 @@
             "avsc": "git://github.com/Irys-xyz/avsc#a730cc8018b79e114b6a3381bbb57760a24c6cef",
             "cross-fetch": "^3.1.5",
             "node-fetch": "^2.6.9",
+            "sas-lib>borsh": "npm:borsh@2.0.0",
             "uuid": "^9.0.0"
         }
     },

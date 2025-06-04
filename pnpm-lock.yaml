@@ -9,6 +9,7 @@ overrides:
   avsc: git://github.com/Irys-xyz/avsc#a730cc8018b79e114b6a3381bbb57760a24c6cef
   cross-fetch: ^3.1.5
   node-fetch: ^2.6.9
+  sas-lib>borsh: npm:borsh@2.0.0
   uuid: ^9.0.0
 
 pnpmfileChecksum: eykfbaa3ibmm5bgnhlapvbpjra
@@ -110,6 +111,9 @@ importers:
       bn.js:
         specifier: 5.2.1
         version: 5.2.1
+      borsh:
+        specifier: 0.7.0
+        version: 0.7.0
       bs58:
         specifier: ^4.0.1
         version: 4.0.1
@@ -212,6 +216,9 @@ importers:
       remark-gfm:
         specifier: ^3.0.1
         version: 3.0.1
+      sas-lib:
+        specifier: ^1.0.6
+        version: 1.0.6(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@7.5.10(bufferutil@4.0.7)(utf-8-validate@5.0.10))
       superstruct:
         specifier: ^0.15.3
         version: 0.15.3
@@ -4223,6 +4230,12 @@ packages:
   borsh@0.7.0:
     resolution: {integrity: sha512-CLCsZGIBCFnPtkNnieW/a8wmreDmfUtjU2m9yHrzPXIlNbqVs0AQrSatSG6vdNYUqdc83tkQi2eHfF98ubzQLA==}
 
+  borsh@2.0.0:
+    resolution: {integrity: sha512-kc9+BgR3zz9+cjbwM8ODoUB4fs3X3I5A/HtX7LZKxCLaMrEeDFoBpnhZY//DTS1VZBSs6S5v46RZRbZjRFspEg==}
+
+  borsher@4.0.0:
+    resolution: {integrity: sha512-DrbMSz/xg0bFRiiqe8S0nXEr1whp96hcEHAriKFOlpG2wTihMrg5zZNFH+m4tMcnDY/klKws2YRVHjD4jpdiKg==}
+
   bowser@2.11.0:
     resolution: {integrity: sha512-AlcaJBi/pqqJBIQ8U9Mcpc9i8Aqxn88Skv5d+xBX006BY5u8N3mGLHa5Lgppa7L/HfwgwLgZ6NYs+Ag6uUmJRA==}
 
@@ -7210,6 +7223,9 @@ packages:
 
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
+
+  sas-lib@1.0.6:
+    resolution: {integrity: sha512-6dmtgz4XiEv0KDNB1MsG9aKhJ6YhJb4bqBBcLNb7RE7FwE/8Wow9PcS7uzkmA0G3AKUfkFEDYJQFAImd6phHsQ==}
 
   sass@1.53.0:
     resolution: {integrity: sha512-zb/oMirbKhUgRQ0/GFz8TSAwRq2IlR29vOUJZOx0l8sV+CkHUfHa4u5nqrG+1VceZp7Jfj59SVW9ogdhTvJDcQ==}
@@ -13626,6 +13642,13 @@ snapshots:
       bs58: 4.0.1
       text-encoding-utf-8: 1.0.2
 
+  borsh@2.0.0: {}
+
+  borsher@4.0.0:
+    dependencies:
+      borsh: 2.0.0
+      buffer: 6.0.3
+
   bowser@2.11.0: {}
 
   brace-expansion@1.1.11:
@@ -17292,6 +17315,17 @@ snapshots:
       is-regex: 1.1.4
 
   safer-buffer@2.1.2: {}
+
+  sas-lib@1.0.6(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@7.5.10(bufferutil@4.0.7)(utf-8-validate@5.0.10)):
+    dependencies:
+      '@solana/kit': 2.1.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@7.5.10(bufferutil@4.0.7)(utf-8-validate@5.0.10))
+      bn.js: 5.2.1
+      borsh: 2.0.0
+      borsher: 4.0.0
+    transitivePeerDependencies:
+      - fastestsmallesttextencoderdecoder
+      - typescript
+      - ws
 
   sass@1.53.0:
     dependencies:
