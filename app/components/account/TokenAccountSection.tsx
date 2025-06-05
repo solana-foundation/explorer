@@ -1,7 +1,8 @@
+import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { Account, NFTData, TokenProgramData, useFetchAccountInfo } from '@providers/accounts';
+import { Account, NFTData, TokenProgramData, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useCluster } from '@providers/cluster';
@@ -9,6 +10,7 @@ import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { displayTimestamp } from '@utils/date';
 import { normalizeTokenAmount } from '@utils/index';
+import { getCurrentTokenScaledUiAmountMultiplier } from '@utils/token-info';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import { TokenExtensionType } from '@validators/accounts/token-extension';
@@ -131,6 +133,7 @@ function FungibleTokenMintAccountCard({
 
     const mintExtensions = mintInfo.extensions?.slice();
     mintExtensions?.sort(cmpExtension);
+    const scaledUiAmountMultiplier = getCurrentTokenScaledUiAmountMultiplier(mintExtensions);
 
     return (
         <div className="card">
@@ -157,9 +160,12 @@ function FungibleTokenMintAccountCard({
                 <tr>
                     <td>{mintInfo.mintAuthority === null ? 'Fixed Supply' : 'Current Supply'}</td>
                     <td className="text-lg-end">
-                        {normalizeTokenAmount(mintInfo.supply, mintInfo.decimals).toLocaleString('en-US', {
-                            maximumFractionDigits: 20,
-                        })}
+                        <span>
+                            {normalizeTokenAmount(Number(mintInfo.supply) * scaledUiAmountMultiplier, mintInfo.decimals).toLocaleString('en-US', {
+                                maximumFractionDigits: 20,
+                            })}
+                        </span>
+                        <ScaledUiAmountMultiplierTooltip scaledUiAmountMultiplier={scaledUiAmountMultiplier} />
                     </td>
                 </tr>
                 {tokenInfo?.extensions?.website && (
@@ -338,6 +344,7 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
 
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useFetchAccountInfo();
+    const mint = useAccountInfo(info.mint.toBase58());
     const { cluster, url } = useCluster();
     const label = addressLabel(account.pubkey.toBase58(), cluster);
     const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, info.mint, url]);
@@ -346,6 +353,14 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
     const [symbol, setSymbol] = useState<string | undefined>(undefined);
     const accountExtensions = info.extensions?.slice();
     accountExtensions?.sort(cmpExtension);
+
+    useEffect(() => {
+        refresh(info.mint, 'parsed');
+    }, [info.mint]);
+
+    const infoParsed = mint?.data?.data.parsed;
+    const mintInfo = infoParsed && create(infoParsed?.parsed.info, MintAccountInfo);
+    const scaledUiAmountMultiplier = getCurrentTokenScaledUiAmountMultiplier(mintInfo?.extensions);
 
     const balance = info.isNative ? (
         <>
@@ -402,7 +417,10 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                 </tr>
                 <tr>
                     <td>Token balance {typeof symbol === 'string' && `(${symbol})`}</td>
-                    <td className="text-lg-end">{balance}</td>
+                    <td className="text-lg-end">
+                        {balance}
+                        <ScaledUiAmountMultiplierTooltip scaledUiAmountMultiplier={scaledUiAmountMultiplier} />
+                    </td>
                 </tr>
                 <tr>
                     <td>Status</td>

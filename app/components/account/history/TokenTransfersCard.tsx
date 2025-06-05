@@ -1,5 +1,6 @@
 'use client';
 
+import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
@@ -18,7 +19,7 @@ import Moment from 'react-moment';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
-import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
+import { calculateCurrentTokenScaledUiAmountMultiplier, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 import { extractMintDetails, MintDetails } from './common';
@@ -111,6 +112,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
             transfers.forEach(({ transfer, index, childIndex }) => {
                 let units = 'Tokens';
                 let amountString = '';
+                let scaledUiAmountMultiplier = 1;
 
                 // Loading token info, just don't show units
                 if (tokenInfoLoading) {
@@ -124,6 +126,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
 
                 if ('tokenAmount' in transfer) {
                     amountString = transfer.tokenAmount.uiAmountString;
+                    scaledUiAmountMultiplier = calculateCurrentTokenScaledUiAmountMultiplier({amount: String(transfer.tokenAmount.amount), decimals: transfer.tokenAmount.decimals, uiAmount: Number(amountString)});
                 } else {
                     let decimals = 0;
 
@@ -134,6 +137,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
                     } else if (mintMap.has(transfer.destination.toBase58())) {
                         decimals = mintMap.get(transfer.destination.toBase58())?.decimals || 0;
                     }
+                    scaledUiAmountMultiplier = calculateCurrentTokenScaledUiAmountMultiplier({amount: String(transfer.amount), decimals: decimals, uiAmount: Number(amountString)});
 
                     amountString = new Intl.NumberFormat('en-US', {
                         maximumFractionDigits: decimals,
@@ -161,6 +165,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
 
                         <td>
                             {amountString} {units}
+                            <ScaledUiAmountMultiplierTooltip scaledUiAmountMultiplier={scaledUiAmountMultiplier} />
                         </td>
 
                         <td>

@@ -1,11 +1,13 @@
 'use client';
 
+import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
+import { calculateCurrentTokenScaledUiAmountMultiplier } from '@utils/token-info';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
 import Link from 'next/link';
@@ -140,6 +142,7 @@ function HoldingsDetailTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
 function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     type MappedToken = {
         amount: string;
+        scaledUiAmountMultiplier: number;
         logoURI?: string;
         symbol?: string;
         name?: string;
@@ -150,12 +153,14 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
         const totalByMint = mappedTokens.get(mintAddress)?.amount;
 
         let amount = token.tokenAmount.uiAmountString;
+        const scaledUiAmountMultiplier = calculateCurrentTokenScaledUiAmountMultiplier({amount: token.tokenAmount.amount, decimals: token.tokenAmount.decimals, uiAmount: Number(token.tokenAmount.uiAmountString)});
         if (totalByMint !== undefined) {
             amount = new BigNumber(totalByMint).plus(token.tokenAmount.uiAmountString).toString();
         }
 
         mappedTokens.set(mintAddress, {
             amount,
+            scaledUiAmountMultiplier,
             logoURI,
             name,
             symbol,
@@ -192,6 +197,7 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 </td>
                 <td>
                     {token.amount} {token.symbol}
+                    <ScaledUiAmountMultiplierTooltip scaledUiAmountMultiplier={token.scaledUiAmountMultiplier} />
                 </td>
             </tr>
         );
