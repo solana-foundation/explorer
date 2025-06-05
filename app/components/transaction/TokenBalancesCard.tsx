@@ -7,11 +7,11 @@ import { BigNumber } from 'bignumber.js';
 import React, { useEffect, useState } from 'react';
 import useAsyncEffect from 'use-async-effect';
 
-import { create } from 'superstruct';
+import { useAccountInfos, useFetchAccountInfo } from '@/app/providers/accounts';
 import { useCluster } from '@/app/providers/cluster';
 import { getCurrentTokenScaledUiAmountMultiplier, getTokenInfos } from '@/app/utils/token-info';
-import { useAccountInfos, useFetchAccountInfo } from '@/app/providers/accounts';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
+import { create } from 'superstruct';
 import ScaledUiAmountMultiplierTooltip from '../account/token-extensions/ScaledUiAmountMultiplierTooltip';
 
 type TokenBalanceRow = {
@@ -87,7 +87,8 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
             return getCurrentTokenScaledUiAmountMultiplier(mintInfo?.extensions);
         });
         setScaledUiAmountMultipliers(new Map(rows.map((r, i) => [r.mint, scaledUiAmountMultipliers[i]])));
-    }, [tokenInfosLoading, accountInfos]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tokenInfosLoading]);
 
     const accountRows = rows.map(({ account, delta, balance, mint }) => {
         const key = account.toBase58() + mint;
@@ -178,8 +179,8 @@ export function generateTokenBalanceRows(
             continue;
         }
 
-        let postBalanceUiAmountString = uiTokenAmount.uiAmountString;
-        let preBalanceUiAmountString = preBalance?.uiTokenAmount.uiAmountString;
+        const postBalanceUiAmountString = uiTokenAmount.uiAmountString;
+        const preBalanceUiAmountString = preBalance?.uiTokenAmount.uiAmountString;
 
         // case where mint changes
         if (preBalance && preBalance.mint !== mint) {

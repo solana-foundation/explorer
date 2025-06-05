@@ -19,7 +19,11 @@ import Moment from 'react-moment';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
-import { calculateCurrentTokenScaledUiAmountMultiplier, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
+import {
+    calculateCurrentTokenScaledUiAmountMultiplier,
+    getTokenInfo,
+    getTokenInfoSwrKey,
+} from '@/app/utils/token-info';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 import { extractMintDetails, MintDetails } from './common';
@@ -126,7 +130,11 @@ export function TokenTransfersCard({ address }: { address: string }) {
 
                 if ('tokenAmount' in transfer) {
                     amountString = transfer.tokenAmount.uiAmountString;
-                    scaledUiAmountMultiplier = calculateCurrentTokenScaledUiAmountMultiplier({amount: String(transfer.tokenAmount.amount), decimals: transfer.tokenAmount.decimals, uiAmount: Number(amountString)});
+                    scaledUiAmountMultiplier = calculateCurrentTokenScaledUiAmountMultiplier({
+                        amount: String(transfer.tokenAmount.amount),
+                        decimals: transfer.tokenAmount.decimals,
+                        uiAmount: Number(amountString),
+                    });
                 } else {
                     let decimals = 0;
 
@@ -137,7 +145,11 @@ export function TokenTransfersCard({ address }: { address: string }) {
                     } else if (mintMap.has(transfer.destination.toBase58())) {
                         decimals = mintMap.get(transfer.destination.toBase58())?.decimals || 0;
                     }
-                    scaledUiAmountMultiplier = calculateCurrentTokenScaledUiAmountMultiplier({amount: String(transfer.amount), decimals: decimals, uiAmount: Number(amountString)});
+                    scaledUiAmountMultiplier = calculateCurrentTokenScaledUiAmountMultiplier({
+                        amount: String(transfer.amount),
+                        decimals: decimals,
+                        uiAmount: Number(amountString),
+                    });
 
                     amountString = new Intl.NumberFormat('en-US', {
                         maximumFractionDigits: decimals,

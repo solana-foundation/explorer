@@ -7,8 +7,8 @@ import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
-import { calculateCurrentTokenScaledUiAmountMultiplier } from '@utils/token-info';
 import { PublicKey } from '@solana/web3.js';
+import { calculateCurrentTokenScaledUiAmountMultiplier } from '@utils/token-info';
 import { BigNumber } from 'bignumber.js';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -153,15 +153,19 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
         const totalByMint = mappedTokens.get(mintAddress)?.amount;
 
         let amount = token.tokenAmount.uiAmountString;
-        const scaledUiAmountMultiplier = calculateCurrentTokenScaledUiAmountMultiplier({amount: token.tokenAmount.amount, decimals: token.tokenAmount.decimals, uiAmount: Number(token.tokenAmount.uiAmountString)});
+        const scaledUiAmountMultiplier = calculateCurrentTokenScaledUiAmountMultiplier({
+            amount: token.tokenAmount.amount,
+            decimals: token.tokenAmount.decimals,
+            uiAmount: Number(token.tokenAmount.uiAmountString),
+        });
         if (totalByMint !== undefined) {
             amount = new BigNumber(totalByMint).plus(token.tokenAmount.uiAmountString).toString();
         }
 
         mappedTokens.set(mintAddress, {
             amount,
-            scaledUiAmountMultiplier,
             logoURI,
+            scaledUiAmountMultiplier,
             name,
             symbol,
         });

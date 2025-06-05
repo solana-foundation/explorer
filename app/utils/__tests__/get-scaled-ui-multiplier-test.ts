@@ -1,6 +1,6 @@
-import { getCurrentTokenScaledUiAmountMultiplier } from '../token-info';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TokenExtension } from '../../validators/accounts/token-extension';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { getCurrentTokenScaledUiAmountMultiplier } from '../token-info';
 
 describe('getCurrentTokenScaledUiAmountMultiplier', () => {
     let originalDateNow: () => number;

@@ -356,7 +356,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
 
     useEffect(() => {
         refresh(info.mint, 'parsed');
-    }, [info.mint]);
+    }, [info.mint, refresh]);
 
     const infoParsed = mint?.data?.data.parsed;
     const mintInfo = infoParsed && create(infoParsed?.parsed.info, MintAccountInfo);

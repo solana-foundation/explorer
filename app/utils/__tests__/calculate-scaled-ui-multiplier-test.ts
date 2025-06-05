@@ -1,5 +1,5 @@
+import { describe, expect, it } from 'vitest';
 import { calculateCurrentTokenScaledUiAmountMultiplier } from '../token-info';
-import { describe, it, expect } from 'vitest';
 
 describe('calculateCurrentTokenScaledUiAmountMultiplier', () => {
     it('should calculate multiplier of 1 when raw amount equals ui amount', () => {
