@@ -73,7 +73,6 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
                 setTokenInfosLoading(false);
             }
         });
-
     }, []);
 
     const accountInfos = useAccountInfos(rows.map(r => r.mint));
@@ -88,7 +87,7 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
             return getCurrentTokenScaledUiAmountMultiplier(mintInfo?.extensions);
         });
         setScaledUiAmountMultipliers(new Map(rows.map((r, i) => [r.mint, scaledUiAmountMultipliers[i]])));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tokenInfosLoading]);
 
     const accountRows = rows.map(({ account, delta, balance, mint }) => {

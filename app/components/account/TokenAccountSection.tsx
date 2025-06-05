@@ -161,7 +161,10 @@ function FungibleTokenMintAccountCard({
                     <td>{mintInfo.mintAuthority === null ? 'Fixed Supply' : 'Current Supply'}</td>
                     <td className="text-lg-end">
                         <span>
-                            {normalizeTokenAmount(Number(mintInfo.supply) * scaledUiAmountMultiplier, mintInfo.decimals).toLocaleString('en-US', {
+                            {normalizeTokenAmount(
+                                Number(mintInfo.supply) * scaledUiAmountMultiplier,
+                                mintInfo.decimals
+                            ).toLocaleString('en-US', {
                                 maximumFractionDigits: 20,
                             })}
                         </span>
