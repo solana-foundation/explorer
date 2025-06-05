@@ -194,11 +194,11 @@ export function calculateCurrentTokenScaledUiAmountMultiplier({
     decimals,
     uiAmount,
 }: {
-    amount: String;
+    amount: string;
     decimals: number;
     uiAmount: number;
 }): number {
     const rawAmount = Number(amount);
     const rawUiAmount = uiAmountToRawAmount(uiAmount, decimals);
-    return rawUiAmount / rawAmount;
+    return rawAmount === 0 ? 0 : rawUiAmount / rawAmount;
 }
