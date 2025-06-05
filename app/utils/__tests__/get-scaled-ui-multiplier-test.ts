@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { TokenExtension } from '../../validators/accounts/token-extension';
 import { getCurrentTokenScaledUiAmountMultiplier } from '../token-info';
 

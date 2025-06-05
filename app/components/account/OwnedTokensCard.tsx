@@ -165,8 +165,8 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
         mappedTokens.set(mintAddress, {
             amount,
             logoURI,
-            scaledUiAmountMultiplier,
             name,
+            scaledUiAmountMultiplier,
             symbol,
         });
     }
