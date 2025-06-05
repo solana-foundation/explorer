@@ -198,6 +198,9 @@ export function calculateCurrentTokenScaledUiAmountMultiplier({
     uiAmount: number;
 }): number {
     const rawAmount = Number(amount);
+    if (isNaN(rawAmount)) {
+        return 0;
+    }
     const rawUiAmount = uiAmountToRawAmount(uiAmount, decimals);
-    return rawAmount === 0 ? 0 : rawUiAmount / rawAmount;
+    return rawUiAmount / rawAmount;
 }
