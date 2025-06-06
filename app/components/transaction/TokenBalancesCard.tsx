@@ -81,7 +81,7 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
             return;
         }
         const scaledUiAmountMultipliers = rows.map(r => {
-            const info = accountInfos.find(a => a.data?.pubkey.toBase58() === r.mint);
+            const info = accountInfos.find(a => a && a.data?.pubkey.toBase58() === r.mint);
             const infoParsed = info?.data?.data.parsed;
             const mintInfo = infoParsed && create(infoParsed?.parsed.info, MintAccountInfo);
             return getCurrentTokenScaledUiAmountMultiplier(mintInfo?.extensions);
