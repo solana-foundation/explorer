@@ -936,5 +936,161 @@
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": null
+  },
+  {
+    "key": "JE86WkYvTrzW8HgNmrHY7dFYpCmSptUpKupbo2AdQ9cG",
+    "title": "Feature Gate: Enables deployment and execution of SBPFv1 programs",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      "0166"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [
+      "v0.503.20214"
+    ],
+    "min_jito_versions": [
+      "v2.2.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "8Cb77yHjPWe9wuWUfXeh6iszFGCDGNCoFk3tprViYHNm",
+    "title": "Feature Gate: Enable loader-v4",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      "0167"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.13"
+    ],
+    "min_fd_versions": [
+      "v0.503.20214"
+    ],
+    "min_jito_versions": [
+      "v2.2.13"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "F6UVKh1ujTEFK3en2SyAL3cdVnqko1FVEXWhmdLRu6WP",
+    "title": "Feature Gate: Enables deployment and execution of SBPFv2 programs",
+    "simd_link": [
+      "",
+      ""
+    ],
+    "simds": [
+      "0173",
+      " 0174"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [
+      "v0.503.20214"
+    ],
+    "min_jito_versions": [
+      "v2.2.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "5KLGJSASDVxKPjLCDWNtnABLpZjsQSrYZ8HKwcEdAMC8",
+    "title": "drop unchained Merkle shreds",
+    "simd_link": [
+      ""
+    ],
+    "simds": [],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.8"
+    ],
+    "min_fd_versions": [
+      "no release yet"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "6oMCUgfY6BzZ6jwB681J6ju5Bh6CjVXbd7NeWYqiXBSu",
+    "title": "Raise Block Limits to 60M CU",
+    "simd_link": [
+      ""
+    ],
+    "simds": [
+      "0256"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.7"
+    ],
+    "min_fd_versions": [
+      "no release yet"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "C8XZNs1bfzaiT3YDeXZJ7G5swQWQv7tVzDnCxtHvnSpw",
+    "title": "Feature Gate: Enables deployment and execution of SBPFv3 programs",
+    "simd_link": [
+      "",
+      "",
+      ""
+    ],
+    "simds": [
+      "0178",
+      " 0179",
+      " 0189"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.0"
+    ],
+    "min_fd_versions": [
+      "v0.503.20214"
+    ],
+    "min_jito_versions": [
+      "v2.2.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
   }
 ]
