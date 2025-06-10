@@ -355,7 +355,7 @@
     "devnet_activation_epoch": 852,
     "comms_required": null,
     "mainnet_activation_epoch": 764,
-    "description": null
+    "description": "Blocks exceeding cost tracker limits should fail during replay with proper error"
   },
   {
     "key": "LTsNAP8h1voEVVToMNBNqoiNQex4aqfUrbFhRH3mSQ2",
@@ -509,7 +509,7 @@
     "devnet_activation_epoch": 839,
     "comms_required": null,
     "mainnet_activation_epoch": 758,
-    "description": null
+    "description": "Relax account loading rules to simplify the protocol and give block-producers more flexibility"
   },
   {
     "key": "5oMCU3JPaFLr8Zr4ct7yFA7jdk6Mw1RmB8K4u9ZbS42z",
@@ -531,7 +531,7 @@
     "devnet_activation_epoch": 857,
     "comms_required": null,
     "mainnet_activation_epoch": 771,
-    "description": null
+    "description": "Raises max block limit to 50M CUs to give additional capacity to the network"
   },
   {
     "key": "LTdLt9Ycbyoipz5fLysCi1NnDnASsZfmJLJXts5ZxZz",
