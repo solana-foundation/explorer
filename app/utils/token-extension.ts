@@ -233,7 +233,9 @@ export function populatePartialParsedTokenExtension(
         }
         case 'pausableAccount': {
             return {
-                externalLinks: [{ label: 'Docs', url: 'https://www.solana-program.com/docs/token-2022/extensions#pausable' }],
+                externalLinks: [
+                    { label: 'Docs', url: 'https://www.solana-program.com/docs/token-2022/extensions#pausable' },
+                ],
                 name: 'Pausable Account',
                 status: 'active',
                 tooltip: 'This account can be paused by the Pausable extension',
