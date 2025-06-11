@@ -251,9 +251,7 @@ describe('TokenExtensionRow', () => {
     test('should render pausableAccount extension', async () => {
         const data = {
             extension: 'pausableAccount',
-            state: {
-                paused: true,
-            },
+            state: {},
         } as TokenExtension;
 
         render(
