@@ -516,6 +516,7 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
         'nonTransferable',
         'nonTransferableAccount',
         'cpiGuard',
+        'pausableAccount',
         'permanentDelegate',
         'transferHook',
         'transferHookAccount',
@@ -801,6 +802,14 @@ export function TokenExtensionRow(
                         </td>
                     </tr>
                 </>
+            );
+        }
+        case 'pausableAccount': {
+            return (
+                <tr>
+                    <td>Pausable Account</td>
+                    <td className="text-lg-end">enabled</td>
+                </tr>
             );
         }
         case 'pausableConfig': {

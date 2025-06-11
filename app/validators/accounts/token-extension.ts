@@ -27,6 +27,7 @@ const ExtensionType = enums([
     'tokenGroup',
     'tokenGroupMember',
     'scaledUiAmountConfig',
+    'pausableAccount',
     'pausableConfig',
     'unparseableExtension',
 ]);

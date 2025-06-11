@@ -248,6 +248,28 @@ describe('TokenExtensionRow', () => {
         expect(screen.getByText('4.22')).toBeInTheDocument();
     });
 
+    test('should render pausableAccount extension', async () => {
+        const data = {
+            extension: 'pausableAccount',
+            state: {
+                paused: true,
+            },
+        } as TokenExtension;
+
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <AccountsProvider>
+                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
+                    </AccountsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>
+        );
+
+        expect(await screen.findByText('Pausable Account')).toBeInTheDocument();
+        expect(screen.getByText('enabled')).toBeInTheDocument();
+    });
+
     test('should render pausableConfig extension', async () => {
         const data = {
             extension: 'pausableConfig',
