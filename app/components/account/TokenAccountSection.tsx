@@ -13,7 +13,6 @@ import { normalizeTokenAmount } from '@utils/index';
 import { getCurrentTokenScaledUiAmountMultiplier } from '@utils/token-info';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
-import { TokenExtensionType } from '@validators/accounts/token-extension';
 import {
     ConfidentialTransferAccount,
     ConfidentialTransferFeeAmount,
@@ -30,14 +29,13 @@ import {
     PausableConfig,
     PermanentDelegate,
     ScaledUiAmountConfig,
-    TokenExtension,
-    TokenGroup,
+    TokenExtension, TokenExtensionType, TokenGroup,
     TokenGroupMember,
     TokenMetadata,
     TransferFeeAmount,
     TransferFeeConfig,
     TransferHook,
-    TransferHookAccount,
+    TransferHookAccount
 } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { capitalCase } from 'change-case';

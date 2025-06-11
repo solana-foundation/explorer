@@ -9,7 +9,6 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens, useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import { calculateCurrentTokenScaledUiAmountMultiplier } from '@utils/token-info';
 import { BigNumber } from 'bignumber.js';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';

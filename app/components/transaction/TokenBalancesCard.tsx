@@ -4,7 +4,7 @@ import { useTransactionDetails } from '@providers/transactions';
 import { ParsedMessageAccount, PublicKey, TokenBalance } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { create } from 'superstruct';
 import useAsyncEffect from 'use-async-effect';
 
