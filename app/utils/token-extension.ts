@@ -231,6 +231,14 @@ export function populatePartialParsedTokenExtension(
                 tooltip: description,
             };
         }
+        case 'pausableAccount': {
+            return {
+                externalLinks: [{ label: 'Docs', url: 'https://www.solana-program.com/docs/token-2022/extensions#pausable' }],
+                name: 'Pausable Account',
+                status: 'active',
+                tooltip: 'This account can be paused by the Pausable extension',
+            };
+        }
         case 'pausableConfig': {
             const description =
                 'Allows the token program to pause all interactions including transfers, mints, and burns';
