@@ -1,11 +1,12 @@
 'use client';
 
+import { normalizeTokenAmount } from '@/app/utils';
 import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
-import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens } from '@providers/accounts/tokens';
+import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens, useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { calculateCurrentTokenScaledUiAmountMultiplier } from '@utils/token-info';
@@ -142,7 +143,9 @@ function HoldingsDetailTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
 function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     type MappedToken = {
         amount: string;
-        scaledUiAmountMultiplier: number;
+        decimals: number;
+        rawAmount: string;
+        scaledUiAmountMultiplier: string;
         logoURI?: string;
         symbol?: string;
         name?: string;
@@ -153,17 +156,17 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
         const totalByMint = mappedTokens.get(mintAddress)?.amount;
 
         let amount = token.tokenAmount.uiAmountString;
-        const scaledUiAmountMultiplier = calculateCurrentTokenScaledUiAmountMultiplier({
-            amount: token.tokenAmount.amount,
-            decimals: token.tokenAmount.decimals,
-            uiAmount: Number(token.tokenAmount.uiAmountString),
-        });
+        let rawAmount = token.tokenAmount.amount;
+        let decimals = token.tokenAmount.decimals;
+        const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(mintAddress, rawAmount);
         if (totalByMint !== undefined) {
             amount = new BigNumber(totalByMint).plus(token.tokenAmount.uiAmountString).toString();
         }
 
         mappedTokens.set(mintAddress, {
             amount,
+            decimals,
+            rawAmount,
             logoURI,
             name,
             scaledUiAmountMultiplier,
@@ -201,7 +204,13 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 </td>
                 <td>
                     {token.amount} {token.symbol}
-                    <ScaledUiAmountMultiplierTooltip scaledUiAmountMultiplier={token.scaledUiAmountMultiplier} />
+                    <ScaledUiAmountMultiplierTooltip
+                        rawAmount={normalizeTokenAmount(
+                            Number(token.rawAmount),
+                            token.decimals || 0
+                        ).toString()}
+                        scaledUiAmountMultiplier={token.scaledUiAmountMultiplier}
+                    />
                 </td>
             </tr>
         );

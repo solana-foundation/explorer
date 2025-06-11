@@ -57,7 +57,7 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     const fetchAccount = useFetchAccountInfo();
     const [tokenInfosLoading, setTokenInfosLoading] = useState(true);
     const [tokenSymbols, setTokenSymbols] = useState<Map<string, string>>(new Map());
-    const [scaledUiAmountMultipliers, setScaledUiAmountMultipliers] = useState<Map<string, number>>(new Map());
+    const [scaledUiAmountMultipliers, setScaledUiAmountMultipliers] = useState<Map<string, string>>(new Map());
 
     useAsyncEffect(async isMounted => {
         const mints = rows.map(r => new PublicKey(r.mint));
@@ -108,7 +108,8 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
                 <td>
                     {new BigNumber(balance).multipliedBy(scaledUiAmountMultipliers.get(mint) || 1).toString()} {units}
                     <ScaledUiAmountMultiplierTooltip
-                        scaledUiAmountMultiplier={scaledUiAmountMultipliers.get(mint) || 1}
+                        rawAmount={balance}
+                        scaledUiAmountMultiplier={scaledUiAmountMultipliers.get(mint) || '1'}
                     />
                 </td>
             </tr>

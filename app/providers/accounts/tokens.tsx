@@ -9,7 +9,9 @@ import { TokenAccountInfo } from '@validators/accounts/token';
 import React from 'react';
 import { create } from 'superstruct';
 
-import { getTokenInfos } from '@/app/utils/token-info';
+import { getCurrentTokenScaledUiAmountMultiplier, getTokenInfos } from '@/app/utils/token-info';
+import { MintAccountInfo } from '@/app/validators/accounts/token';
+import { useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 
 export type TokenInfoWithPubkey = {
     info: TokenAccountInfo;
@@ -145,4 +147,29 @@ export function useFetchAccountOwnedTokens() {
         },
         [dispatch, cluster, url]
     );
+}
+
+export function useScaledUiAmountForMint(address: string | undefined, rawAmount: string): [string, string] {
+    const mint = useAccountInfo(address);
+    const refresh = useFetchAccountInfo();
+
+    React.useEffect(() => {
+        if (address && !mint) {
+            refresh(new PublicKey(address), 'parsed');
+        }
+    }, [address, refresh, mint]);
+
+    if (!mint) {
+        return [rawAmount, '1'];
+    }
+
+    const infoParsed = mint?.data?.data.parsed;
+    const mintInfo = infoParsed && create(infoParsed?.parsed.info, MintAccountInfo);
+    const scaledUiAmountMultiplier = getCurrentTokenScaledUiAmountMultiplier(mintInfo?.extensions);
+
+    if (scaledUiAmountMultiplier === '1') {
+        return [rawAmount, '1'];
+    }
+
+    return [(Number(rawAmount) * Number(scaledUiAmountMultiplier)).toString(), scaledUiAmountMultiplier];
 }

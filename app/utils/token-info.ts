@@ -177,10 +177,10 @@ export async function getTokenInfos(
     return tokens;
 }
 
-export function getCurrentTokenScaledUiAmountMultiplier(extensions: Array<TokenExtension> | undefined): number {
+export function getCurrentTokenScaledUiAmountMultiplier(extensions: Array<TokenExtension> | undefined): string {
     const scaledUiAmountConfig = extensions?.find(extension => extension.extension === 'scaledUiAmountConfig');
     if (!scaledUiAmountConfig) {
-        return 1;
+        return '1';
     }
     const currentTimestamp = Math.floor(Date.now() / 1000);
     return currentTimestamp >= scaledUiAmountConfig.state.newMultiplierEffectiveTimestamp

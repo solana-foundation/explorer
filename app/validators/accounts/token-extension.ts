@@ -14,6 +14,7 @@ const ExtensionType = enums([
     'nonTransferable',
     'interestBearingConfig',
     'cpiGuard',
+    'pausableAccount',
     'permanentDelegate',
     'nonTransferableAccount',
     'confidentialTransferFeeConfig',

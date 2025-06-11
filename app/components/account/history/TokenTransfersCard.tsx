@@ -8,6 +8,7 @@ import { Signature } from '@components/common/Signature';
 import { TokenInstructionType, Transfer, TransferChecked } from '@components/instruction/token/types';
 import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
 import { useFetchAccountHistory } from '@providers/accounts/history';
+import { useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
@@ -19,11 +20,7 @@ import Moment from 'react-moment';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
-import {
-    calculateCurrentTokenScaledUiAmountMultiplier,
-    getTokenInfo,
-    getTokenInfoSwrKey,
-} from '@/app/utils/token-info';
+import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 import { extractMintDetails, MintDetails } from './common';
@@ -34,8 +31,66 @@ type IndexedTransfer = {
     transfer: Transfer | TransferChecked;
 };
 
+type TransferData = {
+    amountString: string;
+    blockTime: number | undefined;
+    childIndex?: number;
+    index: number;
+    signature: string;
+    statusClass: string;
+    statusText: string;
+    transfer: Transfer | TransferChecked;
+    units: string;
+};
+
 async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
     return await getTokenInfo(new PublicKey(address), cluster, url);
+}
+
+function TransferRow({
+    data,
+    hasTimestamps,
+    tokenAddress,
+}: {
+    data: TransferData;
+    hasTimestamps: boolean;
+    tokenAddress: string | undefined;
+}) {
+    const { signature, blockTime, statusText, statusClass, transfer, index, childIndex, amountString, units } = data;
+    const [amountWithScaledUiAmountMultiplier, scaledUiAmountMultiplier] = useScaledUiAmountForMint(
+        tokenAddress,
+        amountString
+    );
+
+    return (
+        <tr key={signature + index + (childIndex || '')}>
+            <td>
+                <Signature signature={signature} link truncateChars={24} />
+            </td>
+
+            {hasTimestamps && <td className="text-muted">{blockTime && <Moment date={blockTime * 1000} fromNow />}</td>}
+
+            <td>
+                <Address pubkey={transfer.source} link truncateChars={16} />
+            </td>
+
+            <td>
+                <Address pubkey={transfer.destination} link truncateChars={16} />
+            </td>
+
+            <td>
+                {amountWithScaledUiAmountMultiplier} {units}
+                <ScaledUiAmountMultiplierTooltip
+                    rawAmount={amountString}
+                    scaledUiAmountMultiplier={scaledUiAmountMultiplier}
+                />
+            </td>
+
+            <td>
+                <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
+            </td>
+        </tr>
+    );
 }
 
 export function TokenTransfersCard({ address }: { address: string }) {
@@ -61,21 +116,18 @@ export function TokenTransfersCard({ address }: { address: string }) {
         }
     }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const { hasTimestamps, detailsList } = React.useMemo(() => {
+    const { allTransfers, hasTimestamps } = React.useMemo(() => {
         const detailedHistoryMap = history?.data?.transactionMap || new Map<string, ParsedTransactionWithMeta>();
         const hasTimestamps = transactionRows.some(element => element.blockTime);
-        const detailsList: React.ReactNode[] = [];
         const mintMap = new Map<string, MintDetails>();
+        const allTransfers: TransferData[] = [];
 
         transactionRows.forEach(({ signature, blockTime, statusText, statusClass }) => {
             const transactionWithMeta = detailedHistoryMap.get(signature);
             if (!transactionWithMeta) return;
 
-            // Extract mint information from token deltas
-            // (used to filter out non-checked tokens transfers not belonging to this mint)
             extractMintDetails(transactionWithMeta, mintMap);
 
-            // Extract all transfers from transaction
             let transfers: IndexedTransfer[] = [];
             InstructionContainer.create(transactionWithMeta).instructions.forEach(({ instruction, inner }, index) => {
                 const transfer = getTransfer(instruction, cluster, signature);
@@ -97,7 +149,6 @@ export function TokenTransfersCard({ address }: { address: string }) {
                 });
             });
 
-            // Filter out transfers not belonging to this mint
             transfers = transfers.filter(({ transfer }) => {
                 const sourceKey = transfer.source.toBase58();
                 const destinationKey = transfer.destination.toBase58();
@@ -116,25 +167,17 @@ export function TokenTransfersCard({ address }: { address: string }) {
             transfers.forEach(({ transfer, index, childIndex }) => {
                 let units = 'Tokens';
                 let amountString = '';
-                let scaledUiAmountMultiplier = 1;
 
-                // Loading token info, just don't show units
                 if (tokenInfoLoading) {
                     units = '';
                 }
 
-                // Loaded symbol, use it
                 if (tokenInfo?.symbol) {
                     units = tokenInfo.symbol;
                 }
 
                 if ('tokenAmount' in transfer) {
                     amountString = transfer.tokenAmount.uiAmountString;
-                    scaledUiAmountMultiplier = calculateCurrentTokenScaledUiAmountMultiplier({
-                        amount: String(transfer.tokenAmount.amount),
-                        decimals: transfer.tokenAmount.decimals,
-                        uiAmount: Number(amountString),
-                    });
                 } else {
                     let decimals = 0;
 
@@ -145,11 +188,6 @@ export function TokenTransfersCard({ address }: { address: string }) {
                     } else if (mintMap.has(transfer.destination.toBase58())) {
                         decimals = mintMap.get(transfer.destination.toBase58())?.decimals || 0;
                     }
-                    scaledUiAmountMultiplier = calculateCurrentTokenScaledUiAmountMultiplier({
-                        amount: String(transfer.amount),
-                        decimals: decimals,
-                        uiAmount: Number(amountString),
-                    });
 
                     amountString = new Intl.NumberFormat('en-US', {
                         maximumFractionDigits: decimals,
@@ -157,42 +195,35 @@ export function TokenTransfersCard({ address }: { address: string }) {
                     }).format(normalizeTokenAmount(transfer.amount, decimals));
                 }
 
-                detailsList.push(
-                    <tr key={signature + index + (childIndex || '')}>
-                        <td>
-                            <Signature signature={signature} link truncateChars={24} />
-                        </td>
-
-                        {hasTimestamps && (
-                            <td className="text-muted">{blockTime && <Moment date={blockTime * 1000} fromNow />}</td>
-                        )}
-
-                        <td>
-                            <Address pubkey={transfer.source} link truncateChars={16} />
-                        </td>
-
-                        <td>
-                            <Address pubkey={transfer.destination} link truncateChars={16} />
-                        </td>
-
-                        <td>
-                            {amountString} {units}
-                            <ScaledUiAmountMultiplierTooltip scaledUiAmountMultiplier={scaledUiAmountMultiplier} />
-                        </td>
-
-                        <td>
-                            <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
-                        </td>
-                    </tr>
-                );
+                allTransfers.push({
+                    amountString,
+                    blockTime: blockTime || undefined,
+                    childIndex,
+                    index,
+                    signature,
+                    statusClass,
+                    statusText,
+                    transfer,
+                    units,
+                });
             });
         });
 
         return {
-            detailsList,
+            allTransfers,
             hasTimestamps,
         };
     }, [history, transactionRows, tokenInfo, pubkey, address, cluster, tokenInfoLoading]);
+
+    // Process transfers with the hook outside of useMemo
+    const processedTransfers = allTransfers.map(transferData => (
+        <TransferRow
+            key={transferData.signature + transferData.index + (transferData.childIndex || '')}
+            data={transferData}
+            hasTimestamps={hasTimestamps}
+            tokenAddress={pubkey.toBase58()}
+        />
+    ));
 
     if (!history) {
         return null;
@@ -222,7 +253,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
                             <th className="text-muted">Result</th>
                         </tr>
                     </thead>
-                    <tbody className="list">{detailsList}</tbody>
+                    <tbody className="list">{processedTransfers}</tbody>
                 </table>
             </div>
             <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />

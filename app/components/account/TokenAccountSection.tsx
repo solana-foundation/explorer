@@ -162,13 +162,19 @@ function FungibleTokenMintAccountCard({
                     <td className="text-lg-end">
                         <span>
                             {normalizeTokenAmount(
-                                Number(mintInfo.supply) * scaledUiAmountMultiplier,
+                                Number(mintInfo.supply) * Number(scaledUiAmountMultiplier),
                                 mintInfo.decimals
                             ).toLocaleString('en-US', {
                                 maximumFractionDigits: 20,
                             })}
                         </span>
-                        <ScaledUiAmountMultiplierTooltip scaledUiAmountMultiplier={scaledUiAmountMultiplier} />
+                        <ScaledUiAmountMultiplierTooltip
+                            rawAmount={normalizeTokenAmount(
+                                Number(mintInfo.supply),
+                                mintInfo.decimals
+                            ).toString()}
+                            scaledUiAmountMultiplier={scaledUiAmountMultiplier}
+                        />
                     </td>
                 </tr>
                 {tokenInfo?.extensions?.website && (
@@ -422,7 +428,13 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                     <td>Token balance {typeof symbol === 'string' && `(${symbol})`}</td>
                     <td className="text-lg-end">
                         {balance}
-                        <ScaledUiAmountMultiplierTooltip scaledUiAmountMultiplier={scaledUiAmountMultiplier} />
+                        <ScaledUiAmountMultiplierTooltip
+                            rawAmount={normalizeTokenAmount(
+                                Number(info.tokenAmount.amount),
+                                info.tokenAmount.decimals || 0
+                            ).toString()}
+                            scaledUiAmountMultiplier={scaledUiAmountMultiplier}
+                        />
                     </td>
                 </tr>
                 <tr>
