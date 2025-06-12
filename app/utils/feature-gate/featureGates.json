@@ -623,7 +623,7 @@
     "devnet_activation_epoch": 892,
     "comms_required": null,
     "mainnet_activation_epoch": 802,
-    "description": null
+    "description": "Sets rent_epoch to a constant to prevent divergence and enable future field repurposing"
   },
   {
     "key": "FXs1zh47QbNnhXcnB6YiAQoJ4sGB91tKF3UFHLcKT7PM",
