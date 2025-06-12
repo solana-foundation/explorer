@@ -52,7 +52,6 @@ export type TokenBalancesCardInnerProps = {
 
 export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     const { cluster, url } = useCluster();
-    const [tokenInfosLoading, setTokenInfosLoading] = useState(true);
     const [tokenSymbols, setTokenSymbols] = useState<Map<string, string>>(new Map());
 
     useAsyncEffect(async isMounted => {
@@ -60,7 +59,6 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
         getTokenInfos(mints, cluster, url).then(tokens => {
             if (isMounted()) {
                 setTokenSymbols(new Map(tokens?.map(t => [t.address, t.symbol])));
-                setTokenInfosLoading(false);
             }
         });
     }, []);
