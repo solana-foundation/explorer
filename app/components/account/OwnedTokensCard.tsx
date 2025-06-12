@@ -79,7 +79,7 @@ export function OwnedTokensCard({ address }: { address: string }) {
                     <h3 className="card-header-title">Token Holdings</h3>
                     <DisplayDropdown display={display} toggle={() => setDropdown(show => !show)} show={showDropdown} />
                 </div>
-               
+
                 <div className="table-responsive mb-0">
                     <table className="table table-sm table-nowrap card-table">
                         <thead>
@@ -89,7 +89,7 @@ export function OwnedTokensCard({ address }: { address: string }) {
                                 <th className="text-muted">Mint Address</th>
                                 <th className="text-muted">{display === 'detail' ? 'Total Balance' : 'Balance'}</th>
                             </tr>
-                        </thead> 
+                        </thead>
                         {display === 'detail' ? (
                             <HoldingsDetail tokens={tokens} showLogos={showLogos} />
                         ) : (
@@ -112,7 +112,7 @@ type MappedToken = {
     symbol?: string;
 };
 
-function HoldingsDetail({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[], showLogos: boolean }) {
+function HoldingsDetail({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[]; showLogos: boolean }) {
     const mappedTokens = useMemo(() => {
         const tokensMap = new Map<string, MappedToken>();
 
@@ -157,7 +157,7 @@ function HoldingsDetail({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[], 
     );
 }
 
-function HoldingsSummary({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[], showLogos: boolean }) {
+function HoldingsSummary({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[]; showLogos: boolean }) {
     const mappedTokens = new Map<string, MappedToken>();
     for (const { info: token, logoURI, symbol, name } of tokens) {
         const mintAddress = token.mint.toBase58();
