@@ -1,13 +1,5 @@
 'use client';
 
-import { BigNumber } from 'bignumber.js';
-import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
-import React, { useCallback, useMemo } from 'react';
-import { ChevronDown } from 'react-feather';
-import { PublicKey } from '@solana/web3.js';
-
-import { normalizeTokenAmount } from '@/app/utils';
 import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
@@ -15,6 +7,14 @@ import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens, useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
+import { PublicKey } from '@solana/web3.js';
+import { BigNumber } from 'bignumber.js';
+import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
+import React, { useCallback, useMemo } from 'react';
+import { ChevronDown } from 'react-feather';
+
+import { normalizeTokenAmount } from '@/app/utils';
 
 type Display = 'summary' | 'detail' | null;
 
@@ -173,8 +173,8 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 decimals,
                 logoURI,
                 name,
-                symbol,
                 rawAmount,
+                symbol,
             });
         });
 
