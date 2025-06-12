@@ -29,13 +29,15 @@ import {
     PausableConfig,
     PermanentDelegate,
     ScaledUiAmountConfig,
-    TokenExtension, TokenExtensionType, TokenGroup,
+    TokenExtension,
+    TokenExtensionType,
+    TokenGroup,
     TokenGroupMember,
     TokenMetadata,
     TransferFeeAmount,
     TransferFeeConfig,
     TransferHook,
-    TransferHookAccount
+    TransferHookAccount,
 } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { capitalCase } from 'change-case';
@@ -167,10 +169,7 @@ function FungibleTokenMintAccountCard({
                             })}
                         </span>
                         <ScaledUiAmountMultiplierTooltip
-                            rawAmount={normalizeTokenAmount(
-                                Number(mintInfo.supply),
-                                mintInfo.decimals
-                            ).toString()}
+                            rawAmount={normalizeTokenAmount(Number(mintInfo.supply), mintInfo.decimals).toString()}
                             scaledUiAmountMultiplier={scaledUiAmountMultiplier}
                         />
                     </td>

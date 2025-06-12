@@ -5,7 +5,12 @@ import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
-import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens, useScaledUiAmountForMint } from '@providers/accounts/tokens';
+import {
+    TokenInfoWithPubkey,
+    useAccountOwnedTokens,
+    useFetchAccountOwnedTokens,
+    useScaledUiAmountForMint,
+} from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
@@ -153,19 +158,17 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     // Process all tokens in a single pass
     const mappedTokens = useMemo(() => {
         const tokensMap = new Map<string, MappedToken>();
-        
+
         tokens.forEach(({ info: token, logoURI, symbol, name }) => {
             const mintAddress = token.mint.toBase58();
             const existingToken = tokensMap.get(mintAddress);
-            
+
             const rawAmount = token.tokenAmount.amount;
             const decimals = token.tokenAmount.decimals;
             let amount = token.tokenAmount.uiAmountString;
-            
+
             if (existingToken) {
-                amount = new BigNumber(existingToken.amount)
-                    .plus(token.tokenAmount.uiAmountString)
-                    .toString();
+                amount = new BigNumber(existingToken.amount).plus(token.tokenAmount.uiAmountString).toString();
             }
 
             tokensMap.set(mintAddress, {
@@ -252,10 +255,7 @@ function TokenSummaryRow({ mintAddress, token, showLogo }: TokenSummaryRowProps)
             <td>
                 {token.amount} {token.symbol}
                 <ScaledUiAmountMultiplierTooltip
-                    rawAmount={normalizeTokenAmount(
-                        Number(token.rawAmount),
-                        token.decimals || 0
-                    ).toString()}
+                    rawAmount={normalizeTokenAmount(Number(token.rawAmount), token.decimals || 0).toString()}
                     scaledUiAmountMultiplier={scaledUiAmountMultiplier}
                 />
             </td>

@@ -1,7 +1,13 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
 import { Info } from 'react-feather';
 
-function ScaledUiAmountMultiplierTooltip({ rawAmount, scaledUiAmountMultiplier }: { rawAmount?: string, scaledUiAmountMultiplier: string }) {
+function ScaledUiAmountMultiplierTooltip({
+    rawAmount,
+    scaledUiAmountMultiplier,
+}: {
+    rawAmount?: string;
+    scaledUiAmountMultiplier: string;
+}) {
     if (scaledUiAmountMultiplier === '1') {
         return null;
     }
@@ -13,7 +19,8 @@ function ScaledUiAmountMultiplierTooltip({ rawAmount, scaledUiAmountMultiplier }
             </TooltipTrigger>
             <TooltipContent>
                 <div className="e-min-w-36 e-max-w-16">
-                    Scaled {rawAmount ? `${rawAmount} ` : ''}by {scaledUiAmountMultiplier} due to the scaled ui amount extension on the mint
+                    Scaled {rawAmount ? `${rawAmount} ` : ''}by {scaledUiAmountMultiplier} due to the scaled ui amount
+                    extension on the mint
                 </div>
             </TooltipContent>
         </Tooltip>
