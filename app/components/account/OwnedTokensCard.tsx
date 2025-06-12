@@ -1,5 +1,12 @@
 'use client';
 
+import { BigNumber } from 'bignumber.js';
+import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
+import React, { useCallback, useMemo } from 'react';
+import { ChevronDown } from 'react-feather';
+import { PublicKey } from '@solana/web3.js';
+
 import { normalizeTokenAmount } from '@/app/utils';
 import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
@@ -8,12 +15,6 @@ import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens, useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
-import { PublicKey } from '@solana/web3.js';
-import { BigNumber } from 'bignumber.js';
-import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
-import React, { useCallback, useMemo } from 'react';
-import { ChevronDown } from 'react-feather';
 
 type Display = 'summary' | 'detail' | null;
 
@@ -144,76 +145,43 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
         amount: string;
         decimals: number;
         rawAmount: string;
-        scaledUiAmountMultiplier: string;
         logoURI?: string;
         symbol?: string;
         name?: string;
     };
-    const mappedTokens = new Map<string, MappedToken>();
-    for (const { info: token, logoURI, symbol, name } of tokens) {
-        const mintAddress = token.mint.toBase58();
-        const totalByMint = mappedTokens.get(mintAddress)?.amount;
 
-        let amount = token.tokenAmount.uiAmountString;
-        let rawAmount = token.tokenAmount.amount;
-        let decimals = token.tokenAmount.decimals;
-        const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(mintAddress, rawAmount);
-        if (totalByMint !== undefined) {
-            amount = new BigNumber(totalByMint).plus(token.tokenAmount.uiAmountString).toString();
-        }
+    // Process all tokens in a single pass
+    const mappedTokens = useMemo(() => {
+        const tokensMap = new Map<string, MappedToken>();
+        
+        tokens.forEach(({ info: token, logoURI, symbol, name }) => {
+            const mintAddress = token.mint.toBase58();
+            const existingToken = tokensMap.get(mintAddress);
+            
+            const rawAmount = token.tokenAmount.amount;
+            const decimals = token.tokenAmount.decimals;
+            let amount = token.tokenAmount.uiAmountString;
+            
+            if (existingToken) {
+                amount = new BigNumber(existingToken.amount)
+                    .plus(token.tokenAmount.uiAmountString)
+                    .toString();
+            }
 
-        mappedTokens.set(mintAddress, {
-            amount,
-            decimals,
-            rawAmount,
-            logoURI,
-            name,
-            scaledUiAmountMultiplier,
-            symbol,
+            tokensMap.set(mintAddress, {
+                amount,
+                decimals,
+                logoURI,
+                name,
+                symbol,
+                rawAmount,
+            });
         });
-    }
 
-    const detailsList: React.ReactNode[] = [];
+        return tokensMap;
+    }, [tokens]);
+
     const showLogos = tokens.some(t => t.logoURI !== undefined);
-    mappedTokens.forEach((token, mintAddress) => {
-        detailsList.push(
-            <tr key={mintAddress}>
-                {showLogos && (
-                    <td className="w-1 p-0 text-center">
-                        {token.logoURI ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                                alt="token icon"
-                                className="token-icon rounded-circle border border-4 border-gray-dark"
-                                height={16}
-                                src={token.logoURI}
-                                width={16}
-                            />
-                        ) : (
-                            <Identicon
-                                address={mintAddress}
-                                className="avatar-img identicon-wrapper identicon-wrapper-small"
-                                style={{ width: SMALL_IDENTICON_WIDTH }}
-                            />
-                        )}
-                    </td>
-                )}
-                <td>
-                    <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={token} useMetadata />
-                </td>
-                <td>
-                    {token.amount} {token.symbol}
-                    <ScaledUiAmountMultiplierTooltip
-                        rawAmount={normalizeTokenAmount(
-                            Number(token.rawAmount),
-                            token.decimals || 0
-                        ).toString()}
-                        scaledUiAmountMultiplier={token.scaledUiAmountMultiplier}
-                    />
-                </td>
-            </tr>
-        );
-    });
 
     return (
         <div className="table-responsive mb-0">
@@ -225,9 +193,73 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         <th className="text-muted">Total Balance</th>
                     </tr>
                 </thead>
-                <tbody className="list">{detailsList}</tbody>
+                <tbody className="list">
+                    {Array.from(mappedTokens.entries()).map(([mintAddress, token]) => (
+                        <TokenSummaryRow
+                            key={mintAddress}
+                            mintAddress={mintAddress}
+                            token={token}
+                            showLogo={showLogos}
+                        />
+                    ))}
+                </tbody>
             </table>
         </div>
+    );
+}
+
+type TokenSummaryRowProps = {
+    mintAddress: string;
+    token: {
+        amount: string;
+        decimals: number;
+        rawAmount: string;
+        logoURI?: string;
+        symbol?: string;
+        name?: string;
+    };
+    showLogo: boolean;
+};
+
+function TokenSummaryRow({ mintAddress, token, showLogo }: TokenSummaryRowProps) {
+    const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(mintAddress, token.rawAmount);
+
+    return (
+        <tr>
+            {showLogo && (
+                <td className="w-1 p-0 text-center">
+                    {token.logoURI ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            alt="token icon"
+                            className="token-icon rounded-circle border border-4 border-gray-dark"
+                            height={16}
+                            src={token.logoURI}
+                            width={16}
+                        />
+                    ) : (
+                        <Identicon
+                            address={mintAddress}
+                            className="avatar-img identicon-wrapper identicon-wrapper-small"
+                            style={{ width: SMALL_IDENTICON_WIDTH }}
+                        />
+                    )}
+                </td>
+            )}
+            <td>
+                <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={token} useMetadata />
+            </td>
+            <td>
+                {token.amount} {token.symbol}
+                <ScaledUiAmountMultiplierTooltip
+                    rawAmount={normalizeTokenAmount(
+                        Number(token.rawAmount),
+                        token.decimals || 0
+                    ).toString()}
+                    scaledUiAmountMultiplier={scaledUiAmountMultiplier}
+                />
+            </td>
+        </tr>
     );
 }
 

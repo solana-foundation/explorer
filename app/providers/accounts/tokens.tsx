@@ -1,17 +1,18 @@
 'use client';
 
+import React from 'react';
+import { Connection, PublicKey } from '@solana/web3.js';
+import { create } from 'superstruct';
+
+import { useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { Connection, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { TokenAccountInfo } from '@validators/accounts/token';
-import React from 'react';
-import { create } from 'superstruct';
 
 import { getCurrentTokenScaledUiAmountMultiplier, getTokenInfos } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
-import { useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 
 export type TokenInfoWithPubkey = {
     info: TokenAccountInfo;
