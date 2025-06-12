@@ -150,7 +150,7 @@ function ClusterActivationEpochAtCluster({
 }) {
     if (cluster === Cluster.Custom) return null;
 
-    if (activatedAt && clusterInfo?.epochSchedule) {
+    if (activatedAt !== null && clusterInfo?.epochSchedule) {
         const epoch = getEpochForSlot(clusterInfo?.epochSchedule, BigInt(activatedAt));
         return (
             <Link href={`/epoch/${epoch}?cluster=${cluster}`} className="epoch-link">
