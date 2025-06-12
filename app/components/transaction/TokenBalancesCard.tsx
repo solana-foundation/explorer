@@ -4,16 +4,14 @@ import { useTransactionDetails } from '@providers/transactions';
 import { ParsedMessageAccount, PublicKey, TokenBalance } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
-import { useEffect, useState } from 'react';
-import { create } from 'superstruct';
+import { useState } from 'react';
 import useAsyncEffect from 'use-async-effect';
 
-import { useAccountInfos, useFetchAccountInfo } from '@/app/providers/accounts';
 import { useCluster } from '@/app/providers/cluster';
-import { getCurrentTokenScaledUiAmountMultiplier, getTokenInfos } from '@/app/utils/token-info';
-import { MintAccountInfo } from '@/app/validators/accounts/token';
+import { getTokenInfos } from '@/app/utils/token-info';
 
 import ScaledUiAmountMultiplierTooltip from '../account/token-extensions/ScaledUiAmountMultiplierTooltip';
+import { useScaledUiAmountForMint } from '@/app/providers/accounts/tokens';
 
 type TokenBalanceRow = {
     account: PublicKey;
@@ -54,67 +52,18 @@ export type TokenBalancesCardInnerProps = {
 
 export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     const { cluster, url } = useCluster();
-    const fetchAccount = useFetchAccountInfo();
     const [tokenInfosLoading, setTokenInfosLoading] = useState(true);
     const [tokenSymbols, setTokenSymbols] = useState<Map<string, string>>(new Map());
-    const [scaledUiAmountMultipliers, setScaledUiAmountMultipliers] = useState<Map<string, string>>(new Map());
 
     useAsyncEffect(async isMounted => {
         const mints = rows.map(r => new PublicKey(r.mint));
-        await Promise.all([
-            rows.map(async r => {
-                fetchAccount(new PublicKey(r.mint), 'parsed');
-            }),
-            getTokenInfos(mints, cluster, url).then(tokens => {
-                setTokenSymbols(new Map(tokens?.map(t => [t.address, t.symbol])));
-            }),
-        ]).finally(() => {
+        getTokenInfos(mints, cluster, url).then(tokens => {
             if (isMounted()) {
+                setTokenSymbols(new Map(tokens?.map(t => [t.address, t.symbol])));
                 setTokenInfosLoading(false);
             }
         });
     }, []);
-
-    const accountInfos = useAccountInfos(rows.map(r => r.mint));
-    useEffect(() => {
-        if (tokenInfosLoading) {
-            return;
-        }
-        const scaledUiAmountMultipliers = rows.map(r => {
-            const info = accountInfos.find(a => a && a.data?.pubkey.toBase58() === r.mint);
-            const infoParsed = info?.data?.data.parsed;
-            const mintInfo = infoParsed && create(infoParsed?.parsed.info, MintAccountInfo);
-            return getCurrentTokenScaledUiAmountMultiplier(mintInfo?.extensions);
-        });
-        setScaledUiAmountMultipliers(new Map(rows.map((r, i) => [r.mint, scaledUiAmountMultipliers[i]])));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [tokenInfosLoading]);
-
-    const accountRows = rows.map(({ account, delta, balance, mint }) => {
-        const key = account.toBase58() + mint;
-        const units = tokenInfosLoading ? '' : tokenSymbols.get(mint) || 'tokens';
-
-        return (
-            <tr key={key}>
-                <td>
-                    <Address pubkey={account} link />
-                </td>
-                <td>
-                    <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo />
-                </td>
-                <td>
-                    <BalanceDelta delta={delta.multipliedBy(scaledUiAmountMultipliers.get(mint) || 1)} />
-                </td>
-                <td>
-                    {new BigNumber(balance).multipliedBy(scaledUiAmountMultipliers.get(mint) || 1).toString()} {units}
-                    <ScaledUiAmountMultiplierTooltip
-                        rawAmount={balance}
-                        scaledUiAmountMultiplier={scaledUiAmountMultipliers.get(mint) || '1'}
-                    />
-                </td>
-            </tr>
-        );
-    });
 
     return (
         <div className="card">
@@ -131,10 +80,56 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
                             <th className="text-muted">Post Balance</th>
                         </tr>
                     </thead>
-                    <tbody className="list">{accountRows}</tbody>
+                    <tbody className="list">
+                        {rows.map(row => (
+                            <TokenBalanceRow
+                                key={row.account.toBase58() + row.mint}
+                                {...row}
+                                units={tokenSymbols.get(row.mint) || 'tokens'}
+                            />
+                        ))}
+                    </tbody>
                 </table>
             </div>
         </div>
+    );
+}
+
+function TokenBalanceRow({
+    account,
+    delta,
+    balance,
+    mint,
+    units,
+}: {
+    account: PublicKey;
+    delta: BigNumber;
+    balance: string;
+    mint: string;
+    units: string;
+}) {
+    const key = account.toBase58() + mint;
+    const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(mint, balance);
+
+    return (
+        <tr key={key}>
+            <td>
+                <Address pubkey={account} link />
+            </td>
+            <td>
+                <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo />
+            </td>
+            <td>
+                <BalanceDelta delta={delta.multipliedBy(scaledUiAmountMultiplier)} />
+            </td>
+            <td>
+                {new BigNumber(balance).multipliedBy(scaledUiAmountMultiplier).toString()} {units}
+                <ScaledUiAmountMultiplierTooltip
+                    rawAmount={balance}
+                    scaledUiAmountMultiplier={scaledUiAmountMultiplier}
+                />
+            </td>
+        </tr>
     );
 }
 

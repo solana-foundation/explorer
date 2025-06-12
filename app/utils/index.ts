@@ -23,10 +23,6 @@ export function normalizeTokenAmount(raw: string | number, decimals: number): nu
     return rawTokens / Math.pow(10, decimals);
 }
 
-export function uiAmountToRawAmount(uiAmount: number, decimals: number): number {
-    return uiAmount * Math.pow(10, decimals);
-}
-
 export function microLamportsToLamports(microLamports: number | bigint): number {
     if (typeof microLamports === 'number') {
         return microLamports / MICRO_LAMPORTS_PER_LAMPORT;

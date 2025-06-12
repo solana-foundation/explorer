@@ -187,20 +187,3 @@ export function getCurrentTokenScaledUiAmountMultiplier(extensions: Array<TokenE
         ? scaledUiAmountConfig.state.newMultiplier
         : scaledUiAmountConfig.state.multiplier;
 }
-
-export function calculateCurrentTokenScaledUiAmountMultiplier({
-    amount,
-    decimals,
-    uiAmount,
-}: {
-    amount: string;
-    decimals: number;
-    uiAmount: number;
-}): number {
-    const rawAmount = Number(amount);
-    if (isNaN(rawAmount)) {
-        return 0;
-    }
-    const rawUiAmount = uiAmountToRawAmount(uiAmount, decimals);
-    return rawUiAmount / rawAmount;
-}

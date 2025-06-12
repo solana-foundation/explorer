@@ -3,7 +3,7 @@ import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { Account, NFTData, TokenProgramData, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
-import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
+import { TOKEN_2022_PROGRAM_ID, useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
@@ -350,7 +350,7 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
 
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useFetchAccountInfo();
-    const mint = useAccountInfo(info.mint.toBase58());
+    const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(info.mint.toBase58(), info.tokenAmount.amount);
     const { cluster, url } = useCluster();
     const label = addressLabel(account.pubkey.toBase58(), cluster);
     const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, info.mint, url]);
@@ -359,14 +359,6 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
     const [symbol, setSymbol] = useState<string | undefined>(undefined);
     const accountExtensions = info.extensions?.slice();
     accountExtensions?.sort(cmpExtension);
-
-    useEffect(() => {
-        refresh(info.mint, 'parsed');
-    }, [info.mint, refresh]);
-
-    const infoParsed = mint?.data?.data.parsed;
-    const mintInfo = infoParsed && create(infoParsed?.parsed.info, MintAccountInfo);
-    const scaledUiAmountMultiplier = getCurrentTokenScaledUiAmountMultiplier(mintInfo?.extensions);
 
     const balance = info.isNative ? (
         <>

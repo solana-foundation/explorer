@@ -126,8 +126,11 @@ export function TokenTransfersCard({ address }: { address: string }) {
             const transactionWithMeta = detailedHistoryMap.get(signature);
             if (!transactionWithMeta) return;
 
+            // Extract mint information from token deltas
+            // (used to filter out non-checked tokens transfers not belonging to this mint)
             extractMintDetails(transactionWithMeta, mintMap);
 
+            // Extract all transfers from transaction
             let transfers: IndexedTransfer[] = [];
             InstructionContainer.create(transactionWithMeta).instructions.forEach(({ instruction, inner }, index) => {
                 const transfer = getTransfer(instruction, cluster, signature);
@@ -149,6 +152,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
                 });
             });
 
+            // Filter out transfers not belonging to this mint
             transfers = transfers.filter(({ transfer }) => {
                 const sourceKey = transfer.source.toBase58();
                 const destinationKey = transfer.destination.toBase58();
@@ -168,10 +172,12 @@ export function TokenTransfersCard({ address }: { address: string }) {
                 let units = 'Tokens';
                 let amountString = '';
 
+                // Loading token info, just don't show units
                 if (tokenInfoLoading) {
                     units = '';
                 }
 
+                // Loaded symbol, use it
                 if (tokenInfo?.symbol) {
                     units = tokenInfo.symbol;
                 }
@@ -215,16 +221,6 @@ export function TokenTransfersCard({ address }: { address: string }) {
         };
     }, [history, transactionRows, tokenInfo, pubkey, address, cluster, tokenInfoLoading]);
 
-    // Process transfers with the hook outside of useMemo
-    const processedTransfers = allTransfers.map(transferData => (
-        <TransferRow
-            key={transferData.signature + transferData.index + (transferData.childIndex || '')}
-            data={transferData}
-            hasTimestamps={hasTimestamps}
-            tokenAddress={pubkey.toBase58()}
-        />
-    ));
-
     if (!history) {
         return null;
     }
@@ -253,7 +249,16 @@ export function TokenTransfersCard({ address }: { address: string }) {
                             <th className="text-muted">Result</th>
                         </tr>
                     </thead>
-                    <tbody className="list">{processedTransfers}</tbody>
+                    <tbody className="list">
+                        {allTransfers.map(transferData => (
+                            <TransferRow
+                                key={transferData.signature + transferData.index + (transferData.childIndex || '')}
+                                data={transferData}
+                                hasTimestamps={hasTimestamps}
+                                tokenAddress={pubkey.toBase58()}
+                            />
+                        ))}
+                    </tbody>
                 </table>
             </div>
             <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />
