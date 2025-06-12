@@ -7,11 +7,11 @@ import { BigNumber } from 'bignumber.js';
 import { useState } from 'react';
 import useAsyncEffect from 'use-async-effect';
 
+import { useScaledUiAmountForMint } from '@/app/providers/accounts/tokens';
 import { useCluster } from '@/app/providers/cluster';
 import { getTokenInfos } from '@/app/utils/token-info';
 
 import ScaledUiAmountMultiplierTooltip from '../account/token-extensions/ScaledUiAmountMultiplierTooltip';
-import { useScaledUiAmountForMint } from '@/app/providers/accounts/tokens';
 
 type TokenBalanceRow = {
     account: PublicKey;
