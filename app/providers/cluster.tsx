@@ -18,7 +18,7 @@ interface EpochInfo {
     slotsInEpoch: bigint;
 }
 
-interface ClusterInfo {
+export interface ClusterInfo {
     firstAvailableBlock: bigint;
     epochSchedule: EpochSchedule;
     epochInfo: EpochInfo;
