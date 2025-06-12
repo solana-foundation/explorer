@@ -1,4 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
+import Logger from '@utils/logger';
 
 import { Account } from '../../../providers/accounts';
 import { NFTOKEN_ADDRESS } from './nftoken';
@@ -38,7 +39,7 @@ export const parseNFTokenNFTAccount = (account: Account): NftokenTypes.NftAccoun
             metadata_url: parsed.metadata_url?.replace(/\0/g, '') ?? null,
         };
     } catch (e) {
-        console.error('Problem parsing NFToken NFT...', e);
+        Logger.error('Problem parsing NFToken NFT...', e);
         return null;
     }
 };
@@ -66,7 +67,7 @@ export const parseNFTokenCollectionAccount = (account: Account): NftokenTypes.Co
             metadata_url: parsed.metadata_url?.replace(/\0/g, '') ?? null,
         };
     } catch (e) {
-        console.error('Problem parsing NFToken Collection...', e);
+        Logger.error('Problem parsing NFToken Collection...', e);
         return null;
     }
 };

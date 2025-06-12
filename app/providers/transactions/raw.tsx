@@ -5,6 +5,7 @@ import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Connection, DecompileArgs, TransactionMessage, TransactionSignature, VersionedMessage } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
+import Logger from '@utils/logger';
 import React from 'react';
 
 export interface Details {
@@ -78,7 +79,7 @@ async function fetchRawTransaction(dispatch: Dispatch, signature: TransactionSig
         });
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
+            Logger.error(error, { url });
         }
     }
 }

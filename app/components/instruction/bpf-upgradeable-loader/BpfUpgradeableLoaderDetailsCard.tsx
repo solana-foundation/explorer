@@ -1,6 +1,7 @@
 import { Address } from '@components/common/Address';
 import { ParsedInstruction, ParsedTransaction, PublicKey, SignatureResult } from '@solana/web3.js';
 import { camelToTitleCase } from '@utils/index';
+import Logger from '@utils/logger';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create, Struct } from 'superstruct';
@@ -55,7 +56,7 @@ export function BpfUpgradeableLoaderDetailsCard(props: DetailsProps) {
                 return <UnknownDetailsCard {...props} />;
         }
     } catch (error) {
-        console.error(error, {
+        Logger.error(error, {
             signature: props.tx.signatures[0],
         });
         return <UnknownDetailsCard {...props} />;

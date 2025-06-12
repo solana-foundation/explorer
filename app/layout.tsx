@@ -36,8 +36,10 @@ const rubikFont = Rubik({
 export default function RootLayout({
     analytics,
     children,
+    logrocket,
 }: {
     analytics?: React.ReactNode;
+    logrocket?: React.ReactNode;
     children: React.ReactNode;
 }) {
     return (
@@ -67,6 +69,7 @@ export default function RootLayout({
                     </ClusterProvider>
                 </ScrollAnchorProvider>
                 {analytics}
+                {logrocket}
             </body>
         </html>
     );

@@ -1,4 +1,5 @@
 import { ParsedInstruction, ParsedTransaction, SignatureResult } from '@solana/web3.js';
+import Logger from '@utils/logger';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
@@ -102,7 +103,7 @@ export function SystemDetailsCard(props: DetailsProps) {
                 return <UnknownDetailsCard {...props} />;
         }
     } catch (error) {
-        console.error(error, {
+        Logger.error(error, {
             signature: props.tx.signatures[0],
         });
         return <UnknownDetailsCard {...props} />;

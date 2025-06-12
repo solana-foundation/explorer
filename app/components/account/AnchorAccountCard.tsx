@@ -5,6 +5,7 @@ import { Account } from '@providers/accounts';
 import { useAnchorProgram } from '@providers/anchor';
 import { useCluster } from '@providers/cluster';
 import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
+import Logger from '@utils/logger';
 import React, { useMemo } from 'react';
 
 export function AnchorAccountCard({ account }: { account: Account }) {
@@ -27,7 +28,7 @@ export function AnchorAccountCard({ account }: { account: Account }) {
                 try {
                     decodedAccountData = coder.decode(account.name, rawData);
                 } catch (err) {
-                    console.log(err);
+                    Logger.error(err);
                 }
             }
         }

@@ -16,6 +16,7 @@ import FEATURES from '@/app/utils/feature-gate/featureGates.json';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { FeatureInfoType } from '../utils/feature-gate/types';
+import Logger from '../utils/logger';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
 import { searchTokens } from '../utils/token-search';
 import { useDebouncedAsync } from '../utils/use-debounce-async';
@@ -495,7 +496,7 @@ function buildAppendableSearchOptions(
 ): SearchOptions[] {
     if (!searchOptions) return [];
     if (searchOptions.status === 'rejected') {
-        console.error(`Failed to build ${name} options for search: ${searchOptions.reason}`);
+        Logger.error(`Failed to build ${name} options for search: ${searchOptions.reason}`);
         return [];
     }
     return searchOptions.value

@@ -1,4 +1,5 @@
 import { fetchMetadataFromSeeds, unpackAndFetchData } from '@solana-program/program-metadata';
+import Logger from '@utils/logger';
 import { address, createSolanaRpc, mainnet } from 'web3js-experimental';
 
 export async function getCodamaIdl(programAddress: string, url: string) {
@@ -13,7 +14,7 @@ export async function getCodamaIdl(programAddress: string, url: string) {
             seed: 'idl',
         });
     } catch (error) {
-        console.error('Metadata fetch failed', error);
+        Logger.error('Error fetching metadata for program', programAddress, error);
         throw new Error('Metadata fetch failed');
     }
     try {

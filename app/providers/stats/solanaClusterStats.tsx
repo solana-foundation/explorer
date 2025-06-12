@@ -2,6 +2,7 @@
 
 import { useCluster } from '@providers/cluster';
 import { Cluster } from '@utils/cluster';
+import Logger from '@utils/logger';
 import useTabVisibility from '@utils/use-tab-visibility';
 import React from 'react';
 import { createSolanaRpc } from 'web3js-experimental';
@@ -114,7 +115,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
                 });
             } catch (error) {
                 if (cluster !== Cluster.Custom) {
-                    console.error(error, { url });
+                    Logger.error(error, { url });
                 }
                 if (error instanceof Error) {
                     dispatchPerformanceInfo({
@@ -142,7 +143,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
                 });
             } catch (error) {
                 if (cluster !== Cluster.Custom) {
-                    console.error(error, { url });
+                    Logger.error(error, { url });
                 }
                 if (error instanceof Error) {
                     dispatchPerformanceInfo({
@@ -176,7 +177,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
                 });
             } catch (error) {
                 if (cluster !== Cluster.Custom) {
-                    console.error(error, { url });
+                    Logger.error(error, { url });
                 }
                 if (error instanceof Error) {
                     dispatchDashboardInfo({
@@ -257,7 +258,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
             data: 'Cluster stats timed out',
             type: PerformanceInfoActionType.SetError,
         });
-        console.error('Cluster stats timed out');
+        Logger.error('Cluster stats timed out', { url });
         setActive(false);
     }, []);
 

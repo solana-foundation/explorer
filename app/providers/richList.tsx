@@ -3,6 +3,7 @@
 import { useCluster } from '@providers/cluster';
 import { AccountBalancePair, Connection } from '@solana/web3.js';
 import { Cluster, ClusterStatus } from '@utils/cluster';
+import Logger from '@utils/logger';
 import React from 'react';
 
 export enum Status {
@@ -71,7 +72,7 @@ async function fetch(dispatch: Dispatch, cluster: Cluster, url: string) {
         });
     } catch (err) {
         if (cluster !== Cluster.Custom) {
-            console.error(err, { url });
+            Logger.error(err, { url });
         }
         dispatch('Failed to fetch top accounts');
     }

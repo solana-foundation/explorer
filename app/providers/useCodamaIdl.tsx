@@ -1,6 +1,8 @@
 import { fetch } from 'cross-fetch';
 import useSWRImmutable from 'swr/immutable';
 
+import Logger from '@/app/utils/logger';
+
 import { getCodamaIdl } from '../components/instruction/codama/getCodamaIdl';
 import { Cluster } from '../utils/cluster';
 
@@ -23,7 +25,7 @@ export function useCodamaIdl(programAddress: string, url: string, cluster: Clust
             }
             return null;
         } catch (error) {
-            console.error('Error fetching codama idl', error);
+            Logger.error('Error fetching codama idl', error);
             return null;
         }
     });
