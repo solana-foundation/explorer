@@ -68,6 +68,7 @@ export function OwnedTokensCard({ address }: { address: string }) {
     if (tokens.length > 100) {
         return <ErrorCard text="Token holdings is not available for accounts with over 100 token accounts" />;
     }
+    const showLogos = tokens.some(t => t.logoURI !== undefined);
 
     return (
         <>
@@ -78,7 +79,24 @@ export function OwnedTokensCard({ address }: { address: string }) {
                     <h3 className="card-header-title">Token Holdings</h3>
                     <DisplayDropdown display={display} toggle={() => setDropdown(show => !show)} show={showDropdown} />
                 </div>
-                <HoldingsTable showAccountAddress={display === 'detail'} tokens={tokens} />
+               
+                <div className="table-responsive mb-0">
+                    <table className="table table-sm table-nowrap card-table">
+                        <thead>
+                            <tr>
+                                {showLogos && <th className="text-muted w-1 p-0 text-center">Logo</th>}
+                                {display === 'detail' && <th className="text-muted">Account Address</th>}
+                                <th className="text-muted">Mint Address</th>
+                                <th className="text-muted">{display === 'detail' ? 'Total Balance' : 'Balance'}</th>
+                            </tr>
+                        </thead> 
+                        {display === 'detail' ? (
+                            <HoldingsDetail tokens={tokens} showLogos={showLogos} />
+                        ) : (
+                            <HoldingsSummary tokens={tokens} showLogos={showLogos} />
+                        )}
+                    </table>
+                </div>
             </div>
         </>
     );
@@ -89,12 +107,12 @@ type MappedToken = {
     decimals: number;
     logoURI?: string;
     name?: string;
-    pubkey: string;
+    pubkey?: string;
     rawAmount: string;
     symbol?: string;
 };
 
-function HoldingsTable({ tokens, showAccountAddress }: { tokens: TokenInfoWithPubkey[]; showAccountAddress: boolean }) {
+function HoldingsDetail({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[], showLogos: boolean }) {
     const mappedTokens = useMemo(() => {
         const tokensMap = new Map<string, MappedToken>();
 
@@ -124,32 +142,54 @@ function HoldingsTable({ tokens, showAccountAddress }: { tokens: TokenInfoWithPu
         return tokensMap;
     }, [tokens]);
 
-    const showLogos = tokens.some(t => t.logoURI !== undefined);
+    return (
+        <tbody className="list">
+            {Array.from(mappedTokens.entries()).map(([mintAddress, token]) => (
+                <TokenRow
+                    key={mintAddress}
+                    mintAddress={mintAddress}
+                    token={token}
+                    showLogo={showLogos}
+                    showAccountAddress={true}
+                />
+            ))}
+        </tbody>
+    );
+}
+
+function HoldingsSummary({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[], showLogos: boolean }) {
+    const mappedTokens = new Map<string, MappedToken>();
+    for (const { info: token, logoURI, symbol, name } of tokens) {
+        const mintAddress = token.mint.toBase58();
+        const totalByMint = mappedTokens.get(mintAddress)?.amount;
+
+        let amount = token.tokenAmount.uiAmountString;
+        if (totalByMint !== undefined) {
+            amount = new BigNumber(totalByMint).plus(token.tokenAmount.uiAmountString).toString();
+        }
+
+        mappedTokens.set(mintAddress, {
+            amount,
+            decimals: token.tokenAmount.decimals,
+            logoURI,
+            name,
+            rawAmount: token.tokenAmount.amount,
+            symbol,
+        });
+    }
 
     return (
-        <div className="table-responsive mb-0">
-            <table className="table table-sm table-nowrap card-table">
-                <thead>
-                    <tr>
-                        {showLogos && <th className="text-muted w-1 p-0 text-center">Logo</th>}
-                        {showAccountAddress && <th className="text-muted">Account Address</th>}
-                        <th className="text-muted">Mint Address</th>
-                        <th className="text-muted">Total Balance</th>
-                    </tr>
-                </thead>
-                <tbody className="list">
-                    {Array.from(mappedTokens.entries()).map(([mintAddress, token]) => (
-                        <TokenRow
-                            key={mintAddress}
-                            mintAddress={mintAddress}
-                            token={token}
-                            showLogo={showLogos}
-                            showAccountAddress={showAccountAddress}
-                        />
-                    ))}
-                </tbody>
-            </table>
-        </div>
+        <tbody className="list">
+            {Array.from(mappedTokens.entries()).map(([mintAddress, token]) => (
+                <TokenRow
+                    key={mintAddress}
+                    mintAddress={mintAddress}
+                    token={token}
+                    showLogo={showLogos}
+                    showAccountAddress={false}
+                />
+            ))}
+        </tbody>
     );
 }
 
@@ -185,7 +225,7 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
                     )}
                 </td>
             )}
-            {showAccountAddress && (
+            {showAccountAddress && token.pubkey && (
                 <td>
                     <Address pubkey={new PublicKey(token.pubkey)} link tokenLabelInfo={token} useMetadata />
                 </td>
