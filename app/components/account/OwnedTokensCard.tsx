@@ -78,88 +78,27 @@ export function OwnedTokensCard({ address }: { address: string }) {
                     <h3 className="card-header-title">Token Holdings</h3>
                     <DisplayDropdown display={display} toggle={() => setDropdown(show => !show)} show={showDropdown} />
                 </div>
-                {display === 'detail' ? (
-                    <HoldingsDetailTable tokens={tokens} />
-                ) : (
-                    <HoldingsSummaryTable tokens={tokens} />
-                )}
+                <HoldingsTable showAccountAddress={display === 'detail'} tokens={tokens} />
             </div>
         </>
     );
 }
 
-function HoldingsDetailTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
-    const detailsList: React.ReactNode[] = [];
-    const showLogos = tokens.some(t => t.logoURI !== undefined);
-    tokens.forEach(tokenAccount => {
-        const address = tokenAccount.pubkey.toBase58();
-        detailsList.push(
-            <tr key={address}>
-                {showLogos && (
-                    <td className="w-1 p-0 text-center">
-                        {tokenAccount.logoURI ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                                alt="token icon"
-                                className="token-icon rounded-circle border border-4 border-gray-dark"
-                                height={16}
-                                src={tokenAccount.logoURI}
-                                width={16}
-                            />
-                        ) : (
-                            <Identicon
-                                address={address}
-                                className="avatar-img identicon-wrapper identicon-wrapper-small"
-                                style={{ width: SMALL_IDENTICON_WIDTH }}
-                            />
-                        )}
-                    </td>
-                )}
-                <td>
-                    <Address pubkey={tokenAccount.pubkey} link truncate />
-                </td>
-                <td>
-                    <Address pubkey={tokenAccount.info.mint} link truncate tokenLabelInfo={tokenAccount} />
-                </td>
-                <td>
-                    {tokenAccount.info.tokenAmount.uiAmountString} {tokenAccount.symbol}
-                </td>
-            </tr>
-        );
-    });
+type MappedToken = {
+    amount: string;
+    decimals: number;
+    logoURI?: string;
+    name?: string;
+    pubkey: string;
+    rawAmount: string;
+    symbol?: string;
+};
 
-    return (
-        <div className="table-responsive mb-0">
-            <table className="table table-sm table-nowrap card-table">
-                <thead>
-                    <tr>
-                        {showLogos && <th className="text-muted w-1 p-0 text-center">Logo</th>}
-                        <th className="text-muted">Account Address</th>
-                        <th className="text-muted">Mint Address</th>
-                        <th className="text-muted">Balance</th>
-                    </tr>
-                </thead>
-                <tbody className="list">{detailsList}</tbody>
-            </table>
-        </div>
-    );
-}
-
-function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
-    type MappedToken = {
-        amount: string;
-        decimals: number;
-        rawAmount: string;
-        logoURI?: string;
-        symbol?: string;
-        name?: string;
-    };
-
-    // Process all tokens in a single pass
+function HoldingsTable({ tokens, showAccountAddress }: { tokens: TokenInfoWithPubkey[]; showAccountAddress: boolean }) {
     const mappedTokens = useMemo(() => {
         const tokensMap = new Map<string, MappedToken>();
 
-        tokens.forEach(({ info: token, logoURI, symbol, name }) => {
+        tokens.forEach(({ info: token, logoURI, pubkey, symbol, name }) => {
             const mintAddress = token.mint.toBase58();
             const existingToken = tokensMap.get(mintAddress);
 
@@ -176,6 +115,7 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 decimals,
                 logoURI,
                 name,
+                pubkey: pubkey.toBase58(),
                 rawAmount,
                 symbol,
             });
@@ -192,17 +132,19 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 <thead>
                     <tr>
                         {showLogos && <th className="text-muted w-1 p-0 text-center">Logo</th>}
+                        {showAccountAddress && <th className="text-muted">Account Address</th>}
                         <th className="text-muted">Mint Address</th>
                         <th className="text-muted">Total Balance</th>
                     </tr>
                 </thead>
                 <tbody className="list">
                     {Array.from(mappedTokens.entries()).map(([mintAddress, token]) => (
-                        <TokenSummaryRow
+                        <TokenRow
                             key={mintAddress}
                             mintAddress={mintAddress}
                             token={token}
                             showLogo={showLogos}
+                            showAccountAddress={showAccountAddress}
                         />
                     ))}
                 </tbody>
@@ -211,20 +153,14 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     );
 }
 
-type TokenSummaryRowProps = {
+type TokenRowProps = {
     mintAddress: string;
-    token: {
-        amount: string;
-        decimals: number;
-        rawAmount: string;
-        logoURI?: string;
-        symbol?: string;
-        name?: string;
-    };
+    token: MappedToken;
     showLogo: boolean;
+    showAccountAddress: boolean;
 };
 
-function TokenSummaryRow({ mintAddress, token, showLogo }: TokenSummaryRowProps) {
+function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRowProps) {
     const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(mintAddress, token.rawAmount);
 
     return (
@@ -247,6 +183,11 @@ function TokenSummaryRow({ mintAddress, token, showLogo }: TokenSummaryRowProps)
                             style={{ width: SMALL_IDENTICON_WIDTH }}
                         />
                     )}
+                </td>
+            )}
+            {showAccountAddress && (
+                <td>
+                    <Address pubkey={new PublicKey(token.pubkey)} link tokenLabelInfo={token} useMetadata />
                 </td>
             )}
             <td>
