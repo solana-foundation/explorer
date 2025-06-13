@@ -179,11 +179,11 @@ function SolanaAttestationCard({ attestation }: { attestation: SasAttestation })
                 <td>Expiry</td>
                 <td className="text-lg-end">{Number(attestation.expiry)}</td>
             </tr>
-            {decoded ? (
-                <ReactJson src={decoded} theme={'solarized'} style={{ padding: 25 }} name={false} />
-            ) : (
-                <tr>
-                    <td>Data (Base64)</td>
+            <tr>
+                <td>Data (Base64)</td>
+                {decoded ? (
+                    <ReactJson src={decoded} theme={'solarized'} style={{ padding: 25 }} name={false} />
+                ) : (
                     <td
                         className="text-lg-end"
                         style={{
@@ -197,8 +197,8 @@ function SolanaAttestationCard({ attestation }: { attestation: SasAttestation })
                     >
                         {Buffer.from(attestation.data).toString('base64')}
                     </td>
-                </tr>
-            )}
+                )}
+            </tr>
         </>
     );
 }
