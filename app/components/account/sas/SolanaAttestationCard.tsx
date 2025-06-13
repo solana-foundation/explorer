@@ -1,7 +1,7 @@
 import { AccountAddressRow, AccountHeader } from '@components/common/Account';
 import { Address } from '@components/common/Address';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { Account, useFetchAccountInfo } from '@providers/accounts';
+import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';
 import ReactJson from 'react-json-view';
@@ -15,6 +15,7 @@ import {
     Schema as SasSchema,
 } from 'sas-lib';
 import { Address as TAddress, ReadonlyUint8Array } from 'web3js-experimental';
+import * as borsh from 'borsh';
 
 function decodeWithType(
     account: Account,
@@ -123,6 +124,33 @@ function SolanaSchemaCard({ schema }: { schema: SasSchema }) {
 }
 
 function SolanaAttestationCard({ attestation }: { attestation: SasAttestation }) {
+    const schemaAccountInfo = useAccountInfo(mapToPublicKey(attestation.schema).toBase58());
+    const fetchAccountInfo = useFetchAccountInfo();
+    React.useEffect(() => {
+        if (!schemaAccountInfo?.data) {
+            fetchAccountInfo(mapToPublicKey(attestation.schema), 'parsed');
+        }
+    }, [schemaAccountInfo?.data, fetchAccountInfo, attestation.schema]);
+
+    let decoded: any | null = null;
+    try {
+        if (schemaAccountInfo?.data) {
+            const schema: SasSchema = decodeWithType(schemaAccountInfo.data, 'schema', decodeSchema)?.data.data;
+            // deserializeAttestationData(schema, Uint8Array.from(attestation.data));
+            const borshSchema = convertSasSchemaToBorshSchema(schema);
+
+            const bs = borshSchema['schema'];
+            console.log('bs', bs);
+            const final = borsh.deserialize(bs, Object, Buffer.from(attestation.data));
+            console.log('final', final);
+
+            const borshSchemaData = borshSchema.deserialize(Uint8Array.from(attestation.data));
+            decoded = borshSchemaData;
+        }
+    } catch (e) {
+        console.error(e);
+    }
+
     return (
         <>
             <tr>
@@ -160,22 +188,26 @@ function SolanaAttestationCard({ attestation }: { attestation: SasAttestation })
                 <td>Expiry</td>
                 <td className="text-lg-end">{Number(attestation.expiry)}</td>
             </tr>
-            <tr>
-                <td>Data (Base64)</td>
-                <td
-                    className="text-lg-end"
-                    style={{
-                        fontSize: '0.85rem',
-                        lineHeight: '1.2',
-                        maxWidth: '100%',
-                        overflowWrap: 'break-word',
-                        whiteSpace: 'normal',
-                        wordBreak: 'break-all',
-                    }}
-                >
-                    {Buffer.from(attestation.data).toString('base64')}
-                </td>
-            </tr>
+            {decoded ? (
+                <ReactJson src={decoded} theme={'solarized'} style={{ padding: 25 }} name={false} />
+            ) : (
+                <tr>
+                    <td>Data (Base64)</td>
+                    <td
+                        className="text-lg-end"
+                        style={{
+                            fontSize: '0.85rem',
+                            lineHeight: '1.2',
+                            maxWidth: '100%',
+                            overflowWrap: 'break-word',
+                            whiteSpace: 'normal',
+                            wordBreak: 'break-all',
+                        }}
+                    >
+                        {Buffer.from(attestation.data).toString('base64')}
+                    </td>
+                </tr>
+            )}
         </>
     );
 }
