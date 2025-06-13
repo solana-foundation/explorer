@@ -46,11 +46,11 @@ import useSWRImmutable from 'swr/immutable';
 import { Address } from 'web3js-experimental';
 
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
+import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
-import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
 
 const TABS_LOOKUP: { [id: string]: Tab[] } = {
     'address-lookup-table': [

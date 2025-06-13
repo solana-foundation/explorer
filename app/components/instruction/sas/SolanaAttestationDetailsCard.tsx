@@ -20,6 +20,7 @@ import { IAccountMeta } from 'web3js-experimental';
 
 import { Address } from '../../common/Address';
 import { upcastTransactionInstruction } from '../../inspector/into-parsed-data';
+import { mapCodamaIxArgsToRows } from '../codama/codamaUtils';
 import { InstructionCard } from '../InstructionCard';
 
 export function isSolanaAttestationInstruction(transactionIx: TransactionInstruction) {
@@ -113,10 +114,21 @@ export function SolanaAttestationDetailsCard({
                     <tr key={idx}>
                         <td>{key.charAt(0).toUpperCase() + key.slice(1)}</td>
                         <td className="text-lg-end" colSpan={2}>
-                            <Address pubkey={new PublicKey(value.address)} alignRight link raw />
+                            <Address pubkey={new PublicKey(value.address)} alignRight link />
                         </td>
                     </tr>
                 ))}
+
+            {parsed.data && (
+                <>
+                    <tr className="table-sep">
+                        <td>Argument Name</td>
+                        <td>Type</td>
+                        <td className="text-lg-end">Value</td>
+                    </tr>
+                    {mapCodamaIxArgsToRows(parsed.data)}
+                </>
+            )}
         </InstructionCard>
     );
 }

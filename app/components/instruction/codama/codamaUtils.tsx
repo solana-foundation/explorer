@@ -16,7 +16,7 @@ export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
         let type = 'unknown';
 
         const baseKey = `${nestingLevel}-${index}`;
-        if (Array.isArray(value)) {
+        if (Array.isArray(value) || value instanceof Uint8Array) {
             type = `Array[${value.length}]`;
             return (
                 <ExpandableRow
@@ -26,7 +26,7 @@ export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
                     nestingLevel={nestingLevel}
                     data-testid={`ix-args-${baseKey}`}
                 >
-                    {value.map((item, i) => {
+                    {(Array.isArray(value) ? value : Array.from(value)).map((item, i) => {
                         if (typeof item === 'object') {
                             return (
                                 <React.Fragment key={`${baseKey}-${i}`}>

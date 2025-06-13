@@ -4,8 +4,10 @@ import { TableCardBody } from '@components/common/TableCardBody';
 import { Account, useFetchAccountInfo } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';
+import ReactJson from 'react-json-view';
 import {
     Attestation as SasAttestation,
+    convertSasSchemaToBorshSchema,
     Credential as SasCredential,
     decodeAttestation,
     decodeCredential,
@@ -85,6 +87,7 @@ function mapToPublicKey(address: TAddress) {
 }
 
 function SolanaSchemaCard({ schema }: { schema: SasSchema }) {
+    const borshSchema = convertSasSchemaToBorshSchema(schema);
     return (
         <>
             <tr>
@@ -110,12 +113,10 @@ function SolanaSchemaCard({ schema }: { schema: SasSchema }) {
                 <td className="text-lg-end">{schema.version}</td>
             </tr>
             <tr>
-                <td>Layout</td>
-                <td className="text-lg-end">{schema.layout.join(', ')}</td>
-            </tr>
-            <tr>
-                <td>Field Names</td>
-                <td className="text-lg-end">{schema.fieldNames.join(', ')}</td>
+                <td>Layout (Borsh)</td>
+                <td className="text-lg-start">
+                    <ReactJson src={borshSchema['schema']} theme={'solarized'} style={{ padding: 25 }} name={false} />
+                </td>
             </tr>
         </>
     );
@@ -144,23 +145,35 @@ function SolanaAttestationCard({ attestation }: { attestation: SasAttestation })
                 </td>
             </tr>
             <tr>
-                <td>Data</td>
-                <td className="text-lg-end">{attestation.data.join(', ')}</td>
-            </tr>
-            <tr>
                 <td>Signer</td>
                 <td className="text-lg-end">
                     <Address pubkey={mapToPublicKey(attestation.signer)} alignRight raw link />
                 </td>
             </tr>
             <tr>
-                <td>Expiry</td>
-                <td className="text-lg-end">{String(attestation.expiry)}</td>
-            </tr>
-            <tr>
                 <td>Token Account</td>
                 <td className="text-lg-end">
                     <Address pubkey={mapToPublicKey(attestation.tokenAccount)} alignRight raw link />
+                </td>
+            </tr>
+            <tr>
+                <td>Expiry</td>
+                <td className="text-lg-end">{Number(attestation.expiry)}</td>
+            </tr>
+            <tr>
+                <td>Data (Base64)</td>
+                <td
+                    className="text-lg-end"
+                    style={{
+                        fontSize: '0.85rem',
+                        lineHeight: '1.2',
+                        maxWidth: '100%',
+                        overflowWrap: 'break-word',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-all',
+                    }}
+                >
+                    {Buffer.from(attestation.data).toString('base64')}
                 </td>
             </tr>
         </>
@@ -184,7 +197,7 @@ export function SolanaAttestationServiceCard({ account }: { account: Account }) 
             break;
     }
 
-    let title = 'Solana Attestation';
+    let title = 'Solana Attestation Service';
     if (decoded) {
         title = `${title} ${decoded.type.charAt(0).toUpperCase() + decoded.type.slice(1)}`;
     }
