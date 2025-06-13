@@ -3,6 +3,7 @@ import { Address } from '@components/common/Address';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
+import * as borsh from 'borsh';
 import React from 'react';
 import ReactJson from 'react-json-view';
 import {
@@ -13,9 +14,9 @@ import {
     decodeCredential,
     decodeSchema,
     Schema as SasSchema,
+    deserializeAttestationData,
 } from 'sas-lib';
 import { Address as TAddress, ReadonlyUint8Array } from 'web3js-experimental';
-import * as borsh from 'borsh';
 
 function decodeWithType(
     account: Account,
@@ -136,16 +137,7 @@ function SolanaAttestationCard({ attestation }: { attestation: SasAttestation })
     try {
         if (schemaAccountInfo?.data) {
             const schema: SasSchema = decodeWithType(schemaAccountInfo.data, 'schema', decodeSchema)?.data.data;
-            // deserializeAttestationData(schema, Uint8Array.from(attestation.data));
-            const borshSchema = convertSasSchemaToBorshSchema(schema);
-
-            const bs = borshSchema['schema'];
-            console.log('bs', bs);
-            const final = borsh.deserialize(bs, Object, Buffer.from(attestation.data));
-            console.log('final', final);
-
-            const borshSchemaData = borshSchema.deserialize(Uint8Array.from(attestation.data));
-            decoded = borshSchemaData;
+            decoded = deserializeAttestationData(schema, Uint8Array.from(attestation.data));
         }
     } catch (e) {
         console.error(e);
