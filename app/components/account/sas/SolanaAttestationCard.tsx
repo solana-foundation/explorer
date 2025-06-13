@@ -3,7 +3,6 @@ import { Address } from '@components/common/Address';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import * as borsh from 'borsh';
 import React from 'react';
 import ReactJson from 'react-json-view';
 import {
@@ -13,8 +12,8 @@ import {
     decodeAttestation,
     decodeCredential,
     decodeSchema,
-    Schema as SasSchema,
     deserializeAttestationData,
+    Schema as SasSchema,
 } from 'sas-lib';
 import { Address as TAddress, ReadonlyUint8Array } from 'web3js-experimental';
 
