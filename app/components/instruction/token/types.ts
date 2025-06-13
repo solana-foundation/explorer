@@ -234,6 +234,52 @@ const CreateNativeMint = type({
     systemProgram: PublicKeyFromString,
 });
 
+const InitializeMetadataPointer = type({
+    authority: PublicKeyFromString,
+    metadataAddress: PublicKeyFromString,
+    mint: PublicKeyFromString,
+});
+
+const InitializeGroupMemberPointer = type({
+    authority: PublicKeyFromString,
+    memberAddress: PublicKeyFromString,
+    mint: PublicKeyFromString,
+});
+
+const InitializeNonTransferableMint = type({
+    mint: PublicKeyFromString,
+});
+
+const InitializePermanentDelegate = type({
+    delegate: PublicKeyFromString,
+    mint: PublicKeyFromString,
+});
+
+const InitializeTokenMetadata = type({
+    metadata: PublicKeyFromString,
+    mint: PublicKeyFromString,
+    mintAuthority: PublicKeyFromString,
+    name: string(),
+    symbol: string(),
+    updateAuthority: PublicKeyFromString,
+    uri: string(),
+});
+
+const UpdateTokenMetadataField = type({
+    field: string(),
+    metadata: PublicKeyFromString,
+    updateAuthority: PublicKeyFromString,
+    value: PublicKeyFromString,
+});
+
+const InitializeTokenGroupMember = type({
+    group: PublicKeyFromString,
+    groupUpdateAuthority: PublicKeyFromString,
+    member: PublicKeyFromString,
+    memberMint: PublicKeyFromString,
+    memberMintAuthority: PublicKeyFromString,
+});
+
 export type TokenInstructionType = Infer<typeof TokenInstructionType>;
 export const TokenInstructionType = enums([
     'initializeMint',
@@ -241,7 +287,13 @@ export const TokenInstructionType = enums([
     'initializeAccount',
     'initializeAccount2',
     'initializeAccount3',
+    'initializeGroupMemberPointer',
     'initializeMultisig',
+    'initializeNonTransferableMint',
+    'initializeTokenGroupMember',
+    'initializeTokenMetadata',
+    'initializePermanentDelegate',
+    'initializeMetadataPointer',
     'transfer',
     'approve',
     'revoke',
@@ -269,6 +321,7 @@ export const TokenInstructionType = enums([
     'defaultAccountStateExtension',
     'reallocate',
     'memoTransferExtension',
+    'updateTokenMetadataField',
     'createNativeMint',
 ]);
 
@@ -288,11 +341,17 @@ export const IX_STRUCTS = {
     initializeAccount: InitializeAccount,
     initializeAccount2: InitializeAccount2,
     initializeAccount3: InitializeAccount3,
+    initializeGroupMemberPointer: InitializeGroupMemberPointer,
     initializeImmutableOwner: InitializeImmutableOwner,
+    initializeMetadataPointer: InitializeMetadataPointer,
     initializeMint: InitializeMint,
     initializeMint2: InitializeMint2,
     initializeMintCloseAuthority: InitializeMintCloseAuthority,
     initializeMultisig: InitializeMultisig,
+    initializeNonTransferableMint: InitializeNonTransferableMint,
+    initializePermanentDelegate: InitializePermanentDelegate,
+    initializeTokenGroupMember: InitializeTokenGroupMember,
+    initializeTokenMetadata: InitializeTokenMetadata,
     memoTransferExtension: MemoTransferExtension,
     mintTo: MintTo,
     mintTo2: MintToChecked,
@@ -307,6 +366,7 @@ export const IX_STRUCTS = {
     transferChecked: TransferChecked,
     transferFeeExtension: TransferFeeExtension,
     uiAmountToAmount: UiAmountToAmount,
+    updateTokenMetadataField: UpdateTokenMetadataField,
 };
 
 export const IX_TITLES = {
@@ -325,11 +385,17 @@ export const IX_TITLES = {
     initializeAccount: 'Initialize Account',
     initializeAccount2: 'Initialize Account (2)',
     initializeAccount3: 'Initialize Account (3)',
+    initializeGroupMemberPointer: 'Initialize Group Member Pointer',
     initializeImmutableOwner: 'Initialize Immutable Owner',
+    initializeMetadataPointer: 'Initialize Metadata Pointer',
     initializeMint: 'Initialize Mint',
     initializeMint2: 'Initialize Mint (2)',
     initializeMintCloseAuthority: 'Initialize Mint Close Authority',
     initializeMultisig: 'Initialize Multisig',
+    initializeNonTransferableMint: 'Initialize Non-Transferable Mint',
+    initializePermanentDelegate: 'Initialize Permanent Delegate',
+    initializeTokenGroupMember: 'Initialize Token Group Member',
+    initializeTokenMetadata: 'Initialize Token Metadata',
     memoTransferExtension: 'Memo Transfer Extension',
     mintTo: 'Mint To',
     mintTo2: 'Mint To (Checked)',
@@ -344,4 +410,5 @@ export const IX_TITLES = {
     transferChecked: 'Transfer (Checked)',
     transferFeeExtension: 'Transfer Fee Extension',
     uiAmountToAmount: 'UiAmount To Amount',
+    updateTokenMetadataField: 'Update Token Metadata Field',
 };
