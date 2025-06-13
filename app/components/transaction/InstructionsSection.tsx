@@ -53,6 +53,10 @@ import { isEd25519Instruction } from '../instruction/ed25519/types';
 import { LighthouseDetailsCard } from '../instruction/lighthouse/LighthouseDetailsCard';
 import { isLighthouseInstruction } from '../instruction/lighthouse/types';
 import { isMangoInstruction } from '../instruction/mango/types';
+import {
+    isSolanaAttestationInstruction,
+    SolanaAttestationDetailsCard,
+} from '../instruction/sas/SolanaAttestationDetailsCard';
 
 export type InstructionDetailsProps = {
     tx: ParsedTransaction;
@@ -249,6 +253,8 @@ function InstructionCard({
         return <ComputeBudgetDetailsCard key={key} {...props} />;
     } else if (isLighthouseInstruction(transactionIx)) {
         return <LighthouseDetailsCard key={key} {...props} />;
+    } else if (isSolanaAttestationInstruction(transactionIx)) {
+        return <SolanaAttestationDetailsCard key={key} {...props} />;
     } else if (codamaIdl) {
         const parsedIx = parseInstruction(codamaIdl as RootNode, upcastTransactionInstruction(transactionIx));
         if (!parsedIx) {

@@ -93,7 +93,6 @@ export function SolanaAttestationDetailsCard({
             parsed = parseCloseTokenizedAttestationInstruction(_ix);
             break;
     }
-    console.log('parsed', parsed);
     return (
         <InstructionCard title={`Solana Attestation: ${title}`} {...{ childIndex, index, innerCards, ix, result }}>
             <tr>

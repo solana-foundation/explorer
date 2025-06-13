@@ -1,6 +1,7 @@
 import { Cluster } from './cluster';
 
 export enum PROGRAM_NAMES {
+
     // native built-ins
     ADDRESS_LOOKUP_TABLE = 'Address Lookup Table Program',
     COMPUTE_BUDGET = 'Compute Budget Program',
@@ -27,6 +28,9 @@ export enum PROGRAM_NAMES {
     TOKEN_2022 = 'Token-2022 Program',
     TOKEN_METADATA = 'Token Metadata Program',
     TOKEN_VAULT = 'Token Vault Program',
+
+    // foundation programs
+    SAS_PROGRAM = 'Solana Attestation Service Program',
 
     // other
     ACUMEN = 'Acumen Program',
@@ -125,6 +129,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     '22Y43yTVxuUkoRKdm9thyRhQ3SdgQS7c7kB6UNCiaczD': {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.SERUM_SWAP,
+    },
+    '22zoJMtdu4tQc2PzL74ZUT7FrwgB1Udec8DdW4yw4BdG': {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.SAS_PROGRAM,
     },
     '27haf8L6oxUeXrHrgEgsexjSY5hbVUWEmvv9Nyxg8vQv': {
         deployments: [Cluster.MainnetBeta],

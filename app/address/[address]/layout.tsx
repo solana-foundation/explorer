@@ -41,6 +41,7 @@ import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren, Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
 import useSWRImmutable from 'swr/immutable';
 import { Address } from 'web3js-experimental';
 
@@ -49,6 +50,7 @@ import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
+import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
 
 const TABS_LOOKUP: { [id: string]: Tab[] } = {
     'address-lookup-table': [
@@ -330,6 +332,8 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
         return <AddressLookupTableAccountSection account={account} data={rawData} />;
     } else if (featureInfo || account.owner.toBase58() === FEATURE_PROGRAM_ID) {
         return <FeatureAccountSection account={account} />;
+    } else if (account.owner.toBase58() === SAS_PROGRAM_ID) {
+        return <SolanaAttestationServiceCard account={account} />;
     } else {
         const fallback = <UnknownAccountCard account={account} />;
         return (
