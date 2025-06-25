@@ -49,6 +49,7 @@ import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
+import { isAttestationAccount } from '@/app/utils/attestation-service';
 import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 
@@ -58,6 +59,13 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
             path: 'entries',
             slug: 'entries',
             title: 'Table Entries',
+        },
+    ],
+    attestation: [
+        {
+            path: 'attestation',
+            slug: 'attestation',
+            title: 'Attestation',
         },
     ],
     'bpf-upgradeable-loader': [
@@ -380,7 +388,8 @@ export type MoreTabs =
     | 'verified-build'
     | 'program-multisig'
     | 'feature-gate'
-    | 'token-extensions';
+    | 'token-extensions'
+    | 'attestation';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -484,6 +493,10 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
 
     if (account.owner.toBase58() === ACCOUNT_COMPRESSION_ID.toBase58()) {
         tabs.push(TABS_LOOKUP['spl-account-compression'][0]);
+    }
+
+    if (isAttestationAccount(account)) {
+        tabs.push(...TABS_LOOKUP['attestation']);
     }
 
     return tabs.map(tab => {
