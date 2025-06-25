@@ -143,13 +143,11 @@ export type CompressedNft = {
         primary_sale_happened: boolean;
         locked: boolean;
     };
-    creators: [
-        {
-            address: string;
-            share: number;
-            verified: boolean;
-        }
-    ];
+    creators: {
+        address: string;
+        share: number;
+        verified: boolean;
+    }[];
     ownership: {
         frozen: boolean;
         delegated: boolean;
