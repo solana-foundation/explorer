@@ -65,7 +65,7 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
         {
             path: 'attestation',
             slug: 'attestation',
-            title: 'Attestation',
+            title: 'Attestation Service',
         },
     ],
     'bpf-upgradeable-loader': [
