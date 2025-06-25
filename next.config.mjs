@@ -61,7 +61,7 @@ const nextConfig = {
             // Fixes npm packages that depend on `fs` module like `@project-serum/anchor`.
             config.resolve.fallback.fs = false;
         }
-        
+
         return config;
     },
 };

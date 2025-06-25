@@ -1,7 +1,6 @@
 import { Cluster } from './cluster';
 
 export enum PROGRAM_NAMES {
-
     // native built-ins
     ADDRESS_LOOKUP_TABLE = 'Address Lookup Table Program',
     COMPUTE_BUDGET = 'Compute Budget Program',
