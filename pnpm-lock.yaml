@@ -40,11 +40,11 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       '@metaplex-foundation/mpl-token-metadata':
-        specifier: ^3.4.0
-        version: 3.4.0(@metaplex-foundation/umi@1.2.0)
+        specifier: ^1.1.0
+        version: 1.2.5(bufferutil@4.0.7)(utf-8-validate@5.0.10)
       '@metaplex/js':
         specifier: ^4.12.0
-        version: 4.12.0(@metaplex-foundation/mpl-auction@0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-core@0.6.1(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-metaplex@0.0.5(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-token-metadata@3.4.0(@metaplex-foundation/umi@1.2.0))(@metaplex-foundation/mpl-token-vault@0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@solana/spl-token@0.1.8(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))
+        version: 4.12.0(@metaplex-foundation/mpl-auction@0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-core@0.6.1(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-metaplex@0.0.5(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-token-metadata@1.2.5(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-token-vault@0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@solana/spl-token@0.1.8(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))
       '@noble/hashes':
         specifier: ^1.5.0
         version: 1.5.0
@@ -1456,42 +1456,14 @@ packages:
   '@metaplex-foundation/mpl-token-metadata@0.0.2':
     resolution: {integrity: sha512-yKJPhFlX8MkNbSCi1iwHn4xKmguLK/xFhYa+RuYdL2seuT4CKXHj2CnR2AkcdQj46Za4/nR3jZcRFKq7QlnvBw==}
 
+  '@metaplex-foundation/mpl-token-metadata@1.2.5':
+    resolution: {integrity: sha512-pxRG53JsTSwXpiJJMHNulJhH8kO3hHztQ3QxslUoKw2hBYKXsg9TGsiHgNIhN2MPZGBJ2pDeK6kNGv0sd54HhA==}
+
   '@metaplex-foundation/mpl-token-metadata@2.13.0':
     resolution: {integrity: sha512-Fl/8I0L9rv4bKTV/RAl5YIbJe9SnQPInKvLz+xR1fEc4/VQkuCn3RPgypfUMEKWmCznzaw4sApDxy6CFS4qmJw==}
 
-  '@metaplex-foundation/mpl-token-metadata@3.4.0':
-    resolution: {integrity: sha512-AxBAYCK73JWxY3g9//z/C9krkR0t1orXZDknUPS4+GjwGH2vgPfsk04yfZ31Htka2AdS9YE/3wH7sMUBHKn9Rg==}
-    peerDependencies:
-      '@metaplex-foundation/umi': '>= 0.8.2 <= 1'
-
   '@metaplex-foundation/mpl-token-vault@0.0.2':
     resolution: {integrity: sha512-JiVcow8OzUGW0KTs/E1QrAdmYGqE9EGKE6cc2gxNNBYqDeVdjYlgEa64IiGvNF9rvbI2g2Z3jw0mYuA9LD9S/A==}
-
-  '@metaplex-foundation/mpl-toolbox@0.10.0':
-    resolution: {integrity: sha512-84KD1L5cFyw5xnntHwL4uPwfcrkKSiwuDeypiVr92qCUFuF3ZENa2zlFVPu+pQcjTlod2LmEX3MhBmNjRMpdKg==}
-    peerDependencies:
-      '@metaplex-foundation/umi': '>= 0.8.2 <= 1'
-
-  '@metaplex-foundation/umi-options@1.2.0':
-    resolution: {integrity: sha512-dNEfhDg9PUoosU46SnmB8PzdhgAF7qJ0RUkn5keLKU2s0Xy2DKZVtdaELTfMZZckhaDvOzRTKdphTRrEwIjbyw==}
-
-  '@metaplex-foundation/umi-public-keys@1.2.0':
-    resolution: {integrity: sha512-UZISKLcrsAQ3M17JCkNIXtacoKHpSNEgXHGcxyJp7zfJkdLDq5Qlvd7KeyZoYC7A7XuA3lAlVY14qhhIwC5p5w==}
-
-  '@metaplex-foundation/umi-serializers-core@1.2.0':
-    resolution: {integrity: sha512-9scqhjkjW8tJ+/q1veh73jQjo9vvgTN5iN4OfOYFMtFVTT8/y2AVxGmniV/DbQC5wIgx7WTZkAnJmqOMs2904Q==}
-
-  '@metaplex-foundation/umi-serializers-encodings@1.2.0':
-    resolution: {integrity: sha512-Yo3TPI9ei8Z5eTJ1UeT12+pYaQ1zMSn57/M/3r4WAOTFtTCOuKsDRKg8eBQCpBuffH8yGUbRs0poy1n25IzeNg==}
-
-  '@metaplex-foundation/umi-serializers-numbers@1.2.0':
-    resolution: {integrity: sha512-ZBVb498GHYlfB+1JzOcczJ1LrCYWr0IiiXjeEAf+64mSSp3IFwK7D3rjL6RZ05bjxBzuWDJVRzI+mFVFC9UgtQ==}
-
-  '@metaplex-foundation/umi-serializers@1.2.0':
-    resolution: {integrity: sha512-7ivgqVP6ZouN13EBN5aMirjoX2x0Ja7IuzrBeIa8YYrxGcy7YQp+fUj4YCPtMClzsETgJ5jL8EZnZPpZX4dxaQ==}
-
-  '@metaplex-foundation/umi@1.2.0':
-    resolution: {integrity: sha512-SIcDO8O9gRYL2C5ntsedVfpRBICK7ZoMB5ap8P5N2TEJ/QC205UxDzhdQsImdWQG1DQ7XJsDXWiiFzccpFZcSg==}
 
   '@metaplex/js@4.12.0':
     resolution: {integrity: sha512-rIUTMXo5gIXFIZt08AEHyqH4oVoLL2dMYiNePQluw9pydesRym4jDayJ5POxEmKmyc6KGqVKw/YWUIivmUY5zg==}
@@ -10159,6 +10131,16 @@ snapshots:
       - encoding
       - utf-8-validate
 
+  '@metaplex-foundation/mpl-token-metadata@1.2.5(bufferutil@4.0.7)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@metaplex-foundation/mpl-core': 0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10)
+      '@solana/spl-token': 0.1.8(bufferutil@4.0.7)(utf-8-validate@5.0.10)
+      '@solana/web3.js': 1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - utf-8-validate
+
   '@metaplex-foundation/mpl-token-metadata@2.13.0(bufferutil@4.0.7)(utf-8-validate@5.0.10)':
     dependencies:
       '@metaplex-foundation/beet': 0.7.1
@@ -10174,11 +10156,6 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@metaplex-foundation/mpl-token-metadata@3.4.0(@metaplex-foundation/umi@1.2.0)':
-    dependencies:
-      '@metaplex-foundation/mpl-toolbox': 0.10.0(@metaplex-foundation/umi@1.2.0)
-      '@metaplex-foundation/umi': 1.2.0
-
   '@metaplex-foundation/mpl-token-vault@0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10)':
     dependencies:
       '@metaplex-foundation/mpl-core': 0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10)
@@ -10189,46 +10166,12 @@ snapshots:
       - encoding
       - utf-8-validate
 
-  '@metaplex-foundation/mpl-toolbox@0.10.0(@metaplex-foundation/umi@1.2.0)':
-    dependencies:
-      '@metaplex-foundation/umi': 1.2.0
-
-  '@metaplex-foundation/umi-options@1.2.0': {}
-
-  '@metaplex-foundation/umi-public-keys@1.2.0':
-    dependencies:
-      '@metaplex-foundation/umi-serializers-encodings': 1.2.0
-
-  '@metaplex-foundation/umi-serializers-core@1.2.0': {}
-
-  '@metaplex-foundation/umi-serializers-encodings@1.2.0':
-    dependencies:
-      '@metaplex-foundation/umi-serializers-core': 1.2.0
-
-  '@metaplex-foundation/umi-serializers-numbers@1.2.0':
-    dependencies:
-      '@metaplex-foundation/umi-serializers-core': 1.2.0
-
-  '@metaplex-foundation/umi-serializers@1.2.0':
-    dependencies:
-      '@metaplex-foundation/umi-options': 1.2.0
-      '@metaplex-foundation/umi-public-keys': 1.2.0
-      '@metaplex-foundation/umi-serializers-core': 1.2.0
-      '@metaplex-foundation/umi-serializers-encodings': 1.2.0
-      '@metaplex-foundation/umi-serializers-numbers': 1.2.0
-
-  '@metaplex-foundation/umi@1.2.0':
-    dependencies:
-      '@metaplex-foundation/umi-options': 1.2.0
-      '@metaplex-foundation/umi-public-keys': 1.2.0
-      '@metaplex-foundation/umi-serializers': 1.2.0
-
-  '@metaplex/js@4.12.0(@metaplex-foundation/mpl-auction@0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-core@0.6.1(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-metaplex@0.0.5(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-token-metadata@3.4.0(@metaplex-foundation/umi@1.2.0))(@metaplex-foundation/mpl-token-vault@0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@solana/spl-token@0.1.8(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))':
+  '@metaplex/js@4.12.0(@metaplex-foundation/mpl-auction@0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-core@0.6.1(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-metaplex@0.0.5(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-token-metadata@1.2.5(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-token-vault@0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@solana/spl-token@0.1.8(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))':
     dependencies:
       '@metaplex-foundation/mpl-auction': 0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10)
       '@metaplex-foundation/mpl-core': 0.6.1(bufferutil@4.0.7)(utf-8-validate@5.0.10)
       '@metaplex-foundation/mpl-metaplex': 0.0.5(bufferutil@4.0.7)(utf-8-validate@5.0.10)
-      '@metaplex-foundation/mpl-token-metadata': 3.4.0(@metaplex-foundation/umi@1.2.0)
+      '@metaplex-foundation/mpl-token-metadata': 1.2.5(bufferutil@4.0.7)(utf-8-validate@5.0.10)
       '@metaplex-foundation/mpl-token-vault': 0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10)
       '@solana/spl-token': 0.1.8(bufferutil@4.0.7)(utf-8-validate@5.0.10)
       '@solana/web3.js': 1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10)
