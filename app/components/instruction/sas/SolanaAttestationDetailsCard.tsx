@@ -119,7 +119,8 @@ export function SolanaAttestationDetailsCard({
                     </tr>
                 ))}
 
-            {parsed.data && (
+            {/* Need to make sure there's one other field besides the discriminator */}
+            {parsed.data && Object.keys(parsed.data).length > 2 && (
                 <>
                     <tr className="table-sep">
                         <td>Argument Name</td>

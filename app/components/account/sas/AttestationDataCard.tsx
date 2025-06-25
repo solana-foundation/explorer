@@ -1,7 +1,12 @@
 import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 import React from 'react';
 import ReactJson from 'react-json-view';
-import { Attestation as SasAttestation, decodeSchema, Schema as SasSchema } from 'sas-lib';
+import {
+    Attestation as SasAttestation,
+    convertSasSchemaToBorshSchema,
+    decodeSchema,
+    Schema as SasSchema,
+} from 'sas-lib';
 
 import {
     decodeAccount,
@@ -16,7 +21,33 @@ export function AttestationDataCard({ account, onNotFound }: { account?: Account
         return onNotFound();
     }
 
-    return <AttestationCard attestation={decodeAccount(account)?.data.data} />;
+    const decoded = decodeAccount(account);
+    if (decoded?.type === 'attestation') {
+        return <AttestationCard attestation={decoded.data.data} />;
+    } else if (decoded?.type === 'schema') {
+        return <SchemaCard schema={decoded.data.data} />;
+    }
+
+    return onNotFound();
+}
+
+function SchemaCard({ schema }: { schema: SasSchema }) {
+    const borshSchema = convertSasSchemaToBorshSchema(schema);
+    return (
+        <div className="card">
+            <div className="card-header">
+                <div className="row align-items-center">
+                    <div className="col">
+                        <h3 className="card-header-title">Schema Layout (Borsh)</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div className="card metadata-json-viewer m-4">
+                <ReactJson src={borshSchema['schema']} theme={'solarized'} style={{ padding: 25 }} name={false} />
+            </div>
+        </div>
+    );
 }
 
 function AttestationCard({ attestation }: { attestation: SasAttestation }) {

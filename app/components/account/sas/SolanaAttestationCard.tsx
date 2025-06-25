@@ -1,12 +1,6 @@
 import { SystemProgram } from '@solana/web3.js';
 import React from 'react';
-import ReactJson from 'react-json-view';
-import {
-    Attestation as SasAttestation,
-    convertSasSchemaToBorshSchema,
-    Credential as SasCredential,
-    Schema as SasSchema,
-} from 'sas-lib';
+import { Attestation as SasAttestation, Credential as SasCredential, Schema as SasSchema } from 'sas-lib';
 
 import { AccountAddressRow, AccountHeader } from '@/app/components/common/Account';
 import { Address } from '@/app/components/common/Address';
@@ -41,7 +35,6 @@ function SolanaCredentialCard({ credential }: { credential: SasCredential }) {
 }
 
 function SolanaSchemaCard({ schema }: { schema: SasSchema }) {
-    const borshSchema = convertSasSchemaToBorshSchema(schema);
     return (
         <>
             <tr>
@@ -65,12 +58,6 @@ function SolanaSchemaCard({ schema }: { schema: SasSchema }) {
             <tr>
                 <td>Version</td>
                 <td className="text-lg-end">{schema.version}</td>
-            </tr>
-            <tr>
-                <td>Layout (Borsh)</td>
-                <td className="text-lg-start">
-                    <ReactJson src={borshSchema['schema']} theme={'solarized'} style={{ padding: 25 }} name={false} />
-                </td>
             </tr>
         </>
     );
@@ -140,7 +127,7 @@ export function SolanaAttestationServiceCard({ account }: { account: Account }) 
 
     let title = 'Solana Attestation Service';
     if (decoded) {
-        title = `${title} ${decoded.type.charAt(0).toUpperCase() + decoded.type.slice(1)}`;
+        title = `${title}: ${decoded.type.charAt(0).toUpperCase() + decoded.type.slice(1)}`;
     }
 
     return (

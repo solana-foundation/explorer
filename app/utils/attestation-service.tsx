@@ -48,7 +48,10 @@ export function decodeAccount(account: Account) {
 
 export function isAttestationAccount(account: Account) {
     try {
-        return account.owner.toBase58() === SAS_PROGRAM_ID && decodeAccount(account)?.type === 'attestation';
+        const accountType = decodeAccount(account)?.type;
+        return (
+            account.owner.toBase58() === SAS_PROGRAM_ID && (accountType === 'attestation' || accountType === 'schema')
+        );
     } catch (e) {
         return false;
     }
