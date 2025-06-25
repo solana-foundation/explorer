@@ -1,19 +1,20 @@
-import { decodeAccount, decodeWithType, deserializeAttestationDataWithBorsh070 } from '@/app/utils/attestation-service';
-import { decodeString, mapToPublicKey } from '@/app/utils/kit-wrapper';
 import { AccountAddressRow, AccountHeader } from '@components/common/Account';
 import { Address } from '@components/common/Address';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
+import { Account, useFetchAccountInfo } from '@providers/accounts';
 import { SystemProgram } from '@solana/web3.js';
+
 import React from 'react';
 import ReactJson from 'react-json-view';
 import {
     convertSasSchemaToBorshSchema,
-    decodeSchema,
     Credential as SasCredential,
     Schema as SasSchema,
     Attestation as SasAttestation,
 } from 'sas-lib';
+
+import { decodeAccount } from '@/app/utils/attestation-service';
+import { decodeString, mapToPublicKey } from '@/app/utils/kit-wrapper';
 
 function SolanaCredentialCard({ credential }: { credential: SasCredential }) {
     return (
