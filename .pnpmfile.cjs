@@ -22,7 +22,7 @@ function overridesPeerDependencies(pkg) {
     if (pkg.peerDependencies) {
         remapPeerDependencies.map(dep => {
             if (pkg.name === dep.package && pkg.version.startsWith(dep.packageVersion)) {
-                console.log(`  - Checking ${pkg.name}@${pkg.version}`); // , pkg.peerDependencies);
+                console.log(`  - Checking ${pkg.name}@${pkg.version}`);
 
                 if (dep.peerDependency in pkg.peerDependencies) {
                     try {

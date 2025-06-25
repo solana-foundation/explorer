@@ -254,7 +254,11 @@ function InstructionCard({
     } else if (isLighthouseInstruction(transactionIx)) {
         return <LighthouseDetailsCard key={key} {...props} />;
     } else if (isSolanaAttestationInstruction(transactionIx)) {
-        return <SolanaAttestationDetailsCard key={key} {...props} />;
+        return (
+            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                <SolanaAttestationDetailsCard {...props} />
+            </ErrorBoundary>
+        );
     } else if (codamaIdl) {
         const parsedIx = parseInstruction(codamaIdl as RootNode, upcastTransactionInstruction(transactionIx));
         if (!parsedIx) {

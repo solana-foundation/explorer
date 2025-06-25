@@ -26,7 +26,7 @@
         "@coral-xyz/anchor": "^0.30.1",
         "@mantine/hooks": "^7.17.3",
         "@metamask/jazzicon": "^2.0.0",
-        "@metaplex-foundation/mpl-token-metadata": "^1.1.0",
+        "@metaplex-foundation/mpl-token-metadata": "^3.4.0",
         "@metaplex/js": "^4.12.0",
         "@noble/hashes": "^1.5.0",
         "@onsol/tldparser": "^0.6.5",
@@ -157,8 +157,8 @@
             "avsc": "git://github.com/Irys-xyz/avsc#a730cc8018b79e114b6a3381bbb57760a24c6cef",
             "cross-fetch": "^3.1.5",
             "node-fetch": "^2.6.9",
-            "sas-lib>borsh": "npm:borsh@2.0.0",
-            "uuid": "^9.0.0"
+            "uuid": "^9.0.0",
+            "borsh": "0.7.0"
         }
     },
     "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
