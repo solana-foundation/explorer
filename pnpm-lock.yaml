@@ -217,8 +217,8 @@ importers:
         specifier: ^3.0.1
         version: 3.0.1
       sas-lib:
-        specifier: ^1.0.6
-        version: 1.0.6(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@7.5.10(bufferutil@4.0.7)(utf-8-validate@5.0.10))
+        specifier: 1.0.8
+        version: 1.0.8(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@7.5.10(bufferutil@4.0.7)(utf-8-validate@5.0.10))
       superstruct:
         specifier: ^0.15.3
         version: 0.15.3
@@ -7276,8 +7276,8 @@ packages:
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
-  sas-lib@1.0.6:
-    resolution: {integrity: sha512-6dmtgz4XiEv0KDNB1MsG9aKhJ6YhJb4bqBBcLNb7RE7FwE/8Wow9PcS7uzkmA0G3AKUfkFEDYJQFAImd6phHsQ==}
+  sas-lib@1.0.8:
+    resolution: {integrity: sha512-+uGvLnqtgxSMiKt0zSymNri2VVjgYPZktekydHlW89HiA0HpTME+HhHTix9lgmp4Vfjpep37wA3Vd5kKm/pesQ==}
 
   sass@1.53.0:
     resolution: {integrity: sha512-zb/oMirbKhUgRQ0/GFz8TSAwRq2IlR29vOUJZOx0l8sV+CkHUfHa4u5nqrG+1VceZp7Jfj59SVW9ogdhTvJDcQ==}
@@ -17426,7 +17426,7 @@ snapshots:
 
   safer-buffer@2.1.2: {}
 
-  sas-lib@1.0.6(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@7.5.10(bufferutil@4.0.7)(utf-8-validate@5.0.10)):
+  sas-lib@1.0.8(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@7.5.10(bufferutil@4.0.7)(utf-8-validate@5.0.10)):
     dependencies:
       '@solana/kit': 2.1.1(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@7.5.10(bufferutil@4.0.7)(utf-8-validate@5.0.10))
       bn.js: 5.2.1
