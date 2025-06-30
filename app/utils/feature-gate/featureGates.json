@@ -936,5 +936,24 @@
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": null
+  },
+  {
+    "key": "JE86WkYvTrzW8HgNmrHY7dFYpCmSptUpKupbo2AdQ9cG",
+    "title": "Dynamic stack frames",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0166-dynamic-stack-frames.md"
+    ],
+    "simds": [
+      "0166"
+    ],
+    "owners": [],
+    "min_agave_versions": [],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "testnet_activation_epoch": 797,
+    "devnet_activation_epoch": 902,
+    "comms_required": null,
+    "mainnet_activation_epoch": 809,
+    "description": null
   }
 ]
