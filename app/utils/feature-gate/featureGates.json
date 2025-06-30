@@ -667,7 +667,7 @@
     "devnet_activation_epoch": 896,
     "comms_required": null,
     "mainnet_activation_epoch": 809,
-    "description": null
+    "description": "Removes partitioned rent updates to reduce unnecessary account lookups and speed up block processing"
   },
   {
     "key": "8199Q2gMD2kwgfopK5qqVWuDbegLgpuFUFHCcUJQDN8b",
@@ -954,6 +954,6 @@
     "devnet_activation_epoch": 902,
     "comms_required": null,
     "mainnet_activation_epoch": 809,
-    "description": null
+    "description": "Enables dynamic stack allocation in SBPF to optimize memory usage and eliminate stack gaps"
   }
 ]
