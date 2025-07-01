@@ -51,7 +51,7 @@ import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { isAttestationAccount } from '@/app/utils/attestation-service';
 import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
-import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
+import { FullTokenInfo, getFullTokenInfo, isBadTokenAddress } from '@/app/utils/token-info';
 
 const TABS_LOOKUP: { [id: string]: Tab[] } = {
     'address-lookup-table': [
@@ -497,6 +497,13 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
 
     if (isAttestationAccount(account)) {
         tabs.push(...TABS_LOOKUP['attestation']);
+    }
+
+    if (isBadTokenAddress(address)) {
+        const metadataIndex = tabs.findIndex(tab => tab.slug === 'metadata');
+        if (metadataIndex !== -1) {
+            tabs.splice(metadataIndex, 1);
+        }
     }
 
     return tabs.map(tab => {
