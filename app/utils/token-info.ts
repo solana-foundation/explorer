@@ -120,7 +120,7 @@ async function getFullLegacyTokenInfoUsingCdn(
 }
 
 export function isRedactedTokenAddress(address: string): boolean {
-    return process.env.NEXT_PUBLIC_BAD_TOKENS?.split(',').includes(address) ?? false;
+    return process.env.NEXT_PUBLIC_BAD_TOKENS?.split(',').map(addr => addr.trim()).includes(address) ?? false;
 }
 
 /**
