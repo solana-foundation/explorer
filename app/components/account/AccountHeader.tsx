@@ -12,7 +12,7 @@ import { create } from 'superstruct';
 import { CompressedNftAccountHeader } from '@/app/components/account/CompressedNftCard';
 import { getProxiedUri } from '@/app/features/metadata/utils';
 import { useMetadataJsonLink } from '@/app/providers/compressed-nft';
-import { FullTokenInfo, isBadTokenAddress } from '@/app/utils/token-info';
+import { FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
 
 const IDENTICON_WIDTH = 64;
@@ -43,7 +43,7 @@ export function AccountHeader({
     }
 
     if (isToken && !isTokenInfoLoading) {
-        if (isBadTokenAddress(address)) {
+        if (isRedactedTokenAddress(address)) {
             return (
                 <TokenMintHeader address={address} mintInfo={mintInfo} parsedData={undefined} tokenInfo={undefined} />
             );

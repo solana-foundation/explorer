@@ -4,7 +4,7 @@ import ReactJson from 'react-json-view';
 
 import { useCluster } from '@/app/providers/cluster';
 import { CompressedNft, useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
-import { isBadTokenAddress } from '@/app/utils/token-info';
+import { isRedactedTokenAddress } from '@/app/utils/token-info';
 
 export function MetaplexMetadataCard({ account, onNotFound }: { account?: Account; onNotFound: () => never }) {
     const { url } = useCluster();
@@ -12,7 +12,7 @@ export function MetaplexMetadataCard({ account, onNotFound }: { account?: Accoun
 
     const parsedData = account?.data?.parsed;
     if (
-        isBadTokenAddress(account?.pubkey.toString() ?? '') ||
+        isRedactedTokenAddress(account?.pubkey.toString() ?? '') ||
         !parsedData ||
         !isTokenProgramData(parsedData) ||
         parsedData.parsed.type !== 'mint' ||

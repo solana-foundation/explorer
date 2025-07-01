@@ -119,7 +119,7 @@ async function getFullLegacyTokenInfoUsingCdn(
     return tokenInfo;
 }
 
-export function isBadTokenAddress(address: string): boolean {
+export function isRedactedTokenAddress(address: string): boolean {
     return process.env.NEXT_PUBLIC_BAD_TOKENS?.split(',').includes(address) ?? false;
 }
 
@@ -134,7 +134,7 @@ export async function getFullTokenInfo(
     cluster: Cluster,
     connectionString: string
 ): Promise<FullTokenInfo | undefined> {
-    if (isBadTokenAddress(address.toBase58())) {
+    if (isRedactedTokenAddress(address.toBase58())) {
         return undefined;
     }
     const chainId = getChainId(cluster);
