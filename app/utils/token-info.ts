@@ -110,9 +110,9 @@ export async function getFullTokenInfo(
     if (!sdkTokenInfo) {
         return legacyCdnTokenInfo
             ? {
-                ...legacyCdnTokenInfo,
-                verified: true,
-            }
+                  ...legacyCdnTokenInfo,
+                  verified: true,
+              }
             : undefined;
     }
 
