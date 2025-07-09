@@ -1,6 +1,5 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { ChainId, Client, Token, UtlConfig } from '@solflare-wallet/utl-sdk';
-
 import { Cluster } from './cluster';
 
 type TokenExtensions = {
@@ -69,38 +68,8 @@ export async function getTokenInfo(
 ): Promise<Token | undefined> {
     const client = makeUtlClient(cluster, connectionString);
     if (!client) return undefined;
-    const token = await client.fetchMint(address);
+    const [token] = await client.getFromMetaplex([address]);
     return token;
-}
-
-type UtlApiResponse = {
-    content: Token[]
-}
-
-export async function getTokenInfoWithoutOnChainFallback(
-    address: PublicKey,
-    cluster: Cluster
-): Promise<Token | undefined> {
-    const chainId = getChainId(cluster);
-    if (!chainId) return undefined;
-
-    // Request token info directly from UTL API
-    // We don't use the SDK here because we don't want it to fallback to an on-chain request
-    const response = await fetch(`https://token-list-api.solana.cloud/v1/mints?chainId=${chainId}`, {
-        body: JSON.stringify({ addresses: [address.toBase58()] }),
-        headers: {
-            "Content-Type": "application/json",
-        },
-        method: 'POST',
-    });
-
-    if (response.status >= 400) {
-        console.error(`Error calling UTL API for address ${address} on chain ID ${chainId}. Status ${response.status}`);
-        return undefined;
-    }
-
-    const fetchedData = await response.json() as UtlApiResponse;
-    return fetchedData.content[0];
 }
 
 async function getFullLegacyTokenInfoUsingCdn(
@@ -141,9 +110,9 @@ export async function getFullTokenInfo(
     if (!sdkTokenInfo) {
         return legacyCdnTokenInfo
             ? {
-                ...legacyCdnTokenInfo,
-                verified: true,
-            }
+                  ...legacyCdnTokenInfo,
+                  verified: true,
+              }
             : undefined;
     }
 
