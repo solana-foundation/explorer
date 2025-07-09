@@ -1006,34 +1006,6 @@
     "description": ""
   },
   {
-    "key": "F6UVKh1ujTEFK3en2SyAL3cdVnqko1FVEXWhmdLRu6WP",
-    "title": "Feature Gate: Enables deployment and execution of SBPFv2 programs",
-    "simd_link": [
-      "",
-      ""
-    ],
-    "simds": [
-      "0173",
-      " 0174"
-    ],
-    "owners": [],
-    "min_agave_versions": [
-      "v2.2.0"
-    ],
-    "min_fd_versions": [
-      "v0.503.20214"
-    ],
-    "min_jito_versions": [
-      "v2.2.0"
-    ],
-    "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
-    "devnet_activation_epoch": null,
-    "comms_required": null,
-    "mainnet_activation_epoch": null,
-    "description": ""
-  },
-  {
     "key": "5JsG4NWH8Jbrqdd8uL6BNwnyZK3dQSoieRXG5vmofj9y",
     "title": "SIMD-0180: Use Vote Account Address To Key Leader Schedule",
     "simd_link": [
