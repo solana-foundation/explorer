@@ -15,7 +15,7 @@ export default function isMetaplexNFT(
         (
             parseInt(mintInfo.supply) === 1 ||
             (
-                parsedData.nftData.metadata.tokenStandard &&
+                parsedData.nftData.metadata.tokenStandard != null &&
                 [0, 3, 4].includes(parsedData.nftData.metadata.tokenStandard)
             )
         )
