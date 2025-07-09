@@ -12,6 +12,12 @@ export default function isMetaplexNFT(
         parsedData.parsed.type === 'mint' &&
         parsedData.nftData &&
         mintInfo?.decimals === 0 &&
-        (parseInt(mintInfo.supply) === 1 || parsedData.nftData.metadata.tokenStandard === 1)
+        (
+            parseInt(mintInfo.supply) === 1 ||
+            (
+                parsedData.nftData.metadata.tokenStandard &&
+                [0, 3, 4].includes(parsedData.nftData.metadata.tokenStandard)
+            )
+        )
     );
 }
