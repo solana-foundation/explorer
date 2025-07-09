@@ -57,11 +57,6 @@ export function Address({
         addressLabel = metaplexData.data.data.name;
     }
 
-    const tokenInfo = useTokenInfo(fetchTokenLabelInfo, address);
-    if (tokenInfo) {
-        addressLabel = displayAddress(address, cluster, tokenInfo);
-    }
-
     if (truncateChars && addressLabel === address) {
         addressLabel = addressLabel.slice(0, truncateChars) + '…';
     }
