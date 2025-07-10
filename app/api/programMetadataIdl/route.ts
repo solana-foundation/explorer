@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { getCodamaIdl } from '@/app/components/instruction/codama/getCodamaIdl';
+import { getProgramMetadataIdl } from '@/app/components/instruction/codama/getProgramMetadataIdl';
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
 const CACHE_DURATION = 30 * 60; // 30 minutes
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     }
 
     try {
-        const codamaIdl = await getCodamaIdl(programAddress, url);
+        const codamaIdl = await getProgramMetadataIdl(programAddress, url);
         return NextResponse.json(
             { codamaIdl },
             {

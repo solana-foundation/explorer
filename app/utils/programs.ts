@@ -27,6 +27,7 @@ export enum PROGRAM_NAMES {
     TOKEN_2022 = 'Token-2022 Program',
     TOKEN_METADATA = 'Token Metadata Program',
     TOKEN_VAULT = 'Token Vault Program',
+    PROGRAM_METADATA = 'Program Metadata Program',
 
     // foundation programs
     SAS_PROGRAM = 'Solana Attestation Service Program',
@@ -327,6 +328,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     Port7uDYB3wk6GJAw4KT1WpTeMtSu9bTcChBHkX2LfR: {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.PORT,
+    },
+    ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S: {
+        deployments: ALL_CLUSTERS,
+        name: PROGRAM_NAMES.PROGRAM_METADATA,
     },
     QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto: {
         deployments: LIVE_CLUSTERS,

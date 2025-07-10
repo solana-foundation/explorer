@@ -1,4 +1,3 @@
-import { parseInstruction } from '@codama/dynamic-parsers';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { AddressLookupTableDetailsCard } from '@components/instruction/AddressLookupTableDetailsCard';
@@ -39,20 +38,18 @@ import {
 import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT, SignatureProps } from '@utils/index';
 import { intoTransactionInstruction } from '@utils/tx';
-import { RootNode } from 'codama';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { useCodamaIdl } from '@/app/providers/useCodamaIdl';
+import { useProgramMetadataIdl } from '@/app/providers/useProgramMetadataIdl';
 
-import { upcastTransactionInstruction } from '../inspector/into-parsed-data';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
-import { CodamaInstructionCard } from '../instruction/codama/CodamaInstructionDetailsCard';
 import { Ed25519DetailsCard } from '../instruction/ed25519/Ed25519DetailsCard';
 import { isEd25519Instruction } from '../instruction/ed25519/types';
 import { LighthouseDetailsCard } from '../instruction/lighthouse/LighthouseDetailsCard';
 import { isLighthouseInstruction } from '../instruction/lighthouse/types';
 import { isMangoInstruction } from '../instruction/mango/types';
+import { ProgramMetadataIdlInstructionDetailsCard } from '../instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard';
 import {
     isSolanaAttestationInstruction,
     SolanaAttestationDetailsCard,
@@ -180,7 +177,7 @@ function InstructionCard({
 }) {
     const key = `${index}-${childIndex}`;
     const { program: anchorProgram } = useAnchorProgram(ix.programId.toString(), url, cluster);
-    const { codamaIdl } = useCodamaIdl(ix.programId.toString(), url, cluster);
+    const { programMetadataIdl } = useProgramMetadataIdl(ix.programId.toString(), url, cluster);
 
     if ('parsed' in ix) {
         const props = {
@@ -259,16 +256,8 @@ function InstructionCard({
                 <SolanaAttestationDetailsCard {...props} />
             </ErrorBoundary>
         );
-    } else if (codamaIdl) {
-        try {
-            const parsedIx = parseInstruction(codamaIdl as RootNode, upcastTransactionInstruction(transactionIx));
-            if (!parsedIx) {
-                return <UnknownDetailsCard key={key} {...props} />;
-            }
-            return <CodamaInstructionCard key={key} {...props} parsedIx={parsedIx} />;
-        } catch (error) {
-            return <UnknownDetailsCard key={key} {...props} />;
-        }
+    } else if (programMetadataIdl) {
+        return <ProgramMetadataIdlInstructionDetailsCard key={key} {...props} idl={programMetadataIdl} />;
     } else if (anchorProgram) {
         return (
             <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>

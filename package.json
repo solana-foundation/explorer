@@ -23,6 +23,7 @@
         "@bonfida/spl-name-service": "0.1.30",
         "@cloudflare/stream-react": "^1.2.0",
         "@codama/dynamic-parsers": "^1.1.12",
+        "@codama/nodes-from-anchor": "^1.2.1",
         "@coral-xyz/anchor": "^0.30.1",
         "@mantine/hooks": "^7.17.3",
         "@metamask/jazzicon": "^2.0.0",
