@@ -260,11 +260,15 @@ function InstructionCard({
             </ErrorBoundary>
         );
     } else if (codamaIdl) {
-        const parsedIx = parseInstruction(codamaIdl as RootNode, upcastTransactionInstruction(transactionIx));
-        if (!parsedIx) {
+        try {
+            const parsedIx = parseInstruction(codamaIdl as RootNode, upcastTransactionInstruction(transactionIx));
+            if (!parsedIx) {
+                return <UnknownDetailsCard key={key} {...props} />;
+            }
+            return <CodamaInstructionCard key={key} {...props} parsedIx={parsedIx} />;
+        } catch (error) {
             return <UnknownDetailsCard key={key} {...props} />;
         }
-        return <CodamaInstructionCard key={key} {...props} parsedIx={parsedIx} />;
     } else if (anchorProgram) {
         return (
             <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
