@@ -72,15 +72,24 @@ const BaseFeatureCard = ({
     if (featureInfo) {
         simdLink = (
             <tr>
-                <td>SIMD</td>
+                <td>SIMDs</td>
                 <td className="text-lg-end">
-                    {featureInfo.simds[0] && featureInfo.simd_link[0] ? (
-                        <a href={featureInfo.simd_link[0]} target="_blank" rel="noopener noreferrer" className="">
-                            SIMD {featureInfo.simds[0]} <ExternalLinkIcon className="align-text-top" size={13} />
-                        </a>
-                    ) : (
-                        <code>No link</code>
-                    )}
+                    {featureInfo.simds.map((simd, index) => (
+                        <div key={index}>
+                            {simd && featureInfo.simd_link[index] ? (
+                                <a
+                                    href={featureInfo.simd_link[index]}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className=""
+                                >
+                                    SIMD {simd} <ExternalLinkIcon className="align-text-top" size={13} />
+                                </a>
+                            ) : (
+                                <code>No link</code>
+                            )}
+                        </div>
+                    ))}
                 </td>
             </tr>
         );

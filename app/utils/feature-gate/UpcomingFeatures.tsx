@@ -139,16 +139,17 @@ function FeaturesTable({
                                     />
                                 </td>
                                 <td>
-                                    {feature.simds[0] && feature.simd_link[0] && (
+                                    {feature.simds.map((simd, index) => (
                                         <a
-                                            href={feature.simd_link[0]}
+                                            key={index}
+                                            href={feature.simd_link[index]}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="btn btn-sm btn-outline-primary fs-sm"
                                         >
-                                            SIMD {feature.simds[0].replace(/^0+/, '')}
+                                            SIMD {simd.replace(/^0+/, '')}
                                         </a>
-                                    )}
+                                    ))}
                                 </td>
                             </tr>
                         ))}
