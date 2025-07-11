@@ -1,9 +1,9 @@
 import { TableCardBody } from '@components/common/TableCardBody';
 import { ParsedMessage, PublicKey, VersionedMessage } from '@solana/web3.js';
-import { ProgramName } from '@utils/anchor';
 import { Cluster } from '@utils/cluster';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import { InstructionLogs } from '@utils/program-logs';
+import { ProgramName } from '@utils/program-name';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';

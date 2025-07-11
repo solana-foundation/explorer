@@ -6,7 +6,6 @@ import { useAnchorProgram } from '@providers/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/index';
-import { programLabel } from '@utils/tx';
 import React, { Fragment, ReactNode, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 import ReactJson from 'react-json-view';
@@ -36,18 +35,6 @@ export function AnchorProgramName({
     const { program } = useAnchorProgram(programId.toString(), url, cluster);
     const programName = getAnchorProgramName(program) || defaultName;
     return <>{programName}</>;
-}
-
-export function ProgramName({ programId, cluster, url }: { programId: PublicKey; cluster: Cluster; url: string }) {
-    const defaultProgramName = programLabel(programId.toBase58(), cluster);
-    if (defaultProgramName) {
-        return <>{defaultProgramName}</>;
-    }
-    return (
-        <React.Suspense fallback={<>{defaultProgramName}</>}>
-            <AnchorProgramName programId={programId} url={url} cluster={cluster} defaultName={defaultProgramName} />
-        </React.Suspense>
-    );
 }
 
 export function getAnchorNameForInstruction(ix: TransactionInstruction, program: Program): string | null {
