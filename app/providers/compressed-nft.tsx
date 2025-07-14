@@ -1,10 +1,13 @@
 import useSWRImmutable from 'swr/immutable';
 
 export function useMetadataJsonLink(url: string, options?: { suspense?: boolean }) {
+    const proxyUrl = `/api/fetchMetadata?url=${encodeURIComponent(url)}`;
     const { data, error } = useSWRImmutable(
-        url,
-        async (url: string) => {
-            return fetch(url).then(response => response.json());
+        proxyUrl,
+        async (proxyUrl: string) => {
+            const response = await fetch(proxyUrl);
+            const json = await response.json();
+            return json;
         },
         { suspense: options?.suspense }
     );
