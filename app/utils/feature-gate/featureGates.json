@@ -376,7 +376,7 @@
     "testnet_activation_epoch": 810,
     "devnet_activation_epoch": 911,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 819,
     "description": "Improve validator performance by using Accounts Lattice Hash for snapshots instead of the Merkle-based account hash"
   },
   {
