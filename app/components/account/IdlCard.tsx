@@ -26,14 +26,14 @@ export function IdlCard({ programId }: { programId: string }) {
                     <h3 className="card-header-title">IDL</h3>
                 </div>
             </div>
-            {!!programMetadataIdl && (
+            {Boolean(programMetadataIdl) && (
                 <IdlSection
                     badge={<IDLBadge title="Codama IDL" idl={programMetadataIdl} />}
                     idl={programMetadataIdl}
                     programId={programId}
                 />
             )}
-            {!!idl && (
+            {Boolean(idl) && (
                 <IdlSection
                     badge={<IDLBadge title="Anchor IDL" idl={idl} />}
                     idl={idl}
