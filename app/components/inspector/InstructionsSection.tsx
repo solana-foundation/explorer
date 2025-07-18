@@ -4,6 +4,7 @@ import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
     AddressLookupTableAccount,
     ComputeBudgetProgram,
+    SystemProgram,
     TransactionInstruction,
     TransactionMessage,
     VersionedMessage,
@@ -20,8 +21,9 @@ import { ErrorCard } from '../common/ErrorCard';
 import { LoadingCard } from '../common/LoadingCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
+import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
-import { intoParsedInstruction } from './into-parsed-data';
+import { intoParsedInstruction, intoParsedTransaction } from './into-parsed-data';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
 
 export function InstructionsSection({ message }: { message: VersionedMessage }) {
@@ -133,6 +135,19 @@ function InspectorInstructionCard({
                     result={result}
                     signature={signature}
                     InstructionCardComponent={BaseInstructionCard}
+                />
+            );
+        }
+        case SystemProgram.programId.toString(): {
+            const asParsedInstruction = intoParsedInstruction(ix);
+            const asParsedTransaction = intoParsedTransaction(ix, message);
+            return (
+                <SystemDetailsCard
+                    key={index}
+                    ix={asParsedInstruction}
+                    tx={asParsedTransaction}
+                    index={index}
+                    result={result}
                 />
             );
         }
