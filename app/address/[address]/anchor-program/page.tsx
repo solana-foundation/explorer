@@ -14,7 +14,10 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
         title: `Anchor Program IDL | ${await getReadableTitleFromAddress(props)} | Solana`,
     };
 }
-
+/**
+    * @deprecated This route is deprecated. Programs may have multiple IDLs.
+    * The Anchor program IDL page has been renamed to a more generic one.
+*/
 export default function DeprecatedAnchorProgramIDLPage({ params: { address } }: Props) {
     return redirect(`/address/${address}/idl`);
 }
