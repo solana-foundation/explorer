@@ -110,6 +110,8 @@ function InspectorInstructionCard({
     //  - result is `err: null` as at this point there should not be errors
     const result = { err: null };
     const signature = '';
+
+    //!!! console.log('MESSAGE', JSON.stringify(message)); //.serialize()); //.toString('base64'));
     switch (ix.programId.toString()) {
         case ASSOCIATED_TOKEN_PROGRAM_ID.toString(): {
             // NOTE: current limitation is that innerInstructions won't be present at the AssociatedTokenDetailsCard. For that purpose we might need to simulateTransactions to get them.

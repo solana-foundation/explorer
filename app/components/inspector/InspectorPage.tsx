@@ -265,6 +265,8 @@ export function TransactionInspectorPage({
     const router = useRouter();
     const [paramString, setParamString] = React.useState<string>();
 
+    //!!! console.log({ inspectorData });
+
     // Sync message with url search params
     const prevInspectorData = usePrevious(inspectorData);
     React.useEffect(() => {
