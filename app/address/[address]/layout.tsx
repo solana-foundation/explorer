@@ -53,6 +53,7 @@ import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { isAttestationAccount } from '@/app/utils/attestation-service';
 import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
+import { useProgramMetadataIdl } from '@/app/providers/useProgramMetadataIdl';
 
 const TABS_LOOKUP: { [id: string]: Tab[] } = {
     'address-lookup-table': [
@@ -381,7 +382,7 @@ export type MoreTabs =
     | 'attributes'
     | 'domains'
     | 'security'
-    | 'anchor-program'
+    | 'idl'
     | 'anchor-account'
     | 'entries'
     | 'concurrent-merkle-tree'
@@ -569,18 +570,18 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
         });
     }
 
-    const anchorProgramTab: Tab = {
-        path: 'anchor-program',
-        slug: 'anchor-program',
-        title: 'Anchor Program IDL',
+    const idlProgramTab: Tab = {
+        path: 'idl',
+        slug: 'idl',
+        title: 'Program IDL',
     };
     tabComponents.push({
         component: (
-            <React.Suspense key={anchorProgramTab.slug} fallback={<></>}>
-                <AnchorProgramIdlLink tab={anchorProgramTab} address={pubkey.toString()} pubkey={pubkey} />
+            <React.Suspense key={idlProgramTab.slug} fallback={<></>}>
+                <ProgramIdlLink tab={idlProgramTab} address={pubkey.toString()} pubkey={pubkey} />
             </React.Suspense>
         ),
-        tab: anchorProgramTab,
+        tab: idlProgramTab,
     });
 
     const accountDataTab: Tab = {
@@ -613,13 +614,14 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
     return tabComponents;
 }
 
-function AnchorProgramIdlLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
+function ProgramIdlLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
     const { url, cluster } = useCluster();
     const { idl } = useAnchorProgram(pubkey.toString(), url, cluster);
+    const { programMetadataIdl } = useProgramMetadataIdl(pubkey.toString(), url, cluster);
     const anchorProgramPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
-    if (!idl) {
+    if (!idl && !programMetadataIdl) {
         return null;
     }
 

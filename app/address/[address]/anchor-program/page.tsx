@@ -1,8 +1,6 @@
-import { AnchorProgramCard } from '@components/account/AnchorProgramCard';
-import { LoadingCard } from '@components/common/LoadingCard';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
+import { redirect } from 'next/navigation';
 import { Metadata } from 'next/types';
-import { Suspense } from 'react';
 
 type Props = Readonly<{
     params: {
@@ -17,10 +15,6 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
     };
 }
 
-export default function AnchorProgramIDLPage({ params: { address } }: Props) {
-    return (
-        <Suspense fallback={<LoadingCard message="Loading anchor program IDL" />}>
-            <AnchorProgramCard programId={address} />
-        </Suspense>
-    );
+export default function DeprecatedAnchorProgramIDLPage({ params: { address } }: Props) {
+    return redirect(`/address/${address}/idl`);
 }
