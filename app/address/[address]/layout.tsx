@@ -1,5 +1,6 @@
 'use client';
 import './styles.css';
+import '@/app/types/bigint'; // polyfill toJSON for BigInt
 
 import { AddressLookupTableAccountSection } from '@components/account/address-lookup-table/AddressLookupTableAccountSection';
 import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
@@ -52,7 +53,6 @@ import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { isAttestationAccount } from '@/app/utils/attestation-service';
 import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
-import * as _ from '@/app/types/bigint';
 
 const TABS_LOOKUP: { [id: string]: Tab[] } = {
     'address-lookup-table': [
