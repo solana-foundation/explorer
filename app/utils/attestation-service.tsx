@@ -58,9 +58,15 @@ export function isAttestationAccount(account: Account) {
     }
 }
 
-// Helper function to deserialize attestation data using the borsh@0.7.0 API
-// This is annoying because sas-lib relies on @solana/kit which uses borsh@2.0.0 but metaplex & other libraries use borsh@0.7.0
-// This is a workaround to get the data deserialized correctly.
+/**
+    Helper function to deserialize attestation data using the borsh@0.7.0 API
+    This is annoying because sas-lib relies on @solana/kit which uses borsh@2.0.0 but metaplex & other libraries use borsh@0.7.0
+    This is a workaround to get the data deserialized correctly.
+
+    TODO: remove implementation upon refactoring with major or minor change
+
+    @deprecated - legacy deserialization should not be used
+*/
 export function deserializeAttestationDataWithBorsh070(schema: SasSchema, data: Uint8Array) {
     // 1. Use sas-lib to convert its schema into a borsh-compatible format.
     const sasBorshSchema = convertSasSchemaToBorshSchema(schema);
