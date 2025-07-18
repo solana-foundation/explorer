@@ -1,5 +1,6 @@
 import { Account } from '@providers/accounts';
 import { deserialize } from 'borsh';
+import { deserialize as deserializeWithVersion200 } from 'borsh2';
 import {
     convertSasSchemaToBorshSchema,
     decodeAttestation,
@@ -95,4 +96,14 @@ export function deserializeAttestationDataWithBorsh070(schema: SasSchema, data: 
     // 4. Call borsh@0.7.0's deserialize function with the correct arguments.
     // It will return an instance of DynamicAttestationData with populated fields.
     return deserialize(schemaMap, DynamicAttestationData, Buffer.from(data));
+}
+
+// Helper function to deserialize attestation data using the borsh@2.0.0 API
+export function deserializeAttestationDataWithBorsh200(schema: SasSchema, data: Uint8Array) {
+    // Use sas-lib to convert its schema into a borsh-compatible format.
+    const sasBorshSchema = convertSasSchemaToBorshSchema(schema);
+
+    // @ts-expect-error borsh@2.0.0 actually exposes private schema field, even though it's not typed
+    const deserializedData = deserializeWithVersion200(sasBorshSchema.schema, data);
+    return deserializedData;
 }

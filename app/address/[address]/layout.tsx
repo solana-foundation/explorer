@@ -52,6 +52,7 @@ import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { isAttestationAccount } from '@/app/utils/attestation-service';
 import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
+import * as _ from '@/app/types/bigint';
 
 const TABS_LOOKUP: { [id: string]: Tab[] } = {
     'address-lookup-table': [

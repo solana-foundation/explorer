@@ -11,7 +11,7 @@ import {
 import {
     decodeAccount,
     decodeWithType,
-    deserializeAttestationDataWithBorsh070,
+    deserializeAttestationDataWithBorsh200,
     isAttestationAccount,
 } from '@/app/utils/attestation-service';
 import { mapToPublicKey } from '@/app/utils/kit-wrapper';
@@ -63,7 +63,7 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
     try {
         if (schemaAccountInfo?.data) {
             const schema: SasSchema = decodeWithType(schemaAccountInfo.data, 'schema', decodeSchema)?.data.data;
-            decoded = deserializeAttestationDataWithBorsh070(schema, Uint8Array.from(attestation.data));
+            decoded = deserializeAttestationDataWithBorsh200(schema, Uint8Array.from(attestation.data));
         }
     } catch (e) {
         console.error(e);
