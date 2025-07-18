@@ -86,7 +86,7 @@ export async function GET(request: Request, { params: _params }: Params) {
     }
 
     // preserve original cache-control headers
-    const contentLength = resourceHeaders.get('content-length');
+    // const contentLength = resourceHeaders.get('content-length');
     const responseHeaders: Record<string, string> = {
         'Cache-Control': resourceHeaders.get('cache-control') ?? 'no-cache',
         'Content-Type': resourceHeaders.get('content-type') ?? 'application/json; charset=utf-8',
