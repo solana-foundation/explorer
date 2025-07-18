@@ -10,10 +10,8 @@ Thank you for your interest in contributing to the Solana Explorer project! This
 -   [Development Environment](#development-environment)
 -   [Testing Protocol Integrations](#testing-protocol-integrations)
 -   [CI/CD Requirements](#cicd-requirements)
--   [Security Features](#security-features)
 -   [Bug Reporting](#bug-reporting)
 -   [Pull Request Process](#pull-request-process)
--   [Code Style](#code-style)
 
 ## Getting Started
 
