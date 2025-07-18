@@ -86,17 +86,28 @@ export async function GET(request: Request, { params: _params }: Params) {
     }
 
     // preserve original cache-control headers
-    const contentLength = resourceHeaders.get('content-length');
+    // const contentLength = resourceHeaders.get('content-length');
     const responseHeaders: Record<string, string> = {
         'Cache-Control': resourceHeaders.get('cache-control') ?? 'no-cache',
         'Content-Type': resourceHeaders.get('content-type') ?? 'application/json; charset=utf-8',
         Etag: resourceHeaders.get('etag') ?? 'no-etag',
     };
 
-    // Only set Content-Length if it exists in the original response
-    if (contentLength) {
-        responseHeaders['Content-Length'] = contentLength;
-    }
+    // Skipping Content-Length to avoid browser CORS issues:
+    // - Some upstream metadata servers (e.g. AWS S3/CDNs) return a Content-Length header.
+    // - When we forward it, the browser treats the response as a "non-simple" CORS response,
+    //   requiring proper Access-Control-Allow-Origin headers.
+    // - Since many upstream servers don’t return valid CORS headers, the browser blocks it
+    //   with a misleading CORS or ERR_CONTENT_LENGTH_MISMATCH error, even if status is 200 OK.
+    // - Other servers (like IPFS gateways) don’t include Content-Length and work fine.
+    //
+    // By omitting Content-Length entirely, the proxy response only includes safelisted headers,
+    // allowing the browser to accept it without extra CORS checks. Next.js will handle the
+    // body size automatically, so this is safe.
+
+    // if (contentLength) {
+    //     responseHeaders['Content-Length'] = contentLength;
+    // }
 
     // Validate that all required headers are present
     const hasMissingHeaders = Object.values(responseHeaders).some(value => value == null);
