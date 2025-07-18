@@ -21,7 +21,6 @@ import {
 } from '@coral-xyz/anchor/dist/cjs/idl';
 import { sha256 } from '@noble/hashes/sha256';
 import { snakeCase } from 'change-case';
-import { RootNode } from 'codama';
 
 // Legacy types based on the Rust structs
 // Should be included in next minor release of anchor
@@ -438,7 +437,7 @@ export function getIdlSpecType(idl: any): IdlSpec {
 
 export type IdlSpec = '0.1.0' | 'legacy' | 'codama';
 
-export function formatIdl(idl: any, programAddress?: string): Idl | RootNode {
+export function formatIdl(idl: any, programAddress?: string): Idl {
     const spec = getIdlSpecType(idl);
 
     switch (spec) {
@@ -446,8 +445,6 @@ export function formatIdl(idl: any, programAddress?: string): Idl | RootNode {
             return idl as Idl;
         case 'legacy':
             return removeUnusedTypes(convertLegacyIdl(idl as LegacyIdl, programAddress));
-        case 'codama':
-            return idl as RootNode;
         default:
             throw new Error(`IDL spec not supported: ${spec}`);
     }
