@@ -431,10 +431,11 @@ function convertDefinedTypeArg(arg: LegacyIdlDefinedTypeArg): any {
 }
 
 export function getIdlSpecType(idl: any): IdlSpec {
+    if (idl?.standard === 'codama') return 'codama';
     return idl.metadata?.spec ?? 'legacy';
 }
 
-export type IdlSpec = '0.1.0' | 'legacy';
+export type IdlSpec = '0.1.0' | 'legacy' | 'codama';
 
 export function formatIdl(idl: any, programAddress?: string): Idl {
     const spec = getIdlSpecType(idl);
