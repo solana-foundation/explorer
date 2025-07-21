@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
 
@@ -38,7 +38,7 @@ describe.only('IdlCard', () => {
         vi.clearAllMocks();
     });
 
-    test('should render IdlCard with PMP IDL when programMetadataIdl exists', () => {
+    test('should render IdlCard with PMP IDL when programMetadataIdl exists', async () => {
         vi.spyOn(anchorModule, 'useAnchorProgram').mockReturnValue({
             idl: null,
             program: null,
@@ -54,15 +54,15 @@ describe.only('IdlCard', () => {
             </ClusterProvider>
         );
 
-        // Check if IDL is rendered
-        expect(screen.getByText('IDL')).toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.getByText(/Program Metadata/)).toBeInTheDocument();
+        });
         expect(screen.getByText(/Codama IDL/)).toBeInTheDocument();
         expect(screen.getByText(/rootNode/)).toBeInTheDocument(); // from json view
         expect(screen.queryByText(/Anchor IDL/)).not.toBeInTheDocument();
-        expect(screen.getAllByText('Download')).toHaveLength(1);
     });
 
-    test('should render IdlCard with Anchor IDL when anchorIdl exists', () => {
+    test('should render IdlCard with Anchor IDL when anchorIdl exists', async () => {
         vi.spyOn(anchorModule, 'useAnchorProgram').mockReturnValue({
             idl: mockAnchorIdl as any,
             program: null,
@@ -78,14 +78,15 @@ describe.only('IdlCard', () => {
             </ClusterProvider>
         );
 
-        expect(screen.getByText('IDL')).toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.getByText("Anchor")).toBeInTheDocument();
+        });
         expect(screen.getByText(/Anchor IDL/)).toBeInTheDocument();
         expect(screen.getByText(/metadata/)).toBeInTheDocument(); // from json view
         expect(screen.queryByText(/Codama IDL/)).not.toBeInTheDocument();
-        expect(screen.getAllByText('Download')).toHaveLength(1);
     });
 
-    test('should render IdlCard with both IDLs when both exist', () => {
+    test('should render IdlCard tabs when both IDLs exist', async () => {
         vi.spyOn(anchorModule, 'useAnchorProgram').mockReturnValue({
             idl: mockAnchorIdl as any,
             program: null,
@@ -101,13 +102,17 @@ describe.only('IdlCard', () => {
             </ClusterProvider>
         );
 
-        expect(screen.getByText('IDL')).toBeInTheDocument();
-        expect(screen.getByText(/Codama IDL/)).toBeInTheDocument();
+        // pmp idl should be rendered as first
+        await waitFor(() => {
+            expect(screen.getByText(/Codama IDL/)).toBeInTheDocument();
+        });
+
+        const button = screen.getByRole('button', { name: "Anchor" });
+        fireEvent.click(button);
         expect(screen.getByText(/Anchor IDL/)).toBeInTheDocument();
-        expect(screen.getAllByText('Download')).toHaveLength(2);
     });
 
-    test('should not render IdlCard when both IDLs are null', () => {
+    test('should not render IdlCard when both IDLs are null', async () => {
         vi.spyOn(anchorModule, 'useAnchorProgram').mockReturnValue({
             idl: null,
             program: null,
@@ -123,8 +128,11 @@ describe.only('IdlCard', () => {
             </ClusterProvider>
         );
 
-        expect(screen.queryByText('IDL')).not.toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.queryByText(/Program metadata/)).not.toBeInTheDocument();
+        });
+        
+        expect(screen.queryByText(/Anchor/)).not.toBeInTheDocument();
         expect(screen.queryByText(/Codama IDL/)).not.toBeInTheDocument();
-        expect(screen.queryByText(/Anchor IDL/)).not.toBeInTheDocument();
     });
 });

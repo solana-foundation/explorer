@@ -19,7 +19,8 @@ export function useProgramMetadataIdl(programAddress: string, url: string, clust
                     `/api/programMetadataIdl?programAddress=${programAddress}&cluster=${cluster}`
                 );
                 if (response.ok) {
-                    return response.json().then(data => data.codamaIdl);
+                    const data = await response.json();
+                    return data.codamaIdl || null;
                 }
                 // Only attempt to fetch client side if the url is localhost or 127.0.0.1
                 if (new URL(url).hostname === 'localhost' || new URL(url).hostname === '127.0.0.1') {
