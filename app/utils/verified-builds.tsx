@@ -40,6 +40,7 @@ export type OsecInfo = {
 };
 
 const TRUSTED_SIGNERS: Record<string, string> = {
+    '11111111111111111111111111111111': 'Explorer',
     '9VWiUUhgNoRwTH5NVehYJEDwcotwYX3VgW4MChiHPAqU': 'OtterSecurity',
     CyJj5ejJAUveDXnLduJbkvwjxcmWJNqCuB9DR7AExrHn: 'Explorer',
 };
@@ -191,16 +192,21 @@ function useEnrichedOsecInfo({
                 return null;
             }
 
-            const [pda] = PublicKey.findProgramAddressSync(
-                [Buffer.from('otter_verify'), new PublicKey(osecInfo.signer).toBuffer(), programId.toBuffer()],
-                new PublicKey(VERIFY_PROGRAM_ID)
-            );
+            try {
+                const [pda] = PublicKey.findProgramAddressSync(
+                    [Buffer.from('otter_verify'), new PublicKey(osecInfo.signer).toBuffer(), programId.toBuffer()],
+                    new PublicKey(VERIFY_PROGRAM_ID)
+                );
 
-            const pdaAccountInfo = await (accountAnchorProgram.account as any).buildParams.fetch(pda);
-            if (!pdaAccountInfo) {
+                const pdaAccountInfo = await (accountAnchorProgram.account as any).buildParams.fetch(pda);
+                if (!pdaAccountInfo) {
+                    return null;
+                }
+                return pdaAccountInfo;
+            } catch (error) {
+                console.error('Error fetching on-chain PDA', error);
                 return null;
             }
-            return pdaAccountInfo;
         },
         { suspense: options?.suspense }
     );

@@ -31,10 +31,14 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
         return (
             <div className="card">
                 <div className="card-body text-center">
-                    Verified build information not yet uploaded by program authority. For more information, see the{' '}
+                    Verified build information not yet uploaded by the program authority. For more information, see the{' '}
                     <Link href="https://solana.com/developers/guides/advanced/verified-builds" target="_blank">
                         Verified Build Guide
                     </Link>
+                    .<br />
+                    <br />
+                    Note: Some programs were verified using older, deprecated versions of the API and may not include
+                    on-chain verification details.
                 </div>
             </div>
         );
