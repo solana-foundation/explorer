@@ -931,7 +931,7 @@
       ""
     ],
     "planned_testnet_order": 5200,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 814,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -976,30 +976,6 @@
     "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": 811,
-    "devnet_activation_epoch": null,
-    "comms_required": null,
-    "mainnet_activation_epoch": null,
-    "description": ""
-  },
-  {
-    "key": "6oMCUgfY6BzZ6jwB681J6ju5Bh6CjVXbd7NeWYqiXBSu",
-    "title": "Raise Block Limits to 60M CU",
-    "simd_link": [
-      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0256-raise-block-limits-to-60M.md"
-    ],
-    "simds": [
-      "0256"
-    ],
-    "owners": [],
-    "min_agave_versions": [
-      "v2.2.7"
-    ],
-    "min_fd_versions": [
-      "v0.501.20212"
-    ],
-    "min_jito_versions": [],
-    "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -1070,6 +1046,52 @@
     "min_jito_versions": [
       "v2.2.0"
     ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 815,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "6oMCUgfY6BzZ6jwB681J6ju5Bh6CjVXbd7NeWYqiXBSu",
+    "title": "Raise Block Limits to 60M CU",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0256-raise-block-limits-to-60M.md"
+    ],
+    "simds": [
+      "0256"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.7"
+    ],
+    "min_fd_versions": [
+      "v0.501.20212"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 813,
+    "devnet_activation_epoch": 916,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "sProgVaNWkYdP2eTRAy1CPrgb3b9p8yXCASrPEqo6VJ",
+    "title": "SIMD-0204: Enable slashable event verification",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0204-slashable-event-verification.md"
+    ],
+    "simds": [
+      "0204"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.3.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": null,
     "devnet_activation_epoch": null,

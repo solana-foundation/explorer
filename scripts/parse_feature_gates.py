@@ -5,6 +5,11 @@ import os
 import re
 from pydantic import BaseModel, Field, BeforeValidator, ConfigDict, ValidationError
 
+from solana.rpc.async_api import AsyncClient
+from solders.pubkey import Pubkey
+
+from fetch_mainnet_activations import get_epoch_for_slot
+
 FEATURE_GATES_PATH = 'app/utils/feature-gate/featureGates.json'
 
 IntOrBlank = Annotated[
@@ -155,7 +160,32 @@ def safe_model_validate(model, data):
         return None
 
 
-def parse_wiki():
+async def fetch_feature_activations(cluster_url: str, key: str, backup_epoch: int | None) -> dict[str, int | None]:
+    """Fetch feature activations from a Solana cluster."""
+
+    connection = AsyncClient(cluster_url)
+    account = await connection.get_account_info(Pubkey.from_string(key))
+    epoch_schedule = (await connection.get_epoch_schedule()).value
+
+    if account.value and account.value.data:
+        # First byte indicates if activated (1) or not (0)
+        is_activated = account.value.data[0]
+        
+        if is_activated:
+            # If activated, next 8 bytes contain activation slot as u64
+            activation_slot = int.from_bytes(account.value.data[1:9], 'little')
+
+            # Technically, feature gates only become active in the following epoch
+            activation_epoch = get_epoch_for_slot(epoch_schedule, activation_slot) + 1
+
+            return activation_epoch
+        else:
+            return backup_epoch
+    else:
+        return backup_epoch
+
+
+async def parse_wiki():
     # Fetch markdown content
     url = "https://raw.githubusercontent.com/wiki/anza-xyz/agave/Feature-Gate-Tracker-Schedule.md"
     response = requests.get(url)
@@ -211,8 +241,8 @@ def parse_wiki():
         if existing.key in features_by_key:
             # Only update devnet and testnet epochs
             new_feature = features_by_key[existing.key]
-            existing.devnet_activation_epoch = new_feature.devnet_activation_epoch
-            existing.testnet_activation_epoch = new_feature.testnet_activation_epoch
+            existing.devnet_activation_epoch = await fetch_feature_activations("https://api.devnet.solana.com", existing.key, new_feature.devnet_activation_epoch)
+            existing.testnet_activation_epoch = await fetch_feature_activations("https://api.testnet.solana.com", existing.key, new_feature.testnet_activation_epoch)
             del features_by_key[existing.key]
     
     # Print new features that were found
@@ -231,4 +261,5 @@ def parse_wiki():
 
 
 if __name__ == "__main__":
-    parse_wiki() 
+    import asyncio
+    asyncio.run(parse_wiki()) 
