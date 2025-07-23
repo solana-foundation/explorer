@@ -11,12 +11,11 @@ import { useCluster } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { useClusterPath } from '@utils/url';
-import { getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
 import Link from 'next/link';
 import { notFound, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren } from 'react';
 
-import { getEpochForSlot } from '@/app/utils/epoch-schedule';
+import { getEpochForSlot, getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
 
 type Props = PropsWithChildren<{ params: { slot: string } }>;
 
@@ -56,7 +55,7 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
         const showSuccessfulCount = block.transactions.every(tx => tx.meta !== null);
         const successfulTxs = block.transactions.filter(tx => tx.meta?.err === null);
         const epoch = clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(slotNumber)) : undefined;
-        const maxComputeUnits = getMaxComputeUnitsInBlock({epoch, cluster});
+        const maxComputeUnits = getMaxComputeUnitsInBlock({ cluster, epoch });
 
         content = (
             <>
