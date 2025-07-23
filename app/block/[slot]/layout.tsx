@@ -19,7 +19,7 @@ import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
 type Props = PropsWithChildren<{ params: { slot: string } }>;
 
-const MAX_CU_PER_BLOCK = 50_000_000;
+const MAX_CU_PER_BLOCK = 60_000_000;
 
 function BlockLayoutInner({ children, params: { slot } }: Props) {
     const slotNumber = Number(slot);
