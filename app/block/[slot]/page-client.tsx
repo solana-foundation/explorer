@@ -4,6 +4,7 @@ import { BlockHistoryCard } from '@components/block/BlockHistoryCard';
 import { useBlock, useFetchBlock } from '@providers/block';
 import { useCluster } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
+import { getEpochForSlot } from '@utils/epoch-schedule';
 import { notFound } from 'next/navigation';
 import React from 'react';
 
@@ -16,7 +17,16 @@ export default function BlockTransactionsTabClient({ params: { slot } }: Props) 
     }
     const confirmedBlock = useBlock(slotNumber);
     const fetchBlock = useFetchBlock();
-    const { status } = useCluster();
+    const { status, clusterInfo } = useCluster();
+    
+    // Calculate epoch from slot
+    const epoch = React.useMemo(() => {
+        if (clusterInfo) {
+            return getEpochForSlot(clusterInfo.epochSchedule, BigInt(slotNumber));
+        }
+        return undefined;
+    }, [clusterInfo, slotNumber]);
+    
     // Fetch block on load
     React.useEffect(() => {
         if (!confirmedBlock && status === ClusterStatus.Connected) {
@@ -24,7 +34,7 @@ export default function BlockTransactionsTabClient({ params: { slot } }: Props) 
         }
     }, [slotNumber, status]); // eslint-disable-line react-hooks/exhaustive-deps
     if (confirmedBlock?.data?.block) {
-        return <BlockHistoryCard block={confirmedBlock.data.block} />;
+        return <BlockHistoryCard block={confirmedBlock.data.block} epoch={epoch} />;
     }
     return null;
 }
