@@ -55,9 +55,9 @@ describe('IdlCard', () => {
         );
 
         await waitFor(() => {
-            expect(screen.getByText(/Program Metadata/)).toBeInTheDocument();
+            expect(screen.getByText('Program Metadata')).toBeInTheDocument();
         });
-        expect(screen.getByText(/Codama IDL/)).toBeInTheDocument();
+        expect(screen.getByText(/Program Metadata IDL/)).toBeInTheDocument();
         expect(screen.getByText(/rootNode/)).toBeInTheDocument(); // from json view
         expect(screen.queryByText(/Anchor IDL/)).not.toBeInTheDocument();
     });
@@ -83,7 +83,7 @@ describe('IdlCard', () => {
         });
         expect(screen.getByText(/Anchor IDL/)).toBeInTheDocument();
         expect(screen.getByText(/metadata/)).toBeInTheDocument(); // from json view
-        expect(screen.queryByText(/Codama IDL/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Program Metadata IDL/)).not.toBeInTheDocument();
     });
 
     test('should render IdlCard tabs when both IDLs exist', async () => {
@@ -104,7 +104,7 @@ describe('IdlCard', () => {
 
         // pmp idl should be rendered as first
         await waitFor(() => {
-            expect(screen.getByText(/Codama IDL/)).toBeInTheDocument();
+            expect(screen.getByText(/Program Metadata IDL/)).toBeInTheDocument();
         });
 
         const button = screen.getByRole('button', { name: 'Anchor' });
@@ -129,10 +129,10 @@ describe('IdlCard', () => {
         );
 
         await waitFor(() => {
-            expect(screen.queryByText(/Program metadata/)).not.toBeInTheDocument();
+            expect(screen.queryByText('Program Metadata')).not.toBeInTheDocument();
         });
 
         expect(screen.queryByText(/Anchor/)).not.toBeInTheDocument();
-        expect(screen.queryByText(/Codama IDL/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Program Metadata IDL/)).not.toBeInTheDocument();
     });
 });
