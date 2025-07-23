@@ -36,6 +36,9 @@ import Link from 'next/link';
 import React, { Suspense, useEffect, useState } from 'react';
 import { RefreshCw, Settings } from 'react-feather';
 
+import { estimateRequestedComputeUnitsForParsedTransaction } from '@/app/utils/compute-units-schedule';
+import { getEpochForSlot } from '@/app/utils/epoch-schedule';
+
 const AUTO_REFRESH_INTERVAL = 2000;
 const ZERO_CONFIRMATION_BAILOUT = 5;
 
@@ -189,6 +192,10 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
     const computeUnitsConsumed = transactionWithMeta?.meta?.computeUnitsConsumed;
     const transaction = transactionWithMeta?.transaction;
     const blockhash = transaction?.message.recentBlockhash;
+    const epoch = clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(info.slot)) : undefined;
+    const reservedCUs = transactionWithMeta?.transaction
+        ? estimateRequestedComputeUnitsForParsedTransaction(transactionWithMeta.transaction, epoch, cluster)
+        : undefined;
     const version = transactionWithMeta?.version;
     const isNonce = (() => {
         if (!transaction || transaction.message.instructions.length < 1) {
@@ -335,6 +342,13 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                     <tr>
                         <td>Compute units consumed</td>
                         <td className="text-lg-end">{computeUnitsConsumed.toLocaleString('en-US')}</td>
+                    </tr>
+                )}
+
+                {reservedCUs !== undefined && (
+                    <tr>
+                        <td>Reserved CUs</td>
+                        <td className="text-lg-end">{reservedCUs.toLocaleString('en-US')}</td>
                     </tr>
                 )}
 

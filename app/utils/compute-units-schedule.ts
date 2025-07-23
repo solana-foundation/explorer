@@ -1,4 +1,12 @@
-import { ComputeBudgetProgram, PublicKey } from '@solana/web3.js';
+import { ComputeBudgetProgram, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
+import {
+    ComputeBudgetInstruction,
+    identifyComputeBudgetInstruction,
+    parseRequestUnitsInstruction,
+    parseSetComputeUnitLimitInstruction,
+} from '@solana-program/compute-budget';
+import bs58 from 'bs58';
+import { address } from 'web3js-experimental';
 
 import { Cluster } from '@/app/utils/cluster';
 
@@ -123,6 +131,40 @@ export function getReservedComputeUnits({
 }
 
 /**
+ * Helper to extract compute units from a compute budget instruction
+ */
+function extractComputeUnitsFromInstruction(instruction: {
+    programId: PublicKey;
+    data: Uint8Array;
+}): number | null {
+    if (instruction.programId.toBase58() !== ComputeBudgetProgram.programId.toBase58()) {
+        return null;
+    }
+
+    try {
+        const ix = {
+            accounts: [],
+            data: Buffer.from(instruction.data),
+            programAddress: address(instruction.programId.toBase58()),
+        };
+
+        const type = identifyComputeBudgetInstruction(ix);
+
+        if (type === ComputeBudgetInstruction.SetComputeUnitLimit) {
+            const parsed = parseSetComputeUnitLimitInstruction(ix);
+            return parsed.data.units;
+        } else if (type === ComputeBudgetInstruction.RequestUnits) {
+            const parsed = parseRequestUnitsInstruction(ix);
+            return parsed.data.units;
+        }
+    } catch {
+        // Instruction is not a recognized compute budget instruction
+    }
+
+    return null;
+}
+
+/**
  * Estimate the requested compute units for a transaction
  * @param tx - The transaction to analyze
  * @param epoch - The epoch of the transaction
@@ -144,39 +186,60 @@ export function estimateRequestedComputeUnits(
     epoch: bigint | undefined,
     cluster: Cluster
 ): number {
-    let requestedUnits: number | null = null;
-
     // First, check for explicit compute budget instructions
+    let totalReservedUnits = 0;
     for (const instruction of tx.transaction.message.compiledInstructions) {
         const programId = tx.transaction.message.staticAccountKeys[instruction.programIdIndex];
+        const requestedUnits = extractComputeUnitsFromInstruction({
+            data: instruction.data,
+            programId,
+        });
 
-        if (programId.toBase58() === ComputeBudgetProgram.programId.toBase58() && instruction.data.length > 0) {
-            const data = Buffer.from(instruction.data);
-            const instructionType = data[0];
-
-            // Check for SetComputeUnitLimit instruction (type 2)
-            if (instructionType === 2 && data.length >= 5) {
-                requestedUnits = data.readUInt32LE(1);
-                break; // Found compute unit limit, stop searching
-            }
-            // Check for deprecated RequestUnits instruction (type 0)
-            else if (instructionType === 0 && data.length >= 5) {
-                requestedUnits = data.readUInt32LE(1);
-                break;
-            }
+        if (requestedUnits !== null) {
+            totalReservedUnits = requestedUnits;
+            break;
+        } else {
+            const programId = tx.transaction.message.staticAccountKeys[instruction.programIdIndex].toBase58();
+            const reservedUnits = getReservedComputeUnits({
+                cluster,
+                epoch,
+                programId,
+            });
+            totalReservedUnits += reservedUnits;
         }
     }
 
-    // If we found an explicit compute budget, return it
-    if (requestedUnits !== null) {
-        return requestedUnits;
-    }
+    return Math.min(totalReservedUnits, MAX_COMPUTE_UNITS);
+}
 
-    // No compute budget instruction, check if all instructions are from built-in programs
-    // that would use minimal compute units
+/**
+ * Estimates requested compute units for a parsed transaction.
+ * Checks for compute budget instructions and extracts the units if available.
+ */
+export function estimateRequestedComputeUnitsForParsedTransaction(
+    parsedTransaction: {
+        message: {
+            instructions: Array<ParsedInstruction | PartiallyDecodedInstruction>;
+        };
+    },
+    epoch: bigint | undefined,
+    cluster: Cluster
+): number {
     let totalReservedUnits = 0;
-    for (const instruction of tx.transaction.message.compiledInstructions) {
-        const programId = tx.transaction.message.staticAccountKeys[instruction.programIdIndex].toBase58();
+    for (const instruction of parsedTransaction.message.instructions) {
+        // For partially decoded instructions, we need the raw data
+        if ('data' in instruction && typeof instruction.data === 'string') {
+            const requestedUnits = extractComputeUnitsFromInstruction({
+                data: bs58.decode(instruction.data),
+                programId: instruction.programId,
+            });
+
+            if (requestedUnits !== null) {
+                totalReservedUnits = requestedUnits;
+                break;
+            }
+        }
+        const programId = instruction.programId.toBase58();
         const reservedUnits = getReservedComputeUnits({
             cluster,
             epoch,

@@ -222,9 +222,10 @@ describe('estimateRequestedComputeUnits', () => {
 
         it('returns compute units from deprecated RequestUnits instruction', () => {
             const computeUnits = 150_000;
-            const data = Buffer.alloc(5);
+            const data = Buffer.alloc(9); // RequestUnits needs 9 bytes
             data[0] = 0; // RequestUnits instruction type
             data.writeUInt32LE(computeUnits, 1);
+            data.writeUInt32LE(0, 5); // additionalFee
 
             const tx = createMockTransaction([
                 {
