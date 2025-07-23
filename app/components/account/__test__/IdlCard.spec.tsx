@@ -51,7 +51,7 @@ describe.only('IdlCard', () => {
         render(
             <ClusterProvider>
                 <IdlCard programId={programId} />
-            </ClusterProvider>
+            </ClusterProvider>,
         );
 
         await waitFor(() => {
@@ -75,11 +75,11 @@ describe.only('IdlCard', () => {
         render(
             <ClusterProvider>
                 <IdlCard programId={programId} />
-            </ClusterProvider>
+            </ClusterProvider>,
         );
 
         await waitFor(() => {
-            expect(screen.getByText("Anchor")).toBeInTheDocument();
+            expect(screen.getByText('Anchor')).toBeInTheDocument();
         });
         expect(screen.getByText(/Anchor IDL/)).toBeInTheDocument();
         expect(screen.getByText(/metadata/)).toBeInTheDocument(); // from json view
@@ -99,7 +99,7 @@ describe.only('IdlCard', () => {
         render(
             <ClusterProvider>
                 <IdlCard programId={programId} />
-            </ClusterProvider>
+            </ClusterProvider>,
         );
 
         // pmp idl should be rendered as first
@@ -107,7 +107,7 @@ describe.only('IdlCard', () => {
             expect(screen.getByText(/Codama IDL/)).toBeInTheDocument();
         });
 
-        const button = screen.getByRole('button', { name: "Anchor" });
+        const button = screen.getByRole('button', { name: 'Anchor' });
         fireEvent.click(button);
         expect(screen.getByText(/Anchor IDL/)).toBeInTheDocument();
     });
@@ -125,13 +125,13 @@ describe.only('IdlCard', () => {
         render(
             <ClusterProvider>
                 <IdlCard programId={programId} />
-            </ClusterProvider>
+            </ClusterProvider>,
         );
 
         await waitFor(() => {
             expect(screen.queryByText(/Program metadata/)).not.toBeInTheDocument();
         });
-        
+
         expect(screen.queryByText(/Anchor/)).not.toBeInTheDocument();
         expect(screen.queryByText(/Codama IDL/)).not.toBeInTheDocument();
     });

@@ -16,7 +16,7 @@ type IdlTab = {
     idl: any;
     title: string;
     badge: string;
-}
+};
 
 export function IdlCard({ programId }: { programId: string }) {
     const { url, cluster } = useCluster();
@@ -27,17 +27,17 @@ export function IdlCard({ programId }: { programId: string }) {
     const tabs = useMemo(() => {
         return [
             {
-                badge: "Codama IDL",
-                id: "codama",
+                badge: 'Program Metadata IDL',
+                id: 'program-metadata',
                 idl: programMetadataIdl,
-                title: "Program Metadata"
+                title: 'Program Metadata',
             },
-            { 
-                badge: "Anchor IDL", 
-                id: "anchor", 
-                idl: idl, 
-                title: "Anchor" 
-            }
+            {
+                badge: 'Anchor IDL',
+                id: 'anchor',
+                idl: idl,
+                title: 'Anchor',
+            },
         ];
     }, [idl, programMetadataIdl]);
 
@@ -56,17 +56,19 @@ export function IdlCard({ programId }: { programId: string }) {
         <div className="card">
             <div className="card-header">
                 <div className="nav nav-tabs" role="tablist">
-                    {tabs.filter(tab => tab.idl).map(tab => (
-                        <button
-                            key={tab.title}
-                            className={classNames('nav-item nav-link', {
-                                active: tab.id === activeTab?.id,
-                            })}
-                            onClick={() => setActiveTab(tab)}
-                        >
-                            {tab.title}
-                        </button>
-                    ))}
+                    {tabs
+                        .filter(tab => tab.idl)
+                        .map(tab => (
+                            <button
+                                key={tab.title}
+                                className={classNames('nav-item nav-link', {
+                                    active: tab.id === activeTab?.id,
+                                })}
+                                onClick={() => setActiveTab(tab)}
+                            >
+                                {tab.title}
+                            </button>
+                        ))}
                 </div>
             </div>
             <div className="card-body">
@@ -82,8 +84,7 @@ export function IdlCard({ programId }: { programId: string }) {
     );
 }
 
-
-function IdlSection({ idl, badge, programId }: { idl: any, badge: React.ReactNode, programId: string }) {
+function IdlSection({ idl, badge, programId }: { idl: any; badge: React.ReactNode; programId: string }) {
     const [collapsedValue, setCollapsedValue] = useState<boolean | number>(1);
     return (
         <>
@@ -120,7 +121,7 @@ function IdlSection({ idl, badge, programId }: { idl: any, badge: React.ReactNod
     );
 }
 
-function IdlJson({ idl, collapsed }: { idl: any, collapsed: boolean | number }) {
+function IdlJson({ idl, collapsed }: { idl: any; collapsed: boolean | number }) {
     return (
         <ReactJson
             src={idl}
