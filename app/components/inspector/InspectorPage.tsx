@@ -19,7 +19,6 @@ import React from 'react';
 import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
-import { estimateRequestedComputeUnits } from '@/app/utils/compute-units-schedule';
 
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';
@@ -431,8 +430,6 @@ const DEFAULT_FEES = {
 
 function OverviewCard({ message, raw, onClear }: { message: VersionedMessage; raw: Uint8Array; onClear: () => void }) {
     const fee = message.header.numRequiredSignatures * DEFAULT_FEES.lamportsPerSignature;
-    const { cluster } = useCluster();
-    const reservedCUs = estimateRequestedComputeUnits({ transaction: { message } }, undefined, cluster);
     const feePayerValidator = createFeePayerValidator(fee);
 
     const size = React.useMemo(() => {
@@ -473,17 +470,6 @@ function OverviewCard({ message, raw, onClear }: { message: VersionedMessage; ra
                         </td>
                     </tr>
 
-                    <tr>
-                        <td>Reserved CUs</td>
-                        <td className="text-lg-end">
-                            <div className="d-flex align-items-end flex-column">
-                                {reservedCUs.toLocaleString('en-US')}
-                                <span className="text-muted">
-                                    {`Can be explicitly set with a compute budget instruction`}
-                                </span>
-                            </div>
-                        </td>
-                    </tr>
                     <tr>
                         <td>
                             <div className="d-flex align-items-start flex-column">

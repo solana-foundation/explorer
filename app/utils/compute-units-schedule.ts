@@ -195,11 +195,10 @@ export function estimateRequestedComputeUnits(
             totalReservedUnits = requestedUnits;
             break;
         } else {
-            const programId = tx.transaction.message.staticAccountKeys[instruction.programIdIndex].toBase58();
             const reservedUnits = getReservedComputeUnits({
                 cluster,
                 epoch,
-                programId,
+                programId: programId.toBase58(),
             });
             totalReservedUnits += reservedUnits;
         }
@@ -235,11 +234,10 @@ export function estimateRequestedComputeUnitsForParsedTransaction(
                 break;
             }
         }
-        const programId = instruction.programId.toBase58();
         const reservedUnits = getReservedComputeUnits({
             cluster,
             epoch,
-            programId,
+            programId: instruction.programId.toBase58(),
         });
         totalReservedUnits += reservedUnits;
     }
