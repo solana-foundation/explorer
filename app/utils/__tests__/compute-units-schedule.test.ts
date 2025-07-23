@@ -184,18 +184,14 @@ describe('estimateRequestedComputeUnits', () => {
             data: Uint8Array;
         }>
     ): Parameters<typeof estimateRequestedComputeUnits>[0] => {
-        const staticAccountKeys = [
-            ...new Set(instructions.map(ix => ix.programId)),
-        ].map(id => new PublicKey(id));
+        const staticAccountKeys = [...new Set(instructions.map(ix => ix.programId))].map(id => new PublicKey(id));
 
         return {
             transaction: {
                 message: {
                     compiledInstructions: instructions.map(ix => ({
                         data: ix.data,
-                        programIdIndex: staticAccountKeys.findIndex(
-                            key => key.toBase58() === ix.programId
-                        ),
+                        programIdIndex: staticAccountKeys.findIndex(key => key.toBase58() === ix.programId),
                     })),
                     staticAccountKeys,
                 },

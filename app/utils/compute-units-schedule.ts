@@ -30,7 +30,6 @@ const BUILTIN_PROGRAMS_3K: readonly string[] = [
     'Ed25519SigVerify111111111111111111111111111', // Ed25519 Signature Verify
 ];
 
-
 /**
  * Represents a configuration for reserved compute units based on epoch
  */
@@ -133,10 +132,7 @@ export function getReservedComputeUnits({
 /**
  * Helper to extract compute units from a compute budget instruction
  */
-function extractComputeUnitsFromInstruction(instruction: {
-    programId: PublicKey;
-    data: Uint8Array;
-}): number | null {
+function extractComputeUnitsFromInstruction(instruction: { programId: PublicKey; data: Uint8Array }): number | null {
     if (instruction.programId.toBase58() !== ComputeBudgetProgram.programId.toBase58()) {
         return null;
     }

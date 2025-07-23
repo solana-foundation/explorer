@@ -18,7 +18,7 @@ export default function BlockTransactionsTabClient({ params: { slot } }: Props) 
     const confirmedBlock = useBlock(slotNumber);
     const fetchBlock = useFetchBlock();
     const { status, clusterInfo } = useCluster();
-    
+
     // Calculate epoch from slot
     const epoch = React.useMemo(() => {
         if (clusterInfo) {
@@ -26,7 +26,7 @@ export default function BlockTransactionsTabClient({ params: { slot } }: Props) 
         }
         return undefined;
     }, [clusterInfo, slotNumber]);
-    
+
     // Fetch block on load
     React.useEffect(() => {
         if (!confirmedBlock && status === ClusterStatus.Connected) {
