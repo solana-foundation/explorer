@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { notFound, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren } from 'react';
 
+import { estimateRequestedComputeUnits } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot, getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
 
 type Props = PropsWithChildren<{ params: { slot: string } }>;
@@ -43,18 +44,19 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
         content = <ErrorCard retry={refresh} text={`Block ${slotNumber} was not found`} />;
     } else {
         const { block, blockLeader, childSlot, childLeader, parentLeader } = confirmedBlock.data;
-        let successfulCUs = 0;
+        const epoch = clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(slotNumber)) : undefined;
+
         let totalCUs = 0;
+        let totalRequestedCUs = 0;
         for (const tx of block.transactions) {
+            const requestedCUs = estimateRequestedComputeUnits(tx, epoch, cluster);
             const cus = tx.meta?.computeUnitsConsumed ?? 0;
-            if (tx.meta?.err === null) {
-                successfulCUs += cus;
-            }
+            totalRequestedCUs += requestedCUs;
             totalCUs += cus;
         }
+
         const showSuccessfulCount = block.transactions.every(tx => tx.meta !== null);
         const successfulTxs = block.transactions.filter(tx => tx.meta?.err === null);
-        const epoch = clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(slotNumber)) : undefined;
         const maxComputeUnits = getMaxComputeUnitsInBlock({ cluster, epoch });
 
         content = (
@@ -177,11 +179,11 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
                             </td>
                         </tr>
                         <tr>
-                            <td className="w-100">Successful Compute Unit Utilization</td>
+                            <td className="w-100">Reserved Compute Units</td>
                             <td className="text-lg-end font-monospace">
                                 <span>
-                                    {successfulCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
-                                    {Math.round((successfulCUs / maxComputeUnits) * 100)}%)
+                                    {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
+                                    {Math.round((totalRequestedCUs / maxComputeUnits) * 100)}%)
                                 </span>
                             </td>
                         </tr>
