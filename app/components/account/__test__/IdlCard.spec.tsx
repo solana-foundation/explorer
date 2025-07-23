@@ -31,7 +31,7 @@ const mockProgramMetadataIdl = {
     version: '1.2.11',
 };
 
-describe.only('IdlCard', () => {
+describe('IdlCard', () => {
     const programId = 'CmAwXVg7R7LVmKqVg9EyVHYF9U4VLVsXoP2RG7Zra6XY';
 
     beforeEach(() => {
