@@ -1,4 +1,4 @@
-import { EpochSchedule, getEpochForSlot, getFirstSlotInEpoch, getLastSlotInEpoch } from '../epoch-schedule';
+import { EpochSchedule, getEpochForSlot, getFirstSlotInEpoch, getLastSlotInEpoch, getMaxComputeUnitsInBlock } from '../epoch-schedule';
 
 describe('getEpoch', () => {
     it('returns the correct epoch for a slot after `firstNormalSlot`', () => {
@@ -79,5 +79,18 @@ describe('getLastSlotInEpoch', () => {
         expect(getLastSlotInEpoch(schedule, 1n)).toEqual(95n);
         expect(getLastSlotInEpoch(schedule, 2n)).toEqual(223n);
         expect(getLastSlotInEpoch(schedule, 10n)).toEqual(65_503n);
+    });
+});
+
+describe('getMaxComputeUnitsForEpoch', () => {
+    it('returns the correct max compute units for an epoch', () => {
+        expect(getMaxComputeUnitsInBlock(0)).toEqual(48_000_000);
+        expect(getMaxComputeUnitsInBlock(769)).toEqual(48_000_000);
+        expect(getMaxComputeUnitsInBlock(770)).toEqual(50_000_000);
+        expect(getMaxComputeUnitsInBlock(821)).toEqual(50_000_000);
+        expect(getMaxComputeUnitsInBlock(822)).toEqual(60_000_000);
+        expect(getMaxComputeUnitsInBlock(823)).toEqual(60_000_000);
+        expect(getMaxComputeUnitsInBlock(undefined)).toEqual(48_000_000);
+        expect(getMaxComputeUnitsInBlock(-1)).toEqual(48_000_000);
     });
 });

@@ -11,6 +11,7 @@ import { useCluster } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { useClusterPath } from '@utils/url';
+import { getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
 import Link from 'next/link';
 import { notFound, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren } from 'react';
@@ -18,8 +19,6 @@ import React, { PropsWithChildren } from 'react';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
 type Props = PropsWithChildren<{ params: { slot: string } }>;
-
-const MAX_CU_PER_BLOCK = 50_000_000;
 
 function BlockLayoutInner({ children, params: { slot } }: Props) {
     const slotNumber = Number(slot);
@@ -57,6 +56,7 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
         const showSuccessfulCount = block.transactions.every(tx => tx.meta !== null);
         const successfulTxs = block.transactions.filter(tx => tx.meta?.err === null);
         const epoch = clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(slotNumber)) : undefined;
+        const maxComputeUnits = getMaxComputeUnitsInBlock(epoch ? Number(epoch) : undefined);
 
         content = (
             <>
@@ -172,8 +172,8 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
                             <td className="w-100">Compute Unit Utilization</td>
                             <td className="text-lg-end font-monospace">
                                 <span>
-                                    {totalCUs.toLocaleString()} / {MAX_CU_PER_BLOCK.toLocaleString()} (
-                                    {Math.round((totalCUs / MAX_CU_PER_BLOCK) * 100)}%)
+                                    {totalCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
+                                    {Math.round((totalCUs / maxComputeUnits) * 100)}%)
                                 </span>
                             </td>
                         </tr>
@@ -181,8 +181,8 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
                             <td className="w-100">Successful Compute Unit Utilization</td>
                             <td className="text-lg-end font-monospace">
                                 <span>
-                                    {successfulCUs.toLocaleString()} / {MAX_CU_PER_BLOCK.toLocaleString()} (
-                                    {Math.round((successfulCUs / MAX_CU_PER_BLOCK) * 100)}%)
+                                    {successfulCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
+                                    {Math.round((successfulCUs / maxComputeUnits) * 100)}%)
                                 </span>
                             </td>
                         </tr>

@@ -77,3 +77,68 @@ export function getFirstSlotInEpoch(epochSchedule: EpochSchedule, epoch: bigint)
 export function getLastSlotInEpoch(epochSchedule: EpochSchedule, epoch: bigint): bigint {
     return getFirstSlotInEpoch(epochSchedule, epoch + 1n) - 1n;
 }
+
+
+/**
+ * Configuration for maximum compute units per epoch.
+ * Solana's compute unit limits have changed over time as the network has evolved.
+ */
+interface ComputeUnitEpochConfig {
+    /** The starting epoch when this configuration becomes active */
+    readonly startEpoch: number;
+    /** Maximum compute units allowed per transaction in this epoch range */
+    readonly maxComputeUnits: number;
+    /** Optional reference URL for the governance proposal or announcement */
+    readonly referenceUrl?: string;
+}
+
+/**
+ * Historical compute unit configurations for Solana epochs.
+ * Configurations are ordered chronologically by startEpoch.
+ */
+const COMPUTE_UNIT_EPOCH_CONFIGS: readonly ComputeUnitEpochConfig[] = [
+    {
+        startEpoch: 0,
+        maxComputeUnits: 48_000_000,
+    },
+    {
+        startEpoch: 770,
+        maxComputeUnits: 50_000_000,
+        referenceUrl: 'https://explorer.solana.com/address/5oMCU3JPaFLr8Zr4ct7yFA7jdk6Mw1RmB8K4u9ZbS42z',
+    },
+    {
+        startEpoch: 822,
+        maxComputeUnits: 60_000_000,
+        referenceUrl: 'https://explorer.solana.com/address/6oMCUgfY6BzZ6jwB681J6ju5Bh6CjVXbd7NeWYqiXBSu',
+    },
+] as const;
+
+/**
+ * Retrieves the maximum compute units allowed for a given epoch.
+ * @param epoch - The epoch number to query. Must be non-negative.
+ * @returns The maximum compute units allowed in a block for the specified epoch
+ * (defaults to the first epoch's config if epoch is undefined or negative, though this should never happen)
+ */
+export function getMaxComputeUnitsInBlock(epoch?: number): number {
+    if (epoch === undefined || epoch < 0) {
+        return COMPUTE_UNIT_EPOCH_CONFIGS[0].maxComputeUnits;
+    }
+
+    const applicableConfig = COMPUTE_UNIT_EPOCH_CONFIGS.reduce(
+        (latest, config) => {
+            if (config.startEpoch <= epoch) {
+                // Return the config with the higher startEpoch (more recent)
+                return config.startEpoch >= latest.startEpoch ? config : latest;
+            }
+            return latest;
+        },
+        COMPUTE_UNIT_EPOCH_CONFIGS[0] // Start with the first config as fallback
+    );
+
+
+    if (!applicableConfig) {
+        throw new Error(`No configuration found for epoch ${epoch}`);
+    }
+
+    return applicableConfig.maxComputeUnits;
+}
