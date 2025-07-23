@@ -1,3 +1,5 @@
+import { Cluster, clusterName } from "@/app/utils/cluster";
+
 const MINIMUM_SLOT_PER_EPOCH = BigInt(32);
 
 export interface EpochSchedule {
@@ -80,65 +82,89 @@ export function getLastSlotInEpoch(epochSchedule: EpochSchedule, epoch: bigint):
 
 
 /**
- * Configuration for maximum compute units per epoch.
- * Solana's compute unit limits have changed over time as the network has evolved.
+ * Represents a SIMD configuration for compute units per block.
+ * Each configuration defines the maximum compute units allowed in a block and when it becomes active on each cluster.
  */
-interface ComputeUnitEpochConfig {
-    /** The starting epoch when this configuration becomes active */
-    readonly startEpoch: number;
-    /** Maximum compute units allowed per transaction in this epoch range */
+interface ComputeUnitConfigEntry {
+    /** Optional reference SIMD ID (e.g. 0207) */
+    readonly simd?: string;
+    /** Optional reference account to feature (e.g. 5oMCU3JPaFLr8Zr4ct7yFA7jdk6Mw1RmB8K4u9ZbS42z) */
+    readonly featureAccount?: string;
+    /** Maximum compute units allowed in a block after specified epoch */
     readonly maxComputeUnits: number;
-    /** Optional reference URL for the governance proposal or announcement */
-    readonly referenceUrl?: string;
+    /** When the configuration becomes active on each cluster */
+    readonly activations: {
+        readonly [Cluster.MainnetBeta]: number;
+        readonly [Cluster.Devnet]: number;
+        readonly [Cluster.Testnet]: number;
+    };
 }
 
 /**
- * Historical compute unit configurations for Solana epochs.
- * Configurations are ordered chronologically by startEpoch.
+ * A list of SIMD configurations for compute units per block.
+ * Add new configurations here as they are activated.
  */
-const COMPUTE_UNIT_EPOCH_CONFIGS: readonly ComputeUnitEpochConfig[] = [
+const COMPUTE_UNIT_CONFIGS: readonly ComputeUnitConfigEntry[] = [
     {
-        startEpoch: 0,
         maxComputeUnits: 48_000_000,
+        activations: {
+            [Cluster.MainnetBeta]: 0,
+            [Cluster.Devnet]: 0,
+            [Cluster.Testnet]: 0,
+        },
     },
     {
-        startEpoch: 770,
+        simd: '0207',
+        featureAccount: '5oMCU3JPaFLr8Zr4ct7yFA7jdk6Mw1RmB8K4u9ZbS42z',
         maxComputeUnits: 50_000_000,
-        referenceUrl: 'https://explorer.solana.com/address/5oMCU3JPaFLr8Zr4ct7yFA7jdk6Mw1RmB8K4u9ZbS42z',
+        activations: {
+            [Cluster.MainnetBeta]: 770,
+            [Cluster.Devnet]: 857,
+            [Cluster.Testnet]: 764,
+        },
     },
     {
-        startEpoch: 822,
+        simd: '0256',
+        featureAccount: '6oMCUgfY6BzZ6jwB681J6ju5Bh6CjVXbd7NeWYqiXBSu',
         maxComputeUnits: 60_000_000,
-        referenceUrl: 'https://explorer.solana.com/address/6oMCUgfY6BzZ6jwB681J6ju5Bh6CjVXbd7NeWYqiXBSu',
+        activations: {
+            [Cluster.MainnetBeta]: 822,
+            [Cluster.Devnet]: 915,
+            [Cluster.Testnet]: 812,
+        },
     },
-] as const;
+];
 
 /**
- * Retrieves the maximum compute units allowed for a given epoch.
- * @param epoch - The epoch number to query. Must be non-negative.
- * @returns The maximum compute units allowed in a block for the specified epoch
- * (defaults to the first epoch's config if epoch is undefined or negative, though this should never happen)
+ * Get the maximum compute units allowed in a block for a given epoch and cluster.
+ * @param epoch - The epoch to get the maximum compute units for. (default: 0)
+ * @param cluster - The cluster to get the maximum compute units for. (for custom clusters, fallback to the most recent config w/ highest max compute units)
+ * @returns (number) The maximum compute units allowed in a block for the given epoch and cluster.
  */
-export function getMaxComputeUnitsInBlock(epoch?: number): number {
-    if (epoch === undefined || epoch < 0) {
-        return COMPUTE_UNIT_EPOCH_CONFIGS[0].maxComputeUnits;
+export function getMaxComputeUnitsInBlock({
+    epoch = 0n,
+    cluster
+}: {
+    epoch?: bigint;
+    cluster: Cluster;
+}): number {
+    if (cluster === Cluster.Custom) {
+        // Fallback to the most recent config w/ highest max compute units (e.g., local host should use most recent even if epoch is 0)
+        return COMPUTE_UNIT_CONFIGS.reduce((max, config) => Math.max(max, config.maxComputeUnits), 0);
     }
 
-    const applicableConfig = COMPUTE_UNIT_EPOCH_CONFIGS.reduce(
-        (latest, config) => {
-            if (config.startEpoch <= epoch) {
-                // Return the config with the higher startEpoch (more recent)
-                return config.startEpoch >= latest.startEpoch ? config : latest;
-            }
-            return latest;
-        },
-        COMPUTE_UNIT_EPOCH_CONFIGS[0] // Start with the first config as fallback
-    );
+    let epochNumber = Number(epoch);
 
-
-    if (!applicableConfig) {
-        throw new Error(`No configuration found for epoch ${epoch}`);
+    let applicableConfig = COMPUTE_UNIT_CONFIGS[0];
+    let highestActivationEpoch = -1;
+    
+    for (const config of COMPUTE_UNIT_CONFIGS) {
+        const activationEpoch = config.activations[cluster];
+        if (activationEpoch <= epochNumber && activationEpoch > highestActivationEpoch) {
+            applicableConfig = config;
+            highestActivationEpoch = activationEpoch;
+        }
     }
-
+    
     return applicableConfig.maxComputeUnits;
 }

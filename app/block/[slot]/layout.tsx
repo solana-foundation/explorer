@@ -27,7 +27,7 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
     }
     const confirmedBlock = useBlock(slotNumber);
     const fetchBlock = useFetchBlock();
-    const { clusterInfo, status } = useCluster();
+    const { clusterInfo, status, cluster } = useCluster();
     const refresh = () => fetchBlock(slotNumber);
 
     // Fetch block on load
@@ -56,7 +56,7 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
         const showSuccessfulCount = block.transactions.every(tx => tx.meta !== null);
         const successfulTxs = block.transactions.filter(tx => tx.meta?.err === null);
         const epoch = clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(slotNumber)) : undefined;
-        const maxComputeUnits = getMaxComputeUnitsInBlock(epoch ? Number(epoch) : undefined);
+        const maxComputeUnits = getMaxComputeUnitsInBlock({epoch, cluster});
 
         content = (
             <>
