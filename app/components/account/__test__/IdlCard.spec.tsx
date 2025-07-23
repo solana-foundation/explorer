@@ -51,7 +51,7 @@ describe.only('IdlCard', () => {
         render(
             <ClusterProvider>
                 <IdlCard programId={programId} />
-            </ClusterProvider>,
+            </ClusterProvider>
         );
 
         await waitFor(() => {
@@ -75,7 +75,7 @@ describe.only('IdlCard', () => {
         render(
             <ClusterProvider>
                 <IdlCard programId={programId} />
-            </ClusterProvider>,
+            </ClusterProvider>
         );
 
         await waitFor(() => {
@@ -99,7 +99,7 @@ describe.only('IdlCard', () => {
         render(
             <ClusterProvider>
                 <IdlCard programId={programId} />
-            </ClusterProvider>,
+            </ClusterProvider>
         );
 
         // pmp idl should be rendered as first
@@ -125,7 +125,7 @@ describe.only('IdlCard', () => {
         render(
             <ClusterProvider>
                 <IdlCard programId={programId} />
-            </ClusterProvider>,
+            </ClusterProvider>
         );
 
         await waitFor(() => {
