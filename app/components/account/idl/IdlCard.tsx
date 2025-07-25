@@ -4,15 +4,20 @@ import { useAnchorProgram } from '@providers/anchor';
 import { useCluster } from '@providers/cluster';
 import classNames from 'classnames';
 import { useEffect, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { Eye } from 'react-feather';
 import ReactJson from 'react-json-view';
 
 import { useProgramMetadataIdl } from '@/app/providers/useProgramMetadataIdl';
+import { getIdlSpecType } from '@/app/utils/convertLegacyIdl';
 
-import { DownloadableButton } from '../common/Downloadable';
-import { IDLBadge } from '../common/IDLBadge';
+import { DownloadableButton } from '../../common/Downloadable';
+import { IDLBadge } from '../../common/IDLBadge';
+import { AnchorFormattedIdl, CodamaFormattedIdl } from './formatted-idl/IdlView';
 
+type IdlVariant = 'program-metadata' | 'anchor';
 type IdlTab = {
-    id: string;
+    id: IdlVariant;
     idl: any;
     title: string;
     badge: string;
@@ -24,7 +29,7 @@ export function IdlCard({ programId }: { programId: string }) {
     const { programMetadataIdl } = useProgramMetadataIdl(programId, url, cluster);
     const [activeTab, setActiveTab] = useState<IdlTab>();
 
-    const tabs = useMemo(() => {
+    const tabs = useMemo<IdlTab[]>(() => {
         return [
             {
                 badge: 'Program Metadata IDL',
@@ -86,6 +91,8 @@ export function IdlCard({ programId }: { programId: string }) {
 
 function IdlSection({ idl, badge, programId }: { idl: any; badge: React.ReactNode; programId: string }) {
     const [collapsedValue, setCollapsedValue] = useState<boolean | number>(1);
+    const [isRawIdlView, setIsRawIdlView] = useState<boolean>(true);
+
     return (
         <>
             <div className="d-flex justify-content-between align-items-center">
@@ -102,37 +109,75 @@ function IdlSection({ idl, badge, programId }: { idl: any; badge: React.ReactNod
                             Expand All
                         </label>
                     </div>
-                    <div className="col-auto btn btn-sm btn-primary d-flex align-items-center">
-                        <DownloadableButton
-                            data={Buffer.from(JSON.stringify(idl, null, 2)).toString('base64')}
-                            filename={`${programId}-idl.json`}
-                            type="application/json"
+                    <div className="col-auto d-flex align-items-center gap-2">
+                        <div className="d-flex btn btn-sm btn-primary">
+                            <DownloadableButton
+                                data={Buffer.from(JSON.stringify(idl, null, 2)).toString('base64')}
+                                filename={`${programId}-idl.json`}
+                                type="application/json"
+                            >
+                                Download
+                            </DownloadableButton>
+                        </div>
+                        <button
+                            className="d-flex btn btn-sm btn-primary align-items-center"
+                            onClick={() => setIsRawIdlView(!isRawIdlView)}
                         >
-                            Download
-                        </DownloadableButton>
+                            <Eye className="me-2" size={15} />
+                            {isRawIdlView ? 'Details' : 'Raw'}
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <div className="metadata-json-viewer mt-4">
-                <IdlJson idl={idl} collapsed={collapsedValue} />
+            <div className="mt-4 e-min-h-[200px]">
+                <IdlRenderer idl={idl} collapsed={collapsedValue} raw={isRawIdlView} programId={programId} />
             </div>
         </>
     );
 }
 
-function IdlJson({ idl, collapsed }: { idl: any; collapsed: boolean | number }) {
-    return (
-        <ReactJson
-            src={idl}
-            theme={'solarized'}
-            style={{ padding: 25 }}
-            name={null}
-            enableClipboard={true}
-            collapsed={collapsed}
-            displayObjectSize={false}
-            displayDataTypes={false}
-            displayArrayKey={false}
-        />
-    );
+function IdlRenderer({
+    idl,
+    collapsed,
+    raw,
+    programId,
+}: {
+    idl: any;
+    collapsed: boolean | number;
+    raw: boolean;
+    programId: string;
+}) {
+    if (raw) {
+        return (
+            <ReactJson
+                src={idl}
+                theme={'solarized'}
+                style={{ padding: 25 }}
+                name={null}
+                enableClipboard={true}
+                collapsed={collapsed}
+                displayObjectSize={false}
+                displayDataTypes={false}
+                displayArrayKey={false}
+            />
+        );
+    }
+
+    switch (getIdlSpecType(idl)) {
+        case 'codama':
+            return (
+                <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering PMP IDL" />}>
+                    <CodamaFormattedIdl idl={idl} />
+                </ErrorBoundary>
+            );
+        default:
+            <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering Anchor IDL" />}>
+                <AnchorFormattedIdl idl={idl} programId={programId} />;
+            </ErrorBoundary>;
+    }
+}
+
+function IdlErrorFallback({ message }: { message: string }) {
+    return <center className="pt-5">{message}</center>;
 }
