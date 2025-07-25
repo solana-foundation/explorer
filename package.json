@@ -39,6 +39,7 @@
         "@react-hook/previous": "^1.0.1",
         "@solana-program/compute-budget": "^0.6.1",
         "@solana-program/program-metadata": "^0.1.0",
+        "@solana-program/system": "^0.7.0",
         "@solana-program/token": "^0.5.1",
         "@solana-program/token-2022": "^0.4.0",
         "@solana/buffer-layout": "^3.0.0",
