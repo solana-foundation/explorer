@@ -2,6 +2,7 @@
 
 import { useAnchorProgram } from '@providers/anchor';
 import { useCluster } from '@providers/cluster';
+import { useDebounceCallback } from '@react-hook/debounce';
 import classNames from 'classnames';
 import { useEffect, useMemo, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -27,7 +28,7 @@ export function IdlCard({ programId }: { programId: string }) {
     const { url, cluster } = useCluster();
     const { idl } = useAnchorProgram(programId, url, cluster);
     const { programMetadataIdl } = useProgramMetadataIdl(programId, url, cluster);
-    const [activeTab, setActiveTab] = useState<IdlTab>();
+    const [activeTabIndex, setActiveTabIndex] = useState<number>();
 
     const tabs = useMemo<IdlTab[]>(() => {
         return [
@@ -49,27 +50,28 @@ export function IdlCard({ programId }: { programId: string }) {
     useEffect(() => {
         // wait until both data are ready and then activate first available in the array
         if (tabs.every(tab => tab.idl !== undefined)) {
-            setActiveTab(tabs.find(tab => tab.idl));
+            setActiveTabIndex(tabs.findIndex(tab => tab.idl));
         }
     }, [tabs]);
 
-    if (!idl && !programMetadataIdl) {
+    if ((!idl && !programMetadataIdl) || activeTabIndex == undefined) {
         return null;
     }
 
+    const activeTab = tabs[activeTabIndex];
     return (
         <div className="card">
             <div className="card-header">
                 <div className="nav nav-tabs" role="tablist">
                     {tabs
                         .filter(tab => tab.idl)
-                        .map(tab => (
+                        .map((tab, i) => (
                             <button
                                 key={tab.title}
                                 className={classNames('nav-item nav-link', {
                                     active: tab.id === activeTab?.id,
                                 })}
-                                onClick={() => setActiveTab(tab)}
+                                onClick={() => setActiveTabIndex(i)}
                             >
                                 {tab.title}
                             </button>
@@ -77,13 +79,11 @@ export function IdlCard({ programId }: { programId: string }) {
                 </div>
             </div>
             <div className="card-body">
-                {Boolean(activeTab) && (
-                    <IdlSection
-                        badge={<IDLBadge title={activeTab!.badge} idl={activeTab!.idl} />}
-                        idl={activeTab!.idl}
-                        programId={programId}
-                    />
-                )}
+                <IdlSection
+                    badge={<IDLBadge title={activeTab.badge} idl={activeTab.idl} />}
+                    idl={activeTab.idl}
+                    programId={programId}
+                />
             </div>
         </div>
     );
@@ -92,23 +92,37 @@ export function IdlCard({ programId }: { programId: string }) {
 function IdlSection({ idl, badge, programId }: { idl: any; badge: React.ReactNode; programId: string }) {
     const [collapsedValue, setCollapsedValue] = useState<boolean | number>(1);
     const [isRawIdlView, setIsRawIdlView] = useState<boolean>(true);
+    const [searchStr, setSearchStr] = useState<string>('');
+
+    const onSearchIdl = useDebounceCallback((str: string) => {
+        setSearchStr(str);
+    }, 1000);
 
     return (
         <>
             <div className="d-flex justify-content-between align-items-center">
                 {badge}
                 <div className="d-flex align-items-center gap-4">
-                    <div className="form-check form-switch">
+                    {isRawIdlView ? (
+                        <div className="form-check form-switch">
+                            <input
+                                className="form-check-input"
+                                type="checkbox"
+                                id="expandToggle"
+                                onChange={e => setCollapsedValue(e.target.checked ? false : 1)}
+                            />
+                            <label className="form-check-label" htmlFor="expandToggle">
+                                Expand All
+                            </label>
+                        </div>
+                    ) : (
                         <input
-                            className="form-check-input"
-                            type="checkbox"
-                            id="expandToggle"
-                            onChange={e => setCollapsedValue(e.target.checked ? false : 1)}
+                            className="form-control"
+                            style={{ height: 30 }}
+                            placeholder="Search"
+                            onChange={e => onSearchIdl(e.target.value)}
                         />
-                        <label className="form-check-label" htmlFor="expandToggle">
-                            Expand All
-                        </label>
-                    </div>
+                    )}
                     <div className="col-auto d-flex align-items-center gap-2">
                         <div className="d-flex btn btn-sm btn-primary">
                             <DownloadableButton
@@ -131,7 +145,13 @@ function IdlSection({ idl, badge, programId }: { idl: any; badge: React.ReactNod
             </div>
 
             <div className="mt-4 e-min-h-[200px]">
-                <IdlRenderer idl={idl} collapsed={collapsedValue} raw={isRawIdlView} programId={programId} />
+                <IdlRenderer
+                    idl={idl}
+                    collapsed={collapsedValue}
+                    raw={isRawIdlView}
+                    searchStr={searchStr}
+                    programId={programId}
+                />
             </div>
         </>
     );
@@ -141,11 +161,13 @@ function IdlRenderer({
     idl,
     collapsed,
     raw,
+    searchStr = '',
     programId,
 }: {
     idl: any;
     collapsed: boolean | number;
     raw: boolean;
+    searchStr: string;
     programId: string;
 }) {
     if (raw) {
@@ -168,13 +190,15 @@ function IdlRenderer({
         case 'codama':
             return (
                 <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering PMP IDL" />}>
-                    <CodamaFormattedIdl idl={idl} />
+                    <CodamaFormattedIdl idl={idl} searchStr={searchStr} />
                 </ErrorBoundary>
             );
         default:
-            <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering Anchor IDL" />}>
-                <AnchorFormattedIdl idl={idl} programId={programId} />;
-            </ErrorBoundary>;
+            return (
+                <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering Anchor IDL" />}>
+                    <AnchorFormattedIdl idl={idl} programId={programId} searchStr={searchStr} />
+                </ErrorBoundary>
+            );
     }
 }
 

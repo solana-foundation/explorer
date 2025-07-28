@@ -81,44 +81,54 @@ function useTabs(idl: FormattedIdl | null) {
 }
 
 export function FormattedIdlView({ idl }: { idl: FormattedIdl | null }) {
-    const [activeTab, setActiveTab] = useState<Tab>();
+    const [activeTabIndex, setActiveTabIndex] = useState<number | null>(null);
     const tabs = useTabs(idl);
 
     useEffect(() => {
-        if (activeTab) return;
-        setActiveTab(tabs.find(tab => !tab.disabled));
-    }, [tabs, activeTab]);
+        if (typeof activeTabIndex === 'number') return;
+        setActiveTabIndex(tabs.findIndex(tab => !tab.disabled));
+    }, [tabs, activeTabIndex]);
 
-    if (!tabs) return null;
+    if (!tabs || activeTabIndex === null) return null;
+
+    const activeTab = tabs[activeTabIndex];
 
     return (
         <div className="idl-view">
             <div className="nav nav-tabs mb-5">
-                {tabs.map(tab => (
+                {tabs.map((tab, index) => (
                     <button
                         key={tab.title}
                         className={classNames('nav-item nav-link', {
-                            active: tab.id === activeTab?.id,
+                            active: index === activeTabIndex,
                             'opacity-50': tab.disabled,
                         })}
                         disabled={tab.disabled}
-                        onClick={() => setActiveTab(tab)}
+                        onClick={() => setActiveTabIndex(index)}
                     >
                         {tab.title}
                     </button>
                 ))}
             </div>
-            <div className="table-responsive mb-0 e-min-h-[200px]">{!!activeTab && activeTab.component}</div>
+            <div className="table-responsive mb-0 e-min-h-[200px]">{activeTab.component}</div>
         </div>
     );
 }
 
-export function AnchorFormattedIdl({ idl, programId }: { idl?: Idl; programId: string }) {
-    const formattedIdl = useFormatAnchorIdl(idl ? formatIdl(idl, programId) : idl);
+export function AnchorFormattedIdl({
+    idl,
+    programId,
+    searchStr = '',
+}: {
+    idl?: Idl;
+    programId: string;
+    searchStr?: string;
+}) {
+    const formattedIdl = useFormatAnchorIdl(idl ? formatIdl(idl, programId) : idl, searchStr);
     return <FormattedIdlView idl={formattedIdl} />;
 }
 
-export function CodamaFormattedIdl({ idl }: { idl?: RootNode }) {
-    const formattedIdl = useFormatCodamaIdl(idl);
+export function CodamaFormattedIdl({ idl, searchStr = '' }: { idl?: RootNode; searchStr?: string }) {
+    const formattedIdl = useFormatCodamaIdl(idl, searchStr);
     return <FormattedIdlView idl={formattedIdl} />;
 }

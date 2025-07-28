@@ -17,6 +17,7 @@ import { camelCase } from 'change-case';
 import { useMemo } from 'react';
 
 import { FieldType, FormattedIdl, PdaData, StructField } from './FormattedIdl';
+import { searchIdl } from './search';
 
 function parseStructFields(fields: IdlDefinedFields): StructField[] | null {
     // Handle struct with named fields or tuple fields
@@ -145,7 +146,7 @@ function getPdaSeeds(seeds: IdlSeed[], idl: Idl): PdaData['seeds'] {
     });
 }
 
-export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
+export function useFormatAnchorIdl(idl?: Idl, searchStr?: string): FormattedIdl | null {
     const formattedIdl = useMemo(() => {
         if (!idl) return null;
         const typesMap = new Map<string, IdlTypeDef>(idl.types?.map(item => [item.name, item]) || []);
@@ -230,8 +231,8 @@ export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
                     name: t.name,
                 })),
         };
-        return formattedIdl;
-    }, [idl]);
+        return searchIdl(formattedIdl, searchStr);
+    }, [idl, searchStr]);
 
     return formattedIdl;
 }
