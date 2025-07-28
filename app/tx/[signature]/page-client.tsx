@@ -190,6 +190,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const fee = transactionWithMeta?.meta?.fee;
     const computeUnitsConsumed = transactionWithMeta?.meta?.computeUnitsConsumed;
+    const costUnits = transactionWithMeta?.meta?.costUnits;
     const transaction = transactionWithMeta?.transaction;
     const blockhash = transaction?.message.recentBlockhash;
     const epoch = clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(info.slot)) : undefined;
@@ -342,6 +343,13 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                     <tr>
                         <td>Compute units consumed</td>
                         <td className="text-lg-end">{computeUnitsConsumed.toLocaleString('en-US')}</td>
+                    </tr>
+                )}
+
+                {costUnits !== undefined && (
+                    <tr>
+                        <td>Transaction cost</td>
+                        <td className="text-lg-end">{costUnits.toLocaleString('en-US')}</td>
                     </tr>
                 )}
 
