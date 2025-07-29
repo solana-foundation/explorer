@@ -9,7 +9,7 @@ export function IdlDoc({ docs }: { docs: string[] }) {
 }
 
 export function IdlDocTooltip({ docs, children }: { docs?: string[]; children: React.ReactNode }) {
-    if (!docs?.length) return children;
+    if (!docs?.length) return <>{children}</>;
 
     return (
         <Tooltip>
