@@ -12,8 +12,13 @@ export type FormattedIdl = {
 export type InstructionData = {
     docs: string[];
     name: string;
-    accounts: Array<InstructionAccountData | { name: string; accounts: InstructionAccountData[] }>;
+    accounts: Array<InstructionAccountData | NestedInstructionAccountsData>;
     args: ArgField[];
+};
+
+export type NestedInstructionAccountsData = {
+    name: string;
+    accounts: InstructionAccountData[];
 };
 
 export type InstructionAccountData = {

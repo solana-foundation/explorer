@@ -22,7 +22,7 @@ function parseStructFields(fields: IdlDefinedFields): StructField[] | null {
     // Handle struct with named fields or tuple fields
     if (!fields) {
         return null;
-    } else if ('name' in (fields as IdlDefinedFieldsNamed)[0]) {
+    } else if (typeof fields[0] === 'object' && 'name' in (fields as IdlDefinedFieldsNamed)[0]) {
         // Named fields
         return (fields as IdlDefinedFieldsNamed).map(field => ({
             docs: field.docs || [],
@@ -189,10 +189,10 @@ export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
                                 accounts: acc.accounts.map(a => ({
                                     docs: a?.docs || [],
                                     name: camelCase(a.name),
-                                    optional: a.optional,
+                                    optional: !!a.optional,
                                     pda: !!a.pda,
-                                    signer: a.signer,
-                                    writable: a.writable,
+                                    signer: !!a.signer,
+                                    writable: !!a.writable,
                                 })),
                                 docs: ix?.docs || [],
                                 name: camelCase(acc.name),
@@ -201,9 +201,10 @@ export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
                         return {
                             docs: acc?.docs || [],
                             name: camelCase(acc.name),
+                            optional: !!acc.optional,
                             pda: !!acc.pda,
-                            signer: acc.signer,
-                            writable: acc.writable,
+                            signer: !!acc.signer,
+                            writable: !!acc.writable,
                         };
                     }),
                     args: ix.args.map(arg => ({
