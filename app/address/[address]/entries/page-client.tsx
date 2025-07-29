@@ -3,8 +3,8 @@
 import { LookupTableEntriesCard } from '@components/account/address-lookup-table/LookupTableEntriesCard';
 import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
+import { Address } from '@solana/kit';
 import React from 'react';
-import { Address } from 'web3js-experimental';
 
 type Props = Readonly<{
     params: {

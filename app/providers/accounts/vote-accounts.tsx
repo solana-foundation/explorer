@@ -1,7 +1,7 @@
 import { useCluster } from '@providers/cluster';
+import { createSolanaRpc } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
-import { createSolanaRpc } from 'web3js-experimental';
 
 type VoteAccountInfo = Readonly<{
     activatedStake: bigint;
