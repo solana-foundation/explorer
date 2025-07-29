@@ -1,3 +1,4 @@
+import { AccountMeta } from '@solana/kit';
 import { PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import {
     identifySolanaAttestationServiceInstruction,
@@ -16,7 +17,6 @@ import {
     SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID,
     SolanaAttestationServiceInstruction,
 } from 'sas-lib';
-import { IAccountMeta } from 'web3js-experimental';
 
 import { Address } from '../../common/Address';
 import { upcastTransactionInstruction } from '../../inspector/into-parsed-data';
@@ -110,7 +110,7 @@ export function SolanaAttestationDetailsCard({
             </tr>
             {parsed &&
                 parsed.accounts &&
-                Object.entries(parsed.accounts as Record<string, IAccountMeta>).map(([key, value], idx: number) => (
+                Object.entries(parsed.accounts as Record<string, AccountMeta>).map(([key, value], idx: number) => (
                     <tr key={idx}>
                         <td>{key.charAt(0).toUpperCase() + key.slice(1)}</td>
                         <td className="text-lg-end" colSpan={2}>

@@ -1,3 +1,4 @@
+import { address } from '@solana/kit';
 import { ComputeBudgetProgram, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import {
     ComputeBudgetInstruction,
@@ -6,7 +7,6 @@ import {
     parseSetComputeUnitLimitInstruction,
 } from '@solana-program/compute-budget';
 import bs58 from 'bs58';
-import { address } from 'web3js-experimental';
 
 import { Cluster } from '@/app/utils/cluster';
 

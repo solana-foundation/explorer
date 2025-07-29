@@ -43,6 +43,7 @@
         "@solana-program/token": "^0.5.1",
         "@solana-program/token-2022": "^0.4.0",
         "@solana/buffer-layout": "^3.0.0",
+        "@solana/kit": "^2.3.0",
         "@solana/spl-account-compression": "^0.1.8",
         "@solana/spl-token": "^0.1.8",
         "@solana/web3.js": "^1.98.4",
@@ -94,8 +95,7 @@
         "tailwind-merge": "^3.0.2",
         "tweetnacl": "^1.0.3",
         "typescript": "5.0.4",
-        "use-async-effect": "^2.2.7",
-        "web3js-experimental": "npm:@solana/web3.js@2.0.0"
+        "use-async-effect": "^2.2.7"
     },
     "devDependencies": {
         "@chromatic-com/storybook": "^3",

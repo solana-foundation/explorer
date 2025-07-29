@@ -6,7 +6,7 @@
  * So to avoid pulling in extra dependencies we just use the public API directly for search
  */
 
-import { Address } from 'web3js-experimental';
+import { Address } from '@solana/kit';
 
 import { Cluster } from './cluster';
 
