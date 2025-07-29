@@ -46,42 +46,63 @@ function IdlInstructionArguments({ data }: { data: IxArgsData }) {
 }
 
 function IdlInstructionAccounts({ data }: { data: IxAccountsData }) {
-    if ('accounts' in data) {
-        return (
-            <div>
-                <p className="text-muted">{data.name}</p>
-                <InstructionAccounts accounts={data.accounts} />
-            </div>
-        );
-    }
-    return <InstructionAccounts accounts={data} />;
+    return (
+        <div className="d-flex gap-1 flex-column align-items-start justify-start flex-wrap">
+            {data.map(acc => {
+                // nested accs
+                if ('accounts' in acc) {
+                    return (
+                        <div key={acc.name}>
+                            <p className="text-muted mb-2">{acc.name}</p>
+                            <div className="px-3 py-2 e-bg-neutral-800">
+                                <InstructionAccounts accounts={acc.accounts} />
+                            </div>
+                        </div>
+                    );
+                }
+                return (
+                    <IdlInstructionAccount
+                        key={acc.name}
+                        docs={acc.docs}
+                        name={acc.name}
+                        isWritable={acc.writable}
+                        isSigner={acc.signer}
+                        isPda={acc.pda}
+                        isOptional={acc.optional}
+                    />
+                );
+            })}
+        </div>
+    );
 }
 
 function InstructionAccounts({ accounts }: { accounts: InstructionAccountData[] }) {
     return (
-        <div className="d-flex gap-1 flex-column items-center flex-wrap">
+        <div className="d-flex gap-1 flex-column align-items-start justify-start flex-wrap">
             {accounts.map(({ docs, name, writable, signer, pda, optional }) => (
-                <IdlDocTooltip key={name} docs={docs}>
-                    <IdlInstructionAccount
-                        name={name}
-                        isWritable={writable}
-                        isSigner={signer}
-                        isPda={pda}
-                        isOptional={optional}
-                    />
-                </IdlDocTooltip>
+                <IdlInstructionAccount
+                    key={name}
+                    docs={docs}
+                    name={name}
+                    isWritable={writable}
+                    isSigner={signer}
+                    isPda={pda}
+                    isOptional={optional}
+                />
             ))}
         </div>
     );
 }
 
 function IdlInstructionAccount({
+    docs,
     name,
     isWritable,
     isSigner,
     isPda,
     isOptional,
 }: {
+    docs: string[];
     name: string;
     isWritable?: boolean;
     isSigner?: boolean;
@@ -89,12 +110,14 @@ function IdlInstructionAccount({
     isOptional?: boolean;
 }) {
     return (
-        <div className="d-flex align-items-center gap-2">
-            <span>{name}</span>
-            {!!isWritable && <span className="badge bg-info-soft">isMut</span>}
-            {!!isSigner && <span className="badge bg-warning-soft">isSigner</span>}
-            {!!isPda && <span className="badge bg-light-soft">pda</span>}
-            {!!isOptional && <span className="badge bg-secondary-soft">optional</span>}
-        </div>
+        <IdlDocTooltip key={name} docs={docs}>
+            <div className="d-inline-flex align-items-center gap-2">
+                <span>{name}</span>
+                {!!isWritable && <span className="badge bg-info-soft">isMut</span>}
+                {!!isSigner && <span className="badge bg-warning-soft">isSigner</span>}
+                {!!isPda && <span className="badge bg-light-soft">pda</span>}
+                {!!isOptional && <span className="badge bg-secondary-soft">optional</span>}
+            </div>
+        </IdlDocTooltip>
     );
 }

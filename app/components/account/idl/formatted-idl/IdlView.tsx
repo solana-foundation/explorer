@@ -10,6 +10,7 @@ import { formatIdl } from '@/app/utils/convertLegacyIdl';
 import { useFormatAnchorIdl } from './formatters/anchor';
 import { useFormatCodamaIdl } from './formatters/codama';
 import { FormattedIdl } from './formatters/FormattedIdl';
+import { useSearchIdl } from './formatters/search';
 import { IdlAccountsView } from './IdlAccounts';
 import { IdlConstantsView } from './IdlConstants';
 import { IdlErrorsView } from './IdlErrors';
@@ -89,7 +90,7 @@ export function FormattedIdlView({ idl }: { idl: FormattedIdl | null }) {
         setActiveTabIndex(tabs.findIndex(tab => !tab.disabled));
     }, [tabs, activeTabIndex]);
 
-    if (!tabs || activeTabIndex === null) return null;
+    if (!tabs || activeTabIndex === null || !idl) return null;
 
     const activeTab = tabs[activeTabIndex];
 
@@ -124,11 +125,13 @@ export function AnchorFormattedIdl({
     programId: string;
     searchStr?: string;
 }) {
-    const formattedIdl = useFormatAnchorIdl(idl ? formatIdl(idl, programId) : idl, searchStr);
-    return <FormattedIdlView idl={formattedIdl} />;
+    const formattedIdl = useFormatAnchorIdl(idl ? formatIdl(idl, programId) : idl);
+    const searchResults = useSearchIdl(formattedIdl, searchStr);
+    return <FormattedIdlView idl={searchResults} />;
 }
 
 export function CodamaFormattedIdl({ idl, searchStr = '' }: { idl?: RootNode; searchStr?: string }) {
-    const formattedIdl = useFormatCodamaIdl(idl, searchStr);
-    return <FormattedIdlView idl={formattedIdl} />;
+    const formattedIdl = useFormatCodamaIdl(idl);
+    const searchResults = useSearchIdl(formattedIdl, searchStr);
+    return <FormattedIdlView idl={searchResults} />;
 }

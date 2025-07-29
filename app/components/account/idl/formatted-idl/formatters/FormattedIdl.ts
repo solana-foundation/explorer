@@ -12,7 +12,7 @@ export type FormattedIdl = {
 export type InstructionData = {
     docs: string[];
     name: string;
-    accounts: InstructionAccountData[] | { name: string; accounts: InstructionAccountData[] };
+    accounts: Array<InstructionAccountData | { name: string; accounts: InstructionAccountData[] }>;
     args: ArgField[];
 };
 

@@ -1,4 +1,5 @@
 import Fuse, { IFuseOptions } from 'fuse.js';
+import { useMemo } from 'react';
 
 import { FormattedIdl } from './FormattedIdl';
 
@@ -62,4 +63,11 @@ export function searchIdl(formattedIdl: FormattedIdl, searchStr?: string): Forma
     };
 
     return searchResult;
+}
+
+export function useSearchIdl(formattedIdl: FormattedIdl | null, searchStr?: string): FormattedIdl | null {
+    return useMemo(() => {
+        if (!formattedIdl) return null;
+        return searchIdl(formattedIdl, searchStr);
+    }, [formattedIdl, searchStr]);
 }

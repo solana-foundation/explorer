@@ -13,6 +13,11 @@ const meta = {
         ),
     ],
     parameters: {
+        docs: {
+            description: {
+                story: 'Format and render Anchor IDL',
+            },
+        },
         nextjs: {
             appDirectory: true,
         },

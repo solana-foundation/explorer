@@ -1,6 +1,7 @@
 'use client';
 
 import { FormattedIdl } from './formatters/FormattedIdl';
+import { IdlDoc } from './IdlDoc';
 import { IdlFieldsView } from './IdlFields';
 
 export function IdlEventsView({ data }: { data: FormattedIdl['events'] }) {
@@ -17,7 +18,10 @@ export function IdlEventsView({ data }: { data: FormattedIdl['events'] }) {
             <tbody className="list">
                 {data.map(event => (
                     <tr key={event.name}>
-                        <td>{event.name}</td>
+                        <td>
+                            {event.name}
+                            {!!event.docs && <IdlDoc docs={event.docs} />}
+                        </td>
                         <td>{!!event.fieldType && <IdlFieldsView fieldType={event.fieldType} />}</td>
                     </tr>
                 ))}

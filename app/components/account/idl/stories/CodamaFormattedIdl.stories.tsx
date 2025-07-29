@@ -13,6 +13,11 @@ const meta = {
         ),
     ],
     parameters: {
+        docs: {
+            description: {
+                story: 'Format and render Codama IDL',
+            },
+        },
         nextjs: {
             appDirectory: true,
         },

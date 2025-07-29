@@ -12,7 +12,6 @@ import {
 import { useMemo } from 'react';
 
 import { FieldType, FormattedIdl, PdaData, StructField } from './FormattedIdl';
-import { searchIdl } from './search';
 
 function parseEnumNodeVariants(type: EnumTypeNode): string[] {
     return type.variants.map(variant => {
@@ -221,7 +220,7 @@ function getSeedsFromPda(pda: PdaNode): PdaData['seeds'] {
     }));
 }
 
-export function useFormatCodamaIdl(idl?: RootNode, searchStr?: string): FormattedIdl | null {
+export function useFormatCodamaIdl(idl?: RootNode): FormattedIdl | null {
     const formattedIdl = useMemo(() => {
         if (!idl) return null;
 
@@ -281,8 +280,8 @@ export function useFormatCodamaIdl(idl?: RootNode, searchStr?: string): Formatte
                 name: item.name,
             })),
         };
-        return searchIdl(formattedIdl, searchStr);
-    }, [idl, searchStr]);
+        return formattedIdl;
+    }, [idl]);
 
     return formattedIdl;
 }
