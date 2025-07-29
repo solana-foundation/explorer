@@ -40,11 +40,11 @@ const useQueryAccountFilter = (query: ReadonlyURLSearchParams): PublicKey | null
     return null;
 };
 
-type SortMode = 'index' | 'compute' | 'txn cost' | 'fee' | 'reservedCUs';
+type SortMode = 'index' | 'compute' | 'txnCost' | 'fee' | 'reservedCUs';
 const useQuerySort = (query: ReadonlyURLSearchParams): SortMode => {
     const sort = query.get('sort');
     if (sort === 'compute') return 'compute';
-    if (sort === 'txn cost') return 'txn cost';
+    if (sort === 'txnCost') return 'txnCost';
     if (sort === 'fee') return 'fee';
     if (sort === 'reservedCUs') return 'reservedCUs';
     return 'index';
@@ -171,7 +171,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
 
         if (sortMode === 'compute' && showComputeUnits) {
             filteredTxs.sort((a, b) => b.computeUnits! - a.computeUnits!);
-        } else if (sortMode === 'txn cost') {
+        } else if (sortMode === 'txnCost') {
             filteredTxs.sort((a, b) => (b.costUnits! - a.costUnits!));
         } else if (sortMode === 'fee') {
             filteredTxs.sort((a, b) => (b.meta?.fee || 0) - (a.meta?.fee || 0));
@@ -286,7 +286,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                     className="text-muted c-pointer"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
-                                        additionalParams.set('sort', 'txn cost');
+                                        additionalParams.set('sort', 'txnCost');
                                         router.push(pickClusterParams(currentPathname, currentSearchParams, additionalParams));
                                     }}
                                 >
