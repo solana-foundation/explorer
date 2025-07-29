@@ -934,7 +934,7 @@
     "testnet_activation_epoch": 814,
     "devnet_activation_epoch": 918,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 824,
     "description": null
   },
   {
@@ -1020,7 +1020,7 @@
     "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": 817,
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 921,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1048,9 +1048,9 @@
     ],
     "planned_testnet_order": null,
     "testnet_activation_epoch": 815,
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 919,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 826,
     "description": ""
   },
   {
@@ -1089,6 +1089,28 @@
     "owners": [],
     "min_agave_versions": [
       "v2.3.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "P1BCUMpAC7V2GRBRiJCNUgpMyWZhoqt3LKo712ePqsz",
+    "title": "Raise Block Limits to 100M CU",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0286-raise-block-limits-to-100M.md"
+    ],
+    "simds": [
+      "0286"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.0.0"
     ],
     "min_fd_versions": [],
     "min_jito_versions": [],
