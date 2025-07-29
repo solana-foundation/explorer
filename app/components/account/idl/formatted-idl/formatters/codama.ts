@@ -181,13 +181,19 @@ function getUniqPdaNodesFromIxs(ixs: InstructionNode[]): PdaValueNode[] {
             if (acc.defaultValue?.kind === 'conditionalValueNode') {
                 const conditionalTruePda = acc.defaultValue.ifTrue as PdaValueNode;
                 const conditionalFalsePda = acc.defaultValue.ifFalse as PdaValueNode;
-                uniqPdas.set(conditionalTruePda.pda.name, conditionalTruePda);
-                uniqPdas.set(conditionalFalsePda.pda.name, conditionalFalsePda);
+                if (!uniqPdas.get(conditionalTruePda.pda.name)) {
+                    uniqPdas.set(conditionalTruePda.pda.name, conditionalTruePda);
+                }
+                if (!uniqPdas.get(conditionalFalsePda.pda.name)) {
+                    uniqPdas.set(conditionalFalsePda.pda.name, conditionalFalsePda);
+                }
                 return;
             }
+            if (uniqPdas.get(acc.name)) return;
             uniqPdas.set(acc.name, acc.defaultValue as PdaValueNode);
         });
     });
+
     return Array.from(uniqPdas.values());
 }
 
