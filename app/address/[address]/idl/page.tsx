@@ -3,7 +3,7 @@ import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/ge
 import { Metadata } from 'next/types';
 import { Suspense } from 'react';
 
-import { IdlCard } from '@/app/components/account/IdlCard';
+import { IdlCard } from '@/app/components/account/idl/IdlCard';
 
 type Props = Readonly<{
     params: {

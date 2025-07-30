@@ -64,6 +64,7 @@
         "cross-spawn": "7.0.6",
         "elfy": "^1.0.0",
         "eslint-config-next": "14.2.5",
+        "fuse.js": "^7.1.0",
         "humanize-duration-ts": "^2.1.1",
         "ipaddr.js": "^2.2.0",
         "lighthouse-sdk": "^2.0.1",
