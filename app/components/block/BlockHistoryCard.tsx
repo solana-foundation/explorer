@@ -172,7 +172,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
         if (sortMode === 'compute' && showComputeUnits) {
             filteredTxs.sort((a, b) => b.computeUnits! - a.computeUnits!);
         } else if (sortMode === 'txnCost') {
-            filteredTxs.sort((a, b) => (b.costUnits! - a.costUnits!));
+            filteredTxs.sort((a, b) => b.costUnits! - a.costUnits!);
         } else if (sortMode === 'fee') {
             filteredTxs.sort((a, b) => (b.meta?.fee || 0) - (a.meta?.fee || 0));
         } else if (sortMode === 'reservedCUs') {
@@ -287,7 +287,9 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'txnCost');
-                                        router.push(pickClusterParams(currentPathname, currentSearchParams, additionalParams));
+                                        router.push(
+                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams)
+                                        );
                                     }}
                                 >
                                     Txn Cost
@@ -342,8 +344,8 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                         )}
                                         <td>
                                             {tx.costUnits !== undefined
-                                                        ? new Intl.NumberFormat('en-US').format(tx.costUnits)
-                                                        : 'Unknown'}
+                                                ? new Intl.NumberFormat('en-US').format(tx.costUnits)
+                                                : 'Unknown'}
                                         </td>
                                         <td>
                                             {tx.invocations.size === 0
