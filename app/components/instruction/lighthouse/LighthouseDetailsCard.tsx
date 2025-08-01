@@ -1,3 +1,4 @@
+import { AccountMeta, AccountRole, Address as TAddress, Instruction } from '@solana/kit';
 import { PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import {
     EquatableOperator,
@@ -24,7 +25,6 @@ import {
     parseMemoryWriteInstruction,
 } from 'lighthouse-sdk';
 import React from 'react';
-import { AccountRole, Address as TAddress, IAccountMeta, IInstruction } from 'web3js-experimental';
 
 import { camelToTitleCase } from '@/app/utils';
 
@@ -36,7 +36,7 @@ import { LIGHTHOUSE_ADDRESS } from './types';
 
 type ParsedCodamaInstruction = {
     programAddress: TAddress;
-    accounts?: Record<string, IAccountMeta>;
+    accounts?: Record<string, AccountMeta>;
     data: any;
 };
 
@@ -331,7 +331,7 @@ function renderEquatableOperator(operator: EquatableOperator) {
     }
 }
 
-function CodamaCard({ ix, parsedIx }: { ix: IInstruction; parsedIx: ParsedCodamaInstruction }) {
+function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaInstruction }) {
     const programName = 'Lighthouse';
     const programId = new PublicKey(LIGHTHOUSE_ADDRESS);
 

@@ -1,6 +1,7 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
 import { useCluster } from '@providers/cluster';
+import { address } from '@solana/kit';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import {
     ComputeBudgetInstruction,
@@ -13,7 +14,6 @@ import {
 } from '@solana-program/compute-budget';
 import { microLamportsToLamportsString } from '@utils/index';
 import React from 'react';
-import { address } from 'web3js-experimental';
 
 import { InstructionCard } from './InstructionCard';
 

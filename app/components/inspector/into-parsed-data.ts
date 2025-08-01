@@ -1,6 +1,14 @@
-import * as spl from '@solana/spl-token';
 import {
     AccountMeta,
+    AccountRole,
+    address,
+    Instruction,
+    InstructionWithAccounts,
+    InstructionWithData,
+} from '@solana/kit';
+import * as spl from '@solana/spl-token';
+import {
+    AccountMeta as LegacyAccountMeta,
     ParsedInstruction,
     ParsedMessage,
     ParsedMessageAccount,
@@ -17,14 +25,6 @@ import {
     parseCreateAssociatedTokenInstruction,
     parseRecoverNestedAssociatedTokenInstruction,
 } from '@solana-program/token';
-import {
-    AccountRole,
-    address,
-    IAccountMeta,
-    IInstruction,
-    IInstructionWithAccounts,
-    IInstructionWithData,
-} from 'web3js-experimental';
 
 function discriminatorToBuffer(discrimnator: number): Buffer {
     return Buffer.from(Uint8Array.from([discrimnator]));
@@ -104,7 +104,7 @@ function getInstructionData(instruction: TransactionInstruction, data?: any) {
     return { parsed, program };
 }
 
-function convertAccountKeysToParsedMessageAccounts(keys: AccountMeta[]): ParsedMessageAccount[] {
+function convertAccountKeysToParsedMessageAccounts(keys: LegacyAccountMeta[]): ParsedMessageAccount[] {
     const accountKeys = keys.map((key): ParsedMessageAccount => {
         return {
             pubkey: key.pubkey,
@@ -157,7 +157,7 @@ export function intoParsedTransaction(
     };
 }
 
-export function upcastAccountMeta({ pubkey, isSigner, isWritable }: AccountMeta): IAccountMeta {
+export function upcastAccountMeta({ pubkey, isSigner, isWritable }: LegacyAccountMeta): AccountMeta {
     return {
         address: address(pubkey.toBase58()),
         role: isSigner
@@ -181,10 +181,10 @@ export function upcastTransactionInstruction(ix: TransactionInstruction) {
 /**
  * Wrap instruction into format compatible with @solana-program/token library' parsers.
  */
-type TAccount = NonNullable<IAccountMeta>;
-type TInstruction = IInstruction<string> &
-    IInstructionWithAccounts<readonly TAccount[]> &
-    IInstructionWithData<Uint8Array>;
+type TAccount = NonNullable<AccountMeta>;
+type TInstruction = Instruction<string> &
+    InstructionWithAccounts<readonly TAccount[]> &
+    InstructionWithData<Uint8Array>;
 export function intoInstructionData(instruction: TransactionInstruction): TInstruction {
     return upcastTransactionInstruction(instruction);
 }
