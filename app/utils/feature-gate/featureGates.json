@@ -1098,5 +1098,49 @@
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
+  },
+  {
+    "key": "P1BCUMpAC7V2GRBRiJCNUgpMyWZhoqt3LKo712ePqsz",
+    "title": "Raise Block Limits to 100M CU",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0286-raise-block-limits-to-100M.md"
+    ],
+    "simds": [
+      "0286"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "htsptAwi2yRoZH83SKaUXykeZGtZHgxkS2QwW1pssR8",
+    "title": "Increase Account Limit to 40% of Block CU",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0306-raise-account-cu-limits.md"
+    ],
+    "simds": [
+      "0306"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
   }
 ]
