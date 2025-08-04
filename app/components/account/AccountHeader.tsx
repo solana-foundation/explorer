@@ -220,7 +220,7 @@ function TokenMintHeaderCard({
                 <h6 className="header-pretitle">Token</h6>
                 <h2 className="header-title">{token?.name || 'Unknown Token'}</h2>
                 <h4 className="header-pretitle ms-1 mt-1 no-overflow-with-ellipsis">
-                    {token?.symbol !== '' ? token.symbol : 'No Symbol was found'}
+                    {token?.symbol ? token.symbol : 'No Symbol was found'}
                 </h4>{' '}
             </div>
         </div>
