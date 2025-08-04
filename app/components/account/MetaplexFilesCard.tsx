@@ -31,30 +31,35 @@ function NormalMetaplexFilesCard({ metadataUri }: { metadataUri: string }) {
     const [files, setFiles] = React.useState<File[]>([]);
     const [status, setStatus] = React.useState<'loading' | 'success' | 'error'>('loading');
 
-    async function fetchMetadataFiles() {
-        try {
-            const response = await fetch(getProxiedUri(metadataUri));
-            const metadata = await response.json();
-            // Verify if the attributes value is an array
-            if (Array.isArray(metadata.properties.files)) {
-                // Filter files to keep objects matching schema
-                const filteredFiles = metadata.properties.files.filter((file: any) => {
-                    return typeof file === 'object' && typeof file.uri === 'string' && typeof file.type === 'string';
-                });
-
-                setFiles(filteredFiles);
-                setStatus('success');
-            } else {
-                throw new Error('Files is not an array');
-            }
-        } catch (error) {
-            setStatus('error');
-        }
-    }
-
     React.useEffect(() => {
+        async function fetchMetadataFiles() {
+            try {
+                const response = await fetch(getProxiedUri(metadataUri));
+                if (!response.ok) {
+                    throw new Error('Failed to fetch metadata');
+                }
+
+                const metadata = await response.json();
+                // Verify if the attributes value is an array
+                if (Array.isArray(metadata.properties.files)) {
+                    // Filter files to keep objects matching schema
+                    const filteredFiles = metadata.properties.files.filter((file: any) => {
+                        return (
+                            typeof file === 'object' && typeof file.uri === 'string' && typeof file.type === 'string'
+                        );
+                    });
+
+                    setFiles(filteredFiles);
+                    setStatus('success');
+                } else {
+                    throw new Error('Files is not an array');
+                }
+            } catch (error) {
+                setStatus('error');
+            }
+        }
         fetchMetadataFiles();
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [metadataUri]);
 
     if (status === 'loading') {
         return <LoadingCard />;
