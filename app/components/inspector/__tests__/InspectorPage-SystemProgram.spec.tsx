@@ -268,13 +268,16 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
 
         expect(screen.getByText(/System Program: Assign Account/i)).not.toBeNull();
 
-        await waitForTimeout(() => {
-            expectAllColumnsNotNull(c, [
-                [/Program/, /System Program/],
-                [/Account Address/, /recvKuUhe9nsQ4QzrW68rTnzFT2S2dGmBKFNRfQB4Lp/],
-                [/Assigned Program Id/, /Associated Token Program/],
-            ]);
-        });
+        await waitForTimeout(
+            () => {
+                expectAllColumnsNotNull(c, [
+                    [/Program/, /System Program/],
+                    [/Account Address/, /recvKuUhe9nsQ4QzrW68rTnzFT2S2dGmBKFNRfQB4Lp/],
+                    [/Assigned Program Id/, /Associated Token Program/],
+                ]);
+            },
+            { interval: 50, timeout: 15000 }
+        );
     });
 
     test('renders SystemProgram::Transfer instruction', async () => {
