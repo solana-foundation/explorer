@@ -119,6 +119,22 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         // Setup router mock
         const mockRouter = { push: vi.fn(), replace: vi.fn() };
         vi.spyOn(await import('next/navigation'), 'useRouter').mockReturnValue(mockRouter as any);
+
+        // Add this before the render
+        vi.mock('@providers/accounts', async () => {
+            const actual = await vi.importActual('@providers/accounts');
+            return {
+                ...actual,
+                useAccountInfo: () => ({
+                    data: {
+                        lamports: 1000000,
+                        owner: SystemProgram.programId,
+                        space: 0,
+                    },
+                    status: 'fetched',
+                }),
+            };
+        });
     });
 
     afterEach(() => {
@@ -242,7 +258,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         });
     });
 
-    test('renders SystemProgram::Assign instruction', { timeout: 60000 }, async () => {
+    test('renders SystemProgram::Assign instruction', async () => {
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramAssignQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
