@@ -247,21 +247,21 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramAssignQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
 
-        // Add this before the render
-        vi.mock('@providers/accounts', async () => {
-            const actual = await vi.importActual('@providers/accounts');
-            return {
-                ...actual,
-                useAccountInfo: () => ({
-                    data: {
-                        lamports: 1000000,
-                        owner: SystemProgram.programId,
-                        space: 0,
-                    },
-                    status: 'fetched', //FetchStatus.Fetched,
-                }),
-            };
-        });
+        // // Add this before the render
+        // vi.mock('@providers/accounts', async () => {
+        //     const actual = await vi.importActual('@providers/accounts');
+        //     return {
+        //         ...actual,
+        //         useAccountInfo: () => ({
+        //             data: {
+        //                 lamports: 1000000,
+        //                 owner: SystemProgram.programId,
+        //                 space: 0,
+        //             },
+        //             status: 'fetched',
+        //         }),
+        //     };
+        // });
 
         const { container: c } = render(
             <ScrollAnchorProvider>
@@ -283,33 +283,13 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         // Wait for the proper card to be rendered to prevent failing upon `Loading`
         expect(screen.getByText(/System Program: Assign Account/i)).not.toBeNull();
 
-        // await waitForTimeout(
-        //     () => {
-        //         expect(screen.queryAllByText(/Loading/i)).toHaveLength(0);
-        //     },
-        //     { interval: 100, timeout: 25000 }
-        // );
-
-        // Add this before the failing assertion to debug in CI
-        const loadingElements = screen.queryAllByText(/Loading/i);
-        if (loadingElements.length > 0) {
-            console.log(
-                'Still loading:',
-                // eslint-disable-next-line
-                loadingElements.map(el => el.closest('[data-testid]')?.getAttribute('data-testid'))
-            );
-        }
-
-        await waitForTimeout(
-            () => {
-                expectAllColumnsNotNull(c, [
-                    [/Program/, /System Program/],
-                    [/Account Address/, /recvKuUhe9nsQ4QzrW68rTnzFT2S2dGmBKFNRfQB4Lp/],
-                    [/Assigned Program Id/, /Associated Token Program/],
-                ]);
-            }
-            // { interval: 50, timeout: 15000 }
-        );
+        await waitForTimeout(() => {
+            expectAllColumnsNotNull(c, [
+                [/Program/, /System Program/],
+                [/Account Address/, /recvKuUhe9nsQ4QzrW68rTnzFT2S2dGmBKFNRfQB4Lp/],
+                [/Assigned Program Id/, /Associated Token Program/],
+            ]);
+        });
     });
 
     test('renders SystemProgram::Transfer instruction', async () => {
