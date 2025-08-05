@@ -295,6 +295,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         if (loadingElements.length > 0) {
             console.log(
                 'Still loading:',
+                // eslint-disable-next-line
                 loadingElements.map(el => el.closest('[data-testid]')?.getAttribute('data-testid'))
             );
         }
