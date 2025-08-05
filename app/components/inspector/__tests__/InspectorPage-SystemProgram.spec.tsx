@@ -120,7 +120,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         const mockRouter = { push: vi.fn(), replace: vi.fn() };
         vi.spyOn(await import('next/navigation'), 'useRouter').mockReturnValue(mockRouter as any);
 
-        // Add this before the render
+        // Mock accountInfo to prevent the UI stuck upon loading
         vi.mock('@providers/accounts', async () => {
             const actual = await vi.importActual('@providers/accounts');
             return {
@@ -262,22 +262,6 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramAssignQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
-
-        // Add this before the render
-        vi.mock('@providers/accounts', async () => {
-            const actual = await vi.importActual('@providers/accounts');
-            return {
-                ...actual,
-                useAccountInfo: () => ({
-                    data: {
-                        lamports: 1000000,
-                        owner: SystemProgram.programId,
-                        space: 0,
-                    },
-                    status: 'fetched',
-                }),
-            };
-        });
 
         const { container: c } = render(
             <ScrollAnchorProvider>
