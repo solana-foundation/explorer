@@ -263,7 +263,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
             expect(screen.queryByText(/Inspector Input/i)).toBeNull();
         });
         await waitForTimeout(() => {
-            expect(screen.queryByText(/Loading/i)).toBeNull();
+            expect(screen.queryAllByText(/Loading/i)).toHaveLength(0);
         });
 
         expect(screen.getByText(/System Program: Assign Account/i)).not.toBeNull();
