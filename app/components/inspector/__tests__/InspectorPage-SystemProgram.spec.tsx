@@ -1,4 +1,4 @@
-// import { SystemProgram } from '@solana/web3.js';
+import { SystemProgram } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
@@ -247,21 +247,21 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramAssignQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
 
-        // // Add this before the render
-        // vi.mock('@providers/accounts', async () => {
-        //     const actual = await vi.importActual('@providers/accounts');
-        //     return {
-        //         ...actual,
-        //         useAccountInfo: () => ({
-        //             data: {
-        //                 lamports: 1000000,
-        //                 owner: SystemProgram.programId,
-        //                 space: 0,
-        //             },
-        //             status: 'fetched',
-        //         }),
-        //     };
-        // });
+        // Add this before the render
+        vi.mock('@providers/accounts', async () => {
+            const actual = await vi.importActual('@providers/accounts');
+            return {
+                ...actual,
+                useAccountInfo: () => ({
+                    data: {
+                        lamports: 1000000,
+                        owner: SystemProgram.programId,
+                        space: 0,
+                    },
+                    status: 'fetched',
+                }),
+            };
+        });
 
         const { container: c } = render(
             <ScrollAnchorProvider>
