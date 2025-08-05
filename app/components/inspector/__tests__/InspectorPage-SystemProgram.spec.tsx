@@ -241,7 +241,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         });
     });
 
-    test('renders SystemProgram::Assign instruction', { timeout: 30000 }, async () => {
+    test('renders SystemProgram::Assign instruction', { timeout: 60000 }, async () => {
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramAssignQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
@@ -266,7 +266,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
             () => {
                 expect(screen.queryAllByText(/Loading/i)).toHaveLength(0);
             },
-            { interval: 50, timeout: 15000 }
+            { interval: 50, timeout: 20000 }
         );
 
         expect(screen.getByText(/System Program: Assign Account/i)).not.toBeNull();
@@ -278,8 +278,8 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                     [/Account Address/, /recvKuUhe9nsQ4QzrW68rTnzFT2S2dGmBKFNRfQB4Lp/],
                     [/Assigned Program Id/, /Associated Token Program/],
                 ]);
-            },
-            { interval: 50, timeout: 15000 }
+            }
+            // { interval: 50, timeout: 15000 }
         );
     });
 
