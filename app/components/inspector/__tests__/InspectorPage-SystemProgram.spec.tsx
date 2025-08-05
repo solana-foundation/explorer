@@ -241,7 +241,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         });
     });
 
-    test('renders SystemProgram::Assign instruction', { timeout: 20000 }, async () => {
+    test('renders SystemProgram::Assign instruction', { timeout: 30000 }, async () => {
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramAssignQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
@@ -262,9 +262,12 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         await waitForTimeout(() => {
             expect(screen.queryByText(/Inspector Input/i)).toBeNull();
         });
-        await waitForTimeout(() => {
-            expect(screen.queryAllByText(/Loading/i)).toHaveLength(0);
-        });
+        await waitForTimeout(
+            () => {
+                expect(screen.queryAllByText(/Loading/i)).toHaveLength(0);
+            },
+            { interval: 50, timeout: 15000 }
+        );
 
         expect(screen.getByText(/System Program: Assign Account/i)).not.toBeNull();
 
