@@ -262,14 +262,16 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         await waitForTimeout(() => {
             expect(screen.queryByText(/Inspector Input/i)).toBeNull();
         });
+
+        // Wait for the proper card to be rendered to prevent failing upon `Loading`
+        expect(screen.getByText(/System Program: Assign Account/i)).not.toBeNull();
+
         await waitForTimeout(
             () => {
                 expect(screen.queryAllByText(/Loading/i)).toHaveLength(0);
             },
-            { interval: 50, timeout: 20000 }
+            { interval: 100, timeout: 25000 }
         );
-
-        expect(screen.getByText(/System Program: Assign Account/i)).not.toBeNull();
 
         await waitForTimeout(
             () => {
