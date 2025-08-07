@@ -120,6 +120,7 @@ function TokenMintHeader({
         const token = {
             logoURI: parsedData?.nftData?.json?.image,
             name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
+            symbol: parsedData?.nftData?.metadata.data.symbol,
         };
         return <TokenMintHeaderCard token={token} address={address} unverified={!tokenInfo?.verified} />;
     } else if (tokenInfo) {
@@ -144,6 +145,7 @@ function Token22MintHeader({
     const headerTokenMetadata = {
         logoURI: '',
         name: tokenMetadata.name,
+        symbol: tokenMetadata.symbol,
     };
     if (metadata) {
         headerTokenMetadata.logoURI = metadata.image;
@@ -163,11 +165,11 @@ function TokenMintHeaderCard({
     unverified,
 }: {
     address: string;
-    token: { name?: string | undefined; logoURI?: string | undefined };
+    token: { name?: string | undefined; logoURI?: string | undefined; symbol?: string | undefined };
     unverified: boolean;
 }) {
     return (
-        <div className="row align-items-end">
+        <div className="row align-items-center">
             {unverified && (
                 <div className="alert alert-warning alert-scam" role="alert">
                     Warning! Token names and logos are not unique. This token may have spoofed its name and logo to look
@@ -214,9 +216,12 @@ function TokenMintHeaderCard({
                 </div>
             </div>
 
-            <div className="col mb-3 ms-n3 ms-md-n2">
+            <div className="col ms-n3 ms-md-n2">
                 <h6 className="header-pretitle">Token</h6>
                 <h2 className="header-title">{token?.name || 'Unknown Token'}</h2>
+                <div className="header-pretitle ms-1 mt-1 no-overflow-with-ellipsis">
+                    {token?.symbol ? token.symbol : 'No Symbol was found'}
+                </div>
             </div>
         </div>
     );
