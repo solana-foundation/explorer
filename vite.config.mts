@@ -8,7 +8,16 @@ const specWorkspace = (name = 'specs') => ({
     name,
     server: {
         deps: {
-            inline: ['@noble', 'change-case', '@react-hook/previous'],
+            inline: [
+                '@noble',
+                'change-case',
+                '@react-hook/previous',
+                '@solana/kit',
+                '@solana/rpc',
+                '@solana/rpc-spec',
+                '@solana/event-target-impl',
+                '@solana/addresses',
+            ],
         },
     },
     setupFiles: ['./test-setup.ts'],
@@ -34,6 +43,7 @@ export default defineConfig({
             '@utils': path.resolve(__dirname, './app/utils'),
             '@validators': path.resolve(__dirname, './app/validators'),
         },
+        conditions: ['browser', 'default'],
     },
     test: {
         coverage: {
