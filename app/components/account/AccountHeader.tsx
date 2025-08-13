@@ -219,7 +219,7 @@ function TokenMintHeaderCard({
             <div className="col ms-n3 ms-md-n2">
                 <h6 className="header-pretitle">Token</h6>
                 <h2 className="header-title">{token?.name || 'Unknown Token'}</h2>
-                <div className="header-pretitle ms-1 mt-1 no-overflow-with-ellipsis">
+                <div className="header-pretitle no-overflow-with-ellipsis">
                     {token?.symbol ? token.symbol : 'No Symbol was found'}
                 </div>
             </div>
