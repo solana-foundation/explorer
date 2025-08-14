@@ -1,3 +1,4 @@
+import { fetch } from 'cross-fetch';
 import useSWRImmutable from 'swr/immutable';
 
 import { isEnvEnabled } from '@/app/utils/env';
