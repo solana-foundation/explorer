@@ -10,7 +10,7 @@ import { program_stats } from '@/src/db/schema';
 const { DUNE_API_KEY, DUNE_PROGRAM_STATS_MV_ID, CRON_SECRET } = process.env;
 
 if (!DUNE_API_KEY || !DUNE_PROGRAM_STATS_MV_ID || !CRON_SECRET) {
-    throw new Error('DUNE_API_KEY, DUNE_PROGRAM_CALLS_MV_ID, CRON_SECRET must be set in environment variables');
+    throw new Error('DUNE_API_KEY, DUNE_PROGRAM_STATS_MV_ID, CRON_SECRET must be set in environment variables');
 }
 
 export async function GET() {
