@@ -621,6 +621,7 @@ function ProgramIdlLink({ tab, address, pubkey }: { tab: Tab; address: string; p
     const anchorProgramPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
+
     if (!idl && !programMetadataIdl) {
         return null;
     }
