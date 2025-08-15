@@ -8,6 +8,7 @@ export function IdlDoc({ docs }: { docs: string[] }) {
     return <p className="text-muted mb-0">{docs.join(' ')}</p>;
 }
 
+// TODO: improve Tooltip. Vurrent version renders additional button element inside another one
 export function IdlDocTooltip({ docs, children }: { docs?: string[]; children: React.ReactNode }) {
     if (!docs?.length) return <>{children}</>;
 

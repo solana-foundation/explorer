@@ -1,7 +1,7 @@
 'use client';
 
 import { FormattedIdl } from './formatters/FormattedIdl';
-import { IdlDoc, IdlDocTooltip } from './IdlDoc';
+import { IdlDoc } from './IdlDoc';
 import { IdlFieldsView } from './IdlFields';
 
 export function IdlPdasView({ data }: { data: FormattedIdl['pdas'] }) {
@@ -26,9 +26,9 @@ export function IdlPdasView({ data }: { data: FormattedIdl['pdas'] }) {
                             <div className="d-flex gap-2 flex-column items-center flex-wrap">
                                 {pda.seeds.map((seed, i) => (
                                     <div key={i} className="d-flex">
-                                        <IdlDocTooltip docs={seed.docs}>
-                                            <IdlFieldsView fieldType={seed} />
-                                        </IdlDocTooltip>
+                                        {/*<IdlDocTooltip docs={seed.docs}>*/}
+                                        <IdlFieldsView fieldType={seed} />
+                                        {/*</IdlDocTooltip>*/}
                                     </div>
                                 ))}
                             </div>

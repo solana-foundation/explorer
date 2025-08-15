@@ -143,6 +143,13 @@ type LegacyIdlType =
     | { generic: string }
     | { definedWithTypeArgs: { name: string; args: LegacyIdlDefinedTypeArg[] } };
 
+// TODO: check IdlType in terms of recursiveness
+type TupleType = 'string'[] | 'u64'[];
+
+type ShankIdlType = { tuple: TupleType };
+
+export type LegacyOrShankIdlType = LegacyIdlType | ShankIdlType;
+
 type LegacyIdlDefinedTypeArg = { generic: string } | { value: string } | { type: LegacyIdlType };
 
 function convertLegacyIdl(legacyIdl: LegacyIdl, programAddress?: string): Idl {
@@ -395,7 +402,7 @@ function convertEventToTypeDef(event: LegacyIdlEvent): IdlTypeDef {
     };
 }
 
-function convertType(type: LegacyIdlType): IdlType {
+function convertType(type: LegacyOrShankIdlType): IdlType {
     if (typeof type === 'string') {
         return type === 'publicKey' ? 'pubkey' : type;
     } else if ('vec' in type) {
@@ -415,6 +422,14 @@ function convertType(type: LegacyIdlType): IdlType {
                 name: type.definedWithTypeArgs.name,
             },
         } as IdlTypeDefined;
+    } else if ('tuple' in type) {
+        // Use generic type to display tuple as it is not covered by IdlType
+        return {
+            defined: {
+                generics: type.tuple.map(t => ({ kind: 'type', type: convertType(t) })),
+                name: `tuple[${type.tuple[0]}]`,
+            },
+        };
     }
     throw new Error(`Unsupported type: ${JSON.stringify(type)}`);
 }
@@ -449,3 +464,5 @@ export function formatIdl(idl: any, programAddress?: string): Idl {
             throw new Error(`IDL spec not supported: ${spec}`);
     }
 }
+
+export const privateConvertType = convertType;
