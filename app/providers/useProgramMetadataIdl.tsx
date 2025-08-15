@@ -13,7 +13,7 @@ const PMP_IDL_ENABLED = isEnvEnabled(process.env.NEXT_PUBLIC_PMP_IDL_ENABLED);
 export function useProgramMetadataIdl(programAddress: string, url: string, cluster: Cluster, useSuspense = false) {
     const { data } = useSWRImmutable(
         `program-metadata-idl-${programAddress}-${url}`,
-        async (): Promise<null | Record<string, unknown>> => {
+        async () => {
             if (!PMP_IDL_ENABLED) {
                 return null;
             }
