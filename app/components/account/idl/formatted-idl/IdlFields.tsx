@@ -40,7 +40,7 @@ export function IdlEnumFieldsView({ variants }: { variants?: string[] }) {
     return (
         <div className="d-flex gap-2 flex-column align-items-start flex-wrap">
             {variants.map((variant, index) => (
-                <span className="badge bg-warning-soft" key={index}>
+                <span className="badge bg-secondary-soft" key={index}>
                     {variant}
                 </span>
             ))}
