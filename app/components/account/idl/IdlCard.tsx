@@ -91,7 +91,7 @@ export function IdlCard({ programId }: { programId: string }) {
 
 function IdlSection({ idl, badge, programId }: { idl: any; badge: React.ReactNode; programId: string }) {
     const [collapsedValue, setCollapsedValue] = useState<boolean | number>(1);
-    const [isRawIdlView, setIsRawIdlView] = useState<boolean>(true);
+    const [isRawIdlView, setIsRawIdlView] = useState<boolean>(false);
     const [searchStr, setSearchStr] = useState<string>('');
 
     const onSearchIdl = useDebounceCallback((str: string) => {
