@@ -1,6 +1,7 @@
 import { address, createSolanaRpc, mainnet } from '@solana/kit';
 import { fetchMetadataFromSeeds, unpackAndFetchData } from '@solana-program/program-metadata';
 import { RootNode } from 'codama';
+import { address, createSolanaRpc, mainnet } from 'web3js-experimental';
 
 export async function getProgramMetadataIdl(programAddress: string, url: string) {
     const rpc = createSolanaRpc(mainnet(url));
