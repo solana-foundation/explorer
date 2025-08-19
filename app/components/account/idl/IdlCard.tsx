@@ -10,10 +10,11 @@ import { Eye } from 'react-feather';
 import ReactJson from 'react-json-view';
 
 import { useProgramMetadataIdl } from '@/app/providers/useProgramMetadataIdl';
-import { getIdlSpecType } from '@/app/utils/convertLegacyIdl';
+import { getIdlSpecKeyType } from '@/app/utils/convertLegacyIdl';
 
 import { DownloadableButton } from '../../common/Downloadable';
 import { IDLBadge } from '../../common/IDLBadge';
+import { ErrorCard } from '../../shared/ErrorCard';
 import { AnchorFormattedIdl, CodamaFormattedIdl } from './formatted-idl/IdlView';
 
 type IdlVariant = 'program-metadata' | 'anchor';
@@ -186,11 +187,18 @@ function IdlRenderer({
         );
     }
 
-    switch (getIdlSpecType(idl)) {
+    const spec = getIdlSpecKeyType(idl);
+    switch (spec) {
         case 'codama':
             return (
                 <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering PMP IDL" />}>
                     <CodamaFormattedIdl idl={idl} searchStr={searchStr} />
+                </ErrorBoundary>
+            );
+        case 'legacy-shank':
+            return (
+                <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering PMP IDL" />}>
+                    <ErrorCard message={`IDL for "${spec}" origin is not currently supported. See the RAW version`} />
                 </ErrorBoundary>
             );
         default:

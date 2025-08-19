@@ -233,6 +233,5 @@ export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
         };
         return formattedIdl;
     }, [idl]);
-
     return formattedIdl;
 }
