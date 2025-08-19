@@ -452,7 +452,7 @@ export type IdlSpec = '0.1.0' | 'legacy' | 'codama';
 
 export function getIdlSpecType(idl: any): IdlSpec {
     if (idl?.standard === 'codama') return 'codama';
-    return idl.metadata?.spec ?? 'legacy';
+    return idl?.metadata?.spec ?? 'legacy';
 }
 
 export type IdlSpecKey = IdlSpec | 'legacy-shank';
