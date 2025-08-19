@@ -90,6 +90,7 @@ export function useAnchorProgram(
             return null;
         }
     }, [idl, programAddress, url]);
+
     return { idl, program };
 }
 
