@@ -1,9 +1,8 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [master, development, feat/program-pages]
-    # TODO: remove feat/program-pages before merging into the target branch
+  push:
+    branches: [feat/program-pages-deployment]
 
 env:
   # cash folder for pnpm_store, nextjs and playwright later on
@@ -11,7 +10,7 @@ env:
   PW_CACHE_FOLDER: ~/.cache/ms-playwright
 
 jobs:
-  Build-And-Test:
+  static-checks:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -65,11 +64,11 @@ jobs:
       - name: Code-style
         run: pnpm format:ci
 
-      - name: Database migration
-        run: NODE_ENV=test pnpm drizzle-kit migrate
-
       - name: Test
         env:
           TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
         run: |
           pnpm test:ci
+
+      - name: Database migration
+        run: NODE_ENV=test pnpm drizzle-kit migrate
