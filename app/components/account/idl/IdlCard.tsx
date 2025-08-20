@@ -198,7 +198,9 @@ function IdlRenderer({
         case 'legacy-shank':
             return (
                 <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering PMP IDL" />}>
-                    <ErrorCard message={`IDL for "${spec}" origin is not currently supported. See the RAW version`} />
+                    <ErrorCard
+                        message={`Right now, we don’t support IDL with the “${spec}” origin. Please use the raw version for details.`}
+                    />
                 </ErrorBoundary>
             );
         default:
