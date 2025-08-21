@@ -997,7 +997,7 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 830,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -1022,7 +1022,7 @@
     "testnet_activation_epoch": 817,
     "devnet_activation_epoch": 921,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 837,
     "description": ""
   },
   {
