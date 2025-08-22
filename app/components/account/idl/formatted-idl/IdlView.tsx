@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { RootNode } from 'codama';
 import { useEffect, useMemo, useState } from 'react';
 
-import { formatExtIdl, getFormattedIdl } from '@/app/utils/convertLegacyIdl';
+import { formatDisplayIdl, getFormattedIdl } from '@/app/utils/convertLegacyIdl';
 
 import { useFormatAnchorIdl } from './formatters/anchor';
 import { useFormatCodamaIdl } from './formatters/codama';
@@ -125,7 +125,7 @@ export function AnchorFormattedIdl({
     programId: string;
     searchStr?: string;
 }) {
-    const formattedIdl = getFormattedIdl(formatExtIdl, idl, programId);
+    const formattedIdl = getFormattedIdl(formatDisplayIdl, idl, programId);
     const anchorFormattedIdl = useFormatAnchorIdl(idl ? formattedIdl : idl);
     const searchResults = useSearchIdl(anchorFormattedIdl, searchStr);
     return <FormattedIdlView idl={searchResults} />;
