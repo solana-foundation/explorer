@@ -195,17 +195,15 @@ function IdlRenderer({
                     <CodamaFormattedIdl idl={idl} searchStr={searchStr} />
                 </ErrorBoundary>
             );
-        case 'legacy-shank':
-            return (
-                <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering PMP IDL" />}>
-                    <ErrorCard
-                        message={`Right now, we don’t support IDL with the “${spec}” origin. Please use the raw version for details.`}
-                    />
-                </ErrorBoundary>
-            );
         default:
             return (
                 <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering Anchor IDL" />}>
+                    {spec === 'legacy-shank' ? (
+                        <ErrorCard
+                            message={`Right now, we don’t support IDL with the “${spec}” origin in full. Some data might be absent.`}
+                        />
+                    ) : null}
+
                     <AnchorFormattedIdl idl={idl} programId={programId} searchStr={searchStr} />
                 </ErrorBoundary>
             );
