@@ -26,9 +26,14 @@ export function useSquadsMultisigLookup(programAuthority: PublicKey | null | und
             if (cluster !== Cluster.MainnetBeta || !programIdString) {
                 return null;
             }
-            const response = await fetch(`${SQUADS_MAP_URL}/${programIdString}`);
-            const data = await response.json();
-            return 'error' in data ? null : (data as SquadsMultisigMapInfo);
+            try {
+                const response = await fetch(`${SQUADS_MAP_URL}/${programIdString}`);
+                const data = await response.json();
+                return 'error' in data ? null : (data as SquadsMultisigMapInfo);
+            } catch (error) {
+                console.error('Error fetching squads information', error);
+                return null;
+            }
         },
         { suspense: true }
     );
