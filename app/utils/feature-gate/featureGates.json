@@ -935,7 +935,7 @@
     "devnet_activation_epoch": 918,
     "comms_required": null,
     "mainnet_activation_epoch": 824,
-    "description": null
+    "description": "Migrates Stake program to Core BPF, reducing client complexity and unifying validator runtime behavior"
   },
   {
     "key": "JE86WkYvTrzW8HgNmrHY7dFYpCmSptUpKupbo2AdQ9cG",
@@ -1023,7 +1023,7 @@
     "devnet_activation_epoch": 921,
     "comms_required": null,
     "mainnet_activation_epoch": 837,
-    "description": ""
+    "description": "Corrects alt-bn128 multiplication input length to 96 bytes, preventing errors and simplifying debugging"
   },
   {
     "key": "F6UVKh1ujTEFK3en2SyAL3cdVnqko1FVEXWhmdLRu6WP",
@@ -1051,7 +1051,7 @@
     "devnet_activation_epoch": 919,
     "comms_required": null,
     "mainnet_activation_epoch": 826,
-    "description": ""
+    "description": "Improves SBPF encoding and arithmetic, simplifying verification and enabling faster big-integer operations"
   },
   {
     "key": "6oMCUgfY6BzZ6jwB681J6ju5Bh6CjVXbd7NeWYqiXBSu",
@@ -1075,7 +1075,7 @@
     "devnet_activation_epoch": 916,
     "comms_required": null,
     "mainnet_activation_epoch": 823,
-    "description": ""
+    "description": "Raises block limits to 60M CUs, expanding network capacity for more transactions"
   },
   {
     "key": "sProgVaNWkYdP2eTRAy1CPrgb3b9p8yXCASrPEqo6VJ",
