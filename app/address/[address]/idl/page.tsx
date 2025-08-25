@@ -1,27 +1,18 @@
-import { LoadingCard } from '@components/common/LoadingCard';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
-import { Suspense } from 'react';
+import { ComponentProps } from 'react';
 
-import { IdlCard } from '@/app/components/account/idl/IdlCard';
+import { withSentryTraceData } from '@/app/utils/with-sentry-trace-data';
 
-type Props = Readonly<{
-    params: {
-        address: string;
-    };
-}>;
+import IdlPageClient from './page-client';
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
-    return {
+    return withSentryTraceData({
         description: `The Interface Definition Language (IDL) file for the program at address ${props.params.address} on Solana`,
         title: `Program IDL | ${await getReadableTitleFromAddress(props)} | Solana`,
-    };
+    });
 }
 
-export default function ProgramIDLPage({ params: { address } }: Props) {
-    return (
-        <Suspense fallback={<LoadingCard message="Loading program IDL" />}>
-            <IdlCard programId={address} />
-        </Suspense>
-    );
+export default function ProgramIDLPage(props: ComponentProps<typeof IdlPageClient>) {
+    return <IdlPageClient {...props} />;
 }
