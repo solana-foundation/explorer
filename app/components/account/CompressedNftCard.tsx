@@ -36,6 +36,12 @@ export function CompressedNftCard({ account }: { account: Account }) {
                     </td>
                 </tr>
                 <tr>
+                    <td>Owner</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={new PublicKey(compressedNft.ownership.owner)} alignRight link />
+                    </td>
+                </tr>
+                <tr>
                     <td>Verified Collection Address</td>
                     <td className="text-lg-end">
                         {collectionGroup ? (

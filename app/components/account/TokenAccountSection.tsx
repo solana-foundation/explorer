@@ -272,6 +272,12 @@ function NonFungibleTokenMintAccountCard({
                         <Address pubkey={account.pubkey} alignRight raw />
                     </td>
                 </tr>
+                <tr>
+                    <td>Owner</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={account.owner} alignRight link />
+                    </td>
+                </tr>
                 {nftData.editionInfo.masterEdition?.maxSupply && (
                     <tr>
                         <td>Max Total Supply</td>
