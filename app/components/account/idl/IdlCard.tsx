@@ -14,7 +14,6 @@ import { getIdlSpecKeyType } from '@/app/utils/convertLegacyIdl';
 
 import { DownloadableButton } from '../../common/Downloadable';
 import { IDLBadge } from '../../common/IDLBadge';
-import { ErrorCard } from '../../shared/ErrorCard';
 import { AnchorFormattedIdl, CodamaFormattedIdl } from './formatted-idl/IdlView';
 
 type IdlVariant = 'program-metadata' | 'anchor';
@@ -199,9 +198,7 @@ function IdlRenderer({
             return (
                 <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering Anchor IDL" />}>
                     {spec === 'legacy-shank' ? (
-                        <ErrorCard
-                            message={`Right now, we don’t support IDL with the “${spec}” origin in full. Some data might be absent.`}
-                        />
+                        <div className="my-2">{`Note: Shank IDLs are not fully supported. Unused types may be absent from detailed view.`}</div>
                     ) : null}
 
                     <AnchorFormattedIdl idl={idl} programId={programId} searchStr={searchStr} />
