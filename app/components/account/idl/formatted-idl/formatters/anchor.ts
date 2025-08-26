@@ -166,7 +166,7 @@ export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
                 docs: (constant as any).docs || [],
                 name: constant.name,
                 type: parseIdlType(constant.type),
-                value: JSON.parse(constant.value),
+                value: constant.value, // we can expect any value here, even not JSON-compat one
             })),
             errors: idl.errors?.map(err => ({
                 code: err.code.toString(),
