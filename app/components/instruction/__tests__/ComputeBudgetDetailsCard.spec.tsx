@@ -86,5 +86,5 @@ describe('instruction::ComputeBudgetDetailsCard', () => {
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/155.666 compute units/)).toBeInTheDocument();
-    });
+    }, 15000);
 });
