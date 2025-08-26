@@ -162,12 +162,21 @@ export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
                     name: acc.name,
                 };
             }),
-            constants: idl.constants?.map(constant => ({
-                docs: (constant as any).docs || [],
-                name: constant.name,
-                type: parseIdlType(constant.type),
-                value: constant.value, // we can expect any value here, even not JSON-compat one
-            })),
+            constants: idl.constants?.map(constant => {
+                let maybeValue = constant.value;
+                try {
+                    maybeValue = JSON.parse(constant.value);
+                } catch (e) {
+                    console.error(`Can not parse constant: ${constant.name}`, e);
+                }
+
+                return {
+                    docs: (constant as any).docs || [],
+                    name: constant.name,
+                    type: parseIdlType(constant.type),
+                    value: maybeValue,
+                };
+            }),
             errors: idl.errors?.map(err => ({
                 code: err.code.toString(),
                 message: err.msg || '',

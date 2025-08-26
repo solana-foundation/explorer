@@ -14,13 +14,13 @@ export function IdlConstantsView({ data }: { data?: FormattedIdl['constants'] })
                 </tr>
             </thead>
             <tbody className="list">
-                {data.map(err => (
-                    <tr key={err.name}>
-                        <td>{err.name}</td>
+                {data.map(constant => (
+                    <tr key={constant.name}>
+                        <td>{constant.name}</td>
                         <td>
                             <div className="d-flex gap-2 align-items-center">
-                                <span>{err.value}:</span>
-                                <span className="badge bg-success-soft">{err.type}</span>
+                                <span>{JSON.stringify(constant.value, undefined, 2)}:</span>
+                                <span className="badge bg-success-soft">{constant.type}</span>
                             </div>
                         </td>
                     </tr>
