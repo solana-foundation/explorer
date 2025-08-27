@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 20
 
     env:
-      DATABASE_URL: ${{ vars.DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
       DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
       DUNE_PROGRAM_STATS_MV_ID: ${{ vars.DUNE_PROGRAM_STATS_MV_ID }}
       DUNE_PROGRAM_CALLS_MV_ID: ${{ vars.DUNE_PROGRAM_CALLS_MV_ID }}
@@ -71,4 +71,7 @@ jobs:
           pnpm test:ci
 
       - name: Database migration
-        run: NODE_ENV=test pnpm drizzle-kit migrate
+        run: NODE_ENV=production pnpm drizzle-kit migrate
+
+      - name: Trigger Vercel Deploy
+        run: curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}"

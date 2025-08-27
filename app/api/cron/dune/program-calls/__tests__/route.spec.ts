@@ -33,16 +33,38 @@ vi.mock('@/app/components/instruction/codama/getProgramMetadataIdl', () => ({
 // Mock programs map
 vi.mock('@/app/utils/programs', () => ({ PROGRAM_INFO_BY_ID: {} }));
 
+// Mock cluster utils
+vi.mock('@/app/utils/cluster', () => ({
+    Cluster: { MainnetBeta: 'mainnet-beta' },
+    serverClusterUrl: vi.fn().mockReturnValue('https://api.mainnet-beta.solana.com'),
+}));
+
 // Mock DB transaction and tables
 const mockExecute = vi.fn().mockResolvedValue(undefined);
+
+// Mock schema tables
+vi.mock('@/src/db/schema', () => ({
+    program_call_stats: {},
+    quicknode_stream_cpi_program_calls: {},
+}));
+
+// Mock drizzle-orm functions
+vi.mock('drizzle-orm', () => ({
+    lte: vi.fn().mockReturnValue({}),
+}));
 
 vi.mock('@/src/db/drizzle', () => {
     return {
         db: {
             transaction: vi.fn(async (cb: any) => {
                 const tx = {
-                    delete: () => ({ execute: mockExecute }),
-                    insert: () => ({ values: () => ({ execute: mockExecute }) }),
+                    delete: () => ({
+                        execute: mockExecute,
+                        where: () => ({ execute: mockExecute }),
+                    }),
+                    insert: () => ({
+                        values: () => ({ execute: mockExecute }),
+                    }),
                 } as any;
                 await cb(tx);
             }),
@@ -108,7 +130,9 @@ describe('GET /api/cron/dune/program-calls', () => {
                 rows: [
                     {
                         address: 'Caller1',
+                        block_slot: '123456',
                         calls_number: 42,
+                        created_at: '2024-01-01T00:00:00Z',
                         program_address: 'Prog1',
                         program_description: 'desc',
                         program_name: 'fallbackName',

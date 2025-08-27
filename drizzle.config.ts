@@ -1,10 +1,12 @@
 import { config } from 'dotenv';
 import { defineConfig } from 'drizzle-kit';
 
-if (process.env.NODE_ENV === 'development') {
-    config({ path: '.env.local' });
-} else {
-    config({ path: '.env' });
+if (!process.env.CI) {
+    if (process.env.NODE_ENV === 'development') {
+        config({ path: '.env.local' });
+    } else {
+        config({ path: '.env' });
+    }
 }
 
 export default defineConfig({

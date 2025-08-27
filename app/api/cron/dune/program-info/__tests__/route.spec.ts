@@ -24,6 +24,11 @@ vi.mock('@duneanalytics/client-sdk', () => {
     };
 });
 
+// Mock schema tables
+vi.mock('@/src/db/schema', () => ({
+    program_stats: {},
+}));
+
 // Mock DB transaction and tables
 const mockExecute = vi.fn().mockResolvedValue(undefined);
 vi.mock('@/src/db/drizzle', () => {

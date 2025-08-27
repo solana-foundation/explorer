@@ -5,27 +5,61 @@ let mockResultRows: any[] = [];
 let capturedLimit: number | undefined;
 let capturedOffset: number | undefined;
 
+// Mock schema tables
+vi.mock('@/src/db/schema', () => ({
+    program_call_stats: {
+        address: { name: 'address' },
+        calls_number: { name: 'calls_number' },
+        createdAt: { name: 'createdAt' },
+        description: { name: 'description' },
+        name: { name: 'name' },
+        program_address: { name: 'program_address' },
+    },
+    quicknode_stream_cpi_program_calls_mv: {
+        callerProgramAddress: { name: 'caller_program_address' },
+        callsNumber: { name: 'calls_number' },
+        programAddress: { name: 'program_address' },
+    },
+}));
+
+// Mock drizzle-orm functions
+vi.mock('drizzle-orm', () => ({
+    desc: vi.fn().mockReturnValue({}),
+    eq: vi.fn().mockReturnValue({}),
+    sql: vi.fn().mockImplementation((_: any) => ({ name: 'sql_expression' })),
+}));
+
+// Mock drizzle-orm/pg-core
+vi.mock('drizzle-orm/pg-core', () => ({
+    unionAll: vi.fn().mockReturnValue({ as: vi.fn().mockReturnValue({}) }),
+}));
+
 vi.mock('@/src/db/drizzle', () => {
-    const chain: any = {
+    const createChain = () => ({
         _limit: undefined as number | undefined,
         _offset: undefined as number | undefined,
         _rows: () => mockResultRows,
+        as: vi.fn().mockReturnValue({}),
         from: vi.fn().mockReturnThis(),
+        groupBy: vi.fn().mockReturnThis(),
         limit: vi.fn().mockImplementation((n: number) => {
             capturedLimit = n;
-            chain._limit = n;
-            return chain;
+            return createChain();
         }),
         offset: vi.fn().mockImplementation((n: number) => {
             capturedOffset = n;
-            chain._offset = n;
-            return Promise.resolve(chain._rows());
+            return Promise.resolve(mockResultRows);
         }),
         orderBy: vi.fn().mockReturnThis(),
         select: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
+    });
+
+    const db = {
+        select: vi.fn().mockImplementation(() => createChain()),
     };
-    return { db: chain };
+
+    return { db };
 });
 
 // Mock error response helper
