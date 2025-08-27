@@ -11,7 +11,11 @@ const buildManifest = () => {
     return;
   }
 
-  fs.copyFileSync('.next/build-manifest.json', '.next/build-manifest.temp.json');
+  try {
+    fs.copyFileSync('.next/build-manifest.json', '.next/build-manifest.temp.json');
+  } catch (err) {
+    console.error('Error creating backup of build-manifest.json:', err);
+  }
 
   buildMeta.pages = {
     ...buildMeta.pages,

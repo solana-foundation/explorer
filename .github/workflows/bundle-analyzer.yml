@@ -35,7 +35,7 @@ jobs:
                   cache: 'pnpm'
 
             - name: Setup pnpm config
-              run: pnpm config set store-dir $PNPM_CACHE_FOLDER
+              run: pnpm config set store-dir $PW_CACHE_FOLDER
 
             - name: Setup Cache
               uses: actions/cache@v4
