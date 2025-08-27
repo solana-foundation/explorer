@@ -37,7 +37,7 @@ function PageRenderer({
     );
 }
 
-export default function IdlPageCilient({ params: { address } }: Props) {
+export default function IdlPageClient({ params: { address } }: Props) {
     return <PageRenderer address={address} renderComponent={IdlRenderComponent} />;
 }
 

@@ -4,7 +4,7 @@ import { ComponentProps } from 'react';
 
 import { withSentryTraceData } from '@/app/utils/with-sentry-trace-data';
 
-import IdlPageCilient from './page-client';
+import IdlPageClient from './page-client';
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
     return withSentryTraceData({
@@ -13,6 +13,6 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
     });
 }
 
-export default function ProgramIDLPage(props: ComponentProps<typeof IdlPageCilient>) {
-    return <IdlPageCilient {...props} />;
+export default function ProgramIDLPage(props: ComponentProps<typeof IdlPageClient>) {
+    return <IdlPageClient {...props} />;
 }
