@@ -16,7 +16,9 @@
         "test:sb": "vitest --project storybook --watch",
         "test:ci": "vitest --project specs run",
         "sb": "storybook dev -p 6006",
-        "build-sb": "storybook build"
+        "build-sb": "storybook build",
+        "build-manifest": "node scripts/build-manifest.js",
+        "reset-manifest": "node scripts/reset-manifest.js"
     },
     "dependencies": {
         "@blockworks-foundation/mango-client": "^3.6.7",
