@@ -7,11 +7,11 @@
         },
         {
             "path": "/api/cron/dune/program-calls",
-            "schedule": "0 */12 * * *"
+            "schedule": "0 */3 * * *"
         },
         {
             "path": "/api/cron/quicknode/program-calls",
-            "schedule": "*/10 * * * * *"
+            "schedule": "*/1 * * * *"
         }
     ]
 }

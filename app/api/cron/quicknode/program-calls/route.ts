@@ -19,12 +19,36 @@ export async function GET() {
         return respondWithError(401);
     }
 
+    let counter = 0;
+
+    const refresh = async () => {
+        try {
+            await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY public.quicknode_stream_cpi_program_calls_mv;`);
+        } catch (err) {
+            Logger.error(err as Error);
+            throw err;
+        }
+    };
+
     try {
-        await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY public.quicknode_stream_cpi_program_calls_mv;`);
-    } catch (error) {
-        Logger.error(error);
+        await refresh();
+    } catch {
         return respondWithError(500);
     }
+    counter++;
+    const intervalId = setInterval(async () => {
+        counter++;
+        if (counter >= 7) {
+            clearInterval(intervalId);
+            return;
+        }
+        try {
+            await refresh();
+        } catch (err) {
+            Logger.error(err as Error);
+            clearInterval(intervalId);
+        }
+    }, 5000);
 
     return NextResponse.json({ ok: true });
 }
