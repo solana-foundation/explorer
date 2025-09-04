@@ -7,9 +7,9 @@ import Logger from '@/app/utils/logger';
 import { db } from '@/src/db/drizzle';
 import { program_call_stats, quicknode_stream_cpi_program_calls_mv } from '@/src/db/schema';
 
-const CACHE_DURATION = 10 * 60; // 10 minutes
+const CACHE_DURATION = 5;
 const CACHE_HEADERS = {
-    'Cache-Control': `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=60`,
+    'Cache-Control': `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=2`,
 };
 
 type Params = {
