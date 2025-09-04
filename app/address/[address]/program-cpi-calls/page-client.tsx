@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 
 import { ErrorCard } from '@/app/components/common/ErrorCard';
 import { withSentry } from '@/app/entities/error-boundary/ui/ErrorBoundary';
+import { ProgramCpiCalls } from '@/app/features/program-cpi-calls';
 
 type Params = Readonly<{
     params: {
@@ -23,7 +24,7 @@ const PageRenderer = withSentry(ProgramCpiCallsRenderComponent, {
 function ProgramCpiCallsRenderComponent({ address }: { address: string }) {
     return (
         <Suspense fallback={<LoadingCard message="Loading program CPI calls" />}>
-            <div>program cpi calls {address}</div>
+            <ProgramCpiCalls address={address} />
         </Suspense>
     );
 }
