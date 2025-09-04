@@ -391,7 +391,8 @@ export type MoreTabs =
     | 'program-multisig'
     | 'feature-gate'
     | 'token-extensions'
-    | 'attestation';
+    | 'attestation'
+    | 'program-cpi-calls';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -557,6 +558,20 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
         tab: programMultisigTab,
     });
 
+    const programCpiCallsTab: Tab = {
+        path: 'program-cpi-calls',
+        slug: 'program-cpi-calls',
+        title: 'Program CPI Calls',
+    };
+    tabComponents.push({
+        component: (
+            <React.Suspense key={programCpiCallsTab.slug} fallback={<></>}>
+                <ProgramCpiCallsLink tab={programCpiCallsTab} address={pubkey.toString()} />
+            </React.Suspense>
+        ),
+        tab: programCpiCallsTab,
+    });
+
     // Add extensions tab for Token Extensions program accounts
     if (account.owner.toBase58() === TOKEN_2022_PROGRAM_ADDRESS) {
         const extensionsTab: Tab = {
@@ -717,6 +732,20 @@ function ProgramMultisigLink({
     return (
         <li key={tab.slug} className="nav-item">
             <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath}>
+                {tab.title}
+            </Link>
+        </li>
+    );
+}
+
+function ProgramCpiCallsLink({ tab, address }: { tab: Tab; address: string }) {
+    const accountDataPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
+    const selectedLayoutSegment = useSelectedLayoutSegment();
+    const isActive = selectedLayoutSegment === tab.path;
+
+    return (
+        <li key={tab.slug} className="nav-item">
+            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={accountDataPath}>
                 {tab.title}
             </Link>
         </li>

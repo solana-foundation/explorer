@@ -3,28 +3,27 @@
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Suspense } from 'react';
 
-import { IdlCard } from '@/app/components/account/IdlCard';
 import { ErrorCard } from '@/app/components/common/ErrorCard';
 import { withSentry } from '@/app/entities/error-boundary/ui/ErrorBoundary';
 
-type Props = Readonly<{
+type Params = Readonly<{
     params: {
         address: string;
     };
 }>;
 
-export default function IdlPageClient({ params: { address } }: Props) {
+export default function ProgramCpiCallsClient({ params: { address } }: Params) {
     return <PageRenderer address={address} />;
 }
 
-const PageRenderer = withSentry(IdlRenderComponent, {
+const PageRenderer = withSentry(ProgramCpiCallsRenderComponent, {
     fallbackRender: ({ error }) => <ErrorCard text={`Failed to load: ${error.message}`} />,
 });
 
-function IdlRenderComponent({ address }: { address: string }) {
+function ProgramCpiCallsRenderComponent({ address }: { address: string }) {
     return (
-        <Suspense fallback={<LoadingCard message="Loading program IDL" />}>
-            <IdlCard programId={address} />
+        <Suspense fallback={<LoadingCard message="Loading program CPI calls" />}>
+            <div>program cpi calls {address}</div>
         </Suspense>
     );
 }
