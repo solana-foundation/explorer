@@ -95,14 +95,17 @@ export async function GET(request: Request, { params: { address } }: Params) {
         return respondWithError(500);
     }
 
-    return NextResponse.json({
-        data,
-        pagination: {
-          totalPages,
-          limit,
-          offset
+    return NextResponse.json(
+        {
+            data,
+            pagination: {
+                limit,
+                offset,
+                totalPages,
+            },
         },
-      }, {
-        headers: CACHE_HEADERS,
-    });
+        {
+            headers: CACHE_HEADERS,
+        }
+    );
 }

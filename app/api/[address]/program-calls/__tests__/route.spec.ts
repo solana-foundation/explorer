@@ -52,10 +52,10 @@ vi.mock('@/src/db/drizzle', () => {
         }),
         orderBy: vi.fn().mockReturnThis(),
         select: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
         then: vi.fn().mockImplementation((resolve: any) => {
             resolve(mockResultRows);
         }),
+        where: vi.fn().mockReturnThis(),
     });
 
     const createCountChain = (): any => ({
@@ -126,9 +126,9 @@ describe('GET /api/[address]/program-calls', () => {
         const response = await res.json();
         expect(response.data).toEqual(mockResultRows);
         expect(response.pagination).toEqual({
-            totalPages: 0,
             limit: 10,
-            offset: 5
+            offset: 5,
+            totalPages: 0,
         });
 
         expect(capturedLimit).toBe(10);
@@ -150,9 +150,9 @@ describe('GET /api/[address]/program-calls', () => {
         const response = await res.json();
         expect(response.data).toEqual([]);
         expect(response.pagination).toEqual({
-            totalPages: 0,
             limit: 50,
-            offset: 0
+            offset: 0,
+            totalPages: 0,
         });
     });
 
