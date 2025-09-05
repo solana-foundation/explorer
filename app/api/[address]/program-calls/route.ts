@@ -40,6 +40,7 @@ export async function GET(request: Request, { params: { address } }: Params) {
     let dune_data;
     let quicknode_data;
     let unionSub;
+    let totalPages;
     try {
         dune_data = db
             .select({
@@ -81,12 +82,27 @@ export async function GET(request: Request, { params: { address } }: Params) {
             .orderBy(desc(sql`SUM(${unionSub.calls_number})`))
             .limit(limit)
             .offset(offset);
+
+        const [{ total }] = await db
+            .select({
+                total: sql<number>`COUNT(DISTINCT (${unionSub.address}, ${unionSub.program_address}))`,
+            })
+            .from(unionSub);
+
+        totalPages = limit ? Math.ceil(total / limit) : 0;
     } catch (error) {
         Logger.error(error);
         return respondWithError(500);
     }
 
-    return NextResponse.json(data, {
+    return NextResponse.json({
+        data,
+        pagination: {
+          totalPages,
+          limit,
+          offset
+        },
+      }, {
         headers: CACHE_HEADERS,
     });
 }

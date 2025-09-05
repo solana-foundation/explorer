@@ -35,7 +35,7 @@ vi.mock('drizzle-orm/pg-core', () => ({
 }));
 
 vi.mock('@/src/db/drizzle', () => {
-    const createChain = () => ({
+    const createChain = (): any => ({
         _limit: undefined as number | undefined,
         _offset: undefined as number | undefined,
         _rows: () => mockResultRows,
@@ -48,15 +48,32 @@ vi.mock('@/src/db/drizzle', () => {
         }),
         offset: vi.fn().mockImplementation((n: number) => {
             capturedOffset = n;
-            return Promise.resolve(mockResultRows);
+            return createChain();
         }),
         orderBy: vi.fn().mockReturnThis(),
         select: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
+        then: vi.fn().mockImplementation((resolve: any) => {
+            resolve(mockResultRows);
+        }),
+    });
+
+    const createCountChain = (): any => ({
+        from: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        then: vi.fn().mockImplementation((resolve: any) => {
+            resolve([{ total: 0 }]);
+        }),
     });
 
     const db = {
-        select: vi.fn().mockImplementation(() => createChain()),
+        select: vi.fn().mockImplementation((selectFields: any) => {
+            // Check if this is a count query by looking for 'total' in the select fields
+            if (selectFields && typeof selectFields === 'object' && 'total' in selectFields) {
+                return createCountChain();
+            }
+            return createChain();
+        }),
     };
 
     return { db };
@@ -78,6 +95,11 @@ vi.mock('@/app/utils/logger', () => ({
 async function importRoute() {
     return await import('../route');
 }
+
+beforeEach(() => {
+    // Reset query count for the mock
+    vi.resetModules();
+});
 
 afterEach(() => {
     vi.clearAllMocks();
@@ -101,8 +123,13 @@ describe('GET /api/[address]/program-calls', () => {
         expect(res.status).toBe(200);
         expect(res.headers.get('cache-control')).toBe('public, s-maxage=5, stale-while-revalidate=2');
 
-        const data = await res.json();
-        expect(data).toEqual(mockResultRows);
+        const response = await res.json();
+        expect(response.data).toEqual(mockResultRows);
+        expect(response.pagination).toEqual({
+            totalPages: 0,
+            limit: 10,
+            offset: 5
+        });
 
         expect(capturedLimit).toBe(10);
         expect(capturedOffset).toBe(5);
@@ -119,6 +146,14 @@ describe('GET /api/[address]/program-calls', () => {
         expect(res.status).toBe(200);
         expect(capturedLimit).toBe(50);
         expect(capturedOffset).toBe(0);
+
+        const response = await res.json();
+        expect(response.data).toEqual([]);
+        expect(response.pagination).toEqual({
+            totalPages: 0,
+            limit: 50,
+            offset: 0
+        });
     });
 
     it('handles invalid limit parameter gracefully', async () => {
