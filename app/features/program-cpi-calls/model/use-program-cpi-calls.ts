@@ -10,8 +10,8 @@ export interface ProgramCallData {
     address: string;
     calls_number: number;
     createdAt: string;
-    description: string | null;
-    name: string | null;
+    description: string | 'None';
+    name: string | 'None';
     program_address: string;
 }
 

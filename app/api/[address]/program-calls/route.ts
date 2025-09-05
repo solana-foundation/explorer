@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 
 import { respondWithError } from '@/app/api/shared/errors';
 import Logger from '@/app/utils/logger';
+import { SentryLogger } from '@/app/utils/logger-sentry';
 import { db } from '@/src/db/drizzle';
 import { program_call_stats, quicknode_stream_cpi_program_calls_mv } from '@/src/db/schema';
 
@@ -92,6 +93,7 @@ export async function GET(request: Request, { params: { address } }: Params) {
         totalPages = limit ? Math.ceil(total / limit) : 0;
     } catch (error) {
         Logger.error(error);
+        SentryLogger.error(error);
         return respondWithError(500);
     }
 

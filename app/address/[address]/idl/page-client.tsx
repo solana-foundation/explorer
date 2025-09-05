@@ -3,7 +3,7 @@
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Suspense } from 'react';
 
-import { IdlCard } from '@/app/components/account/IdlCard';
+import { IdlCard } from '@/app/components/account/idl/IdlCard';
 import { ErrorCard } from '@/app/components/common/ErrorCard';
 import { withSentry } from '@/app/entities/error-boundary/ui/ErrorBoundary';
 

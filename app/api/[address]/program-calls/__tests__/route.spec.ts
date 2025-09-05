@@ -91,6 +91,13 @@ vi.mock('@/app/utils/logger', () => ({
     },
 }));
 
+// Mock logger
+vi.mock('@/app/utils/logger-sentry', () => ({
+    SentryLogger: {
+        error: vi.fn(),
+    },
+}));
+
 // Import dynamically inside tests so mocks are applied before module load
 async function importRoute() {
     return await import('../route');
@@ -192,6 +199,7 @@ describe('GET /api/[address]/program-calls', () => {
     it('logs errors when they occur', async () => {
         const { GET } = await importRoute();
         const Logger = (await import('@/app/utils/logger')).default;
+        const Sentry = (await import('@/app/utils/logger-sentry')).SentryLogger;
 
         // Mock db chain to throw error
         const { db } = await import('@/src/db/drizzle');
@@ -203,5 +211,6 @@ describe('GET /api/[address]/program-calls', () => {
         await GET(request, { params: { address: 'Prog1' } });
 
         expect(Logger.error).toHaveBeenCalledWith(expect.any(Error));
+        expect(Sentry.error).toHaveBeenCalledWith(expect.any(Error));
     });
 });
