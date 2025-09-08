@@ -10,7 +10,7 @@ export function CpiCallsCardFooter({
     return (
         <div className="card-footer">
             {foundOldest ? (
-                <div className="text-muted text-center">Fetched full history</div>
+                <div className="text-muted text-center">There is no more data</div>
             ) : (
                 <button className="btn btn-primary w-100" onClick={() => loadMore()} disabled={fetching}>
                     {fetching ? (

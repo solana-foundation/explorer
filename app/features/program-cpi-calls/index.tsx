@@ -1,12 +1,12 @@
-import { PublicKey } from '@solana/web3.js';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { Provider as JotaiProvider } from 'jotai';
-import { useMemo } from 'react';
+import { Provider as JotaiProvider, useAtomValue, useSetAtom } from 'jotai';
+import { useCallback } from 'react';
 
-import { store as paginationStore } from './model/pagination-state';
 import { queryClient } from './model/query-client';
+import { programCpiCallsAtom, store as paginationStore } from './model/state';
+import { usePagination } from './model/use-pagiantion';
 import { useProgramCpiCalls } from './model/use-program-cpi-calls';
-import { type CpiCallRecord,ProgramCpiCallsView } from './ui/ProgramCpiCallsView';
+import { ProgramCpiCallsView } from './ui/ProgramCpiCallsView';
 
 export function ProgramCpiCalls({ address }: { address: string }) {
     return (
@@ -19,23 +19,43 @@ export function ProgramCpiCalls({ address }: { address: string }) {
 }
 
 function BaseProgramCpiCalls({ address }: { address: string }) {
-    const { data, isLoading, error } = useProgramCpiCalls({
-        address,
-        limit: 20,
-        offset: 0,
-    });
+    const pagination = usePagination();
+    const records = useAtomValue(programCpiCallsAtom);
+    const setRecords = useSetAtom(programCpiCallsAtom);
 
-    console.log({ data, error, isLoading });
+    const { isLoading, isPending, error, refetch } = useProgramCpiCalls(
+        {
+            address,
+            limit: pagination.limit,
+            offset: pagination.offset,
+        },
+        {
+            onSuccess: data => {
+                pagination.setTotal(data.pagination.totalPages * data.pagination.limit);
+            },
+        }
+    );
 
-    const records = useMemo(() => {
-        if (!data) return undefined;
-        return data.map<CpiCallRecord>(({ address, calls_number, description, name }) => ({
-            address: new PublicKey(address),
-            calls: calls_number,
-            description,
-            name,
-        }));
-    }, [data]);
+    const handleLoadNextPage = useCallback(() => {
+        pagination.nextPage();
+    }, [pagination]);
 
-    return <ProgramCpiCallsView records={records} isLoading={isLoading} />;
+    const handleRefresh = useCallback(async () => {
+        setRecords([]);
+        pagination.reset();
+        await queryClient.invalidateQueries({ queryKey: ['program-cpi-calls', address] });
+        refetch();
+    }, [address, pagination, refetch, setRecords]);
+
+    return (
+        <ProgramCpiCallsView
+            error={error}
+            records={records}
+            isLoading={isLoading}
+            isPending={isPending}
+            foundLatest={!pagination.hasNextPage}
+            onLoadNextPage={handleLoadNextPage}
+            onRefresh={handleRefresh}
+        />
+    );
 }

@@ -46,6 +46,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
 import useSWRImmutable from 'swr/immutable';
 
+import { ENABLED_PROGRAMS_FOR_CPI_CALLS } from '@/app/api/shared/constants';
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
@@ -558,19 +559,22 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
         tab: programMultisigTab,
     });
 
-    const programCpiCallsTab: Tab = {
-        path: 'program-cpi-calls',
-        slug: 'program-cpi-calls',
-        title: 'Program CPI Calls',
-    };
-    tabComponents.push({
-        component: (
-            <React.Suspense key={programCpiCallsTab.slug} fallback={<></>}>
-                <ProgramCpiCallsLink tab={programCpiCallsTab} address={pubkey.toString()} />
-            </React.Suspense>
-        ),
-        tab: programCpiCallsTab,
-    });
+    // Render Program CPI Calls tab only for specific programs
+    if (ENABLED_PROGRAMS_FOR_CPI_CALLS.includes(pubkey.toBase58())) {
+        const programCpiCallsTab: Tab = {
+            path: 'program-cpi-calls',
+            slug: 'program-cpi-calls',
+            title: 'Program CPI Calls',
+        };
+        tabComponents.push({
+            component: (
+                <React.Suspense key={programCpiCallsTab.slug} fallback={<></>}>
+                    <ProgramCpiCallsLink tab={programCpiCallsTab} address={pubkey.toString()} />
+                </React.Suspense>
+            ),
+            tab: programCpiCallsTab,
+        });
+    }
 
     // Add extensions tab for Token Extensions program accounts
     if (account.owner.toBase58() === TOKEN_2022_PROGRAM_ADDRESS) {

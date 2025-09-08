@@ -1,10 +1,11 @@
 'use client';
 
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useSetAtom } from 'jotai';
 
-const REFETCH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes in milliseconds
-const INITIAL_LIMIT = 50;
-const INITIAL_OFFSET = 0;
+import { programCpiCallsAtom } from './state';
+
+const REFETCH_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes in milliseconds
 
 export interface ProgramCallData {
     address: string;
@@ -15,15 +16,24 @@ export interface ProgramCallData {
     program_address: string;
 }
 
+export interface PagesPaginationWrappper<T extends ProgramCallData> {
+    data: Array<T>;
+    pagination: { limit: number; offset: number; totalPages: number };
+}
+
 export interface ProgramCpiCallsParams {
     address: string;
-    limit?: number;
-    offset?: number;
+    limit: number;
+    offset: number;
 }
 
 export interface UseProgramCpiCallsOptions {
     enabled?: boolean;
-    queryOptions?: Omit<UseQueryOptions<ProgramCallData[], Error>, 'queryKey' | 'queryFn' | 'staleTime'>;
+    queryOptions?: Omit<
+        UseQueryOptions<PagesPaginationWrappper<ProgramCallData>, Error>,
+        'queryKey' | 'queryFn' | 'staleTime'
+    >;
+    onSuccess?: (data: PagesPaginationWrappper<ProgramCallData>) => void;
 }
 
 /**
@@ -34,11 +44,12 @@ export interface UseProgramCpiCallsOptions {
  * @returns Query result with program CPI calls data
  */
 export function useProgramCpiCalls(params: ProgramCpiCallsParams, options: UseProgramCpiCallsOptions = {}) {
-    const { address, limit = INITIAL_LIMIT, offset = INITIAL_OFFSET } = params;
-    const { enabled = true, queryOptions = {} } = options;
+    const { address, limit, offset } = params;
+    const { enabled = true, queryOptions = {}, onSuccess } = options;
+    const setRecords = useSetAtom(programCpiCallsAtom);
     const queryKey = ['program-cpi-calls', address, limit, offset];
 
-    return useQuery<ProgramCallData[], Error>({
+    const { data: records, ...rest } = useQuery({
         enabled,
         queryFn: async () => {
             // Build URL with query parameters
@@ -53,10 +64,32 @@ export function useProgramCpiCalls(params: ProgramCpiCallsParams, options: UsePr
                 throw new Error(`Failed to fetch program CPI calls: ${response.statusText}`);
             }
 
-            return response.json();
+            let data: PagesPaginationWrappper<ProgramCallData>;
+            try {
+                data = await response.json();
+            } catch (_e) {
+                throw new Error('Could not fetch CPI calls data');
+            }
+
+            setRecords(prev => {
+                // If offset is 0, we're starting fresh (either initial load or refresh)
+                // Otherwise, we're paginating and should append
+                if (offset === 0) {
+                    return data.data;
+                }
+                return [...prev, ...data.data];
+            });
+
+            onSuccess?.(data);
+
+            return data;
         },
         queryKey,
         staleTime: REFETCH_INTERVAL_MS,
         ...queryOptions,
     });
+
+    if (!records) return { data: undefined, ...rest };
+
+    return { data: records.data, pagination: records.pagination, ...rest };
 }
