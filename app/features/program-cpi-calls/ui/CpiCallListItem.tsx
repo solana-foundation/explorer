@@ -1,6 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 
 import { Address } from '@/app/components/common/Address';
+import { PROGRAM_INFO_BY_ID } from '@/app/utils/programs';
 
 type Item = {
     address: PublicKey;
@@ -9,15 +10,21 @@ type Item = {
     name: string;
 };
 
+function getProgramInfo(address: string) {
+    return PROGRAM_INFO_BY_ID[address];
+}
+
 export function CpiCallListItem({ record }: { record: Item }) {
+    const programInfo = getProgramInfo(record.address.toBase58());
     return (
         <tr>
-            <td className="w-1 text-capitalize">{record.name}</td>
-            <td>{record.description === 'None' ? '\u2014' : record.description}</td>
-            <td>
-                <Address pubkey={record.address} link truncate truncateChars={40} />
+            <td className="w-1 text-capitalize">
+                {programInfo ? <Address overrideText={programInfo.name} pubkey={record.address} /> : record.name}
             </td>
-            <td>{record.calls}</td>
+            <td className="w-100 text-lg-end">
+                <Address pubkey={record.address} link alignRight />
+            </td>
+            <td className="">{record.calls}</td>
         </tr>
     );
 }

@@ -51,8 +51,7 @@ export function ProgramCpiCallsView({
                             <thead>
                                 <tr>
                                     <th className="text-muted w-1">Program Name</th>
-                                    <th className="text-muted w-1">Description</th>
-                                    <th className="text-muted">Address</th>
+                                    <th className="text-muted w-100 text-lg-end">Address</th>
                                     <th className="text-muted"># of Calls</th>
                                 </tr>
                             </thead>
