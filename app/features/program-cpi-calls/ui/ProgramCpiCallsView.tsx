@@ -7,7 +7,6 @@ import { ProgramCallData } from '../model/use-program-cpi-calls';
 import { CpiCallListItem } from './CpiCallListItem';
 import { CpiCallsCardFooter } from './CpiCallsCardFooter';
 import { CpiCallsCardHeader } from './CpiCallsCardHeader';
-import { GSP_NO_RETURNED_VALUE } from 'next/dist/lib/constants';
 
 export type CpiCallRecord = {
     address: PublicKey;
