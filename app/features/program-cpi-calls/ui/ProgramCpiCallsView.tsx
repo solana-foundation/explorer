@@ -1,12 +1,11 @@
 import { PublicKey } from '@solana/web3.js';
 
-import { ErrorCard } from '@/app/components/common/ErrorCard';
 import { LoadingCard } from '@/app/components/common/LoadingCard';
 
 import { ProgramCallData } from '../model/use-program-cpi-calls';
-import { CpiCallListItem } from './CpiCallListItem';
 import { CpiCallsCardFooter } from './CpiCallsCardFooter';
 import { CpiCallsCardHeader } from './CpiCallsCardHeader';
+import { ProgramCpiCallsRenderer } from './ProgramCpiCallsRenderer';
 
 export type CpiCallRecord = {
     address: PublicKey;
@@ -25,6 +24,7 @@ export function populateRecordsFromData(data: ProgramCallData[]) {
 }
 
 export function ProgramCpiCallsView({
+    address,
     error,
     foundLatest,
     isLoading,
@@ -34,6 +34,7 @@ export function ProgramCpiCallsView({
     onLoadNextPage,
     onRefresh,
 }: {
+    address: string;
     error: Error | null;
     foundLatest: boolean;
     isLoading: boolean;
@@ -71,30 +72,7 @@ export function ProgramCpiCallsView({
                                 </tr>
                             </thead>
                             <tbody className="list">
-                                {records.length ? (
-                                    records.map(record => {
-                                        return (
-                                            <CpiCallListItem
-                                                key={record.address.toBase58()}
-                                                record={{
-                                                    address: record.address,
-                                                    calls: record.calls,
-                                                    description: record.description,
-                                                    name: record.name,
-                                                }}
-                                            />
-                                        );
-                                    })
-                                ) : (
-                                    <NoRecords isLoading={isLoading} error={error} />
-                                )}
-                                {!error ? null : (
-                                    <tr>
-                                        <td colSpan={3}>
-                                            <ErrorCard text={error.message} />
-                                        </td>
-                                    </tr>
-                                )}
+                                <ProgramCpiCallsRenderer address={address} />
                             </tbody>
                         </table>
                     </div>
@@ -108,23 +86,5 @@ export function ProgramCpiCallsView({
                 </div>
             )}
         </>
-    );
-}
-
-function NoRecords({
-    isLoading,
-    error,
-    records,
-}: {
-    isLoading: boolean;
-    records?: ProgramCallData[];
-    error?: Error | null;
-}) {
-    return error && !records ? null : (
-        <tr>
-            <td colSpan={3}>
-                <div className="text-center">{isLoading ? '' : 'No records found'}</div>
-            </td>
-        </tr>
     );
 }

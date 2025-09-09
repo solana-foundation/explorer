@@ -47,6 +47,7 @@ function BaseProgramCpiCalls({ address }: { address: string }) {
 
     return (
         <ProgramCpiCallsView
+            address={address}
             error={error}
             records={records}
             isLoading={isLoading}
