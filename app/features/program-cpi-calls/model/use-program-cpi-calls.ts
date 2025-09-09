@@ -2,6 +2,8 @@
 
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 
+import { isFeatureEnabled as isProgramCpiCallsFeatureEnabled } from '../index';
+
 const REFETCH_INTERVAL_MS = 12_000; // 12 seconds in milliseconds
 const S_MAX_AGE = 12;
 
@@ -28,7 +30,7 @@ export interface ProgramCpiCallsParams {
 export interface UseProgramCpiCallsOptions {
     enabled?: boolean;
     queryOptions?: Omit<
-        UseQueryOptions<PagesPaginationWrappper<ProgramCallData>, Error>,
+        UseQueryOptions<PagesPaginationWrappper<ProgramCallData> | null, Error>,
         'queryKey' | 'queryFn' | 'staleTime'
     >;
     onSuccess?: (data: PagesPaginationWrappper<ProgramCallData>) => void;
@@ -49,6 +51,8 @@ export function useProgramCpiCalls(params: ProgramCpiCallsParams, options: UsePr
     const { data: records, ...rest } = useQuery({
         enabled,
         queryFn: async () => {
+            if (!isProgramCpiCallsFeatureEnabled()) return null;
+
             // Build URL with query parameters
             const url = new URL(`/api/${address}/program-calls`, 'https://origin');
 

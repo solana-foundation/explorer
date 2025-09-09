@@ -49,6 +49,7 @@ import useSWRImmutable from 'swr/immutable';
 import { ENABLED_PROGRAMS_FOR_CPI_CALLS } from '@/app/api/shared/constants';
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
+import { isFeatureEnabled as isProgramCpiCallsFeatureEnabled } from '@/app/features/program-cpi-calls';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { useProgramMetadataIdl } from '@/app/providers/useProgramMetadataIdl';
@@ -560,7 +561,7 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
     });
 
     // Render Program CPI Calls tab only for specific programs
-    if (ENABLED_PROGRAMS_FOR_CPI_CALLS.includes(pubkey.toBase58())) {
+    if (isProgramCpiCallsFeatureEnabled() && ENABLED_PROGRAMS_FOR_CPI_CALLS.includes(pubkey.toBase58())) {
         const programCpiCallsTab: Tab = {
             path: 'program-cpi-calls',
             slug: 'program-cpi-calls',

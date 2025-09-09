@@ -1,9 +1,15 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
+import { isEnvEnabled } from '@/app/utils/env';
+
 import { queryClient } from './model/query-client';
 import { usePagination } from './model/use-pagiantion';
 import { ProgramCpiCallsView } from './ui/ProgramCpiCallsView';
+
+export function isFeatureEnabled() {
+    return isEnvEnabled(process.env.NEXT_PUBLIC_PROGRAM_CPI_CALLS_ENABLED);
+}
 
 export function ProgramCpiCalls({ address }: { address: string }) {
     return (
