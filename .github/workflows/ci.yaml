@@ -3,7 +3,6 @@ name: CI
 on:
   pull_request:
     branches: [master, development]
-    # TODO: remove feat/program-pages before merging into the target branch
 
 env:
   # cash folder for pnpm_store, nextjs and playwright later on
