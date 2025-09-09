@@ -19,10 +19,10 @@ if (!DUNE_API_KEY || !DUNE_PROGRAM_CALLS_MV_ID || !CRON_SECRET) {
 
 export async function GET() {
     const headersList = headers();
-    // if (headersList.get('Authorization') !== `Bearer ${CRON_SECRET}`) {
-    //     Logger.error(new Error('Unauthorized access attempt'));
-    //     return respondWithError(401);
-    // }
+    if (headersList.get('Authorization') !== `Bearer ${CRON_SECRET}`) {
+        Logger.error(new Error('Unauthorized access attempt'));
+        return respondWithError(401);
+    }
 
     let executionResult: ResultsResponse;
     let maxBlockSlot: bigint;
