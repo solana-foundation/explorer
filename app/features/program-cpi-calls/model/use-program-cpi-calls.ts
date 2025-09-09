@@ -5,7 +5,8 @@ import { useSetAtom } from 'jotai';
 
 import { programCpiCallsAtom } from './state';
 
-const REFETCH_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes in milliseconds
+const REFETCH_INTERVAL_MS = 12_000; // 12 seconds in milliseconds
+const S_MAX_AGE = 12;
 
 export interface ProgramCallData {
     address: string;
@@ -85,7 +86,8 @@ export function useProgramCpiCalls(params: ProgramCpiCallsParams, options: UsePr
             return data;
         },
         queryKey,
-        staleTime: REFETCH_INTERVAL_MS,
+        refetchInterval: REFETCH_INTERVAL_MS,
+        staleTime: S_MAX_AGE,
         ...queryOptions,
     });
 
