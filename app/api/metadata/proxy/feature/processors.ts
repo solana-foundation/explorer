@@ -1,5 +1,3 @@
-import { default as fetch } from 'cross-fetch';
-
 import Logger from '@/app/utils/logger';
 
 import { errors, matchMaxSizeError } from './errors';
@@ -7,7 +5,7 @@ import { errors, matchMaxSizeError } from './errors';
 /**
  * process binary data and catch any specific errors
  */
-export async function processBinary(data: fetch.Response) {
+export async function processBinary(data: Response) {
     const headers = data.headers;
 
     try {
@@ -28,7 +26,7 @@ export async function processBinary(data: fetch.Response) {
 /**
  * process text data as json and handle specific errors
  */
-export async function processJson(data: fetch.Response) {
+export async function processJson(data: Response) {
     const headers = data.headers;
 
     try {

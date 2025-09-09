@@ -1,4 +1,4 @@
-import { default as fetch, Headers } from 'cross-fetch';
+import { default as fetch, Headers, Response } from 'cross-fetch';
 
 import Logger from '@/app/utils/logger';
 
@@ -34,15 +34,14 @@ async function requestResource(
     uri: string,
     headers: Headers,
     timeout: number,
-    size: number
-): Promise<[Error, void] | [void, fetch.Response]> {
-    let response: fetch.Response | undefined;
+    _size: number
+): Promise<[Error, void] | [void, Response]> {
+    let response: Response | undefined;
     let error;
     try {
         response = await fetch(uri, {
             headers,
             signal: AbortSignal.timeout(timeout),
-            size,
         });
 
         return [undefined, response];
