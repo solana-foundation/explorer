@@ -3,20 +3,20 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "next dev",
         "build": "next build",
-        "start": "next start",
-        "scan": "next dev & react-scan localhost:3000",
-        "lint": "next lint",
+        "build-sb": "storybook build",
+        "coverage": "vitest --coverage",
+        "dev": "next dev",
         "format": "prettier --config .prettierrc.cjs **/*.{ts,tsx,mts,mjs,cjs} *.json --check",
         "format:ci": "pnpm format",
         "gen": "pnpx shadcn@^2.4.0 add",
-        "coverage": "vitest --coverage",
-        "test": "vitest --project specs --watch",
-        "test:sb": "vitest --project storybook --watch",
-        "test:ci": "vitest --project specs run",
+        "lint": "next lint",
         "sb": "storybook dev -p 6006",
-        "build-sb": "storybook build"
+        "scan": "next dev & react-scan localhost:3000",
+        "start": "next start",
+        "test": "vitest --project specs --watch",
+        "test:ci": "vitest --project specs run",
+        "test:sb": "vitest --project storybook --watch"
     },
     "dependencies": {
         "@blockworks-foundation/mango-client": "^3.6.7",
@@ -152,6 +152,7 @@
         "vite-plugin-node-polyfills": "^0.23.0",
         "vitest": "^3.0.8"
     },
+    "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c",
     "engines": {
         "node": "^18.20 || ^20.19"
     },
@@ -159,11 +160,10 @@
         "overrides": {
             "@solana/addresses": "2.1.0",
             "avsc": "git://github.com/Irys-xyz/avsc#a730cc8018b79e114b6a3381bbb57760a24c6cef",
+            "borsh": "0.7.0",
             "cross-fetch": "^3.1.5",
             "node-fetch": "^2.6.9",
-            "uuid": "^9.0.0",
-            "borsh": "0.7.0"
+            "uuid": "^9.0.0"
         }
-    },
-    "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
+    }
 }
