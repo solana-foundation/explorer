@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [master, development, feat/program-pages]
+    branches: [master, development]
     # TODO: remove feat/program-pages before merging into the target branch
 
 env:
