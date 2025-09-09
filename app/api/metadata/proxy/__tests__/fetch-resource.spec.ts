@@ -1,10 +1,10 @@
-import fetch, { Headers } from 'node-fetch';
+import fetch, { Headers } from 'cross-fetch';
 import { vi } from 'vitest';
 
 import { fetchResource } from '../feature';
 
-vi.mock('node-fetch', async () => {
-    const actual = await vi.importActual('node-fetch');
+vi.mock('cross-fetch', async () => {
+    const actual = await vi.importActual('cross-fetch');
     return {
         ...actual,
         default: vi.fn(),

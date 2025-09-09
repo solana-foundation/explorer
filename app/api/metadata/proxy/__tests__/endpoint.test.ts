@@ -1,5 +1,5 @@
+import fetch, { Headers } from 'cross-fetch';
 import _dns from 'dns';
-import fetch, { Headers } from 'node-fetch';
 import { vi } from 'vitest';
 
 import { GET } from '../route';
@@ -10,8 +10,8 @@ function setEnvironment(key: string, value: string) {
     Object.assign(process.env, { ...process.env, [key]: value });
 }
 
-vi.mock('node-fetch', async () => {
-    const actual = await vi.importActual('node-fetch');
+vi.mock('cross-fetch', async () => {
+    const actual = await vi.importActual('cross-fetch');
     return {
         ...actual,
         default: vi.fn(),

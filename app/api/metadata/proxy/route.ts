@@ -1,5 +1,5 @@
+import { Headers } from 'cross-fetch';
 import { NextResponse } from 'next/server';
-import { Headers } from 'node-fetch';
 
 import Logger from '@/app/utils/logger';
 

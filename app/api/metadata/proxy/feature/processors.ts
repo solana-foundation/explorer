@@ -1,4 +1,4 @@
-import { default as fetch } from 'node-fetch';
+import { default as fetch } from 'cross-fetch';
 
 import Logger from '@/app/utils/logger';
 
