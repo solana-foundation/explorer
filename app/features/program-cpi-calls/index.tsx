@@ -21,7 +21,6 @@ function BaseProgramCpiCalls({ address }: { address: string }) {
     }, [pagination]);
 
     const handleRefresh = useCallback(async () => {
-        [];
         pagination.reset();
         await queryClient.invalidateQueries({ queryKey: ['program-cpi-calls', address] });
     }, [address, pagination]);
