@@ -1,9 +1,6 @@
 'use client';
 
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { useSetAtom } from 'jotai';
-
-import { programCpiCallsAtom } from './state';
 
 const REFETCH_INTERVAL_MS = 12_000; // 12 seconds in milliseconds
 const S_MAX_AGE = 12;
@@ -47,7 +44,6 @@ export interface UseProgramCpiCallsOptions {
 export function useProgramCpiCalls(params: ProgramCpiCallsParams, options: UseProgramCpiCallsOptions = {}) {
     const { address, limit, offset } = params;
     const { enabled = true, queryOptions = {}, onSuccess } = options;
-    const setRecords = useSetAtom(programCpiCallsAtom);
     const queryKey = ['program-cpi-calls', address, limit, offset];
 
     const { data: records, ...rest } = useQuery({
@@ -71,15 +67,6 @@ export function useProgramCpiCalls(params: ProgramCpiCallsParams, options: UsePr
             } catch (_e) {
                 throw new Error('Could not fetch CPI calls data');
             }
-
-            setRecords(prev => {
-                // If offset is 0, we're starting fresh (either initial load or refresh)
-                // Otherwise, we're paginating and should append
-                if (offset === 0) {
-                    return data.data;
-                }
-                return [...prev, ...data.data];
-            });
 
             onSuccess?.(data);
 

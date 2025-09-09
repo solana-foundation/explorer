@@ -1,9 +1,9 @@
 export function CpiCallsCardFooter({
-    fetching,
+    fetching = false,
     foundOldest,
     loadMore,
 }: {
-    fetching: boolean;
+    fetching?: boolean;
     foundOldest: boolean;
     loadMore: () => void;
 }) {

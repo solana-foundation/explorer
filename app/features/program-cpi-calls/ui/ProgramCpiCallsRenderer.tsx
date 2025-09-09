@@ -6,7 +6,7 @@ import React, { Fragment, useMemo } from 'react';
 import { LoadingSpinner } from '@/app/components/common/LoadingCard';
 
 import { usePagination } from '../model/use-pagiantion';
-import { useProgramCpiCalls } from '../model/use-program-cpi-calls';
+import { type ProgramCallData, useProgramCpiCalls } from '../model/use-program-cpi-calls';
 import { CpiCallListItem } from './CpiCallListItem';
 
 interface CpiCallsPageProps {
@@ -65,15 +65,7 @@ function CpiCallsPage({ address, limit, offset }: CpiCallsPageProps) {
     return (
         <>
             {data.map(record => (
-                <CpiCallListItem
-                    key={`${offset}-${record.address}`}
-                    record={{
-                        address: new PublicKey(record.address),
-                        calls: record.calls_number,
-                        description: record.description,
-                        name: record.name,
-                    }}
-                />
+                <CpiCallListItem key={`${offset}-${record.address}`} record={populateRecordFromData(record)} />
             ))}
         </>
     );
@@ -111,4 +103,13 @@ export function ProgramCpiCallsRenderer({ address }: { address: string }) {
             ))}
         </>
     );
+}
+
+function populateRecordFromData({ address, calls_number, description, name }: ProgramCallData) {
+    return {
+        address: new PublicKey(address),
+        calls: calls_number,
+        description,
+        name,
+    };
 }
