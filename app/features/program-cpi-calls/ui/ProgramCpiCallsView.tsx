@@ -5,19 +5,21 @@ import { ProgramCpiCallsRenderer } from './ProgramCpiCallsRenderer';
 export function ProgramCpiCallsView({
     address,
     foundLatest,
+    isRefreshing,
     total,
     onLoadNextPage,
     onRefresh,
 }: {
     address: string;
     foundLatest: boolean;
+    isRefreshing: boolean;
     total?: number;
     onLoadNextPage: () => void;
     onRefresh: () => void;
 }) {
     return (
         <div className="card">
-            <CpiCallsCardHeader refresh={onRefresh} title="Calling Programs" total={total} />
+            <CpiCallsCardHeader refresh={onRefresh} title="Calling Programs" total={total} fetching={isRefreshing} />
 
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
@@ -33,7 +35,7 @@ export function ProgramCpiCallsView({
                     </tbody>
                 </table>
             </div>
-            <CpiCallsCardFooter foundOldest={foundLatest} loadMore={onLoadNextPage} />
+            <CpiCallsCardFooter foundOldest={foundLatest} loadMore={onLoadNextPage} fetching={isRefreshing} />
         </div>
     );
 }

@@ -12,16 +12,18 @@ export function CpiCallsCardFooter({
             {foundOldest ? (
                 <div className="text-muted text-center">There is no more data</div>
             ) : (
-                <button className="btn btn-primary w-100" onClick={() => loadMore()} disabled={fetching}>
+                <>
                     {fetching ? (
                         <>
                             <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
                             Loading
                         </>
                     ) : (
-                        'Load More'
+                        <button className="btn btn-primary w-100" onClick={() => loadMore()} disabled={fetching}>
+                            Load More
+                        </button>
                     )}
-                </button>
+                </>
             )}
         </div>
     );
