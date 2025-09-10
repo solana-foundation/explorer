@@ -135,6 +135,7 @@ describe('GET /api/[address]/program-calls', () => {
         expect(response.pagination).toEqual({
             limit: 10,
             offset: 5,
+            total: 0,
             totalPages: 0,
         });
 
@@ -159,6 +160,7 @@ describe('GET /api/[address]/program-calls', () => {
         expect(response.pagination).toEqual({
             limit: 50,
             offset: 0,
+            total: 0,
             totalPages: 0,
         });
     });
