@@ -5,8 +5,9 @@ import React, { Fragment, useMemo } from 'react';
 
 import { LoadingSpinner } from '@/app/components/common/LoadingCard';
 
+import type { ProgramCallData } from '../model/types';
 import { usePagination } from '../model/use-pagiantion';
-import { type ProgramCallData, useProgramCpiCalls } from '../model/use-program-cpi-calls';
+import { useProgramCpiCalls } from '../model/use-program-cpi-calls';
 import { CpiCallListItem } from './CpiCallListItem';
 
 interface CpiCallsPageProps {
