@@ -4,8 +4,8 @@ import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 
 import { isFeatureEnabled as isProgramCpiCallsFeatureEnabled } from '../index';
 
-const REFETCH_INTERVAL_MS = 12_000; // 12 seconds in milliseconds
-const S_MAX_AGE = 12;
+const S_MAX_AGE = 12_000; // 12 seconds in milliseconds
+const GC_AGE_MS = 60_000; // 1 min in milliseconds
 
 export interface ProgramCallData {
     address: string;
@@ -50,6 +50,7 @@ export function useProgramCpiCalls(params: ProgramCpiCallsParams, options: UsePr
 
     const { data: records, ...rest } = useQuery({
         enabled,
+        gcTime: GC_AGE_MS,
         queryFn: async () => {
             if (!isProgramCpiCallsFeatureEnabled()) return null;
 
@@ -77,7 +78,6 @@ export function useProgramCpiCalls(params: ProgramCpiCallsParams, options: UsePr
             return data;
         },
         queryKey,
-        refetchInterval: REFETCH_INTERVAL_MS,
         staleTime: S_MAX_AGE,
         ...queryOptions,
     });
