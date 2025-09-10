@@ -565,7 +565,7 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
         const programCpiCallsTab: Tab = {
             path: 'program-cpi-calls',
             slug: 'program-cpi-calls',
-            title: 'Program CPI Calls',
+            title: 'Calling Programs',
         };
         tabComponents.push({
             component: (
