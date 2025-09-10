@@ -5,6 +5,7 @@ import { isEnvEnabled } from '@/app/utils/env';
 
 import { queryClient } from './model/query-client';
 import { usePagination } from './model/use-pagiantion';
+import { useTotalProgramCpiCalls } from './model/use-total-program-cpi-calls';
 import { ProgramCpiCallsView } from './ui/ProgramCpiCallsView';
 
 export function isFeatureEnabled() {
@@ -21,6 +22,7 @@ export function ProgramCpiCalls({ address }: { address: string }) {
 
 function BaseProgramCpiCalls({ address }: { address: string }) {
     const pagination = usePagination();
+    const { data } = useTotalProgramCpiCalls({ address });
 
     const handleLoadNextPage = useCallback(() => {
         pagination.nextPage();
@@ -37,6 +39,7 @@ function BaseProgramCpiCalls({ address }: { address: string }) {
             foundLatest={!pagination.hasNextPage}
             onLoadNextPage={handleLoadNextPage}
             onRefresh={handleRefresh}
+            total={data?.total}
         />
     );
 }

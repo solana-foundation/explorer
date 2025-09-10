@@ -8,13 +8,13 @@ import type { PagesPaginationWrappper, ProgramCallData } from './types';
 const S_MAX_AGE = 12_000; // 12 seconds in milliseconds
 const GC_AGE_MS = 60_000; // 1 min in milliseconds
 
-export interface ProgramCpiCallsParams {
+interface TotalProgramCpiCallsParams {
     address: string;
-    limit: number;
-    offset: number;
+    limit?: number;
+    offset?: number;
 }
 
-export interface UseProgramCpiCallsOptions {
+interface UseTotalProgramCpiCallsOptions {
     enabled?: boolean;
     queryOptions?: Omit<
         UseQueryOptions<PagesPaginationWrappper<ProgramCallData> | null, Error>,
@@ -30,10 +30,13 @@ export interface UseProgramCpiCallsOptions {
  * @param options - Additional options for the query
  * @returns Query result with program CPI calls data
  */
-export function useProgramCpiCalls(params: ProgramCpiCallsParams, options: UseProgramCpiCallsOptions = {}) {
-    const { address, limit, offset } = params;
+export function useTotalProgramCpiCalls(
+    params: TotalProgramCpiCallsParams,
+    options: UseTotalProgramCpiCallsOptions = {}
+) {
+    const { address, limit = 1, offset = 0 } = params;
     const { enabled = true, queryOptions = {}, onSuccess } = options;
-    const queryKey = ['program-cpi-calls', address, limit, offset];
+    const queryKey = ['total-program-cpi-calls', address, limit, offset];
 
     const { data: records, ...rest } = useQuery({
         enabled,
@@ -71,5 +74,5 @@ export function useProgramCpiCalls(params: ProgramCpiCallsParams, options: UsePr
 
     if (!records) return { data: undefined, ...rest };
 
-    return { data: records.data, pagination: records.pagination, ...rest };
+    return { data: { total: records.pagination.total ?? 0 }, ...rest };
 }

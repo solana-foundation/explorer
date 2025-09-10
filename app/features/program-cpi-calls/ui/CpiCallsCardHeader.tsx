@@ -14,8 +14,10 @@ export function CpiCallsCardHeader({
     return (
         <div className="card-header align-items-center">
             <div className="flex flex-row">
-                <h3 className="card-header-title">{title} (last 30 days)</h3>
-                {total ? <span className="text-muted">({total}) items</span> : null}
+                <h3 className="card-header-title">
+                    {title}
+                    <span className="text-muted small"> (last 30 days{total ? `; total: ${total} records` : ''})</span>
+                </h3>
             </div>
             <button className="btn btn-white btn-sm" disabled={fetching} onClick={() => refresh()}>
                 {fetching ? (
