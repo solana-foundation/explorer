@@ -42,6 +42,7 @@ export async function GET(request: Request, { params: { address } }: Params) {
     let quicknode_data;
     let unionSub;
     let totalPages;
+    let total;
     try {
         dune_data = db
             .select({
@@ -84,7 +85,7 @@ export async function GET(request: Request, { params: { address } }: Params) {
             .limit(limit)
             .offset(offset);
 
-        const [{ total }] = await db
+        [{ total }] = await db
             .select({
                 total: sql<number>`COUNT(DISTINCT (${unionSub.address}, ${unionSub.program_address}))`,
             })
@@ -103,6 +104,7 @@ export async function GET(request: Request, { params: { address } }: Params) {
             pagination: {
                 limit,
                 offset,
+                total,
                 totalPages,
             },
         },
