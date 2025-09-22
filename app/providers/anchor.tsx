@@ -15,6 +15,44 @@ function getProvider(url: string) {
     return new AnchorProvider(new Connection(url), new NodeWallet(Keypair.generate()), {});
 }
 
+async function fetchIdlFromApi(programAddress: string, cluster: Cluster): Promise<Idl | null> {
+    const apiResponse = await fetch(`/api/anchor?programAddress=${programAddress}&cluster=${cluster}`);
+    if (!apiResponse.ok) {
+        throw new Error(
+            `could not fetch idl for program ${programAddress} cluster ${cluster} from api: ` +
+                `api returned non-2xx status code: ${apiResponse.status} (${apiResponse.statusText})`
+        );
+    }
+
+    const { idl, error } = await apiResponse.json();
+    // only throw error if api returns an error
+    if (error) {
+        throw new Error(
+            `could not fetch idl for program ${programAddress} cluster ${cluster} from api: ` +
+                (error || 'IDL not found')
+        );
+    }
+
+    return idl;
+}
+
+async function fetchIdlFromRpc(programAddress: string, url: string): Promise<Idl | null> {
+    const programId = new PublicKey(programAddress);
+
+    let errorMessage = `could not fetch idl for program ${programAddress} from rpc ${url}`;
+    let idl: Idl | null = null;
+    try {
+        idl = await Program.fetchIdl<Idl>(programId, getProvider(url));
+    } catch (e) {
+        console.error(e);
+        errorMessage += ': ' + (e as Error)?.message;
+    }
+    if (!idl) {
+        throw new Error(errorMessage);
+    }
+    return idl;
+}
+
 function useIdlFromAnchorProgramSeed(programAddress: string, url: string, cluster?: Cluster): Idl | null {
     const key = `${programAddress}-${url}`;
     const cacheEntry = cachedAnchorProgramPromises[key];
@@ -23,34 +61,21 @@ function useIdlFromAnchorProgramSeed(programAddress: string, url: string, cluste
         let promise;
         cluster = cluster || Cluster.MainnetBeta;
         if (cluster !== undefined && cluster !== Cluster.Custom) {
-            promise = fetch(`/api/anchor?programAddress=${programAddress}&cluster=${cluster}`)
-                .then(async result => {
-                    return result
-                        .json()
-                        .then(({ idl, error }) => {
-                            if (!idl) {
-                                throw new Error(error || `IDL not found for program: ${programAddress.toString()}`);
-                            }
-                            cachedAnchorProgramPromises[key] = {
-                                __type: 'result',
-                                result: idl,
-                            };
-                        })
-                        .catch(_ => {
-                            cachedAnchorProgramPromises[key] = { __type: 'result', result: null };
-                        });
+            promise = fetchIdlFromApi(programAddress, cluster)
+                // fallback to fetching idl from rpc
+                .catch(_ => fetchIdlFromRpc(programAddress, url))
+                .then(async idl => {
+                    cachedAnchorProgramPromises[key] = {
+                        __type: 'result',
+                        result: idl,
+                    };
                 })
                 .catch(_ => {
                     cachedAnchorProgramPromises[key] = { __type: 'result', result: null };
                 });
         } else {
-            const programId = new PublicKey(programAddress);
-            promise = Program.fetchIdl<Idl>(programId, getProvider(url))
+            promise = fetchIdlFromRpc(programAddress, url)
                 .then(idl => {
-                    if (!idl) {
-                        throw new Error(`IDL not found for program: ${programAddress.toString()}`);
-                    }
-
                     cachedAnchorProgramPromises[key] = {
                         __type: 'result',
                         result: idl,
