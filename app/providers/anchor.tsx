@@ -84,11 +84,12 @@ function useIdlFromAnchorProgramSeed(programAddress: string, url: string, cluste
                 .catch(_ => {
                     cachedAnchorProgramPromises[key] = { __type: 'result', result: null };
                 });
-            cachedAnchorProgramPromises[key] = {
-                __type: 'promise',
-                promise,
-            };
         }
+
+        cachedAnchorProgramPromises[key] = {
+            __type: 'promise',
+            promise,
+        };
         throw promise;
     } else if (cacheEntry.__type === 'promise') {
         throw cacheEntry.promise;
