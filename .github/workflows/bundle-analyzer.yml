@@ -67,7 +67,7 @@ jobs:
         uses: transferwise/actions-next-bundle-analyzer@v2
         with:
           comment-strategy: 'always'
-          github-token: ${{ secrets.GITHUB_TOKEN }} #
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Reset manifest file
         run: pnpm run reset-manifest
