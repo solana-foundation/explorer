@@ -1,10 +1,10 @@
-name: Bundle Analysis 
+name: Bundle Analysis
 
 on:
   push:
     branches: [master]
   pull_request:
-    branches: [master]
+    branches: [master, development]
 
 env:
   PW_CACHE_AFFIX: pw
