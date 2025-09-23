@@ -1,4 +1,4 @@
-import { default as fetch, Headers } from 'node-fetch';
+import { default as fetch, Headers, Response as NodeFetchResponse } from 'node-fetch';
 
 import Logger from '@/app/utils/logger';
 
@@ -35,8 +35,8 @@ async function requestResource(
     headers: Headers,
     timeout: number,
     size: number
-): Promise<[Error, void] | [void, fetch.Response]> {
-    let response: fetch.Response | undefined;
+): Promise<[Error, void] | [void, NodeFetchResponse]> {
+    let response: NodeFetchResponse | undefined;
     let error;
     try {
         response = await fetch(uri, {

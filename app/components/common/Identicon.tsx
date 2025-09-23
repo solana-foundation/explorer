@@ -1,8 +1,6 @@
 'use client';
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import Jazzicon from '@metamask/jazzicon';
+import Jazzicon from '@metamask/jazzicon'; // project contains custom typedecls ../../types/metamask-jazzicon.d.ts
 import { PublicKey } from '@solana/web3.js';
 import bs58 from 'bs58';
 import React, { useEffect, useRef } from 'react';

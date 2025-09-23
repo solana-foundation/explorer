@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Headers } from 'node-fetch';
+import { Headers as NodeFetchHeaders } from 'node-fetch';
 
 import Logger from '@/app/utils/logger';
 
@@ -58,13 +58,13 @@ export async function GET(request: Request, { params: _params }: Params) {
         return respondWithError(400);
     }
 
-    const headers = new Headers({
+    const headers = new NodeFetchHeaders({
         'Content-Type': 'application/json; charset=utf-8',
         'User-Agent': USER_AGENT,
     });
 
     let data;
-    let resourceHeaders: Headers;
+    let resourceHeaders: NodeFetchHeaders;
 
     try {
         const response = await fetchResource(uriParam, headers, TIMEOUT, MAX_SIZE);

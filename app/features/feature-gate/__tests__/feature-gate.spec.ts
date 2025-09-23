@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import fetch from 'cross-fetch';
 import { vi } from 'vitest';
 
 import { FeatureInfoType } from '@/app/utils/feature-gate/types';
@@ -25,8 +25,8 @@ const FEATURE: FeatureInfoType = {
     title: 'MoveStake and MoveLamports',
 };
 
-vi.mock('node-fetch', async () => {
-    const actual = await vi.importActual('node-fetch');
+vi.mock('cross-fetch', async () => {
+    const actual = await vi.importActual('cross-fetch');
     return {
         ...actual,
         default: vi.fn(),
