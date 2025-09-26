@@ -160,7 +160,6 @@
             "@solana/addresses": "2.1.0",
             "avsc": "git://github.com/Irys-xyz/avsc#a730cc8018b79e114b6a3381bbb57760a24c6cef",
             "axios@<0.30.0": "0.30.0",
-            "axios@<1.12.0": ">=1.12.0",
             "base-x@<=3.0.10": "3.0.11",
             "base-x@=4.0.0": "4.0.1",
             "borsh": "0.7.0",
