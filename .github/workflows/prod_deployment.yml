@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [feat/program-pages]
+    branches: [master]
 
 env:
   # cash folder for pnpm_store, nextjs and playwright later on
