@@ -1,0 +1,129 @@
+{
+  "id": "8c426252-7366-46e7-8603-9317a7f6bd5f",
+  "prevId": "edb5058b-8306-4430-b948-56dc8acf175e",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.program_call_stats": {
+      "name": "program_call_stats",
+      "schema": "",
+      "columns": {
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "calls_number": {
+          "name": "calls_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "name_test": {
+          "name": "name_test",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "program_address": {
+          "name": "program_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "program_call_stats_program_address_address_unique": {
+          "name": "program_call_stats_program_address_address_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "program_address",
+            "address"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.program_stats": {
+      "name": "program_stats",
+      "schema": "",
+      "columns": {
+        "calling_programs_count": {
+          "name": "calling_programs_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "program_address": {
+          "name": "program_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "transaction_references_count": {
+          "name": "transaction_references_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "program_stats_program_address_unique": {
+          "name": "program_stats_program_address_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "program_address"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
