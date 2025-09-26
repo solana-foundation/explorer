@@ -124,7 +124,7 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       '@solana/kit':
-        specifier: 2.3.0
+        specifier: ^2.3.0
         version: 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@8.18.1(bufferutil@4.0.7)(utf-8-validate@5.0.10))
       '@solana/spl-account-compression':
         specifier: 0.1.8
