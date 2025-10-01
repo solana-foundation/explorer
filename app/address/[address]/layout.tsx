@@ -565,7 +565,7 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
             title: 'Extensions',
         };
         tabComponents.push({
-            component: <TokenExtensionsLink tab={extensionsTab} address={pubkey.toString()} />,
+            component: <TokenExtensionsLink key={extensionsTab.slug} tab={extensionsTab} address={pubkey.toString()} />,
             tab: extensionsTab,
         });
     }
