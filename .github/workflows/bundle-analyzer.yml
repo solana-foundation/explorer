@@ -1,16 +1,22 @@
-name: CI
+name: Bundle Analysis
 
 on:
+  push:
+    branches: [master]
   pull_request:
     branches: [master, development]
 
 env:
-  # cash folder for pnpm_store, nextjs and playwright later on
   PW_CACHE_AFFIX: pw
   PW_CACHE_FOLDER: ~/.cache/ms-playwright
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
-  Build-And-Test:
+  Bundle-Analysis:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -34,7 +40,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Setup pnpm config
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
+        run: pnpm config set store-dir $PW_CACHE_FOLDER
 
       - name: Setup Cache
         uses: actions/cache@v4
@@ -52,13 +58,22 @@ jobs:
         run: pnpm install
 
       - name: Build
-        run: pnpm build
+        run: ANALYZE=true pnpm build
 
-      - name: Code-style
-        run: pnpm format:ci
+      - name: Build manifest file
+        run: pnpm run build-manifest
 
-      - name: Test
-        env:
-          TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
-        run: |
-          pnpm test:ci
+      - name: Analyze bundle sizes
+        uses: transferwise/actions-next-bundle-analyzer@v2
+        with:
+          comment-strategy: 'always'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Reset manifest file
+        run: pnpm run reset-manifest
+
+      - name: Upload dependency graph
+        uses: actions/upload-artifact@v4
+        with:
+          name: dg
+          path: .next/analyze/client.html
