@@ -81,7 +81,7 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
 
             {decoded ? (
                 <div className="card metadata-json-viewer m-4">
-                    <ReactJson src={decoded} theme={'solarized'} style={{ padding: 25 }} name={false} />
+                    <ReactJson src={decoded} style={{ padding: 25 }} name={false} />
                 </div>
             ) : (
                 <div
