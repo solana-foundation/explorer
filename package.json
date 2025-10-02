@@ -150,7 +150,7 @@
         "vite-plugin-node-polyfills": "0.23.0",
         "vitest": "3.0.8"
     },
-    "packageManager": "pnpm@10.16.1",
+    "packageManager": "pnpm@10.17.1",
     "engines": {
         "node": "^20.19"
     },
@@ -192,6 +192,20 @@
             "word-wrap@<=1.2.4": "1.2.5",
             "ws@>=8.0.0 <8.17.1": "8.17.1",
             "ws@>=7.0.0 <7.5.10": "7.5.10"
-        }
+        },
+        "ignoredBuiltDependencies": [
+            "bigint-buffer",
+            "bufferutil",
+            "keccak",
+            "msw",
+            "secp256k1",
+            "sharp",
+            "unrs-resolver",
+            "utf-8-validate"
+        ],
+        "onlyBuiltDependencies": [
+            "@sentry/cli",
+            "esbuild"
+        ]
     }
 }
