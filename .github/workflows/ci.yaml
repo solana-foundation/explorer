@@ -7,7 +7,7 @@ on:
     branches: [master]
 
 env:
-  # cash folder for pnpm_store, nextjs and playwright later on
+  # cache folders for pnpm_store, nextjs and playwright
   PW_CACHE_AFFIX: pw
   PW_CACHE_FOLDER: ~/.cache/ms-playwright
   PNPM_CACHE_FOLDER: ~/.pnpm-store
@@ -46,26 +46,28 @@ jobs:
       - name: Install package manager
         uses: pnpm/action-setup@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      # Configure pnpm store directory BEFORE setup-node tries to cache it
+      - name: Setup pnpm config
+        run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
 
-      - name: Setup pnpm config
-        run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
-
-      - name: Setup Cache
+      - name: Setup Additional Cache
         uses: actions/cache@v4
-        id: pnpm_store_cache
+        id: additional_cache
         with:
           path: |
             ${{ env.PW_CACHE_FOLDER }}
             ${{ github.workspace }}/.next/cache
           key: ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
           restore-keys: |
-            ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-
             ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-
 
       - name: Install dependencies
         run: |
