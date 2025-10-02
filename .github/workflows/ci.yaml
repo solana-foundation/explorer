@@ -60,7 +60,6 @@ jobs:
         id: pnpm_store_cache
         with:
           path: |
-            ${{ env.PNPM_CACHE_FOLDER }}
             ${{ env.PW_CACHE_FOLDER }}
             ${{ github.workspace }}/.next/cache
           key: ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
