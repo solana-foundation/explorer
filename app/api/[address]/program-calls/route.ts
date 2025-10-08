@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 import { createCacheHeaders } from '@/app/api/shared/cache';
 import { respondWithError } from '@/app/api/shared/errors';
-import { calculatePagination, PaginationError,parsePaginationParams } from '@/app/api/shared/pagination';
+import { calculatePagination, PaginationError, parsePaginationParams } from '@/app/api/shared/pagination';
 import { validateSolanaAddress, ValidationError } from '@/app/api/shared/validation';
 import Logger from '@/app/utils/logger';
 import { SentryLogger } from '@/app/utils/logger-sentry';
