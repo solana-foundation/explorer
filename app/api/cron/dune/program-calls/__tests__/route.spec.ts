@@ -45,7 +45,6 @@ const mockExecute = vi.fn().mockResolvedValue(undefined);
 // Mock schema tables
 vi.mock('@/src/db/schema', () => ({
     program_call_stats: {},
-    quicknode_stream_cpi_program_calls: {},
 }));
 
 // Mock drizzle-orm functions

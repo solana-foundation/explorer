@@ -24,28 +24,3 @@ export const program_stats = p.pgTable(
     },
     t => [p.unique().on(t.program_address)]
 );
-
-export const quicknode_stream_cpi_program_calls = p.pgTable(
-    'quicknode_stream_cpi_program_calls',
-    {
-        data: p.jsonb('data').notNull(),
-        fromBlockNumber: p.bigint('from_block_number', { mode: 'bigint' }).notNull(),
-        network: p.varchar('network', { length: 255 }).notNull(),
-        streamId: p.uuid('stream_id').notNull(),
-        toBlockNumber: p.bigint('to_block_number', { mode: 'bigint' }).notNull(),
-    },
-    t => ({
-        pk: p.primaryKey({
-            columns: [t.network, t.fromBlockNumber, t.toBlockNumber],
-            name: 't_pkey',
-        }),
-    })
-);
-
-export const quicknode_stream_cpi_program_calls_mv = p
-    .pgMaterializedView('quicknode_stream_cpi_program_calls_mv', {
-        callerProgramAddress: p.text('caller_program_address'),
-        callsNumber: p.bigint('calls_number', { mode: 'bigint' }),
-        programAddress: p.text('program_address'),
-    })
-    .existing();

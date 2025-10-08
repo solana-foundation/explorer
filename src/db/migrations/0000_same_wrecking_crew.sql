@@ -1,5 +1,6 @@
 CREATE TABLE "program_call_stats" (
 	"address" text NOT NULL,
+	"block_slot" text NOT NULL,
 	"calls_number" integer DEFAULT 0 NOT NULL,
 	"description" text DEFAULT '' NOT NULL,
 	"name" text DEFAULT '' NOT NULL,

@@ -1,36 +1,31 @@
 import { DuneClient, ResultsResponse, RunQueryArgs } from '@duneanalytics/client-sdk';
-import { lte } from 'drizzle-orm';
-import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+import { requireCronAuth } from '@/app/api/shared/auth';
+import { programNameCache } from '@/app/api/shared/caching';
+import { replaceTableData } from '@/app/api/shared/db-helpers';
 import { respondWithError } from '@/app/api/shared/errors';
 import { getProgramMetadataIdl, programNameFromIdl } from '@/app/components/instruction/codama/getProgramMetadataIdl';
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 import Logger from '@/app/utils/logger';
 import { PROGRAM_INFO_BY_ID } from '@/app/utils/programs';
-import { db } from '@/src/db/drizzle';
-import { program_call_stats, quicknode_stream_cpi_program_calls } from '@/src/db/schema';
+import { program_call_stats } from '@/src/db/schema';
 
-const { DUNE_API_KEY, DUNE_PROGRAM_CALLS_MV_ID, CRON_SECRET } = process.env;
+const { DUNE_API_KEY, DUNE_PROGRAM_CALLS_MV_ID } = process.env;
 
-if (!DUNE_API_KEY || !DUNE_PROGRAM_CALLS_MV_ID || !CRON_SECRET) {
-    throw new Error('DUNE_API_KEY, DUNE_PROGRAM_CALLS_MV_ID, CRON_SECRET must be set in environment variables');
+if (!DUNE_API_KEY || !DUNE_PROGRAM_CALLS_MV_ID) {
+    throw new Error('DUNE_API_KEY, DUNE_PROGRAM_CALLS_MV_ID must be set in environment variables');
 }
 
 export async function GET() {
-    const headersList = headers();
-    if (headersList.get('Authorization') !== `Bearer ${CRON_SECRET}`) {
-        Logger.error(new Error('Unauthorized access attempt'));
-        return respondWithError(401);
-    }
+    const authError = requireCronAuth();
+    if (authError) return authError;
 
     let executionResult: ResultsResponse;
-    let maxBlockSlot: bigint;
     try {
         const client = new DuneClient(DUNE_API_KEY ?? '');
         const opts: RunQueryArgs = { queryId: Number(DUNE_PROGRAM_CALLS_MV_ID) };
         executionResult = await client.getLatestResult(opts);
-        maxBlockSlot = getMaxBlockSlot(executionResult);
     } catch (error) {
         Logger.error(error);
         return respondWithError(500);
@@ -42,7 +37,7 @@ export async function GET() {
         address: string;
         block_slot: string;
         calls_number: number;
-        created_at: any;
+        created_at: string | Date;
         description: string;
         name: string;
         program_address: string;
@@ -63,17 +58,7 @@ export async function GET() {
     });
 
     try {
-        await db.transaction(async tx => {
-            await tx.delete(program_call_stats).execute();
-
-            await tx.insert(program_call_stats).values(values).execute();
-
-            // Clean up old QuickNode data
-            await tx
-                .delete(quicknode_stream_cpi_program_calls)
-                .where(lte(quicknode_stream_cpi_program_calls.fromBlockNumber, maxBlockSlot))
-                .execute();
-        });
+        await replaceTableData(program_call_stats, values);
     } catch (error) {
         Logger.error(error);
         return respondWithError(500);
@@ -82,23 +67,21 @@ export async function GET() {
     return NextResponse.json({ ok: true });
 }
 
-const nameCache = new Map<string, string>();
-
 async function buildProgramName(address: string, program_name: string): Promise<string> {
-    const cached = nameCache.get(address);
+    const cached = programNameCache.get(address);
     if (cached !== undefined) return cached;
 
     if (PROGRAM_INFO_BY_ID[address]) {
         const staticHashName = String(PROGRAM_INFO_BY_ID[address].name);
-        nameCache.set(address, staticHashName);
+        programNameCache.set(address, staticHashName);
         return staticHashName;
     }
     const pmName = await getPmName(address);
     if (pmName !== null && pmName !== undefined && pmName !== '') {
-        nameCache.set(address, pmName);
+        programNameCache.set(address, pmName);
         return String(pmName);
     }
-    nameCache.set(address, program_name);
+    programNameCache.set(address, program_name);
     return program_name;
 }
 
@@ -119,18 +102,6 @@ async function getPmName(address: string): Promise<string> {
     } catch (error) {
         return '';
     }
-}
-
-function getMaxBlockSlot(executionResult: any): bigint {
-    const rows = executionResult?.result?.rows ?? [];
-    if (!Array.isArray(rows) || rows.length === 0) {
-        return 0n; // fallback if no rows
-    }
-
-    return rows.reduce<bigint>((max, row) => {
-        const slot = BigInt(row.block_slot ?? 0);
-        return slot > max ? slot : max;
-    }, 0n);
 }
 
 async function mapWithLimit<T, R>(items: T[], limit: number, fn: (t: T) => Promise<R>): Promise<R[]> {

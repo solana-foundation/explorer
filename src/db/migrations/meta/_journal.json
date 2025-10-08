@@ -8,34 +8,6 @@
       "when": 1755104812252,
       "tag": "0000_same_wrecking_crew",
       "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1755700490647,
-      "tag": "0001_supreme_ma_gnuci",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1755700546762,
-      "tag": "0002_majestic_mad_thinker",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1756299824731,
-      "tag": "0003_sturdy_sharon_carter",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1756393353559,
-      "tag": "0004_clammy_nightmare",
-      "breakpoints": true
     }
   ]
 }

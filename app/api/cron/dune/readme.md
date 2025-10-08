@@ -1,16 +1,13 @@
 # Cron Routes: Dune Sync
 
 This repo contains **two** Next.js API routes driven by **Vercel Cron Jobs** to sync Dune CPI calls historical data.
-- **Real‑time Solana data** streamed from **QuickNode** *directly into Postgres*.
 - **Historical & aggregate data** from **Dune** (via SDK).
-- A **materialized view** that unifies both sources.
 
 ---
 
 ## Architecture
 
-- **QuickNode → Postgres sink**: Streams filtered CPI rows **directly** into Postgres (no middle service).
-- **Dune routes**: Import Program Usage and Historical CPI Calls on schedule, then the MV refresher rebuilds the unified view.
+- **Dune routes**: Import Program Usage and Historical CPI Calls on schedule.
 
 ---
 
@@ -56,7 +53,7 @@ DUNE_PROGRAM_CALLS_MV_ID=<dune query id for program_call_stats> # historical CPI
 **Purpose**
 - Pulls **historical CPI calls** aggregates from Dune (`DUNE_PROGRAM_CALLS_MV_ID`).
 - Resolves names using static `PROGRAM_INFO_BY_ID`, Program Metadata IDL, then Dune fallback.
-- Replaces `program_call_stats` and **cleans up** QuickNode rows up to the **max Dune block slot**.
+- Replaces `program_call_stats`.
 
 **Flow**
 1. Verify `Authorization: Bearer <CRON_SECRET>` → else **401**.
@@ -65,11 +62,6 @@ DUNE_PROGRAM_CALLS_MV_ID=<dune query id for program_call_stats> # historical CPI
 4. Transaction:
    - `DELETE FROM program_call_stats`
    - bulk `INSERT` mapped values
-   - cleanup:
-     ```sql
-     DELETE FROM quicknode_stream_cpi_program_calls
-     WHERE fromBlockNumber <= :maxBlockSlot;
-     ```
 
 **Errors**
 - Any SDK/DB failure → logged; return **500**.
@@ -79,5 +71,4 @@ DUNE_PROGRAM_CALLS_MV_ID=<dune query id for program_call_stats> # historical CPI
 ## Notes
 
 - **Idempotent** imports: Dune routes replace their tables fully; safe to re-run.
-- **MV refresh**: Uses `CONCURRENTLY`; conflicts are logged and retried by the next schedule.
 - **Observability**: Log row counts and durations per stage.

@@ -3,15 +3,11 @@
     "crons": [
         {
             "path": "/api/cron/dune/program-info",
-            "schedule": "*/15 * * * *"
+            "schedule": "0 3 * * *"
         },
         {
             "path": "/api/cron/dune/program-calls",
-            "schedule": "0 */3 * * *"
-        },
-        {
-            "path": "/api/cron/quicknode/program-calls",
-            "schedule": "*/1 * * * *"
+            "schedule": "5 3 * * *"
         }
     ]
 }

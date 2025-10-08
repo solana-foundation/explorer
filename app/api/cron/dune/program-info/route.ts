@@ -1,24 +1,21 @@
 import { DuneClient, ResultsResponse, RunQueryArgs } from '@duneanalytics/client-sdk';
-import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+import { requireCronAuth } from '@/app/api/shared/auth';
+import { replaceTableData } from '@/app/api/shared/db-helpers';
 import { respondWithError } from '@/app/api/shared/errors';
 import Logger from '@/app/utils/logger';
-import { db } from '@/src/db/drizzle';
 import { program_stats } from '@/src/db/schema';
 
-const { DUNE_API_KEY, DUNE_PROGRAM_STATS_MV_ID, CRON_SECRET } = process.env;
+const { DUNE_API_KEY, DUNE_PROGRAM_STATS_MV_ID } = process.env;
 
-if (!DUNE_API_KEY || !DUNE_PROGRAM_STATS_MV_ID || !CRON_SECRET) {
-    throw new Error('DUNE_API_KEY, DUNE_PROGRAM_STATS_MV_ID, CRON_SECRET must be set in environment variables');
+if (!DUNE_API_KEY || !DUNE_PROGRAM_STATS_MV_ID) {
+    throw new Error('DUNE_API_KEY, DUNE_PROGRAM_STATS_MV_ID must be set in environment variables');
 }
 
 export async function GET() {
-    const headersList = headers();
-    if (headersList.get('Authorization') !== `Bearer ${CRON_SECRET}`) {
-        Logger.error(new Error('Unauthorized access attempt'));
-        return respondWithError(401);
-    }
+    const authError = requireCronAuth();
+    if (authError) return authError;
 
     let executionResult: ResultsResponse;
     try {
@@ -31,20 +28,14 @@ export async function GET() {
     }
 
     try {
-        await db.transaction(async tx => {
-            await tx.delete(program_stats).execute();
+        const values = (executionResult.result?.rows ?? []).map(row => ({
+            calling_programs_count: Number(row.calling_programs_count),
+            created_at: row.created_at,
+            program_address: String(row.program_address),
+            transaction_references_count: Number(row.transaction_references_count),
+        }));
 
-            const values = await Promise.all(
-                (executionResult.result?.rows ?? []).map(async row => ({
-                    calling_programs_count: Number(row.calling_programs_count),
-                    created_at: row.created_at,
-                    program_address: String(row.program_address),
-                    transaction_references_count: Number(row.transaction_references_count),
-                }))
-            );
-
-            await tx.insert(program_stats).values(values).execute();
-        });
+        await replaceTableData(program_stats, values);
     } catch (error) {
         Logger.error(error);
         return respondWithError(500);

@@ -2,6 +2,23 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 let mockResultRows: any[] = [];
 
+// Valid test Solana address (Token Program)
+const TEST_PROGRAM_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+
+// Mock validation module
+vi.mock('@/app/api/shared/validation', () => ({
+    ValidationError: class ValidationError extends Error {},
+    isValidSolanaAddress: vi.fn().mockReturnValue(true),
+    validateSolanaAddress: vi.fn(),
+}));
+
+// Mock Sentry logger
+vi.mock('@/app/utils/logger-sentry', () => ({
+    SentryLogger: {
+        error: vi.fn(),
+    },
+}));
+
 vi.mock('@/src/db/drizzle', () => {
     const chain: any = {
         _rows: () => mockResultRows,
@@ -35,14 +52,16 @@ afterEach(() => {
 
 describe('GET /api/[address]/program-info', () => {
     it('returns program info and sets cache-control header', async () => {
-        mockResultRows = [{ calling_programs_count: 3, program_address: 'Prog1', transaction_references_count: 12 }];
+        mockResultRows = [
+            { calling_programs_count: 3, program_address: TEST_PROGRAM_ADDRESS, transaction_references_count: 12 },
+        ];
 
         const { GET } = await importRoute();
-        const request = new Request('http://localhost:3000/api/Prog1/program-info');
+        const request = new Request(`http://localhost:3000/api/${TEST_PROGRAM_ADDRESS}/program-info`);
 
-        const res = await GET(request, { params: { address: 'Prog1' } });
+        const res = await GET(request, { params: { address: TEST_PROGRAM_ADDRESS } });
         expect(res.status).toBe(200);
-        expect(res.headers.get('cache-control')).toBe('public, s-maxage=5, stale-while-revalidate=2');
+        expect(res.headers.get('cache-control')).toBe('public, s-maxage=1800, stale-while-revalidate=2');
 
         const data = await res.json();
         expect(data).toEqual(mockResultRows);
@@ -57,8 +76,8 @@ describe('GET /api/[address]/program-info', () => {
             throw new Error('Database connection failed');
         });
 
-        const request = new Request('http://localhost:3000/api/Prog1/program-info');
-        const res = await GET(request, { params: { address: 'Prog1' } });
+        const request = new Request(`http://localhost:3000/api/${TEST_PROGRAM_ADDRESS}/program-info`);
+        const res = await GET(request, { params: { address: TEST_PROGRAM_ADDRESS } });
 
         expect(res.status).toBe(500);
     });
@@ -66,6 +85,7 @@ describe('GET /api/[address]/program-info', () => {
     it('logs errors when they occur', async () => {
         const { GET } = await importRoute();
         const Logger = (await import('@/app/utils/logger')).default;
+        const Sentry = (await import('@/app/utils/logger-sentry')).SentryLogger;
 
         // Mock db chain to throw error
         const { db } = await import('@/src/db/drizzle');
@@ -73,9 +93,10 @@ describe('GET /api/[address]/program-info', () => {
             throw new Error('Database connection failed');
         });
 
-        const request = new Request('http://localhost:3000/api/Prog1/program-info');
-        await GET(request, { params: { address: 'Prog1' } });
+        const request = new Request(`http://localhost:3000/api/${TEST_PROGRAM_ADDRESS}/program-info`);
+        await GET(request, { params: { address: TEST_PROGRAM_ADDRESS } });
 
         expect(Logger.error).toHaveBeenCalledWith(expect.any(Error));
+        expect(Sentry.error).toHaveBeenCalledWith(expect.any(Error));
     });
 });
