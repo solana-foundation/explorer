@@ -50,7 +50,7 @@ export async function GET() {
             address,
             block_slot: String(row.block_slot ?? '0'),
             calls_number: Number(row.calls_number ?? 0),
-            created_at: row.created_at,
+            created_at: String(row.created_at ?? new Date().toISOString()),
             description: String(row.program_description ?? ''),
             name,
             program_address: progAddr,
