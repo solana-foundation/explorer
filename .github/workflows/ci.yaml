@@ -1,10 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches: [master]
   pull_request:
-    branches: [master]
+    branches: [master, development]
 
 env:
   # cache folders for pnpm_store, nextjs and playwright
@@ -34,6 +32,13 @@ jobs:
     needs: read-nvmrc
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
+    env:
+      DATABASE_URL: ${{ vars.DATABASE_URL }}
+      DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
+      DUNE_PROGRAM_STATS_MV_ID: ${{ vars.DUNE_PROGRAM_STATS_MV_ID }}
+      DUNE_PROGRAM_CALLS_MV_ID: ${{ vars.DUNE_PROGRAM_CALLS_MV_ID }}
+      CRON_SECRET: ${{ vars.CRON_SECRET }}
 
     strategy:
       matrix:
@@ -81,6 +86,9 @@ jobs:
 
       - name: Code-style
         run: pnpm format:ci
+
+      - name: Database migration
+        run: NODE_ENV=test pnpm drizzle-kit migrate
 
       - name: Test
         env:
