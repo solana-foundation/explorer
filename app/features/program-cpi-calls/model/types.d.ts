@@ -7,7 +7,7 @@ export interface ProgramCallData {
     program_address: string;
 }
 
-export interface PagesPaginationWrappper<T extends ProgramCallData> {
+export interface PagesPaginationWrapper<T extends ProgramCallData> {
     data: Array<T>;
     pagination: { limit: number; offset: number; totalPages: number; total: number };
 }

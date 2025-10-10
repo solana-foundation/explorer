@@ -3,7 +3,7 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 
 import { isFeatureEnabled as isProgramCpiCallsFeatureEnabled } from '../index';
-import type { PagesPaginationWrappper, ProgramCallData } from './types';
+import type { PagesPaginationWrapper, ProgramCallData } from './types';
 
 const S_MAX_AGE = 12_000; // 12 seconds in milliseconds
 const GC_AGE_MS = 60_000; // 1 min in milliseconds
@@ -17,10 +17,10 @@ interface TotalProgramCpiCallsParams {
 interface UseTotalProgramCpiCallsOptions {
     enabled?: boolean;
     queryOptions?: Omit<
-        UseQueryOptions<PagesPaginationWrappper<ProgramCallData> | null, Error>,
+        UseQueryOptions<PagesPaginationWrapper<ProgramCallData> | null, Error>,
         'queryKey' | 'queryFn' | 'staleTime'
     >;
-    onSuccess?: (data: PagesPaginationWrappper<ProgramCallData>) => void;
+    onSuccess?: (data: PagesPaginationWrapper<ProgramCallData>) => void;
 }
 
 /**
@@ -56,7 +56,7 @@ export function useTotalProgramCpiCalls(
                 throw new Error(`Failed to fetch program CPI calls: ${response.statusText}`);
             }
 
-            let data: PagesPaginationWrappper<ProgramCallData>;
+            let data: PagesPaginationWrapper<ProgramCallData>;
             try {
                 data = await response.json();
             } catch (_e) {
