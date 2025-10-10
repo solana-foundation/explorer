@@ -1,8 +1,8 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [master, development]
+  push:
+    branches: [master]
 
 env:
   # cash folder for pnpm_store, nextjs and playwright later on
@@ -10,12 +10,12 @@ env:
   PW_CACHE_FOLDER: ~/.cache/ms-playwright
 
 jobs:
-  Build-And-Test:
+  static-checks:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
     env:
-      DATABASE_URL: ${{ vars.DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
       DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
       DUNE_PROGRAM_STATS_MV_ID: ${{ vars.DUNE_PROGRAM_STATS_MV_ID }}
       DUNE_PROGRAM_CALLS_MV_ID: ${{ vars.DUNE_PROGRAM_CALLS_MV_ID }}
@@ -64,11 +64,14 @@ jobs:
       - name: Code-style
         run: pnpm format:ci
 
-      - name: Database migration
-        run: NODE_ENV=test pnpm drizzle-kit migrate
-
       - name: Test
         env:
           TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
         run: |
           pnpm test:ci
+
+      - name: Database migration
+        run: NODE_ENV=production pnpm drizzle-kit migrate
+
+      - name: Trigger Vercel Deploy
+        run: curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}"
