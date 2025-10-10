@@ -13,6 +13,6 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
     });
 }
 
-export default function ProgramCPICallsPage(props: ComponentProps<typeof ProgramCpiCallsClient>) {
+export default function ProgramCpiCallsPage(props: ComponentProps<typeof ProgramCpiCallsClient>) {
     return <ProgramCpiCallsClient {...props} />;
 }
