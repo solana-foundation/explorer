@@ -1,4 +1,4 @@
-enum LOG_LEVEL {
+export enum LOG_LEVEL {
     ERROR,
     WARN,
     INFO,
@@ -16,6 +16,18 @@ function isLoggable(expectedLevel: LOG_LEVEL) {
     return !isNullish(currentLevel) && Number.isFinite(currentLevel) && expectedLevel <= currentLevel;
 }
 
+export function toError(maybeError: any) {
+    let error: Error;
+    let originalError;
+    if (maybeError instanceof Error) {
+        error = maybeError;
+    } else {
+        error = new Error('Unrecognized error');
+        originalError = maybeError;
+    }
+    return { error, originalError };
+}
+
 export default class StraightforwardLogger {
     static error(maybeError: any, ...other: any[]) {
         let error;
@@ -23,11 +35,11 @@ export default class StraightforwardLogger {
             error = maybeError;
         } else {
             error = new Error('Unrecognized error');
-            isLoggable(3) && console.debug(maybeError);
+            isLoggable(LOG_LEVEL.DEBUG) && console.debug(maybeError);
         }
-        isLoggable(0) && console.error(error, ...other);
+        isLoggable(LOG_LEVEL.ERROR) && console.error(error, ...other);
     }
     static debug(message: any, ...other: any[]) {
-        isLoggable(3) && console.debug(message, ...other);
+        isLoggable(LOG_LEVEL.DEBUG) && console.debug(message, ...other);
     }
 }
