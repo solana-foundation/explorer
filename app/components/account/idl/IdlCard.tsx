@@ -7,8 +7,8 @@ import classNames from 'classnames';
 import { useEffect, useMemo, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Eye } from 'react-feather';
-import ReactJson from 'react-json-view';
 
+import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
 import { useProgramMetadataIdl } from '@/app/providers/useProgramMetadataIdl';
 import { getIdlSpecKeyType } from '@/app/utils/convertLegacyIdl';
 
@@ -174,7 +174,6 @@ function IdlRenderer({
         return (
             <ReactJson
                 src={idl}
-                theme={'solarized'}
                 style={{ padding: 25 }}
                 name={null}
                 enableClipboard={true}

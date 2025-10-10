@@ -1,4 +1,5 @@
 import { Address } from '@components/common/Address';
+import { SolarizedJsonViewer as ReactJson } from '@components/common/JsonViewer';
 import { BorshInstructionCoder, Idl, Program } from '@coral-xyz/anchor';
 import { IdlDefinedFields } from '@coral-xyz/anchor/dist/cjs/idl';
 import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
@@ -8,7 +9,6 @@ import { Cluster } from '@utils/cluster';
 import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/index';
 import React, { Fragment, ReactNode, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
-import ReactJson from 'react-json-view';
 
 const ANCHOR_SELF_CPI_TAG = Buffer.from('1d9acb512ea545e4', 'hex').reverse();
 const ANCHOR_SELF_CPI_NAME = 'Anchor Self Invocation';
@@ -107,7 +107,7 @@ export function mapIxArgsToRows(ixArgs: any, ixType: IdlInstruction, idl: Idl) {
                     <td>{key}</td>
                     <td className="text-lg-end">
                         <td className="metadata-json-viewer m-4">
-                            <ReactJson src={ixArgs} theme="solarized" />
+                            <ReactJson src={ixArgs} />
                         </td>
                     </td>
                 </tr>
@@ -146,7 +146,7 @@ export function mapAccountToRows(accountData: any, accountType: IdlTypeDef, idl:
                     <td>{key}</td>
                     <td className="text-lg-end">
                         <td className="metadata-json-viewer m-4">
-                            <ReactJson src={accountData} theme="solarized" />
+                            <ReactJson src={accountData} />
                         </td>
                     </td>
                 </tr>

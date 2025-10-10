@@ -1,7 +1,7 @@
 import { Account, NFTData } from '@providers/accounts';
 import { isTokenProgramData } from '@providers/accounts';
-import ReactJson from 'react-json-view';
 
+import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
 import { useCluster } from '@/app/providers/cluster';
 import { CompressedNft, useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { isRedactedTokenAddress } from '@/app/utils/token-info';
@@ -39,7 +39,7 @@ function NormalMetadataCard({ metadata }: { metadata: NFTData['metadata'] }) {
                 </div>
 
                 <div className="card metadata-json-viewer m-4">
-                    <ReactJson src={metadata} theme={'solarized'} style={{ padding: 25 }} name={false} />
+                    <ReactJson src={metadata} style={{ padding: 25 }} name={false} />
                 </div>
             </div>
         </>
