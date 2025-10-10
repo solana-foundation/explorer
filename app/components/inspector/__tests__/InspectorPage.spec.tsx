@@ -62,6 +62,12 @@ vi.mock('next/link', () => ({
     default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
 }));
 
+vi.mock('@sentry/nextjs', () => ({
+    captureException: vi.fn(),
+    captureMessage: vi.fn(),
+    withScope: vi.fn(),
+}));
+
 // Simple test to verify our mocks
 describe('TransactionInspectorPage with Squads Transaction', () => {
     const specificAccountKey = [
