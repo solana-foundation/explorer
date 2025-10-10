@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/nextjs';
+import { captureException, captureMessage, withScope } from '@sentry/nextjs';
 
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
 
@@ -38,7 +38,7 @@ interface CaptureMessageOptions {
  */
 export const captureApiException = (error: unknown, context: ApiErrorContext): void => {
     // Add context to Sentry scope
-    Sentry.withScope(scope => {
+    withScope(scope => {
         // Set tags for filtering
         if (context.cluster !== undefined) {
             const clusterName =
@@ -58,7 +58,7 @@ export const captureApiException = (error: unknown, context: ApiErrorContext): v
         });
 
         // Capture the exception
-        Sentry.captureException(error);
+        captureException(error);
     });
 };
 
@@ -72,7 +72,7 @@ export const captureApiMessage = (
 ): void => {
     const { level = SeverityLevel.Info, fingerprint, tags } = options;
 
-    Sentry.withScope(scope => {
+    withScope(scope => {
         // Set tags
         if (context.cluster !== undefined) {
             const clusterName =
@@ -104,6 +104,6 @@ export const captureApiMessage = (
         });
 
         // Capture the message
-        Sentry.captureMessage(message, level as Sentry.SeverityLevel);
+        captureMessage(message, level as SeverityLevel);
     });
 };

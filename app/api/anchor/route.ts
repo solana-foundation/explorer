@@ -4,7 +4,7 @@ import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
-// import { captureApiException } from '@/app/utils/issue-tracker';
+import { captureApiException } from '@/app/utils/issue-tracker';
 
 const CACHE_DURATION = 60 * 60; // 60 minutes
 
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Invalid cluster' }, { status: 400 });
     }
 
-    const _context = {
+    const context = {
         cluster: clusterProp,
         endpoint: '/api/anchor',
         programAddress,
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
             }
         );
     } catch (error) {
-        // captureApiException(error, context);
+        captureApiException(error, context);
 
         return NextResponse.json(
             { details: error, error: error instanceof Error ? error.message : 'Unknown error' },
