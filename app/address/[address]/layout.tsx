@@ -46,8 +46,10 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
 import useSWRImmutable from 'swr/immutable';
 
+import { ENABLED_PROGRAMS_FOR_CPI_CALLS } from '@/app/api/shared/constants';
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
+import { isFeatureEnabled as isProgramCpiCallsFeatureEnabled } from '@/app/features/program-cpi-calls';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { useProgramMetadataIdl } from '@/app/providers/useProgramMetadataIdl';
@@ -391,7 +393,8 @@ export type MoreTabs =
     | 'program-multisig'
     | 'feature-gate'
     | 'token-extensions'
-    | 'attestation';
+    | 'attestation'
+    | 'program-cpi-calls';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -557,6 +560,23 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
         tab: programMultisigTab,
     });
 
+    // Render Program CPI Calls tab only for specific programs
+    if (isProgramCpiCallsFeatureEnabled() && ENABLED_PROGRAMS_FOR_CPI_CALLS.includes(pubkey.toBase58())) {
+        const programCpiCallsTab: Tab = {
+            path: 'program-cpi-calls',
+            slug: 'program-cpi-calls',
+            title: 'Calling Programs',
+        };
+        tabComponents.push({
+            component: (
+                <React.Suspense key={programCpiCallsTab.slug} fallback={<></>}>
+                    <ProgramCpiCallsLink tab={programCpiCallsTab} address={pubkey.toString()} />
+                </React.Suspense>
+            ),
+            tab: programCpiCallsTab,
+        });
+    }
+
     // Add extensions tab for Token Extensions program accounts
     if (account.owner.toBase58() === TOKEN_2022_PROGRAM_ADDRESS) {
         const extensionsTab: Tab = {
@@ -565,7 +585,7 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
             title: 'Extensions',
         };
         tabComponents.push({
-            component: <TokenExtensionsLink key={extensionsTab.slug} tab={extensionsTab} address={pubkey.toString()} />,
+            component: <TokenExtensionsLink tab={extensionsTab} address={pubkey.toString()} />,
             tab: extensionsTab,
         });
     }
@@ -717,6 +737,20 @@ function ProgramMultisigLink({
     return (
         <li key={tab.slug} className="nav-item">
             <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath}>
+                {tab.title}
+            </Link>
+        </li>
+    );
+}
+
+function ProgramCpiCallsLink({ tab, address }: { tab: Tab; address: string }) {
+    const accountDataPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
+    const selectedLayoutSegment = useSelectedLayoutSegment();
+    const isActive = selectedLayoutSegment === tab.path;
+
+    return (
+        <li key={tab.slug} className="nav-item">
+            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={accountDataPath}>
                 {tab.title}
             </Link>
         </li>
