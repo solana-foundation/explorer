@@ -1,5 +1,6 @@
 import { address, createSolanaRpc, mainnet } from '@solana/kit';
 import { fetchMetadataFromSeeds, unpackAndFetchData } from '@solana-program/program-metadata';
+import { RootNode } from 'codama';
 
 export async function getProgramMetadataIdl(programAddress: string, url: string) {
     const rpc = createSolanaRpc(mainnet(url));
@@ -22,4 +23,11 @@ export async function getProgramMetadataIdl(programAddress: string, url: string)
     } catch (error) {
         throw new Error('JSON parse failed');
     }
+}
+
+export function programNameFromIdl(idl: RootNode) {
+    return idl.program.name
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
 }
