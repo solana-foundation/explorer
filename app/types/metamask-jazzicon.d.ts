@@ -5,7 +5,7 @@ declare module '@metamask/jazzicon' {
      * @param seed - The seed used to generate the identicon pattern
      * @returns The HTML container element with the SVG identicon
      */
-    function generateIdenticon(diameter: string | number, seed: number | string): HTMLElement;
+    function Jazzicon(diameter: number, seed: number): HTMLElement;
 
-    export = generateIdenticon;
+    export default Jazzicon;
 }
