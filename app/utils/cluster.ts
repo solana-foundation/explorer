@@ -67,11 +67,11 @@ export function clusterUrl(cluster: Cluster, customUrl: string): string {
 export function serverClusterUrl(cluster: Cluster, customUrl: string): string {
     switch (cluster) {
         case Cluster.Devnet:
-            return process.env.DEVNET_RPC_URL ?? modifyUrl(DEVNET_URL);
+            return process.env.NEXT_PUBLIC_DEVNET_RPC_URL ?? modifyUrl(DEVNET_URL);
         case Cluster.MainnetBeta:
-            return process.env.MAINNET_RPC_URL ?? modifyUrl(MAINNET_BETA_URL);
+            return process.env.NEXT_PUBLIC_MAINNET_RPC_URL ?? modifyUrl(MAINNET_BETA_URL);
         case Cluster.Testnet:
-            return process.env.TESTNET_RPC_URL ?? modifyUrl(TESTNET_URL);
+            return process.env.NEXT_PUBLIC_TESTNET_RPC_URL ?? modifyUrl(TESTNET_URL);
         case Cluster.Custom:
             return customUrl;
     }

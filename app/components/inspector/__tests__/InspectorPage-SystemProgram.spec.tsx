@@ -89,6 +89,12 @@ vi.mock('next/link', () => ({
 }));
 /** end */
 
+vi.mock('@sentry/nextjs', () => ({
+    captureException: vi.fn(),
+    captureMessage: vi.fn(),
+    withScope: vi.fn(),
+}));
+
 describe("TransactionInspectorPage with SystemProgram' instructions", () => {
     const originalFetch = global.fetch;
 
