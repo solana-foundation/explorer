@@ -42,7 +42,7 @@ export function useProgramCpiCalls(params: ProgramCpiCallsParams, options: UsePr
             if (!isProgramCpiCallsFeatureEnabled()) return null;
 
             // Build URL with query parameters
-            const url = new URL(`/api/${address}/program-calls`, 'https://origin');
+            const url = new URL(`/api/${address}/program-calls`, window.location.origin);
 
             url.searchParams.set('limit', limit.toString());
             url.searchParams.set('offset', offset.toString());
