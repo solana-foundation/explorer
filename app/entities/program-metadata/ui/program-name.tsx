@@ -3,6 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { RootNode } from 'codama';
 
+import { getProgramNameFromIdl } from '../lib/getProgramNameFromIdl';
 import { useProgramMetadataIdl } from '../model/useProgramMetadataIdl';
 
 export default function ProgramName({
@@ -19,15 +20,8 @@ export default function ProgramName({
     if (!programMetadataIdl) return null;
 
     try {
-        return <>{programNameFromIdl(programMetadataIdl)}</>;
+        return <>{getProgramNameFromIdl(programMetadataIdl)}</>;
     } catch {
-        return <>{programNameFromIdl(rootNodeFromAnchor(programMetadataIdl) as unknown as RootNode)}</>;
+        return <>{getProgramNameFromIdl(rootNodeFromAnchor(programMetadataIdl) as unknown as RootNode)}</>;
     }
-}
-
-function programNameFromIdl(idl: RootNode) {
-    return idl.program.name
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
 }
