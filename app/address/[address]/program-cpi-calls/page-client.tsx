@@ -24,7 +24,7 @@ const PageRenderer = withSentry(ProgramCpiCallsRenderComponent, {
 
 function ProgramCpiCallsRenderComponent({ address }: { address: string }) {
     if (!isProgramCpiCallsFeatureEnabled()) {
-        return <ErrorCard text="Feature is temporary disabled" />;
+        return <ErrorCard text="Feature is temporarily disabled" />;
     }
 
     if (!ENABLED_PROGRAMS_FOR_CPI_CALLS.includes(address)) {
