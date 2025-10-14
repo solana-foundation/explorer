@@ -24,10 +24,10 @@ function createRequest(address?: string, cluster?: Cluster, seed?: string) {
     if (address) params.append('programAddress', address);
     if (cluster) params.append('cluster', cluster.toString());
     if (seed) params.append('seed', seed);
-    return new Request(`http://localhost:3000/api/program-canonical-metadata?${params.toString()}`);
+    return new Request(`http://localhost:3000/api/programMetadataIdl?${params.toString()}`);
 }
 
-describe('GET api/program-canonical-metadata', () => {
+describe('GET api/programMetadataIdl', () => {
     afterEach(() => {
         vi.clearAllMocks();
     });
