@@ -28,6 +28,12 @@ export function createSentryConfig(_context: RuntimeContext): Partial<ClientOpti
                 return 0;
             }
 
+            // Don't sample infrastructure requests:
+            // - GET https://iad1.suspense-cache.vercel-infra.com/v1/suspense-cache/*
+            if (samplingContext.name.includes('suspense-cache.vercel-infra.com')) {
+                return 0;
+            }
+
             // We encountered the peak of 24M spans per day
             // Adjust the rate to fit the monthly quote
             return process.env.NODE_ENV === 'production' ? 0.0005 : 1;
