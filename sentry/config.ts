@@ -9,7 +9,7 @@ type RuntimeContext = 'client' | 'server' | 'edge';
  */
 export function createSentryConfig(_context: RuntimeContext): Partial<ClientOptions> {
     return {
-        sampleRate: 1, // Don't discard possible errors and issues
+        sampleRate: 0.1, // Track 10% of issues
 
         // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
         tracesSampler: (samplingContext: TracesSamplerSamplingContext) => {
