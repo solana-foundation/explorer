@@ -37,6 +37,7 @@
         "@radix-ui/react-tooltip": "1.1.8",
         "@react-hook/debounce": "4.0.0",
         "@react-hook/previous": "1.0.1",
+        "@sentry/core": "^10.17.0",
         "@sentry/nextjs": "10",
         "@solana-program/compute-budget": "0.6.1",
         "@solana-program/program-metadata": "0.1.0",
