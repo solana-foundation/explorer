@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { ProgramSecurityTxtCard } from '../SecurityCard';
-import defaultSecurityTxtlMock from './mocks/defaultSecurityTxt.json';
+import defaultSecurityTxtMock from './mocks/defaultSecurityTxt.json';
 
 const meta = {
     component: ProgramSecurityTxtCard,
