@@ -13,31 +13,31 @@ env:
   PNPM_CACHE_FOLDER: ~/.pnpm-store
 
 jobs:
-  # Job to read Node version from .nvmrc
-  read-nvmrc:
+  # Job to read Node version from .nmv
+  read-nmv:
     runs-on: ubuntu-latest
     outputs:
-      node-version: ${{ steps.nvmrc.outputs.NODE_VERSION }}
+      node-version: ${{ steps.nmv.outputs.NODE_VERSION }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            .nvmrc
+            .nmv
           sparse-checkout-cone-mode: false
 
-      - name: Read .nvmrc
-        id: nvmrc
-        run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+      - name: Read .nmv
+        id: nmv
+        run: echo "NODE_VERSION=$(cat .nmv)" >> $GITHUB_OUTPUT
 
   Build-And-Test:
-    needs: read-nvmrc
+    needs: read-nmv
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
     strategy:
       matrix:
-        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}']
+        node-version: ['${{ needs.read-nmv.outputs.node-version }}']
 
     steps:
       - name: Checkout
