@@ -1,19 +1,29 @@
+import { CompressedNftAccountHeader } from '@components/account/CompressedNftCard';
 import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
 import { isNFTokenAccount } from '@components/account/nftoken/isNFTokenAccount';
 import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
 import { Identicon } from '@components/common/Identicon';
-import { Account, isTokenProgramData, TokenProgramData, useMintAccountInfo } from '@providers/accounts';
+import ProgramLogoPlaceholder from '@img/program-logo-placeholder.svg';
+import {
+    Account,
+    isTokenProgramData,
+    isUpgradeableLoaderAccountData,
+    TokenProgramData,
+    type UpgradeableLoaderAccountData,
+    useMintAccountInfo,
+} from '@providers/accounts';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
+import { useMetadataJsonLink } from '@providers/compressed-nft';
+import { MintAccountInfo } from '@validators/accounts/token';
 import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension';
+import Image from 'next/image';
 import React, { Suspense, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'superstruct';
 
-import { CompressedNftAccountHeader } from '@/app/components/account/CompressedNftCard';
 import { getProxiedUri } from '@/app/features/metadata/utils';
-import { useMetadataJsonLink } from '@/app/providers/compressed-nft';
-import { FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
-import { MintAccountInfo } from '@/app/validators/accounts/token';
+import { isPmpSecurityTXT, useSecurityTxt } from '@/app/features/security-txt';
+import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 
 const IDENTICON_WIDTH = 64;
 
@@ -31,7 +41,9 @@ export function AccountHeader({
     const mintInfo = useMintAccountInfo(address);
 
     const parsedData = account?.data.parsed;
+
     const isToken = parsedData && isTokenProgramData(parsedData) && parsedData?.parsed.type === 'mint';
+    const isProgram = parsedData && isUpgradeableLoaderAccountData(parsedData) && parsedData?.parsed.type === 'program';
 
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
@@ -49,6 +61,10 @@ export function AccountHeader({
             );
         }
         return <TokenMintHeader address={address} mintInfo={mintInfo} parsedData={parsedData} tokenInfo={tokenInfo} />;
+    }
+
+    if (isProgram) {
+        return <ProgramHeader address={address} parsedData={parsedData} />;
     }
 
     const fallback = (
@@ -222,6 +238,62 @@ function TokenMintHeaderCard({
                 <div className="header-pretitle no-overflow-with-ellipsis">
                     {token?.symbol ? token.symbol : 'No Symbol was found'}
                 </div>
+            </div>
+        </div>
+    );
+}
+
+function ProgramHeader({ address, parsedData }: { address: string; parsedData: UpgradeableLoaderAccountData }) {
+    const securityTxt = useSecurityTxt(address, parsedData);
+
+    const { programName, logo, version } = ((): { programName: string; logo?: string; version?: string } => {
+        if (!securityTxt) {
+            return {
+                programName: 'Program Account',
+            };
+        }
+        if (isPmpSecurityTXT(securityTxt)) {
+            return {
+                logo: getProxiedUri(securityTxt.logo),
+                programName: securityTxt.name,
+                version: securityTxt.version,
+            };
+        }
+        return {
+            programName: securityTxt.name,
+        };
+    })();
+
+    return (
+        <div className="row align-items-center">
+            <div className="col-auto">
+                <div className="avatar avatar-lg header-avatar-top">
+                    {logo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            alt="Program logo"
+                            className="avatar-img rounded border border-4 border-body"
+                            height={16}
+                            src={logo}
+                            width={16}
+                        />
+                    ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <Image
+                            src={ProgramLogoPlaceholder}
+                            height={IDENTICON_WIDTH}
+                            width={IDENTICON_WIDTH}
+                            alt="Program logo placeholder"
+                            className="avatar-img rounded border border-body"
+                        />
+                    )}
+                </div>
+            </div>
+
+            <div className="col ms-n3 ms-md-n2">
+                <h6 className="header-pretitle">Program account</h6>
+                <h2 className="header-title">{programName}</h2>
+                {version && <div className="header-pretitle no-overflow-with-ellipsis">{version}</div>}
             </div>
         </div>
     );

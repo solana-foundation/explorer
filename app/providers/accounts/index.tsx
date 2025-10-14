@@ -55,6 +55,10 @@ export type UpgradeableLoaderAccountData = {
     programData?: ProgramDataAccountInfo;
 };
 
+export function isUpgradeableLoaderAccountData(data: { program: string }): data is UpgradeableLoaderAccountData {
+    return data.program === 'bpf-upgradeable-loader';
+}
+
 export type NFTData = {
     metadata: programs.metadata.MetadataData;
     json: MetadataJson | undefined;
