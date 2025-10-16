@@ -6,7 +6,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getProgramMetadataIdl } from '@/app/components/instruction/codama/getProgramMetadataIdl';
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
-import { GET, routeFunctions } from '../route';
+import { GET } from '../route';
+import { getMetadataEndpointUrl } from '../feature/endpoints';
 
 const MAINNET_RPC = 'http://mainnet.rpc.address';
 const DEVNET_RPC = 'http://devnet.rpc.address';
@@ -36,6 +37,10 @@ vi.mock('@solana/kit', async () => {
         isSolanaError: vi.fn(),
     };
 });
+
+vi.mock('../feature/endpoints', () => ({
+    getMetadataEndpointUrl: vi.fn(),
+}));
 
 // Create a mock SolanaError
 const createMockSolanaError = (code: number = SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND) => {
@@ -123,7 +128,7 @@ describe('[api] programMetadataIdl', () => {
 
     describe('Happy path', () => {
         it('should return IDL data with correct cache headers', async () => {
-            vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
+            vi.mocked(getMetadataEndpointUrl).mockReturnValueOnce(MAINNET_RPC);
 
             const mockIdl = createMockIdl();
             vi.mocked(getProgramMetadataIdl).mockResolvedValue(mockIdl);
@@ -141,7 +146,7 @@ describe('[api] programMetadataIdl', () => {
         });
 
         it('should call getProgramMetadataIdl with correct parameters', async () => {
-            vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
+            vi.mocked(getMetadataEndpointUrl).mockReturnValueOnce(MAINNET_RPC);
 
             const mockIdl = createMockIdl();
             vi.mocked(getProgramMetadataIdl).mockResolvedValue(mockIdl);
@@ -155,7 +160,7 @@ describe('[api] programMetadataIdl', () => {
         });
 
         it('should handle different cluster values correctly', async () => {
-            const spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl');
+            const spy = vi.mocked(getMetadataEndpointUrl);
 
             const mockIdl = createMockIdl();
             vi.mocked(getProgramMetadataIdl).mockResolvedValue(mockIdl);
@@ -185,7 +190,7 @@ describe('[api] programMetadataIdl', () => {
 
     describe('Error handling', () => {
         it('should return null codamaIdl when SolanaError with expected code is thrown', async () => {
-            vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
+            vi.mocked(getMetadataEndpointUrl).mockReturnValueOnce(MAINNET_RPC);
 
             const solanaError = createMockSolanaError();
             vi.mocked(getProgramMetadataIdl).mockRejectedValue(solanaError);
@@ -208,7 +213,7 @@ describe('[api] programMetadataIdl', () => {
         });
 
         it('should handle Error objects correctly', async () => {
-            vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
+            vi.mocked(getMetadataEndpointUrl).mockReturnValueOnce(MAINNET_RPC);
 
             const errorMessage = 'Failed to fetch IDL';
             const error = new Error(errorMessage);
@@ -231,7 +236,7 @@ describe('[api] programMetadataIdl', () => {
         });
 
         it('should handle non-Error objects correctly', async () => {
-            vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
+            vi.mocked(getMetadataEndpointUrl).mockReturnValueOnce(MAINNET_RPC);
 
             const error = { code: 'NETWORK_ERROR', message: 'Network failure' };
             vi.mocked(getProgramMetadataIdl).mockRejectedValue(error);
@@ -252,7 +257,7 @@ describe('[api] programMetadataIdl', () => {
         });
 
         it('should handle string errors correctly', async () => {
-            vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
+            vi.mocked(getMetadataEndpointUrl).mockReturnValueOnce(MAINNET_RPC);
 
             const error = 'String error message';
             vi.mocked(getProgramMetadataIdl).mockRejectedValue(error);

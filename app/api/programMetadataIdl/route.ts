@@ -3,10 +3,10 @@ import { NextResponse } from 'next/server';
 
 import { errors, getProgramMetadataIdl } from '@/app/components/instruction/codama/getProgramMetadataIdl';
 import { normalizeUnknownError } from '@/app/shared/unknown-error';
-import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
+import { Cluster } from '@/app/utils/cluster';
 import Logger from '@/app/utils/logger';
 
-import { isClusterSupported } from './feature/cluster';
+import { getMetadataEndpointUrl } from './feature/endpoints';
 
 const CACHE_DURATION = 30 * 60; // 30 minutes
 
@@ -28,17 +28,6 @@ function isExpectedSolanaError(error: Error) {
     return result;
 }
 
-function getMetadataEndpointUrl(cluster: number): string | undefined {
-    if (!isClusterSupported(cluster)) {
-        return undefined;
-    }
-    return serverClusterUrl(cluster, '');
-}
-
-export const routeFunctions = {
-    getMetadataEndpointUrl,
-};
-
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const clusterProp = searchParams.get('cluster');
@@ -49,7 +38,7 @@ export async function GET(request: Request) {
     }
 
     const cluster: Cluster = Number(clusterProp);
-    const url = routeFunctions.getMetadataEndpointUrl(cluster);
+    const url = getMetadataEndpointUrl(cluster);
 
     if (!url) {
         return NextResponse.json({ error: 'Invalid cluster' }, { status: 400 });
