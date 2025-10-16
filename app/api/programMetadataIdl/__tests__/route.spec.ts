@@ -6,8 +6,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getProgramMetadataIdl } from '@/app/components/instruction/codama/getProgramMetadataIdl';
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
-import { GET } from '../route';
 import { getMetadataEndpointUrl } from '../feature/endpoints';
+import { GET } from '../route';
 
 const MAINNET_RPC = 'http://mainnet.rpc.address';
 const DEVNET_RPC = 'http://devnet.rpc.address';
