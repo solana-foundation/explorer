@@ -38,7 +38,7 @@ vi.mock('@solana/kit', async () => {
 });
 
 // Create a mock SolanaError
-const createMockSolanaError = (code: number = 3230000) => {
+const createMockSolanaError = (code: number = SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND) => {
     const error = new Error('Solana error') as any;
     error.context = {
         __code: code,
