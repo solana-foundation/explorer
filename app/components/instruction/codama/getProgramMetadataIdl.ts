@@ -5,7 +5,7 @@ import { normalizeUnknownError } from '@/app/shared/unknown-error';
 import { Cluster } from '@/app/utils/cluster';
 
 export const errors = {
-    422: 'JSON parse faield',
+    422: 'JSON parse failed',
     500: 'Metadata fetch failed',
     501: 'Cluster is not supported',
 };
