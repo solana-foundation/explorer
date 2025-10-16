@@ -117,7 +117,7 @@ describe('[public] getProgramMetadataIdl', () => {
         version: '0.1.0',
     };
 
-    describe('expected failures during cluster parameter validation', () => {
+    describe('Expected failures during cluster parameter validation', () => {
         beforeEach(() => {
             vi.clearAllMocks();
         });
@@ -154,7 +154,7 @@ describe('[public] getProgramMetadataIdl', () => {
         });
     });
 
-    describe('happy path', () => {
+    describe('Happy path', () => {
         beforeEach(() => {
             vi.clearAllMocks();
         });

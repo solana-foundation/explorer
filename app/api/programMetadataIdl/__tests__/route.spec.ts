@@ -73,7 +73,7 @@ describe('[api] programMetadataIdl', () => {
         vi.clearAllMocks();
     });
 
-    describe('Input Validation', () => {
+    describe('Input validation', () => {
         it('should return 400 when programAddress is missing', async () => {
             const request = createValidRequest({ programAddress: '' }, MAINNET_RPC);
             const urlWithoutProgramAddress = request.url.replace('programAddress=&', '');
@@ -123,7 +123,7 @@ describe('[api] programMetadataIdl', () => {
 
     describe('Happy path', () => {
         it('should return IDL data with correct cache headers', async () => {
-            const spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
+            const _spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
 
             const mockIdl = createMockIdl();
             vi.mocked(getProgramMetadataIdl).mockResolvedValue(mockIdl);
@@ -141,7 +141,7 @@ describe('[api] programMetadataIdl', () => {
         });
 
         it('should call getProgramMetadataIdl with correct parameters', async () => {
-            const spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
+            const _spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
 
             const mockIdl = createMockIdl();
             vi.mocked(getProgramMetadataIdl).mockResolvedValue(mockIdl);
@@ -155,7 +155,7 @@ describe('[api] programMetadataIdl', () => {
         });
 
         it('should handle different cluster values correctly', async () => {
-            const spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl');
+            const _spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl');
 
             const mockIdl = createMockIdl();
             vi.mocked(getProgramMetadataIdl).mockResolvedValue(mockIdl);
@@ -183,9 +183,9 @@ describe('[api] programMetadataIdl', () => {
         });
     });
 
-    describe('Error Handling', () => {
+    describe('Error handling', () => {
         it('should return null codamaIdl when SolanaError with expected code is thrown', async () => {
-            const spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
+            const _spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
 
             const solanaError = createMockSolanaError();
             vi.mocked(getProgramMetadataIdl).mockRejectedValue(solanaError);
@@ -208,7 +208,7 @@ describe('[api] programMetadataIdl', () => {
         });
 
         it('should handle Error objects correctly', async () => {
-            const spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
+            const _spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
 
             const errorMessage = 'Failed to fetch IDL';
             const error = new Error(errorMessage);
@@ -231,7 +231,7 @@ describe('[api] programMetadataIdl', () => {
         });
 
         it('should handle non-Error objects correctly', async () => {
-            const spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
+            const _spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
 
             const error = { code: 'NETWORK_ERROR', message: 'Network failure' };
             vi.mocked(getProgramMetadataIdl).mockRejectedValue(error);
@@ -252,7 +252,7 @@ describe('[api] programMetadataIdl', () => {
         });
 
         it('should handle string errors correctly', async () => {
-            const spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
+            const _spy = vi.spyOn(routeFunctions, 'getMetadataEndpointUrl').mockReturnValueOnce(MAINNET_RPC);
 
             const error = 'String error message';
             vi.mocked(getProgramMetadataIdl).mockRejectedValue(error);
