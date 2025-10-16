@@ -50,7 +50,7 @@ export const NoSecurityTxt: Story = {
 
 export const ValidPmpSecurityTxt: Story = {
     args: {
-        pmpSecurityTxt: defaultSecurityTxtlMock,
+        pmpSecurityTxt: defaultSecurityTxtMock,
         programAddress: '11111111111111111111111111111111',
         programDataSecurityTxt: undefined,
     },

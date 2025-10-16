@@ -39,11 +39,11 @@ describe('GET api/programMetadataIdl', () => {
         const request3 = createRequest(undefined, Cluster.Devnet, 'idl'); // missing programAddress
 
         const res = await Promise.all([GET(request1), GET(request2), GET(request3)]);
-        res.forEach(async r => {
+        for (const r of res) {
             expect(r.status).toBe(400);
             const data = await r.json();
             expect(data.error).toBe('Invalid query params');
-        });
+        }
     });
 
     it('should reject when cluster is invalid', async () => {

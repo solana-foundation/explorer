@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { PmpSecurityTxtTable } from '../PmpSecurityTxtTable';
-import defaultSecurityTxtlMock from './mocks/defaultSecurityTxt.json';
+import defaultSecurityTxtMock from './mocks/defaultSecurityTxt.json';
 
 const meta = {
     component: PmpSecurityTxtTable,
@@ -35,7 +35,7 @@ type Story = StoryObj<typeof meta>;
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary: Story = {
     args: {
-        data: defaultSecurityTxtlMock as any,
+        data: defaultSecurityTxtMock as any,
     },
 };
 
