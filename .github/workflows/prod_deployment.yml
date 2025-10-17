@@ -1,41 +1,22 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [master, development]
+  push:
+    branches: [master]
 
 env:
-  # cache folders for pnpm_store, nextjs and playwright
+  # cash folder for pnpm_store, nextjs and playwright later on
   PW_CACHE_AFFIX: pw
   PW_CACHE_FOLDER: ~/.cache/ms-playwright
   PNPM_CACHE_FOLDER: ~/.pnpm-store
-  SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING: 1
 
 jobs:
-  # Job to read Node version from .nvmrc
-  read-nvmrc:
-    runs-on: ubuntu-latest
-    outputs:
-      node-version: ${{ steps.nvmrc.outputs.NODE_VERSION }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          sparse-checkout: |
-            .nvmrc
-          sparse-checkout-cone-mode: false
-
-      - name: Read .nvmrc
-        id: nvmrc
-        run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
-
-  Build-And-Test:
-    needs: read-nvmrc
+  static-checks:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
     env:
-      DATABASE_URL: ${{ vars.DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
       DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
       DUNE_PROGRAM_STATS_MV_ID: ${{ vars.DUNE_PROGRAM_STATS_MV_ID }}
       DUNE_PROGRAM_CALLS_MV_ID: ${{ vars.DUNE_PROGRAM_CALLS_MV_ID }}
@@ -43,7 +24,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}']
+        node-version: ['20.x']
 
     steps:
       - name: Checkout
@@ -88,11 +69,14 @@ jobs:
       - name: Code-style
         run: pnpm format:ci
 
-      - name: Database migration
-        run: NODE_ENV=test pnpm drizzle-kit migrate
-
       - name: Test
         env:
           TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
         run: |
           pnpm test:ci
+
+      - name: Database migration
+        run: NODE_ENV=production pnpm drizzle-kit migrate
+
+      - name: Trigger Vercel Deploy
+        run: curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}"
