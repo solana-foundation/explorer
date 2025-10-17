@@ -5,6 +5,7 @@
     "scripts": {
         "build": "next build",
         "build-manifest": "node scripts/build-manifest.js",
+        "build:info": "node scripts/update-build-info.js",
         "build-sb": "storybook build",
         "coverage": "vitest --coverage",
         "dev": "next dev",
