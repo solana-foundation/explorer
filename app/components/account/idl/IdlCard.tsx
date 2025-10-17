@@ -9,7 +9,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { Eye } from 'react-feather';
 
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
-import { useProgramMetadataIdl } from '@/app/providers/useProgramMetadataIdl';
+import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
 import { getIdlSpecKeyType } from '@/app/utils/convertLegacyIdl';
 
 import { DownloadableButton } from '../../common/Downloadable';

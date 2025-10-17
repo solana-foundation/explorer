@@ -1,21 +1,10 @@
-import { ProgramDataAccountInfo } from '@validators/accounts/upgradeable-program';
+import type { ProgramDataAccountInfo } from '@/app/validators/accounts/upgradeable-program';
 
-export type SecurityTXT = {
-    name: string;
-    project_url: string;
-    contacts: string;
-    policy: string;
-    preferred_languages?: string;
-    encryption?: string;
-    source_code?: string;
-    source_release?: string;
-    source_revision?: string;
-    auditors?: string;
-    acknowledgements?: string;
-    expiry?: string;
-};
-const REQUIRED_KEYS: (keyof SecurityTXT)[] = ['name', 'project_url', 'contacts', 'policy'];
-const VALID_KEYS: (keyof SecurityTXT)[] = [
+import { NO_SECURITY_TXT_ERROR } from './constants';
+import type { NeodymeSecurityTXT } from './types';
+
+const REQUIRED_KEYS: (keyof NeodymeSecurityTXT)[] = ['name', 'project_url', 'contacts', 'policy'];
+const VALID_KEYS: (keyof NeodymeSecurityTXT)[] = [
     'name',
     'project_url',
     'contacts',
@@ -33,7 +22,9 @@ const VALID_KEYS: (keyof SecurityTXT)[] = [
 const HEADER = '=======BEGIN SECURITY.TXT V1=======\0';
 const FOOTER = '=======END SECURITY.TXT V1=======\0';
 
-export const fromProgramData = (programData: ProgramDataAccountInfo): { securityTXT?: SecurityTXT; error?: string } => {
+export const fromProgramData = (
+    programData: ProgramDataAccountInfo
+): { securityTXT?: NeodymeSecurityTXT; error?: string } => {
     const [data, encoding] = programData.data;
     if (!(data && encoding === 'base64')) return { error: 'Failed to decode program data', securityTXT: undefined };
 
@@ -43,7 +34,7 @@ export const fromProgramData = (programData: ProgramDataAccountInfo): { security
     const footerIdx = decoded.indexOf(FOOTER);
 
     if (headerIdx < 0 || footerIdx < 0) {
-        return { error: 'Program has no security.txt', securityTXT: undefined };
+        return { error: NO_SECURITY_TXT_ERROR, securityTXT: undefined };
     }
 
     /*
@@ -92,5 +83,5 @@ export const fromProgramData = (programData: ProgramDataAccountInfo): { security
             securityTXT: undefined,
         };
     }
-    return { error: undefined, securityTXT: map as SecurityTXT };
+    return { error: undefined, securityTXT: map as NeodymeSecurityTXT };
 };
