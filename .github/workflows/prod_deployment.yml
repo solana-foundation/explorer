@@ -8,6 +8,7 @@ env:
   # cash folder for pnpm_store, nextjs and playwright later on
   PW_CACHE_AFFIX: pw
   PW_CACHE_FOLDER: ~/.cache/ms-playwright
+  PNPM_CACHE_FOLDER: ~/.pnpm-store
 
 jobs:
   static-checks:
@@ -23,40 +24,41 @@ jobs:
 
     strategy:
       matrix:
-        node-version: ['20.x']
+        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}']
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Install package manager
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8.6.6
+        uses: pnpm/action-setup@v4
+
+      # Configure pnpm store directory BEFORE setup-node tries to cache it
+      - name: Setup pnpm config
+        run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
 
-      - name: Setup pnpm config
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-
-      - name: Setup Cache
+      - name: Setup Additional Cache
         uses: actions/cache@v4
-        id: pnpm_store_cache
+        id: additional_cache
         with:
           path: |
+            ${{ env.PNPM_CACHE_FOLDER }}
             ${{ env.PW_CACHE_FOLDER }}
             ${{ github.workspace }}/.next/cache
           key: ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
           restore-keys: |
-            ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-
             ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm build
