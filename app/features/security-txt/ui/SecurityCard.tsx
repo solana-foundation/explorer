@@ -59,6 +59,13 @@ export function ProgramSecurityTxtCard({
         return <ErrorCard text={NO_SECURITY_TXT_ERROR} />;
     }
 
+    // Determine which table component to render
+    const securityTable = pmpSecurityTxt ? (
+        <PmpSecurityTxtTable data={pmpSecurityTxt} />
+    ) : programDataSecurityTxt ? (
+        <NeodymeSecurityTxtTable data={programDataSecurityTxt} />
+    ) : null;
+
     return (
         <div className="card security-txt">
             <div className="card-header e-flex e-h-auto e-min-h-[60px] e-items-center">
@@ -83,11 +90,7 @@ export function ProgramSecurityTxtCard({
                 </small>
             </div>
             <ErrorBoundary fallback={<div className="card-body text-center">Invalid security.txt</div>}>
-                {pmpSecurityTxt ? (
-                    <PmpSecurityTxtTable data={pmpSecurityTxt!} />
-                ) : (
-                    Boolean(programDataSecurityTxt) && <NeodymeSecurityTxtTable data={programDataSecurityTxt!} />
-                )}
+                {securityTable}
             </ErrorBoundary>
         </div>
     );
