@@ -1,9 +1,12 @@
+'use client';
+
 import { fetch } from 'cross-fetch';
 import useSWRImmutable from 'swr/immutable';
 
-import { getProgramCanonicalMetadata } from '@/app/components/instruction/codama/getProgramCanonicalMetadata';
 import { Cluster } from '@/app/utils/cluster';
 import Logger from '@/app/utils/logger';
+
+import { getProgramCanonicalMetadata } from '../api/getProgramCanonicalMetadata';
 
 export function useProgramCanonicalMetadata(
     programAddress: string,

@@ -58,7 +58,7 @@ describe('GET api/programMetadataIdl', () => {
     it('should handle errors from getProgramCanonicalMetadata call', async () => {
         const { GET } = await importRoute();
         const { getProgramCanonicalMetadata } = await import(
-            '@/app/components/instruction/codama/getProgramCanonicalMetadata'
+            '@/app/entities/program-metadata/api/getProgramCanonicalMetadata'
         );
         const expectedError = new Error('Request failed!');
         (getProgramCanonicalMetadata as any).mockImplementationOnce(() => {

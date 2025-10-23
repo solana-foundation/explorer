@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { getProgramCanonicalMetadata } from '@/app/components/instruction/codama/getProgramCanonicalMetadata';
+import { getProgramCanonicalMetadata } from '@/app/entities/program-metadata/api/getProgramCanonicalMetadata';
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
 const CACHE_DURATION = 30 * 60; // 30 minutes
