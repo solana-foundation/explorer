@@ -14,9 +14,11 @@
         "sb": "storybook dev -p 6006",
         "scan": "next dev & react-scan localhost:3000",
         "start": "next start",
-        "test": "vitest --project specs --watch",
+        "test": "vitest --project specs run",
         "test:ci": "vitest --project specs run",
-        "test:sb": "vitest --project storybook --watch"
+        "test:watch": "vitest --project specs --watch",
+        "test:sb": "vitest --project storybook run",
+        "test:sb:watch": "vitest --project storybook --watch"
     },
     "dependencies": {
         "@blockworks-foundation/mango-client": "3.6.7",
