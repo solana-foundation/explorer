@@ -12,6 +12,7 @@ env:
   PW_CACHE_FOLDER: ~/.cache/ms-playwright
   PNPM_CACHE_FOLDER: ~/.pnpm-store
   SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING: 1
+  SENTRY_TELEMETRY_DISABLE: true
 
 jobs:
   # Job to read Node version from .nvmrc
