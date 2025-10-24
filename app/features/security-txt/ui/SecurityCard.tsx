@@ -30,7 +30,7 @@ export function SecurityCard({ data, pubkey }: { data: UpgradeableLoaderAccountD
 
     if (!securityTXT && !programMetadataSecurityTxt && error) {
         if (error === NO_SECURITY_TXT_ERROR) {
-            <EmptySecurityTxtCard programAddress={pubkey.toString()} />;
+            return <EmptySecurityTxtCard programAddress={pubkey.toString()} />;
         } else {
             return <ErrorCard text={error} />;
         }
