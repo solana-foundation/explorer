@@ -65,6 +65,10 @@ export function ProgramSecurityTxtCard({
                     <div className="mb-4">{NO_SECURITY_TXT_ERROR}</div>
 
                     <div className="mb-4">
+                        <p>
+                            This program did not provide Security.txt information yet. If you are the maintainer of this
+                            program you can use the following command to add your information.
+                        </p>
                         <div className="p-2 rounded text-start border d-inline-flex align-items-center text-sm">
                             <Copyable text={copyableTxt}>
                                 <code className="font-monospace small text-muted">{copyableTxt}</code>
@@ -78,7 +82,7 @@ export function ProgramSecurityTxtCard({
                             rel="noopener noreferrer"
                             className="btn btn-outline-primary btn-sm"
                         >
-                            Or read about Program Metadata Program security.txt at the docs
+                            For further details please follow the documentation
                         </a>
                     </div>
                 </div>
