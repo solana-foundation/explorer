@@ -271,7 +271,7 @@ function ProgramHeader({ address, parsedData }: { address: string; parsedData: U
         }
         return {
             programName: securityTxt.name,
-            unverified: undefined,
+            unverified: true,
         };
     })();
 
