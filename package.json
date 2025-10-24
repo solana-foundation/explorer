@@ -4,6 +4,7 @@
     "private": true,
     "scripts": {
         "build": "next build",
+        "build:info": "node scripts/update-build-info.js",
         "build-sb": "storybook build",
         "coverage": "vitest --coverage",
         "dev": "next dev",
