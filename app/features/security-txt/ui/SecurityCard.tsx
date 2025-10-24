@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { AlertCircle } from 'react-feather';
 
-import { Copyable } from '@/app/components/common/Copyable';
 import { DownloadableButton } from '@/app/components/common/Downloadable';
 import { ErrorCard } from '@/app/components/common/ErrorCard';
 import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
@@ -14,6 +13,7 @@ import { NO_SECURITY_TXT_ERROR } from '../lib/constants';
 import { fromProgramData } from '../lib/fromProgramData';
 import type { NeodymeSecurityTXT } from '../lib/types';
 import { SecurityTxtVersionBadge } from './common';
+import { EmptySecurityTxtCard } from './EmptySecurityTxtCard';
 import { NeodymeSecurityTxtTable } from './NeodymeSecurityTxtTable';
 import { PmpSecurityTxtTable } from './PmpSecurityTxtTable';
 import { securityTxtDataToBase64 } from './utils';
@@ -27,8 +27,13 @@ export function SecurityCard({ data, pubkey }: { data: UpgradeableLoaderAccountD
     }
 
     const { securityTXT, error } = fromProgramData(data.programData);
+
     if (!securityTXT && !programMetadataSecurityTxt && error) {
-        return <ErrorCard text={error} />;
+        if (error === NO_SECURITY_TXT_ERROR) {
+            <EmptySecurityTxtCard programAddress={pubkey.toString()} />;
+        } else {
+            return <ErrorCard text={error} />;
+        }
     }
     return (
         <ProgramSecurityTxtCard
@@ -57,37 +62,7 @@ export function ProgramSecurityTxtCard({
     }, [programDataSecurityTxt, pmpSecurityTxt]);
 
     if (!programDataSecurityTxt && !pmpSecurityTxt) {
-        const copyableTxt = `npx @solana-program/program-metadata@latest write security ${programAddress} ./security.json`;
-
-        return (
-            <div className="card">
-                <div className="card-body text-center">
-                    <div className="mb-4">{NO_SECURITY_TXT_ERROR}</div>
-
-                    <div className="mb-4">
-                        <p>
-                            This program did not provide Security.txt information yet. If you are the maintainer of this
-                            program you can use the following command to add your information.
-                        </p>
-                        <div className="p-2 rounded text-start border d-inline-flex align-items-center text-sm">
-                            <Copyable text={copyableTxt}>
-                                <code className="font-monospace small text-muted">{copyableTxt}</code>
-                            </Copyable>
-                        </div>
-                    </div>
-                    <div className="text-muted">
-                        <a
-                            href="https://github.com/solana-program/program-metadata"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-outline-primary btn-sm"
-                        >
-                            For further details please follow the documentation
-                        </a>
-                    </div>
-                </div>
-            </div>
-        );
+        return <EmptySecurityTxtCard programAddress={programAddress} />;
     }
 
     // Determine which table component to render
