@@ -114,14 +114,12 @@ export function ProgramSecurityTxtCard({
                     </DownloadableButton>
                 </div>
             </div>
-            {pmpSecurityTxt ? (
-                <div className="e-px-6 e-py-4">
-                    <small className="text-warning e-flex e-gap-1">
-                        <AlertCircle size={16} className="e-mt-0.5" />
-                        Note that this is self-reported by the author of the program and might not be accurate
-                    </small>
-                </div>
-            ) : null}
+            <div className="e-px-6 e-py-4">
+                <small className="text-warning e-flex e-gap-1">
+                    <AlertCircle size={16} className="e-mt-0.5" />
+                    Note that this is self-reported by the author of the program and might not be accurate
+                </small>
+            </div>
             <ErrorBoundary fallback={<div className="card-body text-center">Invalid security.txt</div>}>
                 {securityTable}
             </ErrorBoundary>
