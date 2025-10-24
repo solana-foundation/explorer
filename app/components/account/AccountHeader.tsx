@@ -67,7 +67,7 @@ export function AccountHeader({
 
     if (isProgram) {
         // NOTE: it is not clear how security data should be verified atm. Mark all as unverified
-        return <ProgramHeader address={address} parsedData={parsedData} unverified />;
+        return <ProgramHeader address={address} parsedData={parsedData} />;
     }
 
     const fallback = (
@@ -246,32 +246,32 @@ function TokenMintHeaderCard({
     );
 }
 
-function ProgramHeader({
-    address,
-    parsedData,
-    unverified,
-}: {
-    address: string;
-    parsedData: UpgradeableLoaderAccountData;
-    unverified: boolean;
-}) {
+function ProgramHeader({ address, parsedData }: { address: string; parsedData: UpgradeableLoaderAccountData }) {
     const securityTxt = useSecurityTxt(address, parsedData);
 
-    const { programName, logo, version } = ((): { programName: string; logo?: string; version?: string } => {
+    const { programName, logo, version, unverified } = ((): {
+        programName: string;
+        logo?: string;
+        version?: string;
+        unverified?: boolean;
+    } => {
         if (!securityTxt) {
             return {
                 programName: 'Program Account',
+                unverified: undefined,
             };
         }
         if (isPmpSecurityTXT(securityTxt)) {
             return {
                 logo: getProxiedUri(securityTxt.logo),
                 programName: securityTxt.name,
+                unverified: true,
                 version: securityTxt.version,
             };
         }
         return {
             programName: securityTxt.name,
+            unverified: undefined,
         };
     })();
 
