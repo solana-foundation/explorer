@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { AlertCircle } from 'react-feather';
 
+import { Copyable } from '@/app/components/common/Copyable';
 import { DownloadableButton } from '@/app/components/common/Downloadable';
 import { ErrorCard } from '@/app/components/common/ErrorCard';
 import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
@@ -56,7 +57,33 @@ export function ProgramSecurityTxtCard({
     }, [programDataSecurityTxt, pmpSecurityTxt]);
 
     if (!programDataSecurityTxt && !pmpSecurityTxt) {
-        return <ErrorCard text={NO_SECURITY_TXT_ERROR} />;
+        const copyableTxt = `npx @solana-program/program-metadata@latest write security ${programAddress} ./security.json`;
+
+        return (
+            <div className="card">
+                <div className="card-body text-center">
+                    <div className="mb-4">{NO_SECURITY_TXT_ERROR}</div>
+
+                    <div className="mb-4">
+                        <div className="p-2 rounded text-start border d-inline-flex align-items-center text-sm">
+                            <Copyable text={copyableTxt}>
+                                <code className="font-monospace small text-muted">{copyableTxt}</code>
+                            </Copyable>
+                        </div>
+                    </div>
+                    <div className="text-muted">
+                        <a
+                            href="https://github.com/solana-program/program-metadata"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-outline-primary btn-sm"
+                        >
+                            Or read about Program Metadata Program security.txt at the docs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     // Determine which table component to render

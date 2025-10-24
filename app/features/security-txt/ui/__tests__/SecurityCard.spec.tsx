@@ -41,12 +41,17 @@ describe('SecurityCard (mocked useProgramMetadataSecurityTxt)', () => {
         expect(screen.getByText(/Account has no data/i)).toBeInTheDocument();
     });
 
-    it("should show error when account doesn't have any security.txt", () => {
+    it("should show error when account doesn't have any security.txt", async () => {
         (useProgramMetadataSecurityTxt as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
             programMetadataSecurityTxt: null,
         });
+        vi.spyOn(await import('../../lib/fromProgramData'), 'fromProgramData').mockReturnValueOnce({
+            error: undefined,
+            securityTXT: undefined,
+        });
         render(<SecurityCard data={mockAccountData(programDataWithoutSecurityTxt)} pubkey={mockPubkey} />);
         expect(screen.getByText(/Program has no security.txt/i)).toBeInTheDocument();
+        expect(screen.getByText(/read about Program Metadata Program security\.txt at the docs/i)).toBeInTheDocument();
     });
 
     it('should show Neodyme security.txt', () => {
