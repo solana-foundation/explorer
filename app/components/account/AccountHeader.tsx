@@ -3,29 +3,24 @@ import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
 import { isNFTokenAccount } from '@components/account/nftoken/isNFTokenAccount';
 import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
 import { Identicon } from '@components/common/Identicon';
-import ProgramLogoPlaceholder from '@img/program-logo-placeholder.svg';
 import {
     Account,
     isTokenProgramData,
     isUpgradeableLoaderAccountData,
     TokenProgramData,
-    type UpgradeableLoaderAccountData,
     useMintAccountInfo,
 } from '@providers/accounts';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useMetadataJsonLink } from '@providers/compressed-nft';
 import { MintAccountInfo } from '@validators/accounts/token';
 import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension';
-import Image from 'next/image';
 import React, { Suspense, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'superstruct';
 
+import { ProgramHeader } from '@/app/components/shared/account/ProgramHeader';
 import { getProxiedUri } from '@/app/features/metadata/utils';
-import { isPmpSecurityTXT, useSecurityTxt } from '@/app/features/security-txt';
 import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
-
-import { InfoTooltip } from '../common/InfoTooltip';
 
 const IDENTICON_WIDTH = 64;
 
@@ -240,88 +235,6 @@ function TokenMintHeaderCard({
                 <div className="header-pretitle no-overflow-with-ellipsis">
                     {token?.symbol ? token.symbol : 'No Symbol was found'}
                 </div>
-            </div>
-        </div>
-    );
-}
-
-function ProgramHeader({ address, parsedData }: { address: string; parsedData: UpgradeableLoaderAccountData }) {
-    const securityTxt = useSecurityTxt(address, parsedData);
-
-    const { programName, logo, version, unverified } = ((): {
-        programName: string;
-        logo?: string;
-        version?: string;
-        unverified?: boolean;
-    } => {
-        if (!securityTxt) {
-            return {
-                programName: 'Program Account',
-                unverified: undefined,
-            };
-        }
-        if (isPmpSecurityTXT(securityTxt)) {
-            return {
-                logo: getProxiedUri(securityTxt.logo),
-                programName: securityTxt.name,
-                unverified: true,
-                version: securityTxt.version,
-            };
-        }
-        return {
-            programName: securityTxt.name,
-            unverified: true,
-        };
-    })();
-
-    const unverifiedChunk = (() => {
-        if (!unverified) return null;
-        if (unverified) {
-            const text = 'Note that this is self-reported by the author of the program and might not be accurate';
-            return (
-                <div className="d-inline-flex align-items-center ms-2">
-                    <span className="badge badge-pill bg-dark">Unverified</span>
-                    <div style={{ width: '200px' }}>
-                        <InfoTooltip text={text} />
-                    </div>
-                </div>
-            );
-        }
-    })();
-
-    return (
-        <div className="row align-items-center">
-            <div className="col-auto">
-                <div className="avatar avatar-lg header-avatar-top">
-                    {logo ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            alt="Program logo"
-                            className="avatar-img rounded border border-4 border-body"
-                            height={16}
-                            src={logo}
-                            width={16}
-                        />
-                    ) : (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <Image
-                            src={ProgramLogoPlaceholder}
-                            height={IDENTICON_WIDTH}
-                            width={IDENTICON_WIDTH}
-                            alt="Program logo placeholder"
-                            className="avatar-img rounded border border-body"
-                        />
-                    )}
-                </div>
-            </div>
-
-            <div className="col ms-n3 ms-md-n2">
-                <h6 className="header-pretitle">Program account</h6>
-                <div className="d-inline-flex">
-                    <h2 className="header-title">{programName}</h2>
-                    {unverifiedChunk}
-                </div>
-                {version && <div className="header-pretitle no-overflow-with-ellipsis">{version}</div>}
             </div>
         </div>
     );
