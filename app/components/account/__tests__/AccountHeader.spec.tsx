@@ -56,7 +56,7 @@ vi.mock('@utils/token-info', () => ({
 
 describe('AccountHeader', () => {
     describe('ProgramHeader', () => {
-        afterEach(() => {
+        beforeEach(() => {
             vi.clearAllMocks();
             vi.unstubAllEnvs();
         });
@@ -138,6 +138,24 @@ describe('AccountHeader', () => {
             expect(screen.getByAltText('Program logo placeholder')).toBeInTheDocument();
             expect(screen.queryByText('1.0.0')).not.toBeInTheDocument();
             expect(screen.queryByAltText('Program logo')).not.toBeInTheDocument();
+        });
+
+        it('should render with unverified tooltip', () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+            const pmpSecurityTxt = createPmpSecurityTxt();
+            vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
+
+            const { account, mockAddress } = setup();
+            render(
+                <AccountHeader
+                    address={mockAddress}
+                    account={account}
+                    tokenInfo={undefined}
+                    isTokenInfoLoading={false}
+                />
+            );
+
+            expect(screen.getByText('Unverified')).toBeInTheDocument();
         });
     });
 });

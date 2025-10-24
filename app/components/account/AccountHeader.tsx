@@ -25,6 +25,8 @@ import { getProxiedUri } from '@/app/features/metadata/utils';
 import { isPmpSecurityTXT, useSecurityTxt } from '@/app/features/security-txt';
 import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 
+import { InfoTooltip } from '../common/InfoTooltip';
+
 const IDENTICON_WIDTH = 64;
 
 export function AccountHeader({
@@ -64,7 +66,8 @@ export function AccountHeader({
     }
 
     if (isProgram) {
-        return <ProgramHeader address={address} parsedData={parsedData} />;
+        // NOTE: it is not clear how security data should be verified atm. Mark all as unverified
+        return <ProgramHeader address={address} parsedData={parsedData} unverified />;
     }
 
     const fallback = (
@@ -243,7 +246,15 @@ function TokenMintHeaderCard({
     );
 }
 
-function ProgramHeader({ address, parsedData }: { address: string; parsedData: UpgradeableLoaderAccountData }) {
+function ProgramHeader({
+    address,
+    parsedData,
+    unverified,
+}: {
+    address: string;
+    parsedData: UpgradeableLoaderAccountData;
+    unverified: boolean;
+}) {
     const securityTxt = useSecurityTxt(address, parsedData);
 
     const { programName, logo, version } = ((): { programName: string; logo?: string; version?: string } => {
@@ -262,6 +273,21 @@ function ProgramHeader({ address, parsedData }: { address: string; parsedData: U
         return {
             programName: securityTxt.name,
         };
+    })();
+
+    const unverifiedChunk = (() => {
+        if (!unverified) return null;
+        if (unverified) {
+            const text = 'Note that this is self-reported by the author of the program and might not be accurate';
+            return (
+                <div className="d-inline-flex align-items-center ms-2">
+                    <span className="badge badge-pill bg-dark">Unverified</span>
+                    <div style={{ width: '200px' }}>
+                        <InfoTooltip text={text} />
+                    </div>
+                </div>
+            );
+        }
     })();
 
     return (
@@ -292,7 +318,10 @@ function ProgramHeader({ address, parsedData }: { address: string; parsedData: U
 
             <div className="col ms-n3 ms-md-n2">
                 <h6 className="header-pretitle">Program account</h6>
-                <h2 className="header-title">{programName}</h2>
+                <div className="d-inline-flex">
+                    <h2 className="header-title">{programName}</h2>
+                    {unverifiedChunk}
+                </div>
                 {version && <div className="header-pretitle no-overflow-with-ellipsis">{version}</div>}
             </div>
         </div>

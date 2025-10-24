@@ -1,8 +1,9 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { PublicKey } from '@solana/web3.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster } from '@/app/utils/cluster';
 
-vi.mock('@/app/components/instruction/codama/getProgramCanonicalMetadata', () => ({
+vi.mock('@/app/entities/program-metadata/api/getProgramCanonicalMetadata', () => ({
     getProgramCanonicalMetadata: vi.fn().mockImplementation((_programAddress: string, seed: string, _url: string) => {
         if (seed === 'idl') {
             return Promise.resolve({ data: 'Idl data' });
@@ -17,7 +18,7 @@ vi.mock('@/app/components/instruction/codama/getProgramCanonicalMetadata', () =>
 async function importRoute() {
     return await import('../route');
 }
-const mockAddress = '11111111111111111111111111111111';
+const mockAddress = PublicKey.default.toBase58();
 
 function createRequest(address?: string, cluster?: Cluster, seed?: string) {
     const params = new URLSearchParams();
@@ -28,7 +29,7 @@ function createRequest(address?: string, cluster?: Cluster, seed?: string) {
 }
 
 describe('GET api/programMetadataIdl', () => {
-    afterEach(() => {
+    beforeEach(() => {
         vi.clearAllMocks();
     });
 
@@ -57,11 +58,12 @@ describe('GET api/programMetadataIdl', () => {
 
     it('should handle errors from getProgramCanonicalMetadata call', async () => {
         const { GET } = await importRoute();
-        const { getProgramCanonicalMetadata } = await import(
-            '@/app/entities/program-metadata/api/getProgramCanonicalMetadata'
+        const spy = vi.spyOn(
+            await import('@/app/entities/program-metadata/api/getProgramCanonicalMetadata'),
+            'getProgramCanonicalMetadata'
         );
         const expectedError = new Error('Request failed!');
-        (getProgramCanonicalMetadata as any).mockImplementationOnce(() => {
+        spy.mockImplementationOnce(() => {
             throw expectedError;
         });
 
