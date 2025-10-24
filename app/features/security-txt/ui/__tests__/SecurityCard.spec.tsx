@@ -50,8 +50,8 @@ describe('SecurityCard (mocked useProgramMetadataSecurityTxt)', () => {
             securityTXT: undefined,
         });
         render(<SecurityCard data={mockAccountData(programDataWithoutSecurityTxt)} pubkey={mockPubkey} />);
-        expect(screen.getByText(/Program has no security.txt/i)).toBeInTheDocument();
-        expect(screen.getByText(/read about Program Metadata Program security\.txt at the docs/i)).toBeInTheDocument();
+        expect(screen.getByText(/Program has no security\.txt/i)).toBeInTheDocument();
+        expect(screen.getByText(/program did not provide Security\.txt information/i)).toBeInTheDocument();
     });
 
     it('should show Neodyme security.txt', () => {
