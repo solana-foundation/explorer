@@ -66,7 +66,6 @@ export function AccountHeader({
     }
 
     if (isProgram) {
-        // NOTE: it is not clear how security data should be verified atm. Mark all as unverified
         return <ProgramHeader address={address} parsedData={parsedData} />;
     }
 
