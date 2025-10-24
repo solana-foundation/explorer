@@ -2,14 +2,23 @@ import { ClientOptions, TracesSamplerSamplingContext } from '@sentry/core';
 
 type RuntimeContext = 'client' | 'server' | 'edge';
 
+// Extend ClientOptions to include telemetry option
+interface SentryConfig extends Partial<ClientOptions> {
+    telemetry?: boolean;
+}
+
 /**
  * Creates the common Sentry configuration for all runtimes
  * @param context - The runtime context (client, server, or edge)
  * @returns Sentry configuration options
  */
-export function createSentryConfig(_context: RuntimeContext): Partial<ClientOptions> {
+export function createSentryConfig(_context: RuntimeContext): SentryConfig {
     return {
         sampleRate: 0.1, // Track 10% of issues
+
+        // Respect the SENTRY_TELEMETRY_DISABLE environment variable
+        // This will be false in CI (disabled) and true in production (enabled)
+        telemetry: process.env.SENTRY_TELEMETRY_DISABLE !== 'true',
 
         // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
         tracesSampler: (samplingContext: TracesSamplerSamplingContext) => {
