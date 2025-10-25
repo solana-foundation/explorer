@@ -1000,7 +1000,7 @@
     "testnet_activation_epoch": 830,
     "devnet_activation_epoch": 934,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 842,
     "description": ""
   },
   {
@@ -1134,6 +1134,142 @@
     "min_agave_versions": [
       "v3.0.0"
     ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 845,
+    "devnet_activation_epoch": 950,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "turbnbNRp22nwZCmgVVXFSshz7H7V23zMzQgA46YpmQ",
+    "title": "disable turbine fanout experiment",
+    "simd_link": [
+      ""
+    ],
+    "simds": [],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.2.8"
+    ],
+    "min_fd_versions": [
+      "v0.708.20306"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 846,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "DeS7sR48ZcFTUmt5FFEVDr1v1bh73aAbZiZq3SYr8Eh8",
+    "title": "Feature Gate: Loaded Transaction Data Size Specification",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0186-loaded-transaction-data-size-specification.md"
+    ],
+    "simds": [
+      "0186"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.3.0"
+    ],
+    "min_fd_versions": [
+      "v0.709.30000"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "7VVhpg5oAjAmnmz1zCcSHb2Z9ecZB2FQqpnEwReka9Zm",
+    "title": "SIMD-0242: Static Nonce Account Only",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0242-static-nonce-account.md"
+    ],
+    "simds": [
+      "0242"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.3.0"
+    ],
+    "min_fd_versions": [
+      "v0.709.30000"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "sD3uVpaavUXQRvDXrMFCQ2CqLqnbz5mK8ttWNXbtD3r",
+    "title": "Stricter ABI and Runtime Constraints",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0219-stricter-abi-and-runtime-constraints.md"
+    ],
+    "simds": [
+      "0219"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "ENTRYnPAoT5Swwx73YDGzMp3XnNH1kxacyvLosRHza1i",
+    "title": "Relax intrabatch account locks",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0083-relax-entry-constraints.md"
+    ],
+    "simds": [
+      "0083"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v2.3.0"
+    ],
+    "min_fd_versions": [
+      "v0.709.30000"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "6TkHkRmP7JZy1fdM6fg5uXn76wChQBWGokHBJzrLB3mj",
+    "title": "SIMD-0268: Raise CPI Nesting Limit",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0268-raise-cpi-nesting-limit.md"
+    ],
+    "simds": [
+      "0268"
+    ],
+    "owners": [],
+    "min_agave_versions": [],
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
