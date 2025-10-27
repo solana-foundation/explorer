@@ -3,9 +3,9 @@ import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { RootNode } from 'codama';
 
-import { useProgramMetadataIdl } from '../providers/useProgramMetadataIdl';
+import { useProgramMetadataIdl } from '../model/useProgramMetadataIdl';
 
-export function ProgramMetadataProgramName({
+export default function ProgramName({
     programId,
     url,
     cluster,
@@ -20,8 +20,8 @@ export function ProgramMetadataProgramName({
 
     try {
         return <>{programNameFromIdl(programMetadataIdl)}</>;
-    } catch (error) {
-        return <>{programNameFromIdl(rootNodeFromAnchor(programMetadataIdl) as any as RootNode)}</>;
+    } catch {
+        return <>{programNameFromIdl(rootNodeFromAnchor(programMetadataIdl) as unknown as RootNode)}</>;
     }
 }
 

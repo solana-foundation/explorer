@@ -38,6 +38,7 @@ export default defineConfig({
 
             // @ aliases
             '@app': path.resolve(__dirname, './app'),
+            '@img': path.resolve(__dirname, './app/img'),
             '@components': path.resolve(__dirname, './app/components'),
             '@providers': path.resolve(__dirname, './app/providers'),
             '@utils': path.resolve(__dirname, './app/utils'),

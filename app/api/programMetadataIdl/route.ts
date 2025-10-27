@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { getProgramMetadataIdl } from '@/app/components/instruction/codama/getProgramMetadataIdl';
+import { getProgramCanonicalMetadata } from '@/app/entities/program-metadata/api/getProgramCanonicalMetadata';
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
 const CACHE_DURATION = 30 * 60; // 30 minutes
@@ -13,8 +13,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const clusterProp = searchParams.get('cluster');
     const programAddress = searchParams.get('programAddress');
+    const seed = searchParams.get('seed');
 
-    if (!programAddress || !clusterProp) {
+    if (!programAddress || !clusterProp || !seed) {
         return NextResponse.json({ error: 'Invalid query params' }, { status: 400 });
     }
 
@@ -25,9 +26,9 @@ export async function GET(request: Request) {
     }
 
     try {
-        const codamaIdl = await getProgramMetadataIdl(programAddress, url);
+        const programMetadata = await getProgramCanonicalMetadata(programAddress, seed, url);
         return NextResponse.json(
-            { codamaIdl },
+            { programMetadata },
             {
                 headers: CACHE_HEADERS,
                 status: 200,
