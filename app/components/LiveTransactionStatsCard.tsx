@@ -151,7 +151,7 @@ type TpsBarChartProps = {
 };
 function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
     const { perfHistory, avgTps, historyMaxTps } = performanceInfo;
-    const averageTps = Math.round(avgTps).toLocaleString('en-US');
+    const averageTps = Math.round(avgTps != null ? avgTps : 0.0).toLocaleString('en-US');
     const transactionCount = <AnimatedTransactionCount info={performanceInfo} />;
     const seriesData = perfHistory[series];
     const chartOptions = React.useMemo<ChartOptions<'bar'>>(() => TPS_CHART_OPTIONS(historyMaxTps), [historyMaxTps]);
@@ -250,7 +250,7 @@ function AnimatedTransactionCount({ info }: { info: PerformanceInfo }) {
         } else {
             // Since this is the first tx count value, estimate the previous
             // tx count in order to have a starting point for our animation
-            countUp.period = PERF_UPDATE_SEC * avgTps;
+            countUp.period = PERF_UPDATE_SEC * (avgTps != null ? avgTps : 0.0);
             countUp.start = txCount - countUp.period;
         }
         countUp.lastUpdate = Date.now();
