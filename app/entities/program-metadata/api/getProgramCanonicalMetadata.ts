@@ -3,13 +3,8 @@ import { fetchMetadataFromSeeds, unpackAndFetchData } from '@solana-program/prog
 
 import { normalizeUnknownError } from '@/app/shared/unknown-error';
 
-/**
- * Method to fetch PMP' metadata by seed
- * We construct rpc but address is meant to be on the mainnet
- * NOTE: should use invariant to prevent requests for other cluster, but handle this outside the module atm
- */
 export async function getProgramCanonicalMetadata(programAddress: string, seed: string, url: string) {
-    // NOTE: previously we used mainnet() to ensure url for Mainnet, but that is against the current logic for security.txt
+    // NOTE: previously we used mainnet() to infer url for Mainnet, but that is against the current logic for security.txt
     const rpc = createSolanaRpc(mainnet(url));
     let metadata;
 
