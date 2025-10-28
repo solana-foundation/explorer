@@ -1,5 +1,4 @@
 import { Cluster, serverClusterUrl } from '../../../utils/cluster';
-import { IDL_SEED } from './getProgramCanonicalMetadata';
 
 /**
  * Match cluster to the list of supported ones
