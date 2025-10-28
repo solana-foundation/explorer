@@ -39,7 +39,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Invalid query params' }, { status: 400 });
     }
 
-    const url = getMetadataEndpointUrl(Number(clusterProp), seed);
+    const url = getMetadataEndpointUrl(Number(clusterProp));
     if (!url) {
         return NextResponse.json({ error: 'Invalid cluster' }, { status: 400 });
     }

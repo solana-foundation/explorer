@@ -17,15 +17,8 @@ const isClusterSupported = (cluster: Cluster) => {
  * @param cluster
  * @returns
  */
-export function getMetadataEndpointUrl(cluster: number, seed: string | null): string | undefined {
+export function getMetadataEndpointUrl(cluster: number): string | undefined {
     if (!isClusterSupported(cluster)) {
-        return undefined;
-    }
-
-    // NOTE: originally we did not allow to load idls for all the clusters except the mainnet
-    // At the moment we allow to load not only the idl but security.txt as well
-    // Preserve orignal logic to prevent loading idls for clusters except mainnet (custom also as it might direct the mainnet)
-    if (seed === IDL_SEED && !(Cluster.MainnetBeta === cluster || Cluster.Custom === cluster)) {
         return undefined;
     }
 
