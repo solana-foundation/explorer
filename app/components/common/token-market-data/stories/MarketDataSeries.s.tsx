@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, within } from '@storybook/test';
+import { expect, within } from 'storybook/test';
 
 import { MarketData } from '../MarketData';
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
     component: MarketData.Series,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/TokenMarketData/MarketDataSeries',
 } satisfies Meta<typeof MarketData.Series>;
 

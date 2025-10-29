@@ -1,8 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import { storybookTest } from '@storybook/experimental-addon-test/vitest-plugin';
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { defineWorkspace } from 'vitest/config';
 
 const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
@@ -15,30 +13,21 @@ export default defineWorkspace([
         plugins: [
             // The plugin will run tests for the stories defined in your Storybook config
             // See options at: https://storybook.js.org/docs/writing-tests/test-addon#storybooktest
-            storybookTest({ configDir: path.join(dirname, '.storybook') }),
-            nodePolyfills({
-                globals: {
-                    Buffer: true, // can also be 'build', 'dev', or false
-                    global: true,
-                    process: true,
+            storybookTest({
+                configDir: path.join(dirname, '.storybook'),
+                tags: {
+                    include: ['test'],
+                    exclude: ['experimental'],
                 },
-                include: ['path', 'util'],
             }),
         ],
         test: {
+            name: 'storybook',
             browser: {
                 enabled: true,
                 headless: true,
-                name: 'chromium',
+                instances: [{ browser: 'chromium' }],
                 provider: 'playwright',
-            },
-            environment: 'jsdom',
-            globals: true,
-            name: 'storybook',
-            server: {
-                deps: {
-                    inline: ['@noble', 'change-case', '@react-hook/previous'],
-                },
             },
             setupFiles: ['./test-setup.ts', '.storybook/vitest.setup.ts'],
             testTimeout: 10000,

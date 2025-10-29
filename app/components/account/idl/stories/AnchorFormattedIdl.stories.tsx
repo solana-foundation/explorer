@@ -22,7 +22,7 @@ const meta = {
             appDirectory: true,
         },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/idl/AnchorFormattedIdl',
 } satisfies Meta<typeof AnchorFormattedIdl>;
 

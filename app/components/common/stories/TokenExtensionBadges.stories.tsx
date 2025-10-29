@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, within } from '@storybook/test';
+import { expect, within } from 'storybook/test';
 
 import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
 import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
@@ -8,7 +8,7 @@ import { TokenExtensionBadges } from '../TokenExtensionBadges';
 
 const meta = {
     component: TokenExtensionBadges,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/TokenExtensionBadges',
 } satisfies Meta<typeof TokenExtensionBadges>;
 

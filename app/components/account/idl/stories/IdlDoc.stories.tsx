@@ -11,7 +11,7 @@ const meta = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/idl/components/IdlDoc',
 } satisfies Meta<typeof IdlDoc>;
 
@@ -55,7 +55,7 @@ const tooltipMeta = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/idl/components/IdlDocTooltip',
 } satisfies Meta<typeof IdlDocTooltip>;
 

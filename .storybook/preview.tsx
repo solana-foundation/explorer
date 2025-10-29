@@ -18,11 +18,10 @@ const rubikFont = Rubik({
 const preview: Preview = {
     parameters: {
         backgrounds: {
-            values: [
-                { name: 'Dark', value: '#161a19' },
-                { name: 'Card', value: '#1e2423' },
-            ],
-            default: 'Dark',
+            options: {
+                dark: { name: 'Dark', value: '#161a19' },
+                card: { name: 'Card', value: '#1e2423' },
+            },
         },
         controls: {
             matchers: {
@@ -31,6 +30,7 @@ const preview: Preview = {
             },
         },
     },
+
     decorators: [
         Story => {
             // Add useEffect to ensure font is properly loaded
@@ -45,6 +45,12 @@ const preview: Preview = {
             );
         },
     ],
+
+    initialGlobals: {
+        backgrounds: {
+            value: 'dark',
+        },
+    },
 };
 
 export default preview;
