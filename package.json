@@ -6,6 +6,10 @@
         "build": "next build",
         "build-sb": "storybook build",
         "coverage": "vitest --coverage",
+        "db:down": "docker compose down",
+        "db:logs": "docker compose logs -f db",
+        "db:migrate": "drizzle-kit migrate",
+        "db:up": "docker compose up -d",
         "dev": "next dev",
         "format": "prettier --config .prettierrc.cjs **/*.{ts,tsx,mts,mjs,cjs} *.json --check",
         "format:ci": "pnpm format",
@@ -14,13 +18,11 @@
         "sb": "storybook dev -p 6006",
         "scan": "next dev & react-scan localhost:3000",
         "start": "next start",
-        "test": "vitest --project specs --watch",
+        "test": "vitest --project specs run",
         "test:ci": "vitest --project specs run",
-        "test:sb": "vitest --project storybook --watch",
-        "db:up": "docker compose up -d",
-        "db:down": "docker compose down",
-        "db:logs": "docker compose logs -f db",
-        "db:migrate": "drizzle-kit migrate"
+        "test:sb": "vitest --project storybook run",
+        "test:sb:watch": "vitest --project storybook --watch",
+        "test:watch": "vitest --project specs --watch"
     },
     "dependencies": {
         "@blockworks-foundation/mango-client": "3.6.7",
@@ -174,6 +176,10 @@
         "node": "^20.19"
     },
     "pnpm": {
+        "onlyBuiltDependencies": [
+            "@sentry/cli",
+            "esbuild"
+        ],
         "overrides": {
             "@babel/runtime@<7.26.10": "7.26.10",
             "@solana/addresses": "2.1.0",
@@ -221,10 +227,6 @@
             "sharp",
             "unrs-resolver",
             "utf-8-validate"
-        ],
-        "onlyBuiltDependencies": [
-            "@sentry/cli",
-            "esbuild"
         ]
     }
 }

@@ -18,7 +18,10 @@ const rubikFont = Rubik({
 const preview: Preview = {
     parameters: {
         backgrounds: {
-            values: [{ name: 'Dark', value: '#161a19' }],
+            values: [
+                { name: 'Dark', value: '#161a19' },
+                { name: 'Card', value: '#1e2423' },
+            ],
             default: 'Dark',
         },
         controls: {

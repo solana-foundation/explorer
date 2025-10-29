@@ -29,7 +29,7 @@ export enum ClusterStatsStatus {
 }
 
 const initialPerformanceInfo: PerformanceInfo = {
-    avgTps: 0,
+    avgTps: null,
     historyMaxTps: 0,
     perfHistory: {
         long: [],

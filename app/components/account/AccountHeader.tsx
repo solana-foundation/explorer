@@ -1,19 +1,26 @@
+import { CompressedNftAccountHeader } from '@components/account/CompressedNftCard';
 import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
 import { isNFTokenAccount } from '@components/account/nftoken/isNFTokenAccount';
 import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
 import { Identicon } from '@components/common/Identicon';
-import { Account, isTokenProgramData, TokenProgramData, useMintAccountInfo } from '@providers/accounts';
+import {
+    Account,
+    isTokenProgramData,
+    isUpgradeableLoaderAccountData,
+    TokenProgramData,
+    useMintAccountInfo,
+} from '@providers/accounts';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
+import { useMetadataJsonLink } from '@providers/compressed-nft';
+import { MintAccountInfo } from '@validators/accounts/token';
 import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension';
 import React, { Suspense, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'superstruct';
 
-import { CompressedNftAccountHeader } from '@/app/components/account/CompressedNftCard';
+import { ProgramHeader } from '@/app/components/shared/account/ProgramHeader';
 import { getProxiedUri } from '@/app/features/metadata/utils';
-import { useMetadataJsonLink } from '@/app/providers/compressed-nft';
-import { FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
-import { MintAccountInfo } from '@/app/validators/accounts/token';
+import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 
 const IDENTICON_WIDTH = 64;
 
@@ -31,7 +38,9 @@ export function AccountHeader({
     const mintInfo = useMintAccountInfo(address);
 
     const parsedData = account?.data.parsed;
+
     const isToken = parsedData && isTokenProgramData(parsedData) && parsedData?.parsed.type === 'mint';
+    const isProgram = parsedData && isUpgradeableLoaderAccountData(parsedData) && parsedData?.parsed.type === 'program';
 
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
@@ -49,6 +58,10 @@ export function AccountHeader({
             );
         }
         return <TokenMintHeader address={address} mintInfo={mintInfo} parsedData={parsedData} tokenInfo={tokenInfo} />;
+    }
+
+    if (isProgram) {
+        return <ProgramHeader address={address} parsedData={parsedData} />;
     }
 
     const fallback = (
