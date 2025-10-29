@@ -1,11 +1,10 @@
-import { address, createSolanaRpc, mainnet } from '@solana/kit';
+import { address, createSolanaRpc } from '@solana/kit';
 import { fetchMetadataFromSeeds, unpackAndFetchData } from '@solana-program/program-metadata';
 
 import { normalizeUnknownError } from '@/app/shared/unknown-error';
 
 export async function getProgramCanonicalMetadata(programAddress: string, seed: string, url: string) {
-    // NOTE: previously we used mainnet() to infer url for Mainnet, but that is against the current logic for security.txt
-    const rpc = createSolanaRpc(mainnet(url));
+    const rpc = createSolanaRpc(url);
     let metadata;
 
     try {
