@@ -1,0 +1,30 @@
+export function CpiCallsCardFooter({
+    fetching = false,
+    foundOldest,
+    loadMore,
+}: {
+    fetching?: boolean;
+    foundOldest: boolean;
+    loadMore: () => void;
+}) {
+    return (
+        <div className="card-footer">
+            {foundOldest ? (
+                <div className="text-muted text-center">There is no more data</div>
+            ) : (
+                <>
+                    {fetching ? (
+                        <>
+                            <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+                            Loading
+                        </>
+                    ) : (
+                        <button className="btn btn-primary w-100" onClick={() => loadMore()} disabled={fetching}>
+                            Load More
+                        </button>
+                    )}
+                </>
+            )}
+        </div>
+    );
+}
