@@ -1,6 +1,5 @@
 'use client';
 
-import ProgramLogoPlaceholder from '@img/program-logo-placeholder.svg';
 import { type UpgradeableLoaderAccountData } from '@providers/accounts';
 import Image from 'next/image';
 import React from 'react';
@@ -8,6 +7,7 @@ import React from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
 import { getProxiedUri } from '@/app/features/metadata/utils';
 import { isPmpSecurityTXT, useSecurityTxt } from '@/app/features/security-txt';
+import ProgramLogoPlaceholder from '@/app/img/logos-solana/low-contrast-solana-logo.svg';
 
 import { Badge } from '../ui/badge';
 
