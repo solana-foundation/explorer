@@ -49,6 +49,7 @@ import useSWRImmutable from 'swr/immutable';
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
 import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
+import { hasTokenMetadata } from '@/app/features/metadata';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { isAttestationAccount } from '@/app/utils/attestation-service';
@@ -444,6 +445,14 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
         (parsedData as TokenProgramData).nftData
     ) {
         tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplexNFT`]);
+    }
+
+    if (hasTokenMetadata(parsedData)) {
+        tabs.push({
+            path: 'metadata',
+            slug: 'metadata',
+            title: 'Metadata',
+        });
     }
 
     // Compressed NFT tabs

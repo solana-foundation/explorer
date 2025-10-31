@@ -1,9 +1,10 @@
 import useSWRImmutable from 'swr/immutable';
 
-export function useMetadataJsonLink(url: string, options?: { suspense?: boolean }) {
+export function useMetadataJsonLink(url: string | null, options?: { suspense?: boolean }) {
     const { data, error } = useSWRImmutable(
         url,
         async () => {
+            if (!url) return null;
             const response = await fetch(url);
             const json = await response.json();
             return json;
