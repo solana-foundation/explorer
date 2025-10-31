@@ -1,6 +1,6 @@
 'use client';
 
-import { VerifiedProgramsCard } from '@components/programs/VerifiedProgramsCard';
+import { VerifiedProgramsCard } from '@/app/features/verified-programs';
 
 export default function ProgramsPageClient() {
     return (
