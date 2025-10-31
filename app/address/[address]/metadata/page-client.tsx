@@ -1,10 +1,10 @@
 'use client';
 
-import { MetaplexMetadataCard } from '@components/account/MetaplexMetadataCard';
-import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
 import React, { Suspense } from 'react';
 
+import { ParsedAccountRenderer } from '@/app/components/account/ParsedAccountRenderer';
 import { LoadingCard } from '@/app/components/common/LoadingCard';
+import { MetadataCard } from '@/app/features/metadata';
 
 type Props = Readonly<{
     params: {
@@ -16,11 +16,10 @@ function MetaplexMetadataCardRenderer({
     account,
     onNotFound,
 }: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
-    return (
-        <Suspense fallback={<LoadingCard />}>
-            {<MetaplexMetadataCard account={account} onNotFound={onNotFound} />}
-        </Suspense>
-    );
+    if (!account) {
+        return onNotFound();
+    }
+    return <Suspense fallback={<LoadingCard />}>{<MetadataCard account={account} />}</Suspense>;
 }
 
 export default function MetaplexNFTMetadataPageClient({ params: { address } }: Props) {
