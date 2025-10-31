@@ -4,6 +4,7 @@ import { createRef, Suspense } from 'react';
 import { ChevronDown, ExternalLink } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
+import { getProxiedUri } from '@/app/features/metadata';
 import { useCluster } from '@/app/providers/cluster';
 import { CompressedNft, useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
 
@@ -90,7 +91,9 @@ export function CompressedNftAccountHeader({ account }: { account: Account }) {
 }
 
 export function CompressedNFTHeader({ compressedNft }: { compressedNft: CompressedNft }) {
-    const metadataJson = useMetadataJsonLink(compressedNft.content.json_uri);
+    // Empty strings are possible, so the check is necessary.
+    const proxiedURI = compressedNft.content.json_uri ? getProxiedUri(compressedNft.content.json_uri) : null;
+    const metadataJson = useMetadataJsonLink(proxiedURI);
     const dropdownRef = createRef<HTMLButtonElement>();
 
     useAsyncEffect(

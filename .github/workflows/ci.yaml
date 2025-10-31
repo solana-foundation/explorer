@@ -2,12 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master, development]
+    branches: [master, development, 'development-*']
   pull_request:
-    branches:
-      - master
-      - development
-      - 'development-*'
+    branches: [master, development, 'development-*']
 
 env:
   # cache folders for pnpm_store, nextjs and playwright
