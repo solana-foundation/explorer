@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { extractProgramNameFromRepo, getProgramName, isValidGitHubUrl } from '../program-name-extraction';
+import { extractProgramNameFromRepo, getProgramName, isValidGitHubUrl } from '../model';
 
 describe('isValidGitHubUrl', () => {
     it('validates github.com URLs', () => {

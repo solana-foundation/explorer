@@ -1,4 +1,4 @@
-import Logger from './logger';
+import Logger from '@/app/utils/logger';
 
 // Validate that repo URL is from GitHub (security check)
 export function isValidGitHubUrl(repoUrl: string): boolean {

@@ -1,6 +1,7 @@
-import { ProgramMetadata, VerifiedProgramInfo, VerifiedProgramsResponse } from '../types/verified-programs';
-import Logger from './logger';
-import { getProgramName } from './program-name-extraction';
+import Logger from '@/app/utils/logger';
+
+import { getProgramName } from './model';
+import { ProgramMetadata, VerifiedProgramInfo, VerifiedProgramsResponse } from './types';
 
 // Use local API routes to avoid CORS issues in development
 const API_BASE_URL = '/api/verified-programs';

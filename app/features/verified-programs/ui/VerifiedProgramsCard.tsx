@@ -5,13 +5,15 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { TableCardBodyHeaded } from '@components/common/TableCardBody';
 import { useDebounceCallback } from '@react-hook/debounce';
 import { displayTimestampUtc } from '@utils/date';
-import { isValidGitHubUrl } from '@utils/program-name-extraction';
 import { useClusterPath } from '@utils/url';
-import { fetchProgramsProgressively } from '@utils/verified-programs-progressive';
 import Link from 'next/link';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import type { VerifiedProgramInfo } from '../../types/verified-programs';
+import {
+    fetchProgramsProgressively,
+    isValidGitHubUrl,
+    type VerifiedProgramInfo,
+} from '@/app/features/verified-programs';
 
 const SEARCH_DEBOUNCE_MS = 1000;
 
@@ -82,7 +84,7 @@ export function VerifiedProgramsCard() {
     }
 
     return (
-        <div className="card">
+        <div className="e-card">
             <div className="card-header">
                 <h3 className="card-header-title mb-0">Verified Programs</h3>
                 <small>
@@ -98,7 +100,7 @@ export function VerifiedProgramsCard() {
                 </small>
             </div>
 
-            <div className="card-body">
+            <div className="e-card-body">
                 {isLoadingMore && (
                     <div className="alert alert-info mb-3" role="status" aria-live="polite">
                         <div className="d-flex align-items-center">

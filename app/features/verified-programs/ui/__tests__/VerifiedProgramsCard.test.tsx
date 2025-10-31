@@ -1,9 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { fetchProgramsProgressively } from '@utils/verified-programs-progressive';
 import { vi } from 'vitest';
 
-import type { VerifiedProgramInfo } from '@/types/verified-programs';
+import { fetchProgramsProgressively, type VerifiedProgramInfo } from '@/app/features/verified-programs';
 
 import { VerifiedProgramsCard } from '../VerifiedProgramsCard';
 
@@ -17,14 +16,10 @@ vi.mock('@utils/url', () => ({
     useClusterPath: vi.fn(({ pathname }: { pathname: string }) => pathname),
 }));
 
-// Mock program name extraction
-vi.mock('@utils/program-name-extraction', () => ({
-    isValidGitHubUrl: vi.fn((url: string) => url.startsWith('https://github.com')),
-}));
-
-// Mock progressive fetcher
-vi.mock('@utils/verified-programs-progressive', () => ({
+// Mock verified-programs feature
+vi.mock('@/app/features/verified-programs', () => ({
     fetchProgramsProgressively: vi.fn(),
+    isValidGitHubUrl: vi.fn((url: string) => url.startsWith('https://github.com')),
 }));
 
 // Mock Next.js Link component
@@ -33,17 +28,17 @@ vi.mock('next/link', () => ({
 }));
 
 // Mock LoadingCard
-vi.mock('../../common/LoadingCard', () => ({
+vi.mock('@components/common/LoadingCard', () => ({
     LoadingCard: ({ message }: { message?: string }) => <div data-testid="loading-card">{message || 'Loading'}</div>,
 }));
 
 // Mock ErrorCard
-vi.mock('../../common/ErrorCard', () => ({
+vi.mock('@components/common/ErrorCard', () => ({
     ErrorCard: ({ text }: { text: string }) => <div data-testid="error-card">{text}</div>,
 }));
 
 // Mock TableCardBodyHeaded
-vi.mock('../../common/TableCardBody', () => ({
+vi.mock('@components/common/TableCardBody', () => ({
     TableCardBodyHeaded: ({
         children,
         headerComponent,
