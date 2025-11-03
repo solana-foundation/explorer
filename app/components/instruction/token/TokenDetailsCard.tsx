@@ -108,7 +108,7 @@ function TokenInstruction(props: InfoProps) {
             <tr key={mintAddress}>
                 <td>Token</td>
                 <td className="text-lg-end">
-                    <Address pubkey={new PublicKey(mintAddress)} alignRight link fetchTokenLabelInfo />
+                    <Address pubkey={new PublicKey(mintAddress)} alignRight link />
                 </td>
             </tr>
         );

@@ -23,7 +23,6 @@ type Props = {
     useMetadata?: boolean;
     overrideText?: string;
     tokenLabelInfo?: TokenLabelInfo;
-    fetchTokenLabelInfo?: boolean;
 };
 
 export function Address({
@@ -37,7 +36,6 @@ export function Address({
     useMetadata,
     overrideText,
     tokenLabelInfo,
-    fetchTokenLabelInfo,
 }: Props) {
     const address = pubkey.toBase58();
     const { cluster } = useCluster();

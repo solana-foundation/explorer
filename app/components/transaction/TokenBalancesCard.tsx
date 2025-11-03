@@ -72,7 +72,7 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
                     <Address pubkey={account} link />
                 </td>
                 <td>
-                    <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo />
+                    <Address pubkey={new PublicKey(mint)} link />
                 </td>
                 <td>
                     <BalanceDelta delta={delta} />

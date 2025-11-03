@@ -416,7 +416,7 @@ function AccountsCard({ signature }: SignatureProps) {
             <tr key={key}>
                 <td>{index + 1}</td>
                 <td>
-                    <Address pubkey={pubkey} link fetchTokenLabelInfo />
+                    <Address pubkey={pubkey} link />
                 </td>
                 <td>
                     <BalanceDelta delta={delta} isSol />
