@@ -7,12 +7,14 @@ import { displayAddress, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useAsyncEffect from 'use-async-effect';
 
 import { getTokenInfoWithoutOnChainFallback } from '@/app/utils/token-info';
+import { getNickname } from '@utils/nicknames';
 
 import { Copyable } from './Copyable';
+import { NicknameEditor } from './NicknameEditor';
 
 type Props = {
     pubkey: PublicKey;
@@ -44,6 +46,25 @@ export function Address({
     const address = pubkey.toBase58();
     const { cluster } = useCluster();
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
+    const [showNicknameEditor, setShowNicknameEditor] = useState(false);
+    const [nickname, setNickname] = useState<string | null>(null);
+
+    // Load nickname from localStorage
+    useEffect(() => {
+        setNickname(getNickname(address));
+
+        // Listen for nickname updates
+        const handleNicknameUpdate = (event: CustomEvent) => {
+            if (event.detail.address === address) {
+                setNickname(getNickname(address));
+            }
+        };
+
+        window.addEventListener('nicknameUpdated', handleNicknameUpdate as EventListener);
+        return () => {
+            window.removeEventListener('nicknameUpdated', handleNicknameUpdate as EventListener);
+        };
+    }, [address]);
 
     const display = displayAddress(address, cluster, tokenLabelInfo);
     if (truncateUnknown && address === display) {
@@ -70,6 +91,9 @@ export function Address({
         addressLabel = overrideText;
     }
 
+    // Prepend nickname if exists
+    const displayText = nickname ? `"${nickname}" (${addressLabel})` : addressLabel;
+
     const handleMouseEnter = (text: string) => {
         const elements = document.querySelectorAll(`[data-address="${text}"]`);
         elements.forEach(el => {
@@ -85,22 +109,47 @@ export function Address({
     };
 
     const content = (
-        <Copyable text={address} replaceText={!alignRight}>
-            <span
-                data-address={address}
-                className="font-monospace"
-                onMouseEnter={() => handleMouseEnter(address)}
-                onMouseLeave={() => handleMouseLeave(address)}
+        <div className="d-flex align-items-center gap-2">
+            <Copyable text={address} replaceText={!alignRight}>
+                <span
+                    data-address={address}
+                    className="font-monospace"
+                    onMouseEnter={() => handleMouseEnter(address)}
+                    onMouseLeave={() => handleMouseLeave(address)}
+                >
+                    {link ? (
+                        <Link className={truncate ? 'text-truncate address-truncate' : ''} href={addressPath}>
+                            {displayText}
+                        </Link>
+                    ) : (
+                        <span className={truncate ? 'text-truncate address-truncate' : ''}>{displayText}</span>
+                    )}
+                </span>
+            </Copyable>
+            <button
+                className="btn btn-sm btn-link p-0 text-muted"
+                onClick={() => setShowNicknameEditor(true)}
+                title="Edit nickname"
+                style={{ fontSize: '0.875rem', lineHeight: 1 }}
             >
-                {link ? (
-                    <Link className={truncate ? 'text-truncate address-truncate' : ''} href={addressPath}>
-                        {addressLabel}
-                    </Link>
-                ) : (
-                    <span className={truncate ? 'text-truncate address-truncate' : ''}>{addressLabel}</span>
-                )}
-            </span>
-        </Copyable>
+                <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+            </button>
+            {showNicknameEditor && (
+                <NicknameEditor address={address} onClose={() => setShowNicknameEditor(false)} />
+            )}
+        </div>
     );
 
     return (
