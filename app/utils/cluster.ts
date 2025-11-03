@@ -11,7 +11,7 @@ export enum Cluster {
     Custom,
 }
 
-export const CLUSTERS = [Cluster.Testnet, Cluster.Custom];
+export const CLUSTERS = [Cluster.Testnet, Cluster.MainnetBeta, Cluster.Custom];
 
 export function clusterSlug(cluster: Cluster): string {
     switch (cluster) {
@@ -29,7 +29,7 @@ export function clusterSlug(cluster: Cluster): string {
 export function clusterName(cluster: Cluster): string {
     switch (cluster) {
         case Cluster.MainnetBeta:
-            return 'Mainnet Beta';
+            return 'Private Mainnet';
         case Cluster.Testnet:
             return 'Testnet';
         case Cluster.Devnet:
@@ -39,7 +39,7 @@ export function clusterName(cluster: Cluster): string {
     }
 }
 
-export const MAINNET_BETA_URL = 'https://api.mainnet-beta.solana.com';
+export const MAINNET_BETA_URL = 'https://mainnet.fogo.io';
 export const TESTNET_URL = 'https://testnet.fogo.io';
 export const DEVNET_URL = 'https://api.devnet.solana.com';
 
