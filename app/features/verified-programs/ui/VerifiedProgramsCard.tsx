@@ -10,7 +10,7 @@ import Link from 'next/link';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import {
-    fetchProgramsProgressively,
+    fetchProgramsPage,
     isValidGitHubUrl,
     type VerifiedProgramInfo,
 } from '@/app/features/verified-programs';
@@ -21,32 +21,29 @@ export function VerifiedProgramsCard() {
     const [searchQuery, setSearchQuery] = useState('');
     const [programs, setPrograms] = useState<VerifiedProgramInfo[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isFetching, setIsFetching] = useState(false);
     const [error, setError] = useState<Error | null>(null);
-    const [loadedCount, setLoadedCount] = useState(0);
     const [totalCount, setTotalCount] = useState(0);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [foundLast, setFoundLast] = useState(false);
 
     const handleSearchChange = useDebounceCallback((value: string) => setSearchQuery(value), SEARCH_DEBOUNCE_MS);
 
     useEffect(() => {
         let cancelled = false;
 
-        async function loadPrograms() {
+        async function loadFirstPage() {
             try {
-                await fetchProgramsProgressively((pagePrograms, page, pages, total) => {
-                    if (cancelled) return;
+                setIsLoading(true);
+                const result = await fetchProgramsPage(1);
 
-                    setPrograms(prev => [...prev, ...pagePrograms]);
-                    setLoadedCount(prev => prev + pagePrograms.length);
-                    setCurrentPage(page);
-                    setTotalPages(pages);
-                    setTotalCount(total);
+                if (cancelled) return;
 
-                    if (page === pages) {
-                        setIsLoading(false);
-                    }
-                });
+                setPrograms(result.programs);
+                setTotalCount(result.totalCount);
+                setCurrentPage(2); // Next page to load
+                setFoundLast(result.totalPages === 1);
+                setIsLoading(false);
             } catch (err) {
                 if (!cancelled) {
                     setError(err instanceof Error ? err : new Error('Failed to load programs'));
@@ -55,14 +52,29 @@ export function VerifiedProgramsCard() {
             }
         }
 
-        loadPrograms();
+        loadFirstPage();
 
         return () => {
             cancelled = true;
         };
     }, []);
 
-    const isLoadingMore = isLoading && programs.length > 0;
+    const loadMore = async () => {
+        if (isFetching || foundLast) return;
+
+        try {
+            setIsFetching(true);
+            const result = await fetchProgramsPage(currentPage);
+
+            setPrograms(prev => [...prev, ...result.programs]);
+            setCurrentPage(prev => prev + 1);
+            setFoundLast(currentPage >= result.totalPages);
+            setIsFetching(false);
+        } catch (err) {
+            setError(err instanceof Error ? err : new Error('Failed to load more programs'));
+            setIsFetching(false);
+        }
+    };
 
     const filteredPrograms = useMemo(() => {
         if (searchQuery) {
@@ -86,14 +98,9 @@ export function VerifiedProgramsCard() {
     return (
         <div className="e-card">
             <div className="card-header">
-                <h3 className="card-header-title mb-0">Verified Programs</h3>
+                <h3 className="card-header-title e-mb-0">Verified Programs</h3>
                 <small>
-                    {isLoading && totalCount > 0
-                        ? `${programs.length} of ${totalCount}`
-                        : totalCount > 0
-                        ? totalCount
-                        : programs.length}{' '}
-                    verified programs from{' '}
+                    {totalCount > 0 ? `${programs.length} of ${totalCount}` : programs.length} verified programs from{' '}
                     <a href="https://verify.osec.io" target="_blank" rel="noopener noreferrer">
                         osec.io
                     </a>
@@ -101,21 +108,7 @@ export function VerifiedProgramsCard() {
             </div>
 
             <div className="e-card-body">
-                {isLoadingMore && (
-                    <div className="alert alert-info mb-3" role="status" aria-live="polite">
-                        <div className="d-flex align-items-center">
-                            <div className="spinner-border spinner-border-sm me-2" role="status">
-                                <span className="visually-hidden">Loading</span>
-                            </div>
-                            <small>
-                                Loading programs... ({loadedCount}/{totalCount} loaded - Page {currentPage}/{totalPages}
-                                )
-                            </small>
-                        </div>
-                    </div>
-                )}
-
-                <div className="mb-3">
+                <div className="e-mb-3">
                     <input
                         type="text"
                         className="form-control"
@@ -126,7 +119,7 @@ export function VerifiedProgramsCard() {
                 </div>
 
                 {filteredPrograms.length === 0 ? (
-                    <div className="text-center py-4">No programs match your search.</div>
+                    <div className="e-text-center e-py-4">No programs match your search.</div>
                 ) : (
                     <TableCardBodyHeaded
                         headerComponent={
@@ -135,7 +128,7 @@ export function VerifiedProgramsCard() {
                                 <th>Address</th>
                                 <th>Source Code</th>
                                 <th>Last Verified</th>
-                                <th className="text-end">Status</th>
+                                <th className="e-text-end">Status</th>
                             </tr>
                         }
                     >
@@ -145,6 +138,32 @@ export function VerifiedProgramsCard() {
                     </TableCardBodyHeaded>
                 )}
             </div>
+
+            {!foundLast && (
+                <div className="card-footer">
+                    <button
+                        className="btn btn-primary w-100"
+                        onClick={loadMore}
+                        disabled={isFetching}
+                        aria-label="Load more verified programs"
+                    >
+                        {isFetching ? (
+                            <>
+                                <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+                                Loading
+                            </>
+                        ) : (
+                            'Load More'
+                        )}
+                    </button>
+                </div>
+            )}
+
+            {foundLast && programs.length > 0 && (
+                <div className="card-footer">
+                    <div className="text-muted text-center">All programs loaded</div>
+                </div>
+            )}
         </div>
     );
 }
@@ -162,7 +181,6 @@ function CopyableAddress({ address }: { address: string }) {
 }
 
 function ProgramRow({ program }: { program: VerifiedProgramInfo }) {
-    // Hide name if it matches the address
     const showName = program.name !== program.programId;
 
     return (
@@ -201,7 +219,7 @@ function ProgramRow({ program }: { program: VerifiedProgramInfo }) {
                     <span className="text-muted">—</span>
                 )}
             </td>
-            <td className="text-end">
+            <td className="e-text-end">
                 <span className="badge bg-success-soft">Verified</span>
             </td>
         </tr>

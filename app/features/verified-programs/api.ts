@@ -3,10 +3,8 @@ import Logger from '@/app/utils/logger';
 import { getProgramName } from './model';
 import { ProgramMetadata, VerifiedProgramInfo, VerifiedProgramsResponse } from './types';
 
-// Use local API routes to avoid CORS issues in development
 const API_BASE_URL = '/api/verified-programs';
 
-// Fetch metadata for a single program
 async function fetchProgramMetadata(programId: string): Promise<ProgramMetadata | null> {
     try {
         const response = await fetch(`${API_BASE_URL}/metadata/${programId}`);
@@ -17,7 +15,6 @@ async function fetchProgramMetadata(programId: string): Promise<ProgramMetadata 
 
         const data: ProgramMetadata[] = await response.json();
 
-        // Return first entry if exists
         if (data.length === 0) {
             Logger.debug(`Metadata is empty for ${programId}: API returned empty array`);
             return null;
@@ -29,7 +26,6 @@ async function fetchProgramMetadata(programId: string): Promise<ProgramMetadata 
     }
 }
 
-// Fetch metadata for multiple programs (in parallel for one page)
 async function fetchMetadataForPage(programIds: string[]): Promise<Map<string, ProgramMetadata | null>> {
     const results = await Promise.allSettled(programIds.map(id => fetchProgramMetadata(id)));
 
@@ -42,25 +38,25 @@ async function fetchMetadataForPage(programIds: string[]): Promise<Map<string, P
     return metadataMap;
 }
 
-// Fetch programs page by page with metadata
-export async function fetchProgramsProgressively(
-    onPageLoaded: (programs: VerifiedProgramInfo[], page: number, totalPages: number, totalCount: number) => void
-): Promise<void> {
+export async function fetchProgramsPage(page: number): Promise<{
+    programs: VerifiedProgramInfo[];
+    totalPages: number;
+    totalCount: number;
+    currentPage: number;
+}> {
     try {
-        // Fetch first page to get total pages
-        const firstPageResponse = await fetch(`${API_BASE_URL}/list/1`);
-        if (!firstPageResponse.ok) {
-            throw new Error('Failed to fetch verified programs');
+        const pageResponse = await fetch(`${API_BASE_URL}/list/${page}`);
+        if (!pageResponse.ok) {
+            throw new Error(`Failed to fetch verified programs page ${page}`);
         }
-        const firstPage: VerifiedProgramsResponse = await firstPageResponse.json();
 
-        const totalPages = firstPage.meta.total_pages;
-        const totalCount = firstPage.meta.total;
+        const pageData: VerifiedProgramsResponse = await pageResponse.json();
+        const totalPages = pageData.meta.total_pages;
+        const totalCount = pageData.meta.total;
 
-        // Process first page
-        const firstPageMetadata = await fetchMetadataForPage(firstPage.verified_programs);
-        const firstPagePrograms = firstPage.verified_programs.map(programId => {
-            const metadata = firstPageMetadata.get(programId) ?? null;
+        const pageMetadata = await fetchMetadataForPage(pageData.verified_programs);
+        const programs = pageData.verified_programs.map(programId => {
+            const metadata = pageMetadata.get(programId) ?? null;
 
             return {
                 isVerified: true as const,
@@ -71,39 +67,14 @@ export async function fetchProgramsProgressively(
             };
         });
 
-        onPageLoaded(firstPagePrograms, 1, totalPages, totalCount);
-
-        // Fetch remaining pages sequentially
-        for (let page = 2; page <= totalPages; page++) {
-            const pageResponse = await fetch(`${API_BASE_URL}/list/${page}`);
-            if (!pageResponse.ok) {
-                Logger.error(`Failed to fetch page ${page}`);
-                continue;
-            }
-
-            const pageData: VerifiedProgramsResponse = await pageResponse.json();
-            const pageMetadata = await fetchMetadataForPage(pageData.verified_programs);
-            const pagePrograms = pageData.verified_programs.map(programId => {
-                const metadata = pageMetadata.get(programId) ?? null;
-
-                return {
-                    isVerified: true as const,
-                    lastVerifiedAt: metadata?.last_verified_at,
-                    name: getProgramName(programId, metadata?.repo_url),
-                    programId,
-                    repoUrl: metadata?.repo_url,
-                };
-            });
-
-            onPageLoaded(pagePrograms, page, totalPages, totalCount);
-
-            // Small delay between pages to avoid rate limiting
-            if (page < totalPages) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-        }
+        return {
+            currentPage: page,
+            programs,
+            totalCount,
+            totalPages,
+        };
     } catch (error) {
-        Logger.error('Failed to fetch programs progressively', error);
+        Logger.error(`Failed to fetch programs page ${page}`, error);
         throw error;
     }
 }

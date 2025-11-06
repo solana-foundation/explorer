@@ -1,6 +1,3 @@
-// Type definitions for verified programs feature
-
-// Enhanced type with metadata
 export type VerifiedProgramInfo = {
     programId: string;
     name: string; // From repo URL or address fallback
