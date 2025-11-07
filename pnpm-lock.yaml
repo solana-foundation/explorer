@@ -54,9 +54,6 @@ importers:
       '@bonfida/spl-name-service':
         specifier: 0.1.30
         version: 0.1.30(@solana/buffer-layout@3.0.0)(@solana/spl-token@0.1.8(bufferutil@4.0.7)(typescript@5.0.4)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.7)(typescript@5.0.4)(utf-8-validate@5.0.10))(bn.js@5.2.1)(borsh@0.7.0)(bufferutil@4.0.7)(utf-8-validate@5.0.10)
-      '@cloudflare/stream-react':
-        specifier: 1.2.0
-        version: 1.2.0(react@18.3.1)
       '@codama/dynamic-parsers':
         specifier: 1.1.12
         version: 1.1.12(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)
@@ -791,12 +788,6 @@ packages:
 
   '@clack/prompts@0.8.2':
     resolution: {integrity: sha512-6b9Ab2UiZwJYA9iMyboYyW9yJvAO9V753ZhS+DHKEjZRKAxPPOb7MXXu84lsPFG+vZt6FRFniZ8rXi+zCIw4yQ==}
-
-  '@cloudflare/stream-react@1.2.0':
-    resolution: {integrity: sha512-uLsKstcNOrTH19UEFxHWUX6h8SM9Ytr1Qyo6dIObuDUQ40g/cJgNnNnFn4gcGWf3zPwXQN3LkRmVol5MU/rU2Q==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      react: '>=16'
 
   '@codama/cli@1.0.10':
     resolution: {integrity: sha512-zKfQZYIqu834fno5ra6H/rlqFlNWNJ5tU5spxxVBOwECX3oUZc5+ED9Vu6cOP/FRgs6FI24/d603P6iSz0vuuA==}
@@ -9793,10 +9784,6 @@ snapshots:
       '@clack/core': 0.3.5
       picocolors: 1.1.1
       sisteransi: 1.0.5
-
-  '@cloudflare/stream-react@1.2.0(react@18.3.1)':
-    dependencies:
-      react: 18.3.1
 
   '@codama/cli@1.0.10(chokidar@3.6.0)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)':
     dependencies:
