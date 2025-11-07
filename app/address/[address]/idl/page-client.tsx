@@ -1,14 +1,11 @@
 'use client';
 
 import { LoadingCard } from '@components/common/LoadingCard';
-import { captureException } from '@sentry/nextjs';
-import { ComponentProps, Suspense } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
+import { Suspense } from 'react';
 
 import { IdlCard } from '@/app/components/account/idl/IdlCard';
 import { ErrorCard } from '@/app/components/common/ErrorCard';
-
-const isSentryEnabled = process.env.NEXT_PUBLIC_ENABLE_CATCH_EXCEPTIONS === '1';
+import { withSentry } from '@/app/entities/error-boundary/ui/ErrorBoundary';
 
 type Props = Readonly<{
     params: {
@@ -16,30 +13,13 @@ type Props = Readonly<{
     };
 }>;
 
-function PageRenderer({
-    address,
-    renderComponent: RenderComponent,
-}: {
-    address: string;
-    renderComponent: React.ComponentType<ComponentProps<typeof IdlRenderComponent>>;
-}) {
-    return (
-        <ErrorBoundary
-            onError={(error: Error) => {
-                if (isSentryEnabled) {
-                    captureException(error);
-                }
-            }}
-            fallbackRender={({ error }) => <ErrorCard text={`Failed to load: ${error.message}`} />}
-        >
-            <RenderComponent address={address} />
-        </ErrorBoundary>
-    );
+export default function IdlPageClient({ params: { address } }: Props) {
+    return <PageRenderer address={address} />;
 }
 
-export default function IdlPageClient({ params: { address } }: Props) {
-    return <PageRenderer address={address} renderComponent={IdlRenderComponent} />;
-}
+const PageRenderer = withSentry(IdlRenderComponent, {
+    fallbackRender: ({ error }) => <ErrorCard text={`Failed to load: ${error.message}`} />,
+});
 
 function IdlRenderComponent({ address }: { address: string }) {
     return (
