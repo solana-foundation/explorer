@@ -232,8 +232,8 @@ importers:
         specifier: 5.2.0
         version: 5.2.0(chart.js@4.3.0)(react@18.3.1)
       react-content-loader:
-        specifier: 6.1.0
-        version: 6.1.0(react@18.3.1)
+        specifier: 7.1.1
+        version: 7.1.1(react@18.3.1)
       react-countup:
         specifier: 6.4.0
         version: 6.4.0(@babel/core@7.28.4)(@types/babel__core@7.20.5)(react@18.3.1)(rollup@4.50.1)
@@ -7665,8 +7665,8 @@ packages:
       chart.js: ^4.1.1
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
 
-  react-content-loader@6.1.0:
-    resolution: {integrity: sha512-S4/+doQrNs0PGDgUYCGGfdFjGax8dMQzYkWcSSxfaUcUjFkbnikWARuX9lWkglocIVhxnn3lxNb6uEWFFUzNUw==}
+  react-content-loader@7.1.1:
+    resolution: {integrity: sha512-yNkqtd+15wXRLfDKZb5nTqDV2fPTG2kpUgeGRb+WBz43bU0j4DSGXETF0bnFr44fAoTPpm0Dya0WGdhpHSvtYA==}
     engines: {node: '>=10'}
     peerDependencies:
       react: '>=16.0.0'
@@ -18479,7 +18479,7 @@ snapshots:
       chart.js: 4.3.0
       react: 18.3.1
 
-  react-content-loader@6.1.0(react@18.3.1):
+  react-content-loader@7.1.1(react@18.3.1):
     dependencies:
       react: 18.3.1
 
