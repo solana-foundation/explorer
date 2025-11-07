@@ -17,7 +17,7 @@ export function useProgramCanonicalMetadata(
     useSuspense = false
 ) {
     const { data } = useSWRImmutable(
-        `program-metadata-${seed}-${programAddress}-${url}`,
+        `program-metadata-${programAddress}-${url}-${seed}`,
         async () => {
             if (!enabled) {
                 return null;
