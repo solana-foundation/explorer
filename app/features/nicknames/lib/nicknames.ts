@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Utility functions for managing wallet address nicknames in localStorage
  */
@@ -49,3 +51,4 @@ export const removeNickname = (address: string): void => {
         console.error('Error removing nickname from localStorage:', error);
     }
 };
+

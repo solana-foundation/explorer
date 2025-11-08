@@ -1,8 +1,9 @@
 /**
  * Tests for nickname localStorage utility functions
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getNickname, setNickname, removeNickname } from '../nicknames';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { getNickname, removeNickname, setNickname } from '../nicknames';
 
 describe('nicknames', () => {
     // Clear localStorage before each test for isolation
@@ -18,9 +19,12 @@ describe('nicknames', () => {
 
         it('returns the nickname when it exists', () => {
             // Setup: add nickname to localStorage
-            localStorage.setItem('solana-explorer-nicknames', JSON.stringify({
-                'TestAddress123': 'My Wallet'
-            }));
+            localStorage.setItem(
+                'solana-explorer-nicknames',
+                JSON.stringify({
+                    TestAddress123: 'My Wallet',
+                })
+            );
 
             const result = getNickname('TestAddress123');
             expect(result).toBe('My Wallet');
@@ -54,7 +58,7 @@ describe('nicknames', () => {
         it('removes nickname when empty string provided', () => {
             // Setup: save a nickname
             setNickname('TestAddress123', 'My Wallet');
-            
+
             // Update with empty/whitespace-only string
             setNickname('TestAddress123', '   ');
 
@@ -80,7 +84,7 @@ describe('nicknames', () => {
             // Verify event was dispatched with correct address
             expect(listener).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    detail: { address: 'TestAddress123' }
+                    detail: { address: 'TestAddress123' },
                 })
             );
 
@@ -120,7 +124,7 @@ describe('nicknames', () => {
             // Verify event was dispatched with correct address
             expect(listener).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    detail: { address: 'TestAddress123' }
+                    detail: { address: 'TestAddress123' },
                 })
             );
 
@@ -128,3 +132,4 @@ describe('nicknames', () => {
         });
     });
 });
+
