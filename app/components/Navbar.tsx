@@ -19,7 +19,7 @@ export function Navbar({ children }: INavbarProps) {
     const homePath = useClusterPath({ pathname: '/' });
     const featureGatesPath = useClusterPath({ pathname: '/feature-gates' });
     const supplyPath = useClusterPath({ pathname: '/supply' });
-    const programsPath = useClusterPath({ pathname: '/programs' });
+    const programsPath = useClusterPath({ pathname: '/verified-programs' });
     const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const selectedLayoutSegments = useSelectedLayoutSegments();

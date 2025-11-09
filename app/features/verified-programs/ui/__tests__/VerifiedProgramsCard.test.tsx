@@ -2,42 +2,38 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
-import { fetchProgramsProgressively, type VerifiedProgramInfo } from '@/app/features/verified-programs';
-
+import { fetchProgramsPage } from '../../api';
+import type { VerifiedProgramInfo } from '../../types';
 import { VerifiedProgramsCard } from '../VerifiedProgramsCard';
 
-// Mock debounce hook
 vi.mock('@react-hook/debounce', () => ({
     useDebounceCallback: vi.fn((callback: any) => callback),
 }));
 
-// Mock useClusterPath
 vi.mock('@utils/url', () => ({
     useClusterPath: vi.fn(({ pathname }: { pathname: string }) => pathname),
 }));
 
-// Mock verified-programs feature
-vi.mock('@/app/features/verified-programs', () => ({
-    fetchProgramsProgressively: vi.fn(),
+vi.mock('../../api', () => ({
+    fetchProgramsPage: vi.fn(),
+}));
+
+vi.mock('../../model', () => ({
     isValidGitHubUrl: vi.fn((url: string) => url.startsWith('https://github.com')),
 }));
 
-// Mock Next.js Link component
 vi.mock('next/link', () => ({
     default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
 }));
 
-// Mock LoadingCard
 vi.mock('@components/common/LoadingCard', () => ({
     LoadingCard: ({ message }: { message?: string }) => <div data-testid="loading-card">{message || 'Loading'}</div>,
 }));
 
-// Mock ErrorCard
 vi.mock('@components/common/ErrorCard', () => ({
     ErrorCard: ({ text }: { text: string }) => <div data-testid="error-card">{text}</div>,
 }));
 
-// Mock TableCardBodyHeaded
 vi.mock('@components/common/TableCardBody', () => ({
     TableCardBodyHeaded: ({
         children,
@@ -83,15 +79,18 @@ describe('VerifiedProgramsCard', () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        // Default mock implementation that calls callback with all programs
-        vi.mocked(fetchProgramsProgressively).mockImplementation(async (callback: any) => {
-            callback(mockPrograms, 1, 1, mockPrograms.length);
+        // Default mock implementation returns first page with all programs
+        vi.mocked(fetchProgramsPage).mockResolvedValue({
+            currentPage: 1,
+            programs: mockPrograms,
+            totalCount: mockPrograms.length,
+            totalPages: 1,
         });
     });
 
     it('renders loading state initially', () => {
         // Mock a slow fetch that never resolves
-        vi.mocked(fetchProgramsProgressively).mockImplementation(
+        vi.mocked(fetchProgramsPage).mockImplementation(
             () =>
                 new Promise(() => {
                     // Never resolves
@@ -105,7 +104,7 @@ describe('VerifiedProgramsCard', () => {
     });
 
     it('renders error state', async () => {
-        vi.mocked(fetchProgramsProgressively).mockRejectedValue(new Error('Failed to fetch'));
+        vi.mocked(fetchProgramsPage).mockRejectedValue(new Error('Failed to fetch'));
 
         render(<VerifiedProgramsCard />);
 
@@ -122,9 +121,8 @@ describe('VerifiedProgramsCard', () => {
             expect(screen.getByText('Verified Programs')).toBeInTheDocument();
         });
 
-        expect(screen.getByText('3 verified programs from')).toBeInTheDocument();
+        expect(screen.getByText('3 of 3 verified programs from')).toBeInTheDocument();
 
-        // Check that all programs are rendered
         expect(screen.getByText('Solana Program Library')).toBeInTheDocument();
         expect(screen.getByText('Token 2022')).toBeInTheDocument();
         expect(screen.getByText('Phoenix V1')).toBeInTheDocument();
@@ -134,7 +132,6 @@ describe('VerifiedProgramsCard', () => {
         render(<VerifiedProgramsCard />);
 
         await waitFor(() => {
-            // Should have 3 "Verified" badges
             const badges = screen.getAllByText('Verified');
             expect(badges).toHaveLength(3);
         });
@@ -205,7 +202,6 @@ describe('VerifiedProgramsCard', () => {
             expect(screen.getByText('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')).toBeInTheDocument();
         });
 
-        // Check that each program ID is rendered
         expect(screen.getByText('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb')).toBeInTheDocument();
         expect(screen.getByText('PhoeNiXZ8ByJGLkxNfZRnkUfjvmuYqLR89jjFHGqdXY')).toBeInTheDocument();
     });
@@ -217,39 +213,51 @@ describe('VerifiedProgramsCard', () => {
             expect(screen.getAllByText('GitHub →')).toHaveLength(3);
         });
 
-        // Verify the first link has correct attributes
         const githubLinks = screen.getAllByText('GitHub →');
         const link = githubLinks[0];
         expect(link).toHaveAttribute('target', '_blank');
         expect(link).toHaveAttribute('rel', 'noopener noreferrer');
     });
 
-    it('shows loading banner while fetching additional pages', async () => {
-        // Mock progressive loading with 2 pages
-        vi.mocked(fetchProgramsProgressively).mockImplementation(async (callback: any) => {
-            // First page loads immediately
-            callback([mockPrograms[0]], 1, 2, 3);
+    it('shows Load More button and loads additional pages', async () => {
+        const user = userEvent.setup();
 
-            // Second page loads after a delay
-            await new Promise(resolve => setTimeout(resolve, 100));
-            callback([mockPrograms[1], mockPrograms[2]], 2, 2, 3);
+        vi.mocked(fetchProgramsPage).mockResolvedValueOnce({
+            currentPage: 1,
+            programs: [mockPrograms[0]],
+            totalCount: 3,
+            totalPages: 2,
         });
 
         render(<VerifiedProgramsCard />);
 
-        // Should show first program immediately
         await waitFor(() => {
             expect(screen.getByText('Phoenix V1')).toBeInTheDocument();
         });
 
-        // Should show loading banner while loading page 2
-        expect(screen.getByText(/Loading programs.../)).toBeInTheDocument();
+        expect(screen.getByText('1 of 3 verified programs from')).toBeInTheDocument();
+        expect(screen.getByText('Load More')).toBeInTheDocument();
 
-        // Wait for all programs to load
+        vi.mocked(fetchProgramsPage).mockResolvedValueOnce({
+            currentPage: 2,
+            programs: [mockPrograms[1], mockPrograms[2]],
+            totalCount: 3,
+            totalPages: 2,
+        });
+
+        await user.click(screen.getByText('Load More'));
+
+        await waitFor(() => {
+            expect(screen.getByText('Loading')).toBeInTheDocument();
+        });
+
         await waitFor(() => {
             expect(screen.getByText('Solana Program Library')).toBeInTheDocument();
         });
 
         expect(screen.getByText('Token 2022')).toBeInTheDocument();
+        expect(screen.getByText('3 of 3 verified programs from')).toBeInTheDocument();
+        expect(screen.getByText('All programs loaded')).toBeInTheDocument();
+        expect(screen.queryByText('Load More')).not.toBeInTheDocument();
     });
 });
