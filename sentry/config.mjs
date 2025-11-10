@@ -36,7 +36,7 @@ export function createSentryConfig(_context) {
 
             // We encountered the peak of 24M spans per day
             // Adjust the rate to fit the monthly quote
-            return process.env.NODE_ENV === 'production' ? 5e-9 : 1;
+            return process.env.NODE_ENV === 'production' ? 0.0000001 : 1;
         },
 
         // Enable logs to be sent to Sentry
