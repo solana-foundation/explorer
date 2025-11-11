@@ -38,11 +38,8 @@ jobs:
     timeout-minutes: 20
 
     env:
+      # Use url to check that migrations work with test database
       DATABASE_URL: ${{ vars.DATABASE_URL }}
-      DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
-      DUNE_PROGRAM_STATS_MV_ID: ${{ vars.DUNE_PROGRAM_STATS_MV_ID }}
-      DUNE_PROGRAM_CALLS_MV_ID: ${{ vars.DUNE_PROGRAM_CALLS_MV_ID }}
-      CRON_SECRET: ${{ vars.CRON_SECRET }}
 
     strategy:
       matrix:
