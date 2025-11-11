@@ -1,6 +1,6 @@
 import { Keypair } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, within } from '@storybook/test';
+import { expect, within } from 'storybook/test';
 
 import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
 import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
@@ -23,7 +23,7 @@ const meta = {
             appDirectory: true,
         },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/token-extensions/TokenExtensionsStatusRow',
 } satisfies Meta<typeof TokenExtensionsStatusRow>;
 

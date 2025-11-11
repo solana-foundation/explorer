@@ -16,7 +16,7 @@ const meta = {
             appDirectory: true,
         },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/idl/components/IdlTypes',
 } satisfies Meta<typeof IdlTypesView>;
 

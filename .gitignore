@@ -37,8 +37,7 @@ next-env.d.ts
 # Speedy Web Compiler
 .swc/
 
-# vim
-.editorconfig
+# Storybook
 *storybook.log
 
 # Sentry Config File

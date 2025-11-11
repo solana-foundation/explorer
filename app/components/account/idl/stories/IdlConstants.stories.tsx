@@ -11,7 +11,7 @@ const meta = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/idl/components/IdlConstants',
 } satisfies Meta<typeof IdlConstantsView>;
 
