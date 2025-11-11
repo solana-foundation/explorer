@@ -22,7 +22,7 @@ const ViewOriginalArtContentLink = ({ src }: { src: string }) => {
                 <Link href={src} target="_blank" className="d-flex align-items-center">
                     <div>VIEW ORIGINAL</div>
                     <div className="d-flex">
-                        <InfoTooltip right text="By clicking the link external resource will be open" />
+                       <InfoTooltip right text="By clicking the link external resource will be open" />
                     </div>
                 </Link>
             )}
@@ -35,7 +35,7 @@ export const NFTImageContent = ({ uri }: { uri?: string }) => {
         <div style={{ maxHeight: 200, width: 150 }}>
             <div className="rounded mx-auto d-block" style={{ overflow: 'hidden' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img alt="nft" src={lowContrastSolanalogo.src} width="100%" />
+                <img alt="nft" src={uri ?? lowContrastSolanalogo.src} width="100%" />
             </div>
             {uri && <ViewOriginalArtContentLink src={uri} />}
         </div>
