@@ -213,9 +213,6 @@ importers:
       lighthouse-sdk:
         specifier: 2.0.1
         version: 2.0.1(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@8.18.1(bufferutil@4.0.7)(utf-8-validate@5.0.10))
-      lru-cache:
-        specifier: 11.2.2
-        version: 11.2.2
       micromatch:
         specifier: 4.0.8
         version: 4.0.8
@@ -356,7 +353,7 @@ importers:
         specifier: ^8.15.5
         version: 8.15.5
       '@types/prettier':
-        specifier: '2'
+        specifier: 2.7.3
         version: 2.7.3
       '@types/react':
         specifier: 18.3.3
@@ -6906,10 +6903,6 @@ packages:
 
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
-
-  lru-cache@11.2.2:
-    resolution: {integrity: sha512-F9ODfyqML2coTIsQpSkRHnLSZMtkU8Q+mSfcaIyKwy58u+8k5nvAYeiNhsyMARvzNcXJ9QfWVrcPsC9e9rAxtg==}
-    engines: {node: 20 || >=22}
 
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
@@ -17514,8 +17507,6 @@ snapshots:
       tslib: 2.7.0
 
   lru-cache@10.4.3: {}
-
-  lru-cache@11.2.2: {}
 
   lru-cache@5.1.1:
     dependencies:
