@@ -1,12 +1,11 @@
 import { config } from 'dotenv';
 import { defineConfig } from 'drizzle-kit';
 
-if (!process.env.CI) {
-    if (process.env.NODE_ENV === 'development') {
-        config({ path: '.env.local' });
-    } else {
-        config({ path: '.env' });
-    }
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+// load configuration from .env.local for tests
+if (!process.env.CI && isDevelopment) {
+    config({ path: '.env.local' });
 }
 
 export default defineConfig({
