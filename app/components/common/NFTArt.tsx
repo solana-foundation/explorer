@@ -22,7 +22,7 @@ const ViewOriginalArtContentLink = ({ src }: { src: string }) => {
                 <Link href={src} target="_blank" className="d-flex align-items-center">
                     <div>VIEW ORIGINAL</div>
                     <div className="d-flex">
-                       <InfoTooltip right text="By clicking the link external resource will be open" />
+                        <InfoTooltip right text="By clicking the link external resource will be open" />
                     </div>
                 </Link>
             )}
