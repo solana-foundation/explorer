@@ -3,6 +3,7 @@ import { MetadataJson } from '@metaplex/js';
 import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 
+import { getProxiedUri } from '@/app/features/metadata/utils';
 import { isEnvEnabled } from '@/app/utils/env';
 
 import { InfoTooltip } from './InfoTooltip';
@@ -35,7 +36,7 @@ export const NFTImageContent = ({ uri }: { uri?: string }) => {
         <div style={{ maxHeight: 200, width: 150 }}>
             <div className="rounded mx-auto d-block" style={{ overflow: 'hidden' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img alt="nft" src={uri ?? lowContrastSolanalogo.src} width="100%" />
+                <img alt="nft" src={uri ? getProxiedUri(uri) : lowContrastSolanalogo.src} width="100%" />
             </div>
             {uri && <ViewOriginalArtContentLink src={uri} />}
         </div>
