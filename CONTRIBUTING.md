@@ -1,6 +1,6 @@
 # Contributor's Guide
 
-Thank you for your interest in contributing to the Solana Explorer project! This guide will help you understand how to contribute effectively, including testing protocol integrations, ensuring CI/CD passes, and handling security-related features.
+Thank you for your interest in contributing to the Fogo Explorer project! This guide will help you understand how to contribute effectively, including testing protocol integrations, ensuring CI/CD passes, and handling security-related features.
 
 ## Table of Contents
 
@@ -27,11 +27,9 @@ Thank you for your interest in contributing to the Solana Explorer project! This
 Contributing to the Explorer requires `pnpm` version `9.10.0`.
 Once you have this version of `pnpm`, you can continue with the following steps.
 
--   Copy `.env.example` into `.env` & fill out the fields with custom RPC urls \
-    from a Solana RPC provider. You should not use `https://api.mainnet-beta.solana.com` \
-    or `https://api.devnet.solana.com` or else you will get rate-limited. These are public \
-    endpoints not suitable for application development. You must set these URLs with \
-    endpoints from your own provider.
+-   Copy `.env.example` into `.env` & fill out the fields with RPC URLs from a Fogo RPC provider. \
+    Avoid shared public endpoints (e.g., `https://mainnet.fogo.io`, `https://testnet.fogo.io`) for day-to-day \
+    development because they can be rate-limited. Use endpoints from your own provider whenever possible.
 
 -   `pnpm i` \
     Installs all project dependencies using pnpm package manager. This will create a \
@@ -166,7 +164,7 @@ pnpm test:ci
 
 ### Security Vulnerabilities
 
-For bugs relating to Solana Verify (aka Verified Builds), please send email to disclosures@solana.org.
+For security vulnerabilities—including issues in the Verified Builds feature—please open a private report via GitHub Security Advisories or contact the maintainer team through the security channel listed in the repository README. Public issues should not be used for undisclosed vulnerabilities.
 
 For other security vulnerabilities, please do NOT report them publicly on GitHub Issues. Instead, use our dedicated bug bounty form at [https://example.com/bug-bounty](https://example.com/bug-bounty).
 
