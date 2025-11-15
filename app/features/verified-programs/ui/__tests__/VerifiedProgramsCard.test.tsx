@@ -238,17 +238,26 @@ describe('VerifiedProgramsCard', () => {
         expect(screen.getByText('1 of 3 verified programs from')).toBeInTheDocument();
         expect(screen.getByText('Load More')).toBeInTheDocument();
 
-        vi.mocked(fetchProgramsPage).mockResolvedValueOnce({
-            currentPage: 2,
-            programs: [mockPrograms[1], mockPrograms[2]],
-            totalCount: 3,
-            totalPages: 2,
+        // Use a promise we can control to ensure loading state is visible
+        let resolveLoadMore: (value: any) => void;
+        const loadMorePromise = new Promise(resolve => {
+            resolveLoadMore = resolve;
         });
+
+        vi.mocked(fetchProgramsPage).mockReturnValueOnce(loadMorePromise as any);
 
         await user.click(screen.getByText('Load More'));
 
         await waitFor(() => {
             expect(screen.getByText('Loading')).toBeInTheDocument();
+        });
+
+        // Now resolve the promise
+        resolveLoadMore!({
+            currentPage: 2,
+            programs: [mockPrograms[1], mockPrograms[2]],
+            totalCount: 3,
+            totalPages: 2,
         });
 
         await waitFor(() => {
