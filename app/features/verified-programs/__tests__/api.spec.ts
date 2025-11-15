@@ -216,10 +216,7 @@ describe('fetchProgramsPage', () => {
                 mockProgramIds[0],
                 'https://github.com/solana-labs/solana-program-library'
             );
-            expect(getProgramName).toHaveBeenCalledWith(
-                mockProgramIds[1],
-                'https://github.com/solana-labs/token-2022'
-            );
+            expect(getProgramName).toHaveBeenCalledWith(mockProgramIds[1], 'https://github.com/solana-labs/token-2022');
             expect(getProgramName).toHaveBeenCalledWith(
                 mockProgramIds[2],
                 'https://github.com/Ellipsis-Labs/phoenix-v1'
@@ -349,10 +346,7 @@ describe('fetchProgramsPage', () => {
                 // Expected to throw
             }
 
-            expect(Logger.error).toHaveBeenCalledWith(
-                'Failed to fetch programs page 1',
-                expect.any(Error)
-            );
+            expect(Logger.error).toHaveBeenCalledWith('Failed to fetch programs page 1', expect.any(Error));
         });
 
         it('throws error on network failure', async () => {
@@ -399,9 +393,7 @@ describe('fetchProgramsPage', () => {
 
             await fetchProgramsPage(1);
 
-            expect(Logger.debug).toHaveBeenCalledWith(
-                `Metadata fetch failed for ${mockProgramIds[0]}: HTTP 404`
-            );
+            expect(Logger.debug).toHaveBeenCalledWith(`Metadata fetch failed for ${mockProgramIds[0]}: HTTP 404`);
         });
 
         it('logs debug message for empty metadata', async () => {
@@ -447,10 +439,7 @@ describe('fetchProgramsPage', () => {
 
             await fetchProgramsPage(1);
 
-            expect(Logger.error).toHaveBeenCalledWith(
-                `Failed to fetch metadata for ${mockProgramIds[0]}`,
-                fetchError
-            );
+            expect(Logger.error).toHaveBeenCalledWith(`Failed to fetch metadata for ${mockProgramIds[0]}`, fetchError);
         });
     });
 

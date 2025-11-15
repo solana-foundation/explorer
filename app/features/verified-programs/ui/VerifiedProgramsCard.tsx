@@ -55,7 +55,7 @@ export function VerifiedProgramsCard() {
                 </div>
 
                 {filteredPrograms.length === 0 ? (
-                    <div className="e-text-center e-py-4">No programs match your search.</div>
+                    <div className="e-py-4 e-text-center">No programs match your search.</div>
                 ) : (
                     <TableCardBodyHeaded
                         headerComponent={

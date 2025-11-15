@@ -18,9 +18,7 @@ export default function ProgramsPageClient() {
                     captureException(error);
                 }
             }}
-            fallbackRender={({ error }) => (
-                <ErrorCard text={`Failed to load verified programs: ${error.message}`} />
-            )}
+            fallbackRender={({ error }) => <ErrorCard text={`Failed to load verified programs: ${error.message}`} />}
         >
             <div className="container e-mt-4">
                 <VerifiedProgramsCard />
