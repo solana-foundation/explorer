@@ -55,7 +55,6 @@ export function parseProgramLogs(logs: string[], error: TransactionError | null,
                 text: log,
             });
         } else if (log.startsWith('Program data:')) {
-
             prettyLogs[prettyLogs.length - 1].logs.push({
                 prefix: prefixBuilder(depth),
                 style: 'muted',

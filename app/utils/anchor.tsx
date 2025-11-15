@@ -55,10 +55,8 @@ export function decodeEventWithCustomDiscriminator(eventData: string, program: P
                 const modifiedIdl: Idl = {
                     ...program.idl,
                     events: program.idl.events.map(ev =>
-                        ev.name === event.name
-                            ? { ...ev, discriminator: paddedDiscriminator }
-                            : { ...ev }
-                    )
+                        ev.name === event.name ? { ...ev, discriminator: paddedDiscriminator } : { ...ev }
+                    ),
                 };
 
                 // Pad the event data
@@ -151,10 +149,8 @@ export function decodeInstructionWithCustomDiscriminator(ixData: Buffer | Uint8A
                 const modifiedIdl: Idl = {
                     ...program.idl,
                     instructions: program.idl.instructions.map(ix =>
-                        ix.name === instruction.name
-                            ? { ...ix, discriminator: paddedDiscriminator }
-                            : { ...ix }
-                    )
+                        ix.name === instruction.name ? { ...ix, discriminator: paddedDiscriminator } : { ...ix }
+                    ),
                 };
 
                 // Pad the instruction data
@@ -399,9 +395,10 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
         type === 'i256'
     ) {
         // Handle BN (BigNumber) objects from Anchor
-        const displayValue = typeof value === 'object' && value !== null && 'toNumber' in value
-            ? value.toNumber().toString()
-            : value.toString();
+        const displayValue =
+            typeof value === 'object' && value !== null && 'toNumber' in value
+                ? value.toNumber().toString()
+                : value.toString();
 
         return (
             <SimpleRow
@@ -614,9 +611,7 @@ function SimpleRow({
         <tr className={nestingLevel > 0 ? 'table-nested-account' : ''}>
             <td>
                 <div className="d-flex flex-row align-items-center">
-                    {nestingLevel > 0 && (
-                        <CornerDownRight className="me-2 mb-1" size={14} />
-                    )}
+                    {nestingLevel > 0 && <CornerDownRight className="me-2 mb-1" size={14} />}
                     <div>{itemKey}</div>
                 </div>
             </td>
@@ -643,9 +638,7 @@ export function ExpandableRow({
             <tr className="table-group-header">
                 <td>
                     <div className="d-flex flex-row align-items-center">
-                        {nestingLevel > 0 && (
-                            <CornerDownRight className="me-2 mb-1" size={14} />
-                        )}
+                        {nestingLevel > 0 && <CornerDownRight className="me-2 mb-1" size={14} />}
                         <div>{fieldName}</div>
                     </div>
                 </td>

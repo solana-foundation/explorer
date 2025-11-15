@@ -46,10 +46,18 @@ function ProgramNameWithInstruction({
         if (programNameStr.endsWith(' Program')) {
             // Replace "Program" with instruction name
             const baseName = programNameStr.slice(0, -8); // Remove " Program"
-            return <>{baseName} {instructionName}</>;
+            return (
+                <>
+                    {baseName} {instructionName}
+                </>
+            );
         } else {
             // Just append instruction name
-            return <>{programNameStr} {instructionName}</>;
+            return (
+                <>
+                    {programNameStr} {instructionName}
+                </>
+            );
         }
     }
 
@@ -158,7 +166,8 @@ function ProgramLogRow({
 
             if ('compiledInstructions' in message) {
                 // VersionedMessage with compiledInstructions
-                const { numRequiredSignatures, numReadonlySignedAccounts, numReadonlyUnsignedAccounts } = message.header;
+                const { numRequiredSignatures, numReadonlySignedAccounts, numReadonlyUnsignedAccounts } =
+                    message.header;
 
                 const accounts = instruction.accountKeyIndexes.map((accountIndex: number) => {
                     const pubkey = message.staticAccountKeys[accountIndex];

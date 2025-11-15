@@ -50,7 +50,14 @@ export default function AnchorDetailsCard(props: {
         if (eventDataList.length === 0) return undefined;
 
         // Create event cards
-        return [<ProgramEventsCard key="events" eventDataList={eventDataList} program={anchorProgram} instructionIndex={index} />];
+        return [
+            <ProgramEventsCard
+                key="events"
+                eventDataList={eventDataList}
+                program={anchorProgram}
+                instructionIndex={index}
+            />,
+        ];
     }, [details, index, anchorProgram]);
 
     return (
@@ -201,16 +208,11 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                                 // Render group header
                                 const groupHeaderIndex = accountInfoIndex;
                                 const isExpanded = !collapsedGroups.has(groupHeaderIndex);
-                                skipUntilLevel = isExpanded ? null : (currentInfo.nestingLevel ?? 0);
+                                skipUntilLevel = isExpanded ? null : currentInfo.nestingLevel ?? 0;
 
                                 rows.push(
-                                    <tr
-                                        key={`group-${groupHeaderIndex}`}
-                                        className="table-group-header"
-                                    >
-                                        <td colSpan={2}>
-                                            {camelToTitleCase(currentInfo.name)}
-                                        </td>
+                                    <tr key={`group-${groupHeaderIndex}`} className="table-group-header">
+                                        <td colSpan={2}>{camelToTitleCase(currentInfo.name)}</td>
                                         <td className="text-lg-end" onClick={() => toggleGroup(groupHeaderIndex)}>
                                             <div className="c-pointer">
                                                 {isExpanded ? (
@@ -237,9 +239,8 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                     }
 
                     // Get the account info for this actual account
-                    const accountInfo = accountMap.has(keyIndex) && ixAccounts
-                        ? ixAccounts[accountMap.get(keyIndex)!]
-                        : null;
+                    const accountInfo =
+                        accountMap.has(keyIndex) && ixAccounts ? ixAccounts[accountMap.get(keyIndex)!] : null;
 
                     // Skip nested accounts if parent group is collapsed
                     if (
@@ -264,15 +265,13 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                         <tr key={keyIndex} className={accountInfo?.isNested ? 'table-nested-account' : ''}>
                             <td>
                                 <div className="d-flex flex-row align-items-center">
-                                    {accountInfo?.isNested && (
-                                        <CornerDownRight className="me-2 mb-1" size={14} />
-                                    )}
+                                    {accountInfo?.isNested && <CornerDownRight className="me-2 mb-1" size={14} />}
                                     <div className="me-2 d-md-inline">
                                         {accountInfo
                                             ? `${camelToTitleCase(accountInfo.name)}`
                                             : ixAccounts
-                                              ? `Remaining Account #${keyIndex + 1 - actualAccountCount}`
-                                              : `Account #${keyIndex + 1}`}
+                                            ? `Remaining Account #${keyIndex + 1 - actualAccountCount}`
+                                            : `Account #${keyIndex + 1}`}
                                     </div>
                                     {isWritable && <span className="badge bg-danger-soft me-1">Writable</span>}
                                     {isSigner && <span className="badge bg-info-soft me-1">Signer</span>}
