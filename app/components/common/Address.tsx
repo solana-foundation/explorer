@@ -85,7 +85,7 @@ export function Address({
     };
 
     const content = (
-        <Copyable text={address} replaceText={!alignRight}>
+        <Copyable text={address}>
             <span
                 data-address={address}
                 className="font-monospace"

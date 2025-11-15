@@ -16,6 +16,7 @@ type InstructionProps = {
     ix: TransactionInstruction | ParsedInstruction;
     defaultRaw?: boolean;
     innerCards?: JSX.Element[];
+    eventCards?: JSX.Element[];
     childIndex?: number;
     // raw can be used to display raw instruction information
     raw?: TransactionInstruction;
@@ -30,6 +31,7 @@ export function BaseInstructionCard({
     index,
     ix,
     defaultRaw,
+    eventCards,
     innerCards,
     childIndex,
     raw,
@@ -97,6 +99,18 @@ export function BaseInstructionCard({
                                 <tr>
                                     <td colSpan={3}>
                                         <div className="inner-cards">{innerCards}</div>
+                                    </td>
+                                </tr>
+                            </>
+                        )}
+                        {eventCards && eventCards.length > 0 && (
+                            <>
+                                <tr className="table-sep">
+                                    <td colSpan={3}>Events</td>
+                                </tr>
+                                <tr>
+                                    <td colSpan={3}>
+                                        <div className="inner-cards">{eventCards}</div>
                                     </td>
                                 </tr>
                             </>

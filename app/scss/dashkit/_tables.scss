@@ -36,9 +36,13 @@ tbody td {
     background-color: $table-head-bg;
     text-transform: uppercase;
     font-size: $font-size-xs;
-    font-weight: $font-weight-bold;
+    // font-weight: $font-weight-bold;
     letter-spacing: 0.08em;
     color: $table-head-color;
+}
+
+.table-nested-account {
+    background-color: rgba(0,0,0,0.2)
 }
 
 // Sizing

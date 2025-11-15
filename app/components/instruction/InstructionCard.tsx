@@ -13,6 +13,7 @@ type InstructionProps = {
     ix: TransactionInstruction | ParsedInstruction;
     defaultRaw?: boolean;
     innerCards?: JSX.Element[];
+    eventCards?: JSX.Element[];
     childIndex?: number;
 };
 
@@ -24,6 +25,7 @@ export function InstructionCard({
     ix,
     defaultRaw,
     innerCards,
+    eventCards,
     childIndex,
 }: InstructionProps) {
     const signature = useContext(SignatureContext);
@@ -45,6 +47,7 @@ export function InstructionCard({
             ix={ix}
             defaultRaw={defaultRaw}
             innerCards={innerCards}
+            eventCards={eventCards}
             childIndex={childIndex}
             raw={raw}
             onRequestRaw={fetchRawTrigger}
