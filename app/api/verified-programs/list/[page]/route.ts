@@ -15,7 +15,7 @@ export async function GET(_request: Request, { params: { page } }: Params) {
     try {
         const pageNumber = parseInt(page, 10);
 
-        if (isNaN(pageNumber) || pageNumber < 1) {
+        if (isNaN(pageNumber) || pageNumber < 1 || !Number.isInteger(Number(page))) {
             return NextResponse.json({ error: 'Invalid page number' }, { status: 400 });
         }
 
