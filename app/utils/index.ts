@@ -136,11 +136,3 @@ export function abbreviatedNumber(value: number, fixed = 1) {
 export const pubkeyToString = (key: PublicKey | string = '') => {
     return typeof key === 'string' ? key : key.toBase58();
 };
-
-export const getLast = (arr: string[]) => {
-    if (arr.length <= 0) {
-        return undefined;
-    }
-
-    return arr[arr.length - 1];
-};

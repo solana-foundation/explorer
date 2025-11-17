@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { SolarizedJsonViewer as ReactJson } from '@components/common/JsonViewer';
-import { BorshInstructionCoder, Idl, Program } from '@coral-xyz/anchor';
+import { BorshEventCoder, BorshInstructionCoder, Idl, Program } from '@coral-xyz/anchor';
 import { IdlDefinedFields } from '@coral-xyz/anchor/dist/cjs/idl';
 import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { useAnchorProgram } from '@providers/anchor';
@@ -13,8 +13,87 @@ import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 const ANCHOR_SELF_CPI_TAG = Buffer.from('1d9acb512ea545e4', 'hex').reverse();
 const ANCHOR_SELF_CPI_NAME = 'Anchor Self Invocation';
 
-export function instructionIsSelfCPI(ixData: Buffer): boolean {
-    return ixData.slice(0, 8).equals(ANCHOR_SELF_CPI_TAG);
+export function instructionIsSelfCPI(ixData: Buffer | Uint8Array): boolean {
+    const data = Buffer.isBuffer(ixData) ? ixData : Buffer.from(ixData);
+    const slice = data.subarray(0, 8);
+    return ANCHOR_SELF_CPI_TAG.every((byte, index) => slice[index] === byte);
+}
+
+/**
+ * Decodes an Anchor event with support for custom discriminators.
+ * Similar to instruction decoding but handles the self-CPI event format.
+ */
+export function decodeEventWithCustomDiscriminator(eventData: string, program: Program): any | null {
+    if (!program.idl.events || program.idl.events.length === 0) {
+        return null;
+    }
+
+    // Event data is base64 encoded
+    const data = Buffer.from(eventData, 'base64');
+
+    // Find matching event by comparing discriminators
+    for (const event of program.idl.events) {
+        const discriminator = event.discriminator;
+        const discLength = discriminator.length;
+
+        // Check if event data is long enough
+        if (data.length < discLength) {
+            continue;
+        }
+
+        // Compare discriminator bytes
+        const matches = discriminator.every((byte, index) => data[index] === byte);
+
+        if (matches) {
+            // Found matching event
+            if (discLength < 8) {
+                // For custom short discriminators, pad them for the BorshEventCoder
+                const paddingBytes = new Array(8 - discLength).fill(0);
+                const paddedDiscriminator = [...discriminator, ...paddingBytes];
+
+                // Create modified IDL with padded discriminator
+                const modifiedIdl: Idl = {
+                    ...program.idl,
+                    events: program.idl.events.map(ev =>
+                        ev.name === event.name ? { ...ev, discriminator: paddedDiscriminator } : { ...ev }
+                    ),
+                };
+
+                // Pad the event data
+                const eventArgs = data.subarray(discLength);
+                const paddedData = new Uint8Array(paddedDiscriminator.length + eventArgs.length);
+                paddedData.set(paddedDiscriminator, 0);
+                paddedData.set(eventArgs, paddedDiscriminator.length);
+
+                try {
+                    const coder = new BorshEventCoder(modifiedIdl);
+                    const decoded = coder.decode(Buffer.from(paddedData).toString('base64'));
+                    return decoded;
+                } catch (error) {
+                    return { data: {}, name: event.name };
+                }
+            } else {
+                // Standard 8-byte discriminator - use normal decoder
+                try {
+                    const coder = new BorshEventCoder(program.idl);
+                    const decoded = coder.decode(eventData);
+                    return decoded;
+                } catch (error) {
+                    return { data: {}, name: event.name };
+                }
+            }
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Decodes an event from a log message's base64 data.
+ * Returns the decoded event with its name and fields, or null if decoding fails.
+ */
+export function decodeEventFromLog(eventData: string, program: Program): { name: string; data: any } | null {
+    return decodeEventWithCustomDiscriminator(eventData, program);
 }
 
 export function getAnchorProgramName(program: Program | null): string | undefined {
@@ -37,23 +116,96 @@ export function AnchorProgramName({
     return <>{programName}</>;
 }
 
+/**
+ * Decodes an instruction using a custom discriminator matcher that supports variable-length discriminators.
+ * Handles both standard 8-byte Anchor discriminators and custom shorter discriminators.
+ */
+export function decodeInstructionWithCustomDiscriminator(ixData: Buffer | Uint8Array, program: Program): any | null {
+    const data = Buffer.isBuffer(ixData) ? ixData : Buffer.from(ixData);
+
+    // Find matching instruction by comparing discriminators
+    for (const instruction of program.idl.instructions) {
+        const discriminator = instruction.discriminator;
+        const discLength = discriminator.length;
+
+        // Check if instruction data is long enough
+        if (data.length < discLength) {
+            continue;
+        }
+
+        // Compare discriminator bytes
+        const matches = discriminator.every((byte, index) => data[index] === byte);
+
+        if (matches) {
+            // Found matching instruction
+            if (discLength < 8) {
+                // For custom short discriminators, we need to create a modified IDL
+                // with padded discriminators for the BorshInstructionCoder
+                const paddingBytes = new Array(8 - discLength).fill(0);
+                const paddedDiscriminator = [...discriminator, ...paddingBytes];
+
+                // Create modified IDL with padded discriminator
+                // Deep clone to avoid reference issues
+                const modifiedIdl: Idl = {
+                    ...program.idl,
+                    instructions: program.idl.instructions.map(ix =>
+                        ix.name === instruction.name ? { ...ix, discriminator: paddedDiscriminator } : { ...ix }
+                    ),
+                };
+
+                // Pad the instruction data
+                const argsData = new Uint8Array(data.subarray(discLength));
+                const paddedData = new Uint8Array(paddedDiscriminator.length + argsData.length);
+                paddedData.set(paddedDiscriminator, 0);
+                paddedData.set(argsData, paddedDiscriminator.length);
+
+                try {
+                    const coder = new BorshInstructionCoder(modifiedIdl);
+                    const decoded = coder.decode(Buffer.from(paddedData) as any);
+                    return decoded;
+                } catch (error) {
+                    // If Borsh decoding fails, return basic instruction info
+                    return { data: {}, name: instruction.name };
+                }
+            } else {
+                // Standard 8-byte discriminator - use normal decoder
+                try {
+                    const coder = new BorshInstructionCoder(program.idl);
+                    const decoded = coder.decode(data as any);
+                    return decoded;
+                } catch (error) {
+                    // If Borsh decoding fails, return basic instruction info
+                    return { data: {}, name: instruction.name };
+                }
+            }
+        }
+    }
+
+    return null;
+}
+
 export function getAnchorNameForInstruction(ix: TransactionInstruction, program: Program): string | null {
     if (instructionIsSelfCPI(ix.data)) {
         return ANCHOR_SELF_CPI_NAME;
     }
 
-    const coder = new BorshInstructionCoder(program.idl);
-    let decodedIx = null;
-    try {
-        decodedIx = coder.decode(ix.data);
-    } catch (error) {
-        console.log(
-            'Error while decoding instruction for program',
-            program.programId.toString(),
-            'with 8 byte discriminator',
-            ix.data.slice(0, 8),
-            error
-        );
+    // Try custom discriminator matching first
+    let decodedIx = decodeInstructionWithCustomDiscriminator(ix.data, program);
+
+    // Fall back to standard Anchor decoder if custom matching fails
+    if (!decodedIx) {
+        const coder = new BorshInstructionCoder(program.idl);
+        try {
+            decodedIx = coder.decode(ix.data);
+        } catch (error) {
+            console.log(
+                'Error while decoding instruction for program',
+                program.programId.toString(),
+                'with discriminator',
+                ix.data.slice(0, Math.min(8, ix.data.length)),
+                error
+            );
+        }
     }
 
     if (!decodedIx) {
@@ -64,30 +216,80 @@ export function getAnchorNameForInstruction(ix: TransactionInstruction, program:
     return _ixTitle.charAt(0).toUpperCase() + _ixTitle.slice(1);
 }
 
+type IdlAccountItem = {
+    name: string;
+    isMut: boolean;
+    isSigner: boolean;
+    pda?: object;
+    accounts?: IdlAccountItem[];
+};
+
+export type FlattenedIdlAccount = {
+    name: string;
+    isMut: boolean;
+    isSigner: boolean;
+    pda?: object;
+    isNested?: boolean;
+    nestingLevel?: number;
+    isGroupHeader?: boolean;
+};
+
+/**
+ * Flattens nested account structures while preserving hierarchy for display.
+ * For nested accounts like:
+ *   { name: "withdrawAccounts", accounts: [{ name: "owner" }, { name: "reserve" }] }
+ * Returns a flat array with group headers:
+ *   [
+ *     { name: "withdrawAccounts", isGroupHeader: true, nestingLevel: 0 },
+ *     { name: "owner", isNested: true, nestingLevel: 1, ... },
+ *     { name: "reserve", isNested: true, nestingLevel: 1, ... }
+ *   ]
+ */
+function flattenIdlAccounts(accounts: IdlAccountItem[], nestingLevel = 0): FlattenedIdlAccount[] {
+    const result: FlattenedIdlAccount[] = [];
+
+    for (const account of accounts) {
+        if (account.accounts && account.accounts.length > 0) {
+            // This is a nested account structure - add a group header
+            result.push({
+                isGroupHeader: true,
+                isMut: account.isMut,
+                isSigner: account.isSigner,
+                name: account.name,
+                nestingLevel,
+                pda: account.pda,
+            });
+            // Recursively flatten nested accounts with increased nesting level
+            result.push(...flattenIdlAccounts(account.accounts, nestingLevel + 1));
+        } else {
+            // This is a regular account
+            result.push({
+                isMut: account.isMut,
+                isNested: nestingLevel > 0,
+                isSigner: account.isSigner,
+                name: account.name,
+                nestingLevel,
+                pda: account.pda,
+            });
+        }
+    }
+
+    return result;
+}
+
 export function getAnchorAccountsFromInstruction(
     decodedIx: { name: string } | null,
     program: Program
-):
-    | {
-          name: string;
-          isMut: boolean;
-          isSigner: boolean;
-          pda?: object;
-      }[]
-    | null {
+): FlattenedIdlAccount[] | null {
     if (decodedIx) {
         // get ix accounts
         const idlInstructions = program.idl.instructions.filter(ix => ix.name === decodedIx.name);
         if (idlInstructions.length === 0) {
             return null;
         }
-        return idlInstructions[0].accounts as {
-            // type coercing since anchor doesn't export the underlying type
-            name: string;
-            isMut: boolean;
-            isSigner: boolean;
-            pda?: object;
-        }[];
+        const accounts = idlInstructions[0].accounts as IdlAccountItem[];
+        // Flatten nested account structures while preserving hierarchy
+        return flattenIdlAccounts(accounts);
     }
     return null;
 }
@@ -192,6 +394,12 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
         type === 'u256' ||
         type === 'i256'
     ) {
+        // Handle BN (BigNumber) objects from Anchor
+        const displayValue =
+            typeof value === 'object' && value !== null && 'toNumber' in value
+                ? value.toNumber().toString()
+                : value.toString();
+
         return (
             <SimpleRow
                 key={keySuffix ? `${key}-${keySuffix}` : key}
@@ -200,7 +408,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 keySuffix={keySuffix}
                 nestingLevel={nestingLevel}
             >
-                <div>{numberWithSeparator(value.toString())}</div>
+                <div>{numberWithSeparator(displayValue)}</div>
             </SimpleRow>
         );
     } else if (type === 'bool' || type === 'string') {
@@ -400,18 +608,12 @@ function SimpleRow({
     }
     itemKey = camelToTitleCase(itemKey);
     return (
-        <tr
-            style={{
-                ...(nestingLevel === 0 ? {} : { backgroundColor: '#141816' }),
-            }}
-        >
-            <td className="d-flex flex-row">
-                {nestingLevel > 0 && (
-                    <span style={{ paddingLeft: `${15 * nestingLevel}px` }}>
-                        <CornerDownRight className="me-2" size={15} />
-                    </span>
-                )}
-                <div>{itemKey}</div>
+        <tr className={nestingLevel > 0 ? 'table-nested-account' : ''}>
+            <td>
+                <div className="d-flex flex-row align-items-center">
+                    {nestingLevel > 0 && <CornerDownRight className="me-2 mb-1" size={14} />}
+                    <div>{itemKey}</div>
+                </div>
             </td>
             <td>{typeDisplayName(type)}</td>
             <td className="text-lg-end">{children}</td>
@@ -433,18 +635,12 @@ export function ExpandableRow({
     const [expanded, setExpanded] = useState(false);
     return (
         <>
-            <tr
-                style={{
-                    backgroundColor: '#141816',
-                }}
-            >
-                <td className="d-flex flex-row">
-                    {nestingLevel > 0 && (
-                        <div style={{ paddingLeft: `${15 * nestingLevel}px` }}>
-                            <CornerDownRight className="me-2" size={15} />
-                        </div>
-                    )}
-                    <div>{fieldName}</div>
+            <tr className="table-group-header">
+                <td>
+                    <div className="d-flex flex-row align-items-center">
+                        {nestingLevel > 0 && <CornerDownRight className="me-2 mb-1" size={14} />}
+                        <div>{fieldName}</div>
+                    </div>
                 </td>
                 <td>{fieldType}</td>
                 <td className="text-lg-end" onClick={() => setExpanded(current => !current)}>
@@ -491,10 +687,11 @@ function typeDisplayName(
         case 'i128':
         case 'i256':
         case 'u256':
+            return type;
         case 'bytes':
             return 'bytes (Base64)';
         case 'string':
-            return type.toString();
+            return 'string';
         case 'pubkey':
             return 'PublicKey';
         default:

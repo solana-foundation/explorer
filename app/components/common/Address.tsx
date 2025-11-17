@@ -92,7 +92,7 @@ export function Address({
 
     const content = (
         <div className="d-flex align-items-center gap-2">
-            <Copyable text={address} replaceText={!alignRight}>
+            <Copyable text={address}>
                 <span
                     data-address={address}
                     className="font-monospace"

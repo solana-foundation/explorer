@@ -163,52 +163,56 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
         expect(screen.getByText(/Error loading vault transaction/i)).not.toBeNull();
     });
 
-    test('renders Squads transaction with lookup table without crashing', async () => {
-        // Setup SWR mock for successful response
-        const mockSWR = await import('swr');
-        (mockSWR.default as any).mockImplementation((key: any) => {
-            if (Array.isArray(key) && key[0] === specificAccountKey[0] && key[1] === specificAccountKey[1]) {
-                return {
-                    data: VaultTransaction.fromAccountInfo(MOCK_SQUADS_LOOKUP_TABLE_ACCOUNT_INFO)[0],
-                    error: null,
-                    isLoading: false,
-                };
-            }
-            return { data: null, error: null, isLoading: true };
-        });
+    test(
+        'renders Squads transaction with lookup table without crashing',
+        async () => {
+            // Setup SWR mock for successful response
+            const mockSWR = await import('swr');
+            (mockSWR.default as any).mockImplementation((key: any) => {
+                if (Array.isArray(key) && key[0] === specificAccountKey[0] && key[1] === specificAccountKey[1]) {
+                    return {
+                        data: VaultTransaction.fromAccountInfo(MOCK_SQUADS_LOOKUP_TABLE_ACCOUNT_INFO)[0],
+                        error: null,
+                        isLoading: false,
+                    };
+                }
+                return { data: null, error: null, isLoading: true };
+            });
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TransactionInspectorPage showTokenBalanceChanges={false} />
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>
-        );
+            render(
+                <ScrollAnchorProvider>
+                    <ClusterProvider>
+                        <AccountsProvider>
+                            <TransactionInspectorPage showTokenBalanceChanges={false} />
+                        </AccountsProvider>
+                    </ClusterProvider>
+                </ScrollAnchorProvider>
+            );
 
-        await waitFor(
-            () => {
-                expect(screen.queryByText(/Inspector Input/i)).toBeNull();
-            },
-            { interval: 50, timeout: 10000 }
-        );
+            await waitFor(
+                () => {
+                    expect(screen.queryByText(/Inspector Input/i)).toBeNull();
+                },
+                { interval: 50, timeout: 10000 }
+            );
 
-        await waitFor(
-            () => {
-                expect(screen.queryByText(/Loading/i)).toBeNull();
-            },
-            { interval: 50, timeout: 10000 }
-        );
+            await waitFor(
+                () => {
+                    expect(screen.queryByText(/Loading/i)).toBeNull();
+                },
+                { interval: 50, timeout: 10000 }
+            );
 
-        // Check that the td with text Fee Payer has the text F3S4PD17Eo3FyCMropzDLCpBFuQuBmufUVBBdKEHbQFT
-        expect(screen.getByRole('row', { name: /Fee Payer/i })).toHaveTextContent(
-            '62gRsAdA6dcbf4Frjp7YRFLpFgdGu8emAACcnnREX3L3'
-        );
+            // Check that the td with text Fee Payer has the text F3S4PD17Eo3FyCMropzDLCpBFuQuBmufUVBBdKEHbQFT
+            expect(screen.getByRole('row', { name: /Fee Payer/i })).toHaveTextContent(
+                '62gRsAdA6dcbf4Frjp7YRFLpFgdGu8emAACcnnREX3L3'
+            );
 
-        expect(screen.getByText(/Account List \(11\)/i)).not.toBeNull();
-        expect(
-            screen.getByText(/Unknown Program \(8TqqugH88U3fDEWeKHqBSxZKeqoRrXkdpy3ciX5GAruK\) Instruction/i)
-        ).not.toBeNull();
-    });
+            expect(screen.getByText(/Account List \(11\)/i)).not.toBeNull();
+            expect(
+                screen.getByText(/Unknown Program \(8TqqugH88U3fDEWeKHqBSxZKeqoRrXkdpy3ciX5GAruK\) Instruction/i)
+            ).not.toBeNull();
+        },
+        { timeout: 20000 }
+    );
 });

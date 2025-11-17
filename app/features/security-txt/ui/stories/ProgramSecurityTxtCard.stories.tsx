@@ -25,7 +25,7 @@ const meta = {
             appDirectory: true,
         },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/security/ProgramSecurityTxtCard',
 } satisfies Meta<typeof ProgramSecurityTxtCard>;
 

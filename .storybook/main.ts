@@ -1,11 +1,11 @@
-import type { StorybookConfig } from '@storybook/experimental-nextjs-vite';
+import type { StorybookConfig } from '@storybook/nextjs-vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 const config: StorybookConfig = {
     stories: ['../app/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
-    addons: ['@storybook/addon-essentials', '@storybook/experimental-addon-test'],
+    addons: ['@storybook/addon-docs', '@storybook/addon-vitest'],
     framework: {
-        name: '@storybook/experimental-nextjs-vite',
+        name: '@storybook/nextjs-vite',
         options: {},
     },
     staticDirs: ['../public'],
@@ -17,7 +17,10 @@ const config: StorybookConfig = {
                 nodePolyfills({
                     globals: {
                         Buffer: true,
+                        global: true,
+                        process: true,
                     },
+                    include: ['path', 'util'],
                 }),
             ],
         };
