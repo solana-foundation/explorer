@@ -117,6 +117,7 @@ export type ProgramInfo = {
 };
 
 export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
+    /*
     '11111111111111111111111111111111': {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.SYSTEM,
@@ -464,6 +465,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.WORMHOLE_TOKEN,
     },
+    */
 };
 
 export const SPECIAL_IDS: { [key: string]: string } = {
