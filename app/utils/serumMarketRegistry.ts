@@ -2,6 +2,7 @@ import { Cluster } from '@utils/cluster';
 
 /* eslint-disable sort-keys-fix/sort-keys-fix */
 const MARKET_REGISTRY: { [key: string]: string } = {
+    /*
     '7kgkDyW7dmyMeP8KFXzbcUZz1R2WHsovDZ7n3ihZuNDS': 'Serum: MSRM / USDC',
     '6WpkeqE5oU1MUNPWvMDHhru1G5gjxMgAtib5wXuBSvgm': 'Serum: MSRM / USDC - Request Queue',
     DwpUjRHQuotE1LG2R68wZM3nwkv2fChHibcm7NzL8WGq: 'Serum: MSRM / USDC - Event Queue',
@@ -165,6 +166,7 @@ const MARKET_REGISTRY: { [key: string]: string } = {
     HZ1aXc9KVfGGS9mD2mzxHh5jeJSvQrx1dz4zGWBaGmkE: 'Serum: SRM / USDT - Base Asset Vault',
     FEyMWn3KnWVEMeJr8q7nQxfQu3jq15MchkhLq94kEoVh: 'Serum: SRM / USDT - Quote Currency Vault',
     '9sBxruSjQ97z8k42RXAr2grx9S7Fsk2yisbvZE9cNfjG': 'Serum: SRM / USDT - Vault Owner',
+    */
 };
 /* eslint-enable sort-keys-fix/sort-keys-fix */
 
