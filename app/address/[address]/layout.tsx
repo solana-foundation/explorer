@@ -403,7 +403,7 @@ function TokenMintHeaderCard({
 }) {
     return (
         <div className="row align-items-end">
-            {unverified && (
+            {false && unverified && (
                 <div className="alert alert-warning alert-scam" role="alert">
                     Warning! Token names and logos are not unique. This token may have spoofed its name and logo to look
                     like another token. Verify the token&apos;s mint address to ensure it is correct.
