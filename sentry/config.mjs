@@ -36,7 +36,7 @@ export function createSentryConfig(_context) {
 
             // We encountered the peak of 24M spans per day
             // Adjust the rate to fit the monthly quote
-            return 1 / 1000000;
+            return 1 / 10000000;
         },
 
         // Enable logs to be sent to Sentry
@@ -44,6 +44,8 @@ export function createSentryConfig(_context) {
 
         // Setting this option to true will print useful information to the console while you're setting up Sentry.
         debug: false, // eslint-disable-line sort-keys-fix/sort-keys-fix
+
+        environment: process.env.NODE_ENV,
     };
 }
 
