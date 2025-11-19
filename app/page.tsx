@@ -1,14 +1,11 @@
 'use client';
 
 import { Epoch } from '@components/common/Epoch';
-import { ErrorCard } from '@components/common/ErrorCard';
-import { LoadingCard } from '@components/common/LoadingCard';
 import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { TimestampToggle } from '@components/common/TimestampToggle';
 import { LiveTransactionStatsCard } from '@components/LiveTransactionStatsCard';
 import { StatsNotReady } from '@components/StatsNotReady';
-import { useVoteAccounts } from '@providers/accounts/vote-accounts';
 import { useCluster } from '@providers/cluster';
 import { StatsProvider } from '@providers/stats';
 import {
@@ -17,9 +14,8 @@ import {
     usePerformanceInfo,
     useStatsProvider,
 } from '@providers/stats/solanaClusterStats';
-import { Status, SupplyProvider, useFetchSupply, useSupply } from '@providers/supply';
-import { ClusterStatus } from '@utils/cluster';
-import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/index';
+import { SupplyProvider } from '@providers/supply';
+import { slotsToHumanString } from '@utils/index';
 import { percentage } from '@utils/math';
 import React from 'react';
 
@@ -28,7 +24,6 @@ export default function Page() {
         <StatsProvider>
             <SupplyProvider>
                 <div className="container mt-4">
-                    <StakingComponent />
                     <div className="card">
                         <div className="card-header">
                             <div className="row align-items-center">
@@ -44,98 +39,6 @@ export default function Page() {
             </SupplyProvider>
         </StatsProvider>
     );
-}
-
-function StakingComponent() {
-    const { status } = useCluster();
-    const supply = useSupply();
-    const fetchSupply = useFetchSupply();
-    const { fetchVoteAccounts, voteAccounts } = useVoteAccounts();
-
-    function fetchData() {
-        fetchSupply();
-        fetchVoteAccounts();
-    }
-
-    React.useEffect(() => {
-        if (status === ClusterStatus.Connected) {
-            fetchData();
-        }
-    }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const delinquentStake = React.useMemo(() => {
-        if (voteAccounts) {
-            return voteAccounts.delinquent.reduce((prev, current) => prev + current.activatedStake, BigInt(0));
-        }
-    }, [voteAccounts]);
-
-    const activeStake = React.useMemo(() => {
-        if (voteAccounts && delinquentStake) {
-            return (
-                voteAccounts.current.reduce((prev, current) => prev + current.activatedStake, BigInt(0)) +
-                delinquentStake
-            );
-        }
-    }, [voteAccounts, delinquentStake]);
-
-    if (supply === Status.Disconnected) {
-        // we'll return here to prevent flicker
-        return null;
-    }
-
-    if (supply === Status.Idle || supply === Status.Connecting) {
-        return <LoadingCard message="Loading supply data" />;
-    } else if (typeof supply === 'string') {
-        return <ErrorCard text={supply} retry={fetchData} />;
-    }
-
-    // Calculate to 2dp for accuracy, then display as 1
-    const circulatingPercentage = percentage(supply.circulating, supply.total, 2).toFixed(1);
-
-    let delinquentStakePercentage;
-    if (delinquentStake && activeStake) {
-        delinquentStakePercentage = percentage(delinquentStake, activeStake, 2).toFixed(1);
-    }
-
-    return (
-        <div className="row staking-card">
-            <div className="col-6 col-xl">
-                <div className="card">
-                    <div className="card-body">
-                        <h4>Circulating Supply</h4>
-                        <h1>
-                            <em>{displayLamports(supply.circulating)}</em> /{' '}
-                            <small>{displayLamports(supply.total)}</small>
-                        </h1>
-                        <h5>
-                            <em>{circulatingPercentage}%</em> is circulating
-                        </h5>
-                    </div>
-                </div>
-            </div>
-            <div className="col-6 col-xl">
-                <div className="card">
-                    <div className="card-body">
-                        <h4>Active Stake</h4>
-                        {activeStake ? (
-                            <h1>
-                                <em>{displayLamports(activeStake)}</em> / <small>{displayLamports(supply.total)}</small>
-                            </h1>
-                        ) : null}
-                        {delinquentStakePercentage && (
-                            <h5>
-                                Delinquent stake: <em>{delinquentStakePercentage}%</em>
-                            </h5>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function displayLamports(value: number | bigint) {
-    return abbreviatedNumber(lamportsToSol(value));
 }
 
 function StatsCardBody() {
