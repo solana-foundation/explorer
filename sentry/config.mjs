@@ -34,9 +34,8 @@ export function createSentryConfig(_context) {
                 return 0;
             }
 
-            // We encountered the peak of 24M spans per day
-            // Adjust the rate to fit the monthly quote
-            return 1 / 10000000;
+            // Adjust the rate to fit the monthly quote. Previous 1e-7 rate was enough to track small 30M/hour peaks and huge 180-200M/hour ones
+            return 1 / 100000000;
         },
 
         // Enable logs to be sent to Sentry
