@@ -31,20 +31,26 @@ export function IdlCard({ programId }: { programId: string }) {
     const [activeTabIndex, setActiveTabIndex] = useState<number>();
 
     const tabs = useMemo<IdlTab[]>(() => {
-        return [
-            {
-                badge: 'Program Metadata IDL',
-                id: 'program-metadata',
-                idl: programMetadataIdl,
-                title: 'Program Metadata',
-            },
-            {
-                badge: 'Anchor IDL',
-                id: 'anchor',
-                idl: idl,
-                title: 'Anchor',
-            },
-        ];
+        const pmpTab: IdlTab = {
+            badge: 'Program Metadata IDL',
+            id: 'program-metadata',
+            idl: programMetadataIdl,
+            title: 'Program Metadata',
+        };
+        const idlTab: IdlTab = {
+            badge: 'Anchor IDL',
+            id: 'anchor',
+            idl: idl,
+            title: 'Anchor',
+        };
+
+        /// Use PMP's IDL tab as the primary
+        const idlTabs: IdlTab[] = [pmpTab];
+
+        // add Anchor's tab only if IDL is present
+        if (idl !== null) idlTabs.push(idlTab);
+
+        return idlTabs;
     }, [idl, programMetadataIdl]);
 
     useEffect(() => {
