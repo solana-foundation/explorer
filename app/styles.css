@@ -1,6 +1,30 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --accent: #13d89b;
+    --card-border: #111;
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --border: oklch(0.922 0 0);
+    
+    /* Tailwind variables - compatibility only, values don't matter
+     * Required because @tailwind base is skipped to avoid conflicts
+     * with Bootstrap/Dashkit reset styles. Ring utilities override these. */
+    --tw-translate-x: 0;
+    --tw-translate-y: 0;
+    --tw-rotate: 0;
+    --tw-skew-x: 0;
+    --tw-skew-y: 0;
+    --tw-scale-x: 1;
+    --tw-scale-y: 1;
+    --tw-ring-inset: var(--tw-empty,/*!*/ /*!*/);
+    --tw-ring-offset-width: 0px;
+    --tw-ring-offset-color: #fff;
+    --tw-ring-color: rgb(59 130 246 / 0.5);
+    --tw-ring-width: 0px;
+}
+
 /* port existing card components as is from Dashkit */
 @layer components {
     .e-card {
