@@ -6,6 +6,41 @@
 
 The Solana Explorer is a web application that allows users to explore the Solana blockchain. It provides a user-friendly interface to view transactions, accounts, blocks, and other on-chain data. The Explorer supports various protocol integrations, allowing users to inspect and understand different types of transactions and instructions on the Solana network.
 
+## Local Development Setup
+
+### Database Setup with Docker
+
+The Explorer uses PostgreSQL with [Drizzle ORM](https://orm.drizzle.team/) for database features like program statistics and CPI calls.
+
+**Start the database:**
+```bash
+pnpm db:up
+```
+
+This starts a PostgreSQL 18 container accessible at `localhost:5434`.
+
+**Run migrations:**
+```bash
+pnpm db:migrate
+```
+
+**Other useful commands:**
+```bash
+pnpm db:logs  # View database logs
+pnpm db:down  # Stop the database
+```
+
+### Environment Variables
+
+Create a `.env.local` file based on `.env.example`:
+
+#### Database & External Services
+- `DATABASE_URL` - PostgreSQL connection string (default: `postgres://postgres:postgres@localhost:5434/solana_explorer`)
+- `DUNE_API_KEY` - API key for Dune Analytics integration
+- `DUNE_PROGRAM_CALLS_MV_ID` - Dune materialized view ID for program calls data
+- `DUNE_PROGRAM_STATS_MV_ID` - Dune materialized view ID for program statistics data
+- `CRON_SECRET` - Secret token to secure cron endpoints
+
 ## Contributing
 
 We welcome contributions to the Solana Explorer! Before submitting a pull request, please:
