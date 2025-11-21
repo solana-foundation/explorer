@@ -18,9 +18,9 @@ import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { FeatureInfoType } from '../utils/feature-gate/types';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
 import { searchTokens } from '../utils/token-search';
+import { pickClusterParams } from '../utils/url';
 import { useDebouncedAsync } from '../utils/use-debounce-async';
 import { MIN_MESSAGE_LENGTH } from './inspector/RawInputCard';
-import { pickClusterParams } from '../utils/url';
 
 interface SearchOptions {
     label: string;
