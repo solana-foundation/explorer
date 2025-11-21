@@ -10,7 +10,7 @@ import { Cluster, clusterName, clusterSlug, clusterUrl } from '@utils/cluster';
 import { addressLabel } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function UnknownAccountCard({ account }: { account: Account }) {
     const { cluster } = useCluster();
@@ -76,28 +76,58 @@ function useClusterAccountSearch(address: string, currentCluster: Cluster, _enab
     const [status, setStatus] = useState<SearchStatus>('idle');
     const [searchingCluster, setSearchingCluster] = useState<Cluster | null>(null);
     const [foundCluster, setFoundCluster] = useState<Cluster | null>(null);
+    const searchIdRef = useRef(0);
 
     const sleep = () => new Promise(res => setTimeout(res, 700));
 
+    // Extract the customUrl value to avoid re-running effect on searchParams object change
+    const customUrl = searchParams?.get('customUrl');
+
     useEffect(() => {
+        // Increment search ID to track this specific search
+        const currentSearchId = ++searchIdRef.current;
+
+        // NOTE: This ref-based approach prevents duplicate requests within a single component instance,
+        // but if multiple instances of UnknownAccountCard are rendered (e.g., as both a Suspense fallback
+        // and returned from CompressedNftCard), each instance will still make its own RPC requests.
+        // Consider moving the search logic to a parent component or using React Context to share state
+        // between instances if duplicate requests become a performance issue.
+
         const clusters = [Cluster.MainnetBeta, Cluster.Devnet, Cluster.Testnet].filter(c => c !== currentCluster);
 
+        const hasCustomUrlEnabled = Boolean(customUrl);
+
         // add custom url if parameter is present
-        if (searchParams?.has('customUrl')) {
+        if (hasCustomUrlEnabled) {
             clusters.push(Cluster.Custom);
         }
 
         const searchClusters = async () => {
+            // Check if this search is still the current one
+            if (searchIdRef.current !== currentSearchId) return;
+
             setStatus('searching');
 
             // search cluster one by one to not make extra requests
             for (const cluster of clusters) {
+                // Check if this search has been superseded
+                if (searchIdRef.current !== currentSearchId) return;
+
                 setSearchingCluster(cluster);
 
                 try {
-                    const url = clusterUrl(cluster, '');
+                    let url = clusterUrl(cluster, '');
+
+                    // adjust url for a custom cluster as `clusterUrl` does not return one
+                    if (customUrl && cluster === Cluster.Custom) {
+                        url = customUrl;
+                    }
+
                     const rpc = createSolanaRpc(url);
                     const accountInfo = await rpc.getAccountInfo(createAddress(address), { encoding: 'base64' }).send();
+
+                    // Check again before updating state
+                    if (searchIdRef.current !== currentSearchId) return;
 
                     if (accountInfo.value !== null) {
                         setFoundCluster(cluster);
@@ -108,16 +138,28 @@ function useClusterAccountSearch(address: string, currentCluster: Cluster, _enab
                         await sleep();
                     }
                 } catch (error) {
+                    // Check if this search is still active before continuing
+                    if (searchIdRef.current !== currentSearchId) return;
                     // Continue to next cluster
                 }
             }
 
-            setStatus('not-found');
-            setSearchingCluster(null);
+            // Final check before updating not-found status
+            if (searchIdRef.current === currentSearchId) {
+                setStatus('not-found');
+                setSearchingCluster(null);
+            }
         };
 
         searchClusters();
-    }, [address, currentCluster, searchParams]);
+
+        // Cleanup function to mark this search as cancelled
+        return () => {
+            if (searchIdRef.current === currentSearchId) {
+                searchIdRef.current += 1;
+            }
+        };
+    }, [address, currentCluster, customUrl]);
 
     return { foundCluster, searchingCluster, status };
 }
