@@ -2,14 +2,15 @@ import { bytesToHex } from '@noble/hashes/utils';
 import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { useFormatAnchorIdl } from '../anchor';
-import {
+import type {
     EnumFieldType,
     NestedInstructionAccountsData,
     StructFieldType,
     TypeFieldType,
     UnknownFieldType,
-} from '../FormattedIdl';
+} from '@/app/entities/idl/formatters/formatted-idl';
+
+import { useFormatAnchorIdl } from '../anchor';
 
 // Mock byte to hex utility since we don't need actual conversion in tests
 vi.mock('@noble/hashes/utils', () => ({

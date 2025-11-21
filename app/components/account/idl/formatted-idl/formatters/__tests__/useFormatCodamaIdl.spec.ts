@@ -1,7 +1,13 @@
 import { renderHook } from '@testing-library/react';
 
+import type {
+    EnumFieldType,
+    FieldType,
+    StructFieldType,
+    TypeFieldType,
+} from '@/app/entities/idl/formatters/formatted-idl';
+
 import { useFormatCodamaIdl } from '../codama';
-import { EnumFieldType, FieldType, StructFieldType, TypeFieldType } from '../FormattedIdl';
 import minimalMock from './codama-mocks/minimalMock';
 // simplified versions of codama IDLs
 import programMock1 from './codama-mocks/programMock1';

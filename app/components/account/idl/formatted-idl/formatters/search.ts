@@ -1,7 +1,7 @@
 import Fuse, { IFuseOptions } from 'fuse.js';
 import { useMemo } from 'react';
 
-import { FormattedIdl } from './FormattedIdl';
+import type { FormattedIdl } from '@/app/entities/idl/formatters/formatted-idl';
 
 function fieldTypeSearchKeys(key: string) {
     return [
