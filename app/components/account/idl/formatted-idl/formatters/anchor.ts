@@ -16,7 +16,7 @@ import { bytesToHex } from '@noble/hashes/utils';
 import { camelCase } from 'change-case';
 import { useMemo } from 'react';
 
-import { FieldType, FormattedIdl, PdaData, StructField } from './FormattedIdl';
+import type { FieldType, FormattedIdl, PdaData, StructField } from '@/app/entities/idl/formatters/formatted-idl';
 
 function parseStructFields(fields: IdlDefinedFields): StructField[] | null {
     // Handle struct with named fields or tuple fields
