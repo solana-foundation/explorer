@@ -10,7 +10,7 @@ import { Cluster, clusterName, clusterSlug, clusterUrl } from '@utils/cluster';
 import { addressLabel } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function UnknownAccountCard({ account }: { account: Account }) {
     const { cluster } = useCluster();
@@ -117,7 +117,7 @@ function useClusterAccountSearch(address: string, currentCluster: Cluster, _enab
         };
 
         searchClusters();
-    }, [address, currentCluster]);
+    }, [address, currentCluster, searchParams]);
 
     return { foundCluster, searchingCluster, status };
 }
@@ -131,8 +131,6 @@ function AccountNofFound({ account, labels = LABELS }: { account: Account; label
     const address = account.pubkey.toBase58();
     const { status, searchingCluster, foundCluster } = useClusterAccountSearch(address, cluster);
 
-    const targetCluster = useMemo(() => foundCluster, [foundCluster, account, cluster]);
-
     if (status === 'searching' && searchingCluster !== null) {
         return (
             <span>
@@ -142,11 +140,11 @@ function AccountNofFound({ account, labels = LABELS }: { account: Account; label
         );
     }
 
-    const isAddressFoundOnAnotherClsuter = status === 'found' && targetCluster !== null;
+    const isAddressFoundOnAnotherClsuter = status === 'found' && foundCluster !== null;
 
     return isAddressFoundOnAnotherClsuter ? (
         <span>
-            <AdjacentAddressLink address={address} foundCluster={targetCluster} />
+            <AdjacentAddressLink address={address} foundCluster={foundCluster} />
             <span className="align-middle">{labels['not-found']}</span>
         </span>
     ) : (
