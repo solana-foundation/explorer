@@ -1,7 +1,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
 
-import { Cluster,clusterSlug } from './cluster';
+import { Cluster, clusterSlug } from './cluster';
 
 type Config = Readonly<{
     additionalParams?: { get(key: string): string | null; toString(): string };
@@ -68,7 +68,6 @@ export function pickClusterParams(
             nextSearchParams!.set(key, value); // Override current with additional
         });
     }
-
     const queryString = nextSearchParams?.toString();
     return `${pathname}${queryString ? `?${queryString}` : ''}`;
 }
