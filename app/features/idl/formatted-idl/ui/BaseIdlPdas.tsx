@@ -1,5 +1,6 @@
 import { BaseIdlDoc } from './BaseIdlDoc';
 import { BaseIdlFields } from './BaseIdlFields';
+import { HighlightNode } from './HighlightNode';
 import type { FormattedIdlDataView } from './types';
 
 export function BaseIdlPdas({ data }: FormattedIdlDataView<'pdas'>) {
@@ -12,11 +13,11 @@ export function BaseIdlPdas({ data }: FormattedIdlDataView<'pdas'>) {
                     <th className="e-text-neutral-500">Seeds</th>
                 </tr>
             </thead>
-            <tbody className="list">
+            <tbody className="list e-font-mono e-text-xs">
                 {data.map(pda => (
                     <tr key={pda.name}>
                         <td>
-                            <span className="e-font-mono e-text-xs">{pda.name}</span>
+                            <HighlightNode className="e-rounded e-py-0.5">{pda.name}</HighlightNode>
                             <BaseIdlDoc docs={pda.docs} />
                         </td>
                         <td>

@@ -1,3 +1,4 @@
+import type { Idl } from '@coral-xyz/anchor';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
@@ -12,6 +13,32 @@ vi.mock('next/navigation', () => ({
     usePathname: vi.fn(),
     useRouter: vi.fn(),
     useSearchParams: vi.fn(),
+}));
+
+vi.mock('@solana/kit', () => ({
+    createSolanaRpc: vi.fn(() => ({
+        getEpochInfo: vi.fn(() => ({
+            send: vi.fn().mockResolvedValue({
+                absoluteSlot: 0n,
+                blockHeight: 0n,
+                epoch: 0n,
+                slotIndex: 0n,
+                slotsInEpoch: 432000n,
+            }),
+        })),
+        getEpochSchedule: vi.fn(() => ({
+            send: vi.fn().mockResolvedValue({
+                firstNormalEpoch: 0n,
+                firstNormalSlot: 0n,
+                leaderScheduleSlotOffset: 0n,
+                slotsPerEpoch: 432000n,
+                warmup: false,
+            }),
+        })),
+        getFirstAvailableBlock: vi.fn(() => ({
+            send: vi.fn().mockResolvedValue(0n),
+        })),
+    })),
 }));
 
 const mockAnchorIdl = {
@@ -83,7 +110,7 @@ describe('IdlCard', () => {
 
     test('should render IdlCard with Anchor IDL when anchorIdl exists', async () => {
         vi.spyOn(anchorModule, 'useAnchorProgram').mockReturnValue({
-            idl: mockAnchorIdl as any,
+            idl: mockAnchorIdl as unknown as Idl,
             program: null,
         });
 
@@ -106,7 +133,7 @@ describe('IdlCard', () => {
 
     test('should render IdlCard tabs when both IDLs exist', async () => {
         vi.spyOn(anchorModule, 'useAnchorProgram').mockReturnValue({
-            idl: mockAnchorIdl as any,
+            idl: mockAnchorIdl as unknown as Idl,
             program: null,
         });
 
@@ -120,7 +147,6 @@ describe('IdlCard', () => {
             </ClusterProvider>
         );
 
-        // pmp idl should be rendered as first
         await waitFor(() => {
             expect(screen.getByText(/Program Metadata IDL/)).toBeInTheDocument();
         });
@@ -146,7 +172,12 @@ describe('IdlCard', () => {
             </ClusterProvider>
         );
 
-        expect(screen.queryByText(/Anchor/)).not.toBeInTheDocument();
-        expect(screen.queryByText(/Program Metadata IDL/)).not.toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.queryByText(/Anchor/)).not.toBeInTheDocument();
+        });
+
+        await waitFor(() => {
+            expect(screen.queryByText(/Program Metadata IDL/)).not.toBeInTheDocument();
+        });
     });
 });

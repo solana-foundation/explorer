@@ -16,64 +16,108 @@ type TabId = 'instructions' | 'accounts' | 'types' | 'errors' | 'constants' | 'e
 
 export type DataTab<K extends IdlDataKeys = IdlDataKeys> = {
     id: TabId;
-    title: string;
+    title: React.ReactNode;
     disabled: boolean;
     render: () => React.ReactElement<FormattedIdlDataView<K>>;
 };
 
 type Tab = DataTab;
 
-export function useTabs(idl: FormattedIdl | null) {
+export function useTabs(idl: FormattedIdl | null, searchStr?: string) {
     const tabs: Tab[] = useMemo(() => {
         if (!idl) return [];
+
+        const hasSearch = Boolean(searchStr?.trim());
+
+        const createTabRenderer = <K extends IdlDataKeys>(
+            Component: React.ComponentType<FormattedIdlDataView<K>>,
+            data: unknown[] | undefined,
+            tabName: string
+        ) => {
+            const TabRenderer = () => {
+                if (hasSearch && (!data || data.length === 0)) {
+                    return <NoSearchResultsPlaceholder tabName={tabName} />;
+                }
+                return <Component data={data as any} />;
+            };
+            TabRenderer.displayName = `TabRenderer(${tabName})`;
+            return TabRenderer;
+        };
 
         const tabItems: Tab[] = [
             {
                 disabled: !idl.instructions,
                 id: 'instructions',
-                render: () => <BaseIdlInstructions data={idl.instructions} />,
-                title: 'Instructions',
+                render: createTabRenderer(BaseIdlInstructions, idl.instructions, 'instructions'),
+                title: <TabTitle baseTitle="Instructions" data={idl.instructions} searchStr={searchStr} />,
             },
             {
                 disabled: !idl.accounts?.length,
                 id: 'accounts',
-                render: () => <BaseIdlAccounts data={idl.accounts} />,
-                title: 'Accounts',
+                render: createTabRenderer(BaseIdlAccounts, idl.accounts, 'accounts'),
+                title: <TabTitle baseTitle="Accounts" data={idl.accounts} searchStr={searchStr} />,
             },
             {
                 disabled: !idl.types?.length,
                 id: 'types',
-                render: () => <BaseIdlTypes data={idl.types} />,
-                title: 'Types',
+                render: createTabRenderer(BaseIdlTypes, idl.types, 'types'),
+                title: <TabTitle baseTitle="Types" data={idl.types} searchStr={searchStr} />,
             },
             {
                 disabled: !idl.pdas?.length,
                 id: 'pdas',
-                render: () => <BaseIdlPdas data={idl.pdas} />,
-                title: 'PDAs',
+                render: createTabRenderer(BaseIdlPdas, idl.pdas, 'pdas'),
+                title: <TabTitle baseTitle="PDAs" data={idl.pdas} searchStr={searchStr} />,
             },
             {
                 disabled: !idl.errors?.length,
                 id: 'errors',
-                render: () => <BaseIdlErrors data={idl.errors} />,
-                title: 'Errors',
+                render: createTabRenderer(BaseIdlErrors, idl.errors, 'errors'),
+                title: <TabTitle baseTitle="Errors" data={idl.errors} searchStr={searchStr} />,
             },
             {
                 disabled: !idl.constants?.length,
                 id: 'constants',
-                render: () => <BaseIdlConstants data={idl.constants} />,
-                title: 'Constants',
+                render: createTabRenderer(BaseIdlConstants, idl.constants, 'constants'),
+                title: <TabTitle baseTitle="Constants" data={idl.constants} searchStr={searchStr} />,
             },
             {
                 disabled: !idl.events?.length,
                 id: 'events',
-                render: () => <BaseIdlEvents data={idl.events} />,
-                title: 'Events',
+                render: createTabRenderer(BaseIdlEvents, idl.events, 'events'),
+                title: <TabTitle baseTitle="Events" data={idl.events} searchStr={searchStr} />,
             },
         ];
 
         return tabItems;
-    }, [idl]);
+    }, [idl, searchStr]);
 
     return tabs;
+}
+
+type TabTitleProps = {
+    baseTitle: string;
+    data: unknown[] | undefined;
+    searchStr?: string;
+};
+
+function TabTitle({ baseTitle, data, searchStr }: TabTitleProps) {
+    const hasSearch = Boolean(searchStr?.trim());
+    const count = data?.length;
+    if (hasSearch && count !== undefined) {
+        return (
+            <>
+                {baseTitle} <span className="e-font-mono e-text-xs">{`(${count})`}</span>
+            </>
+        );
+    }
+    return <>{baseTitle}</>;
+}
+
+function NoSearchResultsPlaceholder({ tabName }: { tabName: string }) {
+    return (
+        <div className="e-flex e-items-center e-justify-center e-py-6 e-text-center">
+            <p className="e-m-0 e-text-sm e-text-neutral-500">No {tabName.toLowerCase()} found</p>
+        </div>
+    );
 }

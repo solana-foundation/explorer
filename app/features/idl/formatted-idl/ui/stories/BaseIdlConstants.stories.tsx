@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { BaseIdlConstants } from '../BaseIdlConstants';
+import { SearchHighlightProvider } from '../SearchHighlightContext';
 
 const meta = {
     component: BaseIdlConstants,
@@ -91,4 +92,38 @@ export const NoConstants: Story = {
     args: {
         data: [],
     },
+};
+
+export const WithSearchTerm: Story = {
+    args: {
+        data: [
+            {
+                docs: ['Maximum number of users allowed'],
+                name: 'MAX_USERS',
+                type: 'u16',
+                value: '1000',
+            },
+            {
+                docs: ['Minimum deposit amount in lamports'],
+                name: 'MIN_DEPOSIT',
+                type: 'u64',
+                value: '10000000',
+            },
+            {
+                docs: ['Protocol fee in basis points'],
+                name: 'PROTOCOL_FEE',
+                type: 'u16',
+                value: '25',
+            },
+        ],
+    },
+    decorators: [
+        Story => (
+            <SearchHighlightProvider searchStr="deposit">
+                <div>
+                    <Story />
+                </div>
+            </SearchHighlightProvider>
+        ),
+    ],
 };

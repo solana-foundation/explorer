@@ -1,5 +1,6 @@
 import { BaseIdlDoc } from './BaseIdlDoc';
 import { BaseIdlFields } from './BaseIdlFields';
+import { HighlightNode } from './HighlightNode';
 import type { FormattedIdlDataView } from './types';
 
 export function BaseIdlAccounts({ data }: FormattedIdlDataView<'accounts'>) {
@@ -12,14 +13,16 @@ export function BaseIdlAccounts({ data }: FormattedIdlDataView<'accounts'>) {
                     <th className="e-text-neutral-500">Fields</th>
                 </tr>
             </thead>
-            <tbody className="list">
+            <tbody className="list e-font-mono e-text-xs">
                 {data.map(acc => (
                     <tr key={acc.name}>
                         <td>
-                            <span className="e-font-mono e-text-xs">{acc.name}</span>
+                            <HighlightNode className="e-rounded e-py-0.5">{acc.name}</HighlightNode>
                             <BaseIdlDoc docs={acc.docs} />
                         </td>
-                        <td>{!!acc.fieldType && <BaseIdlFields fieldType={acc.fieldType} />}</td>
+                        <td>
+                            <BaseIdlFields fieldType={acc.fieldType} />
+                        </td>
                     </tr>
                 ))}
             </tbody>

@@ -1,5 +1,6 @@
 import { BaseIdlDoc } from './BaseIdlDoc';
 import { BaseIdlFields } from './BaseIdlFields';
+import { HighlightNode } from './HighlightNode';
 import type { FormattedIdlDataView } from './types';
 
 export function BaseIdlEvents({ data }: FormattedIdlDataView<'events'>) {
@@ -12,14 +13,16 @@ export function BaseIdlEvents({ data }: FormattedIdlDataView<'events'>) {
                     <th className="e-text-neutral-500">Fields</th>
                 </tr>
             </thead>
-            <tbody className="list">
+            <tbody className="list e-font-mono e-text-xs">
                 {data.map(event => (
                     <tr key={event.name}>
                         <td>
-                            <span className="e-font-mono e-text-xs">{event.name}</span>
+                            <HighlightNode className="e-rounded e-py-0.5">{event.name}</HighlightNode>
                             <BaseIdlDoc docs={event.docs} />
                         </td>
-                        <td>{event.fieldType && <BaseIdlFields fieldType={event.fieldType} />}</td>
+                        <td>
+                            <BaseIdlFields fieldType={event.fieldType} />
+                        </td>
                     </tr>
                 ))}
             </tbody>
