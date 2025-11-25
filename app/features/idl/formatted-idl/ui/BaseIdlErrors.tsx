@@ -1,3 +1,4 @@
+import { HighlightNode } from './HighlightNode';
 import type { FormattedIdlDataView } from './types';
 
 export function BaseIdlErrors({ data }: FormattedIdlDataView<'errors'>) {
@@ -11,15 +12,17 @@ export function BaseIdlErrors({ data }: FormattedIdlDataView<'errors'>) {
                     <th className="e-text-neutral-500">Message</th>
                 </tr>
             </thead>
-            <tbody className="list">
+            <tbody className="list e-font-mono e-text-xs">
                 {data.map(err => (
                     <tr key={err.code}>
-                        <td className="e-font-mono e-text-neutral-500">{err.code}</td>
-                        <td>
-                            <span className="e-font-mono e-text-xs">{err.name}</span>
+                        <td className="e-text-neutral-500">
+                            <HighlightNode className="e-rounded">{err.code}</HighlightNode>
                         </td>
                         <td>
-                            <p className="e-mb-0 e-font-mono e-text-xs">{err.message}</p>
+                            <HighlightNode className="e-rounded e-py-0.5">{err.name}</HighlightNode>
+                        </td>
+                        <td>
+                            <HighlightNode className="e-rounded e-py-0.5">{err.message}</HighlightNode>
                         </td>
                     </tr>
                 ))}

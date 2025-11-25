@@ -1,15 +1,17 @@
 'use client';
 
-import classNames from 'classnames';
+import { cn } from '@components/shared/utils';
+import type { Idl } from '@coral-xyz/anchor';
+import type { RootNode } from 'codama';
 import { useEffect, useState } from 'react';
 
-import type { FormattedIdl } from '@/app/entities/idl';
-
 import { useTabs } from '../../model/use-tabs';
+import { SearchHighlightProvider } from './SearchHighlightContext';
+import { FormattedIdlViewProps } from './types';
 
-export function BaseFormattedIdl({ idl }: { idl: FormattedIdl | null }) {
+export function BaseFormattedIdl({ idl, searchStr }: FormattedIdlViewProps<Idl> | FormattedIdlViewProps<RootNode>) {
     const [activeTabIndex, setActiveTabIndex] = useState<number | null>(null);
-    const tabs = useTabs(idl);
+    const tabs = useTabs(idl, searchStr);
 
     useEffect(() => {
         if (typeof activeTabIndex === 'number') return;
@@ -21,26 +23,28 @@ export function BaseFormattedIdl({ idl }: { idl: FormattedIdl | null }) {
     const activeTab = tabs[activeTabIndex];
 
     return (
-        <div className="idl-view">
-            <div className="nav nav-tabs e-mb-5">
-                {tabs.map((tab, index) => (
-                    <button
-                        key={tab.id}
-                        className={classNames('nav-item nav-link', {
-                            active: index === activeTabIndex,
-                            'opacity-50': tab.disabled,
-                        })}
-                        disabled={tab.disabled}
-                        onClick={() => setActiveTabIndex(index)}
-                    >
-                        {tab.title}
-                    </button>
-                ))}
+        <SearchHighlightProvider searchStr={searchStr || ''}>
+            <div className="idl-view">
+                <div className="nav nav-tabs e-mb-5">
+                    {tabs.map((tab, index) => (
+                        <button
+                            key={tab.id}
+                            className={cn('nav-item nav-link', {
+                                active: index === activeTabIndex,
+                                'e-opacity-50': tab.disabled,
+                            })}
+                            disabled={tab.disabled}
+                            onClick={() => setActiveTabIndex(index)}
+                        >
+                            {tab.title}
+                        </button>
+                    ))}
+                </div>
+                <div className="table-responsive e-mb-0 e-min-h-96">
+                    <ActiveTab activeTab={activeTab} />
+                </div>
             </div>
-            <div className="table-responsive mb-0 e-min-h-[200px]">
-                <ActiveTab activeTab={activeTab} />
-            </div>
-        </div>
+        </SearchHighlightProvider>
     );
 }
 

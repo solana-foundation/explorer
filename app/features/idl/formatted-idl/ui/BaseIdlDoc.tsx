@@ -1,11 +1,13 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 
+import { HighlightNode } from './HighlightNode';
+
 export function BaseIdlDoc({ docs }: { docs?: string[] }) {
     if (!docs?.length) return null;
 
     return (
         <div className="e-mb-0 e-whitespace-break-spaces e-font-mono e-text-xs e-text-neutral-500">
-            {docs.join(' ')}
+            <HighlightNode className="e-rounded">{docs.join(' ')}</HighlightNode>
         </div>
     );
 }

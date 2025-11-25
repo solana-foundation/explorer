@@ -3,6 +3,7 @@ import { Badge } from '@shared/ui/badge';
 
 import { BaseIdlDoc, IdlDocTooltip } from './BaseIdlDoc';
 import { BaseIdlStructFields } from './BaseIdlFields';
+import { HighlightNode } from './HighlightNode';
 import type { FormattedIdlDataView } from './types';
 
 type IxAccountsData = NonNullable<FormattedIdl['instructions']>[0]['accounts'];
@@ -19,11 +20,11 @@ export function BaseIdlInstructions({ data }: FormattedIdlDataView<'instructions
                     <th className="e-text-neutral-500">Accounts</th>
                 </tr>
             </thead>
-            <tbody className="list">
+            <tbody className="list e-font-mono e-text-xs">
                 {data.map(ix => (
                     <tr key={ix.name}>
                         <td>
-                            <span className="e-font-mono e-text-xs">{ix.name}</span>
+                            <HighlightNode className="e-rounded e-py-0.5">{ix.name}</HighlightNode>
                             <BaseIdlDoc docs={ix.docs} />
                         </td>
                         <td>
@@ -51,7 +52,7 @@ function IdlInstructionAccounts({ data }: { data: IxAccountsData }) {
                 if ('accounts' in acc) {
                     return (
                         <div key={acc.name}>
-                            <span className="e-font-mono e-text-xs">{acc.name}</span>
+                            <HighlightNode className="e-font-mono e-text-xs">{acc.name}</HighlightNode>
                             <div className="e-bg-neutral-800 e-px-3 e-py-2">
                                 <InstructionAccounts accounts={acc.accounts} />
                             </div>
@@ -109,30 +110,34 @@ function IdlInstructionAccount({
 }) {
     return (
         <IdlDocTooltip key={name} docs={docs}>
-            <div className="e-inline-flex e-items-center e-gap-2">
-                <span className="e-font-mono e-text-xs">{name}</span>
-                <div className="e-flex e-gap-1">
-                    {isWritable && (
-                        <Badge variant="warning" size="xs">
-                            Mutable
-                        </Badge>
-                    )}
-                    {isSigner && (
-                        <Badge variant="warning" size="xs">
-                            Signer
-                        </Badge>
-                    )}
-                    {isPda && (
-                        <Badge variant="info" size="xs">
-                            PDA
-                        </Badge>
-                    )}
-                    {isOptional && (
-                        <Badge variant="secondary" size="xs">
-                            Optional
-                        </Badge>
-                    )}
-                </div>
+            <div>
+                <HighlightNode className="e-rounded">
+                    <div className="e-inline-flex e-items-center e-gap-2">
+                        {name}
+                        <div className="e-flex e-gap-1">
+                            {isWritable && (
+                                <Badge variant="warning" size="xs">
+                                    Mutable
+                                </Badge>
+                            )}
+                            {isSigner && (
+                                <Badge variant="warning" size="xs">
+                                    Signer
+                                </Badge>
+                            )}
+                            {isPda && (
+                                <Badge variant="info" size="xs">
+                                    PDA
+                                </Badge>
+                            )}
+                            {isOptional && (
+                                <Badge variant="secondary" size="xs">
+                                    Optional
+                                </Badge>
+                            )}
+                        </div>
+                    </div>
+                </HighlightNode>
             </div>
         </IdlDocTooltip>
     );
