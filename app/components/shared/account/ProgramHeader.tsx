@@ -13,6 +13,16 @@ import { Badge } from '../ui/badge';
 
 const IDENTICON_WIDTH = 64;
 
+// The "unverified" badge indicates that the securityTxt metadata (name, logo, etc.)
+// is self-reported by the program author and may not be accurate. However, we trust
+// official Solana programs (e.g. spl-token, token-2022, associated token) even if they
+// have securityTxt, so we skip showing the badge for these trusted programs.
+export const PROGRAMS_SKIP_UNVERIFIED_BADGE = new Map([
+    ['TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', 'Token Program'],
+    ['TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb', 'Token-2022 Program'],
+    ['ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL', 'Associated Token Program'],
+]);
+
 export function ProgramHeader({ address, parsedData }: { address: string; parsedData: UpgradeableLoaderAccountData }) {
     const securityTxt = useSecurityTxt(address, parsedData);
 
@@ -28,17 +38,20 @@ export function ProgramHeader({ address, parsedData }: { address: string; parsed
                 unverified: undefined,
             };
         }
+
+        const shouldSkipUnverifiedBadge = PROGRAMS_SKIP_UNVERIFIED_BADGE.has(address);
+
         if (isPmpSecurityTXT(securityTxt)) {
             return {
                 logo: getProxiedUri(securityTxt.logo),
                 programName: securityTxt.name,
-                unverified: true,
+                unverified: shouldSkipUnverifiedBadge ? false : true,
                 version: securityTxt.version,
             };
         }
         return {
             programName: securityTxt.name,
-            unverified: true,
+            unverified: shouldSkipUnverifiedBadge ? false : true,
         };
     })();
 

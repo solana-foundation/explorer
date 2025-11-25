@@ -4,6 +4,7 @@ import React from 'react';
 import { vi } from 'vitest';
 
 import { AccountHeader } from '@/app/components/account/AccountHeader';
+import { PROGRAMS_SKIP_UNVERIFIED_BADGE } from '@/app/components/shared/account/ProgramHeader';
 import { useSecurityTxt } from '@/app/features/security-txt';
 import { createNeodymeSecurityTxt, createPmpSecurityTxt } from '@/app/features/security-txt/ui/__tests__/helpers';
 import type { Account, UpgradeableLoaderAccountData } from '@/app/providers/accounts';
@@ -156,6 +157,45 @@ describe('AccountHeader', () => {
             );
 
             expect(screen.getByText('Unverified')).toBeInTheDocument();
+        });
+
+        describe('unverified badge for trusted programs', () => {
+            it.each([...PROGRAMS_SKIP_UNVERIFIED_BADGE].map(([address, name]) => ({ address, name })))(
+                'should not show unverified badge for $name even with securityTxt',
+                ({ address }) => {
+                    const pmpSecurityTxt = createPmpSecurityTxt();
+                    vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
+
+                    const account = setup().account;
+                    render(
+                        <AccountHeader
+                            address={address}
+                            account={account}
+                            tokenInfo={undefined}
+                            isTokenInfoLoading={false}
+                        />
+                    );
+
+                    expect(screen.queryByText('Unverified')).not.toBeInTheDocument();
+                }
+            );
+
+            it('should show unverified badge for non-trusted programs with securityTxt', () => {
+                const pmpSecurityTxt = createPmpSecurityTxt();
+                vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
+
+                const { account, mockAddress } = setup();
+                render(
+                    <AccountHeader
+                        address={mockAddress}
+                        account={account}
+                        tokenInfo={undefined}
+                        isTokenInfoLoading={false}
+                    />
+                );
+
+                expect(screen.getByText('Unverified')).toBeInTheDocument();
+            });
         });
     });
 });
