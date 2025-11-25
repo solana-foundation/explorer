@@ -346,12 +346,12 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                     </tr>
                 )}
 
-                {costUnits !== undefined && (
-                    <tr>
-                        <td>Transaction cost</td>
-                        <td className="text-lg-end">{costUnits.toLocaleString('en-US')}</td>
-                    </tr>
-                )}
+                <tr>
+                    <td>Transaction cost</td>
+                    <td className="text-lg-end">
+                        {costUnits !== undefined ? costUnits.toLocaleString('en-US') : 'Not Supported Slot'}
+                    </td>
+                </tr>
 
                 {reservedCUs !== undefined && (
                     <tr>
