@@ -43,6 +43,7 @@
         "@react-hook/previous": "1.0.1",
         "@sentry/core": "^10.17.0",
         "@sentry/nextjs": "10",
+        "@solana-developers/helpers": "=2.8.1",
         "@solana-program/compute-budget": "0.6.1",
         "@solana-program/program-metadata": "0.1.0",
         "@solana-program/system": "0.7.0",
@@ -192,6 +193,9 @@
             "word-wrap@<=1.2.4": "1.2.5",
             "ws@>=8.0.0 <8.17.1": "8.17.1",
             "ws@>=7.0.0 <7.5.10": "7.5.10"
+        },
+        "patchedDependencies": {
+            "@solana-developers/helpers@2.8.1": "patches/@solana-developers__helpers@2.8.1.patch"
         },
         "ignoredBuiltDependencies": [
             "bigint-buffer",

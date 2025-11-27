@@ -8,14 +8,17 @@ import type {
     StructFieldType,
     TypeFieldType,
     UnknownFieldType,
-} from '@/app/entities/idl/formatters/formatted-idl';
-
-import { useFormatAnchorIdl } from '../anchor';
+} from '../formatters/formatted-idl';
+import { useFormatAnchorIdl } from '../use-format-anchor-idl';
 
 // Mock byte to hex utility since we don't need actual conversion in tests
-vi.mock('@noble/hashes/utils', () => ({
-    bytesToHex: (data: Uint8Array) => `0x${Buffer.from(data).toString('hex')}`,
-}));
+vi.mock('@noble/hashes/utils', async importOriginal => {
+    const actual = (await importOriginal()) as NonNullable<unknown>;
+    return {
+        ...actual,
+        bytesToHex: (data: Uint8Array) => `0x${Buffer.from(data).toString('hex')}`,
+    };
+});
 
 describe('useFormatAnchorIdl', () => {
     it('should return null when idl is undefined', () => {

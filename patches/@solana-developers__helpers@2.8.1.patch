@@ -1,0 +1,43 @@
+diff --git a/dist/cjs/index.cjs b/dist/cjs/index.cjs
+index 7d9de91a181b47ca85ca775eaf2bb25109f2dcac..22182f4b604f2952c5055490e23e5b258a145c7b 100644
+--- a/dist/cjs/index.cjs
++++ b/dist/cjs/index.cjs
+@@ -21,5 +21,6 @@ __exportStar(require("./lib/airdrop"), exports);
+ __exportStar(require("./lib/token"), exports);
+ __exportStar(require("./lib/logs"), exports);
+ __exportStar(require("./lib/idl"), exports);
++__exportStar(require("./lib/convertLegacyIdl"), exports);
+ __exportStar(require("./types"), exports);
+ //# sourceMappingURL=index.js.map
+diff --git a/dist/cjs/lib/convertLegacyIdl.js b/dist/cjs/lib/convertLegacyIdl.js
+index da048d668c4d1204a209c10e911396f8b023891c..cd69d496f15805814e91b9223047fd1250bd6906 100644
+--- a/dist/cjs/lib/convertLegacyIdl.js
++++ b/dist/cjs/lib/convertLegacyIdl.js
+@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.convertLegacyIdl = convertLegacyIdl;
+ exports.getIdlSpecType = getIdlSpecType;
+ exports.formatIdl = formatIdl;
++exports._convertType = convertType;
+ const sha256_1 = require("@noble/hashes/sha256");
+ // Remove the dynamic import
+ function getSnakeCase(str) {
+diff --git a/dist/esm/index.js b/dist/esm/index.js
+index a236c13ab3ebb8eb450bee57daf019d87693ae5b..e2038197d1be4715c51c02eabec98381e02d5b6b 100644
+--- a/dist/esm/index.js
++++ b/dist/esm/index.js
+@@ -6,4 +6,5 @@ export * from './lib/token.js';
+ export * from './lib/logs.js';
+ export * from './lib/idl.js';
+ export * from './types.js';
++export * from './lib/convertLegacyIdl.js';
+ //# sourceMappingURL=index.js.map
+diff --git a/dist/esm/lib/convertLegacyIdl.js b/dist/esm/lib/convertLegacyIdl.js
+index b8cf8fa0db9f327f4f55c0e609b3669162634081..cc1c362f27f7040ec50b5fb3dc1a7c05e938ef44 100644
+--- a/dist/esm/lib/convertLegacyIdl.js
++++ b/dist/esm/lib/convertLegacyIdl.js
+@@ -303,4 +303,5 @@ export function formatIdl(idl, programAddress) {
+             throw new Error(`IDL spec not supported: ${spec}`);
+     }
+ }
++export const _convertType = convertType;
+ //# sourceMappingURL=convertLegacyIdl.js.map

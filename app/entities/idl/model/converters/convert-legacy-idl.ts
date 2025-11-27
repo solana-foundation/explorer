@@ -1,8 +1,8 @@
 /**
  * This is a port of the anchor command `anchor idl convert` to TypeScript.
  */
-import { Idl } from '@coral-xyz/anchor';
-import {
+import type { Idl } from '@coral-xyz/anchor';
+import type {
     IdlAccount,
     IdlConst,
     IdlDefinedFields,
@@ -22,9 +22,11 @@ import {
 import { sha256 } from '@noble/hashes/sha256';
 import { snakeCase } from 'change-case';
 
+import { isLeafTupleU8String, parseAnchorType_U8_PathTuple } from './type-handlers/leaf-tuple-type-handler';
+
 // Legacy types based on the Rust structs
 // Should be included in next minor release of anchor
-interface LegacyIdl {
+export interface LegacyIdl {
     version: string;
     name: string;
     docs?: string[];
@@ -143,13 +145,6 @@ type LegacyIdlType =
     | { generic: string }
     | { definedWithTypeArgs: { name: string; args: LegacyIdlDefinedTypeArg[] } };
 
-// TODO: check IdlType in terms of recursiveness
-type TupleType = 'string'[] | 'u64'[];
-
-type ShankIdlType = { tuple: TupleType };
-
-export type LegacyOrShankIdlType = LegacyIdlType | ShankIdlType;
-
 type LegacyIdlDefinedTypeArg = { generic: string } | { value: string } | { type: LegacyIdlType };
 
 function convertLegacyIdl(legacyIdl: LegacyIdl, programAddress?: string): Idl {
@@ -169,11 +164,27 @@ function convertLegacyIdl(legacyIdl: LegacyIdl, programAddress?: string): Idl {
             version: legacyIdl.version,
         } as IdlMetadata,
         types: [
-            ...(legacyIdl.types || []).map(convertTypeDef),
-            ...(legacyIdl.accounts || []).map(convertTypeDef),
+            ...(legacyIdl.types || []).map(convertTypeDef).filter(filterOutUnsupportedTypeDef),
+            ...(legacyIdl.accounts || []).map(convertTypeDef).filter(filterOutUnsupportedTypeDef),
             ...(legacyIdl.events || []).map(convertEventToTypeDef),
         ],
     };
+}
+
+/**
+ * Filter unsupported typeDefs
+ *
+ * Case 1:
+ * Accounts contain plain discriminators.
+ * ```
+ * "accounts": [{"name": "SomeZcAccount","discriminator": [56, 72, 82, 194, 210, 35, 17, 191]},
+ * ```
+ *
+ * @param t
+ * @returns boolean
+ */
+function filterOutUnsupportedTypeDef(t?: IdlTypeDef) {
+    return t !== undefined;
 }
 
 function traverseType(type: IdlType, refs: Set<string>) {
@@ -243,7 +254,7 @@ function getTypeReferences(idl: Idl): Set<string> {
 }
 
 // Remove types that are not used in definition of instructions, accounts, events, or constants
-function removeUnusedTypes(idl: Idl): Idl {
+export function removeUnusedTypes(idl: Idl): Idl {
     const usedElsewhere = getTypeReferences(idl);
     return {
         ...idl,
@@ -267,6 +278,11 @@ function convertInstruction(instruction: LegacyIdlInstruction): IdlInstruction {
     };
 }
 
+/**
+ *
+ * @param account
+ * @returns
+ */
 function convertAccount(account: LegacyIdlTypeDefinition): IdlAccount {
     return {
         discriminator: getDisc('account', account.name),
@@ -405,14 +421,47 @@ function convertEventToTypeDef(event: LegacyIdlEvent): IdlTypeDef {
     };
 }
 
-function convertType(type: LegacyOrShankIdlType): IdlType {
+type TupleType = 'string'[] | 'u64'[];
+
+type IdlTupleType = { tuple: TupleType };
+
+type ExtendedLegacyType = LegacyIdlType | IdlTupleType | { option: IdlTupleType };
+
+// TODO: generalize approach for parsing tuples. Currently ad-hoc version for 32-bytes tuple is used
+function convertType(type: ExtendedLegacyType): IdlType {
     if (typeof type === 'string') {
         return type === 'publicKey' ? 'pubkey' : type;
     } else if ('vec' in type) {
+        // Check if vec contains a tuple
+        if (typeof type.vec === 'object' && 'defined' in type.vec && isLeafTupleU8String(type.vec.defined)) {
+            // For vec<(u8, [u8;32])>, use vec<[u8; 33]>
+            const tupleStr = type.vec.defined;
+            if (tupleStr === '(u8,[u8;32])' || tupleStr === '(u8,[u8,32])') {
+                return { vec: { array: ['u8', 33] } };
+            }
+        }
         return { vec: convertType(type.vec) };
     } else if ('option' in type) {
         return { option: convertType(type.option) };
     } else if ('defined' in type) {
+        // TODO: cover complex type
+        if (type.defined === '(u8,[u8;32])') {
+            // console.log(555, type, isLeafTupleU8String(type.defined));
+        }
+        // Check if defined type is a leaf tuple string
+        if (isLeafTupleU8String(type.defined)) {
+            const tupleElements = parseAnchorType_U8_PathTuple(type.defined);
+
+            return {
+                defined: {
+                    generics: tupleElements.tuple.map(elem => ({
+                        kind: 'type' as const,
+                        type: convertType(elem),
+                    })),
+                    name: 'Tuple',
+                },
+            } as IdlTypeDefined;
+        }
         return { defined: { generics: [], name: type.defined } } as IdlTypeDefined;
     } else if ('array' in type) {
         return { array: [convertType(type.array[0]), type.array[1]] };
@@ -426,13 +475,45 @@ function convertType(type: LegacyOrShankIdlType): IdlType {
             },
         } as IdlTypeDefined;
     } else if ('tuple' in type) {
-        // Use generic type to display tuple as it is not covered by IdlType
+        const tuple = type.tuple;
+
+        if (!Array.isArray(tuple) || tuple.length === 0) {
+            throw new Error(`Unsupported type: ${JSON.stringify(type)}`);
+        }
+
+        const first: LegacyIdlType = tuple[0];
+        const arrayLikeTuple: ReadonlyArray<typeof first> = Array.from(tuple);
+
+        // We only support tuples like ["u64", "u64"], ["string", "string"], etc.
+        if (typeof first !== 'string' || !arrayLikeTuple.every(t => t === first)) {
+            throw new Error(`Unsupported type: ${JSON.stringify(type)}`);
+        }
+
+        // Convert `[T, T, ...]` → `{ array: [convertType(T), N] }`
         return {
-            defined: {
-                generics: type.tuple.map(t => ({ kind: 'type', type: convertType(t) })),
-                name: `tuple[${type.tuple[0]}]`,
-            },
+            array: [convertType(first), tuple.length],
         };
+
+        // TODO(rogaldh): remove upon resolution
+        // // Use generic type to display tuple as it is not covered by IdlType
+        // // return {
+        // //     defined: {
+        // //         generics: type.tuple.map(t => ({ kind: 'type', type: convertType(t) })),
+        // //         // name: `tuple[${type.tuple[0]}]`,
+        // //         name: 'Tuple',
+        // //     },
+        // // };
+        // if (type.tuple.every(t => t === type.tuple[0])) {
+        //     return { array: [convertType(type.tuple[0]), type.tuple.length] };
+        // }
+
+        // // For (u8, [u8; 32]) pattern
+        // if (type.tuple.length === 2 && type.tuple[0] === 'u8' && JSON.stringify(type.tuple[1]).includes('array')) {
+        //     return { array: ['u8', 33] }; // Flattened representation
+        // }
+
+        // // Default: use bytes for complex tuples
+        // return 'bytes';
     }
     throw new Error(`Unsupported type: ${JSON.stringify(type)}`);
 }
@@ -455,24 +536,7 @@ export function getIdlSpecType(idl: any): IdlSpec {
     return idl?.metadata?.spec ?? 'legacy';
 }
 
-export type IdlSpecKey = IdlSpec | 'legacy-shank';
-
-export function getIdlSpecKeyType(idl: any): IdlSpecKey {
-    const baseKey = getIdlSpecType(idl);
-
-    let actualKey: IdlSpecKey;
-    if (idl?.metadata?.origin === 'shank') {
-        actualKey = 'legacy-shank';
-    } else {
-        actualKey = baseKey;
-    }
-
-    return actualKey && baseKey === 'legacy' ? actualKey : baseKey;
-}
-
-type IdlFormatter = (idl: any, programAddress?: string) => Idl;
-
-export function formatSerdeIdl(idl: any, programAddress?: string): Idl {
+export function formatIdl(idl: any, programAddress?: string): Idl {
     const spec = getIdlSpecType(idl);
 
     switch (spec) {
@@ -485,42 +549,9 @@ export function formatSerdeIdl(idl: any, programAddress?: string): Idl {
     }
 }
 
-/// Problem: formatSerdeIdl(aka formatIdl before) is used to produce Idl to create a Program instance, but needed to display Idl also
-// Upon displaying Idl, we discovered new spec-type that is likely generated by Shank.
-// Having this, we can not just introduce new switch-case. That potentially leads to degradation
-//
-// Solution: implement wrapper that will use formatIdl's signature as a provider
-// That allows to keep current functionality to create Program instances
-// That also allows to have a seaprate output according the spec-type of Idl
-export function getFormattedIdl(formatter: IdlFormatter, idl: any, programAddress?: string): Idl {
-    return formatter(idl, programAddress);
-}
+export { convertLegacyIdl };
+export type { LegacyIdlType, TupleType };
 
-/// Write a layer to register current formatters as well as to a add new one
-const formattersRegistry = new Map<IdlSpecKey, IdlFormatter>();
-function registerFormatter(key: IdlSpecKey, fn: IdlFormatter) {
-    formattersRegistry.set(key, fn);
-}
-registerFormatter('0.1.0', idl => idl as Idl);
-registerFormatter('legacy', (idl, programAddress) => {
-    return removeUnusedTypes(convertLegacyIdl(idl as LegacyIdl, programAddress));
-});
-registerFormatter('legacy-shank', (idl, programAddress) => {
-    return removeUnusedTypes(convertLegacyIdl(idl as LegacyIdl, programAddress));
-});
-
-export const formatDisplayIdl: IdlFormatter = (idl, programAddress?) => {
-    const baseSpec = getIdlSpecType(idl);
-    const spec = getIdlSpecKeyType(idl);
-
-    // get a spec formatter and make a fallback to the base one
-    const formatter = formattersRegistry.get(spec) ?? formattersRegistry.get(baseSpec);
-
-    if (!formatter) {
-        throw new Error(`IDL spec not supported: ${spec}`);
-    }
-
-    return formatter(idl, programAddress);
-};
-
+/// export part of the internal implementation to preserve existing functonality to display the IDL as it was
+export const internalConvertDefinedTypeArg = convertDefinedTypeArg;
 export const privateConvertType = convertType;

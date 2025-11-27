@@ -1,9 +1,7 @@
+import { getDisplayIdlSpecType } from '@entities/idl';
 import { memo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import ReactJson from 'react-json-view';
-
-// TODO: Move utils to entities
-import { getIdlSpecKeyType } from '@/app/utils/convertLegacyIdl';
 
 import { AnchorFormattedIdl } from '../formatted-idl/ui/AnchorFormattedIdl';
 import { CodamaFormattedIdl } from '../formatted-idl/ui/CodamaFormattedIdl';
@@ -25,7 +23,7 @@ export function IdlRenderer({
         return <IdlJson idl={idl} collapsed={collapsed} />;
     }
 
-    const spec = getIdlSpecKeyType(idl);
+    const spec = getDisplayIdlSpecType(idl);
     switch (spec) {
         case 'codama':
             return (

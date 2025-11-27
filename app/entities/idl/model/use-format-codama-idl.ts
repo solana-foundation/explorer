@@ -1,3 +1,5 @@
+'use client';
+
 import {
     EnumTypeNode,
     InstructionAccountNode,
@@ -11,7 +13,7 @@ import {
 } from 'codama';
 import { useMemo } from 'react';
 
-import type { FieldType, FormattedIdl, PdaData, StructField } from '@/app/entities/idl/formatters/formatted-idl';
+import type { FieldType, FormattedIdl, PdaData, StructField } from './formatters/formatted-idl';
 
 function parseEnumNodeVariants(type: EnumTypeNode): string[] {
     return type.variants.map(variant => {

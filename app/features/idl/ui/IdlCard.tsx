@@ -1,8 +1,7 @@
 'use client';
 
-import { getIdlVersion } from '@entities/idl';
+import { getIdlVersion, useAnchorProgram } from '@entities/idl';
 import { useProgramMetadataIdl } from '@entities/program-metadata';
-import { useAnchorProgram } from '@providers/anchor';
 import { useCluster } from '@providers/cluster';
 import { Badge } from '@shared/ui/badge';
 import { cn } from '@shared/utils';

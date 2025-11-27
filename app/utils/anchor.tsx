@@ -3,7 +3,7 @@ import { SolarizedJsonViewer as ReactJson } from '@components/common/JsonViewer'
 import { BorshEventCoder, BorshInstructionCoder, Idl, Program } from '@coral-xyz/anchor';
 import { IdlDefinedFields } from '@coral-xyz/anchor/dist/cjs/idl';
 import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
-import { useAnchorProgram } from '@providers/anchor';
+import { useAnchorProgram } from '@entities/idl';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/index';

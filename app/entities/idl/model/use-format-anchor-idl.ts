@@ -1,3 +1,5 @@
+'use client';
+
 import {
     Idl,
     IdlAccount,
@@ -15,8 +17,10 @@ import {
 import { bytesToHex } from '@noble/hashes/utils';
 import { camelCase } from 'change-case';
 import { useMemo } from 'react';
+import { array, Infer, literal, nullable, object, optional, string, union, validate } from 'superstruct';
 
-import type { FieldType, FormattedIdl, PdaData, StructField } from '@/app/entities/idl/formatters/formatted-idl';
+import { safeJsonParse } from '../lib/utils';
+import type { FieldType, FormattedIdl, PdaData, StructField } from './formatters/formatted-idl';
 
 function parseStructFields(fields: IdlDefinedFields): StructField[] | null {
     // Handle struct with named fields or tuple fields
@@ -145,6 +149,62 @@ function getPdaSeeds(seeds: IdlSeed[], idl: Idl): PdaData['seeds'] {
     });
 }
 
+const StructFieldSchema = object({
+    docs: optional(array(string())),
+    name: optional(string()),
+    type: string(),
+});
+
+const StructFieldTypeSchema = object({
+    docs: optional(array(string())),
+    fields: optional(array(StructFieldSchema)),
+    kind: literal('struct'),
+});
+
+const EnumFieldSchema = object({
+    docs: optional(array(string())),
+    fields: array(string()),
+    kind: literal('enum'),
+});
+
+const TypeFieldSchema = object({
+    docs: optional(array(string())),
+    kind: literal('type'),
+    name: optional(string()),
+    type: string(),
+});
+const UnknownFieldSchema = object({
+    docs: optional(array(string())),
+
+    kind: literal('unknown'),
+    name: optional(string()),
+    type: string(),
+});
+
+const Account = object({
+    docs: array(),
+    fieldType: union([StructFieldTypeSchema, EnumFieldSchema, TypeFieldSchema, UnknownFieldSchema, nullable(string())]),
+    name: string(),
+});
+
+const produceUnknownType = (): Infer<typeof UnknownFieldSchema> => {
+    return {
+        kind: 'unknown',
+        type: 'unknown',
+    };
+};
+
+function parseDefaultAccount(acc: IdlAccount, typesMap: Map<string, IdlTypeDef>) {
+    const accType = typesMap.get(acc.name)?.type;
+    const fieldType = !accType ? produceUnknownType() : parseIdlTypeDef(accType);
+
+    return {
+        docs: (acc as any).docs || [],
+        fieldType,
+        name: acc.name,
+    };
+}
+
 export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
     const formattedIdl = useMemo(() => {
         if (!idl) return null;
@@ -153,28 +213,23 @@ export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
         const eventsMap = new Map<string, IdlEvent>(idl.events?.map(item => [item.name, item]) || []);
         const pdas = getUniqPdaAccountsFromIxs(idl.instructions);
 
+        const formattingErrors: Array<[Error, any]> = [];
+
+        // TODO: currently we modify the logic inside this helper, but we should split version-specific implementaitons later
         const formattedIdl: FormattedIdl = {
             accounts: idl.accounts?.map(acc => {
-                const accType = typesMap.get(acc.name)?.type as IdlTypeDefTy;
-                return {
-                    docs: (acc as any).docs || [],
-                    fieldType: parseIdlTypeDef(accType),
-                    name: acc.name,
-                };
+                const account = parseDefaultAccount(acc, typesMap);
+                const [err] = validate(account, Account);
+                if (err) formattingErrors.push([err, acc]);
+
+                return account;
             }),
             constants: idl.constants?.map(constant => {
-                let maybeValue = constant.value;
-                try {
-                    maybeValue = JSON.parse(constant.value);
-                } catch (e) {
-                    console.error(`Can not parse constant: ${constant.name}`, e);
-                }
-
                 return {
                     docs: (constant as any).docs || [],
                     name: constant.name,
                     type: parseIdlType(constant.type),
-                    value: maybeValue,
+                    value: safeJsonParse(constant.value),
                 };
             }),
             errors: idl.errors?.map(err => ({
@@ -240,6 +295,12 @@ export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
                     name: t.name,
                 })),
         };
+
+        // Log formatting errors with Sentry upon its delivery. Just show them at this point
+        if (formattingErrors.length) {
+            console.error('Formatting Errors:', formattingErrors);
+        }
+
         return formattedIdl;
     }, [idl]);
     return formattedIdl;
