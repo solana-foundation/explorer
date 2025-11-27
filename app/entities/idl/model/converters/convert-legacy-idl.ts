@@ -432,6 +432,14 @@ function convertType(type: ExtendedLegacyType): IdlType {
     if (typeof type === 'string') {
         return type === 'publicKey' ? 'pubkey' : type;
     } else if ('vec' in type) {
+        // Check if vec contains a tuple
+        if (typeof type.vec === 'object' && 'defined' in type.vec && isLeafTupleU8String(type.vec.defined)) {
+            // For vec<(u8, [u8;32])>, use vec<[u8; 33]>
+            const tupleStr = type.vec.defined;
+            if (tupleStr === '(u8,[u8;32])' || tupleStr === '(u8,[u8,32])') {
+                return { vec: { array: ['u8', 33] } };
+            }
+        }
         return { vec: convertType(type.vec) };
     } else if ('option' in type) {
         return { option: convertType(type.option) };
