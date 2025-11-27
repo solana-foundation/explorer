@@ -1,8 +1,7 @@
 import type { Idl } from '@coral-xyz/anchor';
 import type { RootNode } from 'codama';
 
-// TODO: Move utils to entities
-import { getIdlSpecType as getSerdeIdlSpecType } from '@/app/utils/convertLegacyIdl';
+import { getIdlSpecType as getSerdeIdlSpecType } from './converters/convert-legacy-idl';
 
 export type IdlVersion = 'Legacy' | '0.30.1' | RootNode['version'];
 

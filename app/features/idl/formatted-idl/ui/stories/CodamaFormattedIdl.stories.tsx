@@ -1,8 +1,7 @@
+import codamaIdlMock from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
+import convertedFromAnchorIdlMock from '@entities/idl/mocks/codama/whirlpool@0.30.1.json';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { RootNode } from 'codama';
-
-import codamaIdlMock from '@/app/components/account/idl/mocks/codama/whirlpool@0.30.1.json';
-import convertedFromAnchorIdlMock from '@/app/components/account/idl/mocks/codama/whirlpool@0.30.1.json';
 
 import { CodamaFormattedIdl } from '../CodamaFormattedIdl';
 

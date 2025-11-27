@@ -1,5 +1,5 @@
 import { TableCardBody } from '@components/common/TableCardBody';
-import { useAnchorProgram } from '@providers/anchor';
+import { useAnchorProgram } from '@entities/idl';
 import { ParsedMessage, PublicKey, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import { getAnchorNameForInstruction, getAnchorProgramName } from '@utils/anchor';
 import { Cluster } from '@utils/cluster';

@@ -1,8 +1,8 @@
+import { useAnchorProgram } from '@entities/idl';
 import { PublicKey } from '@solana/web3.js';
 import { Suspense } from 'react';
 
 import { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
-import { useAnchorProgram } from '@/app/providers/anchor';
 import { useCluster } from '@/app/providers/cluster';
 import {
     SQUADS_V3_ADDRESS,

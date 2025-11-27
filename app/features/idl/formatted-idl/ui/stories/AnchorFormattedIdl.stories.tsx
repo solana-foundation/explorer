@@ -1,7 +1,6 @@
 import type { Idl } from '@coral-xyz/anchor';
+import idlMock from '@entities/idl/mocks/codama/whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc-idl.json';
 import type { Meta, StoryObj } from '@storybook/react';
-
-import idlMock from '@/app/components/account/idl/mocks/whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc-idl.json';
 
 import { AnchorFormattedIdl } from '../AnchorFormattedIdl';
 

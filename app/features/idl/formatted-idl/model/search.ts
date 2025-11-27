@@ -1,7 +1,6 @@
+import type { FormattedIdl } from '@entities/idl';
 import Fuse, { type IFuseOptions } from 'fuse.js';
 import { useMemo } from 'react';
-
-import type { FormattedIdl } from '@/app/entities/idl/formatters/formatted-idl';
 
 export function useSearchIdl(formattedIdl: FormattedIdl | null, searchStr?: string): FormattedIdl | null {
     return useMemo(() => {
