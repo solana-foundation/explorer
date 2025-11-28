@@ -54,7 +54,7 @@ export function IdlCard({ programId }: { programId: string }) {
         }
     }, [tabs]);
 
-    if ((!idl && !programMetadataIdl) || activeTabIndex == undefined) {
+    if ((!idl && !programMetadataIdl) || activeTabIndex === undefined) {
         return null;
     }
 
