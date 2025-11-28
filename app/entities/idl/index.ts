@@ -4,6 +4,9 @@ export type {
     StructField,
     InstructionAccountData,
     PdaData,
+    ArgField,
+    InstructionData,
+    NestedInstructionAccountsData,
 } from './model/formatters/formatted-idl';
 export { getIdlVersion } from './model/idl-version';
 
