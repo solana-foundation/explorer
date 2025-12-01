@@ -4,4 +4,4 @@
 
 [formatDisplayIdl]() - formats IDL into a format that is used to display IDL in a human-readable format. Keeps original version of conversion logic that was introduced for Explorer
 
-[formatReferenceSerdeIdl]() - reference implementaton for the formatter. Used only to keep track of limitations of original implementation
+[formatReferenceSerdeIdl]() - reference implementation for the formatter. Used only to keep track of limitations of original implementation
