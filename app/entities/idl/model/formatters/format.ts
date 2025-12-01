@@ -8,7 +8,7 @@ import type { IdlFormatter } from './formatted-idl';
 //
 // Solution: implement wrapper that will use formatIdl's signature as a provider
 // That allows to keep current functionality to create Program instances
-// That also allows to have a seaprate output according the spec-type of Idl
+// That also allows to have a separate output according the spec-type of Idl
 export function getFormattedIdl(formatter: IdlFormatter, idl: any, programAddress?: string): ReturnType<IdlFormatter> {
     return formatter(idl, programAddress);
 }
