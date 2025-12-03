@@ -24,7 +24,7 @@ export function InteractInstructions({
                 <InteractInstruction
                     key={instruction.name}
                     instruction={instruction}
-                    onExecuteInstruciton={onExecuteInstruction}
+                    onExecuteInstruction={onExecuteInstruction}
                     isExecuting={isExecuting}
                 />
             ))}

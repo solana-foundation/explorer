@@ -18,10 +18,10 @@ import { ArgumentInput } from './ArgumentInput';
 
 export function InteractInstruction({
     instruction,
-    onExecuteInstruciton,
+    onExecuteInstruction,
     isExecuting,
 }: {
-    onExecuteInstruciton: (data: InstructionData, params: InstructionCallParams) => void;
+    onExecuteInstruction: (data: InstructionData, params: InstructionCallParams) => void;
     instruction: InstructionData;
     isExecuting: boolean;
 }) {
@@ -30,7 +30,7 @@ export function InteractInstruction({
     const { form, onSubmit, validationRules, fieldNames } = useInstructionForm({
         instruction,
         onSubmit: params => {
-            onExecuteInstruciton(instruction, params);
+            onExecuteInstruction(instruction, params);
         },
     });
 

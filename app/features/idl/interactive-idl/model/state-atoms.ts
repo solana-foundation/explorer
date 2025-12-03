@@ -9,7 +9,6 @@ const program = atom<UnifiedProgram | undefined>();
 export const programAtom = atom(
     get => {
         const v = get(program);
-        // if (v === undefined) throw new Error('programId is absent');
         return v;
     },
     (_get, set, next: UnifiedProgram | undefined) => {
@@ -18,21 +17,20 @@ export const programAtom = atom(
 );
 
 // Original IDL atom
-const orignalIdl = atom<BaseIdl | undefined>();
+const originalIdl = atom<BaseIdl | undefined>();
 
 export const originalIdlAtom = atom(
     get => {
-        const v = get(orignalIdl);
-        // if (v === undefined) throw new Error('orignalIdl is absent');
+        const v = get(originalIdl);
         return v;
     },
     (_get, set, next: BaseIdl) => {
-        set(orignalIdl, next);
+        set(originalIdl, next);
     }
 );
 
 export const unsetOriginalIdl = atom(null, (_, set) => {
-    set(orignalIdl, undefined);
+    set(originalIdl, undefined);
 });
 
 // Program ID atom
