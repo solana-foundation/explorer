@@ -23,6 +23,7 @@ import { sha256 } from '@noble/hashes/sha256';
 import { snakeCase } from 'change-case';
 
 import { isLeafTupleU8String, parseAnchorType_U8_PathTuple } from './type-handlers/leaf-tuple-type-handler';
+import { parseHomogeneousTuple } from './type-handlers/tuple-type-handlers';
 
 // Legacy types based on the Rust structs
 // Should be included in next minor release of anchor
@@ -432,35 +433,16 @@ function convertType(type: ExtendedLegacyType): IdlType {
     if (typeof type === 'string') {
         return type === 'publicKey' ? 'pubkey' : type;
     } else if ('vec' in type) {
-        // Check if vec contains a tuple
-        if (typeof type.vec === 'object' && 'defined' in type.vec && isLeafTupleU8String(type.vec.defined)) {
-            // For vec<(u8, [u8;32])>, use vec<[u8; 33]>
-            const tupleStr = type.vec.defined;
-            if (tupleStr === '(u8,[u8;32])' || tupleStr === '(u8,[u8,32])') {
-                return { vec: { array: ['u8', 33] } };
-            }
-        }
         return { vec: convertType(type.vec) };
     } else if ('option' in type) {
         return { option: convertType(type.option) };
     } else if ('defined' in type) {
-        // TODO: cover complex type
-        if (type.defined === '(u8,[u8;32])') {
-            // console.log(555, type, isLeafTupleU8String(type.defined));
-        }
-        // Check if defined type is a leaf tuple string
+        // Check if defined type is a leaf tuple string like (u8,[u8;N])
+        // Convert to [u8; N+1] by recursing into array handler
         if (isLeafTupleU8String(type.defined)) {
-            const tupleElements = parseAnchorType_U8_PathTuple(type.defined);
-
-            return {
-                defined: {
-                    generics: tupleElements.tuple.map(elem => ({
-                        kind: 'type' as const,
-                        type: convertType(elem),
-                    })),
-                    name: 'Tuple',
-                },
-            } as IdlTypeDefined;
+            const parsed = parseAnchorType_U8_PathTuple(type.defined);
+            const totalLength = 1 + parsed.tuple[1].array[1];
+            return convertType({ array: ['u8', totalLength] });
         }
         return { defined: { generics: [], name: type.defined } } as IdlTypeDefined;
     } else if ('array' in type) {
@@ -475,45 +457,12 @@ function convertType(type: ExtendedLegacyType): IdlType {
             },
         } as IdlTypeDefined;
     } else if ('tuple' in type) {
-        const tuple = type.tuple;
-
-        if (!Array.isArray(tuple) || tuple.length === 0) {
+        // Convert homogeneous tuples like [T, T, ...] → { array: [T, N] }
+        const parsed = parseHomogeneousTuple(type.tuple);
+        if (!parsed) {
             throw new Error(`Unsupported type: ${JSON.stringify(type)}`);
         }
-
-        const first: LegacyIdlType = tuple[0];
-        const arrayLikeTuple: ReadonlyArray<typeof first> = Array.from(tuple);
-
-        // We only support tuples like ["u64", "u64"], ["string", "string"], etc.
-        if (typeof first !== 'string' || !arrayLikeTuple.every(t => t === first)) {
-            throw new Error(`Unsupported type: ${JSON.stringify(type)}`);
-        }
-
-        // Convert `[T, T, ...]` → `{ array: [convertType(T), N] }`
-        return {
-            array: [convertType(first), tuple.length],
-        };
-
-        // TODO(rogaldh): remove upon resolution
-        // // Use generic type to display tuple as it is not covered by IdlType
-        // // return {
-        // //     defined: {
-        // //         generics: type.tuple.map(t => ({ kind: 'type', type: convertType(t) })),
-        // //         // name: `tuple[${type.tuple[0]}]`,
-        // //         name: 'Tuple',
-        // //     },
-        // // };
-        // if (type.tuple.every(t => t === type.tuple[0])) {
-        //     return { array: [convertType(type.tuple[0]), type.tuple.length] };
-        // }
-
-        // // For (u8, [u8; 32]) pattern
-        // if (type.tuple.length === 2 && type.tuple[0] === 'u8' && JSON.stringify(type.tuple[1]).includes('array')) {
-        //     return { array: ['u8', 33] }; // Flattened representation
-        // }
-
-        // // Default: use bytes for complex tuples
-        // return 'bytes';
+        return convertType(parsed);
     }
     throw new Error(`Unsupported type: ${JSON.stringify(type)}`);
 }
@@ -552,6 +501,6 @@ export function formatIdl(idl: any, programAddress?: string): Idl {
 export { convertLegacyIdl };
 export type { LegacyIdlType, TupleType };
 
-/// export part of the internal implementation to preserve existing functonality to display the IDL as it was
+/// export part of the internal implementation to preserve existing functonality to display the IDL
 export const internalConvertDefinedTypeArg = convertDefinedTypeArg;
 export const privateConvertType = convertType;
