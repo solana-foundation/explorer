@@ -47,7 +47,7 @@ export function clusterName(cluster: Cluster): string {
 export const MAINNET_BETA_URL = 'https://api.mainnet-beta.solana.com';
 export const TESTNET_URL = 'https://api.testnet.solana.com';
 export const DEVNET_URL = 'https://api.devnet.solana.com';
-export const SIMD296_URL = 'https://simd-0296.surfnet.dev';
+export const SIMD296_URL = 'https://simd-0296.surfnet.dev:8899';
 
 const modifyUrl = (url: string): string => {
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
