@@ -8,10 +8,11 @@ export enum Cluster {
     MainnetBeta,
     Testnet,
     Devnet,
+    Simd296,
     Custom,
 }
 
-export const CLUSTERS = [Cluster.MainnetBeta, Cluster.Testnet, Cluster.Devnet, Cluster.Custom];
+export const CLUSTERS = [Cluster.MainnetBeta, Cluster.Testnet, Cluster.Devnet, Cluster.Simd296, Cluster.Custom];
 
 export function clusterSlug(cluster: Cluster): string {
     switch (cluster) {
@@ -21,6 +22,8 @@ export function clusterSlug(cluster: Cluster): string {
             return 'testnet';
         case Cluster.Devnet:
             return 'devnet';
+        case Cluster.Simd296:
+            return 'simd296';
         case Cluster.Custom:
             return 'custom';
     }
@@ -34,6 +37,8 @@ export function clusterName(cluster: Cluster): string {
             return 'Testnet';
         case Cluster.Devnet:
             return 'Devnet';
+        case Cluster.Simd296:
+            return 'SIMD-296';
         case Cluster.Custom:
             return 'Custom';
     }
@@ -42,6 +47,7 @@ export function clusterName(cluster: Cluster): string {
 export const MAINNET_BETA_URL = 'https://api.mainnet-beta.solana.com';
 export const TESTNET_URL = 'https://api.testnet.solana.com';
 export const DEVNET_URL = 'https://api.devnet.solana.com';
+export const SIMD296_URL = 'https://simd-0296.surfnet.dev';
 
 const modifyUrl = (url: string): string => {
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
@@ -59,6 +65,8 @@ export function clusterUrl(cluster: Cluster, customUrl: string): string {
             return process.env.NEXT_PUBLIC_MAINNET_RPC_URL ?? modifyUrl(MAINNET_BETA_URL);
         case Cluster.Testnet:
             return process.env.NEXT_PUBLIC_TESTNET_RPC_URL ?? modifyUrl(TESTNET_URL);
+        case Cluster.Simd296:
+            return process.env.NEXT_PUBLIC_SIMD296_RPC_URL ?? SIMD296_URL;
         case Cluster.Custom:
             return customUrl;
     }
@@ -72,6 +80,8 @@ export function serverClusterUrl(cluster: Cluster, customUrl: string): string {
             return process.env.MAINNET_RPC_URL ?? modifyUrl(MAINNET_BETA_URL);
         case Cluster.Testnet:
             return process.env.TESTNET_RPC_URL ?? modifyUrl(TESTNET_URL);
+        case Cluster.Simd296:
+            return process.env.SIMD296_RPC_URL ?? SIMD296_URL;
         case Cluster.Custom:
             return customUrl;
     }
