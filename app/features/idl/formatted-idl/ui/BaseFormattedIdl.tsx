@@ -1,17 +1,21 @@
 'use client';
 
-import { cn } from '@components/shared/utils';
 import type { Idl } from '@coral-xyz/anchor';
+import { cn } from '@shared/utils';
 import type { RootNode } from 'codama';
 import { useEffect, useState } from 'react';
 
 import { useTabs } from '../../model/use-tabs';
 import { SearchHighlightProvider } from './SearchHighlightContext';
-import { FormattedIdlViewProps } from './types';
+import type { FormattedIdlViewProps } from './types';
 
-export function BaseFormattedIdl({ idl, searchStr }: FormattedIdlViewProps<Idl> | FormattedIdlViewProps<RootNode>) {
+export function BaseFormattedIdl({
+    idl,
+    originalIdl,
+    searchStr,
+}: FormattedIdlViewProps<Idl> | FormattedIdlViewProps<RootNode>) {
     const [activeTabIndex, setActiveTabIndex] = useState<number | null>(null);
-    const tabs = useTabs(idl, searchStr);
+    const tabs = useTabs(idl, originalIdl, searchStr);
 
     useEffect(() => {
         if (typeof activeTabIndex === 'number') return;

@@ -1,6 +1,6 @@
 'use client';
 
-import { getIdlVersion, useAnchorProgram } from '@entities/idl';
+import { getIdlVersion, type SupportedIdl, useAnchorProgram } from '@entities/idl';
 import { useProgramMetadataIdl } from '@entities/program-metadata';
 import { useCluster } from '@providers/cluster';
 import { Badge } from '@shared/ui/badge';
@@ -12,7 +12,7 @@ import { IdlSection } from './IdlSection';
 type IdlVariant = 'program-metadata' | 'anchor';
 type IdlTab = {
     id: IdlVariant;
-    idl: any;
+    idl: SupportedIdl;
     title: string;
     badge: string;
 };
@@ -24,24 +24,24 @@ export function IdlCard({ programId }: { programId: string }) {
     const [activeTabIndex, setActiveTabIndex] = useState<number>();
 
     const tabs = useMemo<IdlTab[]>(() => {
-        const pmpTab: IdlTab = {
-            badge: 'Program Metadata IDL',
-            id: 'program-metadata',
-            idl: programMetadataIdl,
-            title: 'Program Metadata',
-        };
-        const idlTab: IdlTab = {
-            badge: 'Anchor IDL',
-            id: 'anchor',
-            idl: idl,
-            title: 'Anchor',
-        };
-
         /// Use PMP's IDL tab as the primary
-        const idlTabs: IdlTab[] = [pmpTab];
+        const idlTabs: IdlTab[] = [
+            {
+                badge: 'Program Metadata IDL',
+                id: 'program-metadata',
+                idl: programMetadataIdl,
+                title: 'Program Metadata',
+            },
+        ];
 
         // add Anchor's tab only if IDL is present
-        if (idl !== null) idlTabs.push(idlTab);
+        if (idl !== null)
+            idlTabs.push({
+                badge: 'Anchor IDL',
+                id: 'anchor',
+                idl: idl,
+                title: 'Anchor',
+            });
 
         return idlTabs;
     }, [idl, programMetadataIdl]);
