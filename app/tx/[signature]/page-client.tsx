@@ -36,6 +36,7 @@ import Link from 'next/link';
 import React, { Suspense, useEffect, useState } from 'react';
 import { RefreshCw, Settings } from 'react-feather';
 
+import { CUProfilingSection } from '@/app/features/cu-profiling';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
@@ -400,6 +401,7 @@ function DetailsSection({ signature }: SignatureProps) {
 
     return (
         <>
+            <CUProfilingSection signature={signature} />
             <AccountsCard signature={signature} />
             <TokenBalancesCard signature={signature} />
             <InstructionsSection signature={signature} />
