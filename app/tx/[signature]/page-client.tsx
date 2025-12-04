@@ -13,6 +13,7 @@ import { SignatureContext } from '@components/instruction/SignatureContext';
 import { InstructionsSection } from '@components/transaction/InstructionsSection';
 import { ProgramLogSection } from '@components/transaction/ProgramLogSection';
 import { TokenBalancesCard } from '@components/transaction/TokenBalancesCard';
+import { CUProfilingSection } from '@features/cu-profiling';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import {
@@ -36,7 +37,6 @@ import Link from 'next/link';
 import React, { Suspense, useEffect, useState } from 'react';
 import { RefreshCw, Settings } from 'react-feather';
 
-import { CUProfilingSection } from '@/app/features/cu-profiling';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 

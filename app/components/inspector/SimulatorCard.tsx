@@ -1,4 +1,5 @@
 import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
+import { CUProfilingCard } from '@features/cu-profiling';
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { useCluster } from '@providers/cluster';
 import { AccountLayout, MintLayout } from '@solana/spl-token';
@@ -18,8 +19,6 @@ import {
 import { formatInstructionLogs } from '@utils/cu-profiling';
 import { InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
-
-import { CUProfilingCard } from '@/app/features/cu-profiling';
 
 import {
     generateTokenBalanceRows,
