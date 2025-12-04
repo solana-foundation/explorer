@@ -1,79 +1,84 @@
 'use client';
 
+import { getProxiedUri } from '@features/metadata';
+import { isPmpSecurityTXT, useSecurityTxt } from '@features/security-txt';
+import ProgramLogoPlaceholder from '@img/logos-solana/low-contrast-solana-logo.svg';
 import { type UpgradeableLoaderAccountData } from '@providers/accounts';
+import { useCluster } from '@providers/cluster';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
+import { PROGRAM_INFO_BY_ID } from '@utils/programs';
 import Image from 'next/image';
 import React from 'react';
-
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
-import { getProxiedUri } from '@/app/features/metadata/utils';
-import { isPmpSecurityTXT, useSecurityTxt } from '@/app/features/security-txt';
-import ProgramLogoPlaceholder from '@/app/img/logos-solana/low-contrast-solana-logo.svg';
-
-import { Badge } from '../ui/badge';
+import { AlertCircle } from 'react-feather';
 
 const IDENTICON_WIDTH = 64;
 
-// The "unverified" badge indicates that the securityTxt metadata (name, logo, etc.)
-// is self-reported by the program author and may not be accurate. However, we trust
-// official Solana programs (e.g. spl-token, token-2022, associated token) even if they
-// have securityTxt, so we skip showing the badge for these trusted programs.
-export const PROGRAMS_SKIP_UNVERIFIED_BADGE = new Map([
-    ['TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', 'Token Program'],
-    ['TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb', 'Token-2022 Program'],
-    ['ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL', 'Associated Token Program'],
-]);
-
-export function ProgramHeader({ address, parsedData }: { address: string; parsedData: UpgradeableLoaderAccountData }) {
+// The "self-reported" warning indicates that the securityTxt metadata (name, logo, etc.)
+// is self-reported by the program author and may not be accurate. We only show this warning
+// when the displayed data actually comes from program metadata, not from the explorer's
+// trusted internal mapping (PROGRAM_INFO_BY_ID).
+export function ProgramHeader({
+    address,
+    parsedData,
+}: {
+    address: string;
+    parsedData?: UpgradeableLoaderAccountData | undefined;
+}) {
     const securityTxt = useSecurityTxt(address, parsedData);
+    const { cluster } = useCluster();
 
-    const { programName, logo, version, unverified } = ((): {
+    const { programName, logo, version, selfReported } = ((): {
         programName: string;
         logo?: string;
         version?: string;
-        unverified?: boolean;
+        selfReported?: boolean;
     } => {
+        const programInfo = PROGRAM_INFO_BY_ID[address];
+        const isTrustedProgram = programInfo && programInfo.deployments.includes(cluster);
+        const trustedProgramName = isTrustedProgram ? programInfo.name : undefined;
+
         if (!securityTxt) {
             return {
-                programName: 'Program Account',
-                unverified: undefined,
+                programName: trustedProgramName || 'Program Account',
+                selfReported: false,
             };
         }
 
-        const shouldSkipUnverifiedBadge = PROGRAMS_SKIP_UNVERIFIED_BADGE.has(address);
+        // Only show warning if we're actually using self-reported data
+        const usingSelfReportedName = !trustedProgramName;
 
         if (isPmpSecurityTXT(securityTxt)) {
             return {
                 logo: getProxiedUri(securityTxt.logo),
-                programName: securityTxt.name,
-                unverified: shouldSkipUnverifiedBadge ? false : true,
+                programName: trustedProgramName ?? securityTxt.name,
+                selfReported: usingSelfReportedName,
                 version: securityTxt.version,
             };
         }
         return {
-            programName: securityTxt.name,
-            unverified: shouldSkipUnverifiedBadge ? false : true,
+            programName: trustedProgramName ?? securityTxt.name,
+            selfReported: usingSelfReportedName,
         };
     })();
 
-    const unverifiedChunk = (() => {
-        if (!unverified) return null;
-        if (unverified) {
-            const text = 'Note that this is self-reported by the author of the program and might not be accurate';
-            return (
-                <div className="e-ml-2 e-inline-flex e-items-center">
-                    <Tooltip>
-                        <TooltipTrigger className="e-border-0 e-bg-transparent e-p-0">
-                            <Badge variant="destructive">Unverified</Badge>
-                        </TooltipTrigger>
-                        {text && (
-                            <TooltipContent>
-                                <div className="e-min-w-36 e-max-w-64">{text}</div>
-                            </TooltipContent>
-                        )}
-                    </Tooltip>
-                </div>
-            );
-        }
+    const warningChunk = (() => {
+        if (!selfReported) return null;
+        const text =
+            'Program name and icon are self-reported by the program authority. See program security tab for more details';
+        return (
+            <div className="e-ml-2 e-inline-flex e-items-center">
+                <Tooltip>
+                    <TooltipTrigger className="e-border-0 e-bg-transparent e-p-0">
+                        <AlertCircle className="e-size-3 e-text-destructive" aria-label="Self-reported program" />
+                    </TooltipTrigger>
+                    {text && (
+                        <TooltipContent>
+                            <div className="e-min-w-36 e-max-w-64">{text}</div>
+                        </TooltipContent>
+                    )}
+                </Tooltip>
+            </div>
+        );
     })();
 
     return (
@@ -90,7 +95,6 @@ export function ProgramHeader({ address, parsedData }: { address: string; parsed
                             width={16}
                         />
                     ) : (
-                        // eslint-disable-next-line @next/next/no-img-element
                         <Image
                             src={ProgramLogoPlaceholder}
                             height={IDENTICON_WIDTH}
@@ -106,7 +110,7 @@ export function ProgramHeader({ address, parsedData }: { address: string; parsed
                 <h6 className="header-pretitle">Program account</h6>
                 <div className="e-inline-flex">
                     <h2 className="header-title">{programName}</h2>
-                    {unverifiedChunk}
+                    {warningChunk}
                 </div>
                 {version && <div className="header-pretitle no-overflow-with-ellipsis">{version}</div>}
             </div>
