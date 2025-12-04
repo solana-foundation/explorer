@@ -6,7 +6,6 @@ import anchor030devi from '../../mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN2
 import anchorLegacy094ShankWave from '../../mocks/anchor/anchor-legacy-0.9.4-shank-waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF.json';
 import anchorLegacyAccountComp from '../../mocks/anchor/anchor-legacy-account_compression-compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq.json';
 import { formatDisplayIdl, getFormattedIdl } from '../../model/formatters/format';
-import { normalizeIdl } from '../../model/use-anchor-program';
 import { useFormatAnchorIdl } from '../../model/use-format-anchor-idl';
 
 function toLengths(result: any) {
@@ -29,7 +28,7 @@ describe('formatDisplayIdl', () => {
     ])(
         'should display %s program idl via useFormatAnchorIdl hook',
         (fallbackId: string, idl: any, structure: (number | undefined)[]) => {
-            const programAddress = normalizeIdl(idl).address;
+            const programAddress = idl.metadata?.address ?? fallbackId;
             const programId = programAddress || fallbackId;
 
             expect(() => {

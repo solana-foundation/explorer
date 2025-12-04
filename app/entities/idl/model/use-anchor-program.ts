@@ -1,7 +1,6 @@
 'use client';
 
 import { Idl, Program } from '@coral-xyz/anchor';
-import { IdlMetadata } from '@coral-xyz/anchor/dist/cjs/idl';
 import { useMemo } from 'react';
 
 import { Cluster } from '@/app/utils/cluster';
@@ -31,24 +30,6 @@ export function useAnchorProgram(
     }, [idl, programAddress, url]);
 
     return { idl, program };
-}
-
-/**
- * Various IDLs have different logic behind keeping program address in it.
- * This helper should leverage different variants of these IDLs
- *
- * @param idl
- * @returns
- */
-export function normalizeIdl(idl: Idl, fallbackAddress?: string): Idl {
-    type RichMetadata = IdlMetadata & { address?: string };
-
-    let programAddress = (idl.metadata as RichMetadata)?.address ?? idl.address;
-    if (fallbackAddress) programAddress = fallbackAddress;
-    return {
-        ...idl,
-        address: programAddress,
-    };
 }
 
 export type AnchorAccount = {
