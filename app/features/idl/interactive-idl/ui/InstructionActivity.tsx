@@ -61,7 +61,7 @@ function TxStatusHeader({ lastResult }: { lastResult: NonNullable<InstructionInv
     const { link } = useExplorerLink(
         lastResult.status === 'success'
             ? `/tx/${lastResult.signature}`
-            : `/tx/inspector?message=${lastResult.serializedTxMessage}`
+            : `/tx/inspector?message=${encodeURIComponent(lastResult.serializedTxMessage ?? '')}`
     );
     return lastResult.status === 'success' ? (
         <TxSuccessStatus signature={lastResult.signature} date={lastResult.finishedAt} link={link} />
