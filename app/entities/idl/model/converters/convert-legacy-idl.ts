@@ -428,7 +428,6 @@ type IdlTupleType = { tuple: TupleType };
 
 type ExtendedLegacyType = LegacyIdlType | IdlTupleType | { option: IdlTupleType };
 
-// TODO: generalize approach for parsing tuples. Currently ad-hoc version for 32-bytes tuple is used
 function convertType(type: ExtendedLegacyType): IdlType {
     if (typeof type === 'string') {
         return type === 'publicKey' ? 'pubkey' : type;
