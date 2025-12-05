@@ -50,10 +50,10 @@ describe('processTextAsJson', () => {
         const result = await processTextAsJson(response);
 
         expect(result.data).toEqual({
-            name: 'World Liberty Financial USD',
-            symbol: 'USD1',
             description: 'The US Dollar upgraded for a new era of finance.',
             image: 'https://example.com/logo.png',
+            name: 'World Liberty Financial USD',
+            symbol: 'USD1',
         });
     });
 
