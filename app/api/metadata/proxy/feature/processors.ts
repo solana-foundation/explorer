@@ -26,7 +26,7 @@ export async function processBinary(data: NodeFetchResponse) {
 }
 
 /**
- * process text data as json and handle specific errors
+ * process text data as json or text and handle specific errors
  */
 export async function processJson(data: NodeFetchResponse) {
     const headers = data.headers;
@@ -40,6 +40,31 @@ export async function processJson(data: NodeFetchResponse) {
             throw errors[413];
         } else if (error instanceof SyntaxError) {
             // Handle JSON syntax errors specifically
+            throw errors[415];
+        } else {
+            Logger.debug('Debug:', error);
+            throw errors[500];
+        }
+    }
+}
+
+/**
+ * Process text response as JSON, handling newlines and whitespace issues
+ */
+export async function processTextAsJson(data: NodeFetchResponse) {
+    const headers = data.headers;
+
+    try {
+        const text = await data.text();
+        // Remove trailing/leading whitespace and normalize line endings
+        const cleanedText = text.trim().replace(/\r\n/g, '\n');
+        const json = JSON.parse(cleanedText);
+
+        return { data: json, headers };
+    } catch (error) {
+        if (matchMaxSizeError(error)) {
+            throw errors[413];
+        } else if (error instanceof SyntaxError) {
             throw errors[415];
         } else {
             Logger.debug('Debug:', error);
