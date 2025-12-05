@@ -26,7 +26,7 @@ export async function processBinary(data: NodeFetchResponse) {
 }
 
 /**
- * process text data as json or text and handle specific errors
+ * process text data as json and handle specific errors
  */
 export async function processJson(data: NodeFetchResponse) {
     const headers = data.headers;
