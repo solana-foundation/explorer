@@ -40,6 +40,7 @@ export function OwnedTokensCard({ address }: { address: string }) {
     const fetchAccountTokens = useFetchAccountOwnedTokens();
     const refresh = () => fetchAccountTokens(pubkey);
     const [showDropdown, setDropdown] = React.useState(false);
+    const [tokenFilter, setTokenFilter] = React.useState('');
     const display = useQueryDisplay();
 
     // Fetch owned tokens
@@ -47,12 +48,14 @@ export function OwnedTokensCard({ address }: { address: string }) {
         if (!ownedTokens) refresh();
     }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    const tokens = ownedTokens?.data?.tokens;
+    const filteredTokens = useFilteredTokens(tokens, tokenFilter);
+    const status = ownedTokens?.status;
+
     if (ownedTokens === undefined) {
         return null;
     }
 
-    const { status } = ownedTokens;
-    const tokens = ownedTokens.data?.tokens;
     const fetching = status === FetchStatus.Fetching;
     if (fetching && (tokens === undefined || tokens.length === 0)) {
         return <LoadingCard message="Loading token holdings" />;
@@ -68,15 +71,24 @@ export function OwnedTokensCard({ address }: { address: string }) {
         return <ErrorCard text="Token holdings is not available for accounts with over 100 token accounts" />;
     }
     const showLogos = tokens.some(t => t.logoURI !== undefined);
+    const columnCount = 2 + (display === 'detail' ? 1 : 0) + (showLogos ? 1 : 0);
 
     return (
         <>
             {showDropdown && <div className="dropdown-exit" onClick={() => setDropdown(false)} />}
 
             <div className="card">
-                <div className="card-header align-items-center">
-                    <h3 className="card-header-title">Token Holdings</h3>
-                    <DisplayDropdown display={display} toggle={() => setDropdown(show => !show)} show={showDropdown} />
+                <div className="card-header align-items-center gap-2">
+                    <h3 className="card-header-title mb-0">Token Holdings</h3>
+                    <div
+                        className="ms-auto d-flex align-items-center gap-2 flex-nowrap w-100"
+                        style={{ maxWidth: '20rem' }}
+                    >
+                        <TokenFilterInput value={tokenFilter} onChange={setTokenFilter} />
+                        <div className="flex-shrink-0">
+                            <DisplayDropdown display={display} toggle={() => setDropdown(show => !show)} show={showDropdown} />
+                        </div>
+                    </div>
                 </div>
 
                 <div className="table-responsive mb-0">
@@ -89,14 +101,23 @@ export function OwnedTokensCard({ address }: { address: string }) {
                                 <th className="text-muted">{display === 'detail' ? 'Total Balance' : 'Balance'}</th>
                             </tr>
                         </thead>
-                        {display === 'detail' ? (
-                            <HoldingsDetail tokens={tokens} showLogos={showLogos} />
+                        {filteredTokens.length === 0 ? (
+                            <tbody>
+                                <tr>
+                                    <td colSpan={columnCount} className="text-center text-muted">
+                                        No tokens match this search
+                                    </td>
+                                </tr>
+                            </tbody>
+                        ) : display === 'detail' ? (
+                            <HoldingsDetail tokens={filteredTokens} showLogos={showLogos} />
                         ) : (
-                            <HoldingsSummary tokens={tokens} showLogos={showLogos} />
+                            <HoldingsSummary tokens={filteredTokens} showLogos={showLogos} />
                         )}
                     </table>
                 </div>
             </div>
+
         </>
     );
 }
@@ -293,3 +314,43 @@ const DisplayDropdown = ({ display, toggle, show }: DropdownProps) => {
         </div>
     );
 };
+
+type TokenFilterInputProps = {
+    value: string;
+    onChange: (value: string) => void;
+};
+
+const TokenFilterInput = ({ value, onChange }: TokenFilterInputProps) => (
+    <input
+        type="text"
+        className="form-control form-control-sm flex-grow-1"
+        style={{ minWidth: '5rem' }}
+        placeholder="Find token"
+        aria-label="Find token"
+        value={value}
+        onChange={event => onChange(event.target.value)}
+    />
+);
+
+function useFilteredTokens(tokens: TokenInfoWithPubkey[] | undefined, filter: string) {
+    return useMemo(() => {
+        const query = filter.trim().toLowerCase();
+        if (!query) {
+            return tokens ?? [];
+        }
+
+        return (tokens ?? []).filter(({ info, pubkey, symbol, name }) => {
+            const accountAddress = pubkey.toBase58().toLowerCase();
+            const mintAddress = info.mint.toBase58().toLowerCase();
+            const normalizedSymbol = symbol?.toLowerCase();
+            const normalizedName = name?.toLowerCase();
+
+            return (
+                mintAddress.includes(query) ||
+                accountAddress.includes(query) ||
+                (normalizedSymbol?.includes(query) ?? false) ||
+                (normalizedName?.includes(query) ?? false)
+            );
+        });
+    }, [tokens, filter]);
+}
