@@ -13,6 +13,7 @@ import {
     UpgradeNonceInfo,
     WithdrawNonceInfo,
 } from '@components/instruction/system/types';
+import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import {
     AccountMeta,
     AccountRole,
@@ -58,6 +59,9 @@ import {
     parseCreateAssociatedTokenInstruction,
     parseRecoverNestedAssociatedTokenInstruction,
 } from '@solana-program/token';
+import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
+
+import { parseToken2022Instruction } from './instruction-parsers/token-2022-program.parser';
 
 /**
  * Helper function to safely convert BigInt or number to regular number
@@ -190,6 +194,12 @@ function discriminatorToBuffer(discrimnator: number): Buffer {
 function intoProgramName(programId: PublicKey): string | undefined {
     if (programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)) {
         return 'spl-associated-token-account';
+    }
+    if (programId.equals(TOKEN_PROGRAM_ID)) {
+        return 'spl-token';
+    }
+    if (programId.toBase58() === TOKEN_2022_PROGRAM_ADDRESS) {
+        return 'spl-token-2022';
     }
     /* add other variants here */
 }
@@ -354,6 +364,20 @@ function intoParsedData(instruction: TransactionInstruction, parsed?: any): any 
     }
 
     /* add other variants here */
+
+    if (programId.toBase58() === TOKEN_2022_PROGRAM_ADDRESS) {
+        const result = parseToken2022Instruction(instruction);
+        if (result) {
+            return {
+                info: parsed ?? result.info,
+                type: result.type,
+            };
+        }
+        return {
+            info: parsed ?? info,
+            type: UNKNOWN_PROGRAM_TYPE,
+        };
+    }
 
     return {
         info: parsed ?? info,
