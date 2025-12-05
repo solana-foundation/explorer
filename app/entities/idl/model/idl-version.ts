@@ -4,8 +4,11 @@ import type { RootNode } from 'codama';
 import { getIdlSpecType as getSerdeIdlSpecType } from './converters/convert-legacy-idl';
 
 export type IdlVersion = 'Legacy' | '0.30.1' | RootNode['version'];
+export type CodamaIdl = RootNode;
+export type AnchorIdl = Idl;
+export type SupportedIdl = CodamaIdl | AnchorIdl;
 
-export function getIdlVersion(idl: RootNode | Idl): IdlVersion {
+export function getIdlVersion(idl: SupportedIdl): IdlVersion {
     const spec = getSerdeIdlSpecType(idl);
     switch (spec) {
         case 'legacy':

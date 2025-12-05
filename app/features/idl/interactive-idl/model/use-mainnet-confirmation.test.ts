@@ -254,7 +254,7 @@ function setup(cluster: Cluster = Cluster.MainnetBeta) {
         clusterInfo: undefined,
         customUrl: '',
         name: config.name,
-        status: 'connected' as any,
+        status: 'connected',
         url: config.url,
     });
 }

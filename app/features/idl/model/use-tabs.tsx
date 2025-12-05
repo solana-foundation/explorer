@@ -1,7 +1,12 @@
 'use client';
 
-import type { FormattedIdl } from '@entities/idl';
+import type { Idl } from '@coral-xyz/anchor';
+import { FormattedIdl, getIdlVersion } from '@entities/idl';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
+import { cn } from '@shared/utils';
+import type { RootNode } from 'codama';
 import React, { useMemo } from 'react';
+import { PlayCircle, XCircle } from 'react-feather';
 
 import { BaseIdlAccounts } from '../formatted-idl/ui/BaseIdlAccounts';
 import { BaseIdlConstants } from '../formatted-idl/ui/BaseIdlConstants';
@@ -11,6 +16,8 @@ import { BaseIdlInstructions } from '../formatted-idl/ui/BaseIdlInstructions';
 import { BaseIdlPdas } from '../formatted-idl/ui/BaseIdlPdas';
 import { BaseIdlTypes } from '../formatted-idl/ui/BaseIdlTypes';
 import type { FormattedIdlDataView, IdlDataKeys } from '../formatted-idl/ui/types';
+import { BaseWarningCard } from '../interactive-idl/ui/BaseWarningCard';
+import { InteractWithIdl } from '../interactive-idl/ui/InteractWithIdl';
 
 type TabId = 'instructions' | 'accounts' | 'types' | 'errors' | 'constants' | 'events' | 'pdas';
 
@@ -21,9 +28,16 @@ export type DataTab<K extends IdlDataKeys = IdlDataKeys> = {
     render: () => React.ReactElement<FormattedIdlDataView<K>>;
 };
 
-type Tab = DataTab;
+export type InteractTab = {
+    id: 'interact';
+    title: string | React.ReactNode;
+    disabled: boolean;
+    render: () => ReturnType<typeof InteractWithIdl>;
+};
 
-export function useTabs(idl: FormattedIdl | null, searchStr?: string) {
+type Tab = DataTab | InteractTab;
+
+export function useTabs(idl: FormattedIdl | null, originalIdl: Idl | RootNode, searchStr?: string) {
     const tabs: Tab[] = useMemo(() => {
         if (!idl) return [];
 
@@ -31,14 +45,14 @@ export function useTabs(idl: FormattedIdl | null, searchStr?: string) {
 
         const createTabRenderer = <K extends IdlDataKeys>(
             Component: React.ComponentType<FormattedIdlDataView<K>>,
-            data: unknown[] | undefined,
+            data: FormattedIdl[K] | undefined,
             tabName: string
         ) => {
             const TabRenderer = () => {
                 if (hasSearch && (!data || data.length === 0)) {
                     return <NoSearchResultsPlaceholder tabName={tabName} />;
                 }
-                return <Component data={data as any} />;
+                return <Component data={data} />;
             };
             TabRenderer.displayName = `TabRenderer(${tabName})`;
             return TabRenderer;
@@ -89,8 +103,27 @@ export function useTabs(idl: FormattedIdl | null, searchStr?: string) {
             },
         ];
 
+        if (originalIdl && !isCodamaIdl(originalIdl)) {
+            const version = getIdlVersion(originalIdl);
+
+            /// Allow to work with modern Anchor@>=0.30
+            const isInteractDisabled = version !== '0.30.1';
+
+            tabItems.push({
+                disabled: !idl.instructions?.length,
+                id: 'interact',
+                render: () =>
+                    isInteractDisabled ? (
+                        <BaseWarningCard message="Current version of IDL is not suported" />
+                    ) : (
+                        <InteractWithIdl data={idl.instructions} />
+                    ),
+                title: <InteractWithIdlTabName isInteractDisabled={isInteractDisabled} />,
+            } as InteractTab);
+        }
+
         return tabItems;
-    }, [idl, searchStr]);
+    }, [idl, originalIdl, searchStr]);
 
     return tabs;
 }
@@ -120,4 +153,38 @@ function NoSearchResultsPlaceholder({ tabName }: { tabName: string }) {
             <p className="e-m-0 e-text-sm e-text-neutral-500">No {tabName.toLowerCase()} found</p>
         </div>
     );
+}
+
+function InteractWithIdlTabName({ isInteractDisabled }: { isInteractDisabled: boolean }) {
+    const tab = (
+        <div className="e-flex e-items-center e-gap-1">
+            {isInteractDisabled ? <XCircle size={14} /> : <PlayCircle size={14} />}
+            Interact
+        </div>
+    );
+
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <div
+                    className={cn('e-w-fit', {
+                        'e-cursor-not-allowed e-opacity-50': isInteractDisabled,
+                    })}
+                >
+                    {tab}
+                </div>
+            </TooltipTrigger>
+            <TooltipContent>
+                <div className="e-min-w-36 e-max-w-16">
+                    {isInteractDisabled
+                        ? 'Currently we support only modern Anchor IDL'
+                        : "Launch Anchor's instructions"}
+                </div>
+            </TooltipContent>
+        </Tooltip>
+    );
+}
+
+function isCodamaIdl(idl: Idl | RootNode): idl is RootNode {
+    return 'standard' in idl && idl.standard === 'codama';
 }

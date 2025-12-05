@@ -1,5 +1,6 @@
 'use client';
 
+import type { SupportedIdl } from '@entities/idl';
 import { useDebounceCallback } from '@react-hook/debounce';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
@@ -8,11 +9,20 @@ import { Switch } from '@shared/ui/switch';
 import { useMemo, useState } from 'react';
 import { Code, Download, Search } from 'react-feather';
 
+import { WalletProvider } from '@/app/providers/wallet-provider';
 import { triggerDownload } from '@/app/shared/lib/triggerDownload';
 
 import { IdlRenderer } from './IdlRenderer';
 
-export function IdlSection({ idl, badge, programId }: { idl: any; badge: React.ReactNode; programId: string }) {
+export function IdlSection({
+    idl,
+    badge,
+    programId,
+}: {
+    idl: SupportedIdl;
+    badge: React.ReactNode;
+    programId: string;
+}) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isRawIdlView, setIsRawIdlView] = useState(false);
     const [searchStr, setSearchStr] = useState('');
@@ -69,13 +79,15 @@ export function IdlSection({ idl, badge, programId }: { idl: any; badge: React.R
             </div>
 
             <div className="e-mt-4 e-min-h-48">
-                <IdlRenderer
-                    idl={idl}
-                    collapsed={!isExpanded}
-                    raw={isRawIdlView}
-                    searchStr={searchStr}
-                    programId={programId}
-                />
+                <WalletProvider skipToast autoConnect>
+                    <IdlRenderer
+                        idl={idl}
+                        collapsed={!isExpanded}
+                        raw={isRawIdlView}
+                        searchStr={searchStr}
+                        programId={programId}
+                    />
+                </WalletProvider>
             </div>
         </>
     );

@@ -27,7 +27,7 @@ interface IdlExecutorSpec {
         args: UnifiedArguments,
         idl: T,
         interpreterName: string
-    ): TransactionInstruction | VersionedMessage;
+    ): Promise<TransactionInstruction | VersionedMessage>;
 
     setConnection(connection: Connection): void;
 }
