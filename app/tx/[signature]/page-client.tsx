@@ -13,6 +13,7 @@ import { SignatureContext } from '@components/instruction/SignatureContext';
 import { InstructionsSection } from '@components/transaction/InstructionsSection';
 import { ProgramLogSection } from '@components/transaction/ProgramLogSection';
 import { TokenBalancesCard } from '@components/transaction/TokenBalancesCard';
+import { CUProfilingSection } from '@features/cu-profiling';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import {
@@ -400,6 +401,7 @@ function DetailsSection({ signature }: SignatureProps) {
 
     return (
         <>
+            <CUProfilingSection signature={signature} />
             <AccountsCard signature={signature} />
             <TokenBalancesCard signature={signature} />
             <InstructionsSection signature={signature} />
