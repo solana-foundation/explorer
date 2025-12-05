@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, screen, userEvent, within } from 'storybook/test';
 
 import { Button } from './button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
@@ -27,8 +27,8 @@ export const Default: Story = {
         const canvas = within(canvasElement);
         const trigger = canvas.getByRole('button');
         await userEvent.hover(trigger);
-        const tooltip = await canvas.findByText('This is a tooltip');
-        expect(tooltip).toBeInTheDocument();
+        const tooltip = await screen.findByRole('tooltip');
+        expect(tooltip).toHaveTextContent('This is a tooltip');
     },
     render: () => (
         <Tooltip>

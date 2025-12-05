@@ -4,14 +4,13 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
+import { SimulatorCard } from '@features/instruction-simulation';
 import { useFetchAccountInfo } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import usePrevious from '@react-hook/previous';
 import { Connection, MessageV0, PACKET_DATA_SIZE, PublicKey, VersionedMessage } from '@solana/web3.js';
 import { generated, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
-const { VaultTransaction } = generated;
-
 import { useClusterPath } from '@utils/url';
 import bs58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -26,12 +25,17 @@ import { AddressWithContext, createFeePayerValidator } from './AddressWithContex
 import { InstructionsSection } from './InstructionsSection';
 import { MIN_MESSAGE_LENGTH, RawInput } from './RawInputCard';
 import { TransactionSignatures } from './SignaturesCard';
-import { SimulatorCard } from './SimulatorCard';
+
+const { VaultTransaction } = generated;
 
 export type TransactionData = {
     rawMessage: Uint8Array;
     message: VersionedMessage;
     signatures?: (string | null)[];
+    accountBalances?: {
+        preBalances: number[];
+        postBalances: number[];
+    };
 };
 
 export type SquadsProposalAccountData = {
@@ -388,8 +392,13 @@ function PermalinkView({
         return <ErrorCard text="Transaction was not found" retry={reset} retryText="Reset" />;
     }
 
-    const { message, signatures } = transaction;
-    const tx = { message, rawMessage: message.serialize(), signatures };
+    const { message, signatures, meta } = transaction;
+    const tx = {
+        accountBalances: meta,
+        message,
+        rawMessage: message.serialize(),
+        signatures,
+    };
 
     return <LoadedView transaction={tx} onClear={reset} showTokenBalanceChanges={showTokenBalanceChanges} />;
 }
@@ -403,7 +412,7 @@ function LoadedView({
     onClear: () => void;
     showTokenBalanceChanges: boolean;
 }) {
-    const { message, rawMessage, signatures } = transaction;
+    const { message, rawMessage, signatures, accountBalances } = transaction;
 
     const fetchAccountInfo = useFetchAccountInfo();
     React.useEffect(() => {
@@ -415,7 +424,11 @@ function LoadedView({
     return (
         <>
             <OverviewCard message={message} raw={rawMessage} onClear={onClear} />
-            <SimulatorCard message={message} showTokenBalanceChanges={showTokenBalanceChanges} />
+            <SimulatorCard
+                message={message}
+                showTokenBalanceChanges={showTokenBalanceChanges}
+                accountBalances={accountBalances}
+            />
             {signatures && <TransactionSignatures message={message} signatures={signatures} rawMessage={rawMessage} />}
             <AccountsCard message={message} />
             <AddressTableLookupsCard message={message} />
