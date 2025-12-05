@@ -14,3 +14,5 @@
 export function isEnvEnabled(variable: undefined | string) {
     return variable === 'true';
 }
+
+export const EXPLORER_BASE_URL = 'https://explorer.solana.com';
