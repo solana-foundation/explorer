@@ -6,6 +6,7 @@ import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';
 import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
+import { Toaster } from '@shared/ui/sonner/toaster';
 import type { Viewport } from 'next';
 import dynamic from 'next/dynamic';
 import { Rubik } from 'next/font/google';
@@ -64,6 +65,7 @@ export default function RootLayout({
                             </div>
                             {children}
                         </div>
+                        <Toaster position="bottom-center" toastOptions={{ duration: 5_000 }} />
                     </ClusterProvider>
                 </ScrollAnchorProvider>
                 {analytics}

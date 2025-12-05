@@ -1,10 +1,14 @@
-import { getDisplayIdlSpecType } from '@entities/idl';
-import { memo } from 'react';
+import { type AnchorIdl, CodamaIdl, getDisplayIdlSpecType, type SupportedIdl } from '@entities/idl';
+import { PublicKey } from '@solana/web3.js';
+import { useSetAtom } from 'jotai';
+import { memo, useEffect } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import ReactJson from 'react-json-view';
 
 import { AnchorFormattedIdl } from '../formatted-idl/ui/AnchorFormattedIdl';
 import { CodamaFormattedIdl } from '../formatted-idl/ui/CodamaFormattedIdl';
+import { originalIdlAtom, programIdAtom } from '../interactive-idl/model/state-atoms';
+import type { BaseIdl } from '../interactive-idl/model/unified-program';
 
 export function IdlRenderer({
     idl,
@@ -13,12 +17,20 @@ export function IdlRenderer({
     searchStr = '',
     programId,
 }: {
-    idl: any;
+    idl: SupportedIdl;
     collapsed: boolean | number;
     raw: boolean;
     searchStr: string;
     programId: string;
 }) {
+    const setOriginalIdl = useSetAtom(originalIdlAtom);
+    const setProgramId = useSetAtom(programIdAtom);
+
+    useEffect(() => {
+        setOriginalIdl(idl as BaseIdl);
+        setProgramId(new PublicKey(programId));
+    }, [idl, programId, setOriginalIdl, setProgramId]);
+
     if (raw) {
         return <IdlJson idl={idl} collapsed={collapsed} />;
     }
@@ -28,7 +40,7 @@ export function IdlRenderer({
         case 'codama':
             return (
                 <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering PMP IDL" />}>
-                    <CodamaFormattedIdl idl={idl} searchStr={searchStr} />
+                    <CodamaFormattedIdl idl={idl as CodamaIdl} programId={programId} searchStr={searchStr} />
                 </ErrorBoundary>
             );
         default:
@@ -38,7 +50,7 @@ export function IdlRenderer({
                         <div className="my-2">{`Note: Shank IDLs are not fully supported. Unused types may be absent from detailed view.`}</div>
                     ) : null}
 
-                    <AnchorFormattedIdl idl={idl} programId={programId} searchStr={searchStr} />
+                    <AnchorFormattedIdl idl={idl as AnchorIdl} programId={programId} searchStr={searchStr} />
                 </ErrorBoundary>
             );
     }
@@ -53,7 +65,7 @@ function IdlErrorFallback({ message, ...props }: { message: string }) {
     );
 }
 
-const IdlJson = memo(({ idl, collapsed }: { idl: any; collapsed: boolean | number }) => {
+const IdlJson = memo(({ idl, collapsed }: { idl: SupportedIdl; collapsed: boolean | number }) => {
     return (
         <ReactJson
             src={idl}
