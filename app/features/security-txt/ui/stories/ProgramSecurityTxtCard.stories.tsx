@@ -75,6 +75,10 @@ export const InvalidPmpSecurityTxt: Story = {
                 story: 'Render security.txt error message',
             },
         },
+        // This story intentionally triggers an ErrorBoundary with invalid data
+        test: {
+            dangerouslyIgnoreUnhandledErrors: true,
+        },
     },
 };
 

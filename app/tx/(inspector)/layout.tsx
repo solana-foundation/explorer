@@ -1,3 +1,5 @@
+import '@/app/styles.css';
+
 import { Metadata } from 'next/types';
 import React from 'react';
 
