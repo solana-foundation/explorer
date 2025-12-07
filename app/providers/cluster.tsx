@@ -95,6 +95,7 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
     const searchParams = useSearchParams();
     const cluster = parseQuery(searchParams);
     const enableCustomUrl =
+        cluster === Cluster.Custom ||
         (localStorageIsAvailable() && localStorage.getItem('enableCustomUrl') !== null) ||
         isWhitelistedRpc(state.customUrl);
     const customUrl = (enableCustomUrl && searchParams?.get('customUrl')) || state.customUrl;
