@@ -73,18 +73,8 @@ export function Address({
         addressLabel = overrideText;
     }
 
-    // Prepend nickname if exists, truncate if too long
-    // Display limit is shorter than storage limit to prevent UI overflow
-    const MAX_DISPLAY_LENGTH = 20;
-    let displayText = addressLabel;
-    let fullText = addressLabel;
-
-    if (nickname) {
-        const truncatedNickname =
-            nickname.length > MAX_DISPLAY_LENGTH ? nickname.slice(0, MAX_DISPLAY_LENGTH) + '…' : nickname;
-        displayText = `"${truncatedNickname}" (${addressLabel})`;
-        fullText = `"${nickname}" (${addressLabel})`;
-    }
+    // Prepend nickname if exists
+    const displayText = nickname ? `"${nickname}" (${addressLabel})` : addressLabel;
 
     const handleMouseEnter = (text: string) => {
         const elements = document.querySelectorAll(`[data-address="${text}"]`);
@@ -108,14 +98,19 @@ export function Address({
                     className="font-monospace"
                     onMouseEnter={() => handleMouseEnter(address)}
                     onMouseLeave={() => handleMouseLeave(address)}
-                    title={nickname && nickname.length > MAX_DISPLAY_LENGTH ? fullText : undefined}
+                    title={nickname ? displayText : undefined}
                 >
                     {link ? (
-                        <Link className={truncate ? 'text-truncate address-truncate' : ''} href={addressPath}>
+                        <Link
+                            className={truncate || nickname ? 'text-truncate address-truncate' : ''}
+                            href={addressPath}
+                        >
                             {displayText}
                         </Link>
                     ) : (
-                        <span className={truncate ? 'text-truncate address-truncate' : ''}>{displayText}</span>
+                        <span className={truncate || nickname ? 'text-truncate address-truncate' : ''}>
+                            {displayText}
+                        </span>
                     )}
                 </span>
             </Copyable>
