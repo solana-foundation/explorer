@@ -64,8 +64,7 @@ const getCUProfileChartOptions = (totalCU: number): ChartOptions<'bar'> => {
                         const color = dataPoint.dataset.backgroundColor;
                         const dataset = dataPoint.dataset as ExtendedBarDataset;
 
-                        const value =
-                            dataset.actualCU || dataset.reservedValue || dataset.displayUnits || dataset.minValue;
+                        const value = dataset.actualCU || dataset.reservedValue || dataset.displayUnits;
 
                         const isReserved = !dataset.actualCU && !dataset.reservedValue && dataset.displayUnits;
                         const cuValue = value?.toLocaleString();
@@ -257,7 +256,7 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
                 <div className="e-mt-3 e-flex e-flex-wrap e-gap-3 e-text-xs">
                     {instructions.map((item, i) => {
                         const isReserved = !item.computeUnits && !item.reservedValue && item.displayUnits;
-                        const value = item.computeUnits || item.reservedValue || item.displayUnits || item.minValue;
+                        const value = item.computeUnits || item.reservedValue || item.displayUnits;
 
                         return (
                             <div key={i} className="e-align-items-center e-flex">
@@ -272,7 +271,7 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
                                 />
                                 <span>
                                     Instruction #{i + 1}: {isReserved && '~'}
-                                    {value.toLocaleString()}
+                                    {value ? value.toLocaleString() : 'Unknown'}
                                 </span>
                             </div>
                         );
