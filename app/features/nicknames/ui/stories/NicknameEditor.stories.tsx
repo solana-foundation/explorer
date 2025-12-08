@@ -56,4 +56,3 @@ export const LongAddress: Story = {
         onClose: () => console.log('Close clicked'),
     },
 };
-

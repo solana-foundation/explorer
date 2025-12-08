@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
-import { getNickname, removeNickname, setNickname } from '../lib/nicknames';
+import { getNickname, MAX_NICKNAME_LENGTH, removeNickname, setNickname } from '../lib/nicknames';
 
 type Props = {
     address: string;
@@ -89,9 +89,15 @@ export function NicknameEditor({ address, onClose }: Props) {
                             onChange={e => setNicknameLocal(e.target.value)}
                             onKeyDown={handleKeyDown}
                             placeholder="Enter a memorable name..."
+                            maxLength={MAX_NICKNAME_LENGTH}
                             autoFocus
                         />
-                        <small className="text-muted">This nickname is stored locally on your device.</small>
+                        <div className="d-flex justify-content-between">
+                            <small className="text-muted">This nickname is stored locally on your device.</small>
+                            <small className="text-muted">
+                                {nickname.length}/{MAX_NICKNAME_LENGTH}
+                            </small>
+                        </div>
                     </div>
                     <div className="d-flex justify-content-between">
                         <div>
@@ -121,4 +127,3 @@ export function NicknameEditor({ address, onClose }: Props) {
         </div>
     );
 }
-

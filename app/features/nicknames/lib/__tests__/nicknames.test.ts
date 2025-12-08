@@ -90,6 +90,15 @@ describe('nicknames', () => {
 
             window.removeEventListener('nicknameUpdated', listener);
         });
+
+        it('truncates nicknames longer than MAX_NICKNAME_LENGTH', () => {
+            const longNickname = 'This is a very long nickname that exceeds the maximum allowed length';
+            setNickname('TestAddress123', longNickname);
+
+            const stored = JSON.parse(localStorage.getItem('solana-explorer-nicknames') || '{}');
+            expect(stored['TestAddress123']).toBe(longNickname.slice(0, 32));
+            expect(stored['TestAddress123'].length).toBe(32);
+        });
     });
 
     describe('removeNickname', () => {
@@ -132,4 +141,3 @@ describe('nicknames', () => {
         });
     });
 });
-

@@ -9,4 +9,3 @@ type Props = {
 export function EditIcon({ width = 14, className }: Props) {
     return <Edit size={width} className={className} />;
 }
-

@@ -29,4 +29,3 @@ export function useNickname(address: string) {
 
     return nickname;
 }
-

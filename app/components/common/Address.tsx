@@ -73,8 +73,18 @@ export function Address({
         addressLabel = overrideText;
     }
 
-    // Prepend nickname if exists
-    const displayText = nickname ? `"${nickname}" (${addressLabel})` : addressLabel;
+    // Prepend nickname if exists, truncate if too long
+    // Display limit is shorter than storage limit to prevent UI overflow
+    const MAX_DISPLAY_LENGTH = 20;
+    let displayText = addressLabel;
+    let fullText = addressLabel;
+
+    if (nickname) {
+        const truncatedNickname =
+            nickname.length > MAX_DISPLAY_LENGTH ? nickname.slice(0, MAX_DISPLAY_LENGTH) + '…' : nickname;
+        displayText = `"${truncatedNickname}" (${addressLabel})`;
+        fullText = `"${nickname}" (${addressLabel})`;
+    }
 
     const handleMouseEnter = (text: string) => {
         const elements = document.querySelectorAll(`[data-address="${text}"]`);
@@ -98,6 +108,7 @@ export function Address({
                     className="font-monospace"
                     onMouseEnter={() => handleMouseEnter(address)}
                     onMouseLeave={() => handleMouseLeave(address)}
+                    title={nickname && nickname.length > MAX_DISPLAY_LENGTH ? fullText : undefined}
                 >
                     {link ? (
                         <Link className={truncate ? 'text-truncate address-truncate' : ''} href={addressPath}>
@@ -116,9 +127,7 @@ export function Address({
             >
                 <EditIcon />
             </button>
-            {showNicknameEditor && (
-                <NicknameEditor address={address} onClose={() => setShowNicknameEditor(false)} />
-            )}
+            {showNicknameEditor && <NicknameEditor address={address} onClose={() => setShowNicknameEditor(false)} />}
         </div>
     );
 
