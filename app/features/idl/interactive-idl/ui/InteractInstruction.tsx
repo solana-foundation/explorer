@@ -1,12 +1,19 @@
-import type { InstructionAccountData, InstructionData, NestedInstructionAccountsData } from '@entities/idl';
+import type {
+    InstructionAccountData,
+    InstructionData,
+    NestedInstructionAccountsData,
+    SupportedIdl,
+} from '@entities/idl';
+import type { AutocompleteItem } from '@shared/ui/autocomplete';
 import { Button } from '@shared/ui/button';
 import { Card } from '@shared/ui/card';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Loader, Send } from 'react-feather';
 import { Control, Controller, FieldPath } from 'react-hook-form';
 
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
-
+import { createGetAutocompleteItems } from '../model/accounts-autocomplete';
+import { useGeneratedPdas } from '../model/use-generated-pdas';
 import {
     type InstructionCallParams,
     type InstructionFormData,
@@ -17,15 +24,17 @@ import { AccountInput } from './AccountInput';
 import { ArgumentInput } from './ArgumentInput';
 
 export function InteractInstruction({
+    idl,
     instruction,
     onExecuteInstruciton,
     isExecuting,
 }: {
+    idl: SupportedIdl | undefined;
     onExecuteInstruciton: (data: InstructionData, params: InstructionCallParams) => void;
     instruction: InstructionData;
     isExecuting: boolean;
 }) {
-    const { connected: walletConnected } = useWallet();
+    const { connected: walletConnected, publicKey } = useWallet();
 
     const { form, onSubmit, validationRules, fieldNames } = useInstructionForm({
         instruction,
@@ -33,6 +42,9 @@ export function InteractInstruction({
             onExecuteInstruciton(instruction, params);
         },
     });
+
+    const pdas = useGeneratedPdas({ form, idl, instruction });
+    const getAutocompleteItems = createGetAutocompleteItems({ pdas, publicKey });
 
     const executeDisabled = !walletConnected || isExecuting;
 
@@ -66,6 +78,7 @@ export function InteractInstruction({
                                             control={form.control}
                                             fieldNames={fieldNames}
                                             validationRules={validationRules}
+                                            getAutocompleteItems={getAutocompleteItems}
                                         />
                                     ) : (
                                         <AccountController
@@ -74,6 +87,7 @@ export function InteractInstruction({
                                             name={fieldNames.account(account)}
                                             control={form.control}
                                             rules={validationRules.account(account)}
+                                            getAutocompleteItems={getAutocompleteItems}
                                         />
                                     )
                                 )}
@@ -138,12 +152,15 @@ function AccountController({
     name,
     control,
     rules,
+    getAutocompleteItems,
 }: {
     account: InstructionAccountData;
     name: FieldPath<InstructionFormData>;
     control: Control<InstructionFormData>;
     rules: { required: { value: boolean; message: string } };
+    getAutocompleteItems: (accountName: string) => AutocompleteItem[];
 }) {
+    const autocompleteItems = getAutocompleteItems(account.name);
     return (
         <Controller
             name={name}
@@ -155,6 +172,7 @@ function AccountController({
                     value={typeof field.value === 'string' ? field.value : ''}
                     account={account}
                     error={error}
+                    autocompleteItems={autocompleteItems}
                 />
             )}
         />
@@ -166,11 +184,13 @@ function NestedAccountGroup({
     control,
     fieldNames,
     validationRules,
+    getAutocompleteItems,
 }: {
     group: NestedInstructionAccountsData;
     control: Control<InstructionFormData>;
     fieldNames: ReturnType<typeof useInstructionForm>['fieldNames'];
     validationRules: ReturnType<typeof useInstructionForm>['validationRules'];
+    getAutocompleteItems: (accountName: string) => AutocompleteItem[];
 }) {
     return (
         <div className="e-space-y-3">
@@ -183,6 +203,7 @@ function NestedAccountGroup({
                         name={fieldNames.account(group, nestedAccount)}
                         control={control}
                         rules={validationRules.account(nestedAccount)}
+                        getAutocompleteItems={getAutocompleteItems}
                     />
                 ))}
             </div>

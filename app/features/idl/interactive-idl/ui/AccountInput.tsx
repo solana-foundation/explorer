@@ -1,16 +1,23 @@
 import type { InstructionAccountData } from '@entities/idl';
+import { Autocomplete, type AutocompleteItem } from '@shared/ui/autocomplete';
 import { Badge } from '@shared/ui/badge';
-import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
-import { forwardRef, useId } from 'react';
+import { forwardRef, useState } from 'react';
 
 export interface AccountInputProps extends React.ComponentProps<'input'> {
     account: InstructionAccountData;
     error: { message?: string | undefined } | undefined;
+    autocompleteItems?: AutocompleteItem[];
 }
 
-export const AccountInput = forwardRef<HTMLInputElement, AccountInputProps>(({ account, error, ...props }, ref) => {
-    const inputId = useId();
+export const AccountInput = forwardRef<
+    HTMLInputElement,
+    Omit<AccountInputProps, 'onChange'> & {
+        // This type serves as an intermediary between the autocomplete component and the react-hook-form component
+        onChange: (value: { target: { value: string }; currentTarget: { value: string } }) => void;
+    }
+>(({ account, error, onChange, autocompleteItems = [], ...props }, ref) => {
+    const [inputId, setInputId] = useState('');
 
     return (
         <div className="e-space-y-2">
@@ -41,7 +48,22 @@ export const AccountInput = forwardRef<HTMLInputElement, AccountInputProps>(({ a
                     )}
                 </div>
             </div>
-            <Input ref={ref} {...props} id={inputId} variant="dark" aria-invalid={Boolean(error)} />
+            <Autocomplete
+                items={autocompleteItems}
+                value={String(props.value)}
+                onChange={value => {
+                    onChange({
+                        currentTarget: { value },
+                        target: { value },
+                    });
+                }}
+                inputProps={{
+                    'aria-invalid': Boolean(error),
+                    ref,
+                    variant: 'dark',
+                }}
+                onInputIdReady={setInputId}
+            />
             {account.docs.length > 0 && <p className="e-text-xs e-text-neutral-400">{account.docs.join(' ')}</p>}
             {error && <p className="e-mt-1 e-text-xs e-text-destructive">{error.message}</p>}
         </div>
