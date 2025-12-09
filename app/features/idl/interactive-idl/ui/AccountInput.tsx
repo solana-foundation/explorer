@@ -1,8 +1,10 @@
 import type { InstructionAccountData } from '@entities/idl';
-import { Autocomplete, type AutocompleteItem } from '@shared/ui/autocomplete';
+import { Autocomplete } from '@shared/ui/autocomplete';
 import { Badge } from '@shared/ui/badge';
 import { Label } from '@shared/ui/label';
 import { forwardRef, useState } from 'react';
+
+import type { AutocompleteItem } from '../model/account-autocomplete/types';
 
 export interface AccountInputProps extends React.ComponentProps<'input'> {
     account: InstructionAccountData;

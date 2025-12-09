@@ -1,15 +1,18 @@
 import type { PublicKey } from '@solana/web3.js';
 
+import { DEFAULT_AUTOCOMPLETE_ITEMS } from './const';
+import type { AutocompleteItem } from './types';
+
 type AccountName = string;
 export function createGetAutocompleteItems(deps: {
     pdas: Record<AccountName, string | null>;
     publicKey: PublicKey | null;
+    defaultItems?: AutocompleteItem[];
 }) {
-    const { pdas, publicKey } = deps;
+    const { pdas, publicKey, defaultItems = DEFAULT_AUTOCOMPLETE_ITEMS } = deps;
 
     const getAutocompleteItems = (accountName: string) => {
-        const autocompleteItems = getFixedItems();
-
+        const autocompleteItems = [...defaultItems];
         const pdaSuggestion = pdas[accountName];
         if (pdaSuggestion) {
             autocompleteItems.push({
@@ -32,23 +35,4 @@ export function createGetAutocompleteItems(deps: {
     };
 
     return getAutocompleteItems;
-}
-
-function getFixedItems() {
-    return [
-        {
-            group: 'Program' as string | undefined,
-            keywords: ['system'],
-            label: 'System Program',
-            value: '11111111111111111111111111111111',
-        },
-        {
-            group: 'Program',
-            label: 'Address Lookup Table Program',
-            value: 'AddressLookupTab1e1111111111111111111111111',
-        },
-        { group: 'Program', label: 'Compute Budget Program', value: 'ComputeBudget111111111111111111111111111111' },
-        { group: 'Program', label: 'Config Program', value: 'Config1111111111111111111111111111111111111' },
-        { group: 'Sysvar', label: 'Clock', value: 'SysvarC1ock11111111111111111111111111111111' },
-    ];
 }

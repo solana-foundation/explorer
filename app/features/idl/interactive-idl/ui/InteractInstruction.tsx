@@ -4,7 +4,6 @@ import type {
     NestedInstructionAccountsData,
     SupportedIdl,
 } from '@entities/idl';
-import type { AutocompleteItem } from '@shared/ui/autocomplete';
 import { Button } from '@shared/ui/button';
 import { Card } from '@shared/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
@@ -12,7 +11,8 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { Loader, Send } from 'react-feather';
 import { Control, Controller, FieldPath } from 'react-hook-form';
 
-import { createGetAutocompleteItems } from '../model/accounts-autocomplete';
+import { createGetAutocompleteItems } from '../model/account-autocomplete/createGetAutocompleteItems';
+import type { AutocompleteItem } from '../model/account-autocomplete/types';
 import { useGeneratedPdas } from '../model/use-generated-pdas';
 import {
     type InstructionCallParams,

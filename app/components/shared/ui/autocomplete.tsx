@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { cn } from '../utils';
 import { Input, type InputProps } from './input';
 
-export type Value = string;
+type Value = string;
 
 type AutocompleteItem = {
     value: Value;
