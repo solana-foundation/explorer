@@ -22,10 +22,14 @@ function AccordionItem({ className, ...props }: React.ComponentProps<typeof Acco
     );
 }
 
-function AccordionTrigger({ className, children, ...props }: React.ComponentProps<typeof AccordionPrimitive.Trigger>) {
+const AccordionTrigger = React.forwardRef<
+    React.ElementRef<typeof AccordionPrimitive.Trigger>,
+    React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
+>(({ className, children, ...props }, ref) => {
     return (
         <AccordionPrimitive.Header className="mb-0 e-flex">
             <AccordionPrimitive.Trigger
+                ref={ref}
                 data-slot="accordion-trigger"
                 className={cn(
                     'bg-transparent border-0 e-flex e-flex-1 e-items-start e-gap-4 e-rounded-md e-py-4',
@@ -43,11 +47,16 @@ function AccordionTrigger({ className, children, ...props }: React.ComponentProp
             </AccordionPrimitive.Trigger>
         </AccordionPrimitive.Header>
     );
-}
+});
+AccordionTrigger.displayName = 'AccordionTrigger';
 
-function AccordionContent({ className, children, ...props }: React.ComponentProps<typeof AccordionPrimitive.Content>) {
+const AccordionContent = React.forwardRef<
+    React.ElementRef<typeof AccordionPrimitive.Content>,
+    React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
+>(({ className, children, ...props }, ref) => {
     return (
         <AccordionPrimitive.Content
+            ref={ref}
             data-slot="accordion-content"
             className="[data-state=closed]:e-animate-accordion-up [data-state=open]:e-animate-accordion-down e-overflow-hidden e-text-sm"
             {...props}
@@ -55,6 +64,7 @@ function AccordionContent({ className, children, ...props }: React.ComponentProp
             <div className={cn('e-pb-4 e-pt-0', className)}>{children}</div>
         </AccordionPrimitive.Content>
     );
-}
+});
+AccordionContent.displayName = 'AccordionContent';
 
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };
