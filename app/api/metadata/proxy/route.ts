@@ -3,7 +3,7 @@ import { Headers as NodeFetchHeaders } from 'node-fetch';
 
 import Logger from '@/app/utils/logger';
 
-import { fetchResource, StatusError } from './feature';
+import { fetchResource, matchJsonContent, StatusError } from './feature';
 import { errors } from './feature/errors';
 import { checkURLForPrivateIP, isHTTPProtocol } from './feature/ip';
 
@@ -119,11 +119,15 @@ export async function GET(request: Request, { params: _params }: Params) {
         return new NextResponse(data, {
             headers: responseHeaders,
         });
-    } else if (resourceHeaders.get('content-type')?.startsWith('application/json')) {
+    }
+
+    const contentType = resourceHeaders.get('content-type');
+
+    if (matchJsonContent(contentType)) {
         return NextResponse.json(data, {
             headers: responseHeaders,
         });
-    } else {
-        return respondWithError(415);
     }
+
+    return respondWithError(415);
 }

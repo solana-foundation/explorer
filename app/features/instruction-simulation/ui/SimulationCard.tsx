@@ -4,7 +4,8 @@ import { useCluster } from '@providers/cluster';
 import type { VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
-import { useSimulator } from '../model/useSimulator';
+import { useSimulation } from '../model/use-simulation';
+import { SimulatorCUProfilingCard } from './SimulatorCUProfilingCard';
 import { SolBalanceChangesCard } from './SolBalanceChangesCard';
 
 type SimulatorCardProps = {
@@ -21,11 +22,13 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
     const {
         simulate,
         simulating,
+        simulationEpoch,
         simulationLogs: logs,
         simulationError,
         simulationTokenBalanceRows,
         simulationSolBalanceChanges,
-    } = useSimulator(message, accountBalances);
+        simulationUnitsConsumed,
+    } = useSimulation(message, accountBalances);
 
     if (simulating) {
         return (
@@ -79,6 +82,15 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
                 </div>
                 <ProgramLogsCardBody message={message} logs={logs} cluster={cluster} url={url} />
             </div>
+            {simulationEpoch !== undefined && (
+                <SimulatorCUProfilingCard
+                    message={message}
+                    logs={logs}
+                    unitsConsumed={simulationUnitsConsumed}
+                    cluster={cluster}
+                    epoch={simulationEpoch}
+                />
+            )}
             {simulationSolBalanceChanges && !simulationError && simulationSolBalanceChanges.length > 0 && (
                 <SolBalanceChangesCard balanceChanges={simulationSolBalanceChanges} />
             )}

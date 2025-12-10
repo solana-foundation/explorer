@@ -20,8 +20,9 @@ import React from 'react';
 
 import { getMintDecimals, isTokenProgramBase58 } from '../lib/tokenAccountParsing';
 import type { SolBalanceChange } from '../lib/types';
+import { useEpochInfo } from './use-epoch-info';
 
-export function useSimulator(
+export function useSimulation(
     message: VersionedMessage,
     accountBalances?: {
         preBalances: number[];
@@ -29,17 +30,20 @@ export function useSimulator(
     }
 ) {
     const { cluster, url } = useCluster();
+    const { epoch: cachedEpoch } = useEpochInfo();
     const [simulating, setSimulating] = React.useState(false);
     const [logs, setLogs] = React.useState<Array<InstructionLogs> | null>(null);
     const [error, setError] = React.useState<string>();
     const [tokenBalanceRows, setTokenBalanceRows] = React.useState<TokenBalancesCardInnerProps>();
     const [solBalanceChanges, setSolBalanceChanges] = React.useState<SolBalanceChange[]>();
+    const [unitsConsumed, setUnitsConsumed] = React.useState<number | undefined>();
 
     React.useEffect(() => {
         setLogs(null);
         setSimulating(false);
         setError(undefined);
         setSolBalanceChanges(undefined);
+        setUnitsConsumed(undefined);
     }, [url]);
 
     const onClick = React.useCallback(() => {
@@ -218,6 +222,10 @@ export function useSimulator(
                     // Prettify logs
                     setLogs(parseProgramLogs(resp.value.logs, resp.value.err, cluster));
                 }
+                // Set units consumed from simulation response
+                if (resp.value.unitsConsumed !== undefined) {
+                    setUnitsConsumed(resp.value.unitsConsumed);
+                }
                 // If the response has an error, the logs will say what it it, so no need to parse here.
                 if (resp.value.err) {
                     setError('TransactionError');
@@ -236,9 +244,11 @@ export function useSimulator(
     return {
         simulate: onClick,
         simulating,
+        simulationEpoch: cachedEpoch !== undefined ? BigInt(cachedEpoch) : undefined,
         simulationError: error,
         simulationLogs: logs,
         simulationSolBalanceChanges: solBalanceChanges,
         simulationTokenBalanceRows: tokenBalanceRows,
+        simulationUnitsConsumed: unitsConsumed,
     };
 }
