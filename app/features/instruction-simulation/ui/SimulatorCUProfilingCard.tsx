@@ -13,7 +13,13 @@ type SimulatorCUProfilingCardProps = {
     epoch: bigint;
 };
 
-export function SimulatorCUProfilingCard({ message, logs, unitsConsumed, cluster, epoch }: SimulatorCUProfilingCardProps) {
+export function SimulatorCUProfilingCard({
+    message,
+    logs,
+    unitsConsumed,
+    cluster,
+    epoch,
+}: SimulatorCUProfilingCardProps) {
     const instructionsForCU = React.useMemo(() => {
         const instructions = message.compiledInstructions.map(ix => ({
             programId: message.staticAccountKeys[ix.programIdIndex],
