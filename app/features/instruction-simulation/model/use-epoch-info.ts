@@ -1,3 +1,5 @@
+'use client';
+
 import { useCluster } from '@providers/cluster';
 import { Connection } from '@solana/web3.js';
 import useSWRImmutable from 'swr/immutable';

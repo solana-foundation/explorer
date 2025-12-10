@@ -1,3 +1,5 @@
+'use client';
+
 import { generateTokenBalanceRows, TokenBalancesCardInnerProps } from '@components/transaction/TokenBalancesCard';
 import { useCluster } from '@providers/cluster';
 import { AccountLayout } from '@solana/spl-token';
