@@ -12,15 +12,15 @@ export const DEFAULT_AUTOCOMPLETE_ITEMS: AutocompleteItem[] = [
     {
         group: 'Program',
         keywords: ['system'],
-        label: 'System Program',
+        label: 'System',
         value: '11111111111111111111111111111111',
     },
     {
         group: 'Program',
-        label: 'Address Lookup Table Program',
+        label: 'Address Lookup Table',
         value: 'AddressLookupTab1e1111111111111111111111111',
     },
-    { group: 'Program', label: 'Compute Budget Program', value: 'ComputeBudget111111111111111111111111111111' },
-    { group: 'Program', label: 'Config Program', value: 'Config1111111111111111111111111111111111111' },
+    { group: 'Program', label: 'Compute Budget', value: 'ComputeBudget111111111111111111111111111111' },
+    { group: 'Program', label: 'Config', value: 'Config1111111111111111111111111111111111111' },
     { group: 'Sysvar', label: 'Clock', value: 'SysvarC1ock11111111111111111111111111111111' },
 ];
