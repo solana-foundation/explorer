@@ -50,7 +50,7 @@ export function InteractInstruction({
 
     return (
         <Card variant="tight">
-            <AccordionItem value={instruction.name} className="">
+            <AccordionItem value={instruction.name}>
                 <AccordionTrigger>
                     <div className="w-full e-flex e-items-center e-justify-between">
                         <span className="e-min-w-0 e-flex-1 e-truncate e-pr-4 e-text-left e-text-sm e-font-medium e-text-white md:e-w-[170px] [@media(min-width:992px)]:e-w-[300px]">
@@ -64,6 +64,34 @@ export function InteractInstruction({
                         <div className="e-mb-4 e-rounded-lg e-bg-[#1a1b1d] e-p-3">
                             <p className="e-text-xs e-text-neutral-400">{instruction.docs.join(' ')}</p>
                         </div>
+                    )}
+
+                    {/* Arguments Section */}
+                    {instruction.args.length > 0 && (
+                        <CardSection title="Arguments">
+                            <div className="e-space-y-3 e-px-6">
+                                {instruction.args.map(arg => (
+                                    <Controller
+                                        key={arg.name}
+                                        name={fieldNames.argument(arg)}
+                                        control={form.control}
+                                        rules={validationRules.argument(arg)}
+                                        render={({ field, fieldState: { error } }) => (
+                                            <ArgumentInput
+                                                {...field}
+                                                value={
+                                                    typeof field.value === 'string'
+                                                        ? field.value
+                                                        : String(field.value || '')
+                                                }
+                                                arg={arg}
+                                                error={error}
+                                            />
+                                        )}
+                                    />
+                                ))}
+                            </div>
+                        </CardSection>
                     )}
 
                     {/* Accounts Section */}
@@ -95,33 +123,6 @@ export function InteractInstruction({
                         </CardSection>
                     )}
 
-                    {/* Arguments Section */}
-                    {instruction.args.length > 0 && (
-                        <CardSection title="Arguments">
-                            <div className="e-space-y-3 e-px-6">
-                                {instruction.args.map(arg => (
-                                    <Controller
-                                        key={arg.name}
-                                        name={fieldNames.argument(arg)}
-                                        control={form.control}
-                                        rules={validationRules.argument(arg)}
-                                        render={({ field, fieldState: { error } }) => (
-                                            <ArgumentInput
-                                                {...field}
-                                                value={
-                                                    typeof field.value === 'string'
-                                                        ? field.value
-                                                        : String(field.value || '')
-                                                }
-                                                arg={arg}
-                                                error={error}
-                                            />
-                                        )}
-                                    />
-                                ))}
-                            </div>
-                        </CardSection>
-                    )}
                     <div className="e-px-6 e-pb-2.5">
                         <ExecuteButton
                             onClick={onSubmit}
