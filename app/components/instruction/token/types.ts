@@ -291,6 +291,13 @@ const UpdateTokenMetadataUpdateAuthority = type({
     updateAuthority: PublicKeyFromString,
 });
 
+export type UpdateTokenMetadataAuthorityInfo = Infer<typeof UpdateTokenMetadataAuthority>;
+const UpdateTokenMetadataAuthority = type({
+    metadata: PublicKeyFromString,
+    newAuthority: PublicKeyFromString,
+    updateAuthority: PublicKeyFromString,
+});
+
 export type EmitTokenMetadataInfo = Infer<typeof EmitTokenMetadata>;
 const EmitTokenMetadata = type({
     end: optional(nullable(number())),
@@ -401,6 +408,7 @@ export const TokenInstructionType = enums([
     'memoTransferExtension',
     'updateTokenMetadataField',
     'removeTokenMetadataKey',
+    'updateTokenMetadataAuthority',
     'updateTokenMetadataUpdateAuthority',
     'emitTokenMetadata',
     'updateMetadataPointer',
@@ -463,6 +471,7 @@ export const IX_STRUCTS = {
     updateMetadataPointer: UpdateMetadataPointer,
     updateTokenGroupMaxSize: UpdateTokenGroupMaxSize,
     updateTokenGroupUpdateAuthority: UpdateTokenGroupUpdateAuthority,
+    updateTokenMetadataAuthority: UpdateTokenMetadataAuthority,
     updateTokenMetadataField: UpdateTokenMetadataField,
     updateTokenMetadataUpdateAuthority: UpdateTokenMetadataUpdateAuthority,
 };
@@ -517,6 +526,7 @@ export const IX_TITLES = {
     updateMetadataPointer: 'Update Metadata Pointer',
     updateTokenGroupMaxSize: 'Update Token Group Max Size',
     updateTokenGroupUpdateAuthority: 'Update Token Group Update Authority',
+    updateTokenMetadataAuthority: 'Update Token Metadata Authority',
     updateTokenMetadataField: 'Update Token Metadata Field',
     updateTokenMetadataUpdateAuthority: 'Update Token Metadata Update Authority',
 };
