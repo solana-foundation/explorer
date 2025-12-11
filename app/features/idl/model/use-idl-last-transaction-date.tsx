@@ -56,7 +56,7 @@ export function useIdlLastTransactionDate(
                 const [anchorTimestamp, pmpTimestamp] = await Promise.race([
                     Promise.all([
                         fetchAnchorIdlTimestamp(connection, programPubkey),
-                        fetchPmpIdlTimestamp(url, programId),
+                        fetchPmpIdlTimestamp(connection, programId),
                     ]),
                     new Promise<never>((_, reject) => {
                         abortController.signal.addEventListener('abort', () => reject(new Error('Aborted')));
@@ -106,9 +106,9 @@ async function fetchAnchorIdlTimestamp(connection: Connection, programPubkey: Pu
     }
 }
 
-async function fetchPmpIdlTimestamp(url: string, programId: string): Promise<number | null> {
+async function fetchPmpIdlTimestamp(connection: Connection, programId: string): Promise<number | null> {
     try {
-        const rpc = createSolanaRpc(url);
+        const rpc = createSolanaRpc(connection.rpcEndpoint);
         const programAddress = address(programId);
 
         const metadataAccount = await fetchMetadataFromSeeds(rpc, {
@@ -117,7 +117,6 @@ async function fetchPmpIdlTimestamp(url: string, programId: string): Promise<num
             seed: IDL_SEED,
         });
 
-        const connection = new Connection(url);
         const signatures = await connection.getSignaturesForAddress(new PublicKey(metadataAccount.address), {
             limit: 1,
         });
