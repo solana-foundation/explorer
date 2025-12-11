@@ -36,10 +36,13 @@ export function ProgramHeader({
         const programInfo = PROGRAM_INFO_BY_ID[address];
         const isTrustedProgram = programInfo && programInfo.deployments.includes(cluster);
         const trustedProgramName = isTrustedProgram ? programInfo.name : undefined;
+        const namePlaceholder = 'Program Account';
+
+        let programName = trustedProgramName ?? namePlaceholder;
 
         if (!securityTxt) {
             return {
-                programName: trustedProgramName || 'Program Account',
+                programName,
                 selfReported: false,
             };
         }
@@ -47,16 +50,19 @@ export function ProgramHeader({
         // Only show warning if we're actually using self-reported data
         const usingSelfReportedName = !trustedProgramName;
 
+        // Handle empty name in security.txt
+        programName = (trustedProgramName ?? securityTxt.name) || namePlaceholder;
+
         if (isPmpSecurityTXT(securityTxt)) {
             return {
                 logo: getProxiedUri(securityTxt.logo),
-                programName: trustedProgramName ?? securityTxt.name,
+                programName,
                 selfReported: usingSelfReportedName,
                 version: securityTxt.version,
             };
         }
         return {
-            programName: trustedProgramName ?? securityTxt.name,
+            programName,
             selfReported: usingSelfReportedName,
         };
     })();
@@ -83,7 +89,7 @@ export function ProgramHeader({
 
     return (
         <div className="e-inline-flex e-items-center e-gap-2">
-            <div className="">
+            <div>
                 <div className="e-relative e-h-10 e-w-10 e-flex-shrink-0 e-overflow-hidden e-rounded sm:e-h-16 sm:e-w-16">
                     {logo ? (
                         // eslint-disable-next-line @next/next/no-img-element
