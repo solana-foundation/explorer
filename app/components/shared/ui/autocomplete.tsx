@@ -5,9 +5,9 @@ import { useEffect, useRef, useState } from 'react';
 import { cn } from '../utils';
 import { Input, type InputProps } from './input';
 
-type Value = string;
+export type Value = string;
 
-type AutocompleteItem = {
+export type AutocompleteItem = {
     value: Value;
     label: string;
     group?: string;
@@ -220,4 +220,3 @@ function renderItemContentDefault(option: AutocompleteItem) {
 }
 
 export { Autocomplete };
-export type { AutocompleteItem };
