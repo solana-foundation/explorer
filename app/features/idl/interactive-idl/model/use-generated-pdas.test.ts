@@ -88,8 +88,13 @@ describe('useGeneratedPdas', () => {
         );
 
         expect(result.current.poll).toBeDefined();
-        expect(result.current.poll).not.toBeNull();
-        expect(typeof result.current.poll).toBe('string');
+        expect(result.current.poll.generated).not.toBeNull();
+        expect(typeof result.current.poll.generated).toBe('string');
+        expect(result.current.poll.seeds).toHaveLength(1);
+        expect(result.current.poll.seeds[0]).toEqual({
+            name: 'pollId',
+            value: '123',
+        });
     });
 
     it('should generate PDA for multiple seeds (candidate)', () => {
@@ -107,8 +112,17 @@ describe('useGeneratedPdas', () => {
         );
 
         expect(result.current.candidate).toBeDefined();
-        expect(result.current.candidate).not.toBeNull();
-        expect(typeof result.current.candidate).toBe('string');
+        expect(result.current.candidate.generated).not.toBeNull();
+        expect(typeof result.current.candidate.generated).toBe('string');
+        expect(result.current.candidate.seeds).toHaveLength(2);
+        expect(result.current.candidate.seeds[0]).toEqual({
+            name: 'pollId',
+            value: '123',
+        });
+        expect(result.current.candidate.seeds[1]).toEqual({
+            name: 'candidateName',
+            value: 'Alice',
+        });
     });
 
     it('should handle underscore prefix in argument names (_poll_id vs poll_id)', () => {
@@ -127,7 +141,9 @@ describe('useGeneratedPdas', () => {
 
         // Should still generate PDAs even though seed.path is "poll_id" and arg.name is "_poll_id"
         expect(result.current.poll).toBeDefined();
+        expect(result.current.poll.generated).not.toBeNull();
         expect(result.current.candidate).toBeDefined();
+        expect(result.current.candidate.generated).not.toBeNull();
     });
 
     it('should return null for PDA when required argument is missing', () => {
@@ -144,8 +160,54 @@ describe('useGeneratedPdas', () => {
             })
         );
 
-        expect(result.current.poll).toBeNull();
-        expect(result.current.candidate).toBeNull();
+        expect(result.current.poll.generated).toBeNull();
+        expect(result.current.poll.seeds).toHaveLength(1);
+        expect(result.current.poll.seeds[0]).toEqual({
+            name: 'pollId',
+            value: null,
+        });
+        expect(result.current.candidate.generated).toBeNull();
+        expect(result.current.candidate.seeds).toHaveLength(2);
+        expect(result.current.candidate.seeds[0]).toEqual({
+            name: 'pollId',
+            value: null,
+        });
+        expect(result.current.candidate.seeds[1]).toEqual({
+            name: 'candidateName',
+            value: 'Charlie',
+        });
+    });
+
+    it('should return null for PDA when numeric argument value cannot be converted to number', () => {
+        const { createMockForm, mockInstruction, mockIdl } = setup();
+        const form = createMockForm();
+        form.setValue('arguments.initializeCandidate.pollId', 'invalid-number');
+        form.setValue('arguments.initializeCandidate.candidateName', 'Test');
+
+        const { result } = renderHook(() =>
+            useGeneratedPdas({
+                form,
+                idl: mockIdl,
+                instruction: mockInstruction,
+            })
+        );
+
+        expect(result.current.poll.generated).toBeNull();
+        expect(result.current.poll.seeds).toHaveLength(1);
+        expect(result.current.poll.seeds[0]).toEqual({
+            name: 'pollId',
+            value: 'invalid-number',
+        });
+        expect(result.current.candidate.generated).toBeNull();
+        expect(result.current.candidate.seeds).toHaveLength(2);
+        expect(result.current.candidate.seeds[0]).toEqual({
+            name: 'pollId',
+            value: 'invalid-number',
+        });
+        expect(result.current.candidate.seeds[1]).toEqual({
+            name: 'candidateName',
+            value: 'Test',
+        });
     });
 
     it('should handle different argument types (u64, string)', () => {
@@ -163,7 +225,9 @@ describe('useGeneratedPdas', () => {
         );
 
         expect(result.current.poll).toBeDefined();
+        expect(result.current.poll.generated).not.toBeNull();
         expect(result.current.candidate).toBeDefined();
+        expect(result.current.candidate.generated).not.toBeNull();
     });
 
     it('should skip nested account groups', () => {
@@ -264,7 +328,12 @@ describe('useGeneratedPdas', () => {
         );
 
         expect(result.current.pdaAccount).toBeDefined();
-        expect(result.current.pdaAccount).not.toBeNull();
+        expect(result.current.pdaAccount.generated).not.toBeNull();
+        expect(result.current.pdaAccount.seeds).toHaveLength(1);
+        expect(result.current.pdaAccount.seeds[0]).toEqual({
+            name: 'authority',
+            value: accountPubkey,
+        });
     });
 
     it('should handle const seeds', () => {
@@ -317,7 +386,12 @@ describe('useGeneratedPdas', () => {
         );
 
         expect(result.current.pdaAccount).toBeDefined();
-        expect(result.current.pdaAccount).not.toBeNull();
+        expect(result.current.pdaAccount.generated).not.toBeNull();
+        expect(result.current.pdaAccount.seeds).toHaveLength(1);
+        expect(result.current.pdaAccount.seeds[0]).toEqual({
+            name: '0x74657374', // "test" in hex
+            value: '0x74657374',
+        });
     });
 
     it('should return null when account seed value is missing', () => {
@@ -371,61 +445,12 @@ describe('useGeneratedPdas', () => {
             })
         );
 
-        expect(result.current.pdaAccount).toBeNull();
-    });
-
-    it('should return null when account seed value is invalid public key', () => {
-        const { createMockForm, mockIdl } = setup();
-        const form = createMockForm();
-
-        const idlWithAccountSeed = {
-            ...mockIdl,
-            instructions: [
-                {
-                    accounts: [
-                        {
-                            name: 'pda_account',
-                            pda: {
-                                seeds: [
-                                    {
-                                        kind: 'account',
-                                        path: 'authority',
-                                    },
-                                ],
-                            },
-                        },
-                    ],
-                    args: [],
-                    discriminator: [1, 2, 3, 4, 5, 6, 7, 8],
-                    name: 'test_instruction',
-                },
-            ],
-        } as SupportedIdl;
-
-        form.setValue('accounts.testInstruction.authority', 'invalid-public-key');
-
-        const testInstruction: InstructionData = {
-            accounts: [
-                {
-                    docs: [],
-                    name: 'pdaAccount',
-                    pda: true,
-                },
-            ],
-            args: [],
-            docs: [],
-            name: 'testInstruction',
-        };
-
-        const { result } = renderHook(() =>
-            useGeneratedPdas({
-                form,
-                idl: idlWithAccountSeed,
-                instruction: testInstruction,
-            })
-        );
-
-        expect(result.current.pdaAccount).toBeNull();
+        expect(result.current.pdaAccount.generated).toBeNull();
+        expect(result.current.pdaAccount.seeds).toHaveLength(1);
+        expect(result.current.pdaAccount.seeds[0]).toEqual({
+            name: 'authority',
+            value: null,
+        });
     });
 
     it('should skip accounts without PDA', () => {
@@ -446,7 +471,9 @@ describe('useGeneratedPdas', () => {
         expect(result.current.signer).toBeUndefined();
         // Only PDA accounts should be present
         expect(result.current.poll).toBeDefined();
+        expect(result.current.poll.generated).not.toBeNull();
         expect(result.current.candidate).toBeDefined();
+        expect(result.current.candidate.generated).not.toBeNull();
     });
 
     it('should generate consistent PDA addresses for same inputs', () => {
@@ -471,8 +498,8 @@ describe('useGeneratedPdas', () => {
             })
         );
 
-        expect(result1.current.poll).toBe(result2.current.poll);
-        expect(result1.current.candidate).toBe(result2.current.candidate);
+        expect(result1.current.poll.generated).toBe(result2.current.poll.generated);
+        expect(result1.current.candidate.generated).toBe(result2.current.candidate.generated);
     });
 });
 

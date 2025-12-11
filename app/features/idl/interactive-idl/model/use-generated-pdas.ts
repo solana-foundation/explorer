@@ -5,7 +5,7 @@ import { type Control, useWatch } from 'react-hook-form';
 
 import { createAnchorPdaProvider } from './pda-generator/anchor-provider';
 import { createPdaProviderRegistry } from './pda-generator/registry';
-import { buildSeeds } from './pda-generator/seed-builder';
+import { buildSeedsWithInfo } from './pda-generator/seed-builder';
 import type { InstructionFormData } from './use-instruction-form';
 
 const defaultRegistry = createPdaProviderRegistry();
@@ -43,7 +43,8 @@ export function useGeneratedPdas({
 
     const args = formValues.arguments?.[instruction.name] || {};
     const accounts = formValues.accounts?.[instruction.name] || {};
-    const pdaAddresses: Record<string, string | null> = {};
+    const pdaAddresses: Record<string, { generated: string | null; seeds: { value: string | null; name: string }[] }> =
+        {};
 
     for (const account of idlInstruction.accounts) {
         if (!account.pda) {
@@ -53,15 +54,31 @@ export function useGeneratedPdas({
         const camelName = camelCase(account.name);
 
         try {
-            const seeds = buildSeeds(account.pda.seeds, args, accounts, idlInstruction);
-            if (seeds) {
-                const [pda] = PublicKey.findProgramAddressSync(seeds, programId);
-                pdaAddresses[camelName] = pda.toBase58();
+            const { buffers: seedBuffers, info: seedInfo } = buildSeedsWithInfo(
+                account.pda.seeds,
+                args,
+                accounts,
+                idlInstruction
+            );
+
+            if (seedBuffers) {
+                const [pda] = PublicKey.findProgramAddressSync(seedBuffers, programId);
+                pdaAddresses[camelName] = {
+                    generated: pda.toBase58(),
+                    seeds: seedInfo,
+                };
             } else {
-                pdaAddresses[camelName] = null;
+                pdaAddresses[camelName] = {
+                    generated: null,
+                    seeds: seedInfo,
+                };
             }
         } catch {
-            pdaAddresses[camelName] = null;
+            const { info: seedInfo } = buildSeedsWithInfo(account.pda.seeds, args, accounts, idlInstruction);
+            pdaAddresses[camelName] = {
+                generated: null,
+                seeds: seedInfo,
+            };
         }
     }
 

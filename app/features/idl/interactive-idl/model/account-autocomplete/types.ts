@@ -9,6 +9,8 @@ export type AutocompleteItem = {
     value: string;
     /** Human-readable name displayed to users in the autocomplete dropdown. */
     label: string;
+    /** Indicates that the item is a generated PDA. */
+    generated?: boolean;
     /**
      * Used to categorize items in the autocomplete dropdown. Common groups include:
      * - `'Program'` - For Solana native programs

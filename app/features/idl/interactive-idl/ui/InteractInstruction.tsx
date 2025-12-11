@@ -107,6 +107,7 @@ export function InteractInstruction({
                                             fieldNames={fieldNames}
                                             validationRules={validationRules}
                                             getAutocompleteItems={getAutocompleteItems}
+                                            seeds={pdas[account.name]?.seeds || []}
                                         />
                                     ) : (
                                         <AccountController
@@ -116,6 +117,7 @@ export function InteractInstruction({
                                             control={form.control}
                                             rules={validationRules.account(account)}
                                             getAutocompleteItems={getAutocompleteItems}
+                                            seeds={pdas[account.name]?.seeds || []}
                                         />
                                     )
                                 )}
@@ -154,12 +156,14 @@ function AccountController({
     control,
     rules,
     getAutocompleteItems,
+    seeds,
 }: {
     account: InstructionAccountData;
     name: FieldPath<InstructionFormData>;
     control: Control<InstructionFormData>;
     rules: { required: { value: boolean; message: string } };
     getAutocompleteItems: (accountName: string) => AutocompleteItem[];
+    seeds: { name: string }[];
 }) {
     const autocompleteItems = getAutocompleteItems(account.name);
     return (
@@ -174,6 +178,7 @@ function AccountController({
                     account={account}
                     error={error}
                     autocompleteItems={autocompleteItems}
+                    seeds={seeds}
                 />
             )}
         />
@@ -186,12 +191,14 @@ function NestedAccountGroup({
     fieldNames,
     validationRules,
     getAutocompleteItems,
+    seeds,
 }: {
     group: NestedInstructionAccountsData;
     control: Control<InstructionFormData>;
     fieldNames: ReturnType<typeof useInstructionForm>['fieldNames'];
     validationRules: ReturnType<typeof useInstructionForm>['validationRules'];
     getAutocompleteItems: (accountName: string) => AutocompleteItem[];
+    seeds: { name: string }[];
 }) {
     return (
         <div className="e-space-y-3">
@@ -205,6 +212,7 @@ function NestedAccountGroup({
                         control={control}
                         rules={validationRules.account(nestedAccount)}
                         getAutocompleteItems={getAutocompleteItems}
+                        seeds={seeds}
                     />
                 ))}
             </div>

@@ -5,7 +5,7 @@ import type { AutocompleteItem } from './types';
 
 type AccountName = string;
 export function createGetAutocompleteItems(deps: {
-    pdas: Record<AccountName, string | null>;
+    pdas: Record<AccountName, { generated: string | null; seeds: { value: string | null; name: string }[] }>;
     publicKey: PublicKey | null;
     defaultItems?: AutocompleteItem[];
 }) {
@@ -13,13 +13,14 @@ export function createGetAutocompleteItems(deps: {
 
     const getAutocompleteItems = (accountName: string) => {
         const autocompleteItems = [...defaultItems];
-        const pdaSuggestion = pdas[accountName];
-        if (pdaSuggestion) {
+        const pdaData = pdas[accountName];
+        if (pdaData) {
             autocompleteItems.push({
+                generated: true,
                 group: undefined,
                 keywords: [accountName],
-                label: 'Generated PDA',
-                value: pdaSuggestion,
+                label: 'PDA (generated)',
+                value: pdaData.generated ?? '',
             });
         }
 
