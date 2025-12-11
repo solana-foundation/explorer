@@ -14,42 +14,44 @@ export type AutocompleteItem = {
     keywords?: string[];
 };
 
-type AutocompleteProps = {
+type AutocompleteProps<Item extends AutocompleteItem = AutocompleteItem> = {
     value: Value;
     onChange: (value: Value) => void;
-    items: AutocompleteItem[];
+    items: Item[];
     loading?: boolean;
     emptyMessage?: string;
-    renderItemContent?: (option: AutocompleteItem) => React.ReactNode;
+    renderItemContent?: (option: Item) => React.ReactNode;
+    renderItemLabel?: (option: Item) => React.ReactNode;
     label?: string;
     inputProps?: Pick<InputProps, 'ref' | 'aria-invalid' | 'variant' | 'placeholder'>;
     onInputIdReady?: (id: string) => void;
 };
 
-const Autocomplete = ({
+function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
     value,
     onChange,
     items,
     loading,
     emptyMessage = 'No items.',
-    renderItemContent = renderItemContentDefault,
+    renderItemContent,
+    renderItemLabel,
     label,
     inputProps,
     onInputIdReady,
-}: AutocompleteProps) => {
+}: AutocompleteProps<Item>) {
     const [open, setOpen] = useState(false);
 
     const ungroupedItems = items.filter(item => !item.group);
 
     const groupedItems = items
-        .filter((item): item is AutocompleteItem & { group: string } => Boolean(item.group))
+        .filter((item): item is Item & { group: string } => Boolean(item.group))
         .reduce((groups, item) => {
             if (!groups.has(item.group)) {
                 groups.set(item.group, []);
             }
             groups.get(item.group)?.push(item);
             return groups;
-        }, new Map<string, AutocompleteItem[]>());
+        }, new Map<string, Item[]>());
 
     const handleSelectItem = (inputValue: string) => {
         onChange(inputValue);
@@ -132,13 +134,15 @@ const Autocomplete = ({
                             <>
                                 {ungroupedItems.length > 0 && (
                                     <CommandGroup>
-                                        {ungroupedItems.map(option =>
-                                            renderItem({
-                                                onSelectItem: handleSelectItem,
-                                                option,
-                                                renderItemContent,
-                                            })
-                                        )}
+                                        {ungroupedItems.map(option => (
+                                            <AutocompleteItemComponent<Item>
+                                                key={option.value}
+                                                onSelectItem={handleSelectItem}
+                                                option={option}
+                                                renderItemContent={renderItemContent}
+                                                renderItemLabel={renderItemLabel}
+                                            />
+                                        ))}
                                     </CommandGroup>
                                 )}
                                 {Array.from(groupedItems.entries()).map(([groupName, groupItems]) => (
@@ -156,13 +160,15 @@ const Autocomplete = ({
                                             '[&_[cmdk-group-heading]]:e-select-none'
                                         )}
                                     >
-                                        {groupItems.map(option =>
-                                            renderItem({
-                                                onSelectItem: handleSelectItem,
-                                                option,
-                                                renderItemContent,
-                                            })
-                                        )}
+                                        {groupItems.map(option => (
+                                            <AutocompleteItemComponent<Item>
+                                                key={option.value}
+                                                onSelectItem={handleSelectItem}
+                                                option={option}
+                                                renderItemContent={renderItemContent}
+                                                renderItemLabel={renderItemLabel}
+                                            />
+                                        ))}
                                     </CommandGroup>
                                 ))}
                             </>
@@ -177,21 +183,24 @@ const Autocomplete = ({
             </Command>
         </PopoverPrimitive.Root>
     );
-};
+}
 Autocomplete.displayName = 'Autocomplete';
 
-function renderItem({
+type AutocompleteItemProps<Item extends AutocompleteItem = AutocompleteItem> = {
+    option: Item;
+    onSelectItem: (value: Value) => void;
+    renderItemContent?: (option: Item) => React.ReactNode;
+    renderItemLabel?: (option: Item) => React.ReactNode;
+};
+
+function AutocompleteItemComponent<Item extends AutocompleteItem = AutocompleteItem>({
     option,
     onSelectItem,
     renderItemContent,
-}: {
-    option: AutocompleteItem;
-    onSelectItem: (value: Value) => void;
-    renderItemContent: (option: AutocompleteItem) => React.ReactNode;
-}) {
+    renderItemLabel,
+}: AutocompleteItemProps<Item>) {
     return (
         <CommandItem
-            key={option.value}
             value={option.value}
             onMouseDown={e => e.preventDefault()}
             onSelect={() => onSelectItem(option.value)}
@@ -203,20 +212,29 @@ function renderItem({
                 'aria-[selected=true]:e-bg-heavy-metal-600'
             )}
         >
-            {renderItemContent(option)}
+            {renderItemContent
+                ? renderItemContent(option)
+                : renderItemContentDefault(option, renderItemLabel ?? renderItemLabelDefault)}
         </CommandItem>
     );
 }
 
-function renderItemContentDefault(option: AutocompleteItem) {
+function renderItemContentDefault<Item extends AutocompleteItem = AutocompleteItem>(
+    option: Item,
+    renderItemLabel: (option: Item) => React.ReactNode
+) {
     return (
         <div className="e-flex e-w-full e-items-center e-justify-between e-px-4 e-py-1.5 e-text-xs">
-            <span className="e-hidden md:e-inline">{option.label}</span>
+            {renderItemLabel(option)}
             <span className="e-font-mono e-text-xs e-text-white md:e-ml-2 md:e-text-heavy-metal-400">
                 {option.value}
             </span>
         </div>
     );
+}
+
+function renderItemLabelDefault<Item extends AutocompleteItem>(option: Item) {
+    return <span className="e-hidden md:e-inline">{option.label}</span>;
 }
 
 export { Autocomplete };

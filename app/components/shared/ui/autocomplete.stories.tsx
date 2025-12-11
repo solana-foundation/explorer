@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { Code, Database, Settings, Star } from 'react-feather';
 
-import { Autocomplete, type Value } from './autocomplete';
+import { Autocomplete, type AutocompleteItem, type Value } from './autocomplete';
 
 const meta: Meta<typeof Autocomplete> = {
     argTypes: {
@@ -136,6 +137,123 @@ export const Empty: Story = {
         };
 
         return <EmptyStory />;
+    },
+};
+
+export const CustomLabel: Story = {
+    render: () => {
+        const CustomLabelStory = () => {
+            const [value, setValue] = useState<Value>('');
+            const [inputId, setInputId] = useState<string>('');
+
+            const renderItemLabel = (option: AutocompleteItem) => {
+                return (
+                    <span className="e-flex e-hidden e-items-center e-gap-2 md:e-flex">
+                        {option.label}
+                        {option.value === 'other' && <Star className="e-h-3 e-w-3 e-text-heavy-metal-100" />}
+                    </span>
+                );
+            };
+
+            return (
+                <Layout
+                    value={value}
+                    label="Custom Label with Icon"
+                    description="This example demonstrates custom labels with react-feather icons. Each item displays an icon next to its label based on the item type. Icons help visually distinguish different item categories."
+                    inputId={inputId}
+                >
+                    <Autocomplete
+                        items={getMixedtems()}
+                        inputProps={{ placeholder: 'Search with icons...' }}
+                        renderItemLabel={renderItemLabel}
+                        onInputIdReady={setInputId}
+                        onChange={setValue}
+                        value={value}
+                    />
+                </Layout>
+            );
+        };
+
+        return <CustomLabelStory />;
+    },
+};
+
+export const CustomContent: Story = {
+    render: () => {
+        const CustomContentStory = () => {
+            const [value, setValue] = useState<Value>('');
+            const [inputId, setInputId] = useState<string>('');
+
+            const getIcon = (option: AutocompleteItem) => {
+                if (option.group === 'Program') {
+                    return <Code className="e-h-4 e-w-4 e-text-blue-400" />;
+                }
+                if (option.group === 'Sysvar') {
+                    return <Database className="e-h-4 e-w-4 e-text-purple-400" />;
+                }
+                if (option.value === 'other') {
+                    return <Star className="e-h-4 e-w-4 e-text-yellow-400" />;
+                }
+                return <Settings className="e-h-4 e-w-4 e-text-green-400" />;
+            };
+
+            const renderItemContent = (option: AutocompleteItem) => {
+                const isProgram = option.group === 'Program';
+                const isSysvar = option.group === 'Sysvar';
+                const isFeatured = option.value === 'other' || option.keywords?.includes('wallet');
+
+                return (
+                    <div className="e-flex e-w-full e-items-center e-gap-3 e-px-4 e-py-2">
+                        <div className="e-flex e-shrink-0 e-items-center e-justify-center">{getIcon(option)}</div>
+                        <div className="e-flex e-min-w-0 e-flex-1 e-flex-col e-gap-1">
+                            <div className="e-flex e-items-center e-gap-2">
+                                <span className="e-text-xs e-font-medium e-text-white">{option.label}</span>
+                                {isFeatured && (
+                                    <span className="e-rounded e-bg-yellow-500/20 e-px-1.5 e-py-0.5 e-text-[10px] e-font-semibold e-text-yellow-400">
+                                        Featured
+                                    </span>
+                                )}
+                            </div>
+                            <div className="e-flex e-items-center e-gap-2">
+                                <span className="e-font-mono e-text-[10px] e-text-heavy-metal-400">
+                                    {option.value.slice(0, 20)}...
+                                </span>
+                                {isProgram && (
+                                    <span className="e-rounded e-bg-blue-500/20 e-px-1.5 e-py-0.5 e-text-[10px] e-font-medium e-text-blue-400">
+                                        Program
+                                    </span>
+                                )}
+                                {isSysvar && (
+                                    <span className="e-rounded e-bg-purple-500/20 e-px-1.5 e-py-0.5 e-text-[10px] e-font-medium e-text-purple-400">
+                                        Sysvar
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <Layout
+                    value={value}
+                    label="Custom Content Render"
+                    description="This example demonstrates fully custom content rendering using renderItemContent. Each item displays an icon, label, badges, and a truncated value with custom styling. This allows complete control over the item layout and appearance."
+                    inputId={inputId}
+                >
+                    <Autocomplete
+                        items={getMixedtems()}
+                        inputProps={{ placeholder: 'Search with custom content...' }}
+                        renderItemContent={renderItemContent}
+                        onInputIdReady={setInputId}
+                        onChange={setValue}
+                        value={value}
+                    />
+                </Layout>
+            );
+        };
+
+        return <CustomContentStory />;
     },
 };
 
