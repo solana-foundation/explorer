@@ -88,6 +88,10 @@ export function dashboardInfoReducer(state: DashboardInfo, action: DashboardInfo
                 })
                 .slice(0, 60);
 
+            if (samples.length === 0) {
+                return state;
+            }
+
             const samplesInHour = samples.length < 60 ? samples.length : 60;
             const avgSlotTime_1h =
                 samples.reduce((sum: number, cur: number) => {
