@@ -212,6 +212,24 @@ describe('AccountHeader', () => {
             expect(screen.queryByAltText('Program logo')).not.toBeInTheDocument();
         });
 
+        it('should render with empty name when securityTxt is present but name is empty string for non-trusted program', () => {
+            const pmpSecurityTxt = createPmpSecurityTxt({ name: '' });
+            vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
+
+            const nonTrustedAddress = '11111111111111111111111111111112';
+            const { account } = setup(nonTrustedAddress);
+            render(
+                <AccountHeader
+                    address={nonTrustedAddress}
+                    account={account}
+                    tokenInfo={undefined}
+                    isTokenInfoLoading={false}
+                />
+            );
+
+            expect(screen.getByRole('heading', { name: 'Program Account' })).toBeInTheDocument();
+        });
+
         it('should render with self-reported warning icon', () => {
             vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
             const pmpSecurityTxt = createPmpSecurityTxt();
