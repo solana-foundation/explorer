@@ -1,5 +1,6 @@
 import type { Idl } from '@coral-xyz/anchor';
 import * as anchorModule from '@entities/idl';
+import { PublicKey } from '@solana/web3.js';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
@@ -41,13 +42,19 @@ vi.mock('@solana/kit', () => ({
     })),
 }));
 
-const mockAnchorIdl = {
+const mockAnchorIdl: Idl = {
+    accounts: [],
+    address: PublicKey.default.toString(),
+    constants: [],
+    errors: [],
+    events: [],
     instructions: [],
     metadata: {
         name: 'anchor_program',
         spec: '0.1.0',
         version: '0.1.0',
     },
+    types: [],
 };
 
 const mockProgramMetadataIdl = {
@@ -110,7 +117,7 @@ describe('IdlCard', () => {
 
     test('should render IdlCard with Anchor IDL when anchorIdl exists', async () => {
         vi.spyOn(anchorModule, 'useAnchorProgram').mockReturnValue({
-            idl: mockAnchorIdl as unknown as Idl,
+            idl: mockAnchorIdl,
             program: null,
         });
 
@@ -133,7 +140,7 @@ describe('IdlCard', () => {
 
     test('should render IdlCard tabs when both IDLs exist', async () => {
         vi.spyOn(anchorModule, 'useAnchorProgram').mockReturnValue({
-            idl: mockAnchorIdl as unknown as Idl,
+            idl: mockAnchorIdl,
             program: null,
         });
 

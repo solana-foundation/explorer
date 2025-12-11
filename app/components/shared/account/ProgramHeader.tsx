@@ -26,7 +26,6 @@ export function ProgramHeader({
 }) {
     const securityTxt = useSecurityTxt(address, parsedData);
     const { cluster } = useCluster();
-
     const { programName, logo, version, selfReported } = ((): {
         programName: string;
         logo?: string;
