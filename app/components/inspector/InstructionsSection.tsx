@@ -10,6 +10,7 @@ import {
     TransactionMessage,
     VersionedMessage,
 } from '@solana/web3.js';
+import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { getProgramName } from '@utils/tx';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -22,6 +23,7 @@ import { LoadingCard } from '../common/LoadingCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
+import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
 import { intoParsedInstruction, intoParsedTransaction } from './into-parsed-data';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
@@ -151,6 +153,28 @@ function InspectorInstructionCard({
                     result={result}
                 />
             );
+        }
+        case TOKEN_2022_PROGRAM_ADDRESS: {
+            const asParsedInstruction = intoParsedInstruction(ix);
+            const asParsedTransaction = intoParsedTransaction(ix, message);
+            // Only render TokenDetailsCard if the instruction was successfully parsed
+            if (asParsedInstruction.parsed?.type) {
+                return (
+                    <ErrorBoundary
+                        fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                    >
+                        <TokenDetailsCard
+                            key={index}
+                            ix={asParsedInstruction}
+                            tx={asParsedTransaction}
+                            index={index}
+                            result={result}
+                        />
+                    </ErrorBoundary>
+                );
+            }
+            // Fall through to unknown if parsing failed
+            break;
         }
         default: {
             // unknown program; allow to render the next card

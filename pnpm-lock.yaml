@@ -132,8 +132,8 @@ importers:
         specifier: 0.5.1
         version: 0.5.1(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@8.18.1(bufferutil@4.0.7)(utf-8-validate@5.0.10)))
       '@solana-program/token-2022':
-        specifier: 0.4.0
-        version: 0.4.0(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@8.18.1(bufferutil@4.0.7)(utf-8-validate@5.0.10)))(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4))
+        specifier: 0.6.1
+        version: 0.6.1(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@8.18.1(bufferutil@4.0.7)(utf-8-validate@5.0.10)))(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4))
       '@solana/buffer-layout':
         specifier: 3.0.0
         version: 3.0.0
@@ -3341,11 +3341,11 @@ packages:
     peerDependencies:
       '@solana/kit': ^2.1.0
 
-  '@solana-program/token-2022@0.4.0':
-    resolution: {integrity: sha512-rLcYyjeRq/dW62ju9X+gFYqIIRGuD4vXq6EwM9oQBoURFbFzyo12VUi6v0hNh0dRcru+kUx321qVCAfsWWV/ug==}
+  '@solana-program/token-2022@0.6.1':
+    resolution: {integrity: sha512-Ex02cruDMGfBMvZZCrggVR45vdQQSI/unHVpt/7HPt/IwFYB4eTlXtO8otYZyqV/ce5GqZ8S6uwyRf0zy6fdbA==}
     peerDependencies:
-      '@solana/kit': ^2.1.0
-      '@solana/sysvars': ^2.1.0
+      '@solana/kit': ^5.0
+      '@solana/sysvars': ^5.0
 
   '@solana-program/token@0.5.1':
     resolution: {integrity: sha512-bJvynW5q9SFuVOZ5vqGVkmaPGA0MCC+m9jgJj1nk5m20I389/ms69ASnhWGoOPNcie7S9OwBX0gTj2fiyWpfag==}
@@ -13048,7 +13048,7 @@ snapshots:
     dependencies:
       '@solana/kit': 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@8.18.1(bufferutil@4.0.7)(utf-8-validate@5.0.10))
 
-  '@solana-program/token-2022@0.4.0(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@8.18.1(bufferutil@4.0.7)(utf-8-validate@5.0.10)))(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4))':
+  '@solana-program/token-2022@0.6.1(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@8.18.1(bufferutil@4.0.7)(utf-8-validate@5.0.10)))(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4))':
     dependencies:
       '@solana/kit': 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)(ws@8.18.1(bufferutil@4.0.7)(utf-8-validate@5.0.10))
       '@solana/sysvars': 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.0.4)
