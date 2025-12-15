@@ -24,6 +24,7 @@ export const WalletProvider: FC<
 
     const onError = useCallback(
         (error: WalletError) => {
+            console.error(error);
             if (!skipToast) {
                 toast.custom({ description: error.message, title: 'Wallet Error', type: 'error' });
             }
@@ -31,7 +32,7 @@ export const WalletProvider: FC<
         [toast, skipToast]
     );
 
-    // use empty array to allow detect wallets automatially
+    // use an empty array to allow detect wallets automatically
     const wallets = useMemo(() => [], []);
 
     return (

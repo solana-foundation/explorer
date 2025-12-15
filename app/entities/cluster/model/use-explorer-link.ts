@@ -28,6 +28,9 @@ export function useExplorerLink(path: string) {
         case Cluster.Devnet:
             params.append('cluster', clusterSlug(cluster));
             break;
+        case Cluster.Simd296:
+            params.append('cluster', clusterSlug(cluster));
+            break;
         case Cluster.Custom:
             params.append('cluster', clusterSlug(cluster));
             if (customUrl) {

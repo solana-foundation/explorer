@@ -12,7 +12,6 @@ export interface IdlExecutorConfig {
 }
 
 interface IdlExecutorSpec {
-    // TODO: put arguments into order less > often
     initializeProgram<T extends BaseIdl>(
         idl: T,
         programId: PublicKey,
