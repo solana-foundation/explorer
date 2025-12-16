@@ -45,7 +45,6 @@ export function IdlRenderer({
 }
 
 function IdlErrorFallback({ message, ...props }: { message: string }) {
-    console.log(props);
     return (
         <center className="pt-5">
             {message}

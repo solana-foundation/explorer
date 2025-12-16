@@ -6,7 +6,7 @@ import { IdlVariant, useIdlLastTransactionDate } from '../use-idl-last-transacti
 
 vi.mock('@providers/cluster', () => ({
     useCluster: vi.fn(() => ({
-        url: 'https://api.mainnet-beta.solana.com',
+        url: 'https://mainnet.rpc.address',
     })),
 }));
 
@@ -110,7 +110,7 @@ describe('useIdlLastTransactionDate', () => {
         );
     });
 
-    it('should prefer Anchor IDL when both timestamps are equal', async () => {
+    it('should prefer ProgramMetadata IDL when both timestamps are equal', async () => {
         const timestamp = 1700000000;
 
         mockConnection.getSignaturesForAddress
@@ -126,7 +126,7 @@ describe('useIdlLastTransactionDate', () => {
 
         await waitFor(
             () => {
-                expect(result.current).toBe(IdlVariant.Anchor);
+                expect(result.current).toBe(IdlVariant.ProgramMetadata);
             },
             { timeout: 1000 }
         );

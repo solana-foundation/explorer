@@ -1,10 +1,11 @@
 'use client';
 
 import { useCluster } from '@providers/cluster';
-import { address, createSolanaRpc } from '@solana/kit';
+import { Address, address, createSolanaRpc } from '@solana/kit';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { fetchMetadataFromSeeds } from '@solana-program/program-metadata';
 import { useEffect, useState } from 'react';
+import { idlAddress } from '@coral-xyz/anchor/dist/cjs/idl';
 
 import { IDL_SEED } from '@/app/entities/program-metadata/api/getProgramCanonicalMetadata';
 
@@ -51,20 +52,20 @@ export function useIdlLastTransactionDate(
             if (!programId) return;
             try {
                 const connection = new Connection(url);
-                const programPubkey = new PublicKey(programId);
+                const programAddress = address(programId);
 
                 const [anchorTimestamp, pmpTimestamp] = await Promise.race([
                     Promise.all([
-                        fetchAnchorIdlTimestamp(connection, programPubkey),
-                        fetchPmpIdlTimestamp(connection, programId),
+                        fetchAnchorIdlTimestamp(connection, programAddress),
+                        fetchPmpIdlTimestamp(connection, programAddress),
                     ]),
                     new Promise<never>((_, reject) => {
                         abortController.signal.addEventListener('abort', () => reject(new Error('Aborted')));
                     }),
                 ]);
-
                 if (anchorTimestamp !== null && pmpTimestamp !== null) {
-                    const preferred = anchorTimestamp >= pmpTimestamp ? IdlVariant.Anchor : IdlVariant.ProgramMetadata;
+                    // Prefer PMP when timestamps are equal (newer standard)
+                    const preferred = anchorTimestamp > pmpTimestamp ? IdlVariant.Anchor : IdlVariant.ProgramMetadata;
                     setPreferredVariant(preferred);
                 } else if (anchorTimestamp !== null) {
                     setPreferredVariant(IdlVariant.Anchor);
@@ -88,15 +89,11 @@ export function useIdlLastTransactionDate(
     return preferredVariant;
 }
 
-async function fetchAnchorIdlTimestamp(connection: Connection, programPubkey: PublicKey): Promise<number | null> {
+async function fetchAnchorIdlTimestamp(connection: Connection, programAddress: Address): Promise<number | null> {
     try {
-        const [idlAddress] = PublicKey.findProgramAddressSync(
-            [Buffer.from('anchor:idl'), programPubkey.toBuffer()],
-            programPubkey
-        );
-
-        const signatures = await connection.getSignaturesForAddress(idlAddress, { limit: 1 });
-
+        const programPubkey = new PublicKey(programAddress);
+        const anchorIdlAddr = await idlAddress(programPubkey);
+        const signatures = await connection.getSignaturesForAddress(anchorIdlAddr, { limit: 1 });
         if (signatures.length > 0 && signatures[0].blockTime) {
             return signatures[0].blockTime;
         }
@@ -106,17 +103,14 @@ async function fetchAnchorIdlTimestamp(connection: Connection, programPubkey: Pu
     }
 }
 
-async function fetchPmpIdlTimestamp(connection: Connection, programId: string): Promise<number | null> {
+async function fetchPmpIdlTimestamp(connection: Connection, programAddress: Address): Promise<number | null> {
     try {
         const rpc = createSolanaRpc(connection.rpcEndpoint);
-        const programAddress = address(programId);
-
         const metadataAccount = await fetchMetadataFromSeeds(rpc, {
             authority: null,
             program: programAddress,
             seed: IDL_SEED,
         });
-
         const signatures = await connection.getSignaturesForAddress(new PublicKey(metadataAccount.address), {
             limit: 1,
         });
