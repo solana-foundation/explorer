@@ -4,6 +4,7 @@ import type { Idl } from '@coral-xyz/anchor';
 import { FormattedIdl, getIdlVersion } from '@entities/idl';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { cn } from '@shared/utils';
+import { isEnvEnabled } from '@utils/env';
 import type { RootNode } from 'codama';
 import React, { useMemo } from 'react';
 import { PlayCircle, XCircle } from 'react-feather';
@@ -103,7 +104,7 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: Idl | RootNode, s
             },
         ];
 
-        if (originalIdl && !isCodamaIdl(originalIdl)) {
+        if (originalIdl && !isCodamaIdl(originalIdl) && isEnvEnabled(process.env.NEXT_PUBLIC_INTERACTIVE_IDL_ENABLED)) {
             const version = getIdlVersion(originalIdl);
 
             /// Allow to work with modern Anchor@>=0.30

@@ -1,6 +1,6 @@
 import { AnchorProvider, type Idl as AnchorIdl, Program as AnchorProgram, type Wallet } from '@coral-xyz/anchor';
 import type { IdlInstruction } from '@coral-xyz/anchor/dist/esm/idl';
-import { formatSerdeIdl, getFormattedIdl, normalizeIdl } from '@entities/idl';
+import { formatSerdeIdl, getFormattedIdl } from '@entities/idl';
 import { type Connection, PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
 
@@ -39,8 +39,7 @@ export class AnchorInterpreter implements IdlInterpreter<AnchorIdl, AnchorUnifie
 
         const pubkey = publicKey.toBase58();
 
-        // Perform normalization against formatted Idl to fill missing address where needed
-        const properIdl = normalizeIdl(getFormattedIdl(formatSerdeIdl, idl, pubkey), pubkey);
+        const properIdl = getFormattedIdl(formatSerdeIdl, idl, pubkey);
 
         // Create Anchor program
         let anchorProgram: AnchorProgram;
