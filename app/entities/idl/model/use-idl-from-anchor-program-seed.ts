@@ -18,6 +18,7 @@ export function getProvider(url: string) {
 export function useIdlFromAnchorProgramSeed(programAddress: string, url: string, cluster?: Cluster): Idl | null {
     const key = `${programAddress}-${url}`;
     const cacheEntry = cachedAnchorProgramPromises[key];
+
     if (cacheEntry === undefined) {
         let promise;
         cluster = cluster || Cluster.MainnetBeta;

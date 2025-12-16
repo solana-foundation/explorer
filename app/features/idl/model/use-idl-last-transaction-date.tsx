@@ -1,11 +1,11 @@
 'use client';
 
+import { idlAddress } from '@coral-xyz/anchor/dist/cjs/idl';
 import { useCluster } from '@providers/cluster';
 import { Address, address, createSolanaRpc } from '@solana/kit';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { fetchMetadataFromSeeds } from '@solana-program/program-metadata';
 import { useEffect, useState } from 'react';
-import { idlAddress } from '@coral-xyz/anchor/dist/cjs/idl';
 
 import { IDL_SEED } from '@/app/entities/program-metadata/api/getProgramCanonicalMetadata';
 
