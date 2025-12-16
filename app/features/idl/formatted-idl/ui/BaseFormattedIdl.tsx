@@ -44,7 +44,7 @@ export function BaseFormattedIdl({
                         </button>
                     ))}
                 </div>
-                <div className="table-responsive e-mb-0 e-min-h-96">
+                <div className={cn('e-mb-0 e-min-h-96', activeTab.id !== 'interact' ? 'table-responsive' : '')}>
                     <ActiveTab activeTab={activeTab} />
                 </div>
             </div>
