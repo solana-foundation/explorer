@@ -1,11 +1,9 @@
 'use client';
 
-import type { Idl } from '@coral-xyz/anchor';
-import { FormattedIdl, getIdlVersion } from '@entities/idl';
+import { FormattedIdl, getIdlSpec, isInteractiveIdlSupported, type SupportedIdl } from '@entities/idl';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { cn } from '@shared/utils';
 import { isEnvEnabled } from '@utils/env';
-import type { RootNode } from 'codama';
 import React, { useMemo } from 'react';
 import { PlayCircle, XCircle } from 'react-feather';
 
@@ -19,6 +17,8 @@ import { BaseIdlTypes } from '../formatted-idl/ui/BaseIdlTypes';
 import type { FormattedIdlDataView, IdlDataKeys } from '../formatted-idl/ui/types';
 import { BaseWarningCard } from '../interactive-idl/ui/BaseWarningCard';
 import { InteractWithIdl } from '../interactive-idl/ui/InteractWithIdl';
+
+const IS_INTERACTIVE_IDL_ENABLED = isEnvEnabled(process.env.NEXT_PUBLIC_INTERACTIVE_IDL_ENABLED);
 
 type TabId = 'instructions' | 'accounts' | 'types' | 'errors' | 'constants' | 'events' | 'pdas';
 
@@ -38,7 +38,7 @@ export type InteractTab = {
 
 type Tab = DataTab | InteractTab;
 
-export function useTabs(idl: FormattedIdl | null, originalIdl: Idl | RootNode, searchStr?: string) {
+export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, searchStr?: string) {
     const tabs: Tab[] = useMemo(() => {
         if (!idl) return [];
 
@@ -104,11 +104,9 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: Idl | RootNode, s
             },
         ];
 
-        if (originalIdl && !isCodamaIdl(originalIdl) && isEnvEnabled(process.env.NEXT_PUBLIC_INTERACTIVE_IDL_ENABLED)) {
-            const version = getIdlVersion(originalIdl);
-
-            /// Allow to work with modern Anchor@>=0.30
-            const isInteractDisabled = version !== '0.30.1';
+        // Only show interactive tab for Anchor IDLs (getIdlSpec returns null for legacy and codama)
+        if (originalIdl && getIdlSpec(originalIdl) !== null && IS_INTERACTIVE_IDL_ENABLED) {
+            const isInteractDisabled = !isInteractiveIdlSupported(originalIdl);
 
             tabItems.push({
                 disabled: !idl.instructions?.length,
@@ -184,8 +182,4 @@ function InteractWithIdlTabName({ isInteractDisabled }: { isInteractDisabled: bo
             </TooltipContent>
         </Tooltip>
     );
-}
-
-function isCodamaIdl(idl: Idl | RootNode): idl is RootNode {
-    return 'standard' in idl && idl.standard === 'codama';
 }
