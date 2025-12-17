@@ -22,7 +22,7 @@ import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
 import { VoteDetailsCard } from '@components/instruction/vote/VoteDetailsCard';
 import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
-import { useAnchorProgram } from '@providers/anchor';
+import { useAnchorProgram } from '@entities/idl';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails, useTransactionStatus } from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
@@ -41,7 +41,7 @@ import { intoTransactionInstruction } from '@utils/tx';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { useProgramMetadataIdl } from '@/app/providers/useProgramMetadataIdl';
+import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
 
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { Ed25519DetailsCard } from '../instruction/ed25519/Ed25519DetailsCard';
@@ -191,6 +191,7 @@ function InstructionCard({
 
         switch (ix.program) {
             case 'spl-token':
+            case 'spl-token-2022':
                 return (
                     <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
                         <TokenDetailsCard {...props} key={key} />

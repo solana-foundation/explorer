@@ -19,6 +19,7 @@ export function Navbar({ children }: INavbarProps) {
     const homePath = useClusterPath({ pathname: '/' });
     const featureGatesPath = useClusterPath({ pathname: '/feature-gates' });
     const supplyPath = useClusterPath({ pathname: '/supply' });
+    const programsPath = useClusterPath({ pathname: '/verified-programs' });
     const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const selectedLayoutSegments = useSelectedLayoutSegments();
@@ -26,14 +27,17 @@ export function Navbar({ children }: INavbarProps) {
         <nav className="navbar navbar-expand-lg navbar-light">
             <div className="container px-4">
                 <Link href={homePath}>
-                    <Image alt="Solana Explorer" height={22} src={Logo} width={214} />
+                    <Image alt="Solana Explorer" height={22} src={Logo} width={214} priority />
                 </Link>
 
                 <button className="navbar-toggler" type="button" onClick={navHandlers.toggle}>
                     <span className="navbar-toggler-icon"></span>
                 </button>
 
-                <div className="navbar-children d-flex align-items-center flex-grow-1 w-100 h-100 d-none d-lg-block">
+                <div
+                    className="navbar-children d-flex align-items-center flex-grow-1 h-100 d-none d-lg-block"
+                    style={{ minWidth: 0 }}
+                >
                     {children}
                 </div>
 
@@ -53,6 +57,14 @@ export function Navbar({ children }: INavbarProps) {
                                 href={supplyPath}
                             >
                                 Supply
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link${selectedLayoutSegment === 'programs' ? ' active' : ''}`}
+                                href={programsPath}
+                            >
+                                Programs
                             </Link>
                         </li>
                         <li className="nav-item">

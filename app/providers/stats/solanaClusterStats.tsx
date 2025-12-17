@@ -1,10 +1,10 @@
 'use client';
 
 import { useCluster } from '@providers/cluster';
+import { createSolanaRpc } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
 import useTabVisibility from '@utils/use-tab-visibility';
 import React from 'react';
-import { createSolanaRpc } from 'web3js-experimental';
 
 import { DashboardInfo, DashboardInfoActionType, dashboardInfoReducer, EpochInfo } from './solanaDashboardInfo';
 import {
@@ -29,7 +29,7 @@ export enum ClusterStatsStatus {
 }
 
 const initialPerformanceInfo: PerformanceInfo = {
-    avgTps: 0,
+    avgTps: null,
     historyMaxTps: 0,
     perfHistory: {
         long: [],

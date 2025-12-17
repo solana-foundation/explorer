@@ -94,6 +94,11 @@ function StakingComponent() {
         return <ErrorCard text={supply} retry={fetchData} />;
     }
 
+    // Don't display the staking card if the supply is 0
+    if (supply.circulating === BigInt(0) && supply.total === BigInt(0)) {
+        return null;
+    }
+
     // Calculate to 2dp for accuracy, then display as 1
     const circulatingPercentage = percentage(supply.circulating, supply.total, 2).toFixed(1);
 

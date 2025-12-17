@@ -1,6 +1,5 @@
 import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 import React from 'react';
-import ReactJson from 'react-json-view';
 import {
     Attestation as SasAttestation,
     convertSasSchemaToBorshSchema,
@@ -8,6 +7,7 @@ import {
     Schema as SasSchema,
 } from 'sas-lib';
 
+import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
 import {
     decodeAccount,
     decodeWithType,
@@ -44,7 +44,7 @@ function SchemaCard({ schema }: { schema: SasSchema }) {
             </div>
 
             <div className="card metadata-json-viewer m-4">
-                <ReactJson src={borshSchema['schema']} theme={'solarized'} style={{ padding: 25 }} name={false} />
+                <ReactJson src={borshSchema['schema']} style={{ padding: 25 }} name={false} />
             </div>
         </div>
     );
@@ -81,7 +81,7 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
 
             {decoded ? (
                 <div className="card metadata-json-viewer m-4">
-                    <ReactJson src={decoded} theme={'solarized'} style={{ padding: 25 }} name={false} />
+                    <ReactJson src={decoded} style={{ padding: 25 }} name={false} />
                 </div>
             ) : (
                 <div

@@ -1,21 +1,27 @@
+import { CompressedNftAccountHeader } from '@components/account/CompressedNftCard';
 import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
 import { isNFTokenAccount } from '@components/account/nftoken/isNFTokenAccount';
 import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
-import { Identicon } from '@components/common/Identicon';
-import { Account, isTokenProgramData, TokenProgramData, useMintAccountInfo } from '@providers/accounts';
+import {
+    Account,
+    isTokenProgramData,
+    isUpgradeableLoaderAccountData,
+    TokenProgramData,
+    useMintAccountInfo,
+} from '@providers/accounts';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
+import { useMetadataJsonLink } from '@providers/compressed-nft';
+import { MintAccountInfo } from '@validators/accounts/token';
 import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension';
+import Image from 'next/image';
 import React, { Suspense, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'superstruct';
 
-import { CompressedNftAccountHeader } from '@/app/components/account/CompressedNftCard';
+import { ProgramHeader } from '@/app/components/shared/account/ProgramHeader';
 import { getProxiedUri } from '@/app/features/metadata/utils';
-import { useMetadataJsonLink } from '@/app/providers/compressed-nft';
-import { FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
-import { MintAccountInfo } from '@/app/validators/accounts/token';
-
-const IDENTICON_WIDTH = 64;
+import TokenLogoPlaceholder from '@/app/img/logos-solana/low-contrast-solana-logo.svg';
+import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 
 export function AccountHeader({
     address,
@@ -31,7 +37,10 @@ export function AccountHeader({
     const mintInfo = useMintAccountInfo(address);
 
     const parsedData = account?.data.parsed;
+
     const isToken = parsedData && isTokenProgramData(parsedData) && parsedData?.parsed.type === 'mint';
+    const isProgram = parsedData && isUpgradeableLoaderAccountData(parsedData) && parsedData?.parsed.type === 'program';
+    const isNativeProgram = Boolean(account?.executable);
 
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
@@ -49,6 +58,14 @@ export function AccountHeader({
             );
         }
         return <TokenMintHeader address={address} mintInfo={mintInfo} parsedData={parsedData} tokenInfo={tokenInfo} />;
+    }
+
+    if (isProgram) {
+        return <ProgramHeader address={address} parsedData={parsedData} />;
+    }
+
+    if (isNativeProgram) {
+        return <ProgramHeader address={address} />;
     }
 
     const fallback = (
@@ -91,11 +108,10 @@ function TokenMintHeader({
         () => (
             <TokenMintHeaderCard
                 token={tokenInfo ? tokenInfo : { logoURI: undefined, name: undefined }}
-                address={address}
                 unverified={tokenInfo ? !tokenInfo.verified : false}
             />
         ),
-        [address, tokenInfo]
+        [tokenInfo]
     );
 
     if (metadataPointerExtension && metadataExtension) {
@@ -120,8 +136,9 @@ function TokenMintHeader({
         const token = {
             logoURI: parsedData?.nftData?.json?.image,
             name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
+            symbol: parsedData?.nftData?.metadata.data.symbol,
         };
-        return <TokenMintHeaderCard token={token} address={address} unverified={!tokenInfo?.verified} />;
+        return <TokenMintHeaderCard token={token} unverified={!tokenInfo?.verified} />;
     } else if (tokenInfo) {
         return defaultCard;
     }
@@ -144,6 +161,7 @@ function Token22MintHeader({
     const headerTokenMetadata = {
         logoURI: '',
         name: tokenMetadata.name,
+        symbol: tokenMetadata.symbol,
     };
     if (metadata) {
         headerTokenMetadata.logoURI = metadata.image;
@@ -152,22 +170,21 @@ function Token22MintHeader({
     // Handles the basic case where MetadataPointer is referencing the Token Metadata extension directly
     // Does not handle the case where MetadataPointer is pointing at a separate account.
     if (metadataAddress?.toString() === address) {
-        return <TokenMintHeaderCard address={address} token={headerTokenMetadata} unverified={false} />;
+        return <TokenMintHeaderCard token={headerTokenMetadata} unverified={false} />;
     }
     throw new Error('Metadata loading for non-token 2022 programs is not yet supported');
 }
 
 function TokenMintHeaderCard({
-    address,
     token,
     unverified,
 }: {
-    address: string;
-    token: { name?: string | undefined; logoURI?: string | undefined };
+    token: { name?: string | undefined; logoURI?: string | undefined; symbol?: string | undefined };
     unverified: boolean;
 }) {
+    const logoURI = token.logoURI ? getProxiedUri(token.logoURI) : undefined;
     return (
-        <div className="row align-items-end">
+        <div className="row align-items-center">
             {unverified && (
                 <div className="alert alert-warning alert-scam" role="alert">
                     Warning! Token names and logos are not unique. This token may have spoofed its name and logo to look
@@ -195,28 +212,33 @@ function TokenMintHeaderCard({
             )}
             <div className="col-auto">
                 <div className="avatar avatar-lg header-avatar-top">
-                    {token?.logoURI ? (
+                    {logoURI ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                            alt="token logo"
+                            src={logoURI}
+                            alt="Token logo"
+                            height={64}
+                            width={64}
                             className="avatar-img rounded-circle border border-4 border-body"
-                            height={16}
-                            src={token.logoURI}
-                            width={16}
                         />
                     ) : (
-                        <Identicon
-                            address={address}
-                            className="avatar-img rounded-circle border border-body identicon-wrapper"
-                            style={{ width: IDENTICON_WIDTH }}
+                        <Image
+                            src={TokenLogoPlaceholder}
+                            alt="Token logo placeholder"
+                            height={64}
+                            width={64}
+                            className="e-h-full e-w-full e-rounded-full e-border e-border-gray-200 e-object-cover"
                         />
                     )}
                 </div>
             </div>
 
-            <div className="col mb-3 ms-n3 ms-md-n2">
+            <div className="col ms-n3 ms-md-n2">
                 <h6 className="header-pretitle">Token</h6>
                 <h2 className="header-title">{token?.name || 'Unknown Token'}</h2>
+                <div className="header-pretitle no-overflow-with-ellipsis">
+                    {token?.symbol ? token.symbol : 'No Symbol was found'}
+                </div>
             </div>
         </div>
     );

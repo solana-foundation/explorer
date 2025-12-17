@@ -19,6 +19,7 @@ import { VoteAccountSection } from '@components/account/VoteAccountSection';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Header } from '@components/Header';
+import { useAnchorProgram } from '@entities/idl';
 import {
     Account,
     AccountsProvider,
@@ -29,9 +30,9 @@ import {
     useFetchAccountInfo,
 } from '@providers/accounts';
 import FLAGGED_ACCOUNTS_WARNING from '@providers/accounts/flagged-accounts';
-import { useAnchorProgram } from '@providers/anchor';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
+import { Address } from '@solana/kit';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
@@ -44,13 +45,13 @@ import React, { PropsWithChildren, Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
 import useSWRImmutable from 'swr/immutable';
-import { Address } from 'web3js-experimental';
 
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
+import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
+import { hasTokenMetadata } from '@/app/features/metadata';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
-import { useProgramMetadataIdl } from '@/app/providers/useProgramMetadataIdl';
 import { isAttestationAccount } from '@/app/utils/attestation-service';
 import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import { FullTokenInfo, getFullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
@@ -457,6 +458,14 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
         tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplex`]);
     }
 
+    if (hasTokenMetadata(parsedData)) {
+        tabs.push({
+            path: 'metadata',
+            slug: 'metadata',
+            title: 'Metadata',
+        });
+    }
+
     // Compressed NFT tabs
     if ((!account.data.raw || account.data.raw.length === 0) && !account.data.parsed) {
         tabs.push(
@@ -576,7 +585,7 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
             title: 'Extensions',
         };
         tabComponents.push({
-            component: <TokenExtensionsLink tab={extensionsTab} address={pubkey.toString()} />,
+            component: <TokenExtensionsLink key={extensionsTab.slug} tab={extensionsTab} address={pubkey.toString()} />,
             tab: extensionsTab,
         });
     }
@@ -632,6 +641,7 @@ function ProgramIdlLink({ tab, address, pubkey }: { tab: Tab; address: string; p
     const anchorProgramPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
+
     if (!idl && !programMetadataIdl) {
         return null;
     }

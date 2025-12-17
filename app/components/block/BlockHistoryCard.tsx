@@ -40,10 +40,11 @@ const useQueryAccountFilter = (query: ReadonlyURLSearchParams): PublicKey | null
     return null;
 };
 
-type SortMode = 'index' | 'compute' | 'fee' | 'reservedCUs';
+type SortMode = 'index' | 'compute' | 'txnCost' | 'fee' | 'reservedCUs';
 const useQuerySort = (query: ReadonlyURLSearchParams): SortMode => {
     const sort = query.get('sort');
     if (sort === 'compute') return 'compute';
+    if (sort === 'txnCost') return 'txnCost';
     if (sort === 'fee') return 'fee';
     if (sort === 'reservedCUs') return 'reservedCUs';
     return 'index';
@@ -55,6 +56,7 @@ type TransactionWithInvocations = {
     meta: ConfirmedTransactionMeta | null;
     invocations: Map<string, number>;
     computeUnits?: number;
+    costUnits?: number;
     reservedComputeUnits?: number;
     logTruncated: boolean;
 };
@@ -114,11 +116,19 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                 // ignore parsing errors because some old logs aren't parsable
             }
 
+            let costUnits: number | undefined = undefined;
+            try {
+                costUnits = tx.meta?.costUnits ?? 0;
+            } catch (err) {
+                // ignore parsing errors because some old logs aren't parsable
+            }
+
             // Calculate reserved compute units
             const reservedComputeUnits = estimateRequestedComputeUnits(tx, epoch, cluster);
 
             return {
                 computeUnits,
+                costUnits,
                 index,
                 invocations,
                 logTruncated,
@@ -161,6 +171,8 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
 
         if (sortMode === 'compute' && showComputeUnits) {
             filteredTxs.sort((a, b) => b.computeUnits! - a.computeUnits!);
+        } else if (sortMode === 'txnCost') {
+            filteredTxs.sort((a, b) => b.costUnits! - a.costUnits!);
         } else if (sortMode === 'fee') {
             filteredTxs.sort((a, b) => (b.meta?.fee || 0) - (a.meta?.fee || 0));
         } else if (sortMode === 'reservedCUs') {
@@ -270,6 +282,18 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                         Compute
                                     </th>
                                 )}
+                                <th
+                                    className="text-muted c-pointer"
+                                    onClick={() => {
+                                        const additionalParams = new URLSearchParams(currentSearchParams?.toString());
+                                        additionalParams.set('sort', 'txnCost');
+                                        router.push(
+                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams)
+                                        );
+                                    }}
+                                >
+                                    Txn Cost
+                                </th>
                                 <th className="text-muted">Invoked Programs</th>
                             </tr>
                         </thead>
@@ -318,6 +342,11 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                                     : 'Unknown'}
                                             </td>
                                         )}
+                                        <td>
+                                            {tx.costUnits !== undefined
+                                                ? new Intl.NumberFormat('en-US').format(tx.costUnits)
+                                                : 'Unknown'}
+                                        </td>
                                         <td>
                                             {tx.invocations.size === 0
                                                 ? 'NA'

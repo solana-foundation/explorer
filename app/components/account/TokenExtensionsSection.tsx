@@ -1,8 +1,8 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@components/shared/ui/accordion';
 import { SyntheticEvent, useCallback, useMemo, useRef, useState } from 'react';
 import { Code, ExternalLink } from 'react-feather';
-import ReactJson from 'react-json-view';
 
+import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
 import { TableCardBodyHeaded } from '@/app/components/common/TableCardBody';
 import { Badge } from '@/app/components/shared/ui/badge';
 import {
@@ -118,7 +118,7 @@ function TokenExtensionAccordionItem({
                     </div>
                 ) : (
                     <div className="e-p-4">
-                        <ReactJson src={parsedExtension.parsed || {}} theme={'solarized'} style={{ padding: 25 }} />
+                        <ReactJson src={parsedExtension.parsed || {}} style={{ padding: 25 }} />
                     </div>
                 )}
             </AccordionContent>

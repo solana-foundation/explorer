@@ -54,6 +54,12 @@ export function parseProgramLogs(logs: string[], error: TransactionError | null,
                 style: 'muted',
                 text: log,
             });
+        } else if (log.startsWith('Program data:')) {
+            prettyLogs[prettyLogs.length - 1].logs.push({
+                prefix: prefixBuilder(depth),
+                style: 'muted',
+                text: log,
+            });
         } else if (log.startsWith('Log truncated')) {
             prettyLogs[prettyLogs.length - 1].truncated = true;
         } else {
@@ -163,4 +169,32 @@ export function parseProgramLogs(logs: string[], error: TransactionError | null,
     }
 
     return prettyLogs;
+}
+
+/**
+ * Extracts event data from transaction logs for a specific instruction.
+ * Returns an array of base64-encoded event data strings.
+ */
+export function extractEventsFromLogs(logs: string[], instructionIndex: number): string[] {
+    const events: string[] = [];
+    let currentIxIndex = -1;
+    let depth = 0;
+
+    for (const log of logs) {
+        // Track program invocations to match instruction indices
+        if (log.match(/Program \w* invoke \[(\d)\]/)) {
+            if (depth === 0) {
+                currentIxIndex++;
+            }
+            depth++;
+        } else if (log.includes('success') || log.includes('failed')) {
+            depth--;
+        } else if (log.startsWith('Program data:') && currentIxIndex === instructionIndex) {
+            // Extract base64-encoded event data for the current instruction
+            const eventData = log.slice('Program data: '.length).trim();
+            events.push(eventData);
+        }
+    }
+
+    return events;
 }

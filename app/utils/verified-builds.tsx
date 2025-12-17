@@ -1,8 +1,8 @@
+import { useAnchorProgram } from '@entities/idl';
 import { sha256 } from '@noble/hashes/sha256';
 import { Connection, PublicKey } from '@solana/web3.js';
 import useSWRImmutable from 'swr/immutable';
 
-import { useAnchorProgram } from '../providers/anchor';
 import { useCluster } from '../providers/cluster';
 import { ProgramDataAccountInfo } from '../validators/accounts/upgradeable-program';
 import { Cluster } from './cluster';
@@ -41,6 +41,7 @@ export type OsecInfo = {
 
 const TRUSTED_SIGNERS: Record<string, string> = {
     '11111111111111111111111111111111': 'Explorer',
+    '5vJwnLeyjV8uNJSp1zn7VLW8GwiQbcsQbGaVSwRmkE4r': 'Foundation',
     '9VWiUUhgNoRwTH5NVehYJEDwcotwYX3VgW4MChiHPAqU': 'OtterSecurity',
     CyJj5ejJAUveDXnLduJbkvwjxcmWJNqCuB9DR7AExrHn: 'Explorer',
 };

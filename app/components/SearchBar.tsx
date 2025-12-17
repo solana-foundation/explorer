@@ -3,7 +3,7 @@
 import { useHotkeys } from '@mantine/hooks';
 import { useCluster } from '@providers/cluster';
 import { VersionedMessage } from '@solana/web3.js';
-import { Cluster } from '@utils/cluster';
+import { Cluster, clusterSlug } from '@utils/cluster';
 import { SearchElement } from '@utils/token-search';
 import bs58 from 'bs58';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -18,6 +18,7 @@ import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { FeatureInfoType } from '../utils/feature-gate/types';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
 import { searchTokens } from '../utils/token-search';
+import { pickClusterParams } from '../utils/url';
 import { useDebouncedAsync } from '../utils/use-debounce-async';
 import { MIN_MESSAGE_LENGTH } from './inspector/RawInputCard';
 
@@ -48,7 +49,14 @@ export function SearchBar() {
         if (meta.action === 'select-option') {
             // Always use the pathname directly if it contains query params
             if (pathname.includes('?')) {
-                router.push(pathname);
+                const [path, currentSearchParamsString] = pathname.split('?');
+                // break pathname to preserve existing params and allow to keep same cluster
+                const nextPath = pickClusterParams(
+                    path,
+                    new URLSearchParams(currentSearchParamsString),
+                    new URLSearchParams(`cluster=${clusterSlug(cluster)}`)
+                );
+                router.push(nextPath);
             } else {
                 // Only preserve existing query params for paths without their own params
                 const nextQueryString = searchParams?.toString();

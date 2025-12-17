@@ -13,6 +13,7 @@ import { SignatureContext } from '@components/instruction/SignatureContext';
 import { InstructionsSection } from '@components/transaction/InstructionsSection';
 import { ProgramLogSection } from '@components/transaction/ProgramLogSection';
 import { TokenBalancesCard } from '@components/transaction/TokenBalancesCard';
+import { CUProfilingSection } from '@features/cu-profiling';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import {
@@ -190,6 +191,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const fee = transactionWithMeta?.meta?.fee;
     const computeUnitsConsumed = transactionWithMeta?.meta?.computeUnitsConsumed;
+    const costUnits = transactionWithMeta?.meta?.costUnits;
     const transaction = transactionWithMeta?.transaction;
     const blockhash = transaction?.message.recentBlockhash;
     const epoch = clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(info.slot)) : undefined;
@@ -345,6 +347,13 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                     </tr>
                 )}
 
+                {costUnits !== undefined && (
+                    <tr>
+                        <td>Transaction cost</td>
+                        <td className="text-lg-end">{costUnits.toLocaleString('en-US')}</td>
+                    </tr>
+                )}
+
                 {reservedCUs !== undefined && (
                     <tr>
                         <td>Reserved CUs</td>
@@ -392,6 +401,7 @@ function DetailsSection({ signature }: SignatureProps) {
 
     return (
         <>
+            <CUProfilingSection signature={signature} />
             <AccountsCard signature={signature} />
             <TokenBalancesCard signature={signature} />
             <InstructionsSection signature={signature} />

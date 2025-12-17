@@ -2,7 +2,7 @@ import { ClusterStatsStatus } from './solanaClusterStats';
 
 export type PerformanceInfo = {
     status: ClusterStatsStatus;
-    avgTps: number;
+    avgTps: number | null;
     historyMaxTps: number;
     perfHistory: {
         short: (number | null)[];
@@ -63,10 +63,10 @@ export function performanceInfoReducer(state: PerformanceInfo, action: Performan
                     return sample.numTransactions !== BigInt(0);
                 })
                 .map(sample => {
-                    return Number(sample.numTransactions / BigInt(sample.samplePeriodSecs));
+                    return Number(sample.numTransactions) / sample.samplePeriodSecs;
                 });
 
-            const avgTps = short[0];
+            const avgTps = short[0] || null;
             const medium = downsampleByFactor(short, 4);
             const long = downsampleByFactor(medium, 3);
 
@@ -94,7 +94,7 @@ export function performanceInfoReducer(state: PerformanceInfo, action: Performan
         }
 
         case PerformanceInfoActionType.SetTransactionCount: {
-            const status = state.avgTps !== 0 ? ClusterStatsStatus.Ready : ClusterStatsStatus.Loading;
+            const status = state.avgTps != null ? ClusterStatsStatus.Ready : ClusterStatsStatus.Loading;
 
             return {
                 ...state,

@@ -96,6 +96,7 @@ interface ComputeUnitConfigEntry {
         readonly [Cluster.MainnetBeta]: number;
         readonly [Cluster.Devnet]: number;
         readonly [Cluster.Testnet]: number;
+        readonly [Cluster.Simd296]: number;
     };
 }
 
@@ -109,6 +110,7 @@ const COMPUTE_UNIT_CONFIGS: readonly ComputeUnitConfigEntry[] = [
             [Cluster.MainnetBeta]: 0,
             [Cluster.Devnet]: 0,
             [Cluster.Testnet]: 0,
+            [Cluster.Simd296]: 0,
         },
         maxComputeUnits: 48_000_000,
     },
@@ -117,6 +119,7 @@ const COMPUTE_UNIT_CONFIGS: readonly ComputeUnitConfigEntry[] = [
             [Cluster.MainnetBeta]: 770,
             [Cluster.Devnet]: 857,
             [Cluster.Testnet]: 764,
+            [Cluster.Simd296]: 0,
         },
         featureAccount: '5oMCU3JPaFLr8Zr4ct7yFA7jdk6Mw1RmB8K4u9ZbS42z',
         maxComputeUnits: 50_000_000,
@@ -127,6 +130,7 @@ const COMPUTE_UNIT_CONFIGS: readonly ComputeUnitConfigEntry[] = [
             [Cluster.MainnetBeta]: 822,
             [Cluster.Devnet]: 915,
             [Cluster.Testnet]: 812,
+            [Cluster.Simd296]: 0,
         },
         featureAccount: '6oMCUgfY6BzZ6jwB681J6ju5Bh6CjVXbd7NeWYqiXBSu',
         maxComputeUnits: 60_000_000,

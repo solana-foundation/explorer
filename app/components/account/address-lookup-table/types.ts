@@ -1,4 +1,4 @@
-import { Address } from 'web3js-experimental';
+import { Address } from '@solana/kit';
 
 const LOOKUP_TABLE_ACCOUNT_TYPE = 1;
 const PROGRAM_ID =

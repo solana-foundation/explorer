@@ -48,11 +48,14 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
 
         let totalCUs = 0;
         let totalRequestedCUs = 0;
+        let totalCostUnits = 0;
         for (const tx of block.transactions) {
             const requestedCUs = estimateRequestedComputeUnits(tx, epoch, cluster);
             const cus = tx.meta?.computeUnitsConsumed ?? 0;
+            const costUnits = tx.meta?.costUnits ?? 0;
             totalRequestedCUs += requestedCUs;
             totalCUs += cus;
+            totalCostUnits += costUnits;
         }
 
         const showSuccessfulCount = block.transactions.every(tx => tx.meta !== null);
@@ -170,11 +173,17 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
                             </tr>
                         )}
                         <tr>
-                            <td className="w-100">Compute Unit Utilization</td>
+                            <td className="w-100">Total Compute Units Consumed</td>
+                            <td className="text-lg-end font-monospace">
+                                <span>{totalCUs.toLocaleString()}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td className="w-100">Transaction Cost Utilization</td>
                             <td className="text-lg-end font-monospace">
                                 <span>
-                                    {totalCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
-                                    {Math.round((totalCUs / maxComputeUnits) * 100)}%)
+                                    {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
+                                    {Math.round((totalCostUnits / maxComputeUnits) * 100)}%)
                                 </span>
                             </td>
                         </tr>

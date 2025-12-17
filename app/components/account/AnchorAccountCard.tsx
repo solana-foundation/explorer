@@ -1,8 +1,8 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { BorshAccountsCoder } from '@coral-xyz/anchor';
 import { IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
+import { useAnchorProgram } from '@entities/idl';
 import { Account } from '@providers/accounts';
-import { useAnchorProgram } from '@providers/anchor';
 import { useCluster } from '@providers/cluster';
 import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
 import React, { useMemo } from 'react';

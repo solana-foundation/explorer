@@ -25,6 +25,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env
 .env*.local
 
 # vercel
@@ -37,6 +38,8 @@ next-env.d.ts
 # Speedy Web Compiler
 .swc/
 
-# vim
-.editorconfig
+# Storybook
 *storybook.log
+
+# Sentry Config File
+.env.sentry-build-plugin

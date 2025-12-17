@@ -935,7 +935,7 @@
     "devnet_activation_epoch": 918,
     "comms_required": null,
     "mainnet_activation_epoch": 824,
-    "description": null
+    "description": "Migrates Stake program to Core BPF, reducing client complexity and unifying validator runtime behavior"
   },
   {
     "key": "JE86WkYvTrzW8HgNmrHY7dFYpCmSptUpKupbo2AdQ9cG",
@@ -997,8 +997,8 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
-    "devnet_activation_epoch": null,
+    "testnet_activation_epoch": 830,
+    "devnet_activation_epoch": 934,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1022,8 +1022,8 @@
     "testnet_activation_epoch": 817,
     "devnet_activation_epoch": 921,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
-    "description": ""
+    "mainnet_activation_epoch": 837,
+    "description": "Corrects alt-bn128 multiplication input length to 96 bytes, preventing errors and simplifying debugging"
   },
   {
     "key": "F6UVKh1ujTEFK3en2SyAL3cdVnqko1FVEXWhmdLRu6WP",
@@ -1051,7 +1051,7 @@
     "devnet_activation_epoch": 919,
     "comms_required": null,
     "mainnet_activation_epoch": 826,
-    "description": ""
+    "description": "Improves SBPF encoding and arithmetic, simplifying verification and enabling faster big-integer operations"
   },
   {
     "key": "6oMCUgfY6BzZ6jwB681J6ju5Bh6CjVXbd7NeWYqiXBSu",
@@ -1075,7 +1075,7 @@
     "devnet_activation_epoch": 916,
     "comms_required": null,
     "mainnet_activation_epoch": 823,
-    "description": ""
+    "description": "Raises block limits to 60M CUs, expanding network capacity for more transactions"
   },
   {
     "key": "sProgVaNWkYdP2eTRAy1CPrgb3b9p8yXCASrPEqo6VJ",
@@ -1089,6 +1089,50 @@
     "owners": [],
     "min_agave_versions": [
       "v2.3.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "P1BCUMpAC7V2GRBRiJCNUgpMyWZhoqt3LKo712ePqsz",
+    "title": "Raise Block Limits to 100M CU",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0286-raise-block-limits-to-100M.md"
+    ],
+    "simds": [
+      "0286"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "htsptAwi2yRoZH83SKaUXykeZGtZHgxkS2QwW1pssR8",
+    "title": "Increase Account Limit to 40% of Block CU",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0306-raise-account-cu-limits.md"
+    ],
+    "simds": [
+      "0306"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.0.0"
     ],
     "min_fd_versions": [],
     "min_jito_versions": [],

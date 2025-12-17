@@ -25,11 +25,19 @@ export default async function FeatureGatePage({ params: { address } }: Props) {
     const feature = getFeatureInfo(address);
     const data = await fetchFeatureGateInformation(feature);
 
-    // remark-gfm won't handle github-flavoured-markdown with a table present at it
-    // TODO: figure out a configuration to render GFM table correctly
     return (
         <FeatureGateCard>
-            <ReactMarkdown remarkPlugins={[remarkGFM, remarkFrontmatter]}>{data[0]}</ReactMarkdown>
+            <ReactMarkdown
+                remarkPlugins={[remarkGFM, remarkFrontmatter]}
+                components={{
+                    h2: ({ children }) => <h2 className="e-mb-2 e-mt-5 e-text-gray-300">{children}</h2>,
+                    li: ({ children }) => <li className="e-mb-1 e-text-gray-400">{children}</li>,
+                    p: ({ children }) => <p className="e-mb-4 e-mt-0 e-text-gray-400">{children}</p>,
+                    table: ({ children }) => <table className="table table-sm">{children}</table>,
+                }}
+            >
+                {data[0]}
+            </ReactMarkdown>
         </FeatureGateCard>
     );
 }
