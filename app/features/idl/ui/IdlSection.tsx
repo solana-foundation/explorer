@@ -1,5 +1,4 @@
 import type { SupportedIdl } from '@entities/idl';
-import { useDebounceCallback } from '@react-hook/debounce';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
@@ -28,8 +27,6 @@ export function IdlSection({
     const [isExpanded, setIsExpanded] = useState(false);
     const [isRawIdlView, setIsRawIdlView] = useState(false);
 
-    const onSearchIdl = useDebounceCallback(onSearchChange, 1000);
-
     const idlBase64 = useMemo(() => {
         return Buffer.from(JSON.stringify(idl, null, 2)).toString('base64');
     }, [idl]);
@@ -56,7 +53,7 @@ export function IdlSection({
                                 variant="dark"
                                 className="e-pl-9"
                                 value={searchStr}
-                                onChange={e => onSearchIdl(e.target.value)}
+                                onChange={e => onSearchChange(e.target.value)}
                             />
                         </div>
                     )}
