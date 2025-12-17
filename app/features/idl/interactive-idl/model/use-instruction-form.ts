@@ -1,5 +1,5 @@
 import type { ArgField, InstructionAccountData, InstructionData, NestedInstructionAccountsData } from '@entities/idl';
-import { Path, SubmitHandler, useForm } from 'react-hook-form';
+import { type Path, type SubmitHandler, useForm, type UseFormSetValue } from 'react-hook-form';
 
 import { isRequiredArg } from '../lib/instruction-args';
 
@@ -13,6 +13,16 @@ export type AccountFormValueMap = Record<string, string | Record<string, string>
 export type InstructionFormData = {
     accounts: Record<string, AccountFormValueMap>;
     arguments: Record<string, Record<string, string>>;
+};
+
+export type FormValue = Parameters<UseFormSetValue<InstructionFormData>>[1];
+
+export type InstructionFormFieldNames = {
+    account: (
+        account: InstructionAccountData | NestedInstructionAccountsData,
+        nestedAccount?: InstructionAccountData
+    ) => Path<InstructionFormData>;
+    argument: (arg: ArgField) => Path<InstructionFormData>;
 };
 
 export function useInstructionForm({
