@@ -150,14 +150,9 @@ function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
                                         key={groupName}
                                         heading={groupName}
                                         className={cn(
-                                            '[&_[cmdk-group-heading]]:e-px-4',
-                                            '[&_[cmdk-group-heading]]:e-py-1',
-                                            '[&_[cmdk-group-heading]]:e-text-[10px]',
-                                            '[&_[cmdk-group-heading]]:e-font-medium',
-                                            '[&_[cmdk-group-heading]]:e-text-heavy-metal-400',
-                                            '[&_[cmdk-group-heading]]:e-uppercase',
-                                            '[&_[cmdk-group-heading]]:e-tracking-wider',
-                                            '[&_[cmdk-group-heading]]:e-select-none'
+                                            '[&_[cmdk-group-heading]]:e-px-4 [&_[cmdk-group-heading]]:e-py-1',
+                                            '[&_[cmdk-group-heading]]:e-text-[10px] [&_[cmdk-group-heading]]:e-font-medium [&_[cmdk-group-heading]]:e-text-heavy-metal-400',
+                                            '[&_[cmdk-group-heading]]:e-select-none [&_[cmdk-group-heading]]:e-uppercase [&_[cmdk-group-heading]]:e-tracking-wider'
                                         )}
                                     >
                                         {groupItems.map(option => (
