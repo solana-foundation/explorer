@@ -35,7 +35,12 @@ vi.mock('@solana/wallet-adapter-react-ui', () => ({
 describe('WalletProvider', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.spyOn(console, 'error').mockImplementation(() => {});
         capturedOnError = undefined;
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
     });
 
     it('should show toast when skipToast is false (default)', () => {
@@ -45,8 +50,11 @@ describe('WalletProvider', () => {
             </WalletProvider>
         );
 
-        capturedOnError?.(new WalletError('Test error message'));
+        const error = new WalletError('Test error message');
+        capturedOnError?.(error);
 
+        expect(console.error).toHaveBeenCalledTimes(1);
+        expect(console.error).toHaveBeenCalledWith(error);
         expect(mockToastCustom).toHaveBeenCalledWith({
             description: 'Test error message',
             title: 'Wallet Error',
@@ -61,8 +69,11 @@ describe('WalletProvider', () => {
             </WalletProvider>
         );
 
-        capturedOnError?.(new WalletError('Test error message'));
+        const error = new WalletError('Test error message');
+        capturedOnError?.(error);
 
+        expect(console.error).toHaveBeenCalledTimes(1);
+        expect(console.error).toHaveBeenCalledWith(error);
         expect(mockToastCustom).not.toHaveBeenCalled();
     });
 });
