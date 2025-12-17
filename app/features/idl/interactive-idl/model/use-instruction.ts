@@ -256,7 +256,6 @@ export function useInstruction({
                 const signedTransaction = await wallet.signTransaction(transaction);
 
                 const signature = await connection.sendRawTransaction(signedTransaction.serialize(), {
-                    preflightCommitment: 'confirmed',
                     skipPreflight: false,
                 });
 

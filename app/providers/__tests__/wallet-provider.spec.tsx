@@ -35,6 +35,7 @@ vi.mock('@solana/wallet-adapter-react-ui', () => ({
 describe('WalletProvider', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         vi.spyOn(console, 'error').mockImplementation(() => {});
         capturedOnError = undefined;
     });
