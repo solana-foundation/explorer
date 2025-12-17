@@ -116,24 +116,6 @@ export class IdlExecutor implements IdlExecutorSpec {
 }
 
 /**
- * Perform basic normalization for arguments.
- * Needed to address complex leaf types
- * In-depth transformations should be done on the interporeter level
- */
-export function normalizeArguments(args: UnifiedArguments, interpreterName: string, enforceTuppleWrapping = false) {
-    if (interpreterName === 'anchor') {
-        if (enforceTuppleWrapping) {
-            // FIXME: we use [[ ]] ad-hoc wrapper for tests. settle that at the populator
-            return [[args]];
-        } else {
-            return args;
-        }
-    }
-    console.error('Encounter uncovered normalization variant');
-    return [];
-}
-
-/**
  * Populates accounts into format that satisfies the UnifiedAccounts
  */
 export function populateAccounts(
@@ -161,9 +143,18 @@ export function populateArguments(args: Record<string, string>, instructionName:
 /**
  * Extract "key:value" for from the "name.key:value" by provided name
  */
-export function populateValue(data: Record<string, unknown>, key: string, instructionName: string) {
+function populateValue(data: Record<string, unknown>, key: string, instructionName: string) {
     const [name, field] = key.split('.');
     if (name !== instructionName) throw new Error(`Could not populate data for ${instructionName}`);
 
     return { field, value: data[key] };
+}
+
+/**
+ * Perform basic normalization for arguments.
+ * Needed to address complex leaf types
+ * In-depth transformations should be done on the interpreter level
+ */
+function normalizeArguments(args: UnifiedArguments, _interpreterName: string) {
+    return args;
 }
