@@ -35,7 +35,7 @@ export class AnchorInterpreter implements IdlInterpreter<AnchorIdl, AnchorUnifie
         const publicKey = typeof programId === 'string' ? new PublicKey(programId) : programId;
 
         // Create provider
-        const provider = new AnchorProvider(connection, wallet, { commitment: 'confirmed' });
+        const provider = new AnchorProvider(connection, wallet);
 
         const pubkey = publicKey.toBase58();
 
