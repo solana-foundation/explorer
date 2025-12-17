@@ -176,7 +176,7 @@ function InteractWithIdlTabName({ isInteractDisabled }: { isInteractDisabled: bo
             <TooltipContent>
                 <div className="e-min-w-36 e-max-w-16">
                     {isInteractDisabled
-                        ? 'Currently we support only modern Anchor IDL'
+                        ? 'Currently we support only modern Anchor IDL >= 0.30.1'
                         : "Launch Anchor's instructions"}
                 </div>
             </TooltipContent>
