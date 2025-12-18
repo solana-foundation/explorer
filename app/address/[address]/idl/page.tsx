@@ -1,10 +1,15 @@
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
-import { ComponentProps } from 'react';
 
 import { withSentryTraceData } from '@/app/utils/with-sentry-trace-data';
 
 import IdlPageClient from './page-client';
+
+type Props = Readonly<{
+    params: {
+        address: string;
+    };
+}>;
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
     return withSentryTraceData({
@@ -13,6 +18,6 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
     });
 }
 
-export default function ProgramIDLPage(props: ComponentProps<typeof IdlPageClient>) {
-    return <IdlPageClient {...props} />;
+export default function ProgramIDLPage({ params }: Props) {
+    return <IdlPageClient address={params.address} />;
 }

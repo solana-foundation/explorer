@@ -43,6 +43,7 @@ interface ComputeUnitReserveConfig {
         readonly [Cluster.MainnetBeta]: number;
         readonly [Cluster.Devnet]: number;
         readonly [Cluster.Testnet]: number;
+        readonly [Cluster.Simd296]: number;
     };
     /** Function to get reserved compute units for a given program */
     readonly getReservedUnits: (programId: string) => number;
@@ -69,6 +70,7 @@ const COMPUTE_UNIT_RESERVE_CONFIGS: readonly ComputeUnitReserveConfig[] = [
             [Cluster.MainnetBeta]: 0,
             [Cluster.Devnet]: 0,
             [Cluster.Testnet]: 0,
+            [Cluster.Simd296]: 0,
         },
         description: 'Initial configuration - no built-in program optimization',
         getReservedUnits: (_programId: string) => DEFAULT_COMPUTE_UNITS,
@@ -78,6 +80,7 @@ const COMPUTE_UNIT_RESERVE_CONFIGS: readonly ComputeUnitReserveConfig[] = [
             [Cluster.MainnetBeta]: 759,
             [Cluster.Devnet]: 842,
             [Cluster.Testnet]: 750,
+            [Cluster.Simd296]: 0,
         },
         description: 'Built-in programs use minimal compute units',
         featureAccount: 'C9oAhLxDBm3ssWtJx1yBGzPY55r2rArHmN1pbQn6HogH',

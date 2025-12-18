@@ -9,7 +9,7 @@ import type { NeodymeSecurityTXT, PmpSecurityTXT } from '../lib/types';
 
 export function useSecurityTxt(
     address: string,
-    parsedData: { programData?: ProgramDataAccountInfo }
+    parsedData?: { programData?: ProgramDataAccountInfo }
 ): NeodymeSecurityTXT | PmpSecurityTXT | undefined {
     const { url, cluster } = useCluster();
 
@@ -21,7 +21,7 @@ export function useSecurityTxt(
         securityTXT = programMetadataSecurityTxt;
     }
 
-    if (!securityTXT && parsedData.programData) {
+    if (!securityTXT && parsedData?.programData) {
         const { securityTXT: programDataSecurityTxt } = fromProgramData(parsedData.programData);
         securityTXT = programDataSecurityTxt;
     }

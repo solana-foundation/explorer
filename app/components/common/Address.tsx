@@ -10,6 +10,7 @@ import React from 'react';
 import { useState } from 'react';
 import useAsyncEffect from 'use-async-effect';
 
+import { EditIcon, NicknameEditor, useNickname } from '@/app/features/nicknames';
 import { getTokenInfoWithoutOnChainFallback } from '@/app/utils/token-info';
 
 import { Copyable } from './Copyable';
@@ -44,6 +45,8 @@ export function Address({
     const address = pubkey.toBase58();
     const { cluster } = useCluster();
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
+    const [showNicknameEditor, setShowNicknameEditor] = useState(false);
+    const nickname = useNickname(address);
 
     const display = displayAddress(address, cluster, tokenLabelInfo);
     if (truncateUnknown && address === display) {
@@ -70,6 +73,9 @@ export function Address({
         addressLabel = overrideText;
     }
 
+    // Prepend nickname if exists
+    const displayText = nickname ? `"${nickname}" (${addressLabel})` : addressLabel;
+
     const handleMouseEnter = (text: string) => {
         const elements = document.querySelectorAll(`[data-address="${text}"]`);
         elements.forEach(el => {
@@ -85,22 +91,39 @@ export function Address({
     };
 
     const content = (
-        <Copyable text={address}>
-            <span
-                data-address={address}
-                className="font-monospace"
-                onMouseEnter={() => handleMouseEnter(address)}
-                onMouseLeave={() => handleMouseLeave(address)}
+        <div className="d-flex align-items-center gap-2">
+            <Copyable text={address}>
+                <span
+                    data-address={address}
+                    className="font-monospace"
+                    onMouseEnter={() => handleMouseEnter(address)}
+                    onMouseLeave={() => handleMouseLeave(address)}
+                    title={nickname ? displayText : undefined}
+                >
+                    {link ? (
+                        <Link
+                            className={truncate || nickname ? 'text-truncate address-truncate' : ''}
+                            href={addressPath}
+                        >
+                            {displayText}
+                        </Link>
+                    ) : (
+                        <span className={truncate || nickname ? 'text-truncate address-truncate' : ''}>
+                            {displayText}
+                        </span>
+                    )}
+                </span>
+            </Copyable>
+            <button
+                className="btn btn-sm btn-link p-0 text-muted"
+                onClick={() => setShowNicknameEditor(true)}
+                title="Edit nickname"
+                style={{ fontSize: '0.875rem', lineHeight: 1 }}
             >
-                {link ? (
-                    <Link className={truncate ? 'text-truncate address-truncate' : ''} href={addressPath}>
-                        {addressLabel}
-                    </Link>
-                ) : (
-                    <span className={truncate ? 'text-truncate address-truncate' : ''}>{addressLabel}</span>
-                )}
-            </span>
-        </Copyable>
+                <EditIcon />
+            </button>
+            {showNicknameEditor && <NicknameEditor address={address} onClose={() => setShowNicknameEditor(false)} />}
+        </div>
     );
 
     return (

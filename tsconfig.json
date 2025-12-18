@@ -22,8 +22,11 @@
         "paths": {
             "@/*": ["./*"],
             "@components/*": ["./app/components/*"],
+            "@entities/*": ["./app/entities/*"],
+            "@features/*": ["./app/features/*"],
             "@img/*": ["./app/img/*"],
             "@providers/*": ["./app/providers/*"],
+            "@shared/*": ["./app/components/shared/*"],
             "@utils/*": ["./app/utils/*"],
             "@validators/*": ["./app/validators/*"]
         }
