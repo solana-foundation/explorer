@@ -1,3 +1,4 @@
+import { getIdlSpecType } from '@entities/idl/model/converters/convert-legacy-idl';
 import type { Connection, PublicKey, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 
 import type { IdlInterpreter } from '../idl-interpreter.d';
@@ -12,9 +13,7 @@ export class CodamaInterpreter implements IdlInterpreter<any, UnifiedProgram> {
     name = CodamaInterpreter.NAME;
 
     canHandle(idl: any): boolean {
-        // Check for Codama IDL based on the standard field
-        // This is the canonical way to identify Codama IDLs in the codebase
-        return Boolean(idl) && typeof idl === 'object' && idl.standard === 'codama';
+        return getIdlSpecType(idl) === CodamaInterpreter.NAME;
     }
 
     async createProgram(
