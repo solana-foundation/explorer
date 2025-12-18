@@ -145,7 +145,6 @@ export function useInstruction({
         }
     }, [enabled, idl, programId, executor, unifiedWallet, interpreterName, setProgram]);
 
-    // TODO: move to separate effect
     // Track initialization key to prevent re-runs
     const initKeyRef = useRef<string>('');
     // Single effect to handle initialization
