@@ -20,9 +20,13 @@ export class AnchorInterpreter implements IdlInterpreter<AnchorIdl, AnchorUnifie
             return false;
         }
 
+        const isString = (value: unknown): value is string => typeof value === 'string';
+
+        // Modern Anchor IDL (>= 0.30.0): has address at root, metadata (version or spec), and instructions
         return (
-            (Boolean(idl.name) && Boolean(idl.version) && Boolean(idl.instructions)) ||
-            (Boolean(idl.version) && Boolean(idl?.metadata))
+            isString(idl.address) &&
+            (isString(idl.metadata?.version) || isString(idl.metadata?.spec)) &&
+            Array.isArray(idl.instructions)
         );
     }
 
