@@ -1,6 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
-import { ok } from 'assert';
 import { vi } from 'vitest';
 
 import { MetaplexFilesCard } from '../MetaplexFilesCard';
