@@ -1,10 +1,4 @@
-import {
-    AccountInfo,
-    clusterApiUrl,
-    ConfirmedSignatureInfo,
-    Connection,
-    PublicKey,
-} from '@solana/web3.js';
+import { AccountInfo, clusterApiUrl, ConfirmedSignatureInfo, Connection, PublicKey } from '@solana/web3.js';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { vi } from 'vitest';
@@ -28,14 +22,13 @@ type SerializedUint8Array = {
 };
 
 function isPublicKey(value: unknown): value is PublicKey {
-    const res = (
+    const res =
         value !== null &&
         typeof value === 'object' &&
         'toBase58' in value &&
         typeof (value as any).toBase58 === 'function' &&
         'toBytes' in value &&
-        typeof (value as any).toBytes === 'function'
-    );
+        typeof (value as any).toBytes === 'function';
     return res;
 }
 
@@ -56,23 +49,24 @@ function isUint8Array(value: unknown): value is Uint8Array {
 
 type SerializedType = SerializedBigInt | SerializedPublicKey | SerializedUint8Array;
 
-
 if (!existsSync(FIXTURES_DIR)) {
     mkdirSync(FIXTURES_DIR, { recursive: true });
 }
 
 function hashParams(method: string, params: any[]): string {
-    const paramsStr = params.map(p => {
-        if (typeof p === 'object' && p !== null && 'toString' in p) {
-            return p.toString();
-        }
-        return JSON.stringify(p);
-    }).join('|');
+    const paramsStr = params
+        .map(p => {
+            if (typeof p === 'object' && p !== null && 'toString' in p) {
+                return p.toString();
+            }
+            return JSON.stringify(p);
+        })
+        .join('|');
 
     let hash = 0;
     for (let i = 0; i < paramsStr.length; i++) {
         const char = paramsStr.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
+        hash = (hash << 5) - hash + char;
     }
 
     return `${method}-${Math.abs(hash).toString(36)}`;
@@ -165,12 +159,7 @@ function loadFixture(filename: string): any | null {
     }
 }
 
-function recordReplay<T>(
-    testName: string,
-    method: string,
-    params: any[],
-    realCall: () => Promise<T>
-): Promise<T> {
+function recordReplay<T>(testName: string, method: string, params: any[], realCall: () => Promise<T>): Promise<T> {
     const filename = `${testName}-${hashParams(method, params)}`;
 
     if (USE_REAL_RPC) {
@@ -187,89 +176,55 @@ function recordReplay<T>(
 
     throw new Error(
         `No fixture found for ${method} with params: ${JSON.stringify(params)}\n` +
-        `Expected fixture file: ${filename}.json\n` +
-        `To record this fixture, run tests with: TEST_USE_REAL_RPC=true npm test`
+            `Expected fixture file: ${filename}.json\n` +
+            `To record this fixture, run tests with: TEST_USE_REAL_RPC=true npm test`
     );
 }
 
-export function createMockConnection(
-    testName: string,
-    realConnection?: Connection
-): Connection {
+export function createMockConnection(testName: string, realConnection?: Connection): Connection {
     if (USE_REAL_RPC && !realConnection) {
         throw new Error(
             'TEST_USE_REAL_RPC is enabled but no real connection provided. ' +
-            'Pass a real Connection instance as the second parameter.'
+                'Pass a real Connection instance as the second parameter.'
         );
     }
 
     const mockConnection = {
-        getAccountInfo: vi.fn(async (
-            publicKey: PublicKey,
-            commitmentOrConfig?: any
-        ): Promise<AccountInfo<Buffer> | null> => {
-            return recordReplay(
-                testName,
-                'getAccountInfo',
-                [publicKey.toString(), commitmentOrConfig],
-                () => realConnection!.getAccountInfo(publicKey, commitmentOrConfig)
-            );
-        }),
+        getAccountInfo: vi.fn(
+            async (publicKey: PublicKey, commitmentOrConfig?: any): Promise<AccountInfo<Buffer> | null> => {
+                return recordReplay(testName, 'getAccountInfo', [publicKey.toString(), commitmentOrConfig], () =>
+                    realConnection!.getAccountInfo(publicKey, commitmentOrConfig)
+                );
+            }
+        ),
 
         getAddressLookupTable: vi.fn(async (accountKey: PublicKey) => {
-            return recordReplay(
-                testName,
-                'getAddressLookupTable',
-                [accountKey.toString()],
-                () => realConnection!.getAddressLookupTable(accountKey)
+            return recordReplay(testName, 'getAddressLookupTable', [accountKey.toString()], () =>
+                realConnection!.getAddressLookupTable(accountKey)
             );
         }),
 
-        getBalance: vi.fn(async (
-            publicKey: PublicKey,
-            commitmentOrConfig?: any
-        ): Promise<number> => {
-            return recordReplay(
-                testName,
-                'getBalance',
-                [publicKey.toString(), commitmentOrConfig],
-                () => realConnection!.getBalance(publicKey, commitmentOrConfig)
+        getBalance: vi.fn(async (publicKey: PublicKey, commitmentOrConfig?: any): Promise<number> => {
+            return recordReplay(testName, 'getBalance', [publicKey.toString(), commitmentOrConfig], () =>
+                realConnection!.getBalance(publicKey, commitmentOrConfig)
             );
         }),
 
-        getParsedAccountInfo: vi.fn(async (
-            publicKey: PublicKey,
-            commitmentOrConfig?: any
-        ) => {
-            return recordReplay(
-                testName,
-                'getParsedAccountInfo',
-                [publicKey.toString(), commitmentOrConfig],
-                () => realConnection!.getParsedAccountInfo(publicKey, commitmentOrConfig)
+        getParsedAccountInfo: vi.fn(async (publicKey: PublicKey, commitmentOrConfig?: any) => {
+            return recordReplay(testName, 'getParsedAccountInfo', [publicKey.toString(), commitmentOrConfig], () =>
+                realConnection!.getParsedAccountInfo(publicKey, commitmentOrConfig)
             );
         }),
 
-        getSignaturesForAddress: vi.fn(async (
-            address: PublicKey,
-            options?: any
-        ): Promise<ConfirmedSignatureInfo[]> => {
-            return recordReplay(
-                testName,
-                'getSignaturesForAddress',
-                [address.toString(), options],
-                () => realConnection!.getSignaturesForAddress(address, options)
+        getSignaturesForAddress: vi.fn(async (address: PublicKey, options?: any): Promise<ConfirmedSignatureInfo[]> => {
+            return recordReplay(testName, 'getSignaturesForAddress', [address.toString(), options], () =>
+                realConnection!.getSignaturesForAddress(address, options)
             );
         }),
 
-        getTokenAccountBalance: vi.fn(async (
-            tokenAccount: PublicKey,
-            commitment?: any
-        ) => {
-            return recordReplay(
-                testName,
-                'getTokenAccountBalance',
-                [tokenAccount.toString(), commitment],
-                () => realConnection!.getTokenAccountBalance(tokenAccount, commitment)
+        getTokenAccountBalance: vi.fn(async (tokenAccount: PublicKey, commitment?: any) => {
+            return recordReplay(testName, 'getTokenAccountBalance', [tokenAccount.toString(), commitment], () =>
+                realConnection!.getTokenAccountBalance(tokenAccount, commitment)
             );
         }),
     };
@@ -338,13 +293,14 @@ export function mockSolanaKit(options: SolanaKitMockOptions = {}) {
 
 export const mockPresets = {
     empty: (testName: string) => createMockConnection(testName),
-    forIdlTests: (testName: string, realConnection?: Connection) =>
-        createMockConnection(testName, realConnection),
+    forIdlTests: (testName: string, realConnection?: Connection) => createMockConnection(testName, realConnection),
     forInstructionTests: (testName: string, realConnection?: Connection) =>
         createMockConnection(testName, realConnection),
 };
 
-export function createRealConnection(cluster: 'mainnet-beta' | 'testnet' | 'devnet' = 'mainnet-beta'): Connection | undefined {
+export function createRealConnection(
+    cluster: 'mainnet-beta' | 'testnet' | 'devnet' = 'mainnet-beta'
+): Connection | undefined {
     if (!USE_REAL_RPC) {
         return undefined;
     }

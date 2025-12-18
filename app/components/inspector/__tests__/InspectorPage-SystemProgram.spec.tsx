@@ -95,7 +95,6 @@ vi.mock('@solana/web3.js', async () => {
     return mockSolanaWeb3('account-token-extension-row', actual);
 });
 
-
 describe("TransactionInspectorPage with SystemProgram' instructions", () => {
     const originalFetch = global.fetch;
 

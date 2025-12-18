@@ -1,9 +1,5 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
-import {
-    AddressLookupTableAccount,
-    ComputeBudgetProgram,
-    TransactionMessage,
-} from '@solana/web3.js';
+import { AddressLookupTableAccount, ComputeBudgetProgram, TransactionMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
