@@ -89,7 +89,7 @@ function preprocessForSerialization(data: any, seen = new WeakSet()): any {
     }
 
     if (seen.has(data)) {
-        throw Error(`Circular object. Cant not apply JSON.stringify()`);
+        throw Error(`Circular object. Cannot apply JSON.stringify()`);
     }
     seen.add(data);
 
