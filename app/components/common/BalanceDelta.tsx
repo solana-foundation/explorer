@@ -13,17 +13,18 @@ function toBigNumber(delta: DeltaValue): BigNumber {
 }
 
 export function BalanceDelta({ delta, isSol = false }: { delta: DeltaValue; isSol?: boolean }) {
-    const value = toBigNumber(delta);
+    const deltaValue = toBigNumber(delta);
     let sols;
 
     if (isSol) {
-        sols = <SolBalance lamports={Math.abs(value.toNumber())} />;
+        const absValue = deltaValue.abs();
+        sols = <SolBalance lamports={BigInt(absValue.toString())} />;
     }
 
-    if (value.gt(0)) {
-        return <span className="badge bg-success-soft">+{isSol ? sols : value.toString()}</span>;
-    } else if (value.lt(0)) {
-        return <span className="badge bg-warning-soft">{isSol ? <>-{sols}</> : value.toString()}</span>;
+    if (deltaValue.gt(0)) {
+        return <span className="badge bg-success-soft">+{isSol ? sols : deltaValue.toString()}</span>;
+    } else if (deltaValue.lt(0)) {
+        return <span className="badge bg-warning-soft">{isSol ? <>-{sols}</> : deltaValue.toString()}</span>;
     }
 
     return <span className="badge bg-secondary-soft">0</span>;

@@ -34,7 +34,7 @@ export function SolBalanceChangesCard({ balanceChanges }: { balanceChanges: SolB
                                     <BalanceDelta delta={change.delta} isSol />
                                 </td>
                                 <td>
-                                    <SolBalance lamports={change.postBalance.toNumber()} />
+                                    <SolBalance lamports={BigInt(change.postBalance.toString())} />
                                 </td>
                             </tr>
                         ))}

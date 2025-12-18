@@ -20,7 +20,9 @@ vi.mock('@components/common/BalanceDelta', () => ({
 }));
 
 vi.mock('@components/common/SolBalance', () => ({
-    SolBalance: ({ lamports }: { lamports: number }) => <div data-testid="sol-balance">{lamports}</div>,
+    SolBalance: ({ lamports }: { lamports: number | bigint }) => (
+        <div data-testid="sol-balance">{lamports.toString()}</div>
+    ),
 }));
 
 describe('SolBalanceChangesCard', () => {
