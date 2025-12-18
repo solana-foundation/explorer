@@ -1,15 +1,14 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import {
     AddressLookupTableAccount,
-    clusterApiUrl,
     ComputeBudgetProgram,
-    Connection,
     TransactionMessage,
 } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
 
+import { createMockConnection, createRealConnection } from '@/app/__tests__/mock-solana-rpc';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
 import { ClusterProvider } from '@/app/providers/cluster';
@@ -29,7 +28,8 @@ describe('instruction::ComputeBudgetDetailsCard', () => {
     test('should render "SetComputeUnitPrice"', async () => {
         const index = 0;
         const m = mock.deserializeMessageV0(stubs.computeBudgetMsg);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const realConnection = createRealConnection('mainnet-beta');
+        const connection = createMockConnection('instruction-compute-budget-details-card', realConnection);
         const lookups = await Promise.all(
             m.addressTableLookups.map(lookup =>
                 connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
@@ -60,7 +60,8 @@ describe('instruction::ComputeBudgetDetailsCard', () => {
     test('should render "SetComputeUnitLimit"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.computeBudgetMsg);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const realConnection = createRealConnection('mainnet-beta');
+        const connection = createMockConnection('instruction-compute-budget-details-card', realConnection);
         const lookups = await Promise.all(
             m.addressTableLookups.map(lookup =>
                 connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)

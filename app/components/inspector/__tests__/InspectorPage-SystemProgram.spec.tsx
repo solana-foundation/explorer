@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
 
+import { isUsingRealRpc } from '@/app/__tests__/mock-solana-rpc';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import { sleep } from '@/app/__tests__/mocks';
 import { GET } from '@/app/api/anchor/route';
@@ -12,7 +13,6 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { TransactionsProvider } from '@/app/providers/transactions';
 
 import { TransactionInspectorPage } from '../InspectorPage';
-
 type ColumnMatcher = {
     columnIndex: number;
     regex: RegExp;
@@ -89,6 +89,13 @@ vi.mock('next/link', () => ({
 }));
 /** end */
 
+vi.mock('@solana/web3.js', async () => {
+    const actual = await vi.importActual<typeof import('@solana/web3.js')>('@solana/web3.js');
+    const { mockSolanaWeb3 } = await import('@/app/__tests__/mock-solana-rpc');
+    return mockSolanaWeb3('account-token-extension-row', actual);
+});
+
+
 describe("TransactionInspectorPage with SystemProgram' instructions", () => {
     const originalFetch = global.fetch;
 
@@ -114,7 +121,9 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
 
     beforeEach(async () => {
         // sleep to allow not facing 429s
-        await sleep();
+        if (isUsingRealRpc()) {
+            await sleep();
+        }
 
         // Setup router mock
         const mockRouter = { push: vi.fn(), replace: vi.fn() };
