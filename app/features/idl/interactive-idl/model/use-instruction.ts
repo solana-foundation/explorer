@@ -235,14 +235,12 @@ export function useInstruction({
                     throw new Error('Unsuported instruction format');
                 }
 
-                // TODO: move tx out of use instruction and impement a transaction provider
                 // Get recent blockhash
                 const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
                 transaction.recentBlockhash = blockhash;
                 transaction.feePayer = publicKey;
 
                 // Simulate the transaction
-                // TODO: make it optional
                 const simulatedTx = await connection.simulateTransaction(
                     new VersionedTransaction(transaction.compileMessage()),
                     {
