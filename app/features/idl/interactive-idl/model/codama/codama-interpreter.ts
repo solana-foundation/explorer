@@ -8,7 +8,8 @@ import type { UnifiedAccounts, UnifiedArguments, UnifiedProgram, UnifiedWallet }
  * Currently not supported, but properly identifies Codama IDLs to prevent infinite retries
  */
 export class CodamaInterpreter implements IdlInterpreter<any, UnifiedProgram> {
-    name = 'codama';
+    static readonly NAME = 'codama' as const;
+    name = CodamaInterpreter.NAME;
 
     canHandle(idl: any): boolean {
         // Check for Codama IDL based on the standard field

@@ -4,7 +4,9 @@ import type { InstructionData } from '@entities/idl';
 import { useParsedLogs } from '@entities/program-logs';
 import { useWallet } from '@solana/wallet-adapter-react';
 import {
+    type Commitment,
     Connection,
+    type Finality,
     PublicKey,
     type RpcResponseAndContext,
     SendTransactionError,
@@ -21,6 +23,7 @@ import { useCluster } from '@/app/providers/cluster';
 import { clusterUrl } from '@/app/utils/cluster';
 
 import { programAtom } from '../model/state-atoms';
+import { AnchorInterpreter } from './anchor/anchor-interpreter';
 import { IdlExecutor, populateAccounts, populateArguments } from './idl-executor';
 import type { UnifiedWallet } from './unified-program';
 import { BaseIdl } from './unified-program';
@@ -30,7 +33,10 @@ interface UseInstructionOptions {
     cluster?: string;
     idl?: BaseIdl;
     enabled?: boolean;
-    interpreterName?: 'anchor';
+    interpreterName?: typeof AnchorInterpreter.NAME;
+    commitment?: Finality;
+    /** Commitment level for transaction simulation. Defaults to 'processed'. */
+    simulationCommitment?: Commitment;
 }
 
 interface UseInstructionReturn {
@@ -66,7 +72,9 @@ export function useInstruction({
     cluster,
     idl,
     enabled = true,
-    interpreterName = 'anchor',
+    interpreterName = AnchorInterpreter.NAME,
+    commitment = 'confirmed',
+    simulationCommitment = 'processed',
 }: UseInstructionOptions): UseInstructionReturn {
     const { connected, publicKey, ...wallet } = useWallet();
     const { cluster: currentCluster, customUrl } = useCluster();
@@ -244,7 +252,7 @@ export function useInstruction({
                 const simulatedTx = await connection.simulateTransaction(
                     new VersionedTransaction(transaction.compileMessage()),
                     {
-                        commitment: 'processed',
+                        commitment: simulationCommitment,
                     }
                 );
                 handleSimulatedTxResult(simulatedTx);
@@ -262,7 +270,7 @@ export function useInstruction({
                         lastValidBlockHeight,
                         signature,
                     },
-                    'confirmed'
+                    commitment
                 );
 
                 if (confirmed.value?.err) {
@@ -270,7 +278,7 @@ export function useInstruction({
                 }
 
                 const publishedTransaction = await connection.getTransaction(signature, {
-                    commitment: 'confirmed',
+                    commitment,
                     maxSupportedTransactionVersion: 0,
                 });
 
@@ -290,6 +298,8 @@ export function useInstruction({
             executor,
             program,
             interpreterName,
+            commitment,
+            simulationCommitment,
             handleTxStart,
             handleTxSuccess,
             handleTxError,

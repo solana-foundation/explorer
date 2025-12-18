@@ -12,7 +12,8 @@ import { parseArrayInput } from './array-parser';
  * Anchor IDL interpreter
  */
 export class AnchorInterpreter implements IdlInterpreter<AnchorIdl, AnchorUnifiedProgram> {
-    name = 'anchor';
+    static readonly NAME = 'anchor' as const;
+    name = AnchorInterpreter.NAME;
 
     canHandle(idl: any): boolean {
         // Check for Anchor-specific fields
