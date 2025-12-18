@@ -28,7 +28,7 @@ export const Primary: Story = {
     },
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
-        const tooltipButton = canvas.getAllByRole('button');
-        expect(tooltipButton).toHaveLength(5);
+        const badges = canvas.getAllByText('transferFeeConfig');
+        expect(badges).toHaveLength(5);
     },
 };
