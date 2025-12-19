@@ -1,6 +1,6 @@
-import { getCreateAccountWithSeedInstructionDataEncoder } from '@solana-program/system';
 import { Address } from '@solana/kit';
 import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
+import { getCreateAccountWithSeedInstructionDataEncoder } from '@solana-program/system';
 import { describe, expect, test } from 'vitest';
 
 import { parseSystemProgramInstruction } from '../system-program.parser';

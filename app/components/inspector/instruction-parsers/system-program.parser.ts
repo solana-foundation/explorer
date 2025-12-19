@@ -1,13 +1,10 @@
 import { CreateAccountWithSeedInfo } from '@components/instruction/system/types';
-import { address } from '@solana/kit';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     getCreateAccountWithSeedInstructionDataDecoder,
     identifySystemInstruction,
     SystemInstruction,
 } from '@solana-program/system';
-
-import { upcastAccountMeta } from '../into-parsed-data';
 
 /**
  * Helper function to safely convert BigInt or number to regular number
@@ -56,8 +53,7 @@ function parseCreateAccountWithSeedInstructionSafe(instruction: TransactionInstr
     const baseAddress = decodedData.base as string;
 
     // Determine baseAccount: use keys[2] if present, otherwise derive from data
-    const baseAccountAddress =
-        instruction.keys.length >= 3 ? instruction.keys[2].pubkey.toBase58() : baseAddress;
+    const baseAccountAddress = instruction.keys.length >= 3 ? instruction.keys[2].pubkey.toBase58() : baseAddress;
 
     return {
         accounts: {
