@@ -106,7 +106,8 @@ function createDefaultValues(instruction: InstructionData): InstructionFormData 
             if (!acc[instruction.name]) {
                 acc[instruction.name] = {};
             }
-            acc[instruction.name][arg.name] = '';
+
+            acc[instruction.name][arg.name] = getDefaultArgumentValue(arg.type);
             return acc;
         }, {} as Record<string, Record<string, string>>),
     };
@@ -130,4 +131,33 @@ export function flattenNestedRecord(
     });
 
     return result;
+}
+
+function getDefaultArgumentValue(arg_type: string) {
+    switch (arg_type) {
+        case 'bool':
+            return 'false';
+
+        case 'u8':
+        case 'u16':
+        case 'u32':
+        case 'u64':
+        case 'u128':
+        case 'i8':
+        case 'i16':
+        case 'i32':
+        case 'i64':
+        case 'i128':
+            return '1';
+
+        case 'f32':
+        case 'f64':
+            return '1.0';
+
+        case 'string':
+            return 'default';
+
+        default:
+            return '';
+    }
 }
