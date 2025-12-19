@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, within } from 'storybook/test';
 
 import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
 import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
@@ -32,8 +32,8 @@ export const Primary: Story = {
     },
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
-        const tooltipButton = canvas.getByRole('button');
-        expect(tooltipButton).toHaveAttribute('data-slot', 'tooltip-trigger');
-        await userEvent.hover(tooltipButton);
+        // The badge shows "Enabled" or "Disabled" by default, not the extension name
+        const badge = await canvas.findByText(/Enabled|Disabled/);
+        expect(badge).toBeInTheDocument();
     },
 };

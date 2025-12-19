@@ -7,7 +7,7 @@ import anchor029Devi from '../../mocks/anchor/anchor-0.29.0-devi51mZmdwUJGU9hjN2
 import anchor030devi from '../../mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import anchorLegacy094ShankWave from '../../mocks/anchor/anchor-legacy-0.9.4-shank-waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF.json';
 import { formatSerdeIdl, getFormattedIdl } from '../formatters/format';
-import { normalizeIdl, useAnchorProgram } from '../use-anchor-program';
+import { useAnchorProgram } from '../use-anchor-program';
 import { getProvider, useIdlFromAnchorProgramSeed } from '../use-idl-from-anchor-program-seed';
 
 // Create a mock provider that matches Anchor's expected structure
@@ -43,7 +43,7 @@ describe('Create program instance from legacy idl', () => {
         ['devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH', anchor029Devi, 'any'],
         ['waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF', anchorLegacy094ShankWave, 'any'],
     ])('should create %s program instance; version: $2', (fallbackId: string, idl: any, _version?: string) => {
-        const programAddress = normalizeIdl(idl).address;
+        const programAddress = idl.metadata?.address ?? fallbackId;
         const programId = programAddress || fallbackId;
 
         vi.mocked(getProvider).mockReturnValue(createMockProvider(url, programId) as unknown as AnchorProvider);
@@ -51,10 +51,6 @@ describe('Create program instance from legacy idl', () => {
         expect(() => {
             const formattedIdl = getFormattedIdl(formatSerdeIdl, idl, programId);
             const p = new Program(formattedIdl, getProvider(url));
-
-            // if (fallbackId == 'compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq') {
-            //     console.log(p._idl.accounts);
-            // }
 
             expect(programId).toBe(p.programId.toString());
         }).not.toThrowError();
@@ -71,7 +67,7 @@ describe('Create program instance from idl@0.30+', () => {
     it.each([['devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH', anchor030devi]])(
         'should create %s program instance',
         (fallbackId: string, idl: any) => {
-            const programAddress = normalizeIdl(idl).address;
+            const programAddress = idl.metadata?.address ?? fallbackId;
             const programId = programAddress || fallbackId;
 
             vi.mocked(getProvider).mockReturnValue(createMockProvider(url, programId) as unknown as AnchorProvider);
@@ -97,10 +93,9 @@ describe('Allow for useAnchorProgram to create program instance', () => {
         ['devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH', anchor030devi],
         ['waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF', anchorLegacy094ShankWave],
     ])('should create %s program instance via hook', (fallbackId: string, idl: any) => {
-        const programAddress = normalizeIdl(idl).address;
-        const programId = programAddress || fallbackId;
+        const programId = idl.metadata?.address ?? fallbackId;
 
-        vi.mocked(useIdlFromAnchorProgramSeed).mockReturnValue(normalizeIdl(idl));
+        vi.mocked(useIdlFromAnchorProgramSeed).mockReturnValue(idl);
         vi.mocked(getProvider).mockReturnValue(createMockProvider(url, programId) as unknown as AnchorProvider);
 
         const { result } = renderHook(() => useAnchorProgram(programId, url, 2));

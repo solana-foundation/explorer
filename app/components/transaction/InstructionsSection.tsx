@@ -191,6 +191,7 @@ function InstructionCard({
 
         switch (ix.program) {
             case 'spl-token':
+            case 'spl-token-2022':
                 return (
                     <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
                         <TokenDetailsCard {...props} key={key} />

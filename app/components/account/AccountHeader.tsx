@@ -40,6 +40,7 @@ export function AccountHeader({
 
     const isToken = parsedData && isTokenProgramData(parsedData) && parsedData?.parsed.type === 'mint';
     const isProgram = parsedData && isUpgradeableLoaderAccountData(parsedData) && parsedData?.parsed.type === 'program';
+    const isNativeProgram = Boolean(account?.executable);
 
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
@@ -61,6 +62,10 @@ export function AccountHeader({
 
     if (isProgram) {
         return <ProgramHeader address={address} parsedData={parsedData} />;
+    }
+
+    if (isNativeProgram) {
+        return <ProgramHeader address={address} />;
     }
 
     const fallback = (

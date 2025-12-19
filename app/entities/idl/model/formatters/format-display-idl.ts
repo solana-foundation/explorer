@@ -29,7 +29,7 @@ registerFormatter('legacy-shank', (idl, programAddress) => {
 });
 
 /**
- * Format IDL to display it in a human-readable way acording its type
+ * Format IDL to display it in a human-readable way according its type
  *
  * @param idl
  * @param programAddress

@@ -59,6 +59,8 @@ function parseQuery(searchParams: ReadonlyURLSearchParams | null): Cluster {
             return Cluster.Devnet;
         case 'testnet':
             return Cluster.Testnet;
+        case 'simd296':
+            return Cluster.Simd296;
         case 'mainnet-beta':
         default:
             return Cluster.MainnetBeta;
@@ -93,6 +95,7 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
     const searchParams = useSearchParams();
     const cluster = parseQuery(searchParams);
     const enableCustomUrl =
+        cluster === Cluster.Custom ||
         (localStorageIsAvailable() && localStorage.getItem('enableCustomUrl') !== null) ||
         isWhitelistedRpc(state.customUrl);
     const customUrl = (enableCustomUrl && searchParams?.get('customUrl')) || state.customUrl;

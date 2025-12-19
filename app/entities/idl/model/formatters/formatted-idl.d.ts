@@ -29,7 +29,7 @@ export type InstructionAccountData = {
     writable?: boolean;
     signer?: boolean;
     optional?: boolean;
-    pda?: boolean; // TODO: may be keep seeds inside?
+    pda?: boolean;
 };
 
 export type ErrorData = {

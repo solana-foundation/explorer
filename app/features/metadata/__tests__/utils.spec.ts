@@ -37,4 +37,16 @@ describe('getProxiedUri', () => {
         const uri = 'https://example.com';
         expect(getProxiedUri(uri)).toBe('/api/metadata/proxy?uri=https%3A%2F%2Fexample.com');
     });
+
+    it('returns empty string when empty string is passed', () => {
+        process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
+        expect(getProxiedUri('')).toBe('');
+    });
+
+    it('throws an error for invalid URL strings', () => {
+        process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
+        expect(() => getProxiedUri('not-a-valid-url')).toThrow();
+        expect(() => getProxiedUri('://missing-protocol')).toThrow();
+        expect(() => getProxiedUri('http://')).toThrow();
+    });
 });

@@ -18,28 +18,53 @@ describe('AnchorInterpreter', () => {
         it.each([
             [
                 {
+                    address: 'TestProgram11111111111111111111111111111111',
                     instructions: [],
-                    name: 'test-program',
-                    version: '1.0.0',
+                    metadata: {
+                        name: 'test-program',
+                        version: '0.1.0',
+                    },
                 },
                 true,
-                'Anchor',
+                'modern Anchor IDL with metadata.version',
+            ],
+            [
+                {
+                    address: 'TestProgram11111111111111111111111111111111',
+                    instructions: [],
+                    metadata: {
+                        name: 'test-program',
+                        spec: '0.1.0',
+                    },
+                },
+                true,
+                'modern Anchor IDL with metadata.spec',
+            ],
+            [
+                {
+                    address: 'TestProgram11111111111111111111111111111111',
+                    instructions: [],
+                    metadata: {
+                        name: 'test-program',
+                        spec: '0.1.0',
+                        version: '0.1.0',
+                    },
+                },
+                true,
+                'modern Anchor IDL with both version and spec',
             ],
             [
                 {
                     instructions: [],
-                    metadata: {
-                        spec: 'legacy',
-                    },
                     name: 'test-program',
-                    version: '0.0.0',
+                    version: '1.0.0',
                 },
-                true,
-                'Other format',
+                false,
+                'legacy Anchor IDL',
             ],
             [null, false, 'null'],
             [undefined, false, 'undefined'],
-        ])('should identify whether can handle $2 IDL with Anchor', (anchorIdl: any, result, _name: string) => {
+        ])('should identify whether can handle %s IDL (%s)', (anchorIdl: any, result, _name: string) => {
             expect(interpreter.canHandle(anchorIdl)).toBe(result);
         });
     });

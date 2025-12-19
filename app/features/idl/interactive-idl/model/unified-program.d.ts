@@ -32,14 +32,8 @@ export interface UnifiedProgram {
     ): Promise<TransactionInstruction>;
 }
 
-/**
- * Unified Accounts
- */
 export type UnifiedAccounts = Record<string, PublicKey | null>;
 
-/**
- * Unified Arguments
- */
 export type UnifiedArguments = Array<unknown>;
 
 /**

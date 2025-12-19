@@ -1,19 +1,12 @@
-import type {
-    InstructionAccountData,
-    InstructionData,
-    NestedInstructionAccountsData,
-    SupportedIdl,
-} from '@entities/idl';
+import type { InstructionAccountData, InstructionData, NestedInstructionAccountsData } from '@entities/idl';
 import { Button } from '@shared/ui/button';
 import { Card } from '@shared/ui/card';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Loader, Send } from 'react-feather';
 import { Control, Controller, FieldPath } from 'react-hook-form';
 
-import { createGetAutocompleteItems } from '../model/account-autocomplete/createGetAutocompleteItems';
-import type { AutocompleteItem } from '../model/account-autocomplete/types';
-import { useGeneratedPdas } from '../model/use-generated-pdas';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
+
 import {
     type InstructionCallParams,
     type InstructionFormData,
@@ -24,33 +17,28 @@ import { AccountInput } from './AccountInput';
 import { ArgumentInput } from './ArgumentInput';
 
 export function InteractInstruction({
-    idl,
     instruction,
-    onExecuteInstruciton,
+    onExecuteInstruction,
     isExecuting,
 }: {
-    idl: SupportedIdl | undefined;
-    onExecuteInstruciton: (data: InstructionData, params: InstructionCallParams) => void;
+    onExecuteInstruction: (data: InstructionData, params: InstructionCallParams) => void;
     instruction: InstructionData;
     isExecuting: boolean;
 }) {
-    const { connected: walletConnected, publicKey } = useWallet();
+    const { connected: walletConnected } = useWallet();
 
     const { form, onSubmit, validationRules, fieldNames } = useInstructionForm({
         instruction,
         onSubmit: params => {
-            onExecuteInstruciton(instruction, params);
+            onExecuteInstruction(instruction, params);
         },
     });
-
-    const pdas = useGeneratedPdas({ form, idl, instruction });
-    const getAutocompleteItems = createGetAutocompleteItems({ pdas, publicKey });
 
     const executeDisabled = !walletConnected || isExecuting;
 
     return (
         <Card variant="tight">
-            <AccordionItem value={instruction.name}>
+            <AccordionItem value={instruction.name} className="">
                 <AccordionTrigger>
                     <div className="w-full e-flex e-items-center e-justify-between">
                         <span className="e-min-w-0 e-flex-1 e-truncate e-pr-4 e-text-left e-text-sm e-font-medium e-text-white md:e-w-[170px] [@media(min-width:992px)]:e-w-[300px]">
@@ -64,6 +52,33 @@ export function InteractInstruction({
                         <div className="e-mb-4 e-rounded-lg e-bg-[#1a1b1d] e-p-3">
                             <p className="e-text-xs e-text-neutral-400">{instruction.docs.join(' ')}</p>
                         </div>
+                    )}
+
+                    {/* Accounts Section */}
+                    {instruction.accounts.length > 0 && (
+                        <CardSection title="Accounts">
+                            <div className="e-space-y-3 e-px-6">
+                                {instruction.accounts.map(account =>
+                                    'accounts' in account ? (
+                                        <NestedAccountGroup
+                                            key={account.name}
+                                            group={account}
+                                            control={form.control}
+                                            fieldNames={fieldNames}
+                                            validationRules={validationRules}
+                                        />
+                                    ) : (
+                                        <AccountController
+                                            key={account.name}
+                                            account={account}
+                                            name={fieldNames.account(account)}
+                                            control={form.control}
+                                            rules={validationRules.account(account)}
+                                        />
+                                    )
+                                )}
+                            </div>
+                        </CardSection>
                     )}
 
                     {/* Arguments Section */}
@@ -93,38 +108,6 @@ export function InteractInstruction({
                             </div>
                         </CardSection>
                     )}
-
-                    {/* Accounts Section */}
-                    {instruction.accounts.length > 0 && (
-                        <CardSection title="Accounts">
-                            <div className="e-space-y-3 e-px-6">
-                                {instruction.accounts.map(account =>
-                                    'accounts' in account ? (
-                                        <NestedAccountGroup
-                                            key={account.name}
-                                            group={account}
-                                            control={form.control}
-                                            fieldNames={fieldNames}
-                                            validationRules={validationRules}
-                                            getAutocompleteItems={getAutocompleteItems}
-                                            seeds={pdas[account.name]?.seeds || []}
-                                        />
-                                    ) : (
-                                        <AccountController
-                                            key={account.name}
-                                            account={account}
-                                            name={fieldNames.account(account)}
-                                            control={form.control}
-                                            rules={validationRules.account(account)}
-                                            getAutocompleteItems={getAutocompleteItems}
-                                            seeds={pdas[account.name]?.seeds || []}
-                                        />
-                                    )
-                                )}
-                            </div>
-                        </CardSection>
-                    )}
-
                     <div className="e-px-6 e-pb-2.5">
                         <ExecuteButton
                             onClick={onSubmit}
@@ -155,17 +138,12 @@ function AccountController({
     name,
     control,
     rules,
-    getAutocompleteItems,
-    seeds,
 }: {
     account: InstructionAccountData;
     name: FieldPath<InstructionFormData>;
     control: Control<InstructionFormData>;
     rules: { required: { value: boolean; message: string } };
-    getAutocompleteItems: (accountName: string) => AutocompleteItem[];
-    seeds: { name: string }[];
 }) {
-    const autocompleteItems = getAutocompleteItems(account.name);
     return (
         <Controller
             name={name}
@@ -177,8 +155,6 @@ function AccountController({
                     value={typeof field.value === 'string' ? field.value : ''}
                     account={account}
                     error={error}
-                    autocompleteItems={autocompleteItems}
-                    seeds={seeds}
                 />
             )}
         />
@@ -190,15 +166,11 @@ function NestedAccountGroup({
     control,
     fieldNames,
     validationRules,
-    getAutocompleteItems,
-    seeds,
 }: {
     group: NestedInstructionAccountsData;
     control: Control<InstructionFormData>;
     fieldNames: ReturnType<typeof useInstructionForm>['fieldNames'];
     validationRules: ReturnType<typeof useInstructionForm>['validationRules'];
-    getAutocompleteItems: (accountName: string) => AutocompleteItem[];
-    seeds: { name: string }[];
 }) {
     return (
         <div className="e-space-y-3">
@@ -211,8 +183,6 @@ function NestedAccountGroup({
                         name={fieldNames.account(group, nestedAccount)}
                         control={control}
                         rules={validationRules.account(nestedAccount)}
-                        getAutocompleteItems={getAutocompleteItems}
-                        seeds={seeds}
                     />
                 ))}
             </div>

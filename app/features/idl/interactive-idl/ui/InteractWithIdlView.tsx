@@ -1,4 +1,4 @@
-import { getIdlVersion, type InstructionData, type SupportedIdl } from '@entities/idl';
+import { getIdlSpec, getIdlVersion, type InstructionData, type SupportedIdl } from '@entities/idl';
 import { useLayoutEffect, useState } from 'react';
 
 import { Label } from '@/app/components/shared/ui/label';
@@ -72,7 +72,10 @@ export function InteractWithIdlView({
             <div className="e-grid e-gap-6 md:e-grid-cols-12">
                 {/* Interact Header */}
                 <div className="e-flex e-items-center e-justify-between md:e-col-span-12">
-                    <p className="e-mb-0 e-text-sm e-text-neutral-400">Anchor{idl ? `: ${getIdlVersion(idl)}` : ''}</p>
+                    <p className="e-mb-0 e-text-sm e-text-neutral-400">
+                        Anchor{idl ? `: ${getIdlVersion(idl)}` : ''}
+                        {idl && getIdlSpec(idl) ? ` (spec: ${getIdlSpec(idl)})` : ''}
+                    </p>
                     <div className="e-flex e-items-center e-gap-3">
                         <Switch id="expand-all" checked={areAllExpanded} onCheckedChange={handleExpandAllToggle} />
                         <Label htmlFor="expand-all" className="e-cursor-pointer e-text-xs e-text-white">
@@ -84,7 +87,6 @@ export function InteractWithIdlView({
                 {/* Left Column - Instructions */}
                 <div className="e-order-2 md:e-order-1 md:e-col-span-6">
                     <InteractInstructions
-                        idl={idl}
                         instructions={instructions}
                         expandedSections={expandedSections}
                         setExpandedSections={setExpandedSections}

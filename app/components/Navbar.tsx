@@ -34,7 +34,10 @@ export function Navbar({ children }: INavbarProps) {
                     <span className="navbar-toggler-icon"></span>
                 </button>
 
-                <div className="navbar-children d-flex align-items-center flex-grow-1 w-100 h-100 d-none d-lg-block">
+                <div
+                    className="navbar-children d-flex align-items-center flex-grow-1 h-100 d-none d-lg-block"
+                    style={{ minWidth: 0 }}
+                >
                     {children}
                 </div>
 

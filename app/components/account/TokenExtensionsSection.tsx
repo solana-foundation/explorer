@@ -1,5 +1,5 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@components/shared/ui/accordion';
-import { SyntheticEvent, useCallback, useMemo, useRef, useState } from 'react';
+import { SyntheticEvent, useCallback, useMemo, useState } from 'react';
 import { Code, ExternalLink } from 'react-feather';
 
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
@@ -93,7 +93,6 @@ function TokenExtensionAccordionItem({
     symbol?: string;
 }) {
     const [showRaw, setShowRaw] = useState(false);
-    const accordionTriggerRef = useRef<HTMLButtonElement>(null);
 
     const handleToggleRaw = useCallback(() => {
         onSelect(parsedExtension.extension);
@@ -106,9 +105,38 @@ function TokenExtensionAccordionItem({
 
     return (
         <>
-            <AccordionTrigger className="e-items-center" ref={accordionTriggerRef}>
-                <ExtensionListItem ext={parsedExtension} onToggleRaw={handleToggleRaw} raw={showRaw} />
-            </AccordionTrigger>
+            <div className="e-flex e-items-center e-justify-between">
+                <AccordionTrigger className="e-items-baseline">
+                    <ExtensionListItem ext={parsedExtension} />
+                </AccordionTrigger>
+                <div className="e-flex e-items-center e-gap-1">
+                    <button
+                        onClick={handleToggleRaw}
+                        type="button"
+                        className="e-cursor-pointer e-border-0 e-bg-transparent e-p-0"
+                        aria-label={showRaw ? 'Hide raw data' : 'Show raw data'}
+                        aria-pressed={showRaw}
+                    >
+                        <Badge
+                            className="text-white e-font-normal"
+                            as="link"
+                            size="sm"
+                            status={showRaw ? 'active' : 'inactive'}
+                            variant="transparent"
+                        >
+                            <Code size={16} /> Raw
+                        </Badge>
+                    </button>
+                    {parsedExtension.externalLinks.map((link, index) => (
+                        <a key={index} href={link.url} target="_blank" rel="noopener noreferrer">
+                            <Badge variant="transparent" size="sm" as="link" className="text-white e-font-normal">
+                                <ExternalLink size={16} />
+                                {link.label}
+                            </Badge>
+                        </a>
+                    ))}
+                </div>
+            </div>
             <AccordionContent>
                 {!showRaw ? (
                     <div className="card e-m-4">
@@ -135,57 +163,18 @@ function TokenExtensionStateHeader({ name }: { name: string }) {
     );
 }
 
-function ExtensionListItem({
-    ext,
-    onToggleRaw,
-    raw,
-}: {
-    ext: ParsedTokenExtension;
-    onToggleRaw: () => void;
-    raw: boolean;
-}) {
-    const handleToggleRaw = useCallback(
-        (e: React.MouseEvent<HTMLAnchorElement>) => {
-            e.stopPropagation();
-            onToggleRaw();
-        },
-        [onToggleRaw]
-    );
-
+function ExtensionListItem({ ext }: { ext: ParsedTokenExtension }) {
     return (
-        <div className="w-100 e-w-100 text-white e-grid e-grid-cols-12-ext e-items-center e-gap-2 e-text-sm">
+        <div className="w-100 e-w-100 text-white e-flex e-items-center e-gap-2 e-text-sm">
             {/* Name */}
-            <div className="e-flex e-min-w-80 e-items-center e-gap-2 e-whitespace-nowrap e-font-normal max-sm:e-col-span-6 sm:e-col-span-6 md:e-col-span-6 lg:e-col-span-4 xl:e-col-span-3">
-                <div>{ext.name}</div>
+            <div className="e-flex e-min-w-80 e-items-center e-gap-2 e-whitespace-nowrap e-font-normal">
+                <span>{ext.name}</span>
                 <TokenExtensionBadge extension={ext} />
             </div>
 
             {/* Description */}
-            <span className="e-text-[0.75rem] e-text-[#8E9090] e-underline e-decoration-[#1e2423] max-lg:e-hidden lg:e-col-span-6 lg:e-pl-12 xl:e-col-span-7">
+            <div className="e-flex-1 e-text-[0.75rem] e-text-[#8E9090] e-underline e-decoration-[#1e2423] max-lg:e-hidden">
                 {ext.description ?? null}
-            </span>
-
-            {/* External links badges */}
-            <div className="text-white e-flex e-justify-end e-gap-1 max-sm:e-col-span-6 sm:e-col-span-6 md:e-col-span-6 lg:e-col-span-2 xl:e-col-span-2">
-                <a key="raw" href="javascript:void(0)" onClick={handleToggleRaw}>
-                    <Badge
-                        className="text-white e-font-normal"
-                        as="link"
-                        size="sm"
-                        status={raw ? 'active' : 'inactive'}
-                        variant="transparent"
-                    >
-                        <Code size={16} /> Raw
-                    </Badge>
-                </a>
-                {ext.externalLinks.map((link, index) => (
-                    <a key={index} href={link.url} target="_blank" rel="noopener noreferrer">
-                        <Badge variant="transparent" size="sm" as="link" className="text-white e-font-normal">
-                            <ExternalLink size={16} />
-                            {link.label}
-                        </Badge>
-                    </a>
-                ))}
             </div>
         </div>
     );

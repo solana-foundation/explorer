@@ -7,7 +7,7 @@ import { cn } from '@/app/components/shared/utils';
 const badgeVariants = cva(
     cn(
         'e-inline-flex e-items-center e-justify-center',
-        'e-px-2 e-py-0.5 e-font-medium e-w-fit e-whitespace-break-spaces e-shrink-0',
+        'e-px-2 e-py-0.5 e-font-medium e-w-fit e-whitespace-nowrap e-shrink-0',
         '[&_svg]:e-size-3 e-gap-1 [&_svg]:e-pointer-events-none'
     ),
     {

@@ -61,6 +61,11 @@ describe('useSecurityTxt', () => {
         const { result } = setup();
         expect(result.current).toEqual(pmpSecurityTxt);
     });
+
+    it('should return undefined when no parsed data is available', () => {
+        const { result } = renderHook(() => useSecurityTxt('9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin'));
+        expect(result.current).toBeUndefined();
+    });
 });
 
 function setup() {

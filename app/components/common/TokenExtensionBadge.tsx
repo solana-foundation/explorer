@@ -34,8 +34,10 @@ export function TokenExtensionBadge({
 
     return (
         <Tooltip>
-            <TooltipTrigger className="e-border-0 e-bg-transparent e-p-0" onClick={handleClick}>
-                <StatusBadge status={status} label={label} className={badgeVariants({ size })} />
+            <TooltipTrigger asChild>
+                <div className="e-inline-block e-cursor-default" onClick={handleClick}>
+                    <StatusBadge status={status} label={label} className={badgeVariants({ size })} />
+                </div>
             </TooltipTrigger>
             {tooltip && (
                 <TooltipContent>

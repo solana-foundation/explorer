@@ -10,9 +10,15 @@ import {
     StatusError,
     unsupportedMediaError,
 } from './errors';
-import { processBinary, processJson } from './processors';
+import { processBinary, processJson, processTextAsJson } from './processors';
 
 export { StatusError };
+
+// Content-type matchers
+export const matchJson = (header?: string | null) => header?.includes('application/json');
+export const matchTextPlain = (header?: string | null) => header?.includes('text/plain');
+export const matchImage = (header?: string | null) => header?.includes('image/');
+export const matchJsonContent = (header?: string | null) => matchJson(header) || matchTextPlain(header);
 
 /**
  *  use this to handle errors that are thrown by fetch.
@@ -63,7 +69,9 @@ export async function fetchResource(
     headers: Headers,
     timeout: number,
     size: number
-): Promise<Awaited<ReturnType<typeof processBinary> | ReturnType<typeof processJson>>> {
+): Promise<
+    Awaited<ReturnType<typeof processBinary> | ReturnType<typeof processJson> | ReturnType<typeof processTextAsJson>>
+> {
     const [error, response] = await requestResource(uri, headers, timeout, size);
 
     // check for response to infer proper type for it
@@ -73,11 +81,13 @@ export async function fetchResource(
     }
 
     // guess how to process resource by content-type
-    const isJson = response.headers.get('content-type')?.includes('application/json');
-
-    const isImage = response.headers.get('content-type')?.includes('image/');
+    const contentTypeHeader = response.headers.get('content-type');
+    const isJson = matchJson(contentTypeHeader);
+    const isPlainText = matchTextPlain(contentTypeHeader);
+    const isImage = matchImage(contentTypeHeader);
 
     if (isJson) return processJson(response);
+    if (isPlainText) return processTextAsJson(response);
 
     if (isImage) return processBinary(response);
 

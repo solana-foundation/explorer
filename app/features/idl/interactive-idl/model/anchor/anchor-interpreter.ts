@@ -1,6 +1,6 @@
 import { AnchorProvider, type Idl as AnchorIdl, Program as AnchorProgram, type Wallet } from '@coral-xyz/anchor';
 import type { IdlInstruction } from '@coral-xyz/anchor/dist/esm/idl';
-import { formatSerdeIdl, getFormattedIdl, normalizeIdl } from '@entities/idl';
+import { formatSerdeIdl, getFormattedIdl } from '@entities/idl';
 import { type Connection, PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
 
@@ -12,7 +12,8 @@ import { parseArrayInput } from './array-parser';
  * Anchor IDL interpreter
  */
 export class AnchorInterpreter implements IdlInterpreter<AnchorIdl, AnchorUnifiedProgram> {
-    name = 'anchor';
+    static readonly NAME = 'anchor' as const;
+    name = AnchorInterpreter.NAME;
 
     canHandle(idl: any): boolean {
         // Check for Anchor-specific fields
@@ -20,9 +21,13 @@ export class AnchorInterpreter implements IdlInterpreter<AnchorIdl, AnchorUnifie
             return false;
         }
 
+        const isString = (value: unknown): value is string => typeof value === 'string';
+
+        // Modern Anchor IDL (>= 0.30.0): has address at root, metadata (version or spec), and instructions
         return (
-            (Boolean(idl.name) && Boolean(idl.version) && Boolean(idl.instructions)) ||
-            (Boolean(idl.version) && Boolean(idl?.metadata))
+            isString(idl.address) &&
+            (isString(idl.metadata?.version) || isString(idl.metadata?.spec)) &&
+            Array.isArray(idl.instructions)
         );
     }
 
@@ -35,12 +40,11 @@ export class AnchorInterpreter implements IdlInterpreter<AnchorIdl, AnchorUnifie
         const publicKey = typeof programId === 'string' ? new PublicKey(programId) : programId;
 
         // Create provider
-        const provider = new AnchorProvider(connection, wallet, { commitment: 'confirmed' });
+        const provider = new AnchorProvider(connection, wallet);
 
         const pubkey = publicKey.toBase58();
 
-        // Perform normalization against formatted Idl to fill missing address where needed
-        const properIdl = normalizeIdl(getFormattedIdl(formatSerdeIdl, idl, pubkey), pubkey);
+        const properIdl = getFormattedIdl(formatSerdeIdl, idl, pubkey);
 
         // Create Anchor program
         let anchorProgram: AnchorProgram;

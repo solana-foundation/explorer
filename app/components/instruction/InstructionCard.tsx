@@ -15,6 +15,8 @@ type InstructionProps = {
     innerCards?: JSX.Element[];
     eventCards?: JSX.Element[];
     childIndex?: number;
+    // Raw instruction for displaying accounts and hex data in raw mode (used by inspector)
+    raw?: TransactionInstruction;
 };
 
 export function InstructionCard({
@@ -27,17 +29,22 @@ export function InstructionCard({
     innerCards,
     eventCards,
     childIndex,
+    raw: rawProp,
 }: InstructionProps) {
     const signature = useContext(SignatureContext);
     const rawDetails = useRawTransactionDetails(signature);
 
-    let raw: TransactionInstruction | undefined = undefined;
-    if (rawDetails && childIndex === undefined) {
+    // Use provided raw prop, or fetch from transaction details
+    let raw: TransactionInstruction | undefined = rawProp;
+    if (!raw && rawDetails && childIndex === undefined) {
         raw = rawDetails?.data?.raw?.transaction.instructions[index];
     }
 
     const fetchRaw = useFetchRawTransaction();
     const fetchRawTrigger = useCallback(() => fetchRaw(signature), [signature, fetchRaw]);
+
+    // Only allow fetching raw data if we have a valid signature (not in inspector mode)
+    const canFetchRaw = signature && !raw;
 
     return (
         <BaseInstructionCard
@@ -50,7 +57,7 @@ export function InstructionCard({
             eventCards={eventCards}
             childIndex={childIndex}
             raw={raw}
-            onRequestRaw={fetchRawTrigger}
+            onRequestRaw={canFetchRaw ? fetchRawTrigger : undefined}
         >
             {children}
         </BaseInstructionCard>

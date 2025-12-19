@@ -1,7 +1,8 @@
-import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
-import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
+'use client';
+
+import { generateTokenBalanceRows, TokenBalancesCardInnerProps } from '@components/transaction/TokenBalancesCard';
 import { useCluster } from '@providers/cluster';
-import { AccountLayout, MintLayout } from '@solana/spl-token';
+import { AccountLayout } from '@solana/spl-token';
 import {
     AccountInfo,
     AddressLookupTableAccount,
@@ -9,114 +10,48 @@ import {
     MessageAddressTableLookup,
     ParsedAccountData,
     ParsedMessageAccount,
+    PublicKey,
     SimulatedTransactionAccountInfo,
     TokenBalance,
     VersionedMessage,
     VersionedTransaction,
 } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
 import { InstructionLogs, parseProgramLogs } from '@utils/program-logs';
+import { BN } from 'bn.js';
 import React from 'react';
 
-import {
-    generateTokenBalanceRows,
-    TokenBalancesCardInner,
-    TokenBalancesCardInnerProps,
-} from '../transaction/TokenBalancesCard';
+import { getMintDecimals, isTokenProgramBase58 } from '../lib/tokenAccountParsing';
+import type { SolBalanceChange } from '../lib/types';
+import { useEpochInfo } from './use-epoch-info';
 
-export function SimulatorCard({
-    message,
-    showTokenBalanceChanges,
-}: {
-    message: VersionedMessage;
-    showTokenBalanceChanges: boolean;
-}) {
-    const { cluster, url } = useCluster();
-    const {
-        simulate,
-        simulating,
-        simulationLogs: logs,
-        simulationError,
-        simulationTokenBalanceRows,
-    } = useSimulator(message);
-    if (simulating) {
-        return (
-            <div className="card">
-                <div className="card-header">
-                    <h3 className="card-header-title">Transaction Simulation</h3>
-                </div>
-                <div className="card-body text-center">
-                    <span className="spinner-grow spinner-grow-sm me-2"></span>
-                    Simulating
-                </div>
-            </div>
-        );
-    } else if (!logs) {
-        return (
-            <div className="card">
-                <div className="card-header">
-                    <h3 className="card-header-title">Transaction Simulation</h3>
-                    <button className="btn btn-sm d-flex btn-white" onClick={simulate}>
-                        {simulationError ? 'Retry' : 'Simulate'}
-                    </button>
-                </div>
-                <div className="card-body">
-                    {simulationError ? (
-                        <>
-                            Simulation Failure:
-                            <span className="text-warning ms-2">{simulationError}</span>
-                        </>
-                    ) : (
-                        <ul className="text-muted">
-                            <li>
-                                Simulation is free and will run this transaction against the latest confirmed ledger
-                                state.
-                            </li>
-                            <li>No state changes will be persisted and all signature checks will be disabled.</li>
-                        </ul>
-                    )}
-                </div>
-            </div>
-        );
+export function useSimulation(
+    message: VersionedMessage,
+    accountBalances?: {
+        preBalances: number[];
+        postBalances: number[];
     }
-
-    return (
-        <>
-            <div className="card">
-                <div className="card-header">
-                    <h3 className="card-header-title">Transaction Simulation</h3>
-                    <button className="btn btn-sm d-flex btn-white" onClick={simulate}>
-                        Retry
-                    </button>
-                </div>
-                <ProgramLogsCardBody message={message} logs={logs} cluster={cluster} url={url} />
-            </div>
-            {showTokenBalanceChanges &&
-            simulationTokenBalanceRows &&
-            !simulationError &&
-            simulationTokenBalanceRows.rows.length ? (
-                <TokenBalancesCardInner rows={simulationTokenBalanceRows.rows} />
-            ) : null}
-        </>
-    );
-}
-
-function useSimulator(message: VersionedMessage) {
+) {
     const { cluster, url } = useCluster();
+    const { epoch: cachedEpoch } = useEpochInfo();
     const [simulating, setSimulating] = React.useState(false);
     const [logs, setLogs] = React.useState<Array<InstructionLogs> | null>(null);
     const [error, setError] = React.useState<string>();
     const [tokenBalanceRows, setTokenBalanceRows] = React.useState<TokenBalancesCardInnerProps>();
+    const [solBalanceChanges, setSolBalanceChanges] = React.useState<SolBalanceChange[]>();
+    const [unitsConsumed, setUnitsConsumed] = React.useState<number | undefined>();
 
     React.useEffect(() => {
         setLogs(null);
         setSimulating(false);
         setError(undefined);
+        setSolBalanceChanges(undefined);
+        setUnitsConsumed(undefined);
     }, [url]);
 
     const onClick = React.useCallback(() => {
         if (simulating) return;
         setError(undefined);
+        setSolBalanceChanges(undefined);
         setSimulating(true);
 
         const connection = new Connection(url, 'confirmed');
@@ -161,10 +96,16 @@ function useSimulator(message: VersionedMessage) {
                     replaceRecentBlockhash: true,
                 });
 
+                if (!resp.value.accounts) {
+                    throw new Error('RPC did not return account data after simulation');
+                }
+
+                const accountsPost = resp.value.accounts;
+
                 const mintToDecimals: { [mintPk: string]: number } = getMintDecimals(
                     accountKeys,
                     parsedAccountsPre.value,
-                    resp.value.accounts as SimulatedTransactionAccountInfo[]
+                    accountsPost as SimulatedTransactionAccountInfo[]
                 );
 
                 const preTokenBalances: TokenBalance[] = [];
@@ -238,6 +179,40 @@ function useSimulator(message: VersionedMessage) {
                     setTokenBalanceRows({ rows: tokenBalanceRows });
                 }
 
+                const solChanges: SolBalanceChange[] = [];
+                for (let index = 0; index < accountKeys.length; index++) {
+                    const key = accountKeys[index];
+
+                    // Use real balances if available, otherwise use simulation data
+                    let pre: number;
+                    let post: number;
+
+                    if (accountBalances) {
+                        pre = accountBalances.preBalances[index] ?? 0;
+                        post = accountBalances.postBalances[index] ?? 0;
+                    } else {
+                        const parsedAccountPre = parsedAccountsPre.value[index];
+                        const accountPostData = accountsPost?.at(index);
+                        pre = parsedAccountPre?.lamports ?? 0;
+                        post = accountPostData?.lamports ?? 0;
+                    }
+
+                    const delta = new BN(post).sub(new BN(pre));
+
+                    if (!delta.isZero()) {
+                        solChanges.push({
+                            delta,
+                            postBalance: new BN(post),
+                            preBalance: new BN(pre),
+                            pubkey: key,
+                        });
+                    }
+                }
+
+                if (solChanges.length > 0) {
+                    setSolBalanceChanges(solChanges);
+                }
+
                 if (resp.value.logs === null) {
                     throw new Error('Expected to receive logs from simulation');
                 }
@@ -248,6 +223,10 @@ function useSimulator(message: VersionedMessage) {
                 } else {
                     // Prettify logs
                     setLogs(parseProgramLogs(resp.value.logs, resp.value.err, cluster));
+                }
+                // Set units consumed from simulation response
+                if (resp.value.unitsConsumed !== undefined) {
+                    setUnitsConsumed(resp.value.unitsConsumed);
                 }
                 // If the response has an error, the logs will say what it it, so no need to parse here.
                 if (resp.value.err) {
@@ -263,63 +242,15 @@ function useSimulator(message: VersionedMessage) {
                 setSimulating(false);
             }
         })();
-    }, [cluster, url, message, simulating]);
+    }, [cluster, url, message, simulating, accountBalances]);
     return {
         simulate: onClick,
         simulating,
+        simulationEpoch: cachedEpoch !== undefined ? BigInt(cachedEpoch) : undefined,
         simulationError: error,
         simulationLogs: logs,
+        simulationSolBalanceChanges: solBalanceChanges,
         simulationTokenBalanceRows: tokenBalanceRows,
+        simulationUnitsConsumed: unitsConsumed,
     };
-}
-
-function isTokenProgramBase58(programIdBase58: string): boolean {
-    return programIdBase58 === TOKEN_PROGRAM_ID.toBase58() || programIdBase58 === TOKEN_2022_PROGRAM_ID.toBase58();
-}
-
-function getMintDecimals(
-    accountKeys: PublicKey[],
-    parsedAccountsPre: (AccountInfo<ParsedAccountData | Buffer> | null)[],
-    accountDatasPost: SimulatedTransactionAccountInfo[]
-): { [mintPk: string]: number } {
-    const mintToDecimals: { [mintPk: string]: number } = {};
-    // Get all the necessary mint decimals by looking at parsed token accounts
-    // and mints before, as well as mints after.
-    for (let index = 0; index < accountKeys.length; index++) {
-        const parsedAccount = parsedAccountsPre[index];
-        const key = accountKeys[index];
-
-        // Token account before
-        if (
-            parsedAccount &&
-            isTokenProgramBase58(parsedAccount.owner.toBase58()) &&
-            (parsedAccount.data as ParsedAccountData).parsed.type === 'account'
-        ) {
-            mintToDecimals[(parsedAccount?.data as ParsedAccountData).parsed.info.mint] = (
-                parsedAccount?.data as ParsedAccountData
-            ).parsed.info.tokenAmount.decimals;
-        }
-        // Mint account before
-        if (
-            parsedAccount &&
-            isTokenProgramBase58(parsedAccount.owner.toBase58()) &&
-            (parsedAccount?.data as ParsedAccountData).parsed.type === 'mint'
-        ) {
-            mintToDecimals[key.toBase58()] = (parsedAccount?.data as ParsedAccountData).parsed.info.decimals;
-        }
-
-        // Token account after
-        const accountDataPost = accountDatasPost.at(index)?.data[0];
-        const accountOwnerPost = accountDatasPost.at(index)?.owner;
-        if (
-            accountOwnerPost &&
-            isTokenProgramBase58(accountOwnerPost) &&
-            Buffer.from(accountDataPost!, 'base64').length === 82
-        ) {
-            const accountParsedPost = MintLayout.decode(Buffer.from(accountDataPost!, 'base64'));
-            mintToDecimals[key.toBase58()] = accountParsedPost.decimals;
-        }
-    }
-
-    return mintToDecimals;
 }

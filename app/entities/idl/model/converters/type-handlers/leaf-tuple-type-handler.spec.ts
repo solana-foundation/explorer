@@ -20,7 +20,7 @@ describe('parseAnchorType_U8_PathTuple', () => {
 
     it('rejects extra tuple items', () => {
         expect(() => parseAnchorType_U8_PathTuple('(u8,[u8;32],u8)')).toThrow(
-            /Too many tuple items|Expected exactly two tuple items/i
+            /Too many tuple items|Expected exactly two tuple items|Expected array like/i
         );
     });
 
@@ -34,8 +34,13 @@ describe('parseAnchorType_U8_PathTuple', () => {
         expect(() => parseAnchorType_U8_PathTuple('(u8,u8)')).toThrow(/Expected array like/i);
     });
 
-    it('rejects missing semicolon in array', () => {
-        expect(() => parseAnchorType_U8_PathTuple('(u8,[u8 32])')).toThrow(/Missing ';' in array body/i);
+    it('rejects missing separator in array', () => {
+        expect(() => parseAnchorType_U8_PathTuple('(u8,[u8 32])')).toThrow(/Missing ';' or ',' in array body/i);
+    });
+
+    it('parses comma separator in array', () => {
+        const res = parseAnchorType_U8_PathTuple('(u8,[u8,32])');
+        expect(res).toEqual({ tuple: ['u8', { array: ['u8', 32] }] });
     });
 
     it('rejects non-u8 element type in array', () => {
@@ -86,8 +91,12 @@ describe('isLeafTupleU8String', () => {
         expect(isLeafTupleU8String('(u8,u8)')).toBe(false);
     });
 
-    it('rejects when array body lacks semicolon', () => {
+    it('rejects when array body lacks separator', () => {
         expect(isLeafTupleU8String('(u8,[u8 32])')).toBe(false);
+    });
+
+    it('accepts comma separator in array', () => {
+        expect(isLeafTupleU8String('(u8,[u8,32])')).toBe(true);
     });
 
     it('rejects non-u8 left item', () => {
