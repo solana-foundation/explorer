@@ -1,4 +1,4 @@
-import type { InstructionData } from '@entities/idl';
+import type { InstructionData, SupportedIdl } from '@entities/idl';
 import { type Dispatch, type SetStateAction } from 'react';
 
 import type { InstructionCallParams } from '../model/use-instruction-form';
@@ -6,12 +6,14 @@ import { Accordion } from './Accordion';
 import { InteractInstruction } from './InteractInstruction';
 
 export function InteractInstructions({
+    idl,
     expandedSections,
     setExpandedSections,
     instructions,
     onExecuteInstruction,
     isExecuting = false,
 }: {
+    idl: SupportedIdl | undefined;
     expandedSections: string[];
     setExpandedSections: Dispatch<SetStateAction<string[]>>;
     instructions: InstructionData[];
@@ -23,6 +25,7 @@ export function InteractInstructions({
             {instructions.map(instruction => (
                 <InteractInstruction
                     key={instruction.name}
+                    idl={idl}
                     instruction={instruction}
                     onExecuteInstruction={onExecuteInstruction}
                     isExecuting={isExecuting}

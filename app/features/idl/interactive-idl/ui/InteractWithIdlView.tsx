@@ -87,6 +87,7 @@ export function InteractWithIdlView({
                 {/* Left Column - Instructions */}
                 <div className="e-order-2 md:e-order-1 md:e-col-span-6">
                     <InteractInstructions
+                        idl={idl}
                         instructions={instructions}
                         expandedSections={expandedSections}
                         setExpandedSections={setExpandedSections}
