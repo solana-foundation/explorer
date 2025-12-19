@@ -10,4 +10,6 @@ const project = setProjectAnnotations([a11yAnnotations, projectAnnotations]);
 // Set globalProjectAnnotations for addon-vitest compatibility
 globalThis.globalProjectAnnotations = project;
 
-beforeAll(project.beforeAll);
+if (project.beforeAll) {
+    beforeAll(project.beforeAll);
+}
