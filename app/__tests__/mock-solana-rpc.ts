@@ -5,6 +5,7 @@ import { vi } from 'vitest';
 
 const USE_REAL_RPC = process.env.TEST_USE_REAL_RPC === 'true';
 const FIXTURES_DIR = join(__dirname, 'fixtures', 'rpc-responses');
+const CLUSTER_FIXTURES_DIR = join(__dirname, 'fixtures', 'cluster-updates');
 
 type SerializedBigInt = {
     __type: 'bigint';
@@ -89,7 +90,7 @@ function preprocessForSerialization(data: any, seen = new WeakSet()): any {
     }
 
     if (seen.has(data)) {
-        throw Error(`Circular object. Cant not apply JSON.stringify()`);
+        throw Error(`Circular object. Cannot apply JSON.stringify()`);
     }
     seen.add(data);
 
@@ -155,7 +156,7 @@ function loadFixture(filename: string): any | null {
             return value;
         });
     } catch (error) {
-        throw new Error(`Failed to load fixture ${filename}:`);
+        throw new Error(`Failed to load fixture ${filename}:\n${error}`);
     }
 }
 
@@ -177,7 +178,7 @@ function recordReplay<T>(testName: string, method: string, params: any[], realCa
     throw new Error(
         `No fixture found for ${method} with params: ${JSON.stringify(params)}\n` +
             `Expected fixture file: ${filename}.json\n` +
-            `To record this fixture, run tests with: TEST_USE_REAL_RPC=true npm test`
+            `To record this fixture, run tests with: TEST_USE_REAL_RPC=true pnpm test`
     );
 }
 
@@ -258,39 +259,85 @@ export interface SolanaKitMockOptions {
     firstAvailableBlock?: bigint;
 }
 
-export function mockSolanaKit(options: SolanaKitMockOptions = {}) {
-    return {
-        address: vi.fn((addr: string) => addr),
-        createSolanaRpc: vi.fn(() => ({
-            getEpochInfo: vi.fn(() => ({
-                send: vi.fn().mockResolvedValue(
-                    options.epochInfo ?? {
-                        absoluteSlot: 0n,
-                        blockHeight: 0n,
-                        epoch: 0n,
-                        slotIndex: 0n,
-                        slotsInEpoch: 432000n,
-                    }
-                ),
-            })),
-            getEpochSchedule: vi.fn(() => ({
-                send: vi.fn().mockResolvedValue(
-                    options.epochSchedule ?? {
-                        firstNormalEpoch: 0n,
-                        firstNormalSlot: 0n,
-                        leaderScheduleSlotOffset: 0n,
-                        slotsPerEpoch: 432000n,
-                        warmup: false,
-                    }
-                ),
-            })),
-            getFirstAvailableBlock: vi.fn(() => ({
-                send: vi.fn().mockResolvedValue(options.firstAvailableBlock ?? 0n),
-            })),
-        })),
-    };
+function loadClusterFixture(filename: string): any | null {
+    const filepath = join(CLUSTER_FIXTURES_DIR, `${filename}.json`);
+
+    if (!existsSync(filepath)) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(readFileSync(filepath, 'utf-8'), (_, value) => {
+            if (value && typeof value === 'object' && '__type' in value) {
+                const serialized = value as SerializedType;
+
+                switch (serialized.__type) {
+                    case 'bigint':
+                        return BigInt((serialized as SerializedBigInt).__value);
+
+                    case 'PublicKey':
+                        return new PublicKey((serialized as SerializedPublicKey).__value);
+
+                    case 'Uint8Array':
+                        return new Uint8Array((serialized as SerializedUint8Array).__value);
+
+                    default:
+                        return value;
+                }
+            }
+            return value;
+        });
+    } catch (error) {
+        throw new Error(`Failed to load cluster fixture ${filename}:\n${error}`);
+    }
 }
 
+export function mockSolanaKit() {
+    return {
+        createSolanaRpc: vi.fn((url: string) => {
+            const getClusterFromUrl = (url: string): string => {
+                if (url.includes('mainnet-beta')) return 'mainnet-beta';
+                if (url.includes('devnet')) return 'devnet';
+                if (url.includes('testnet')) return 'testnet';
+                if (url.includes('localhost')) return 'custom';
+                return 'custom';
+            };
+
+            const cluster = getClusterFromUrl(url);
+            const fixtureKey = `cluster-updates-${cluster}`;
+            const fixture = loadClusterFixture(fixtureKey);
+
+            const mockSend = (key: string, method: string) => {
+                if (fixture && fixture[key] !== undefined) {
+                    return fixture[key];
+                }
+
+                throw new Error(
+                    `No fixture found for ${method} at ${fixtureKey}\n` +
+                        `To record this fixture, run: pnpm tsx scripts/record-cluster-fixtures.ts all`
+                );
+            };
+
+            return {
+                getEpochInfo: vi.fn(() => ({
+                    send: vi.fn(async () => {
+                        return mockSend('epochInfo', 'getEpochInfo');
+                    }),
+                })),
+                getEpochSchedule: vi.fn(() => ({
+                    send: vi.fn(async () => {
+                        return mockSend('epochSchedule', 'getEpochSchedule');
+                    }),
+                })),
+                getFirstAvailableBlock: vi.fn(() => ({
+                    send: vi.fn(async () => {
+                        return mockSend('firstAvailableBlock', 'getFirstAvailableBlock');
+                    }),
+                })),
+            };
+        }),
+    };
+}
 export const mockPresets = {
     empty: (testName: string) => createMockConnection(testName),
     forIdlTests: (testName: string, realConnection?: Connection) => createMockConnection(testName, realConnection),

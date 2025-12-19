@@ -1,0 +1,47 @@
+{
+  "epochInfo": {
+    "absoluteSlot": {
+      "__type": "bigint",
+      "__value": "387745604"
+    },
+    "blockHeight": {
+      "__type": "bigint",
+      "__value": "365888900"
+    },
+    "epoch": {
+      "__type": "bigint",
+      "__value": "897"
+    },
+    "slotIndex": {
+      "__type": "bigint",
+      "__value": "241604"
+    },
+    "slotsInEpoch": {
+      "__type": "bigint",
+      "__value": "432000"
+    }
+  },
+  "epochSchedule": {
+    "firstNormalEpoch": {
+      "__type": "bigint",
+      "__value": "0"
+    },
+    "firstNormalSlot": {
+      "__type": "bigint",
+      "__value": "0"
+    },
+    "leaderScheduleSlotOffset": {
+      "__type": "bigint",
+      "__value": "432000"
+    },
+    "slotsPerEpoch": {
+      "__type": "bigint",
+      "__value": "432000"
+    },
+    "warmup": false
+  },
+  "firstAvailableBlock": {
+    "__type": "bigint",
+    "__value": "0"
+  }
+}
