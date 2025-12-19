@@ -166,6 +166,15 @@ describe('anchor utilities - number overflow handling', () => {
     });
 
     describe('error handling with proper table structure', () => {
+        beforeEach(() => {
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            vi.spyOn(console, 'log').mockImplementation(() => {});
+        });
+
+        afterEach(() => {
+            vi.restoreAllMocks();
+        });
+
         it('should render proper table structure on error in mapIxArgsToRows', () => {
             const ixType: IdlInstruction = {
                 accounts: [],
@@ -184,6 +193,13 @@ describe('anchor utilities - number overflow handling', () => {
                 <table>
                     <tbody>{rows}</tbody>
                 </table>
+            );
+
+            // Should have logged the error
+            expect(console.log).toHaveBeenCalledTimes(1);
+            expect(console.log).toHaveBeenCalledWith(
+                'Error while displaying IDL-based account data',
+                expect.any(Error)
             );
 
             // Should have proper 3-column structure
@@ -221,6 +237,13 @@ describe('anchor utilities - number overflow handling', () => {
                 </table>
             );
 
+            // Should have logged the error
+            expect(console.log).toHaveBeenCalledTimes(1);
+            expect(console.log).toHaveBeenCalledWith(
+                'Error while displaying IDL-based account data',
+                expect.any(Error)
+            );
+
             // Should have proper 3-column structure
             const cells = screen.getAllByRole('cell');
             expect(cells.length).toBe(3);
@@ -256,10 +279,16 @@ describe('anchor utilities - number overflow handling', () => {
                 </table>
             );
 
+            // Should have logged the error
+            expect(console.log).toHaveBeenCalledTimes(1);
+            expect(console.log).toHaveBeenCalledWith(
+                'Error while displaying IDL-based account data',
+                expect.any(Error)
+            );
+
             // Should render JSON viewer for non-struct types
             expect(screen.getByTestId('json-viewer')).toBeInTheDocument();
 
-            // Should show error message in console (tested via the error being caught)
             const cells = screen.getAllByRole('cell');
             expect(cells.length).toBe(3);
             expect(cells[0]).toHaveTextContent('someField');
@@ -284,6 +313,13 @@ describe('anchor utilities - number overflow handling', () => {
                 <table>
                     <tbody>{rows}</tbody>
                 </table>
+            );
+
+            // Should have logged the error
+            expect(console.log).toHaveBeenCalledTimes(1);
+            expect(console.log).toHaveBeenCalledWith(
+                'Error while displaying IDL-based account data',
+                expect.any(Error)
             );
 
             // Should render JSON viewer for type alias

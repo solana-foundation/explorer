@@ -1,5 +1,4 @@
-'use client';
-
+import type { SupportedIdl } from '@entities/idl';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
@@ -7,6 +6,7 @@ import { Switch } from '@shared/ui/switch';
 import { useMemo, useState } from 'react';
 import { Code, Download, Search } from 'react-feather';
 
+import { WalletProvider } from '@/app/providers/wallet-provider';
 import { triggerDownload } from '@/app/shared/lib/triggerDownload';
 
 import { IdlRenderer } from './IdlRenderer';
@@ -18,7 +18,7 @@ export function IdlSection({
     searchStr,
     onSearchChange,
 }: {
-    idl: any;
+    idl: SupportedIdl;
     badge: React.ReactNode;
     programId: string;
     searchStr: string;
@@ -26,10 +26,6 @@ export function IdlSection({
 }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isRawIdlView, setIsRawIdlView] = useState(false);
-
-    const onSearchIdl = (str: string) => {
-        onSearchChange(str);
-    };
 
     const idlBase64 = useMemo(() => {
         return Buffer.from(JSON.stringify(idl, null, 2)).toString('base64');
@@ -57,7 +53,7 @@ export function IdlSection({
                                 variant="dark"
                                 className="e-pl-9"
                                 value={searchStr}
-                                onChange={e => onSearchIdl(e.target.value)}
+                                onChange={e => onSearchChange(e.target.value)}
                             />
                         </div>
                     )}
@@ -80,13 +76,15 @@ export function IdlSection({
             </div>
 
             <div className="e-mt-4 e-min-h-48">
-                <IdlRenderer
-                    idl={idl}
-                    collapsed={!isExpanded}
-                    raw={isRawIdlView}
-                    searchStr={searchStr}
-                    programId={programId}
-                />
+                <WalletProvider skipToast autoConnect>
+                    <IdlRenderer
+                        idl={idl}
+                        collapsed={!isExpanded}
+                        raw={isRawIdlView}
+                        searchStr={searchStr}
+                        programId={programId}
+                    />
+                </WalletProvider>
             </div>
         </>
     );

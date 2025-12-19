@@ -46,7 +46,13 @@ export function useExplorerLink(path: string) {
     // Add query parameters if any
     const queryString = params.toString();
     if (queryString) {
-        url += `?${queryString}`;
+        if (url.indexOf('?') === -1) {
+            url += `?${queryString}`;
+        } else {
+            // change order for additional params as having ?message at the url and placing it first, breaks input at the Inspector
+            const [path, qs] = url.split('?');
+            url = `${path}?${queryString}&${qs}`;
+        }
     }
 
     return { link: url };

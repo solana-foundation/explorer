@@ -9,9 +9,13 @@ import React from 'react';
 
 export interface Details {
     raw?: {
-        transaction: TransactionMessage;
         message: VersionedMessage;
+        meta?: {
+            postBalances: number[];
+            preBalances: number[];
+        };
         signatures: string[];
+        transaction: TransactionMessage;
     } | null;
 }
 
@@ -63,6 +67,12 @@ async function fetchRawTransaction(dispatch: Dispatch, signature: TransactionSig
             data = {
                 raw: {
                     message,
+                    meta: response.meta
+                        ? {
+                              postBalances: response.meta.postBalances,
+                              preBalances: response.meta.preBalances,
+                          }
+                        : undefined,
                     signatures,
                     transaction: TransactionMessage.decompile(message, decompileArgs),
                 },

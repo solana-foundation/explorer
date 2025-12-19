@@ -1,4 +1,4 @@
-import { ParsedInstruction, ParsedTransaction, SignatureResult } from '@solana/web3.js';
+import { ParsedInstruction, ParsedTransaction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
@@ -40,6 +40,8 @@ type DetailsProps = {
     index: number;
     innerCards?: JSX.Element[];
     childIndex?: number;
+    // Raw instruction for displaying accounts and hex data in raw mode (used by inspector)
+    raw?: TransactionInstruction;
 };
 
 export function SystemDetailsCard(props: DetailsProps) {

@@ -151,6 +151,7 @@ function InspectorInstructionCard({
                     tx={asParsedTransaction}
                     index={index}
                     result={result}
+                    raw={ix}
                 />
             );
         }

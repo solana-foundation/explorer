@@ -8,7 +8,7 @@ export type StandardFormattedIdlProps<T> = {
 
 export type FormattedIdlViewProps<T> = {
     idl: FormattedIdl | null;
-    originalIdl?: T;
+    originalIdl: T;
     searchStr?: string;
 };
 

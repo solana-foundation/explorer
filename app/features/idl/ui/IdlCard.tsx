@@ -1,4 +1,5 @@
-import { getIdlVersion, useAnchorProgram } from '@entities/idl';
+'use client';
+import { getIdlVersion, type SupportedIdl, useAnchorProgram } from '@entities/idl';
 import { useProgramMetadataIdl } from '@entities/program-metadata';
 import { useCluster } from '@providers/cluster';
 import { Badge } from '@shared/ui/badge';
@@ -10,7 +11,7 @@ import { IdlSection } from './IdlSection';
 
 type IdlTab = {
     id: IdlVariant;
-    idl: any;
+    idl: SupportedIdl;
     title: string;
     badge: string;
 };

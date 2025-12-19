@@ -25,7 +25,7 @@ const config: StorybookConfig = {
                         global: true,
                         process: true,
                     },
-                    include: ['path', 'util'],
+                    include: ['path', 'util', 'stream'], // stream polyfill is needed for MetadataCard stories
                 }),
             ],
             resolve: {
