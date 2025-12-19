@@ -6,7 +6,6 @@ import {
     AssignWithSeedInfo,
     AuthorizeNonceInfo,
     CreateAccountInfo,
-    CreateAccountWithSeedInfo,
     InitializeNonceInfo,
     TransferInfo,
     TransferWithSeedInfo,
@@ -43,7 +42,6 @@ import {
     parseAssignWithSeedInstruction,
     parseAuthorizeNonceAccountInstruction,
     parseCreateAccountInstruction,
-    parseCreateAccountWithSeedInstruction,
     parseInitializeNonceAccountInstruction,
     parseTransferSolInstruction,
     parseTransferSolWithSeedInstruction,
@@ -61,6 +59,7 @@ import {
 } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
+import { parseSystemProgramInstruction } from './instruction-parsers/system-program.parser';
 import { parseToken2022Instruction } from './instruction-parsers/token-2022-program.parser';
 
 /**
@@ -81,18 +80,6 @@ function convertCreateAccountInfo(parsed: any): CreateAccountInfo {
         lamports: safeNumber(parsed.data.lamports),
         newAccount: new PublicKey(parsed.accounts.newAccount.address),
         owner: new PublicKey(parsed.data.programAddress),
-        source: new PublicKey(parsed.accounts.payer.address),
-        space: safeNumber(parsed.data.space),
-    };
-}
-
-function convertCreateAccountWithSeedInfo(parsed: any): CreateAccountWithSeedInfo {
-    return {
-        base: new PublicKey(parsed.accounts.baseAccount.address),
-        lamports: safeNumber(parsed.data.amount), // Note: field is 'amount' not 'lamports'
-        newAccount: new PublicKey(parsed.accounts.newAccount.address),
-        owner: new PublicKey(parsed.data.programAddress),
-        seed: parsed.data.seed,
         source: new PublicKey(parsed.accounts.payer.address),
         space: safeNumber(parsed.data.space),
     };
@@ -269,10 +256,9 @@ function intoParsedData(instruction: TransactionInstruction, parsed?: any): any 
                 break;
             }
             case SystemInstruction.CreateAccountWithSeed: {
-                type = 'createAccountWithSeed';
-                const idata = intoInstructionData(instruction);
-                const parsed = parseCreateAccountWithSeedInstruction(idata);
-                info = convertCreateAccountWithSeedInfo(parsed);
+                const parsed = parseSystemProgramInstruction(instruction);
+                type = parsed?.type ?? UNKNOWN_PROGRAM_TYPE;
+                info = parsed?.info ?? {};
                 break;
             }
             case SystemInstruction.Allocate: {

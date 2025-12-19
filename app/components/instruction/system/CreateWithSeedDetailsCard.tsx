@@ -1,7 +1,7 @@
 import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
 import { SolBalance } from '@components/common/SolBalance';
-import { ParsedInstruction, SignatureResult, SystemProgram } from '@solana/web3.js';
+import { ParsedInstruction, SignatureResult, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
 import { InstructionCard } from '../InstructionCard';
@@ -14,8 +14,10 @@ export function CreateWithSeedDetailsCard(props: {
     info: CreateAccountWithSeedInfo;
     innerCards?: JSX.Element[];
     childIndex?: number;
+    // Raw instruction for displaying accounts and hex data in raw mode (used by inspector)
+    raw?: TransactionInstruction;
 }) {
-    const { ix, index, result, info, innerCards, childIndex } = props;
+    const { ix, index, result, info, innerCards, childIndex, raw } = props;
 
     return (
         <InstructionCard
@@ -25,6 +27,7 @@ export function CreateWithSeedDetailsCard(props: {
             title="System Program: Create Account w/ Seed"
             innerCards={innerCards}
             childIndex={childIndex}
+            raw={raw}
         >
             <tr>
                 <td>Program</td>
