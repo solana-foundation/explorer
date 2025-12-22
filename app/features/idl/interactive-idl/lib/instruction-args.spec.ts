@@ -123,6 +123,24 @@ describe('isRequiredArg', () => {
             };
             expect(isRequiredArg(arg)).toBe(false);
         });
+
+        it('should return false for option(vec(u8))', () => {
+            const arg: ArgField = {
+                docs: [],
+                name: 'optionalItems',
+                type: 'option(vec(u8))',
+            };
+            expect(isRequiredArg(arg)).toBe(false);
+        });
+
+        it('should return false for coption(array(u8, 32))', () => {
+            const arg: ArgField = {
+                docs: [],
+                name: 'optionalData',
+                type: 'coption(array(u8, 32))',
+            };
+            expect(isRequiredArg(arg)).toBe(false);
+        });
     });
 
     describe('edge cases', () => {
@@ -422,6 +440,24 @@ describe('getArrayMaxLength', () => {
             };
             expect(getArrayMaxLength(arg)).toBe(10);
         });
+
+        it('should handle spaces inside option(array( type , length ))', () => {
+            const arg: ArgField = {
+                docs: [],
+                name: 'optionalData',
+                type: 'option(array( u8 , 24 ))',
+            };
+            expect(getArrayMaxLength(arg)).toBe(24);
+        });
+
+        it('should handle spaces inside coption(array( type , length ))', () => {
+            const arg: ArgField = {
+                docs: [],
+                name: 'optionalData',
+                type: 'coption(array( bool , 8 ))',
+            };
+            expect(getArrayMaxLength(arg)).toBe(8);
+        });
     });
 
     describe('types without length', () => {
@@ -457,6 +493,24 @@ describe('getArrayMaxLength', () => {
                 docs: [],
                 name: 'value',
                 type: 'option(u64)',
+            };
+            expect(getArrayMaxLength(arg)).toBeUndefined();
+        });
+
+        it('should return undefined for option(vec(u8))', () => {
+            const arg: ArgField = {
+                docs: [],
+                name: 'optionalItems',
+                type: 'option(vec(u8))',
+            };
+            expect(getArrayMaxLength(arg)).toBeUndefined();
+        });
+
+        it('should return undefined for coption(vec(u8))', () => {
+            const arg: ArgField = {
+                docs: [],
+                name: 'optionalItems',
+                type: 'coption(vec(u8))',
             };
             expect(getArrayMaxLength(arg)).toBeUndefined();
         });
