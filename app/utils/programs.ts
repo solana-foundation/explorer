@@ -250,10 +250,6 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.Devnet],
         name: PROGRAM_NAMES.WORMHOLE_TOKEN,
     },
-    VRFzZoJdhFWL8rkvu87LpKM3RbcVezpMEc6X5GVDr7y: {
-        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
-        name: PROGRAM_NAMES.ORAO_VRF_2,
-    },
     DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1: {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.ORCA_SWAP_1,
@@ -401,6 +397,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.TOKEN_2022,
+    },
+    VRFzZoJdhFWL8rkvu87LpKM3RbcVezpMEc6X5GVDr7y: {
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.ORAO_VRF_2,
     },
     Vote111111111111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
