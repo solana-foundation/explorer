@@ -80,6 +80,34 @@ export function InteractInstruction({
                         </div>
                     )}
 
+                    {/* Arguments Section - shown first as accounts may depend on argument values */}
+                    {instruction.args.length > 0 && (
+                        <CardSection title="Arguments">
+                            <div className="e-space-y-3 e-px-6">
+                                {instruction.args.map(arg => (
+                                    <Controller
+                                        key={arg.name}
+                                        name={fieldNames.argument(arg)}
+                                        control={form.control}
+                                        rules={validationRules.argument(arg)}
+                                        render={({ field, fieldState: { error } }) => (
+                                            <ArgumentInput
+                                                {...field}
+                                                value={
+                                                    typeof field.value === 'string'
+                                                        ? field.value
+                                                        : String(field.value || '')
+                                                }
+                                                arg={arg}
+                                                error={error}
+                                            />
+                                        )}
+                                    />
+                                ))}
+                            </div>
+                        </CardSection>
+                    )}
+
                     {/* Accounts Section */}
                     {instruction.accounts.length > 0 && (
                         <CardSection title="Accounts">
@@ -107,34 +135,6 @@ export function InteractInstruction({
                                         />
                                     )
                                 )}
-                            </div>
-                        </CardSection>
-                    )}
-
-                    {/* Arguments Section */}
-                    {instruction.args.length > 0 && (
-                        <CardSection title="Arguments">
-                            <div className="e-space-y-3 e-px-6">
-                                {instruction.args.map(arg => (
-                                    <Controller
-                                        key={arg.name}
-                                        name={fieldNames.argument(arg)}
-                                        control={form.control}
-                                        rules={validationRules.argument(arg)}
-                                        render={({ field, fieldState: { error } }) => (
-                                            <ArgumentInput
-                                                {...field}
-                                                value={
-                                                    typeof field.value === 'string'
-                                                        ? field.value
-                                                        : String(field.value || '')
-                                                }
-                                                arg={arg}
-                                                error={error}
-                                            />
-                                        )}
-                                    />
-                                ))}
                             </div>
                         </CardSection>
                     )}
