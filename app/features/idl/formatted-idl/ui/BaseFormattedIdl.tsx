@@ -44,7 +44,7 @@ export function BaseFormattedIdl({
                         </button>
                     ))}
                 </div>
-                <div className={activeTab.id !== 'interact' ? 'e-overflow-x-auto md:e-overflow-x-scroll' : ''}>
+                <div className={cn('e-mb-0 e-min-h-96', activeTab.id !== 'interact' ? 'table-responsive' : '')}>
                     <ActiveTab activeTab={activeTab} />
                 </div>
             </div>
