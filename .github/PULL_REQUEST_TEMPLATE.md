@@ -35,6 +35,7 @@
 -   [ ] I have added tests that prove my fix/feature works
 -   [ ] All tests pass locally and in CI
 -   [ ] I have updated documentation as needed
+-   [ ] I have run `build:info` script to update build information
 -   [ ] CI/CD checks pass
 -   [ ] I have included screenshots for protocol screens (if applicable)
 -   [ ] For security-related features, I have included links to related information
