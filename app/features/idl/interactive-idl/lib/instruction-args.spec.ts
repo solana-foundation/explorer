@@ -459,7 +459,7 @@ describe('getArrayLengthFromIdlType', () => {
         });
 
         it('should return undefined for defined types', () => {
-            const type: IdlType = { defined: { name: 'MyStruct', generics: [] } };
+            const type: IdlType = { defined: { generics: [], name: 'MyStruct' } };
             expect(getArrayLengthFromIdlType(type)).toBeUndefined();
         });
     });

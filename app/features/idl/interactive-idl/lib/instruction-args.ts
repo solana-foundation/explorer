@@ -1,5 +1,4 @@
 import type { IdlType } from '@coral-xyz/anchor/dist/cjs/idl';
-
 import type { ArgField } from '@entities/idl';
 
 /**

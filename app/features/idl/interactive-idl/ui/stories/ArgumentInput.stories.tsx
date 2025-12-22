@@ -1,7 +1,7 @@
 import type { ArgField } from '@entities/idl';
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, userEvent, within } from 'storybook/test';
 import { useState } from 'react';
+import { expect, userEvent, within } from 'storybook/test';
 
 import { ArgumentInput } from '../ArgumentInput';
 
@@ -101,7 +101,6 @@ export const VectorType: Story = {
             type: 'vec(pubkey)',
         },
     },
-    render: args => <ControlledArgumentInput arg={args.arg} initialValue="key1, key2" />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
@@ -119,6 +118,7 @@ export const VectorType: Story = {
         const removeButtons = canvas.getAllByRole('button', { name: 'Remove item' });
         expect(removeButtons).toHaveLength(2);
     },
+    render: args => <ControlledArgumentInput arg={args.arg} initialValue="key1, key2" />,
 };
 
 /**
@@ -133,7 +133,6 @@ export const ArrayWithLimit: Story = {
             type: 'array(u8, 12)',
         },
     },
-    render: args => <ControlledArgumentInput arg={args.arg} initialValue="1, 2, 3" />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         const addButton = canvas.getByRole('button', { name: 'Add' });
@@ -174,6 +173,7 @@ export const ArrayWithLimit: Story = {
         inputs = canvas.getAllByRole('textbox');
         expect(inputs).toHaveLength(12);
     },
+    render: args => <ControlledArgumentInput arg={args.arg} initialValue="1, 2, 3" />,
 };
 
 /**
@@ -188,7 +188,6 @@ export const OptionArray: Story = {
             type: 'option(array(u8, 4))',
         },
     },
-    render: args => <ControlledArgumentInput arg={args.arg} initialValue="10, 20, 30" />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
@@ -214,6 +213,7 @@ export const OptionArray: Story = {
         const removeButtons = canvas.getAllByRole('button', { name: 'Remove item' });
         expect(removeButtons).toHaveLength(3);
     },
+    render: args => <ControlledArgumentInput arg={args.arg} initialValue="10, 20, 30" />,
 };
 
 /**
@@ -228,7 +228,6 @@ export const COptionArray: Story = {
             type: 'coption(array(bool, 3))',
         },
     },
-    render: args => <ControlledArgumentInput arg={args.arg} initialValue="true, false" />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
@@ -253,6 +252,7 @@ export const COptionArray: Story = {
         const removeButtons = canvas.getAllByRole('button', { name: 'Remove item' });
         expect(removeButtons).toHaveLength(2);
     },
+    render: args => <ControlledArgumentInput arg={args.arg} initialValue="true, false" />,
 };
 
 /**
@@ -307,7 +307,6 @@ export const LargeArrayLimit: Story = {
             type: 'array(u8, 32)',
         },
     },
-    render: args => <ControlledArgumentInput arg={args.arg} initialValue="1, 2, 3, 4, 5" />,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
@@ -338,4 +337,5 @@ export const LargeArrayLimit: Story = {
         const removeButtons = canvas.getAllByRole('button', { name: 'Remove item' });
         expect(removeButtons).toHaveLength(5);
     },
+    render: args => <ControlledArgumentInput arg={args.arg} initialValue="1, 2, 3, 4, 5" />,
 };
