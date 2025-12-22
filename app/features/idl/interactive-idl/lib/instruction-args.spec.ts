@@ -1,7 +1,8 @@
+import type { IdlType } from '@coral-xyz/anchor/dist/cjs/idl';
 import type { ArgField } from '@entities/idl';
 import { describe, expect, it } from 'vitest';
 
-import { getArrayMaxLength, isArrayArg, isRequiredArg, isVectorArg } from './instruction-args';
+import { getArrayLengthFromIdlType, isArrayArg, isRequiredArg, isVectorArg } from './instruction-args';
 
 describe('isRequiredArg', () => {
     describe('required arguments', () => {
@@ -374,174 +375,92 @@ describe('isVectorArg', () => {
     });
 });
 
-describe('getArrayMaxLength', () => {
+describe('getArrayLengthFromIdlType', () => {
     describe('array types with length', () => {
         it('should return length for simple array types', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'data',
-                type: 'array(u8, 32)',
-            };
-            expect(getArrayMaxLength(arg)).toBe(32);
+            const type: IdlType = { array: ['u8', 32] };
+            expect(getArrayLengthFromIdlType(type)).toBe(32);
         });
 
-        it('should return length for array(string, 2)', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'items',
-                type: 'array(string, 2)',
-            };
-            expect(getArrayMaxLength(arg)).toBe(2);
+        it('should return length for array of strings', () => {
+            const type: IdlType = { array: ['string', 2] };
+            expect(getArrayLengthFromIdlType(type)).toBe(2);
         });
 
-        it('should return length for array(bool, 3)', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'flags',
-                type: 'array(bool, 3)',
-            };
-            expect(getArrayMaxLength(arg)).toBe(3);
+        it('should return length for array of bools', () => {
+            const type: IdlType = { array: ['bool', 3] };
+            expect(getArrayLengthFromIdlType(type)).toBe(3);
         });
 
-        it('should return length for array(publicKey, 5)', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'keys',
-                type: 'array(publicKey, 5)',
-            };
-            expect(getArrayMaxLength(arg)).toBe(5);
-        });
-
-        it('should handle spaces in array type', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'data',
-                type: 'array( u8 , 64 )',
-            };
-            expect(getArrayMaxLength(arg)).toBe(64);
+        it('should return length for array of pubkeys', () => {
+            const type: IdlType = { array: ['pubkey', 5] };
+            expect(getArrayLengthFromIdlType(type)).toBe(5);
         });
     });
 
     describe('optional array types', () => {
-        it('should return length for option(array(u8, 16))', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'optionalData',
-                type: 'option(array(u8, 16))',
-            };
-            expect(getArrayMaxLength(arg)).toBe(16);
+        it('should return length for option(array)', () => {
+            const type: IdlType = { option: { array: ['u8', 16] } };
+            expect(getArrayLengthFromIdlType(type)).toBe(16);
         });
 
-        it('should return length for coption(array(string, 10))', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'optionalItems',
-                type: 'coption(array(string, 10))',
-            };
-            expect(getArrayMaxLength(arg)).toBe(10);
-        });
-
-        it('should handle spaces inside option(array( type , length ))', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'optionalData',
-                type: 'option(array( u8 , 24 ))',
-            };
-            expect(getArrayMaxLength(arg)).toBe(24);
-        });
-
-        it('should handle spaces inside coption(array( type , length ))', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'optionalData',
-                type: 'coption(array( bool , 8 ))',
-            };
-            expect(getArrayMaxLength(arg)).toBe(8);
+        it('should return length for coption(array)', () => {
+            const type: IdlType = { coption: { array: ['string', 10] } };
+            expect(getArrayLengthFromIdlType(type)).toBe(10);
         });
     });
 
     describe('types without length', () => {
         it('should return undefined for vector types', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'items',
-                type: 'vec(u8)',
-            };
-            expect(getArrayMaxLength(arg)).toBeUndefined();
+            const type: IdlType = { vec: 'u8' };
+            expect(getArrayLengthFromIdlType(type)).toBeUndefined();
         });
 
-        it('should return undefined for array without length', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'items',
-                type: 'array(u8)',
-            };
-            expect(getArrayMaxLength(arg)).toBeUndefined();
+        it('should return undefined for array with generic length', () => {
+            const type: IdlType = { array: ['u8', { generic: 'N' }] };
+            expect(getArrayLengthFromIdlType(type)).toBeUndefined();
         });
 
         it('should return undefined for simple types', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'amount',
-                type: 'u64',
-            };
-            expect(getArrayMaxLength(arg)).toBeUndefined();
+            const type: IdlType = 'u64';
+            expect(getArrayLengthFromIdlType(type)).toBeUndefined();
         });
 
-        it('should return undefined for option types', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'value',
-                type: 'option(u64)',
-            };
-            expect(getArrayMaxLength(arg)).toBeUndefined();
+        it('should return undefined for option of non-array', () => {
+            const type: IdlType = { option: 'u64' };
+            expect(getArrayLengthFromIdlType(type)).toBeUndefined();
         });
 
-        it('should return undefined for option(vec(u8))', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'optionalItems',
-                type: 'option(vec(u8))',
-            };
-            expect(getArrayMaxLength(arg)).toBeUndefined();
+        it('should return undefined for coption of non-array', () => {
+            const type: IdlType = { coption: 'pubkey' };
+            expect(getArrayLengthFromIdlType(type)).toBeUndefined();
         });
 
-        it('should return undefined for coption(vec(u8))', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'optionalItems',
-                type: 'coption(vec(u8))',
-            };
-            expect(getArrayMaxLength(arg)).toBeUndefined();
+        it('should return undefined for option(vec)', () => {
+            const type: IdlType = { option: { vec: 'u8' } };
+            expect(getArrayLengthFromIdlType(type)).toBeUndefined();
+        });
+
+        it('should return undefined for coption(vec)', () => {
+            const type: IdlType = { coption: { vec: 'u8' } };
+            expect(getArrayLengthFromIdlType(type)).toBeUndefined();
         });
     });
 
     describe('edge cases', () => {
         it('should handle large array lengths', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'large',
-                type: 'array(u8, 1000)',
-            };
-            expect(getArrayMaxLength(arg)).toBe(1000);
+            const type: IdlType = { array: ['u8', 1000] };
+            expect(getArrayLengthFromIdlType(type)).toBe(1000);
         });
 
-        it('should handle single digit lengths', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'small',
-                type: 'array(u8, 1)',
-            };
-            expect(getArrayMaxLength(arg)).toBe(1);
+        it('should handle single element arrays', () => {
+            const type: IdlType = { array: ['u8', 1] };
+            expect(getArrayLengthFromIdlType(type)).toBe(1);
         });
 
-        it('should return undefined for empty string type', () => {
-            const arg: ArgField = {
-                docs: [],
-                name: 'value',
-                type: '',
-            };
-            expect(getArrayMaxLength(arg)).toBeUndefined();
+        it('should return undefined for defined types', () => {
+            const type: IdlType = { defined: { name: 'MyStruct', generics: [] } };
+            expect(getArrayLengthFromIdlType(type)).toBeUndefined();
         });
     });
 });

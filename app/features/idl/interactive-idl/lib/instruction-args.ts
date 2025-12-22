@@ -1,35 +1,37 @@
+import type { IdlType } from '@coral-xyz/anchor/dist/cjs/idl';
+
 import type { ArgField } from '@entities/idl';
 
-const OPTION_PREFIX = /^option\(/;
-const COPTION_PREFIX = /^coption\(/;
-const ARRAY_PATTERN = /array\(/;
-const VEC_PATTERN = /vec\(/;
+/**
+ * Extract array length from an IdlType.
+ * Handles option/coption wrapping and returns the numeric length if available.
+ */
+export function getArrayLengthFromIdlType(type: IdlType): number | undefined {
+    if (typeof type === 'string') return undefined;
 
-// Matches array length: array( type , length ) with optional option/coption wrapper
-// Captures length in group 1
-const ARRAY_LENGTH = /^(?:c?option\()?array\(\s*\w+\s*,\s*(\d+)\s*\)/;
+    // Unwrap option/coption
+    let inner: IdlType = type;
+    if ('option' in type) inner = type.option;
+    else if ('coption' in type) inner = type.coption;
+
+    // Check for array
+    if (typeof inner === 'object' && 'array' in inner) {
+        const len = inner.array[1];
+        // len is IdlArrayLen: number | { generic: string }
+        return typeof len === 'number' ? len : undefined;
+    }
+
+    return undefined;
+}
 
 export function isRequiredArg(arg: ArgField): boolean {
-    return !OPTION_PREFIX.test(arg.type) && !COPTION_PREFIX.test(arg.type);
+    return !/^(option|coption)\(/.test(arg.type);
 }
 
 export function isArrayArg(arg: ArgField): boolean {
-    return ARRAY_PATTERN.test(arg.type);
+    return /array\(/.test(arg.type);
 }
 
 export function isVectorArg(arg: ArgField): boolean {
-    return VEC_PATTERN.test(arg.type);
-}
-
-/**
- * Extract the fixed length from an array type.
- * Handles: 'array(u8, 32)', 'option(array(string, 2))', 'coption(array(bool, 3))'
- */
-export function getArrayMaxLength(arg: ArgField): number | undefined {
-    const match = arg.type.match(ARRAY_LENGTH);
-    if (match?.[1]) {
-        const length = parseInt(match[1], 10);
-        return isNaN(length) ? undefined : length;
-    }
-    return undefined;
+    return /vec\(/.test(arg.type);
 }

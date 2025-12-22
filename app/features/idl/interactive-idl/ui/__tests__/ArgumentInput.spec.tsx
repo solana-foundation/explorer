@@ -1,3 +1,4 @@
+import type { IdlType } from '@coral-xyz/anchor/dist/cjs/idl';
 import type { ArgField } from '@entities/idl';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -709,7 +710,7 @@ describe('ArgumentInput', () => {
 
         it('should respect max length from array type', async () => {
             const user = userEvent.setup();
-            const arg = createArgField({ type: 'array(string, 3)' });
+            const arg = createArgField({ type: 'array(string, 3)', rawType: { array: ['string', 3] } });
             const handleChange = vi.fn();
 
             const maxItems = 'item1, item2, item3';
@@ -724,7 +725,7 @@ describe('ArgumentInput', () => {
 
         it('should allow adding items up to array type max length', async () => {
             const user = userEvent.setup();
-            const arg = createArgField({ type: 'array(u8, 5)' });
+            const arg = createArgField({ type: 'array(u8, 5)', rawType: { array: ['u8', 5] } });
             const handleChange = vi.fn();
 
             render(<ArgumentInput arg={arg} value="item1, item2" onChange={handleChange} />);
