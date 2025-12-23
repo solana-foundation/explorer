@@ -89,3 +89,50 @@ jobs:
           TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
         run: |
           pnpm test:ci
+
+  Storybook-Smoke-Tests:
+    needs: read-nvmrc
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+
+    strategy:
+      matrix:
+        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install package manager
+        uses: pnpm/action-setup@v4
+
+      - name: Setup pnpm config
+        run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Setup Additional Cache
+        uses: actions/cache@v4
+        id: additional_cache
+        with:
+          path: |
+            ${{ env.PNPM_CACHE_FOLDER }}
+            ${{ env.PW_CACHE_FOLDER }}
+          key: ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium firefox
+
+      - name: Run Storybook smoke tests
+        run: pnpm test:sb
