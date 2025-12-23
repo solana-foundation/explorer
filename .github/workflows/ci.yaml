@@ -7,12 +7,14 @@ on:
     branches: [master, development, 'development-*']
 
 env:
-  # cache folders for pnpm_store, nextjs and playwright
+  # cache affixes and folders
+  PNPM_CACHE_AFFIX: pnpm
+  PNPM_CACHE_FOLDER: ~/.pnpm-store
   PW_CACHE_AFFIX: pw
   PW_CACHE_FOLDER: ~/.cache/ms-playwright
-  PNPM_CACHE_FOLDER: ~/.pnpm-store
   SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING: 1
   SENTRY_TELEMETRY_DISABLE: true
+  STORYBOOK_DISABLE_TELEMETRY: 1
 
 jobs:
   # Job to read Node version from .nvmrc
@@ -67,10 +69,10 @@ jobs:
             ${{ env.PNPM_CACHE_FOLDER }}
             ${{ env.PW_CACHE_FOLDER }}
             ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
+          key: ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
           restore-keys: |
-            ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
-            ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-
+            ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-
 
       - name: Install dependencies
         run: |
@@ -117,13 +119,19 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Setup Additional Cache
+      - name: Cache pnpm store
         uses: actions/cache@v4
-        id: additional_cache
         with:
-          path: |
-            ${{ env.PNPM_CACHE_FOLDER }}
-            ${{ env.PW_CACHE_FOLDER }}
+          path: ${{ env.PNPM_CACHE_FOLDER }}
+          key: ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: pw_cache
+        with:
+          path: ${{ env.PW_CACHE_FOLDER }}
           key: ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-
@@ -132,7 +140,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium firefox
+        if: steps.pw_cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Install Playwright system deps only
+        if: steps.pw_cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
 
       - name: Run Storybook smoke tests
         run: pnpm test:sb
