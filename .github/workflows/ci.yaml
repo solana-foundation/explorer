@@ -148,4 +148,6 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: Run Storybook smoke tests
+        env:
+          STORYBOOK_DISABLE_TELEMETRY: ${{ env.STORYBOOK_DISABLE_TELEMETRY }}
         run: pnpm test:sb
