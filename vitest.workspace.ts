@@ -28,6 +28,16 @@ export default defineWorkspace([
                 headless: true,
                 instances: [{ browser: 'chromium' }, { browser: 'firefox' }],
                 provider: 'playwright',
+                isolate: true,
+            },
+            pool: 'threads',
+            poolOptions: {
+                threads: {
+                    singleThread: true,
+                },
+            },
+            sequence: {
+                concurrent: false,
             },
             setupFiles: ['./test-setup.ts', './.storybook/vitest.setup.ts'],
             testTimeout: 10000,
