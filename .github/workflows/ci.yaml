@@ -100,7 +100,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}']
+        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}', '22.x']
 
     steps:
       - name: Checkout
