@@ -1,4 +1,6 @@
 import '@testing-library/jest-dom';
+// Import the cluster mock setup FIRST, before any other imports
+import './app/__tests__/setup-cluster-mock';
 
 if (!AbortSignal.timeout) {
     AbortSignal.timeout = ms => {

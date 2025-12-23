@@ -15,8 +15,10 @@
         "sb": "storybook dev -p 6006",
         "scan": "next dev & react-scan localhost:3000",
         "start": "next start",
+        "writeclusterfixtures": "tsx scripts/record-cluster-fixtures.ts all",
         "test": "vitest --project specs run",
         "test:ci": "vitest --project specs run",
+        "test:realrpc": "TEST_USE_REAL_RPC=true vitest --project specs run",
         "test:watch": "vitest --project specs --watch",
         "test:sb": "vitest --project storybook run",
         "test:sb:watch": "vitest --project storybook --watch"

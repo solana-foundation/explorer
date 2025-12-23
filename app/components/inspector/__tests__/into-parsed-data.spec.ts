@@ -1,6 +1,7 @@
 import * as spl from '@solana/spl-token';
-import { AddressLookupTableAccount, clusterApiUrl, Connection, PublicKey, TransactionMessage } from '@solana/web3.js';
+import { AddressLookupTableAccount, PublicKey, TransactionMessage } from '@solana/web3.js';
 
+import { createMockConnection, createRealConnection } from '@/app/__tests__/mock-solana-rpc';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
 
@@ -10,7 +11,8 @@ describe('intoParsedData', () => {
     test('should return "create" instruction data', async () => {
         const index = 2;
         const message = mock.deserializeMessage(stubs.aTokenCreateMsgWithInnerCards);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const realConnection = createRealConnection('mainnet-beta');
+        const connection = createMockConnection('inspector-into-parse-data', realConnection);
         const lookups = await Promise.all(
             message.addressTableLookups.map(lookup =>
                 connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
@@ -48,7 +50,8 @@ describe('intoParsedData', () => {
     test('should return "createIdempotent" instruction data', async () => {
         const index = 1;
         const message = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const realConnection = createRealConnection('mainnet-beta');
+        const connection = createMockConnection('inspector-into-parse-data', realConnection);
         const lookups = await Promise.all(
             message.addressTableLookups.map(lookup =>
                 connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
@@ -86,7 +89,8 @@ describe('intoParsedData', () => {
     test('should return "recoverNested" instruction data', async () => {
         const index = 0;
         const message = mock.deserializeMessage(stubs.aTokenRecoverNestedMsg);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const realConnection = createRealConnection('mainnet-beta');
+        const connection = createMockConnection('inspector-into-parse-data', realConnection);
         const lookups = await Promise.all(
             message.addressTableLookups.map(lookup =>
                 connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)

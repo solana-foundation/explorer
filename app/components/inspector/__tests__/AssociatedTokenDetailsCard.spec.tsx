@@ -1,8 +1,9 @@
 import * as spl from '@solana/spl-token';
-import { AddressLookupTableAccount, clusterApiUrl, Connection, TransactionMessage } from '@solana/web3.js';
+import { AddressLookupTableAccount, TransactionMessage } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe } from 'vitest';
 
+import { createMockConnection, createRealConnection } from '@/app/__tests__/mock-solana-rpc';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
 import { AccountsProvider } from '@/app/providers/accounts';
@@ -16,7 +17,8 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
     test('should render "CreateIdempotent" card', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const realConnection = createRealConnection('mainnet-beta');
+        const connection = createMockConnection('inspector-associated-token-create-idempotent', realConnection);
         const lookups = await Promise.all(
             m.addressTableLookups.map(lookup =>
                 connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
@@ -56,7 +58,10 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
     test('should render "Create" card', async () => {
         const index = 2;
         const m = mock.deserializeMessage(stubs.aTokenCreateMsgWithInnerCards);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+
+        const realConnection = createRealConnection('mainnet-beta');
+        const connection = createMockConnection('inspector-associated-token-create-idempotent', realConnection);
+
         const lookups = await Promise.all(
             m.addressTableLookups.map(lookup =>
                 connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
@@ -90,7 +95,8 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
     test('should render "RecoverNested" card', async () => {
         const index = 0;
         const m = mock.deserializeMessage(stubs.aTokenRecoverNestedMsg);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const realConnection = createRealConnection('mainnet-beta');
+        const connection = createMockConnection('inspector-associated-token-create-idempotent', realConnection);
         const lookups = await Promise.all(
             m.addressTableLookups.map(lookup =>
                 connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
@@ -125,7 +131,8 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
     test('should render "CreateIdempotentDetailsCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsgWithInnerCards);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const realConnection = createRealConnection('mainnet-beta');
+        const connection = createMockConnection('inspector-associated-token-create-idempotent', realConnection);
         const lookups = await Promise.all(
             m.addressTableLookups.map(lookup =>
                 connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)

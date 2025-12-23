@@ -1,7 +1,8 @@
 import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { AddressLookupTableAccount, clusterApiUrl, Connection, TransactionMessage } from '@solana/web3.js';
+import { AddressLookupTableAccount, TransactionMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 
+import { createMockConnection, createRealConnection } from '@/app/__tests__/mock-solana-rpc';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
 import { ClusterProvider } from '@/app/providers/cluster';
@@ -13,7 +14,8 @@ describe('BaseInstructionCard', () => {
     test('should render "BaseInstructionCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const realConnection = createRealConnection('mainnet-beta');
+        const connection = createMockConnection('common-base-instruction-card', realConnection);
         const lookups = await Promise.all(
             m.addressTableLookups.map(lookup =>
                 connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
@@ -40,7 +42,8 @@ describe('BaseInstructionCard', () => {
     test('should render "BaseInstructionCard" with raw data', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
+        const realConnection = createRealConnection('mainnet-beta');
+        const connection = createMockConnection('common-base-instruction-card', realConnection);
         const lookups = await Promise.all(
             m.addressTableLookups.map(lookup =>
                 connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
