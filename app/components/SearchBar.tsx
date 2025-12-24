@@ -15,6 +15,7 @@ import AsyncSelect from 'react-select/async';
 import { is } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { isValidBase64 as checkValidBase64 } from '@/app/shared/lib/bytes';
 import FEATURES from '@/app/utils/feature-gate/featureGates.json';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
@@ -475,12 +476,7 @@ function decodeTransactionFromBase64(base64String: string): {
 }
 
 function isValidBase64(str: string): boolean {
-    try {
-        Buffer.from(str, 'base64');
-        return true;
-    } catch (_err) {
-        return false;
-    }
+    return checkValidBase64(str);
 }
 
 function KeyIndicator() {

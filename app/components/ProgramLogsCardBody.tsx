@@ -1,3 +1,4 @@
+import { fromBase64 } from '@/app/shared/lib/bytes';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useAnchorProgram } from '@entities/idl';
 import { ParsedMessage, PublicKey, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
@@ -195,7 +196,7 @@ function ProgramLogRow({
                 });
 
                 txInstruction = new TransactionInstruction({
-                    data: Buffer.from(instruction.data),
+                    data: Uint8Array.from(instruction.data),
                     keys: accounts,
                     programId,
                 });
@@ -211,7 +212,7 @@ function ProgramLogRow({
                 });
 
                 txInstruction = new TransactionInstruction({
-                    data: Buffer.from(instruction.data, 'base64'),
+                    data: fromBase64(instruction.data),
                     keys,
                     programId,
                 });

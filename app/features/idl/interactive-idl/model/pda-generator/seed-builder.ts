@@ -1,3 +1,4 @@
+import { bnToBytes, fromUtf8, toHex } from '@/app/shared/lib/bytes';
 import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
 import { camelCase } from 'change-case';
@@ -6,7 +7,7 @@ import { parseArrayInput } from '../anchor/array-parser';
 import type { IdlSeed, IdlSeedAccount, IdlSeedArg, IdlSeedConst, PdaArgument, PdaInstruction } from './types';
 
 export interface SeedInfo {
-    buffers: Buffer[] | null;
+    buffers: Uint8Array[] | null;
     info: { value: string | null; name: string }[];
 }
 
@@ -22,15 +23,18 @@ export function buildSeedsWithInfo(
 ): SeedInfo {
     const processed = seeds.map(seed => processSeed(seed, args, accounts, instruction));
     const info = processed.map(p => p.info);
-    const buffers = processed.every(p => p.buffer !== null) ? (processed.map(p => p.buffer) as Buffer[]) : null;
+    const buffers = processed.every(p => p.buffer !== null) ? (processed.map(p => p.buffer) as Uint8Array[]) : null;
     return { buffers, info };
 }
 
 interface ProcessedSeed {
-    buffer: Buffer | null;
+    buffer: Uint8Array | null;
     info: { value: string | null; name: string };
 }
 
+/**
+ * Process a single seed and return its buffer and info
+ */
 function processSeed(
     seed: IdlSeed,
     args: Record<string, string | undefined>,
@@ -50,8 +54,8 @@ function processSeed(
 }
 
 function processConstSeed(seed: IdlSeedConst): ProcessedSeed {
-    const buffer = Buffer.from(seed.value);
-    const hex = buffer.toString('hex');
+    const buffer = new Uint8Array(seed.value);
+    const hex = toHex(buffer);
     return { buffer, info: { name: `0x${hex}`, value: `0x${hex}` } };
 }
 
@@ -85,7 +89,7 @@ function processAccountSeed(
         return { buffer: null, info: { name: camelPath, value: null } };
     }
     try {
-        return { buffer: new PublicKey(value).toBuffer(), info: { name: camelPath, value } };
+        return { buffer: new PublicKey(value).toBytes(), info: { name: camelPath, value } };
     } catch {
         return { buffer: null, info: { name: camelPath, value } };
     }
@@ -106,24 +110,24 @@ const INTEGER_SEED_SIZES: Record<string, number> = {
     u8: 1,
 };
 
-function argToSeedBuffer(value: string, type: PdaArgument['type']): Buffer | null {
+function argToSeedBuffer(value: string, type: PdaArgument['type']): Uint8Array | null {
     if (!value.trim()) return null;
 
     const primitiveSize =
         typeof type === 'string' ? INTEGER_SEED_SIZES[type as keyof typeof INTEGER_SEED_SIZES] : undefined;
     if (primitiveSize !== undefined) return integerToSeedBuffer(value, primitiveSize);
 
-    if (type === 'string' || type === 'bytes') return Buffer.from(value);
+    if (type === 'string' || type === 'bytes') return fromUtf8(value);
     if (type === 'pubkey') {
         try {
-            return new PublicKey(value).toBuffer();
+            return new PublicKey(value).toBytes();
         } catch {
             return null;
         }
     }
     if (type === 'bool') {
-        if (value === 'true') return Buffer.from([1]);
-        if (value === 'false') return Buffer.from([0]);
+        if (value === 'true') return new Uint8Array([1]);
+        if (value === 'false') return new Uint8Array([0]);
         return null;
     }
 
@@ -145,15 +149,15 @@ function argToSeedBuffer(value: string, type: PdaArgument['type']): Buffer | nul
                 : typeof elementType === 'string'
                   ? parseIntegerArray(value, elementType, length)
                   : null;
-        return bytes ? Buffer.from(bytes) : null;
+        return bytes ? new Uint8Array(bytes) : null;
     }
 
     return null;
 }
 
-function integerToSeedBuffer(value: string, size: number): Buffer | null {
+function integerToSeedBuffer(value: string, size: number): Uint8Array | null {
     try {
-        return new BN(value).toArrayLike(Buffer, 'le', size);
+        return bnToBytes(new BN(value), 'le', size);
     } catch {
         return null;
     }

@@ -524,7 +524,13 @@ function handleInvokeError(error: unknown | Error, message = 'Failed to invoke i
 function serializeTransactionMessage(transaction: Transaction | undefined): string | null {
     if (!transaction) return null;
     try {
-        return Buffer.from(transaction.serializeMessage()).toString('base64');
+        const message = transaction.serializeMessage();
+        // Use native btoa for base64 encoding
+        let binaryString = '';
+        for (let i = 0; i < message.length; i++) {
+            binaryString += String.fromCharCode(message[i]);
+        }
+        return btoa(binaryString);
     } catch (error) {
         Logger.warn('[idl] Failed to serialize transaction message', { error });
         return null;

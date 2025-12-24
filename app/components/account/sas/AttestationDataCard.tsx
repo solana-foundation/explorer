@@ -9,6 +9,7 @@ import {
 
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
 import { Logger } from '@/app/shared/lib/logger';
+import { toBase64 } from '@/app/shared/lib/bytes';
 import {
     decodeAccount,
     decodeWithType,
@@ -97,7 +98,7 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
                         wordBreak: 'break-all',
                     }}
                 >
-                    {Buffer.from(attestation.data).toString('base64') || '(empty)'}
+                    {toBase64(new Uint8Array(attestation.data)) || '(empty)'}
                 </div>
             )}
         </div>

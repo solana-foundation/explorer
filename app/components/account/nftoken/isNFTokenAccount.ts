@@ -1,6 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { toBase64 } from '@/app/shared/lib/bytes';
 
 import { Account } from '../../../providers/accounts';
 import { NFTOKEN_ADDRESS } from './nftoken';
@@ -24,7 +25,7 @@ export const parseNFTokenNFTAccount = (account: Account): NftokenTypes.NftAccoun
             return null;
         }
 
-        if (Buffer.from(parsed!.discriminator).toString('base64') !== nftokenAccountDisc) {
+        if (toBase64(new Uint8Array(parsed!.discriminator)) !== nftokenAccountDisc) {
             return null;
         }
 
@@ -58,7 +59,7 @@ export const parseNFTokenCollectionAccount = (account: Account): NftokenTypes.Co
         if (!parsed) {
             return null;
         }
-        if (Buffer.from(parsed.discriminator).toString('base64') !== collectionAccountDisc) {
+        if (toBase64(new Uint8Array(parsed.discriminator)) !== collectionAccountDisc) {
             return null;
         }
 

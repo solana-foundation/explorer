@@ -1,3 +1,4 @@
+import { fromBase64, fromUtf8, toHex } from '@/app/shared/lib/bytes';
 import { useAnchorProgram } from '@entities/idl';
 import { sha256 } from '@noble/hashes/sha256';
 import { Connection, PublicKey } from '@solana/web3.js';
@@ -203,8 +204,8 @@ function useEnrichedOsecInfo({
 
             try {
                 const [pda] = PublicKey.findProgramAddressSync(
-                    [Buffer.from('otter_verify'), new PublicKey(osecInfo.signer).toBuffer(), programId.toBuffer()],
-                    new PublicKey(VERIFY_PROGRAM_ID),
+                    [fromUtf8('otter_verify'), new PublicKey(osecInfo.signer).toBuffer(), programId.toBuffer()],
+                    new PublicKey(VERIFY_PROGRAM_ID)
                 );
 
                 const pdaAccountInfo = await (accountAnchorProgram.account as any).buildParams.fetch(pda);
@@ -278,7 +279,7 @@ function isMainnet(currentCluster: Cluster): boolean {
 
 // Helper function to hash program data
 export function hashProgramData(programData: ProgramDataAccountInfo): string {
-    const buffer = Buffer.from(programData.data[0], 'base64');
+    const buffer = fromBase64(programData.data[0]);
     // The jsonParsed RPC response includes the 32-byte pubkey field from the raw
     // account header when authority is None (may contain stale data from a previous
     // authority). Skip them so the hash matches what solana-verify computes from
@@ -291,6 +292,6 @@ export function hashProgramData(programData: ProgramDataAccountInfo): string {
         truncatedBytes++;
     }
     // Hash the binary
-    const c = Buffer.from(data.slice(0, data.length - truncatedBytes));
-    return Buffer.from(sha256(c)).toString('hex');
+    const dataToHash = data.slice(0, data.length - truncatedBytes);
+    return toHex(sha256(dataToHash));
 }

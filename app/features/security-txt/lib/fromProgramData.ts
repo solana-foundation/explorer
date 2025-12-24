@@ -1,3 +1,4 @@
+import { fromBase64, indexOf } from '@/app/shared/lib/bytes';
 import type { ProgramDataAccountInfo } from '@/app/validators/accounts/upgradeable-program';
 
 import { NO_SECURITY_TXT_ERROR } from './constants';
@@ -28,10 +29,10 @@ export const fromProgramData = (
     const [data, encoding] = programData.data;
     if (!(data && encoding === 'base64')) return { error: 'Failed to decode program data', securityTXT: undefined };
 
-    const decoded = Buffer.from(data, encoding);
+    const decoded = fromBase64(data);
 
-    const headerIdx = decoded.indexOf(HEADER);
-    const footerIdx = decoded.indexOf(FOOTER);
+    const headerIdx = indexOf(decoded, HEADER);
+    const footerIdx = indexOf(decoded, FOOTER);
 
     if (headerIdx < 0 || footerIdx < 0) {
         return { error: NO_SECURITY_TXT_ERROR, securityTXT: undefined };
