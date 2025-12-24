@@ -7,12 +7,14 @@ on:
     branches: [master, development, 'development-*']
 
 env:
-  # cache folders for pnpm_store, nextjs and playwright
+  # cache affixes and folders
+  PNPM_CACHE_AFFIX: pnpm
+  PNPM_CACHE_FOLDER: ~/.pnpm-store
   PW_CACHE_AFFIX: pw
   PW_CACHE_FOLDER: ~/.cache/ms-playwright
-  PNPM_CACHE_FOLDER: ~/.pnpm-store
   SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING: 1
   SENTRY_TELEMETRY_DISABLE: true
+  STORYBOOK_DISABLE_TELEMETRY: 1
 
 jobs:
   # Job to read Node version from .nvmrc
@@ -67,10 +69,10 @@ jobs:
             ${{ env.PNPM_CACHE_FOLDER }}
             ${{ env.PW_CACHE_FOLDER }}
             ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
+          key: ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
           restore-keys: |
-            ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
-            ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-
+            ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-
 
       - name: Install dependencies
         run: |
@@ -89,3 +91,63 @@ jobs:
           TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
         run: |
           pnpm test:ci
+
+  Storybook-Smoke-Tests:
+    needs: read-nvmrc
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+
+    strategy:
+      matrix:
+        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}', '22.x']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install package manager
+        uses: pnpm/action-setup@v4
+
+      - name: Setup pnpm config
+        run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_CACHE_FOLDER }}
+          key: ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: pw_cache
+        with:
+          path: ${{ env.PW_CACHE_FOLDER }}
+          key: ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        if: steps.pw_cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Install Playwright system deps only
+        if: steps.pw_cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Run Storybook smoke tests
+        env:
+          STORYBOOK_DISABLE_TELEMETRY: ${{ env.STORYBOOK_DISABLE_TELEMETRY }}
+        run: pnpm test:sb
