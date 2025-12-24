@@ -1,27 +1,30 @@
 import type { InstructionData, SupportedIdl } from '@entities/idl';
 import { PublicKey } from '@solana/web3.js';
 import { camelCase } from 'change-case';
-import { type Control, useWatch } from 'react-hook-form';
+import type { DeepPartial } from 'react-hook-form';
 
-import { createAnchorPdaProvider } from './pda-generator/anchor-provider';
-import { createPdaProviderRegistry } from './pda-generator/registry';
-import { buildSeedsWithInfo } from './pda-generator/seed-builder';
-import type { InstructionFormData } from './use-instruction-form';
+import type { InstructionFormData } from '../use-instruction-form';
+import { createAnchorPdaProvider } from './anchor-provider';
+import { createPdaProviderRegistry } from './registry';
+import { buildSeedsWithInfo } from './seed-builder';
 
 const defaultRegistry = createPdaProviderRegistry();
 defaultRegistry.register(createAnchorPdaProvider());
 
-export function useGeneratedPdas({
-    idl,
-    instruction,
-    form,
-}: {
-    idl: SupportedIdl | undefined;
-    instruction: InstructionData;
-    form: { control: Control<InstructionFormData> };
-}) {
-    const formValues = useWatch({ control: form.control });
+export interface PdaGenerationResult {
+    generated: string | null;
+    seeds: { value: string | null; name: string }[];
+}
 
+/**
+ * Computes PDA addresses for accounts that have PDA seeds defined.
+ * Returns a map of account names (camelCase) to their computed PDA data.
+ */
+export function computePdas(
+    idl: SupportedIdl | undefined,
+    instruction: InstructionData,
+    formValues: DeepPartial<InstructionFormData>
+): Record<string, PdaGenerationResult> {
     if (!idl) {
         return {};
     }
@@ -43,8 +46,7 @@ export function useGeneratedPdas({
 
     const args = formValues.arguments?.[instruction.name] || {};
     const accounts = formValues.accounts?.[instruction.name] || {};
-    const pdaAddresses: Record<string, { generated: string | null; seeds: { value: string | null; name: string }[] }> =
-        {};
+    const pdaAddresses: Record<string, PdaGenerationResult> = {};
 
     for (const account of idlInstruction.accounts) {
         if (!account.pda) {

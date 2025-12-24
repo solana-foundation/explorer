@@ -13,12 +13,16 @@ import { Control, Controller, FieldPath } from 'react-hook-form';
 
 import { createGetAutocompleteItems } from '../model/account-autocomplete/createGetAutocompleteItems';
 import type { AutocompleteItem } from '../model/account-autocomplete/types';
-import { useGeneratedPdas } from '../model/use-generated-pdas';
+import { createKnownAccountsPrefillDependency } from '../model/form-prefill/providers/known-accounts-prefill-provider';
+import { createPdaPrefillDependency } from '../model/form-prefill/providers/pda-prefill-provider';
+import { createWalletPrefillDependency } from '../model/form-prefill/providers/wallet-prefill-provider';
+import { useFormPrefill } from '../model/form-prefill/use-form-prefill';
 import {
     type InstructionCallParams,
     type InstructionFormData,
     useInstructionForm,
 } from '../model/use-instruction-form';
+import { usePdas } from '../model/use-pdas';
 import { AccordionContent, AccordionItem, AccordionTrigger } from './Accordion';
 import { AccountInput } from './AccountInput';
 import { ArgumentInput } from './ArgumentInput';
@@ -43,8 +47,18 @@ export function InteractInstruction({
         },
     });
 
-    const pdas = useGeneratedPdas({ form, idl, instruction });
+    const pdas = usePdas({ form, idl, instruction });
     const getAutocompleteItems = createGetAutocompleteItems({ pdas, publicKey });
+
+    const walletPrefillDependency = createWalletPrefillDependency(instruction, publicKey, fieldNames);
+    const knownAccountsPrefillDependency = createKnownAccountsPrefillDependency(instruction, fieldNames);
+    const pdaPrefillDependency = createPdaPrefillDependency(idl, instruction, fieldNames);
+    useFormPrefill({
+        config: {
+            externalDependencies: [walletPrefillDependency, knownAccountsPrefillDependency, pdaPrefillDependency],
+        },
+        form,
+    });
 
     const executeDisabled = !walletConnected || isExecuting;
 
@@ -64,6 +78,34 @@ export function InteractInstruction({
                         <div className="e-mb-4 e-rounded-lg e-bg-[#1a1b1d] e-p-3">
                             <p className="e-text-xs e-text-neutral-400">{instruction.docs.join(' ')}</p>
                         </div>
+                    )}
+
+                    {/* Arguments Section - shown first as accounts may depend on argument values */}
+                    {instruction.args.length > 0 && (
+                        <CardSection title="Arguments">
+                            <div className="e-space-y-3 e-px-6">
+                                {instruction.args.map(arg => (
+                                    <Controller
+                                        key={arg.name}
+                                        name={fieldNames.argument(arg)}
+                                        control={form.control}
+                                        rules={validationRules.argument(arg)}
+                                        render={({ field, fieldState: { error } }) => (
+                                            <ArgumentInput
+                                                {...field}
+                                                value={
+                                                    typeof field.value === 'string'
+                                                        ? field.value
+                                                        : String(field.value || '')
+                                                }
+                                                arg={arg}
+                                                error={error}
+                                            />
+                                        )}
+                                    />
+                                ))}
+                            </div>
+                        </CardSection>
                     )}
 
                     {/* Accounts Section */}
@@ -93,34 +135,6 @@ export function InteractInstruction({
                                         />
                                     )
                                 )}
-                            </div>
-                        </CardSection>
-                    )}
-
-                    {/* Arguments Section */}
-                    {instruction.args.length > 0 && (
-                        <CardSection title="Arguments">
-                            <div className="e-space-y-3 e-px-6">
-                                {instruction.args.map(arg => (
-                                    <Controller
-                                        key={arg.name}
-                                        name={fieldNames.argument(arg)}
-                                        control={form.control}
-                                        rules={validationRules.argument(arg)}
-                                        render={({ field, fieldState: { error } }) => (
-                                            <ArgumentInput
-                                                {...field}
-                                                value={
-                                                    typeof field.value === 'string'
-                                                        ? field.value
-                                                        : String(field.value || '')
-                                                }
-                                                arg={arg}
-                                                error={error}
-                                            />
-                                        )}
-                                    />
-                                ))}
                             </div>
                         </CardSection>
                     )}
