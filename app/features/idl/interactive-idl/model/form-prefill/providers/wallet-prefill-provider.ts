@@ -3,6 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import type { FieldPath, UseFormReturn } from 'react-hook-form';
 
 import type { FormValue, InstructionFormData, InstructionFormFieldNames } from '../../use-instruction-form';
+import { WALLET_ACCOUNT_PATTERNS } from '../const';
 import type { ExternalDependency } from '../types';
 import { traverseInstructionAccounts } from './traverse-accounts';
 
@@ -18,7 +19,10 @@ export function createWalletPrefillDependency(
     const signerPaths: FieldPath<InstructionFormData>[] = [];
 
     traverseInstructionAccounts(instruction, (account, parentGroup) => {
-        if (account.signer) {
+        const normalizedName = account.name.toLowerCase().trim();
+        const isWalletAccount = WALLET_ACCOUNT_PATTERNS.some(p => normalizedName === p.toLowerCase());
+
+        if (account.signer || isWalletAccount) {
             if (parentGroup) {
                 signerPaths.push(fieldNames.account(parentGroup, account));
             } else {

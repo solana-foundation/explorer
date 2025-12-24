@@ -18,6 +18,9 @@ const ASSOCIATED_TOKEN = ['associated', 'token', 'program'];
 const ATA = ['ata', 'program'];
 const TOKEN = ['token', 'program'];
 const WSOL = ['wsol', 'mint'];
+const AUTHORITY = ['authority'];
+
+export const WALLET_ACCOUNT_PATTERNS: readonly string[] = generateNameVariations(AUTHORITY, []);
 
 export const HARDCODED_PROGRAM_PATTERNS: Partial<Record<PROGRAM_NAMES, readonly string[]>> = {
     [PROGRAM_NAMES.SYSTEM]: generateNameVariations(SYSTEM, [SYSTEM[0]]),
