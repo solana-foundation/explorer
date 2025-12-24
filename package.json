@@ -111,7 +111,7 @@
         "swr": "2.2.0",
         "tailwind-merge": "3.0.2",
         "tweetnacl": "1.0.3",
-        "typescript": "5.0.4",
+        "typescript": "5.3.3",
         "use-async-effect": "2.2.7"
     },
     "devDependencies": {
