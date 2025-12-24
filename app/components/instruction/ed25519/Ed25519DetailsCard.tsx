@@ -1,4 +1,3 @@
-import { toBase64 } from '@/app/shared/lib/bytes';
 import {
     ParsedTransaction,
     PartiallyDecodedInstruction,
@@ -8,6 +7,8 @@ import {
 } from '@solana/web3.js';
 import bs58 from 'bs58';
 import React from 'react';
+
+import { toBase64 } from '@/app/shared/lib/bytes';
 
 import { Address } from '../../common/Address';
 import { Copyable } from '../../common/Copyable';

@@ -1,6 +1,5 @@
 'use client';
 
-import { fromBase64 } from '@/app/shared/lib/bytes';
 import { generateTokenBalanceRows, TokenBalancesCardInnerProps } from '@components/transaction/TokenBalancesCard';
 import { useCluster } from '@providers/cluster';
 import { AccountLayout } from '@solana/spl-token';
@@ -22,6 +21,7 @@ import { BN } from 'bn.js';
 import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { fromBase64 } from '@/app/shared/lib/bytes';
 
 import { getMintDecimals, isTokenProgramBase58 } from '../lib/tokenAccountParsing';
 import type { SolBalanceChange } from '../lib/types';

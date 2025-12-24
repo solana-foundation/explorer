@@ -1,4 +1,3 @@
-import { equals } from '@/app/shared/lib/bytes';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { BorshAccountsCoder } from '@coral-xyz/anchor';
 import { IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
@@ -9,6 +8,7 @@ import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
 import React, { useMemo } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { equals } from '@/app/shared/lib/bytes';
 
 export function AnchorAccountCard({ account }: { account: Account }) {
     const { lamports } = account;

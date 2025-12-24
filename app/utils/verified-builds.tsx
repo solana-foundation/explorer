@@ -1,10 +1,10 @@
-import { fromBase64, fromUtf8, toHex } from '@/app/shared/lib/bytes';
 import { useAnchorProgram } from '@entities/idl';
 import { sha256 } from '@noble/hashes/sha256';
 import { Connection, PublicKey } from '@solana/web3.js';
 import useSWRImmutable from 'swr/immutable';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { fromBase64, fromUtf8, toHex } from '@/app/shared/lib/bytes';
 
 import { useCluster } from '../providers/cluster';
 import { ProgramDataAccountInfo } from '../validators/accounts/upgradeable-program';

@@ -1,4 +1,3 @@
-import { fromBase64 } from '@/app/shared/lib/bytes';
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { MintLayout } from '@solana/spl-token';
 import {
@@ -7,6 +6,8 @@ import {
     PublicKey,
     type SimulatedTransactionAccountInfo,
 } from '@solana/web3.js';
+
+import { fromBase64 } from '@/app/shared/lib/bytes';
 
 export const MINT_ACCOUNT_BUFFER_LENGTH = 82;
 export const MIN_MINT_ACCOUNT_BUFFER_LENGTH = 82; // Token-2022 mints can be larger with extensions

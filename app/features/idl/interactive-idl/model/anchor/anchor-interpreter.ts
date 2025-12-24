@@ -1,9 +1,10 @@
-import { fromUtf8 } from '@/app/shared/lib/bytes';
 import { AnchorProvider, type Idl as AnchorIdl, Program as AnchorProgram, type Wallet } from '@coral-xyz/anchor';
 import type { IdlInstruction } from '@coral-xyz/anchor/dist/esm/idl';
 import { formatSerdeIdl, getFormattedIdl } from '@entities/idl';
 import { type Connection, PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
+
+import { fromUtf8 } from '@/app/shared/lib/bytes';
 
 import type { IdlInterpreter } from '../idl-interpreter.d';
 import { AnchorUnifiedProgram } from './anchor-program';

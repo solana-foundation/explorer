@@ -1,7 +1,8 @@
-import { fromUtf8 } from '@/app/shared/lib/bytes';
 import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
 import { describe, expect, it, vi } from 'vitest';
+
+import { fromUtf8 } from '@/app/shared/lib/bytes';
 
 import { AnchorInterpreter } from './anchor-interpreter';
 import { AnchorUnifiedProgram } from './anchor-program';
