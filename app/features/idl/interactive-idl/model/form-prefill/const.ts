@@ -4,7 +4,7 @@ import { PROGRAM_NAMES } from '@utils/programs';
 import { generateNameVariations } from './providers/utils/generate-name-variations';
 
 /**
- * Configuration for hardcoded program accounts that should be auto-filled.
+ * Configuration for known program accounts that should be auto-filled.
  * Maps program names to arrays of account name patterns that should match this program.
  *
  * @example
@@ -22,7 +22,7 @@ const AUTHORITY = ['authority'];
 
 export const WALLET_ACCOUNT_PATTERNS: readonly string[] = generateNameVariations(AUTHORITY, []);
 
-export const HARDCODED_PROGRAM_PATTERNS: Partial<Record<PROGRAM_NAMES, readonly string[]>> = {
+export const KNOWN_PROGRAM_PATTERNS: Partial<Record<PROGRAM_NAMES, readonly string[]>> = {
     [PROGRAM_NAMES.SYSTEM]: generateNameVariations(SYSTEM, [SYSTEM[0]]),
     [PROGRAM_NAMES.ASSOCIATED_TOKEN]: [
         ...generateNameVariations(ASSOCIATED_TOKEN, [ASSOCIATED_TOKEN[0]]),
@@ -31,15 +31,15 @@ export const HARDCODED_PROGRAM_PATTERNS: Partial<Record<PROGRAM_NAMES, readonly 
     [PROGRAM_NAMES.TOKEN]: generateNameVariations(TOKEN, [TOKEN[0]]),
 };
 
-// Hardcoded addresses for non-program accounts (e.g., well-known mints)
-export const HARDCODED_ACCOUNT_PATTERNS: Record<string, readonly string[]> = {
+// Known addresses for non-program accounts (e.g., well-known mints)
+export const KNOWN_ACCOUNT_PATTERNS: Record<string, readonly string[]> = {
     [NATIVE_MINT.toBase58()]: generateNameVariations(WSOL, [WSOL[1]]),
 };
 
-// Collect all hardcoded patterns for exclusion checks
-const ALL_HARDCODED_PATTERNS: readonly string[] = [
-    ...Object.values(HARDCODED_PROGRAM_PATTERNS).flat(),
-    ...Object.values(HARDCODED_ACCOUNT_PATTERNS).flat(),
+// Collect all known patterns for exclusion checks
+const ALL_KNOWN_PATTERNS: readonly string[] = [
+    ...Object.values(KNOWN_PROGRAM_PATTERNS).flat(),
+    ...Object.values(KNOWN_ACCOUNT_PATTERNS).flat(),
 ];
 
 /**
@@ -48,5 +48,5 @@ const ALL_HARDCODED_PATTERNS: readonly string[] = [
  */
 export function isPrefilledAccount(accountName: string): boolean {
     const normalizedName = accountName.toLowerCase().trim();
-    return ALL_HARDCODED_PATTERNS.some(pattern => normalizedName === pattern.toLowerCase());
+    return ALL_KNOWN_PATTERNS.some(pattern => normalizedName === pattern.toLowerCase());
 }

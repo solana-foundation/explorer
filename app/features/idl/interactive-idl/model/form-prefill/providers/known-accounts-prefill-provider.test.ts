@@ -3,9 +3,9 @@ import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { useInstructionForm } from '../../use-instruction-form';
-import { createHardcodedAccountsPrefillDependency } from './hardcoded-accounts-prefill-provider';
+import { createKnownAccountsPrefillDependency } from './known-accounts-prefill-provider';
 
-describe('createHardcodedAccountsPrefillDependency', () => {
+describe('createKnownAccountsPrefillDependency', () => {
     it('should fill system program account', () => {
         const instruction: InstructionData = {
             accounts: [
@@ -29,7 +29,7 @@ describe('createHardcodedAccountsPrefillDependency', () => {
         );
         const { form, fieldNames } = result.current;
 
-        const dependency = createHardcodedAccountsPrefillDependency(instruction, {
+        const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: fieldNames.account,
         });
 
@@ -61,7 +61,7 @@ describe('createHardcodedAccountsPrefillDependency', () => {
         );
         const { form, fieldNames } = result.current;
 
-        const dependency = createHardcodedAccountsPrefillDependency(instruction, {
+        const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: fieldNames.account,
         });
 
@@ -95,7 +95,7 @@ describe('createHardcodedAccountsPrefillDependency', () => {
         );
         const { form, fieldNames } = result.current;
 
-        const dependency = createHardcodedAccountsPrefillDependency(instruction, {
+        const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: fieldNames.account,
         });
 
@@ -135,7 +135,7 @@ describe('createHardcodedAccountsPrefillDependency', () => {
         );
         const { form, fieldNames } = result.current;
 
-        const dependency = createHardcodedAccountsPrefillDependency(instruction, {
+        const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: fieldNames.account,
         });
 
@@ -175,7 +175,7 @@ describe('createHardcodedAccountsPrefillDependency', () => {
             form.setValue('accounts.testInstruction.systemProgram', existingValue);
         });
 
-        const dependency = createHardcodedAccountsPrefillDependency(instruction, {
+        const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: fieldNames.account,
         });
 
@@ -211,7 +211,7 @@ describe('createHardcodedAccountsPrefillDependency', () => {
             form.setValue('accounts.testInstruction.systemProgram', '   ');
         });
 
-        const dependency = createHardcodedAccountsPrefillDependency(instruction, {
+        const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: fieldNames.account,
         });
 
@@ -248,7 +248,7 @@ describe('createHardcodedAccountsPrefillDependency', () => {
         );
         const { form, fieldNames } = result.current;
 
-        const dependency = createHardcodedAccountsPrefillDependency(instruction, {
+        const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: fieldNames.account,
         });
 
@@ -265,11 +265,11 @@ describe('createHardcodedAccountsPrefillDependency', () => {
             name: 'testInstruction',
         };
 
-        const dependency = createHardcodedAccountsPrefillDependency(instruction, {
+        const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: () => 'accounts.testInstruction.test' as any,
         });
 
-        expect(dependency.id).toBe('hardcoded-accounts');
+        expect(dependency.id).toBe('known-accounts');
         expect(dependency.getValue()).toBe('testInstruction');
     });
 
@@ -296,7 +296,7 @@ describe('createHardcodedAccountsPrefillDependency', () => {
         );
         const { form, fieldNames } = result.current;
 
-        const dependency = createHardcodedAccountsPrefillDependency(instruction, {
+        const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: fieldNames.account,
         });
 
