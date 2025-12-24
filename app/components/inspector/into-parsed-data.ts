@@ -176,8 +176,8 @@ function convertUpgradeNonceInfo(parsed: any): UpgradeNonceInfo {
     };
 }
 
-function discriminatorToBuffer(discrimnator: number): Uint8Array {
-    return Uint8Array.from([discrimnator]);
+function discriminatorToBuffer(discrimnator: number): Buffer {
+    return Buffer.from([discrimnator]);
 }
 
 function intoProgramName(programId: PublicKey): string | undefined {
