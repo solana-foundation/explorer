@@ -109,7 +109,7 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
             title: 'Instructions',
         },
     ],
-    'spl-token-2022:mint:metaplexNFT': [
+    'spl-token-2022:mint:metaplex': [
         {
             path: 'metadata',
             slug: 'metadata',
@@ -119,6 +119,11 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
             path: 'attributes',
             slug: 'attributes',
             title: 'Attributes',
+        },
+        {
+            path: 'files',
+            slug: 'files',
+            title: 'Files',
         },
     ],
     'spl-token:mint': [
@@ -133,7 +138,7 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
             title: 'Instructions',
         },
     ],
-    'spl-token:mint:metaplexNFT': [
+    'spl-token:mint:metaplex': [
         {
             path: 'metadata',
             slug: 'metadata',
@@ -143,6 +148,11 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
             path: 'attributes',
             slug: 'attributes',
             title: 'Attributes',
+        },
+        {
+            path: 'files',
+            slug: 'files',
+            title: 'Files',
         },
     ],
     stake: [
@@ -381,6 +391,7 @@ export type MoreTabs =
     | 'rewards'
     | 'metadata'
     | 'attributes'
+    | 'files'
     | 'domains'
     | 'security'
     | 'idl'
@@ -444,7 +455,7 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
         (programTypeKey === 'spl-token:mint' || programTypeKey == 'spl-token-2022:mint') &&
         (parsedData as TokenProgramData).nftData
     ) {
-        tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplexNFT`]);
+        tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplex`]);
     }
 
     if (hasTokenMetadata(parsedData)) {
