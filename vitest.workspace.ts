@@ -29,7 +29,7 @@ export default defineWorkspace([
                 instances: [{ browser: 'chromium' }],
                 provider: 'playwright',
             },
-            setupFiles: ['./test-setup.ts', '.storybook/vitest.setup.ts'],
+            setupFiles: ['./test-setup.ts', './.storybook/vitest.setup.ts'],
             testTimeout: 10000,
         },
     },

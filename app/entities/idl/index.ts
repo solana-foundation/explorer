@@ -8,7 +8,8 @@ export type {
     InstructionData,
     NestedInstructionAccountsData,
 } from './model/formatters/formatted-idl';
-export { getIdlVersion } from './model/idl-version';
+export { getIdlSpec, getIdlVersion, type AnchorIdl, type CodamaIdl, type SupportedIdl } from './model/idl-version';
+export { isInteractiveIdlSupported } from './model/interactive-idl';
 
 export { getIdlSpecType as getDisplayIdlSpecType } from './model/converters/convert-display-idl';
 export { formatDisplayIdl, formatSerdeIdl, getFormattedIdl } from './model/formatters/format';

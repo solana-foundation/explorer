@@ -31,9 +31,11 @@ export const Default: Story = {
         const canvas = within(canvasElement);
         const trigger = canvas.getByRole('button', { name: 'Open Dialog' });
         await userEvent.click(trigger);
-        const dialog = await canvas.findByRole('dialog');
+        // Dialog renders in a portal outside canvasElement, so we need to search the whole document
+        const body = within(document.body);
+        const dialog = await body.findByRole('dialog');
         expect(dialog).toBeInTheDocument();
-        expect(canvas.getByText('Dialog Title')).toBeInTheDocument();
+        expect(body.getByText('Dialog Title')).toBeInTheDocument();
     },
     render: function DefaultDialog() {
         const [open, setOpen] = useState(false);

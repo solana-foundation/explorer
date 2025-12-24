@@ -17,6 +17,9 @@ const rubikFont = Rubik({
 
 const preview: Preview = {
     parameters: {
+        a11y: {
+            test: 'todo',
+        },
         backgrounds: {
             options: {
                 dark: { name: 'Dark', value: '#161a19' },

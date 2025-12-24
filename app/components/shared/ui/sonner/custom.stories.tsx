@@ -36,10 +36,10 @@ export const Success: Story = {
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
 
-        const title = canvas.getByText('Wallet Connected');
+        const title = await canvas.findByText('Wallet Connected');
         expect(title).toBeInTheDocument();
 
-        const description = canvas.getByText('Connected to wallet X5s...GnDZ');
+        const description = await canvas.findByText('Connected to wallet X5s...GnDZ');
         expect(description).toBeInTheDocument();
 
         const closeButton = canvas.getAllByRole('button');
@@ -71,10 +71,10 @@ export const Error: Story = {
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
 
-        const title = canvas.getByText('Transaction Failed');
+        const title = await canvas.findByText('Transaction Failed');
         expect(title).toBeInTheDocument();
 
-        const description = canvas.getByText('Unable to process transaction. Please try again.');
+        const description = await canvas.findByText('Unable to process transaction. Please try again.');
         expect(description).toBeInTheDocument();
 
         const closeButton = canvas.getAllByRole('button');
@@ -106,10 +106,10 @@ export const Info: Story = {
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
 
-        const title = canvas.getByText('Processing Transaction');
+        const title = await canvas.findByText('Processing Transaction');
         expect(title).toBeInTheDocument();
 
-        const description = canvas.getByText('Your transaction is being confirmed on the blockchain.');
+        const description = await canvas.findByText('Your transaction is being confirmed on the blockchain.');
         expect(description).toBeInTheDocument();
 
         const closeButton = canvas.getAllByRole('button');
@@ -142,10 +142,10 @@ export const WithLongTitle: Story = {
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
 
-        const title = canvas.getByText(/This is a very long title/);
+        const title = await canvas.findByText(/This is a very long title/);
         expect(title).toBeInTheDocument();
 
-        const description = canvas.getByText(/This toast demonstrates/);
+        const description = await canvas.findByText(/This toast demonstrates/);
         expect(description).toBeInTheDocument();
 
         const closeButton = canvas.getAllByRole('button');
@@ -176,7 +176,7 @@ export const WithoutDescription: Story = {
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
 
-        const title = canvas.getByText('Action Completed');
+        const title = await canvas.findByText('Action Completed');
         expect(title).toBeInTheDocument();
 
         const closeButton = canvas.getAllByRole('button');
@@ -208,13 +208,13 @@ export const WithCustomDescription: Story = {
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
 
-        const title = canvas.getByText('Transaction Complete');
+        const title = await canvas.findByText('Transaction Complete');
         expect(title).toBeInTheDocument();
 
-        const signature = canvas.getByText(/Transaction signature:/);
+        const signature = await canvas.findByText(/Transaction signature:/);
         expect(signature).toBeInTheDocument();
 
-        const link = canvas.getByText('View on Explorer');
+        const link = await canvas.findByText('View on Explorer');
         expect(link).toBeInTheDocument();
 
         const closeButton = canvas.getAllByRole('button');

@@ -17,6 +17,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('@solana/kit', () => ({
+    address: vi.fn((addr: string) => addr),
     createSolanaRpc: vi.fn(() => ({
         getEpochInfo: vi.fn(() => ({
             send: vi.fn().mockResolvedValue({
