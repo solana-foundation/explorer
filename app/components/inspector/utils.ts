@@ -1,4 +1,3 @@
-import { toUint8Array } from '@/app/shared/lib/bytes';
 import {
     AccountMeta,
     MessageAddressTableLookup,
@@ -112,7 +111,7 @@ export function intoTransactionInstructionFromVersionedMessage(
     const accountMetas = fillAccountMetas(accountKeyIndexes, originalMessage, lookupAccounts);
 
     const transactionInstruction: TransactionInstruction = new TransactionInstruction({
-        data: toUint8Array(data),
+        data: Buffer.from(data),
         keys: accountMetas,
         programId: programId,
     });

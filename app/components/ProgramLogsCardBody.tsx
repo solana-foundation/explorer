@@ -194,7 +194,7 @@ function ProgramLogRow({
                 });
 
                 txInstruction = new TransactionInstruction({
-                    data: Uint8Array.from(instruction.data),
+                    data: Buffer.from(instruction.data),
                     keys: accounts,
                     programId,
                 });
@@ -210,7 +210,7 @@ function ProgramLogRow({
                 });
 
                 txInstruction = new TransactionInstruction({
-                    data: fromBase64(instruction.data),
+                    data: Buffer.from(fromBase64(instruction.data)),
                     keys,
                     programId,
                 });
