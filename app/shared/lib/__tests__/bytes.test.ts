@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import {
     alloc,
     bnToBytes,
+    bytes,
     bytesToBn,
     concat,
     equals,
@@ -197,9 +198,18 @@ describe('bytes helpers', () => {
 
         it('should match Buffer.equals behavior', () => {
             const testCases = [
-                [[1, 2, 3], [1, 2, 3]],
-                [[1, 2, 3], [1, 2, 4]],
-                [[1, 2], [1, 2, 3]],
+                [
+                    [1, 2, 3],
+                    [1, 2, 3],
+                ],
+                [
+                    [1, 2, 3],
+                    [1, 2, 4],
+                ],
+                [
+                    [1, 2],
+                    [1, 2, 3],
+                ],
                 [[], []],
             ] as const;
 
@@ -240,10 +250,10 @@ describe('bytes helpers', () => {
 
         it('should match bn.toArrayLike(Buffer) behavior', () => {
             const testCases = [
-                { value: '256', endian: 'le' as const, size: 2 },
-                { value: '256', endian: 'be' as const, size: 2 },
-                { value: '1', endian: 'le' as const, size: 8 },
-                { value: '16777216', endian: 'le' as const, size: 4 },
+                { endian: 'le' as const, size: 2, value: '256' },
+                { endian: 'be' as const, size: 2, value: '256' },
+                { endian: 'le' as const, size: 8, value: '1' },
+                { endian: 'le' as const, size: 4, value: '16777216' },
             ];
 
             for (const { value, endian, size } of testCases) {
@@ -317,6 +327,100 @@ describe('bytes helpers', () => {
             const result = toUint8Array(buf);
             expect(result.constructor).toBe(Uint8Array);
             expect(Array.from(result)).toEqual([1, 2, 3]);
+        });
+    });
+
+    describe('bytes()', () => {
+        describe('string input', () => {
+            it('should encode string as UTF-8 by default', () => {
+                const result = bytes('hello');
+                expect(Array.from(result)).toEqual([104, 101, 108, 108, 111]);
+                // Verify it matches Buffer.from behavior
+                expect(Array.from(result)).toEqual(Array.from(Buffer.from('hello')));
+            });
+
+            it('should encode string as UTF-8 with explicit encoding', () => {
+                const result = bytes('hello', 'utf8');
+                expect(Array.from(result)).toEqual([104, 101, 108, 108, 111]);
+            });
+
+            it('should decode hex string', () => {
+                const result = bytes('deadbeef', 'hex');
+                expect(Array.from(result)).toEqual([0xde, 0xad, 0xbe, 0xef]);
+                // Verify it matches Buffer.from behavior
+                expect(Array.from(result)).toEqual(Array.from(Buffer.from('deadbeef', 'hex')));
+            });
+
+            it('should decode base64 string', () => {
+                const result = bytes('SGVsbG8=', 'base64');
+                expect(Array.from(result)).toEqual([72, 101, 108, 108, 111]); // "Hello"
+                // Verify it matches Buffer.from behavior
+                expect(Array.from(result)).toEqual(Array.from(Buffer.from('SGVsbG8=', 'base64')));
+            });
+
+            it('should handle unicode strings', () => {
+                const result = bytes('Hello 世界');
+                expect(Array.from(result)).toEqual(Array.from(Buffer.from('Hello 世界')));
+            });
+
+            it('should handle empty string', () => {
+                const result = bytes('');
+                expect(result.length).toBe(0);
+            });
+        });
+
+        describe('array input', () => {
+            it('should create from number array', () => {
+                const result = bytes([1, 2, 3, 255]);
+                expect(Array.from(result)).toEqual([1, 2, 3, 255]);
+                // Verify it matches Buffer.from behavior
+                expect(Array.from(result)).toEqual(Array.from(Buffer.from([1, 2, 3, 255])));
+            });
+
+            it('should handle empty array', () => {
+                const result = bytes([]);
+                expect(result.length).toBe(0);
+            });
+        });
+
+        describe('Uint8Array input', () => {
+            it('should create a copy of Uint8Array', () => {
+                const original = new Uint8Array([1, 2, 3]);
+                const result = bytes(original);
+                expect(Array.from(result)).toEqual([1, 2, 3]);
+                // Should be a copy, not the same reference
+                expect(result).not.toBe(original);
+            });
+        });
+
+        describe('ArrayBuffer input', () => {
+            it('should create from ArrayBuffer', () => {
+                const buffer = new ArrayBuffer(4);
+                const view = new Uint8Array(buffer);
+                view.set([10, 20, 30, 40]);
+
+                const result = bytes(buffer);
+                expect(Array.from(result)).toEqual([10, 20, 30, 40]);
+            });
+        });
+
+        describe('Buffer.from parity', () => {
+            it('should match Buffer.from for all common cases', () => {
+                // String without encoding
+                expect(Array.from(bytes('test'))).toEqual(Array.from(Buffer.from('test')));
+
+                // String with utf8
+                expect(Array.from(bytes('test', 'utf8'))).toEqual(Array.from(Buffer.from('test', 'utf8')));
+
+                // Hex
+                expect(Array.from(bytes('0102ff', 'hex'))).toEqual(Array.from(Buffer.from('0102ff', 'hex')));
+
+                // Base64
+                expect(Array.from(bytes('dGVzdA==', 'base64'))).toEqual(Array.from(Buffer.from('dGVzdA==', 'base64')));
+
+                // Array
+                expect(Array.from(bytes([0, 127, 255]))).toEqual(Array.from(Buffer.from([0, 127, 255])));
+            });
         });
     });
 });

@@ -4,6 +4,7 @@ import bs58 from 'bs58';
 import pLimit from 'p-limit';
 
 import { fromHex } from '@/app/shared/lib/bytes';
+
 import { NftokenTypes } from './nftoken-types';
 
 export const NFTOKEN_ADDRESS = 'nftokf9qcHSYkVSP3P2gUMmV6d4AwjMueXgUu43HyLL';

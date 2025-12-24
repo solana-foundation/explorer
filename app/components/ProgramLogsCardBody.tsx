@@ -1,4 +1,3 @@
-import { fromBase64 } from '@/app/shared/lib/bytes';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useAnchorProgram } from '@entities/idl';
 import { ParsedMessage, PublicKey, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
@@ -14,6 +13,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 import { ChevronsUp } from 'react-feather';
+
+import { fromBase64 } from '@/app/shared/lib/bytes';
 
 const NATIVE_PROGRAMS_MISSING_INVOKE_LOG: string[] = [
     'AddressLookupTab1e1111111111111111111111111',

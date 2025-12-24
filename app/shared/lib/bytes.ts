@@ -252,3 +252,64 @@ export function toUint8Array(data: ByteArray): Uint8Array {
     }
     return new Uint8Array(data);
 }
+
+// ============================================
+// UNIVERSAL BYTES CREATION
+// ============================================
+
+type BytesEncoding = 'utf8' | 'utf-8' | 'hex' | 'base64';
+
+/**
+ * Create Uint8Array from various input types.
+ * Drop-in replacement for Buffer.from() with encoding support.
+ *
+ * @example
+ * // From string (UTF-8 by default)
+ * bytes('hello')              // same as Buffer.from('hello')
+ * bytes('hello', 'utf8')      // same as Buffer.from('hello', 'utf8')
+ *
+ * // From hex string
+ * bytes('deadbeef', 'hex')    // same as Buffer.from('deadbeef', 'hex')
+ *
+ * // From base64 string
+ * bytes('SGVsbG8=', 'base64') // same as Buffer.from('SGVsbG8=', 'base64')
+ *
+ * // From array of numbers
+ * bytes([1, 2, 3])            // same as Buffer.from([1, 2, 3])
+ *
+ * // From Uint8Array (copy)
+ * bytes(existingUint8Array)   // same as Buffer.from(existingUint8Array)
+ *
+ * // From ArrayBuffer
+ * bytes(arrayBuffer)          // same as Buffer.from(arrayBuffer)
+ */
+export function bytes(input: string, encoding?: BytesEncoding): Uint8Array;
+export function bytes(input: ArrayLike<number> | ArrayBufferLike): Uint8Array;
+export function bytes(input: string | ArrayLike<number> | ArrayBufferLike, encoding?: BytesEncoding): Uint8Array {
+    // Handle string input with encoding
+    if (typeof input === 'string') {
+        switch (encoding) {
+            case 'hex':
+                return fromHex(input);
+            case 'base64':
+                return fromBase64(input);
+            case 'utf8':
+            case 'utf-8':
+            default:
+                return fromUtf8(input);
+        }
+    }
+
+    // Handle ArrayBuffer
+    if (input instanceof ArrayBuffer) {
+        return new Uint8Array(input);
+    }
+
+    // Handle Uint8Array (make a copy like Buffer.from does)
+    if (input instanceof Uint8Array) {
+        return new Uint8Array(input);
+    }
+
+    // Handle array-like (number[])
+    return new Uint8Array(input as ArrayLike<number>);
+}
