@@ -26,6 +26,8 @@ vi.mock('next/navigation', () => ({
 
 describe('TransactionInspectorPage with Squads Transaction', () => {
     beforeEach(async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: true });
+
         const params = new URLSearchParams();
         params.set('squadsTx', 'ASwDJP5mzxV1dfov2eQz5WAVEy833nwK17VLcjsrZsZf');
 
@@ -49,6 +51,8 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
     });
 
     afterEach(() => {
+        vi.runOnlyPendingTimers();
+        vi.useRealTimers();
         vi.clearAllMocks();
     });
 
