@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react';
 import { Code, Download, Search } from 'react-feather';
 
 import { WalletProvider } from '@/app/providers/wallet-provider';
+import { fromUtf8, toBase64 } from '@/app/shared/lib/bytes';
 import { triggerDownload } from '@/app/shared/lib/triggerDownload';
 
 import { IdlRenderer } from './IdlRenderer';
@@ -28,7 +29,7 @@ export function IdlSection({
     const [isRawIdlView, setIsRawIdlView] = useState(false);
 
     const idlBase64 = useMemo(() => {
-        return Buffer.from(JSON.stringify(idl, null, 2)).toString('base64');
+        return toBase64(fromUtf8(JSON.stringify(idl, null, 2)));
     }, [idl]);
 
     const handleDownloadIdl = () => triggerDownload(idlBase64, `${programId}-idl.json`);

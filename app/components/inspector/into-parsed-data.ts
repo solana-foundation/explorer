@@ -1,3 +1,4 @@
+import { alloc, equals } from '@/app/shared/lib/bytes';
 import {
     AdvanceNonceInfo,
     AllocateInfo,
@@ -175,8 +176,8 @@ function convertUpgradeNonceInfo(parsed: any): UpgradeNonceInfo {
     };
 }
 
-function discriminatorToBuffer(discrimnator: number): Buffer {
-    return Buffer.from(Uint8Array.from([discrimnator]));
+function discriminatorToBuffer(discrimnator: number): Uint8Array {
+    return Uint8Array.from([discrimnator]);
 }
 
 function intoProgramName(programId: PublicKey): string | undefined {
@@ -192,9 +193,8 @@ function intoProgramName(programId: PublicKey): string | undefined {
     /* add other variants here */
 }
 
-function isDataEqual(data1: Buffer, data2: Buffer): boolean {
-    // Browser will fail if data2 is created with Uint8Array.from
-    return data1.equals(data2);
+function isDataEqual(data1: Uint8Array, data2: Uint8Array): boolean {
+    return equals(data1, data2);
 }
 
 function intoParsedData(instruction: TransactionInstruction, parsed?: any): any {
@@ -207,7 +207,7 @@ function intoParsedData(instruction: TransactionInstruction, parsed?: any): any 
         let instructionData = data;
 
         // workaround for "create" instructions
-        if (isDataEqual(data, Buffer.alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
+        if (isDataEqual(data, alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
             instructionData = discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR);
             instruction.data = instructionData; // overwrite original data with the modified one
         }

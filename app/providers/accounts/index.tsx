@@ -254,7 +254,7 @@ async function fetchMultipleAccounts({
                 let account: Account;
                 if (result === null) {
                     account = {
-                        data: { raw: Buffer.alloc(0) },
+                        data: { raw: new Uint8Array(0) },
                         executable: false,
                         lamports: 0,
                         owner: SystemProgram.programId,

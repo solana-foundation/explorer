@@ -1,3 +1,4 @@
+import { fromBase64 } from '@/app/shared/lib/bytes';
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { MintLayout } from '@solana/spl-token';
 import {
@@ -53,10 +54,10 @@ export function getMintDecimals(
             accountOwnerPost &&
             accountDataPost &&
             isTokenProgramBase58(accountOwnerPost) &&
-            Buffer.from(accountDataPost, 'base64').length >= MINT_ACCOUNT_BUFFER_LENGTH
+            fromBase64(accountDataPost).length >= MINT_ACCOUNT_BUFFER_LENGTH
         ) {
-            const buffer = Buffer.from(accountDataPost, 'base64');
-            const accountParsedPost = MintLayout.decode(buffer.subarray(0, MIN_MINT_ACCOUNT_BUFFER_LENGTH));
+            const bytes = fromBase64(accountDataPost);
+            const accountParsedPost = MintLayout.decode(bytes.subarray(0, MIN_MINT_ACCOUNT_BUFFER_LENGTH));
             mintToDecimals[key.toBase58()] = accountParsedPost.decimals;
         }
     }

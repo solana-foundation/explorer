@@ -1,15 +1,16 @@
-import { Buffer } from 'buffer';
 import React, { ReactNode } from 'react';
+
+import { toHex } from '@/app/shared/lib/bytes';
 
 import { Copyable } from './Copyable';
 
-export function HexData({ raw }: { raw: Buffer }) {
+export function HexData({ raw }: { raw: Uint8Array }) {
     if (!raw || raw.length === 0) {
         return <span>No data</span>;
     }
 
     const chunks = [];
-    const hexString = raw.toString('hex');
+    const hexString = toHex(raw);
     for (let i = 0; i < hexString.length; i += 2) {
         chunks.push(hexString.slice(i, i + 2));
     }

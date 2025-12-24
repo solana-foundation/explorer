@@ -1,3 +1,5 @@
+import { fromBase64, isValidBase64 } from './bytes';
+
 export interface DownloadOptions {
     /** MIME type for the file */
     type?: string;
@@ -43,7 +45,7 @@ export const triggerDownload = async (data: string, filename: string, options?: 
     let tempLink: HTMLAnchorElement | null = null;
 
     try {
-        const decodedData = Buffer.from(data, 'base64');
+        const decodedData = fromBase64(data);
 
         // MIME type is not validated because:
         // - Invalid MIME types don't cause security issues for client-side downloads
@@ -76,18 +78,7 @@ export const triggerDownload = async (data: string, filename: string, options?: 
     }
 };
 
-const isValidBase64 = (str: string): boolean => {
-    try {
-        const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
-        if (!base64Regex.test(str)) {
-            return false;
-        }
-        Buffer.from(str, 'base64');
-        return true;
-    } catch {
-        return false;
-    }
-};
+// isValidBase64 is now imported from ./bytes
 
 const formatBytes = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';

@@ -12,6 +12,7 @@ import { Search, X } from 'react-feather';
 import { ActionMeta, components, ControlProps, InputActionMeta, SelectInstance } from 'react-select';
 import AsyncSelect from 'react-select/async';
 
+import { isValidBase64 as checkValidBase64 } from '@/app/shared/lib/bytes';
 import FEATURES from '@/app/utils/feature-gate/featureGates.json';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
@@ -475,12 +476,7 @@ function decodeTransactionFromBase64(base64String: string): {
 }
 
 function isValidBase64(str: string): boolean {
-    try {
-        Buffer.from(str, 'base64');
-        return true;
-    } catch (err) {
-        return false;
-    }
+    return checkValidBase64(str);
 }
 
 function KeyIndicator() {
