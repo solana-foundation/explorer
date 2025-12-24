@@ -3,7 +3,7 @@ import { PROGRAM_INFO_BY_ID, PROGRAM_NAMES } from '@utils/programs';
 import type { FieldPath, UseFormReturn } from 'react-hook-form';
 
 import type { FormValue, InstructionFormData, InstructionFormFieldNames } from '../../use-instruction-form';
-import { HARDCODED_ADDRESSES, HARDCODED_PROGRAM_PATTERNS } from '../const';
+import { HARDCODED_ACCOUNT_PATTERNS, HARDCODED_PROGRAM_PATTERNS } from '../const';
 import type { ExternalDependency } from '../types';
 import { traverseInstructionAccounts } from './traverse-accounts';
 
@@ -18,7 +18,7 @@ const HARDCODED_ACCOUNTS: Record<string, readonly string[]> = Object.entries(PRO
             }
             return acc;
         },
-        { ...HARDCODED_ADDRESSES } as Record<string, readonly string[]>
+        { ...HARDCODED_ACCOUNT_PATTERNS } as Record<string, readonly string[]>
     );
 
 /**
@@ -37,7 +37,7 @@ export function createHardcodedAccountsPrefillDependency(
     const programPathsMap = new Map<string, FieldPath<InstructionFormData>[]>();
 
     traverseInstructionAccounts(instruction, (account, parentGroup) => {
-        const programAddress = findProgramAddressForAccount(account.name);
+        const programAddress = findHardcodedAddressForAccount(account.name);
         if (programAddress) {
             const paths = programPathsMap.get(programAddress) || [];
             if (parentGroup) {
@@ -70,7 +70,11 @@ export function createHardcodedAccountsPrefillDependency(
     };
 }
 
-function findProgramAddressForAccount(accountName: string): string | undefined {
+/**
+ * Finds the hardcoded program address for a given account name.
+ * Returns undefined if the account name doesn't match any hardcoded pattern.
+ */
+export function findHardcodedAddressForAccount(accountName: string): string | undefined {
     const normalizedName = accountName.toLowerCase().trim();
 
     for (const [programAddress, patterns] of Object.entries(HARDCODED_ACCOUNTS)) {

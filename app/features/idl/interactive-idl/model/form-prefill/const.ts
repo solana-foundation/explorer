@@ -32,6 +32,21 @@ export const HARDCODED_PROGRAM_PATTERNS: Partial<Record<PROGRAM_NAMES, readonly 
 };
 
 // Hardcoded addresses for non-program accounts (e.g., well-known mints)
-export const HARDCODED_ADDRESSES: Record<string, readonly string[]> = {
+export const HARDCODED_ACCOUNT_PATTERNS: Record<string, readonly string[]> = {
     [NATIVE_MINT.toBase58()]: generateNameVariations(WSOL, [WSOL[1]]),
 };
+
+// Collect all hardcoded patterns for exclusion checks
+const ALL_HARDCODED_PATTERNS: readonly string[] = [
+    ...Object.values(HARDCODED_PROGRAM_PATTERNS).flat(),
+    ...Object.values(HARDCODED_ACCOUNT_PATTERNS).flat(),
+];
+
+/**
+ * Checks if an account name matches any prefilled account pattern.
+ * Used to prevent wallet prefill from overwriting accounts with known addresses.
+ */
+export function isPrefilledAccount(accountName: string): boolean {
+    const normalizedName = accountName.toLowerCase().trim();
+    return ALL_HARDCODED_PATTERNS.some(pattern => normalizedName === pattern.toLowerCase());
+}
