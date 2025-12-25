@@ -1,10 +1,12 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     identifyTokenInstruction,
+    parseSyncNativeInstruction,
     parseTransferCheckedInstruction,
     parseTransferInstruction,
     TokenInstruction,
 } from '@solana-program/token';
+import { normalizeTokenAmount } from '@utils/index';
 
 import { upcastTransactionInstruction } from '../into-parsed-data';
 
@@ -46,13 +48,29 @@ export function parseTokenProgramInstruction(instruction: TransactionInstruction
             }
             case TokenInstruction.TransferChecked: {
                 const parsed = parseTransferCheckedInstruction(upcastTransactionInstruction(instruction));
+                const amount = parsed.data.amount.toString();
+                const decimals = parsed.data.decimals;
                 const info = {
                     ...parsedTransferDataIntoAccountInfo(parsed),
-                    amount: parsed.data.amount.toString(),
+                    tokenAmount: {
+                        amount,
+                        decimals,
+                        uiAmountString: normalizeTokenAmount(amount, decimals).toString(),
+                    },
                 };
                 return {
                     info,
                     type: 'transferChecked',
+                };
+            }
+            case TokenInstruction.SyncNative: {
+                const parsed = parseSyncNativeInstruction(upcastTransactionInstruction(instruction));
+                const info = {
+                    account: new PublicKey(parsed.accounts.account.address),
+                };
+                return {
+                    info,
+                    type: 'syncNative',
                 };
             }
             default: {

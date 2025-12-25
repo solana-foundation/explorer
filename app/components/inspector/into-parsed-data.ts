@@ -164,8 +164,8 @@ function convertTransferWithSeedInfo(parsed: any): TransferWithSeedInfo {
         lamports: safeNumber(parsed.data.amount),
         source: new PublicKey(parsed.accounts.source.address),
         sourceBase: new PublicKey(parsed.accounts.baseAccount.address),
-        sourceOwner: new PublicKey(parsed.accounts.sourceOwner.address),
-        sourceSeed: parsed.data.seed,
+        sourceOwner: new PublicKey(parsed.data.fromOwner),
+        sourceSeed: parsed.data.fromSeed,
     };
 }
 

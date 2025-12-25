@@ -76,15 +76,13 @@ export function InspectorInstructionCard({
                     <tbody className="list">
                         <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
                         {showRaw ? (
-                            <>
-                                {'parsed' in ix ? (
-                                    <BaseRawParsedDetails ix={ix}>
-                                        {raw ? <BaseRawDetails ix={raw} /> : null}
-                                    </BaseRawParsedDetails>
-                                ) : (
-                                    <BaseRawDetails ix={raw || ix} />
-                                )}
-                            </>
+                            'parsed' in ix ? (
+                                <BaseRawParsedDetails ix={ix}>
+                                    {raw ? <BaseRawDetails ix={raw} /> : null}
+                                </BaseRawParsedDetails>
+                            ) : (
+                                <BaseRawDetails ix={raw || ix} />
+                            )
                         ) : (
                             children
                         )}
