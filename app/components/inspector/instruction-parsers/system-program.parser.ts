@@ -3,11 +3,8 @@ import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     getCreateAccountWithSeedInstructionDataDecoder,
     identifySystemInstruction,
-    parseTransferSolInstruction,
     SystemInstruction,
 } from '@solana-program/system';
-
-import { ITransactionInstructionParser, upcastTransactionInstruction } from '@/app/utils/parsed-tx';
 
 /**
  * Helper function to safely convert BigInt or number to regular number
@@ -119,40 +116,3 @@ export function parseSystemProgramInstruction(
         return null;
     }
 }
-
-type CreateAccountData = { stackHeight: number };
-type TAdditionalParsedData = CreateAccountData | object;
-
-/**
- * Parser for System Program instructions implementing ITransactionInstructionParser interface.
- *
- * Currently supports:
- * - TransferSol
- */
-export const parseSystemInstruction: ITransactionInstructionParser<TAdditionalParsedData> = (ti, data) => {
-    const PROGRAM_NAME = 'system';
-    const instructionType = identifySystemInstruction(ti.data);
-
-    const pre = {
-        parsed: {},
-        program: '',
-        programId: ti.programId,
-    };
-
-    switch (instructionType) {
-        case SystemInstruction.TransferSol: {
-            pre.program = PROGRAM_NAME;
-            const parsedData = parseTransferSolInstruction(upcastTransactionInstruction(ti));
-            pre.parsed = {
-                info: parsedData,
-                type: 'transfer',
-            };
-            break;
-        }
-        default: {
-            // do nothing if cannot parse
-        }
-    }
-    // enrich parsed data with external one as several instructions contains additional data
-    return { ...pre, ...(data ?? {}) };
-};

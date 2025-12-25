@@ -17,7 +17,6 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import { useAddressLookupTables } from '@/app/providers/accounts';
 import { FetchStatus } from '@/app/providers/cache';
-import { intoPartialParsedTransactionFromTransactionInstruction } from '@/app/utils/parsed-tx';
 
 import { ErrorCard } from '../common/ErrorCard';
 import { InspectorInstructionCard } from '../common/InspectorInstructionCard';
@@ -27,7 +26,6 @@ import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCar
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
-import { parseSPLTokenInstruction } from './instruction-parsers/spl-token.parser';
 import { intoParsedInstruction, intoParsedTransaction } from './into-parsed-data';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
 
@@ -159,23 +157,18 @@ function InstructionsSectionCard({
             );
         }
         case TOKEN_PROGRAM_ID.toString(): {
-            const tx = intoPartialParsedTransactionFromTransactionInstruction(
-                ix,
-                message,
-                [],
-                parseSPLTokenInstruction
-            );
-            const parsedIx = tx.message.instructions[0];
+            const asParsedInstruction = intoParsedInstruction(ix);
+            const asParsedTransaction = intoParsedTransaction(ix, message, [asParsedInstruction]);
             // Only render TokenDetailsCard if the instruction was successfully parsed
-            if (parsedIx && 'parsed' in parsedIx && parsedIx.parsed?.type) {
+            if (asParsedInstruction.parsed?.type) {
                 return (
                     <ErrorBoundary
                         fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
                     >
                         <TokenDetailsCard
                             key={index}
-                            ix={parsedIx}
-                            tx={tx}
+                            ix={asParsedInstruction}
+                            tx={asParsedTransaction}
                             index={index}
                             result={result}
                             InstructionCardComponent={InspectorInstructionCard}
@@ -190,7 +183,7 @@ function InstructionsSectionCard({
         }
         case TOKEN_2022_PROGRAM_ADDRESS: {
             const asParsedInstruction = intoParsedInstruction(ix);
-            const asParsedTransaction = intoParsedTransaction(ix, message);
+            const asParsedTransaction = intoParsedTransaction(ix, message, [asParsedInstruction]);
             // Only render TokenDetailsCard if the instruction was successfully parsed
             if (asParsedInstruction.parsed?.type) {
                 return (
