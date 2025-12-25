@@ -1,66 +1,36 @@
 {
-  "compilerOptions": {
-    "target": "es2020",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@components/*": [
-        "./app/components/*"
-      ],
-      "@entities/*": [
-        "./app/entities/*"
-      ],
-      "@features/*": [
-        "./app/features/*"
-      ],
-      "@img/*": [
-        "./app/img/*"
-      ],
-      "@providers/*": [
-        "./app/providers/*"
-      ],
-      "@shared/*": [
-        "./app/components/shared/*"
-      ],
-      "@utils/*": [
-        "./app/utils/*"
-      ],
-      "@validators/*": [
-        "./app/validators/*"
-      ]
-    }
-  },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next-prod/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+    "compilerOptions": {
+        "target": "es2020",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "noEmit": true,
+        "esModuleInterop": true,
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "jsx": "preserve",
+        "incremental": true,
+        "plugins": [
+            {
+                "name": "next"
+            }
+        ],
+        "paths": {
+            "@/*": ["./*"],
+            "@components/*": ["./app/components/*"],
+            "@entities/*": ["./app/entities/*"],
+            "@features/*": ["./app/features/*"],
+            "@img/*": ["./app/img/*"],
+            "@providers/*": ["./app/providers/*"],
+            "@shared/*": ["./app/components/shared/*"],
+            "@utils/*": ["./app/utils/*"],
+            "@validators/*": ["./app/validators/*"]
+        }
+    },
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next-prod/types/**/*.ts"],
+    "exclude": ["node_modules"]
 }
