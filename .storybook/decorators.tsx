@@ -4,40 +4,14 @@ import React from 'react';
 
 import { MockAccountsProvider } from './__mocks__/MockAccountsProvider';
 
-/**
- * Decorator that wraps stories with ClusterProvider.
- *
- * Use this for components that depend on cluster context.
- *
- * @example
- * ```tsx
- * import { withCluster } from '../../../../../.storybook/decorators';
- *
- * const meta = {
- *     decorators: [withCluster],
- * };
- * ```
- */
+/** Wraps stories with ClusterProvider. Usage: `decorators: [withCluster]` */
 export const withCluster: Decorator = Story => (
     <ClusterProvider>
         <Story />
     </ClusterProvider>
 );
 
-/**
- * Decorator that wraps stories with ClusterProvider and MockAccountsProvider.
- *
- * Use this for components that depend on both cluster and accounts context.
- *
- * @example
- * ```tsx
- * import { withClusterAndAccounts } from '../../../../../.storybook/decorators';
- *
- * const meta = {
- *     decorators: [withClusterAndAccounts],
- * };
- * ```
- */
+/** Wraps stories with ClusterProvider and MockAccountsProvider. Usage: `decorators: [withClusterAndAccounts]` */
 export const withClusterAndAccounts: Decorator = Story => (
     <ClusterProvider>
         <MockAccountsProvider>
@@ -46,22 +20,7 @@ export const withClusterAndAccounts: Decorator = Story => (
     </ClusterProvider>
 );
 
-/**
- * Decorator for card table field components (like ProgramField).
- *
- * Wraps the story in a card with table structure and provides
- * ClusterProvider and MockAccountsProvider contexts.
- *
- * @example
- * ```tsx
- * import { withCardTableField, cardTableFieldParameters } from '../../../../../.storybook/decorators';
- *
- * const meta = {
- *     decorators: [withCardTableField],
- *     parameters: cardTableFieldParameters,
- * };
- * ```
- */
+/** Decorator for card table field components. Usage: `decorators: [withCardTableField]` */
 export const withCardTableField: Decorator = Story => (
     <ClusterProvider>
         <MockAccountsProvider>
@@ -84,21 +43,7 @@ type NextjsNavigationOptions = {
     query?: Record<string, string>;
 };
 
-/**
- * Creates parameters for components using Next.js navigation.
- *
- * @example
- * ```tsx
- * // With defaults (pathname: '/', query: {})
- * parameters: createNextjsParameters(),
- *
- * // With custom pathname
- * parameters: createNextjsParameters({ pathname: '/tx/abc123' }),
- *
- * // With custom query
- * parameters: createNextjsParameters({ query: { cluster: 'devnet' } }),
- * ```
- */
+/** Creates parameters for components using Next.js navigation */
 export const createNextjsParameters = (options?: NextjsNavigationOptions): Parameters => ({
     nextjs: {
         appDirectory: true,
@@ -109,7 +54,4 @@ export const createNextjsParameters = (options?: NextjsNavigationOptions): Param
     },
 });
 
-/**
- * Default parameters for components using Next.js navigation.
- */
 export const nextjsParameters: Parameters = createNextjsParameters();

@@ -29,9 +29,7 @@ type TokenDetailsCardProps<P extends TitleInfoLessProps> = P & {
 };
 
 export function TokenDetailsCard<P extends TitleInfoLessProps>(props: TokenDetailsCardProps<P>) {
-    // @ts-expect-error parsed as absent at TransactionInstruction
-    const parsedData = props.ix?.parsed || {};
-    // NOTE: handle absent parsed for TransactionInstruction
+    const parsedData = 'parsed' in props.ix ? props.ix.parsed : {};
     const parsed = create(parsedData, ParsedInfo);
     const { type: rawType, info } = parsed;
     const type = create(rawType, TokenInstructionType);
