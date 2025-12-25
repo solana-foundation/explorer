@@ -24,10 +24,10 @@ export function parseTokenProgramInstruction(instruction: TransactionInstruction
             case TokenInstruction.Transfer: {
                 const parsed = parseTransferInstruction(upcastTransactionInstruction(instruction));
                 const info = {
-                    source: new PublicKey(parsed.accounts.source.address),
-                    destination: new PublicKey(parsed.accounts.destination.address),
-                    authority: new PublicKey(parsed.accounts.authority.address),
                     amount: parsed.data.amount.toString(),
+                    authority: new PublicKey(parsed.accounts.authority.address),
+                    destination: new PublicKey(parsed.accounts.destination.address),
+                    source: new PublicKey(parsed.accounts.source.address),
                 };
                 return { info, type: 'transfer' };
             }
@@ -36,10 +36,10 @@ export function parseTokenProgramInstruction(instruction: TransactionInstruction
                 const amount = parsed.data.amount.toString();
                 const decimals = parsed.data.decimals;
                 const info = {
-                    source: new PublicKey(parsed.accounts.source.address),
-                    mint: new PublicKey(parsed.accounts.mint.address),
-                    destination: new PublicKey(parsed.accounts.destination.address),
                     authority: new PublicKey(parsed.accounts.authority.address),
+                    destination: new PublicKey(parsed.accounts.destination.address),
+                    mint: new PublicKey(parsed.accounts.mint.address),
+                    source: new PublicKey(parsed.accounts.source.address),
                     tokenAmount: {
                         amount,
                         decimals,

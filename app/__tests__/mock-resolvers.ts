@@ -1,7 +1,8 @@
 import { AddressLookupTableAccount, PublicKey } from '@solana/web3.js';
-import GDAlt from './stubs/GDLpHg53y5sufRSftvZscFMwdSqP8kHaLwhsT4ZwYSaV.json';
+
 import E5Alt from './stubs/E59uBXGqn83xN17kMbBVfU1M7T4wHG91eiygHb88Aovb.json';
 import EDAlt from './stubs/EDDSpjZHrsFKYTMJDcBqXAjkLcu9EKdvrQR4XnqsXErH.json';
+import GDAlt from './stubs/GDLpHg53y5sufRSftvZscFMwdSqP8kHaLwhsT4ZwYSaV.json';
 
 /**
  * Mock Address Lookup Table data for tests.
@@ -15,14 +16,18 @@ import EDAlt from './stubs/EDDSpjZHrsFKYTMJDcBqXAjkLcu9EKdvrQR4XnqsXErH.json';
  * ```
  */
 const ALT_DATA: Record<string, string[]> = {
+    
     // Used by computeBudgetMsg
-    GDLpHg53y5sufRSftvZscFMwdSqP8kHaLwhsT4ZwYSaV: GDAlt,
+E59uBXGqn83xN17kMbBVfU1M7T4wHG91eiygHb88Aovb: E5Alt,
 
+    
+    
+// Used by aTokenCreateIdempotentMsg
+EDDSpjZHrsFKYTMJDcBqXAjkLcu9EKdvrQR4XnqsXErH: EDAlt,
+
+    
     // Used by computeBudgetMsg
-    E59uBXGqn83xN17kMbBVfU1M7T4wHG91eiygHb88Aovb: E5Alt,
-
-    // Used by aTokenCreateIdempotentMsg
-    EDDSpjZHrsFKYTMJDcBqXAjkLcu9EKdvrQR4XnqsXErH: EDAlt,
+GDLpHg53y5sufRSftvZscFMwdSqP8kHaLwhsT4ZwYSaV: GDAlt,
 };
 
 /**
