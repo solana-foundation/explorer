@@ -1,22 +1,12 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { useAddressLookupTables } from '@providers/accounts';
-import { FetchStatus } from '@providers/cache';
-import { AddressLookupTableAccount, PublicKey, VersionedMessage } from '@solana/web3.js';
+import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
 import { AddressFromLookupTableWithContext, AddressWithContext } from './AddressWithContext';
 
 export function AccountsCard({ message }: { message: VersionedMessage }) {
     const [expanded, setExpanded] = React.useState(true);
-
-    // Pre-fetch all lookup tables to avoid rows appearing one by one
-    const lookupTableKeys = message.addressTableLookups.map(lookup => lookup.accountKey.toString());
-    const lookupTables = useAddressLookupTables(lookupTableKeys);
-    const allLookupTablesLoaded = lookupTables.every(
-        table => table !== undefined && (table[0] instanceof AddressLookupTableAccount || typeof table[0] === 'string')
-    );
-    const hasLookupTableError = lookupTables.some(table => table && table[1] === FetchStatus.FetchFailed);
 
     const { validMessage, error } = React.useMemo(() => {
         const { numRequiredSignatures, numReadonlySignedAccounts, numReadonlyUnsignedAccounts } = message.header;
@@ -101,13 +91,6 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
         return <ErrorCard text={`Unable to display accounts. ${error}`} />;
     }
 
-    if (hasLookupTableError) {
-        return <ErrorCard text="Failed to load address lookup tables" />;
-    }
-
-    // Show loading state while lookup tables are being fetched
-    const isLoadingLookupTables = lookupTableKeys.length > 0 && !allLookupTablesLoaded;
-
     return (
         <div className="card">
             <div className="card-header">
@@ -119,20 +102,7 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
                     {expanded ? 'Collapse' : 'Expand'}
                 </button>
             </div>
-            {expanded && (
-                <TableCardBody>
-                    {isLoadingLookupTables ? (
-                        <tr>
-                            <td colSpan={2} className="text-center">
-                                <span className="spinner-grow spinner-grow-sm me-2"></span>
-                                Loading accounts...
-                            </td>
-                        </tr>
-                    ) : (
-                        accountRows
-                    )}
-                </TableCardBody>
-            )}
+            {expanded && <TableCardBody>{accountRows}</TableCardBody>}
         </div>
     );
 }
