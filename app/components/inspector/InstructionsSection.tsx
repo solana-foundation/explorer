@@ -18,7 +18,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { useAddressLookupTables } from '@/app/providers/accounts';
 import { FetchStatus } from '@/app/providers/cache';
 import { intoPartialParsedTransactionFromTransactionInstruction } from '@/app/utils/parsed-tx';
-import { tokenProgramTransactionInstructionParser } from '@/app/utils/parsers';
+import { parseSPLTokenInstruction } from './instruction-parsers/spl-token.parser';
 
 import { ErrorCard } from '../common/ErrorCard';
 import { InspectorInstructionCard } from '../common/InspectorInstructionCard';
@@ -163,7 +163,7 @@ function InstructionsSectionCard({
                 ix,
                 message,
                 [],
-                tokenProgramTransactionInstructionParser
+                parseSPLTokenInstruction
             );
             const parsedIx = tx.message.instructions[0];
             // Only render TokenDetailsCard if the instruction was successfully parsed

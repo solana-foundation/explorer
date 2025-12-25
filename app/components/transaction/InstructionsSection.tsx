@@ -202,7 +202,6 @@ function InstructionCard({
             case 'bpf-upgradeable-loader':
                 return <BpfUpgradeableLoaderDetailsCard {...props} key={key} />;
             case 'system':
-                console.log('AINSTRUCTION', { ix, tx });
                 return <SystemDetailsCard {...props} key={key} />;
             case 'stake':
                 return <StakeDetailsCard {...props} key={key} />;
