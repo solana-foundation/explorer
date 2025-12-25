@@ -17,7 +17,7 @@
 | Dynamic | `/address/[address]/instructions` | 2.19 kB | 1.03 MB |
 | Dynamic | `/address/[address]/metadata` | 3.96 kB | 941 kB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 5.98 kB | 967 kB |
-| Dynamic | `/address/[address]/program-multisig` | 3.48 kB | 990 kB |
+| Dynamic | `/address/[address]/program-multisig` | 3.48 kB | 991 kB |
 | Dynamic | `/address/[address]/rewards` | 3.49 kB | 925 kB |
 | Dynamic | `/address/[address]/security` | 8.17 kB | 1.01 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 3.43 kB | 925 kB |
@@ -43,6 +43,6 @@
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 6.53 kB | 925 kB |
 | Dynamic | `/tx/[signature]` | 37.7 kB | 1.39 MB |
-| Dynamic | `/tx/[signature]/inspect` | 412 B | 1.2 MB |
-| Static | `/tx/inspector` | 411 B | 1.2 MB |
+| Dynamic | `/tx/[signature]/inspect` | 410 B | 1.2 MB |
+| Static | `/tx/inspector` | 410 B | 1.2 MB |
 | Static | `/verified-programs` | 6.13 kB | 165 kB |
