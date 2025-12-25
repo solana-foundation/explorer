@@ -13,8 +13,8 @@ const SUPPLY_ALIASES = ['accounts', 'accounts/top'];
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // Use separate build directory for production builds to avoid conflicts with dev server
-    distDir: process.env.NODE_ENV === 'production' ? '.next-prod' : '.next',
+    // Use separate build directory for dev server to avoid conflicts with production builds
+    distDir: process.env.NODE_ENV === 'production' ? '.next' : '.next-dev',
     experimental: {
         // FIXME: https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout
         missingSuspenseWithCSRBailout: false,
