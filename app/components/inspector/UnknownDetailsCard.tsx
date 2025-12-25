@@ -1,4 +1,5 @@
 import { TableCardBody } from '@components/common/TableCardBody';
+import { ProgramField } from '@entities/instruction-card';
 import { useScrollAnchor } from '@providers/scroll-anchor';
 import { TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
@@ -6,7 +7,6 @@ import React from 'react';
 import getInstructionCardScrollAnchorId from '@/app/utils/get-instruction-card-scroll-anchor-id';
 
 import { BaseRawDetails } from '../common/BaseRawDetails';
-import { AddressWithContext, programValidator } from './AddressWithContext';
 
 export function UnknownDetailsCard({
     index,
@@ -38,12 +38,7 @@ export function UnknownDetailsCard({
             </div>
             {expanded && (
                 <TableCardBody>
-                    <tr>
-                        <td>Program</td>
-                        <td className="text-lg-end">
-                            <AddressWithContext pubkey={ix.programId} validator={programValidator} />
-                        </td>
-                    </tr>
+                    <ProgramField programId={ix.programId} showExtendedInfo />
                     <BaseRawDetails ix={ix} />
                 </TableCardBody>
             )}

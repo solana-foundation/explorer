@@ -34,13 +34,7 @@ const rubikFont = Rubik({
     weight: ['300', '400', '700'],
 });
 
-export default function RootLayout({
-    analytics,
-    children,
-}: {
-    analytics?: React.ReactNode;
-    children: React.ReactNode;
-}) {
+export default function RootLayout({ analytics, children }: { analytics: React.ReactNode; children: React.ReactNode }) {
     return (
         <html lang="en" className={`${rubikFont.variable}`}>
             <head>

@@ -1,15 +1,10 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
-import {
-    AddressLookupTableAccount,
-    clusterApiUrl,
-    ComputeBudgetProgram,
-    Connection,
-    TransactionMessage,
-} from '@solana/web3.js';
+import { ComputeBudgetProgram, TransactionMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
 
+import { resolveAddressLookupTables } from '@/app/__tests__/mock-resolvers';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
 import { ClusterProvider } from '@/app/providers/cluster';
@@ -26,17 +21,12 @@ useSearchParams.mockReturnValue({
 });
 
 describe('instruction::ComputeBudgetDetailsCard', () => {
-    test('should render "SetComputeUnitPrice"', async () => {
+    test('should render "SetComputeUnitPrice"', () => {
         const index = 0;
         const m = mock.deserializeMessageV0(stubs.computeBudgetMsg);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
-        const lookups = await Promise.all(
-            m.addressTableLookups.map(lookup =>
-                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
-            )
-        );
+        const lookups = resolveAddressLookupTables(m.addressTableLookups);
         const ti = TransactionMessage.decompile(m, {
-            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+            addressLookupTableAccounts: lookups,
         }).instructions[index];
         expect(ti.programId.equals(ComputeBudgetProgram.programId)).toBeTruthy();
 
@@ -57,17 +47,12 @@ describe('instruction::ComputeBudgetDetailsCard', () => {
         expect(screen.getByText(/7.187812 lamports per compute unit/)).toBeInTheDocument();
     });
 
-    test('should render "SetComputeUnitLimit"', async () => {
+    test('should render "SetComputeUnitLimit"', () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.computeBudgetMsg);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
-        const lookups = await Promise.all(
-            m.addressTableLookups.map(lookup =>
-                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
-            )
-        );
+        const lookups = resolveAddressLookupTables(m.addressTableLookups);
         const ti = TransactionMessage.decompile(m, {
-            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+            addressLookupTableAccounts: lookups,
         }).instructions[index];
         expect(ti.programId.equals(ComputeBudgetProgram.programId)).toBeTruthy();
 

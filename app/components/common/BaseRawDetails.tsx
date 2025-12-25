@@ -4,12 +4,26 @@ import React from 'react';
 
 import { HexData } from './HexData';
 
+function RawDetailsLoader() {
+    return (
+        <tr>
+            <td colSpan={2} className="text-center">
+                <span className="spinner-grow spinner-grow-sm me-2"></span>
+                Loading instruction data...
+            </td>
+        </tr>
+    );
+}
+
 /**
  *  Component that displays accounts from any Instruction.
  *
  *  VersionedMessage is optional as it will be present at inspector page only.
  */
-export function BaseRawDetails({ ix }: { ix: TransactionInstruction }) {
+export function BaseRawDetails({ ix }: { ix?: TransactionInstruction }) {
+    if (!ix || ix.keys.length === 0) {
+        return <RawDetailsLoader />;
+    }
     return <BaseTransactionInstructionRawDetails ix={ix} />;
 }
 

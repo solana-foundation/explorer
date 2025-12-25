@@ -1,4 +1,3 @@
-import { Address } from '@components/common/Address';
 import { InspectorInstructionCard } from '@components/common/InspectorInstructionCard';
 import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
@@ -38,12 +37,6 @@ export function CreateIdempotentDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end">
-                    <Address pubkey={ix.programId} alignRight link />
-                </td>
-            </tr>
             <tr>
                 <td>Source</td>
                 <td className="text-lg-end">
