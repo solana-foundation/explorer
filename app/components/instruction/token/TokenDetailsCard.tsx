@@ -9,12 +9,11 @@ import {
 } from '@solana/web3.js';
 import { normalizeTokenAmount } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
-import React from 'react';
+import React, { ComponentType } from 'react';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
-import { CType } from '@/app/types/generics';
 import { Cluster } from '@/app/utils/cluster';
 import { TOKEN_IDS } from '@/app/utils/programs';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
@@ -25,7 +24,7 @@ import { IX_STRUCTS, IX_TITLES, TokenAmountUi, TokenInstructionType } from './ty
 type TitleInfoLessProps = Omit<InfoProps, 'info' | 'title'>;
 
 type TokenDetailsCardProps<P extends TitleInfoLessProps> = P & {
-    InstructionCardComponent?: CType;
+    InstructionCardComponent?: ComponentType<any>;
     tx: ParsedTransaction;
 };
 
@@ -46,7 +45,7 @@ type InfoProps = {
     index: number;
     info: any;
     innerCards?: JSX.Element[];
-    InstructionCardComponent?: CType;
+    InstructionCardComponent?: ComponentType<any>;
     ix: TransactionInstruction | ParsedInstruction;
     result: SignatureResult;
     title: string;

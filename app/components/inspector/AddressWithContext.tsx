@@ -85,11 +85,7 @@ function AccountInfo({ pubkey, validator }: { pubkey: PublicKey; validator?: Acc
     // Fetch account on load
     React.useEffect(() => {
         if (!info && status === ClusterStatus.Connected && pubkey) {
-            // That is needed to fetch acccount data properly.
-            // The issue is that at the inspector page
-            //  instructions start to request data for different addresses.
-            //  Having "skip" here causes cases flaky situation when account data is fetched but erased after.
-            fetchAccount(pubkey, 'parsed');
+            fetchAccount(pubkey, 'skip');
         }
     }, [address, status]); // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -406,7 +406,6 @@ async function handleParsedAccountData(
                 // Generate a PDA and check for a Metadata Account
                 if (parsed.type === 'mint') {
                     const metadata = await Metadata.load(connection, await Metadata.getPDA(accountKey));
-
                     if (metadata) {
                         // We have a valid Metadata account. Try and pull edition data.
                         const editionInfo = await getEditionInfo(metadata, connection);
@@ -497,7 +496,6 @@ export function useAccountInfo(address: string | undefined): Cache.CacheEntry<Ac
         throw new Error(`useAccountInfo must be used within a AccountsProvider`);
     }
     if (address === undefined) return;
-
     return context.entries[address];
 }
 
@@ -531,15 +529,11 @@ export function useMintAccountInfo(address: string | undefined): MintAccountInfo
 
 export function useTokenAccountInfo(address: string | undefined): TokenAccountInfo | undefined {
     const accountInfo = useAccountInfo(address);
-
     return React.useMemo(() => {
         if (address === undefined || accountInfo?.data === undefined) return;
         const account = accountInfo.data;
 
         try {
-            if (!account.data.parsed) {
-                return;
-            }
             const parsedData = account.data.parsed;
             if (!parsedData) return;
             if (!isTokenProgramData(parsedData) || parsedData.parsed.type !== 'account') {

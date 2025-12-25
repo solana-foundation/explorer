@@ -18,7 +18,6 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { useAddressLookupTables } from '@/app/providers/accounts';
 import { FetchStatus } from '@/app/providers/cache';
 import { intoPartialParsedTransactionFromTransactionInstruction } from '@/app/utils/parsed-tx';
-import { parseSPLTokenInstruction } from './instruction-parsers/spl-token.parser';
 
 import { ErrorCard } from '../common/ErrorCard';
 import { InspectorInstructionCard } from '../common/InspectorInstructionCard';
@@ -28,6 +27,7 @@ import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCar
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
+import { parseSPLTokenInstruction } from './instruction-parsers/spl-token.parser';
 import { intoParsedInstruction, intoParsedTransaction } from './into-parsed-data';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
 

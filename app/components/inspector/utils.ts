@@ -87,7 +87,6 @@ export function fillAddressTableLookupsAccounts(addressTableLookups: MessageAddr
     return lookupsForAccountKeyIndex;
 }
 
-// TODO: move to the util directory at some point
 export function intoTransactionInstructionFromVersionedMessage(
     compiledInstruction: MessageCompiledInstruction,
     originalMessage: VersionedMessage

@@ -2,9 +2,9 @@ import { PublicKey, Transaction } from '@solana/web3.js';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
+import { parseSystemInstruction } from '@/app/components/inspector/instruction-parsers/system-program.parser';
 
 import { intoPartialParsedTransaction, privateUpcastMessageCompiledInstruction } from '../parsed-tx';
-import { systemProgramTransactionInstructionParser } from '../parsers';
 
 /**
  * This suite covers conversion based on Transaction and VersionedTransaction. Instruction-specific cases are covered in the separate test-suite
@@ -24,7 +24,7 @@ describe('intoPartialParsedTransaction', () => {
             signatures: [],
         } as unknown as Transaction;
 
-        const ix = intoPartialParsedTransaction(tx, 0, systemProgramTransactionInstructionParser);
+        const ix = intoPartialParsedTransaction(tx, 0, parseSystemInstruction);
 
         expect(ix.message.accountKeys).toEqual([
             {

@@ -5,11 +5,11 @@ import { render, screen } from '@testing-library/react';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
+import { parseSPLTokenInstruction } from '@/app/components/inspector/instruction-parsers/spl-token.parser';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { intoPartialParsedTransactionFromTransactionInstruction } from '@/app/utils/parsed-tx';
-import { parseSPLTokenInstruction } from '@/app/components/inspector/instruction-parsers/spl-token.parser';
 
 import { InspectorInstructionCard } from '../../common/InspectorInstructionCard';
 import { TokenDetailsCard } from '../token/TokenDetailsCard';

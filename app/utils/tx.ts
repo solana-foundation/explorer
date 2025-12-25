@@ -78,7 +78,6 @@ export function intoTransactionInstruction(
     });
 }
 
-// TODO: check if this helper is still needed
 export function intoParsedTransaction(tx: Transaction): ParsedTransaction {
     const message = tx.compileMessage();
     return {

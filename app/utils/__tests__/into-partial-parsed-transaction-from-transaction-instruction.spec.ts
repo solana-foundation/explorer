@@ -2,13 +2,14 @@ import { PublicKey, Transaction } from '@solana/web3.js';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
+import { parseSPLTokenInstruction } from '@/app/components/inspector/instruction-parsers/spl-token.parser';
+import { parseSystemInstruction } from '@/app/components/inspector/instruction-parsers/system-program.parser';
 
 import {
     intoPartialParsedTransaction,
     intoPartialParsedTransactionFromTransactionInstruction,
     privateUpcastMessageCompiledInstruction,
 } from '../parsed-tx';
-import { systemProgramTransactionInstructionParser, tokenProgramTransactionInstructionParser } from '../parsers';
 
 describe('intoPartialParsedTransactionFromTransactionInstruction', () => {
     test('should return PartialParsedTransaction compatible data for SystemProgram::transfer transaction instruction', async () => {
@@ -25,7 +26,7 @@ describe('intoPartialParsedTransactionFromTransactionInstruction', () => {
             signatures: [],
         } as unknown as Transaction;
 
-        const ix = intoPartialParsedTransaction(tx, 0, systemProgramTransactionInstructionParser);
+        const ix = intoPartialParsedTransaction(tx, 0, parseSystemInstruction);
 
         expect(ix.message.accountKeys).toEqual([
             {
@@ -69,7 +70,7 @@ describe('intoPartialParsedTransactionFromTransactionInstruction', () => {
             instructions[3],
             m,
             [],
-            tokenProgramTransactionInstructionParser
+            parseSPLTokenInstruction
         );
 
         expect(ix.message.accountKeys).toEqual([
@@ -163,7 +164,7 @@ describe('intoPartialParsedTransactionFromTransactionInstruction', () => {
             instructions[1],
             m,
             [],
-            tokenProgramTransactionInstructionParser
+            parseSPLTokenInstruction
         );
 
         expect(ix.message.accountKeys).toEqual([

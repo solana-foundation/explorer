@@ -1,8 +1,8 @@
+import { AccountMeta as SolanaAccountMeta, AccountRole, address } from '@solana/kit';
 import {
     AccountMeta,
     CompiledInstruction,
     MessageCompiledInstruction,
-    MessageV0,
     ParsedInstruction,
     ParsedMessage,
     ParsedMessageAccount,
@@ -15,23 +15,20 @@ import {
     VersionedTransaction,
 } from '@solana/web3.js';
 import bs58 from 'bs58';
-import { AccountRole, address, IAccountMeta } from 'web3js-experimental';
 
 /**
  * @returns account data compatible with IAccountMeta interface
  */
-export function upcastAccountMeta({ pubkey, isSigner, isWritable }: AccountMeta): IAccountMeta {
+export function upcastAccountMeta({ pubkey, isSigner, isWritable }: AccountMeta): SolanaAccountMeta {
     return {
         address: address(pubkey.toBase58()),
         role: isSigner
-            ? (isWritable
-              ? AccountRole.WRITABLE_SIGNER
-              : AccountRole.READONLY_SIGNER
-              )
-            : (isWritable
-              ? AccountRole.WRITABLE
-              : AccountRole.READONLY
-            )
+            ? isWritable
+                ? AccountRole.WRITABLE_SIGNER
+                : AccountRole.READONLY_SIGNER
+            : isWritable
+            ? AccountRole.WRITABLE
+            : AccountRole.READONLY,
     };
 }
 
@@ -42,7 +39,7 @@ export function upcastTransactionInstruction(ix: TransactionInstruction) {
     return {
         accounts: ix.keys.map(upcastAccountMeta),
         data: ix.data,
-        programAddress: address(ix.programId.toBase58())
+        programAddress: address(ix.programId.toBase58()),
     };
 }
 
@@ -57,23 +54,29 @@ function upcastMessageCompiledInstruction(ix: MessageCompiledInstruction, m: Ver
         programIds = m.accountKeys;
     } else {
         // take into account that we might have address of the lookup here instead of real program's address
-        programIds = ([
+        programIds = [
             ...m.staticAccountKeys,
-            ...m.addressTableLookups.flatMap((lookup) => [
-                ...lookup.writableIndexes.map((index) => m.addressTableLookups[index].accountKey),
-                ...lookup.readonlyIndexes.map((index) => m.addressTableLookups[index].accountKey)
-            ])
-        ]);
+            ...m.addressTableLookups.flatMap(lookup => [
+                ...lookup.writableIndexes.map(index => m.addressTableLookups[index].accountKey),
+                ...lookup.readonlyIndexes.map(index => m.addressTableLookups[index].accountKey),
+            ]),
+        ];
     }
 
     return {
         data: Buffer.from(ix.data),
-        keys: ix.accountKeyIndexes.reduce((accountMetas, index) =>  accountMetas.concat([({
-            isSigner: m.isAccountSigner(index),
-            isWritable: m.isAccountWritable(index),
-            pubkey: m.staticAccountKeys[index]
-        })]), [] as AccountMeta[]),
-        programId: programIds[ix.programIdIndex]
+        keys: ix.accountKeyIndexes.reduce(
+            (accountMetas, index) =>
+                accountMetas.concat([
+                    {
+                        isSigner: m.isAccountSigner(index),
+                        isWritable: m.isAccountWritable(index),
+                        pubkey: m.staticAccountKeys[index],
+                    },
+                ]),
+            [] as AccountMeta[]
+        ),
+        programId: programIds[ix.programIdIndex],
     };
 }
 
@@ -81,22 +84,29 @@ function upcastMessageCompiledInstruction(ix: MessageCompiledInstruction, m: Ver
  * @returns ParsedMessageAccount which is collected based on transaction or lookupTable
  */
 
-export function intoParsedMessageAccount(accountMeta: AccountMeta[]): ParsedMessageAccount[]
-export function intoParsedMessageAccount(message: VersionedMessage): ParsedMessageAccount[]
-export function intoParsedMessageAccount(messageOrAccountMeta: AccountMeta[] | VersionedMessage): ParsedMessageAccount[] {
+export function intoParsedMessageAccount(accountMeta: AccountMeta[]): ParsedMessageAccount[];
+export function intoParsedMessageAccount(message: VersionedMessage): ParsedMessageAccount[];
+export function intoParsedMessageAccount(
+    messageOrAccountMeta: AccountMeta[] | VersionedMessage
+): ParsedMessageAccount[] {
     const fromAccountMeta = (a: AccountMeta): ParsedMessageAccount => ({
         pubkey: a.pubkey,
         signer: a.isSigner,
         source: 'transaction',
-        writable: a.isWritable
+        writable: a.isWritable,
     });
 
-    const fromMessage = (accountKey: PublicKey, index: number, m: VersionedMessage, source?: ParsedMessageAccount['source'])=> {
+    const fromMessage = (
+        accountKey: PublicKey,
+        index: number,
+        m: VersionedMessage,
+        source?: ParsedMessageAccount['source']
+    ) => {
         return {
             pubkey: accountKey,
             signer: m.isAccountSigner(index),
             source,
-            writable: m.isAccountWritable(index)
+            writable: m.isAccountWritable(index),
         };
     };
 
@@ -109,7 +119,16 @@ export function intoParsedMessageAccount(messageOrAccountMeta: AccountMeta[] | V
         }, [] as ParsedMessageAccount[]);
     } else if (messageOrAccountMeta.version === 0) {
         return messageOrAccountMeta.staticAccountKeys.reduce((keys, accountKey, index) => {
-            keys.push(fromMessage(accountKey, index, messageOrAccountMeta, messageOrAccountMeta.addressTableLookups.some(({ accountKey: ak }) => ak.equals(accountKey)) ? 'lookupTable': 'transaction'));
+            keys.push(
+                fromMessage(
+                    accountKey,
+                    index,
+                    messageOrAccountMeta,
+                    messageOrAccountMeta.addressTableLookups.some(({ accountKey: ak }) => ak.equals(accountKey))
+                        ? 'lookupTable'
+                        : 'transaction'
+                )
+            );
             return keys;
         }, [] as ParsedMessageAccount[]);
     }
@@ -120,7 +139,7 @@ export function intoParsedMessageAccount(messageOrAccountMeta: AccountMeta[] | V
  * @param data - allow to pass `any` to be able mock real data which can be seen on mainnet
  */
 export interface ITransactionInstructionParser<TAdditionalData extends object> {
-    (ti: TransactionInstruction, data?: TAdditionalData): ParsedInstruction | (ParsedInstruction & TAdditionalData)
+    (ti: TransactionInstruction, data?: TAdditionalData): ParsedInstruction | (ParsedInstruction & TAdditionalData);
 }
 
 /**
@@ -132,43 +151,20 @@ export interface ITransactionInstructionParser<TAdditionalData extends object> {
  * @param {ITransactionInstructionParser} parse - parser that implements ITransactionInstructionParser interface
  * @returns ParsedInstruction for incoming TransactionInstruction
  */
-export function intoParsedInstruction<TInstruction extends TransactionInstruction, TAdditionalData extends object>(ix: TInstruction, data: TAdditionalData | undefined, parse: ITransactionInstructionParser<TAdditionalData>): ReturnType<ITransactionInstructionParser<TAdditionalData>> {
+export function intoParsedInstruction<TInstruction extends TransactionInstruction, TAdditionalData extends object>(
+    ix: TInstruction,
+    data: TAdditionalData | undefined,
+    parse: ITransactionInstructionParser<TAdditionalData>
+): ReturnType<ITransactionInstructionParser<TAdditionalData>> {
     const parsedInstruction = parse(ix, data);
 
     return parsedInstruction;
 }
 
-/**
- * Convert CompiledInstructions in MessageV0 to ParsedInstruction[]
- * Note: Does not decode instruction data (data remains base58)
- * @param messageV0 - The MessageV0 object
- * @returns ParsedInstruction[]
- */
-export function _parseCompiledInstructions(
-  message: MessageV0
-): ParsedInstruction[] {
-  const accountKeys: PublicKey[] = [
-    ...message.staticAccountKeys,
-    ...message.addressTableLookups.flatMap((lookup) => [
-      ...lookup.writableIndexes.map((i) => message.addressTableLookups[i]),
-      ...lookup.readonlyIndexes.map((i) => message.addressTableLookups[i]),
-    ]),
-  ];
-
-  return message.compiledInstructions.map((ix) => {
-    const programId = accountKeys[ix.programIdIndex];
-
-    const parsedIx: ParsedInstruction = {
-      parsed: {},
-      program: programId.toBase58(),
-      programId,
-    };
-
-    return parsedIx;
-  });
-}
-
-function intoPartiallyDecodedInstruction(ix: MessageCompiledInstruction | CompiledInstruction, parsedAccounts: ParsedMessageAccount[]): PartiallyDecodedInstruction {
+function intoPartiallyDecodedInstruction(
+    ix: MessageCompiledInstruction | CompiledInstruction,
+    parsedAccounts: ParsedMessageAccount[]
+): PartiallyDecodedInstruction {
     if ('accountKeyIndexes' in ix) {
         return {
             accounts: ix.accountKeyIndexes.reduce((acc, index) => {
@@ -185,7 +181,7 @@ function intoPartiallyDecodedInstruction(ix: MessageCompiledInstruction | Compil
                 return acc;
             }, [] as PublicKey[]),
             data: ix.data,
-            programId: parsedAccounts[ix.programIdIndex].pubkey
+            programId: parsedAccounts[ix.programIdIndex].pubkey,
         };
     }
 }
@@ -196,19 +192,19 @@ export function intoParsedTransaction(transaction: VersionedTransaction | Transa
         // Transaction
         const message = transaction.compileMessage();
         const accountKeys = intoParsedMessageAccount(message);
-        
+
         parsedTransaction = {
             message: {
                 accountKeys,
                 addressTableLookups: [],
-                instructions: message.instructions.map((ix) => {
+                instructions: message.instructions.map(ix => {
                     return intoPartiallyDecodedInstruction(ix, accountKeys);
                 }),
-                recentBlockhash: message.recentBlockhash
+                recentBlockhash: message.recentBlockhash,
             },
             signatures: transaction.signatures
-                .map(a => a.signature !== null ? bs58.encode(a.signature) : null)
-                .filter<string>((a): a is string => a != null)
+                .map(a => (a.signature !== null ? bs58.encode(a.signature) : null))
+                .filter<string>((a): a is string => a != null),
         };
     } else {
         // VersionedTransaction
@@ -221,12 +217,12 @@ export function intoParsedTransaction(transaction: VersionedTransaction | Transa
                 message: {
                     accountKeys,
                     addressTableLookups: message.addressTableLookups,
-                    instructions: message.instructions.map((ix) => {
+                    instructions: message.instructions.map(ix => {
                         return intoPartiallyDecodedInstruction(ix, accountKeys);
                     }),
-                    recentBlockhash: message.recentBlockhash
+                    recentBlockhash: message.recentBlockhash,
                 },
-                signatures: signatures.map(bs58.encode)
+                signatures: signatures.map(bs58.encode),
             };
         } else if (transaction.message.version === 0) {
             const { message } = transaction;
@@ -236,14 +232,14 @@ export function intoParsedTransaction(transaction: VersionedTransaction | Transa
                 message: {
                     accountKeys,
                     addressTableLookups: message.addressTableLookups,
-                    instructions: message.compiledInstructions.map((ix) => {
+                    instructions: message.compiledInstructions.map(ix => {
                         // use  PartiallyDecoded format as Transaction might contain instructions from different programs
                         // NOTE: might be usefull to adopt parse mechanism in future. skip for now
                         return intoPartiallyDecodedInstruction(ix, accountKeys);
                     }),
-                    recentBlockhash:message.recentBlockhash
+                    recentBlockhash: message.recentBlockhash,
                 },
-                signatures: signatures.map(bs58.encode)
+                signatures: signatures.map(bs58.encode),
             };
         } else {
             throw new Error('Unsupported transaction version');
@@ -268,7 +264,9 @@ export function intoParsedTransactionFromMessage(message: VersionedMessage): Par
  */
 function parseTransactionSignatures(t: VersionedTransaction | Transaction): string[] {
     if ('compileMessage' in t) {
-        return t.signatures.map(a => a.signature !== null ? bs58.encode(a.signature) : null).filter<string>((a): a is string => a != null);
+        return t.signatures
+            .map(a => (a.signature !== null ? bs58.encode(a.signature) : null))
+            .filter<string>((a): a is string => a != null);
     } else {
         return t.signatures.map(bs58.encode);
     }
@@ -280,11 +278,11 @@ function parseTransactionSignatures(t: VersionedTransaction | Transaction): stri
  * It containts message with only one instruction.
  * That is needed to display instruction data properly with UI compatible with ParsedTransaction
  */
-type ElementType<T> = T extends (infer U)[]? U : T;
+type ElementType<T> = T extends (infer U)[] ? U : T;
 interface PartialParsedTransaction extends ParsedTransaction {
     message: Omit<ParsedMessage, 'instructions'> & {
-        instructions: [ElementType<ParsedMessage['instructions']>]
-    }
+        instructions: [ElementType<ParsedMessage['instructions']>];
+    };
 }
 
 /**
@@ -293,7 +291,12 @@ interface PartialParsedTransaction extends ParsedTransaction {
  * @param {number} index - position of instruction to wrap with PartialParsedTransaction
  * @returns PartialParsedTransaction
  */
-export function intoPartialParsedTransaction<TAdditionalData extends object>(t: VersionedTransaction | Transaction, index: number, parse: ITransactionInstructionParser<TAdditionalData>, data?: TAdditionalData): PartialParsedTransaction {
+export function intoPartialParsedTransaction<TAdditionalData extends object>(
+    t: VersionedTransaction | Transaction,
+    index: number,
+    parse: ITransactionInstructionParser<TAdditionalData>,
+    data?: TAdditionalData
+): PartialParsedTransaction {
     function assertInstruction(ix?: TransactionInstruction | MessageCompiledInstruction): void {
         if (!ix) throw new Error('Cannot find instruction by index');
     }
@@ -322,7 +325,13 @@ export function intoPartialParsedTransaction<TAdditionalData extends object>(t: 
  * @param {TAdditionalData?} data - optional additional data that might be added into parsed instruction data
  * @returns PartialParsedTransaction
  */
-export function intoPartialParsedTransactionFromTransactionInstruction<TAdditionalData extends object>(ix: TransactionInstruction/* | MessageCompiledInstruction*/, m: VersionedMessage, signatures: string[], parse: ITransactionInstructionParser<TAdditionalData>, data?: TAdditionalData): PartialParsedTransaction {
+export function intoPartialParsedTransactionFromTransactionInstruction<TAdditionalData extends object>(
+    ix: TransactionInstruction /* | MessageCompiledInstruction*/,
+    m: VersionedMessage,
+    signatures: string[],
+    parse: ITransactionInstructionParser<TAdditionalData>,
+    data?: TAdditionalData
+): PartialParsedTransaction {
     const { addressTableLookups, recentBlockhash } = m;
     if ('keys' in ix) {
         // TransactionInstruction
@@ -331,9 +340,9 @@ export function intoPartialParsedTransactionFromTransactionInstruction<TAddition
                 accountKeys: intoParsedMessageAccount(m),
                 addressTableLookups,
                 instructions: [intoParsedInstruction(ix, data, parse)],
-                recentBlockhash
+                recentBlockhash,
             },
-            signatures
+            signatures,
         };
     } else {
         // VersionedTransaction
@@ -343,9 +352,9 @@ export function intoPartialParsedTransactionFromTransactionInstruction<TAddition
                 addressTableLookups,
                 // TODO: cover branch for MessageCompiledInstruction
                 instructions: [intoParsedInstruction(ix as any, data, parse)],
-                recentBlockhash
+                recentBlockhash,
             },
-            signatures
+            signatures,
         };
     }
 }
