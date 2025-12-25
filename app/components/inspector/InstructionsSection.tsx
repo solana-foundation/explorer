@@ -19,7 +19,7 @@ import { useAddressLookupTables } from '@/app/providers/accounts';
 import { FetchStatus } from '@/app/providers/cache';
 
 import { ErrorCard } from '../common/ErrorCard';
-import { InspectorInstructionCard } from '../common/InspectorInstructionCard';
+import { InspectorInstructionCard as InspectorInstructionCardComponent } from '../common/InspectorInstructionCard';
 import { LoadingCard } from '../common/LoadingCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
@@ -62,13 +62,13 @@ export function InstructionsSection({ message }: { message: VersionedMessage }) 
     return (
         <>
             {transactionMessage.instructions.map((ix, index) => {
-                return <InstructionsSectionCard key={index} {...{ index, ix, message }} />;
+                return <InspectorInstructionCard key={index} {...{ index, ix, message }} />;
             })}
         </>
     );
 }
 
-function InstructionsSectionCard({
+function InspectorInstructionCard({
     message,
     ix,
     index,
@@ -171,7 +171,7 @@ function InstructionsSectionCard({
                             tx={asParsedTransaction}
                             index={index}
                             result={result}
-                            InstructionCardComponent={InspectorInstructionCard}
+                            InstructionCardComponent={InspectorInstructionCardComponent}
                             message={message}
                             raw={ix}
                         />
