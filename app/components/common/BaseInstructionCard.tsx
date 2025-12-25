@@ -8,20 +8,21 @@ import { Code } from 'react-feather';
 import { BaseRawDetails } from './BaseRawDetails';
 import { BaseRawParsedDetails } from './BaseRawParsedDetails';
 
-type InstructionProps = {
-    title: string;
-    children?: React.ReactNode;
-    result: SignatureResult;
-    index: number;
-    ix: TransactionInstruction | ParsedInstruction;
-    defaultRaw?: boolean;
-    innerCards?: JSX.Element[];
-    eventCards?: JSX.Element[];
+export type BaseProps = React.PropsWithChildren<{
     childIndex?: number;
-    // raw can be used to display raw instruction information
-    raw?: TransactionInstruction;
+    defaultRaw?: boolean;
+    index: number;
+    innerCards?: JSX.Element[];
+    ix: TransactionInstruction | ParsedInstruction;
+    result: SignatureResult;
+    title: string;
+}>;
+
+type BaseInstructionProps = BaseProps & {
     // will be triggered on requesting raw data for instruction, if present
     onRequestRaw?: () => void;
+    // raw can be used to display raw instruction information
+    raw?: TransactionInstruction;
 };
 
 export function BaseInstructionCard({
@@ -31,12 +32,11 @@ export function BaseInstructionCard({
     index,
     ix,
     defaultRaw,
-    eventCards,
     innerCards,
     childIndex,
     raw,
     onRequestRaw,
-}: InstructionProps) {
+}: BaseInstructionProps) {
     const [resultClass] = ixResult(result, index);
     const [showRaw, setShowRaw] = React.useState(defaultRaw || false);
     const rawClickHandler = () => {
@@ -99,18 +99,6 @@ export function BaseInstructionCard({
                                 <tr>
                                     <td colSpan={3}>
                                         <div className="inner-cards">{innerCards}</div>
-                                    </td>
-                                </tr>
-                            </>
-                        )}
-                        {eventCards && eventCards.length > 0 && (
-                            <>
-                                <tr className="table-sep">
-                                    <td colSpan={3}>Events</td>
-                                </tr>
-                                <tr>
-                                    <td colSpan={3}>
-                                        <div className="inner-cards">{eventCards}</div>
                                     </td>
                                 </tr>
                             </>

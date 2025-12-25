@@ -1,30 +1,27 @@
 import { Address } from '@components/common/Address';
 import { useScrollAnchor } from '@providers/scroll-anchor';
-import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
+import { MessageCompiledInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import React from 'react';
 import { Code } from 'react-feather';
 
+import { CProp } from '@/app/types/generics';
+
+import { BaseInstructionCard, BaseProps } from './BaseInstructionCard';
 import { BaseRawDetails } from './BaseRawDetails';
 import { BaseRawParsedDetails } from './BaseRawParsedDetails';
 
-type InstructionProps = {
-    title: string;
-    children?: React.ReactNode;
-    result: SignatureResult;
-    index: number;
-    ix: TransactionInstruction | ParsedInstruction;
-    defaultRaw?: boolean;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-    // raw can be used to display raw instruction information
-    // depends on whether the transaction was received from blockchain (TransactionInstruction)
-    // or generated at the inspector (MessageCompiledInstruction)
-    raw?: TransactionInstruction;
-    // will be triggered on requesting raw data for instruction, if present
-    onRequestRaw?: () => void;
-    message: VersionedMessage;
-};
+type TitleLessBaseProps = Omit<BaseProps, 'title'>;
+
+type InspectorInstructionProps = Pick<CProp<typeof BaseInstructionCard>, 'onRequestRaw'> &
+    TitleLessBaseProps & {
+        // raw can be used to display raw instruction information
+        // depends on whether the transaction was received from blockchain (TransactionInstruction)
+        // or generated at the inspector (MessageCompiledInstruction)
+        raw?: TransactionInstruction | MessageCompiledInstruction;
+        message: VersionedMessage;
+        title?: string; // title is optional to allow HOCs that use this card to define title themselves (TokenDetailsCard for ex.)
+    };
 
 export function InspectorInstructionCard({
     title,
@@ -37,7 +34,8 @@ export function InspectorInstructionCard({
     childIndex,
     raw,
     onRequestRaw,
-}: InstructionProps) {
+    message,
+}: InspectorInstructionProps) {
     const [resultClass] = ixResult(result, index);
     const [showRaw, setShowRaw] = React.useState(defaultRaw || false);
     const rawClickHandler = () => {
@@ -84,10 +82,10 @@ export function InspectorInstructionCard({
                                 </tr>
                                 {'parsed' in ix ? (
                                     <BaseRawParsedDetails ix={ix}>
-                                        {raw ? <BaseRawDetails ix={raw} /> : null}
+                                        {raw ? <BaseRawDetails ix={raw} message={message} /> : null}
                                     </BaseRawParsedDetails>
                                 ) : (
-                                    <BaseRawDetails ix={raw || ix} />
+                                    <BaseRawDetails ix={raw || ix} message={message} />
                                 )}
                             </>
                         ) : (

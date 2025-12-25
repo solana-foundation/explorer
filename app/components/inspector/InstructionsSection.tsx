@@ -1,7 +1,7 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { useAnchorProgram } from '@entities/idl';
 import { useCluster } from '@providers/cluster';
-import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
     AddressLookupTableAccount,
     ComputeBudgetProgram,
@@ -17,8 +17,11 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import { useAddressLookupTables } from '@/app/providers/accounts';
 import { FetchStatus } from '@/app/providers/cache';
+import { intoPartialParsedTransactionFromTransactionInstruction } from '@/app/utils/parsed-tx';
+import { tokenProgramTransactionInstructionParser } from '@/app/utils/parsers';
 
 import { ErrorCard } from '../common/ErrorCard';
+import { InspectorInstructionCard } from '../common/InspectorInstructionCard';
 import { LoadingCard } from '../common/LoadingCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
@@ -61,13 +64,13 @@ export function InstructionsSection({ message }: { message: VersionedMessage }) 
     return (
         <>
             {transactionMessage.instructions.map((ix, index) => {
-                return <InspectorInstructionCard key={index} {...{ index, ix, message }} />;
+                return <InstructionsSectionCard key={index} {...{ index, ix, message }} />;
             })}
         </>
     );
 }
 
-function InspectorInstructionCard({
+function InstructionsSectionCard({
     message,
     ix,
     index,
@@ -154,6 +157,36 @@ function InspectorInstructionCard({
                     raw={ix}
                 />
             );
+        }
+        case TOKEN_PROGRAM_ID.toString(): {
+            const tx = intoPartialParsedTransactionFromTransactionInstruction(
+                ix,
+                message,
+                [],
+                tokenProgramTransactionInstructionParser
+            );
+            const parsedIx = tx.message.instructions[0];
+            // Only render TokenDetailsCard if the instruction was successfully parsed
+            if (parsedIx && 'parsed' in parsedIx && parsedIx.parsed?.type) {
+                return (
+                    <ErrorBoundary
+                        fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                    >
+                        <TokenDetailsCard
+                            key={index}
+                            ix={parsedIx}
+                            tx={tx}
+                            index={index}
+                            result={result}
+                            InstructionCardComponent={InspectorInstructionCard}
+                            message={message}
+                            raw={ix}
+                        />
+                    </ErrorBoundary>
+                );
+            }
+            // Fall through to unknown if parsing failed
+            break;
         }
         case TOKEN_2022_PROGRAM_ADDRESS: {
             const asParsedInstruction = intoParsedInstruction(ix);
