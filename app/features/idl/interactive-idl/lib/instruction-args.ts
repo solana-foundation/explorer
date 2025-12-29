@@ -34,7 +34,7 @@ export function isRequiredArg(arg: ArgField): boolean {
         return !isOptionalIdlType(arg.rawType);
     }
     // Fallback to regex on type string (lowercased for case-insensitivity)
-    // eslint-disable-next-lint no-restricted-syntax -- use a fallback regexp to check if the field is require
+    // eslint-disable-next-line no-restricted-syntax -- use a fallback regexp to check if the field is require
     return !/^(option|coption)\(/.test(arg.type.toLowerCase());
 }
 
@@ -52,7 +52,7 @@ export function isArrayArg(arg: ArgField): boolean {
         return hasArrayInIdlType(arg.rawType);
     }
     // Fallback to regex on type string (lowercased for case-insensitivity)
-    // eslint-disable-next-lint no-restricted-syntax -- use a fallback regexp to check if the field is require
+    // eslint-disable-next-line no-restricted-syntax -- use a fallback regexp to check if the field is require
     return /array\(/.test(arg.type.toLowerCase());
 }
 
@@ -70,6 +70,6 @@ export function isVectorArg(arg: ArgField): boolean {
         return hasVecInIdlType(arg.rawType);
     }
     // Fallback to regex on type string (lowercased for case-insensitivity)
-    // eslint-disable-next-lint no-restricted-syntax -- use a fallback regexp to check if the field is require
+    // eslint-disable-next-line no-restricted-syntax -- use a fallback regexp to check if the field is require
     return /vec\(/.test(arg.type.toLowerCase());
 }
