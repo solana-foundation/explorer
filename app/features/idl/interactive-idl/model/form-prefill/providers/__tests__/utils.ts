@@ -21,10 +21,7 @@ function toPlainAccount(input: PlainAccountInput): InstructionAccountData {
     };
 }
 
-export function createTestInstruction(
-    accounts: PlainAccountInput[],
-    name = 'testInstruction'
-): InstructionData {
+export function createTestInstruction(accounts: PlainAccountInput[], name = 'testInstruction'): InstructionData {
     return {
         accounts: accounts.map(toPlainAccount),
         args: [],
