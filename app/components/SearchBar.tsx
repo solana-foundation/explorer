@@ -155,7 +155,11 @@ export function SearchBar() {
                 onChange={onChange}
                 styles={{
                     control: style => ({ ...style, pointerEvents: 'all' }),
-                    input: style => ({ ...style, width: '100%' }),
+                    input: style => ({
+                        ...style,
+                        gridTemplateColumns: '0 minmax(min-content, 1fr)',
+                        width: '100%',
+                    }),
                     /* work around for https://github.com/JedWatson/react-select/issues/3857 */
                     placeholder: style => ({ ...style, pointerEvents: 'none' }),
                 }}

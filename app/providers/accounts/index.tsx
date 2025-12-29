@@ -128,13 +128,18 @@ export interface Account {
     data: AccountData;
 }
 
-type State = Cache.State<Account>;
-type Dispatch = Cache.Dispatch<Account>;
+/**
+ * Contexts and State exported for mocking purposes only (e.g., Storybook stories).
+ * Do not use these directly in application code - use the provided hooks instead.
+ * @see .storybook/__mocks__/MockAccountsProvider.tsx
+ */
+export type State = Cache.State<Account>;
+export type Dispatch = Cache.Dispatch<Account>;
 type Fetchers = { [mode in FetchAccountDataMode]: MultipleAccountFetcher };
 
-const FetchersContext = React.createContext<Fetchers | undefined>(undefined);
-const StateContext = React.createContext<State | undefined>(undefined);
-const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+export const FetchersContext = React.createContext<Fetchers | undefined>(undefined);
+export const StateContext = React.createContext<State | undefined>(undefined);
+export const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
 
 class MultipleAccountFetcher {
     pubkeys: Set<string> = new Set();
