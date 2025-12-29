@@ -1,4 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { describe, expect, it, vi } from 'vitest';
 
 import { useInstructionForm } from '../../../use-instruction-form';
@@ -23,7 +25,7 @@ describe('createKnownAccountsPrefillDependency', () => {
 
         dependency.onValueChange(instruction.name, form);
 
-        expect(form.getValues('accounts.testInstruction.systemProgram')).toBe('11111111111111111111111111111111');
+        expect(form.getValues('accounts.testInstruction.systemProgram')).toBe(SYSTEM_PROGRAM_ADDRESS);
     });
 
     it('should fill token program account', () => {
@@ -43,9 +45,7 @@ describe('createKnownAccountsPrefillDependency', () => {
 
         dependency.onValueChange(instruction.name, form);
 
-        expect(form.getValues('accounts.testInstruction.tokenProgram')).toBe(
-            'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-        );
+        expect(form.getValues('accounts.testInstruction.tokenProgram')).toBe(TOKEN_PROGRAM_ADDRESS);
     });
 
     it('should fill associated token program account', () => {
@@ -87,10 +87,8 @@ describe('createKnownAccountsPrefillDependency', () => {
 
         dependency.onValueChange(instruction.name, form);
 
-        expect(form.getValues('accounts.testInstruction.SYSTEM_PROGRAM')).toBe('11111111111111111111111111111111');
-        expect(form.getValues('accounts.testInstruction.Token Program')).toBe(
-            'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-        );
+        expect(form.getValues('accounts.testInstruction.SYSTEM_PROGRAM')).toBe(SYSTEM_PROGRAM_ADDRESS);
+        expect(form.getValues('accounts.testInstruction.Token Program')).toBe(TOKEN_PROGRAM_ADDRESS);
     });
 
     it('should not overwrite existing values', () => {
@@ -139,7 +137,7 @@ describe('createKnownAccountsPrefillDependency', () => {
 
         dependency.onValueChange(instruction.name, form);
 
-        expect(form.getValues('accounts.testInstruction.systemProgram')).toBe('11111111111111111111111111111111');
+        expect(form.getValues('accounts.testInstruction.systemProgram')).toBe(SYSTEM_PROGRAM_ADDRESS);
     });
 
     it('should handle nested accounts', () => {
@@ -164,7 +162,7 @@ describe('createKnownAccountsPrefillDependency', () => {
 
         dependency.onValueChange(instruction.name, form);
 
-        expect(form.getValues('accounts.testInstruction.group.systemProgram')).toBe('11111111111111111111111111111111');
+        expect(form.getValues('accounts.testInstruction.group.systemProgram')).toBe(SYSTEM_PROGRAM_ADDRESS);
     });
 
     it('should return correct dependency id and getValue', () => {
