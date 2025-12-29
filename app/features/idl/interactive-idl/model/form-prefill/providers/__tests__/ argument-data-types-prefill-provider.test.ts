@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { findDefaultValueForArgumentType } from './argument-data-types-prefill-provider';
+import { findDefaultValueForArgumentType } from '../argument-data-types-prefill-provider';
 
 describe('findDefaultValueForArgumentType', () => {
     it('should create default value for scalar types', () => {
