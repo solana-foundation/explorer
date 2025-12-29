@@ -59,8 +59,8 @@ export enum PROGRAM_NAMES {
     ORE = 'ORE Program',
     PORT = 'Port Finance Program',
     PYTH_DEVNET = 'Pyth Oracle Program',
-    PYTH_TESTNET = 'Pyth Oracle Program',
-    PYTH_MAINNET = 'Pyth Oracle Program',
+    PYTH_TESTNET = 'Pyth Oracle Program', // eslint-disable-line @typescript-eslint/no-duplicate-enum-values -- allow to use same name for different enums
+    PYTH_MAINNET = 'Pyth Oracle Program', // eslint-disable-line @typescript-eslint/no-duplicate-enum-values -- allow to use same name for different enums
     QUARRY_MERGE_MINE = 'Quarry Merge Mine',
     QUARRY_MINE = 'Quarry Mine',
     QUARRY_MINT_WRAPPER = 'Quarry Mint Wrapper',
