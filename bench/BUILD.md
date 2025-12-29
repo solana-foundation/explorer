@@ -39,7 +39,7 @@
 | Dynamic | `/block/[slot]/programs` | 5.04 kB | 919 kB |
 | Dynamic | `/block/[slot]/rewards` | 4.97 kB | 924 kB |
 | Dynamic | `/epoch/[epoch]` | 6.78 kB | 257 kB |
-| Static | `/feature-gates` | 3.35 kB | 924 kB |
+| Static | `/feature-gates` | 3.35 kB | 923 kB |
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 6.48 kB | 925 kB |
 | Dynamic | `/tx/[signature]` | 37.5 kB | 1.39 MB |

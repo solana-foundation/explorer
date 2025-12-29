@@ -1,25 +1,13 @@
-import type { InstructionData } from '@entities/idl';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useInstructionForm } from '../../use-instruction-form';
-import { createKnownAccountsPrefillDependency } from './known-accounts-prefill-provider';
+import { useInstructionForm } from '../../../use-instruction-form';
+import { createKnownAccountsPrefillDependency } from '../known-accounts-prefill-provider';
+import { createNestedTestAccount, createTestInstruction } from '../utils/create-test-instruction';
 
 describe('createKnownAccountsPrefillDependency', () => {
     it('should fill system program account', () => {
-        const instruction: InstructionData = {
-            accounts: [
-                {
-                    docs: [],
-                    name: 'systemProgram',
-                    optional: false,
-                    signer: false,
-                },
-            ],
-            args: [],
-            docs: [],
-            name: 'testInstruction',
-        };
+        const instruction = createTestInstruction(['systemProgram']);
 
         const { result } = renderHook(() =>
             useInstructionForm({
@@ -39,19 +27,7 @@ describe('createKnownAccountsPrefillDependency', () => {
     });
 
     it('should fill token program account', () => {
-        const instruction: InstructionData = {
-            accounts: [
-                {
-                    docs: [],
-                    name: 'tokenProgram',
-                    optional: false,
-                    signer: false,
-                },
-            ],
-            args: [],
-            docs: [],
-            name: 'testInstruction',
-        };
+        const instruction = createTestInstruction(['tokenProgram']);
 
         const { result } = renderHook(() =>
             useInstructionForm({
@@ -73,19 +49,7 @@ describe('createKnownAccountsPrefillDependency', () => {
     });
 
     it('should fill associated token program account', () => {
-        const instruction: InstructionData = {
-            accounts: [
-                {
-                    docs: [],
-                    name: 'associatedTokenProgram',
-                    optional: false,
-                    signer: false,
-                },
-            ],
-            args: [],
-            docs: [],
-            name: 'testInstruction',
-        };
+        const instruction = createTestInstruction(['associatedTokenProgram']);
 
         const { result } = renderHook(() =>
             useInstructionForm({
@@ -107,25 +71,7 @@ describe('createKnownAccountsPrefillDependency', () => {
     });
 
     it('should match account names case-insensitively', () => {
-        const instruction: InstructionData = {
-            accounts: [
-                {
-                    docs: [],
-                    name: 'SYSTEM_PROGRAM',
-                    optional: false,
-                    signer: false,
-                },
-                {
-                    docs: [],
-                    name: 'Token Program',
-                    optional: false,
-                    signer: false,
-                },
-            ],
-            args: [],
-            docs: [],
-            name: 'testInstruction',
-        };
+        const instruction = createTestInstruction(['SYSTEM_PROGRAM', 'Token Program']);
 
         const { result } = renderHook(() =>
             useInstructionForm({
@@ -148,19 +94,7 @@ describe('createKnownAccountsPrefillDependency', () => {
     });
 
     it('should not overwrite existing values', () => {
-        const instruction: InstructionData = {
-            accounts: [
-                {
-                    docs: [],
-                    name: 'systemProgram',
-                    optional: false,
-                    signer: false,
-                },
-            ],
-            args: [],
-            docs: [],
-            name: 'testInstruction',
-        };
+        const instruction = createTestInstruction(['systemProgram']);
 
         const { result } = renderHook(() =>
             useInstructionForm({
@@ -185,19 +119,7 @@ describe('createKnownAccountsPrefillDependency', () => {
     });
 
     it('should fill empty string values', () => {
-        const instruction: InstructionData = {
-            accounts: [
-                {
-                    docs: [],
-                    name: 'systemProgram',
-                    optional: false,
-                    signer: false,
-                },
-            ],
-            args: [],
-            docs: [],
-            name: 'testInstruction',
-        };
+        const instruction = createTestInstruction(['systemProgram']);
 
         const { result } = renderHook(() =>
             useInstructionForm({
@@ -221,20 +143,8 @@ describe('createKnownAccountsPrefillDependency', () => {
     });
 
     it('should handle nested accounts', () => {
-        const instruction: InstructionData = {
-            accounts: [
-                {
-                    accounts: [
-                        {
-                            docs: [],
-                            name: 'systemProgram',
-                            optional: false,
-                            signer: false,
-                        },
-                    ],
-                    name: 'group',
-                },
-            ],
+        const instruction: Parameters<typeof createKnownAccountsPrefillDependency>[0] = {
+            accounts: [createNestedTestAccount('group', ['systemProgram'])],
             args: [],
             docs: [],
             name: 'testInstruction',
@@ -258,12 +168,7 @@ describe('createKnownAccountsPrefillDependency', () => {
     });
 
     it('should return correct dependency id and getValue', () => {
-        const instruction: InstructionData = {
-            accounts: [],
-            args: [],
-            docs: [],
-            name: 'testInstruction',
-        };
+        const instruction = createTestInstruction([]);
 
         const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: () => 'accounts.testInstruction.test' as any,
@@ -274,19 +179,7 @@ describe('createKnownAccountsPrefillDependency', () => {
     });
 
     it('should not fill unknown account names', () => {
-        const instruction: InstructionData = {
-            accounts: [
-                {
-                    docs: [],
-                    name: 'unknownAccount',
-                    optional: false,
-                    signer: false,
-                },
-            ],
-            args: [],
-            docs: [],
-            name: 'testInstruction',
-        };
+        const instruction = createTestInstruction(['unknownAccount']);
 
         const { result } = renderHook(() =>
             useInstructionForm({
