@@ -2,7 +2,7 @@ import type { ArgField, InstructionAccountData, InstructionData, NestedInstructi
 import { type Path, type SubmitHandler, useForm, type UseFormSetValue } from 'react-hook-form';
 
 import { isRequiredArg } from '../lib/instruction-args';
-
+import { findDefaultValueForArgumentType } from './form-prefill/providers/argument-data-types-prefill-provider';
 export type InstructionCallParams = {
     accounts: Record<string, string>;
     arguments: Record<string, string>;
@@ -106,7 +106,7 @@ function createDefaultValues(instruction: InstructionData): InstructionFormData 
             if (!acc[instruction.name]) {
                 acc[instruction.name] = {};
             }
-            acc[instruction.name][arg.name] = '';
+            acc[instruction.name][arg.name] = findDefaultValueForArgumentType(arg.rawType || arg.type);
             return acc;
         }, {} as Record<string, Record<string, string>>),
     };
