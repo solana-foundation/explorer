@@ -10,6 +10,12 @@ const project = setProjectAnnotations([a11yAnnotations, projectAnnotations]);
 // Set globalProjectAnnotations for addon-vitest compatibility
 globalThis.globalProjectAnnotations = project;
 
-if (project.beforeAll) {
-    beforeAll(project.beforeAll);
-}
+beforeAll(async () => {
+    // Small delay to allow browser runner to fully initialize
+    // Workaround for: "Vitest failed to find the runner" race condition
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    if (project.beforeAll) {
+        await project.beforeAll();
+    }
+});

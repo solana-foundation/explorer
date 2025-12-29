@@ -1,7 +1,9 @@
-import { IdlType } from '@coral-xyz/anchor/dist/cjs/idl';
+import type { IdlType } from '@coral-xyz/anchor/dist/cjs/idl';
 import type { UseFormReturn } from 'react-hook-form';
 
 import type { InstructionFormData } from '../use-instruction-form';
+
+export type ArgumentType = Extract<IdlType, string>;
 
 /**
  * External dependency that triggers automatic field filling when it changes.
@@ -26,5 +28,3 @@ export type UseFormPrefillOptions = {
     form: UseFormReturn<InstructionFormData>;
     config: PrefillConfig;
 };
-
-export type ArgumentType = Extract<IdlType, string>;

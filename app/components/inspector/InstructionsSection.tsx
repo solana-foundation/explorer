@@ -1,7 +1,7 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { useAnchorProgram } from '@entities/idl';
 import { useCluster } from '@providers/cluster';
-import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
     AddressLookupTableAccount,
     ComputeBudgetProgram,
@@ -19,6 +19,7 @@ import { useAddressLookupTables } from '@/app/providers/accounts';
 import { FetchStatus } from '@/app/providers/cache';
 
 import { ErrorCard } from '../common/ErrorCard';
+import { InspectorInstructionCard as InspectorInstructionCardComponent } from '../common/InspectorInstructionCard';
 import { LoadingCard } from '../common/LoadingCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
@@ -155,9 +156,34 @@ function InspectorInstructionCard({
                 />
             );
         }
+        case TOKEN_PROGRAM_ID.toString(): {
+            const asParsedInstruction = intoParsedInstruction(ix);
+            const asParsedTransaction = intoParsedTransaction(ix, message, [asParsedInstruction]);
+            // Only render TokenDetailsCard if the instruction was successfully parsed
+            if (asParsedInstruction.parsed?.type) {
+                return (
+                    <ErrorBoundary
+                        fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                    >
+                        <TokenDetailsCard
+                            key={index}
+                            ix={asParsedInstruction}
+                            tx={asParsedTransaction}
+                            index={index}
+                            result={result}
+                            InstructionCardComponent={InspectorInstructionCardComponent}
+                            message={message}
+                            raw={ix}
+                        />
+                    </ErrorBoundary>
+                );
+            }
+            // Fall through to unknown if parsing failed
+            break;
+        }
         case TOKEN_2022_PROGRAM_ADDRESS: {
             const asParsedInstruction = intoParsedInstruction(ix);
-            const asParsedTransaction = intoParsedTransaction(ix, message);
+            const asParsedTransaction = intoParsedTransaction(ix, message, [asParsedInstruction]);
             // Only render TokenDetailsCard if the instruction was successfully parsed
             if (asParsedInstruction.parsed?.type) {
                 return (

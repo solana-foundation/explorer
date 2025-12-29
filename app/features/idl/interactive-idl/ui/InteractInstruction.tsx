@@ -13,7 +13,7 @@ import { Control, Controller, FieldPath } from 'react-hook-form';
 
 import { createGetAutocompleteItems } from '../model/account-autocomplete/createGetAutocompleteItems';
 import type { AutocompleteItem } from '../model/account-autocomplete/types';
-import { createHardcodedAccountsPrefillDependency } from '../model/form-prefill/providers/hardcoded-accounts-prefill-provider';
+import { createKnownAccountsPrefillDependency } from '../model/form-prefill/providers/known-accounts-prefill-provider';
 import { createPdaPrefillDependency } from '../model/form-prefill/providers/pda-prefill-provider';
 import { createWalletPrefillDependency } from '../model/form-prefill/providers/wallet-prefill-provider';
 import { useFormPrefill } from '../model/form-prefill/use-form-prefill';
@@ -51,11 +51,11 @@ export function InteractInstruction({
     const getAutocompleteItems = createGetAutocompleteItems({ pdas, publicKey });
 
     const walletPrefillDependency = createWalletPrefillDependency(instruction, publicKey, fieldNames);
-    const hardcodedAccountsPrefillDependency = createHardcodedAccountsPrefillDependency(instruction, fieldNames);
+    const knownAccountsPrefillDependency = createKnownAccountsPrefillDependency(instruction, fieldNames);
     const pdaPrefillDependency = createPdaPrefillDependency(idl, instruction, fieldNames);
     useFormPrefill({
         config: {
-            externalDependencies: [walletPrefillDependency, hardcodedAccountsPrefillDependency, pdaPrefillDependency],
+            externalDependencies: [walletPrefillDependency, knownAccountsPrefillDependency, pdaPrefillDependency],
         },
         form,
     });

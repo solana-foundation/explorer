@@ -1,4 +1,5 @@
 import { Address } from '@components/common/Address';
+import { ProgramField } from '@entities/instruction-card';
 import { ParsedInstruction, SignatureResult } from '@solana/web3.js';
 import React from 'react';
 
@@ -25,6 +26,7 @@ export function CreateIdempotentDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
+            <ProgramField programId={ix.programId} />
             <tr>
                 <td>Source</td>
                 <td className="text-lg-end">

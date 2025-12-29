@@ -1,8 +1,8 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { Cluster } from '@utils/cluster';
+import { Cluster, clusterName, DEVNET_URL, MAINNET_BETA_URL, SIMD296_URL, TESTNET_URL } from '@utils/cluster';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useMainnetConfirmation } from './use-mainnet-confirmation';
+import { useMainnetConfirmation } from '../use-mainnet-confirmation';
 
 const mockUseCluster = vi.fn();
 vi.mock('@/app/providers/cluster', () => ({
@@ -227,34 +227,21 @@ describe('useMainnetConfirmation', () => {
     });
 });
 
+const clusterUrls: Record<Cluster, string> = {
+    [Cluster.MainnetBeta]: MAINNET_BETA_URL,
+    [Cluster.Testnet]: TESTNET_URL,
+    [Cluster.Devnet]: DEVNET_URL,
+    [Cluster.Simd296]: SIMD296_URL,
+    [Cluster.Custom]: 'http://localhost:8899',
+};
+
 function setup(cluster: Cluster = Cluster.MainnetBeta) {
-    const clusterConfig = {
-        [Cluster.MainnetBeta]: {
-            name: 'Mainnet Beta',
-            url: 'https://api.mainnet-beta.solana.com',
-        },
-        [Cluster.Devnet]: {
-            name: 'Devnet',
-            url: 'https://api.devnet.solana.com',
-        },
-        [Cluster.Testnet]: {
-            name: 'Testnet',
-            url: 'https://api.testnet.solana.com',
-        },
-        [Cluster.Custom]: {
-            name: 'Custom',
-            url: 'http://localhost:8899',
-        },
-    };
-
-    const config = clusterConfig[cluster];
-
     mockUseCluster.mockReturnValue({
         cluster,
         clusterInfo: undefined,
         customUrl: '',
-        name: config.name,
+        name: clusterName(cluster),
         status: 'connected',
-        url: config.url,
+        url: clusterUrls[cluster],
     });
 }

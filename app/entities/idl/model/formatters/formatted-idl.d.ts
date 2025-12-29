@@ -1,5 +1,5 @@
 import type { Idl } from '@coral-xyz/anchor';
-import { IdlType } from '@coral-xyz/anchor/dist/cjs/idl';
+import type { IdlType } from '@coral-xyz/anchor/dist/cjs/idl';
 
 // renderable idl for ui
 export type FormattedIdl = {
@@ -65,7 +65,7 @@ export type ArgField = {
     docs: string[];
     name: string;
     type: string; // type of the field, e.g. "u64", "string", "publicKey", etc.
-    rawType?: IdlType;
+    rawType?: IdlType; // original IDL type for programmatic access
 };
 
 export type StructField = {

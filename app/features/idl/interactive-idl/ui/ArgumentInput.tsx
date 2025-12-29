@@ -5,7 +5,7 @@ import { Label } from '@shared/ui/label';
 import { forwardRef, useEffect, useId, useRef } from 'react';
 import { X } from 'react-feather';
 
-import { getArrayMaxLength, isArrayArg, isRequiredArg, isVectorArg } from '../lib/instruction-args';
+import { getArrayLengthFromIdlType, isArrayArg, isRequiredArg, isVectorArg } from '../lib/instruction-args';
 
 export interface ArgumentInputProps extends React.ComponentProps<'input'> {
     arg: ArgField;
@@ -251,9 +251,11 @@ function useAutoFocus(
 /**
  * Manages array value derived state and provides helpers for UI logic.
  */
-function useArrayValueState(value: string | number | readonly string[] | undefined, arg: ArgField) {
-    const maxArrayInputs = 100;
-
+function useArrayValueState(
+    value: string | number | readonly string[] | undefined,
+    arg: ArgField,
+    maxArrayInputs = 100
+) {
     const parseStateValue = (value: string | number | readonly string[] | undefined): string[] => {
         if (!value || typeof value !== 'string') return [''];
         const trimmed = value.trim();
@@ -262,7 +264,7 @@ function useArrayValueState(value: string | number | readonly string[] | undefin
     };
 
     const values = parseStateValue(value);
-    const maxLength = getArrayMaxLength(arg) ?? maxArrayInputs;
+    const maxLength = (arg.rawType && getArrayLengthFromIdlType(arg.rawType)) ?? maxArrayInputs;
     const isAtMinLength = values.length <= 1;
     const isAtMaxLength = values.length >= maxLength;
     const lastItemIsEmpty = values.length > 0 && values[values.length - 1] === '';

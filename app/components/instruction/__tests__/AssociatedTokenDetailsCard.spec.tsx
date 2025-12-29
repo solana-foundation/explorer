@@ -1,10 +1,11 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import * as spl from '@solana/spl-token';
-import { AddressLookupTableAccount, clusterApiUrl, Connection, PublicKey, TransactionMessage } from '@solana/web3.js';
+import { PublicKey, TransactionMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
 
+import { resolveAddressLookupTables } from '@/app/__tests__/mock-resolvers';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
 import { ClusterProvider } from '@/app/providers/cluster';
@@ -22,17 +23,12 @@ useSearchParams.mockReturnValue({
 });
 
 describe('instruction::AssociatedTokenDetailsCard', () => {
-    test('should render "CreateIdempotentDetailsCard"', async () => {
+    test('should render "CreateIdempotentDetailsCard"', () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
-        const connection = new Connection(clusterApiUrl('mainnet-beta'));
-        const lookups = await Promise.all(
-            m.addressTableLookups.map(lookup =>
-                connection.getAddressLookupTable(lookup.accountKey).then(val => val.value)
-            )
-        );
+        const lookups = resolveAddressLookupTables(m.addressTableLookups);
         const ti = TransactionMessage.decompile(m, {
-            addressLookupTableAccounts: lookups.filter(x => x !== null) as AddressLookupTableAccount[],
+            addressLookupTableAccounts: lookups,
         }).instructions[index];
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
@@ -63,5 +59,80 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
             </ScrollAnchorProvider>
         );
         expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
+    });
+
+    test('should render "CreateDetailsCard"', () => {
+        const index = 2;
+        const m = mock.deserializeMessage(stubs.aTokenCreateMsgWithInnerCards);
+        const lookups = resolveAddressLookupTables(m.addressTableLookups);
+        const ti = TransactionMessage.decompile(m, {
+            addressLookupTableAccounts: lookups,
+        }).instructions[index];
+        expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
+
+        const parsed = {
+            account: new PublicKey(ti.keys[1].pubkey),
+            mint: new PublicKey(ti.keys[3].pubkey),
+            source: new PublicKey(ti.keys[0].pubkey),
+            systemProgram: new PublicKey(ti.keys[4].pubkey),
+            tokenProgram: new PublicKey(ti.keys[5].pubkey),
+            wallet: new PublicKey(ti.keys[2].pubkey),
+        };
+
+        const ix = intoParsedInstruction(ti, parsed);
+        const tx = intoParsedTransaction(ti, m);
+
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <AssociatedTokenDetailsCard
+                        ix={ix}
+                        index={index}
+                        result={{ err: null }}
+                        tx={tx}
+                        InstructionCardComponent={BaseInstructionCard}
+                    />
+                </ClusterProvider>
+            </ScrollAnchorProvider>
+        );
+        expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
+    });
+
+    test('should render "RecoverNestedDetailsCard"', () => {
+        const index = 0;
+        const m = mock.deserializeMessage(stubs.aTokenRecoverNestedMsg);
+        const lookups = resolveAddressLookupTables(m.addressTableLookups);
+        const ti = TransactionMessage.decompile(m, {
+            addressLookupTableAccounts: lookups,
+        }).instructions[index];
+        expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
+
+        const parsed = {
+            destination: new PublicKey(ti.keys[2].pubkey),
+            nestedMint: new PublicKey(ti.keys[1].pubkey),
+            nestedOwner: new PublicKey(ti.keys[3].pubkey),
+            nestedSource: new PublicKey(ti.keys[0].pubkey),
+            ownerMint: new PublicKey(ti.keys[4].pubkey),
+            tokenProgram: new PublicKey(ti.keys[6].pubkey),
+            wallet: new PublicKey(ti.keys[5].pubkey),
+        };
+
+        const ix = intoParsedInstruction(ti, parsed);
+        const tx = intoParsedTransaction(ti, m);
+
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <AssociatedTokenDetailsCard
+                        ix={ix}
+                        index={index}
+                        result={{ err: null }}
+                        tx={tx}
+                        InstructionCardComponent={BaseInstructionCard}
+                    />
+                </ClusterProvider>
+            </ScrollAnchorProvider>
+        );
+        expect(screen.getByText(/Associated Token Program: Recover Nested/)).toBeInTheDocument();
     });
 });

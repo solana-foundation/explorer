@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { AccountFormValueMap } from './use-instruction-form';
-import { flattenNestedRecord } from './use-instruction-form';
+import type { AccountFormValueMap } from '../use-instruction-form';
+import { flattenNestedRecord } from '../use-instruction-form';
 
 describe('useInstructionForm', () => {
     describe('flattenNestedRecord', () => {
