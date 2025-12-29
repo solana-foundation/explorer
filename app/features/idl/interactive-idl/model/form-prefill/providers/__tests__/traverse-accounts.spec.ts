@@ -1,7 +1,7 @@
 import type { InstructionAccountData, InstructionData, NestedInstructionAccountsData } from '@entities/idl';
 import { describe, expect, it, vi } from 'vitest';
 
-import { traverseInstructionAccounts } from './traverse-accounts';
+import { traverseInstructionAccounts } from '../traverse-accounts';
 
 describe('traverseInstructionAccounts', () => {
     it('should traverse regular accounts without parent group', () => {

@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { useInstructionForm } from '../../../use-instruction-form';
 import { createKnownAccountsPrefillDependency } from '../known-accounts-prefill-provider';
-import { createNestedTestAccount, createTestInstruction } from '../utils/create-test-instruction';
+import { createNestedTestAccount, createTestInstruction } from './utils';
 
 describe('createKnownAccountsPrefillDependency', () => {
     it('should fill system program account', () => {

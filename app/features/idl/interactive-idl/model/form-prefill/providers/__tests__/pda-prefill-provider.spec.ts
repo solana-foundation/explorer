@@ -2,8 +2,11 @@ import type { InstructionData, SupportedIdl } from '@entities/idl';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useInstructionForm } from '../../use-instruction-form';
-import { createPdaPrefillDependency } from './pda-prefill-provider';
+import votingIdl030 from '../../../__mocks__/anchor/anchor-0.30.0-voting-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
+import votingIdl030Variations from '../../../__mocks__/anchor/anchor-0.30.0-voting-variations-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
+import { findInstruction } from '../../../__tests__/utils';
+import { useInstructionForm } from '../../../use-instruction-form';
+import { createPdaPrefillDependency } from '../pda-prefill-provider';
 
 describe('createPdaPrefillDependency', () => {
     const programId = 'AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye';
@@ -95,26 +98,7 @@ describe('createPdaPrefillDependency', () => {
     });
 
     it('should fill PDA account when form values are provided', () => {
-        const instruction: InstructionData = {
-            accounts: [
-                {
-                    docs: [],
-                    name: 'poll',
-                    optional: false,
-                    pda: true,
-                    signer: false,
-                },
-            ],
-            args: [
-                {
-                    docs: [],
-                    name: 'pollId',
-                    type: 'u64',
-                },
-            ],
-            docs: [],
-            name: 'initializePoll',
-        };
+        const instruction = findInstruction(votingIdl030, 'initialize_poll')!;
 
         const { result } = renderHook(() =>
             useInstructionForm({
@@ -141,26 +125,7 @@ describe('createPdaPrefillDependency', () => {
     });
 
     it('should not overwrite existing PDA value if it matches', () => {
-        const instruction: InstructionData = {
-            accounts: [
-                {
-                    docs: [],
-                    name: 'poll',
-                    optional: false,
-                    pda: true,
-                    signer: false,
-                },
-            ],
-            args: [
-                {
-                    docs: [],
-                    name: 'pollId',
-                    type: 'u64',
-                },
-            ],
-            docs: [],
-            name: 'initializePoll',
-        };
+        const instruction = findInstruction(votingIdl030, 'initialize_poll')!;
 
         const { result } = renderHook(() =>
             useInstructionForm({
@@ -192,31 +157,7 @@ describe('createPdaPrefillDependency', () => {
     });
 
     it('should handle nested PDA accounts', () => {
-        const instruction: InstructionData = {
-            accounts: [
-                {
-                    accounts: [
-                        {
-                            docs: [],
-                            name: 'poll',
-                            optional: false,
-                            pda: true,
-                            signer: false,
-                        },
-                    ],
-                    name: 'group',
-                },
-            ],
-            args: [
-                {
-                    docs: [],
-                    name: 'pollId',
-                    type: 'u64',
-                },
-            ],
-            docs: [],
-            name: 'initializePoll',
-        };
+        const instruction = findInstruction(votingIdl030Variations, 'instruction_with_nested')!;
 
         const { result } = renderHook(() =>
             useInstructionForm({
@@ -227,35 +168,22 @@ describe('createPdaPrefillDependency', () => {
         const { form, fieldNames } = result.current;
 
         act(() => {
-            form.setValue('arguments.initializePoll.pollId', '123');
+            form.setValue('arguments.instructionWithNested.pollId', '123');
         });
 
-        const dependency = createPdaPrefillDependency(mockIdl, instruction, {
+        const dependency = createPdaPrefillDependency(votingIdl030Variations as unknown as SupportedIdl, instruction, {
             account: fieldNames.account,
         });
 
         dependency.onValueChange(instruction.name, form);
 
-        const pollValue = form.getValues('accounts.initializePoll.group.poll');
-        expect(pollValue).toBeDefined();
-        expect(typeof pollValue).toBe('string');
+        const nestedAccountValue = form.getValues('accounts.instructionWithNested.nestedGroup.nestedAccount');
+        expect(nestedAccountValue).toBeDefined();
+        expect(typeof nestedAccountValue).toBe('string');
     });
 
     it('should not fill non-PDA accounts', () => {
-        const instruction: InstructionData = {
-            accounts: [
-                {
-                    docs: [],
-                    name: 'regularAccount',
-                    optional: false,
-                    pda: false,
-                    signer: false,
-                },
-            ],
-            args: [],
-            docs: [],
-            name: 'initializePoll',
-        };
+        const instruction = findInstruction(votingIdl030Variations, 'instruction_with_non_pda')!;
 
         const { result } = renderHook(() =>
             useInstructionForm({
@@ -265,7 +193,7 @@ describe('createPdaPrefillDependency', () => {
         );
         const { form, fieldNames } = result.current;
 
-        const dependency = createPdaPrefillDependency(mockIdl, instruction, {
+        const dependency = createPdaPrefillDependency(votingIdl030Variations as unknown as SupportedIdl, instruction, {
             account: fieldNames.account,
         });
 

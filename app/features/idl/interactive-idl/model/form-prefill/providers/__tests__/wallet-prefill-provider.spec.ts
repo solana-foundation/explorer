@@ -3,8 +3,8 @@ import { PublicKey } from '@solana/web3.js';
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useInstructionForm } from '../../use-instruction-form';
-import { createWalletPrefillDependency } from './wallet-prefill-provider';
+import { useInstructionForm } from '../../../use-instruction-form';
+import { createWalletPrefillDependency } from '../wallet-prefill-provider';
 
 describe('createWalletPrefillDependency', () => {
     it('should fill signer accounts with wallet address', () => {
