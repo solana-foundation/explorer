@@ -274,6 +274,7 @@ export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
                     args: ix.args.map(arg => ({
                         docs: arg.docs || [],
                         name: camelCase(arg.name),
+                        rawType: arg.type,
                         type: parseIdlType(arg.type),
                     })),
                     docs: ix?.docs || [],

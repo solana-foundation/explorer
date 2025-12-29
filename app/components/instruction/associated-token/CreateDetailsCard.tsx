@@ -1,4 +1,5 @@
 import { Address } from '@components/common/Address';
+import { ProgramField } from '@entities/instruction-card';
 import { ParsedInstruction, PublicKey, SignatureResult } from '@solana/web3.js';
 import React from 'react';
 
@@ -29,12 +30,7 @@ export function CreateDetailsCard({
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end">
-                    <Address pubkey={ix.programId} alignRight link />
-                </td>
-            </tr>
+            <ProgramField programId={ix.programId} />
 
             <tr>
                 <td>Source</td>

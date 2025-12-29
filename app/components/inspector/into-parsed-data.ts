@@ -59,6 +59,7 @@ import {
 } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
+import { parseTokenProgramInstruction } from './instruction-parsers/spl-token.parser';
 import { parseSystemProgramInstruction } from './instruction-parsers/system-program.parser';
 import { parseToken2022Instruction } from './instruction-parsers/token-2022-program.parser';
 
@@ -163,8 +164,8 @@ function convertTransferWithSeedInfo(parsed: any): TransferWithSeedInfo {
         lamports: safeNumber(parsed.data.amount),
         source: new PublicKey(parsed.accounts.source.address),
         sourceBase: new PublicKey(parsed.accounts.baseAccount.address),
-        sourceOwner: new PublicKey(parsed.accounts.sourceOwner.address),
-        sourceSeed: parsed.data.seed,
+        sourceOwner: new PublicKey(parsed.data.fromOwner),
+        sourceSeed: parsed.data.fromSeed,
     };
 }
 
@@ -347,11 +348,19 @@ function intoParsedData(instruction: TransactionInstruction, parsed?: any): any 
             info: parsed ?? info, // allow for "parsed" to take priority over "info"
             type,
         };
-    }
-
-    /* add other variants here */
-
-    if (programId.toBase58() === TOKEN_2022_PROGRAM_ADDRESS) {
+    } else if (programId.equals(TOKEN_PROGRAM_ID)) {
+        const result = parseTokenProgramInstruction(instruction);
+        if (result) {
+            return {
+                info: parsed ?? result.info,
+                type: result.type,
+            };
+        }
+        return {
+            info: parsed ?? info,
+            type: UNKNOWN_PROGRAM_TYPE,
+        };
+    } else if (programId.toBase58() === TOKEN_2022_PROGRAM_ADDRESS) {
         const result = parseToken2022Instruction(instruction);
         if (result) {
             return {
@@ -412,22 +421,21 @@ export function intoParsedInstruction(transactionInstruction: TransactionInstruc
 
 export function intoParsedTransaction(
     transactionInstruction: TransactionInstruction,
-    versionedMessage: VersionedMessage
+    versionedMessage: VersionedMessage,
+    instructions: ParsedMessage['instructions'] = [],
+    signatures: string[] = []
 ): ParsedTransaction {
     const { keys } = transactionInstruction;
     const { addressTableLookups, recentBlockhash } = versionedMessage;
 
-    const parsedMessage: ParsedMessage = {
-        accountKeys: convertAccountKeysToParsedMessageAccounts(keys),
-        addressTableLookups,
-        // at this moment we do not parse instructions as they are not required to represent the transaction. that's why array is empty
-        instructions: [],
-        recentBlockhash,
-    };
-
     return {
-        message: parsedMessage,
-        signatures: [],
+        message: {
+            accountKeys: convertAccountKeysToParsedMessageAccounts(keys),
+            addressTableLookups,
+            instructions,
+            recentBlockhash,
+        },
+        signatures,
     };
 }
 

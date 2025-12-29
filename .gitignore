@@ -10,6 +10,7 @@
 
 # next.js
 /.next/
+/.next-dev/
 /out/
 
 # production
@@ -43,3 +44,5 @@ next-env.d.ts
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+certificates

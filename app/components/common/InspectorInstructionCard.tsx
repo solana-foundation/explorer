@@ -1,4 +1,4 @@
-import { Address } from '@components/common/Address';
+import { ProgramField } from '@entities/instruction-card';
 import { useScrollAnchor } from '@providers/scroll-anchor';
 import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
@@ -74,22 +74,15 @@ export function InspectorInstructionCard({
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <tbody className="list">
+                        <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
                         {showRaw ? (
-                            <>
-                                <tr>
-                                    <td>Program</td>
-                                    <td className="text-lg-end">
-                                        <Address pubkey={ix.programId} alignRight link />
-                                    </td>
-                                </tr>
-                                {'parsed' in ix ? (
-                                    <BaseRawParsedDetails ix={ix}>
-                                        {raw ? <BaseRawDetails ix={raw} /> : null}
-                                    </BaseRawParsedDetails>
-                                ) : (
-                                    <BaseRawDetails ix={raw || ix} />
-                                )}
-                            </>
+                            'parsed' in ix ? (
+                                <BaseRawParsedDetails ix={ix}>
+                                    {raw ? <BaseRawDetails ix={raw} /> : null}
+                                </BaseRawParsedDetails>
+                            ) : (
+                                <BaseRawDetails ix={raw || ix} />
+                            )
                         ) : (
                             children
                         )}
