@@ -1,6 +1,6 @@
 {
     "extends": ["next/core-web-vitals", "@solana/eslint-config-solana"],
-    "plugins": ["testing-library", "simple-import-sort"],
+    "plugins": ["testing-library", "simple-import-sort", "@eslint-community/eslint-plugin-eslint-comments"],
     "rules": {
         "semi": ["error", "always"],
         // Temporary rule to ignore any explicit any type warnings in TypeScript files
@@ -9,7 +9,21 @@
         // Do not rely on non-null assertions, please. Make it off to see other errors.
         "@typescript-eslint/no-non-null-assertion": "off",
         // Import sorting rules
-        "simple-import-sort/imports": "error"
+        "simple-import-sort/imports": "error",
+        "no-restricted-globals": ["error", "RegExp"],
+        "no-restricted-syntax": [
+            "error",
+            {
+                "selector": "Literal[regex]",
+                "message": "RegExp are forbidden. If you sure we need regexp here - please use eslint-disable-next no-restricted-syntax -- %comment%  to explaint why "
+            },
+            {
+                "selector": "RegExpLiteral",
+                "message": "RegExp are forbidden. If you sure we need regexp here - please use eslint-disable-next no-restricted-syntax -- %comment%  to explaint why "
+            }
+        ],
+        "@eslint-community/eslint-comments/require-description": "error",
+        "@eslint-community/eslint-comments/no-unlimited-disable": "error"
     },
     "overrides": [
         // Only uses Testing Library lint rules in test files
