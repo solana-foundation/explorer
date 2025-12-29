@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { findDefaultValueForArgumentType } from './argument-data-types-prefill-provider';
 
-describe('findDefaultVAlueForArgumentType', () => {
+describe('findDefaultValueForArgumentType', () => {
     it('should create default value for scalar types', () => {
         expect(findDefaultValueForArgumentType('bool')).toBe('false');
         expect(findDefaultValueForArgumentType('f32')).toBe('1.0');
