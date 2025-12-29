@@ -1,4 +1,4 @@
-import type { IdlInstruction, IdlSeed } from '@coral-xyz/anchor/dist/cjs/idl';
+import type { IdlInstruction, IdlInstructionAccountItem, IdlSeed } from '@coral-xyz/anchor/dist/cjs/idl';
 import type { AnchorIdl, SupportedIdl } from '@entities/idl';
 import { PublicKey } from '@solana/web3.js';
 import { camelCase } from 'change-case';
@@ -20,10 +20,19 @@ export function createAnchorPdaProvider(): PdaProvider {
 function mapAccounts(accounts: IdlInstruction['accounts']): PdaAccount[] {
     return accounts
         .filter(acc => !('accounts' in acc)) // Skip nested account groups
-        .map(acc => ({
-            name: acc.name,
-            pda: 'pda' in acc && acc.pda ? { seeds: mapSeeds(acc.pda.seeds) } : undefined,
-        }));
+        .map(acc => {
+            const seeds = getPdaSeeds(acc);
+            return {
+                name: acc.name,
+                pda: seeds ? { seeds: mapSeeds(seeds) } : undefined,
+            };
+        });
+}
+
+function getPdaSeeds(acc: IdlInstructionAccountItem): IdlSeed[] | undefined {
+    if ('accounts' in acc) return undefined; // nested group
+    const pda = acc.pda;
+    return typeof pda === 'object' && pda !== null && 'seeds' in pda ? pda.seeds : undefined;
 }
 
 function mapSeeds(seeds: IdlSeed[]): PdaSeed[] {
