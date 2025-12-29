@@ -36,7 +36,7 @@ describe('createWalletPrefillDependency', () => {
         );
         const { form, fieldNames } = result.current;
 
-        const walletPublicKey = new PublicKey('11111111111111111111111111111111');
+        const walletPublicKey = PublicKey.default;
         const dependency = createWalletPrefillDependency(instruction, walletPublicKey, {
             account: fieldNames.account,
         });
@@ -109,7 +109,7 @@ describe('createWalletPrefillDependency', () => {
         );
         const { form, fieldNames } = result.current;
 
-        const walletPublicKey = new PublicKey('11111111111111111111111111111111');
+        const walletPublicKey = PublicKey.default;
         const dependency = createWalletPrefillDependency(instruction, walletPublicKey, {
             account: fieldNames.account,
         });
@@ -128,7 +128,7 @@ describe('createWalletPrefillDependency', () => {
             name: 'testInstruction',
         };
 
-        const walletPublicKey = new PublicKey('11111111111111111111111111111111');
+        const walletPublicKey = PublicKey.default;
         const dependency = createWalletPrefillDependency(instruction, walletPublicKey, {
             account: () => 'accounts.testInstruction.test' as any,
         });
