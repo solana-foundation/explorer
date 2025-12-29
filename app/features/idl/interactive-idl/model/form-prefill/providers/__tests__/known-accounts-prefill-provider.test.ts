@@ -1,6 +1,6 @@
-import { act, renderHook } from '@testing-library/react';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { useInstructionForm } from '../../../use-instruction-form';
