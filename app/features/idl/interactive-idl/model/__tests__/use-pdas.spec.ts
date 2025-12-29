@@ -20,9 +20,9 @@ describe('usePdas', () => {
         const { createMockForm, mockInstruction, renderUsePdas } = setup(idl, instructionName);
         const form = createMockForm();
 
-        const result = renderUsePdas({ form, idl: undefined, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: undefined, instruction: mockInstruction });
 
-        expect(result.current).toEqual({});
+        expect(view.current).toEqual({});
     });
 
     it.each([
@@ -33,9 +33,9 @@ describe('usePdas', () => {
         const form = createMockForm();
         const idlWithoutAddress = { ...mockIdl, address: undefined } as SupportedIdl;
 
-        const result = renderUsePdas({ form, idl: idlWithoutAddress, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: idlWithoutAddress, instruction: mockInstruction });
 
-        expect(result.current).toEqual({});
+        expect(view.current).toEqual({});
     });
 
     it.each([
@@ -46,9 +46,9 @@ describe('usePdas', () => {
         const form = createMockForm();
         const unknownInstruction: InstructionData = { ...mockInstruction, name: 'unknownInstruction' };
 
-        const result = renderUsePdas({ form, idl: mockIdl, instruction: unknownInstruction });
+        const view = renderUsePdas({ form, idl: mockIdl, instruction: unknownInstruction });
 
-        expect(result.current).toEqual({});
+        expect(view.current).toEqual({});
     });
 
     // 0.29 variations tests - pda:true without seeds (backport check)
@@ -58,10 +58,10 @@ describe('usePdas', () => {
         form.setValue('arguments.initializeCandidate.pollId', '123');
         form.setValue('arguments.initializeCandidate.candidateName', 'Test');
 
-        const result = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
 
         // 0.29 IDL has pda:true but no seeds array, so no PDAs can be generated
-        expect(result.current).toEqual({});
+        expect(view.current).toEqual({});
     });
 
     // 0.30 tests - these need PDA seeds from 0.30 IDL
@@ -70,61 +70,61 @@ describe('usePdas', () => {
         const form = createMockForm();
         form.setValue('arguments.initializeCandidate.pollId', '123');
 
-        const result = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
 
-        expect(result.current.poll).toBeDefined();
-        expect(result.current.poll.generated).not.toBeNull();
-        expect(typeof result.current.poll.generated).toBe('string');
-        expect(result.current.poll.seeds).toHaveLength(1);
-        expect(result.current.poll.seeds[0]).toEqual({ name: 'pollId', value: '123' });
+        expect(view.current.poll).toBeDefined();
+        expect(view.current.poll.generated).not.toBeNull();
+        expect(typeof view.current.poll.generated).toBe('string');
+        expect(view.current.poll.seeds).toHaveLength(1);
+        expect(view.current.poll.seeds[0]).toEqual({ name: 'pollId', value: '123' });
     });
 
     it('should generate PDA for multiple seeds (candidate)', () => {
         const { createMockForm, mockInstruction, mockIdl, renderUsePdas } = setup(votingIdl030, 'initialize_candidate');
         const form = createMockForm();
         form.setValue('arguments.initializeCandidate.pollId', '123');
-        form.setValue('arguments.initializeCandidate.candidateName', 'Alice');
+        form.setValue('arguments.initializeCandidate.candidateName', 'Marco');
 
-        const result = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
 
-        expect(result.current.candidate).toBeDefined();
-        expect(result.current.candidate.generated).not.toBeNull();
-        expect(typeof result.current.candidate.generated).toBe('string');
-        expect(result.current.candidate.seeds).toHaveLength(2);
-        expect(result.current.candidate.seeds[0]).toEqual({ name: 'pollId', value: '123' });
-        expect(result.current.candidate.seeds[1]).toEqual({ name: 'candidateName', value: 'Alice' });
+        expect(view.current.candidate).toBeDefined();
+        expect(view.current.candidate.generated).not.toBeNull();
+        expect(typeof view.current.candidate.generated).toBe('string');
+        expect(view.current.candidate.seeds).toHaveLength(2);
+        expect(view.current.candidate.seeds[0]).toEqual({ name: 'pollId', value: '123' });
+        expect(view.current.candidate.seeds[1]).toEqual({ name: 'candidateName', value: 'Marco' });
     });
 
     it('should handle underscore prefix in argument names (_poll_id vs poll_id)', () => {
         const { createMockForm, mockInstruction, mockIdl, renderUsePdas } = setup(votingIdl030, 'initialize_candidate');
         const form = createMockForm();
         form.setValue('arguments.initializeCandidate.pollId', '456');
-        form.setValue('arguments.initializeCandidate.candidateName', 'Bob');
+        form.setValue('arguments.initializeCandidate.candidateName', 'Polo');
 
-        const result = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
 
         // Should still generate PDAs even though seed.path is "poll_id" and arg.name is "_poll_id"
-        expect(result.current.poll).toBeDefined();
-        expect(result.current.poll.generated).not.toBeNull();
-        expect(result.current.candidate).toBeDefined();
-        expect(result.current.candidate.generated).not.toBeNull();
+        expect(view.current.poll).toBeDefined();
+        expect(view.current.poll.generated).not.toBeNull();
+        expect(view.current.candidate).toBeDefined();
+        expect(view.current.candidate.generated).not.toBeNull();
     });
 
     it('should return null for PDA when required argument is missing', () => {
         const { createMockForm, mockInstruction, mockIdl, renderUsePdas } = setup(votingIdl030, 'initialize_candidate');
         const form = createMockForm();
-        form.setValue('arguments.initializeCandidate.candidateName', 'Charlie');
+        form.setValue('arguments.initializeCandidate.candidateName', 'Marco');
         // pollId is missing
 
-        const result = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
 
-        expect(result.current.poll.generated).toBeNull();
-        expect(result.current.poll.seeds).toHaveLength(1);
-        expect(result.current.poll.seeds[0]).toEqual({ name: 'pollId', value: null });
-        expect(result.current.candidate.generated).toBeNull();
-        expect(result.current.candidate.seeds).toHaveLength(2);
-        expect(result.current.candidate.seeds[0]).toEqual({ name: 'pollId', value: null });
-        expect(result.current.candidate.seeds[1]).toEqual({ name: 'candidateName', value: 'Charlie' });
+        expect(view.current.poll.generated).toBeNull();
+        expect(view.current.poll.seeds).toHaveLength(1);
+        expect(view.current.poll.seeds[0]).toEqual({ name: 'pollId', value: null });
+        expect(view.current.candidate.generated).toBeNull();
+        expect(view.current.candidate.seeds).toHaveLength(2);
+        expect(view.current.candidate.seeds[0]).toEqual({ name: 'pollId', value: null });
+        expect(view.current.candidate.seeds[1]).toEqual({ name: 'candidateName', value: 'Marco' });
     });
 
     it('should return null for PDA when numeric argument value cannot be converted to number', () => {
@@ -133,29 +133,29 @@ describe('usePdas', () => {
         form.setValue('arguments.initializeCandidate.pollId', 'invalid-number');
         form.setValue('arguments.initializeCandidate.candidateName', 'Test');
 
-        const result = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
 
-        expect(result.current.poll.generated).toBeNull();
-        expect(result.current.poll.seeds).toHaveLength(1);
-        expect(result.current.poll.seeds[0]).toEqual({ name: 'pollId', value: 'invalid-number' });
-        expect(result.current.candidate.generated).toBeNull();
-        expect(result.current.candidate.seeds).toHaveLength(2);
-        expect(result.current.candidate.seeds[0]).toEqual({ name: 'pollId', value: 'invalid-number' });
-        expect(result.current.candidate.seeds[1]).toEqual({ name: 'candidateName', value: 'Test' });
+        expect(view.current.poll.generated).toBeNull();
+        expect(view.current.poll.seeds).toHaveLength(1);
+        expect(view.current.poll.seeds[0]).toEqual({ name: 'pollId', value: 'invalid-number' });
+        expect(view.current.candidate.generated).toBeNull();
+        expect(view.current.candidate.seeds).toHaveLength(2);
+        expect(view.current.candidate.seeds[0]).toEqual({ name: 'pollId', value: 'invalid-number' });
+        expect(view.current.candidate.seeds[1]).toEqual({ name: 'candidateName', value: 'Test' });
     });
 
     it('should handle different argument types (u64, string)', () => {
         const { createMockForm, mockInstruction, mockIdl, renderUsePdas } = setup(votingIdl030, 'initialize_candidate');
         const form = createMockForm();
         form.setValue('arguments.initializeCandidate.pollId', '789');
-        form.setValue('arguments.initializeCandidate.candidateName', 'David');
+        form.setValue('arguments.initializeCandidate.candidateName', 'Marco');
 
-        const result = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
 
-        expect(result.current.poll).toBeDefined();
-        expect(result.current.poll.generated).not.toBeNull();
-        expect(result.current.candidate).toBeDefined();
-        expect(result.current.candidate.generated).not.toBeNull();
+        expect(view.current.poll).toBeDefined();
+        expect(view.current.poll.generated).not.toBeNull();
+        expect(view.current.candidate).toBeDefined();
+        expect(view.current.candidate.generated).not.toBeNull();
     });
 
     // 0.30 variations tests - nested groups
@@ -167,10 +167,10 @@ describe('usePdas', () => {
         const form = createMockForm();
         form.setValue('arguments.instructionWithNested.pollId', '999');
 
-        const result = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
 
         // Nested accounts should be skipped, so nestedAccount should not be in result
-        expect(result.current.nestedAccount).toBeUndefined();
+        expect(view.current.nestedAccount).toBeUndefined();
     });
 
     // 0.30 variations tests
@@ -184,12 +184,12 @@ describe('usePdas', () => {
 
         form.setValue('accounts.instructionWithAccountSeed.authority', accountPubkey);
 
-        const result = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
 
-        expect(result.current.pdaAccount).toBeDefined();
-        expect(result.current.pdaAccount.generated).not.toBeNull();
-        expect(result.current.pdaAccount.seeds).toHaveLength(1);
-        expect(result.current.pdaAccount.seeds[0]).toEqual({ name: 'authority', value: accountPubkey });
+        expect(view.current.pdaAccount).toBeDefined();
+        expect(view.current.pdaAccount.generated).not.toBeNull();
+        expect(view.current.pdaAccount.seeds).toHaveLength(1);
+        expect(view.current.pdaAccount.seeds[0]).toEqual({ name: 'authority', value: accountPubkey });
     });
 
     it('should handle const seeds', () => {
@@ -199,12 +199,12 @@ describe('usePdas', () => {
         );
         const form = createMockForm();
 
-        const result = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
 
-        expect(result.current.pdaAccount).toBeDefined();
-        expect(result.current.pdaAccount.generated).not.toBeNull();
-        expect(result.current.pdaAccount.seeds).toHaveLength(1);
-        expect(result.current.pdaAccount.seeds[0]).toEqual({ name: '0x74657374', value: '0x74657374' });
+        expect(view.current.pdaAccount).toBeDefined();
+        expect(view.current.pdaAccount.generated).not.toBeNull();
+        expect(view.current.pdaAccount.seeds).toHaveLength(1);
+        expect(view.current.pdaAccount.seeds[0]).toEqual({ name: '0x74657374', value: '0x74657374' });
     });
 
     it('should return null when account seed value is missing', () => {
@@ -214,11 +214,11 @@ describe('usePdas', () => {
         );
         const form = createMockForm();
 
-        const result = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
 
-        expect(result.current.pdaAccount.generated).toBeNull();
-        expect(result.current.pdaAccount.seeds).toHaveLength(1);
-        expect(result.current.pdaAccount.seeds[0]).toEqual({ name: 'authority', value: null });
+        expect(view.current.pdaAccount.generated).toBeNull();
+        expect(view.current.pdaAccount.seeds).toHaveLength(1);
+        expect(view.current.pdaAccount.seeds[0]).toEqual({ name: 'authority', value: null });
     });
 
     // 0.30 tests - these need 0.30 IDL for PDA seeds
@@ -228,15 +228,15 @@ describe('usePdas', () => {
         form.setValue('arguments.initializeCandidate.pollId', '123');
         form.setValue('arguments.initializeCandidate.candidateName', 'Eve');
 
-        const result = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const view = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
 
         // signer account should not be in result since it doesn't have PDA
-        expect(result.current.signer).toBeUndefined();
+        expect(view.current.signer).toBeUndefined();
         // Only PDA accounts should be present
-        expect(result.current.poll).toBeDefined();
-        expect(result.current.poll.generated).not.toBeNull();
-        expect(result.current.candidate).toBeDefined();
-        expect(result.current.candidate.generated).not.toBeNull();
+        expect(view.current.poll).toBeDefined();
+        expect(view.current.poll.generated).not.toBeNull();
+        expect(view.current.candidate).toBeDefined();
+        expect(view.current.candidate.generated).not.toBeNull();
     });
 
     it('should generate consistent PDA addresses for same inputs', () => {
@@ -245,11 +245,11 @@ describe('usePdas', () => {
         form.setValue('arguments.initializeCandidate.pollId', '123');
         form.setValue('arguments.initializeCandidate.candidateName', 'Frank');
 
-        const result1 = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
-        const result2 = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const { current: first } = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
+        const { current: second } = renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction });
 
-        expect(result1.current.poll.generated).toBe(result2.current.poll.generated);
-        expect(result1.current.candidate.generated).toBe(result2.current.candidate.generated);
+        expect(first.poll.generated).toBe(second.poll.generated);
+        expect(first.candidate.generated).toBe(second.candidate.generated);
     });
 });
 
