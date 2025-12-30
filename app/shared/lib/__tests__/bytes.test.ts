@@ -33,9 +33,9 @@ const allByteValuesBase64 = btoa(String.fromCharCode(...new Uint8Array(allByteVa
 
 // Shared test data for hex encoding/decoding
 const hexTestCases: Record<string, number[]> = {
-    '1d9acb512ea545e4': [29, 154, 203, 81, 46, 165, 69, 228],
-    ff007f80: [255, 0, 127, 128],
-    deadbeef: [222, 173, 190, 239],
+    '1d9acb512ea545e4': [0x1d, 0x9a, 0xcb, 0x51, 0x2e, 0xa5, 0x45, 0xe4],
+    ff007f80: [0xff, 0x00, 0x7f, 0x80],
+    deadbeef: [0xde, 0xad, 0xbe, 0xef],
     '': [],
 };
 

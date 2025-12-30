@@ -234,11 +234,19 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Change:** `raw.toString('hex')` → `toHex(raw)` (also changed prop type from `Buffer` to `Uint8Array`)
 
-**Test:** Any page displaying hex data (e.g., raw instruction data)
+**Test:** Pages displaying raw instruction data in hex format
+
+**Used in:**
+- `BaseRawDetails` → instruction cards showing raw hex data
+- `ProgramEventsCard` → raw event data display
+- Transaction Inspector → unknown instruction cards
 
 | Local | Production |
 |-------|------------|
 | http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
+| http://localhost:3000/tx/5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d6G6PP6V7eMLoUpYA1uoJeWs2XNmey8q1aMiP4stXm6Ar?cluster=mainnet | https://explorer.solana.com/tx/5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d6G6PP6V7eMLoUpYA1uoJeWs2XNmey8q1aMiP4stXm6Ar |
+
+*Note: Open "Raw" tab on any instruction card to see HexData component*
 
 ---
 
