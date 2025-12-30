@@ -1,6 +1,6 @@
 | Type | Route | Size | First Load JS |
 |------|-------|------|---------------|
-| Static | `/` | 15.6 kB | 1.01 MB |
+| Static | `/` | 15.5 kB | 1.01 MB |
 | Static | `/_not-found` | 326 B | 157 kB |
 | Dynamic | `/address/[address]` | 6.44 kB | 284 kB |
 | Dynamic | `/address/[address]/anchor-account` | 5.76 kB | 987 kB |
@@ -37,9 +37,9 @@
 | Dynamic | `/block/[slot]` | 10.3 kB | 938 kB |
 | Dynamic | `/block/[slot]/accounts` | 4.46 kB | 918 kB |
 | Dynamic | `/block/[slot]/programs` | 5.04 kB | 919 kB |
-| Dynamic | `/block/[slot]/rewards` | 4.98 kB | 924 kB |
+| Dynamic | `/block/[slot]/rewards` | 4.97 kB | 924 kB |
 | Dynamic | `/epoch/[epoch]` | 6.78 kB | 257 kB |
-| Static | `/feature-gates` | 3.35 kB | 924 kB |
+| Static | `/feature-gates` | 3.35 kB | 923 kB |
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 6.48 kB | 925 kB |
 | Dynamic | `/tx/[signature]` | 37.5 kB | 1.39 MB |
