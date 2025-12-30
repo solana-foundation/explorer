@@ -384,6 +384,40 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 ---
 
+# Buffer.alloc Replacements
+
+## 26. Inspector Parsed Data (alloc)
+
+**File:** `app/components/inspector/into-parsed-data.ts`
+
+**Change:** `Buffer.alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR)` → `alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR)`
+
+**Test:** Transaction inspector with Associated Token Program instructions
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
+
+*Test: Load a transaction with ATA creation instruction*
+
+---
+
+## 27. Account Provider Empty Data (alloc)
+
+**File:** `app/providers/accounts/index.tsx`
+
+**Change:** `Buffer.alloc(0)` → `alloc(0)`
+
+**Test:** Account pages for non-existent accounts
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/11111111111111111111111111111112?cluster=mainnet | https://explorer.solana.com/address/11111111111111111111111111111112 |
+
+*Test: Load any non-existent account address*
+
+---
+
 ## Quick Test Checklist
 
 ### Base64 Conversions
@@ -406,6 +440,10 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 - [ ] **Security.txt Export**: Check security.txt base64 export works correctly
 - [ ] **PDA String Seeds**: Use interactive IDL with string seeds, verify PDA generation works
 - [ ] **Verified Builds**: Verify OtterSec verification check works
+
+### Buffer.alloc Replacements
+- [ ] **Transaction Inspector**: Load ATA creation transaction, verify parsing works correctly
+- [ ] **Non-existent Account**: Load a non-existent account address, verify page loads without errors
 
 ---
 

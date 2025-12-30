@@ -17,15 +17,18 @@ import {
     toHex,
     toUint8Array,
     toUtf8,
+    writeUint32LE,
 } from '../bytes';
 
 // Shared test data for base64 encoding/decoding
+/* eslint-disable sort-keys-fix/sort-keys-fix */
 const base64TestCases: Record<string, number[]> = {
     'SGVsbG8=': [72, 101, 108, 108, 111], // "Hello"
     'SGVsbG8gV29ybGQ=': [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100], // "Hello World"
     'dGVzdA==': [116, 101, 115, 116], // "test"
     '': [], // empty
 };
+/* eslint-enable sort-keys-fix/sort-keys-fix */
 
 // Invalid base64 strings for isValidBase64 tests
 const invalidBase64Strings = ['Hello World!', 'Invalid@#$', 'not-valid-base64!!!'];
@@ -36,10 +39,10 @@ const allByteValuesBase64 = btoa(String.fromCharCode(...new Uint8Array(allByteVa
 
 // Shared test data for hex encoding/decoding
 const hexTestCases: Record<string, number[]> = {
-    '1d9acb512ea545e4': [0x1d, 0x9a, 0xcb, 0x51, 0x2e, 0xa5, 0x45, 0xe4],
-    ff007f80: [0xff, 0x00, 0x7f, 0x80],
-    deadbeef: [0xde, 0xad, 0xbe, 0xef],
     '': [],
+    '1d9acb512ea545e4': [0x1d, 0x9a, 0xcb, 0x51, 0x2e, 0xa5, 0x45, 0xe4],
+    deadbeef: [0xde, 0xad, 0xbe, 0xef],
+    ff007f80: [0xff, 0x00, 0x7f, 0x80],
 };
 
 // All 256 byte values as hex string
@@ -47,11 +50,22 @@ const allByteValuesHex = Array.from({ length: 256 }, (_, i) => i.toString(16).pa
 
 // Shared test data for UTF-8 encoding/decoding
 const utf8TestCases: Record<string, number[]> = {
+    '': [],
     Hello: [72, 101, 108, 108, 111],
     'Hello World': [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100],
-    '': [],
     世界: [228, 184, 150, 231, 149, 140], // Chinese characters
     '🚀': [240, 159, 154, 128], // Emoji (4-byte UTF-8)
+};
+
+// Test values for writeUint32LE (value -> expected LE bytes)
+const writeUint32LETestCases: Record<number, number[]> = {
+    0: [0, 0, 0, 0],
+    1: [1, 0, 0, 0],
+    255: [255, 0, 0, 0],
+    256: [0, 1, 0, 0],
+    300000: [224, 147, 4, 0],
+    0xffffffff: [255, 255, 255, 255],
+    65535: [255, 255, 0, 0],
 };
 
 describe('bytes helpers', () => {
@@ -422,6 +436,34 @@ describe('bytes helpers', () => {
                 const helperResult = alloc(size);
                 expect(Array.from(helperResult)).toEqual(Array.from(bufferResult));
             }
+        });
+    });
+
+    describe('writeUint32LE', () => {
+        it.each(Object.entries(writeUint32LETestCases))('should write %d as little-endian bytes', (value, expected) => {
+            const data = alloc(4);
+            writeUint32LE(data, Number(value), 0);
+            expect(Array.from(data)).toEqual(expected);
+        });
+
+        it.each(Object.entries(writeUint32LETestCases))(
+            'should match Buffer.writeUInt32LE for value %d',
+            (value, expected) => {
+                const data = alloc(4);
+                writeUint32LE(data, Number(value), 0);
+                const bufferResult = Buffer.alloc(4);
+                bufferResult.writeUInt32LE(Number(value), 0);
+                expect(Array.from(data)).toEqual(expected);
+                expect(Array.from(data)).toEqual(Array.from(bufferResult));
+            }
+        );
+
+        it('should write at specified offset', () => {
+            const data = alloc(6);
+            data[0] = 0xff;
+            data[5] = 0xee;
+            writeUint32LE(data, 300000, 1);
+            expect(Array.from(data)).toEqual([0xff, 224, 147, 4, 0, 0xee]);
         });
     });
 

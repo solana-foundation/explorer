@@ -34,6 +34,7 @@ import React from 'react';
 import { create } from 'superstruct';
 
 import { getProxiedUri } from '@/app/features/metadata/utils';
+import { alloc } from '@/app/shared/lib/bytes';
 
 import { HistoryProvider } from './history';
 import { RewardsProvider } from './rewards';
@@ -254,7 +255,7 @@ async function fetchMultipleAccounts({
                 let account: Account;
                 if (result === null) {
                     account = {
-                        data: { raw: Buffer.alloc(0) },
+                        data: { raw: alloc(0) },
                         executable: false,
                         lamports: 0,
                         owner: SystemProgram.programId,
