@@ -115,6 +115,12 @@ describe('bytes helpers', () => {
                     expect(Array.from(decoded)).toEqual(allByteValues);
                 });
             });
+
+            it('should throw on invalid base64 string', () => {
+                expect(() => fromBase64('Hello World!')).toThrow();
+                expect(() => fromBase64('Invalid@#$')).toThrow();
+                expect(() => fromBase64('not-valid-base64!!!')).toThrow();
+            });
         });
 
         describe('toBase64', () => {
