@@ -118,7 +118,7 @@ export type ParsedData =
 
 export interface AccountData {
     parsed?: ParsedData;
-    raw?: Buffer;
+    raw?: Uint8Array;
 }
 
 export interface Account {
