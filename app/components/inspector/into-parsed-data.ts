@@ -59,9 +59,9 @@ import {
 } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
-import { parseTokenProgramInstruction } from './instruction-parsers/spl-token.parser';
 import { alloc, equals } from '@/app/shared/lib/bytes';
 
+import { parseTokenProgramInstruction } from './instruction-parsers/spl-token.parser';
 import { parseSystemProgramInstruction } from './instruction-parsers/system-program.parser';
 import { parseToken2022Instruction } from './instruction-parsers/token-2022-program.parser';
 
