@@ -2,7 +2,7 @@
 |------|-------|------|---------------|
 | Static | `/` | 15.6 kB | 1.01 MB |
 | Static | `/_not-found` | 326 B | 157 kB |
-| Dynamic | `/address/[address]` | 6.5 kB | 284 kB |
+| Dynamic | `/address/[address]` | 6.44 kB | 284 kB |
 | Dynamic | `/address/[address]/anchor-account` | 5.76 kB | 987 kB |
 | Dynamic | `/address/[address]/anchor-program` | 326 B | 157 kB |
 | Dynamic | `/address/[address]/attestation` | 5.78 kB | 968 kB |
@@ -10,7 +10,7 @@
 | Dynamic | `/address/[address]/blockhashes` | 1.88 kB | 921 kB |
 | Dynamic | `/address/[address]/compression` | 4.75 kB | 954 kB |
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 3.63 kB | 948 kB |
-| Dynamic | `/address/[address]/domains` | 13.8 kB | 928 kB |
+| Dynamic | `/address/[address]/domains` | 13.7 kB | 928 kB |
 | Dynamic | `/address/[address]/entries` | 2.98 kB | 934 kB |
 | Dynamic | `/address/[address]/feature-gate` | 325 B | 157 kB |
 | Dynamic | `/address/[address]/idl` | 132 kB | 598 kB |
@@ -19,7 +19,7 @@
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 5.84 kB | 967 kB |
 | Dynamic | `/address/[address]/program-multisig` | 3.4 kB | 990 kB |
 | Dynamic | `/address/[address]/rewards` | 3.47 kB | 925 kB |
-| Dynamic | `/address/[address]/security` | 8.21 kB | 1.01 MB |
+| Dynamic | `/address/[address]/security` | 8.13 kB | 1.01 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 3.38 kB | 925 kB |
 | Dynamic | `/address/[address]/stake-history` | 3.52 kB | 925 kB |
 | Dynamic | `/address/[address]/token-extensions` | 8.46 kB | 986 kB |
@@ -35,14 +35,14 @@
 | Dynamic | `/api/verified-programs/list/[page]` | 0 B | 0 B |
 | Dynamic | `/api/verified-programs/metadata/[programId]` | 0 B | 0 B |
 | Dynamic | `/block/[slot]` | 10.3 kB | 938 kB |
-| Dynamic | `/block/[slot]/accounts` | 4.49 kB | 918 kB |
-| Dynamic | `/block/[slot]/programs` | 5.07 kB | 919 kB |
-| Dynamic | `/block/[slot]/rewards` | 5.01 kB | 924 kB |
-| Dynamic | `/epoch/[epoch]` | 6.85 kB | 258 kB |
-| Static | `/feature-gates` | 3.38 kB | 924 kB |
+| Dynamic | `/block/[slot]/accounts` | 4.46 kB | 918 kB |
+| Dynamic | `/block/[slot]/programs` | 5.04 kB | 919 kB |
+| Dynamic | `/block/[slot]/rewards` | 4.98 kB | 924 kB |
+| Dynamic | `/epoch/[epoch]` | 6.78 kB | 257 kB |
+| Static | `/feature-gates` | 3.35 kB | 924 kB |
 | Static | `/opengraph-image.png` | 0 B | 0 B |
-| Static | `/supply` | 6.52 kB | 925 kB |
+| Static | `/supply` | 6.48 kB | 925 kB |
 | Dynamic | `/tx/[signature]` | 37.5 kB | 1.39 MB |
-| Dynamic | `/tx/[signature]/inspect` | 410 B | 1.19 MB |
+| Dynamic | `/tx/[signature]/inspect` | 412 B | 1.19 MB |
 | Static | `/tx/inspector` | 411 B | 1.19 MB |
-| Static | `/verified-programs` | 6.21 kB | 165 kB |
+| Static | `/verified-programs` | 6.1 kB | 165 kB |

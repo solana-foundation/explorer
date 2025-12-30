@@ -23,14 +23,53 @@ export function getArrayLengthFromIdlType(type: IdlType): number | undefined {
     return undefined;
 }
 
+function isOptionalIdlType(type: IdlType): boolean {
+    if (typeof type !== 'object') return false;
+    return 'option' in type || 'coption' in type;
+}
+
 export function isRequiredArg(arg: ArgField): boolean {
-    return !/^(option|coption)\(/.test(arg.type);
+    // Check rawType first if available (more reliable)
+    if (arg.rawType !== undefined) {
+        return !isOptionalIdlType(arg.rawType);
+    }
+    // Fallback to regex on type string (lowercased for case-insensitivity)
+    // eslint-disable-next-line no-restricted-syntax -- use a fallback regexp to check if the field is require
+    return !/^(option|coption)\(/.test(arg.type.toLowerCase());
+}
+
+function hasArrayInIdlType(type: IdlType): boolean {
+    if (typeof type !== 'object') return false;
+    if ('array' in type) return true;
+    if ('option' in type) return hasArrayInIdlType(type.option);
+    if ('coption' in type) return hasArrayInIdlType(type.coption);
+    return false;
 }
 
 export function isArrayArg(arg: ArgField): boolean {
-    return /array\(/.test(arg.type);
+    // Check rawType first if available (more reliable)
+    if (arg.rawType !== undefined) {
+        return hasArrayInIdlType(arg.rawType);
+    }
+    // Fallback to regex on type string (lowercased for case-insensitivity)
+    // eslint-disable-next-line no-restricted-syntax -- use a fallback regexp to check if the field is require
+    return /array\(/.test(arg.type.toLowerCase());
+}
+
+function hasVecInIdlType(type: IdlType): boolean {
+    if (typeof type !== 'object') return false;
+    if ('vec' in type) return true;
+    if ('option' in type) return hasVecInIdlType(type.option);
+    if ('coption' in type) return hasVecInIdlType(type.coption);
+    return false;
 }
 
 export function isVectorArg(arg: ArgField): boolean {
-    return /vec\(/.test(arg.type);
+    // Check rawType first if available (more reliable)
+    if (arg.rawType !== undefined) {
+        return hasVecInIdlType(arg.rawType);
+    }
+    // Fallback to regex on type string (lowercased for case-insensitivity)
+    // eslint-disable-next-line no-restricted-syntax -- use a fallback regexp to check if the field is require
+    return /vec\(/.test(arg.type.toLowerCase());
 }
