@@ -1,4 +1,4 @@
-import type BN from 'bn.js';
+import type { BN } from 'bn.js';
 
 /**
  * Type alias for gradual migration from Buffer to Uint8Array.
@@ -8,16 +8,28 @@ import type BN from 'bn.js';
 export type ByteArray = Buffer | Uint8Array;
 
 /**
+ * Convert a character to its byte value (0-255).
+ * Used for decoding binary strings from atob().
+ */
+const toCharCode = (c: string): number => c.charCodeAt(0);
+
+/**
+ * Convert bytes to a binary string.
+ * Used for encoding to base64 via btoa().
+ */
+const fromCharCode = (bytes: Uint8Array): string => String.fromCharCode(...bytes);
+
+/**
  * Decode base64 string to Uint8Array
  * Replaces: Buffer.from(data, 'base64')
  */
 export function fromBase64(base64: string): Uint8Array {
-    const binaryString = atob(base64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+    // Use native Uint8Array.fromBase64 when available (Chrome 133+, Firefox 133+, Safari 18.2+)
+    if ('fromBase64' in Uint8Array) {
+        return (Uint8Array.fromBase64 as (s: string, _o?: Object) => Uint8Array)(base64);
     }
-    return bytes;
+    // Fallback to the baseline browser's api
+    return Uint8Array.from(atob(base64), toCharCode);
 }
 
 /**
@@ -25,11 +37,12 @@ export function fromBase64(base64: string): Uint8Array {
  * Replaces: buffer.toString('base64')
  */
 export function toBase64(bytes: Uint8Array): string {
-    let binaryString = '';
-    for (let i = 0; i < bytes.length; i++) {
-        binaryString += String.fromCharCode(bytes[i]);
+    // Use native Uint8Array.prototype.toBase64 when available (Chrome 133+, Firefox 133+, Safari 18.2+)
+    if ('toBase64' in Uint8Array.prototype) {
+        return (Uint8Array.prototype.toBase64 as () => string).call(bytes);
     }
-    return btoa(binaryString);
+    // Fallback to the baseline browser's api
+    return btoa(fromCharCode(bytes));
 }
 
 /**
