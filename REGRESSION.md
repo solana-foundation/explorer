@@ -198,8 +198,83 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 ---
 
+# Hex Encoding/Decoding Replacements
+
+## 14. NFToken Discriminator (Hex)
+
+**File:** `app/components/account/nftoken/nftoken.ts`
+
+**Change:** `Buffer.from(nftokenAccountDiscInHex, 'hex')` → `fromHex(nftokenAccountDiscInHex)`
+
+**Test:** NFToken collection fetching
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/NFTUkR4u7wKxy9QLaX2TGvd9oZSWoMo4jqSJqdMb7Nk?cluster=mainnet | https://explorer.solana.com/address/NFTUkR4u7wKxy9QLaX2TGvd9oZSWoMo4jqSJqdMb7Nk |
+
+---
+
+## 15. Anchor Self-CPI Tag (Hex)
+
+**File:** `app/utils/anchor.tsx`
+
+**Change:** `Buffer.from('1d9acb512ea545e4', 'hex').reverse()` → `fromHex('1d9acb512ea545e4').reverse()`
+
+**Test:** Transaction with Anchor self-CPI instructions
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
+
+---
+
+## 16. HexData Component
+
+**File:** `app/components/common/HexData.tsx`
+
+**Change:** `raw.toString('hex')` → `toHex(raw)` (also changed prop type from `Buffer` to `Uint8Array`)
+
+**Test:** Any page displaying hex data (e.g., raw instruction data)
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
+
+---
+
+## 17. PDA Seed Builder (Hex)
+
+**File:** `app/features/idl/interactive-idl/model/pda-generator/seed-builder.ts`
+
+**Change:** `buffer.toString('hex')` → `toHex(buffer)` (also changed types from `Buffer` to `Uint8Array`)
+
+**Test:** PDA generation in interactive IDL forms
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
+
+*Note: Use interactive IDL form to generate PDAs*
+
+---
+
+## 18. Verified Builds Hash (Hex)
+
+**File:** `app/utils/verified-builds.tsx`
+
+**Change:** `Buffer.from(sha256(c)).toString('hex')` → `toHex(sha256(dataToHash))`
+
+**Test:** Program verified build hash computation
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
+
+---
+
 ## Quick Test Checklist
 
+### Base64 Conversions
 - [ ] **IDL Download**: Go to Jupiter program, click Download IDL, verify JSON file is valid
 - [ ] **Security.txt**: Check program pages show security.txt info correctly
 - [ ] **Transaction Logs**: Open any transaction, verify logs display correctly
@@ -207,6 +282,12 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 - [ ] **Verified Builds**: Check verified build badge appears on supported programs
 - [ ] **NFToken Accounts**: If available, verify NFToken account parsing works
 - [ ] **Ed25519 Signatures**: Find Ed25519 transaction, verify signature display
+
+### Hex Conversions
+- [ ] **Hex Data Display**: In transaction inspector, verify hex data displays correctly
+- [ ] **PDA Generation**: Use interactive IDL form, verify PDA seeds show correct hex values
+- [ ] **Verified Build Hash**: Verify program hash matches expected value on verified programs
+- [ ] **Anchor Self-CPI**: Find transaction with Anchor self-CPI, verify detection works
 
 ---
 

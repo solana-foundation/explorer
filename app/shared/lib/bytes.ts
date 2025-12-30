@@ -46,30 +46,62 @@ export function toBase64(bytes: Uint8Array): string {
 }
 
 /**
+ * Fallback for fromHex when native API is not available.
+ */
+const fromHexFallback = (hex: string): Uint8Array => {
+    const bytes = new Uint8Array(hex.length / 2);
+    bytes.forEach((_, i) => {
+        bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+    });
+    return bytes;
+};
+
+/**
  * Decode hex string to Uint8Array
  * Replaces: Buffer.from(data, 'hex')
  * Handles optional '0x' prefix
+ *
+ * Note: Using manual conversion as native Uint8Array.fromHex() is not widely adopted yet.
+ * Native API available in Chrome 133+, Firefox 133+, Safari 18.2+
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/fromHex
  */
 export function fromHex(hex: string): Uint8Array {
     const cleanHex = hex.startsWith('0x') ? hex.slice(2) : hex;
     if (cleanHex.length === 0) {
         return new Uint8Array(0);
     }
-    const bytes = new Uint8Array(cleanHex.length / 2);
-    for (let i = 0; i < bytes.length; i++) {
-        bytes[i] = parseInt(cleanHex.substr(i * 2, 2), 16);
+    // Use native Uint8Array.fromHex when available (Chrome 133+, Firefox 133+, Safari 18.2+)
+    if ('fromHex' in Uint8Array) {
+        return (Uint8Array.fromHex as (s: string) => Uint8Array)(cleanHex);
     }
-    return bytes;
+    return fromHexFallback(cleanHex);
 }
+
+/**
+ * Fallback for toHex when native API is not available.
+ */
+const toHexFallback = (bytes: Uint8Array): string => {
+    let hex = '';
+    bytes.forEach(b => {
+        hex += b.toString(16).padStart(2, '0');
+    });
+    return hex;
+};
 
 /**
  * Encode Uint8Array to hex string
  * Replaces: buffer.toString('hex')
+ *
+ * Note: Using manual conversion as native Uint8Array.prototype.toHex() is not widely adopted yet.
+ * Native API available in Chrome 133+, Firefox 133+, Safari 18.2+
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/toHex
  */
 export function toHex(bytes: Uint8Array): string {
-    return Array.from(bytes)
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
+    // Use native Uint8Array.prototype.toHex when available (Chrome 133+, Firefox 133+, Safari 18.2+)
+    if ('toHex' in Uint8Array.prototype) {
+        return (Uint8Array.prototype.toHex as () => string).call(bytes);
+    }
+    return toHexFallback(bytes);
 }
 
 /**

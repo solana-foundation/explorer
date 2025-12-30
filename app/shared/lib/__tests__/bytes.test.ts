@@ -31,174 +31,300 @@ const base64TestCases: Record<string, number[]> = {
 const allByteValues = Array.from({ length: 256 }, (_, i) => i);
 const allByteValuesBase64 = btoa(String.fromCharCode(...new Uint8Array(allByteValues)));
 
+// Shared test data for hex encoding/decoding
+const hexTestCases: Record<string, number[]> = {
+    '1d9acb512ea545e4': [29, 154, 203, 81, 46, 165, 69, 228],
+    ff007f80: [255, 0, 127, 128],
+    deadbeef: [222, 173, 190, 239],
+    '': [],
+};
+
+// All 256 byte values as hex string
+const allByteValuesHex = Array.from({ length: 256 }, (_, i) => i.toString(16).padStart(2, '0')).join('');
+
 describe('bytes helpers', () => {
-    describe('fromBase64', () => {
-        it.each(Object.entries(base64TestCases))('should decode "%s"', (base64, expected) => {
-            const result = fromBase64(base64);
-            expect(Array.from(result)).toEqual(expected);
-        });
-
-        it('should match Buffer.from behavior', () => {
-            for (const [base64, expected] of Object.entries(base64TestCases)) {
+    describe('Base64', () => {
+        describe('fromBase64', () => {
+            it.each(Object.entries(base64TestCases))('should decode "%s"', (base64, expected) => {
                 const result = fromBase64(base64);
-                const bufferResult = Buffer.from(base64, 'base64');
                 expect(Array.from(result)).toEqual(expected);
-                expect(Array.from(result)).toEqual(Array.from(bufferResult));
-            }
-        });
-
-        describe('fallback using atob', () => {
-            // @ts-expect-error Intentionally accessing non-standard property for testing
-            const originalFromBase64 = Uint8Array['fromBase64'];
-
-            beforeEach(() => {
-                // @ts-expect-error Intentionally deleting to force fallback path
-                delete Uint8Array['fromBase64'];
             });
 
-            afterEach(() => {
-                if (originalFromBase64) {
-                    // @ts-expect-error Intentionally restoring non-standard property
-                    Uint8Array['fromBase64'] = originalFromBase64;
-                }
-            });
-
-            it.each(Object.entries(base64TestCases))('should decode "%s" using atob', (base64, expected) => {
-                const result = fromBase64(base64);
-                const bufferResult = Buffer.from(base64, 'base64');
-                expect(Array.from(result)).toEqual(expected);
-                expect(Array.from(result)).toEqual(Array.from(bufferResult));
-            });
-
-            it('should handle binary data with all byte values', () => {
-                const decoded = fromBase64(allByteValuesBase64);
-                expect(Array.from(decoded)).toEqual(allByteValues);
-            });
-        });
-
-        describe('native Uint8Array.fromBase64', () => {
-            const hasNative = 'fromBase64' in Uint8Array;
-
-            it.runIf(hasNative).each(Object.entries(base64TestCases))(
-                'should decode "%s" using native',
-                (base64, expected) => {
+            it('should match Buffer.from behavior', () => {
+                for (const [base64, expected] of Object.entries(base64TestCases)) {
                     const result = fromBase64(base64);
                     const bufferResult = Buffer.from(base64, 'base64');
                     expect(Array.from(result)).toEqual(expected);
                     expect(Array.from(result)).toEqual(Array.from(bufferResult));
                 }
-            );
+            });
 
-            it.runIf(hasNative)('should handle binary data with all byte values', () => {
-                const decoded = fromBase64(allByteValuesBase64);
-                expect(Array.from(decoded)).toEqual(allByteValues);
+            describe('fallback using atob', () => {
+                // @ts-expect-error Intentionally accessing non-standard property for testing
+                const originalFromBase64 = Uint8Array['fromBase64'];
+
+                beforeEach(() => {
+                    // @ts-expect-error Intentionally deleting to force fallback path
+                    delete Uint8Array['fromBase64'];
+                });
+
+                afterEach(() => {
+                    if (originalFromBase64) {
+                        // @ts-expect-error Intentionally restoring non-standard property
+                        Uint8Array['fromBase64'] = originalFromBase64;
+                    }
+                });
+
+                it.each(Object.entries(base64TestCases))('should decode "%s" using atob', (base64, expected) => {
+                    const result = fromBase64(base64);
+                    const bufferResult = Buffer.from(base64, 'base64');
+                    expect(Array.from(result)).toEqual(expected);
+                    expect(Array.from(result)).toEqual(Array.from(bufferResult));
+                });
+
+                it('should handle binary data with all byte values', () => {
+                    const decoded = fromBase64(allByteValuesBase64);
+                    expect(Array.from(decoded)).toEqual(allByteValues);
+                });
+            });
+
+            describe('native Uint8Array.fromBase64', () => {
+                const hasNative = 'fromBase64' in Uint8Array;
+
+                it.runIf(hasNative).each(Object.entries(base64TestCases))(
+                    'should decode "%s" using native',
+                    (base64, expected) => {
+                        const result = fromBase64(base64);
+                        const bufferResult = Buffer.from(base64, 'base64');
+                        expect(Array.from(result)).toEqual(expected);
+                        expect(Array.from(result)).toEqual(Array.from(bufferResult));
+                    }
+                );
+
+                it.runIf(hasNative)('should handle binary data with all byte values', () => {
+                    const decoded = fromBase64(allByteValuesBase64);
+                    expect(Array.from(decoded)).toEqual(allByteValues);
+                });
             });
         });
-    });
 
-    describe('toBase64', () => {
-        it.each(Object.entries(base64TestCases))('should encode to "%s"', (expected, input) => {
-            const result = toBase64(new Uint8Array(input));
-            expect(result).toBe(expected);
-        });
-
-        it('should match Buffer.toString behavior', () => {
-            for (const [expected, input] of Object.entries(base64TestCases)) {
+        describe('toBase64', () => {
+            it.each(Object.entries(base64TestCases))('should encode to "%s"', (expected, input) => {
                 const result = toBase64(new Uint8Array(input));
-                const bufferResult = Buffer.from(input).toString('base64');
                 expect(result).toBe(expected);
-                expect(result).toBe(bufferResult);
-            }
-        });
-
-        it('should handle binary data with all byte values', () => {
-            const input = new Uint8Array(allByteValues);
-            const base64 = toBase64(input);
-            expect(base64).toBe(allByteValuesBase64);
-        });
-
-        describe('fallback using btoa', () => {
-            // @ts-expect-error Intentionally accessing non-standard property for testing
-            const originalToBase64 = Uint8Array.prototype['toBase64'];
-
-            beforeEach(() => {
-                // @ts-expect-error Intentionally deleting to force fallback path
-                delete Uint8Array.prototype['toBase64'];
             });
 
-            afterEach(() => {
-                if (originalToBase64) {
-                    // @ts-expect-error Intentionally restoring non-standard property
-                    Uint8Array.prototype['toBase64'] = originalToBase64;
-                }
-            });
-
-            it.each(Object.entries(base64TestCases))('should encode to "%s" using btoa', (expected, input) => {
-                const result = toBase64(new Uint8Array(input));
-                const bufferResult = Buffer.from(input).toString('base64');
-                expect(result).toBe(expected);
-                expect(result).toBe(bufferResult);
-            });
-
-            it('should handle binary data with all byte values', () => {
-                const input = new Uint8Array(allByteValues);
-                const base64 = toBase64(input);
-                const decoded = fromBase64(base64);
-                expect(Array.from(decoded)).toEqual(allByteValues);
-            });
-        });
-
-        describe('native Uint8Array.prototype.toBase64', () => {
-            const hasNative = 'toBase64' in Uint8Array.prototype;
-
-            it.runIf(hasNative).each(Object.entries(base64TestCases))(
-                'should encode to "%s" using native',
-                (expected, input) => {
+            it('should match Buffer.toString behavior', () => {
+                for (const [expected, input] of Object.entries(base64TestCases)) {
                     const result = toBase64(new Uint8Array(input));
                     const bufferResult = Buffer.from(input).toString('base64');
                     expect(result).toBe(expected);
                     expect(result).toBe(bufferResult);
                 }
-            );
+            });
 
-            it.runIf(hasNative)('should handle binary data with all byte values', () => {
+            it('should handle binary data with all byte values', () => {
                 const input = new Uint8Array(allByteValues);
                 const base64 = toBase64(input);
                 expect(base64).toBe(allByteValuesBase64);
             });
+
+            describe('fallback using btoa', () => {
+                // @ts-expect-error Intentionally accessing non-standard property for testing
+                const originalToBase64 = Uint8Array.prototype['toBase64'];
+
+                beforeEach(() => {
+                    // @ts-expect-error Intentionally deleting to force fallback path
+                    delete Uint8Array.prototype['toBase64'];
+                });
+
+                afterEach(() => {
+                    if (originalToBase64) {
+                        // @ts-expect-error Intentionally restoring non-standard property
+                        Uint8Array.prototype['toBase64'] = originalToBase64;
+                    }
+                });
+
+                it.each(Object.entries(base64TestCases))('should encode to "%s" using btoa', (expected, input) => {
+                    const result = toBase64(new Uint8Array(input));
+                    const bufferResult = Buffer.from(input).toString('base64');
+                    expect(result).toBe(expected);
+                    expect(result).toBe(bufferResult);
+                });
+
+                it('should handle binary data with all byte values', () => {
+                    const input = new Uint8Array(allByteValues);
+                    const base64 = toBase64(input);
+                    const decoded = fromBase64(base64);
+                    expect(Array.from(decoded)).toEqual(allByteValues);
+                });
+            });
+
+            describe('native Uint8Array.prototype.toBase64', () => {
+                const hasNative = 'toBase64' in Uint8Array.prototype;
+
+                it.runIf(hasNative).each(Object.entries(base64TestCases))(
+                    'should encode to "%s" using native',
+                    (expected, input) => {
+                        const result = toBase64(new Uint8Array(input));
+                        const bufferResult = Buffer.from(input).toString('base64');
+                        expect(result).toBe(expected);
+                        expect(result).toBe(bufferResult);
+                    }
+                );
+
+                it.runIf(hasNative)('should handle binary data with all byte values', () => {
+                    const input = new Uint8Array(allByteValues);
+                    const base64 = toBase64(input);
+                    expect(base64).toBe(allByteValuesBase64);
+                });
+            });
         });
     });
 
-    describe('Hex encoding/decoding', () => {
-        it('should decode hex to bytes', () => {
-            const result = fromHex('1d9acb512ea545e4');
-            expect(Array.from(result)).toEqual([29, 154, 203, 81, 46, 165, 69, 228]);
+    describe('Hex', () => {
+        describe('fromHex', () => {
+            it.each(Object.entries(hexTestCases))('should decode "%s"', (hex, expected) => {
+                const result = fromHex(hex);
+                expect(Array.from(result)).toEqual(expected);
+            });
+
+            it.each(Object.entries(hexTestCases))(
+                'should decode "0x%s" with prefix to same result',
+                (hex, expected) => {
+                    const withoutPrefix = fromHex(hex);
+                    const withPrefix = fromHex(`0x${hex}`);
+                    expect(Array.from(withoutPrefix)).toEqual(expected);
+                    expect(Array.from(withPrefix)).toEqual(expected);
+                    expect(Array.from(withPrefix)).toEqual(Array.from(withoutPrefix));
+                }
+            );
+
+            it('should match Buffer.from behavior', () => {
+                for (const [hex, expected] of Object.entries(hexTestCases)) {
+                    const result = fromHex(hex);
+                    const bufferResult = Buffer.from(hex, 'hex');
+                    expect(Array.from(result)).toEqual(expected);
+                    expect(Array.from(result)).toEqual(Array.from(bufferResult));
+                }
+            });
+
+            describe('fallback', () => {
+                // @ts-expect-error Intentionally accessing non-standard property for testing
+                const originalFromHex = Uint8Array['fromHex'];
+
+                beforeEach(() => {
+                    // @ts-expect-error Intentionally deleting to force fallback path
+                    delete Uint8Array['fromHex'];
+                });
+
+                afterEach(() => {
+                    if (originalFromHex) {
+                        // @ts-expect-error Intentionally restoring non-standard property
+                        Uint8Array['fromHex'] = originalFromHex;
+                    }
+                });
+
+                it.each(Object.entries(hexTestCases))('should decode "%s" using fallback', (hex, expected) => {
+                    const result = fromHex(hex);
+                    expect(Array.from(result)).toEqual(expected);
+                });
+
+                it('should handle binary data with all byte values', () => {
+                    const decoded = fromHex(allByteValuesHex);
+                    expect(Array.from(decoded)).toEqual(allByteValues);
+                });
+            });
+
+            describe('native Uint8Array.fromHex', () => {
+                const hasNative = 'fromHex' in Uint8Array;
+
+                it.runIf(hasNative).each(Object.entries(hexTestCases))(
+                    'should decode "%s" using native',
+                    (hex, expected) => {
+                        const result = fromHex(hex);
+                        expect(Array.from(result)).toEqual(expected);
+                    }
+                );
+
+                it.runIf(hasNative)('should handle binary data with all byte values', () => {
+                    const decoded = fromHex(allByteValuesHex);
+                    expect(Array.from(decoded)).toEqual(allByteValues);
+                });
+            });
         });
 
-        it('should encode bytes to hex', () => {
-            const input = new Uint8Array([255, 0, 127, 128]);
-            expect(toHex(input)).toBe('ff007f80');
-        });
+        describe('toHex', () => {
+            it.each(Object.entries(hexTestCases))('should encode to "%s"', (expected, input) => {
+                const result = toHex(new Uint8Array(input));
+                expect(result).toBe(expected);
+            });
 
-        it('should handle 0x prefix', () => {
-            const result = fromHex('0xff00');
-            expect(Array.from(result)).toEqual([255, 0]);
-        });
+            it('should match Buffer.toString behavior', () => {
+                for (const [expected, input] of Object.entries(hexTestCases)) {
+                    const result = toHex(new Uint8Array(input));
+                    const bufferResult = Buffer.from(input).toString('hex');
+                    expect(result).toBe(expected);
+                    expect(result).toBe(bufferResult);
+                }
+            });
 
-        it('should handle empty hex', () => {
-            expect(fromHex('').length).toBe(0);
-            expect(fromHex('0x').length).toBe(0);
-        });
+            it('should handle binary data with all byte values', () => {
+                const input = new Uint8Array(allByteValues);
+                const hex = toHex(input);
+                expect(hex).toBe(allByteValuesHex);
+            });
 
-        it('should match Buffer behavior for hex', () => {
-            const testHex = '1d9acb512ea545e4';
-            const bufferResult = Buffer.from(testHex, 'hex');
-            const helperResult = fromHex(testHex);
-            expect(Array.from(helperResult)).toEqual(Array.from(bufferResult));
+            describe('fallback', () => {
+                // @ts-expect-error Intentionally accessing non-standard property for testing
+                const originalToHex = Uint8Array.prototype['toHex'];
+
+                beforeEach(() => {
+                    // @ts-expect-error Intentionally deleting to force fallback path
+                    delete Uint8Array.prototype['toHex'];
+                });
+
+                afterEach(() => {
+                    if (originalToHex) {
+                        // @ts-expect-error Intentionally restoring non-standard property
+                        Uint8Array.prototype['toHex'] = originalToHex;
+                    }
+                });
+
+                it.each(Object.entries(hexTestCases))('should encode to "%s" using fallback', (expected, input) => {
+                    const result = toHex(new Uint8Array(input));
+                    expect(result).toBe(expected);
+                });
+
+                it('should handle binary data with all byte values', () => {
+                    const input = new Uint8Array(allByteValues);
+                    const hex = toHex(input);
+                    const decoded = fromHex(hex);
+                    expect(Array.from(decoded)).toEqual(allByteValues);
+                });
+            });
+
+            describe('native Uint8Array.prototype.toHex', () => {
+                const hasNative = 'toHex' in Uint8Array.prototype;
+
+                it.runIf(hasNative).each(Object.entries(hexTestCases))(
+                    'should encode to "%s" using native',
+                    (expected, input) => {
+                        const result = toHex(new Uint8Array(input));
+                        expect(result).toBe(expected);
+                    }
+                );
+
+                it.runIf(hasNative)('should handle binary data with all byte values', () => {
+                    const input = new Uint8Array(allByteValues);
+                    const hex = toHex(input);
+                    expect(hex).toBe(allByteValuesHex);
+                });
+            });
         });
     });
 
-    describe('UTF-8 encoding/decoding', () => {
+    describe('UTF-8', () => {
         it('should encode utf8 string', () => {
             const result = fromUtf8('Hello');
             expect(Array.from(result)).toEqual([72, 101, 108, 108, 111]);
