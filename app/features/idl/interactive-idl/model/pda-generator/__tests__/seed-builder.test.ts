@@ -1,38 +1,78 @@
+import { PublicKey } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { buildSeedsWithInfo } from '../seed-builder';
 import type { PdaInstruction, PdaSeed } from '../types';
 
-describe('seed-builder - Buffer operations', () => {
+// Common test fixtures
+const EMPTY_INSTRUCTION: PdaInstruction = { accounts: [], args: [], name: 'test' };
+const DEFAULT_PUBKEY = PublicKey.default.toBase58();
+
+// UTF-8 string to bytes mapping
+const UTF8_TEST_CASES: Record<string, number[]> = {
+    hello: [104, 101, 108, 108, 111],
+    test: [116, 101, 115, 116],
+};
+
+// Const seed test cases: { value (bytes), expectedHex }
+const CONST_SEED_TEST_CASES: Array<{ value: number[]; expectedHex: string }> = [
+    { expectedHex: '0xdeadbeef', value: [0xde, 0xad, 0xbe, 0xef] },
+    { expectedHex: '0x0102', value: [0x01, 0x02] },
+    { expectedHex: '0xff', value: [0xff] },
+];
+
+// Integer encoding test cases: { input, type, expectedBytes }
+const INTEGER_TEST_CASES: Array<{ expected: number[]; input: string; type: string }> = [
+    { expected: [42], input: '42', type: 'u8' },
+    { expected: [0xe8, 0x03], input: '1000', type: 'u16' },
+    { expected: [0, 0, 0, 1], input: '16777216', type: 'u32' },
+    { expected: [0, 1, 0, 0, 0, 0, 0, 0], input: '256', type: 'u64' },
+    { expected: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], input: '1', type: 'u128' },
+    { expected: [255, 255, 255, 255, 255, 255, 255, 255], input: '18446744073709551615', type: 'u64' },
+];
+
+// Signed integer test cases
+const SIGNED_INTEGER_TEST_CASES: Array<{ expectedLength: number; input: string; type: string }> = [
+    { expectedLength: 1, input: '127', type: 'i8' },
+    { expectedLength: 2, input: '256', type: 'i16' },
+    { expectedLength: 4, input: '256', type: 'i32' },
+    { expectedLength: 8, input: '256', type: 'i64' },
+    { expectedLength: 16, input: '256', type: 'i128' },
+];
+
+// String/bytes arg test cases
+const STRING_BYTES_TEST_CASES: Array<{ input: string; type: string }> = [
+    { input: 'hello', type: 'string' },
+    { input: 'test', type: 'bytes' },
+];
+
+// Invalid account test cases
+const INVALID_ACCOUNT_TEST_CASES: Array<{ description: string; value: string | undefined }> = [
+    { description: 'invalid PublicKey', value: 'invalid-pubkey' },
+    { description: 'empty string', value: '' },
+];
+
+describe('seed-builder', () => {
     describe('buildSeedsWithInfo', () => {
         describe('const seeds', () => {
-            it('should build const seed buffer from string value', () => {
-                const seeds: PdaSeed[] = [{ kind: 'const', value: [104, 101, 108, 108, 111] }]; // "hello" as bytes
-                const instruction: PdaInstruction = { accounts: [], args: [], name: 'test' };
+            it.each(CONST_SEED_TEST_CASES)(
+                'should build const seed and return hex info "$expectedHex"',
+                ({ value, expectedHex }) => {
+                    const seeds: PdaSeed[] = [{ kind: 'const', value }];
 
-                const result = buildSeedsWithInfo(seeds, {}, {}, instruction);
+                    const result = buildSeedsWithInfo(seeds, {}, {}, EMPTY_INSTRUCTION);
 
-                expect(result.buffers).not.toBeNull();
-                expect(result.buffers!.length).toBe(1);
-                // "hello" = [104, 101, 108, 108, 111]
-                expect(Array.from(result.buffers![0])).toEqual([104, 101, 108, 108, 111]);
-            });
-
-            it('should return hex value in info for const seed', () => {
-                const seeds: PdaSeed[] = [{ kind: 'const', value: [0xde, 0xad, 0xbe, 0xef] }];
-                const instruction: PdaInstruction = { accounts: [], args: [], name: 'test' };
-
-                const result = buildSeedsWithInfo(seeds, {}, {}, instruction);
-
-                expect(result.info[0].name).toBe('0xdeadbeef');
-                expect(result.info[0].value).toBe('0xdeadbeef');
-            });
+                    expect(result.buffers).not.toBeNull();
+                    expect(Array.from(result.buffers![0])).toEqual(value);
+                    expect(result.info[0].name).toBe(expectedHex);
+                    expect(result.info[0].value).toBe(expectedHex);
+                }
+            );
 
             it('should return null buffer when const seed has no value', () => {
                 const seeds: PdaSeed[] = [{ kind: 'const' }];
-                const instruction: PdaInstruction = { accounts: [], args: [], name: 'test' };
 
-                const result = buildSeedsWithInfo(seeds, {}, {}, instruction);
+                const result = buildSeedsWithInfo(seeds, {}, {}, EMPTY_INSTRUCTION);
 
                 expect(result.buffers).toBeNull();
                 expect(result.info[0].name).toBe('const');
@@ -41,166 +81,86 @@ describe('seed-builder - Buffer operations', () => {
         });
 
         describe('arg seeds with integer types', () => {
-            it('should build u64 arg seed with little-endian encoding', () => {
-                const seeds: PdaSeed[] = [{ kind: 'arg', path: 'amount' }];
-                const instruction: PdaInstruction = {
-                    accounts: [],
-                    args: [{ name: 'amount', type: 'u64' }],
-                    name: 'test',
-                };
-                const args = { amount: '256' };
+            it.each(INTEGER_TEST_CASES)(
+                'should encode $type "$input" as little-endian bytes',
+                ({ input, type, expected }) => {
+                    const seeds: PdaSeed[] = [{ kind: 'arg', path: 'value' }];
+                    const instruction: PdaInstruction = {
+                        accounts: [],
+                        args: [{ name: 'value', type }],
+                        name: 'test',
+                    };
 
-                const result = buildSeedsWithInfo(seeds, args, {}, instruction);
+                    const result = buildSeedsWithInfo(seeds, { value: input }, {}, instruction);
 
-                expect(result.buffers).not.toBeNull();
-                expect(result.buffers!.length).toBe(1);
-                // 256 as u64 LE = [0, 1, 0, 0, 0, 0, 0, 0]
-                expect(Array.from(result.buffers![0])).toEqual([0, 1, 0, 0, 0, 0, 0, 0]);
-            });
+                    expect(result.buffers).not.toBeNull();
+                    expect(Array.from(result.buffers![0])).toEqual(expected);
+                }
+            );
 
-            it('should build u8 arg seed', () => {
-                const seeds: PdaSeed[] = [{ kind: 'arg', path: 'index' }];
-                const instruction: PdaInstruction = {
-                    accounts: [],
-                    args: [{ name: 'index', type: 'u8' }],
-                    name: 'test',
-                };
-                const args = { index: '42' };
+            it.each(SIGNED_INTEGER_TEST_CASES)(
+                'should encode $type with correct byte length ($expectedLength)',
+                ({ input, type, expectedLength }) => {
+                    const seeds: PdaSeed[] = [{ kind: 'arg', path: 'value' }];
+                    const instruction: PdaInstruction = {
+                        accounts: [],
+                        args: [{ name: 'value', type }],
+                        name: 'test',
+                    };
 
-                const result = buildSeedsWithInfo(seeds, args, {}, instruction);
+                    const result = buildSeedsWithInfo(seeds, { value: input }, {}, instruction);
 
-                expect(result.buffers).not.toBeNull();
-                expect(Array.from(result.buffers![0])).toEqual([42]);
-            });
-
-            it('should build u16 arg seed with little-endian encoding', () => {
-                const seeds: PdaSeed[] = [{ kind: 'arg', path: 'value' }];
-                const instruction: PdaInstruction = {
-                    accounts: [],
-                    args: [{ name: 'value', type: 'u16' }],
-                    name: 'test',
-                };
-                const args = { value: '1000' };
-
-                const result = buildSeedsWithInfo(seeds, args, {}, instruction);
-
-                expect(result.buffers).not.toBeNull();
-                // 1000 = 0x03E8, LE = [0xE8, 0x03]
-                expect(Array.from(result.buffers![0])).toEqual([0xe8, 0x03]);
-            });
-
-            it('should build u32 arg seed with little-endian encoding', () => {
-                const seeds: PdaSeed[] = [{ kind: 'arg', path: 'id' }];
-                const instruction: PdaInstruction = {
-                    accounts: [],
-                    args: [{ name: 'id', type: 'u32' }],
-                    name: 'test',
-                };
-                const args = { id: '16777216' }; // 0x01000000
-
-                const result = buildSeedsWithInfo(seeds, args, {}, instruction);
-
-                expect(result.buffers).not.toBeNull();
-                // 16777216 = 0x01000000, LE = [0, 0, 0, 1]
-                expect(Array.from(result.buffers![0])).toEqual([0, 0, 0, 1]);
-            });
-
-            it('should build u128 arg seed with little-endian encoding', () => {
-                const seeds: PdaSeed[] = [{ kind: 'arg', path: 'bigValue' }];
-                const instruction: PdaInstruction = {
-                    accounts: [],
-                    args: [{ name: 'bigValue', type: 'u128' }],
-                    name: 'test',
-                };
-                const args = { bigValue: '1' };
-
-                const result = buildSeedsWithInfo(seeds, args, {}, instruction);
-
-                expect(result.buffers).not.toBeNull();
-                expect(result.buffers![0].length).toBe(16);
-                // 1 as u128 LE = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-                expect(Array.from(result.buffers![0])).toEqual([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-            });
-
-            it('should handle signed integer types (i64)', () => {
-                const seeds: PdaSeed[] = [{ kind: 'arg', path: 'offset' }];
-                const instruction: PdaInstruction = {
-                    accounts: [],
-                    args: [{ name: 'offset', type: 'i64' }],
-                    name: 'test',
-                };
-                const args = { offset: '256' };
-
-                const result = buildSeedsWithInfo(seeds, args, {}, instruction);
-
-                expect(result.buffers).not.toBeNull();
-                expect(result.buffers![0].length).toBe(8);
-            });
+                    expect(result.buffers).not.toBeNull();
+                    expect(result.buffers![0].length).toBe(expectedLength);
+                }
+            );
         });
 
         describe('arg seeds with string/bytes types', () => {
-            it('should build string arg seed as UTF-8 buffer', () => {
-                const seeds: PdaSeed[] = [{ kind: 'arg', path: 'name' }];
-                const instruction: PdaInstruction = {
-                    accounts: [],
-                    args: [{ name: 'name', type: 'string' }],
-                    name: 'test',
-                };
-                const args = { name: 'hello' };
-
-                const result = buildSeedsWithInfo(seeds, args, {}, instruction);
-
-                expect(result.buffers).not.toBeNull();
-                // "hello" = [104, 101, 108, 108, 111]
-                expect(Array.from(result.buffers![0])).toEqual([104, 101, 108, 108, 111]);
-            });
-
-            it('should build bytes arg seed', () => {
+            it.each(STRING_BYTES_TEST_CASES)('should build $type arg seed as UTF-8 bytes', ({ input, type }) => {
                 const seeds: PdaSeed[] = [{ kind: 'arg', path: 'data' }];
                 const instruction: PdaInstruction = {
                     accounts: [],
-                    args: [{ name: 'data', type: 'bytes' }],
+                    args: [{ name: 'data', type }],
                     name: 'test',
                 };
-                const args = { data: 'test' };
 
-                const result = buildSeedsWithInfo(seeds, args, {}, instruction);
+                const result = buildSeedsWithInfo(seeds, { data: input }, {}, instruction);
 
                 expect(result.buffers).not.toBeNull();
-                expect(Array.from(result.buffers![0])).toEqual([116, 101, 115, 116]); // "test"
+                expect(Array.from(result.buffers![0])).toEqual(UTF8_TEST_CASES[input]);
             });
         });
 
         describe('account seeds', () => {
             it('should build account seed from PublicKey', () => {
                 const seeds: PdaSeed[] = [{ kind: 'account', path: 'owner' }];
-                const instruction: PdaInstruction = { accounts: [], args: [], name: 'test' };
-                const pubkey = '11111111111111111111111111111111'; // System program
 
-                const result = buildSeedsWithInfo(seeds, {}, { owner: pubkey }, instruction);
+                const result = buildSeedsWithInfo(seeds, {}, { owner: DEFAULT_PUBKEY }, EMPTY_INSTRUCTION);
 
                 expect(result.buffers).not.toBeNull();
                 expect(result.buffers![0].length).toBe(32);
                 expect(result.info[0].name).toBe('owner');
-                expect(result.info[0].value).toBe(pubkey);
+                expect(result.info[0].value).toBe(DEFAULT_PUBKEY);
             });
 
-            it('should return null buffer for invalid PublicKey', () => {
-                const seeds: PdaSeed[] = [{ kind: 'account', path: 'owner' }];
-                const instruction: PdaInstruction = { accounts: [], args: [], name: 'test' };
+            it.each(INVALID_ACCOUNT_TEST_CASES)(
+                'should return null buffer for $description',
+                ({ value, description }) => {
+                    const seeds: PdaSeed[] = [{ kind: 'account', path: 'owner' }];
+                    const accounts = value !== undefined ? { owner: value } : {};
 
-                const result = buildSeedsWithInfo(seeds, {}, { owner: 'invalid-pubkey' }, instruction);
+                    const result = buildSeedsWithInfo(seeds, {}, accounts, EMPTY_INSTRUCTION);
 
-                expect(result.buffers).toBeNull();
-                expect(result.info[0].name).toBe('owner');
-                expect(result.info[0].value).toBe('invalid-pubkey');
-            });
+                    expect(result.buffers).toBeNull();
+                    expect(result.info[0].name).toBe('owner');
+                }
+            );
 
             it('should return null buffer for missing account', () => {
                 const seeds: PdaSeed[] = [{ kind: 'account', path: 'owner' }];
-                const instruction: PdaInstruction = { accounts: [], args: [], name: 'test' };
 
-                const result = buildSeedsWithInfo(seeds, {}, {}, instruction);
+                const result = buildSeedsWithInfo(seeds, {}, {}, EMPTY_INSTRUCTION);
 
                 expect(result.buffers).toBeNull();
                 expect(result.info[0].name).toBe('owner');
@@ -220,10 +180,8 @@ describe('seed-builder - Buffer operations', () => {
                     args: [{ name: 'index', type: 'u8' }],
                     name: 'test',
                 };
-                const args = { index: '5' };
-                const accounts = { user: '11111111111111111111111111111111' };
 
-                const result = buildSeedsWithInfo(seeds, args, accounts, instruction);
+                const result = buildSeedsWithInfo(seeds, { index: '5' }, { user: DEFAULT_PUBKEY }, instruction);
 
                 expect(result.buffers).not.toBeNull();
                 expect(result.buffers!.length).toBe(3);
@@ -235,7 +193,7 @@ describe('seed-builder - Buffer operations', () => {
             it('should return null buffers if any seed fails', () => {
                 const seeds: PdaSeed[] = [
                     { kind: 'const', value: [0x01] },
-                    { kind: 'arg', path: 'missing' }, // This will fail - no value provided
+                    { kind: 'arg', path: 'missing' },
                 ];
                 const instruction: PdaInstruction = {
                     accounts: [],
@@ -246,7 +204,6 @@ describe('seed-builder - Buffer operations', () => {
                 const result = buildSeedsWithInfo(seeds, {}, {}, instruction);
 
                 expect(result.buffers).toBeNull();
-                // Info should still contain all seeds
                 expect(result.info.length).toBe(2);
             });
         });
@@ -259,9 +216,8 @@ describe('seed-builder - Buffer operations', () => {
                     args: [{ name: 'poll_id', type: 'u64' }],
                     name: 'test',
                 };
-                const args = { pollId: '100' }; // camelCase in args
 
-                const result = buildSeedsWithInfo(seeds, args, {}, instruction);
+                const result = buildSeedsWithInfo(seeds, { pollId: '100' }, {}, instruction);
 
                 expect(result.buffers).not.toBeNull();
                 expect(result.info[0].name).toBe('pollId');
@@ -269,10 +225,8 @@ describe('seed-builder - Buffer operations', () => {
 
             it('should handle snake_case account paths', () => {
                 const seeds: PdaSeed[] = [{ kind: 'account', path: 'token_owner' }];
-                const instruction: PdaInstruction = { accounts: [], args: [], name: 'test' };
-                const accounts = { tokenOwner: '11111111111111111111111111111111' }; // camelCase
 
-                const result = buildSeedsWithInfo(seeds, {}, accounts, instruction);
+                const result = buildSeedsWithInfo(seeds, {}, { tokenOwner: DEFAULT_PUBKEY }, EMPTY_INSTRUCTION);
 
                 expect(result.buffers).not.toBeNull();
                 expect(result.info[0].name).toBe('tokenOwner');
@@ -281,9 +235,7 @@ describe('seed-builder - Buffer operations', () => {
 
         describe('edge cases', () => {
             it('should handle empty seeds array', () => {
-                const instruction: PdaInstruction = { accounts: [], args: [], name: 'test' };
-
-                const result = buildSeedsWithInfo([], {}, {}, instruction);
+                const result = buildSeedsWithInfo([], {}, {}, EMPTY_INSTRUCTION);
 
                 expect(result.buffers).not.toBeNull();
                 expect(result.buffers!.length).toBe(0);
@@ -292,9 +244,8 @@ describe('seed-builder - Buffer operations', () => {
 
             it('should handle unknown seed kind', () => {
                 const seeds: PdaSeed[] = [{ kind: 'unknown' as any }];
-                const instruction: PdaInstruction = { accounts: [], args: [], name: 'test' };
 
-                const result = buildSeedsWithInfo(seeds, {}, {}, instruction);
+                const result = buildSeedsWithInfo(seeds, {}, {}, EMPTY_INSTRUCTION);
 
                 expect(result.buffers).toBeNull();
                 expect(result.info[0].name).toBe('unknown');
@@ -307,29 +258,10 @@ describe('seed-builder - Buffer operations', () => {
                     args: [{ name: 'value', type: 'u64' }],
                     name: 'test',
                 };
-                const args = { value: 'not-a-number' };
 
-                const result = buildSeedsWithInfo(seeds, args, {}, instruction);
+                const result = buildSeedsWithInfo(seeds, { value: 'not-a-number' }, {}, instruction);
 
                 expect(result.buffers).toBeNull();
-            });
-
-            it('should handle large u64 values correctly', () => {
-                const seeds: PdaSeed[] = [{ kind: 'arg', path: 'amount' }];
-                const instruction: PdaInstruction = {
-                    accounts: [],
-                    args: [{ name: 'amount', type: 'u64' }],
-                    name: 'test',
-                };
-                // Max u64 value
-                const args = { amount: '18446744073709551615' };
-
-                const result = buildSeedsWithInfo(seeds, args, {}, instruction);
-
-                expect(result.buffers).not.toBeNull();
-                expect(result.buffers![0].length).toBe(8);
-                // Max u64 LE bytes
-                expect(Array.from(result.buffers![0])).toEqual([255, 255, 255, 255, 255, 255, 255, 255]);
             });
         });
     });
