@@ -8,7 +8,7 @@
 | Dynamic | `/address/[address]/attestation` | 5.78 kB | 968 kB |
 | Dynamic | `/address/[address]/attributes` | 2.49 kB | 927 kB |
 | Dynamic | `/address/[address]/blockhashes` | 1.88 kB | 921 kB |
-| Dynamic | `/address/[address]/compression` | 4.75 kB | 954 kB |
+| Dynamic | `/address/[address]/compression` | 4.74 kB | 953 kB |
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 3.63 kB | 948 kB |
 | Dynamic | `/address/[address]/domains` | 13.7 kB | 928 kB |
 | Dynamic | `/address/[address]/entries` | 2.98 kB | 934 kB |
@@ -18,7 +18,7 @@
 | Dynamic | `/address/[address]/metadata` | 3.89 kB | 941 kB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 5.84 kB | 967 kB |
 | Dynamic | `/address/[address]/program-multisig` | 3.4 kB | 990 kB |
-| Dynamic | `/address/[address]/rewards` | 3.47 kB | 925 kB |
+| Dynamic | `/address/[address]/rewards` | 3.46 kB | 925 kB |
 | Dynamic | `/address/[address]/security` | 8.13 kB | 1.01 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 3.38 kB | 925 kB |
 | Dynamic | `/address/[address]/stake-history` | 3.52 kB | 925 kB |
@@ -39,10 +39,10 @@
 | Dynamic | `/block/[slot]/programs` | 5.04 kB | 919 kB |
 | Dynamic | `/block/[slot]/rewards` | 4.98 kB | 924 kB |
 | Dynamic | `/epoch/[epoch]` | 6.78 kB | 257 kB |
-| Static | `/feature-gates` | 3.35 kB | 924 kB |
+| Static | `/feature-gates` | 3.35 kB | 923 kB |
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 6.48 kB | 925 kB |
 | Dynamic | `/tx/[signature]` | 37.5 kB | 1.39 MB |
-| Dynamic | `/tx/[signature]/inspect` | 412 B | 1.19 MB |
-| Static | `/tx/inspector` | 411 B | 1.19 MB |
+| Dynamic | `/tx/[signature]/inspect` | 610 B | 1.19 MB |
+| Static | `/tx/inspector` | 623 B | 1.19 MB |
 | Static | `/verified-programs` | 6.1 kB | 165 kB |
