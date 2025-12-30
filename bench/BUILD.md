@@ -2,10 +2,10 @@
 |------|-------|------|---------------|
 | Static | `/` | 17.8 kB | 1.03 MB |
 | Static | `/_not-found` | 326 B | 164 kB |
-| Dynamic | `/address/[address]` | 13.4 kB | 975 kB |
-| Dynamic | `/address/[address]/anchor-account` | 7.47 kB | 1.01 MB |
+| Dynamic | `/address/[address]` | 13.7 kB | 975 kB |
+| Dynamic | `/address/[address]/anchor-account` | 8 kB | 1.01 MB |
 | Dynamic | `/address/[address]/anchor-program` | 335 B | 892 kB |
-| Dynamic | `/address/[address]/attestation` | 6.28 kB | 982 kB |
+| Dynamic | `/address/[address]/attestation` | 6.81 kB | 983 kB |
 | Dynamic | `/address/[address]/attributes` | 2.96 kB | 936 kB |
 | Dynamic | `/address/[address]/blockhashes` | 2.35 kB | 936 kB |
 | Dynamic | `/address/[address]/compression` | 5.6 kB | 972 kB |
@@ -16,16 +16,16 @@
 | Dynamic | `/address/[address]/idl` | 129 kB | 1.2 MB |
 | Dynamic | `/address/[address]/instructions` | 1.59 kB | 1.05 MB |
 | Dynamic | `/address/[address]/metadata` | 7.55 kB | 951 kB |
-| Dynamic | `/address/[address]/nftoken-collection-nfts` | 8.87 kB | 1.02 MB |
+| Dynamic | `/address/[address]/nftoken-collection-nfts` | 9.21 kB | 1.02 MB |
 | Dynamic | `/address/[address]/program-multisig` | 4.81 kB | 1.01 MB |
 | Dynamic | `/address/[address]/rewards` | 4.32 kB | 940 kB |
-| Dynamic | `/address/[address]/security` | 9.94 kB | 1.02 MB |
+| Dynamic | `/address/[address]/security` | 10.4 kB | 1.02 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 4.21 kB | 940 kB |
 | Dynamic | `/address/[address]/stake-history` | 4.33 kB | 940 kB |
-| Dynamic | `/address/[address]/token-extensions` | 12.5 kB | 1.02 MB |
+| Dynamic | `/address/[address]/token-extensions` | 12.9 kB | 1.02 MB |
 | Dynamic | `/address/[address]/tokens` | 27.5 kB | 1.13 MB |
 | Dynamic | `/address/[address]/transfers` | 3.58 kB | 1.07 MB |
-| Dynamic | `/address/[address]/verified-build` | 7.45 kB | 1.01 MB |
+| Dynamic | `/address/[address]/verified-build` | 8.01 kB | 1.01 MB |
 | Dynamic | `/address/[address]/vote-history` | 4.24 kB | 940 kB |
 | Dynamic | `/api/anchor` | 0 B | 0 B |
 | Dynamic | `/api/ans-domains/[address]` | 0 B | 0 B |
@@ -43,7 +43,7 @@
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | 0 B | 0 B |
 | Dynamic | `/api/verified-programs/list/[page]` | 0 B | 0 B |
 | Dynamic | `/api/verified-programs/metadata/[programId]` | 0 B | 0 B |
-| Dynamic | `/block/[slot]` | 9.61 kB | 960 kB |
+| Dynamic | `/block/[slot]` | 9.59 kB | 960 kB |
 | Dynamic | `/block/[slot]/accounts` | 3.71 kB | 940 kB |
 | Dynamic | `/block/[slot]/programs` | 4.14 kB | 940 kB |
 | Dynamic | `/block/[slot]/rewards` | 4.29 kB | 945 kB |
