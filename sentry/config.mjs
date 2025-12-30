@@ -9,7 +9,7 @@
  */
 export function createSentryConfig(_context) {
     return {
-        sampleRate: 0.1, // Track 10% of issues
+        sampleRate: 1,
 
         // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
         tracesSampler: (/** @type {import('@sentry/core').TracesSamplerSamplingContext} */ samplingContext) => {
