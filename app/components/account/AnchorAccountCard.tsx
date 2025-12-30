@@ -27,7 +27,7 @@ export function AnchorAccountCard({ account }: { account: Account }) {
             if (account) {
                 accountDef = anchorProgram.idl.types?.find((type: any) => type.name === account.name);
                 try {
-                    decodedAccountData = coder.decode(account.name, rawData);
+                    decodedAccountData = coder.decode(account.name, Buffer.from(rawData));
                 } catch (err) {
                     console.log(err);
                 }

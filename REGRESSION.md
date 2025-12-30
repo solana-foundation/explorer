@@ -74,7 +74,9 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **File:** `app/components/ProgramLogsCardBody.tsx`
 
-**Change:** `Buffer.from(instruction.data, 'base64')` → `Buffer.from(fromBase64(instruction.data))` ⚠️ (redundant wrapper)
+**Change:** `Buffer.from(instruction.data, 'base64')` → `Buffer.from(fromBase64(instruction.data))`
+
+**Note:** `Buffer.from()` wrapper is required because `TransactionInstruction` expects `Buffer` type (see #32)
 
 **Test:** Any transaction details page with program logs
 
@@ -415,6 +417,90 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 | http://localhost:3000/address/11111111111111111111111111111112?cluster=mainnet | https://explorer.solana.com/address/11111111111111111111111111111112 |
 
 *Test: Load any non-existent account address*
+
+---
+
+## 28. Pyth LPString Decoder (UTF-8)
+
+**File:** `app/components/instruction/pyth/program.ts`
+
+**Change:** `uint8ArrayToBuffer(b).slice(...).toString('utf-8')` → `toUtf8(b.slice(...))`
+
+**Test:** Transaction with Pyth oracle instructions
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH?cluster=mainnet | https://explorer.solana.com/address/FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH |
+
+*Note: Pyth program address for testing oracle-related transactions*
+
+---
+
+## 29. AccountData.raw Type Change
+
+**File:** `app/providers/accounts/index.tsx`
+
+**Change:** `raw?: Buffer` → `raw?: Uint8Array` in `AccountData` interface
+
+**Test:** All account pages that access raw data
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
+
+---
+
+# Buffer.from Compatibility Wrappers
+
+These locations retain `Buffer.from()` wrappers because external libraries require `Buffer` type.
+
+## 30. Anchor Account Decoding
+
+**File:** `app/components/account/AnchorAccountCard.tsx`
+
+**Kept:** `Buffer.from(rawData)` wrapper for `coder.decode()`
+
+**Reason:** `@coral-xyz/anchor` `BorshAccountsCoder.decode()` expects `Buffer` parameter
+
+**Test:** Anchor program account pages with decoded data
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
+
+---
+
+## 31. Compressed NFT Merkle Tree
+
+**File:** `app/components/account/CompressedNFTInfoCard.tsx`
+
+**Kept:** `Buffer.from(treeAccountInfo.data.data.raw)` wrapper for `ConcurrentMerkleTreeAccount.fromBuffer()`
+
+**Reason:** `@solana/spl-account-compression` `ConcurrentMerkleTreeAccount.fromBuffer()` signature requires `Buffer`
+
+**Test:** Compressed NFT account pages
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/SMBH3wF6baUj6JWtzYvqcKuj2XCKWDqQxzspY12xPND?cluster=mainnet | https://explorer.solana.com/address/SMBH3wF6baUj6JWtzYvqcKuj2XCKWDqQxzspY12xPND |
+
+*Note: Compressed NFT example address*
+
+---
+
+## 32. TransactionInstruction Data
+
+**File:** `app/components/ProgramLogsCardBody.tsx`
+
+**Kept:** `Buffer.from(fromBase64(instruction.data))` wrapper
+
+**Reason:** `@solana/web3.js` `TransactionInstruction` constructor expects `Buffer` for `data` field
+
+**Test:** Transaction pages with program logs
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
 
 ---
 
