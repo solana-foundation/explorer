@@ -15,11 +15,11 @@
             "error",
             {
                 "selector": "Literal[regex]",
-                "message": "RegExp are forbidden. If you sure we need regexp here - please use eslint-disable-next no-restricted-syntax -- %comment%  to explaint why "
+                "message": "RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why"
             },
             {
                 "selector": "RegExpLiteral",
-                "message": "RegExp are forbidden. If you sure we need regexp here - please use eslint-disable-next no-restricted-syntax -- %comment%  to explaint why "
+                "message": "RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why"
             }
         ],
         "@eslint-community/eslint-comments/no-unlimited-disable": "error"

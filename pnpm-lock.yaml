@@ -432,9 +432,6 @@ importers:
       jsdom:
         specifier: 26.0.0
         version: 26.0.0(bufferutil@4.0.7)(utf-8-validate@5.0.10)
-      no-unlimited-disable:
-        specifier: link:@eslint-community/eslint-comments/no-unlimited-disable
-        version: link:@eslint-community/eslint-comments/no-unlimited-disable
       playwright:
         specifier: 1.57.0
         version: 1.57.0
