@@ -22,7 +22,6 @@
                 "message": "RegExp are forbidden. If you sure we need regexp here - please use eslint-disable-next no-restricted-syntax -- %comment%  to explaint why "
             }
         ],
-        "@eslint-community/eslint-comments/require-description": "error",
         "@eslint-community/eslint-comments/no-unlimited-disable": "error"
     },
     "overrides": [
@@ -30,6 +29,13 @@
         {
             "files": ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
             "extends": ["plugin:testing-library/react"]
+        },
+        // Allow unlimited eslint-disable in mock data files
+        {
+            "files": ["**/mocks/**/*.[jt]s?(x)"],
+            "rules": {
+                "@eslint-community/eslint-comments/no-unlimited-disable": "off"
+            }
         }
     ]
 }

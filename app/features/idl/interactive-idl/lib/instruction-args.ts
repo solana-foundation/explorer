@@ -24,13 +24,16 @@ export function getArrayLengthFromIdlType(type: IdlType): number | undefined {
 }
 
 export function isRequiredArg(arg: ArgField): boolean {
+    // eslint-disable-next-line no-restricted-syntax -- check if arg type is optional
     return !/^(option|coption)\(/.test(arg.type);
 }
 
 export function isArrayArg(arg: ArgField): boolean {
+    // eslint-disable-next-line no-restricted-syntax -- check if arg type is array
     return /array\(/.test(arg.type);
 }
 
 export function isVectorArg(arg: ArgField): boolean {
+    // eslint-disable-next-line no-restricted-syntax -- check if arg type is vector
     return /vec\(/.test(arg.type);
 }

@@ -36,6 +36,7 @@ export const ScrollAnchorProvider =
                       return;
                   }
                   const targetsByFragment = registeredScrollTargets.current;
+                  // eslint-disable-next-line no-restricted-syntax -- strip leading hash from URL fragment
                   const fragment = window.location.hash.replace(/^#/, '');
                   const targets = targetsByFragment[fragment];
                   if (!targets) {

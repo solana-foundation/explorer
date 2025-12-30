@@ -351,6 +351,7 @@ function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint
         });
 
         // Parse as BigInt but not if it starts eg 0x or 0b
+        // eslint-disable-next-line no-restricted-syntax -- check for hex/binary prefix to avoid BigInt parsing error
         if (currentEpoch !== undefined && !/^0\w/.test(search) && BigInt(search) <= currentEpoch + 1n) {
             options.push({
                 label: 'Epoch',
