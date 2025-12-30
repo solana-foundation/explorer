@@ -26,7 +26,7 @@ const fromCharCode = (bytes: Uint8Array): string => String.fromCharCode(...bytes
 export function fromBase64(base64: string): Uint8Array {
     // Use native Uint8Array.fromBase64 when available
     if ('fromBase64' in Uint8Array) {
-        return (Uint8Array.fromBase64 as (s: string, _o?: Object) => Uint8Array)(base64);
+        return (Uint8Array.fromBase64 as (s: string, _o?: object) => Uint8Array)(base64);
     }
     // Fallback to the baseline browser's api
     return Uint8Array.from(atob(base64), toCharCode);
@@ -126,6 +126,16 @@ export function toUtf8(bytes: Uint8Array): string {
  */
 export function alloc(size: number): Uint8Array {
     return new Uint8Array(size);
+}
+
+/**
+ * Write a 32-bit unsigned integer in little-endian format
+ * Replaces: buffer.writeUInt32LE(value, offset)
+ */
+export function writeUint32LE(bytes: Uint8Array, value: number, offset: number): void {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    // true = little-endian byte order
+    view.setUint32(offset, value, true);
 }
 
 /**
