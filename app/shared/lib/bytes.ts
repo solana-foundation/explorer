@@ -7,10 +7,6 @@ import type BN from 'bn.js';
  */
 export type ByteArray = Buffer | Uint8Array;
 
-// ============================================
-// BASE64 ENCODING/DECODING
-// ============================================
-
 /**
  * Decode base64 string to Uint8Array
  * Replaces: Buffer.from(data, 'base64')
@@ -35,10 +31,6 @@ export function toBase64(bytes: Uint8Array): string {
     }
     return btoa(binaryString);
 }
-
-// ============================================
-// HEX ENCODING/DECODING
-// ============================================
 
 /**
  * Decode hex string to Uint8Array
@@ -85,10 +77,6 @@ export function toHex(bytes: ByteArray): string {
     return toHexFallback(bytes);
 }
 
-// ============================================
-// UTF-8 ENCODING/DECODING
-// ============================================
-
 /**
  * Encode string to Uint8Array (UTF-8)
  * Replaces: Buffer.from(str, 'utf-8') or Buffer.from(str)
@@ -104,10 +92,6 @@ export function fromUtf8(str: string): Uint8Array {
 export function toUtf8(bytes: Uint8Array): string {
     return new TextDecoder().decode(bytes);
 }
-
-// ============================================
-// ALLOCATION HELPERS
-// ============================================
 
 /**
  * Create a zero-filled Uint8Array
@@ -132,10 +116,6 @@ export function concat(arrays: Uint8Array[]): Uint8Array {
     return result;
 }
 
-// ============================================
-// COMPARISON HELPERS
-// ============================================
-
 /**
  * Compare two Uint8Arrays for equality
  * Replaces: buffer.equals(other)
@@ -158,10 +138,6 @@ export function equals(a: Uint8Array, b: Uint8Array): boolean {
 
     return true;
 }
-
-// ============================================
-// SEARCH HELPERS
-// ============================================
 
 /**
  * Find the index of a byte pattern (string or Uint8Array) in a Uint8Array
@@ -194,10 +170,6 @@ export function indexOf(haystack: Uint8Array, needle: string | Uint8Array): numb
     return -1;
 }
 
-// ============================================
-// BN.JS INTEROP HELPERS
-// ============================================
-
 /**
  * Convert BN to Uint8Array
  * Replaces: bn.toArrayLike(Buffer, 'le', size)
@@ -222,10 +194,6 @@ export function bytesToBn(BNConstructor: typeof BN, bytes: Uint8Array, endian: '
     return new BNConstructor(Array.from(bytes), undefined, endian);
 }
 
-// ============================================
-// VALIDATION HELPERS
-// ============================================
-
 /**
  * Check if a string is valid base64
  * Replaces: try { Buffer.from(str, 'base64'); return true; } catch { return false; }
@@ -247,10 +215,6 @@ export function isValidBase64(str: string): boolean {
     }
 }
 
-// ============================================
-// TYPE GUARDS AND CONVERTERS
-// ============================================
-
 /**
  * Check if value is a ByteArray (Buffer or Uint8Array)
  */
@@ -270,10 +234,6 @@ export function toUint8Array(data: ByteArray): Uint8Array {
     }
     return new Uint8Array(data);
 }
-
-// ============================================
-// UNIVERSAL BYTES CREATION
-// ============================================
 
 type BytesEncoding = 'utf8' | 'utf-8' | 'hex' | 'base64';
 
