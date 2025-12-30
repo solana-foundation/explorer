@@ -27,6 +27,9 @@ const base64TestCases: Record<string, number[]> = {
     '': [], // empty
 };
 
+// Invalid base64 strings for isValidBase64 tests
+const invalidBase64Strings = ['Hello World!', 'Invalid@#$', 'not-valid-base64!!!'];
+
 // All 256 byte values for binary data tests
 const allByteValues = Array.from({ length: 256 }, (_, i) => i);
 const allByteValuesBase64 = btoa(String.fromCharCode(...new Uint8Array(allByteValues)));
@@ -193,6 +196,26 @@ describe('bytes helpers', () => {
                     const base64 = toBase64(input);
                     expect(base64).toBe(allByteValuesBase64);
                 });
+            });
+        });
+
+        describe('isValidBase64', () => {
+            it.each(Object.keys(base64TestCases).filter(k => k !== ''))('should return true for "%s"', str => {
+                expect(isValidBase64(str)).toBe(true);
+            });
+
+            it('should return false for empty string', () => {
+                expect(isValidBase64('')).toBe(false);
+            });
+
+            it.each(invalidBase64Strings)('should return false for "%s"', str => {
+                expect(isValidBase64(str)).toBe(false);
+            });
+
+            it('should return false for non-strings', () => {
+                expect(isValidBase64(null as unknown as string)).toBe(false);
+                expect(isValidBase64(undefined as unknown as string)).toBe(false);
+                expect(isValidBase64(123 as unknown as string)).toBe(false);
             });
         });
     });
@@ -548,25 +571,6 @@ describe('bytes helpers', () => {
             const bytes = new Uint8Array([1, 0]); // 256 in BE
             const result = bytesToBn(BN, bytes, 'be');
             expect(result.toNumber()).toBe(256);
-        });
-    });
-
-    describe('isValidBase64', () => {
-        it('should return true for valid base64', () => {
-            expect(isValidBase64('SGVsbG8=')).toBe(true);
-            expect(isValidBase64('SGVsbG8gV29ybGQ=')).toBe(true);
-            expect(isValidBase64('')).toBe(false); // Empty is not valid
-        });
-
-        it('should return false for invalid base64', () => {
-            expect(isValidBase64('Hello World!')).toBe(false);
-            expect(isValidBase64('Invalid@#$')).toBe(false);
-        });
-
-        it('should return false for non-strings', () => {
-            expect(isValidBase64(null as any)).toBe(false);
-            expect(isValidBase64(undefined as any)).toBe(false);
-            expect(isValidBase64(123 as any)).toBe(false);
         });
     });
 
