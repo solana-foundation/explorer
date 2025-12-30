@@ -78,8 +78,6 @@ export const triggerDownload = async (data: string, filename: string, options?: 
     }
 };
 
-// isValidBase64 is now imported from ./bytes
-
 const formatBytes = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;

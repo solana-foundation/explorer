@@ -368,6 +368,22 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 ---
 
+## 25. SearchBar Base64 Validation
+
+**File:** `app/components/SearchBar.tsx` (uses `app/shared/lib/bytes.ts`)
+
+**Change:** Simplified `isValidBase64()` to use `fromBase64()` with try/catch instead of regex + atob
+
+**Test:** Search bar accepts valid base64-encoded data
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/ | https://explorer.solana.com/ |
+
+*Test: Enter a valid base64 string in search bar (e.g., transaction signature in base64)*
+
+---
+
 ## Quick Test Checklist
 
 ### Base64 Conversions

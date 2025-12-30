@@ -229,13 +229,8 @@ export function isValidBase64(str: string): boolean {
     if (!str || typeof str !== 'string') {
         return false;
     }
-    // Check for valid base64 characters
-    const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
-    if (!base64Regex.test(str)) {
-        return false;
-    }
     try {
-        atob(str);
+        fromBase64(str);
         return true;
     } catch {
         return false;
