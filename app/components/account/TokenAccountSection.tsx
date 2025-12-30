@@ -54,6 +54,7 @@ import { UnknownAccountCard } from './UnknownAccountCard';
 const getEthAddress = (link?: string) => {
     let address = '';
     if (link) {
+        // eslint-disable-next-line no-restricted-syntax -- extract Ethereum address from URL
         const extractEth = link.match(/0x[a-fA-F0-9]{40,64}/);
 
         if (extractEth) {

@@ -436,6 +436,7 @@ async function handleParsedAccountData(
     }
 }
 
+// eslint-disable-next-line no-restricted-syntax -- match image data URI mime types
 const IMAGE_MIME_TYPE_REGEX = /data:image\/(svg\+xml|png|jpeg|gif)/g;
 
 const getMetaDataJSON = async (

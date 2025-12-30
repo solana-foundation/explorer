@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
 import { ClusterProvider } from '@providers/cluster';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';

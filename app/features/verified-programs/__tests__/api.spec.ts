@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import Logger from '@/app/utils/logger';
