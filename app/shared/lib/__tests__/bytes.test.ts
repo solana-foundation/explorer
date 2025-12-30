@@ -27,6 +27,9 @@ const base64TestCases: Record<string, number[]> = {
     '': [], // empty
 };
 
+// Invalid base64 strings for isValidBase64 tests
+const invalidBase64Strings = ['Hello World!', 'Invalid@#$', 'not-valid-base64!!!'];
+
 // All 256 byte values for binary data tests
 const allByteValues = Array.from({ length: 256 }, (_, i) => i);
 const allByteValuesBase64 = btoa(String.fromCharCode(...new Uint8Array(allByteValues)));
@@ -144,6 +147,12 @@ describe('bytes helpers', () => {
                 expect(base64).toBe(allByteValuesBase64);
             });
 
+            it('should handle padding correctly', () => {
+                expect(toBase64(new Uint8Array([1]))).toBe('AQ==');
+                expect(toBase64(new Uint8Array([1, 2]))).toBe('AQI=');
+                expect(toBase64(new Uint8Array([1, 2, 3]))).toBe('AQID');
+            });
+
             describe('fallback using btoa', () => {
                 // @ts-expect-error Intentionally accessing non-standard property for testing
                 const originalToBase64 = Uint8Array.prototype['toBase64'];
@@ -196,24 +205,24 @@ describe('bytes helpers', () => {
             });
         });
 
-        it('should convert empty array', () => {
-            expect(toBase64(new Uint8Array([]))).toBe('');
-        });
+        describe('isValidBase64', () => {
+            it.each(Object.keys(base64TestCases).filter(k => k !== ''))('should return true for "%s"', str => {
+                expect(isValidBase64(str)).toBe(true);
+            });
 
-        it('should convert "Hello"', () => {
-            const data = new Uint8Array([72, 101, 108, 108, 111]);
-            expect(toBase64(data)).toBe('SGVsbG8=');
-        });
+            it('should return false for empty string', () => {
+                expect(isValidBase64('')).toBe(false);
+            });
 
-        it('should handle padding correctly', () => {
-            expect(toBase64(new Uint8Array([1]))).toBe('AQ==');
-            expect(toBase64(new Uint8Array([1, 2]))).toBe('AQI=');
-            expect(toBase64(new Uint8Array([1, 2, 3]))).toBe('AQID');
-        });
+            it.each(invalidBase64Strings)('should return false for "%s"', str => {
+                expect(isValidBase64(str)).toBe(false);
+            });
 
-        it('should handle binary data with high bytes', () => {
-            const data = new Uint8Array([128, 255, 0, 1]);
-            expect(toBase64(data)).toBe(Buffer.from(data).toString('base64'));
+            it('should return false for non-strings', () => {
+                expect(isValidBase64(null as unknown as string)).toBe(false);
+                expect(isValidBase64(undefined as unknown as string)).toBe(false);
+                expect(isValidBase64(123 as unknown as string)).toBe(false);
+            });
         });
     });
 
@@ -587,25 +596,6 @@ describe('bytes helpers', () => {
             const bytes = new Uint8Array([1, 0]); // 256 in BE
             const result = bytesToBn(BN, bytes, 'be');
             expect(result.toNumber()).toBe(256);
-        });
-    });
-
-    describe('isValidBase64', () => {
-        it('should return true for valid base64', () => {
-            expect(isValidBase64('SGVsbG8=')).toBe(true);
-            expect(isValidBase64('SGVsbG8gV29ybGQ=')).toBe(true);
-            expect(isValidBase64('')).toBe(false); // Empty is not valid
-        });
-
-        it('should return false for invalid base64', () => {
-            expect(isValidBase64('Hello World!')).toBe(false);
-            expect(isValidBase64('Invalid@#$')).toBe(false);
-        });
-
-        it('should return false for non-strings', () => {
-            expect(isValidBase64(null as any)).toBe(false);
-            expect(isValidBase64(undefined as any)).toBe(false);
-            expect(isValidBase64(123 as any)).toBe(false);
         });
     });
 
