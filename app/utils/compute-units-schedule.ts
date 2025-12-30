@@ -143,7 +143,7 @@ function extractComputeUnitsFromInstruction(instruction: { programId: PublicKey;
     try {
         const ix = {
             accounts: [],
-            data: Buffer.from(instruction.data),
+            data: instruction.data,
             programAddress: address(instruction.programId.toBase58()),
         };
 

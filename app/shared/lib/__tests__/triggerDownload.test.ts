@@ -92,14 +92,14 @@ describe('triggerDownload', () => {
 
             await triggerDownload(base64, 'file.txt', { type: mimeType });
 
-            expect(global.Blob).toHaveBeenCalledWith([expect.any(Buffer)], { type: mimeType });
+            expect(global.Blob).toHaveBeenCalledWith([expect.any(Uint8Array)], { type: mimeType });
         });
 
         it('should create blob without type when not provided', async () => {
             const base64 = toBase64('Hello');
             await triggerDownload(base64, 'file.txt');
 
-            expect(global.Blob).toHaveBeenCalledWith([expect.any(Buffer)], {});
+            expect(global.Blob).toHaveBeenCalledWith([expect.any(Uint8Array)], {});
         });
 
         it('should create object URL from blob', async () => {

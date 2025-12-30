@@ -4,6 +4,8 @@ import { formatSerdeIdl, getFormattedIdl } from '@entities/idl';
 import { type Connection, PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
 
+import { fromUtf8 } from '@/app/shared/lib/bytes';
+
 import type { IdlInterpreter } from '../idl-interpreter.d';
 import { AnchorUnifiedProgram } from './anchor-program';
 import { parseArrayInput } from './array-parser';
@@ -113,7 +115,7 @@ export class AnchorInterpreter implements IdlInterpreter<AnchorIdl, AnchorUnifie
                 case 'string':
                     return String(value);
                 case 'bytes':
-                    return Buffer.from(value);
+                    return fromUtf8(value);
                 case 'pubkey':
                 case 'publicKey':
                     return new PublicKey(value);
@@ -137,8 +139,8 @@ export class AnchorInterpreter implements IdlInterpreter<AnchorIdl, AnchorUnifie
                 return arr.map((item: any) => this.convertArgument(item, type.array[0]));
             }
             if ('defined' in type) {
-                // For defined types, use Buffer
-                return Buffer.from(value);
+                // For defined types, use Uint8Array
+                return fromUtf8(value);
             }
         }
 

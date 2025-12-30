@@ -1,6 +1,8 @@
 import { ComponentType, ReactNode } from 'react';
 import { Download, IconProps } from 'react-feather';
 
+import { fromBase64 } from '@/app/shared/lib/bytes';
+
 export function DownloadableIcon({
     data,
     filename,
@@ -11,7 +13,7 @@ export function DownloadableIcon({
     children: ReactNode;
 }) {
     const handleClick = async () => {
-        const blob = new Blob([Buffer.from(data, 'base64')]);
+        const blob = new Blob([fromBase64(data)]);
         const fileDownloadUrl = URL.createObjectURL(blob);
         const tempLink = document.createElement('a');
         tempLink.href = fileDownloadUrl;
@@ -41,7 +43,7 @@ export function DownloadableButton({
     icon?: ComponentType<IconProps>;
 }) {
     const handleDownload = async () => {
-        const blob = new Blob([Buffer.from(data, 'base64')], type ? { type } : {});
+        const blob = new Blob([fromBase64(data)], type ? { type } : {});
         const fileDownloadUrl = URL.createObjectURL(blob);
         const tempLink = document.createElement('a');
         tempLink.href = fileDownloadUrl;

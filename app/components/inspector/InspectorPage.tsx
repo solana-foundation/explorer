@@ -223,7 +223,7 @@ function SquadsProposalInspectorCard({ account, onClear }: { account: string; on
             })),
             compiledInstructions: message.instructions.map(instruction => ({
                 accountKeyIndexes: Array.from(instruction.accountIndexes),
-                data: Buffer.from(instruction.data),
+                data: Uint8Array.from(instruction.data),
                 programIdIndex: instruction.programIdIndex,
             })),
             header: {

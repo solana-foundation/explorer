@@ -1,6 +1,8 @@
 import * as BufferLayout from '@solana/buffer-layout';
-import { Layout, uint8ArrayToBuffer } from '@solana/buffer-layout';
+import { Layout } from '@solana/buffer-layout';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+
+import { toUtf8 } from '@/app/shared/lib/bytes';
 
 /**
  * An enumeration of valid PythInstructionTypes
@@ -52,9 +54,7 @@ class LPString extends Layout {
         if (offset === undefined) {
             offset = 0;
         }
-        return uint8ArrayToBuffer(b)
-            .slice(offset + 1, offset + b[offset] + 1)
-            .toString('utf-8');
+        return toUtf8(b.slice(offset + 1, offset + b[offset] + 1));
     }
 }
 

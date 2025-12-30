@@ -5,7 +5,7 @@ import { Address } from '../common/Address';
 import { Slot } from '../common/Slot';
 import { TableCardBody } from '../common/TableCardBody';
 
-export function ConcurrentMerkleTreeCard({ data }: { data: Buffer }) {
+export function ConcurrentMerkleTreeCard({ data }: { data: Uint8Array }) {
     const cmt = ConcurrentMerkleTreeAccount.fromBuffer(Buffer.from(data));
     const authority = cmt.getAuthority();
     const root = cmt.getCurrentRoot();

@@ -7,6 +7,8 @@ import { useCluster } from '@providers/cluster';
 import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
 import React, { useMemo } from 'react';
 
+import { equals } from '@/app/shared/lib/bytes';
+
 export function AnchorAccountCard({ account }: { account: Account }) {
     const { lamports } = account;
     const { url, cluster } = useCluster();
@@ -20,12 +22,12 @@ export function AnchorAccountCard({ account }: { account: Account }) {
         if (anchorProgram && rawData) {
             const coder = new BorshAccountsCoder(anchorProgram.idl);
             const account = anchorProgram.idl.accounts?.find((accountType: any) =>
-                (rawData as Buffer).slice(0, 8).equals(coder.accountDiscriminator(accountType.name))
+                equals(rawData.slice(0, 8), coder.accountDiscriminator(accountType.name))
             );
             if (account) {
                 accountDef = anchorProgram.idl.types?.find((type: any) => type.name === account.name);
                 try {
-                    decodedAccountData = coder.decode(account.name, rawData);
+                    decodedAccountData = coder.decode(account.name, Buffer.from(rawData));
                 } catch (err) {
                     console.log(err);
                 }

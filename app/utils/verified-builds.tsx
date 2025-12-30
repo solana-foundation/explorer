@@ -3,6 +3,8 @@ import { sha256 } from '@noble/hashes/sha256';
 import { Connection, PublicKey } from '@solana/web3.js';
 import useSWRImmutable from 'swr/immutable';
 
+import { fromBase64, fromUtf8, toHex } from '@/app/shared/lib/bytes';
+
 import { useCluster } from '../providers/cluster';
 import { ProgramDataAccountInfo } from '../validators/accounts/upgradeable-program';
 import { Cluster } from './cluster';
@@ -195,7 +197,7 @@ function useEnrichedOsecInfo({
 
             try {
                 const [pda] = PublicKey.findProgramAddressSync(
-                    [Buffer.from('otter_verify'), new PublicKey(osecInfo.signer).toBuffer(), programId.toBuffer()],
+                    [fromUtf8('otter_verify'), new PublicKey(osecInfo.signer).toBuffer(), programId.toBuffer()],
                     new PublicKey(VERIFY_PROGRAM_ID)
                 );
 
@@ -270,13 +272,13 @@ function isMainnet(currentCluster: Cluster): boolean {
 
 // Helper function to hash program data
 export function hashProgramData(programData: ProgramDataAccountInfo): string {
-    const buffer = Buffer.from(programData.data[0], 'base64');
+    const bytes = fromBase64(programData.data[0]);
     // Truncate null bytes at the end of the buffer
     let truncatedBytes = 0;
-    while (buffer[buffer.length - 1 - truncatedBytes] === 0) {
+    while (bytes[bytes.length - 1 - truncatedBytes] === 0) {
         truncatedBytes++;
     }
     // Hash the binary
-    const c = Buffer.from(buffer.slice(0, buffer.length - truncatedBytes));
-    return Buffer.from(sha256(c)).toString('hex');
+    const dataToHash = bytes.slice(0, bytes.length - truncatedBytes);
+    return toHex(sha256(dataToHash));
 }

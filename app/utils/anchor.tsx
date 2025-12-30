@@ -10,13 +10,14 @@ import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/
 import React, { Fragment, ReactNode, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 
-const ANCHOR_SELF_CPI_TAG = Buffer.from('1d9acb512ea545e4', 'hex').reverse();
+import { equals, fromBase64, fromHex, toBase64 } from '@/app/shared/lib/bytes';
+
+const ANCHOR_SELF_CPI_TAG = fromHex('1d9acb512ea545e4').reverse();
 const ANCHOR_SELF_CPI_NAME = 'Anchor Self Invocation';
 
-export function instructionIsSelfCPI(ixData: Buffer | Uint8Array): boolean {
-    const data = Buffer.isBuffer(ixData) ? ixData : Buffer.from(ixData);
-    const slice = data.subarray(0, 8);
-    return ANCHOR_SELF_CPI_TAG.every((byte, index) => slice[index] === byte);
+export function instructionIsSelfCPI(ixData: Uint8Array): boolean {
+    const slice = ixData.subarray(0, 8);
+    return equals(slice, ANCHOR_SELF_CPI_TAG);
 }
 
 /**
@@ -29,7 +30,7 @@ export function decodeEventWithCustomDiscriminator(eventData: string, program: P
     }
 
     // Event data is base64 encoded
-    const data = Buffer.from(eventData, 'base64');
+    const data = fromBase64(eventData);
 
     // Find matching event by comparing discriminators
     for (const event of program.idl.events) {
@@ -67,7 +68,7 @@ export function decodeEventWithCustomDiscriminator(eventData: string, program: P
 
                 try {
                     const coder = new BorshEventCoder(modifiedIdl);
-                    const decoded = coder.decode(Buffer.from(paddedData).toString('base64'));
+                    const decoded = coder.decode(toBase64(paddedData));
                     return decoded;
                 } catch (error) {
                     return { data: {}, name: event.name };
@@ -120,8 +121,8 @@ export function AnchorProgramName({
  * Decodes an instruction using a custom discriminator matcher that supports variable-length discriminators.
  * Handles both standard 8-byte Anchor discriminators and custom shorter discriminators.
  */
-export function decodeInstructionWithCustomDiscriminator(ixData: Buffer | Uint8Array, program: Program): any | null {
-    const data = Buffer.isBuffer(ixData) ? ixData : Buffer.from(ixData);
+export function decodeInstructionWithCustomDiscriminator(ixData: Uint8Array, program: Program): any | null {
+    const data = ixData;
 
     // Find matching instruction by comparing discriminators
     for (const instruction of program.idl.instructions) {
@@ -161,7 +162,7 @@ export function decodeInstructionWithCustomDiscriminator(ixData: Buffer | Uint8A
 
                 try {
                     const coder = new BorshInstructionCoder(modifiedIdl);
-                    const decoded = coder.decode(Buffer.from(paddedData) as any);
+                    const decoded = coder.decode(paddedData as any);
                     return decoded;
                 } catch (error) {
                     // If Borsh decoding fails, return basic instruction info
@@ -439,7 +440,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                         wordBreak: 'break-all',
                     }}
                 >
-                    {(value as Buffer).toString('base64')}
+                    {toBase64(value as Uint8Array)}
                 </div>
             </SimpleRow>
         );

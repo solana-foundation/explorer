@@ -1,5 +1,7 @@
+import { fromUtf8, toBase64 } from '@/app/shared/lib/bytes';
+
 export function securityTxtDataToBase64(data: Record<string, unknown>) {
-    return Buffer.from(JSON.stringify(data, null, 2)).toString('base64');
+    return toBase64(fromUtf8(JSON.stringify(data, null, 2)));
 }
 
 export function isString(value: unknown): value is string {

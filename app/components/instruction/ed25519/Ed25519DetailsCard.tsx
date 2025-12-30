@@ -8,6 +8,8 @@ import {
 import bs58 from 'bs58';
 import React from 'react';
 
+import { toBase64 } from '@/app/shared/lib/bytes';
+
 import { Address } from '../../common/Address';
 import { Copyable } from '../../common/Copyable';
 import { InstructionCard } from '../InstructionCard';
@@ -138,10 +140,8 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                             <td>Signature</td>
                             <td className="text-lg-end">
                                 {signature ? (
-                                    <Copyable text={Buffer.from(signature).toString('base64')}>
-                                        <span className="font-monospace">
-                                            {Buffer.from(signature).toString('base64')}
-                                        </span>
+                                    <Copyable text={toBase64(signature)}>
+                                        <span className="font-monospace">{toBase64(signature)}</span>
                                     </Copyable>
                                 ) : (
                                     'Invalid reference'
@@ -192,10 +192,8 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                                 }}
                             >
                                 {message ? (
-                                    <Copyable text={Buffer.from(message).toString('base64')}>
-                                        <span className="font-monospace">
-                                            {Buffer.from(message).toString('base64')}
-                                        </span>
+                                    <Copyable text={toBase64(message)}>
+                                        <span className="font-monospace">{toBase64(message)}</span>
                                     </Copyable>
                                 ) : (
                                     'Invalid reference'

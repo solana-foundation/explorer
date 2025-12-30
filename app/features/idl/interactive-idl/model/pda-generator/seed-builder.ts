@@ -2,15 +2,17 @@ import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
 import { camelCase } from 'change-case';
 
+import { bnToBytes, fromUtf8, toHex } from '@/app/shared/lib/bytes';
+
 import type { PdaInstruction, PdaSeed } from './types';
 
 export interface SeedInfo {
-    buffers: Buffer[] | null;
+    buffers: Uint8Array[] | null;
     info: { value: string | null; name: string }[];
 }
 
 interface ProcessedSeed {
-    buffer: Buffer | null;
+    buffer: Uint8Array | null;
     info: { value: string | null; name: string };
 }
 
@@ -27,7 +29,7 @@ export function buildSeedsWithInfo(
 ): SeedInfo {
     const processedSeeds = seeds.map(seed => processSeed(seed, args, accounts, instruction));
 
-    const seedBuffers: Buffer[] = [];
+    const seedBuffers: Uint8Array[] = [];
     const seedInfo: { value: string | null; name: string }[] = [];
     let buffersValid = true;
 
@@ -82,8 +84,9 @@ function processConstSeed(seed: PdaSeed): ProcessedSeed {
         };
     }
 
-    const buffer = Buffer.from(seed.value);
-    const hexValue = buffer.toString('hex');
+    // seed.value is already an array of bytes
+    const buffer = new Uint8Array(seed.value);
+    const hexValue = toHex(buffer);
 
     return {
         buffer,
@@ -194,7 +197,7 @@ const INTEGER_SIZE_MAP: Record<string, number> = {
 /**
  * Convert argument value to seed buffer based on type
  */
-function convertArgToSeedBuffer(value: string, type: unknown): Buffer | null {
+function convertArgToSeedBuffer(value: string, type: unknown): Uint8Array | null {
     if (!value || typeof type !== 'string') {
         return null;
     }
@@ -203,7 +206,7 @@ function convertArgToSeedBuffer(value: string, type: unknown): Buffer | null {
     if (size !== undefined) {
         try {
             const bn = new BN(value);
-            return bn.toArrayLike(Buffer, 'le', size);
+            return bnToBytes(bn, 'le', size);
         } catch {
             // Value cannot be converted to a number
             return null;
@@ -211,7 +214,7 @@ function convertArgToSeedBuffer(value: string, type: unknown): Buffer | null {
     }
 
     if (type === 'string' || type === 'bytes') {
-        return Buffer.from(value);
+        return fromUtf8(value);
     }
 
     return null;

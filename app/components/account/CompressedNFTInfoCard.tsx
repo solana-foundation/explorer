@@ -44,7 +44,7 @@ function DasCompressionInfoCard({ proof, compressedNft }: { proof: CompressedNft
     });
     const canopyDepth =
         treeAccountInfo && treeAccountInfo.data && treeAccountInfo.data.data.raw
-            ? ConcurrentMerkleTreeAccount.fromBuffer(treeAccountInfo.data.data.raw).getCanopyDepth()
+            ? ConcurrentMerkleTreeAccount.fromBuffer(Buffer.from(treeAccountInfo.data.data.raw)).getCanopyDepth() // use Buffer.from to provide proper type
             : 0;
     const proofSize = proof.proof.length - canopyDepth;
     return (
