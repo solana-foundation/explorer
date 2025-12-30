@@ -17,9 +17,9 @@
         "start": "next start",
         "test": "vitest --project specs run",
         "test:ci": "vitest --project specs run",
-        "test:watch": "vitest --project specs --watch",
         "test:sb": "vitest --project storybook run",
-        "test:sb:watch": "vitest --project storybook --watch"
+        "test:sb:watch": "vitest --project storybook --watch",
+        "test:watch": "vitest --project specs --watch"
     },
     "dependencies": {
         "@blockworks-foundation/mango-client": "3.6.7",
@@ -169,6 +169,10 @@
         "node": "^20.19"
     },
     "pnpm": {
+        "onlyBuiltDependencies": [
+            "@sentry/cli",
+            "esbuild"
+        ],
         "overrides": {
             "@babel/runtime@<7.26.10": "7.26.10",
             "@solana/addresses": "2.1.0",
@@ -219,10 +223,6 @@
             "sharp",
             "unrs-resolver",
             "utf-8-validate"
-        ],
-        "onlyBuiltDependencies": [
-            "@sentry/cli",
-            "esbuild"
         ]
     }
 }
