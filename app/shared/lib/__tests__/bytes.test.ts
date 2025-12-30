@@ -42,6 +42,15 @@ const hexTestCases: Record<string, number[]> = {
 // All 256 byte values as hex string
 const allByteValuesHex = Array.from({ length: 256 }, (_, i) => i.toString(16).padStart(2, '0')).join('');
 
+// Shared test data for UTF-8 encoding/decoding
+const utf8TestCases: Record<string, number[]> = {
+    Hello: [72, 101, 108, 108, 111],
+    'Hello World': [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100],
+    '': [],
+    世界: [228, 184, 150, 231, 149, 140], // Chinese characters
+    '🚀': [240, 159, 154, 128], // Emoji (4-byte UTF-8)
+};
+
 describe('bytes helpers', () => {
     describe('Base64', () => {
         describe('fromBase64', () => {
@@ -325,27 +334,44 @@ describe('bytes helpers', () => {
     });
 
     describe('UTF-8', () => {
-        it('should encode utf8 string', () => {
-            const result = fromUtf8('Hello');
-            expect(Array.from(result)).toEqual([72, 101, 108, 108, 111]);
+        describe('fromUtf8', () => {
+            it.each(Object.entries(utf8TestCases))('should encode "%s"', (str, expected) => {
+                const result = fromUtf8(str);
+                expect(Array.from(result)).toEqual(expected);
+            });
+
+            it('should match Buffer.from behavior', () => {
+                for (const [str, expected] of Object.entries(utf8TestCases)) {
+                    const result = fromUtf8(str);
+                    const bufferResult = Buffer.from(str, 'utf-8');
+                    expect(Array.from(result)).toEqual(expected);
+                    expect(Array.from(result)).toEqual(Array.from(bufferResult));
+                }
+            });
         });
 
-        it('should decode utf8 bytes', () => {
-            const input = new Uint8Array([72, 101, 108, 108, 111]);
-            expect(toUtf8(input)).toBe('Hello');
-        });
+        describe('toUtf8', () => {
+            it.each(Object.entries(utf8TestCases))('should decode to "%s"', (expected, input) => {
+                const result = toUtf8(new Uint8Array(input));
+                expect(result).toBe(expected);
+            });
 
-        it('should handle unicode characters', () => {
-            const input = 'Hello 世界 🚀';
-            const bytes = fromUtf8(input);
-            expect(toUtf8(bytes)).toBe(input);
-        });
+            it('should match Buffer.toString behavior', () => {
+                for (const [expected, input] of Object.entries(utf8TestCases)) {
+                    const result = toUtf8(new Uint8Array(input));
+                    const bufferResult = Buffer.from(input).toString('utf-8');
+                    expect(result).toBe(expected);
+                    expect(result).toBe(bufferResult);
+                }
+            });
 
-        it('should match Buffer behavior for utf8', () => {
-            const testStr = 'Hello 世界 🚀';
-            const bufferBytes = Buffer.from(testStr, 'utf-8');
-            const helperBytes = fromUtf8(testStr);
-            expect(Array.from(helperBytes)).toEqual(Array.from(bufferBytes));
+            it('should roundtrip with fromUtf8', () => {
+                for (const str of Object.keys(utf8TestCases)) {
+                    const encoded = fromUtf8(str);
+                    const decoded = toUtf8(encoded);
+                    expect(decoded).toBe(str);
+                }
+            });
         });
     });
 

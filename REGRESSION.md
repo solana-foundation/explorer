@@ -272,6 +272,94 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 ---
 
+# UTF-8 Encoding/Decoding Replacements
+
+## 19. Security.txt Base64 Export (UTF-8)
+
+**File:** `app/features/security-txt/ui/utils.ts`
+
+**Change:** `Buffer.from(JSON.stringify(data, null, 2)).toString('base64')` → `toBase64(fromUtf8(JSON.stringify(data, null, 2)))`
+
+**Test:** Security.txt display and export on program pages
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD?cluster=mainnet | https://explorer.solana.com/address/MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD |
+
+---
+
+## 20. IDL Section Base64 Export (UTF-8)
+
+**File:** `app/features/idl/ui/IdlSection.tsx`
+
+**Change:** `Buffer.from(JSON.stringify(idl, null, 2)).toString('base64')` → `toBase64(fromUtf8(JSON.stringify(idl, null, 2)))`
+
+**Test:** IDL download button on program pages
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
+
+---
+
+## 21. PDA Seed Builder String/Bytes (UTF-8)
+
+**File:** `app/features/idl/interactive-idl/model/pda-generator/seed-builder.ts`
+
+**Change:** `Buffer.from(value)` → `fromUtf8(value)` (for string/bytes types)
+
+**Test:** PDA generation with string seeds in interactive IDL forms
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
+
+*Note: Use interactive IDL form with string-type PDA seeds*
+
+---
+
+## 22. Anchor Interpreter Bytes Conversion (UTF-8)
+
+**File:** `app/features/idl/interactive-idl/model/anchor/anchor-interpreter.ts`
+
+**Change:** `Buffer.from(value)` → `fromUtf8(value)` (for bytes and defined types)
+
+**Test:** Anchor instruction building with bytes arguments
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
+
+---
+
+## 23. Verified Builds Otter Verify PDA (UTF-8)
+
+**File:** `app/utils/verified-builds.tsx`
+
+**Change:** `Buffer.from('otter_verify')` → `fromUtf8('otter_verify')`
+
+**Test:** Verified build status check using OtterSec verification
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
+
+---
+
+## 24. Kit Wrapper String Decoding (UTF-8)
+
+**File:** `app/utils/kit-wrapper.tsx`
+
+**Change:** `Buffer.from(data).toString('utf-8')` → `toUtf8(new Uint8Array(data))`
+
+**Test:** Solana Kit integration string decoding
+
+| Local | Production |
+|-------|------------|
+| http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
+
+---
+
 ## Quick Test Checklist
 
 ### Base64 Conversions
@@ -288,6 +376,12 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 - [ ] **PDA Generation**: Use interactive IDL form, verify PDA seeds show correct hex values
 - [ ] **Verified Build Hash**: Verify program hash matches expected value on verified programs
 - [ ] **Anchor Self-CPI**: Find transaction with Anchor self-CPI, verify detection works
+
+### UTF-8 Conversions
+- [ ] **IDL Download**: Go to Jupiter program, click Download IDL, verify JSON file contains valid UTF-8 characters
+- [ ] **Security.txt Export**: Check security.txt base64 export works correctly
+- [ ] **PDA String Seeds**: Use interactive IDL with string seeds, verify PDA generation works
+- [ ] **Verified Builds**: Verify OtterSec verification check works
 
 ---
 
