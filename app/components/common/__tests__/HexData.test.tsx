@@ -49,9 +49,8 @@ describe('HexData', () => {
 
     it('should have copyable text matching hex string', () => {
         const buffer = Buffer.from([0xab, 0xcd]);
-        const { container } = render(<HexData raw={buffer} />);
+        render(<HexData raw={buffer} />);
         // The Copyable component should have the full hex string
-        const preElement = container.querySelector('pre');
-        expect(preElement).toBeInTheDocument();
+        expect(screen.getAllByText(/ab cd/).length).toBeGreaterThan(0);
     });
 });
