@@ -211,7 +211,7 @@ function ProgramLogRow({
                 });
 
                 txInstruction = new TransactionInstruction({
-                    data: Buffer.from(fromBase64(instruction.data)),
+                    data: Buffer.from(fromBase64(instruction.data)), // TransactionInstruction expects Buffer, convert from Uint8Array
                     keys,
                     programId,
                 });

@@ -1,4 +1,4 @@
-import type { BN } from 'bn.js';
+import type BN from 'bn.js';
 
 /**
  * Type alias for gradual migration from Buffer to Uint8Array.
@@ -24,7 +24,7 @@ const fromCharCode = (bytes: Uint8Array): string => String.fromCharCode(...bytes
  * Replaces: Buffer.from(data, 'base64')
  */
 export function fromBase64(base64: string): Uint8Array {
-    // Use native Uint8Array.fromBase64 when available (Chrome 133+, Firefox 133+, Safari 18.2+)
+    // Use native Uint8Array.fromBase64 when available
     if ('fromBase64' in Uint8Array) {
         return (Uint8Array.fromBase64 as (s: string, _o?: Object) => Uint8Array)(base64);
     }
