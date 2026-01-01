@@ -72,8 +72,8 @@ function getTransactionErrorReason(
 
     const { InsufficientFundsForRent } = info.result.err as { InsufficientFundsForRent?: { account_index: number } };
     if (InsufficientFundsForRent !== undefined) {
-        if (tx) {
-            const address = tx.message.accountKeys[InsufficientFundsForRent.account_index].pubkey;
+        const address = tx?.message.accountKeys[InsufficientFundsForRent.account_index]?.pubkey;
+        if (address) {
             return { errorLink: `/address/${address}`, errorReason: `Insufficient Funds For Rent: ${address}` };
         }
         return { errorReason: `Insufficient Funds For Rent: Account #${InsufficientFundsForRent.account_index + 1}` };
