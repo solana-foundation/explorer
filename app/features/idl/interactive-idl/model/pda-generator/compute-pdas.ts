@@ -64,7 +64,7 @@ export function computePdas(
                 idlInstruction
             );
 
-            const derivationProgramId = resolveProgramId(programId, account.pda.program, { args, accounts });
+            const derivationProgramId = resolveProgramId(programId, account.pda.program, { accounts, args });
 
             if (seedBuffers && derivationProgramId) {
                 const [pda] = PublicKey.findProgramAddressSync(seedBuffers, derivationProgramId);

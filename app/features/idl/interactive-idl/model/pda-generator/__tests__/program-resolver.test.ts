@@ -7,7 +7,7 @@ import type { IdlSeedAccount, IdlSeedArg, IdlSeedConst } from '../types';
 
 describe('resolveProgramId', () => {
     const defaultProgramId = PublicKey.default;
-    const emptyContext = { args: {}, accounts: {} };
+    const emptyContext = { accounts: {}, args: {} };
 
     it('should return default program ID when pdaProgram is undefined', () => {
         const result = resolveProgramId(defaultProgramId, undefined, emptyContext);
@@ -33,8 +33,8 @@ describe('resolveProgramId', () => {
                 path: 'program_id',
             };
             const context = {
-                args: { programId: TOKEN_PROGRAM_ID.toBase58() },
                 accounts: {},
+                args: { programId: TOKEN_PROGRAM_ID.toBase58() },
             };
 
             const result = resolveProgramId(defaultProgramId, argSeed, context);
@@ -57,8 +57,8 @@ describe('resolveProgramId', () => {
                 path: 'token_program',
             };
             const context = {
-                args: { tokenProgram: TOKEN_PROGRAM_ID.toBase58() },
                 accounts: {},
+                args: { tokenProgram: TOKEN_PROGRAM_ID.toBase58() },
             };
 
             const result = resolveProgramId(defaultProgramId, argSeed, context);
@@ -73,8 +73,8 @@ describe('resolveProgramId', () => {
                 path: 'token_program',
             };
             const context = {
-                args: {},
                 accounts: { tokenProgram: TOKEN_PROGRAM_ID.toBase58() },
+                args: {},
             };
 
             const result = resolveProgramId(defaultProgramId, accountSeed, context);
@@ -97,8 +97,8 @@ describe('resolveProgramId', () => {
                 path: 'nested_account',
             };
             const context = {
-                args: {},
                 accounts: { nestedAccount: { inner: 'value' } },
+                args: {},
             };
 
             const result = resolveProgramId(defaultProgramId, accountSeed, context);
