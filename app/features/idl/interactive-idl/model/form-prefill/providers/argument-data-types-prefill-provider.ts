@@ -40,7 +40,13 @@ export function findDefaultValueForArgumentType(argType: IdlType | string): stri
         return findDefaultValueForArgumentType(argType.coption);
     }
     if ('array' in argType) {
-        return findDefaultValueForArgumentType(argType.array[0]);
+        const [innerType, length] = argType.array;
+        const innerDefault = findDefaultValueForArgumentType(innerType);
+        // For fixed-size arrays, return N comma-separated defaults
+        if (typeof length === 'number' && length > 1) {
+            return Array(length).fill(innerDefault).join(', ');
+        }
+        return innerDefault;
     }
     return '';
 }
