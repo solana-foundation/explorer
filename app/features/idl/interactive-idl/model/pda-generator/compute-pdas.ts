@@ -54,6 +54,11 @@ export function computePdas(
             continue;
         }
 
+        // Skip if pda is just a boolean (0.29 IDL) without seeds definition
+        if (typeof account.pda === 'boolean' || !account.pda.seeds) {
+            continue;
+        }
+
         const camelName = camelCase(account.name);
 
         try {
