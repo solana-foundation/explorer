@@ -39,7 +39,7 @@ describe('createPdaPrefillDependency', () => {
         const { createForm, mockIdl, mockInstruction } = setup(votingIdl030, 'initialize_poll');
         const { form, fieldNames } = createForm();
 
-            form.setValue('arguments.initializePoll.pollId', '123');
+        form.setValue('arguments.initializePoll.pollId', '123');
 
         const dependency = createPdaPrefillDependency(mockIdl, mockInstruction, {
             account: fieldNames.account,
@@ -57,7 +57,7 @@ describe('createPdaPrefillDependency', () => {
         const { createForm, mockIdl, mockInstruction } = setup(votingIdl030, 'initialize_poll');
         const { form, fieldNames } = createForm();
 
-            form.setValue('arguments.initializePoll.pollId', '123');
+        form.setValue('arguments.initializePoll.pollId', '123');
 
         const dependency = createPdaPrefillDependency(mockIdl, mockInstruction, {
             account: fieldNames.account,
@@ -75,7 +75,7 @@ describe('createPdaPrefillDependency', () => {
         const { createForm, mockIdl, mockInstruction } = setup(votingIdl030Variations, 'instruction_with_nested');
         const { form, fieldNames } = createForm();
 
-            form.setValue('arguments.instructionWithNested.pollId', '123');
+        form.setValue('arguments.instructionWithNested.pollId', '123');
 
         const dependency = createPdaPrefillDependency(mockIdl, mockInstruction, {
             account: fieldNames.account,
@@ -106,7 +106,7 @@ describe('createPdaPrefillDependency', () => {
         const { createForm, mockIdl, mockInstruction } = setup(votingIdl030, 'initialize_poll');
         const { form, fieldNames } = createForm();
 
-            form.setValue('arguments.initializePoll.pollId', '123');
+        form.setValue('arguments.initializePoll.pollId', '123');
 
         const dependency = createPdaPrefillDependency(mockIdl, mockInstruction, {
             account: fieldNames.account,
@@ -115,7 +115,7 @@ describe('createPdaPrefillDependency', () => {
         dependency.onValueChange(mockInstruction.name, form);
 
         const manualEdit = 'ManuallyEditedAddress123456789';
-            form.setValue('accounts.initializePoll.poll', manualEdit);
+        form.setValue('accounts.initializePoll.poll', manualEdit);
 
         dependency.onValueChange(mockInstruction.name, form);
 
@@ -126,7 +126,7 @@ describe('createPdaPrefillDependency', () => {
         const { createForm, mockIdl, mockInstruction } = setup(votingIdl030, 'initialize_poll');
         const { form, fieldNames } = createForm();
 
-            form.setValue('arguments.initializePoll.pollId', '123');
+        form.setValue('arguments.initializePoll.pollId', '123');
 
         const dependency = createPdaPrefillDependency(mockIdl, mockInstruction, {
             account: fieldNames.account,
@@ -135,7 +135,7 @@ describe('createPdaPrefillDependency', () => {
         dependency.onValueChange(mockInstruction.name, form);
         const firstValue = form.getValues('accounts.initializePoll.poll');
 
-            form.setValue('arguments.initializePoll.pollId', '456');
+        form.setValue('arguments.initializePoll.pollId', '456');
 
         dependency.onValueChange(mockInstruction.name, form);
         const secondValue = form.getValues('accounts.initializePoll.poll');

@@ -15,7 +15,7 @@ const formStateCache = new WeakMap<UseFormReturn<InstructionFormData>, Map<strin
  *
  * This provider watches form arguments and accounts, regenerates PDAs when
  * relevant values change, and fills PDA account fields automatically.
- * 
+ *
  * Behavior:
  * - Fills empty fields
  * - Fills fields that haven't been tracked before (first time)
@@ -71,7 +71,7 @@ export function createPdaPrefillDependency(
                 const neverTracked = lastGenerated === undefined;
                 const wasAutoFilled = lastGenerated !== undefined && currentValue === lastGenerated;
                 const generatedChanged = lastGenerated !== undefined && lastGenerated !== generatedValue;
-                
+
                 const shouldAutoFill = isEmpty || wasAutoFilled || neverTracked;
 
                 if (shouldAutoFill && currentValue !== generatedValue) {
