@@ -5,6 +5,7 @@ import type { DeepPartial } from 'react-hook-form';
 
 import type { InstructionFormData } from '../use-instruction-form';
 import { createAnchorPdaProvider } from './anchor-provider';
+import { resolveProgramId } from './program-resolver';
 import { createPdaProviderRegistry } from './registry';
 import { buildSeedsWithInfo } from './seed-builder';
 
@@ -63,8 +64,10 @@ export function computePdas(
                 idlInstruction
             );
 
-            if (seedBuffers) {
-                const [pda] = PublicKey.findProgramAddressSync(seedBuffers, programId);
+            const derivationProgramId = resolveProgramId(programId, account.pda.program, { args, accounts });
+
+            if (seedBuffers && derivationProgramId) {
+                const [pda] = PublicKey.findProgramAddressSync(seedBuffers, derivationProgramId);
                 pdaAddresses[camelName] = {
                     generated: pda.toBase58(),
                     seeds: seedInfo,
