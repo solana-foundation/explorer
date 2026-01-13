@@ -65,10 +65,13 @@ function getTransactionDataFromUserSuppliedBytes(bytes: Uint8Array): {
 
 function parseAccountAddresses(input: string): string[] {
     // Split by commas, newlines, or spaces and filter out empty strings
-    return input
-        .split(/[\s,]+/)
-        .map(addr => addr.trim())
-        .filter(addr => addr.length > 0);
+    return (
+        input
+            // eslint-disable-next-line no-restricted-syntax -- split by whitespace and comma delimiters
+            .split(/[\s,]+/)
+            .map(addr => addr.trim())
+            .filter(addr => addr.length > 0)
+    );
 }
 
 export const MIN_MESSAGE_LENGTH =

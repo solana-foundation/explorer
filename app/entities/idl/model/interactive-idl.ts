@@ -13,6 +13,7 @@ export function isInteractiveIdlSupported(idl: SupportedIdl): boolean {
 
     // Check if spec is >= 0.1.0
     const spec = getSerdeIdlSpecType(idl);
+    // eslint-disable-next-line no-restricted-syntax -- parse semantic version string
     const match = spec.match(/^(\d+)\.(\d+)\.(\d+)/);
     if (!match) return false;
 

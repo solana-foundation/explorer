@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { intoParsedInstruction, intoParsedTransaction } from '@components/inspector/into-parsed-data';
 import { ParsedInstruction, SystemProgram, TransactionMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';

@@ -29,8 +29,11 @@ const SYSTEM_PROGRAM_NAMES: PROGRAM_NAMES[] = [
 
 const PRECOMPILE_NAMES: PROGRAM_NAMES[] = [PROGRAM_NAMES.ED25519, PROGRAM_NAMES.SECP256K1];
 
+// eslint-disable-next-line no-restricted-syntax -- strip " Program" suffix from name
 const stripProgramSuffix = (name: string): string => name.replace(/ Program$/i, '');
+// eslint-disable-next-line no-restricted-syntax -- strip "Sysvar: " prefix from name
 const stripSysvarPrefix = (name: string): string => name.replace(/^Sysvar: /i, '');
+// eslint-disable-next-line no-restricted-syntax -- strip " SigVerify Precompile" suffix from name
 const stripPrecompileSuffix = (name: string): string => name.replace(/ SigVerify Precompile$/i, '');
 
 const systemProgramItems: AutocompleteItem[] = Object.entries(PROGRAM_INFO_BY_ID)

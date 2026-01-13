@@ -115,6 +115,7 @@
         "use-async-effect": "2.2.7"
     },
     "devDependencies": {
+        "@eslint-community/eslint-plugin-eslint-comments": "4.5.0",
         "@mdx-js/react": "3.1.0",
         "@solana/eslint-config-solana": "1.0.1",
         "@solana/prettier-config-solana": "0.0.2",

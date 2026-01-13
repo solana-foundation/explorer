@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import type { Idl } from '@coral-xyz/anchor';
 import * as anchorModule from '@entities/idl';
 import { PublicKey } from '@solana/web3.js';
