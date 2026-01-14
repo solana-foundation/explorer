@@ -3,9 +3,10 @@ import type { InstructionData, SupportedIdl } from '@entities/idl';
 import { useToast } from '@shared/ui/sonner/use-toast';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useAtomValue } from 'jotai';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { ExplorerLink } from '@/app/entities/cluster';
+import { idlAnalytics } from '@/app/utils/analytics';
 
 import { originalIdlAtom, programIdAtom } from '../model/state-atoms';
 import { isEnabled, useInstruction } from '../model/use-instruction';
@@ -28,6 +29,8 @@ export function InteractWithIdl({
     const progId = useAtomValue(programIdAtom);
     const { connected, publicKey } = useWallet();
 
+    const [currentInstruction, setCurrentInstruction] = useState<{ name: string; programId?: string } | null>(null);
+
     const handleTransactionSuccess = useCallback(
         (txSignature: string) => {
             toast.custom({
@@ -41,15 +44,29 @@ export function InteractWithIdl({
                 title: 'Transaction is sent',
                 type: 'success',
             });
+
+            if (currentInstruction) {
+                idlAnalytics.trackInstructionExecutionSuccess(
+                    currentInstruction.name,
+                    currentInstruction.programId,
+                    txSignature
+                );
+                setCurrentInstruction(null);
+            }
         },
-        [toast]
+        [toast, currentInstruction]
     );
 
     const handleTransactionError = useCallback(
         (error: string) => {
             toast.custom({ description: error, title: 'Transaction Failed', type: 'error' });
+
+            if (currentInstruction) {
+                idlAnalytics.trackInstructionExecutionError(currentInstruction.name, currentInstruction.programId, error);
+                setCurrentInstruction(null);
+            }
         },
-        [toast]
+        [toast, currentInstruction]
     );
 
     const { invokeInstruction, initializationError, isExecuting, lastResult, parseLogs } = useInstruction({
@@ -67,6 +84,12 @@ export function InteractWithIdl({
 
     const handleExecuteInstruction = useCallback(
         async (data: InstructionData, params: InstructionCallParams) => {
+            const programIdStr = progId?.toString();
+
+            idlAnalytics.trackInstructionExecutionStarted(data.name, programIdStr);
+
+            setCurrentInstruction({ name: data.name, programId: programIdStr });
+
             await requireConfirmation(
                 async () => {
                     await invokeInstruction(data.name, data, params);
@@ -74,7 +97,7 @@ export function InteractWithIdl({
                 { data, params }
             );
         },
-        [invokeInstruction, requireConfirmation]
+        [invokeInstruction, requireConfirmation, progId]
     );
 
     if (initializationError) {
