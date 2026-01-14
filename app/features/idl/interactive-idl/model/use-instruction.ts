@@ -434,7 +434,7 @@ function useInvocationState({
             if (typeof simulatedTx.value.err === 'string') {
                 errorMessage = simulatedTx.value.err;
             }
-            throw new Error(errorMessage ?? 'Could not simulate transaction');
+            throw new Error(errorMessage ?? 'Simulated with errors');
         }
     };
 
