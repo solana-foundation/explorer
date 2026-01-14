@@ -20,6 +20,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Header } from '@components/Header';
 import { useAnchorProgram } from '@entities/idl';
+import { SecurityNotification } from '@features/security-txt';
 import {
     Account,
     AccountsProvider,
@@ -241,6 +242,7 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
                     pubkey={pubkey}
                     tokenInfo={fullTokenInfo}
                     isTokenInfoLoading={isFullTokenInfoLoading}
+                    notification={<SecurityNotification parsedData={infoParsed} address={address} />}
                 >
                     {children}
                 </DetailsSections>
@@ -264,8 +266,10 @@ function DetailsSections({
     info,
     tokenInfo,
     isTokenInfoLoading,
+    notification,
 }: {
     children: React.ReactNode;
+    notification: React.ReactNode;
     pubkey: PublicKey;
     tab?: string;
     info?: CacheEntry<Account>;
@@ -292,6 +296,7 @@ function DetailsSections({
         <>
             {FLAGGED_ACCOUNTS_WARNING[address] ?? null}
             <InfoSection account={account} tokenInfo={tokenInfo} />
+            {notification}
             <MoreSection tabs={tabComponents.map(({ component }) => component)}>{children}</MoreSection>
         </>
     );
