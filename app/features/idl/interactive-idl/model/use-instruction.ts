@@ -37,6 +37,9 @@ interface UseInstructionOptions {
     commitment?: Finality;
     /** Commitment level for transaction simulation. Defaults to 'processed'. */
     simulationCommitment?: Commitment;
+    onSuccess?: (signature: string) => void;
+    onError?: (error: string) => void;
+    onPreInvocationError?: (error: string) => void;
 }
 
 interface UseInstructionReturn {
@@ -75,6 +78,9 @@ export function useInstruction({
     interpreterName = AnchorInterpreter.NAME,
     commitment = 'confirmed',
     simulationCommitment = 'processed',
+    onSuccess,
+    onError,
+    onPreInvocationError,
 }: UseInstructionOptions): UseInstructionReturn {
     const { connected, publicKey, ...wallet } = useWallet();
     const { cluster: currentCluster, customUrl } = useCluster();
@@ -89,7 +95,7 @@ export function useInstruction({
         handleTxEnd,
         handleSimulatedTxResult,
         parseLogs,
-    } = useInvocationState();
+    } = useInvocationState({ onError, onSuccess });
     const [initializationError, setInitializationError] = useState<string | null>(null);
     const [isProgramLoading, setIsProgramLoading] = useState(false);
     const [program, setProgram] = useAtom(programAtom);
@@ -214,7 +220,9 @@ export function useInstruction({
             }
         ): Promise<void> => {
             if (!connected || !publicKey || !wallet.signTransaction) {
-                setPreInvocationError('Wallet not connected');
+                const error = 'Wallet not connected';
+                setPreInvocationError(error);
+                onPreInvocationError?.(error);
                 return;
             }
             setPreInvocationError(null);
@@ -305,6 +313,7 @@ export function useInstruction({
             handleTxError,
             handleTxEnd,
             handleSimulatedTxResult,
+            onPreInvocationError,
         ]
     );
 
@@ -366,7 +375,13 @@ export type InstructionInvocationResult =
     | { status: 'error'; message: string; logs: string[]; serializedTxMessage: string | null; finishedAt: Date }
     | null;
 
-function useInvocationState() {
+function useInvocationState({
+    onSuccess,
+    onError,
+}: {
+    onSuccess?: (signature: string) => void;
+    onError?: (error: string) => void;
+} = {}) {
     const [transactionError, setTransactionError] = useState<TransactionError | null>(null);
     const { parseLogs } = useParsedLogs(transactionError);
     const [serializedTxMessage, setSerializedTxMessage] = useState<string | null>(null);
@@ -393,6 +408,7 @@ function useInvocationState() {
     const handleTxSuccess = (signature: string, logs: string[] | null | undefined) => {
         setLastSuccess({ finishedAt: new Date(), signature });
         handleLogsChange(logs);
+        onSuccess?.(signature);
     };
 
     const handleTxError = (error: unknown | Error, transaction: Transaction | undefined) => {
@@ -404,6 +420,7 @@ function useInvocationState() {
             setTransactionError(error);
         }
         setSerializedTxMessage(serializeTransactionMessage(transaction));
+        onError?.(errorMessage);
     };
 
     const handleTxEnd = () => {

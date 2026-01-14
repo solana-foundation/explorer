@@ -27,29 +27,6 @@ export function InteractWithIdl({
     const idl = useAtomValue(originalIdlAtom);
     const progId = useAtomValue(programIdAtom);
     const { connected, publicKey } = useWallet();
-    const { invokeInstruction, initializationError, isExecuting, lastResult, parseLogs, preInvocationError } =
-        useInstruction({
-            enabled: isEnabled({ connected, idl, programId: progId, publicKey }),
-            idl,
-            programId: progId?.toString(),
-        });
-
-    const { requireConfirmation, confirm, cancel, isOpen, hasPendingAction } = useMainnetConfirmation<{
-        data: InstructionData;
-        params: InstructionCallParams;
-    }>();
-
-    const handleExecuteInstruction = useCallback(
-        async (data: InstructionData, params: InstructionCallParams) => {
-            await requireConfirmation(
-                async () => {
-                    await invokeInstruction(data.name, data, params);
-                },
-                { data, params }
-            );
-        },
-        [invokeInstruction, requireConfirmation]
-    );
 
     const handleTransactionSuccess = useCallback(
         (txSignature: string) => {
@@ -75,6 +52,31 @@ export function InteractWithIdl({
         [toast]
     );
 
+    const { invokeInstruction, initializationError, isExecuting, lastResult, parseLogs } = useInstruction({
+        enabled: isEnabled({ connected, idl, programId: progId, publicKey }),
+        idl,
+        onError: handleTransactionError,
+        onSuccess: handleTransactionSuccess,
+        programId: progId?.toString(),
+    });
+
+    const { requireConfirmation, confirm, cancel, isOpen, hasPendingAction } = useMainnetConfirmation<{
+        data: InstructionData;
+        params: InstructionCallParams;
+    }>();
+
+    const handleExecuteInstruction = useCallback(
+        async (data: InstructionData, params: InstructionCallParams) => {
+            await requireConfirmation(
+                async () => {
+                    await invokeInstruction(data.name, data, params);
+                },
+                { data, params }
+            );
+        },
+        [invokeInstruction, requireConfirmation]
+    );
+
     if (initializationError) {
         return (
             <BaseWarningCard
@@ -92,11 +94,8 @@ export function InteractWithIdl({
                 instructions={instructions || []}
                 idl={idl as SupportedIdl}
                 onExecuteInstruction={handleExecuteInstruction}
-                onTransactionSuccess={handleTransactionSuccess}
-                onTransactionError={handleTransactionError}
                 isExecuting={isExecuting}
                 lastResult={lastResult}
-                preInvocationError={preInvocationError}
                 parseLogs={parseLogs}
             />
             {hasPendingAction && (
