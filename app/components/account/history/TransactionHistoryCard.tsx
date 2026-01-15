@@ -11,6 +11,8 @@ import { displayTimestampUtc } from '@utils/date';
 import React, { useMemo } from 'react';
 import Moment from 'react-moment';
 
+import { useHideFailedTransactions } from '@/app/hooks/useHideFailedTransactions';
+
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
@@ -19,13 +21,15 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     const fetchAccountHistory = useFetchAccountHistory();
     const refresh = () => fetchAccountHistory(pubkey, false, true);
     const loadMore = () => fetchAccountHistory(pubkey, false);
+    const [hideFailedTxs, setHideFailedTxs] = useHideFailedTransactions();
 
     const transactionRows = React.useMemo(() => {
         if (history?.data?.fetched) {
-            return getTransactionRows(history.data.fetched);
+            const rows = getTransactionRows(history.data.fetched);
+            return hideFailedTxs ? rows.filter(row => !row.err) : rows;
         }
         return [];
-    }, [history]);
+    }, [history, hideFailedTxs]);
 
     React.useEffect(() => {
         if (!history) {
@@ -80,7 +84,13 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     const fetching = history.status === FetchStatus.Fetching;
     return (
         <div className="card">
-            <HistoryCardHeader fetching={fetching} refresh={() => refresh()} title="Transaction History" />
+            <HistoryCardHeader
+                fetching={fetching}
+                refresh={() => refresh()}
+                title="Transaction History"
+                hideFailedTxs={hideFailedTxs}
+                onToggleHideFailedTxs={setHideFailedTxs}
+            />
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
