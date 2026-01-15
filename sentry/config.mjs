@@ -9,12 +9,18 @@
  */
 export function createSentryConfig(_context) {
     return {
-        sampleRate: 0.1, // Track 10% of issues
+        sampleRate: 1,
 
         // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
         tracesSampler: (/** @type {import('@sentry/core').TracesSamplerSamplingContext} */ samplingContext) => {
             // Don't sample .well-known
             if (samplingContext.name.includes('/.well-known')) {
+                return 0;
+            }
+
+            // Don't sample infrastructure requests:
+            // - GET https://iad1.suspense-cache.vercel-infra.com/v1/suspense-cache/*
+            if (samplingContext.name.includes('suspense-cache.vercel-infra.com')) {
                 return 0;
             }
 
@@ -25,17 +31,10 @@ export function createSentryConfig(_context) {
 
             // Don't sample all other api endpoints as we should rely on logging
             if (samplingContext.name.includes('/api/')) {
-                return 0;
+                return 1;
             }
 
-            // Don't sample infrastructure requests:
-            // - GET https://iad1.suspense-cache.vercel-infra.com/v1/suspense-cache/*
-            if (samplingContext.name.includes('suspense-cache.vercel-infra.com')) {
-                return 0;
-            }
-
-            // Adjust the rate to fit the monthly quote. Previous 1e-7 rate was enough to track small 30M/hour peaks and huge 180-200M/hour ones
-            return 1 / 100000000;
+            return 1;
         },
 
         // Enable logs to be sent to Sentry

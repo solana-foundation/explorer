@@ -1,24 +1,18 @@
+import type {
+    IdlInstructionAccount,
+    IdlPda,
+    IdlSeed,
+    IdlSeedAccount,
+    IdlSeedArg,
+    IdlSeedConst,
+} from '@coral-xyz/anchor/dist/cjs/idl';
 import type { SupportedIdl } from '@entities/idl';
 import type { PublicKey } from '@solana/web3.js';
 
-/**
- * Unified PDA seed representation
- */
-export interface PdaSeed {
-    kind: 'const' | 'arg' | 'account';
-    path?: string; // For 'arg' and 'account' seeds
-    value?: number[]; // For 'const' seeds
-}
+export type { IdlSeed, IdlSeedAccount, IdlSeedArg, IdlSeedConst };
 
-/**
- * Unified PDA account representation
- */
-export interface PdaAccount {
-    name: string;
-    pda?: {
-        seeds: PdaSeed[];
-    };
-}
+export type PdaDefinition = IdlPda;
+export type PdaAccount = Pick<IdlInstructionAccount, 'name' | 'pda'>;
 
 /**
  * Unified argument representation

@@ -1,6 +1,10 @@
+import { NATIVE_MINT } from '@solana/spl-token';
 import { PROGRAM_INFO_BY_ID, PROGRAM_NAMES, SPECIAL_IDS, SYSVAR_IDS, TOKEN_IDS } from '@utils/programs';
 
 import type { AutocompleteItem } from './types';
+
+// Well-known mint addresses
+const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
 /**
  * Converts a Record<address, label> to an array of AutocompleteItems.
@@ -57,6 +61,21 @@ const sysvarItems = recordToAutocompleteItems(SYSVAR_IDS, 'Sysvar', stripSysvarP
 
 const specialItems = recordToAutocompleteItems(SPECIAL_IDS, 'Special');
 
+const mintItems: AutocompleteItem[] = [
+    {
+        group: 'Mint',
+        keywords: ['wsol', 'wrapped', 'sol'],
+        label: 'Wrapped SOL',
+        value: NATIVE_MINT.toBase58(),
+    },
+    {
+        group: 'Mint',
+        keywords: ['usdc', 'stablecoin', 'circle'],
+        label: 'USDC',
+        value: USDC_MINT,
+    },
+];
+
 /**
  * Default list of common Solana programs for autocomplete suggestions.
  *
@@ -80,4 +99,7 @@ export const DEFAULT_AUTOCOMPLETE_ITEMS: AutocompleteItem[] = [
 
     // Special
     ...specialItems,
+
+    // Mints
+    ...mintItems,
 ];
