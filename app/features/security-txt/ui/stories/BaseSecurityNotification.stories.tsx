@@ -1,16 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { BaseSecurityNotification } from '../BaseSecurityNotificaton';
+import { BaseSecurityNotification } from '../BaseSecurityNotification';
 
 const meta = {
     component: BaseSecurityNotification,
-    decorators: [
-        Story => (
-            <div>
-                <Story />
-            </div>
-        ),
-    ],
     parameters: {
         backgrounds: {
             default: 'Card',

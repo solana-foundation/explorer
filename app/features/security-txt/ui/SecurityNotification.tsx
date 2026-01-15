@@ -1,7 +1,7 @@
 import { isUpgradeableLoaderAccountData, type ParsedData } from '@providers/accounts';
 
 import { useSecurityTxt } from '../model/useSecurityTxt';
-import { BaseSecurityNotification } from './BaseSecurityNotificaton';
+import { BaseSecurityNotification } from './BaseSecurityNotification';
 
 export function SecurityNotification({ parsedData, address }: { parsedData: ParsedData | undefined; address: string }) {
     const securityTxt = useSecurityTxt(
