@@ -21,6 +21,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
 import { clusterUrl } from '@/app/utils/cluster';
+import { getTransactionInstructionError } from '@/app/utils/program-err';
 
 import { programAtom } from '../model/state-atoms';
 import { AnchorInterpreter } from './anchor/anchor-interpreter';
@@ -430,11 +431,9 @@ function useInvocationState({
     const handleSimulatedTxResult = (simulatedTx: RpcResponseAndContext<SimulatedTransactionResponse>) => {
         if (simulatedTx.value.err !== null) {
             handleLogsChange(simulatedTx.value.logs);
-            let errorMessage;
-            if (typeof simulatedTx.value.err === 'string') {
-                errorMessage = simulatedTx.value.err;
-            }
-            throw new Error(errorMessage ?? 'Simulated with errors');
+            const programError = getTransactionInstructionError(simulatedTx.value.err);
+            const errorDetail = programError?.message ? `: "${programError.message}"` : '';
+            throw new Error(`Simulated with errors${errorDetail}. See logs for details`);
         }
     };
 
