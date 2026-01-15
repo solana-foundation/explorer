@@ -469,29 +469,38 @@ function useInvocationState({
 
     return {
         handleSimulatedTxResult,
-
         handleTxEnd,
         handleTxError,
         handleTxStart,
         handleTxSuccess,
-
         isExecuting,
-
         lastResult,
-
         parseLogs,
     };
 }
 
+/**
+ * Extracts custom error code from InstructionError variant.
+ */
 function extractCustomErrorCode(error: TransactionError | null): number | undefined {
-    if (!error || typeof error !== 'object' || !('InstructionError' in error)) {
+    if (!error || typeof error !== 'object') {
         return undefined;
     }
-    const innerError = error['InstructionError'] as [number, unknown];
+
+    if (!('InstructionError' in error)) {
+        return undefined;
+    }
+
+    const innerError = error['InstructionError'];
+    if (!Array.isArray(innerError) || innerError.length < 2) {
+        return undefined;
+    }
+
     const instructionError = innerError[1];
     if (typeof instructionError === 'object' && instructionError !== null && 'Custom' in instructionError) {
         return (instructionError as { Custom: number })['Custom'];
     }
+
     return undefined;
 }
 
