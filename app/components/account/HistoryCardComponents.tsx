@@ -1,6 +1,6 @@
 import { ConfirmedSignatureInfo, TransactionError } from '@solana/web3.js';
 import React from 'react';
-import { RefreshCw } from 'react-feather';
+import { Eye, EyeOff, RefreshCw } from 'react-feather';
 
 export type TransactionRow = {
     slot: number;
@@ -16,27 +16,52 @@ export function HistoryCardHeader({
     title,
     refresh,
     fetching,
+    hideFailedTxs,
+    onToggleHideFailedTxs,
 }: {
     title: string;
     refresh: () => void;
     fetching: boolean;
+    hideFailedTxs?: boolean;
+    onToggleHideFailedTxs?: (value: boolean) => void;
 }) {
     return (
         <div className="card-header align-items-center">
             <h3 className="card-header-title">{title}</h3>
-            <button className="btn btn-white btn-sm" disabled={fetching} onClick={() => refresh()}>
-                {fetching ? (
-                    <>
-                        <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
-                        Loading
-                    </>
-                ) : (
-                    <>
-                        <RefreshCw className="align-text-top me-2" size={13} />
-                        Refresh
-                    </>
+            <div style={{ display: 'flex', gap: '8px' }}>
+                {hideFailedTxs !== undefined && onToggleHideFailedTxs && (
+                    <button
+                        className="btn btn-white btn-sm"
+                        disabled={fetching}
+                        onClick={() => onToggleHideFailedTxs(!hideFailedTxs)}
+                    >
+                        {hideFailedTxs ? (
+                            <>
+                                <Eye className="align-text-top me-2" size={13} />
+                                Show All
+                            </>
+                        ) : (
+                            <>
+                                <EyeOff className="align-text-top me-2" size={13} />
+                                Hide Failed
+                            </>
+                        )}
+                    </button>
                 )}
-            </button>
+                <button className="btn btn-white btn-sm" disabled={fetching} onClick={() => refresh()}>
+                    {fetching ? (
+                        <>
+                            <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+                            Loading
+                        </>
+                    ) : (
+                        <>
+                            <RefreshCw className="align-text-top me-2" size={13} />
+                            Refresh
+                        </>
+                    )}
+                </button>
+            </div>
         </div>
     );
 }
