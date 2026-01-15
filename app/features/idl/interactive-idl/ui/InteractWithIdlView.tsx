@@ -16,6 +16,7 @@ export function InteractWithIdlView({
     instructions,
     idl,
     onExecuteInstruction,
+    onSectionsExpanded,
     parseLogs,
     isExecuting,
     lastResult,
@@ -23,6 +24,7 @@ export function InteractWithIdlView({
     instructions: InstructionData[];
     idl: SupportedIdl | undefined;
     onExecuteInstruction: (data: InstructionData, params: InstructionCallParams) => Promise<void>;
+    onSectionsExpanded?: (expandedSections: string[], programId?: string) => void;
     parseLogs: (logs: string[]) => InstructionLogs[];
     isExecuting?: boolean;
     lastResult: InstructionInvocationResult;
@@ -38,6 +40,7 @@ export function InteractWithIdlView({
     const handleExpandAllToggle = (checked: boolean) => {
         const sections = checked ? allInstructionNames : [];
         setExpandedSections(sections);
+        onSectionsExpanded?.(sections);
     };
 
     return (
@@ -66,6 +69,7 @@ export function InteractWithIdlView({
                         expandedSections={expandedSections}
                         setExpandedSections={setExpandedSections}
                         onExecuteInstruction={onExecuteInstruction}
+                        onSectionsExpanded={onSectionsExpanded}
                         isExecuting={isExecuting}
                     />
                 </div>

@@ -3,10 +3,9 @@ import type { InstructionData, SupportedIdl } from '@entities/idl';
 import { useToast } from '@shared/ui/sonner/use-toast';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useAtomValue } from 'jotai';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { ExplorerLink } from '@/app/entities/cluster';
-import { idlAnalytics } from '@/app/utils/analytics';
 
 import { originalIdlAtom, programIdAtom } from '../model/state-atoms';
 import { isEnabled, useInstruction } from '../model/use-instruction';
@@ -16,20 +15,49 @@ import { BaseWarningCard } from './BaseWarningCard';
 import { InteractWithIdlView } from './InteractWithIdlView';
 import { MainnetWarningDialog } from './MainnetWarningDialog';
 
+export interface InteractWithIdlAnalyticsCallbacks {
+    onSectionsExpanded?: (expandedSections: string[], programId?: string) => void;
+    onTabOpened?: (programId?: string) => void;
+    onTransactionConfirmed?: (instructionName: string, programId?: string, signature?: string) => void;
+    onTransactionFailed?: (instructionName: string, programId?: string, error?: string) => void;
+    onTransactionSubmitted?: (instructionName: string, programId?: string) => void;
+    onWalletConnected?: (programId?: string, walletType?: string) => void;
+};
+
 export function InteractWithIdl({
     data: instructions,
+    onSectionsExpanded,
+    onTabOpened,
+    onTransactionConfirmed,
+    onTransactionFailed,
+    onTransactionSubmitted,
+    onWalletConnected,
 }: {
     data?: InstructionData[];
-    onClusterSelect?: () => void;
-    onWalletConnect?: () => void;
-    onSendTransaction?: (instruction: string, data: unknown) => void;
-}) {
+} & InteractWithIdlAnalyticsCallbacks) {
     const toast = useToast();
     const idl = useAtomValue(originalIdlAtom);
     const progId = useAtomValue(programIdAtom);
-    const { connected, publicKey } = useWallet();
+    const { connected, publicKey, wallet } = useWallet();
 
     const [currentInstruction, setCurrentInstruction] = useState<{ name: string; programId?: string } | null>(null);
+    const [hasTrackedTabOpen, setHasTrackedTabOpen] = useState(false);
+    const [hasTrackedWalletConnect, setHasTrackedWalletConnect] = useState(false);
+
+    useEffect(() => {
+        if (!hasTrackedTabOpen && progId) {
+            onTabOpened?.(progId.toString());
+            setHasTrackedTabOpen(true);
+        }
+    }, [progId, onTabOpened, hasTrackedTabOpen]);
+
+    useEffect(() => {
+        if (connected && !hasTrackedWalletConnect && progId) {
+            const walletType = wallet?.adapter?.name;
+            onWalletConnected?.(progId.toString(), walletType);
+            setHasTrackedWalletConnect(true);
+        }
+    }, [connected, progId, wallet, onWalletConnected, hasTrackedWalletConnect]);
 
     const handleTransactionSuccess = useCallback(
         (txSignature: string) => {
@@ -46,7 +74,7 @@ export function InteractWithIdl({
             });
 
             if (currentInstruction) {
-                idlAnalytics.trackInstructionExecutionSuccess(
+                onTransactionConfirmed?.(
                     currentInstruction.name,
                     currentInstruction.programId,
                     txSignature
@@ -54,7 +82,7 @@ export function InteractWithIdl({
                 setCurrentInstruction(null);
             }
         },
-        [toast, currentInstruction]
+        [toast, currentInstruction, onTransactionConfirmed]
     );
 
     const handleTransactionError = useCallback(
@@ -62,11 +90,15 @@ export function InteractWithIdl({
             toast.custom({ description: error, title: 'Transaction Failed', type: 'error' });
 
             if (currentInstruction) {
-                idlAnalytics.trackInstructionExecutionError(currentInstruction.name, currentInstruction.programId, error);
+                onTransactionFailed?.(
+                    currentInstruction.name,
+                    currentInstruction.programId,
+                    error
+                );
                 setCurrentInstruction(null);
             }
         },
-        [toast, currentInstruction]
+        [toast, currentInstruction, onTransactionFailed]
     );
 
     const { invokeInstruction, initializationError, isExecuting, lastResult, parseLogs } = useInstruction({
@@ -86,7 +118,7 @@ export function InteractWithIdl({
         async (data: InstructionData, params: InstructionCallParams) => {
             const programIdStr = progId?.toString();
 
-            idlAnalytics.trackInstructionExecutionStarted(data.name, programIdStr);
+            onTransactionSubmitted?.(data.name, programIdStr);
 
             setCurrentInstruction({ name: data.name, programId: programIdStr });
 
@@ -97,7 +129,7 @@ export function InteractWithIdl({
                 { data, params }
             );
         },
-        [invokeInstruction, requireConfirmation, progId]
+        [invokeInstruction, requireConfirmation, progId, onTransactionSubmitted]
     );
 
     if (initializationError) {
@@ -117,6 +149,9 @@ export function InteractWithIdl({
                 instructions={instructions || []}
                 idl={idl as SupportedIdl}
                 onExecuteInstruction={handleExecuteInstruction}
+                onSectionsExpanded={(expandedSections) => {
+                    onSectionsExpanded?.(expandedSections, progId?.toString());
+                }}
                 isExecuting={isExecuting}
                 lastResult={lastResult}
                 parseLogs={parseLogs}

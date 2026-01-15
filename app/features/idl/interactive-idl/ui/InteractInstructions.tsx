@@ -1,10 +1,6 @@
 import type { InstructionData, SupportedIdl } from '@entities/idl';
-import { useAtomValue } from 'jotai';
 import { type Dispatch, type SetStateAction, useCallback } from 'react';
 
-import { idlAnalytics } from '@/app/utils/analytics';
-
-import { programIdAtom } from '../model/state-atoms';
 import type { InstructionCallParams } from '../model/use-instruction-form';
 import { Accordion } from './Accordion';
 import { InteractInstruction } from './InteractInstruction';
@@ -15,6 +11,7 @@ export function InteractInstructions({
     setExpandedSections,
     instructions,
     onExecuteInstruction,
+    onSectionsExpanded,
     isExecuting = false,
 }: {
     idl: SupportedIdl | undefined;
@@ -22,20 +19,15 @@ export function InteractInstructions({
     setExpandedSections: Dispatch<SetStateAction<string[]>>;
     instructions: InstructionData[];
     onExecuteInstruction: (data: InstructionData, params: InstructionCallParams) => Promise<void>;
+    onSectionsExpanded?: (expandedSections: string[], programId?: string) => void;
     isExecuting?: boolean;
 }) {
-    const progId = useAtomValue(programIdAtom);
-
     const handleValueChange = useCallback(
         (value: string[]) => {
-            const newlyExpanded = value.filter(section => !expandedSections.includes(section));
-            newlyExpanded.forEach(instructionName => {
-                idlAnalytics.trackInstructionExpanded(instructionName, progId?.toString());
-            });
-
             setExpandedSections(value);
+            onSectionsExpanded?.(value);
         },
-        [expandedSections, progId, setExpandedSections]
+        [onSectionsExpanded, setExpandedSections]
     );
 
     return (
