@@ -16,11 +16,11 @@ import { InteractWithIdlView } from './InteractWithIdlView';
 import { MainnetWarningDialog } from './MainnetWarningDialog';
 
 export interface InteractWithIdlAnalyticsCallbacks {
-    onSectionsExpanded?: (expandedSections: string[], programId?: string) => void;
+    onSectionsExpanded?: (programId?: string, expandedSections?: string[]) => void;
     onTabOpened?: (programId?: string) => void;
-    onTransactionConfirmed?: (instructionName: string, programId?: string, signature?: string) => void;
-    onTransactionFailed?: (instructionName: string, programId?: string, error?: string) => void;
-    onTransactionSubmitted?: (instructionName: string, programId?: string) => void;
+    onTransactionConfirmed?: (programId?: string, instructionName?: string, signature?: string) => void;
+    onTransactionFailed?: (programId?: string, instructionName?: string, error?: string) => void;
+    onTransactionSubmitted?: (programId?: string, instructionName?: string) => void;
     onWalletConnected?: (programId?: string, walletType?: string) => void;
 }
 
@@ -74,11 +74,7 @@ export function InteractWithIdl({
             });
 
             if (currentInstruction) {
-                onTransactionConfirmed?.(
-                    currentInstruction.name,
-                    currentInstruction.programId,
-                    txSignature
-                );
+                onTransactionConfirmed?.(currentInstruction.programId, currentInstruction.name, txSignature);
                 setCurrentInstruction(null);
             }
         },
@@ -90,11 +86,7 @@ export function InteractWithIdl({
             toast.custom({ description: error, title: 'Transaction Failed', type: 'error' });
 
             if (currentInstruction) {
-                onTransactionFailed?.(
-                    currentInstruction.name,
-                    currentInstruction.programId,
-                    error
-                );
+                onTransactionFailed?.(currentInstruction.programId, currentInstruction.name, error);
                 setCurrentInstruction(null);
             }
         },
@@ -118,7 +110,7 @@ export function InteractWithIdl({
         async (data: InstructionData, params: InstructionCallParams) => {
             const programIdStr = progId?.toString();
 
-            onTransactionSubmitted?.(data.name, programIdStr);
+            onTransactionSubmitted?.(programIdStr, data.name);
 
             setCurrentInstruction({ name: data.name, programId: programIdStr });
 
@@ -149,8 +141,8 @@ export function InteractWithIdl({
                 instructions={instructions || []}
                 idl={idl as SupportedIdl}
                 onExecuteInstruction={handleExecuteInstruction}
-                onSectionsExpanded={(expandedSections) => {
-                    onSectionsExpanded?.(expandedSections, progId?.toString());
+                onSectionsExpanded={expandedSections => {
+                    onSectionsExpanded?.(progId?.toString(), expandedSections);
                 }}
                 isExecuting={isExecuting}
                 lastResult={lastResult}
