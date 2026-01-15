@@ -52,9 +52,7 @@ function resolveProvider(win: Window): AnalyticsProvider | undefined {
 }
 
 function isAnalyticsEnabled(): boolean {
-    return Boolean(
-        process.env.NEXT_PUBLIC_GOOGLE_TAG_ID?.trim() || process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID?.trim()
-    );
+    return Boolean(process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID?.trim());
 }
 
 export function trackEvent(eventName: string, params?: EventParams): void {
