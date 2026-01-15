@@ -26,8 +26,6 @@ export function trackEvent(eventName: string, params?: EventParams): void {
         return;
     }
 
-        console.log(eventName, params)
-
     if (!isAnalyticsEnabled()) {
         return;
     }

@@ -22,7 +22,7 @@ export interface InteractWithIdlAnalyticsCallbacks {
     onTransactionFailed?: (instructionName: string, programId?: string, error?: string) => void;
     onTransactionSubmitted?: (instructionName: string, programId?: string) => void;
     onWalletConnected?: (programId?: string, walletType?: string) => void;
-};
+}
 
 export function InteractWithIdl({
     data: instructions,
