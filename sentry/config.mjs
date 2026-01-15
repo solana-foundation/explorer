@@ -18,6 +18,12 @@ export function createSentryConfig(_context) {
                 return 0;
             }
 
+            // Don't sample infrastructure requests:
+            // - GET https://iad1.suspense-cache.vercel-infra.com/v1/suspense-cache/*
+            if (samplingContext.name.includes('suspense-cache.vercel-infra.com')) {
+                return 0;
+            }
+
             // Don't sample health checks or monitoring endpoints
             if (samplingContext.name.includes('/api/ping')) {
                 return 0;
@@ -25,17 +31,10 @@ export function createSentryConfig(_context) {
 
             // Don't sample all other api endpoints as we should rely on logging
             if (samplingContext.name.includes('/api/')) {
-                return 0;
+                return 1;
             }
 
-            // Don't sample infrastructure requests:
-            // - GET https://iad1.suspense-cache.vercel-infra.com/v1/suspense-cache/*
-            if (samplingContext.name.includes('suspense-cache.vercel-infra.com')) {
-                return 0;
-            }
-
-            // Adjust the rate to fit the monthly quote. Previous 1e-7 rate was enough to track small 30M/hour peaks and huge 180-200M/hour ones
-            return 1 / 100000000;
+            return 1;
         },
 
         // Enable logs to be sent to Sentry
