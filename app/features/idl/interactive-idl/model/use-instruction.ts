@@ -96,7 +96,7 @@ export function useInstruction({
         handleTxEnd,
         handleSimulatedTxResult,
         parseLogs,
-    } = useInvocationState({ onError, onSuccess });
+    } = useInvocationState({ idlErrors: idl?.errors, onError, onSuccess });
     const [initializationError, setInitializationError] = useState<string | null>(null);
     const [isProgramLoading, setIsProgramLoading] = useState(false);
     const [program, setProgram] = useAtom(programAtom);
@@ -379,9 +379,11 @@ export type InstructionInvocationResult =
 function useInvocationState({
     onSuccess,
     onError,
+    idlErrors,
 }: {
     onSuccess?: (signature: string) => void;
     onError?: (error: string) => void;
+    idlErrors?: BaseIdl['errors'];
 } = {}) {
     const [transactionError, setTransactionError] = useState<TransactionError | null>(null);
     const { parseLogs } = useParsedLogs(transactionError);
@@ -432,8 +434,15 @@ function useInvocationState({
         if (simulatedTx.value.err !== null) {
             handleLogsChange(simulatedTx.value.logs);
             const programError = getTransactionInstructionError(simulatedTx.value.err);
-            const errorDetail = programError?.message ? `: "${programError.message}"` : '';
-            throw new Error(`Simulated with errors${errorDetail}. See logs for details`);
+            if (programError) {
+                const instructionNum = programError.index + 1;
+                const customCode = extractCustomErrorCode(simulatedTx.value.err);
+                const idlError = customCode !== undefined ? resolveIdlError(customCode, idlErrors) : undefined;
+                const errorMessage = idlError ? `"${idlError.name}"\u00A0(code:${customCode})` : programError.message;
+                throw new Error(`Instruction #${instructionNum} got ${errorMessage}. See logs for details`);
+            }
+            const errorDetail = JSON.stringify(simulatedTx.value.err);
+            throw new Error(`Simulated with errors: "${errorDetail}". See logs for details`);
         }
     };
 
@@ -472,6 +481,22 @@ function useInvocationState({
 
         parseLogs,
     };
+}
+
+function extractCustomErrorCode(error: TransactionError | null): number | undefined {
+    if (!error || typeof error !== 'object' || !('InstructionError' in error)) {
+        return undefined;
+    }
+    const innerError = error['InstructionError'] as [number, unknown];
+    const instructionError = innerError[1];
+    if (typeof instructionError === 'object' && instructionError !== null && 'Custom' in instructionError) {
+        return (instructionError as { Custom: number })['Custom'];
+    }
+    return undefined;
+}
+
+function resolveIdlError(code: number, errors: BaseIdl['errors']) {
+    return errors?.find(e => e.code === code);
 }
 
 function handleInvokeError(error: unknown | Error, message = 'Failed to invoke instruction') {
