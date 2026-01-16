@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { HistoryCardHeader, HistoryCardFooter, getTransactionRows } from '../HistoryCardComponents';
+import { getTransactionRows,HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 
 describe('HistoryCardHeader', () => {
     it('should render title and refresh button', () => {
@@ -20,10 +20,9 @@ describe('HistoryCardHeader', () => {
 
         render(<HistoryCardHeader title="Transaction History" refresh={mockRefresh} fetching={false} />);
 
-        const refreshButton = screen.getByText('Refresh').closest('button');
-        expect(refreshButton).not.toBeNull();
+        const refreshButton = screen.getByRole('button', { name: /refresh/i });
 
-        await user.click(refreshButton!);
+        await user.click(refreshButton);
         expect(mockRefresh).toHaveBeenCalledTimes(1);
     });
 
@@ -32,7 +31,7 @@ describe('HistoryCardHeader', () => {
 
         render(<HistoryCardHeader title="Transaction History" refresh={mockRefresh} fetching={true} />);
 
-        const refreshButton = screen.getByText('Loading').closest('button');
+        const refreshButton = screen.getByRole('button', { name: /loading/i });
         expect(refreshButton).toBeDisabled();
     });
 
@@ -94,10 +93,9 @@ describe('HistoryCardHeader', () => {
             />
         );
 
-        const filterButton = screen.getByText('Hide Failed').closest('button');
-        expect(filterButton).not.toBeNull();
+        const filterButton = screen.getByRole('button', { name: /hide failed/i });
 
-        await user.click(filterButton!);
+        await user.click(filterButton);
         expect(mockToggle).toHaveBeenCalledTimes(1);
         expect(mockToggle).toHaveBeenCalledWith(true);
     });
@@ -116,7 +114,7 @@ describe('HistoryCardHeader', () => {
             />
         );
 
-        const filterButton = screen.getByText('Hide Failed').closest('button');
+        const filterButton = screen.getByRole('button', { name: /hide failed/i });
         expect(filterButton).toBeDisabled();
     });
 
@@ -163,10 +161,9 @@ describe('HistoryCardFooter', () => {
 
         render(<HistoryCardFooter fetching={false} foundOldest={false} loadMore={mockLoadMore} />);
 
-        const loadMoreButton = screen.getByText('Load More').closest('button');
-        expect(loadMoreButton).not.toBeNull();
+        const loadMoreButton = screen.getByRole('button', { name: /load more/i });
 
-        await user.click(loadMoreButton!);
+        await user.click(loadMoreButton);
         expect(mockLoadMore).toHaveBeenCalledTimes(1);
     });
 
@@ -175,7 +172,7 @@ describe('HistoryCardFooter', () => {
 
         render(<HistoryCardFooter fetching={true} foundOldest={false} loadMore={mockLoadMore} />);
 
-        const loadMoreButton = screen.getByText('Loading').closest('button');
+        const loadMoreButton = screen.getByRole('button', { name: /loading/i });
         expect(loadMoreButton).toBeDisabled();
     });
 });
