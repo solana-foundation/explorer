@@ -1,3 +1,4 @@
+import { withBotId } from 'botid/next/config';
 import { withSentryConfig } from '@sentry/nextjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -86,8 +87,8 @@ const nextConfig = {
     },
 };
 
-/// Add wrapper to track errors with Sentry
-export default withSentryConfig(nextConfig, createSentryBuildConfig());
+/// Add wrapper to track errors with Sentry and BotID for bot protection
+export default withBotId(withSentryConfig(nextConfig, createSentryBuildConfig()));
 
 /// We going to handle Sentry errors step-by-step by cathcing unhandled exceptions route-wise
 /// See: https://nextjs.org/docs/app/getting-started/error-handling#nested-error-boundaries

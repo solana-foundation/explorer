@@ -7,10 +7,14 @@ import { Navbar } from '@components/Navbar';
 import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { Toaster } from '@shared/ui/sonner/toaster';
+import { BotIdClient } from 'botid/client';
 import type { Viewport } from 'next';
 import dynamic from 'next/dynamic';
 import { Rubik } from 'next/font/google';
 import { Metadata } from 'next/types';
+
+import { botIdProtectedRoutes } from '../middleware';
+
 const SearchBar = dynamic(() => import('@components/SearchBar'), {
     ssr: false,
 });
@@ -41,6 +45,7 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                 <link rel="icon" href="/favicon.png" type="image/png" />
                 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
                 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+                <BotIdClient protect={botIdProtectedRoutes} />
             </head>
             <body>
                 <ScrollAnchorProvider>
