@@ -21,3 +21,17 @@ pnpm dev --experimental-https
 ```
 
 This is required because Safari requires HTTPS for Web Cryptography API (`crypto.subtle`) access, which Solana dependencies need.
+
+### Generating sitemap
+
+To generate sitemaps from the build route information:
+
+```bash
+pnpm build:info
+pnpx tsx scripts/update-sitemap.ts
+```
+
+This generates:
+- `public/sitemap.xml` - sitemap index
+- `public/default-sitemap.xml` - static pages
+- `public/accounts-sitemap.xml` - known program addresses
