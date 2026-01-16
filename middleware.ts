@@ -4,6 +4,13 @@ import { NextResponse, type NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
+    // Only check requests that have the x-is-human header (set by BotIdClient on fetch/XHR)
+    // Page navigations don't have this header, so they pass through
+    const hasHumanHeader = request.headers.has('x-is-human');
+    if (!hasHumanHeader) {
+        return NextResponse.next();
+    }
+
     const verification = await checkBotId();
 
     // /api/* - block all bots (verified crawlers shouldn't hit API per robots.txt)
