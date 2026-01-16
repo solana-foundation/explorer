@@ -1,3 +1,4 @@
+import { withBotId } from 'botid/next/config';
 import { withSentryConfig } from '@sentry/nextjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -28,6 +29,21 @@ const nextConfig = {
                 protocol: 'https',
             },
         ],
+    },
+    async headers() {
+        const seoFileHeaders = [
+            {
+                key: 'Cache-Control',
+                value: 'public, max-age=3600, stale-while-revalidate=86400',
+            },
+        ];
+
+        return [
+            { source: '/robots.txt', headers: seoFileHeaders },
+            { source: '/sitemap.xml', headers: seoFileHeaders },
+            { source: '/default-sitemap.xml', headers: seoFileHeaders },
+            { source: '/accounts-sitemap.xml', headers: seoFileHeaders },
+        ];
     },
     async redirects() {
         return [
@@ -71,8 +87,8 @@ const nextConfig = {
     },
 };
 
-/// Add wrapper to track errors with Sentry
-export default withSentryConfig(nextConfig, createSentryBuildConfig());
+/// Add wrapper to track errors with Sentry and BotID for bot protection
+export default withBotId(withSentryConfig(nextConfig, createSentryBuildConfig()));
 
 /// We going to handle Sentry errors step-by-step by cathcing unhandled exceptions route-wise
 /// See: https://nextjs.org/docs/app/getting-started/error-handling#nested-error-boundaries
