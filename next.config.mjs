@@ -29,6 +29,21 @@ const nextConfig = {
             },
         ],
     },
+    async headers() {
+        const seoFileHeaders = [
+            {
+                key: 'Cache-Control',
+                value: 'public, max-age=3600, stale-while-revalidate=86400',
+            },
+        ];
+
+        return [
+            { source: '/robots.txt', headers: seoFileHeaders },
+            { source: '/sitemap.xml', headers: seoFileHeaders },
+            { source: '/default-sitemap.xml', headers: seoFileHeaders },
+            { source: '/accounts-sitemap.xml', headers: seoFileHeaders },
+        ];
+    },
     async redirects() {
         return [
             // Leave this above `ADDRESS_ALIASES`, since it also provides an alias for `/accounts`.
