@@ -427,7 +427,7 @@ importers:
         specifier: 6.2.0
         version: 6.2.0(eslint@8.39.0)(typescript@5.3.3)
       fast-xml-parser:
-        specifier: ^5.3.3
+        specifier: 5.3.3
         version: 5.3.3
       jest-environment-jsdom:
         specifier: 29.5.0
