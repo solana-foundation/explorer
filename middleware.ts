@@ -1,7 +1,13 @@
+import { isEnvEnabled } from '@utils/env';
 import { checkBotId } from 'botid/server';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+    // Feature flag to disable bot protection
+    if (!isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_ENABLED)) {
+        return NextResponse.next();
+    }
+
     const { pathname } = request.nextUrl;
 
     // Only check requests that have the x-is-human header (set by BotIdClient on fetch/XHR)

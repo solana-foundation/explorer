@@ -7,6 +7,7 @@ import { Navbar } from '@components/Navbar';
 import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { Toaster } from '@shared/ui/sonner/toaster';
+import { isEnvEnabled } from '@utils/env';
 import { BotIdClient } from 'botid/client';
 import type { Viewport } from 'next';
 import dynamic from 'next/dynamic';
@@ -45,7 +46,9 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                 <link rel="icon" href="/favicon.png" type="image/png" />
                 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
                 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-                <BotIdClient protect={botIdProtectedRoutes} />
+                <BotIdClient
+                    protect={isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_ENABLED) ? botIdProtectedRoutes : []}
+                />
             </head>
             <body>
                 <ScrollAnchorProvider>
