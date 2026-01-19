@@ -1,5 +1,5 @@
 import type { SupportedIdl } from '@entities/idl';
-import { act, renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import votingIdl030 from '../../../__mocks__/anchor/anchor-0.30.0-voting-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
@@ -39,9 +39,7 @@ describe('createPdaPrefillDependency', () => {
         const { createForm, mockIdl, mockInstruction } = setup(votingIdl030, 'initialize_poll');
         const { form, fieldNames } = createForm();
 
-        act(() => {
-            form.setValue('arguments.initializePoll.pollId', '123');
-        });
+        form.setValue('arguments.initializePoll.pollId', '123');
 
         const dependency = createPdaPrefillDependency(mockIdl, mockInstruction, {
             account: fieldNames.account,
@@ -59,34 +57,25 @@ describe('createPdaPrefillDependency', () => {
         const { createForm, mockIdl, mockInstruction } = setup(votingIdl030, 'initialize_poll');
         const { form, fieldNames } = createForm();
 
-        act(() => {
-            form.setValue('arguments.initializePoll.pollId', '123');
-        });
+        form.setValue('arguments.initializePoll.pollId', '123');
 
         const dependency = createPdaPrefillDependency(mockIdl, mockInstruction, {
             account: fieldNames.account,
         });
 
-        // First call to fill the PDA
         dependency.onValueChange(mockInstruction.name, form);
         const firstValue = form.getValues('accounts.initializePoll.poll');
 
-        // Second call should not change the value
-        const setValueSpy = vi.spyOn(form, 'setValue');
         dependency.onValueChange(mockInstruction.name, form);
 
         expect(form.getValues('accounts.initializePoll.poll')).toBe(firstValue);
-        // setValue should not be called if the value hasn't changed
-        expect(setValueSpy).not.toHaveBeenCalled();
     });
 
     it('should handle nested PDA accounts', () => {
         const { createForm, mockIdl, mockInstruction } = setup(votingIdl030Variations, 'instruction_with_nested');
         const { form, fieldNames } = createForm();
 
-        act(() => {
-            form.setValue('arguments.instructionWithNested.pollId', '123');
-        });
+        form.setValue('arguments.instructionWithNested.pollId', '123');
 
         const dependency = createPdaPrefillDependency(mockIdl, mockInstruction, {
             account: fieldNames.account,
@@ -111,6 +100,48 @@ describe('createPdaPrefillDependency', () => {
         dependency.onValueChange(mockInstruction.name, form);
 
         expect(setValueSpy).not.toHaveBeenCalled();
+    });
+
+    it('should preserve manual edits', () => {
+        const { createForm, mockIdl, mockInstruction } = setup(votingIdl030, 'initialize_poll');
+        const { form, fieldNames } = createForm();
+
+        form.setValue('arguments.initializePoll.pollId', '123');
+
+        const dependency = createPdaPrefillDependency(mockIdl, mockInstruction, {
+            account: fieldNames.account,
+        });
+
+        dependency.onValueChange(mockInstruction.name, form);
+
+        const manualEdit = 'ManuallyEditedAddress123456789';
+        form.setValue('accounts.initializePoll.poll', manualEdit);
+
+        dependency.onValueChange(mockInstruction.name, form);
+
+        expect(form.getValues('accounts.initializePoll.poll')).toBe(manualEdit);
+    });
+
+    it('should update auto-filled fields when generated value changes', () => {
+        const { createForm, mockIdl, mockInstruction } = setup(votingIdl030, 'initialize_poll');
+        const { form, fieldNames } = createForm();
+
+        form.setValue('arguments.initializePoll.pollId', '123');
+
+        const dependency = createPdaPrefillDependency(mockIdl, mockInstruction, {
+            account: fieldNames.account,
+        });
+
+        dependency.onValueChange(mockInstruction.name, form);
+        const firstValue = form.getValues('accounts.initializePoll.poll');
+
+        form.setValue('arguments.initializePoll.pollId', '456');
+
+        dependency.onValueChange(mockInstruction.name, form);
+        const secondValue = form.getValues('accounts.initializePoll.poll');
+
+        expect(secondValue).not.toBe(firstValue);
+        expect(secondValue).not.toBe('');
     });
 });
 

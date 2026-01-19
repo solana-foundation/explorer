@@ -5,6 +5,7 @@ import type { DeepPartial } from 'react-hook-form';
 
 import type { InstructionFormData } from '../use-instruction-form';
 import { createAnchorPdaProvider } from './anchor-provider';
+import { resolveProgramId } from './program-resolver';
 import { createPdaProviderRegistry } from './registry';
 import { buildSeedsWithInfo } from './seed-builder';
 
@@ -53,6 +54,11 @@ export function computePdas(
             continue;
         }
 
+        // Skip if pda is just a boolean (0.29 IDL) without seeds definition
+        if (typeof account.pda === 'boolean' || !account.pda.seeds) {
+            continue;
+        }
+
         const camelName = camelCase(account.name);
 
         try {
@@ -63,8 +69,10 @@ export function computePdas(
                 idlInstruction
             );
 
-            if (seedBuffers) {
-                const [pda] = PublicKey.findProgramAddressSync(seedBuffers, programId);
+            const derivationProgramId = resolveProgramId(programId, account.pda.program, { accounts, args });
+
+            if (seedBuffers && derivationProgramId) {
+                const [pda] = PublicKey.findProgramAddressSync(seedBuffers, derivationProgramId);
                 pdaAddresses[camelName] = {
                     generated: pda.toBase58(),
                     seeds: seedInfo,
