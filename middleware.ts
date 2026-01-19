@@ -10,21 +10,12 @@ export async function middleware(request: NextRequest) {
 
     const { pathname } = request.nextUrl;
 
-    // Only check requests that have the x-is-human header (set by BotIdClient on fetch/XHR)
-    // Page navigations don't have this header, so they pass through
-    // const hasHumanHeader = request.headers.has('x-is-human');
-    // if (hasHumanHeader) {
-    //     console.log('is_human');
-    //     // return NextResponse.next();
-    // }
-
     const verification = await checkBotId({
+        // Set a `bypass` rule to browse as a bot if needed
         developmentOptions: {
             bypass: isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT) ? 'BAD-BOT' : undefined,
         },
     });
-
-    console.log({ verification });
 
     // /api/* - block all bots (verified crawlers shouldn't hit API per robots.txt)
     if (pathname.startsWith('/api/')) {
