@@ -5,8 +5,10 @@ import { useCluster } from '@providers/cluster';
 import { Badge } from '@shared/ui/badge';
 import { cn } from '@shared/utils';
 import { useEffect, useMemo, useState } from 'react';
+import { AlertTriangle, ExternalLink } from 'react-feather';
 
 import { IdlVariant, useIdlLastTransactionDate } from '../model/use-idl-last-transaction-date';
+import { IdlInstructionSection } from './IdlInstructionSection';
 import { IdlSection } from './IdlSection';
 
 type IdlTab = {
@@ -65,7 +67,54 @@ export function IdlCard({ programId }: { programId: string }) {
     }, [tabs, activeTabIndex]);
 
     if (tabs.length === 0 || activeTabIndex === undefined) {
-        return null;
+        return (
+            <div className="card">
+                <div className="card-header">
+                    <h4 className="card-header-title">Program IDL</h4>
+                </div>
+                <div className="card-body">
+                    <div className="e-mb-6 e-flex e-items-center e-gap-2 e-text-destructive">
+                        <AlertTriangle size={16} />
+                        <span>
+                            This program doesn&apos;t have an IDL yet. If you&apos;re the developer, upload it using the
+                            instructions below.
+                        </span>
+                    </div>
+
+                    <div className="e-space-y-6">
+                        <IdlInstructionSection
+                            title="Create & manage IDL buffer"
+                            description="First create a buffer from an IDL JSON file and then transfer authority of that buffer to a new Solana wallet/account."
+                            commands={[
+                                'npx @solana-program/program-metadata@latest create-buffer ./target/idl/$PROGRAM_NAME.json',
+                                `npx @solana-program/program-metadata@latest set-buffer-authority $BUFFER_ACCOUNT \\
+  --new-authority $NEW_AUTHORITY_WALLET`,
+                            ]}
+                        />
+
+                        <IdlInstructionSection
+                            title="Create (or updates if it already exists) on-chain IDL"
+                            description="They use the buffer to either create or update the IDL (Interface Definition Language) on-chain for a specific Solana program. Add --export flag to just see the result."
+                            commands={[
+                                `npx @solana-program/program-metadata@latest write idl $PROGRAM_ADDRESS \\
+  --buffer $BUFFER_ACCOUNT \\
+  --close-buffer $NEW_AUTHORITY_WALLET`,
+                            ]}
+                        />
+
+                        <a
+                            href="https://github.com/solana-program/program-metadata?tab=readme-ov-file#commands"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-outline-primary btn-sm"
+                        >
+                            Full documentation
+                            <ExternalLink className="align-text-top ms-2" size={13} />
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     const activeTab = tabs[activeTabIndex];
