@@ -31,10 +31,10 @@ export function createSentryConfig(_context) {
 
             // Don't sample all other api endpoints as we should rely on logging
             if (samplingContext.name.includes('/api/')) {
-                return 1;
+                return 0;
             }
 
-            return 1;
+            return 1 / 100000000;
         },
 
         // Enable logs to be sent to Sentry
