@@ -39,8 +39,7 @@ export function IdlInstructionSection({ title, description, commands }: IIdlInst
                     onClick={handleCopy}
                     type="button"
                     className="btn btn-white btn-sm e-flex-shrink-0"
-                    aria-label={'Copy'}
-                    aria-pressed={true}
+                    aria-label={copied ? 'Copied' : 'Copy'}
                 >
                     {copied ? (
                         <span className="e-text-green-400">Copied</span>

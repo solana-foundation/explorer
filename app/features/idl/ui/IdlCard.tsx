@@ -94,7 +94,7 @@ export function IdlCard({ programId }: { programId: string }) {
 
                         <IdlInstructionSection
                             title="Create (or updates if it already exists) on-chain IDL"
-                            description="They use the buffer to either create or update the IDL (Interface Definition Language) on-chain for a specific Solana program. Add --export flag to just see the result."
+                            description="This command uses the buffer to either create or update the IDL (Interface Definition Language) on-chain for a specific Solana program. Add --export flag to just see the result."
                             commands={[
                                 `npx @solana-program/program-metadata@latest write idl $PROGRAM_ADDRESS \\
   --buffer $BUFFER_ACCOUNT \\
