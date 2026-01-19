@@ -632,11 +632,7 @@ function ProgramIdlLink({ tab, address, account }: { tab: Tab; address: string; 
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
 
-    // Check if this is a program account
-    const parsedData = account.data.parsed;
-    const isProgram = parsedData && parsedData.parsed.type === 'program';
-
-    if (!isProgram) {
+    if (!account.executable) {
         return null;
     }
 
