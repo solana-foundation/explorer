@@ -1,9 +1,11 @@
 import { NextRequest } from 'next/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('botid/server', () => ({
     checkBotId: vi.fn(),
 }));
+
+vi.spyOn(console, 'log').mockImplementation(() => {});
 
 import { checkBotId } from 'botid/server';
 
@@ -91,7 +93,7 @@ describe('middleware', () => {
 
         describe('with challenge mode enabled', () => {
             beforeEach(() => {
-                process.env.NEXT_PUBLIC_BOT_CHALLENGE_MODE_ENABLED = 'true';
+                process.env.NEXT_PUBLIC_BOTID_CHALLENGE_MODE_ENABLED = 'true';
             });
 
             it('should block bot requests with 401 and explicit message', async () => {
@@ -161,7 +163,7 @@ describe('middleware', () => {
         it('should block request when both simulate bot mode and challenge mode are enabled', async () => {
             process.env.NEXT_PUBLIC_BOTID_ENABLED = 'true';
             process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT = 'true';
-            process.env.NEXT_PUBLIC_BOT_CHALLENGE_MODE_ENABLED = 'true';
+            process.env.NEXT_PUBLIC_BOTID_CHALLENGE_MODE_ENABLED = 'true';
 
             vi.mocked(checkBotId).mockResolvedValue({
                 isBot: true,
