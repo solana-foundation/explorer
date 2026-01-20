@@ -8,7 +8,6 @@ export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     if (!isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_ENABLED)) {
-        console.log(`[middleware] BotId disabled, allowing: ${pathname}`);
         return NextResponse.next();
     }
 
@@ -32,13 +31,18 @@ export async function middleware(request: NextRequest) {
         bypassed: verification.bypassed,
     });
 
-    // Block all bots from API routes
+    // Block bots only when challenge mode is enabled
     if (verification.isBot) {
-        console.log(`[middleware] Bot detected, blocking: ${pathname}`);
-        return NextResponse.json(BOT_RESPONSE.body, { status: BOT_RESPONSE.status });
+        console.log(`[middleware] Bot detected: ${pathname}`);
+
+        if (isEnvEnabled(process.env.NEXT_PUBLIC_BOT_CHALLENGE_MODE_ENABLED)) {
+            console.log(`[middleware] Challenge mode enabled, blocking: ${pathname}`);
+            return NextResponse.json(BOT_RESPONSE.body, { status: BOT_RESPONSE.status });
+        }
+    } else {
+        console.log(`[middleware] Human verified, allowing: ${pathname}`);
     }
 
-    console.log(`[middleware] Human verified, allowing: ${pathname}`);
     return NextResponse.next();
 }
 

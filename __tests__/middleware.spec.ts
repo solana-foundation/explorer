@@ -74,7 +74,27 @@ describe('middleware', () => {
                 expect(checkBotId).toHaveBeenCalled();
             });
 
-            it('should block bot requests to /api/* routes with 401 and explicit message', async () => {
+            it('should allow bot requests when challenge mode is disabled', async () => {
+                vi.mocked(checkBotId).mockResolvedValue({
+                    isBot: true,
+                    isVerifiedBot: false,
+                    isHuman: false,
+                    bypassed: false,
+                });
+
+                const request = createRequest('/api/test', { 'x-is-human': 'true' });
+                const response = await middleware(request);
+
+                expect(response.status).toBe(200);
+            });
+        });
+
+        describe('with challenge mode enabled', () => {
+            beforeEach(() => {
+                process.env.NEXT_PUBLIC_BOT_CHALLENGE_MODE_ENABLED = 'true';
+            });
+
+            it('should block bot requests with 401 and explicit message', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
                     isBot: true,
                     isVerifiedBot: false,
@@ -90,7 +110,7 @@ describe('middleware', () => {
                 expect(body).toEqual({ error: 'Access denied: request identified as automated bot' });
             });
 
-            it('should block verified bot requests to /api/* routes', async () => {
+            it('should block verified bot requests', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
                     isBot: true,
                     isVerifiedBot: true,
@@ -103,11 +123,25 @@ describe('middleware', () => {
 
                 expect(response.status).toBe(401);
             });
+
+            it('should allow human requests', async () => {
+                vi.mocked(checkBotId).mockResolvedValue({
+                    isBot: false,
+                    isVerifiedBot: false,
+                    isHuman: true,
+                    bypassed: false,
+                });
+
+                const request = createRequest('/api/test', { 'x-is-human': 'true' });
+                const response = await middleware(request);
+
+                expect(response.status).toBe(200);
+            });
         });
     });
 
     describe('simulate bot mode', () => {
-        it('should pass BAD-BOT bypass option when NEXT_PUBLIC_BOTID_SIMULATE_BOT is enabled', async () => {
+        it('should allow request when simulate bot mode is enabled but challenge mode is disabled', async () => {
             process.env.NEXT_PUBLIC_BOTID_ENABLED = 'true';
             process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT = 'true';
 
@@ -119,13 +153,27 @@ describe('middleware', () => {
             });
 
             const request = createRequest('/api/test', { 'x-is-human': 'true' });
-            await middleware(request);
+            const response = await middleware(request);
 
-            expect(checkBotId).toHaveBeenCalledWith({
-                developmentOptions: {
-                    bypass: 'BAD-BOT',
-                },
+            expect(response.status).toBe(200);
+        });
+
+        it('should block request when both simulate bot mode and challenge mode are enabled', async () => {
+            process.env.NEXT_PUBLIC_BOTID_ENABLED = 'true';
+            process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT = 'true';
+            process.env.NEXT_PUBLIC_BOT_CHALLENGE_MODE_ENABLED = 'true';
+
+            vi.mocked(checkBotId).mockResolvedValue({
+                isBot: true,
+                isVerifiedBot: false,
+                isHuman: false,
+                bypassed: true,
             });
+
+            const request = createRequest('/api/test', { 'x-is-human': 'true' });
+            const response = await middleware(request);
+
+            expect(response.status).toBe(401);
         });
     });
 });
