@@ -18,6 +18,7 @@ export function Navbar({ children }: INavbarProps) {
     const [navOpened, navHandlers] = useDisclosure(false);
     const homePath = useClusterPath({ pathname: '/' });
     const featureGatesPath = useClusterPath({ pathname: '/feature-gates' });
+    const tosPath = useClusterPath({ pathname: '/tos' });
     const supplyPath = useClusterPath({ pathname: '/supply' });
     const programsPath = useClusterPath({ pathname: '/verified-programs' });
     const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
@@ -49,6 +50,14 @@ export function Navbar({ children }: INavbarProps) {
                                 href={featureGatesPath}
                             >
                                 Feature Gates
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link${selectedLayoutSegment === 'tos' ? ' active' : ''}`}
+                                href={tosPath}
+                            >
+                                Terms of Service
                             </Link>
                         </li>
                         <li className="nav-item">
