@@ -1,12 +1,14 @@
 import { NextRequest } from 'next/server';
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Set default log level for this test to avoid flaky tests if .env changes
+const TEST_LOG_LEVEL = '0';
 
 vi.mock('botid/server', () => ({
     checkBotId: vi.fn(),
 }));
 
-vi.spyOn(console, 'log').mockImplementation(() => {});
-
+import Logger from '@utils/logger';
 import { checkBotId } from 'botid/server';
 
 import { middleware } from '../middleware';
@@ -19,9 +21,27 @@ function createRequest(pathname: string, headers: Record<string, string> = {}): 
 describe('middleware', () => {
     const originalEnv = { ...process.env };
 
+    let loggerInfoSpy: ReturnType<typeof vi.spyOn>;
+    let loggerWarnSpy: ReturnType<typeof vi.spyOn>;
+    let loggerErrorSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeAll(() => {
+        process.env.NEXT_LOG_LEVEL = TEST_LOG_LEVEL;
+    });
+
     beforeEach(() => {
         vi.clearAllMocks();
-        process.env = { ...originalEnv };
+        process.env = { ...originalEnv, NEXT_LOG_LEVEL: TEST_LOG_LEVEL };
+
+        loggerInfoSpy = vi.spyOn(Logger, 'info').mockImplementation(() => {});
+        loggerWarnSpy = vi.spyOn(Logger, 'warn').mockImplementation(() => {});
+        loggerErrorSpy = vi.spyOn(Logger, 'error').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+        loggerInfoSpy.mockRestore();
+        loggerWarnSpy.mockRestore();
+        loggerErrorSpy.mockRestore();
     });
 
     afterAll(() => {
@@ -51,17 +71,20 @@ describe('middleware', () => {
         });
 
         describe('without x-is-human header', () => {
-            it('should allow request without verification', async () => {
+            it('should allow request without verification and log info', async () => {
                 const request = createRequest('/api/test');
                 const response = await middleware(request);
 
                 expect(response.status).toBe(200);
                 expect(checkBotId).not.toHaveBeenCalled();
+                expect(loggerInfoSpy).toHaveBeenCalledWith(
+                    expect.stringContaining('[middleware] No x-is-human header')
+                );
             });
         });
 
         describe('with x-is-human header', () => {
-            it('should allow human requests to /api/* routes', async () => {
+            it('should allow human requests and log verification info', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
                     isBot: false,
                     isVerifiedBot: false,
@@ -74,9 +97,14 @@ describe('middleware', () => {
 
                 expect(response.status).toBe(200);
                 expect(checkBotId).toHaveBeenCalled();
+                expect(loggerInfoSpy).toHaveBeenCalledWith(
+                    expect.stringContaining('[middleware] BotId verification'),
+                    expect.objectContaining({ isHuman: true })
+                );
+                expect(loggerInfoSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Human verified'));
             });
 
-            it('should allow bot requests when challenge mode is disabled', async () => {
+            it('should allow bot requests when challenge mode is disabled and log warning', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
                     isBot: true,
                     isVerifiedBot: false,
@@ -88,6 +116,7 @@ describe('middleware', () => {
                 const response = await middleware(request);
 
                 expect(response.status).toBe(200);
+                expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Bot detected'));
             });
         });
 
@@ -96,7 +125,7 @@ describe('middleware', () => {
                 process.env.NEXT_PUBLIC_BOTID_CHALLENGE_MODE_ENABLED = 'true';
             });
 
-            it('should block bot requests with 401 and explicit message', async () => {
+            it('should block bot requests with 401 and log error', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
                     isBot: true,
                     isVerifiedBot: false,
@@ -110,9 +139,13 @@ describe('middleware', () => {
                 expect(response.status).toBe(401);
                 const body = await response.json();
                 expect(body).toEqual({ error: 'Access denied: request identified as automated bot' });
+                expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Bot detected'));
+                expect(loggerErrorSpy).toHaveBeenCalledWith(
+                    expect.stringContaining('[middleware] Challenge mode enabled, blocking')
+                );
             });
 
-            it('should block verified bot requests', async () => {
+            it('should block verified bot requests and log error', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
                     isBot: true,
                     isVerifiedBot: true,
@@ -124,9 +157,12 @@ describe('middleware', () => {
                 const response = await middleware(request);
 
                 expect(response.status).toBe(401);
+                expect(loggerErrorSpy).toHaveBeenCalledWith(
+                    expect.stringContaining('[middleware] Challenge mode enabled, blocking')
+                );
             });
 
-            it('should allow human requests', async () => {
+            it('should allow human requests and log info', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
                     isBot: false,
                     isVerifiedBot: false,
@@ -138,6 +174,7 @@ describe('middleware', () => {
                 const response = await middleware(request);
 
                 expect(response.status).toBe(200);
+                expect(loggerInfoSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Human verified'));
             });
         });
     });
@@ -158,6 +195,7 @@ describe('middleware', () => {
             const response = await middleware(request);
 
             expect(response.status).toBe(200);
+            expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Bot detected'));
         });
 
         it('should block request when both simulate bot mode and challenge mode are enabled', async () => {
@@ -176,6 +214,9 @@ describe('middleware', () => {
             const response = await middleware(request);
 
             expect(response.status).toBe(401);
+            expect(loggerErrorSpy).toHaveBeenCalledWith(
+                expect.stringContaining('[middleware] Challenge mode enabled, blocking')
+            );
         });
     });
 });
