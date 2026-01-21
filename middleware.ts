@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
         Logger.warn(`[middleware] Bot detected: ${pathname}`);
 
         if (isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_CHALLENGE_MODE_ENABLED)) {
-            Logger.error(`[middleware] Challenge mode enabled, blocking: ${pathname}`);
+            Logger.error(new Error(`[middleware] Challenge mode enabled, blocking: ${pathname}`));
             return NextResponse.json(BOT_RESPONSE.body, { status: BOT_RESPONSE.status });
         }
     } else {
