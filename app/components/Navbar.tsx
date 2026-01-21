@@ -36,7 +36,7 @@ export function Navbar({ children }: INavbarProps) {
                 </button>
 
                 <div
-                    className="navbar-children d-flex align-items-center flex-grow-1 h-100 d-none d-lg-block"
+                    className="navbar-children d-flex align-items-center flex-grow-1 h-100 d-none d-xl-block"
                     style={{ minWidth: 0 }}
                 >
                     {children}
