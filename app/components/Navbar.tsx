@@ -85,7 +85,7 @@ export function Navbar({ children }: INavbarProps) {
                                 className={`nav-link${selectedLayoutSegment === 'tos' ? ' active' : ''}`}
                                 href={tosPath}
                             >
-                                Terms of Service
+                                ToS
                             </Link>
                         </li>
                         <li className="nav-item align-items-center justify-content-center pt-2">
