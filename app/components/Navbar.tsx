@@ -54,14 +54,6 @@ export function Navbar({ children }: INavbarProps) {
                         </li>
                         <li className="nav-item">
                             <Link
-                                className={`nav-link${selectedLayoutSegment === 'tos' ? ' active' : ''}`}
-                                href={tosPath}
-                            >
-                                Terms of Service
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link
                                 className={`nav-link${selectedLayoutSegment === 'supply' ? ' active' : ''}`}
                                 href={supplyPath}
                             >
@@ -86,6 +78,14 @@ export function Navbar({ children }: INavbarProps) {
                                 href={inspectorPath}
                             >
                                 Inspector
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link${selectedLayoutSegment === 'tos' ? ' active' : ''}`}
+                                href={tosPath}
+                            >
+                                Terms of Service
                             </Link>
                         </li>
                         <li className="nav-item align-items-center justify-content-center pt-2">
