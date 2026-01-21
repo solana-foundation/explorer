@@ -141,7 +141,9 @@ describe('middleware', () => {
                 expect(body).toEqual({ error: 'Access denied: request identified as automated bot' });
                 expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Bot detected'));
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
-                    expect.stringContaining('[middleware] Challenge mode enabled, blocking')
+                    expect.objectContaining({
+                        message: expect.stringContaining('[middleware] Challenge mode enabled, blocking'),
+                    })
                 );
             });
 
@@ -158,7 +160,9 @@ describe('middleware', () => {
 
                 expect(response.status).toBe(401);
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
-                    expect.stringContaining('[middleware] Challenge mode enabled, blocking')
+                    expect.objectContaining({
+                        message: expect.stringContaining('[middleware] Challenge mode enabled, blocking'),
+                    })
                 );
             });
 
@@ -215,7 +219,9 @@ describe('middleware', () => {
 
             expect(response.status).toBe(401);
             expect(loggerErrorSpy).toHaveBeenCalledWith(
-                expect.stringContaining('[middleware] Challenge mode enabled, blocking')
+                expect.objectContaining({
+                    message: expect.stringContaining('[middleware] Challenge mode enabled, blocking'),
+                })
             );
         });
     });
