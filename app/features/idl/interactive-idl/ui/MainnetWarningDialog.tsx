@@ -27,8 +27,9 @@ export function MainnetWarningDialog({ open, onOpenChange, onConfirm, onCancel }
                         Spend real funds?
                     </DialogTitle>
                     <DialogDescription className="e-pl-6">
-                        You&apos;re connected to Mainnet. Any SOL you send now is permanent and costs real money. Make
-                        sure the details are correct before continuing.
+                        Please take note that this is a beta version feature and is provided on an &quot;as is&quot; and
+                        &quot;as available&quot; basis. Solana Explorer does not provide any warranties and will not be
+                        liable for any loss, direct or indirect, through continued use of this feature.
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
