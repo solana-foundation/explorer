@@ -1,45 +1,55 @@
 import { isEnvEnabled } from '@utils/env';
+import Logger from '@utils/logger';
 import { checkBotId } from 'botid/server';
 import { NextResponse, type NextRequest } from 'next/server';
 
+const BOT_RESPONSE = { body: { error: 'Access denied: request identified as automated bot' }, status: 401 } as const;
+
 export async function middleware(request: NextRequest) {
-    // Feature flag to disable bot protection
+    const { pathname } = request.nextUrl;
+
     if (!isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_ENABLED)) {
         return NextResponse.next();
     }
 
-    const { pathname } = request.nextUrl;
+    // Allow requests without x-is-human header (direct API calls)
+    if (!request.headers.has('x-is-human')) {
+        Logger.info(`[middleware] No x-is-human header, allowing: ${pathname}`);
+        return NextResponse.next();
+    }
 
+    // Verify requests with x-is-human header (browser requests via BotIdClient)
     const verification = await checkBotId({
-        // Set a `bypass` rule to browse as a bot if needed
         developmentOptions: {
             bypass: isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT) ? 'BAD-BOT' : undefined,
         },
     });
 
-    // /api/* - block all bots (verified crawlers shouldn't hit API per robots.txt)
-    if (pathname.startsWith('/api/')) {
-        if (verification.isBot) {
-            return new NextResponse('Forbidden', { status: 403 });
-        }
-    }
+    Logger.info(`[middleware] BotId verification for ${pathname}:`, {
+        isBot: verification.isBot,
+        isHuman: verification.isHuman,
+        isVerifiedBot: verification.isVerifiedBot,
+        bypassed: verification.bypassed,
+    });
 
-    // /tx/* - block bad bots, allow verified crawlers (Googlebot, Bingbot, etc.)
-    if (pathname.startsWith('/tx/')) {
-        if (verification.isBot && !verification.isVerifiedBot) {
-            return new NextResponse('Forbidden', { status: 403 });
+    // Block bots only when challenge mode is enabled
+    if (verification.isBot) {
+        Logger.warn(`[middleware] Bot detected: ${pathname}`);
+
+        if (isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_CHALLENGE_MODE_ENABLED)) {
+            Logger.error(new Error(`[middleware] Challenge mode enabled, blocking: ${pathname}`));
+            return NextResponse.json(BOT_RESPONSE.body, { status: BOT_RESPONSE.status });
         }
+    } else {
+        Logger.info(`[middleware] Human verified, allowing: ${pathname}`);
     }
 
     return NextResponse.next();
 }
 
 export const config = {
-    matcher: ['/api/:path*', '/tx/:path*'],
+    matcher: ['/api/:path*'],
 };
 
-// BotIdClient protected routes config (used in ./app/layout.tsx )
-export const botIdProtectedRoutes: { path: string; method: string }[] = [
-    { path: '/api/*', method: '*' },
-    { path: '/tx/*', method: 'GET' },
-];
+// BotIdClient protected routes - only API routes need protection
+export const botIdProtectedRoutes: { path: string; method: string }[] = [{ path: '/api/*', method: '*' }];
