@@ -89,7 +89,7 @@ export function IdlCard({ programId }: { programId: string }) {
                         />
 
                         <div className="e-flex e-items-center e-justify-between">
-                            <span>In case you want to upload IDL with a multisig, read documentation.</span>
+                            <span>In case you want to upload IDL with a multisig, follow the documentation.</span>
                             <a
                                 href="https://github.com/solana-program/program-metadata?tab=readme-ov-file#commands"
                                 target="_blank"
