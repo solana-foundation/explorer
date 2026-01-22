@@ -1,5 +1,6 @@
 'use client';
 
+import { DownloadableDropdown } from '@components/common/Downloadable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SolBalance } from '@components/common/SolBalance';
@@ -399,7 +400,6 @@ function PermalinkView({
         rawMessage: message.serialize(),
         signatures,
     };
-
     return <LoadedView transaction={tx} onClear={reset} showTokenBalanceChanges={showTokenBalanceChanges} />;
 }
 
@@ -441,7 +441,17 @@ const DEFAULT_FEES = {
     lamportsPerSignature: 5000,
 };
 
-function OverviewCard({ message, raw, onClear }: { message: VersionedMessage; raw: Uint8Array; onClear: () => void }) {
+function OverviewCard({
+    message,
+    raw,
+    onClear,
+    signature,
+}: {
+    message: VersionedMessage;
+    raw: Uint8Array;
+    onClear: () => void;
+    signature?: string;
+}) {
     const fee = message.header.numRequiredSignatures * DEFAULT_FEES.lamportsPerSignature;
     const feePayerValidator = createFeePayerValidator(fee);
 
@@ -458,6 +468,8 @@ function OverviewCard({ message, raw, onClear }: { message: VersionedMessage; ra
                     <button className="btn btn-sm d-flex btn-white" onClick={onClear}>
                         Clear
                     </button>
+                    <span className="me-2"></span>
+                    <DownloadableDropdown filename={signature || 'signature'} data={raw} />
                 </div>
                 <TableCardBody>
                     <tr>

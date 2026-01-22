@@ -1,40 +1,57 @@
 'use client';
 
-import React, { ReactNode, useState } from 'react';
-import { CheckCircle, Copy, XCircle } from 'react-feather';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+import { CheckCircle, Copy, Loader, XCircle } from 'react-feather';
 
-type CopyState = 'copy' | 'copied' | 'errored';
+type CopyState = 'copy' | 'copied' | 'errored' | 'loading';
 
-export function Copyable({ text, children }: { text: string; children: ReactNode }) {
+export function Copyable({ text, children }: { text: string | null; children: ReactNode }) {
     const [state, setState] = useState<CopyState>('copy');
 
     const handleClick = async () => {
-        try {
-            await navigator.clipboard.writeText(text);
-            setState('copied');
-        } catch (err) {
-            setState('errored');
+        if (typeof text !== 'string') {
+            setState('loading');
+            return;
         }
-        setTimeout(() => setState('copy'), 1000);
+        proceedCopy(text);
+    };
+
+    const copyStrategy: Record<CopyState, JSX.Element> = {
+        copied: <CheckCircle className="align-text-top" size={13} />,
+        copy: <Copy className="align-text-top c-pointer" onClick={handleClick} size={13} />,
+        errored: (
+            <span title="Please check your browser's copy permissions.">
+                <XCircle className="align-text-top" size={13} />
+            </span>
+        ),
+        loading: <Loader className="align-text-top" size={13} />,
     };
 
     function CopyIcon() {
-        if (state === 'copy') {
-            return <Copy className="align-text-top c-pointer" onClick={handleClick} size={13} />;
-        } else if (state === 'copied') {
-            return <CheckCircle className="align-text-top" size={13} />;
-        } else if (state === 'errored') {
-            return (
-                <span title="Please check your browser's copy permissions.">
-                    <XCircle className="align-text-top" size={13} />
-                </span>
-            );
-        }
-        return null;
+        return copyStrategy[state] || null;
     }
 
+    const proceedCopy = useCallback(
+        async (textToCopy: string) => {
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                setState('copied');
+            } catch (err) {
+                setState('errored');
+            }
+            setTimeout(() => setState('copy'), 1000);
+        },
+        [setState]
+    );
+
+    useEffect(() => {
+        if (state === 'loading' && typeof text === 'string') {
+            proceedCopy(text);
+        }
+    }, [text, state, proceedCopy]);
+
     let textColor = '';
-    if (state === 'copied') {
+    if (state === 'copied' || state === 'loading') {
         textColor = 'text-info';
     } else if (state === 'errored') {
         textColor = 'text-danger';

@@ -8,50 +8,16 @@ export interface DownloadOptions {
 const DEFAULT_MAX_SIZE = 10 * 1024 * 1024; // 10MB in bytes
 
 /**
- * Triggers a file download from base64 data
+ * Triggers a file download from a Blob
  *
- * @param data - Base64 encoded string
+ * @param blob - Blob to download
  * @param filename - Name for the downloaded file (browsers automatically sanitize this)
- * @param options - Optional configuration object with type and maxSize
- * @throws Error if data is invalid base64, file size exceeds maxSize, or if download fails
  */
-export const triggerDownload = async (data: string, filename: string, options?: DownloadOptions): Promise<void> => {
-    if (!data || typeof data !== 'string') {
-        throw new Error('Invalid data: must be a non-empty string');
-    }
-
-    if (!isValidBase64(data)) {
-        throw new Error('Invalid data: not a valid base64 string');
-    }
-
-    const type = options?.type;
-    const maxSize = options?.maxSize ?? DEFAULT_MAX_SIZE;
-
-    // Check size BEFORE decoding to prevent DoS via memory exhaustion
-    // Base64 encoding increases size by ~33%, so we estimate: base64Length * 3/4
-    // This prevents creating expensive Buffer/Blob objects for huge files
-    const estimatedDecodedSize = Math.ceil((data.length * 3) / 4);
-    if (estimatedDecodedSize > maxSize) {
-        throw new Error(
-            `File size (estimated ${formatBytes(estimatedDecodedSize)}) exceeds maximum allowed size (${formatBytes(
-                maxSize
-            )})`
-        );
-    }
-
+const triggerDownloadBlob = (blob: Blob, filename: string): void => {
     let fileDownloadUrl: string | null = null;
     let tempLink: HTMLAnchorElement | null = null;
 
     try {
-        const decodedData = Buffer.from(data, 'base64');
-
-        // MIME type is not validated because:
-        // - Invalid MIME types don't cause security issues for client-side downloads
-        // - Browsers handle invalid MIME types gracefully (they use content sniffing as fallback)
-        // - The download will still work even with an invalid MIME type
-        // - Validation might reject valid but uncommon MIME types
-        const blob = new Blob([decodedData], type ? { type } : {});
-
         fileDownloadUrl = URL.createObjectURL(blob);
 
         tempLink = document.createElement('a');
@@ -95,4 +61,67 @@ const formatBytes = (bytes: number): string => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+};
+
+/**
+ * Triggers a file download from base64 encoded data.
+ *
+ * @param data - Base64 encoded string
+ * @param filename - Name for the downloaded file
+ * @param options - Optional configuration object with type and maxSize
+ * @throws Error if data is invalid base64 or exceeds maxSize
+ */
+export const triggerDownload = async (data: string, filename: string, options?: DownloadOptions): Promise<void> => {
+    if (!data || typeof data !== 'string') {
+        throw new Error('Invalid data: must be a non-empty string');
+    }
+
+    if (!isValidBase64(data)) {
+        throw new Error('Invalid data: not a valid base64 string');
+    }
+
+    const type = options?.type;
+    const maxSize = options?.maxSize ?? DEFAULT_MAX_SIZE;
+
+    // Check size BEFORE decoding to prevent DoS via memory exhaustion
+    // Base64 encoding increases size by ~33%, so we estimate: base64Length * 3/4
+    const estimatedDecodedSize = Math.ceil((data.length * 3) / 4);
+    if (estimatedDecodedSize > maxSize) {
+        throw new Error(
+            `File size (estimated ${formatBytes(estimatedDecodedSize)}) exceeds maximum allowed size (${formatBytes(
+                maxSize
+            )})`
+        );
+    }
+
+    const decodedData = Buffer.from(data, 'base64');
+    const blob = new Blob([decodedData], type ? { type } : {});
+
+    triggerDownloadBlob(blob, filename);
+};
+
+/**
+ * Triggers a file download from plain text data.
+ *
+ * @param text - Plain text string to download
+ * @param filename - Name for the downloaded file
+ * @param options - Optional configuration object with type and maxSize
+ * @throws Error if text is empty or exceeds maxSize
+ */
+export const triggerDownloadText = async (text: string, filename: string, options?: DownloadOptions): Promise<void> => {
+    if (!text || typeof text !== 'string') {
+        throw new Error('Invalid data: must be a non-empty string');
+    }
+
+    const type = options?.type ?? 'text/plain';
+    const maxSize = options?.maxSize ?? DEFAULT_MAX_SIZE;
+
+    if (text.length > maxSize) {
+        throw new Error(
+            `File size (${formatBytes(text.length)}) exceeds maximum allowed size (${formatBytes(maxSize)})`
+        );
+    }
+
+    const blob = new Blob([text], { type });
+    triggerDownloadBlob(blob, filename);
 };
