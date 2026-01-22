@@ -92,6 +92,45 @@ jobs:
         run: |
           pnpm test:ci
 
+  Sitemap-Check:
+    needs: read-nvmrc
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install package manager
+        uses: pnpm/action-setup@v4
+
+      - name: Setup pnpm config
+        run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.read-nvmrc.outputs.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_CACHE_FOLDER }}
+          key: ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate sitemap
+        run: pnpx tsx scripts/update-sitemap.ts
+
+      - name: Check for sitemap drift
+        run: git diff --exit-code public/sitemap.xml public/default-sitemap.xml public/accounts-sitemap.xml
+
   Storybook-Smoke-Tests:
     needs: read-nvmrc
     runs-on: ubuntu-latest

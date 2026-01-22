@@ -3,7 +3,7 @@ import type { InstructionData, SupportedIdl } from '@entities/idl';
 import { useToast } from '@shared/ui/sonner/use-toast';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useAtomValue } from 'jotai';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { ExplorerLink } from '@/app/entities/cluster';
 
@@ -15,41 +15,49 @@ import { BaseWarningCard } from './BaseWarningCard';
 import { InteractWithIdlView } from './InteractWithIdlView';
 import { MainnetWarningDialog } from './MainnetWarningDialog';
 
+export interface InteractWithIdlAnalyticsCallbacks {
+    onSectionsExpanded?: (programId?: string, expandedSections?: string[]) => void;
+    onTabOpened?: (programId?: string) => void;
+    onTransactionConfirmed?: (programId?: string, instructionName?: string, signature?: string) => void;
+    onTransactionFailed?: (programId?: string, instructionName?: string, error?: string) => void;
+    onTransactionSubmitted?: (programId?: string, instructionName?: string) => void;
+    onWalletConnected?: (programId?: string, walletType?: string) => void;
+}
+
 export function InteractWithIdl({
     data: instructions,
+    onSectionsExpanded,
+    onTabOpened,
+    onTransactionConfirmed,
+    onTransactionFailed,
+    onTransactionSubmitted,
+    onWalletConnected,
 }: {
     data?: InstructionData[];
-    onClusterSelect?: () => void;
-    onWalletConnect?: () => void;
-    onSendTransaction?: (instruction: string, data: unknown) => void;
-}) {
+} & InteractWithIdlAnalyticsCallbacks) {
     const toast = useToast();
     const idl = useAtomValue(originalIdlAtom);
     const progId = useAtomValue(programIdAtom);
-    const { connected, publicKey } = useWallet();
-    const { invokeInstruction, initializationError, isExecuting, lastResult, parseLogs, preInvocationError } =
-        useInstruction({
-            enabled: isEnabled({ connected, idl, programId: progId, publicKey }),
-            idl,
-            programId: progId?.toString(),
-        });
+    const { connected, publicKey, wallet } = useWallet();
 
-    const { requireConfirmation, confirm, cancel, isOpen, hasPendingAction } = useMainnetConfirmation<{
-        data: InstructionData;
-        params: InstructionCallParams;
-    }>();
+    const [currentInstruction, setCurrentInstruction] = useState<{ name: string; programId?: string } | null>(null);
+    const [hasTrackedTabOpen, setHasTrackedTabOpen] = useState(false);
+    const [hasTrackedWalletConnect, setHasTrackedWalletConnect] = useState(false);
 
-    const handleExecuteInstruction = useCallback(
-        async (data: InstructionData, params: InstructionCallParams) => {
-            await requireConfirmation(
-                async () => {
-                    await invokeInstruction(data.name, data, params);
-                },
-                { data, params }
-            );
-        },
-        [invokeInstruction, requireConfirmation]
-    );
+    useEffect(() => {
+        if (!hasTrackedTabOpen && progId) {
+            onTabOpened?.(progId.toString());
+            setHasTrackedTabOpen(true);
+        }
+    }, [progId, onTabOpened, hasTrackedTabOpen]);
+
+    useEffect(() => {
+        if (connected && !hasTrackedWalletConnect && progId) {
+            const walletType = wallet?.adapter?.name;
+            onWalletConnected?.(progId.toString(), walletType);
+            setHasTrackedWalletConnect(true);
+        }
+    }, [connected, progId, wallet, onWalletConnected, hasTrackedWalletConnect]);
 
     const handleTransactionSuccess = useCallback(
         (txSignature: string) => {
@@ -64,15 +72,56 @@ export function InteractWithIdl({
                 title: 'Transaction is sent',
                 type: 'success',
             });
+
+            if (currentInstruction) {
+                onTransactionConfirmed?.(currentInstruction.programId, currentInstruction.name, txSignature);
+                setCurrentInstruction(null);
+            }
         },
-        [toast]
+        [toast, currentInstruction, onTransactionConfirmed]
     );
 
     const handleTransactionError = useCallback(
         (error: string) => {
             toast.custom({ description: error, title: 'Transaction Failed', type: 'error' });
+
+            if (currentInstruction) {
+                onTransactionFailed?.(currentInstruction.programId, currentInstruction.name, error);
+                setCurrentInstruction(null);
+            }
         },
-        [toast]
+        [toast, currentInstruction, onTransactionFailed]
+    );
+
+    const { invokeInstruction, initializationError, isExecuting, lastResult, parseLogs } = useInstruction({
+        enabled: isEnabled({ connected, idl, programId: progId, publicKey }),
+        idl,
+        onError: handleTransactionError,
+        onSuccess: handleTransactionSuccess,
+        programId: progId?.toString(),
+    });
+
+    const { requireConfirmation, confirm, cancel, isOpen, hasPendingAction } = useMainnetConfirmation<{
+        data: InstructionData;
+        params: InstructionCallParams;
+    }>();
+
+    const handleExecuteInstruction = useCallback(
+        async (data: InstructionData, params: InstructionCallParams) => {
+            const programIdStr = progId?.toString();
+
+            onTransactionSubmitted?.(programIdStr, data.name);
+
+            setCurrentInstruction({ name: data.name, programId: programIdStr });
+
+            await requireConfirmation(
+                async () => {
+                    await invokeInstruction(data.name, data, params);
+                },
+                { data, params }
+            );
+        },
+        [invokeInstruction, requireConfirmation, progId, onTransactionSubmitted]
     );
 
     if (initializationError) {
@@ -92,11 +141,11 @@ export function InteractWithIdl({
                 instructions={instructions || []}
                 idl={idl as SupportedIdl}
                 onExecuteInstruction={handleExecuteInstruction}
-                onTransactionSuccess={handleTransactionSuccess}
-                onTransactionError={handleTransactionError}
+                onSectionsExpanded={expandedSections => {
+                    onSectionsExpanded?.(progId?.toString(), expandedSections);
+                }}
                 isExecuting={isExecuting}
                 lastResult={lastResult}
-                preInvocationError={preInvocationError}
                 parseLogs={parseLogs}
             />
             {hasPendingAction && (

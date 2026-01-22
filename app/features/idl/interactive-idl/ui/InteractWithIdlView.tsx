@@ -1,5 +1,5 @@
 import { getIdlSpec, getIdlVersion, type InstructionData, type SupportedIdl } from '@entities/idl';
-import { useLayoutEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Label } from '@/app/components/shared/ui/label';
 import { Switch } from '@/app/components/shared/ui/switch';
@@ -16,9 +16,7 @@ export function InteractWithIdlView({
     instructions,
     idl,
     onExecuteInstruction,
-    onTransactionSuccess,
-    onTransactionError,
-    preInvocationError,
+    onSectionsExpanded,
     parseLogs,
     isExecuting,
     lastResult,
@@ -26,12 +24,10 @@ export function InteractWithIdlView({
     instructions: InstructionData[];
     idl: SupportedIdl | undefined;
     onExecuteInstruction: (data: InstructionData, params: InstructionCallParams) => Promise<void>;
-    onTransactionSuccess?: (txSignature: string) => void;
-    onTransactionError?: (error: string) => void;
+    onSectionsExpanded?: (expandedSections: string[], programId?: string) => void;
     parseLogs: (logs: string[]) => InstructionLogs[];
     isExecuting?: boolean;
     lastResult: InstructionInvocationResult;
-    preInvocationError: string | null;
 }) {
     const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
@@ -41,29 +37,10 @@ export function InteractWithIdlView({
         expandedSections.length === allInstructionNames.length &&
         allInstructionNames.every(name => expandedSections.includes(name));
 
-    // Handle success state
-    useLayoutEffect(() => {
-        if (lastResult?.status === 'success' && !isExecuting) {
-            onTransactionSuccess?.(lastResult.signature);
-        }
-    }, [lastResult, isExecuting, onTransactionSuccess]);
-
-    // Handle error state
-    useLayoutEffect(() => {
-        if (lastResult?.status === 'error' && !isExecuting) {
-            onTransactionError?.(lastResult.message);
-        }
-    }, [lastResult, isExecuting, onTransactionError]);
-
-    useLayoutEffect(() => {
-        if (preInvocationError && !isExecuting) {
-            onTransactionError?.(preInvocationError);
-        }
-    }, [preInvocationError, isExecuting, onTransactionError]);
-
     const handleExpandAllToggle = (checked: boolean) => {
         const sections = checked ? allInstructionNames : [];
         setExpandedSections(sections);
+        onSectionsExpanded?.(sections);
     };
 
     return (
@@ -92,6 +69,7 @@ export function InteractWithIdlView({
                         expandedSections={expandedSections}
                         setExpandedSections={setExpandedSections}
                         onExecuteInstruction={onExecuteInstruction}
+                        onSectionsExpanded={onSectionsExpanded}
                         isExecuting={isExecuting}
                     />
                 </div>
