@@ -42,6 +42,7 @@
 | Static | `/feature-gates` | 3.43 kB | 928 kB |
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 6.57 kB | 930 kB |
+| Static | `/tos` | 365 B | 161 kB |
 | Dynamic | `/tx/[signature]` | 37.5 kB | 1.39 MB |
 | Dynamic | `/tx/[signature]/inspect` | 610 B | 1.2 MB |
 | Static | `/tx/inspector` | 623 B | 1.2 MB |
