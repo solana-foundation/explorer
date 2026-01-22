@@ -83,34 +83,23 @@ export function IdlCard({ programId }: { programId: string }) {
 
                     <div className="e-space-y-6">
                         <IdlInstructionSection
-                            title="Create & manage IDL buffer"
-                            description="First create a buffer from an IDL JSON file and then transfer authority of that buffer to a new Solana wallet/account."
-                            commands={[
-                                'npx @solana-program/program-metadata@latest create-buffer ./target/idl/$PROGRAM_NAME.json',
-                                `npx @solana-program/program-metadata@latest set-buffer-authority $BUFFER_ACCOUNT \\
-  --new-authority $NEW_AUTHORITY_WALLET`,
-                            ]}
+                            title="Upload IDL"
+                            description="Use this command to upload generated idl in JSON format"
+                            commands={['npx @solana-program/program-metadata@latest write idl $PROGRAM_ID ./idl.json']}
                         />
 
-                        <IdlInstructionSection
-                            title="Create (or updates if it already exists) on-chain IDL"
-                            description="This command uses the buffer to either create or update the IDL (Interface Definition Language) on-chain for a specific Solana program. Add --export flag to just see the result."
-                            commands={[
-                                `npx @solana-program/program-metadata@latest write idl $PROGRAM_ADDRESS \\
-  --buffer $BUFFER_ACCOUNT \\
-  --close-buffer $NEW_AUTHORITY_WALLET`,
-                            ]}
-                        />
-
-                        <a
-                            href="https://github.com/solana-program/program-metadata?tab=readme-ov-file#commands"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-outline-primary btn-sm"
-                        >
-                            Full documentation
-                            <ExternalLink className="align-text-top ms-2" size={13} />
-                        </a>
+                        <div className="e-flex e-items-center e-justify-between">
+                            <span>In case you want to upload IDL with a multisig, read documentation.</span>
+                            <a
+                                href="https://github.com/solana-program/program-metadata?tab=readme-ov-file#commands"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-outline-primary btn-sm e-whitespace-nowrap"
+                            >
+                                Full documentation
+                                <ExternalLink className="align-text-top ms-2" size={13} />
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
