@@ -13,7 +13,7 @@
 | Dynamic | `/address/[address]/domains` | 13.8 kB | 932 kB |
 | Dynamic | `/address/[address]/entries` | 2.98 kB | 939 kB |
 | Dynamic | `/address/[address]/feature-gate` | 325 B | 161 kB |
-| Dynamic | `/address/[address]/idl` | 134 kB | 604 kB |
+| Dynamic | `/address/[address]/idl` | 134 kB | 605 kB |
 | Dynamic | `/address/[address]/instructions` | 2.12 kB | 1.03 MB |
 | Dynamic | `/address/[address]/metadata` | 3.89 kB | 946 kB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 5.84 kB | 971 kB |
