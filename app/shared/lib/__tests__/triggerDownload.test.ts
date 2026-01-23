@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { triggerDownload } from '../triggerDownload';
+import { triggerDownload, triggerDownloadText } from '../triggerDownload';
 
 describe('triggerDownload', () => {
     let mockClick: ReturnType<typeof vi.fn>;
@@ -172,6 +172,17 @@ describe('triggerDownload', () => {
             expect(mockRevokeObjectURL).toHaveBeenCalled();
             expect(mockRemoveChild).not.toHaveBeenCalled();
         });
+    });
+});
+
+describe('triggerDownloadText', () => {
+    it('should throw error if text is empty string', async () => {
+        await expect(triggerDownloadText('', 'file.txt')).rejects.toThrow('Invalid data: must be a non-empty string');
+    });
+
+    it('should reject text exceeding default max size (10MB)', async () => {
+        const largeText = 'A'.repeat(11 * 1024 * 1024);
+        await expect(triggerDownloadText(largeText, 'file.txt')).rejects.toThrow('exceeds maximum allowed size');
     });
 });
 
