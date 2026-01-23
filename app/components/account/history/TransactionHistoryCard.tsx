@@ -56,7 +56,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
             return (
                 <tr key={signature}>
                     <td>
-                        <Signature signature={signature} link truncateChars={44} />
+                        <Signature signature={signature} link truncateChars={40} />
                     </td>
 
                     <td className="w-1">
@@ -124,7 +124,7 @@ function TransactionRawDataDownloadField({ signature }: { signature: string }) {
     }, [transactionData, signature, fetchRaw]);
 
     return (
-        <div className="d-flex align-items-center gap-2" onMouseEnter={handleHover}>
+        <div className="d-flex align-items-center gap-1" onMouseEnter={handleHover}>
             <Copyable text={transactionData ? toBase64(transactionData) : null}>
                 <DownloadableDropdown data={transactionData} filename={signature} />
             </Copyable>
