@@ -107,22 +107,33 @@ function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
                 <PopoverPrimitive.Content
                     asChild
                     align="start"
-                    sideOffset={6}
+                    sideOffset={4}
                     onOpenAutoFocus={e => e.preventDefault()}
                     onInteractOutside={e => {
                         if (e.target instanceof Element && e.target.hasAttribute('cmdk-input')) {
                             e.preventDefault();
                         }
                     }}
-                    className="e-z-10 e-min-w-[var(--radix-popover-trigger-width)]"
+                    className="e-z-10 e-w-[var(--radix-popover-trigger-width)] e-rounded-md e-border e-border-heavy-metal-900 e-bg-heavy-metal-800 e-shadow-2xl [border-style:solid]"
                 >
                     <CommandList
+                        onMouseDown={e => {
+                            // Prevent closing when clicking on scrollbar
+                            if (e.target === e.currentTarget) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }
+                        }}
                         className={cn(
-                            'e-max-h-96 e-overflow-y-auto e-overflow-x-hidden e-rounded',
-                            'e-py-2',
-                            'e-bg-heavy-metal-800',
-                            'e-border e-border-heavy-metal-950',
-                            'e-shadow'
+                            'e-max-h-96 e-overflow-y-auto e-overflow-x-hidden e-py-2',
+                            // scrollbar styling
+                            '[&::-webkit-scrollbar]:e-w-2',
+                            '[&::-webkit-scrollbar-track]:e-bg-heavy-metal-800',
+                            '[&::-webkit-scrollbar-track]:e-rounded-md',
+                            '[&::-webkit-scrollbar-thumb]:e-bg-heavy-metal-600',
+                            '[&::-webkit-scrollbar-thumb]:e-rounded-full',
+                            '[&::-webkit-scrollbar-thumb]:hover:e-bg-heavy-metal-500',
+                            '[&::-webkit-scrollbar-thumb]:e-transition-colors'
                         )}
                     >
                         {loading && (
