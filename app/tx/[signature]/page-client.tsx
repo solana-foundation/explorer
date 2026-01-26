@@ -37,6 +37,7 @@ import Link from 'next/link';
 import React, { Suspense, useEffect, useState } from 'react';
 import { RefreshCw, Settings } from 'react-feather';
 
+import { TokenBatchProvider } from '@/app/providers/token-batch-context';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
@@ -379,7 +380,7 @@ function DetailsSection({ signature }: SignatureProps) {
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const transaction = transactionWithMeta?.transaction;
     const message = transaction?.message;
-    const { status: clusterStatus } = useCluster();
+    const { cluster, status: clusterStatus } = useCluster();
     const refreshDetails = () => fetchDetails(signature);
 
     // Fetch details on load
@@ -399,14 +400,18 @@ function DetailsSection({ signature }: SignatureProps) {
         return <ErrorCard text="Details are not available" />;
     }
 
+    const accountAddresses = message.accountKeys.map(account => account.pubkey.toBase58());
+
     return (
-        <>
+        <TokenBatchProvider cluster={cluster} addresses={accountAddresses}>
             <CUProfilingSection signature={signature} />
-            <AccountsCard signature={signature} />
+            <Suspense fallback={<LoadingCard message="Loading accounts" />}>
+                <AccountsCard signature={signature} />
+            </Suspense>
             <TokenBalancesCard signature={signature} />
             <InstructionsSection signature={signature} />
             <ProgramLogSection signature={signature} />
-        </>
+        </TokenBatchProvider>
     );
 }
 

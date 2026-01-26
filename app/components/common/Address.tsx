@@ -11,7 +11,7 @@ import { useState } from 'react';
 import useAsyncEffect from 'use-async-effect';
 
 import { EditIcon, NicknameEditor, useNickname } from '@/app/features/nicknames';
-import { getTokenInfoWithoutOnChainFallback } from '@/app/utils/token-info';
+import { useTokenBatch } from '@/app/providers/token-batch-context';
 
 import { Copyable } from './Copyable';
 
@@ -163,27 +163,15 @@ const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
 };
 
 const useTokenInfo = (fetchTokenLabelInfo: boolean | undefined, pubkey: string) => {
-    const [info, setInfo] = useState<TokenLabelInfo>();
-    const { cluster, url } = useCluster();
+    let batchContext;
+    try {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        batchContext = useTokenBatch();
+    } catch {
+        return undefined;
+    }
 
-    useAsyncEffect(
-        async isMounted => {
-            if (!fetchTokenLabelInfo) return;
-            if (!info) {
-                try {
-                    const token = await getTokenInfoWithoutOnChainFallback(new PublicKey(pubkey), cluster);
-                    if (isMounted()) {
-                        setInfo(token);
-                    }
-                } catch {
-                    if (isMounted()) {
-                        setInfo(undefined);
-                    }
-                }
-            }
-        },
-        [fetchTokenLabelInfo, pubkey, cluster, url, info, setInfo]
-    );
+    if (!fetchTokenLabelInfo) return undefined;
 
-    return info;
+    return batchContext.getTokenInfo(pubkey);
 };
