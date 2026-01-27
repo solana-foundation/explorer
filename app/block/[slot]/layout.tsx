@@ -3,6 +3,7 @@
 import { Address } from '@components/common/Address';
 import { Epoch } from '@components/common/Epoch';
 import { ErrorCard } from '@components/common/ErrorCard';
+import { ExternalLinkWarning } from '@components/common/ExternalLinkWarning';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
@@ -14,6 +15,7 @@ import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { notFound, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren } from 'react';
+import { ExternalLink } from 'react-feather';
 
 import { estimateRequestedComputeUnits } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot, getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
@@ -79,6 +81,17 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
                             <td className="w-100">Slot</td>
                             <td className="text-lg-end font-monospace">
                                 <Slot slot={slotNumber} />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td className="w-100">Block Analysis</td>
+                            <td className="text-lg-end">
+                                <ExternalLinkWarning href={`https://ibrl.wtf/block/${slotNumber}`}>
+                                    <span>
+                                        IBRL Explorer
+                                        <ExternalLink className="align-text-top ms-2" size={13} />
+                                    </span>
+                                </ExternalLinkWarning>
                             </td>
                         </tr>
                         {blockLeader !== undefined && (
