@@ -176,6 +176,17 @@ export function populatePartialParsedTokenExtension(
                 tooltip: description,
             };
         }
+        case 'confidentialMintBurn': {
+            const description =
+                'Hides the exact amounts minted or burned by encrypting those events for auditors and authorities';
+            return {
+                description,
+                externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
+                name: 'Confidential Mint/Burn',
+                status: 'active',
+                tooltip: description,
+            };
+        }
         case 'interestBearingConfig': {
             const description = 'Allows the token balance to be displayed with accumulated interest';
             return {
