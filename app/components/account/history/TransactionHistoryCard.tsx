@@ -73,9 +73,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                             </td>
                         </>
                     )}
-                    <td>
-                        {signatureInfo.memo && signatureInfo.memo ? <MemoField memo={signatureInfo.memo} /> : '---'}
-                    </td>
+                    <td>{signatureInfo.memo ? <MemoField memo={signatureInfo.memo} /> : '---'}</td>
                     <td>
                         <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
                     </td>
