@@ -1,8 +1,8 @@
 import * as PopoverPrimitive from '@radix-ui/react-popover';
+import { cva } from 'class-variance-authority';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from 'cmdk';
 import { useEffect, useRef, useState } from 'react';
 
-import { cn } from '../utils';
 import { Input, type InputProps } from './input';
 
 export type Value = string;
@@ -13,6 +13,25 @@ export type AutocompleteItem = {
     group?: string;
     keywords?: string[];
 };
+
+const commandListVariants = cva(['e-max-h-96 e-overflow-x-hidden e-overflow-y-auto e-py-2'], {
+    defaultVariants: {
+        scrollbar: 'styled',
+    },
+    variants: {
+        scrollbar: {
+            styled: [
+                '[&::-webkit-scrollbar]:e-w-2',
+                '[&::-webkit-scrollbar-thumb]:e-bg-heavy-metal-600',
+                '[&::-webkit-scrollbar-thumb]:e-rounded-full',
+                '[&::-webkit-scrollbar-thumb]:e-transition-colors',
+                '[&::-webkit-scrollbar-thumb]:hover:e-bg-heavy-metal-500',
+                '[&::-webkit-scrollbar-track]:e-bg-heavy-metal-800',
+                '[&::-webkit-scrollbar-track]:e-rounded-md',
+            ],
+        },
+    },
+});
 
 type AutocompleteProps<Item extends AutocompleteItem = AutocompleteItem> = {
     value: Value;
@@ -114,7 +133,7 @@ function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
                             e.preventDefault();
                         }
                     }}
-                    className="e-z-10 e-w-[var(--radix-popover-trigger-width)] e-rounded-md e-border e-border-heavy-metal-900 e-bg-heavy-metal-800 e-shadow-2xl [border-style:solid]"
+                    className="e-z-10 e-min-w-[min(400px,100vw)] e-w-[var(--radix-popover-trigger-width)] e-rounded-md e-border e-border-heavy-metal-900 e-bg-heavy-metal-800 e-shadow-2xl [border-style:solid]"
                 >
                     <CommandList
                         onMouseDown={e => {
@@ -124,17 +143,7 @@ function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
                                 e.stopPropagation();
                             }
                         }}
-                        className={cn(
-                            'e-max-h-96 e-overflow-y-auto e-overflow-x-hidden e-py-2',
-                            // scrollbar styling
-                            '[&::-webkit-scrollbar]:e-w-2',
-                            '[&::-webkit-scrollbar-track]:e-bg-heavy-metal-800',
-                            '[&::-webkit-scrollbar-track]:e-rounded-md',
-                            '[&::-webkit-scrollbar-thumb]:e-bg-heavy-metal-600',
-                            '[&::-webkit-scrollbar-thumb]:e-rounded-full',
-                            '[&::-webkit-scrollbar-thumb]:hover:e-bg-heavy-metal-500',
-                            '[&::-webkit-scrollbar-thumb]:e-transition-colors'
-                        )}
+                        className={commandListVariants()}
                     >
                         {loading && (
                             <Command.Loading className="e-px-4 e-py-2 e-text-sm e-text-heavy-metal-400">
@@ -160,11 +169,7 @@ function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
                                     <CommandGroup
                                         key={groupName}
                                         heading={groupName}
-                                        className={cn(
-                                            '[&_[cmdk-group-heading]]:e-px-4 [&_[cmdk-group-heading]]:e-py-1',
-                                            '[&_[cmdk-group-heading]]:e-text-[10px] [&_[cmdk-group-heading]]:e-font-medium [&_[cmdk-group-heading]]:e-text-heavy-metal-400',
-                                            '[&_[cmdk-group-heading]]:e-select-none [&_[cmdk-group-heading]]:e-uppercase [&_[cmdk-group-heading]]:e-tracking-wider'
-                                        )}
+                                        className="[&_[cmdk-group-heading]]:e-mt-2 [&_[cmdk-group-heading]]:e-mb-1 [&_[cmdk-group-heading]]:e-select-none [&_[cmdk-group-heading]]:e-border-b [&_[cmdk-group-heading]]:e-border-heavy-metal-700 [&_[cmdk-group-heading]]:e-px-4 [&_[cmdk-group-heading]]:e-pb-1.5 [&_[cmdk-group-heading]]:e-pt-1 [&_[cmdk-group-heading]]:e-text-xs [&_[cmdk-group-heading]]:e-font-semibold [&_[cmdk-group-heading]]:e-uppercase [&_[cmdk-group-heading]]:e-tracking-wide [&_[cmdk-group-heading]]:e-text-heavy-metal-200"
                                     >
                                         {groupItems.map(option => (
                                             <AutocompleteItemComponent<Item>
@@ -211,12 +216,7 @@ function AutocompleteItemComponent<Item extends AutocompleteItem = AutocompleteI
             onMouseDown={e => e.preventDefault()}
             onSelect={() => onSelectItem(option.value)}
             keywords={option.keywords}
-            className={cn(
-                'e-cursor-pointer',
-                'hover:e-bg-heavy-metal-700',
-                'e-transition-colors',
-                'aria-[selected=true]:e-bg-heavy-metal-600'
-            )}
+            className="e-cursor-pointer e-transition-colors hover:e-bg-heavy-metal-700 aria-[selected=true]:e-bg-heavy-metal-600"
         >
             {renderItemContent
                 ? renderItemContent(option)
