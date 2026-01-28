@@ -35,7 +35,7 @@ import useTabVisibility from '@utils/use-tab-visibility';
 import { BigNumber } from 'bignumber.js';
 import bs58 from 'bs58';
 import Link from 'next/link';
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { RefreshCw, Settings } from 'react-feather';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
@@ -394,6 +394,8 @@ function DetailsSection({ signature }: SignatureProps) {
     const { cluster, status: clusterStatus } = useCluster();
     const refreshDetails = () => fetchDetails(signature);
 
+    const accountAddresses = useMemo(() => message?.accountKeys.map(account => account.pubkey.toBase58()) || [""], [message]);
+
     // Fetch details on load
     useEffect(() => {
         if (!details && clusterStatus === ClusterStatus.Connected && status?.status === FetchStatus.Fetched) {
@@ -410,9 +412,7 @@ function DetailsSection({ signature }: SignatureProps) {
     } else if (!transactionWithMeta || !message) {
         return <ErrorCard text="Details are not available" />;
     }
-
-    const accountAddresses = message.accountKeys.map(account => account.pubkey.toBase58());
-
+    
     return (
         <TokenBatchProvider cluster={cluster} addresses={accountAddresses}>
             <CUProfilingSection signature={signature} />

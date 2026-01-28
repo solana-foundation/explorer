@@ -3,7 +3,7 @@
 import { PublicKey } from '@solana/web3.js';
 import { Token } from '@solflare-wallet/utl-sdk';
 import { Cluster } from '@utils/cluster';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 import { getTokenInfosWithoutOnChainFallback } from '@/app/utils/token-info';
 
@@ -23,12 +23,11 @@ export function TokenBatchProvider({
     addresses: string[];
 }) {
     const [tokenMap, setTokenMap] = useState<Map<string, Token>>(new Map());
-    const [hasFetched, setHasFetched] = useState(false);
+    
+    const addressesKey = useMemo(() => addresses.join(','), [addresses]);
 
     useEffect(() => {
-        if (hasFetched || addresses.length === 0) return;
-
-        setHasFetched(true);
+        if (addresses.length === 0) return;
 
         const fetchTokens = async () => {
             const publicKeys = addresses.map(addr => new PublicKey(addr));
@@ -37,7 +36,8 @@ export function TokenBatchProvider({
         };
 
         fetchTokens();
-    }, [hasFetched, addresses, cluster]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [addressesKey, cluster]);
 
     const getTokenInfo = (address: string) => tokenMap.get(address);
 
