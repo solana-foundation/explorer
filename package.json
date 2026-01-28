@@ -47,6 +47,7 @@
         "@sentry/nextjs": "10",
         "@solana-developers/helpers": "=2.8.1",
         "@solana-program/compute-budget": "0.6.1",
+        "@solana-program/memo": "^0.10.0",
         "@solana-program/program-metadata": "0.1.0",
         "@solana-program/system": "0.7.0",
         "@solana-program/token": "0.5.1",

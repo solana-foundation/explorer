@@ -128,6 +128,9 @@ importers:
       '@solana-program/compute-budget':
         specifier: 0.6.1
         version: 0.6.1(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.3.3)(ws@8.18.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))
+      '@solana-program/memo':
+        specifier: ^0.10.0
+        version: 0.10.0(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.3.3)(ws@8.18.3(bufferutil@4.0.7)(utf-8-validate@5.0.10)))
       '@solana-program/program-metadata':
         specifier: 0.1.0
         version: 0.1.0(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.3.3)(ws@8.18.3(bufferutil@4.0.7)(utf-8-validate@5.0.10)))
@@ -3733,6 +3736,11 @@ packages:
     resolution: {integrity: sha512-/JJSE1fKO5zx7Z55Z2tLGWBDDi7tUE+xMlK8qqkHlY51KpqksMsIBzQMkG9Dqhoe2Cnn5/t3QK1nJKqW6eHzpg==}
     peerDependencies:
       '@solana/kit': ^2.1.0
+
+  '@solana-program/memo@0.10.0':
+    resolution: {integrity: sha512-1FvQFenL3lzl5SpxhWV4QJCOLU/nvAOXGXjKjS7dprvG+0u971xoanApN7bM/a4NFZolp6S+lP2xVl6vTVIxbg==}
+    peerDependencies:
+      '@solana/kit': ^5.0
 
   '@solana-program/program-metadata@0.1.0':
     resolution: {integrity: sha512-uHPySZz3APP+26JUA9a2iFMwdrT1fGXpWkujM2U0VuE5WplV8gCeZPzuGATSqWJxztmkBjpGNZVgTwHcc24eGg==}
@@ -14524,6 +14532,10 @@ snapshots:
       - ws
 
   '@solana-program/compute-budget@0.7.0(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.3.3)(ws@8.18.3(bufferutil@4.0.7)(utf-8-validate@5.0.10)))':
+    dependencies:
+      '@solana/kit': 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.3.3)(ws@8.18.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))
+
+  '@solana-program/memo@0.10.0(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.3.3)(ws@8.18.3(bufferutil@4.0.7)(utf-8-validate@5.0.10)))':
     dependencies:
       '@solana/kit': 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.3.3)(ws@8.18.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))
 

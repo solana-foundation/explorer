@@ -39,8 +39,14 @@ ul.log-messages {
     position: relative;
 
     .popover {
+        background-color: $popover-bg;
+        border: 1px solid $popover-border-color;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        word-wrap: normal;
+        max-width: none;
+
         &.bs-popover-top {
-            background-color: $dark;
             top: auto;
             bottom: 1.5rem;
         }
@@ -51,21 +57,26 @@ ul.log-messages {
         }
 
         &.bs-popover-bottom {
-            background-color: $dark;
             top: 1.5rem;
         }
 
         .popover-body {
-            color: white;
+            color: $popover-text-color;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
-        .arrow.right {
-            right: 1rem;
-        }
+        .arrow {
+            display: none;
 
-        .arrow::after {
-            border-top-color: $dark;
-            border-bottom-color: $dark;
+            &.right {
+                right: 1rem;
+            }
+
+            &::after {
+                border-top-color: $popover-bg;
+                border-bottom-color: $popover-bg;
+            }
         }
     }
 }
