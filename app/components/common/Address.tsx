@@ -163,15 +163,9 @@ const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
 };
 
 const useTokenInfo = (fetchTokenLabelInfo: boolean | undefined, pubkey: string) => {
-    let batchContext;
-    try {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        batchContext = useTokenBatch();
-    } catch {
-        return undefined;
-    }
+    const batchContext = useTokenBatch();
 
-    if (!fetchTokenLabelInfo) return undefined;
+    if (!fetchTokenLabelInfo || !batchContext) return undefined;
 
     return batchContext.getTokenInfo(pubkey);
 };
