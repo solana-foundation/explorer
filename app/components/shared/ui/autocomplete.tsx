@@ -133,7 +133,7 @@ function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
                             e.preventDefault();
                         }
                     }}
-                    className="e-z-10 e-min-w-[min(400px,100vw)] e-w-[var(--radix-popover-trigger-width)] e-rounded-md e-border e-border-heavy-metal-900 e-bg-heavy-metal-800 e-shadow-2xl [border-style:solid]"
+                    className="e-z-10 e-w-[var(--radix-popover-trigger-width)] e-min-w-[min(400px,100vw)] e-rounded-md e-border e-border-heavy-metal-900 e-bg-heavy-metal-800 e-shadow-2xl [border-style:solid]"
                 >
                     <CommandList
                         onMouseDown={e => {
@@ -169,7 +169,7 @@ function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
                                     <CommandGroup
                                         key={groupName}
                                         heading={groupName}
-                                        className="[&_[cmdk-group-heading]]:e-mt-2 [&_[cmdk-group-heading]]:e-mb-1 [&_[cmdk-group-heading]]:e-select-none [&_[cmdk-group-heading]]:e-border-b [&_[cmdk-group-heading]]:e-border-heavy-metal-700 [&_[cmdk-group-heading]]:e-px-4 [&_[cmdk-group-heading]]:e-pb-1.5 [&_[cmdk-group-heading]]:e-pt-1 [&_[cmdk-group-heading]]:e-text-xs [&_[cmdk-group-heading]]:e-font-semibold [&_[cmdk-group-heading]]:e-uppercase [&_[cmdk-group-heading]]:e-tracking-wide [&_[cmdk-group-heading]]:e-text-heavy-metal-200"
+                                        className="[&_[cmdk-group-heading]]:e-mb-1 [&_[cmdk-group-heading]]:e-mt-2 [&_[cmdk-group-heading]]:e-select-none [&_[cmdk-group-heading]]:e-border-b [&_[cmdk-group-heading]]:e-border-heavy-metal-700 [&_[cmdk-group-heading]]:e-px-4 [&_[cmdk-group-heading]]:e-pb-1.5 [&_[cmdk-group-heading]]:e-pt-1 [&_[cmdk-group-heading]]:e-text-xs [&_[cmdk-group-heading]]:e-font-semibold [&_[cmdk-group-heading]]:e-uppercase [&_[cmdk-group-heading]]:e-tracking-wide [&_[cmdk-group-heading]]:e-text-heavy-metal-200"
                                     >
                                         {groupItems.map(option => (
                                             <AutocompleteItemComponent<Item>
