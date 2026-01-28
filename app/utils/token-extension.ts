@@ -178,7 +178,7 @@ export function populatePartialParsedTokenExtension(
         }
         case 'confidentialMintBurn': {
             const description =
-                'Hides the exact amounts minted or burned by encrypting those events for auditors and authorities';
+                'Allow token issuers to opt in to encrypted mint and burn operations, along with encrypted total supply';
             return {
                 description,
                 externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
