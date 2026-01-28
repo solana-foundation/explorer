@@ -25,9 +25,7 @@ export function ExternalLinkWarning({ href, children }: ExternalLinkWarningProps
 
     return (
         <Dialog>
-            <DialogTrigger asChild>
-                {children}
-            </DialogTrigger>
+            <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle className="e-flex e-items-center e-gap-2">
@@ -36,9 +34,7 @@ export function ExternalLinkWarning({ href, children }: ExternalLinkWarningProps
                     </DialogTitle>
                 </DialogHeader>
                 <div className="e-space-y-2 e-pl-6">
-                    <DialogDescription>
-                        You are about to visit an external website.
-                    </DialogDescription>
+                    <DialogDescription>You are about to visit an external website.</DialogDescription>
                     <DialogDescription className="e-break-all e-font-mono e-text-xs">{href}</DialogDescription>
                 </div>
                 <DialogFooter>

@@ -56,4 +56,3 @@ export const WithLongURL: Story = {
         href: 'https://example.example.com/transaction/5wHu1qwD7nMHNuAMQqJWqjy9xKJpVLvJqHxYz6dGfHvM8Zk3pBqRtY2sXwV4uN7mK9jL8iH6gF5eD4cB3aA2zY1x',
     },
 };
-
