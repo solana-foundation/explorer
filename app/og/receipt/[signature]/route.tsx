@@ -19,7 +19,7 @@ type Props = Readonly<{
 export async function GET(request: NextRequest, { params }: Props) {
     const { signature } = params;
 
-    if (!signature) new Response('Signature is required', { status: 400 });
+    if (!signature) return new Response('Signature is required', { status: 400 });
 
     const etag = createEtag(signature);
     const cacheHeaders = getCacheHeaders();
