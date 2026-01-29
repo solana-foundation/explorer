@@ -20,6 +20,7 @@ vi.mock('@features/receipt', () => ({
     createReceipt: vi.fn(),
     getCachedReceipt: vi.fn(),
     getReceiptImageUrl: vi.fn().mockResolvedValue(undefined),
+    isReceiptEnabled: true,
     storeReceiptImage: vi.fn().mockResolvedValue(undefined),
 }));
 
