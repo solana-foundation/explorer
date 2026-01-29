@@ -10,7 +10,7 @@ export const runtime = 'edge';
 
 const CACHE_DURATION = 30 * 60; // 30 minutes
 const DEFAULT_CACHE_HEADERS = {
-    'Cache-Control': `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=60`,
+    'Cache-Control': `public, max-age=${CACHE_DURATION}, s-maxage=${CACHE_DURATION}, stale-while-revalidate=60`,
 };
 
 type Props = Readonly<{
