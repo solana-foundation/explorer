@@ -16,9 +16,18 @@ test.describe('Receipt Feature - Valid Transaction', () => {
     test('should render page and load transaction data', async ({ page }) => {
         await expect(page).toHaveTitle(/Solana/);
 
-        const hasReceipt = await page.locator('h3:has-text("Solana Receipt")').isVisible().catch(() => false);
-        const hasError = await page.locator('text=Not Found').isVisible().catch(() => false);
-        const hasNoReceipt = await page.locator('text=There is no receipt').isVisible().catch(() => false);
+        const hasReceipt = await page
+            .locator('h3:has-text("Solana Receipt")')
+            .isVisible()
+            .catch(() => false);
+        const hasError = await page
+            .locator('text=Not Found')
+            .isVisible()
+            .catch(() => false);
+        const hasNoReceipt = await page
+            .locator('text=There is no receipt')
+            .isVisible()
+            .catch(() => false);
 
         expect(hasReceipt || hasError || hasNoReceipt).toBe(true);
 
