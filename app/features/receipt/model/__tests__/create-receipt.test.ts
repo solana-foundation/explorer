@@ -10,7 +10,7 @@ import { mockNoTransferTransaction } from '../../mocks/no-transfers';
 import { mockSingleTransferTransaction } from '../../mocks/single-transfer';
 import { mockToken2022TransferTransaction } from '../../mocks/token-2022-transfer';
 import { mockToken2022Transfer2Transaction } from '../../mocks/token-2022-transfer2';
-import { mockUsdcTransferTransaction } from '../../mocks/usdc-cheked-transfer';
+import { mockUsdcTransferTransaction } from '../../mocks/usdc-checked-transfer';
 import { mockUsdcRegularTransferTransaction } from '../../mocks/usdc-regular-transfer';
 import { mockZeroTransferTransaction } from '../../mocks/zero-transfer';
 import { createReceipt } from '../create-receipt';
