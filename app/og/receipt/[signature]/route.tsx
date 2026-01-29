@@ -1,4 +1,4 @@
-import { BaseReceiptImage, createReceipt, OG_IMAGE_SIZE } from '@features/receipt';
+import { BaseReceiptImage, createReceipt, isReceiptEnabled, OG_IMAGE_SIZE } from '@features/receipt';
 import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -19,6 +19,7 @@ type Props = Readonly<{
 export async function GET(request: NextRequest, { params }: Props) {
     const { signature } = params;
 
+    if (!isReceiptEnabled) return new NextResponse('Not Found', { status: 404 });
     if (!signature) return new Response('Signature is required', { status: 400 });
 
     const etag = createEtag(signature);

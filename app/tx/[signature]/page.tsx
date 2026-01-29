@@ -1,5 +1,6 @@
 import '../../styles.css';
 
+import { isReceiptEnabled } from '@features/receipt';
 import { Cluster, clusterSlug } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
 import { Metadata } from 'next/types';
@@ -18,7 +19,7 @@ const SHAREABLE_CLUSTERS = [Cluster.MainnetBeta, Cluster.Testnet, Cluster.Devnet
 const SHAREABLE_CLUSTER_SLUGS = SHAREABLE_CLUSTERS.map(clusterSlug);
 
 export async function generateMetadata({ params: { signature }, searchParams }: Props): Promise<Metadata> {
-    const isReceiptView = searchParams.view === 'receipt';
+    const isReceiptView = searchParams.view === 'receipt' && isReceiptEnabled;
 
     if (isReceiptView) {
         const title = `Receipt | ${signature.slice(0, 16)}... | Solana`;

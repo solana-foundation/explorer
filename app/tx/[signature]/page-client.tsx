@@ -16,6 +16,7 @@ import { ProgramLogSection } from '@components/transaction/ProgramLogSection';
 import { TokenBalancesCard } from '@components/transaction/TokenBalancesCard';
 import { CUProfilingSection } from '@features/cu-profiling';
 import { Receipt, ViewReceiptButton } from '@features/receipt';
+import { isReceiptEnabled } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import {
@@ -125,7 +126,7 @@ export default function TransactionDetailsPageClient({ params: { signature: raw 
         }
     }, [status, autoRefresh, setZeroConfirmationRetries]);
 
-    if (searchParams.get('view') === 'receipt' && signature) {
+    if (isReceiptEnabled && searchParams.get('view') === 'receipt' && signature) {
         return <Receipt signature={signature} autoRefresh={autoRefresh} />;
     }
 
@@ -259,7 +260,9 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
         <div className="card">
             <div className="card-header align-items-center">
                 <h3 className="card-header-title">Overview</h3>
-                <ViewReceiptButton transactionWithMeta={transactionWithMeta} receiptPath={receiptPath} />
+                {isReceiptEnabled && (
+                    <ViewReceiptButton transactionWithMeta={transactionWithMeta} receiptPath={receiptPath} />
+                )}
                 <Link className="btn btn-white btn-sm me-2" href={inspectPath}>
                     <Settings className="align-text-top me-2" size={13} />
                     Inspect
