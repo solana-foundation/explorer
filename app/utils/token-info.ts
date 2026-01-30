@@ -93,41 +93,6 @@ export async function getTokenInfoWithoutOnChainFallback(
     }
 }
 
-export async function getTokenInfosWithoutOnChainFallback(
-    addresses: PublicKey[],
-    cluster: Cluster
-): Promise<Map<string, Token>> {
-    const chainId = getChainId(cluster);
-    const resultMap = new Map<string, Token>();
-
-    if (!chainId || addresses.length === 0) return resultMap;
-
-    try {
-        const response = await fetch(`https://token-list-api.solana.cloud/v1/mints?chainId=${chainId}`, {
-            body: JSON.stringify({ addresses: addresses.map(addr => addr.toBase58()) }),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            method: 'POST',
-        });
-
-        if (response.status >= 400) {
-            console.error(`Error calling UTL API for addresses on chain ID ${chainId}. Status ${response.status}`);
-            return resultMap;
-        }
-
-        const fetchedData = (await response.json()) as UtlApiResponse;
-
-        fetchedData.content.forEach(token => {
-            resultMap.set(token.address, token);
-        });
-    } catch (error) {
-        console.error('Failed to fetch batch token info:', error);
-    }
-
-    return resultMap;
-}
-
 async function getFullLegacyTokenInfoUsingCdn(
     address: PublicKey,
     chainId: ChainId
