@@ -2,6 +2,7 @@ import { Connection, type ParsedTransactionWithMeta } from '@solana/web3.js';
 
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 import Logger from '@/app/utils/logger';
+import { isClusterProbeEnabled } from '../env';
 
 // Clusters that can be probed when tx not found on mainnet
 type ProbeCluster = Cluster.Devnet | Cluster.Testnet;
@@ -60,6 +61,7 @@ async function getSignatureStatus(signature: string, cluster: Cluster): Promise<
         });
         return { right: status?.value !== null };
     } catch (error) {
+        /** TODO: that is to debug the receipts problems. should be deleted before the release */
         Logger.info(cluster);
         Logger.info(rpcUrl);
         Logger.error(error);
@@ -72,7 +74,8 @@ async function findTransactionCluster(signature: string): Promise<Cluster | unde
 
     // Fail on mainnet network error - don't silently probe other clusters
     if ('left' in mainnetResult) {
-        throw new Error('Failed to check mainnet', { cause: mainnetResult.left });
+        Logger.error(mainnetResult.left);
+        throw new Error('Failed to check the mainnet', { cause: mainnetResult.left });
     }
 
     if (mainnetResult.right) {
@@ -80,14 +83,21 @@ async function findTransactionCluster(signature: string): Promise<Cluster | unde
         return Cluster.MainnetBeta;
     }
 
-    // Transaction not found on mainnet - probe other clusters
-    Logger.warn(`Transaction not found on mainnet, probing other clusters: ${signature}`);
+    // Skip probing other clusters if disabled
+    if (!isClusterProbeEnabled) {
+        Logger.info(`Cluster probing disabled, won't lookup for it at other cluster: ${signature}`);
+        return undefined;
+    } else {
+        // Transaction not found on mainnet - probe other clusters
+        Logger.warn(`Transaction not found on mainnet, probing other clusters: ${signature}`);
+    }
 
     for (const cluster of CLUSTERS_TO_PROBE) {
         const result = await getSignatureStatus(signature, cluster);
 
         if ('left' in result) {
-            throw new Error(`Failed to check cluster ${cluster}`, { cause: result.left });
+            Logger.error(result.left);
+            throw new Error(`Failed to check the ${cluster}`, { cause: result.left });
         }
 
         if (result.right) {
