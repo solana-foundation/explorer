@@ -1,7 +1,7 @@
 import '../../styles.css';
 
-import { isReceiptEnabled, ogImageVersion } from '@features/receipt';
-import { Cluster, clusterSlug } from '@utils/cluster';
+import { isReceiptEnabled, RECEIPT_BASE_URL, RECEIPT_OG_IMAGE_VERSION } from '@features/receipt/env';
+import { Cluster, CLUSTERS, clusterSlug } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
 import { Metadata } from 'next/types';
 import React from 'react';
@@ -13,10 +13,8 @@ type Props = Readonly<{
     searchParams: Record<string, string | string[] | undefined>;
 }>;
 
-/// Receipt feature require BASE_URL to be set
-const RECEIPT_BASE_URL = process.env.RECEIPT_BASE_URL ?? '';
-const SHAREABLE_CLUSTERS = [Cluster.MainnetBeta, Cluster.Testnet, Cluster.Devnet, Cluster.Simd296] as const;
-const SHAREABLE_CLUSTER_SLUGS = SHAREABLE_CLUSTERS.map(clusterSlug);
+// Custom clusters use user-specific RPCs that the receipt API cannot access
+const SHAREABLE_CLUSTERS = CLUSTERS.filter(c => c !== Cluster.Custom);
 
 export async function generateMetadata({ params: { signature }, searchParams }: Props): Promise<Metadata> {
     const isReceiptView = searchParams.view === 'receipt' && isReceiptEnabled;
@@ -25,15 +23,22 @@ export async function generateMetadata({ params: { signature }, searchParams }: 
         const title = `Receipt | ${signature.slice(0, 16)}... | Solana`;
         const description = `Transaction receipt for ${signature} on Solana blockchain`;
 
-        const baseUrl = RECEIPT_BASE_URL.trim();
+        const baseUrl = RECEIPT_BASE_URL;
         const cluster = typeof searchParams.cluster === 'string' ? searchParams.cluster : undefined;
-        const isShareableCluster = cluster && SHAREABLE_CLUSTER_SLUGS.includes(cluster);
-        const clusterParam = isShareableCluster ? `&cluster=${cluster}` : '';
+        const clusterEnum = SHAREABLE_CLUSTERS.find(c => clusterSlug(c) === cluster);
 
-        const pageUrl = `${baseUrl}/tx/${signature}?view=receipt${clusterParam}`;
-        const ogImageUrl = ogImageVersion
-            ? `${baseUrl}/og/receipt/${signature}?v=${ogImageVersion}`
-            : `${baseUrl}/og/receipt/${signature}`;
+        const pageParams = new URLSearchParams();
+        pageParams.set('view', 'receipt');
+        if (clusterEnum !== undefined) pageParams.set('cluster', clusterSlug(clusterEnum));
+        const pageUrl = `${baseUrl}/tx/${signature}?${pageParams}`;
+
+        const ogParams = new URLSearchParams();
+        if (RECEIPT_OG_IMAGE_VERSION) ogParams.set('v', RECEIPT_OG_IMAGE_VERSION);
+        if (clusterEnum !== undefined && clusterEnum !== Cluster.MainnetBeta) {
+            ogParams.set('clusterId', String(clusterEnum));
+        }
+        const ogQuery = ogParams.toString();
+        const ogImageUrl = `${baseUrl}/og/receipt/${signature}${ogQuery ? `?${ogQuery}` : ''}`;
         return {
             description,
             openGraph: {

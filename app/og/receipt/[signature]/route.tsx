@@ -1,11 +1,5 @@
-import {
-    BaseReceiptImage,
-    createReceipt,
-    isReceiptEnabled,
-    OG_IMAGE_SIZE,
-    ogImageVersion,
-    parseClusterId,
-} from '@features/receipt';
+import { BaseReceiptImage, createReceipt, isReceiptEnabled, OG_IMAGE_SIZE, parseClusterId } from '@features/receipt';
+import { RECEIPT_OG_IMAGE_VERSION } from '@features/receipt/env';
 import { assertIsSignature } from '@solana/kit';
 import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
@@ -32,7 +26,7 @@ export async function GET(request: NextRequest, { params }: Props) {
     if (!signature) return new Response('Signature is required', { status: 400 });
     if (!isValidSignature(signature)) return new NextResponse('Invalid transaction signature', { status: 400 });
 
-    const etag = createEtag(signature, ogImageVersion, cluster);
+    const etag = createEtag(signature, RECEIPT_OG_IMAGE_VERSION, cluster);
     const cacheHeaders = getCacheHeaders();
 
     if (ifNoneMatchMatches(request.headers, etag)) return notModifiedResponse({ cacheHeaders, etag });
