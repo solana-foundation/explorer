@@ -19,7 +19,7 @@ export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta)
 
     const raw = extractSolTransferPayload(transaction, instruction);
 
-    const [err, validated] = validate(raw, SolTransferPayload);
+    const [err, validated] = validate(raw, SolTransferPayload, { coerce: true });
     if (err) {
         console.error('Error validating sol transfer payload', err);
         return undefined;
