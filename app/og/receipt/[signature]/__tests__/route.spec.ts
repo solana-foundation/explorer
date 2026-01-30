@@ -14,18 +14,22 @@ vi.mock('next/og', () => ({
     }),
 }));
 
-vi.mock('@features/receipt', () => ({
-    BaseReceiptImage: vi.fn(() => null),
-    OG_IMAGE_SIZE: { height: 630, width: 1200 },
-    createReceipt: vi.fn(),
-    getCachedReceipt: vi.fn(),
-    getReceiptImageUrl: vi.fn().mockResolvedValue(undefined),
-    isReceiptEnabled: true,
-    get ogImageVersion() {
-        return process.env.RECEIPT_OG_IMAGE_VERSION?.trim() ?? '';
-    },
-    storeReceiptImage: vi.fn().mockResolvedValue(undefined),
-}));
+vi.mock('@features/receipt', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@features/receipt')>();
+    return {
+        ...actual,
+        BaseReceiptImage: vi.fn(() => null),
+        OG_IMAGE_SIZE: { height: 630, width: 1200 },
+        createReceipt: vi.fn(),
+        getCachedReceipt: vi.fn(),
+        getReceiptImageUrl: vi.fn().mockResolvedValue(undefined),
+        isReceiptEnabled: true,
+        get ogImageVersion() {
+            return process.env.RECEIPT_OG_IMAGE_VERSION?.trim() ?? '';
+        },
+        storeReceiptImage: vi.fn().mockResolvedValue(undefined),
+    };
+});
 
 const validSignature = '5yKzCuw1e9d58HcnzSL31cczfXUux2H4Ga5TAR2RcQLE5W8BiTAC9x9MvhLtc4h99sC9XxLEAjhrXyfKezdMkZFV';
 
@@ -44,7 +48,7 @@ describe('GET /og/receipt/[signature]', () => {
 
         expect(response.status).toBe(200);
         expect(response.headers.get('Content-Type')).toBe('image/png');
-        expect(createReceipt).toHaveBeenCalledWith(validSignature);
+        expect(createReceipt).toHaveBeenCalledWith(validSignature, undefined);
     });
 
     it('should return 400 when signature is invalid and not call createReceipt', async () => {

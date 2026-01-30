@@ -1,9 +1,11 @@
 import { Connection, type ParsedTransactionWithMeta } from '@solana/web3.js';
 
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
+import Logger from '@/app/utils/logger';
 
-// Clusters to probe when transaction is not found on mainnet
-const CLUSTERS_TO_PROBE: Cluster[] = [Cluster.Devnet, Cluster.Testnet];
+// Clusters that can be probed when tx not found on mainnet
+type ProbeCluster = Cluster.Devnet | Cluster.Testnet;
+const CLUSTERS_TO_PROBE: ProbeCluster[] = [Cluster.Devnet, Cluster.Testnet];
 
 export type ApiData = {
     cluster: Cluster;
@@ -15,25 +17,35 @@ export async function getTx(
     dependencies?: {
         findCluster?: (signature: string) => Promise<Cluster | undefined>;
         fetchDetails?: (signature: string, rpcUrl: string) => Promise<ParsedTransactionWithMeta>;
-    }
+    },
+    cluster?: Cluster
 ): Promise<ApiData> {
     const findClusterFn = dependencies?.findCluster ?? findTransactionCluster;
     const fetchDetailsFn = dependencies?.fetchDetails ?? fetchTransactionDetails;
 
-    const cluster = await findClusterFn(signature);
+    // If cluster is provided, fetch directly without probing
+    if (cluster !== undefined) {
+        const rpcUrl = serverClusterUrl(cluster, '');
+        const transaction = await fetchDetailsFn(signature, rpcUrl);
+        return { cluster, transaction };
+    }
 
-    if (cluster === undefined) {
+    // No cluster specified - probe to find the transaction
+    const foundCluster = await findClusterFn(signature);
+
+    if (foundCluster === undefined) {
+        Logger.warn(`Cluster not found for signature ${signature}`);
         throw new Error('Cluster not found');
     }
 
-    const rpcUrl = serverClusterUrl(cluster, '');
+    const rpcUrl = serverClusterUrl(foundCluster, '');
     const transaction = await fetchDetailsFn(signature, rpcUrl);
 
     if (!transaction) {
         throw new Error('Transaction not found');
     }
 
-    return { cluster, transaction };
+    return { cluster: foundCluster, transaction };
 }
 
 type SignatureStatusResult = { left: Error } | { right: boolean };
@@ -61,10 +73,13 @@ async function findTransactionCluster(signature: string): Promise<Cluster | unde
     }
 
     if (mainnetResult.right) {
+        Logger.info(`Transaction found on mainnet: ${signature}`);
         return Cluster.MainnetBeta;
     }
 
     // Transaction not found on mainnet - probe other clusters
+    Logger.warn(`Transaction not found on mainnet, probing other clusters: ${signature}`);
+
     for (const cluster of CLUSTERS_TO_PROBE) {
         const result = await getSignatureStatus(signature, cluster);
 
@@ -73,6 +88,7 @@ async function findTransactionCluster(signature: string): Promise<Cluster | unde
         }
 
         if (result.right) {
+            Logger.info(`Transaction found on ${cluster}: ${signature}`);
             return cluster;
         }
     }

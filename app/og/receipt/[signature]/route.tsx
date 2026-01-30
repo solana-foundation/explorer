@@ -1,4 +1,11 @@
-import { BaseReceiptImage, createReceipt, isReceiptEnabled, OG_IMAGE_SIZE, ogImageVersion } from '@features/receipt';
+import {
+    BaseReceiptImage,
+    createReceipt,
+    isReceiptEnabled,
+    OG_IMAGE_SIZE,
+    ogImageVersion,
+    parseClusterId,
+} from '@features/receipt';
 import { assertIsSignature } from '@solana/kit';
 import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
@@ -19,18 +26,19 @@ type Props = Readonly<{
 
 export async function GET(request: NextRequest, { params }: Props) {
     const { signature } = params;
+    const cluster = parseClusterId(request.nextUrl.searchParams.get('clusterId') ?? undefined);
 
     if (!isReceiptEnabled) return new NextResponse('Not Found', { status: 404 });
     if (!signature) return new Response('Signature is required', { status: 400 });
     if (!isValidSignature(signature)) return new NextResponse('Invalid transaction signature', { status: 400 });
 
-    const etag = createEtag(signature, ogImageVersion);
+    const etag = createEtag(signature, ogImageVersion, cluster);
     const cacheHeaders = getCacheHeaders();
 
     if (ifNoneMatchMatches(request.headers, etag)) return notModifiedResponse({ cacheHeaders, etag });
 
     try {
-        const receipt = await createReceipt(signature);
+        const receipt = await createReceipt(signature, cluster);
 
         const imageResponse = new ImageResponse(<BaseReceiptImage data={receipt} />, {
             ...OG_IMAGE_SIZE,
@@ -55,8 +63,11 @@ function statusFromError(message: string): number {
     return 500;
 }
 
-function createEtag(signature: string, version: string): string {
-    return version ? `"${signature}-${version}"` : `"${signature}"`;
+function createEtag(signature: string, version: string, cluster?: number): string {
+    const parts = [signature];
+    if (cluster !== undefined) parts.push(String(cluster));
+    if (version) parts.push(version);
+    return `"${parts.join('-')}"`;
 }
 
 function getCacheHeaders(): Record<string, string> {
