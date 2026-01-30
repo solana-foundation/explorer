@@ -6,18 +6,10 @@ import {
 } from '@solana/web3.js';
 import { validate } from 'superstruct';
 
+import { isJitoTransfer } from './jito';
 import { extractMemoFromTransaction } from './memo';
 import { SolTransferPayload } from './schemas';
-import type { ReceiptSol } from './types';
-
-type SolTransferParsed = {
-    type: 'transfer';
-    info: {
-        source?: string;
-        destination?: string;
-        lamports?: number;
-    };
-};
+import type { ReceiptSol, SolTransferParsed } from './types';
 
 type SolTransferInstruction = ParsedInstruction & { parsed: SolTransferParsed };
 
@@ -42,9 +34,9 @@ export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta)
 
 // We support only single sol transfer instruction per transaction by design.
 function getSingleSolTransferInstruction(transaction: ParsedTransactionWithMeta): SolTransferInstruction | undefined {
-    const instructions = transaction.transaction.message.instructions.filter(
-        (instruction): instruction is SolTransferInstruction => isSolTransfer(instruction)
-    );
+    const instructions = transaction.transaction.message.instructions
+        .filter((instruction): instruction is SolTransferInstruction => isSolTransfer(instruction))
+        .filter(instruction => !isJitoTransfer(instruction));
     return instructions.length === 1 ? instructions[0] : undefined;
 }
 

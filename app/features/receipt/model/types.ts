@@ -27,3 +27,12 @@ export function isSolReceipt(receipt: Receipt): receipt is ReceiptSol {
 export function isTokenReceipt(receipt: Receipt): receipt is ReceiptToken {
     return receipt.type === 'token';
 }
+
+export type SolTransferParsed = {
+    type: 'transfer';
+    info: {
+        source?: string;
+        destination?: string;
+        lamports?: number;
+    };
+};
