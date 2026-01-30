@@ -60,6 +60,9 @@ async function getSignatureStatus(signature: string, cluster: Cluster): Promise<
         });
         return { right: status?.value !== null };
     } catch (error) {
+        Logger.error(cluster);
+        Logger.error(rpcUrl);
+        Logger.error(error);
         return { left: error instanceof Error ? error : new Error(String(error)) };
     }
 }
