@@ -11,6 +11,7 @@ import { mockSingleTransferTransaction } from '../../mocks/single-transfer';
 import { mockToken2022TransferTransaction } from '../../mocks/token-2022-transfer';
 import { mockToken2022Transfer2Transaction } from '../../mocks/token-2022-transfer2';
 import { mockUsdcTransferTransaction } from '../../mocks/usdc-checked-transfer';
+import { mockUsdcJitoTransferTransaction } from '../../mocks/usdc-jito-transfer';
 import { mockUsdcRegularTransferTransaction } from '../../mocks/usdc-regular-transfer';
 import { mockZeroTransferTransaction } from '../../mocks/zero-transfer';
 import { createReceipt } from '../create-receipt';
@@ -121,6 +122,34 @@ describe('createReceipt', () => {
 
             expect(result).toMatchObject({
                 network: 'Devnet',
+            });
+        });
+
+        it('when transaction has USDC transferChecked and Jito SOL tip, creates SOL receipt for the tip', async () => {
+            vi.mocked(getTx).mockResolvedValueOnce({
+                cluster: Cluster.Devnet,
+                transaction: mockUsdcJitoTransferTransaction,
+            });
+
+            const result = await createReceipt(mockSignature);
+
+            expect(result).toMatchObject({
+                fee: {
+                    formatted: '0.000005',
+                    raw: 5000,
+                },
+                network: 'Devnet',
+                receiver: {
+                    truncated: '65MUM..L2Fhk',
+                },
+                sender: {
+                    truncated: 'Hd3f3..R3bD5',
+                },
+                total: {
+                    formatted: '1',
+                    raw: 1,
+                    unit: 'TOKEN',
+                },
             });
         });
     });
