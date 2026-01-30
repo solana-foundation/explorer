@@ -21,6 +21,9 @@ vi.mock('@features/receipt', () => ({
     getCachedReceipt: vi.fn(),
     getReceiptImageUrl: vi.fn().mockResolvedValue(undefined),
     isReceiptEnabled: true,
+    get ogImageVersion() {
+        return process.env.RECEIPT_OG_IMAGE_VERSION?.trim() ?? '';
+    },
     storeReceiptImage: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -93,5 +96,32 @@ describe('GET /og/receipt/[signature]', () => {
         expect(response.status).toBe(500);
         const text = await response.text();
         expect(text).toBe('Failed to process request');
+    });
+
+    it('should use no version when v is omitted and ETag is signature only', async () => {
+        const { createReceipt } = await import('@features/receipt');
+        vi.mocked(createReceipt).mockResolvedValue(undefined as never);
+
+        const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
+        const request = new NextRequest(url.toString());
+
+        const response = await GET(request, { params: { signature: validSignature } });
+
+        expect(response.status).toBe(200);
+        expect(response.headers.get('ETag')).toBe(`"${validSignature}"`);
+    });
+
+    it('should include ogImageVersion in ETag when set', async () => {
+        const { createReceipt } = await import('@features/receipt');
+        vi.mocked(createReceipt).mockResolvedValue(undefined as never);
+
+        await vi.stubEnv('RECEIPT_OG_IMAGE_VERSION', '2');
+        const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
+        const request = new NextRequest(url.toString());
+
+        const response = await GET(request, { params: { signature: validSignature } });
+
+        expect(response.status).toBe(200);
+        expect(response.headers.get('ETag')).toContain('2');
     });
 });

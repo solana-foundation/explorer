@@ -1,4 +1,4 @@
-import { BaseReceiptImage, createReceipt, isReceiptEnabled, OG_IMAGE_SIZE } from '@features/receipt';
+import { BaseReceiptImage, createReceipt, isReceiptEnabled, OG_IMAGE_SIZE, ogImageVersion } from '@features/receipt';
 import { assertIsSignature } from '@solana/kit';
 import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest, { params }: Props) {
     if (!signature) return new Response('Signature is required', { status: 400 });
     if (!isValidSignature(signature)) return new NextResponse('Invalid transaction signature', { status: 400 });
 
-    const etag = createEtag(signature);
+    const etag = createEtag(signature, ogImageVersion);
     const cacheHeaders = getCacheHeaders();
 
     if (ifNoneMatchMatches(request.headers, etag)) return notModifiedResponse({ cacheHeaders, etag });
@@ -55,8 +55,8 @@ function statusFromError(message: string): number {
     return 500;
 }
 
-function createEtag(signature: string): string {
-    return `"${signature}"`;
+function createEtag(signature: string, version: string): string {
+    return version ? `"${signature}-${version}"` : `"${signature}"`;
 }
 
 function getCacheHeaders(): Record<string, string> {

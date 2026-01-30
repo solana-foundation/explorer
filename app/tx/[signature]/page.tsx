@@ -1,6 +1,6 @@
 import '../../styles.css';
 
-import { isReceiptEnabled } from '@features/receipt';
+import { isReceiptEnabled, ogImageVersion } from '@features/receipt';
 import { Cluster, clusterSlug } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
 import { Metadata } from 'next/types';
@@ -31,7 +31,9 @@ export async function generateMetadata({ params: { signature }, searchParams }: 
         const clusterParam = isShareableCluster ? `&cluster=${cluster}` : '';
 
         const pageUrl = `${baseUrl}/tx/${signature}?view=receipt${clusterParam}`;
-        const ogImageUrl = `${baseUrl}/og/receipt/${signature}`;
+        const ogImageUrl = ogImageVersion
+            ? `${baseUrl}/og/receipt/${signature}?v=${ogImageVersion}`
+            : `${baseUrl}/og/receipt/${signature}`;
         return {
             description,
             openGraph: {
