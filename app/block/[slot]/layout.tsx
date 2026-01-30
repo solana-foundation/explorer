@@ -73,7 +73,7 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
                         {IBRL_EXPLORER_URL && (
                             <ExternalLinkWarning href={`${IBRL_EXPLORER_URL}/block/${slotNumber}`}>
                                 <>
-                                    <ExternalLink className="e-align-text-top e-me-2" size={13} />
+                                    <ExternalLink className="e-me-2 e-align-text-top" size={13} />
                                     IBRL Explorer
                                 </>
                             </ExternalLinkWarning>
