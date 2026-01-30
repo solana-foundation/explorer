@@ -10,7 +10,7 @@ import { getTx } from '../api/get-tx';
 import type { FormattedReceipt } from '../types';
 import { createSolTransferReceipt } from './sol-transfer';
 import { createTokenTransferReceipt } from './token-transfer';
-import { Receipt } from './types';
+import { isSolReceipt, isTokenReceipt, type Receipt } from './types';
 
 export async function createReceipt(signature: string): Promise<FormattedReceipt | undefined> {
     const data = await getTx(signature);
@@ -32,7 +32,7 @@ export async function extractReceiptData(
 
 export function formatReceiptData(receipt: Receipt, cluster: Cluster): FormattedReceipt {
     const timestamp = receipt.date * 1000;
-    const unit = receipt.type === 'sol' ? 'SOL' : receipt.symbol || 'TOKEN';
+    const unit = isSolReceipt(receipt) ? 'SOL' : receipt.symbol || 'TOKEN';
 
     const base = {
         date: {
@@ -43,7 +43,7 @@ export function formatReceiptData(receipt: Receipt, cluster: Cluster): Formatted
             formatted: lamportsToSolString(receipt.fee, 9),
             raw: receipt.fee,
         },
-        logoURI: receipt.type === 'token' ? receipt.logoURI : undefined,
+        logoURI: isTokenReceipt(receipt) ? receipt.logoURI : undefined,
         memo: receipt.memo,
         network: clusterName(cluster),
         receiver: {
@@ -55,12 +55,12 @@ export function formatReceiptData(receipt: Receipt, cluster: Cluster): Formatted
             truncated: truncateAddress(receipt.sender, 5),
         },
         total: {
-            formatted: receipt.type === 'sol' ? lamportsToSolString(receipt.total, 9) : String(receipt.total),
+            formatted: isSolReceipt(receipt) ? lamportsToSolString(receipt.total, 9) : String(receipt.total),
             raw: receipt.total,
             unit,
         },
     };
-    if (receipt.type === 'token') {
+    if (isTokenReceipt(receipt)) {
         return { ...base, mint: receipt.mint, symbol: receipt.symbol };
     }
     return base;

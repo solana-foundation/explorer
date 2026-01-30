@@ -19,3 +19,11 @@ export type ReceiptToken = BaseReceipt & {
 };
 
 export type Receipt = ReceiptSol | ReceiptToken;
+
+export function isSolReceipt(receipt: Receipt): receipt is ReceiptSol {
+    return receipt.type === 'sol';
+}
+
+export function isTokenReceipt(receipt: Receipt): receipt is ReceiptToken {
+    return receipt.type === 'token';
+}
