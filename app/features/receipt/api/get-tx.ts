@@ -2,7 +2,8 @@ import { Connection, type ParsedTransactionWithMeta } from '@solana/web3.js';
 
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
-const CLUSTERS_TO_TRY: Cluster[] = [Cluster.MainnetBeta, Cluster.Devnet, Cluster.Testnet];
+// Clusters to probe when transaction is not found on mainnet
+const CLUSTERS_TO_PROBE: Cluster[] = [Cluster.Devnet, Cluster.Testnet];
 
 export type ApiData = {
     cluster: Cluster;
@@ -35,20 +36,44 @@ export async function getTx(
     return { cluster, transaction };
 }
 
-async function findTransactionCluster(signature: string): Promise<Cluster | undefined> {
-    for (const cluster of CLUSTERS_TO_TRY) {
-        const rpcUrl = serverClusterUrl(cluster, '');
-        const connection = new Connection(rpcUrl, 'confirmed');
+type SignatureStatusResult = { left: Error } | { right: boolean };
 
-        try {
-            const status = await connection.getSignatureStatus(signature, {
-                searchTransactionHistory: true,
-            });
-            if (status?.value !== null) {
-                return cluster;
-            }
-        } catch (error) {
-            console.error('Failed to find transaction cluster', error);
+async function getSignatureStatus(signature: string, cluster: Cluster): Promise<SignatureStatusResult> {
+    const rpcUrl = serverClusterUrl(cluster, '');
+    const connection = new Connection(rpcUrl, 'confirmed');
+
+    try {
+        const status = await connection.getSignatureStatus(signature, {
+            searchTransactionHistory: true,
+        });
+        return { right: status?.value !== null };
+    } catch (error) {
+        return { left: error instanceof Error ? error : new Error(String(error)) };
+    }
+}
+
+async function findTransactionCluster(signature: string): Promise<Cluster | undefined> {
+    const mainnetResult = await getSignatureStatus(signature, Cluster.MainnetBeta);
+
+    // Fail on mainnet network error - don't silently probe other clusters
+    if ('left' in mainnetResult) {
+        throw new Error('Failed to check mainnet', { cause: mainnetResult.left });
+    }
+
+    if (mainnetResult.right) {
+        return Cluster.MainnetBeta;
+    }
+
+    // Transaction not found on mainnet - probe other clusters
+    for (const cluster of CLUSTERS_TO_PROBE) {
+        const result = await getSignatureStatus(signature, cluster);
+
+        if ('left' in result) {
+            throw new Error(`Failed to check cluster ${cluster}`, { cause: result.left });
+        }
+
+        if (result.right) {
+            return cluster;
         }
     }
 

@@ -123,14 +123,21 @@ describe('getTx', () => {
             });
         });
 
-        it('should handle errors from multiple clusters gracefully', async () => {
+        it('should throw immediately on mainnet network error', async () => {
             mockConnection.getSignatureStatus.mockRejectedValueOnce(new Error('Forbidden access'));
-            mockConnection.getSignatureStatus.mockRejectedValueOnce(new Error('Network error'));
-            mockConnection.getSignatureStatus.mockResolvedValueOnce({
-                value: null,
-            });
 
-            await expect(getTx(mockSignature)).rejects.toThrow('Cluster not found');
+            await expect(getTx(mockSignature)).rejects.toThrow('Failed to check mainnet');
+            expect(mockConnection.getSignatureStatus).toHaveBeenCalledTimes(1);
+        });
+
+        it('should throw on probe cluster network error', async () => {
+            // Mainnet succeeds but tx not found
+            mockConnection.getSignatureStatus.mockResolvedValueOnce({ value: null });
+            // Devnet fails with network error
+            mockConnection.getSignatureStatus.mockRejectedValueOnce(new Error('Network error'));
+
+            await expect(getTx(mockSignature)).rejects.toThrow('Failed to check cluster');
+            expect(mockConnection.getSignatureStatus).toHaveBeenCalledTimes(2);
         });
     });
 
