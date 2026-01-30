@@ -24,6 +24,8 @@ vi.mock('@features/receipt', () => ({
     storeReceiptImage: vi.fn().mockResolvedValue(undefined),
 }));
 
+const validSignature = '5yKzCuw1e9d58HcnzSL31cczfXUux2H4Ga5TAR2RcQLE5W8BiTAC9x9MvhLtc4h99sC9XxLEAjhrXyfKezdMkZFV';
+
 describe('GET /og/receipt/[signature]', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -32,24 +34,35 @@ describe('GET /og/receipt/[signature]', () => {
 
     it('should generate image successfully with signature', async () => {
         const { createReceipt } = await import('@features/receipt');
-        const url = new URL('http://localhost:3000/og/receipt/test-signature-123');
+        const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
         const request = new NextRequest(url.toString());
 
-        const response = await GET(request, { params: { signature: 'test-signature-123' } });
+        const response = await GET(request, { params: { signature: validSignature } });
 
         expect(response.status).toBe(200);
         expect(response.headers.get('Content-Type')).toBe('image/png');
-        expect(createReceipt).toHaveBeenCalledWith('test-signature-123');
+        expect(createReceipt).toHaveBeenCalledWith(validSignature);
+    });
+
+    it('should return 400 when signature is invalid and not call createReceipt', async () => {
+        const { createReceipt } = await import('@features/receipt');
+        const request = new NextRequest('http://localhost:3000/og/receipt/not-base58!!!');
+
+        const response = await GET(request, { params: { signature: 'not-base58!!!' } });
+
+        expect(response.status).toBe(400);
+        expect(await response.text()).toBe('Invalid transaction signature');
+        expect(createReceipt).not.toHaveBeenCalled();
     });
 
     it('should return 404 when transaction or cluster not found', async () => {
         const { createReceipt } = await import('@features/receipt');
         vi.mocked(createReceipt).mockRejectedValue(new Error('Transaction not found'));
 
-        const url = new URL('http://localhost:3000/og/receipt/test-signature-123');
+        const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
         const request = new NextRequest(url.toString());
 
-        const response = await GET(request, { params: { signature: 'test-signature-123' } });
+        const response = await GET(request, { params: { signature: validSignature } });
 
         expect(response.status).toBe(404);
         const text = await response.text();
@@ -60,9 +73,9 @@ describe('GET /og/receipt/[signature]', () => {
         const { createReceipt } = await import('@features/receipt');
         vi.mocked(createReceipt).mockRejectedValue(new Error('Failed to fetch transaction'));
 
-        const request = new NextRequest('http://localhost:3000/og/receipt/abc');
+        const request = new NextRequest(`http://localhost:3000/og/receipt/${validSignature}`);
 
-        const response = await GET(request, { params: { signature: 'abc' } });
+        const response = await GET(request, { params: { signature: validSignature } });
 
         expect(response.status).toBe(502);
         const text = await response.text();
@@ -73,9 +86,9 @@ describe('GET /og/receipt/[signature]', () => {
         const { createReceipt } = await import('@features/receipt');
         vi.mocked(createReceipt).mockRejectedValue(new Error('Something broke'));
 
-        const request = new NextRequest('http://localhost:3000/og/receipt/abc');
+        const request = new NextRequest(`http://localhost:3000/og/receipt/${validSignature}`);
 
-        const response = await GET(request, { params: { signature: 'abc' } });
+        const response = await GET(request, { params: { signature: validSignature } });
 
         expect(response.status).toBe(500);
         const text = await response.text();

@@ -1,4 +1,5 @@
 import { BaseReceiptImage, createReceipt, isReceiptEnabled, OG_IMAGE_SIZE } from '@features/receipt';
+import { assertIsSignature } from '@solana/kit';
 import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -21,6 +22,7 @@ export async function GET(request: NextRequest, { params }: Props) {
 
     if (!isReceiptEnabled) return new NextResponse('Not Found', { status: 404 });
     if (!signature) return new Response('Signature is required', { status: 400 });
+    if (!isValidSignature(signature)) return new NextResponse('Invalid transaction signature', { status: 400 });
 
     const etag = createEtag(signature);
     const cacheHeaders = getCacheHeaders();
@@ -61,4 +63,13 @@ function getCacheHeaders(): Record<string, string> {
     const custom = process.env.RECEIPT_CACHE_HEADERS;
     if (!custom) return { ...DEFAULT_CACHE_HEADERS };
     return { 'Cache-Control': custom };
+}
+
+function isValidSignature(signature: string): boolean {
+    try {
+        assertIsSignature(signature);
+        return true;
+    } catch {
+        return false;
+    }
 }
