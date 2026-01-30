@@ -65,12 +65,11 @@ export async function createTokenTransferReceipt(
         return undefined;
     }
 
-    const tokenInfo = await getTokenInfo(raw.mint);
+    const tokenInfo = await getTokenInfo(validated.mint);
     return {
         ...validated,
         logoURI: tokenInfo?.logoURI,
         memo: raw.memo,
-        mint: raw.mint,
         symbol: tokenInfo?.symbol,
         type: 'token',
     };
