@@ -199,7 +199,7 @@ function Footer({
                         </div>
                     </TooltipTrigger>
                     <TooltipContent side="right">
-                        {total.unit === 'SOL' ? `${total.raw} lamports` : total.raw}
+                        {total.unit === 'SOL' ? `${total.raw} lamports` : `${total.raw} ${total.unit}`}
                     </TooltipContent>
                 </Tooltip>
                 <span>Fee</span>
