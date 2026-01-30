@@ -1,10 +1,10 @@
 | Type | Route | Size | First Load JS |
 |------|-------|------|---------------|
 | Static | `/` | 15.7 kB | 1.01 MB |
-| Static | `/_not-found` | 332 B | 161 kB |
+| Static | `/_not-found` | 326 B | 161 kB |
 | Dynamic | `/address/[address]` | 11.8 kB | 301 kB |
 | Dynamic | `/address/[address]/anchor-account` | 5.76 kB | 992 kB |
-| Dynamic | `/address/[address]/anchor-program` | 332 B | 161 kB |
+| Dynamic | `/address/[address]/anchor-program` | 325 B | 161 kB |
 | Dynamic | `/address/[address]/attestation` | 6.67 kB | 972 kB |
 | Dynamic | `/address/[address]/attributes` | 2.49 kB | 931 kB |
 | Dynamic | `/address/[address]/blockhashes` | 1.88 kB | 926 kB |
@@ -12,8 +12,8 @@
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 3.75 kB | 953 kB |
 | Dynamic | `/address/[address]/domains` | 13.9 kB | 933 kB |
 | Dynamic | `/address/[address]/entries` | 3.09 kB | 939 kB |
-| Dynamic | `/address/[address]/feature-gate` | 333 B | 161 kB |
-| Dynamic | `/address/[address]/idl` | 134 kB | 607 kB |
+| Dynamic | `/address/[address]/feature-gate` | 326 B | 161 kB |
+| Dynamic | `/address/[address]/idl` | 135 kB | 606 kB |
 | Dynamic | `/address/[address]/instructions` | 2.12 kB | 1.03 MB |
 | Dynamic | `/address/[address]/metadata` | 3.89 kB | 946 kB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 5.97 kB | 972 kB |
@@ -22,7 +22,7 @@
 | Dynamic | `/address/[address]/security` | 11 kB | 1.02 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 3.59 kB | 930 kB |
 | Dynamic | `/address/[address]/stake-history` | 3.73 kB | 930 kB |
-| Dynamic | `/address/[address]/token-extensions` | 8.67 kB | 991 kB |
+| Dynamic | `/address/[address]/token-extensions` | 8.59 kB | 991 kB |
 | Dynamic | `/address/[address]/tokens` | 7.98 kB | 1.12 MB |
 | Dynamic | `/address/[address]/transfers` | 3.52 kB | 1.06 MB |
 | Dynamic | `/address/[address]/verified-build` | 5.94 kB | 997 kB |
@@ -42,8 +42,8 @@
 | Static | `/feature-gates` | 3.49 kB | 928 kB |
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 7.03 kB | 930 kB |
-| Static | `/tos` | 332 B | 161 kB |
-| Dynamic | `/tx/[signature]` | 34.3 kB | 1.4 MB |
-| Dynamic | `/tx/[signature]/inspect` | 607 B | 1.2 MB |
+| Static | `/tos` | 364 B | 161 kB |
+| Dynamic | `/tx/[signature]` | 37.5 kB | 1.4 MB |
+| Dynamic | `/tx/[signature]/inspect` | 608 B | 1.2 MB |
 | Static | `/tx/inspector` | 622 B | 1.2 MB |
 | Static | `/verified-programs` | 6.25 kB | 170 kB |
