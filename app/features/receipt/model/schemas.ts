@@ -1,13 +1,15 @@
 import type { Infer } from 'superstruct';
 import { assign, min, number, string, type } from 'superstruct';
 
+import { publicKeyString } from '../lib/structs';
+
 const positiveNumber = min(number(), 0, { exclusive: true });
 
 export const BaseTransferPayload = type({
     date: number(),
     fee: number(),
-    receiver: string(),
-    sender: string(),
+    receiver: publicKeyString(),
+    sender: publicKeyString(),
     total: positiveNumber,
 });
 

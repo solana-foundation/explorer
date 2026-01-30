@@ -101,17 +101,17 @@ function extractTokenTransferPayload(transaction: ParsedTransactionWithMeta, ins
         fee: transaction.meta?.fee,
         memo: extractMemoFromTransaction(transaction),
         mint: extractTokenMint(transaction, parsed),
-        receiver: extractTokenReceiver(transaction, parsed.info.destination),
-        sender: String(parsed.info.authority),
+        receiver: extractTokenReceiver(transaction, parsed.info.destination?.toString()),
+        sender: parsed.info.authority,
         total: extractTotal(parsed, transaction),
     };
 }
 
 function extractTokenMint(transaction: ParsedTransactionWithMeta, parsed: TokenTransferParsed): string | undefined {
     if ('mint' in parsed.info) {
-        return parsed.info.mint;
+        return parsed.info.mint?.toString();
     }
-    const destinationTokenAccount = parsed.info.destination;
+    const destinationTokenAccount = parsed.info.destination?.toString();
 
     const accountIndex = transaction.transaction.message.accountKeys.findIndex(
         account => account.pubkey.toString() === destinationTokenAccount
@@ -147,7 +147,7 @@ function extractTotal(parsed: TokenTransferParsed, transaction: ParsedTransactio
     if (!parsed.info.amount) return 0;
     const rawAmount = parseFloat(parsed.info.amount);
 
-    const decimals = getTokenDecimals(transaction, parsed.info.destination || parsed.info.source);
+    const decimals = getTokenDecimals(transaction, (parsed.info.destination || parsed.info.source)?.toString());
 
     if (decimals !== undefined) {
         return rawAmount / Math.pow(10, decimals);
