@@ -91,7 +91,7 @@ jobs:
           TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
         run: |
           pnpm test:ci
-      
+
   Sitemap-Check:
     needs: read-nvmrc
     runs-on: ubuntu-latest
