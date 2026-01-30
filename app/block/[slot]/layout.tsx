@@ -11,6 +11,7 @@ import { BlockProvider, FetchStatus, useBlock, useFetchBlock } from '@providers/
 import { useCluster } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
+import { IBRL_EXPLORER_URL } from '@utils/env';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { notFound, useSelectedLayoutSegment } from 'next/navigation';
@@ -67,8 +68,16 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
         content = (
             <>
                 <div className="card">
-                    <div className="card-header">
-                        <h3 className="card-header-title mb-0 d-flex align-items-center">Overview</h3>
+                    <div className="card-header align-items-center">
+                        <h3 className="card-header-title">Overview</h3>
+                        {IBRL_EXPLORER_URL && (
+                            <ExternalLinkWarning href={`${IBRL_EXPLORER_URL}/block/${slotNumber}`}>
+                                <>
+                                    <ExternalLink className="e-align-text-top e-me-2" size={13} />
+                                    IBRL Explorer
+                                </>
+                            </ExternalLinkWarning>
+                        )}
                     </div>
                     <TableCardBody>
                         <tr>
@@ -81,17 +90,6 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
                             <td className="w-100">Slot</td>
                             <td className="text-lg-end font-monospace">
                                 <Slot slot={slotNumber} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="w-100">Block Analysis</td>
-                            <td className="text-lg-end">
-                                <ExternalLinkWarning href={`https://ibrl.wtf/block/${slotNumber}`}>
-                                    <span>
-                                        IBRL Explorer
-                                        <ExternalLink className="align-text-top ms-2" size={13} />
-                                    </span>
-                                </ExternalLinkWarning>
                             </td>
                         </tr>
                         {blockLeader !== undefined && (

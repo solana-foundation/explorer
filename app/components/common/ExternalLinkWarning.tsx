@@ -25,7 +25,9 @@ export function ExternalLinkWarning({ href, children }: ExternalLinkWarningProps
 
     return (
         <Dialog>
-            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogTrigger asChild>
+                <button className="btn btn-white btn-sm">{children}</button>
+            </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle className="e-flex e-items-center e-gap-2">
