@@ -51,6 +51,28 @@ describe('getTx', () => {
                 cluster: Cluster.MainnetBeta,
                 transaction: mockSingleTransferTransaction,
             });
+            expect(mockConnection.getSignatureStatus).toHaveBeenCalledTimes(1);
+            expect(mockConnection.getParsedTransaction).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return transaction and cluster when found on devnet', async () => {
+            mockConnection.getSignatureStatus.mockResolvedValueOnce({ value: null }).mockResolvedValueOnce({
+                value: {
+                    confirmationStatus: 'confirmed',
+                    slot: 67890,
+                },
+            });
+
+            mockConnection.getParsedTransaction.mockResolvedValueOnce(mockSingleTransferTransaction);
+
+            const result = await getTx(mockSignature);
+
+            expect(result).toEqual({
+                cluster: Cluster.Devnet,
+                transaction: mockSingleTransferTransaction,
+            });
+            expect(mockConnection.getSignatureStatus).toHaveBeenCalledTimes(2);
+            expect(mockConnection.getParsedTransaction).toHaveBeenCalledTimes(1);
         });
     });
 

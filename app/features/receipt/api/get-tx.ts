@@ -2,6 +2,8 @@ import { Connection, type ParsedTransactionWithMeta } from '@solana/web3.js';
 
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
+const CLUSTERS_TO_TRY: Cluster[] = [Cluster.MainnetBeta, Cluster.Devnet, Cluster.Testnet];
+
 export type ApiData = {
     cluster: Cluster;
     transaction: ParsedTransactionWithMeta;
@@ -34,9 +36,7 @@ export async function getTx(
 }
 
 async function findTransactionCluster(signature: string): Promise<Cluster | undefined> {
-    const clustersToTry: Cluster[] = [Cluster.MainnetBeta, Cluster.Devnet, Cluster.Testnet];
-
-    const clusterChecks = clustersToTry.map(async (cluster): Promise<Cluster | undefined> => {
+    for (const cluster of CLUSTERS_TO_TRY) {
         const rpcUrl = serverClusterUrl(cluster, '');
         const connection = new Connection(rpcUrl, 'confirmed');
 
@@ -44,23 +44,11 @@ async function findTransactionCluster(signature: string): Promise<Cluster | unde
             const status = await connection.getSignatureStatus(signature, {
                 searchTransactionHistory: true,
             });
-
             if (status?.value !== null) {
                 return cluster;
             }
         } catch (error) {
             console.error('Failed to find transaction cluster', error);
-            return undefined;
-        }
-
-        return undefined;
-    });
-
-    const results = await Promise.allSettled(clusterChecks);
-
-    for (const result of results) {
-        if (result.status === 'fulfilled' && result.value !== undefined) {
-            return result.value;
         }
     }
 
