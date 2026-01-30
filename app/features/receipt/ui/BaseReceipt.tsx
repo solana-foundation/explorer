@@ -58,7 +58,7 @@ export function Header({ date }: Pick<FormattedExtendedReceipt, 'date'>) {
                     <TooltipTrigger asChild>
                         <span className="e-text-right e-font-mono e-text-sm e-text-gray-400">{date.utc}</span>
                     </TooltipTrigger>
-                    <TooltipContent side="right">{displayTimestamp(date.timestamp, true)}</TooltipContent>
+                    <TooltipContent side="top">{displayTimestamp(date.timestamp, true)}</TooltipContent>
                 </Tooltip>
             )}
         </div>
@@ -143,7 +143,7 @@ function ListItem({
                     </TooltipTrigger>
                 </div>
                 {tooltipText && (
-                    <TooltipContent side="right">
+                    <TooltipContent side="top">
                         <span className="e-text-green-400">{tooltipText}</span>
                     </TooltipContent>
                 )}
@@ -165,7 +165,7 @@ function Footer({
                 <span className="e-text-white">Total</span>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <div className="e-flex e-items-center e-justify-end e-gap-2">
+                        <div className="e-ml-auto e-flex e-w-fit e-items-center e-gap-2">
                             {logoURI &&
                                 (tokenHref ? (
                                     <a
@@ -198,7 +198,7 @@ function Footer({
                             </span>
                         </div>
                     </TooltipTrigger>
-                    <TooltipContent side="right">
+                    <TooltipContent side="top">
                         {total.unit === 'SOL' ? `${total.raw} lamports` : `${total.raw} ${total.unit}`}
                     </TooltipContent>
                 </Tooltip>
@@ -206,9 +206,9 @@ function Footer({
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <span className="e-text-right">{fee.formatted} SOL</span>
+                        <span className="e-ml-auto e-block e-w-fit">{fee.formatted} SOL</span>
                     </TooltipTrigger>
-                    <TooltipContent side="right">{fee.raw} lamports</TooltipContent>
+                    <TooltipContent side="top">{fee.raw} lamports</TooltipContent>
                 </Tooltip>
             </div>
 
