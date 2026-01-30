@@ -206,7 +206,7 @@ function Footer({
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <span className="e-text-right">~{fee.formatted} SOL</span>
+                        <span className="e-text-right">{fee.formatted} SOL</span>
                     </TooltipTrigger>
                     <TooltipContent side="right">{fee.raw} lamports</TooltipContent>
                 </Tooltip>
