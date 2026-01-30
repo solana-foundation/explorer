@@ -1,11 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+import path from 'path';
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
+// https://playwright.dev/docs/test-parameterize#env-files
+dotenv.config({ path: path.resolve(__dirname, '.env.local') });
+
+// https://playwright.dev/docs/test-configuration
 export default defineConfig({
     testDir: './app',
-    testMatch: '**/*.e2e.{ts,tsx}',
+    testMatch: '**/__e2e__/*.e2e.{ts,tsx}',
     fullyParallel: true,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,

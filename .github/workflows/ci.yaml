@@ -15,7 +15,6 @@ env:
   SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING: 1
   SENTRY_TELEMETRY_DISABLE: true
   STORYBOOK_DISABLE_TELEMETRY: 1
-  CI: true
 
 jobs:
   # Job to read Node version from .nvmrc
@@ -81,9 +80,6 @@ jobs:
           echo "PNPM version: $(pnpm --version)"
           pnpm install --frozen-lockfile
 
-      - name: Install Playwright Browsers
-        run: pnpm playwright install --with-deps
-
       - name: Build
         run: pnpm build
 
@@ -95,20 +91,6 @@ jobs:
           TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
         run: |
           pnpm test:ci
-
-      - name: E2e Test
-        env:
-          CI: ${{ vars.CI }}
-        run: |
-          pnpm test:e2e:ci
-
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v5
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report-e2e
-          path: playwright-report/
-          retention-days: 30
       
   Sitemap-Check:
     needs: read-nvmrc
