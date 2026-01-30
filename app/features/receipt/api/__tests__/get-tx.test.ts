@@ -14,6 +14,10 @@ vi.mock('@solana/web3.js', async () => {
     };
 });
 
+vi.mock('../../env', () => ({
+    isClusterProbeEnabled: true,
+}));
+
 describe('getTx', () => {
     const mockSignature = '5yKzCuw1e9d58HcnzSL31cczfXUux2H4Ga5TAR2RcQLE5W8BiTAC9x9MvhLtc4h99sC9XxLEAjhrXyfKezdMkZFV';
 
@@ -126,7 +130,7 @@ describe('getTx', () => {
         it('should throw immediately on mainnet network error', async () => {
             mockConnection.getSignatureStatus.mockRejectedValueOnce(new Error('Forbidden access'));
 
-            await expect(getTx(mockSignature)).rejects.toThrow('Failed to check mainnet');
+            await expect(getTx(mockSignature)).rejects.toThrow('Failed to check the mainnet-beta');
             expect(mockConnection.getSignatureStatus).toHaveBeenCalledTimes(1);
         });
 
@@ -136,7 +140,7 @@ describe('getTx', () => {
             // Devnet fails with network error
             mockConnection.getSignatureStatus.mockRejectedValueOnce(new Error('Network error'));
 
-            await expect(getTx(mockSignature)).rejects.toThrow('Failed to check cluster');
+            await expect(getTx(mockSignature)).rejects.toThrow('Failed to check the devnet');
             expect(mockConnection.getSignatureStatus).toHaveBeenCalledTimes(2);
         });
     });

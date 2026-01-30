@@ -1,6 +1,6 @@
 import { Connection, type ParsedTransactionWithMeta } from '@solana/web3.js';
 
-import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
+import { Cluster, clusterSlug, serverClusterUrl } from '@/app/utils/cluster';
 import Logger from '@/app/utils/logger';
 
 import { isClusterProbeEnabled } from '../env';
@@ -76,7 +76,7 @@ async function findTransactionCluster(signature: string): Promise<Cluster | unde
     // Fail on mainnet network error - don't silently probe other clusters
     if ('left' in mainnetResult) {
         Logger.error(mainnetResult.left);
-        throw new Error('Failed to check the mainnet', { cause: mainnetResult.left });
+        throw new Error(`Failed to check the ${clusterSlug(Cluster.MainnetBeta)}`, { cause: mainnetResult.left });
     }
 
     if (mainnetResult.right) {
@@ -98,7 +98,7 @@ async function findTransactionCluster(signature: string): Promise<Cluster | unde
 
         if ('left' in result) {
             Logger.error(result.left);
-            throw new Error(`Failed to check the ${cluster}`, { cause: result.left });
+            throw new Error(`Failed to check the ${clusterSlug(cluster)}`, { cause: result.left });
         }
 
         if (result.right) {
