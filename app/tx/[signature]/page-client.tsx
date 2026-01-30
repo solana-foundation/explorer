@@ -35,7 +35,7 @@ import useTabVisibility from '@utils/use-tab-visibility';
 import bs58 from 'bs58';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { RefreshCw, Settings } from 'react-feather';
 
 import { AccountsCard } from '@/app/components/transaction/AccountsCard';
@@ -406,10 +406,8 @@ function DetailsSection({ signature }: SignatureProps) {
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const transaction = transactionWithMeta?.transaction;
     const message = transaction?.message;
-    const { cluster, status: clusterStatus } = useCluster();
+    const { status: clusterStatus } = useCluster();
     const refreshDetails = () => fetchDetails(signature);
-
-    const accountAddresses = useMemo(() => message?.accountKeys.map(account => account.pubkey.toBase58()) || [""], [message]);
 
     // Fetch details on load
     useEffect(() => {
@@ -427,9 +425,9 @@ function DetailsSection({ signature }: SignatureProps) {
     } else if (!transactionWithMeta || !message) {
         return <ErrorCard text="Details are not available" />;
     }
-    
+
     return (
-        <TokenBatchProvider cluster={cluster} addresses={accountAddresses}>
+        <>
             <CUProfilingSection signature={signature} />
             <Suspense fallback={<LoadingCard message="Loading accounts" />}>
                 <AccountsCard signature={signature} />
@@ -437,6 +435,6 @@ function DetailsSection({ signature }: SignatureProps) {
             <TokenBalancesCard signature={signature} />
             <InstructionsSection signature={signature} />
             <ProgramLogSection signature={signature} />
-        </TokenBatchProvider>
+        </>
     );
 }
