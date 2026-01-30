@@ -5,7 +5,10 @@ const INVALID_TX = '34qZEWsTW85uZSd4N53DptMaQ5HTx2cczgwWatW6CPhLbaetEX67jELmrCyz
 const FEATURE_ENABLED = process.env.NEXT_PUBLIC_RECEIPT_ENABLED === 'true';
 
 async function hasElement(page: Page, selector: string): Promise<boolean> {
-    return page.locator(selector).isVisible().catch(() => false);
+    return page
+        .locator(selector)
+        .isVisible()
+        .catch(() => false);
 }
 
 async function waitForPage(page: Page, tx: string, view?: 'receipt') {
@@ -52,7 +55,8 @@ test.describe('when feature enabled', () => {
         await page.waitForTimeout(2000);
 
         const text = await page.textContent('body');
-        const showsError = text?.includes('There is no receipt') || text?.includes('Fetch Failed') || text?.includes('Error');
+        const showsError =
+            text?.includes('There is no receipt') || text?.includes('Fetch Failed') || text?.includes('Error');
 
         expect(showsError).toBe(true);
     });
