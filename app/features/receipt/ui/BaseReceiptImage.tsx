@@ -277,14 +277,18 @@ function NoReceipt({ size }: { size: { width: number; height: number } }) {
                 style={{
                     alignItems: 'center',
                     display: 'flex',
+                    flexDirection: 'column',
                     flexGrow: 1,
                     fontSize: '51px',
                     gap: '24px',
                     justifyContent: 'center',
+                    margin: '0 auto',
+                    maxWidth: '70%',
+                    textAlign: 'center',
                 }}
             >
                 <Warning />
-                There is no receipt for this transaction.
+                See the transaction details on the Solana Explorer.
             </div>
         </div>
     );
