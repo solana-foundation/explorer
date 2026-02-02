@@ -18,6 +18,20 @@ describe('parseCompositeSignature', () => {
     });
 });
 
+describe('parseCompositeSignature - version independence', () => {
+    it('should extract same signature and cluster regardless of version', () => {
+        const versions = [`${SIG}-1-2`, `${SIG}-2-2`, `${SIG}-99-2`, `${SIG}--2`];
+
+        const results = versions.map(parseCompositeSignature);
+
+        // All should have same signature and cluster
+        results.forEach(result => {
+            expect(result.signature).toBe(SIG);
+            expect(result.cluster).toBe(Cluster.Devnet);
+        });
+    });
+});
+
 describe('buildCompositeSignature', () => {
     it.each([
         { cluster: Cluster.MainnetBeta, expected: SIG, name: 'mainnet without version', signature: SIG, version: undefined },

@@ -1,6 +1,6 @@
 import '../../styles.css';
 
-import { buildCompositeSignature } from '@features/receipt';
+import { buildCompositeSignature, getClusterParam } from '@features/receipt';
 import { isReceiptEnabled, RECEIPT_BASE_URL, RECEIPT_OG_IMAGE_VERSION } from '@features/receipt/env';
 import { Cluster, CLUSTERS, clusterSlug } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
@@ -25,7 +25,7 @@ export async function generateMetadata({ params: { signature }, searchParams }: 
         const description = `Transaction receipt for ${signature} on Solana blockchain`;
 
         const baseUrl = RECEIPT_BASE_URL;
-        const cluster = typeof searchParams.cluster === 'string' ? searchParams.cluster : undefined;
+        const cluster = getClusterParam(searchParams);
         const clusterEnum = SHAREABLE_CLUSTERS.find(c => clusterSlug(c) === cluster);
 
         const pageParams = new URLSearchParams();
