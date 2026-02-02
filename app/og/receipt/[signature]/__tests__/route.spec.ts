@@ -1,8 +1,6 @@
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { GET } from '../route';
-
 vi.mock('next/og', () => ({
     ImageResponse: vi.fn(() => {
         return new Response('mock-image-response', {
@@ -34,12 +32,15 @@ vi.mock('@features/receipt', async importOriginal => {
 const validSignature = '5yKzCuw1e9d58HcnzSL31cczfXUux2H4Ga5TAR2RcQLE5W8BiTAC9x9MvhLtc4h99sC9XxLEAjhrXyfKezdMkZFV';
 
 describe('GET /og/receipt/[signature]', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+        await vi.stubEnv('RECEIPT_OG_IMAGE_VERSION', '');
+        vi.resetModules();
         vi.clearAllMocks();
         vi.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     it('should generate image successfully with signature', async () => {
+        const { GET } = await import('../route');
         const { createReceipt } = await import('@features/receipt');
         const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
         const request = new NextRequest(url.toString());
@@ -52,6 +53,7 @@ describe('GET /og/receipt/[signature]', () => {
     });
 
     it('should return 400 when signature is invalid and not call createReceipt', async () => {
+        const { GET } = await import('../route');
         const { createReceipt } = await import('@features/receipt');
         const request = new NextRequest('http://localhost:3000/og/receipt/not-base58!!!');
 
@@ -63,6 +65,7 @@ describe('GET /og/receipt/[signature]', () => {
     });
 
     it('should return 404 when transaction or cluster not found', async () => {
+        const { GET } = await import('../route');
         const { createReceipt, ReceiptError } = await import('@features/receipt');
         vi.mocked(createReceipt).mockRejectedValue(new ReceiptError('Transaction not found', { status: 404 }));
 
@@ -77,6 +80,7 @@ describe('GET /og/receipt/[signature]', () => {
     });
 
     it('should return 502 when fetch transaction fails', async () => {
+        const { GET } = await import('../route');
         const { createReceipt, ReceiptError } = await import('@features/receipt');
         vi.mocked(createReceipt).mockRejectedValue(new ReceiptError('Failed to fetch transaction', { status: 502 }));
 
@@ -90,6 +94,7 @@ describe('GET /og/receipt/[signature]', () => {
     });
 
     it('should return 500 for unknown errors', async () => {
+        const { GET } = await import('../route');
         const { createReceipt } = await import('@features/receipt');
         vi.mocked(createReceipt).mockRejectedValue(new Error('Something broke'));
 
@@ -102,7 +107,8 @@ describe('GET /og/receipt/[signature]', () => {
         expect(text).toBe('Failed to process request');
     });
 
-    it('should use no version when v is omitted and ETag is signature only', async () => {
+    it('should set ETag to quoted signature when no version and no cluster', async () => {
+        const { GET } = await import('../route');
         const { createReceipt } = await import('@features/receipt');
         vi.mocked(createReceipt).mockResolvedValue(undefined as never);
 
@@ -115,17 +121,51 @@ describe('GET /og/receipt/[signature]', () => {
         expect(response.headers.get('ETag')).toBe(`"${validSignature}"`);
     });
 
-    it('should include ogImageVersion in ETag when set', async () => {
+    it('should include cluster in ETag when clusterId query param is provided', async () => {
+        const { GET } = await import('../route');
         const { createReceipt } = await import('@features/receipt');
         vi.mocked(createReceipt).mockResolvedValue(undefined as never);
 
+        const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
+        url.searchParams.set('clusterId', '2'); // Devnet
+        const request = new NextRequest(url.toString());
+
+        const response = await GET(request, { params: { signature: validSignature } });
+
+        expect(response.status).toBe(200);
+        expect(response.headers.get('ETag')).toBe(`"${validSignature}-2"`);
+    });
+
+    it('should include ogImageVersion in ETag when set', async () => {
         await vi.stubEnv('RECEIPT_OG_IMAGE_VERSION', '2');
+        vi.resetModules();
+        const { GET } = await import('../route');
+        const { createReceipt } = await import('@features/receipt');
+        vi.mocked(createReceipt).mockResolvedValue(undefined as never);
+
         const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
         const request = new NextRequest(url.toString());
 
         const response = await GET(request, { params: { signature: validSignature } });
 
         expect(response.status).toBe(200);
-        expect(response.headers.get('ETag')).toContain('2');
+        expect(response.headers.get('ETag')).toBe(`"${validSignature}-2"`);
+    });
+
+    it('should include both cluster and version in ETag when both are set', async () => {
+        await vi.stubEnv('RECEIPT_OG_IMAGE_VERSION', '3');
+        vi.resetModules();
+        const { GET } = await import('../route');
+        const { createReceipt } = await import('@features/receipt');
+        vi.mocked(createReceipt).mockResolvedValue(undefined as never);
+
+        const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
+        url.searchParams.set('clusterId', '1'); // Testnet
+        const request = new NextRequest(url.toString());
+
+        const response = await GET(request, { params: { signature: validSignature } });
+
+        expect(response.status).toBe(200);
+        expect(response.headers.get('ETag')).toBe(`"${validSignature}-1-3"`);
     });
 });
