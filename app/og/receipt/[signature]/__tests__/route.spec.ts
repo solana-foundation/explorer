@@ -14,7 +14,7 @@ vi.mock('next/og', () => ({
     }),
 }));
 
-vi.mock('@features/receipt', async (importOriginal) => {
+vi.mock('@features/receipt', async importOriginal => {
     const actual = await importOriginal<typeof import('@features/receipt')>();
     return {
         ...actual,
@@ -63,8 +63,8 @@ describe('GET /og/receipt/[signature]', () => {
     });
 
     it('should return 404 when transaction or cluster not found', async () => {
-        const { createReceipt } = await import('@features/receipt');
-        vi.mocked(createReceipt).mockRejectedValue(new Error('Transaction not found'));
+        const { createReceipt, ReceiptError } = await import('@features/receipt');
+        vi.mocked(createReceipt).mockRejectedValue(new ReceiptError('Transaction not found', { status: 404 }));
 
         const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
         const request = new NextRequest(url.toString());
@@ -77,8 +77,8 @@ describe('GET /og/receipt/[signature]', () => {
     });
 
     it('should return 502 when fetch transaction fails', async () => {
-        const { createReceipt } = await import('@features/receipt');
-        vi.mocked(createReceipt).mockRejectedValue(new Error('Failed to fetch transaction'));
+        const { createReceipt, ReceiptError } = await import('@features/receipt');
+        vi.mocked(createReceipt).mockRejectedValue(new ReceiptError('Failed to fetch transaction', { status: 502 }));
 
         const request = new NextRequest(`http://localhost:3000/og/receipt/${validSignature}`);
 

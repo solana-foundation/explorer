@@ -1,4 +1,11 @@
-import { BaseReceiptImage, createReceipt, isReceiptEnabled, OG_IMAGE_SIZE, parseClusterId } from '@features/receipt';
+import {
+    BaseReceiptImage,
+    createReceipt,
+    isReceiptEnabled,
+    OG_IMAGE_SIZE,
+    parseClusterId,
+    ReceiptError,
+} from '@features/receipt';
 import { RECEIPT_OG_IMAGE_VERSION } from '@features/receipt/env';
 import { assertIsSignature } from '@solana/kit';
 import { ImageResponse } from 'next/og';
@@ -43,18 +50,12 @@ export async function GET(request: NextRequest, { params }: Props) {
             headers: { ...cacheHeaders, 'Content-Type': 'image/png', ETag: etag },
         });
     } catch (e) {
-        const message = e instanceof Error ? e.message : 'Unknown error';
-        Logger.error(`Failed to process receipt for signature ${signature}: ${message}`, e);
-        const status = statusFromError(message);
+        Logger.error(`Failed to process receipt for signature ${signature}:`, e);
+
+        const status = e instanceof ReceiptError ? e.status : 500;
         const body = status === 404 ? 'Receipt not found' : 'Failed to process request';
         return new NextResponse(body, { status });
     }
-}
-
-function statusFromError(message: string): number {
-    if (message === 'Transaction not found' || message === 'Cluster not found') return 404;
-    if (message === 'Failed to fetch transaction') return 502;
-    return 500;
 }
 
 function createEtag(signature: string, version: string, cluster?: number): string {
