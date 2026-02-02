@@ -76,11 +76,18 @@ export const WarningDialog: Story = {
                             <AlertCircle className="e-mr-2 e-text-destructive" size={14} />
                             Spend real funds?
                         </DialogTitle>
-                        <DialogDescription className="e-pl-6">
+                    </DialogHeader>
+                    <div className="e-space-y-2 e-pl-6">
+                        <DialogDescription>
                             You&apos;re connected to Mainnet. Any SOL you send now is permanent and costs real money.
                             Make sure the details are correct before continuing.
                         </DialogDescription>
-                    </DialogHeader>
+                        <p className="e-text-sm e-text-neutral-400">
+                            Please take note that this is a beta version feature and is provided on an &quot;as is&quot;
+                            and &quot;as available&quot; basis. Solana Explorer does not provide any warranties and will
+                            not be liable for any loss, direct or indirect, through continued use of this feature.
+                        </p>
+                    </div>
                     <DialogFooter>
                         <DialogClose asChild>
                             <Button variant="outline" size="sm">

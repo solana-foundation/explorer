@@ -5,8 +5,10 @@ import { useCluster } from '@providers/cluster';
 import { Badge } from '@shared/ui/badge';
 import { cn } from '@shared/utils';
 import { useEffect, useMemo, useState } from 'react';
+import { AlertTriangle, ExternalLink } from 'react-feather';
 
 import { IdlVariant, useIdlLastTransactionDate } from '../model/use-idl-last-transaction-date';
+import { IdlInstructionSection } from './IdlInstructionSection';
 import { IdlSection } from './IdlSection';
 
 type IdlTab = {
@@ -65,7 +67,43 @@ export function IdlCard({ programId }: { programId: string }) {
     }, [tabs, activeTabIndex]);
 
     if (tabs.length === 0 || activeTabIndex === undefined) {
-        return null;
+        return (
+            <div className="card">
+                <div className="card-header">
+                    <h4 className="card-header-title">Program IDL</h4>
+                </div>
+                <div className="card-body">
+                    <div className="e-mb-6 e-flex e-items-center e-gap-2 e-text-destructive">
+                        <AlertTriangle size={16} />
+                        <span>
+                            This program doesn&apos;t have an IDL yet. If you&apos;re the developer, upload it using the
+                            instructions below.
+                        </span>
+                    </div>
+
+                    <div className="e-space-y-6">
+                        <IdlInstructionSection
+                            title="Upload IDL"
+                            description="Use this command to upload generated idl in JSON format"
+                            commands={['npx @solana-program/program-metadata@latest write idl $PROGRAM_ID ./idl.json']}
+                        />
+
+                        <div className="e-flex e-items-center e-justify-between">
+                            <span>In case you want to upload IDL with a multisig, follow the documentation.</span>
+                            <a
+                                href="https://github.com/solana-program/program-metadata?tab=readme-ov-file#commands"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-outline-primary btn-sm e-whitespace-nowrap"
+                            >
+                                Full documentation
+                                <ExternalLink className="align-text-top ms-2" size={13} />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     const activeTab = tabs[activeTabIndex];

@@ -20,6 +20,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Header } from '@components/Header';
 import { useAnchorProgram } from '@entities/idl';
+import { SecurityNotification } from '@features/security-txt';
 import {
     Account,
     AccountsProvider,
@@ -48,7 +49,6 @@ import useSWRImmutable from 'swr/immutable';
 
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
-import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
 import { hasTokenMetadata } from '@/app/features/metadata';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
@@ -241,6 +241,7 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
                     pubkey={pubkey}
                     tokenInfo={fullTokenInfo}
                     isTokenInfoLoading={isFullTokenInfoLoading}
+                    notification={<SecurityNotification parsedData={infoParsed} address={address} />}
                 >
                     {children}
                 </DetailsSections>
@@ -264,8 +265,10 @@ function DetailsSections({
     info,
     tokenInfo,
     isTokenInfoLoading,
+    notification,
 }: {
     children: React.ReactNode;
+    notification: React.ReactNode;
     pubkey: PublicKey;
     tab?: string;
     info?: CacheEntry<Account>;
@@ -292,6 +295,7 @@ function DetailsSections({
         <>
             {FLAGGED_ACCOUNTS_WARNING[address] ?? null}
             <InfoSection account={account} tokenInfo={tokenInfo} />
+            {notification}
             <MoreSection tabs={tabComponents.map(({ component }) => component)}>{children}</MoreSection>
         </>
     );
@@ -587,7 +591,7 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
     tabComponents.push({
         component: (
             <React.Suspense key={idlProgramTab.slug} fallback={<></>}>
-                <ProgramIdlLink tab={idlProgramTab} address={pubkey.toString()} pubkey={pubkey} />
+                <ProgramIdlLink tab={idlProgramTab} address={pubkey.toString()} account={account} />
             </React.Suspense>
         ),
         tab: idlProgramTab,
@@ -623,15 +627,12 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
     return tabComponents;
 }
 
-function ProgramIdlLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
-    const { url, cluster } = useCluster();
-    const { idl } = useAnchorProgram(pubkey.toString(), url, cluster);
-    const { programMetadataIdl } = useProgramMetadataIdl(pubkey.toString(), url, cluster);
+function ProgramIdlLink({ tab, address, account }: { tab: Tab; address: string; account: Account }) {
     const anchorProgramPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
 
-    if (!idl && !programMetadataIdl) {
+    if (!account.executable) {
         return null;
     }
 

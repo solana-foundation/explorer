@@ -7,6 +7,8 @@ import { isEnvEnabled } from '@utils/env';
 import React, { useMemo } from 'react';
 import { PlayCircle, XCircle } from 'react-feather';
 
+import { idlAnalytics } from '@/app/shared/lib/analytics';
+
 import { BaseIdlAccounts } from '../formatted-idl/ui/BaseIdlAccounts';
 import { BaseIdlConstants } from '../formatted-idl/ui/BaseIdlConstants';
 import { BaseIdlErrors } from '../formatted-idl/ui/BaseIdlErrors';
@@ -115,7 +117,15 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, sea
                     isInteractDisabled ? (
                         <BaseWarningCard message="Current version of IDL is not suported" />
                     ) : (
-                        <InteractWithIdl data={idl.instructions} />
+                        <InteractWithIdl
+                            data={idl.instructions}
+                            onSectionsExpanded={idlAnalytics.trackSectionsExpanded}
+                            onTabOpened={idlAnalytics.trackTabOpened}
+                            onTransactionConfirmed={idlAnalytics.trackTransactionConfirmed}
+                            onTransactionFailed={idlAnalytics.trackTransactionFailed}
+                            onTransactionSubmitted={idlAnalytics.trackTransactionSubmitted}
+                            onWalletConnected={idlAnalytics.trackWalletConnected}
+                        />
                     ),
                 title: <InteractWithIdlTabName isInteractDisabled={isInteractDisabled} />,
             } as InteractTab);

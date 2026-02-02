@@ -2,7 +2,7 @@ import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
 import { camelCase } from 'change-case';
 
-import type { PdaInstruction, PdaSeed } from './types';
+import type { IdlSeed, IdlSeedAccount, IdlSeedArg, IdlSeedConst, PdaInstruction } from './types';
 
 export interface SeedInfo {
     buffers: Buffer[] | null;
@@ -20,7 +20,7 @@ interface ProcessedSeed {
  * Returns null buffers if any required seed value is missing or invalid
  */
 export function buildSeedsWithInfo(
-    seeds: PdaSeed[],
+    seeds: IdlSeed[],
     args: Record<string, string | undefined>,
     accounts: Record<string, string | Record<string, string | undefined> | undefined>,
     instruction: PdaInstruction
@@ -51,7 +51,7 @@ export function buildSeedsWithInfo(
  * Process a single seed and return its buffer and info
  */
 function processSeed(
-    seed: PdaSeed,
+    seed: IdlSeed,
     args: Record<string, string | undefined>,
     accounts: Record<string, string | Record<string, string | undefined> | undefined>,
     instruction: PdaInstruction
@@ -71,17 +71,7 @@ function processSeed(
     }
 }
 
-/**
- * Process a const seed
- */
-function processConstSeed(seed: PdaSeed): ProcessedSeed {
-    if (!seed.value) {
-        return {
-            buffer: null,
-            info: { name: 'const', value: null },
-        };
-    }
-
+function processConstSeed(seed: IdlSeedConst): ProcessedSeed {
     const buffer = Buffer.from(seed.value);
     const hexValue = buffer.toString('hex');
 
@@ -91,21 +81,11 @@ function processConstSeed(seed: PdaSeed): ProcessedSeed {
     };
 }
 
-/**
- * Process an arg seed
- */
 function processArgSeed(
-    seed: PdaSeed,
+    seed: IdlSeedArg,
     args: Record<string, string | undefined>,
     instruction: PdaInstruction
 ): ProcessedSeed {
-    if (!seed.path) {
-        return {
-            buffer: null,
-            info: { name: 'arg', value: null },
-        };
-    }
-
     const camelPath = camelCase(seed.path);
     const argValue = args[camelPath];
 
@@ -131,20 +111,10 @@ function processArgSeed(
     };
 }
 
-/**
- * Process an account seed
- */
 function processAccountSeed(
-    seed: PdaSeed,
+    seed: IdlSeedAccount,
     accounts: Record<string, string | Record<string, string | undefined> | undefined>
 ): ProcessedSeed {
-    if (!seed.path) {
-        return {
-            buffer: null,
-            info: { name: 'account', value: null },
-        };
-    }
-
     const camelPath = camelCase(seed.path);
     const accountValue = getAccountValue(accounts, camelPath);
 

@@ -51,10 +51,13 @@ export function createWalletPrefillDependency(
             const walletAddress = value.toBase58();
 
             for (const path of signerPaths) {
-                form.setValue(path, walletAddress as unknown as FormValue, {
-                    shouldDirty: false,
-                    shouldValidate: false,
-                });
+                const currentValue = form.getValues(path);
+                if (!currentValue || String(currentValue).trim() === '') {
+                    form.setValue(path, walletAddress as unknown as FormValue, {
+                        shouldDirty: false,
+                        shouldValidate: false,
+                    });
+                }
             }
         },
     };

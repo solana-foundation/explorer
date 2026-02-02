@@ -2,6 +2,8 @@ import { TransactionHistoryCard } from '@components/account/history/TransactionH
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
+import { TransactionsProvider } from '@/app/providers/transactions';
+
 type Props = Readonly<{
     params: {
         address: string;
@@ -16,5 +18,9 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
 }
 
 export default function TransactionHistoryPage({ params: { address } }: Props) {
-    return <TransactionHistoryCard address={address} />;
+    return (
+        <TransactionsProvider>
+            <TransactionHistoryCard address={address} />
+        </TransactionsProvider>
+    );
 }
