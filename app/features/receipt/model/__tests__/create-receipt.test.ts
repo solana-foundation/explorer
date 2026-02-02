@@ -12,6 +12,7 @@ import { mockToken2022TransferTransaction } from '../../mocks/token-2022-transfe
 import { mockToken2022Transfer2Transaction } from '../../mocks/token-2022-transfer2';
 import { mockUsdcTransferTransaction } from '../../mocks/usdc-checked-transfer';
 import { mockUsdcJitoTransferTransaction } from '../../mocks/usdc-jito-transfer';
+import { mockUsdcMultisigTransferTransaction } from '../../mocks/usdc-multisig-transfer';
 import { mockUsdcRegularTransferTransaction } from '../../mocks/usdc-regular-transfer';
 import { mockZeroTransferTransaction } from '../../mocks/zero-transfer';
 import { createReceipt } from '../create-receipt';
@@ -331,6 +332,24 @@ describe('createReceipt', () => {
                 'AN8h2reVWuPAWXhfJQounhTMqb5bvwVKumX6pMmSK25U',
                 Cluster.MainnetBeta
             );
+        });
+
+        it('should create a receipt for multisig token transfer using multisigAuthority as sender', async () => {
+            const mockTokenInfo = {
+                logoURI: 'https://example.com/usdc.png',
+                symbol: 'USDC',
+            };
+
+            vi.mocked(getTx).mockResolvedValueOnce({
+                cluster: Cluster.MainnetBeta,
+                transaction: mockUsdcMultisigTransferTransaction,
+            });
+            vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
+
+            const result = await createReceipt(mockSignature);
+
+            expect(result).toBeDefined();
+            expect(result?.sender.address).toBe('Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5');
         });
     });
 

@@ -50,6 +50,14 @@ type TokenTransferParsed =
 
 type TokenTransferInstruction = ParsedInstruction & { parsed: TokenTransferParsed };
 
+type MultisigTransferInfo = {
+    multisigAuthority: string;
+};
+
+function isMultisigTransfer(info: Record<string, unknown>): info is MultisigTransferInfo {
+    return 'multisigAuthority' in info && typeof info.multisigAuthority === 'string';
+}
+
 export async function createTokenTransferReceipt(
     transaction: ParsedTransactionWithMeta,
     getTokenInfo: (mint: string | undefined) => Promise<TokenInfo | undefined>
@@ -101,9 +109,16 @@ function extractTokenTransferPayload(transaction: ParsedTransactionWithMeta, ins
         memo: extractMemoFromTransaction(transaction),
         mint: extractTokenMint(transaction, parsed),
         receiver: extractTokenReceiver(transaction, parsed.info.destination?.toString()),
-        sender: parsed.info.authority,
+        sender: extractTokenSender(parsed.info),
         total: extractTotal(parsed, transaction),
     };
+}
+
+function extractTokenSender(info: TokenTransferParsed['info']): string | undefined {
+    if (isMultisigTransfer(info)) {
+        return info.multisigAuthority;
+    }
+    return info.authority;
 }
 
 function extractTokenMint(transaction: ParsedTransactionWithMeta, parsed: TokenTransferParsed): string | undefined {
