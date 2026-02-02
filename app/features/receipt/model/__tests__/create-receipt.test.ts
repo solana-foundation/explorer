@@ -4,6 +4,7 @@ import { Cluster } from '@/app/utils/cluster';
 
 import { getTokenInfo } from '../../api/get-token-info';
 import { getTx } from '../../api/get-tx';
+import { MULTISIG_AUTHORITY, RECEIVER } from '../../mocks/addresses';
 import { mockCustomFeePayerTransaction } from '../../mocks/custom-fee-payer';
 import { mockMultipleTransfersTransaction } from '../../mocks/multiple-transfers';
 import { mockNoTransferTransaction } from '../../mocks/no-transfers';
@@ -335,21 +336,17 @@ describe('createReceipt', () => {
         });
 
         it('should create a receipt for multisig token transfer using multisigAuthority as sender', async () => {
-            const mockTokenInfo = {
-                logoURI: 'https://example.com/usdc.png',
-                symbol: 'USDC',
-            };
-
             vi.mocked(getTx).mockResolvedValueOnce({
                 cluster: Cluster.MainnetBeta,
                 transaction: mockUsdcMultisigTransferTransaction,
             });
-            vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
+            vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
 
             const result = await createReceipt(mockSignature);
 
             expect(result).toBeDefined();
-            expect(result?.sender.address).toBe('Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5');
+            expect(result?.sender.address).toBe(MULTISIG_AUTHORITY.publicKey.toBase58());
+            expect(result?.receiver.address).toBe(RECEIVER.publicKey.toBase58());
         });
     });
 
