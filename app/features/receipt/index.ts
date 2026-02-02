@@ -5,3 +5,4 @@ export { Receipt } from './ui/Receipt';
 export { ViewReceiptButton } from './ui/ViewReceiptButton';
 export { createReceipt, formatReceiptData } from './model/create-receipt';
 export { parseClusterId } from './model/cluster';
+export { buildCompositeSignature, parseCompositeSignature } from './model/composite-signature';

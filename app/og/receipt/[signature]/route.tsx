@@ -3,15 +3,13 @@ import {
     createReceipt,
     isReceiptEnabled,
     OG_IMAGE_SIZE,
-    parseClusterId,
+    parseCompositeSignature,
     ReceiptError,
 } from '@features/receipt';
-import { RECEIPT_OG_IMAGE_VERSION } from '@features/receipt/env';
 import { assertIsSignature } from '@solana/kit';
 import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { ifNoneMatchMatches, notModifiedResponse } from '@/app/shared/lib/http-utils';
 import Logger from '@/app/utils/logger';
 
 // export const runtime = 'edge';
@@ -26,17 +24,14 @@ type Props = Readonly<{
 }>;
 
 export async function GET(request: NextRequest, { params }: Props) {
-    const { signature } = params;
-    const cluster = parseClusterId(request.nextUrl.searchParams.get('clusterId') ?? undefined);
+    const { signature: compositeSignature } = params;
+    const { signature, cluster } = parseCompositeSignature(compositeSignature);
 
     if (!isReceiptEnabled) return new NextResponse('Not Found', { status: 404 });
     if (!signature) return new Response('Signature is required', { status: 400 });
     if (!isValidSignature(signature)) return new NextResponse('Invalid transaction signature', { status: 400 });
 
-    const etag = createEtag(signature, RECEIPT_OG_IMAGE_VERSION, cluster);
     const cacheHeaders = getCacheHeaders();
-
-    if (ifNoneMatchMatches(request.headers, etag)) return notModifiedResponse({ cacheHeaders, etag });
 
     try {
         const receipt = await createReceipt(signature, cluster);
@@ -47,7 +42,7 @@ export async function GET(request: NextRequest, { params }: Props) {
         const imageBuffer = await imageResponse.arrayBuffer();
 
         return new NextResponse(imageBuffer, {
-            headers: { ...cacheHeaders, 'Content-Type': 'image/png', ETag: etag },
+            headers: { ...cacheHeaders, 'Content-Type': 'image/png' },
         });
     } catch (e) {
         Logger.error(`Failed to process receipt for signature ${signature}:`, e);
@@ -56,13 +51,6 @@ export async function GET(request: NextRequest, { params }: Props) {
         const body = status === 404 ? 'Receipt not found' : 'Failed to process request';
         return new NextResponse(body, { status });
     }
-}
-
-function createEtag(signature: string, version: string, cluster?: number): string {
-    const parts = [signature];
-    if (cluster !== undefined) parts.push(String(cluster));
-    if (version) parts.push(version);
-    return `"${parts.join('-')}"`;
 }
 
 function getCacheHeaders(): Record<string, string> {

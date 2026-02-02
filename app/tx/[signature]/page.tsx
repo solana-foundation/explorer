@@ -1,5 +1,6 @@
 import '../../styles.css';
 
+import { buildCompositeSignature } from '@features/receipt';
 import { isReceiptEnabled, RECEIPT_BASE_URL, RECEIPT_OG_IMAGE_VERSION } from '@features/receipt/env';
 import { Cluster, CLUSTERS, clusterSlug } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
@@ -32,13 +33,12 @@ export async function generateMetadata({ params: { signature }, searchParams }: 
         if (clusterEnum !== undefined) pageParams.set('cluster', clusterSlug(clusterEnum));
         const pageUrl = `${baseUrl}/tx/${signature}?${pageParams}`;
 
-        const ogParams = new URLSearchParams();
-        if (RECEIPT_OG_IMAGE_VERSION) ogParams.set('v', RECEIPT_OG_IMAGE_VERSION);
-        if (clusterEnum !== undefined && clusterEnum !== Cluster.MainnetBeta) {
-            ogParams.set('clusterId', String(clusterEnum));
-        }
-        const ogQuery = ogParams.toString();
-        const ogImageUrl = `${baseUrl}/og/receipt/${signature}${ogQuery ? `?${ogQuery}` : ''}`;
+        const compositeSignature = buildCompositeSignature(
+            signature,
+            RECEIPT_OG_IMAGE_VERSION || undefined,
+            clusterEnum
+        );
+        const ogImageUrl = `${baseUrl}/og/receipt/${compositeSignature}`;
         return {
             description,
             openGraph: {
