@@ -1,6 +1,7 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { ChainId, Client, Token, UtlConfig } from '@solflare-wallet/utl-sdk';
 import { Cluster } from '@utils/cluster';
+import Logger from '@utils/logger';
 import { TokenExtension } from '@validators/accounts/token-extension';
 
 type TokenExtensions = {
@@ -58,25 +59,21 @@ function makeUtlClient(cluster: Cluster, connectionString: string): Client | und
     return new Client(config);
 }
 
-export function getTokenInfoSwrKey(address: string, cluster: Cluster, connectionString: string) {
-    return ['get-token-info', address, cluster, connectionString];
+export function getTokenInfoSwrKey(address: string, cluster: Cluster, _connectionString?: string) {
+    return ['get-token-info', address, cluster];
 }
 
 export async function getTokenInfo(
     address: PublicKey,
     cluster: Cluster,
-    connectionString: string
+    _connectionString?: string
 ): Promise<Token | undefined> {
-    const client = makeUtlClient(cluster, connectionString);
-    if (!client) return undefined;
-    const token = await client.fetchMint(address);
-    return token;
+    return getTokenInfoWithoutOnChainFallback(address, cluster);
 }
 
-type UtlApiResponse = {
-    content: Token[];
-};
-
+/**
+ * @deprecated Use `getTokenInfo` instead.
+ */
 export async function getTokenInfoWithoutOnChainFallback(
     address: PublicKey,
     cluster: Cluster
@@ -84,23 +81,21 @@ export async function getTokenInfoWithoutOnChainFallback(
     const chainId = getChainId(cluster);
     if (!chainId) return undefined;
 
-    // Request token info directly from UTL API
-    // We don't use the SDK here because we don't want it to fallback to an on-chain request
-    const response = await fetch(`https://token-list-api.solana.cloud/v1/mints?chainId=${chainId}`, {
-        body: JSON.stringify({ addresses: [address.toBase58()] }),
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        method: 'POST',
-    });
+    try {
+        const response = await fetch('/api/token-info', {
+            body: JSON.stringify({ address: address.toBase58(), cluster }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        });
 
-    if (response.status >= 400) {
-        console.error(`Error calling UTL API for address ${address} on chain ID ${chainId}. Status ${response.status}`);
+        if (!response.ok) return undefined;
+
+        const data = (await response.json()) as { content?: Token };
+        return data.content;
+    } catch (error) {
+        Logger.warn(`Failed to fetch token info for ${address}`, error);
         return undefined;
     }
-
-    const fetchedData = (await response.json()) as UtlApiResponse;
-    return fetchedData.content[0];
 }
 
 async function getFullLegacyTokenInfoUsingCdn(
