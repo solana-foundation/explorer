@@ -1,10 +1,43 @@
+'use client';
+
+import { COOKIE_CONSENT_KEY } from '@components/common/CookieConsent';
+import { localStorageIsAvailable } from '@utils/local-storage';
 import Script from 'next/script';
+import { useEffect, useState } from 'react';
 
 export default function Analytics() {
+    const [consent, setConsent] = useState(null);
     const safeAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID?.replace("'", "\\'");
     const safeTagId = process.env.NEXT_PUBLIC_GOOGLE_TAG_ID?.replace("'", "\\'");
 
+    const now = new Date().getTime();
+
+    useEffect(() => {
+        if (!localStorageIsAvailable()) return;
+
+        const storedConsent = localStorage.getItem(COOKIE_CONSENT_KEY);
+
+        if (storedConsent) {
+            try {
+                const parsed = JSON.parse(storedConsent);
+
+                if (parsed.timeToExpire && now > parsed.timeToExpire) {
+                    localStorage.removeItem(COOKIE_CONSENT_KEY);
+                    setConsent(null);
+                } else {
+                    setConsent(parsed.value);
+                }
+            } catch {
+                localStorage.removeItem(COOKIE_CONSENT_KEY);
+            }
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
     if (!safeAnalyticsId && !safeTagId) {
+        return null;
+    }
+
+    if (consent !== true) {
         return null;
     }
 
