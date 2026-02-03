@@ -1,6 +1,6 @@
 import { Cluster } from '@/app/utils/cluster';
 
-import { parseClusterId,type QueryCluster } from './cluster';
+import { parseClusterId, type QueryCluster } from './cluster';
 
 export type CompositeSignature = {
     signature: string;
