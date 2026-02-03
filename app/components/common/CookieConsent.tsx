@@ -43,25 +43,22 @@ export function CookieConsent({ isEU }: ICookieConsentProps) {
     if (isEU) {
         return (
             <CookieCard>
-                <div className="e-flex e-justify-between e-items-start">
-                    <p className="e-m-0 e-text-base e-leading-relaxed e-text-white e-flex-1">
+                <div className="e-flex e-items-start e-justify-between">
+                    <p className="e-m-0 e-flex-1 e-text-base e-leading-relaxed e-text-white">
                         This website uses cookies to offer you a better browsing experience. Find out more on{' '}
                         <PrivacyPolicyLink>how we use cookies</PrivacyPolicyLink>.
                     </p>
                     <CloseButton onClick={handleDismiss} />
                 </div>
 
-                <div className="e-flex e-justify-end e-gap-4 e-flex-row e-items-center">
+                <div className="e-flex e-flex-row e-items-center e-justify-end e-gap-4">
                     <button
-                        className="e-bg-transparent e-text-white e-p-0 e-border-none e-cursor-pointer e-transition-opacity hover:e-opacity-70 e-text-sm e-font-medium e-tracking-wider"
+                        className="e-cursor-pointer e-border-none e-bg-transparent e-p-0 e-text-sm e-font-medium e-tracking-wider e-text-white e-transition-opacity hover:e-opacity-70"
                         onClick={() => handleConsent('denied')}
                     >
                         OPT-OUT
                     </button>
-                    <button
-                        className="btn btn-white e-bg-transparent"
-                        onClick={() => handleConsent('granted')}
-                    >
+                    <button className="btn btn-white e-bg-transparent" onClick={() => handleConsent('granted')}>
                         ACCEPT
                     </button>
                 </div>
@@ -70,10 +67,9 @@ export function CookieConsent({ isEU }: ICookieConsentProps) {
     }
 
     return (
-        <CookieCard className="e-p-3 e-flex e-flex-row e-justify-between e-items-center e-gap-4">
+        <CookieCard className="e-flex e-flex-row e-items-center e-justify-between e-gap-4 e-p-3">
             <p className="e-m-0 e-text-sm e-leading-relaxed e-text-white">
-                We use cookies.{' '}
-                <PrivacyPolicyLink>Learn more</PrivacyPolicyLink>
+                We use cookies. <PrivacyPolicyLink>Learn more</PrivacyPolicyLink>
             </p>
             <CloseButton onClick={handleDismiss} />
         </CookieCard>
@@ -86,24 +82,29 @@ function PrivacyPolicyLink({ children }: { children: React.ReactNode }) {
             href={PRIVACY_POLICY_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="e-text-white e-underline e-transition-opacity hover:e-opacity-70 hover:e-text-white"
+            className="e-text-white e-underline e-transition-opacity hover:e-text-white hover:e-opacity-70"
         >
             {children}
         </a>
     );
 }
 
-function CloseButton ({ onClick }: { onClick: () => void }) {
+function CloseButton({ onClick }: { onClick: () => void }) {
     return (
-        <span className="c-pointer e-text-white e-text-2xl e-leading-none hover:e-opacity-70" onClick={onClick}>
+        <span className="c-pointer e-text-2xl e-leading-none e-text-white hover:e-opacity-70" onClick={onClick}>
             &times;
         </span>
     );
 }
 
-function CookieCard ({ children, className }: { children: React.ReactNode, className?: string }) {
+function CookieCard({ children, className }: { children: React.ReactNode; className?: string }) {
     return (
-        <div className={cn("e-fixed e-z-[1200] e-bottom-[10px] e-left-[10px] e-right-[10px] e-bg-black e-border e-border-slate-100 [border-style:solid] e-rounded-lg e-p-4 md:e-max-w-[400px] md:e-right-auto", className)}>
+        <div
+            className={cn(
+                'e-fixed e-bottom-[10px] e-left-[10px] e-right-[10px] e-z-[1200] e-rounded-lg e-border e-border-slate-100 e-bg-black e-p-4 [border-style:solid] md:e-right-auto md:e-max-w-[400px]',
+                className
+            )}
+        >
             {children}
         </div>
     );
