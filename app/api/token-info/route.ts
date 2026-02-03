@@ -18,6 +18,5 @@ export async function POST(request: Request) {
     const tokens = await getTokenInfos([address], cluster as Cluster, {
         next: { revalidate: CACHE_MAX_AGE },
     });
-
     return NextResponse.json({ content: tokens[0] }, { headers: CACHE_HEADERS });
 }
