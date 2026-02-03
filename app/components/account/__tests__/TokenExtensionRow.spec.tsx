@@ -123,6 +123,34 @@ describe('TokenExtensionRow', () => {
         expect(screen.getByText('auto')).toBeInTheDocument();
     });
 
+    test('should render confidentialMintBurn extension', async () => {
+        const data = {
+            extension: 'confidentialMintBurn',
+            state: {
+                confidentialSupply: 'confidential-supply',
+                decryptableSupply: 'decryptable-supply',
+                pendingBurn: 'pending-burn',
+                supplyElgamalPubkey: 'test-pubkey',
+            },
+        } as TokenExtension;
+
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <AccountsProvider>
+                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
+                    </AccountsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>
+        );
+
+        expect(await screen.findByText('Confidential Mint/Burn')).toBeInTheDocument();
+        expect(screen.getByText('Confidential Supply')).toBeInTheDocument();
+        expect(screen.getByText('Decryptable Supply')).toBeInTheDocument();
+        expect(screen.getByText('Supply Elgamal Pubkey')).toBeInTheDocument();
+        expect(screen.getByText('Pending Burn')).toBeInTheDocument();
+    });
+
     test('should render confidentialTransferFeeConfig extension', async () => {
         const data = {
             extension: 'confidentialTransferFeeConfig',

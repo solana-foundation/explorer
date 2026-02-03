@@ -156,6 +156,15 @@ export function getTokenExtension(): TokenExtension[] {
             },
         },
         {
+            extension: 'confidentialMintBurn',
+            state: {
+                confidentialSupply: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==',
+                decryptableSupply: 'Ut1TB1Rk4QgH7Ddc3f62LeddYtQ+jlqpAV9YbgfwBVAGIUk8',
+                pendingBurn: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==',
+                supplyElgamalPubkey: '9o26anpyrZ+xCtVSPWHy3iARnCPovlneimCHKNQLVks=',
+            },
+        },
+        {
             extension: 'confidentialTransferFeeConfig',
             state: {
                 authority: '2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk',

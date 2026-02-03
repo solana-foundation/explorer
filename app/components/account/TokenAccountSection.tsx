@@ -14,6 +14,7 @@ import { getCurrentTokenScaledUiAmountMultiplier } from '@utils/token-info';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import {
+    ConfidentialMintBurn,
     ConfidentialTransferAccount,
     ConfidentialTransferFeeAmount,
     ConfidentialTransferFeeConfig,
@@ -556,6 +557,7 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
         'confidentialTransferFeeConfig',
         'confidentialTransferFeeAmount',
         'confidentialTransferMint',
+        'confidentialMintBurn',
         'interestBearingConfig',
         'pausableConfig',
         'scaledUiAmountConfig',
@@ -720,6 +722,38 @@ export function TokenExtensionRow(
                         <td>New Account Approval Policy</td>
                         <td className="text-lg-end">{extension.autoApproveNewAccounts ? 'auto' : 'manual'}</td>
                     </tr>
+                </>
+            );
+        }
+        case 'confidentialMintBurn': {
+            const extension = create(tokenExtension.state, ConfidentialMintBurn);
+            return (
+                <>
+                    {headerStyle === 'header' ? <HHeader name="Confidential Mint/Burn" /> : null}
+                    {extension.confidentialSupply && (
+                        <tr>
+                            <td>Confidential Supply</td>
+                            <td className="text-lg-end">{extension.confidentialSupply}</td>
+                        </tr>
+                    )}
+                    {extension.decryptableSupply && (
+                        <tr>
+                            <td>Decryptable Supply</td>
+                            <td className="text-lg-end">{extension.decryptableSupply}</td>
+                        </tr>
+                    )}
+                    {extension.supplyElgamalPubkey && (
+                        <tr>
+                            <td>Supply Elgamal Pubkey</td>
+                            <td className="text-lg-end">{extension.supplyElgamalPubkey}</td>
+                        </tr>
+                    )}
+                    {extension.pendingBurn && (
+                        <tr>
+                            <td>Pending Burn</td>
+                            <td className="text-lg-end">{extension.pendingBurn}</td>
+                        </tr>
+                    )}
                 </>
             );
         }

@@ -176,6 +176,17 @@ export function populatePartialParsedTokenExtension(
                 tooltip: description,
             };
         }
+        case 'confidentialMintBurn': {
+            const description =
+                'Allow token issuers to opt in to encrypted mint and burn operations, along with encrypted total supply';
+            return {
+                description,
+                externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
+                name: 'Confidential Mint/Burn',
+                status: 'active',
+                tooltip: description,
+            };
+        }
         case 'interestBearingConfig': {
             const description = 'Allows the token balance to be displayed with accumulated interest';
             return {

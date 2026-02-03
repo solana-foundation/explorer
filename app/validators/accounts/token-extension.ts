@@ -8,6 +8,7 @@ const ExtensionType = enums([
     'mintCloseAuthority',
     'confidentialTransferMint',
     'confidentialTransferAccount',
+    'confidentialMintBurn',
     'defaultAccountState',
     'immutableOwner',
     'memoTransfer',
@@ -90,6 +91,13 @@ export const ConfidentialTransferMint = type({
     auditorElgamalPubkey: nullable(string()),
     authority: nullable(PublicKeyFromString),
     autoApproveNewAccounts: boolean(),
+});
+
+export const ConfidentialMintBurn = type({
+    confidentialSupply: string(),
+    decryptableSupply: string(),
+    pendingBurn: string(),
+    supplyElgamalPubkey: string(),
 });
 
 export const ConfidentialTransferFeeConfig = type({
