@@ -7,7 +7,7 @@ import { validate } from 'superstruct';
 import type { TokenInfo } from '../api/get-token-info';
 import { extractMemoFromTransaction } from './memo';
 import { TokenTransferPayload } from './schemas';
-import type { ReceiptToken } from './types';
+import { isParsedInstruction, type ReceiptToken } from './types';
 
 type TokenTransferParsed =
     | {
@@ -96,7 +96,7 @@ function getSingleTokenTransferInstruction(
 function isTokenTransfer(instruction: ParsedInstruction | PartiallyDecodedInstruction): boolean {
     return (
         isTokenProgram(instruction.programId) &&
-        'parsed' in instruction &&
+        isParsedInstruction(instruction) &&
         ['transfer', 'transferChecked', 'transfer2'].includes(instruction.parsed.type)
     );
 }

@@ -1,3 +1,5 @@
+import type { ParsedInstruction, PartiallyDecodedInstruction } from '@solana/web3.js';
+
 export type BaseReceipt = {
     sender: string;
     receiver: string;
@@ -36,3 +38,9 @@ export type SolTransferParsed = {
         lamports?: number;
     };
 };
+
+export function isParsedInstruction(
+    instruction: ParsedInstruction | PartiallyDecodedInstruction
+): instruction is ParsedInstruction {
+    return 'parsed' in instruction;
+}

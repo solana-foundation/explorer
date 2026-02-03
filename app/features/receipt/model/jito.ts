@@ -1,17 +1,16 @@
-import { type ParsedInstruction, PartiallyDecodedInstruction, SystemProgram } from '@solana/web3.js';
+import { type ParsedInstruction, PartiallyDecodedInstruction } from '@solana/web3.js';
+import { validate } from 'superstruct';
 
 import { DEFAULT_JITO_ACCOUNTS } from './const';
-import type { SolTransferParsed } from './types';
+import { SystemTransferInstructionRefinedSchema } from './schemas';
+import { isParsedInstruction } from './types';
 
 export function isJitoTransfer(instruction: ParsedInstruction | PartiallyDecodedInstruction): boolean {
+    if (!isParsedInstruction(instruction)) return false;
+    const [err, validated] = validate(instruction, SystemTransferInstructionRefinedSchema, { coerce: true });
+    if (err) return false;
     const accountsSet = new Set(getJitoAccounts());
-    return (
-        SystemProgram.programId.equals(instruction.programId) &&
-        'parsed' in instruction &&
-        instruction.parsed.type === 'transfer' &&
-        typeof (instruction.parsed as SolTransferParsed).info?.destination === 'string' &&
-        accountsSet.has(instruction.parsed.info.destination)
-    );
+    return accountsSet.has(validated.parsed.info.destination);
 }
 
 function getJitoAccounts(): string[] {

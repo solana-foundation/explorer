@@ -1,15 +1,10 @@
-import {
-    type ParsedInstruction,
-    type ParsedTransactionWithMeta,
-    PartiallyDecodedInstruction,
-    SystemProgram,
-} from '@solana/web3.js';
+import { type ParsedInstruction, type ParsedTransactionWithMeta, PartiallyDecodedInstruction } from '@solana/web3.js';
 import { validate } from 'superstruct';
 
 import { isJitoTransfer } from './jito';
 import { extractMemoFromTransaction } from './memo';
-import { SolTransferPayload } from './schemas';
-import type { ReceiptSol, SolTransferParsed } from './types';
+import { SolTransferPayload, SystemTransferInstructionRefinedSchema } from './schemas';
+import { isParsedInstruction, type ReceiptSol, type SolTransferParsed } from './types';
 
 type SolTransferInstruction = ParsedInstruction & { parsed: SolTransferParsed };
 
@@ -41,11 +36,9 @@ function getSingleSolTransferInstruction(transaction: ParsedTransactionWithMeta)
 }
 
 function isSolTransfer(instruction: ParsedInstruction | PartiallyDecodedInstruction): boolean {
-    return (
-        SystemProgram.programId.equals(instruction.programId) &&
-        'parsed' in instruction &&
-        instruction.parsed.type === 'transfer'
-    );
+    if (!isParsedInstruction(instruction)) return false;
+    const [err] = validate(instruction, SystemTransferInstructionRefinedSchema, { coerce: true });
+    return err === undefined;
 }
 
 function extractSolTransferPayload(transaction: ParsedTransactionWithMeta, instruction: SolTransferInstruction) {

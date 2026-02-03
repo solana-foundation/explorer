@@ -6,6 +6,8 @@ import {
 } from '@solana/web3.js';
 import { MEMO_PROGRAM_ADDRESS } from '@solana-program/memo';
 
+import { isParsedInstruction } from './types';
+
 export function extractMemoFromTransaction(transaction: ParsedTransactionWithMeta): string | undefined {
     const { transaction: tx } = transaction;
     const memoInstruction = tx.message.instructions.find(isMemoProgram);
@@ -18,5 +20,5 @@ function isMemoProgram(instruction: ParsedInstruction | PartiallyDecodedInstruct
 }
 
 function extractMemoFromInstruction(instruction: ParsedInstruction | PartiallyDecodedInstruction): string | undefined {
-    return 'parsed' in instruction ? String(instruction.parsed) : undefined;
+    return isParsedInstruction(instruction) ? String(instruction.parsed) : undefined;
 }
