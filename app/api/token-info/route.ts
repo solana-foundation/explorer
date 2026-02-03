@@ -1,4 +1,4 @@
-import { getTokenInfos } from '@entities/token-info';
+import { getTokenInfos, isValidCluster } from '@entities/token-info';
 import { Cluster } from '@utils/cluster';
 import { NextResponse } from 'next/server';
 
@@ -7,7 +7,7 @@ const CACHE_MAX_AGE = 3600; // 1 hour
 export async function POST(request: Request) {
     const { address, cluster } = await request.json();
 
-    if (typeof address !== 'string' || cluster === undefined) {
+    if (typeof address !== 'string' || !isValidCluster(cluster)) {
         return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
 
