@@ -161,4 +161,3 @@ const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
     );
     return { data };
 };
-
