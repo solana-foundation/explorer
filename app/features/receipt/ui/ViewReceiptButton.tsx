@@ -5,6 +5,7 @@ import { ParsedTransactionWithMeta } from '@solana/web3.js';
 import Link from 'next/link';
 import useSWR from 'swr';
 
+import { isReceiptEnabled } from '../env';
 import { extractReceiptData } from '../model/create-receipt';
 
 interface ViewReceiptButtonProps {
@@ -16,11 +17,12 @@ interface ViewReceiptButtonProps {
 export function ViewReceiptButton({ signature, receiptPath, transactionWithMeta }: ViewReceiptButtonProps) {
     const { cluster } = useCluster();
 
-    const { data: receipt } = useSWR(transactionWithMeta ? ['receipt', signature, cluster] : null, () =>
-        extractReceiptData(transactionWithMeta!, cluster)
+    const { data: receipt } = useSWR(
+        isReceiptEnabled && transactionWithMeta ? ['receipt', signature, cluster] : null,
+        () => extractReceiptData(transactionWithMeta!, cluster)
     );
 
-    if (!receipt) {
+    if (!isReceiptEnabled || !receipt) {
         return null;
     }
 
