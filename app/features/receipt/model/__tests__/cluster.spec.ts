@@ -9,12 +9,11 @@ describe('getClusterParam', () => {
         expect(getClusterParam({ cluster: 'devnet' })).toBe('devnet');
     });
 
-    it('should return cluster from Slack-mangled param (amp;cluster)', () => {
-        // Slack HTML-encodes & as &amp; causing 'cluster' to become 'amp;cluster'
+    it('should return cluster from HTML-entity-mangled param (amp;cluster)', () => {
         expect(getClusterParam({ 'amp;cluster': 'devnet', view: 'receipt' })).toBe('devnet');
     });
 
-    it('should prefer standard param over mangled param', () => {
+    it('should prefer standard param over amp;-prefixed param', () => {
         expect(getClusterParam({ 'amp;cluster': 'devnet', cluster: 'testnet' })).toBe('testnet');
     });
 

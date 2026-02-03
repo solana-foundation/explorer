@@ -53,7 +53,7 @@ export async function GET(request: NextRequest, { params }: Props) {
     }
 }
 
-function getCacheHeaders(): Record<string, string> {
+function getCacheHeaders(): HeadersInit {
     const custom = process.env.RECEIPT_CACHE_HEADERS;
     if (!custom) return { ...DEFAULT_CACHE_HEADERS };
     return { 'Cache-Control': custom };
