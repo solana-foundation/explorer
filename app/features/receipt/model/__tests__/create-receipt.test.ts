@@ -12,6 +12,7 @@ import { mockSingleTransferTransaction } from '../../mocks/single-transfer';
 import { mockToken2022TransferTransaction } from '../../mocks/token-2022-transfer';
 import { mockToken2022Transfer2Transaction } from '../../mocks/token-2022-transfer2';
 import { mockUsdcTransferTransaction } from '../../mocks/usdc-checked-transfer';
+import { mockJitoOnlyTransferTransaction } from '../../mocks/jito-only-transfer';
 import { mockUsdcJitoTransferTransaction } from '../../mocks/usdc-jito-transfer';
 import { mockUsdcMultisigTransferTransaction } from '../../mocks/usdc-multisig-transfer';
 import { mockUsdcRegularTransferTransaction } from '../../mocks/usdc-regular-transfer';
@@ -153,6 +154,17 @@ describe('createReceipt', () => {
                     unit: 'TOKEN',
                 },
             });
+        });
+
+        it('should return undefined for Jito-only SOL transfer', async () => {
+            vi.mocked(getTx).mockResolvedValueOnce({
+                cluster: Cluster.MainnetBeta,
+                transaction: mockJitoOnlyTransferTransaction,
+            });
+
+            const result = await createReceipt(mockSignature);
+
+            expect(result).toBeUndefined();
         });
     });
 
