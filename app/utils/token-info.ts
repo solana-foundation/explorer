@@ -1,3 +1,4 @@
+import { getChainId } from '@entities/token-info';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { ChainId, Client, Token, UtlConfig } from '@solflare-wallet/utl-sdk';
 import { Cluster } from '@utils/cluster';
@@ -39,13 +40,6 @@ export type FullTokenInfo = FullLegacyTokenInfo & {
 type FullLegacyTokenInfoList = {
     tokens: FullLegacyTokenInfo[];
 };
-
-function getChainId(cluster: Cluster): ChainId | undefined {
-    if (cluster === Cluster.MainnetBeta) return ChainId.MAINNET;
-    else if (cluster === Cluster.Testnet) return ChainId.TESTNET;
-    else if (cluster === Cluster.Devnet) return ChainId.DEVNET;
-    else return undefined;
-}
 
 function makeUtlClient(cluster: Cluster, connectionString: string): Client | undefined {
     const chainId = getChainId(cluster);

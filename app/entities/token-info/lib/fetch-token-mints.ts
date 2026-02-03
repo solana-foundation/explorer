@@ -1,16 +1,9 @@
-import { ChainId } from '@solflare-wallet/utl-sdk';
 import { Cluster } from '@utils/cluster';
 
 import { UTL_API_BASE_URL } from './env';
 import { TokenInfoHttpError, TokenInfoInvalidResponseError } from './errors';
+import { getChainId } from './get-chain-id';
 import { type FetchConfig, type TokenInfo } from './types';
-
-function getChainId(cluster: Cluster): ChainId | undefined {
-    if (cluster === Cluster.MainnetBeta) return ChainId.MAINNET;
-    if (cluster === Cluster.Testnet) return ChainId.TESTNET;
-    if (cluster === Cluster.Devnet) return ChainId.DEVNET;
-    return undefined;
-}
 
 export async function getTokenInfos(addresses: string[], cluster: Cluster, config?: FetchConfig): Promise<TokenInfo[]> {
     if (addresses.length === 0) return [];
