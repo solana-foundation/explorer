@@ -37,7 +37,7 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
     const transactionPath = useClusterPath({ pathname: `/tx/${signature}` });
 
     const tx = details?.data?.transactionWithMeta;
-    const { data: receipt, isLoading: isReceiptLoading } = useSWR(tx ? ['receipt', tx, cluster] : null, () =>
+    const { data: receipt, isLoading: isReceiptLoading } = useSWR(tx ? ['receipt', signature, cluster] : null, () =>
         extractReceiptData(tx!, cluster)
     );
 

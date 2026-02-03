@@ -261,7 +261,11 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
             <div className="card-header align-items-center">
                 <h3 className="card-header-title">Overview</h3>
                 {isReceiptEnabled && (
-                    <ViewReceiptButton transactionWithMeta={transactionWithMeta} receiptPath={receiptPath} />
+                    <ViewReceiptButton
+                        signature={signature}
+                        transactionWithMeta={transactionWithMeta}
+                        receiptPath={receiptPath}
+                    />
                 )}
                 <Link className="btn btn-white btn-sm me-2" href={inspectPath}>
                     <Settings className="align-text-top me-2" size={13} />

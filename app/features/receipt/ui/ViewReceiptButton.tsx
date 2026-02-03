@@ -8,14 +8,15 @@ import useSWR from 'swr';
 import { extractReceiptData } from '../model/create-receipt';
 
 interface ViewReceiptButtonProps {
+    signature: string;
     receiptPath: string;
     transactionWithMeta: ParsedTransactionWithMeta | null | undefined;
 }
 
-export function ViewReceiptButton({ receiptPath, transactionWithMeta }: ViewReceiptButtonProps) {
+export function ViewReceiptButton({ signature, receiptPath, transactionWithMeta }: ViewReceiptButtonProps) {
     const { cluster } = useCluster();
 
-    const { data: receipt } = useSWR(transactionWithMeta ? ['receipt', transactionWithMeta, cluster] : null, () =>
+    const { data: receipt } = useSWR(transactionWithMeta ? ['receipt', signature, cluster] : null, () =>
         extractReceiptData(transactionWithMeta!, cluster)
     );
 
