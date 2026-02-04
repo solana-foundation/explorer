@@ -16,8 +16,6 @@ import dynamic from 'next/dynamic';
 import { Rubik } from 'next/font/google';
 import { Metadata } from 'next/types';
 
-import { getIsEU } from '@/app/utils/geo-location';
-
 import { botIdProtectedRoutes } from '../middleware';
 
 const SearchBar = dynamic(() => import('@components/SearchBar'), {
@@ -44,8 +42,6 @@ const rubikFont = Rubik({
 });
 
 export default function RootLayout({ analytics, children }: { analytics: React.ReactNode; children: React.ReactNode }) {
-    const isEU = getIsEU();
-
     return (
         <html lang="en" className={`${rubikFont.variable}`}>
             <head>
@@ -77,7 +73,7 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                     </ClusterProvider>
                 </ScrollAnchorProvider>
                 {analytics}
-                <CookieConsent isEU={isEU} />
+                <CookieConsent />
             </body>
         </html>
     );
