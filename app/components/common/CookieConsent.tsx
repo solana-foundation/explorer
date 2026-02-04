@@ -11,19 +11,21 @@ const PRIVACY_POLICY_URL = 'https://solana.com/privacy-policy#collection-of-info
 
 type TConsentValue = 'granted' | 'denied';
 
-interface ICookieConsentProps {
-    isEU: boolean;
-}
-
-export function CookieConsent({ isEU }: ICookieConsentProps) {
+export function CookieConsent() {
     const [consent, setConsent] = useState<TConsentValue | null>(null);
     const [isMounted, setIsMounted] = useState(false);
     const [isDismissed, setIsDismissed] = useState(false);
+    const [isEU, setIsEU] = useState(false);
 
     useEffect(() => {
         setIsMounted(true);
         const storedConsent = getCookie(COOKIE_CONSENT_NAME) as TConsentValue | null;
         setConsent(storedConsent);
+
+        fetch('/api/geo-location')
+            .then(res => res.json())
+            .then(data => setIsEU(data.isEU))
+            .catch(() => setIsEU(false));
     }, []);
 
     const handleConsent = (value: TConsentValue) => {
