@@ -289,8 +289,10 @@ function TokensCardFooter({
     loadMore: () => void;
 }) {
     // Count unique mints to get actual token count (not account count)
-    const uniqueMints = new Set(tokens.map(t => t.info.mint.toBase58()));
-    const totalCount = uniqueMints.size;
+    const totalCount = useMemo(() => {
+        const uniqueMints = new Set(tokens.map(t => t.info.mint.toBase58()));
+        return uniqueMints.size;
+    }, [tokens]);
 
     if (visibleCount >= totalCount) {
         return null;
