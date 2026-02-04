@@ -28,12 +28,10 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import React, { useCallback } from 'react';
 import { ChevronDown, MinusSquare, PlusSquare, RefreshCw } from 'react-feather';
 
+import { INITIAL_TOKENS_TO_FETCH, INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
+
 const TRUNCATE_TOKEN_LENGTH = 10;
 const ALL_TOKENS = '';
-const INITIAL_TOKENS_TO_FETCH = 0;
-const LOAD_MORE_TOKENS = 4;
-const INITIAL_VISIBLE_TXS = 4;
-const LOAD_MORE_TXS = 4;
 
 type InstructionType = {
     name: string;
@@ -76,7 +74,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     const transactionDetailsCache = useTransactionDetailsCache();
     const [showDropdown, setDropdown] = React.useState(false);
     const [tokensToFetchCount, setTokensToFetchCount] = React.useState(INITIAL_TOKENS_TO_FETCH);
-    const [visibleTxCount, setVisibleTxCount] = React.useState(INITIAL_VISIBLE_TXS);
+    const [visibleTxCount, setVisibleTxCount] = React.useState(INITIAL_VISIBLE_COUNT);
     const filter = useQueryFilter();
 
     const filteredTokens = React.useMemo(
@@ -199,7 +197,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     <div className="card-footer">
                         <button
                             className="btn btn-primary w-100"
-                            onClick={() => setTokensToFetchCount(LOAD_MORE_TOKENS)}
+                            onClick={() => setTokensToFetchCount(LOAD_MORE_COUNT)}
                         >
                             Load Token History
                         </button>
@@ -269,13 +267,16 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
 
             <div className="card-footer">
                 {visibleTxCount < mintAndTxs.length ? (
-                    <button className="btn btn-primary w-100" onClick={() => setVisibleTxCount(c => c + LOAD_MORE_TXS)}>
+                    <button
+                        className="btn btn-primary w-100"
+                        onClick={() => setVisibleTxCount(c => c + LOAD_MORE_COUNT)}
+                    >
                         {`Show More (${visibleTxCount} of ${mintAndTxs.length})`}
                     </button>
                 ) : tokensToFetchCount < filteredTokens.length ? (
                     <button
                         className="btn btn-primary w-100"
-                        onClick={() => setTokensToFetchCount(c => c + LOAD_MORE_TOKENS)}
+                        onClick={() => setTokensToFetchCount(c => c + LOAD_MORE_COUNT)}
                         disabled={fetching}
                     >
                         {fetching ? (
