@@ -393,7 +393,7 @@ const TokenTransactionRow = React.memo(function TokenTransactionRow({
                 <Address pubkey={mint} link truncate />
             </td>
 
-            <LazyInstructionDetails signature={tx.signature} details={details} mint={mint} tx={tx} />
+            <InstructionDetailsCell signature={tx.signature} details={details} tx={tx} />
 
             <td>
                 <Signature signature={tx.signature} link />
@@ -455,7 +455,7 @@ function formatTokenName(pubkey: string, cluster: Cluster, tokenInfo: TokenInfoW
     return display;
 }
 
-function LazyInstructionDetails({
+function InstructionDetailsCell({
     signature,
     details,
     tx,
@@ -464,32 +464,10 @@ function LazyInstructionDetails({
     details: CacheEntry<Details> | undefined;
     tx: ConfirmedSignatureInfo;
 }) {
-    const ref = React.useRef<HTMLTableCellElement>(null);
-    const [isVisible, setIsVisible] = React.useState(false);
-    const [shouldFetch, setShouldFetch] = React.useState(false);
     const fetchDetails = useFetchTransactionDetails();
     const { cluster } = useCluster();
 
-    React.useEffect(() => {
-        const element = ref.current;
-        if (!element) return;
-
-        const observer = new IntersectionObserver(
-            entries => {
-                if (entries[0].isIntersecting) {
-                    setIsVisible(true);
-                    observer.disconnect();
-                }
-            },
-            { threshold: 0.1 }
-        );
-
-        observer.observe(element);
-        return () => observer.disconnect();
-    }, []);
-
     const handleLoadClick = React.useCallback(() => {
-        setShouldFetch(true);
         fetchDetails(signature);
     }, [fetchDetails, signature]);
 
@@ -498,17 +476,9 @@ function LazyInstructionDetails({
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const instructions = transactionWithMeta?.transaction.message.instructions;
 
-    if (!isVisible) {
+    if (!details) {
         return (
-            <td ref={ref}>
-                <span className="text-muted">-</span>
-            </td>
-        );
-    }
-
-    if (!shouldFetch && !details) {
-        return (
-            <td ref={ref}>
+            <td>
                 <span
                     className="btn btn-sm btn-outline-primary py-0 px-1 lh-1"
                     style={{ fontSize: '0.75rem' }}
@@ -523,7 +493,7 @@ function LazyInstructionDetails({
 
     if (isFetching) {
         return (
-            <td ref={ref}>
+            <td>
                 <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
                 Loading
             </td>
@@ -532,7 +502,7 @@ function LazyInstructionDetails({
 
     if (hasFailed || !instructions) {
         return (
-            <td ref={ref}>
+            <td>
                 <span
                     className="btn btn-sm btn-outline-warning py-0 px-1 lh-1"
                     style={{ fontSize: '0.75rem' }}
@@ -619,7 +589,7 @@ function LazyInstructionDetails({
         .filter((item): item is InstructionType => item !== undefined);
 
     return (
-        <td ref={ref}>
+        <td>
             {tokenInstructionNames.map((instructionType, index) => (
                 <InstructionDetails key={index} instructionType={instructionType} tx={tx} />
             ))}
