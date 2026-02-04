@@ -458,12 +458,10 @@ function formatTokenName(pubkey: string, cluster: Cluster, tokenInfo: TokenInfoW
 function LazyInstructionDetails({
     signature,
     details,
-    mint,
     tx,
 }: {
     signature: string;
     details: CacheEntry<Details> | undefined;
-    mint: PublicKey;
     tx: ConfirmedSignatureInfo;
 }) {
     const ref = React.useRef<HTMLTableCellElement>(null);
