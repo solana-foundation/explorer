@@ -1,3 +1,5 @@
+'use server';
+
 import { getChainId } from '@entities/chain-id';
 import { Cluster } from '@utils/cluster';
 
