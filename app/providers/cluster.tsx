@@ -22,6 +22,7 @@ export interface ClusterInfo {
     firstAvailableBlock: bigint;
     epochSchedule: EpochSchedule;
     epochInfo: EpochInfo;
+    genesisHash: string;
 }
 
 type Dispatch = (action: Action) => void;
@@ -145,10 +146,11 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
         const transportUrl = clusterUrl(cluster, customUrl);
         const rpc = createSolanaRpc(transportUrl);
 
-        const [firstAvailableBlock, epochSchedule, epochInfo] = await Promise.all([
+        const [firstAvailableBlock, epochSchedule, epochInfo, genesisHash] = await Promise.all([
             rpc.getFirstAvailableBlock().send(),
             rpc.getEpochSchedule().send(),
             rpc.getEpochInfo().send(),
+            rpc.getGenesisHash().send(),
         ]);
 
         dispatch({
@@ -159,6 +161,7 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
                 // See https://github.com/solana-labs/solana-web3.js/issues/1389
                 epochSchedule: epochSchedule as EpochSchedule,
                 firstAvailableBlock: firstAvailableBlock as bigint,
+                genesisHash,
             },
             customUrl,
             status: ClusterStatus.Connected,

@@ -1,7 +1,7 @@
 import { getChainId } from '@entities/chain-id';
 import { Cluster } from '@utils/cluster';
 
-import { UTL_API_BASE_URL } from './env';
+import { UTL_API_BASE_URL } from '../env';
 import { TokenInfoHttpError, TokenInfoInvalidResponseError } from './errors';
 import { type FetchConfig, type TokenInfo } from './types';
 

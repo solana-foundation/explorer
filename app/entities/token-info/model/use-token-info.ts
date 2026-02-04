@@ -12,6 +12,7 @@ export function useTokenInfo(
     cluster: Cluster,
     genesisHash?: string
 ): Token | undefined {
+    console.log('useTokenInfo');
     const { data } = useSWR<Token | undefined>(
         fetchTokenLabelInfo ? getTokenInfoSwrKey(pubkey, cluster, genesisHash) : null,
         () => getTokenInfo(new PublicKey(pubkey), cluster, genesisHash),

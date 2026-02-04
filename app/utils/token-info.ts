@@ -1,4 +1,4 @@
-import { getChainId } from '@entities/token-info';
+import { getChainId } from '@entities/chain-id';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { ChainId, Client, Token, UtlConfig } from '@solflare-wallet/utl-sdk';
 import { Cluster } from '@utils/cluster';
@@ -41,8 +41,8 @@ type FullLegacyTokenInfoList = {
     tokens: FullLegacyTokenInfo[];
 };
 
-function makeUtlClient(cluster: Cluster, connectionString: string): Client | undefined {
-    const chainId = getChainId(cluster);
+function makeUtlClient(cluster: Cluster, connectionString: string, genesisHash?: string): Client | undefined {
+    const chainId = getChainId(cluster, genesisHash);
     if (!chainId) return undefined;
 
     const config: UtlConfig = new UtlConfig({
@@ -53,16 +53,16 @@ function makeUtlClient(cluster: Cluster, connectionString: string): Client | und
     return new Client(config);
 }
 
-export function getTokenInfoSwrKey(address: string, cluster: Cluster, _connectionString?: string) {
-    return ['get-token-info', address, cluster];
+export function getTokenInfoSwrKey(address: string, cluster: Cluster, genesisHash?: string) {
+    return ['get-token-info', address, cluster, genesisHash];
 }
 
 export async function getTokenInfo(
     address: PublicKey,
     cluster: Cluster,
-    _connectionString?: string
+    genesisHash?: string
 ): Promise<Token | undefined> {
-    return getTokenInfoWithoutOnChainFallback(address, cluster);
+    return getTokenInfoWithoutOnChainFallback(address, cluster, genesisHash);
 }
 
 /**
@@ -70,14 +70,15 @@ export async function getTokenInfo(
  */
 export async function getTokenInfoWithoutOnChainFallback(
     address: PublicKey,
-    cluster: Cluster
+    cluster: Cluster,
+    genesisHash?: string
 ): Promise<Token | undefined> {
-    const chainId = getChainId(cluster);
+    const chainId = getChainId(cluster, genesisHash);
     if (!chainId) return undefined;
 
     try {
         const response = await fetch('/api/token-info', {
-            body: JSON.stringify({ address: address.toBase58(), cluster }),
+            body: JSON.stringify({ address: address.toBase58(), cluster, genesisHash }),
             headers: { 'Content-Type': 'application/json' },
             method: 'POST',
         });
@@ -121,21 +122,37 @@ export function isRedactedTokenAddress(address: string): boolean {
  * The UTL SDK only returns the most common fields, we sometimes need eg extensions
  * @param address Public key of the token
  * @param cluster Cluster to fetch the token info for
+ * @param genesisHash Genesis hash for cluster identification (required for SIMD-296)
  */
+export type FullTokenInfoSwrKey = ['get-full-token-info', string, Cluster, string, string | undefined];
+
+export function getFullTokenInfoSwrKey(
+    address: string,
+    cluster: Cluster,
+    url: string,
+    genesisHash?: string
+): FullTokenInfoSwrKey {
+    return ['get-full-token-info', address, cluster, url, genesisHash];
+}
+
+export async function fetchFullTokenInfo([_, pubkey, cluster, _url, genesisHash]: FullTokenInfoSwrKey) {
+    return await getFullTokenInfo(new PublicKey(pubkey), cluster, genesisHash);
+}
+
 export async function getFullTokenInfo(
     address: PublicKey,
     cluster: Cluster,
-    connectionString: string
+    genesisHash?: string
 ): Promise<FullTokenInfo | undefined> {
     if (isRedactedTokenAddress(address.toBase58())) {
         return undefined;
     }
-    const chainId = getChainId(cluster);
+    const chainId = getChainId(cluster, genesisHash);
     if (!chainId) return undefined;
 
     const [legacyCdnTokenInfo, sdkTokenInfo] = await Promise.all([
         getFullLegacyTokenInfoUsingCdn(address, chainId),
-        getTokenInfo(address, cluster, connectionString),
+        getTokenInfo(address, cluster, genesisHash),
     ]);
 
     if (!sdkTokenInfo) {
@@ -167,9 +184,10 @@ export async function getFullTokenInfo(
 export async function getTokenInfos(
     addresses: PublicKey[],
     cluster: Cluster,
-    connectionString: string
+    connectionString: string,
+    genesisHash?: string
 ): Promise<Token[] | undefined> {
-    const client = makeUtlClient(cluster, connectionString);
+    const client = makeUtlClient(cluster, connectionString, genesisHash);
     if (!client) return undefined;
     const tokens = await client.fetchMints(addresses);
     return tokens;

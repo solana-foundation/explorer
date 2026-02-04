@@ -43,7 +43,7 @@ export function Address({
     fetchTokenLabelInfo,
 }: Props) {
     const address = pubkey.toBase58();
-    const { cluster } = useCluster();
+    const { cluster, clusterInfo } = useCluster();
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
     const [showNicknameEditor, setShowNicknameEditor] = useState(false);
     const nickname = useNickname(address);
@@ -60,7 +60,7 @@ export function Address({
         addressLabel = metaplexData.data.data.name;
     }
 
-    const tokenInfo = useTokenInfo(fetchTokenLabelInfo, address, cluster);
+    const tokenInfo = useTokenInfo(fetchTokenLabelInfo, address, cluster, clusterInfo?.genesisHash);
     if (tokenInfo) {
         addressLabel = displayAddress(address, cluster, tokenInfo);
     }
