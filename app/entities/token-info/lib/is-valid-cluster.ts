@@ -1,9 +1,11 @@
+import { getChainId } from '@entities/chain-id';
 import { Cluster } from '@utils/cluster';
 
-import { getChainId } from './get-chain-id';
+type SupportedCluster = Extract<
+    Cluster,
+    Cluster.MainnetBeta | Cluster.Testnet | Cluster.Devnet | Cluster.Simd296 | Cluster.Custom
+>;
 
-type SupportedCluster = Cluster.MainnetBeta | Cluster.Testnet | Cluster.Devnet;
-
-export function isValidCluster(value: unknown): value is SupportedCluster {
-    return typeof value === 'number' && getChainId(value as Cluster) !== undefined;
+export function isValidCluster(value: unknown, genesisHash?: string): value is SupportedCluster {
+    return typeof value === 'number' && getChainId(value as Cluster, genesisHash) !== undefined;
 }

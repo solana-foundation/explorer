@@ -36,7 +36,7 @@ describe('getTokenInfos', () => {
             ok: true,
         } as Response);
 
-        await getTokenInfos([mockToken.address], Cluster.MainnetBeta, {
+        await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, {
             signal: abortController.signal,
         });
 
@@ -57,7 +57,7 @@ describe('getTokenInfos', () => {
             ok: true,
         } as Response);
 
-        await getTokenInfos([mockToken.address], Cluster.MainnetBeta, {
+        await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, {
             next: nextOptions,
         });
 
@@ -75,7 +75,7 @@ describe('getTokenInfos', () => {
 
         vi.mocked(global.fetch).mockRejectedValueOnce(error);
 
-        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, {
+        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, {
             onError,
         });
 
@@ -84,14 +84,14 @@ describe('getTokenInfos', () => {
     });
 
     it('should return empty array for empty addresses', async () => {
-        const result = await getTokenInfos([], Cluster.MainnetBeta);
+        const result = await getTokenInfos([], Cluster.MainnetBeta, undefined);
 
         expect(global.fetch).not.toHaveBeenCalled();
         expect(result).toEqual([]);
     });
 
     it('should return empty array for unsupported cluster', async () => {
-        const result = await getTokenInfos([mockToken.address], Cluster.Custom);
+        const result = await getTokenInfos([mockToken.address], Cluster.Custom, undefined);
 
         expect(global.fetch).not.toHaveBeenCalled();
         expect(result).toEqual([]);
@@ -106,7 +106,7 @@ describe('getTokenInfos', () => {
             statusText: 'Internal Server Error',
         } as Response);
 
-        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, { onError });
+        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, { onError });
 
         expect(onError).toHaveBeenCalledTimes(1);
         const error = onError.mock.calls[0][0];
@@ -124,7 +124,7 @@ describe('getTokenInfos', () => {
             ok: true,
         } as Response);
 
-        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, { onError });
+        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, { onError });
 
         expect(onError).toHaveBeenCalledTimes(1);
         expect(onError.mock.calls[0][0]).toBeInstanceOf(TokenInfoInvalidResponseError);
@@ -139,7 +139,7 @@ describe('getTokenInfos', () => {
             ok: true,
         } as Response);
 
-        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta);
+        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined);
 
         expect(result).toEqual([mockToken]);
     });

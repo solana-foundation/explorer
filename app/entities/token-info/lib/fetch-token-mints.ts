@@ -1,14 +1,19 @@
+import { getChainId } from '@entities/chain-id';
 import { Cluster } from '@utils/cluster';
 
 import { UTL_API_BASE_URL } from './env';
 import { TokenInfoHttpError, TokenInfoInvalidResponseError } from './errors';
-import { getChainId } from './get-chain-id';
 import { type FetchConfig, type TokenInfo } from './types';
 
-export async function getTokenInfos(addresses: string[], cluster: Cluster, config?: FetchConfig): Promise<TokenInfo[]> {
+export async function getTokenInfos(
+    addresses: string[],
+    cluster: Cluster,
+    genesisHash?: string,
+    config?: FetchConfig
+): Promise<TokenInfo[]> {
     if (addresses.length === 0) return [];
 
-    const chainId = getChainId(cluster);
+    const chainId = getChainId(cluster, genesisHash);
     if (!chainId) return [];
 
     try {
@@ -43,8 +48,9 @@ export async function getTokenInfos(addresses: string[], cluster: Cluster, confi
 export async function getTokenInfo(
     address: string,
     cluster: Cluster,
+    genesisHash?: string,
     config?: FetchConfig
 ): Promise<TokenInfo | undefined> {
-    const tokens = await getTokenInfos([address], cluster, config);
+    const tokens = await getTokenInfos([address], cluster, genesisHash, config);
     return tokens[0];
 }
