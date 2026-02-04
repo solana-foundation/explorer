@@ -19,6 +19,7 @@ import React, { useCallback, useMemo } from 'react';
 import { ChevronDown } from 'react-feather';
 
 import { getProxiedUri } from '@/app/features/metadata/utils';
+import { INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import TokenLogoPlaceholder from '@/app/img/logos-solana/low-contrast-solana-logo.svg';
 import { normalizeTokenAmount } from '@/app/utils';
 
@@ -33,9 +34,6 @@ const useQueryDisplay = (): Display => {
         return null;
     }
 };
-
-const INITIAL_VISIBLE_COUNT = 4;
-const LOAD_MORE_COUNT = 4;
 
 export function OwnedTokensCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
