@@ -19,7 +19,7 @@ export default function Analytics() {
         return null;
     }
 
-    if (consent !== 'granted') {
+    if (consent === 'denied' || consent === null) {
         return null;
     }
 
