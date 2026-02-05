@@ -37,7 +37,7 @@ import { Address } from '@solana/kit';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
-import { Cluster, ClusterStatus } from '@utils/cluster';
+import { ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
@@ -54,7 +54,12 @@ import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { isAttestationAccount } from '@/app/utils/attestation-service';
 import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
-import { FullTokenInfo, getFullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
+import {
+    fetchFullTokenInfo,
+    FullTokenInfo,
+    getFullTokenInfoSwrKey,
+    isRedactedTokenAddress,
+} from '@/app/utils/token-info';
 
 const TABS_LOOKUP: { [id: string]: Tab[] } = {
     'address-lookup-table': [
@@ -191,13 +196,9 @@ const TOKEN_TABS_HIDDEN = ['spl-token:mint', 'spl-token-2022:mint', 'config', 'v
 
 type Props = PropsWithChildren<{ params: { address: string } }>;
 
-async function fetchFullTokenInfo([_, pubkey, cluster, url]: ['get-full-token-info', string, Cluster, string]) {
-    return await getFullTokenInfo(new PublicKey(pubkey), cluster, url);
-}
-
 function AddressLayoutInner({ children, params: { address } }: Props) {
     const fetchAccount = useFetchAccountInfo();
-    const { status, cluster, url } = useCluster();
+    const { status, cluster, url, clusterInfo } = useCluster();
     const info = useAccountInfo(address);
 
     let pubkey: PublicKey | undefined;
@@ -211,10 +212,10 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
     const infoStatus = info?.status;
     const infoParsed = info?.data?.data.parsed;
 
+    const shouldFetchTokenInfo =
+        infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey;
     const { data: fullTokenInfo, isLoading: isFullTokenInfoLoading } = useSWRImmutable(
-        infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey
-            ? ['get-full-token-info', address, cluster, url]
-            : null,
+        shouldFetchTokenInfo ? getFullTokenInfoSwrKey(address, cluster, url, clusterInfo?.genesisHash) : null,
         fetchFullTokenInfo
     );
 
