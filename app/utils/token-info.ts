@@ -1,6 +1,8 @@
+import { getChainId } from '@entities/token-info';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { ChainId, Client, Token, UtlConfig } from '@solflare-wallet/utl-sdk';
 import { Cluster } from '@utils/cluster';
+import Logger from '@utils/logger';
 import { TokenExtension } from '@validators/accounts/token-extension';
 
 type TokenExtensions = {
@@ -39,15 +41,8 @@ type FullLegacyTokenInfoList = {
     tokens: FullLegacyTokenInfo[];
 };
 
-function getChainId(cluster: Cluster): ChainId | undefined {
-    if (cluster === Cluster.MainnetBeta) return ChainId.MAINNET;
-    else if (cluster === Cluster.Testnet) return ChainId.TESTNET;
-    else if (cluster === Cluster.Devnet) return ChainId.DEVNET;
-    else return undefined;
-}
-
-function makeUtlClient(cluster: Cluster, connectionString: string): Client | undefined {
-    const chainId = getChainId(cluster);
+function makeUtlClient(cluster: Cluster, connectionString: string, genesisHash?: string): Client | undefined {
+    const chainId = getChainId(cluster, genesisHash);
     if (!chainId) return undefined;
 
     const config: UtlConfig = new UtlConfig({
@@ -58,49 +53,44 @@ function makeUtlClient(cluster: Cluster, connectionString: string): Client | und
     return new Client(config);
 }
 
-export function getTokenInfoSwrKey(address: string, cluster: Cluster, connectionString: string) {
-    return ['get-token-info', address, cluster, connectionString];
+export function getTokenInfoSwrKey(address: string, cluster: Cluster, genesisHash?: string) {
+    return ['get-token-info', address, cluster, genesisHash];
 }
 
 export async function getTokenInfo(
     address: PublicKey,
     cluster: Cluster,
-    connectionString: string
+    genesisHash?: string
 ): Promise<Token | undefined> {
-    const client = makeUtlClient(cluster, connectionString);
-    if (!client) return undefined;
-    const token = await client.fetchMint(address);
-    return token;
+    return getTokenInfoWithoutOnChainFallback(address, cluster, genesisHash);
 }
 
-type UtlApiResponse = {
-    content: Token[];
-};
-
+/**
+ * @deprecated Use `getTokenInfo` instead.
+ */
 export async function getTokenInfoWithoutOnChainFallback(
     address: PublicKey,
-    cluster: Cluster
+    cluster: Cluster,
+    genesisHash?: string
 ): Promise<Token | undefined> {
-    const chainId = getChainId(cluster);
+    const chainId = getChainId(cluster, genesisHash);
     if (!chainId) return undefined;
 
-    // Request token info directly from UTL API
-    // We don't use the SDK here because we don't want it to fallback to an on-chain request
-    const response = await fetch(`https://token-list-api.solana.cloud/v1/mints?chainId=${chainId}`, {
-        body: JSON.stringify({ addresses: [address.toBase58()] }),
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        method: 'POST',
-    });
+    try {
+        const response = await fetch('/api/token-info', {
+            body: JSON.stringify({ address: address.toBase58(), cluster, genesisHash }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        });
 
-    if (response.status >= 400) {
-        console.error(`Error calling UTL API for address ${address} on chain ID ${chainId}. Status ${response.status}`);
+        if (!response.ok) return undefined;
+
+        const data = (await response.json()) as { content?: Token };
+        return data.content;
+    } catch (error) {
+        Logger.warn(`Failed to fetch token info for ${address}`, error);
         return undefined;
     }
-
-    const fetchedData = (await response.json()) as UtlApiResponse;
-    return fetchedData.content[0];
 }
 
 async function getFullLegacyTokenInfoUsingCdn(
@@ -132,21 +122,37 @@ export function isRedactedTokenAddress(address: string): boolean {
  * The UTL SDK only returns the most common fields, we sometimes need eg extensions
  * @param address Public key of the token
  * @param cluster Cluster to fetch the token info for
+ * @param genesisHash Genesis hash for cluster identification (required for SIMD-296)
  */
+export type FullTokenInfoSwrKey = ['get-full-token-info', string, Cluster, string, string | undefined];
+
+export function getFullTokenInfoSwrKey(
+    address: string,
+    cluster: Cluster,
+    url: string,
+    genesisHash?: string
+): FullTokenInfoSwrKey {
+    return ['get-full-token-info', address, cluster, url, genesisHash];
+}
+
+export async function fetchFullTokenInfo([_, pubkey, cluster, _url, genesisHash]: FullTokenInfoSwrKey) {
+    return await getFullTokenInfo(new PublicKey(pubkey), cluster, genesisHash);
+}
+
 export async function getFullTokenInfo(
     address: PublicKey,
     cluster: Cluster,
-    connectionString: string
+    genesisHash?: string
 ): Promise<FullTokenInfo | undefined> {
     if (isRedactedTokenAddress(address.toBase58())) {
         return undefined;
     }
-    const chainId = getChainId(cluster);
+    const chainId = getChainId(cluster, genesisHash);
     if (!chainId) return undefined;
 
     const [legacyCdnTokenInfo, sdkTokenInfo] = await Promise.all([
         getFullLegacyTokenInfoUsingCdn(address, chainId),
-        getTokenInfo(address, cluster, connectionString),
+        getTokenInfo(address, cluster, genesisHash),
     ]);
 
     if (!sdkTokenInfo) {
@@ -157,7 +163,6 @@ export async function getFullTokenInfo(
               }
             : undefined;
     }
-
     // Merge the fields, prioritising the sdk ones which are more up to date
     let tags: string[] = [];
     if (sdkTokenInfo.tags) tags = Array.from(sdkTokenInfo.tags);
@@ -179,9 +184,10 @@ export async function getFullTokenInfo(
 export async function getTokenInfos(
     addresses: PublicKey[],
     cluster: Cluster,
-    connectionString: string
+    connectionString: string,
+    genesisHash?: string
 ): Promise<Token[] | undefined> {
-    const client = makeUtlClient(cluster, connectionString);
+    const client = makeUtlClient(cluster, connectionString, genesisHash);
     if (!client) return undefined;
     const tokens = await client.fetchMints(addresses);
     return tokens;
