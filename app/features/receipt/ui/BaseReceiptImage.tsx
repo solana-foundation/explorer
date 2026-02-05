@@ -1,7 +1,6 @@
 import type { FormattedReceipt } from '../types';
 import { BottomLine } from './BottomLine';
 import { Logo } from './Logo';
-import { Warning } from './Warning';
 
 export const IMAGE_SIZE = {
     height: 630,
@@ -253,7 +252,7 @@ function NoReceipt({ size }: { size: { width: number; height: number } }) {
         <div
             style={{
                 backgroundColor: colors.outerSpace900,
-                color: colors.destructive,
+                color: colors.white,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '12px',
@@ -287,7 +286,6 @@ function NoReceipt({ size }: { size: { width: number; height: number } }) {
                     textAlign: 'center',
                 }}
             >
-                <Warning />
                 See the transaction details on the Solana Explorer.
             </div>
         </div>
