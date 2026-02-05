@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import Logger from '@/app/utils/logger';
 
-// export const runtime = 'edge';
+export const runtime = 'edge';
 
 const CACHE_DURATION = 30 * 60; // 30 minutes
 const DEFAULT_CACHE_HEADERS = {
