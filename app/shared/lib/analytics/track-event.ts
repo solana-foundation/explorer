@@ -30,12 +30,12 @@ interface AnalyticsProvider {
 /**
  * Analytics providers in priority order.
  *
- * gtag: Standard method for GA4 and GTM. Uses gtag('event', name, params).
- * dataLayer: Fallback for pure GTM setups without gtag.js. Pushes {event, ...params} directly.
+ * gtag: Standard method for GA4 and GTM. Uses gtag('event', name, params)
+ * dataLayer: Fallback for pure GTM setups without gtag. Pushes {event, ...params} directly
  */
 const dataLayerProvider: AnalyticsProvider = {
     canUse(win: Window): boolean {
-        // Fallback for pure GTM setups without gtag.js
+        // Fallback for pure GTM setups without gtag
         return getDataLayer(win) !== undefined && getGtag(win) === undefined;
     },
     track(win: Window, eventName: string, params?: EventParams): void {
