@@ -11,14 +11,11 @@ export function useTokenInfo(address: string | undefined, cluster: Cluster) {
     return useSWR<Token | undefined>(
         swrKey,
         async () => {
-            if (!address) return undefined;
-            return await getTokenInfoWithoutOnChainFallback(new PublicKey(address), cluster);
+            return await getTokenInfoWithoutOnChainFallback(new PublicKey(address!), cluster);
         },
         {
             dedupingInterval: 5 * 60 * 1000,
-            focusThrottleInterval: 5 * 60 * 1000,
             revalidateOnFocus: false,
-            revalidateOnMount: false,
         }
     );
 }
