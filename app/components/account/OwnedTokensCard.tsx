@@ -19,6 +19,7 @@ import React, { useCallback, useMemo } from 'react';
 import { ChevronDown } from 'react-feather';
 
 import { getProxiedUri } from '@/app/features/metadata/utils';
+import { INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import TokenLogoPlaceholder from '@/app/img/logos-solana/low-contrast-solana-logo.svg';
 import { normalizeTokenAmount } from '@/app/utils';
 
@@ -40,6 +41,7 @@ export function OwnedTokensCard({ address }: { address: string }) {
     const fetchAccountTokens = useFetchAccountOwnedTokens();
     const refresh = () => fetchAccountTokens(pubkey);
     const [showDropdown, setDropdown] = React.useState(false);
+    const [visibleCount, setVisibleCount] = React.useState(INITIAL_VISIBLE_COUNT);
     const display = useQueryDisplay();
 
     // Fetch owned tokens
@@ -90,12 +92,17 @@ export function OwnedTokensCard({ address }: { address: string }) {
                             </tr>
                         </thead>
                         {display === 'detail' ? (
-                            <HoldingsDetail tokens={tokens} showLogos={showLogos} />
+                            <HoldingsDetail tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
                         ) : (
-                            <HoldingsSummary tokens={tokens} showLogos={showLogos} />
+                            <HoldingsSummary tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
                         )}
                     </table>
                 </div>
+                <TokensCardFooter
+                    tokens={tokens}
+                    visibleCount={visibleCount}
+                    loadMore={() => setVisibleCount(c => c + LOAD_MORE_COUNT)}
+                />
             </div>
         </>
     );
@@ -111,7 +118,15 @@ type MappedToken = {
     symbol?: string;
 };
 
-function HoldingsDetail({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[]; showLogos: boolean }) {
+function HoldingsDetail({
+    tokens,
+    showLogos,
+    visibleCount,
+}: {
+    tokens: TokenInfoWithPubkey[];
+    showLogos: boolean;
+    visibleCount: number;
+}) {
     const mappedTokens = useMemo(() => {
         const tokensMap = new Map<string, MappedToken>();
 
@@ -141,9 +156,11 @@ function HoldingsDetail({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[]; 
         return tokensMap;
     }, [tokens]);
 
+    const visibleTokens = Array.from(mappedTokens.entries()).slice(0, visibleCount);
+
     return (
         <tbody className="list">
-            {Array.from(mappedTokens.entries()).map(([mintAddress, token]) => (
+            {visibleTokens.map(([mintAddress, token]) => (
                 <TokenRow
                     key={mintAddress}
                     mintAddress={mintAddress}
@@ -156,30 +173,43 @@ function HoldingsDetail({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[]; 
     );
 }
 
-function HoldingsSummary({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[]; showLogos: boolean }) {
-    const mappedTokens = new Map<string, MappedToken>();
-    for (const { info: token, logoURI, symbol, name } of tokens) {
-        const mintAddress = token.mint.toBase58();
-        const totalByMint = mappedTokens.get(mintAddress)?.amount;
+function HoldingsSummary({
+    tokens,
+    showLogos,
+    visibleCount,
+}: {
+    tokens: TokenInfoWithPubkey[];
+    showLogos: boolean;
+    visibleCount: number;
+}) {
+    const mappedTokens = useMemo(() => {
+        const tokensMap = new Map<string, MappedToken>();
+        for (const { info: token, logoURI, symbol, name } of tokens) {
+            const mintAddress = token.mint.toBase58();
+            const totalByMint = tokensMap.get(mintAddress)?.amount;
 
-        let amount = token.tokenAmount.uiAmountString;
-        if (totalByMint !== undefined) {
-            amount = new BigNumber(totalByMint).plus(token.tokenAmount.uiAmountString).toString();
+            let amount = token.tokenAmount.uiAmountString;
+            if (totalByMint !== undefined) {
+                amount = new BigNumber(totalByMint).plus(token.tokenAmount.uiAmountString).toString();
+            }
+
+            tokensMap.set(mintAddress, {
+                amount,
+                decimals: token.tokenAmount.decimals,
+                logoURI,
+                name,
+                rawAmount: token.tokenAmount.amount,
+                symbol,
+            });
         }
+        return tokensMap;
+    }, [tokens]);
 
-        mappedTokens.set(mintAddress, {
-            amount,
-            decimals: token.tokenAmount.decimals,
-            logoURI,
-            name,
-            rawAmount: token.tokenAmount.amount,
-            symbol,
-        });
-    }
+    const visibleTokens = Array.from(mappedTokens.entries()).slice(0, visibleCount);
 
     return (
         <tbody className="list">
-            {Array.from(mappedTokens.entries()).map(([mintAddress, token]) => (
+            {visibleTokens.map(([mintAddress, token]) => (
                 <TokenRow
                     key={mintAddress}
                     mintAddress={mintAddress}
@@ -230,11 +260,11 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
             )}
             {showAccountAddress && token.pubkey && (
                 <td>
-                    <Address pubkey={new PublicKey(token.pubkey)} link tokenLabelInfo={token} useMetadata />
+                    <Address pubkey={new PublicKey(token.pubkey)} link tokenLabelInfo={token} />
                 </td>
             )}
             <td>
-                <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={token} useMetadata />
+                <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={token} />
             </td>
             <td>
                 {token.amount} {token.symbol}
@@ -244,6 +274,34 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
                 />
             </td>
         </tr>
+    );
+}
+
+function TokensCardFooter({
+    tokens,
+    visibleCount,
+    loadMore,
+}: {
+    tokens: TokenInfoWithPubkey[];
+    visibleCount: number;
+    loadMore: () => void;
+}) {
+    // Count unique mints to get actual token count (not account count)
+    const totalCount = useMemo(() => {
+        const uniqueMints = new Set(tokens.map(t => t.info.mint.toBase58()));
+        return uniqueMints.size;
+    }, [tokens]);
+
+    if (visibleCount >= totalCount) {
+        return null;
+    }
+
+    return (
+        <div className="card-footer">
+            <button className="btn btn-primary w-100" onClick={loadMore}>
+                Load More ({visibleCount} of {totalCount})
+            </button>
+        </div>
     );
 }
 
