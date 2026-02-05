@@ -9,7 +9,7 @@ export const COOKIE_CONSENT_NAME = 'solana_cookie_consent';
 const COOKIE_MAX_AGE = 15778476; // 6 months in seconds
 const PRIVACY_POLICY_URL = 'https://solana.com/privacy-policy#collection-of-information';
 
-type TConsentValue = 'granted' | 'denied';
+type TConsentValue = 'granted' | 'denied' | 'dismissed';
 
 export function CookieConsent() {
     const [consent, setConsent] = useState<TConsentValue | null>(null);
@@ -35,6 +35,7 @@ export function CookieConsent() {
     };
 
     const handleDismiss = () => {
+        setCookie(COOKIE_CONSENT_NAME, 'dismissed', COOKIE_MAX_AGE);
         setIsDismissed(true);
     };
 
@@ -93,7 +94,7 @@ function PrivacyPolicyLink({ children }: { children: React.ReactNode }) {
 
 function CloseButton({ onClick }: { onClick: () => void }) {
     return (
-        <span className="c-pointer e-text-2xl e-leading-none e-text-white hover:e-opacity-70" onClick={onClick}>
+        <span className="e-cursor-pointer e-text-2xl e-leading-none e-text-white hover:e-opacity-70" onClick={onClick}>
             &times;
         </span>
     );
