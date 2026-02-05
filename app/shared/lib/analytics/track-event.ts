@@ -27,9 +27,16 @@ interface AnalyticsProvider {
     track(win: Window, eventName: string, params?: EventParams): void;
 }
 
+/**
+ * Analytics providers in priority order.
+ *
+ * gtag: Standard method for GA4 and GTM. Uses gtag('event', name, params)
+ * dataLayer: Fallback for pure GTM setups without gtag. Pushes {event, ...params} directly
+ */
 const dataLayerProvider: AnalyticsProvider = {
     canUse(win: Window): boolean {
-        return getDataLayer(win) !== undefined;
+        // Fallback for pure GTM setups without gtag
+        return getDataLayer(win) !== undefined && getGtag(win) === undefined;
     },
     track(win: Window, eventName: string, params?: EventParams): void {
         getDataLayer(win)?.dataLayer.push({ event: eventName, ...params });
@@ -45,7 +52,7 @@ const gtagProvider: AnalyticsProvider = {
     },
 };
 
-const providers: AnalyticsProvider[] = [dataLayerProvider, gtagProvider];
+const providers: AnalyticsProvider[] = [gtagProvider, dataLayerProvider];
 
 function resolveProvider(win: Window): AnalyticsProvider | undefined {
     return providers.find(provider => provider.canUse(win));
