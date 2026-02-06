@@ -21,12 +21,15 @@ export function useFormPrefill({ form, config }: UseFormPrefillOptions): void {
             const currentValue = dependency.getValue();
             const previousValue = externalDependencyRefs.current.get(dependency.id);
 
-            if (currentValue !== previousValue) {
+            const valueChanged = currentValue !== previousValue;
+
+            if (valueChanged) {
                 externalDependencyRefs.current.set(dependency.id, currentValue);
-                dependency.onValueChange(currentValue, form);
             }
 
-            if (dependency.watchesFormValues) {
+            const shouldTrigger = valueChanged || dependency.watchesFormValues;
+
+            if (shouldTrigger) {
                 dependency.onValueChange(currentValue, form);
             }
         }

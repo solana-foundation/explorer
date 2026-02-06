@@ -10,7 +10,7 @@ const buttonVariants = cva(
         'e-inline-flex e-items-center e-justify-center e-gap-2',
         'e-whitespace-nowrap e-rounded e-text-sm e-font-medium',
         'e-transition-colors',
-        'focus-visible:e-outline-none focus-visible:e-ring-2 focus-visible:e-ring-offset-2 focus-visible:e-ring-neutral-950',
+        'focus-visible:e-outline-none focus-visible:e-ring-2 focus-visible:e-ring-offset-2 focus-visible:e-ring-offset-transparent focus-visible:e-ring-neutral-950',
         'disabled:e-pointer-events-none disabled:e-opacity-50',
         '[&_svg]:e-pointer-events-none [&_svg]:e-size-3 [&_svg]:e-shrink-0'
     ),
@@ -28,7 +28,8 @@ const buttonVariants = cva(
             },
             variant: {
                 accent: 'e-border-0 e-bg-accent e-text-gray-900 hover:e-bg-accent/90',
-                default: 'e-bg-neutral-900 e-text-neutral-50 e-shadow hover:e-bg-neutral-900/90',
+                default:
+                    'e-border e-border-neutral-700 e-bg-neutral-900 e-text-neutral-50 e-shadow hover:e-bg-neutral-900/90',
                 destructive: 'e-bg-red-500 e-text-neutral-50 e-shadow-sm hover:e-bg-red-500/90',
                 ghost: 'hover:e-bg-neutral-100 hover:e-text-neutral-900',
                 link: 'e-text-neutral-900 e-underline-offset-4 hover:e-underline',

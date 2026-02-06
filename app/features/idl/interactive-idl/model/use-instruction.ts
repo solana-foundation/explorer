@@ -21,6 +21,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
 import { clusterUrl } from '@/app/utils/cluster';
+import { getTransactionInstructionError } from '@/app/utils/program-err';
 
 import { programAtom } from '../model/state-atoms';
 import { AnchorInterpreter } from './anchor/anchor-interpreter';
@@ -37,6 +38,9 @@ interface UseInstructionOptions {
     commitment?: Finality;
     /** Commitment level for transaction simulation. Defaults to 'processed'. */
     simulationCommitment?: Commitment;
+    onSuccess?: (signature: string) => void;
+    onError?: (error: string) => void;
+    onPreInvocationError?: (error: string) => void;
 }
 
 interface UseInstructionReturn {
@@ -75,6 +79,9 @@ export function useInstruction({
     interpreterName = AnchorInterpreter.NAME,
     commitment = 'confirmed',
     simulationCommitment = 'processed',
+    onSuccess,
+    onError,
+    onPreInvocationError,
 }: UseInstructionOptions): UseInstructionReturn {
     const { connected, publicKey, ...wallet } = useWallet();
     const { cluster: currentCluster, customUrl } = useCluster();
@@ -89,7 +96,7 @@ export function useInstruction({
         handleTxEnd,
         handleSimulatedTxResult,
         parseLogs,
-    } = useInvocationState();
+    } = useInvocationState({ idlErrors: idl?.errors, onError, onSuccess });
     const [initializationError, setInitializationError] = useState<string | null>(null);
     const [isProgramLoading, setIsProgramLoading] = useState(false);
     const [program, setProgram] = useAtom(programAtom);
@@ -214,7 +221,9 @@ export function useInstruction({
             }
         ): Promise<void> => {
             if (!connected || !publicKey || !wallet.signTransaction) {
-                setPreInvocationError('Wallet not connected');
+                const error = 'Wallet not connected';
+                setPreInvocationError(error);
+                onPreInvocationError?.(error);
                 return;
             }
             setPreInvocationError(null);
@@ -305,6 +314,7 @@ export function useInstruction({
             handleTxError,
             handleTxEnd,
             handleSimulatedTxResult,
+            onPreInvocationError,
         ]
     );
 
@@ -366,7 +376,15 @@ export type InstructionInvocationResult =
     | { status: 'error'; message: string; logs: string[]; serializedTxMessage: string | null; finishedAt: Date }
     | null;
 
-function useInvocationState() {
+function useInvocationState({
+    onSuccess,
+    onError,
+    idlErrors,
+}: {
+    onSuccess?: (signature: string) => void;
+    onError?: (error: string) => void;
+    idlErrors?: BaseIdl['errors'];
+} = {}) {
     const [transactionError, setTransactionError] = useState<TransactionError | null>(null);
     const { parseLogs } = useParsedLogs(transactionError);
     const [serializedTxMessage, setSerializedTxMessage] = useState<string | null>(null);
@@ -393,6 +411,7 @@ function useInvocationState() {
     const handleTxSuccess = (signature: string, logs: string[] | null | undefined) => {
         setLastSuccess({ finishedAt: new Date(), signature });
         handleLogsChange(logs);
+        onSuccess?.(signature);
     };
 
     const handleTxError = (error: unknown | Error, transaction: Transaction | undefined) => {
@@ -404,6 +423,7 @@ function useInvocationState() {
             setTransactionError(error);
         }
         setSerializedTxMessage(serializeTransactionMessage(transaction));
+        onError?.(errorMessage);
     };
 
     const handleTxEnd = () => {
@@ -413,11 +433,16 @@ function useInvocationState() {
     const handleSimulatedTxResult = (simulatedTx: RpcResponseAndContext<SimulatedTransactionResponse>) => {
         if (simulatedTx.value.err !== null) {
             handleLogsChange(simulatedTx.value.logs);
-            let errorMessage;
-            if (typeof simulatedTx.value.err === 'string') {
-                errorMessage = simulatedTx.value.err;
+            const programError = getTransactionInstructionError(simulatedTx.value.err);
+            if (programError) {
+                const instructionNum = programError.index + 1;
+                const customCode = extractCustomErrorCode(simulatedTx.value.err);
+                const idlError = customCode !== undefined ? resolveIdlError(customCode, idlErrors) : undefined;
+                const errorMessage = idlError ? `"${idlError.name}"\u00A0(code:${customCode})` : programError.message;
+                throw new Error(`Instruction #${instructionNum} got ${errorMessage}. See logs for details`);
             }
-            throw new Error(errorMessage ?? 'Could not simulate transaction');
+            const errorDetail = JSON.stringify(simulatedTx.value.err);
+            throw new Error(`Simulated with errors: "${errorDetail}". See logs for details`);
         }
     };
 
@@ -444,18 +469,43 @@ function useInvocationState() {
 
     return {
         handleSimulatedTxResult,
-
         handleTxEnd,
         handleTxError,
         handleTxStart,
         handleTxSuccess,
-
         isExecuting,
-
         lastResult,
-
         parseLogs,
     };
+}
+
+/**
+ * Extracts custom error code from InstructionError variant.
+ */
+function extractCustomErrorCode(error: TransactionError | null): number | undefined {
+    if (!error || typeof error !== 'object') {
+        return undefined;
+    }
+
+    if (!('InstructionError' in error)) {
+        return undefined;
+    }
+
+    const innerError = error['InstructionError'];
+    if (!Array.isArray(innerError) || innerError.length < 2) {
+        return undefined;
+    }
+
+    const instructionError = innerError[1];
+    if (typeof instructionError === 'object' && instructionError !== null && 'Custom' in instructionError) {
+        return (instructionError as { Custom: number })['Custom'];
+    }
+
+    return undefined;
+}
+
+function resolveIdlError(code: number, errors: BaseIdl['errors']) {
+    return errors?.find(e => e.code === code);
 }
 
 function handleInvokeError(error: unknown | Error, message = 'Failed to invoke instruction') {

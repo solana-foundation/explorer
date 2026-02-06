@@ -16,3 +16,4 @@ export function isEnvEnabled(variable: undefined | string) {
 }
 
 export const EXPLORER_BASE_URL = 'https://explorer.solana.com';
+export const IBRL_EXPLORER_URL = process.env.NEXT_PUBLIC_IBRL_EXPLORER_URL || 'https://ibrl.wtf';

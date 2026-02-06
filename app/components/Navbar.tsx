@@ -18,6 +18,7 @@ export function Navbar({ children }: INavbarProps) {
     const [navOpened, navHandlers] = useDisclosure(false);
     const homePath = useClusterPath({ pathname: '/' });
     const featureGatesPath = useClusterPath({ pathname: '/feature-gates' });
+    const tosPath = useClusterPath({ pathname: '/tos' });
     const supplyPath = useClusterPath({ pathname: '/supply' });
     const programsPath = useClusterPath({ pathname: '/verified-programs' });
     const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
@@ -35,7 +36,7 @@ export function Navbar({ children }: INavbarProps) {
                 </button>
 
                 <div
-                    className="navbar-children d-flex align-items-center flex-grow-1 h-100 d-none d-lg-block"
+                    className="navbar-children d-flex align-items-center flex-grow-1 h-100 d-none d-xl-block"
                     style={{ minWidth: 0 }}
                 >
                     {children}
@@ -77,6 +78,14 @@ export function Navbar({ children }: INavbarProps) {
                                 href={inspectorPath}
                             >
                                 Inspector
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link${selectedLayoutSegment === 'tos' ? ' active' : ''}`}
+                                href={tosPath}
+                            >
+                                ToS
                             </Link>
                         </li>
                         <li className="nav-item align-items-center justify-content-center pt-2">

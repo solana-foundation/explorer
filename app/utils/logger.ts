@@ -44,6 +44,12 @@ export default class StraightforwardLogger {
         }
         isLoggable(0) && console.error(error, ...other);
     }
+    static warn(message: any, ...other: any[]) {
+        isLoggable(1) && console.warn(message, ...other);
+    }
+    static info(message: any, ...other: any[]) {
+        isLoggable(2) && console.info(message, ...other);
+    }
     static debug(message: any, ...other: any[]) {
         isLoggable(3) && console.debug(message, ...other);
     }

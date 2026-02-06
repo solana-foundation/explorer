@@ -1,4 +1,8 @@
+'use client';
+
 import { TransactionInspectorPage } from '@components/inspector/InspectorPage';
+
+import { SentryErrorBoundary } from '@/app/components/common/SentryErrorBoundary';
 
 type Props = Readonly<{
     params: Readonly<{
@@ -7,5 +11,9 @@ type Props = Readonly<{
 }>;
 
 export default function Page({ params: { signature } }: Props) {
-    return <TransactionInspectorPage signature={signature} showTokenBalanceChanges={true} />;
+    return (
+        <SentryErrorBoundary fallbackMessage="Failed to load inspector">
+            <TransactionInspectorPage signature={signature} showTokenBalanceChanges={true} />
+        </SentryErrorBoundary>
+    );
 }

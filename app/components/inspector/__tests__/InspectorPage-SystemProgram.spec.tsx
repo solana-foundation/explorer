@@ -73,7 +73,7 @@ async function waitForTimeout(fn: () => void, params: object = DEFAULT_INTERVAL)
 // Mock SWR
 vi.mock('swr', () => ({
     __esModule: true,
-    default: vi.fn(),
+    default: vi.fn(() => ({ data: undefined })),
 }));
 
 // Mock next/navigation

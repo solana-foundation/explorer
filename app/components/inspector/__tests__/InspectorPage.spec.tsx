@@ -15,7 +15,7 @@ import { TransactionInspectorPage } from '../InspectorPage';
 
 vi.mock('swr', () => ({
     __esModule: true,
-    default: vi.fn(),
+    default: vi.fn(() => ({ data: undefined })),
 }));
 
 vi.mock('next/navigation', () => ({

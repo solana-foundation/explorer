@@ -19,9 +19,11 @@ describe('findDefaultValueForArgumentType', () => {
     });
     it('should create default value for wrapped types', () => {
         expect(findDefaultValueForArgumentType({ vec: 'string' })).toBe('default');
-        expect(findDefaultValueForArgumentType({ array: ['u8', 2] })).toBe('1');
+        expect(findDefaultValueForArgumentType({ array: ['u8', 2] })).toBe('1, 1');
+        expect(findDefaultValueForArgumentType({ array: ['string', 3] })).toBe('default, default, default');
+        expect(findDefaultValueForArgumentType({ array: ['u8', 1] })).toBe('1');
         expect(findDefaultValueForArgumentType({ option: 'bool' })).toBe('false');
         expect(findDefaultValueForArgumentType({ coption: 'f64' })).toBe('1.0');
-        expect(findDefaultValueForArgumentType({ vec: { array: ['string', 2] } })).toBe('default');
+        expect(findDefaultValueForArgumentType({ vec: { array: ['string', 2] } })).toBe('default, default');
     });
 });

@@ -2,6 +2,7 @@
 
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
+import { DownloadableDropdown } from '@components/common/Downloadable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { InfoTooltip } from '@components/common/InfoTooltip';
 import { LoadingCard } from '@components/common/LoadingCard';
@@ -37,6 +38,7 @@ import Link from 'next/link';
 import React, { Suspense, useEffect, useState } from 'react';
 import { RefreshCw, Settings } from 'react-feather';
 
+import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
@@ -146,10 +148,18 @@ export default function TransactionDetailsPageClient({ params: { signature: raw 
 
 function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProps) {
     const fetchStatus = useFetchTransactionStatus();
+    const fetchRaw = useFetchRawTransaction();
     const status = useTransactionStatus(signature);
     const details = useTransactionDetails(signature);
+    const rawDetails = useRawTransactionDetails(signature);
     const { cluster, clusterInfo, name: clusterName, status: clusterStatus, url: clusterUrl } = useCluster();
     const inspectPath = useClusterPath({ pathname: `/tx/${signature}/inspect` });
+
+    useEffect(() => {
+        if (!rawDetails && clusterStatus === ClusterStatus.Connected) {
+            fetchRaw(signature);
+        }
+    }, [signature, clusterStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Fetch transaction on load
     useEffect(() => {
@@ -250,6 +260,8 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                         Refresh
                     </button>
                 )}
+                <span className="me-2"></span>
+                <DownloadableDropdown filename={signature} data={rawDetails?.data?.raw?.message.serialize() || null} />
             </div>
 
             <TableCardBody>
