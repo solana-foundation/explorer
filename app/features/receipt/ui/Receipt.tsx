@@ -68,9 +68,9 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
 
     if (isStatusLoading) return <LoadingCard message="Loading transaction details" />;
     if (isStatusFailed) return <ErrorCard retry={() => fetchStatus(signature)} text="Fetch Failed" />;
-    if (hasNoTxInfo) return <NoReceipt transactionPath={transactionPath} />;
+    if (hasNoTxInfo) return <NoReceipt transactionPath={transactionPath} timestamp={tx?.blockTime} />;
     if (isDetailsLoading || isReceiptLoading) return <LoadingCard message="Loading receipt" />;
-    if (!receipt) return <NoReceipt transactionPath={transactionPath} />;
+    if (!receipt) return <NoReceipt transactionPath={transactionPath} timestamp={tx?.blockTime} />;
 
     return <ReceiptContent receipt={receipt} signature={signature} status={status} transactionPath={transactionPath} />;
 }

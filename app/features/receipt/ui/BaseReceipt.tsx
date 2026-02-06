@@ -49,7 +49,7 @@ export function BaseReceipt({
     );
 }
 
-export function Header({ date }: Pick<FormattedExtendedReceipt, 'date'>) {
+export function Header({ date }: { date?: FormattedExtendedReceipt['date'] }) {
     return (
         <div className="e-flex e-items-center e-justify-between e-gap-x-4 e-border-b e-border-white/10 e-p-6 e-pt-8 [border-bottom-style:solid]">
             <h3 className="e-m-0 e-flex-shrink-0 e-font-medium e-text-white">Solana Receipt</h3>
@@ -226,14 +226,18 @@ export function Zigzag() {
     return <div className="zigzag e-bg-outer-space-900 e-pb-6" />;
 }
 
-export function NoReceipt({ transactionPath }: { transactionPath: string }) {
+export function NoReceipt({ transactionPath, timestamp }: { transactionPath: string; timestamp?: number | null }) {
+    const date = timestamp
+        ? { timestamp: timestamp * 1000, utc: new Date(timestamp * 1000).toISOString() }
+        : undefined;
+
     return (
         <div className="container e-flex e-min-h-[90vh] e-flex-col e-items-center e-justify-center e-gap-6 e-px-5 e-py-10">
             <BluredCircle />
 
             <div className="e-w-full e-max-w-lg">
                 <div className="e-min-h-96 e-bg-outer-space-900">
-                    <Header date={{ timestamp: new Date().getTime(), utc: new Date().toISOString() }} />
+                    <Header date={date} />
                     <div className="e-space-x-1 e-p-6 e-text-destructive">
                         <Info size={16} />
                         <span>There is no receipt for this transaction</span>
