@@ -49,6 +49,20 @@ export const TESTNET_URL = 'https://api.testnet.solana.com';
 export const DEVNET_URL = 'https://api.devnet.solana.com';
 export const SIMD296_URL = 'https://simd-0296.surfnet.dev:8899';
 
+// On localhost we use the default public Solana RPCs (e.g. api.mainnet-beta.solana.com)
+// unless custom ones (server + client) are specified via env vars.
+// In deployed environments (production/preview) we rewrite to the explorer-api subdomain
+// so the request goes to our own RPC instance.
+//
+// Custom RPC endpoints are configured via env vars in two tiers:
+//   NEXT_PUBLIC_*_RPC_URL — exposed to the browser (clusterUrl).
+//   *_RPC_URL             — server-only, used by SSR / API routes (serverClusterUrl).
+//
+// For production/preview deploys only the server-side var (*_RPC_URL) matters:
+// the public one is auto-derived from the default constants + modifyUrl,
+// so there is no need to set it.
+// For custom RPCs that differ from the defaults you must set both:
+// NEXT_PUBLIC_*_RPC_URL (client) and *_RPC_URL (server).
 const modifyUrl = (url: string): string => {
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
         return url;
