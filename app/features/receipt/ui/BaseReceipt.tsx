@@ -227,9 +227,7 @@ export function Zigzag() {
 }
 
 export function NoReceipt({ transactionPath, timestamp }: { transactionPath: string; timestamp?: number | null }) {
-    const date = timestamp
-        ? { timestamp: timestamp * 1000, utc: new Date(timestamp * 1000).toISOString() }
-        : undefined;
+    const date = timestamp ? { timestamp: timestamp * 1000, utc: new Date(timestamp * 1000).toISOString() } : undefined;
 
     return (
         <div className="container e-flex e-min-h-[90vh] e-flex-col e-items-center e-justify-center e-gap-6 e-px-5 e-py-10">
