@@ -3,6 +3,7 @@ import './styles.css';
 
 import { ClusterModal } from '@components/ClusterModal';
 import { ClusterStatusButton } from '@components/ClusterStatusButton';
+import { CookieConsent } from '@components/common/CookieConsent';
 import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';
 import { ClusterProvider } from '@providers/cluster';
@@ -72,6 +73,7 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                     </ClusterProvider>
                 </ScrollAnchorProvider>
                 {analytics}
+                <CookieConsent />
             </body>
         </html>
     );
