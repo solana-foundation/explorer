@@ -38,7 +38,7 @@ def get_epoch_for_slot(epoch_schedule: dict, slot: int) -> int:
 async def main():
     features = get_features()
 
-    connection = AsyncClient('https://api.mainnet-beta.solana.com')
+    connection = AsyncClient('https://api.mainnet.solana.com')
     epoch_schedule = (await connection.get_epoch_schedule()).value
 
     for feature in features:
