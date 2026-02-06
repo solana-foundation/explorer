@@ -46,6 +46,7 @@ test.describe('when feature enabled', () => {
 
         if (hasReceipt) {
             const bodyText = await page.textContent('body');
+            // eslint-disable-next-line no-restricted-syntax -- Verify the receipt contains at least one of the expected fields
             expect(bodyText).toMatch(/Sender|Receiver|Status|Network/i);
         }
     });
