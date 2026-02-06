@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
 import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { SystemProgram } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';

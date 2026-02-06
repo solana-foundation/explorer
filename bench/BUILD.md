@@ -3,7 +3,7 @@
 | Static | `/` | 13.1 kB | 1.02 MB |
 | Static | `/_not-found` | 325 B | 161 kB |
 | Dynamic | `/address/[address]` | 13.4 kB | 942 kB |
-| Dynamic | `/address/[address]/anchor-account` | 5.78 kB | 999 kB |
+| Dynamic | `/address/[address]/anchor-account` | 5.77 kB | 999 kB |
 | Dynamic | `/address/[address]/anchor-program` | 2.65 kB | 890 kB |
 | Dynamic | `/address/[address]/attestation` | 6.68 kB | 979 kB |
 | Dynamic | `/address/[address]/attributes` | 2.5 kB | 933 kB |

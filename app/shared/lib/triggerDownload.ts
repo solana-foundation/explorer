@@ -44,6 +44,7 @@ const triggerDownloadBlob = (blob: Blob, filename: string): void => {
 
 const isValidBase64 = (str: string): boolean => {
     try {
+        // eslint-disable-next-line no-restricted-syntax -- validate base64 string format
         const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
         if (!base64Regex.test(str)) {
             return false;

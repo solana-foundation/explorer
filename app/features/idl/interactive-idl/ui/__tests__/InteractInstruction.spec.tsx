@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, no-restricted-globals -- test assertions use RegExp for pattern matching */
 import { IdlType } from '@coral-xyz/anchor/dist/cjs/idl';
 import type { InstructionData } from '@entities/idl';
 import { Accordion } from '@radix-ui/react-accordion';
