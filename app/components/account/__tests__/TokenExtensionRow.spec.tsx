@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, no-restricted-globals -- test assertions use RegExp for pattern matching */
 import { TableCardBody } from '@components/common/TableCardBody';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, no-restricted-globals -- test assertions use RegExp for pattern matching */
 import { SystemProgram } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';

@@ -1,9 +1,10 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { intoParsedInstruction, intoParsedTransaction } from '@components/inspector/into-parsed-data';
 import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
 import { ParsedInstruction, PublicKey, TransactionMessage } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { render, screen } from '@testing-library/react';
-import { vi } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 
 vi.mock('next/navigation');
 
@@ -17,6 +18,13 @@ import { InspectorInstructionCard } from '../../common/InspectorInstructionCard'
 import { TokenDetailsCard } from '../token/TokenDetailsCard';
 
 describe('instruction::TokenDetailsCard', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
     test('should render Token::Transfer instruction', async () => {
         const index = 3;
         const m = mock.deserializeMessageV0(stubs.tokenTransferMsg);

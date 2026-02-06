@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { describe, expect, it } from 'vitest';
 
 import { isLeafTupleU8String, parseAnchorType_U8_PathTuple } from './leaf-tuple-type-handler';

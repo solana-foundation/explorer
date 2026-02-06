@@ -81,6 +81,7 @@ export default function FeatureGatesPageClient() {
                                                     rel="noopener noreferrer"
                                                     className="btn btn-sm btn-outline-primary fs-sm"
                                                 >
+                                                    {/* eslint-disable-next-line no-restricted-syntax -- strip leading zeros from SIMD number */}
                                                     {feature.simds.map(simd => simd.replace(/^0+/, ''))}
                                                 </a>
                                             )}

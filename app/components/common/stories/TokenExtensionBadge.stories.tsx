@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, within } from 'storybook/test';
 

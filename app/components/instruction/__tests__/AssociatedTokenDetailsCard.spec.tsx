@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import * as spl from '@solana/spl-token';
 import { PublicKey, TransactionMessage } from '@solana/web3.js';

@@ -35,6 +35,7 @@ export const parseNFTokenNFTAccount = (account: Account): NftokenTypes.NftAccoun
             delegate: new PublicKey(parsed.delegate).toBase58(),
             holder: new PublicKey(parsed.holder).toBase58(),
 
+            // eslint-disable-next-line no-restricted-syntax -- remove null bytes from metadata URL
             metadata_url: parsed.metadata_url?.replace(/\0/g, '') ?? null,
         };
     } catch (e) {
@@ -63,6 +64,7 @@ export const parseNFTokenCollectionAccount = (account: Account): NftokenTypes.Co
             address: account.pubkey.toBase58(),
             authority: parsed.authority,
             authority_can_update: Boolean(parsed.authority_can_update),
+            // eslint-disable-next-line no-restricted-syntax -- remove null bytes from metadata URL
             metadata_url: parsed.metadata_url?.replace(/\0/g, '') ?? null,
         };
     } catch (e) {
