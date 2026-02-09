@@ -1,5 +1,6 @@
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
+import { Copyable } from '@components/common/Copyable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { HexData } from '@components/common/HexData';
 import { SolBalance } from '@components/common/SolBalance';
@@ -18,6 +19,7 @@ export function AccountsCard({ signature }: SignatureProps) {
     const [showRaw, setShowRaw] = useState(false);
     const [expanded, setExpanded] = useState(true);
     const [accountSizes, setAccountSizes] = useState<Map<string, number>>(new Map());
+    const [accountsData, setAccountsData] = useState<Map<string, Buffer>>(new Map());
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     if (!transactionWithMeta) {
@@ -31,12 +33,13 @@ export function AccountsCard({ signature }: SignatureProps) {
         return <ErrorCard text="Transaction metadata is missing" />;
     }
 
-    // Fetch account info for all accounts to get their sizes
+    // Fetch account info for all accounts to get their sizes and data
     useEffect(() => {
-        const fetchSizes = async () => {
+        const fetchAccountInfo = async () => {
             const { Connection } = await import('@solana/web3.js');
             const connection = new Connection(clusterUrl);
             const sizes = new Map<string, number>();
+            const dataMap = new Map<string, Buffer>();
 
             for (const account of message.accountKeys) {
                 const pubkey = account.pubkey;
@@ -44,6 +47,10 @@ export function AccountsCard({ signature }: SignatureProps) {
                     const info = await connection.getAccountInfo(pubkey);
                     if (info) {
                         sizes.set(pubkey.toBase58(), info.data.length);
+                        dataMap.set(
+                            pubkey.toBase58(),
+                            info.data instanceof Buffer ? info.data : Buffer.from(info.data)
+                        );
                     }
                 } catch (err) {
                     console.error('Failed to fetch account info for', pubkey.toBase58(), err);
@@ -51,9 +58,10 @@ export function AccountsCard({ signature }: SignatureProps) {
             }
 
             setAccountSizes(sizes);
+            setAccountsData(dataMap);
         };
 
-        fetchSizes();
+        fetchAccountInfo();
     }, [message.accountKeys, clusterUrl]);
 
     const totalAccountSize = Array.from(accountSizes.values()).reduce((sum, size) => sum + size, 0);
@@ -66,6 +74,8 @@ export function AccountsCard({ signature }: SignatureProps) {
         const key = account.pubkey.toBase58();
         const delta = new BigNumber(post).minus(new BigNumber(pre));
         const accountSize = accountSizes.get(key);
+        const accountData = accountsData.get(key);
+        const hexData = accountData?.toString('hex') ?? null;
 
         return (
             <tr key={key}>
@@ -81,7 +91,9 @@ export function AccountsCard({ signature }: SignatureProps) {
                 </td>
                 <td>
                     {accountSize !== undefined ? (
-                        <span>{accountSize.toLocaleString('en-US')}</span>
+                        <Copyable text={hexData}>
+                            <span>{accountSize.toLocaleString('en-US')}</span>
+                        </Copyable>
                     ) : (
                         <span className="text-muted">Loading...</span>
                     )}
@@ -146,7 +158,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                                         <p className="text-muted e-m-0 e-uppercase">Total Account Size:</p>
                                     </td>
                                     <td>
-                                        <span className="text-white">{totalAccountSizeFormatted}</span>
+                                        <span className="text-white">{totalAccountSize.toLocaleString('en-US')}</span>
                                     </td>
                                     <td />
                                 </tr>
