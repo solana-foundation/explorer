@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 import votingIdl029 from '../__mocks__/anchor/anchor-0.29.0-voting-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
 import votingIdl030 from '../__mocks__/anchor/anchor-0.30.0-voting-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
 import votingIdl030Variations from '../__mocks__/anchor/anchor-0.30.0-voting-variations-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
+import donateIdl0301 from '../__mocks__/anchor/anchor-0.30.1-donate-DRLYxueWz6iymdsaRCER6iv6v9zL7gFWANwDL2V5VUx1.json';
 import type { InstructionFormData } from '../use-instruction-form';
 import { usePdas } from '../use-pdas';
 import { findInstruction } from './utils';
@@ -219,6 +220,75 @@ describe('usePdas', () => {
         expect(view.current.pdaAccount.generated).toBeNull();
         expect(view.current.pdaAccount.seeds).toHaveLength(1);
         expect(view.current.pdaAccount.seeds[0]).toEqual({ name: 'authority', value: null });
+    });
+
+    describe('donate IDL (close_donation_epoch_v1)', () => {
+        const DONATE_KEY = 'closeDonationEpochV1';
+        const { createMockForm, mockIdl, mockInstruction, renderUsePdas } = setup(
+            donateIdl0301,
+            'close_donation_epoch_v1'
+        );
+
+        function runDonateTest(formValues: { accounts?: Record<string, string>; arguments?: Record<string, string> }) {
+            const form = createMockForm();
+            for (const [key, val] of Object.entries(formValues.accounts ?? {})) {
+                form.setValue(`accounts.${DONATE_KEY}.${key}`, val);
+            }
+            for (const [key, val] of Object.entries(formValues.arguments ?? {})) {
+                form.setValue(`arguments.${DONATE_KEY}.${key}`, val);
+            }
+            return renderUsePdas({ form, idl: mockIdl, instruction: mockInstruction }).current;
+        }
+
+        it('generates PDA for account seeds (debouncer, tokenProgram, mint)', () => {
+            const pdas = runDonateTest({
+                accounts: {
+                    debouncer: '11111111111111111111111111111111',
+                    mint: PublicKey.default.toString(),
+                    tokenProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+                },
+            });
+            expect(pdas.debouncerTokenAccount?.generated).toBeTruthy();
+            expect(pdas.debouncerTokenAccount?.seeds).toHaveLength(3);
+            expect(pdas.debouncerTokenAccount?.seeds[0].name).toBe('debouncer');
+            expect(pdas.debouncerTokenAccount?.seeds[2].name).toBe('mint');
+        });
+
+        it('generates distribution, epochTracker, debouncer PDAs when config_id (hex) and epoch are set', () => {
+            const configId = '0'.repeat(64);
+            const mint = PublicKey.default.toString();
+            const pdas = runDonateTest({
+                accounts: { mint },
+                arguments: { configId, epoch: '1' },
+            });
+            for (const key of ['distribution', 'epochTracker', 'debouncer']) {
+                expect(pdas[key].generated).toBeTruthy();
+                expect(pdas[key].seeds.find(s => s.name === 'configId')?.value).toBe(configId);
+                expect(pdas[key].seeds.find(s => s.name === 'mint')?.value).toBe(mint);
+            }
+            expect(pdas.distribution.seeds.find(s => s.name === 'epoch')?.value).toBe('1');
+        });
+
+        it('generates PDAs when config_id is comma-separated u8 bytes', () => {
+            const pdas = runDonateTest({
+                accounts: { mint: PublicKey.default.toString() },
+                arguments: { configId: Array(32).fill(0).join(', '), epoch: '42' },
+            });
+            expect(pdas.distribution.generated).toBeTruthy();
+            expect(pdas.epochTracker.generated).toBeTruthy();
+            expect(pdas.debouncer.generated).toBeTruthy();
+        });
+
+        it('returns null for distribution/epochTracker/debouncer when config_id is missing', () => {
+            const pdas = runDonateTest({
+                accounts: { mint: PublicKey.default.toString() },
+                arguments: { epoch: '1' },
+            });
+            for (const key of ['distribution', 'epochTracker', 'debouncer']) {
+                expect(pdas[key].generated).toBeNull();
+                expect(pdas[key].seeds.find(s => s.name === 'configId')?.value).toBeNull();
+            }
+        });
     });
 
     // 0.30 tests - these need 0.30 IDL for PDA seeds
