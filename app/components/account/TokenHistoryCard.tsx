@@ -97,7 +97,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     const fetchHistories = React.useCallback(
         (refresh?: boolean) => {
             tokensToFetch.forEach(token => {
-                fetchAccountHistory(token.pubkey, refresh);
+                fetchAccountHistory(token.pubkey, false, refresh);
             });
         },
         [tokensToFetch, fetchAccountHistory]
@@ -112,7 +112,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
             newTokens.forEach(token => {
                 const address = token.pubkey.toBase58();
                 if (!accountHistories[address]) {
-                    fetchAccountHistory(token.pubkey, true);
+                    fetchAccountHistory(token.pubkey, false, true);
                 }
             });
             prevTokensToFetchCount.current = tokensToFetchCount;
