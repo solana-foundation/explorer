@@ -1,21 +1,22 @@
 'use client';
 
-import { getCookie, setCookie } from '@utils/cookie';
 import { useEffect, useState } from 'react';
 
-import { cn } from '../shared/utils';
+import { cn } from '@/app/components/shared/utils';
+
+import { getCookie, setCookie } from '../lib/cookie';
 
 export const COOKIE_CONSENT_NAME = 'solana_cookie_consent';
 const COOKIE_MAX_AGE = 15778476; // 6 months in seconds
 const PRIVACY_POLICY_URL = 'https://solana.com/privacy-policy#collection-of-information';
 
-type TConsentValue = 'granted' | 'denied' | 'dismissed';
+type TConsentValue = 'granted' | 'denied';
 
 export function CookieConsent() {
     const [consent, setConsent] = useState<TConsentValue | null>(null);
     const [isMounted, setIsMounted] = useState(false);
     const [isDismissed, setIsDismissed] = useState(false);
-    const [isEU, setIsEU] = useState(false);
+    const [isEU, setIsEU] = useState<boolean | null>(null);
 
     useEffect(() => {
         setIsMounted(true);
@@ -31,15 +32,14 @@ export function CookieConsent() {
     const handleConsent = (value: TConsentValue) => {
         setCookie(COOKIE_CONSENT_NAME, value, COOKIE_MAX_AGE);
         setConsent(value);
-        window.location.reload();
+        window.dispatchEvent(new CustomEvent('cookie-consent-change', { detail: value }));
     };
 
     const handleDismiss = () => {
-        setCookie(COOKIE_CONSENT_NAME, 'dismissed', COOKIE_MAX_AGE);
         setIsDismissed(true);
     };
 
-    if (!isMounted || consent !== null || isDismissed) {
+    if (!isMounted || consent !== null || isDismissed || isEU === null) {
         return null;
     }
 
@@ -69,17 +69,10 @@ export function CookieConsent() {
         );
     }
 
-    return (
-        <CookieCard className="e-flex e-flex-row e-items-center e-justify-between e-gap-4 e-p-3">
-            <p className="e-m-0 e-text-sm e-leading-relaxed e-text-white">
-                We use cookies. <PrivacyPolicyLink>Learn more</PrivacyPolicyLink>
-            </p>
-            <CloseButton onClick={handleDismiss} />
-        </CookieCard>
-    );
+    return null;
 }
 
-function PrivacyPolicyLink({ children }: { children: React.ReactNode }) {
+export function PrivacyPolicyLink({ children }: { children: React.ReactNode }) {
     return (
         <a
             href={PRIVACY_POLICY_URL}
@@ -94,17 +87,20 @@ function PrivacyPolicyLink({ children }: { children: React.ReactNode }) {
 
 function CloseButton({ onClick }: { onClick: () => void }) {
     return (
-        <span className="e-cursor-pointer e-text-2xl e-leading-none e-text-white hover:e-opacity-70" onClick={onClick}>
+        <button
+            className="e-cursor-pointer e-border-none e-bg-transparent e-p-0 e-text-2xl e-leading-none e-text-white hover:e-opacity-70"
+            onClick={onClick}
+        >
             &times;
-        </span>
+        </button>
     );
 }
 
-function CookieCard({ children, className }: { children: React.ReactNode; className?: string }) {
+export function CookieCard({ children, className }: { children: React.ReactNode; className?: string }) {
     return (
         <div
             className={cn(
-                'e-fixed e-bottom-[10px] e-left-[10px] e-right-[10px] e-z-[1200] e-rounded-lg e-border e-border-slate-100 e-bg-black e-p-4 [border-style:solid] md:e-right-auto md:e-max-w-[400px]',
+                'e-fixed e-bottom-2.5 e-left-2.5 e-right-2.5 e-z-[1200] e-rounded-lg e-border e-border-slate-100 e-bg-black e-p-4 [border-style:solid] md:e-right-auto md:e-max-w-[400px]',
                 className
             )}
         >

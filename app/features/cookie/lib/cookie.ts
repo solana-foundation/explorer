@@ -11,5 +11,5 @@ export function getCookie(name: string): string | null {
 export function setCookie(name: string, value: string, maxAge: number): void {
     if (typeof document === 'undefined') return;
 
-    document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax`;
+    document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`;
 }

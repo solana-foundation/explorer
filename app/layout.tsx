@@ -3,7 +3,6 @@ import './styles.css';
 
 import { ClusterModal } from '@components/ClusterModal';
 import { ClusterStatusButton } from '@components/ClusterStatusButton';
-import { CookieConsent } from '@components/common/CookieConsent';
 import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';
 import { ClusterProvider } from '@providers/cluster';
@@ -15,6 +14,8 @@ import type { Viewport } from 'next';
 import dynamic from 'next/dynamic';
 import { Rubik } from 'next/font/google';
 import { Metadata } from 'next/types';
+
+import { CookieConsent } from '@/app/features/cookie';
 
 import { botIdProtectedRoutes } from '../middleware';
 

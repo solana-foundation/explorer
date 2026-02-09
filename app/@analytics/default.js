@@ -1,25 +1,19 @@
 'use client';
 
-import { COOKIE_CONSENT_NAME } from '@components/common/CookieConsent';
-import { getCookie } from '@utils/cookie';
 import Script from 'next/script';
-import { useEffect, useState } from 'react';
+
+import { useAnalyticsConsent } from '@/app/features/cookie';
 
 export default function Analytics() {
-    const [consent, setConsent] = useState(null);
+    const { isConsentGiven } = useAnalyticsConsent();
     const safeAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID?.replace("'", "\\'");
     const safeTagId = process.env.NEXT_PUBLIC_GOOGLE_TAG_ID?.replace("'", "\\'");
-
-    useEffect(() => {
-        const storedConsent = getCookie(COOKIE_CONSENT_NAME);
-        setConsent(storedConsent);
-    }, []);
 
     if (!safeAnalyticsId && !safeTagId) {
         return null;
     }
 
-    if (consent === 'denied' || consent === null) {
+    if (!isConsentGiven) {
         return null;
     }
 
