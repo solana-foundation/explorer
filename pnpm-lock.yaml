@@ -83,9 +83,6 @@ importers:
       '@onsol/tldparser':
         specifier: 0.6.5
         version: 0.6.5(@solana/web3.js@1.98.4(bufferutil@4.0.7)(typescript@5.3.3)(utf-8-validate@5.0.10))(bn.js@5.2.1)(borsh@0.7.0)(buffer@6.0.3)(bufferutil@4.0.7)(typescript@5.3.3)(utf-8-validate@5.0.10)
-      '@playwright/test':
-        specifier: ^1.57.0
-        version: 1.57.0
       '@project-serum/serum':
         specifier: 0.13.61
         version: 0.13.61(bufferutil@4.0.7)(typescript@5.3.3)(utf-8-validate@5.0.10)
@@ -339,6 +336,9 @@ importers:
       '@mdx-js/react':
         specifier: 3.1.0
         version: 3.1.0(@types/react@18.3.3)(react@18.3.1)
+      '@playwright/test':
+        specifier: 1.57.0
+        version: 1.57.0
       '@solana/eslint-config-solana':
         specifier: 1.0.1
         version: 1.0.1(@typescript-eslint/eslint-plugin@6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.39.0)(typescript@5.3.3))(eslint@8.39.0)(typescript@5.3.3))(@typescript-eslint/parser@6.21.0(eslint@8.39.0)(typescript@5.3.3))(eslint-plugin-jest@27.2.1(@typescript-eslint/eslint-plugin@6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.39.0)(typescript@5.3.3))(eslint@8.39.0)(typescript@5.3.3))(eslint@8.39.0)(typescript@5.3.3))(eslint-plugin-react-hooks@4.6.0(eslint@8.39.0))(eslint-plugin-simple-import-sort@12.1.1(eslint@8.39.0))(eslint-plugin-sort-keys-fix@1.1.2)(eslint@8.39.0)(typescript@5.3.3)
