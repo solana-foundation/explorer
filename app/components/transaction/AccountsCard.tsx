@@ -13,6 +13,8 @@ import { BigNumber } from 'bignumber.js';
 import React, { useMemo, useState } from 'react';
 import { Code } from 'react-feather';
 
+import { ByteArray, toHex } from '@/app/shared/lib/bytes';
+
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { url } = useCluster();
@@ -44,7 +46,7 @@ export function AccountsCard({ signature }: SignatureProps) {
         const key = pubkey.toBase58();
         const delta = new BigNumber(post).minus(new BigNumber(pre));
         const accountInfo = accounts.get(key);
-        const hexData = accountInfo?.data.toString('hex') ?? null;
+        const hexData = accountInfo ? toHex(accountInfo.data as Uint8Array) : null;
 
         return (
             <tr key={key}>
@@ -188,7 +190,7 @@ function DataRow({
 }: {
     index: number;
     account: { pubkey: PublicKey };
-    data: Buffer | undefined;
+    data: ByteArray | undefined;
     accountSize: string | undefined;
 }) {
     const [isDataVisible, setIsDataVisible] = useState(false);
@@ -217,7 +219,7 @@ function DataRow({
                     {isDataVisible && (
                         <div className="e-items-end e-text-end">
                             {data && data.length > 0 ? (
-                                <HexData raw={data} className="!e-items-baseline" />
+                                <HexData raw={data as Buffer} className="!e-items-baseline" />
                             ) : (
                                 <span className="text-muted">No data</span>
                             )}

@@ -6,6 +6,8 @@ import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import { AccountInfo, useAccountsInfo } from '@utils/use-accounts-info';
 import React, { useMemo } from 'react';
 
+import { toHex } from '@/app/shared/lib/bytes';
+
 import { AddressFromLookupTableWithContext, AddressWithContext } from './AddressWithContext';
 
 export function AccountsCard({ message }: { message: VersionedMessage }) {
@@ -121,8 +123,8 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
                     <TableCardBody>{accountRows}</TableCardBody>
                     {!loading && totalAccountSize > 0 && (
                         <div className="card-footer">
-                            <div className="e-flex e-justify-end e-items-center">
-                                <span className="text-muted e-me-2 e-uppercase e-text-[0.625rem]">
+                            <div className="e-flex e-items-center e-justify-end">
+                                <span className="text-muted e-me-2 e-text-[0.625rem] e-uppercase">
                                     Total Account Size:
                                 </span>
                                 <span className="text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
@@ -182,7 +184,7 @@ function AccountRow({
     signer: boolean;
     readOnly: boolean;
 }) {
-    const hexData = accountInfo?.data.toString('hex') ?? null;
+    const hexData = accountInfo ? toHex(accountInfo.data as Uint8Array) : null;
 
     return (
         <tr>

@@ -1,9 +1,10 @@
 import { Connection, PublicKey } from '@solana/web3.js';
-import { Buffer } from 'buffer';
 import { useEffect, useState } from 'react';
 
+import { ByteArray } from '@/app/shared/lib/bytes';
+
 export interface AccountInfo {
-    data: Buffer;
+    data: ByteArray;
     size: number;
 }
 
@@ -31,7 +32,7 @@ export function useAccountsInfo(pubkeys: PublicKey[], clusterUrl: string) {
                 infos.forEach((info, i) => {
                     if (info) {
                         result.set(pubkeys[i].toBase58(), {
-                            data: info.data instanceof Buffer ? info.data : Buffer.from(info.data),
+                            data: info.data,
                             size: info.data.length,
                         });
                     }
