@@ -8,74 +8,43 @@ import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import { PublicKey } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
+import { AccountInfo, useAccountsInfo } from '@utils/use-accounts-info';
 import { BigNumber } from 'bignumber.js';
-import { Buffer } from 'buffer';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Code } from 'react-feather';
 
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
-    const { url: clusterUrl } = useCluster();
+    const { url } = useCluster();
     const [showRaw, setShowRaw] = useState(false);
     const [expanded, setExpanded] = useState(true);
-    const [accountSizes, setAccountSizes] = useState<Map<string, number>>(new Map());
-    const [accountsData, setAccountsData] = useState<Map<string, Buffer>>(new Map());
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
+    const message = transactionWithMeta?.transaction.message;
+    const meta = transactionWithMeta?.meta;
+
+    const pubkeys = useMemo(() => message?.accountKeys.map(a => a.pubkey) ?? [], [message?.accountKeys]);
+
+    const { accounts, loading } = useAccountsInfo(pubkeys, url);
+
     if (!transactionWithMeta) {
         return null;
     }
-
-    const { meta, transaction } = transactionWithMeta;
-    const { message } = transaction;
 
     if (!meta) {
         return <ErrorCard text="Transaction metadata is missing" />;
     }
 
-    // Fetch account info for all accounts to get their sizes and data
-    useEffect(() => {
-        const fetchAccountInfo = async () => {
-            const { Connection } = await import('@solana/web3.js');
-            const connection = new Connection(clusterUrl);
-            const sizes = new Map<string, number>();
-            const dataMap = new Map<string, Buffer>();
+    const totalAccountSize = Array.from(accounts.values()).reduce((acc, account) => acc + account.size, 0);
 
-            for (const account of message.accountKeys) {
-                const pubkey = account.pubkey;
-                try {
-                    const info = await connection.getAccountInfo(pubkey);
-                    if (info) {
-                        sizes.set(pubkey.toBase58(), info.data.length);
-                        dataMap.set(
-                            pubkey.toBase58(),
-                            info.data instanceof Buffer ? info.data : Buffer.from(info.data)
-                        );
-                    }
-                } catch (err) {
-                    console.error('Failed to fetch account info for', pubkey.toBase58(), err);
-                }
-            }
-
-            setAccountSizes(sizes);
-            setAccountsData(dataMap);
-        };
-
-        fetchAccountInfo();
-    }, [message.accountKeys, clusterUrl]);
-
-    const totalAccountSize = Array.from(accountSizes.values()).reduce((sum, size) => sum + size, 0);
-    const totalAccountSizeFormatted = `${totalAccountSize.toLocaleString('en-US')} bytes`;
-
-    const accountRows = message.accountKeys.map((account, index) => {
+    const accountRows = message!.accountKeys.map((account, index) => {
         const pre = meta.preBalances[index];
         const post = meta.postBalances[index];
         const pubkey = account.pubkey;
-        const key = account.pubkey.toBase58();
+        const key = pubkey.toBase58();
         const delta = new BigNumber(post).minus(new BigNumber(pre));
-        const accountSize = accountSizes.get(key);
-        const accountData = accountsData.get(key);
-        const hexData = accountData?.toString('hex') ?? null;
+        const accountInfo = accounts.get(key);
+        const hexData = accountInfo?.data.toString('hex') ?? null;
 
         return (
             <tr key={key}>
@@ -90,19 +59,21 @@ export function AccountsCard({ signature }: SignatureProps) {
                     <SolBalance lamports={post} />
                 </td>
                 <td>
-                    {accountSize !== undefined ? (
+                    {loading ? (
+                        <span className="text-muted">Loading...</span>
+                    ) : accountInfo ? (
                         <Copyable text={hexData}>
-                            <span>{accountSize.toLocaleString('en-US')}</span>
+                            <span>{accountInfo.size.toLocaleString('en-US')}</span>
                         </Copyable>
                     ) : (
-                        <span className="text-muted">Loading...</span>
+                        <span className="text-muted">-</span>
                     )}
                 </td>
                 <td>
                     {index === 0 && <span className="badge bg-info-soft me-1">Fee Payer</span>}
                     {account.signer && <span className="badge bg-info-soft me-1">Signer</span>}
                     {account.writable && <span className="badge bg-danger-soft me-1">Writable</span>}
-                    {message.instructions.find(ix => ix.programId.equals(pubkey)) && (
+                    {message!.instructions.find(ix => ix.programId.equals(pubkey)) && (
                         <span className="badge bg-warning-soft me-1">Program</span>
                     )}
                     {account.source === 'lookupTable' && (
@@ -115,8 +86,8 @@ export function AccountsCard({ signature }: SignatureProps) {
 
     return (
         <div className="card">
-            <div className="card-header">
-                <h3 className="card-header-title">{`Account Input(s) (${message.accountKeys.length}) - Total Account Size: ${totalAccountSizeFormatted}`}</h3>
+            <div className={`card-header ${!expanded ? 'border-0' : ''}`}>
+                <h3 className="card-header-title">{`Account Input(s) (${message!.accountKeys.length})`}</h3>
                 <button
                     className={`btn btn-sm d-flex align-items-center ${
                         showRaw ? 'btn-black active' : 'btn-white'
@@ -135,7 +106,7 @@ export function AccountsCard({ signature }: SignatureProps) {
             {expanded &&
                 (showRaw ? (
                     <div className="card-body">
-                        <RawAccountsView accountKeys={message.accountKeys} accountSizes={accountSizes} />
+                        <RawAccountsView accountKeys={message!.accountKeys} accounts={accounts} loading={loading} />
                     </div>
                 ) : (
                     <div className="table-responsive mb-0">
@@ -155,7 +126,9 @@ export function AccountsCard({ signature }: SignatureProps) {
                                 <tr>
                                     <td colSpan={3} />
                                     <td>
-                                        <p className="text-muted e-m-0 e-uppercase">Total Account Size:</p>
+                                        <p className="text-muted e-m-0 e-text-[0.625rem] e-uppercase">
+                                            Total Account Size:
+                                        </p>
                                     </td>
                                     <td>
                                         <span className="text-white">{totalAccountSize.toLocaleString('en-US')}</span>
@@ -170,40 +143,15 @@ export function AccountsCard({ signature }: SignatureProps) {
     );
 }
 
-function RawAccountsView({ accountKeys, accountSizes }: { accountKeys: { pubkey: PublicKey }[], accountSizes: Map<string, number> }) {
-    const { url: clusterUrl } = useCluster();
-    const [accountsData, setAccountsData] = useState<Map<string, Buffer>>(new Map());
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchAccountsData = async () => {
-            setLoading(true);
-            const { Connection } = await import('@solana/web3.js');
-            const connection = new Connection(clusterUrl);
-            const dataMap = new Map<string, Buffer>();
-
-            for (const account of accountKeys) {
-                const pubkey = account.pubkey;
-                try {
-                    const info = await connection.getAccountInfo(pubkey);
-                    if (info && info.data) {
-                        dataMap.set(
-                            pubkey.toBase58(),
-                            info.data instanceof Buffer ? info.data : Buffer.from(info.data)
-                        );
-                    }
-                } catch (err) {
-                    console.error('Failed to fetch account data for', pubkey.toBase58(), err);
-                }
-            }
-
-            setAccountsData(dataMap);
-            setLoading(false);
-        };
-
-        fetchAccountsData();
-    }, [accountKeys, clusterUrl]);
-
+function RawAccountsView({
+    accountKeys,
+    accounts,
+    loading,
+}: {
+    accountKeys: { pubkey: PublicKey }[];
+    accounts: Map<string, AccountInfo>;
+    loading: boolean;
+}) {
     if (loading) {
         return <div className="text-center py-4">Loading account data...</div>;
     }
@@ -214,10 +162,17 @@ function RawAccountsView({ accountKeys, accountSizes }: { accountKeys: { pubkey:
                 <tbody className="list">
                     {accountKeys.map((account, index) => {
                         const key = account.pubkey.toBase58();
-                        const data = accountsData.get(key);
-                        const accountSize = accountSizes.get(key);
+                        const info = accounts.get(key);
 
-                        return <DataRow key={key} index={index} account={account} data={data} accountSize={accountSize?.toLocaleString('en-US')} />;
+                        return (
+                            <DataRow
+                                key={key}
+                                index={index}
+                                account={account}
+                                data={info?.data}
+                                accountSize={info?.size.toLocaleString('en-US')}
+                            />
+                        );
                     })}
                 </tbody>
             </table>
@@ -245,9 +200,9 @@ function DataRow({
                     <div className="e-flex e-items-center e-justify-between">
                         <div className="e-flex e-items-start">
                             <span className="badge bg-info-soft e-me-2">#{index + 1}</span>
-                            <div className='e-flex e-flex-col'>
+                            <div className="e-flex e-flex-col">
                                 <Address pubkey={account.pubkey} link fetchTokenLabelInfo />
-                                <span className='text-muted'>{accountSize} bytes</span>
+                                <span className="text-muted">{accountSize} bytes</span>
                             </div>
                         </div>
 
@@ -258,7 +213,7 @@ function DataRow({
                             {isDataVisible ? 'Hide Data' : 'See/Copy Data'}
                         </button>
                     </div>
-                
+
                     {isDataVisible && (
                         <div className="e-items-end e-text-end">
                             {data && data.length > 0 ? (
