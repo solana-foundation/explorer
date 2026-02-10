@@ -106,9 +106,6 @@ async function getSignatureStatus(signature: string, cluster: Cluster): Promise<
         });
         return { right: status?.value !== null };
     } catch (error) {
-        /** TODO: that is to debug the receipts problems. should be deleted before the release */
-        Logger.info(cluster);
-        Logger.info(rpcUrl);
         Logger.error(error);
         return { left: error instanceof Error ? error : new Error(String(error)) };
     }
