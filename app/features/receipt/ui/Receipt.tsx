@@ -119,7 +119,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     return (
         <SignatureContext.Provider value={signature}>
             <div className="container e-flex e-min-h-[90vh] e-flex-col e-items-center e-justify-center e-gap-6 e-px-5 e-py-10">
-                <BluredCircle />
+                <BlurredCircle />
                 <BaseReceipt
                     data={{
                         ...receipt,
@@ -147,7 +147,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     );
 }
 
-export function BluredCircle() {
+export function BlurredCircle() {
     return (
         <div className="e-absolute e-left-[50%] e-top-[55%] e-z-[-1] e-h-2/5 e-w-1/3 e-translate-x-[-50%] e-translate-y-[-50%] e-rounded-full e-bg-emerald-700 e-blur-[150px]" />
     );

@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Info } from 'react-feather';
 
 import type { FormattedExtendedReceipt } from '../types';
-import { BluredCircle } from './Receipt';
+import { BlurredCircle } from './Receipt';
 
 interface BaseReceiptProps {
     data: FormattedExtendedReceipt;
@@ -239,7 +239,7 @@ export function NoReceipt({
 
     return (
         <div className="container e-flex e-min-h-[90vh] e-flex-col e-items-center e-justify-center e-gap-6 e-px-5 e-py-10">
-            <BluredCircle />
+            <BlurredCircle />
 
             <div className="e-w-full e-max-w-lg">
                 <div className="e-min-h-96 e-bg-outer-space-900">
