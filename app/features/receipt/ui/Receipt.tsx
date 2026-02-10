@@ -13,10 +13,11 @@ import { TransactionSignature } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import useSWR from 'swr';
 
 import { getProxiedUri } from '@/app/features/metadata';
+import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app/tx/[signature]/page-client';
 
 import { usePrimaryDomain } from '../lib/use-primary-domain';
@@ -66,11 +67,30 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
     const isDetailsLoading =
         details?.status === FetchStatus.Fetching || (details === undefined && status?.status === FetchStatus.Fetched);
 
+    const showNoReceipt =
+        !isStatusLoading && !isStatusFailed && (hasNoTxInfo || (!isDetailsLoading && !isReceiptLoading && !receipt));
+
+    useEffect(() => {
+        if (showNoReceipt) {
+            receiptAnalytics.trackNoReceipt(signature);
+        }
+    }, [showNoReceipt, signature]);
+
+    const handleViewTxClick = useCallback(() => {
+        receiptAnalytics.trackViewTxClicked(signature);
+    }, [signature]);
+
     if (isStatusLoading) return <LoadingCard message="Loading transaction details" />;
     if (isStatusFailed) return <ErrorCard retry={() => fetchStatus(signature)} text="Fetch Failed" />;
-    if (hasNoTxInfo) return <NoReceipt transactionPath={transactionPath} timestamp={tx?.blockTime} />;
+    if (hasNoTxInfo)
+        return (
+            <NoReceipt transactionPath={transactionPath} timestamp={tx?.blockTime} onViewTxClick={handleViewTxClick} />
+        );
     if (isDetailsLoading || isReceiptLoading) return <LoadingCard message="Loading receipt" />;
-    if (!receipt) return <NoReceipt transactionPath={transactionPath} timestamp={tx?.blockTime} />;
+    if (!receipt)
+        return (
+            <NoReceipt transactionPath={transactionPath} timestamp={tx?.blockTime} onViewTxClick={handleViewTxClick} />
+        );
 
     return <ReceiptContent receipt={receipt} signature={signature} status={status} transactionPath={transactionPath} />;
 }
@@ -83,6 +103,12 @@ interface ReceiptContentProps {
 }
 
 function ReceiptContent({ receipt, signature, status, transactionPath }: ReceiptContentProps) {
+    const receiptType = 'mint' in receipt ? 'token' : 'sol';
+
+    useEffect(() => {
+        receiptAnalytics.trackViewed(signature, receiptType);
+    }, [signature, receiptType]);
+
     const senderDomain = usePrimaryDomain(receipt.sender.address);
     const receiverDomain = usePrimaryDomain(receipt.receiver.address);
     const senderLink = useExplorerLink(`/address/${receipt.sender.address}`);
@@ -107,7 +133,12 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                     }}
                 />
                 <Button size="sm" className="e-me-2" asChild>
-                    <Link href={transactionPath} target="_blank" rel="noopener noreferrer">
+                    <Link
+                        href={transactionPath}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => receiptAnalytics.trackViewTxClicked(signature)}
+                    >
                         View transaction in Explorer
                     </Link>
                 </Button>

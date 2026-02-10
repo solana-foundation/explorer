@@ -24,3 +24,22 @@ tab_opened → [wallet_connected ↔ sections_expanded] → transaction_submitte
 All events are prefixed with `iidl_anchor_`.
 
 > GA4 event names must be <= 40 characters. This is enforced at compile time via the `GA4EventName` type in ../app/shared/lib/analytics/types.d.ts
+
+## Receipt Feature Funnel
+
+The Receipt feature tracks user engagement through the following funnel:
+
+```
+button_clicked → receipt_viewed / no_receipt → view_tx_clicked
+```
+
+### Events
+
+| Event | Parameters |
+|-------|------------|
+| `button_clicked` | `signature` |
+| `viewed` | `signature`, `receipt_type` (sol/token) |
+| `no_receipt` | `signature` |
+| `view_tx_clicked` | `signature` |
+
+All events are prefixed with `rcpt_`.

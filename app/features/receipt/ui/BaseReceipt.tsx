@@ -226,7 +226,15 @@ export function Zigzag() {
     return <div className="zigzag e-bg-outer-space-900 e-pb-6" />;
 }
 
-export function NoReceipt({ transactionPath, timestamp }: { transactionPath: string; timestamp?: number | null }) {
+export function NoReceipt({
+    transactionPath,
+    timestamp,
+    onViewTxClick,
+}: {
+    transactionPath: string;
+    timestamp?: number | null;
+    onViewTxClick?: () => void;
+}) {
     const date = timestamp ? { timestamp: timestamp * 1000, utc: new Date(timestamp * 1000).toISOString() } : undefined;
 
     return (
@@ -245,7 +253,7 @@ export function NoReceipt({ transactionPath, timestamp }: { transactionPath: str
             </div>
 
             <Button size="sm" className="e-me-2" asChild>
-                <Link href={transactionPath} target="_blank" rel="noopener noreferrer">
+                <Link href={transactionPath} target="_blank" rel="noopener noreferrer" onClick={onViewTxClick}>
                     View transaction in Explorer
                 </Link>
             </Button>
