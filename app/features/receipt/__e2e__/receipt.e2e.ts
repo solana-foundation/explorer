@@ -4,11 +4,13 @@ const VALID_TX = '5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR
 const INVALID_TX = '34qZEWsTW85uZSd4N53DptMaQ5HTx2cczgwWatW6CPhLbaetEX67jELmrCyz2M2ydkQin3NR9sMbgVxeqDwT8Sqp';
 const FEATURE_ENABLED = process.env.NEXT_PUBLIC_RECEIPT_ENABLED === 'true';
 
-async function hasElement(page: Page, selector: string): Promise<boolean> {
-    return page
-        .locator(selector)
-        .isVisible()
-        .catch(() => false);
+async function hasElement(page: Page, selector: string, timeout = 5000): Promise<boolean> {
+    try {
+        await page.locator(selector).waitFor({ state: 'visible', timeout });
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 async function waitForPage(page: Page, tx: string, view?: 'receipt') {
@@ -19,6 +21,7 @@ async function waitForPage(page: Page, tx: string, view?: 'receipt') {
 test.describe('receipt feature validation', () => {
     test('respects NEXT_PUBLIC_RECEIPT_ENABLED flag', async ({ page }) => {
         await waitForPage(page, VALID_TX, 'receipt');
+        await page.locator('text=Loading').waitFor({ state: 'hidden', timeout: 30000 }).catch(() => {});
 
         const hasReceipt = await hasElement(page, 'h3:has-text("Solana Receipt")');
 
@@ -83,6 +86,7 @@ test.describe('when feature disabled', () => {
 
     test('ignores ?view=receipt parameter', async ({ page }) => {
         await waitForPage(page, VALID_TX, 'receipt');
+        await page.locator('text=Loading').waitFor({ state: 'hidden', timeout: 30000 }).catch(() => {});
 
         expect(await hasElement(page, 'h3:has-text("Solana Receipt")')).toBe(false);
         expect(await hasElement(page, 'h2:has-text("Transaction")')).toBe(true);
