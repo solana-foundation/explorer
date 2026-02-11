@@ -212,7 +212,7 @@ function DataRow({
                             className={`btn btn-sm d-flex ${isDataVisible ? 'btn-black active' : 'btn-white'}`}
                             onClick={() => setIsDataVisible(!isDataVisible)}
                         >
-                            {isDataVisible ? 'Hide Data' : 'See/Copy Data'}
+                            {isDataVisible ? 'Hide Data' : 'Show Data'}
                         </button>
                     </div>
 

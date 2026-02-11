@@ -123,7 +123,7 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
                     <TableCardBody>{accountRows}</TableCardBody>
                     {!loading && totalAccountSize > 0 && (
                         <div className="card-footer">
-                            <div className="e-flex e-items-center e-justify-end">
+                            <div className="e-flex e-items-baseline e-justify-end">
                                 <span className="text-muted e-me-2 e-text-[0.625rem] e-uppercase">
                                     Total Account Size:
                                 </span>
