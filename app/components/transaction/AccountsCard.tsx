@@ -204,7 +204,7 @@ function DataRow({
                             <span className="badge bg-info-soft e-me-2">#{index + 1}</span>
                             <div className="e-flex e-flex-col">
                                 <Address pubkey={account.pubkey} link fetchTokenLabelInfo />
-                                <span className="text-muted">{accountSize} bytes</span>
+                                <span className="text-muted">{accountSize ? `${accountSize} bytes` : '-'}</span>
                             </div>
                         </div>
 

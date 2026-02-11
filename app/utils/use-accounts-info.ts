@@ -14,6 +14,7 @@ export function useAccountsInfo(pubkeys: PublicKey[], clusterUrl: string) {
 
     useEffect(() => {
         if (pubkeys.length === 0) {
+            setAccounts(new Map());
             setLoading(false);
             return;
         }
