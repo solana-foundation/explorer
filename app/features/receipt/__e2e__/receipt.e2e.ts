@@ -18,15 +18,19 @@ async function hasElement(page: Page, selector: string, timeout = 10000): Promis
 async function waitForPage(page: Page, tx: string, view?: 'receipt') {
     const url = view ? `/tx/${tx}?view=${view}` : `/tx/${tx}`;
 
-    const responsePromise = page.waitForResponse(
-        response => response.url().includes('api.') || response.url().includes('rpc'),
-        { timeout: 60000 }
-    ).catch(() => null);
+    const responsePromise = page
+        .waitForResponse(response => response.url().includes('api.') || response.url().includes('rpc'), {
+            timeout: 60000,
+        })
+        .catch(() => null);
 
     await page.goto(url, { timeout: 60000, waitUntil: 'domcontentloaded' });
     await responsePromise;
 
-    await page.locator('text=Loading').waitFor({ state: 'hidden', timeout: 30000 }).catch(() => {});
+    await page
+        .locator('text=Loading')
+        .waitFor({ state: 'hidden', timeout: 30000 })
+        .catch(() => {});
 }
 
 test.describe('receipt feature validation', () => {
