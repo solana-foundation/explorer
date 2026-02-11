@@ -7,32 +7,48 @@ import { cn } from '@/app/components/shared/utils';
 import { getCookie, setCookie } from '../lib/cookie';
 
 export const COOKIE_CONSENT_NAME = 'solana_cookie_consent';
+export const COOKIE_CONSENT_CHANGE_EVENT = 'cookie-consent-change';
 const COOKIE_MAX_AGE = 15778476; // 6 months in seconds
 const PRIVACY_POLICY_URL = 'https://solana.com/privacy-policy#collection-of-information';
 
-type TConsentValue = 'granted' | 'denied';
+export enum EConsentStatus {
+    Granted = 'granted',
+    Denied = 'denied',
+}
 
 export function CookieConsent() {
-    const [consent, setConsent] = useState<TConsentValue | null>(null);
+    const [consent, setConsent] = useState<EConsentStatus | null>(null);
     const [isMounted, setIsMounted] = useState(false);
     const [isDismissed, setIsDismissed] = useState(false);
     const [isEU, setIsEU] = useState<boolean | null>(null);
 
+    const autoGrantConsent = () => {
+        setCookie(COOKIE_CONSENT_NAME, EConsentStatus.Granted, COOKIE_MAX_AGE);
+        setConsent(EConsentStatus.Granted);
+        window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGE_EVENT, { detail: EConsentStatus.Granted }));
+    };
+
     useEffect(() => {
         setIsMounted(true);
-        const storedConsent = getCookie(COOKIE_CONSENT_NAME) as TConsentValue | null;
+        const storedConsent = getCookie(COOKIE_CONSENT_NAME) as EConsentStatus | null;
         setConsent(storedConsent);
 
         fetch('/api/geo-location')
             .then(res => res.json())
-            .then(data => setIsEU(data.isEU))
-            .catch(() => setIsEU(false));
+            .then(data => {
+                setIsEU(data.isEU);
+                if (!data.isEU && !storedConsent) autoGrantConsent();
+            })
+            .catch(() => {
+                setIsEU(false);
+                if (!storedConsent) autoGrantConsent();
+            });
     }, []);
 
-    const handleConsent = (value: TConsentValue) => {
+    const handleConsent = (value: EConsentStatus) => {
         setCookie(COOKIE_CONSENT_NAME, value, COOKIE_MAX_AGE);
         setConsent(value);
-        window.dispatchEvent(new CustomEvent('cookie-consent-change', { detail: value }));
+        window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGE_EVENT, { detail: value }));
     };
 
     const handleDismiss = () => {
@@ -57,11 +73,14 @@ export function CookieConsent() {
                 <div className="e-flex e-flex-row e-items-center e-justify-end e-gap-4">
                     <button
                         className="e-cursor-pointer e-border-none e-bg-transparent e-p-0 e-text-sm e-font-medium e-tracking-wider e-text-white e-transition-opacity hover:e-opacity-70"
-                        onClick={() => handleConsent('denied')}
+                        onClick={() => handleConsent(EConsentStatus.Denied)}
                     >
                         OPT-OUT
                     </button>
-                    <button className="btn btn-white e-bg-transparent" onClick={() => handleConsent('granted')}>
+                    <button
+                        className="btn btn-white e-bg-transparent"
+                        onClick={() => handleConsent(EConsentStatus.Granted)}
+                    >
                         ACCEPT
                     </button>
                 </div>

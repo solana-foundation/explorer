@@ -1,6 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { COOKIE_CONSENT_CHANGE_EVENT, EConsentStatus } from '../../ui/CookieConsent';
 import { useAnalyticsConsent } from '../use-analytics-consent';
 
 vi.mock('../../lib/cookie', () => ({
@@ -21,13 +22,13 @@ describe('useAnalyticsConsent', () => {
     });
 
     it('returns isConsentGiven=true when granted', () => {
-        vi.mocked(getCookie).mockReturnValue('granted');
+        vi.mocked(getCookie).mockReturnValue(EConsentStatus.Granted);
         const { result } = renderHook(() => useAnalyticsConsent());
         expect(result.current.isConsentGiven).toBe(true);
     });
 
     it('returns isConsentGiven=false when denied', () => {
-        vi.mocked(getCookie).mockReturnValue('denied');
+        vi.mocked(getCookie).mockReturnValue(EConsentStatus.Denied);
         const { result } = renderHook(() => useAnalyticsConsent());
         expect(result.current.isConsentGiven).toBe(false);
     });
@@ -37,7 +38,7 @@ describe('useAnalyticsConsent', () => {
         expect(result.current.isConsentGiven).toBe(false);
 
         act(() => {
-            window.dispatchEvent(new CustomEvent('cookie-consent-change', { detail: 'granted' }));
+            window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGE_EVENT, { detail: EConsentStatus.Granted }));
         });
 
         expect(result.current.isConsentGiven).toBe(true);

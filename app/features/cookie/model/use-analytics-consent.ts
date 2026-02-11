@@ -3,25 +3,23 @@
 import { useEffect, useState } from 'react';
 
 import { getCookie } from '../lib/cookie';
-import { COOKIE_CONSENT_NAME } from '../ui/CookieConsent';
-
-type ConsentState = string | null;
+import { COOKIE_CONSENT_CHANGE_EVENT, COOKIE_CONSENT_NAME, EConsentStatus } from '../ui/CookieConsent';
 
 export function useAnalyticsConsent() {
-    const [consent, setConsent] = useState<ConsentState>(null);
+    const [consent, setConsent] = useState<EConsentStatus | null>(null);
 
     useEffect(() => {
-        const storedConsent = getCookie(COOKIE_CONSENT_NAME);
+        const storedConsent = getCookie(COOKIE_CONSENT_NAME) as EConsentStatus | null;
         setConsent(storedConsent);
 
-        const handleConsentChange = (event: CustomEvent<string>) => {
+        const handleConsentChange = (event: CustomEvent<EConsentStatus>) => {
             setConsent(event.detail);
         };
-        window.addEventListener('cookie-consent-change', handleConsentChange as EventListener);
-        return () => window.removeEventListener('cookie-consent-change', handleConsentChange as EventListener);
+        window.addEventListener(COOKIE_CONSENT_CHANGE_EVENT, handleConsentChange as EventListener);
+        return () => window.removeEventListener(COOKIE_CONSENT_CHANGE_EVENT, handleConsentChange as EventListener);
     }, []);
 
-    const isConsentGiven = consent !== null && consent !== 'denied';
+    const isConsentGiven = consent !== null && consent !== EConsentStatus.Denied;
 
     return { consent, isConsentGiven };
 }
