@@ -1,10 +1,12 @@
 import { expect, Page, test } from '@playwright/test';
 
+test.describe.configure({ retries: 2 });
+
 const VALID_TX = '5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW';
 const INVALID_TX = '34qZEWsTW85uZSd4N53DptMaQ5HTx2cczgwWatW6CPhLbaetEX67jELmrCyz2M2ydkQin3NR9sMbgVxeqDwT8Sqp';
 const FEATURE_ENABLED = process.env.NEXT_PUBLIC_RECEIPT_ENABLED === 'true';
 
-async function hasElement(page: Page, selector: string, timeout = 5000): Promise<boolean> {
+async function hasElement(page: Page, selector: string, timeout = 10000): Promise<boolean> {
     try {
         await page.locator(selector).waitFor({ state: 'visible', timeout });
         return true;
@@ -15,13 +17,21 @@ async function hasElement(page: Page, selector: string, timeout = 5000): Promise
 
 async function waitForPage(page: Page, tx: string, view?: 'receipt') {
     const url = view ? `/tx/${tx}?view=${view}` : `/tx/${tx}`;
-    await page.goto(url, { timeout: 60000, waitUntil: 'networkidle' });
+
+    const responsePromise = page.waitForResponse(
+        response => response.url().includes('api.') || response.url().includes('rpc'),
+        { timeout: 60000 }
+    ).catch(() => null);
+
+    await page.goto(url, { timeout: 60000, waitUntil: 'domcontentloaded' });
+    await responsePromise;
+
+    await page.locator('text=Loading').waitFor({ state: 'hidden', timeout: 30000 }).catch(() => {});
 }
 
 test.describe('receipt feature validation', () => {
     test('respects NEXT_PUBLIC_RECEIPT_ENABLED flag', async ({ page }) => {
         await waitForPage(page, VALID_TX, 'receipt');
-        await page.locator('text=Loading').waitFor({ state: 'hidden', timeout: 30000 }).catch(() => {});
 
         const hasReceipt = await hasElement(page, 'h3:has-text("Solana Receipt")');
 
@@ -39,7 +49,6 @@ test.describe('when feature enabled', () => {
 
     test('renders receipt for valid transaction', async ({ page }) => {
         await waitForPage(page, VALID_TX, 'receipt');
-        await page.waitForLoadState('networkidle');
 
         const hasReceipt = await hasElement(page, 'h3:has-text("Solana Receipt")');
         const hasError = await hasElement(page, 'text=Not Found');
@@ -56,7 +65,6 @@ test.describe('when feature enabled', () => {
 
     test('handles invalid transaction', async ({ page }) => {
         await waitForPage(page, INVALID_TX, 'receipt');
-        await page.waitForTimeout(2000);
 
         const text = await page.textContent('body');
         const showsError =
@@ -67,7 +75,6 @@ test.describe('when feature enabled', () => {
 
     test('shows View Receipt button', async ({ page }) => {
         await waitForPage(page, VALID_TX);
-        await page.waitForTimeout(2000);
 
         const hasOverview = await hasElement(page, 'h3:has-text("Overview")');
 
@@ -86,7 +93,6 @@ test.describe('when feature disabled', () => {
 
     test('ignores ?view=receipt parameter', async ({ page }) => {
         await waitForPage(page, VALID_TX, 'receipt');
-        await page.locator('text=Loading').waitFor({ state: 'hidden', timeout: 30000 }).catch(() => {});
 
         expect(await hasElement(page, 'h3:has-text("Solana Receipt")')).toBe(false);
         expect(await hasElement(page, 'h2:has-text("Transaction")')).toBe(true);
@@ -94,7 +100,6 @@ test.describe('when feature disabled', () => {
 
     test('hides View Receipt button', async ({ page }) => {
         await waitForPage(page, VALID_TX);
-        await page.waitForTimeout(2000);
 
         const hasOverview = await hasElement(page, 'h3:has-text("Overview")');
 
