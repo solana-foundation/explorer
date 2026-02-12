@@ -1,7 +1,5 @@
 'use client';
 
-import { Address } from '@components/common/Address';
-import { BalanceDelta } from '@components/common/BalanceDelta';
 import { DownloadableDropdown } from '@components/common/Downloadable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { InfoTooltip } from '@components/common/InfoTooltip';
@@ -34,13 +32,13 @@ import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
 import useTabVisibility from '@utils/use-tab-visibility';
-import { BigNumber } from 'bignumber.js';
 import bs58 from 'bs58';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
 import { RefreshCw, Settings } from 'react-feather';
 
+import { AccountsCard } from '@/app/components/transaction/AccountsCard';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
@@ -436,77 +434,5 @@ function DetailsSection({ signature }: SignatureProps) {
             <InstructionsSection signature={signature} />
             <ProgramLogSection signature={signature} />
         </>
-    );
-}
-
-function AccountsCard({ signature }: SignatureProps) {
-    const details = useTransactionDetails(signature);
-
-    const transactionWithMeta = details?.data?.transactionWithMeta;
-    if (!transactionWithMeta) {
-        return null;
-    }
-
-    const { meta, transaction } = transactionWithMeta;
-    const { message } = transaction;
-
-    if (!meta) {
-        return <ErrorCard text="Transaction metadata is missing" />;
-    }
-
-    const accountRows = message.accountKeys.map((account, index) => {
-        const pre = meta.preBalances[index];
-        const post = meta.postBalances[index];
-        const pubkey = account.pubkey;
-        const key = account.pubkey.toBase58();
-        const delta = new BigNumber(post).minus(new BigNumber(pre));
-
-        return (
-            <tr key={key}>
-                <td>{index + 1}</td>
-                <td>
-                    <Address pubkey={pubkey} link fetchTokenLabelInfo />
-                </td>
-                <td>
-                    <BalanceDelta delta={delta} isSol />
-                </td>
-                <td>
-                    <SolBalance lamports={post} />
-                </td>
-                <td>
-                    {index === 0 && <span className="badge bg-info-soft me-1">Fee Payer</span>}
-                    {account.signer && <span className="badge bg-info-soft me-1">Signer</span>}
-                    {account.writable && <span className="badge bg-danger-soft me-1">Writable</span>}
-                    {message.instructions.find(ix => ix.programId.equals(pubkey)) && (
-                        <span className="badge bg-warning-soft me-1">Program</span>
-                    )}
-                    {account.source === 'lookupTable' && (
-                        <span className="badge bg-gray-soft me-1">Address Table Lookup</span>
-                    )}
-                </td>
-            </tr>
-        );
-    });
-
-    return (
-        <div className="card">
-            <div className="card-header">
-                <h3 className="card-header-title">Account Input(s)</h3>
-            </div>
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">#</th>
-                            <th className="text-muted">Address</th>
-                            <th className="text-muted">Change (SOL)</th>
-                            <th className="text-muted">Post Balance (SOL)</th>
-                            <th className="text-muted">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">{accountRows}</tbody>
-                </table>
-            </div>
-        </div>
     );
 }
