@@ -21,11 +21,11 @@ describe('CookieConsent', () => {
         );
     });
 
-    it('does not render when consent exists', async () => {
+    it('does not render when consent exists and skips geo-location fetch', async () => {
         vi.mocked(getCookie).mockReturnValue(EConsentStatus.Granted);
         render(<CookieConsent />);
-        await waitFor(() => expect(fetch).toHaveBeenCalled());
-        expect(screen.queryByText('ACCEPT')).toBeNull();
+        await waitFor(() => expect(screen.queryByText('ACCEPT')).toBeNull());
+        expect(fetch).not.toHaveBeenCalled();
     });
 
     it('does not render for non-EU users and auto-grants consent', async () => {
@@ -52,14 +52,11 @@ describe('CookieConsent', () => {
         expect(screen.queryByText('ACCEPT')).toBeNull();
     });
 
-    it('does not overwrite existing consent for non-EU users', async () => {
+    it('does not overwrite existing consent and skips geo-location fetch', async () => {
         vi.mocked(getCookie).mockReturnValue(EConsentStatus.Denied);
-        vi.stubGlobal(
-            'fetch',
-            vi.fn(() => Promise.resolve({ json: () => Promise.resolve({ isEU: false }) }))
-        );
         render(<CookieConsent />);
-        await waitFor(() => expect(fetch).toHaveBeenCalled());
+        await waitFor(() => expect(screen.queryByText('ACCEPT')).toBeNull());
+        expect(fetch).not.toHaveBeenCalled();
         expect(setCookie).not.toHaveBeenCalled();
     });
 

@@ -1,1 +1,1 @@
-export { getIsEU, isEUCountry } from './lib/geo-location';
+export { isEUCountry } from './lib/geo-location';

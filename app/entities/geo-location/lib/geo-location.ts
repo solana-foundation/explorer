@@ -1,5 +1,3 @@
-import { headers } from 'next/headers';
-
 const EU_COUNTRIES = [
     'AT',
     'BE',
@@ -33,14 +31,4 @@ const EU_COUNTRIES = [
 export function isEUCountry(countryCode: string | undefined): boolean {
     if (!countryCode) return false;
     return EU_COUNTRIES.includes(countryCode.toUpperCase());
-}
-
-export function getIsEU(): boolean {
-    try {
-        const headersList = headers();
-        const country = headersList.get('x-vercel-ip-country');
-        return isEUCountry(country || undefined);
-    } catch {
-        return false;
-    }
 }

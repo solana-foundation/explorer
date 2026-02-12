@@ -7,6 +7,7 @@ import { cn } from '@/app/components/shared/utils';
 import { getCookie, setCookie } from '../lib/cookie';
 
 export const COOKIE_CONSENT_NAME = 'solana_cookie_consent';
+export const COOKIE_COUNTRY_NAME = 'solana_country';
 export const COOKIE_CONSENT_CHANGE_EVENT = 'cookie-consent-change';
 const COOKIE_MAX_AGE = 15778476; // 6 months in seconds
 const PRIVACY_POLICY_URL = 'https://solana.com/privacy-policy#collection-of-information';
@@ -32,15 +33,20 @@ export function CookieConsent() {
         const storedConsent = getCookie(COOKIE_CONSENT_NAME) as EConsentStatus | null;
         setConsent(storedConsent);
 
+        if (storedConsent) return;
+
         fetch('/api/geo-location')
             .then(res => res.json())
             .then(data => {
+                if (data.country) {
+                    setCookie(COOKIE_COUNTRY_NAME, data.country, COOKIE_MAX_AGE);
+                }
                 setIsEU(data.isEU);
-                if (!data.isEU && !storedConsent) autoGrantConsent();
+                if (!data.isEU) autoGrantConsent();
             })
             .catch(() => {
                 setIsEU(false);
-                if (!storedConsent) autoGrantConsent();
+                autoGrantConsent();
             });
     }, []);
 
