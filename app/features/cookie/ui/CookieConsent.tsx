@@ -19,7 +19,6 @@ export enum EConsentStatus {
 export function CookieConsent() {
     const [consent, setConsent] = useState<EConsentStatus | null>(null);
     const [isMounted, setIsMounted] = useState(false);
-    const [isDismissed, setIsDismissed] = useState(false);
     const [isEU, setIsEU] = useState<boolean | null>(null);
 
     const autoGrantConsent = () => {
@@ -51,24 +50,17 @@ export function CookieConsent() {
         window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGE_EVENT, { detail: value }));
     };
 
-    const handleDismiss = () => {
-        setIsDismissed(true);
-    };
-
-    if (!isMounted || consent !== null || isDismissed || isEU === null) {
+    if (!isMounted || consent !== null || isEU === null) {
         return null;
     }
 
     if (isEU) {
         return (
             <CookieCard>
-                <div className="e-flex e-items-start e-justify-between">
-                    <p className="e-m-0 e-flex-1 e-text-base e-leading-relaxed e-text-white">
-                        This website uses cookies to offer you a better browsing experience. Find out more on{' '}
-                        <PrivacyPolicyLink>how we use cookies</PrivacyPolicyLink>.
-                    </p>
-                    <CloseButton onClick={handleDismiss} />
-                </div>
+                <p className="e-m-0 e-text-base e-leading-relaxed e-text-white">
+                    This website uses cookies to offer you a better browsing experience. Find out more on{' '}
+                    <PrivacyPolicyLink>how we use cookies</PrivacyPolicyLink>.
+                </p>
 
                 <div className="e-flex e-flex-row e-items-center e-justify-end e-gap-4">
                     <button
@@ -101,17 +93,6 @@ export function PrivacyPolicyLink({ children }: { children: React.ReactNode }) {
         >
             {children}
         </a>
-    );
-}
-
-function CloseButton({ onClick }: { onClick: () => void }) {
-    return (
-        <button
-            className="e-cursor-pointer e-border-none e-bg-transparent e-p-0 e-text-2xl e-leading-none e-text-white hover:e-opacity-70"
-            onClick={onClick}
-        >
-            &times;
-        </button>
     );
 }
 
