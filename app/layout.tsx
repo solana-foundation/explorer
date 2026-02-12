@@ -15,6 +15,8 @@ import dynamic from 'next/dynamic';
 import { Rubik } from 'next/font/google';
 import { Metadata } from 'next/types';
 
+import { CookieConsent } from '@/app/features/cookie';
+
 import { botIdProtectedRoutes } from '../middleware';
 
 const SearchBar = dynamic(() => import('@components/SearchBar'), {
@@ -72,6 +74,7 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                     </ClusterProvider>
                 </ScrollAnchorProvider>
                 {analytics}
+                <CookieConsent />
             </body>
         </html>
     );

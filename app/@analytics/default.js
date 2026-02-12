@@ -1,10 +1,19 @@
+'use client';
+
 import Script from 'next/script';
 
+import { useAnalyticsConsent } from '@/app/features/cookie';
+
 export default function Analytics() {
+    const { isConsentGiven } = useAnalyticsConsent();
     const safeAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID?.replace("'", "\\'");
     const safeTagId = process.env.NEXT_PUBLIC_GOOGLE_TAG_ID?.replace("'", "\\'");
 
     if (!safeAnalyticsId && !safeTagId) {
+        return null;
+    }
+
+    if (!isConsentGiven) {
         return null;
     }
 
