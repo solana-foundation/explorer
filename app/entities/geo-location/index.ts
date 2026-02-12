@@ -1,1 +1,1 @@
-export { isEUCountry } from './lib/geo-location';
+export { isGDPRCountry } from './lib/geo-location';
