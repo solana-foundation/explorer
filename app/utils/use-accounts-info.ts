@@ -1,5 +1,5 @@
 import { Connection, PublicKey } from '@solana/web3.js';
-import { useEffect, useState } from 'react';
+import useSWR from 'swr';
 
 import { ByteArray } from '@/app/shared/lib/bytes';
 
@@ -8,50 +8,26 @@ export interface AccountInfo {
     size: number;
 }
 
-export function useAccountsInfo(pubkeys: PublicKey[], clusterUrl: string) {
-    const [accounts, setAccounts] = useState<Map<string, AccountInfo>>(new Map());
-    const [loading, setLoading] = useState(true);
+async function fetchAccountsInfo(pubkeys: PublicKey[], clusterUrl: string): Promise<Map<string, AccountInfo>> {
+    const connection = new Connection(clusterUrl);
+    const infos = await connection.getMultipleAccountsInfo(pubkeys);
 
-    useEffect(() => {
-        if (pubkeys.length === 0) {
-            setAccounts(new Map());
-            setLoading(false);
-            return;
+    const result = new Map<string, AccountInfo>();
+    infos.forEach((info, i) => {
+        if (info) {
+            result.set(pubkeys[i].toBase58(), {
+                data: info.data,
+                size: info.data.length,
+            });
         }
+    });
+    return result;
+}
 
-        let cancelled = false;
+export function useAccountsInfo(pubkeys: PublicKey[], clusterUrl: string) {
+    const swrKey = pubkeys.length > 0 ? ['accounts-info', pubkeys.map(p => p.toBase58()).join(','), clusterUrl] : null;
 
-        const fetchAccountsInfo = async () => {
-            setLoading(true);
-            const connection = new Connection(clusterUrl);
+    const { data, error, isLoading } = useSWR(swrKey, () => fetchAccountsInfo(pubkeys, clusterUrl));
 
-            try {
-                const infos = await connection.getMultipleAccountsInfo(pubkeys);
-                if (cancelled) return;
-
-                const result = new Map<string, AccountInfo>();
-                infos.forEach((info, i) => {
-                    if (info) {
-                        result.set(pubkeys[i].toBase58(), {
-                            data: info.data,
-                            size: info.data.length,
-                        });
-                    }
-                });
-                setAccounts(result);
-            } catch (err) {
-                console.error('Failed to fetch accounts info', err);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        };
-
-        fetchAccountsInfo();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [pubkeys, clusterUrl]);
-
-    return { accounts, loading };
+    return { accounts: data ?? new Map<string, AccountInfo>(), error, loading: isLoading };
 }

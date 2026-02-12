@@ -15,7 +15,7 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
     const { url } = useCluster();
 
     const pubkeys = useMemo(() => message.staticAccountKeys, [message.staticAccountKeys]);
-    const { accounts, loading } = useAccountsInfo(pubkeys, url);
+    const { accounts, error: fetchError, loading } = useAccountsInfo(pubkeys, url);
 
     const { validMessage, error } = React.useMemo(() => {
         const { numRequiredSignatures, numReadonlySignedAccounts, numReadonlyUnsignedAccounts } = message.header;
@@ -103,6 +103,10 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
         [accounts]
     );
 
+    if (fetchError) {
+        return <ErrorCard text="Failed to fetch accounts info" />;
+    }
+
     if (error) {
         return <ErrorCard text={`Unable to display accounts. ${error}`} />;
     }
@@ -184,7 +188,7 @@ function AccountRow({
     signer: boolean;
     readOnly: boolean;
 }) {
-    const hexData = accountInfo ? toHex(accountInfo.data as Uint8Array) : null;
+    const hexData = accountInfo ? toHex(accountInfo.data) : null;
 
     return (
         <tr>

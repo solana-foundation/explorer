@@ -1,16 +1,25 @@
-import { Buffer } from 'buffer';
 import React, { ReactNode } from 'react';
+
+import { ByteArray, toHex } from '@/app/shared/lib/bytes';
 
 import { cn } from '../shared/utils';
 import { Copyable } from './Copyable';
 
-export function HexData({ raw, className }: { raw: Buffer; className?: string }) {
+export function HexData({
+    raw,
+    className,
+    copyableRaw,
+}: {
+    raw: ByteArray;
+    copyableRaw?: ByteArray;
+    className?: string;
+}) {
     if (!raw || raw.length === 0) {
         return <span>No data</span>;
     }
 
     const chunks = [];
-    const hexString = raw.toString('hex');
+    const hexString = toHex(raw);
     for (let i = 0; i < hexString.length; i += 2) {
         chunks.push(hexString.slice(i, i + 2));
     }
@@ -38,7 +47,7 @@ export function HexData({ raw, className }: { raw: Buffer; className?: string })
 
     function Content() {
         return (
-            <Copyable text={hexString}>
+            <Copyable text={copyableRaw ? toHex(copyableRaw) : hexString}>
                 <pre className="d-inline-block text-start mb-0">{divs}</pre>
             </Copyable>
         );

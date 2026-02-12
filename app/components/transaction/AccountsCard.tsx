@@ -27,26 +27,30 @@ export function AccountsCard({ signature }: SignatureProps) {
 
     const pubkeys = useMemo(() => message?.accountKeys.map(a => a.pubkey) ?? [], [message?.accountKeys]);
 
-    const { accounts, loading } = useAccountsInfo(pubkeys, url);
+    const { accounts, error, loading } = useAccountsInfo(pubkeys, url);
 
     if (!transactionWithMeta) {
         return null;
     }
 
-    if (!meta) {
+    if (!meta || !message) {
         return <ErrorCard text="Transaction metadata is missing" />;
+    }
+
+    if (error) {
+        return <ErrorCard text="Failed to fetch accounts info" />;
     }
 
     const totalAccountSize = Array.from(accounts.values()).reduce((acc, account) => acc + account.size, 0);
 
-    const accountRows = message!.accountKeys.map((account, index) => {
+    const accountRows = message.accountKeys.map((account, index) => {
         const pre = meta.preBalances[index];
         const post = meta.postBalances[index];
         const pubkey = account.pubkey;
         const key = pubkey.toBase58();
         const delta = new BigNumber(post).minus(new BigNumber(pre));
         const accountInfo = accounts.get(key);
-        const hexData = accountInfo ? toHex(accountInfo.data as Uint8Array) : null;
+        const hexData = accountInfo ? toHex(accountInfo.data) : null;
 
         return (
             <tr key={key}>
@@ -75,7 +79,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                     {index === 0 && <span className="badge bg-info-soft me-1">Fee Payer</span>}
                     {account.signer && <span className="badge bg-info-soft me-1">Signer</span>}
                     {account.writable && <span className="badge bg-danger-soft me-1">Writable</span>}
-                    {message!.instructions.find(ix => ix.programId.equals(pubkey)) && (
+                    {message.instructions.find(ix => ix.programId.equals(pubkey)) && (
                         <span className="badge bg-warning-soft me-1">Program</span>
                     )}
                     {account.source === 'lookupTable' && (
@@ -89,7 +93,7 @@ export function AccountsCard({ signature }: SignatureProps) {
     return (
         <div className="card">
             <div className={`card-header ${!expanded ? 'border-0' : ''}`}>
-                <h3 className="card-header-title">{`Account Input(s) (${message!.accountKeys.length})`}</h3>
+                <h3 className="card-header-title">{`Account Input(s) (${message.accountKeys.length})`}</h3>
                 <button
                     className={`btn btn-sm d-flex align-items-center ${
                         showRaw ? 'btn-black active' : 'btn-white'
@@ -108,7 +112,7 @@ export function AccountsCard({ signature }: SignatureProps) {
             {expanded &&
                 (showRaw ? (
                     <div className="card-body">
-                        <RawAccountsView accountKeys={message!.accountKeys} accounts={accounts} loading={loading} />
+                        <RawAccountsView accountKeys={message.accountKeys} accounts={accounts} loading={loading} />
                     </div>
                 ) : (
                     <div className="table-responsive mb-0">
@@ -125,18 +129,22 @@ export function AccountsCard({ signature }: SignatureProps) {
                             </thead>
                             <tbody className="list">{accountRows}</tbody>
                             {totalAccountSize > 0 && (
-                                <tr>
-                                    <td colSpan={3} />
-                                    <td>
-                                        <p className="text-muted e-m-0 e-text-[0.625rem] e-uppercase">
-                                            Total Account Size:
-                                        </p>
-                                    </td>
-                                    <td>
-                                        <span className="text-white">{totalAccountSize.toLocaleString('en-US')}</span>
-                                    </td>
-                                    <td />
-                                </tr>
+                                <tfoot>
+                                    <tr>
+                                        <td colSpan={3} />
+                                        <td className="align-bottom">
+                                            <p className="text-muted e-m-0 e-text-[0.625rem] e-uppercase">
+                                                Total Account Size:
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <span className="text-white">
+                                                {totalAccountSize.toLocaleString('en-US')}
+                                            </span>
+                                        </td>
+                                        <td />
+                                    </tr>
+                                </tfoot>
                             )}
                         </table>
                     </div>
@@ -182,6 +190,8 @@ function RawAccountsView({
     );
 }
 
+const MAX_DISPLAY_BYTES = 1024;
+
 function DataRow({
     index,
     account,
@@ -194,6 +204,9 @@ function DataRow({
     accountSize: string | undefined;
 }) {
     const [isDataVisible, setIsDataVisible] = useState(false);
+
+    const isTruncated = data && data.length > MAX_DISPLAY_BYTES;
+    const displayData = data && isTruncated ? data.slice(0, MAX_DISPLAY_BYTES) : data;
 
     return (
         <tr>
@@ -218,8 +231,16 @@ function DataRow({
 
                     {isDataVisible && (
                         <div className="e-items-end e-text-end">
-                            {data && data.length > 0 ? (
-                                <HexData raw={data as Buffer} className="!e-items-baseline" />
+                            {displayData && displayData.length > 0 ? (
+                                <>
+                                    <HexData raw={displayData} copyableRaw={data} className="!e-items-baseline" />
+                                    {isTruncated && (
+                                        <span className="text-muted e-mt-1 e-text-xs">
+                                            Showing first {MAX_DISPLAY_BYTES.toLocaleString()} of{' '}
+                                            {data.length.toLocaleString()} bytes
+                                        </span>
+                                    )}
+                                </>
                             ) : (
                                 <span className="text-muted">No data</span>
                             )}
