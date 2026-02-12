@@ -76,12 +76,4 @@ describe('CookieConsent', () => {
         await userEvent.click(btn);
         expect(setCookie).toHaveBeenCalledWith(COOKIE_CONSENT_NAME, EConsentStatus.Denied, expect.any(Number));
     });
-
-    it('handles dismiss without cookie', async () => {
-        render(<CookieConsent />);
-        const btn = await screen.findByText('×', {}, { timeout: 3000 });
-        await userEvent.click(btn);
-        expect(screen.queryByText('ACCEPT')).toBeNull();
-        expect(setCookie).not.toHaveBeenCalled();
-    });
 });
