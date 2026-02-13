@@ -1,10 +1,12 @@
 'use client';
 
-import { PublicKey } from '@solana/web3.js';
 import { Token } from '@solflare-wallet/utl-sdk';
 import { Cluster } from '@utils/cluster';
-import { getTokenInfo, getTokenInfoSwrKey } from '@utils/token-info';
+import { getTokenInfoSwrKey } from '@utils/token-info';
+import { useEffect } from 'react';
 import useSWR from 'swr';
+
+import { useTokenInfoBatch } from './token-info-batch-provider';
 
 export function useTokenInfo(
     fetchTokenLabelInfo: boolean | undefined,
@@ -12,10 +14,17 @@ export function useTokenInfo(
     cluster: Cluster,
     genesisHash?: string
 ): Token | undefined {
+    const requestTokenInfo = useTokenInfoBatch();
+
+    useEffect(() => {
+        if (fetchTokenLabelInfo && pubkey) {
+            requestTokenInfo(pubkey, cluster, genesisHash);
+        }
+    }, [fetchTokenLabelInfo, pubkey, cluster, genesisHash, requestTokenInfo]);
+
     const { data } = useSWR<Token | undefined>(
         fetchTokenLabelInfo ? getTokenInfoSwrKey(pubkey, cluster, genesisHash) : null,
-        () => getTokenInfo(new PublicKey(pubkey), cluster, genesisHash),
-        { dedupingInterval: 60_000 }
+        null
     );
 
     return data;
