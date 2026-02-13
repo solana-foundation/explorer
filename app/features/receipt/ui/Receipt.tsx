@@ -38,8 +38,13 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
     const transactionPath = useClusterPath({ pathname: `/tx/${signature}` });
 
     const tx = details?.data?.transactionWithMeta;
-    const { data: receipt, isLoading: isReceiptLoading } = useSWR(tx ? ['receipt', signature, cluster] : null, () =>
-        extractReceiptData(tx!, cluster)
+    const { data: receipt, isLoading: isReceiptLoading } = useSWR(
+        tx ? ['receipt', signature, cluster] : null,
+        () => {
+            if (!tx) return undefined;
+            return extractReceiptData(tx, cluster);
+        },
+        { revalidateOnFocus: false }
     );
 
     useEffect(() => {
