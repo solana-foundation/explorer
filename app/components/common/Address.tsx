@@ -7,7 +7,7 @@ import { displayAddress, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useAsyncEffect from 'use-async-effect';
 
 import { useTokenInfo } from '@/app/entities/token-info';
@@ -47,6 +47,34 @@ export function Address({
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
     const [showNicknameEditor, setShowNicknameEditor] = useState(false);
     const nickname = useNickname(address);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        if (!fetchTokenLabelInfo) return;
+
+        const observer = new IntersectionObserver(
+            entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        setIsVisible(true);
+                    }
+                });
+            },
+            { rootMargin: '50px' }
+        );
+
+        const currentContainer = containerRef.current;
+        if (currentContainer) {
+            observer.observe(currentContainer);
+        }
+
+        return () => {
+            if (currentContainer) {
+                observer.unobserve(currentContainer);
+            }
+        };
+    }, [fetchTokenLabelInfo]);
 
     const display = displayAddress(address, cluster, tokenLabelInfo);
     if (truncateUnknown && address === display) {
@@ -60,7 +88,8 @@ export function Address({
         addressLabel = metaplexData.data.data.name;
     }
 
-    const tokenInfo = useTokenInfo(fetchTokenLabelInfo, address, cluster, clusterInfo?.genesisHash);
+    const shouldFetchTokenInfo = fetchTokenLabelInfo && isVisible;
+    const tokenInfo = useTokenInfo(shouldFetchTokenInfo, address, cluster, clusterInfo?.genesisHash);
     if (tokenInfo) {
         addressLabel = displayAddress(address, cluster, tokenInfo);
     }
@@ -128,7 +157,10 @@ export function Address({
 
     return (
         <>
-            <div className={`d-none d-lg-flex align-items-center ${alignRight ? 'justify-content-end' : ''}`}>
+            <div
+                ref={containerRef}
+                className={`d-none d-lg-flex align-items-center ${alignRight ? 'justify-content-end' : ''}`}
+            >
                 {content}
             </div>
             <div className="d-flex d-lg-none align-items-center">{content}</div>
