@@ -21,7 +21,11 @@ export function ViewReceiptButton({ signature, receiptPath, transactionWithMeta 
 
     const { data: receipt } = useSWR(
         isReceiptEnabled && transactionWithMeta ? ['receipt', signature, cluster] : null,
-        () => extractReceiptData(transactionWithMeta!, cluster)
+        () => {
+            if (!transactionWithMeta) return undefined;
+            return extractReceiptData(transactionWithMeta, cluster);
+        },
+        { revalidateOnFocus: false }
     );
 
     if (!isReceiptEnabled || !receipt) {
