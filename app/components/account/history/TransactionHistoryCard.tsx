@@ -52,7 +52,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
 
     const hasTimestamps = transactionRows.some(element => element.blockTime);
     const detailsList: React.ReactNode[] = transactionRows.map(
-        ({ slot, signature, blockTime, statusClass, statusText }) => {
+        ({ slot, signature, blockTime, statusClass, statusText, signatureInfo }) => {
             return (
                 <tr key={signature}>
                     <td>
@@ -73,7 +73,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                             </td>
                         </>
                     )}
-
+                    <td>{signatureInfo.memo ? <MemoField memo={signatureInfo.memo} /> : '---'}</td>
                     <td>
                         <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
                     </td>
@@ -101,6 +101,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                                     <th className="text-muted w-1">Timestamp</th>
                                 </>
                             )}
+                            <th className="text-muted">Memo</th>
                             <th className="text-muted">Result</th>
                             <th className="text-muted">Raw Data</th>
                         </tr>
@@ -128,6 +129,36 @@ function TransactionRawDataDownloadField({ signature }: { signature: string }) {
             <Copyable text={transactionData ? toBase64(transactionData) : null}>
                 <DownloadableDropdown data={transactionData} filename={signature} />
             </Copyable>
+        </div>
+    );
+}
+
+function MemoField({ memo }: { memo: string }) {
+    const [showTooltip, setShowTooltip] = React.useState(false);
+    const truncateLength = 25;
+    // Remove memo length like "[15] " from the memo for display (handles all occurrences)
+    const cleanMemo = memo.replace(/\[\d+\]\s*/g, '').trim();
+    const isTruncated = cleanMemo.length > truncateLength;
+    const displayText = isTruncated ? `${cleanMemo.slice(0, truncateLength)}...` : cleanMemo;
+
+    return (
+        <div
+            className="popover-container"
+            onMouseOver={() => isTruncated && setShowTooltip(true)}
+            onMouseOut={() => setShowTooltip(false)}
+            style={{ cursor: isTruncated ? 'pointer' : 'default' }}
+        >
+            <Copyable text={cleanMemo}>
+                <span className="text-muted">{displayText}</span>
+            </Copyable>
+            {showTooltip && (
+                <div className="popover bs-popover-top show" style={{ maxWidth: '20rem' }}>
+                    <div className="arrow" />
+                    <div className="popover-body" style={{ wordBreak: 'break-word' }}>
+                        {cleanMemo}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
