@@ -45,7 +45,7 @@ const preview: Preview = {
 
             return (
                 <div id="storybook-outer" className={rubikFont.className}>
-                        <Story />
+                    <Story />
                 </div>
             );
         },

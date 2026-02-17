@@ -107,11 +107,11 @@ export const Default: Story = {
         Story => (
             <ClusterProvider>
                 <MockAccountsProvider>
-                        <Story />
+                    <Story />
                 </MockAccountsProvider>
             </ClusterProvider>
         ),
-        withTokenInfoBatch
+        withTokenInfoBatch,
     ],
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);

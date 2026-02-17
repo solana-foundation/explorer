@@ -64,7 +64,7 @@ const meta = {
                 <Story />
             </TableWrapper>
         ),
-        withTokenInfoBatch
+        withTokenInfoBatch,
     ],
     parameters: nextjsParameters,
     tags: ['autodocs'],
