@@ -13,8 +13,8 @@ const MAINNET_URL = 'https://api.mainnet-beta.solana.com';
 const USER_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 
 const mockDomains = [
-    { address: {} as never, name: 'alice.abc' },
-    { address: {} as never, name: 'charlie.abc' },
+    { address: 'addr1', name: 'alice.abc' },
+    { address: 'addr2', name: 'charlie.abc' },
 ];
 
 const swrResponse = (overrides: { data?: unknown; isLoading?: boolean; error?: unknown } = {}) => ({
@@ -43,7 +43,7 @@ describe('useUserANSDomains', () => {
 
         const { result } = renderHook(() => useUserANSDomains(USER_ADDRESS));
 
-        expect(useSWR).toHaveBeenCalledWith(null, null, expect.any(Object));
+        expect(useSWR).toHaveBeenCalledWith(null, expect.any(Function), expect.any(Object));
         expect(result.current.data).toBeUndefined();
         expect(result.current.isLoading).toBe(false);
     });
@@ -51,7 +51,7 @@ describe('useUserANSDomains', () => {
     it('returns SWR response with no request when userAddress is empty', () => {
         const { result } = renderHook(() => useUserANSDomains(''));
 
-        expect(useSWR).toHaveBeenCalledWith(null, null, expect.any(Object));
+        expect(useSWR).toHaveBeenCalledWith(null, expect.any(Function), expect.any(Object));
         expect(result.current.data).toBeUndefined();
         expect(result.current.isLoading).toBe(false);
     });
@@ -60,23 +60,22 @@ describe('useUserANSDomains', () => {
         renderHook(() => useUserANSDomains(USER_ADDRESS));
 
         expect(useSWR).toHaveBeenCalledWith(
-            ['user-ans-domains', MAINNET_URL, USER_ADDRESS],
+            ['user-ans-domains', USER_ADDRESS],
             expect.any(Function),
             expect.objectContaining({ revalidateOnFocus: false })
         );
     });
 
     it('requests with correct SWR key on Custom cluster', () => {
-        const customUrl = 'https://custom.rpc.com';
         vi.mocked(useCluster).mockReturnValue({
             cluster: Cluster.Custom,
-            url: customUrl,
+            url: 'https://custom.rpc.com',
         } as ReturnType<typeof useCluster>);
 
         renderHook(() => useUserANSDomains(USER_ADDRESS));
 
         expect(useSWR).toHaveBeenCalledWith(
-            ['user-ans-domains', customUrl, USER_ADDRESS],
+            ['user-ans-domains', USER_ADDRESS],
             expect.any(Function),
             expect.any(Object)
         );
