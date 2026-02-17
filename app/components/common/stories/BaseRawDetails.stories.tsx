@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { expect, within } from 'storybook/test';
 
-import { nextjsParameters } from '../../../../.storybook/decorators';
+import { nextjsParameters, withTokenInfoBatch } from '../../../../.storybook/decorators';
 import { BaseRawDetails } from '../BaseRawDetails';
 
 // Wrapper to render in a table context with required providers
@@ -64,6 +64,7 @@ const meta = {
                 <Story />
             </TableWrapper>
         ),
+        withTokenInfoBatch
     ],
     parameters: nextjsParameters,
     tags: ['autodocs'],

@@ -10,7 +10,7 @@ import { getTokenInfos } from '../lib/fetch-token-mints';
 type RequestTokenInfo = (address: string, cluster: Cluster, genesisHash?: string) => void;
 type BatchRequest = { address: string; cluster: Cluster; genesisHash?: string };
 
-const TokenInfoBatchContext = createContext<RequestTokenInfo | undefined>(undefined);
+export const TokenInfoBatchContext = createContext<RequestTokenInfo | undefined>(undefined);
 
 const BATCH_DELAY_MS = 100;
 

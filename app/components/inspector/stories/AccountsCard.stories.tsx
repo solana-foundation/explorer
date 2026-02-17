@@ -9,7 +9,7 @@ import { DispatchContext, FetchersContext, State, StateContext } from '@/app/pro
 import { FetchStatus } from '@/app/providers/cache';
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
 
-import { nextjsParameters } from '../../../../.storybook/decorators';
+import { nextjsParameters, withTokenInfoBatch } from '../../../../.storybook/decorators';
 import { AccountsCard } from '../AccountsCard';
 
 // No-op function for mock fetchers
@@ -90,6 +90,7 @@ function MockAccountsProvider({ children }: { children: React.ReactNode }) {
 
 const meta = {
     component: AccountsCard,
+    decorators: [withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs'],
     title: 'Components/Inspector/AccountsCard',
@@ -106,10 +107,11 @@ export const Default: Story = {
         Story => (
             <ClusterProvider>
                 <MockAccountsProvider>
-                    <Story />
+                        <Story />
                 </MockAccountsProvider>
             </ClusterProvider>
         ),
+        withTokenInfoBatch
     ],
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
