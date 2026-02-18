@@ -61,7 +61,7 @@ describe('GET /api/ans-domains/[address]', () => {
 
             const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
-            expect(response.headers.get('Cache-Control')).toBe('max-age=86400');
+            expect(response.headers.get('Cache-Control')).toBe('public, s-maxage=86400, stale-while-revalidate=3600');
         });
     });
 

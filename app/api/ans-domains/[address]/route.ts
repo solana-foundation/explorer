@@ -3,7 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import Logger from '@utils/logger';
 import { NextResponse } from 'next/server';
 
-const CACHE_HEADERS = { 'Cache-Control': 'max-age=86400' };
+const CACHE_HEADERS = { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=3600' };
 
 type Params = {
     params: {

@@ -61,7 +61,7 @@ describe('GET /api/sns-domains/[address]', () => {
 
             const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
-            expect(response.headers.get('Cache-Control')).toBe('max-age=43200');
+            expect(response.headers.get('Cache-Control')).toBe('public, s-maxage=43200, stale-while-revalidate=3600');
         });
     });
 

@@ -10,15 +10,13 @@ type Params = {
 
 export type FetchedDomainInfo = ResolvedDomainInfo;
 
+const CACHE_HEADERS = { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=3600' };
+
 export async function GET(_request: Request, { params: { domain } }: Params) {
     try {
         const domainInfo = await resolveDomain(domain);
 
-        return NextResponse.json(domainInfo, {
-            headers: {
-                'Cache-Control': 'max-age=86400',
-            },
-        });
+        return NextResponse.json(domainInfo, { headers: CACHE_HEADERS });
     } catch (error) {
         Logger.error(error, `Failed to resolve domain: ${domain}`);
         return NextResponse.json(null, {
