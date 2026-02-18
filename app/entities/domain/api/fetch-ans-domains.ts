@@ -103,6 +103,7 @@ async function fetchDomainNames(connection: Connection, entries: ReverseLookupEn
 
             // eslint-disable-next-line no-restricted-syntax -- Regex needed to strip trailing \0 bytes from fixed-size on-chain name buffer
             const domain = info.data.subarray(NAME_RECORD_HEADER_SIZE).toString().replace(/\0+$/, '');
+            if (!domain) continue;
             results.push({
                 address: batch[j].nameAccountAddress,
                 name: domain + batch[j].tldName,

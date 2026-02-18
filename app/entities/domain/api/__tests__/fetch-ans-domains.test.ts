@@ -133,6 +133,36 @@ describe('fetchAnsDomains', () => {
         expect(result[0].name).toBe('bob.bonk');
     });
 
+    it('skips reverse-lookup accounts with empty domain names (only null bytes)', async () => {
+        const nameAccount1 = PublicKey.unique();
+        const nameAccount2 = PublicKey.unique();
+
+        mockGetProgramAccounts.mockResolvedValue([
+            {
+                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS)) },
+                pubkey: nameAccount1,
+            },
+            {
+                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS)) },
+                pubkey: nameAccount2,
+            },
+        ]);
+
+        vi.mocked(getNameAccountKeyWithBump)
+            .mockReturnValueOnce([PublicKey.unique(), 255])
+            .mockReturnValueOnce([PublicKey.unique(), 255]);
+
+        mockGetMultipleAccountsInfo.mockResolvedValue([
+            makeReverseAccountInfo(''), // empty name — only null bytes after header
+            makeReverseAccountInfo('alice'),
+        ]);
+
+        const result = await fetchAnsDomains(USER_ADDRESS);
+
+        expect(result).toHaveLength(1);
+        expect(result[0].name).toBe('alice.bonk');
+    });
+
     it('strips trailing null bytes from domain names', async () => {
         mockGetProgramAccounts.mockResolvedValue([
             {
