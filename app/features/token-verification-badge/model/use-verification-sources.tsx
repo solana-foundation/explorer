@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 
 import { CoingeckoStatus } from '@/app/utils/coingecko';
 import { JupiterStatus } from '@/app/utils/jupiter';
-import { getRiskLevel, RISK_MAX_LEVEL_GOOD, RugCheckStatus } from '@/app/utils/rugcheck';
+import { getRiskLevel, RugCheckStatus } from '@/app/utils/rugcheck';
 
 import CoinGeckoLogo from '../icons/coingecko-logo.png';
 import JupiterLogo from '../icons/jupiter-logo.png';
@@ -37,7 +37,7 @@ export function useVerificationSources({ tokenInfo, coinInfo, jupiterInfo, rugCh
 
     const rugCheckScore = rugCheckInfo?.status === RugCheckStatus.Success ? rugCheckInfo.score : undefined;
     const rugCheckLevel = rugCheckScore !== undefined ? getRiskLevel(rugCheckScore) : undefined;
-    const rugCheckVerified = rugCheckScore !== undefined && rugCheckScore <= RISK_MAX_LEVEL_GOOD;
+    const rugCheckVerified = Boolean(rugCheckScore || rugCheckScore === 0);
 
     const sources: VerificationSource[] = useMemo(
         () => [
@@ -52,7 +52,7 @@ export function useVerificationSources({ tokenInfo, coinInfo, jupiterInfo, rugCh
             {
                 applyUrl: 'https://help.solflare.com/en/articles/9260147-i-cannot-find-a-token-in-solflare',
                 icon: <Icon src={SolflareLogo} alt="Solflare" />,
-                isVerificationFound: Boolean(tokenInfo),
+                isVerificationFound: tokenInfo && 'verified' in tokenInfo,
                 name: EVerificationSource.Solflare,
                 verified: solflareVerified,
             },

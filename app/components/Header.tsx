@@ -13,7 +13,6 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
     const coinInfo = useCoinGecko(tokenInfo?.extensions?.coingeckoId);
     const jupiterInfo = useJupiterVerification(tokenInfo?.address);
     const rugCheckInfo = useRugCheck(tokenInfo?.address);
-    
 
     return (
         <div className="header">
