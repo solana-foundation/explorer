@@ -1,10 +1,10 @@
-import { fetchAnsDomains } from '@entities/domain';
+import { fetchAnsDomains } from '@entities/domain/api/fetch-ans-domains';
 import Logger from '@utils/logger';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GET } from '../route';
 
-vi.mock('@entities/domain', () => ({
+vi.mock('@entities/domain/api/fetch-ans-domains', () => ({
     fetchAnsDomains: vi.fn(),
 }));
 

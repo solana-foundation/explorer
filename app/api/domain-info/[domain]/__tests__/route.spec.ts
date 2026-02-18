@@ -1,10 +1,10 @@
-import { resolveDomain } from '@entities/domain';
+import { resolveDomain } from '@entities/domain/api/resolve-domain';
 import Logger from '@utils/logger';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GET } from '../route';
 
-vi.mock('@entities/domain', () => ({
+vi.mock('@entities/domain/api/resolve-domain', () => ({
     resolveDomain: vi.fn(),
 }));
 

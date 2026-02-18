@@ -1,4 +1,4 @@
-import { fetchSnsDomains } from '@entities/domain';
+import { fetchSnsDomains } from '@entities/domain/api/fetch-sns-domains';
 import { PublicKey } from '@solana/web3.js';
 import Logger from '@utils/logger';
 import { NextResponse } from 'next/server';

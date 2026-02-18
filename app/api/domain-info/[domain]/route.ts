@@ -1,4 +1,4 @@
-import { type ResolvedDomainInfo, resolveDomain } from '@entities/domain';
+import { type ResolvedDomainInfo, resolveDomain } from '@entities/domain/api/resolve-domain';
 import Logger from '@utils/logger';
 import { NextResponse } from 'next/server';
 

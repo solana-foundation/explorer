@@ -1,7 +1,7 @@
 import { getHashedName, getNameAccountKey, getNameOwner } from '@bonfida/spl-name-service';
 import { getDomainKey as getANSDomainKey, getNameOwner as getANSNameOwner } from '@onsol/tldparser';
 import { Connection } from '@solana/web3.js';
-import { MAINNET_BETA_URL } from '@utils/cluster';
+import { Cluster, serverClusterUrl } from '@utils/cluster';
 import Logger from '@utils/logger';
 
 import { SOL_TLD_AUTHORITY } from './constants';
@@ -15,7 +15,7 @@ export type ResolvedDomainInfo = {
 // until an actual RPC call is made. Safe to create per-request in a short-lived API route handler.
 export async function resolveDomain(
     domain: string,
-    connection: Connection = new Connection(MAINNET_BETA_URL)
+    connection: Connection = new Connection(serverClusterUrl(Cluster.MainnetBeta, ''), 'confirmed')
 ): Promise<ResolvedDomainInfo> {
     return domain.endsWith('.sol') ? resolveSnsDomain(domain, connection) : resolveAnsDomain(domain, connection);
 }

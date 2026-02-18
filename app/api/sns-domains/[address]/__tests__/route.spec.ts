@@ -1,10 +1,10 @@
-import { fetchSnsDomains } from '@entities/domain';
+import { fetchSnsDomains } from '@entities/domain/api/fetch-sns-domains';
 import Logger from '@utils/logger';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GET } from '../route';
 
-vi.mock('@entities/domain', () => ({
+vi.mock('@entities/domain/api/fetch-sns-domains', () => ({
     fetchSnsDomains: vi.fn(),
 }));
 
