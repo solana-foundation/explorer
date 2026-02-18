@@ -2,6 +2,7 @@ import { AccountHeader } from '@components/account/AccountHeader';
 import { TokenMarketData } from '@components/common/TokenMarketData';
 import { ComponentProps } from 'react';
 
+import { TokenVerificationBadge } from '@/app/features/token-verification-badge';
 import { useCoinGecko } from '@/app/utils/coingecko';
 
 type HeaderProps = ComponentProps<typeof AccountHeader>;
@@ -18,7 +19,10 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
                     tokenInfo={tokenInfo}
                     isTokenInfoLoading={isTokenInfoLoading}
                 />
-                <TokenMarketData tokenInfo={tokenInfo} coinInfo={coinInfo} />
+                <div className="e-flex e-flex-col e-gap-1 sm:e-flex-row sm:e-items-start sm:e-gap-2">
+                    <TokenVerificationBadge tokenInfo={tokenInfo} coinInfo={coinInfo} isTokenInfoLoading={isTokenInfoLoading} />
+                    <TokenMarketData tokenInfo={tokenInfo} coinInfo={coinInfo} />
+                </div>
             </div>
         </div>
     );
