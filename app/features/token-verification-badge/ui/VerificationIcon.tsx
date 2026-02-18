@@ -10,10 +10,16 @@ const ICON_SIZE = 16;
 export function VerificationIcon({
     verifiedSources,
     verificationFoundSources,
+    isLoading,
 }: {
+    isLoading?: boolean;
     verifiedSources: VerificationSource[];
     verificationFoundSources: VerificationSource[];
 }): JSX.Element {
+    if (isLoading) {
+        return <HelpCircle className="e-text-gray-500" size={ICON_SIZE} />;
+    }
+
     if (verifiedSources.length === verificationFoundSources.length && verificationFoundSources.length !== 0) {
         return <Image src={VerifiedIcon} alt="Verified" width={ICON_SIZE} />;
     }

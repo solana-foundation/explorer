@@ -71,18 +71,14 @@ export function TokenVerificationContent({
                     ))}
                 </div>
             ) : (
-                <>
-                    <p className="e-mb-1 e-text-base e-font-semibold e-text-gray-200">
-                        This token is not verified
-                        <br />
-                        by independent validators
-                    </p>
-                </>
+                <span className="e-mb-2 e-text-xs e-text-heavy-metal-400">
+                    This doesn&apos;t mean it&apos;s scam, just make double check if it&apos;s what you need.
+                </span>
             )}
 
             {unverifiedSources.length > 0 && (
                 <div className="e-mt-4">
-                    <p className="e-mb-1 e-text-[10px] e-uppercase e-tracking-wider e-text-gray-500">
+                    <p className="e-mb-1 e-text-[10px] e-uppercase e-tracking-wider e-text-heavy-metal-400">
                         Apply for {hasVerification ? 'extra ' : ''}verification
                     </p>
                     <div className="e-flex e-flex-wrap e-gap-x-3 e-gap-y-1">
