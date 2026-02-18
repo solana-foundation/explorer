@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { CoinGeckoResult, CoingeckoStatus } from '@/app/utils/coingecko';
-import { JupiterResult, JupiterStatus, useJupiterVerification } from '@/app/utils/jupiter';
+import { JupiterResult, JupiterStatus } from '@/app/utils/jupiter';
+import { RugCheckResult, RugCheckStatus } from '@/app/utils/rugcheck';
 import { FullLegacyTokenInfo, FullTokenInfo } from '@/app/utils/token-info';
 
 import { useVerificationSources } from '../model/use-verification-sources';
@@ -14,10 +15,11 @@ export type TokenVerificationProps = {
     tokenInfo?: FullTokenInfo | FullLegacyTokenInfo;
     coinInfo?: CoinGeckoResult;
     jupiterInfo?: JupiterResult;
+    rugCheckInfo?: RugCheckResult;
     isTokenInfoLoading?: boolean;
 };
 
-export function TokenVerificationBadge({ tokenInfo, coinInfo, jupiterInfo, isTokenInfoLoading }: TokenVerificationProps) {
+export function TokenVerificationBadge({ tokenInfo, jupiterInfo, rugCheckInfo, coinInfo, isTokenInfoLoading }: TokenVerificationProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [alignRight, setAlignRight] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -49,12 +51,14 @@ export function TokenVerificationBadge({ tokenInfo, coinInfo, jupiterInfo, isTok
     const { verifiedSources, unverifiedSources, verificationFoundSources } = useVerificationSources({
         coinInfo,
         jupiterInfo,
+        rugCheckInfo,
         tokenInfo,
     });
 
     const isLoading =
         (Boolean(tokenInfo?.extensions?.coingeckoId) && coinInfo?.status === CoingeckoStatus.Loading) ||
         jupiterInfo?.status === JupiterStatus.Loading ||
+        rugCheckInfo?.status === RugCheckStatus.Loading ||
         isTokenInfoLoading;
 
     return (

@@ -1,8 +1,35 @@
 import { Check } from 'react-feather';
 
 import { VerificationSource } from '../lib/types';
+import { ERiskLevel } from '@/app/utils/rugcheck';
+import { EVerificationSource } from '../model/use-verification-sources';
+
+function getLevelColor(level?: ERiskLevel): string {
+    switch (level) {
+        case ERiskLevel.Good:
+            return 'e-text-green-400';
+        case ERiskLevel.Warning:
+            return 'e-text-orange-400';
+        case ERiskLevel.Danger:
+            return 'e-text-red-400';
+        default:
+            return 'e-text-gray-400';
+    }
+}
 
 function VerificationBadge({ source }: { source: VerificationSource }) {
+    if (source.name === EVerificationSource.RugCheck && source.score !== undefined) {
+        return (
+            <div className="e-flex e-items-center e-gap-1 e-rounded-md e-border e-border-solid e-border-heavy-metal-600 e-bg-heavy-metal-800 e-p-1">
+                {source.icon}
+                <span className="e-text-xs e-text-gray-200">
+                    {source.name} risk: {source.score}/100 -{' '}
+                    <span className={getLevelColor(source.level as ERiskLevel)}>{source.level}</span>
+                </span>
+            </div>
+        );
+    }
+
     if (source.verified) {
         return (
             <div className="e-flex e-items-center e-gap-1 e-rounded-md e-border e-border-solid e-border-heavy-metal-600 e-bg-heavy-metal-800 e-p-1">
@@ -17,6 +44,8 @@ function VerificationBadge({ source }: { source: VerificationSource }) {
 }
 
 function ApplyForVerificationLink({ source }: { source: VerificationSource }) {
+    const sourceName = source.name === EVerificationSource.RugCheck ? `${EVerificationSource.RugCheck} risk: Unknown` : source.name;
+
     return (
         <a
             href={source.applyUrl}
@@ -24,7 +53,7 @@ function ApplyForVerificationLink({ source }: { source: VerificationSource }) {
             rel="noopener noreferrer"
             className="e-text-xs e-text-white e-underline hover:e-text-gray-400"
         >
-            {source.name}
+            {sourceName}
         </a>
     );
 }
