@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { CoinGeckoResult, CoingeckoStatus } from '@/app/utils/coingecko';
+import { JupiterResult, JupiterStatus, useJupiterVerification } from '@/app/utils/jupiter';
 import { FullLegacyTokenInfo, FullTokenInfo } from '@/app/utils/token-info';
 
 import { useVerificationSources } from '../model/use-verification-sources';
@@ -12,14 +13,11 @@ import { TokenVerificationContent } from './TokenVerificationContent';
 export type TokenVerificationProps = {
     tokenInfo?: FullTokenInfo | FullLegacyTokenInfo;
     coinInfo?: CoinGeckoResult;
+    jupiterInfo?: JupiterResult;
     isTokenInfoLoading?: boolean;
-
-    // jupiterVerified?: boolean;
-    // rugCheckScore?: { score: number; level: string };
-    // bluprintVerified?: boolean;
 };
 
-export function TokenVerificationBadge({ tokenInfo, coinInfo, isTokenInfoLoading }: TokenVerificationProps) {
+export function TokenVerificationBadge({ tokenInfo, coinInfo, jupiterInfo, isTokenInfoLoading }: TokenVerificationProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [alignRight, setAlignRight] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -50,15 +48,17 @@ export function TokenVerificationBadge({ tokenInfo, coinInfo, isTokenInfoLoading
 
     const { verifiedSources, unverifiedSources, verificationFoundSources } = useVerificationSources({
         coinInfo,
+        jupiterInfo,
         tokenInfo,
     });
 
     const isLoading =
         (Boolean(tokenInfo?.extensions?.coingeckoId) && coinInfo?.status === CoingeckoStatus.Loading) ||
+        jupiterInfo?.status === JupiterStatus.Loading ||
         isTokenInfoLoading;
 
     return (
-        <div ref={containerRef} className="e-relative md:e-h-[stretch]">
+        <div ref={containerRef} className="e-relative e-w-full md:e-h-[stretch]">
             <TokenVerificationButton
                 isLoading={isLoading}
                 isOpen={isOpen}

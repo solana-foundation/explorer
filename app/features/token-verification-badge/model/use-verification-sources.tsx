@@ -2,8 +2,10 @@ import Image from 'next/image';
 import { useMemo } from 'react';
 
 import { CoingeckoStatus } from '@/app/utils/coingecko';
+import { JupiterStatus } from '@/app/utils/jupiter';
 
 import CoinGeckoLogo from '../icons/coingecko-logo.png';
+import JupiterLogo from '../icons/jupiter-logo.png';
 import SolflareLogo from '../icons/solflare-logo.png';
 import { VerificationSource } from '../lib/types';
 import { TokenVerificationProps } from '../ui/TokenVerificationBadge';
@@ -14,14 +16,17 @@ function Icon({ src, alt }: { src: typeof SolflareLogo; alt: string }) {
     return <Image src={src} alt={alt} width={ICON_SIZE} height={ICON_SIZE} className="e-rounded-full" />;
 }
 
-export function useVerificationSources({ tokenInfo, coinInfo }: TokenVerificationProps): {
+export function useVerificationSources({ tokenInfo, coinInfo, jupiterInfo }: TokenVerificationProps): {
     sources: VerificationSource[];
     verifiedSources: VerificationSource[];
     unverifiedSources: VerificationSource[];
     verificationFoundSources: VerificationSource[];
 } {
     const coingeckoVerified = !!tokenInfo?.extensions?.coingeckoId && coinInfo?.status === CoingeckoStatus.Success;
+
     const solflareVerified = tokenInfo && 'verified' in tokenInfo ? tokenInfo.verified : false;
+
+    const jupiterVerified = jupiterInfo?.status === JupiterStatus.Success && jupiterInfo.verified;
 
     const sources: VerificationSource[] = useMemo(
         () => [
@@ -40,8 +45,15 @@ export function useVerificationSources({ tokenInfo, coinInfo }: TokenVerificatio
                 name: 'Solflare',
                 verified: solflareVerified,
             },
+            {
+                applyUrl: 'https://catdetlist.jup.ag/',
+                icon: <Icon src={JupiterLogo} alt="Jupiter" />,
+                isVerificationFound: jupiterInfo?.status === JupiterStatus.Success,
+                name: 'Jupiter',
+                verified: jupiterVerified,
+            },
         ],
-        [coingeckoVerified, solflareVerified, tokenInfo]
+        [coingeckoVerified, solflareVerified, jupiterVerified, jupiterInfo, tokenInfo]
     );
 
     const verifiedSources = sources.filter(s => s.verified);
