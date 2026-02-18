@@ -23,7 +23,7 @@ export async function GET(_request: Request, { params: { domain } }: Params) {
         Logger.error(error, `Failed to resolve domain: ${domain}`);
         return NextResponse.json(null, {
             headers: {
-                'Cache-Control': 'max-age=86400',
+                'Cache-Control': 'no-store',
             },
         });
     }

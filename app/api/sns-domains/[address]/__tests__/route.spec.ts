@@ -86,12 +86,12 @@ describe('GET /api/sns-domains/[address]', () => {
             expect(Logger.error).toHaveBeenCalledWith(error, `Failed to fetch SNS domains for ${VALID_ADDRESS}`);
         });
 
-        it('returns cache headers even on error', async () => {
+        it('does not cache error responses', async () => {
             vi.mocked(fetchSnsDomains).mockRejectedValueOnce(new Error('fail'));
 
             const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
-            expect(response.headers.get('Cache-Control')).toBe('max-age=43200');
+            expect(response.headers.get('Cache-Control')).toBe('no-store');
         });
     });
 });

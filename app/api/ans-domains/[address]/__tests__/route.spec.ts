@@ -86,12 +86,12 @@ describe('GET /api/ans-domains/[address]', () => {
             expect(Logger.error).toHaveBeenCalledWith(error, `Failed to fetch ANS domains for ${VALID_ADDRESS}`);
         });
 
-        it('returns cache headers even on error', async () => {
+        it('does not cache error responses', async () => {
             vi.mocked(fetchAnsDomains).mockRejectedValueOnce(new Error('fail'));
 
             const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
-            expect(response.headers.get('Cache-Control')).toBe('max-age=86400');
+            expect(response.headers.get('Cache-Control')).toBe('no-store');
         });
     });
 });
