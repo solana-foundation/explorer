@@ -19,7 +19,9 @@ export function getFromCache<T>(key: string): T | null {
                 return parsed.data as T;
             }
         }
-    } catch {}
+    } catch {
+        // Ignore parse errors
+    }
 
     return null;
 }
@@ -29,7 +31,9 @@ export function setToCache<T>(key: string, data: T): void {
     cache.set(key, entry);
     try {
         setCookie(key, encodeURIComponent(JSON.stringify(entry)), CACHE_TOKEN_VERIFICATION_MS / 1000);
-    } catch {}
+    } catch {
+        // Ignore cookie errors
+    }
 }
 
 export function createCacheKey(prefix: string, ...args: (string | undefined)[]): string {

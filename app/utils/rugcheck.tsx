@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { useCluster } from '../providers/cluster';
-import { createCacheKey, getFromCache, setToCache } from './token-verification-cache';
-import { Cluster } from './cluster';
 import { EVerificationSource } from '../features/token-verification-badge';
+import { useCluster } from '../providers/cluster';
+import { Cluster } from './cluster';
+import { createCacheKey, getFromCache, setToCache } from './token-verification-cache';
 
 export enum RugCheckStatus {
     Success,
@@ -51,7 +51,7 @@ export function useRugCheck(mintAddress?: string): RugCheckResult | undefined {
         let stale = false;
 
         const checkRisk = async () => {
-            setResult({ status: RugCheckStatus.Loading, score: 0 });
+            setResult({ score: 0, status: RugCheckStatus.Loading });
 
             try {
                 const headers: HeadersInit = RUGCHECK_API_KEY ? { 'x-api-key': RUGCHECK_API_KEY } : {};
@@ -60,18 +60,18 @@ export function useRugCheck(mintAddress?: string): RugCheckResult | undefined {
                 if (stale) return;
 
                 if (!response.ok) {
-                    setResult({ status: RugCheckStatus.FetchFailed, score: 0 });
+                    setResult({ score: 0, status: RugCheckStatus.FetchFailed });
                     return;
                 }
 
                 const data = await response.json();
                 const score = data.score_normalised;
-                const res: RugCheckResult = { status: RugCheckStatus.Success, score };
+                const res: RugCheckResult = { score, status: RugCheckStatus.Success };
 
                 setToCache(cacheKey, res);
                 setResult(res);
             } catch {
-                setResult({ status: RugCheckStatus.FetchFailed, score: 0 });
+                setResult({ score: 0, status: RugCheckStatus.FetchFailed });
             }
         };
 

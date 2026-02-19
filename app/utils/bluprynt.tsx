@@ -3,10 +3,10 @@ import bs58 from 'bs58';
 import React from 'react';
 import { decodeAttestation, SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
 
-import { useCluster } from '../providers/cluster';
-import { createCacheKey, getFromCache, setToCache } from './token-verification-cache';
-import { Cluster } from './cluster';
 import { EVerificationSource } from '../features/token-verification-badge';
+import { useCluster } from '../providers/cluster';
+import { Cluster } from './cluster';
+import { createCacheKey, getFromCache, setToCache } from './token-verification-cache';
 
 export enum BlupryntStatus {
     Success,
