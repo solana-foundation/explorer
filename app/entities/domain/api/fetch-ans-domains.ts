@@ -9,7 +9,7 @@
  *
  * 1. One `getProgramAccounts` call filtered by owner (offset 40 in the ANS name record layout)
  *    to get ALL user's name accounts across all TLDs at once.
- * 2. One `getAllTld` call (cached for 1h via Next.js Data Cache) to map parent accounts to TLD names.
+ * 2. One `getAllTld` call to map parent accounts to TLD names.
  * 3. For each name account, derive a reverse-lookup PDA (keyed by tldHouse as nameClass),
  *    then batch-fetch them via `getMultipleAccountsInfo` (max 100 per call).
  *    The human-readable domain name lives after the 200-byte header in the reverse-lookup account.
@@ -27,11 +27,9 @@ import {
 } from '@onsol/tldparser';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
-import { unstable_cache } from 'next/cache';
 
 // 8 (discriminator) + 32 (parentName) + 32 (owner) + 32 (nclass) + 8 (expiresAt) + 8 (createdAt) + 1 (nonTransferable) + 79 (padding)
 const NAME_RECORD_HEADER_SIZE = 200;
-const TLD_REVALIDATE_SECONDS = 3600; // 1 hour — TLDs (top-level domains like .sol, .bonk, .abc) rarely change
 
 type SerializedTldInfo = {
     tldName: string;
@@ -133,19 +131,13 @@ async function fetchAllUserNameAccounts(
     }));
 }
 
-// unstable_cache stores the result in Vercel's Data Cache (persists across serverless invocations).
-// The return value must be JSON-serializable, so PublicKeys are stored as base58 strings.
-const getCachedTlds = unstable_cache(
-    async (): Promise<SerializedTldInfo[]> => {
-        const connection = createMainnetConnection();
-        const allTlds = await getAllTld(connection);
+async function getCachedTlds(): Promise<SerializedTldInfo[]> {
+    const connection = createMainnetConnection();
+    const allTlds = await getAllTld(connection);
 
-        return allTlds.map(({ tld, parentAccount }) => {
-            const tldName = tld.toString();
-            const [tldHouse] = findTldHouse(tldName);
-            return { parentAccount: parentAccount.toBase58(), tldHouse: tldHouse.toBase58(), tldName };
-        });
-    },
-    ['ans-all-tlds'],
-    { revalidate: TLD_REVALIDATE_SECONDS }
-);
+    return allTlds.map(({ tld, parentAccount }) => {
+        const tldName = tld.toString();
+        const [tldHouse] = findTldHouse(tldName);
+        return { parentAccount: parentAccount.toBase58(), tldHouse: tldHouse.toBase58(), tldName };
+    });
+}
