@@ -4,7 +4,9 @@ import React from 'react';
 import { decodeAttestation, SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
 
 import { useCluster } from '../providers/cluster';
+import { createCacheKey, getFromCache, setToCache } from './token-verification-cache';
 import { Cluster } from './cluster';
+import { EVerificationSource } from '../features/token-verification-badge';
 
 export enum BlupryntStatus {
     Success,
@@ -26,6 +28,13 @@ export function useBluprynt(mintAddress?: string): BlupryntResult | undefined {
 
     React.useEffect(() => {
         if (!mintAddress || cluster !== Cluster.MainnetBeta) {
+            return;
+        }
+
+        const cacheKey = createCacheKey(EVerificationSource.Bluprynt, mintAddress);
+        const cached = getFromCache<BlupryntResult>(cacheKey);
+        if (cached) {
+            setResult(cached);
             return;
         }
 
@@ -68,10 +77,13 @@ export function useBluprynt(mintAddress?: string): BlupryntResult | undefined {
                     }
                 });
 
-                setResult({
+                const res: BlupryntResult = {
                     status: verified ? BlupryntStatus.Success : BlupryntStatus.NotFound,
                     verified,
-                });
+                };
+
+                setToCache(cacheKey, res);
+                setResult(res);
             } catch {
                 if (!stale) {
                     setResult({ status: BlupryntStatus.FetchFailed, verified: false });

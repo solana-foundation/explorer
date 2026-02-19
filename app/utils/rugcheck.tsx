@@ -1,7 +1,9 @@
 import React from 'react';
 
 import { useCluster } from '../providers/cluster';
+import { createCacheKey, getFromCache, setToCache } from './token-verification-cache';
 import { Cluster } from './cluster';
+import { EVerificationSource } from '../features/token-verification-badge';
 
 export enum RugCheckStatus {
     Success,
@@ -39,6 +41,13 @@ export function useRugCheck(mintAddress?: string): RugCheckResult | undefined {
             return;
         }
 
+        const cacheKey = createCacheKey(EVerificationSource.RugCheck, mintAddress);
+        const cached = getFromCache<RugCheckResult>(cacheKey);
+        if (cached) {
+            setResult(cached);
+            return;
+        }
+
         let stale = false;
 
         const checkRisk = async () => {
@@ -56,10 +65,11 @@ export function useRugCheck(mintAddress?: string): RugCheckResult | undefined {
                 }
 
                 const data = await response.json();
+                const score = data.score_normalised;
+                const res: RugCheckResult = { status: RugCheckStatus.Success, score };
 
-                const score = data.score_normalised ?? 0;
-
-                setResult({ status: RugCheckStatus.Success, score });
+                setToCache(cacheKey, res);
+                setResult(res);
             } catch {
                 setResult({ status: RugCheckStatus.FetchFailed, score: 0 });
             }

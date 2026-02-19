@@ -1,7 +1,9 @@
 import React from 'react';
 
 import { useCluster } from '../providers/cluster';
+import { createCacheKey, getFromCache, setToCache } from './token-verification-cache';
 import { Cluster } from './cluster';
+import { EVerificationSource } from '../features/token-verification-badge';
 
 export enum JupiterStatus {
     Success,
@@ -25,6 +27,13 @@ export function useJupiterVerification(mintAddress?: string): JupiterResult | un
             return;
         }
 
+        const cacheKey = createCacheKey(EVerificationSource.Jupiter, mintAddress);
+        const cached = getFromCache<JupiterResult>(cacheKey);
+        if (cached) {
+            setResult(cached);
+            return;
+        }
+
         let stale = false;
 
         const checkVerification = async () => {
@@ -43,8 +52,10 @@ export function useJupiterVerification(mintAddress?: string): JupiterResult | un
 
                 const data = await response.json();
                 const token = Array.isArray(data) ? data.find((t: { id?: string }) => t.id === mintAddress) : null;
+                const res: JupiterResult = { status: JupiterStatus.Success, verified: token?.isVerified === true };
 
-                setResult({ status: JupiterStatus.Success, verified: token?.isVerified === true });
+                setToCache(cacheKey, res);
+                setResult(res);
             } catch {
                 setResult({ status: JupiterStatus.FetchFailed, verified: false });
             }

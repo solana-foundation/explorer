@@ -1,8 +1,10 @@
 import React from 'react';
 
 import { useCluster } from '../providers/cluster';
+import { createCacheKey, getFromCache, setToCache } from './token-verification-cache';
 import { Cluster } from './cluster';
 import useTabVisibility from './use-tab-visibility';
+import { EVerificationSource } from '../features/token-verification-badge';
 
 const PRICE_REFRESH = 10000;
 
@@ -59,6 +61,16 @@ export function useCoinGecko(coinId?: string): CoinGeckoResult | undefined {
         if (cluster !== Cluster.MainnetBeta) {
             return;
         }
+        const cacheKey = createCacheKey(EVerificationSource.CoinGecko, coinId);
+        const cached = getFromCache<CoinGeckoResult>(cacheKey);
+        if (cached) {
+            if (cached.coinInfo) {
+                cached.coinInfo.last_updated = new Date(cached.coinInfo.last_updated);
+            }
+            setCoinInfo(cached);
+            return;
+        }
+
         let interval: NodeJS.Timeout | undefined;
         let stale = false;
         if (coinId) {
@@ -84,7 +96,7 @@ export function useCoinGecko(coinId?: string): CoinGeckoResult | undefined {
                         return;
                     }
                     const info: CoinInfoResult = await response.json();
-                    setCoinInfo({
+                    const res: CoinGeckoResult = {
                         coinInfo: {
                             last_updated: new Date(info.last_updated),
                             market_cap: info.market_data.market_cap.usd,
@@ -94,7 +106,9 @@ export function useCoinGecko(coinId?: string): CoinGeckoResult | undefined {
                             volume_24: info.market_data.total_volume.usd,
                         },
                         status: CoingeckoStatus.Success,
-                    });
+                    };
+                    setToCache(cacheKey, res);
+                    setCoinInfo(res);
                 } catch {
                     setCoinInfo({
                         status: CoingeckoStatus.FetchFailed,
