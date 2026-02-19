@@ -24,12 +24,10 @@ import {
     getHashedName,
     getNameAccountKeyWithBump,
     MULTIPLE_ACCOUNT_INFO_MAX,
+    NameRecordHeader,
 } from '@onsol/tldparser';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
-
-// 8 (discriminator) + 32 (parentName) + 32 (owner) + 32 (nclass) + 8 (expiresAt) + 8 (createdAt) + 1 (nonTransferable) + 79 (padding)
-const NAME_RECORD_HEADER_SIZE = 200;
 
 type SerializedTldInfo = {
     tldName: string;
@@ -88,7 +86,6 @@ async function deriveReverseLookupPdas(
 }
 
 // Batch-fetch reverse-lookup accounts (max 100 per RPC call) and decode domain names from the on-chain data.
-// The human-readable domain name lives after the 200-byte header in the reverse-lookup account.
 async function fetchDomainNames(connection: Connection, entries: ReverseLookupEntry[]): Promise<AnsDomain[]> {
     const results: AnsDomain[] = [];
 
@@ -99,8 +96,8 @@ async function fetchDomainNames(connection: Connection, entries: ReverseLookupEn
         for (const [j, info] of accountInfos.entries()) {
             if (!info) continue;
 
-            // eslint-disable-next-line no-restricted-syntax -- Regex needed to strip trailing \0 bytes from fixed-size on-chain name buffer
-            const domain = info.data.subarray(NAME_RECORD_HEADER_SIZE).toString().replace(/\0+$/, '');
+            const record = NameRecordHeader.fromAccountInfo(info);
+            const domain = record.pretty().data;
             if (!domain) continue;
             results.push({
                 address: batch[j].nameAccountAddress,
@@ -116,27 +113,17 @@ async function fetchAllUserNameAccounts(
     connection: Connection,
     user: PublicKey
 ): Promise<{ pubkey: PublicKey; parentName: string }[]> {
-    // ANS name record layout: [8 discriminator][32 parentName][32 owner][32 nclass][8 expiresAt][...]
     const OWNER_OFFSET = 8 + 32; // 40
-    const PARENT_NAME_OFFSET = 8;
-    const PARENT_NAME_END = 8 + 32; // 40
-    const EXPIRES_AT_OFFSET = 8 + 32 + 32 + 32; // 104
 
     const accounts = await connection.getProgramAccounts(ANS_PROGRAM_ID, {
         filters: [{ memcmp: { bytes: user.toBase58(), offset: OWNER_OFFSET } }],
     });
 
-    const nowSecs = BigInt(Math.floor(Date.now() / 1000));
-
     return accounts
-        .filter(({ account }) => {
-            const expiresAt = account.data.readBigInt64LE(EXPIRES_AT_OFFSET);
-            // 0 means no expiry; otherwise must be in the future
-            const isActive = expiresAt === 0n || expiresAt > nowSecs;
-            return isActive;
-        })
-        .map(({ pubkey, account }) => ({
-            parentName: new PublicKey(account.data.subarray(PARENT_NAME_OFFSET, PARENT_NAME_END)).toBase58(),
+        .map(({ pubkey, account }) => ({ pubkey, record: NameRecordHeader.fromAccountInfo(account) }))
+        .filter(({ record }) => record.isValid)
+        .map(({ pubkey, record }) => ({
+            parentName: record.parentName.toBase58(),
             pubkey,
         }));
 }

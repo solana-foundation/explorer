@@ -19,18 +19,22 @@ vi.mock('next/cache', () => ({
     unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
 }));
 
-vi.mock('@onsol/tldparser', () => ({
-    ANS_PROGRAM_ID: new PublicKey('TLDHkysf5pCnKsVA4gXpNQmy7PSj8ByrtuLwFBFSdvB'),
-    MULTIPLE_ACCOUNT_INFO_MAX: 100,
-    findTldHouse: (tldName: string) => {
-        // Return deterministic keys per TLD name
-        if (tldName === '.bonk') return [TLD_HOUSE];
-        return [PublicKey.default];
-    },
-    getAllTld: vi.fn(),
-    getHashedName: vi.fn().mockResolvedValue(Buffer.alloc(32)),
-    getNameAccountKeyWithBump: vi.fn().mockReturnValue([PublicKey.default, 255]),
-}));
+vi.mock('@onsol/tldparser', async importOriginal => {
+    const actual = await importOriginal<typeof import('@onsol/tldparser')>();
+    return {
+        ...actual,
+        ANS_PROGRAM_ID: new PublicKey('TLDHkysf5pCnKsVA4gXpNQmy7PSj8ByrtuLwFBFSdvB'),
+        MULTIPLE_ACCOUNT_INFO_MAX: 100,
+        findTldHouse: (tldName: string) => {
+            // Return deterministic keys per TLD name
+            if (tldName === '.bonk') return [TLD_HOUSE];
+            return [PublicKey.default];
+        },
+        getAllTld: vi.fn(),
+        getHashedName: vi.fn().mockResolvedValue(Buffer.alloc(32)),
+        getNameAccountKeyWithBump: vi.fn().mockReturnValue([PublicKey.default, 255]),
+    };
+});
 
 vi.mock('@solana/web3.js', async () => {
     const actual = await vi.importActual<typeof import('@solana/web3.js')>('@solana/web3.js');
@@ -268,7 +272,7 @@ describe('fetchAnsDomains', () => {
     });
 
     it('filters expired domains while keeping active and non-expiring ones', async () => {
-        const past = BigInt(Math.floor(Date.now() / 1000) - 3600);
+        const past = BigInt(Math.floor(Date.now() / 1000) - 46 * 24 * 60 * 60); // 46 days ago — beyond the 45-day grace period
         const future = BigInt(Math.floor(Date.now() / 1000) + 86400);
         const noExpiry = 0n;
 
@@ -317,8 +321,10 @@ function makeTlds(tlds: { name: string; parentAccount: PublicKey }[]) {
 }
 
 function makeNameAccountData(parentName: PublicKey, owner: PublicKey, expiresAt = 0n): Buffer {
-    // Layout: [8 discriminator][32 parentName][32 owner][32 nclass][8 expiresAt][...]
-    const data = Buffer.alloc(128);
+    // Layout: [8 discriminator][32 parentName][32 owner][32 nclass][8 expiresAt][8 createdAt][1 nonTransferable][79 padding]
+    const data = Buffer.alloc(NAME_RECORD_HEADER_SIZE);
+    // discriminator
+    Buffer.from([68, 72, 88, 44, 15, 167, 103, 243]).copy(new Uint8Array(data.buffer), 0);
     parentName.toBuffer().copy(new Uint8Array(data.buffer), 8);
     owner.toBuffer().copy(new Uint8Array(data.buffer), 40);
     data.writeBigInt64LE(expiresAt, 104);
