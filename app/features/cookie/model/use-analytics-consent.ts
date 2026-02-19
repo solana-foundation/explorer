@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { getCookie } from '../lib/cookie';
+import { getCookie } from '@/app/utils/cookie';
 import { COOKIE_CONSENT_CHANGE_EVENT, COOKIE_CONSENT_NAME, EConsentStatus } from '../ui/CookieConsent';
 
 export function useAnalyticsConsent() {

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
-import { getCookie, setCookie } from '../lib/cookie';
+import { getCookie, setCookie } from '@/app/utils/cookie';
 
 export const COOKIE_CONSENT_NAME = 'solana_cookie_consent';
 export const COOKIE_COUNTRY_NAME = 'solana_country';

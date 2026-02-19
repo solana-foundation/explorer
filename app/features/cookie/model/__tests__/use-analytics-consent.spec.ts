@@ -4,11 +4,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { COOKIE_CONSENT_CHANGE_EVENT, EConsentStatus } from '../../ui/CookieConsent';
 import { useAnalyticsConsent } from '../use-analytics-consent';
 
-vi.mock('../../lib/cookie', () => ({
+vi.mock('@/app/utils/cookie', () => ({
     getCookie: vi.fn(() => null),
 }));
 
-import { getCookie } from '../../lib/cookie';
+import { getCookie } from '@/app/utils/cookie';
 
 describe('useAnalyticsConsent', () => {
     beforeEach(() => {
