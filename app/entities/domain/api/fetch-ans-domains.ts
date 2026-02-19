@@ -116,19 +116,29 @@ async function fetchAllUserNameAccounts(
     connection: Connection,
     user: PublicKey
 ): Promise<{ pubkey: PublicKey; parentName: string }[]> {
-    // ANS name record layout: [8 discriminator][32 parentName][32 owner][...]
+    // ANS name record layout: [8 discriminator][32 parentName][32 owner][32 nclass][8 expiresAt][...]
     const OWNER_OFFSET = 8 + 32; // 40
     const PARENT_NAME_OFFSET = 8;
     const PARENT_NAME_END = 8 + 32; // 40
+    const EXPIRES_AT_OFFSET = 8 + 32 + 32 + 32; // 104
 
     const accounts = await connection.getProgramAccounts(ANS_PROGRAM_ID, {
         filters: [{ memcmp: { bytes: user.toBase58(), offset: OWNER_OFFSET } }],
     });
 
-    return accounts.map(({ pubkey, account }) => ({
-        parentName: new PublicKey(account.data.subarray(PARENT_NAME_OFFSET, PARENT_NAME_END)).toBase58(),
-        pubkey,
-    }));
+    const nowSecs = BigInt(Math.floor(Date.now() / 1000));
+
+    return accounts
+        .filter(({ account }) => {
+            const expiresAt = account.data.readBigInt64LE(EXPIRES_AT_OFFSET);
+            // 0 means no expiry; otherwise must be in the future
+            const isActive = expiresAt === 0n || expiresAt > nowSecs;
+            return isActive;
+        })
+        .map(({ pubkey, account }) => ({
+            parentName: new PublicKey(account.data.subarray(PARENT_NAME_OFFSET, PARENT_NAME_END)).toBase58(),
+            pubkey,
+        }));
 }
 
 async function getCachedTlds(): Promise<SerializedTldInfo[]> {

@@ -266,6 +266,47 @@ describe('fetchAnsDomains', () => {
 
         await expect(fetchAnsDomains(USER_ADDRESS)).rejects.toThrow('RPC timeout');
     });
+
+    it('filters expired domains while keeping active and non-expiring ones', async () => {
+        const past = BigInt(Math.floor(Date.now() / 1000) - 3600);
+        const future = BigInt(Math.floor(Date.now() / 1000) + 86400);
+        const noExpiry = 0n;
+
+        const expiredAccount = PublicKey.unique();
+        const activeAccount = PublicKey.unique();
+        const permanentAccount = PublicKey.unique();
+
+        mockGetProgramAccounts.mockResolvedValue([
+            {
+                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS), past) },
+                pubkey: expiredAccount,
+            },
+            {
+                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS), future) },
+                pubkey: activeAccount,
+            },
+            {
+                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS), noExpiry) },
+                pubkey: permanentAccount,
+            },
+        ]);
+
+        vi.mocked(getNameAccountKeyWithBump)
+            .mockReturnValueOnce([PublicKey.unique(), 255])
+            .mockReturnValueOnce([PublicKey.unique(), 255]);
+
+        mockGetMultipleAccountsInfo.mockResolvedValue([
+            makeReverseAccountInfo('active'),
+            makeReverseAccountInfo('permanent'),
+        ]);
+
+        const result = await fetchAnsDomains(USER_ADDRESS);
+
+        expect(result).toHaveLength(2);
+        const names = result.map(d => d.name).sort();
+        expect(names).toEqual(['active.bonk', 'permanent.bonk']);
+        expect(result.find(d => d.address === expiredAccount.toBase58())).toBeUndefined();
+    });
 });
 
 function makeTlds(tlds: { name: string; parentAccount: PublicKey }[]) {
@@ -275,11 +316,12 @@ function makeTlds(tlds: { name: string; parentAccount: PublicKey }[]) {
     }));
 }
 
-function makeNameAccountData(parentName: PublicKey, owner: PublicKey): Buffer {
-    // Layout: [8 discriminator][32 parentName][32 owner][...]
+function makeNameAccountData(parentName: PublicKey, owner: PublicKey, expiresAt = 0n): Buffer {
+    // Layout: [8 discriminator][32 parentName][32 owner][32 nclass][8 expiresAt][...]
     const data = Buffer.alloc(128);
     parentName.toBuffer().copy(new Uint8Array(data.buffer), 8);
     owner.toBuffer().copy(new Uint8Array(data.buffer), 40);
+    data.writeBigInt64LE(expiresAt, 104);
     return data;
 }
 
