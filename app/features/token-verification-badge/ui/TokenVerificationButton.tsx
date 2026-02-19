@@ -4,7 +4,7 @@ import { EVerificationSource } from '../model/use-verification-sources';
 import { VerificationIcon } from './VerificationIcon';
 
 function getSourceBorderColor(source: VerificationSource): string {
-    if (source.name === EVerificationSource.RugCheck && source.score !== undefined) {
+    if (source && source.name === EVerificationSource.RugCheck && source.score !== undefined) {
         if (source.score <= RISK_MAX_LEVEL_GOOD) return 'e-border-green-400';
         if (source.score <= RISK_MAX_LEVEL_WARNING) return 'e-border-orange-400';
         return 'e-border-red-400';
@@ -31,7 +31,7 @@ export function TokenVerificationButton({
     return (
         <button
             onClick={() => setIsOpen(!isOpen)}
-            className={`e-flex e-w-full e-flex-col e-justify-between e-rounded e-border e-border-solid e-bg-[#1C2120] e-px-3 e-py-2 md:e-h-[stretch] md:e-min-h-[69px] md:e-w-[160px] ${
+            className={`e-flex e-w-full e-flex-col e-rounded e-border e-border-solid e-bg-[#1C2120] e-px-3 e-py-2 md:e-h-[stretch] md:e-min-h-[69px] md:e-w-[160px] ${
                 isOpen ? 'e-border-green-400' : 'e-border-black'
             } ${isLoading ? 'e-cursor-not-allowed' : 'e-cursor-pointer'}`}
         >

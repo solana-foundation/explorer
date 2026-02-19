@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
+import { BlupryntStatus } from '@/app/utils/bluprynt';
 import { CoingeckoStatus } from '@/app/utils/coingecko';
 import { JupiterStatus } from '@/app/utils/jupiter';
 import { RugCheckStatus } from '@/app/utils/rugcheck';
@@ -20,7 +21,6 @@ const meta = {
             appDirectory: true,
         },
     },
-    tags: ['autodocs'],
     title: 'Features/TokenVerification/TokenVerificationBadge',
 } satisfies Meta<typeof TokenVerificationBadge>;
 
@@ -60,6 +60,7 @@ const mockTokenInfoWithCoingecko = {
 
 export const AllVerified: Story = {
     args: {
+        blupryntInfo: { status: BlupryntStatus.Success, verified: true },
         coinInfo: { status: CoingeckoStatus.Success },
         jupiterInfo: { status: JupiterStatus.Success, verified: true },
         rugCheckInfo: { score: 10, status: RugCheckStatus.Success },
@@ -85,7 +86,7 @@ export const NotVerified: Story = {
     },
 };
 
-export const RugCheckGood: Story = {
+export const RugcheckGood: Story = {
     args: {
         coinInfo: undefined,
         jupiterInfo: undefined,
@@ -94,7 +95,7 @@ export const RugCheckGood: Story = {
     },
 };
 
-export const RugCheckWarning: Story = {
+export const RugcheckWarning: Story = {
     args: {
         coinInfo: undefined,
         jupiterInfo: undefined,
@@ -103,7 +104,7 @@ export const RugCheckWarning: Story = {
     },
 };
 
-export const RugCheckDanger: Story = {
+export const RugcheckDanger: Story = {
     args: {
         coinInfo: undefined,
         jupiterInfo: undefined,
@@ -122,7 +123,7 @@ export const Loading: Story = {
     },
 };
 
-export const CoinGeckoVerified: Story = {
+export const CoingeckoVerified: Story = {
     args: {
         coinInfo: { status: CoingeckoStatus.Success },
         jupiterInfo: undefined,
@@ -130,5 +131,3 @@ export const CoinGeckoVerified: Story = {
         tokenInfo: mockTokenInfoWithCoingecko,
     },
 };
-
-

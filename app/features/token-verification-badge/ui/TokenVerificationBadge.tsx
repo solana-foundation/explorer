@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+import { BlupryntResult, BlupryntStatus } from '@/app/utils/bluprynt';
 import { CoinGeckoResult, CoingeckoStatus } from '@/app/utils/coingecko';
 import { JupiterResult, JupiterStatus } from '@/app/utils/jupiter';
 import { RugCheckResult, RugCheckStatus } from '@/app/utils/rugcheck';
@@ -16,10 +17,18 @@ export type TokenVerificationProps = {
     coinInfo?: CoinGeckoResult;
     jupiterInfo?: JupiterResult;
     rugCheckInfo?: RugCheckResult;
+    blupryntInfo?: BlupryntResult;
     isTokenInfoLoading?: boolean;
 };
 
-export function TokenVerificationBadge({ tokenInfo, jupiterInfo, rugCheckInfo, coinInfo, isTokenInfoLoading }: TokenVerificationProps) {
+export function TokenVerificationBadge({
+    tokenInfo,
+    jupiterInfo,
+    rugCheckInfo,
+    coinInfo,
+    blupryntInfo,
+    isTokenInfoLoading,
+}: TokenVerificationProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [alignRight, setAlignRight] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -49,6 +58,7 @@ export function TokenVerificationBadge({ tokenInfo, jupiterInfo, rugCheckInfo, c
     }, [isOpen]);
 
     const { verifiedSources, unverifiedSources, verificationFoundSources } = useVerificationSources({
+        blupryntInfo,
         coinInfo,
         jupiterInfo,
         rugCheckInfo,
@@ -56,6 +66,7 @@ export function TokenVerificationBadge({ tokenInfo, jupiterInfo, rugCheckInfo, c
     });
 
     const isLoading =
+        blupryntInfo?.status === BlupryntStatus.Loading ||
         (Boolean(tokenInfo?.extensions?.coingeckoId) && coinInfo?.status === CoingeckoStatus.Loading) ||
         jupiterInfo?.status === JupiterStatus.Loading ||
         rugCheckInfo?.status === RugCheckStatus.Loading ||

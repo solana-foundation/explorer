@@ -73,7 +73,7 @@ export function TokenVerificationContent({
 
     return (
         <div
-            className={`e-absolute e-top-full e-z-50 e-mt-1 e-min-w-[300px] e-rounded-xl e-border e-border-solid e-border-outer-space-800 e-bg-outer-space-900 e-p-4 ${
+            className={`e-absolute e-top-full e-z-50 e-mt-1 e-w-72 e-rounded-xl e-border e-border-solid e-border-outer-space-800 e-bg-outer-space-900 e-p-4 ${
                 alignRight ? 'e-right-0' : 'e-left-0'
             }`}
             style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)' }}
