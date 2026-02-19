@@ -156,15 +156,14 @@ export function Address({
     );
 
     return (
-        <>
+        <div ref={containerRef}>
             <div
-                ref={containerRef}
                 className={`d-none d-lg-flex align-items-center ${alignRight ? 'justify-content-end' : ''}`}
             >
                 {content}
             </div>
             <div className="d-flex d-lg-none align-items-center">{content}</div>
-        </>
+        </div>
     );
 }
 const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
