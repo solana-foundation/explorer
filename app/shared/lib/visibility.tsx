@@ -53,7 +53,7 @@ export function VisibilityProvider({ children }: { children: ReactNode }) {
 }
 
 export function useVisibility(enabled: boolean | undefined) {
-    const ref = useRef<HTMLDivElement>(null);
+    const ref = useRef<HTMLElement>(null);
     const [isVisible, setIsVisible] = useState(false);
     const observe = useContext(VisibilityContext);
 

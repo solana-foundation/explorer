@@ -111,7 +111,6 @@ export const Default: Story = {
                 </MockAccountsProvider>
             </ClusterProvider>
         ),
-        withTokenInfoBatch,
     ],
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
