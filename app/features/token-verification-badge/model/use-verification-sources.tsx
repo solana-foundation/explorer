@@ -62,7 +62,9 @@ export function useVerificationSources({
                 applyUrl:
                     'https://support.coingecko.com/hc/en-us/articles/23725417857817-Verification-Guide-for-Listing-Update-Requests-on-CoinGecko',
                 icon: <Icon src={CoinGeckoLogo} alt="CoinGecko" />,
-                isVerificationFound: Boolean(tokenInfo?.extensions?.coingeckoId && coinInfo?.status === CoingeckoStatus.Success),
+                isVerificationFound: Boolean(
+                    tokenInfo?.extensions?.coingeckoId && coinInfo?.status === CoingeckoStatus.Success
+                ),
                 name: EVerificationSource.CoinGecko,
                 verified: coingeckoVerified,
             },

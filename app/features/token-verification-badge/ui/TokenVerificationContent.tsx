@@ -1,7 +1,8 @@
 import { Check } from 'react-feather';
 
-import { VerificationSource } from '../lib/types';
 import { ERiskLevel } from '@/app/utils/rugcheck';
+
+import { VerificationSource } from '../lib/types';
 import { EVerificationSource } from '../model/use-verification-sources';
 
 function getLevelColor(level?: ERiskLevel): string {
@@ -44,7 +45,8 @@ function VerificationBadge({ source }: { source: VerificationSource }) {
 }
 
 function ApplyForVerificationLink({ source }: { source: VerificationSource }) {
-    const sourceName = source.name === EVerificationSource.RugCheck ? `${EVerificationSource.RugCheck} risk: Unknown` : source.name;
+    const sourceName =
+        source.name === EVerificationSource.RugCheck ? `${EVerificationSource.RugCheck} risk: Unknown` : source.name;
 
     return (
         <a

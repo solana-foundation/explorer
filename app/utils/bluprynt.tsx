@@ -1,7 +1,6 @@
-import React from 'react';
-
 import { Connection, PublicKey } from '@solana/web3.js';
 import bs58 from 'bs58';
+import React from 'react';
 import { decodeAttestation, SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
 
 import { useCluster } from '../providers/cluster';
@@ -38,7 +37,7 @@ export function useBluprynt(mintAddress?: string): BlupryntResult | undefined {
             try {
                 const connection = new Connection(url);
                 const accounts = await connection.getProgramAccounts(new PublicKey(SAS_PROGRAM_ID), {
-                    filters: [{ memcmp: { offset: 33, bytes: BLUPRYNT_CREDENTIAL } }],
+                    filters: [{ memcmp: { bytes: BLUPRYNT_CREDENTIAL, offset: 33 } }],
                 });
 
                 if (stale) return;
@@ -51,7 +50,11 @@ export function useBluprynt(mintAddress?: string): BlupryntResult | undefined {
                         } as any);
                         const att = (decoded as any).data;
 
-                        if (att.nonce === mintAddress || att.signer === mintAddress || att.tokenAccount === mintAddress) {
+                        if (
+                            att.nonce === mintAddress ||
+                            att.signer === mintAddress ||
+                            att.tokenAccount === mintAddress
+                        ) {
                             return true;
                         }
 

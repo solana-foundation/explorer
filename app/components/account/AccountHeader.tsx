@@ -105,9 +105,7 @@ function TokenMintHeader({
     );
 
     const defaultCard = useMemo(
-        () => (
-            <TokenMintHeaderCard token={tokenInfo ? tokenInfo : { logoURI: undefined, name: undefined }} />
-        ),
+        () => <TokenMintHeaderCard token={tokenInfo ? tokenInfo : { logoURI: undefined, name: undefined }} />,
         [tokenInfo]
     );
 
