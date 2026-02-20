@@ -118,7 +118,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
 
             let costUnits: number | undefined = undefined;
             try {
-                costUnits = tx.meta?.costUnits ?? 0;
+                costUnits = tx.meta?.costUnits;
             } catch (err) {
                 // ignore parsing errors because some old logs aren't parsable
             }
@@ -172,7 +172,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
         if (sortMode === 'compute' && showComputeUnits) {
             filteredTxs.sort((a, b) => b.computeUnits! - a.computeUnits!);
         } else if (sortMode === 'txnCost') {
-            filteredTxs.sort((a, b) => b.costUnits! - a.costUnits!);
+            filteredTxs.sort((a, b) => (b.costUnits ?? 0) - (a.costUnits ?? 0));
         } else if (sortMode === 'fee') {
             filteredTxs.sort((a, b) => (b.meta?.fee || 0) - (a.meta?.fee || 0));
         } else if (sortMode === 'reservedCUs') {
@@ -345,7 +345,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                         <td>
                                             {tx.costUnits !== undefined
                                                 ? new Intl.NumberFormat('en-US').format(tx.costUnits)
-                                                : 'Unknown'}
+                                                : 'Not Supported Slot'}
                                         </td>
                                         <td>
                                             {tx.invocations.size === 0
