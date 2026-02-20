@@ -4,7 +4,7 @@ import { Cluster } from '@utils/cluster';
 import useSWR from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useUserDomains } from '../use-user-domains';
+import { useUserSnsDomains } from '../use-user-sns-domains';
 
 vi.mock('@providers/cluster', () => ({ useCluster: vi.fn() }));
 vi.mock('swr', () => ({ default: vi.fn() }));
@@ -13,8 +13,8 @@ const MAINNET_URL = 'https://api.mainnet-beta.solana.com';
 const USER_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 
 const mockDomains = [
-    { address: {} as never, name: 'alex.sol' },
-    { address: {} as never, name: 'bob.sol' },
+    { address: 'addr1', name: 'alex.sol' },
+    { address: 'addr2', name: 'bob.sol' },
 ];
 
 const swrResponse = (overrides: { data?: unknown; isLoading?: boolean; error?: unknown } = {}) => ({
@@ -26,7 +26,7 @@ const swrResponse = (overrides: { data?: unknown; isLoading?: boolean; error?: u
     ...overrides,
 });
 
-describe('useUserDomains', () => {
+describe('useUserSnsDomains', () => {
     beforeEach(() => {
         vi.mocked(useCluster).mockReturnValue({
             cluster: Cluster.MainnetBeta,
@@ -41,42 +41,41 @@ describe('useUserDomains', () => {
             url: 'https://api.devnet.solana.com',
         } as ReturnType<typeof useCluster>);
 
-        const { result } = renderHook(() => useUserDomains(USER_ADDRESS));
+        const { result } = renderHook(() => useUserSnsDomains(USER_ADDRESS));
 
-        expect(useSWR).toHaveBeenCalledWith(null, null, expect.any(Object));
+        expect(useSWR).toHaveBeenCalledWith(null, expect.any(Function), expect.any(Object));
         expect(result.current.data).toBeUndefined();
         expect(result.current.isLoading).toBe(false);
     });
 
     it('returns SWR response with no request when userAddress is empty', () => {
-        const { result } = renderHook(() => useUserDomains(''));
+        const { result } = renderHook(() => useUserSnsDomains(''));
 
-        expect(useSWR).toHaveBeenCalledWith(null, null, expect.any(Object));
+        expect(useSWR).toHaveBeenCalledWith(null, expect.any(Function), expect.any(Object));
         expect(result.current.data).toBeUndefined();
         expect(result.current.isLoading).toBe(false);
     });
 
     it('requests with correct SWR key on Mainnet', () => {
-        renderHook(() => useUserDomains(USER_ADDRESS));
+        renderHook(() => useUserSnsDomains(USER_ADDRESS));
 
         expect(useSWR).toHaveBeenCalledWith(
-            ['user-domains', MAINNET_URL, USER_ADDRESS],
+            ['user-sns-domains', USER_ADDRESS],
             expect.any(Function),
             expect.objectContaining({ revalidateOnFocus: false })
         );
     });
 
     it('requests with correct SWR key on Custom cluster', () => {
-        const customUrl = 'https://custom.rpc.com';
         vi.mocked(useCluster).mockReturnValue({
             cluster: Cluster.Custom,
-            url: customUrl,
+            url: 'https://custom.rpc.com',
         } as ReturnType<typeof useCluster>);
 
-        renderHook(() => useUserDomains(USER_ADDRESS));
+        renderHook(() => useUserSnsDomains(USER_ADDRESS));
 
         expect(useSWR).toHaveBeenCalledWith(
-            ['user-domains', customUrl, USER_ADDRESS],
+            ['user-sns-domains', USER_ADDRESS],
             expect.any(Function),
             expect.any(Object)
         );
@@ -85,7 +84,7 @@ describe('useUserDomains', () => {
     it('returns isLoading true when loading', () => {
         vi.mocked(useSWR).mockReturnValue(swrResponse({ isLoading: true }));
 
-        const { result } = renderHook(() => useUserDomains(USER_ADDRESS));
+        const { result } = renderHook(() => useUserSnsDomains(USER_ADDRESS));
 
         expect(result.current.isLoading).toBe(true);
         expect(result.current.data).toBeUndefined();
@@ -94,7 +93,7 @@ describe('useUserDomains', () => {
     it('returns data when loaded', () => {
         vi.mocked(useSWR).mockReturnValue(swrResponse({ data: mockDomains }));
 
-        const { result } = renderHook(() => useUserDomains(USER_ADDRESS));
+        const { result } = renderHook(() => useUserSnsDomains(USER_ADDRESS));
 
         expect(result.current.data).toEqual(mockDomains);
         expect(result.current.isLoading).toBe(false);
@@ -104,7 +103,7 @@ describe('useUserDomains', () => {
         const err = new Error('fetch failed');
         vi.mocked(useSWR).mockReturnValue(swrResponse({ error: err }));
 
-        const { result } = renderHook(() => useUserDomains(USER_ADDRESS));
+        const { result } = renderHook(() => useUserSnsDomains(USER_ADDRESS));
 
         expect(result.current.error).toBe(err);
         expect(result.current.data).toBeUndefined();
