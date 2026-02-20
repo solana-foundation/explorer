@@ -1,8 +1,4 @@
 export const getProxiedUri = (uri: string): string | '' => {
-    const isProxyEnabled = process.env.NEXT_PUBLIC_METADATA_ENABLED === 'true';
-
-    if (!isProxyEnabled) return uri;
-
     // handle empty addresses as that is likely the case for metadata
     if (uri === '') return '';
 
@@ -12,6 +8,23 @@ export const getProxiedUri = (uri: string): string | '' => {
     } catch {
         throw new Error(`Could not construct URL for "${uri}"`);
     }
+
+    if (url.protocol === 'ipfs:') {
+        let path = url.host + url.pathname;
+        if (path.startsWith('ipfs/')) {
+            path = path.replace(/^ipfs\//, '');
+        }
+        uri = `https://ipfs.io/ipfs/${path}${url.search}`;
+        try {
+            url = new URL(uri);
+        } catch {
+            // Should not happen, but safe fallback
+        }
+    }
+
+    const isProxyEnabled = process.env.NEXT_PUBLIC_METADATA_ENABLED === 'true';
+
+    if (!isProxyEnabled) return uri;
 
     if (!['http:', 'https:'].includes(url.protocol)) return uri;
 
