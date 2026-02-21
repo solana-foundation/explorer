@@ -13,7 +13,7 @@ import {
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
-const MAX_TRANSACTION_BATCH_SIZE = 10;
+const TRANSACTION_FETCH_DELAY_MS = 100; // Delay between individual transaction fetches to avoid rate limiting
 
 type TransactionMap = Map<string, ParsedTransactionWithMeta>;
 
@@ -94,16 +94,24 @@ async function fetchParsedTransactions(url: string, transactionSignatures: strin
     const transactionMap = new Map();
     const connection = new Connection(url);
 
-    while (transactionSignatures.length > 0) {
-        const signatures = transactionSignatures.splice(0, MAX_TRANSACTION_BATCH_SIZE);
-        const fetched = await connection.getParsedTransactions(signatures, {
-            maxSupportedTransactionVersion: 0,
-        });
-        fetched.forEach((transactionWithMeta: ParsedTransactionWithMeta | null, index: number) => {
-            if (transactionWithMeta !== null) {
-                transactionMap.set(signatures[index], transactionWithMeta);
+    // Fetch transactions individually to avoid batch request limitations
+    for (let i = 0; i < transactionSignatures.length; i++) {
+        const signature = transactionSignatures[i];
+
+        if (i > 0) {
+            await new Promise(resolve => setTimeout(resolve, TRANSACTION_FETCH_DELAY_MS));
+        }
+
+        try {
+            const transaction = await connection.getParsedTransaction(signature, {
+                maxSupportedTransactionVersion: 0,
+            });
+            if (transaction !== null) {
+                transactionMap.set(signature, transaction);
             }
-        });
+        } catch (error) {
+            console.warn(`Failed to fetch transaction ${signature}:`, error);
+        }
     }
 
     return transactionMap;
