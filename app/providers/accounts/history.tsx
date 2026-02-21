@@ -13,7 +13,7 @@ import {
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
-const MAX_TRANSACTION_BATCH_SIZE = 10;
+const TRANSACTION_FETCH_DELAY_MS = 100; // Delay between individual transaction fetches to avoid rate limiting
 
 type TransactionMap = Map<string, ParsedTransactionWithMeta>;
 
@@ -91,19 +91,23 @@ export function HistoryProvider({ children }: HistoryProviderProps) {
 }
 
 async function fetchParsedTransactions(url: string, transactionSignatures: string[]) {
-    const transactionMap = new Map();
     const connection = new Connection(url);
+    const transactionMap = new Map<string, ParsedTransactionWithMeta>();
 
-    while (transactionSignatures.length > 0) {
-        const signatures = transactionSignatures.splice(0, MAX_TRANSACTION_BATCH_SIZE);
-        const fetched = await connection.getParsedTransactions(signatures, {
+    // Fetch transactions individually to avoid batch request limitations
+    for (let i = 0; i < transactionSignatures.length; i++) {
+        if (i > 0) {
+            await new Promise(resolve => setTimeout(resolve, TRANSACTION_FETCH_DELAY_MS));
+        }
+
+        const signature = transactionSignatures[i];
+        const tx = await connection.getParsedTransaction(signature, {
             maxSupportedTransactionVersion: 0,
         });
-        fetched.forEach((transactionWithMeta: ParsedTransactionWithMeta | null, index: number) => {
-            if (transactionWithMeta !== null) {
-                transactionMap.set(signatures[index], transactionWithMeta);
-            }
-        });
+
+        if (tx !== null) {
+            transactionMap.set(signature, tx);
+        }
     }
 
     return transactionMap;
