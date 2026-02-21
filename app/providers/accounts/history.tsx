@@ -91,26 +91,22 @@ export function HistoryProvider({ children }: HistoryProviderProps) {
 }
 
 async function fetchParsedTransactions(url: string, transactionSignatures: string[]) {
-    const transactionMap = new Map();
     const connection = new Connection(url);
+    const transactionMap = new Map<string, ParsedTransactionWithMeta>();
 
     // Fetch transactions individually to avoid batch request limitations
     for (let i = 0; i < transactionSignatures.length; i++) {
-        const signature = transactionSignatures[i];
-
         if (i > 0) {
             await new Promise(resolve => setTimeout(resolve, TRANSACTION_FETCH_DELAY_MS));
         }
 
-        try {
-            const transaction = await connection.getParsedTransaction(signature, {
-                maxSupportedTransactionVersion: 0,
-            });
-            if (transaction !== null) {
-                transactionMap.set(signature, transaction);
-            }
-        } catch (error) {
-            console.warn(`Failed to fetch transaction ${signature}:`, error);
+        const signature = transactionSignatures[i];
+        const tx = await connection.getParsedTransaction(signature, {
+            maxSupportedTransactionVersion: 0,
+        });
+
+        if (tx !== null) {
+            transactionMap.set(signature, tx);
         }
     }
 
