@@ -1000,7 +1000,7 @@
     "testnet_activation_epoch": 830,
     "devnet_activation_epoch": 934,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 842,
     "description": ""
   },
   {
@@ -1135,6 +1135,290 @@
       "v3.0.0"
     ],
     "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "H6iVbVaDZgDphcPbcZwc5LoznMPWQfnJ1AM7L1xzqvt5",
+    "title": "SIMD-0339: Increase CPI Account Infos Limit",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0339-increase-cpi-account-info-limit.md"
+    ],
+    "simds": [
+      "0339"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.806.30102"
+    ],
+    "min_jito_versions": [
+      "v3.1.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 906,
+    "devnet_activation_epoch": 1008,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "fixfecLZYMfkGzwq6NJA11Yw6KYztzXiK9QcL3K78in",
+    "title": "SIMD-0317: Enforce 32 data + 32 coding shreds",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0317-enforce-32-data-shreds.md"
+    ],
+    "simds": [
+      "0317"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.806.30102"
+    ],
+    "min_jito_versions": [
+      "v3.1.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 906,
+    "devnet_activation_epoch": 1011,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "64ixypL1HPu8WtJhNSMb9mSgfFaJvsANuRkTbHyuLfnx",
+    "title": "SIMD-0160: Static Instruction Limit",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0160-static-instruction-limit.md"
+    ],
+    "simds": [
+      "0160"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.806.30102"
+    ],
+    "min_jito_versions": [
+      "v3.1.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 906,
+    "devnet_activation_epoch": 1012,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "poUdAqRXXsNmfqAZ6UqpjbeYgwBygbfQLEvWSqVhSnb",
+    "title": "SIMD-0359: Poseidon Syscall - Enforce Input Length",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0359-poseidon-enforce-input-length.md"
+    ],
+    "simds": [
+      "0359"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.806.30102"
+    ],
+    "min_jito_versions": [
+      "v3.1.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 906,
+    "devnet_activation_epoch": 1014,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "bnYzodLwmybj7e1HAe98yZrdJTd7we69eMMLgCXqKZm",
+    "title": "SIMD-0334: Fix alt_bn128_pairing Syscall Length Check",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0334-fix-alt-bn128-pairing-length-check.md"
+    ],
+    "simds": [
+      "0334"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.806.30102"
+    ],
+    "min_jito_versions": [
+      "v3.1.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 906,
+    "devnet_activation_epoch": 1015,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "rent6iVy6PDoViPBeJ6k5EJQrkj62h7DPyLbWGHwjrC",
+    "title": "SIMD-0194: Deprecate rent exemption threshold",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0194-deprecate-rent-exemption-threshold.md"
+    ],
+    "simds": [
+      "0194"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.806.30102"
+    ],
+    "min_jito_versions": [
+      "v3.1.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 907,
+    "devnet_activation_epoch": 1023,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "CHaChatUnR3s6cPyPMMGNJa3VdQQ8PNH2JqdD4LpCKnB",
+    "title": "SIMD-0332: Reduce ChaCha rounds for Turbine from 20 to 8",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0332-cha-cha-8.md"
+    ],
+    "simds": [
+      "0332"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.812.30108"
+    ],
+    "min_jito_versions": [
+      "v3.1.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 909,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "Gx4XFcrVMt4HUvPzTpTSVkdDVgcDSjKhDN1RqRS6KDuZ",
+    "title": "SIMD-0185: Vote Account V4",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0185-vote-account-v4.md"
+    ],
+    "simds": [
+      "0185"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.811.30108"
+    ],
+    "min_jito_versions": [
+      "v3.1.0 (need to update tip distribution program for VoteStateV4 parsing)"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 910,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "5xXZc66h4UdB6Yq7FzdBxBiRAFMMScMLwHxk2QZDaNZL",
+    "title": "SIMD-0321: Instruction Data Pointer in VM Register 2",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0321-vm-r2-instruction-data-pointer.md"
+    ],
+    "simds": [
+      "0321"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.806.30102"
+    ],
+    "min_jito_versions": [
+      "v3.1.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 911,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "4WeHX6QoXCCwqbSFgi6dxnB6QsPo6YApaNTH7P4MLQ99",
+    "title": "SIMD-0083: Relax intrabatch account locks",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0083-relax-entry-constraints.md"
+    ],
+    "simds": [
+      "0083"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.7"
+    ],
+    "min_fd_versions": [
+      "v0.811.30108"
+    ],
+    "min_jito_versions": [
+      "v3.1.7"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 915,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "76dHtohc2s5dR3ahJyBxs7eJJVipFkaPdih9CLgTTb4B",
+    "title": "SIMD-0249: Delay Commission Updates",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0249-delay-commission-updates.md"
+    ],
+    "simds": [
+      "0249"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [
+      "No version yet"
+    ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": null,
