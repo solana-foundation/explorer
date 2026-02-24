@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
     addSavedCluster,
-    clearPersistedCluster,
+    findSavedClusterUrl,
     getPersistedCluster,
     getSavedClusters,
     removeSavedCluster,
@@ -58,22 +58,6 @@ describe('cluster-storage', () => {
             vi.mocked(localStorageIsAvailable).mockReturnValue(false);
             setPersistedCluster('devnet');
             expect(localStorage.getItem('explorer:selectedCluster')).toBeNull();
-        });
-    });
-
-    describe('clearPersistedCluster', () => {
-        it('removes the stored cluster', () => {
-            setPersistedCluster('devnet');
-            clearPersistedCluster();
-            expect(getPersistedCluster()).toBeNull();
-        });
-
-        it('does nothing when localStorage is unavailable', () => {
-            setPersistedCluster('devnet');
-            vi.mocked(localStorageIsAvailable).mockReturnValue(false);
-            clearPersistedCluster();
-            vi.mocked(localStorageIsAvailable).mockReturnValue(true);
-            expect(getPersistedCluster()).toBe('devnet');
         });
     });
 
@@ -147,6 +131,22 @@ describe('cluster-storage', () => {
             removeSavedCluster('Local');
             vi.mocked(localStorageIsAvailable).mockReturnValue(true);
             expect(getSavedClusters()).toHaveLength(1);
+        });
+    });
+
+    describe('findSavedClusterUrl', () => {
+        it('returns the URL for a matching saved cluster', () => {
+            addSavedCluster({ name: 'Local', url: 'http://localhost:8899' });
+            expect(findSavedClusterUrl('custom:Local')).toBe('http://localhost:8899');
+        });
+
+        it('returns undefined for a slug without the custom: prefix', () => {
+            addSavedCluster({ name: 'Local', url: 'http://localhost:8899' });
+            expect(findSavedClusterUrl('devnet')).toBeUndefined();
+        });
+
+        it('returns undefined when the named cluster does not exist', () => {
+            expect(findSavedClusterUrl('custom:Nonexistent')).toBeUndefined();
         });
     });
 });

@@ -2,7 +2,7 @@
 
 import { createSolanaRpc } from '@solana/kit';
 import { Cluster, clusterFromSlug, clusterName, clusterSlug, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
-import { getPersistedCluster, getSavedClusters, setPersistedCluster } from '@utils/cluster-storage';
+import { findSavedClusterUrl, getPersistedCluster, SAVED_CLUSTER_PREFIX, setPersistedCluster } from '@utils/cluster-storage';
 import { localStorageIsAvailable } from '@utils/local-storage';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
@@ -55,16 +55,13 @@ function clusterReducer(state: State, action: Action): State {
 function parseQuery(searchParams: ReadonlyURLSearchParams | null): Cluster {
     const clusterParam = searchParams?.get('cluster');
     if (clusterParam) {
-        const cluster = clusterFromSlug(clusterParam);
-        if (cluster !== null) return cluster;
+        return clusterFromSlug(clusterParam) ?? DEFAULT_CLUSTER;
     }
 
-    if (!clusterParam) {
-        const persisted = getPersistedCluster();
-        if (persisted) {
-            const cluster = clusterFromSlug(persisted);
-            if (cluster !== null) return cluster;
-        }
+    const persisted = getPersistedCluster();
+    if (persisted) {
+        if (persisted.startsWith(SAVED_CLUSTER_PREFIX)) return Cluster.Custom;
+        return clusterFromSlug(persisted) ?? DEFAULT_CLUSTER;
     }
 
     return DEFAULT_CLUSTER;
@@ -102,22 +99,9 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
         (localStorageIsAvailable() && localStorage.getItem('enableCustomUrl') !== null) ||
         isWhitelistedRpc(state.customUrl);
 
-    const resolveCustomUrl = (): string => {
-        if (enableCustomUrl && searchParams?.get('customUrl')) {
-            return searchParams.get('customUrl')!;
-        }
-        if (cluster === Cluster.Custom && !searchParams?.get('customUrl')) {
-            const saved = getSavedClusters();
-            const persisted = getPersistedCluster();
-            if (persisted?.startsWith('custom:')) {
-                const name = persisted.slice('custom:'.length);
-                const match = saved.find(c => c.name === name);
-                if (match) return match.url;
-            }
-        }
-        return state.customUrl;
-    };
-    const customUrl = resolveCustomUrl();
+    const urlFromParams = enableCustomUrl ? searchParams?.get('customUrl') : null;
+    const urlFromSaved = cluster === Cluster.Custom && !urlFromParams ? findSavedClusterUrl(getPersistedCluster() ?? '') : undefined;
+    const customUrl = urlFromParams ?? urlFromSaved ?? state.customUrl;
     const pathname = usePathname();
     const router = useRouter();
 
@@ -136,8 +120,9 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
         }
     }, [enableCustomUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Persist cluster selection to localStorage
     useEffect(() => {
+        const persisted = getPersistedCluster();
+        if (cluster === Cluster.Custom && persisted?.startsWith(SAVED_CLUSTER_PREFIX)) return;
         setPersistedCluster(clusterSlug(cluster));
     }, [cluster]);
 

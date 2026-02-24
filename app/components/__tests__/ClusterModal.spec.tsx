@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { Cluster, ClusterStatus } from '@/app/utils/cluster';
 import { addSavedCluster, getSavedClusters, removeSavedCluster } from '@/app/utils/cluster-storage';
 
 vi.mock('next/navigation', () => ({
@@ -11,15 +12,16 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/app/providers/cluster', () => ({
     useCluster: () => ({
-        cluster: 4, // Cluster.Custom
+        cluster: Cluster.Custom,
         customUrl: 'http://localhost:8899',
-        status: 0, // ClusterStatus.Connected
+        status: ClusterStatus.Connected,
     }),
     useClusterModal: () => [true, vi.fn()],
     useUpdateCustomUrl: () => vi.fn(),
 }));
 
 vi.mock('@/app/utils/cluster-storage', () => ({
+    SAVED_CLUSTER_PREFIX: 'custom:',
     addSavedCluster: vi.fn(),
     getSavedClusters: vi.fn(() => []),
     removeSavedCluster: vi.fn(),

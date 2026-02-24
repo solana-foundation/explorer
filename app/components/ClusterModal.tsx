@@ -3,7 +3,14 @@
 import { useCluster, useClusterModal, useUpdateCustomUrl } from '@providers/cluster';
 import { useDebounceCallback } from '@react-hook/debounce';
 import { Cluster, clusterName, CLUSTERS, clusterSlug, ClusterStatus } from '@utils/cluster';
-import { addSavedCluster, getSavedClusters, removeSavedCluster, SavedCluster, setPersistedCluster } from '@utils/cluster-storage';
+import {
+    addSavedCluster,
+    getSavedClusters,
+    removeSavedCluster,
+    SAVED_CLUSTER_PREFIX,
+    SavedCluster,
+    setPersistedCluster,
+} from '@utils/cluster-storage';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -38,14 +45,13 @@ export function ClusterModal() {
     );
 }
 
-type InputProps = { activeSuffix: string; active: boolean; onSaved: () => void };
-function CustomClusterInput({ activeSuffix, active, onSaved }: InputProps) {
+type InputProps = { activeSuffix: string; active: boolean; onSaved: () => void; savedClusters: SavedCluster[] };
+function CustomClusterInput({ activeSuffix, active, onSaved, savedClusters }: InputProps) {
     const { customUrl } = useCluster();
     const updateCustomUrl = useUpdateCustomUrl();
     const [editing, setEditing] = React.useState(false);
     const [saving, setSaving] = React.useState(false);
-    const [clusterName, setClusterName] = React.useState('');
-    const [currentUrl, setCurrentUrl] = React.useState(customUrl);
+    const [savedName, setSavedName] = React.useState('');
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
@@ -53,7 +59,6 @@ function CustomClusterInput({ activeSuffix, active, onSaved }: InputProps) {
     const btnClass = active ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white';
 
     const onUrlInput = useDebounceCallback((url: string) => {
-        setCurrentUrl(url);
         updateCustomUrl(url);
         if (url.length > 0) {
             const nextSearchParams = new URLSearchParams(searchParams?.toString());
@@ -64,10 +69,10 @@ function CustomClusterInput({ activeSuffix, active, onSaved }: InputProps) {
     }, 500);
 
     const handleSave = () => {
-        if (!clusterName.trim()) return;
-        addSavedCluster({ name: clusterName.trim(), url: currentUrl });
-        setPersistedCluster(`custom:${clusterName.trim()}`);
-        setClusterName('');
+        if (!savedName.trim()) return;
+        addSavedCluster({ name: savedName.trim(), url: customUrl });
+        setPersistedCluster(`${SAVED_CLUSTER_PREFIX}${savedName.trim()}`);
+        setSavedName('');
         setSaving(false);
         onSaved();
     };
@@ -84,6 +89,7 @@ function CustomClusterInput({ activeSuffix, active, onSaved }: InputProps) {
             {active && (
                 <>
                     <input
+                        key={customUrl}
                         type="url"
                         defaultValue={customUrl}
                         className={`form-control ${inputTextClass}`}
@@ -91,7 +97,43 @@ function CustomClusterInput({ activeSuffix, active, onSaved }: InputProps) {
                         onBlur={() => setEditing(false)}
                         onInput={e => onUrlInput(e.currentTarget.value)}
                     />
-                    {!saving ? (
+                    {saving ? (
+                        <div className="col-12 mt-2 mb-3" data-testid="save-cluster-form">
+                            <input
+                                type="text"
+                                className="form-control mb-2"
+                                placeholder="Cluster name"
+                                value={savedName}
+                                onChange={e => setSavedName(e.target.value)}
+                                data-testid="cluster-name-input"
+                                autoFocus
+                            />
+                            {savedName.trim() === '' && (
+                                <small className="text-muted" data-testid="name-required-hint">
+                                    Name is required
+                                </small>
+                            )}
+                            <div className="d-flex gap-2 mt-1">
+                                <button
+                                    className="btn btn-primary flex-grow-1"
+                                    onClick={handleSave}
+                                    disabled={!savedName.trim()}
+                                    data-testid="confirm-save-cluster-btn"
+                                >
+                                    Save
+                                </button>
+                                <button
+                                    className="btn btn-white flex-grow-1"
+                                    onClick={() => {
+                                        setSaving(false);
+                                        setSavedName('');
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    ) : !savedClusters.some(sc => sc.url === customUrl) ? (
                         <button
                             className="btn btn-sm btn-white col-12 mt-2 mb-3"
                             onClick={() => setSaving(true)}
@@ -99,43 +141,7 @@ function CustomClusterInput({ activeSuffix, active, onSaved }: InputProps) {
                         >
                             Save this cluster
                         </button>
-                    ) : (
-                        <div className="mt-2 mb-3" data-testid="save-cluster-form">
-                            <input
-                                type="text"
-                                className="form-control form-control-sm mb-2"
-                                placeholder="Cluster name"
-                                value={clusterName}
-                                onChange={e => setClusterName(e.target.value)}
-                                data-testid="cluster-name-input"
-                                autoFocus
-                            />
-                            {clusterName.trim() === '' && (
-                                <small className="text-muted" data-testid="name-required-hint">
-                                    Name is required
-                                </small>
-                            )}
-                            <div className="d-flex gap-2 mt-1">
-                                <button
-                                    className="btn btn-sm btn-primary flex-grow-1"
-                                    onClick={handleSave}
-                                    disabled={!clusterName.trim()}
-                                    data-testid="confirm-save-cluster-btn"
-                                >
-                                    Save
-                                </button>
-                                <button
-                                    className="btn btn-sm btn-white flex-grow-1"
-                                    onClick={() => {
-                                        setSaving(false);
-                                        setClusterName('');
-                                    }}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                    ) : null}
                 </>
             )}
         </>
@@ -168,20 +174,18 @@ function SavedClusterItem({
     const nextQueryString = nextSearchParams.toString();
     const clusterUrl = `${pathname}?${nextQueryString}`;
 
-    const truncatedUrl = cluster.url.length > 40 ? cluster.url.slice(0, 37) + '...' : cluster.url;
-
     return (
-        <div className="d-flex align-items-center mb-2" data-testid={`saved-cluster-${cluster.name}`}>
+        <div className="position-relative col-12 mb-3" data-testid={`saved-cluster-${cluster.name}`}>
             <Link
-                className={`btn flex-grow-1 text-start ${btnClass}`}
+                className={`btn col-12 text-center ${btnClass}`}
                 href={clusterUrl}
-                onClick={() => setPersistedCluster(`custom:${cluster.name}`)}
+                onClick={() => setPersistedCluster(`${SAVED_CLUSTER_PREFIX}${cluster.name}`)}
             >
-                <div>{cluster.name}</div>
-                <small className="text-muted">{truncatedUrl}</small>
+                {cluster.name}
             </Link>
             <button
-                className="btn btn-sm btn-white ms-2"
+                className="btn btn-sm position-absolute"
+                style={{ right: 4, top: '50%', transform: 'translateY(-50%)' }}
                 onClick={e => {
                     e.stopPropagation();
                     onDelete(cluster.name);
@@ -195,19 +199,18 @@ function SavedClusterItem({
     );
 }
 
-function SavedClustersSection({ activeSuffix }: { activeSuffix: string }) {
-    const [savedClusters, setSavedClusters] = React.useState<SavedCluster[]>([]);
+function SavedClustersSection({
+    activeSuffix,
+    savedClusters,
+    onChanged,
+}: {
+    activeSuffix: string;
+    savedClusters: SavedCluster[];
+    onChanged: () => void;
+}) {
     const { customUrl, cluster } = useCluster();
     const router = useRouter();
     const pathname = usePathname();
-
-    React.useEffect(() => {
-        setSavedClusters(getSavedClusters());
-    }, []);
-
-    const refresh = React.useCallback(() => {
-        setSavedClusters(getSavedClusters());
-    }, []);
 
     const handleDelete = (name: string) => {
         const isActive = cluster === Cluster.Custom && savedClusters.find(c => c.name === name)?.url === customUrl;
@@ -216,13 +219,13 @@ function SavedClustersSection({ activeSuffix }: { activeSuffix: string }) {
             setPersistedCluster('mainnet-beta');
             router.push(pathname);
         }
-        refresh();
+        onChanged();
     };
 
     if (savedClusters.length === 0) return null;
 
     return (
-        <div data-testid="saved-clusters-section">
+        <div className="w-100" data-testid="saved-clusters-section">
             <hr />
             <h3 className="text-center mb-3">Saved Clusters</h3>
             {savedClusters.map(sc => (
@@ -240,7 +243,8 @@ function SavedClustersSection({ activeSuffix }: { activeSuffix: string }) {
 
 function ClusterToggle() {
     const { status, cluster } = useCluster();
-    const [, forceRefresh] = React.useReducer(x => x + 1, 0);
+    const [savedClusters, setSavedClusters] = React.useState<SavedCluster[]>(() => getSavedClusters());
+    const refreshSaved = React.useCallback(() => setSavedClusters(getSavedClusters()), []);
 
     let activeSuffix = '';
     switch (status) {
@@ -268,7 +272,8 @@ function ClusterToggle() {
                             key={index}
                             activeSuffix={activeSuffix}
                             active={active}
-                            onSaved={forceRefresh}
+                            onSaved={refreshSaved}
+                            savedClusters={savedClusters}
                         />
                     );
 
@@ -289,7 +294,7 @@ function ClusterToggle() {
                     </Link>
                 );
             })}
-            <SavedClustersSection activeSuffix={activeSuffix} />
+            <SavedClustersSection activeSuffix={activeSuffix} savedClusters={savedClusters} onChanged={refreshSaved} />
         </div>
     );
 }

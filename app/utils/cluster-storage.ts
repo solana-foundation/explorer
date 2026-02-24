@@ -7,32 +7,16 @@ export interface SavedCluster {
 
 const SELECTED_CLUSTER_KEY = 'explorer:selectedCluster';
 const SAVED_CLUSTERS_KEY = 'explorer:savedClusters';
+export const SAVED_CLUSTER_PREFIX = 'custom:';
 
 export function getPersistedCluster(): string | null {
     if (!localStorageIsAvailable()) return null;
-    try {
-        return localStorage.getItem(SELECTED_CLUSTER_KEY);
-    } catch {
-        return null;
-    }
+    return localStorage.getItem(SELECTED_CLUSTER_KEY);
 }
 
-export function setPersistedCluster(clusterSlug: string): void {
+export function setPersistedCluster(slug: string): void {
     if (!localStorageIsAvailable()) return;
-    try {
-        localStorage.setItem(SELECTED_CLUSTER_KEY, clusterSlug);
-    } catch {
-        // Silently fail if storage is full or unavailable
-    }
-}
-
-export function clearPersistedCluster(): void {
-    if (!localStorageIsAvailable()) return;
-    try {
-        localStorage.removeItem(SELECTED_CLUSTER_KEY);
-    } catch {
-        // Silently fail
-    }
+    localStorage.setItem(SELECTED_CLUSTER_KEY, slug);
 }
 
 export function getSavedClusters(): SavedCluster[] {
@@ -54,22 +38,20 @@ export function getSavedClusters(): SavedCluster[] {
 
 export function addSavedCluster(cluster: SavedCluster): void {
     if (!localStorageIsAvailable()) return;
-    try {
-        const clusters = getSavedClusters();
-        clusters.push(cluster);
-        localStorage.setItem(SAVED_CLUSTERS_KEY, JSON.stringify(clusters));
-    } catch {
-        // Silently fail
-    }
+    const clusters = getSavedClusters().filter(c => c.name !== cluster.name);
+    clusters.push(cluster);
+    localStorage.setItem(SAVED_CLUSTERS_KEY, JSON.stringify(clusters));
 }
 
 export function removeSavedCluster(name: string): void {
     if (!localStorageIsAvailable()) return;
-    try {
-        const clusters = getSavedClusters();
-        const filtered = clusters.filter(c => c.name !== name);
-        localStorage.setItem(SAVED_CLUSTERS_KEY, JSON.stringify(filtered));
-    } catch {
-        // Silently fail
-    }
+    const clusters = getSavedClusters();
+    const filtered = clusters.filter(c => c.name !== name);
+    localStorage.setItem(SAVED_CLUSTERS_KEY, JSON.stringify(filtered));
+}
+
+export function findSavedClusterUrl(persistedSlug: string): string | undefined {
+    if (!persistedSlug.startsWith(SAVED_CLUSTER_PREFIX)) return undefined;
+    const name = persistedSlug.slice(SAVED_CLUSTER_PREFIX.length);
+    return getSavedClusters().find(c => c.name === name)?.url;
 }
