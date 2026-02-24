@@ -52,9 +52,14 @@ function CustomClusterInput({ activeSuffix, active, onSaved, savedClusters }: In
     const [editing, setEditing] = React.useState(false);
     const [saving, setSaving] = React.useState(false);
     const [savedName, setSavedName] = React.useState('');
+    const [localUrl, setLocalUrl] = React.useState(customUrl);
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
+
+    React.useEffect(() => {
+        if (!editing) setLocalUrl(customUrl);
+    }, [customUrl, editing]);
 
     const btnClass = active ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white';
 
@@ -89,13 +94,15 @@ function CustomClusterInput({ activeSuffix, active, onSaved, savedClusters }: In
             {active && (
                 <>
                     <input
-                        key={customUrl}
                         type="url"
-                        defaultValue={customUrl}
+                        value={localUrl}
                         className={`form-control ${inputTextClass}`}
                         onFocus={() => setEditing(true)}
                         onBlur={() => setEditing(false)}
-                        onInput={e => onUrlInput(e.currentTarget.value)}
+                        onChange={e => {
+                            setLocalUrl(e.target.value);
+                            onUrlInput(e.target.value);
+                        }}
                     />
                     {saving ? (
                         <div className="col-12 mt-2 mb-3" data-testid="save-cluster-form">
@@ -243,8 +250,12 @@ function SavedClustersSection({
 
 function ClusterToggle() {
     const { status, cluster } = useCluster();
-    const [savedClusters, setSavedClusters] = React.useState<SavedCluster[]>(() => getSavedClusters());
+    const [savedClusters, setSavedClusters] = React.useState<SavedCluster[]>([]);
     const refreshSaved = React.useCallback(() => setSavedClusters(getSavedClusters()), []);
+
+    React.useEffect(() => {
+        setSavedClusters(getSavedClusters());
+    }, []);
 
     let activeSuffix = '';
     switch (status) {

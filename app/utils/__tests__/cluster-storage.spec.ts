@@ -103,6 +103,12 @@ describe('cluster-storage', () => {
             expect(getSavedClusters()[1].name).toBe('Staging');
         });
 
+        it('replaces an existing cluster with the same name', () => {
+            addSavedCluster({ name: 'Local', url: 'http://localhost:8899' });
+            addSavedCluster({ name: 'Local', url: 'http://localhost:9999' });
+            expect(getSavedClusters()).toEqual([{ name: 'Local', url: 'http://localhost:9999' }]);
+        });
+
         it('does nothing when localStorage is unavailable', () => {
             vi.mocked(localStorageIsAvailable).mockReturnValue(false);
             addSavedCluster({ name: 'Local', url: 'http://localhost:8899' });

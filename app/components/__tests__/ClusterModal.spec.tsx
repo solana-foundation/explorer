@@ -56,6 +56,12 @@ describe('ClusterModal', () => {
         expect(screen.getByTestId('save-custom-cluster-btn')).toBeInTheDocument();
     });
 
+    it('hides save button when URL is already saved', () => {
+        vi.mocked(getSavedClusters).mockReturnValue([{ name: 'My Local', url: 'http://localhost:8899' }]);
+        render(<ClusterModal />);
+        expect(screen.queryByTestId('save-custom-cluster-btn')).not.toBeInTheDocument();
+    });
+
     it('shows name input after clicking Save this cluster', () => {
         render(<ClusterModal />);
         fireEvent.click(screen.getByTestId('save-custom-cluster-btn'));
