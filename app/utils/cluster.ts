@@ -102,20 +102,7 @@ export function serverClusterUrl(cluster: Cluster, customUrl: string): string {
 }
 
 export function clusterFromSlug(slug: string): Cluster | null {
-    switch (slug) {
-        case 'mainnet-beta':
-            return Cluster.MainnetBeta;
-        case 'testnet':
-            return Cluster.Testnet;
-        case 'devnet':
-            return Cluster.Devnet;
-        case 'simd296':
-            return Cluster.Simd296;
-        case 'custom':
-            return Cluster.Custom;
-        default:
-            return null;
-    }
+    return CLUSTERS.find(c => clusterSlug(c) === slug) ?? null;
 }
 
 export const DEFAULT_CLUSTER = Cluster.MainnetBeta;

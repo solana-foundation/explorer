@@ -1,4 +1,4 @@
-import { localStorageIsAvailable } from './local-storage';
+import { localStorageIsAvailable } from '@utils/local-storage';
 
 export interface SavedCluster {
     name: string;

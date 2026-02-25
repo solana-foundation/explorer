@@ -2,7 +2,7 @@
 
 import { createSolanaRpc } from '@solana/kit';
 import { Cluster, clusterFromSlug, clusterName, clusterSlug, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
-import { findSavedClusterUrl, getPersistedCluster, SAVED_CLUSTER_PREFIX, setPersistedCluster } from '@utils/cluster-storage';
+import { findSavedClusterUrl, getPersistedCluster, SAVED_CLUSTER_PREFIX, setPersistedCluster } from '@features/custom-cluster';
 import { localStorageIsAvailable } from '@utils/local-storage';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';

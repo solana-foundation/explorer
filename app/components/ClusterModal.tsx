@@ -2,20 +2,22 @@
 
 import { useCluster, useClusterModal, useUpdateCustomUrl } from '@providers/cluster';
 import { useDebounceCallback } from '@react-hook/debounce';
-import { Cluster, clusterName, CLUSTERS, clusterSlug, ClusterStatus } from '@utils/cluster';
+import { Cluster, clusterName, CLUSTERS, clusterSlug, ClusterStatus, DEFAULT_CLUSTER } from '@utils/cluster';
 import {
     addSavedCluster,
     getSavedClusters,
     removeSavedCluster,
     SAVED_CLUSTER_PREFIX,
-    SavedCluster,
+    type SavedCluster,
     setPersistedCluster,
-} from '@utils/cluster-storage';
+} from '@features/custom-cluster';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
+import { Trash2 } from 'react-feather';
 
+import { cn } from './shared/utils';
 import { Overlay } from './common/Overlay';
 
 const ClusterModalDeveloperSettings = dynamic(() => import('./ClusterModalDeveloperSettings'), { ssr: false });
@@ -61,8 +63,6 @@ function CustomClusterInput({ activeSuffix, active, onSaved, savedClusters }: In
         if (!editing) setLocalUrl(customUrl);
     }, [customUrl, editing]);
 
-    const btnClass = active ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white';
-
     const onUrlInput = useDebounceCallback((url: string) => {
         updateCustomUrl(url);
         if (url.length > 0) {
@@ -82,11 +82,10 @@ function CustomClusterInput({ activeSuffix, active, onSaved, savedClusters }: In
         onSaved();
     };
 
-    const inputTextClass = editing ? '' : 'text-muted';
     return (
         <>
             <Link
-                className={`btn col-12 mb-3 ${btnClass}`}
+                className={cn('btn col-12 mb-3', active ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white')}
                 href={{ query: { cluster: 'custom', ...(customUrl.length > 0 ? { customUrl } : null) } }}
             >
                 Custom RPC URL
@@ -96,7 +95,7 @@ function CustomClusterInput({ activeSuffix, active, onSaved, savedClusters }: In
                     <input
                         type="url"
                         value={localUrl}
-                        className={`form-control ${inputTextClass}`}
+                        className={cn('form-control', !editing && 'text-muted')}
                         onFocus={() => setEditing(true)}
                         onBlur={() => setEditing(false)}
                         onChange={e => {
@@ -173,8 +172,6 @@ function SavedClusterItem({
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const btnClass = isActive ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white';
-
     const nextSearchParams = new URLSearchParams(searchParams?.toString());
     nextSearchParams.set('cluster', 'custom');
     nextSearchParams.set('customUrl', cluster.url);
@@ -184,7 +181,7 @@ function SavedClusterItem({
     return (
         <div className="position-relative col-12 mb-3" data-testid={`saved-cluster-${cluster.name}`}>
             <Link
-                className={`btn col-12 text-center ${btnClass}`}
+                className={cn('btn col-12 text-center', isActive ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white')}
                 href={clusterUrl}
                 onClick={() => setPersistedCluster(`${SAVED_CLUSTER_PREFIX}${cluster.name}`)}
             >
@@ -200,7 +197,7 @@ function SavedClusterItem({
                 data-testid={`delete-cluster-${cluster.name}`}
                 aria-label={`Delete ${cluster.name}`}
             >
-                &times;
+                <Trash2 size={14} />
             </button>
         </div>
     );
@@ -223,7 +220,7 @@ function SavedClustersSection({
         const isActive = cluster === Cluster.Custom && savedClusters.find(c => c.name === name)?.url === customUrl;
         removeSavedCluster(name);
         if (isActive) {
-            setPersistedCluster('mainnet-beta');
+            setPersistedCluster(clusterSlug(DEFAULT_CLUSTER));
             router.push(pathname);
         }
         onChanged();
@@ -288,11 +285,9 @@ function ClusterToggle() {
                         />
                     );
 
-                const btnClass = active ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white';
-
                 const nextSearchParams = new URLSearchParams(searchParams?.toString());
                 const slug = clusterSlug(net);
-                if (slug !== 'mainnet-beta') {
+                if (net !== DEFAULT_CLUSTER) {
                     nextSearchParams.set('cluster', slug);
                 } else {
                     nextSearchParams.delete('cluster');
@@ -300,7 +295,7 @@ function ClusterToggle() {
                 const nextQueryString = nextSearchParams.toString();
                 const clusterUrl = `${pathname}${nextQueryString ? `?${nextQueryString}` : ''}`;
                 return (
-                    <Link key={index} className={`btn col-12 mb-3 ${btnClass}`} href={clusterUrl}>
+                    <Link key={index} className={cn('btn col-12 mb-3', active ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white')} href={clusterUrl}>
                         {clusterName(net)}
                     </Link>
                 );

@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster, ClusterStatus } from '@/app/utils/cluster';
-import { addSavedCluster, getSavedClusters, removeSavedCluster } from '@/app/utils/cluster-storage';
+import { addSavedCluster, getSavedClusters, removeSavedCluster } from '@features/custom-cluster';
 
 vi.mock('next/navigation', () => ({
     usePathname: () => '/',
@@ -20,7 +20,7 @@ vi.mock('@/app/providers/cluster', () => ({
     useUpdateCustomUrl: () => vi.fn(),
 }));
 
-vi.mock('@/app/utils/cluster-storage', () => ({
+vi.mock('@features/custom-cluster', () => ({
     SAVED_CLUSTER_PREFIX: 'custom:',
     addSavedCluster: vi.fn(),
     getSavedClusters: vi.fn(() => []),

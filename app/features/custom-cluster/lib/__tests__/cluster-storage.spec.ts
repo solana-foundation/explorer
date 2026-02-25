@@ -9,11 +9,11 @@ import {
     setPersistedCluster,
 } from '../cluster-storage';
 
-vi.mock('../local-storage', () => ({
+vi.mock('@utils/local-storage', () => ({
     localStorageIsAvailable: vi.fn(() => true),
 }));
 
-import { localStorageIsAvailable } from '../local-storage';
+import { localStorageIsAvailable } from '@utils/local-storage';
 
 describe('cluster-storage', () => {
     beforeEach(() => {
