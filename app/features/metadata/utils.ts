@@ -1,5 +1,7 @@
 import { parseUrl, SAFE_EXTERNAL_PROTOCOLS } from '@/app/shared/lib/url';
 
+const IPFS_GATEWAY = 'https://ipfs.io/ipfs';
+
 export const getProxiedUri = (uri: string): string | '' => {
     if (!uri) return '';
 
@@ -11,16 +13,12 @@ export const getProxiedUri = (uri: string): string | '' => {
     let url = parseUrl(uri);
     if (!url) return uri;
 
-    if (url.protocol === 'ipfs:') {
-        let path = url.host + url.pathname;
-        if (path.startsWith('ipfs/')) {
-            path = path.replace(/^ipfs\//, '');
-        }
-        uri = `https://ipfs.io/ipfs/${path}${url.search}`;
-        url = parseUrl(uri) || url;
-    }
-
     const isProxyEnabled = process.env.NEXT_PUBLIC_METADATA_ENABLED === 'true';
+
+    if (url.protocol === 'ipfs:') {
+        const gatewayUri = resolveIpfsUri(url);
+        return isProxyEnabled ? proxyUri(gatewayUri) : gatewayUri;
+    }
 
     if (!isProxyEnabled) return uri;
 
@@ -28,5 +26,12 @@ export const getProxiedUri = (uri: string): string | '' => {
     // them through unchanged so the caller can decide what to do with them.
     if (!SAFE_EXTERNAL_PROTOCOLS.includes(url.protocol)) return uri;
 
-    return `/api/metadata/proxy?uri=${encodeURIComponent(uri)}`;
+    return proxyUri(uri);
 };
+
+const resolveIpfsUri = (url: URL): string => {
+    const path = (url.host + url.pathname).replace(/^ipfs\//, '');
+    return `${IPFS_GATEWAY}/${path}${url.search}`;
+};
+
+const proxyUri = (uri: string): string => `/api/metadata/proxy?uri=${encodeURIComponent(uri)}`
