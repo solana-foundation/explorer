@@ -1,4 +1,5 @@
 import type { Idl } from '@coral-xyz/anchor';
+import { PublicKey } from '@solana/web3.js';
 
 import { getIdlSpecType as getSerdeIdlSpecType } from './converters/convert-legacy-idl';
 import { getIdlVersion, MODERN_ANCHOR_IDL_WILDCARD, type SupportedIdl } from './idl-version';
@@ -34,5 +35,9 @@ export function isInteractiveIdlSupported(idl: SupportedIdl): boolean {
  */
 export function isIdlProgramIdMismatch(idl: SupportedIdl, programAddress: string): boolean {
     const idlAddress = (idl as Idl).address; // cast idl to omit error for currently unsupported Codama standard
-    return Boolean(idlAddress && idlAddress !== programAddress);
+    if (!idlAddress) return false;
+
+    const idlKey = new PublicKey(idlAddress);
+    const programKey = new PublicKey(programAddress);
+    return !idlKey.equals(programKey);
 }
