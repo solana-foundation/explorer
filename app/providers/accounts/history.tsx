@@ -11,9 +11,9 @@ import {
     TransactionSignature,
 } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
+import { fetchAll } from '@utils/fetch-all';
+import { fetchOnce } from '@utils/fetch-once';
 import React from 'react';
-
-const TRANSACTION_FETCH_DELAY_MS = 100; // Delay between individual transaction fetches to avoid rate limiting
 
 type TransactionMap = Map<string, ParsedTransactionWithMeta>;
 
@@ -73,43 +73,41 @@ function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | 
 
 const StateContext = React.createContext<State | undefined>(undefined);
 const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+const InFlightContext = React.createContext<Set<string>>(new Set());
 
 type HistoryProviderProps = { children: React.ReactNode };
 export function HistoryProvider({ children }: HistoryProviderProps) {
     const { url } = useCluster();
     const [state, dispatch] = Cache.useCustomReducer(url, reconcile);
+    const inFlightRef = React.useRef(new Set<string>());
 
     React.useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
+        inFlightRef.current.clear();
     }, [dispatch, url]);
 
     return (
         <StateContext.Provider value={state}>
-            <DispatchContext.Provider value={dispatch}>{children}</DispatchContext.Provider>
+            <DispatchContext.Provider value={dispatch}>
+                <InFlightContext.Provider value={inFlightRef.current}>{children}</InFlightContext.Provider>
+            </DispatchContext.Provider>
         </StateContext.Provider>
     );
 }
 
 async function fetchParsedTransactions(url: string, transactionSignatures: string[]) {
     const connection = new Connection(url);
-    const transactionMap = new Map<string, ParsedTransactionWithMeta>();
-
-    // Fetch transactions individually to avoid batch request limitations
-    for (let i = 0; i < transactionSignatures.length; i++) {
-        if (i > 0) {
-            await new Promise(resolve => setTimeout(resolve, TRANSACTION_FETCH_DELAY_MS));
-        }
-
-        const signature = transactionSignatures[i];
-        const tx = await connection.getParsedTransaction(signature, {
+    const results = await fetchAll(transactionSignatures, signature =>
+        connection.getParsedTransaction(signature, {
             maxSupportedTransactionVersion: 0,
-        });
-
+        })
+    );
+    const transactionMap = new Map<string, ParsedTransactionWithMeta>();
+    results.forEach((tx, i) => {
         if (tx !== null) {
-            transactionMap.set(signature, tx);
+            transactionMap.set(transactionSignatures[i], tx);
         }
-    }
-
+    });
     return transactionMap;
 }
 
@@ -205,10 +203,11 @@ function getUnfetchedSignatures(before: Cache.CacheEntry<AccountHistory>) {
     return allSignatures.filter(signature => !existingMap.has(signature));
 }
 
-export function useFetchAccountHistory() {
+export function useFetchAccountHistory(limit = 12) {
     const { cluster, url } = useCluster();
     const state = React.useContext(StateContext);
     const dispatch = React.useContext(DispatchContext);
+    const inFlight = React.useContext(InFlightContext);
     if (!state || !dispatch) {
         throw new Error(`useFetchAccountHistory must be used within a AccountsProvider`);
     }
@@ -225,22 +224,23 @@ export function useFetchAccountHistory() {
                 }
 
                 const oldest = before.data.fetched[before.data.fetched.length - 1].signature;
-                fetchAccountHistory(
-                    dispatch,
-                    pubkey,
-                    cluster,
-                    url,
-                    {
-                        before: oldest,
-                        limit: 25,
-                    },
-                    fetchTransactions,
-                    additionalSignatures
+                fetchOnce(pubkey.toBase58(), inFlight, () =>
+                    fetchAccountHistory(
+                        dispatch,
+                        pubkey,
+                        cluster,
+                        url,
+                        { before: oldest, limit },
+                        fetchTransactions,
+                        additionalSignatures
+                    )
                 );
             } else {
-                fetchAccountHistory(dispatch, pubkey, cluster, url, { limit: 25 }, fetchTransactions);
+                fetchOnce(pubkey.toBase58(), inFlight, () =>
+                    fetchAccountHistory(dispatch, pubkey, cluster, url, { limit }, fetchTransactions)
+                );
             }
         },
-        [state, dispatch, cluster, url]
+        [limit, state, dispatch, cluster, url, inFlight]
     );
 }
