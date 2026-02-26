@@ -73,7 +73,7 @@ function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | 
 
 const StateContext = React.createContext<State | undefined>(undefined);
 const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
-const InFlightContext = React.createContext<Set<string>>(new Set());
+const InFlightContext = React.createContext<Set<string> | undefined>(undefined);
 
 type HistoryProviderProps = { children: React.ReactNode };
 export function HistoryProvider({ children }: HistoryProviderProps) {
@@ -203,13 +203,13 @@ function getUnfetchedSignatures(before: Cache.CacheEntry<AccountHistory>) {
     return allSignatures.filter(signature => !existingMap.has(signature));
 }
 
-export function useFetchAccountHistory(limit = 12) {
+export function useFetchAccountHistory(limit = 25) {
     const { cluster, url } = useCluster();
     const state = React.useContext(StateContext);
     const dispatch = React.useContext(DispatchContext);
     const inFlight = React.useContext(InFlightContext);
-    if (!state || !dispatch) {
-        throw new Error(`useFetchAccountHistory must be used within a AccountsProvider`);
+    if (!state || !dispatch || !inFlight) {
+        throw new Error(`useFetchAccountHistory must be used within a HistoryProvider`);
     }
 
     return React.useCallback(
@@ -234,11 +234,11 @@ export function useFetchAccountHistory(limit = 12) {
                         fetchTransactions,
                         additionalSignatures
                     )
-                );
+                ).catch(console.error);
             } else {
                 fetchOnce(pubkey.toBase58(), inFlight, () =>
                     fetchAccountHistory(dispatch, pubkey, cluster, url, { limit }, fetchTransactions)
-                );
+                ).catch(console.error);
             }
         },
         [limit, state, dispatch, cluster, url, inFlight]

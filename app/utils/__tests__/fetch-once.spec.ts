@@ -44,6 +44,25 @@ describe('fetchOnce', () => {
         expect(fnB).toHaveBeenCalledOnce();
     });
 
+    it('should return true when executed', async () => {
+        const inFlight = new Set<string>();
+        const fn = vi.fn().mockResolvedValue(undefined);
+
+        const result = await fetchOnce('key', inFlight, fn);
+
+        expect(result).toBe(true);
+    });
+
+    it('should return false when skipped', async () => {
+        const inFlight = new Set<string>();
+        const fn = vi.fn().mockReturnValue(new Promise<void>(() => {}));
+
+        fetchOnce('key', inFlight, fn);
+        const result = await fetchOnce('key', inFlight, fn);
+
+        expect(result).toBe(false);
+    });
+
     it('should remove key from inFlight when callback throws', async () => {
         const inFlight = new Set<string>();
         const fn = vi.fn().mockRejectedValue(new Error('fail'));

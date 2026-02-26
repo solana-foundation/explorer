@@ -40,6 +40,26 @@ describe('fetchAll', () => {
         expect(maxRunning).toBe(3);
     });
 
+    it('should default concurrency to 2', async () => {
+        let running = 0;
+        let maxRunning = 0;
+
+        const items = Array.from({ length: 10 }, (_, i) => i);
+        const fn = async (n: number) => {
+            running++;
+            maxRunning = Math.max(maxRunning, running);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            running--;
+            return n;
+        };
+
+        const promise = fetchAll(items, fn);
+        await vi.advanceTimersByTimeAsync(10 * 10);
+
+        await promise;
+        expect(maxRunning).toBe(2);
+    });
+
     it('should propagate errors from the callback', async () => {
         const items = [1, 2, 3];
         const fn = async (n: number) => {
