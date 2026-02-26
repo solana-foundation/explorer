@@ -11,5 +11,5 @@ export function AnchorFormattedIdl({ idl, programId, searchStr = '' }: StandardF
     const formattedIdl = getFormattedIdl(formatDisplayIdl, idl, programId);
     const anchorFormattedIdl = useFormatAnchorIdl(idl ? formattedIdl : idl);
     const searchResults = useSearchIdl(anchorFormattedIdl, searchStr);
-    return <BaseFormattedIdl idl={searchResults} originalIdl={idl} searchStr={searchStr} />;
+    return <BaseFormattedIdl idl={searchResults} originalIdl={idl} programId={programId} searchStr={searchStr} />;
 }

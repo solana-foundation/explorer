@@ -9,7 +9,7 @@ export type {
     NestedInstructionAccountsData,
 } from './model/formatters/formatted-idl';
 export { getIdlSpec, getIdlVersion, type AnchorIdl, type CodamaIdl, type SupportedIdl } from './model/idl-version';
-export { isInteractiveIdlSupported } from './model/interactive-idl';
+export { isIdlProgramIdMismatch, isInteractiveIdlSupported } from './model/interactive-idl';
 
 export { getIdlSpecType as getDisplayIdlSpecType } from './model/converters/convert-display-idl';
 export { formatDisplayIdl, formatSerdeIdl, getFormattedIdl } from './model/formatters/format';
