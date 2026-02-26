@@ -13,6 +13,7 @@ import {
 import { Cluster } from '@utils/cluster';
 import { fetchAll } from '@utils/fetch-all';
 import { fetchOnce } from '@utils/fetch-once';
+import { withBackoff } from '@utils/with-backoff';
 import React from 'react';
 
 type TransactionMap = Map<string, ParsedTransactionWithMeta>;
@@ -98,9 +99,11 @@ export function HistoryProvider({ children }: HistoryProviderProps) {
 async function fetchParsedTransactions(url: string, transactionSignatures: string[]) {
     const connection = new Connection(url);
     const results = await fetchAll(transactionSignatures, signature =>
-        connection.getParsedTransaction(signature, {
-            maxSupportedTransactionVersion: 0,
-        })
+        withBackoff(() =>
+            connection.getParsedTransaction(signature, {
+                maxSupportedTransactionVersion: 0,
+            })
+        )
     );
     const transactionMap = new Map<string, ParsedTransactionWithMeta>();
     results.forEach((tx, i) => {
