@@ -1,6 +1,12 @@
 'use client';
 
-import { FormattedIdl, getIdlSpec, isInteractiveIdlSupported, type SupportedIdl } from '@entities/idl';
+import {
+    FormattedIdl,
+    getIdlSpec,
+    isIdlProgramIdMismatch,
+    isInteractiveIdlSupported,
+    type SupportedIdl,
+} from '@entities/idl';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { cn } from '@shared/utils';
 import { isEnvEnabled } from '@utils/env';
@@ -40,7 +46,7 @@ export type InteractTab = {
 
 type Tab = DataTab | InteractTab;
 
-export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, searchStr?: string) {
+export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, programId?: string, searchStr?: string) {
     const tabs: Tab[] = useMemo(() => {
         if (!idl) return [];
 
@@ -108,14 +114,20 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, sea
 
         // Only show interactive tab for Anchor IDLs (getIdlSpec returns null for legacy and codama)
         if (originalIdl && getIdlSpec(originalIdl) !== null && IS_INTERACTIVE_IDL_ENABLED) {
-            const isInteractDisabled = !isInteractiveIdlSupported(originalIdl);
+            const isVersionUnsupported = !isInteractiveIdlSupported(originalIdl);
+            const isProgramIdMismatch = programId ? isIdlProgramIdMismatch(originalIdl, programId) : false;
+            const isInteractDisabled = isVersionUnsupported || isProgramIdMismatch;
+
+            const warningMessage = isProgramIdMismatch
+                ? 'IDL program address does not match the current program'
+                : 'Current version of IDL is not supported';
 
             tabItems.push({
                 disabled: !idl.instructions?.length,
                 id: 'interact',
                 render: () =>
                     isInteractDisabled ? (
-                        <BaseWarningCard message="Current version of IDL is not suported" />
+                        <BaseWarningCard message={warningMessage} />
                     ) : (
                         <InteractWithIdl
                             data={idl.instructions}
@@ -127,12 +139,17 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, sea
                             onWalletConnected={idlAnalytics.trackWalletConnected}
                         />
                     ),
-                title: <InteractWithIdlTabName isInteractDisabled={isInteractDisabled} />,
+                title: (
+                    <InteractWithIdlTabName
+                        isInteractDisabled={isInteractDisabled}
+                        isProgramIdMismatch={isProgramIdMismatch}
+                    />
+                ),
             } as InteractTab);
         }
 
         return tabItems;
-    }, [idl, originalIdl, searchStr]);
+    }, [idl, originalIdl, programId, searchStr]);
 
     return tabs;
 }
@@ -164,13 +181,25 @@ function NoSearchResultsPlaceholder({ tabName }: { tabName: string }) {
     );
 }
 
-function InteractWithIdlTabName({ isInteractDisabled }: { isInteractDisabled: boolean }) {
+function InteractWithIdlTabName({
+    isInteractDisabled,
+    isProgramIdMismatch = false,
+}: {
+    isInteractDisabled: boolean;
+    isProgramIdMismatch?: boolean;
+}) {
     const tab = (
         <div className="e-flex e-items-center e-gap-1">
             {isInteractDisabled ? <XCircle size={14} /> : <PlayCircle size={14} />}
             Interact
         </div>
     );
+
+    const tooltipMessage = isProgramIdMismatch
+        ? 'IDL program address does not match the current program'
+        : isInteractDisabled
+        ? 'Currently we support only modern Anchor IDL >= 0.30.1'
+        : "Launch Anchor's instructions";
 
     return (
         <Tooltip>
@@ -184,11 +213,7 @@ function InteractWithIdlTabName({ isInteractDisabled }: { isInteractDisabled: bo
                 </div>
             </TooltipTrigger>
             <TooltipContent>
-                <div className="e-min-w-36 e-max-w-16">
-                    {isInteractDisabled
-                        ? 'Currently we support only modern Anchor IDL >= 0.30.1'
-                        : "Launch Anchor's instructions"}
-                </div>
+                <div className="e-min-w-36 e-max-w-16">{tooltipMessage}</div>
             </TooltipContent>
         </Tooltip>
     );
