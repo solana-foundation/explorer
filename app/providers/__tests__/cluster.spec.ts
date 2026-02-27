@@ -13,8 +13,8 @@ describe('parseQuery', () => {
         expect(parseQuery(makeSearchParams({ cluster: 'devnet' }), null)).toBe(Cluster.Devnet);
     });
 
-    it('falls back to persisted cluster when no URL params', () => {
-        expect(parseQuery(makeSearchParams(), 'devnet')).toBe(Cluster.Devnet);
+    it('ignores persisted built-in cluster slugs', () => {
+        expect(parseQuery(makeSearchParams(), 'devnet')).toBe(DEFAULT_CLUSTER);
     });
 
     it('returns Custom when persisted value has saved-cluster prefix', () => {

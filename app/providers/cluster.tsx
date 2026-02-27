@@ -59,10 +59,7 @@ export function parseQuery(searchParams: ReadonlyURLSearchParams | null, persist
         return clusterFromSlug(clusterParam) ?? DEFAULT_CLUSTER;
     }
 
-    if (persisted) {
-        if (persisted.startsWith(SAVED_CLUSTER_PREFIX)) return Cluster.Custom;
-        return clusterFromSlug(persisted) ?? DEFAULT_CLUSTER;
-    }
+    if (persisted?.startsWith(SAVED_CLUSTER_PREFIX)) return Cluster.Custom;
 
     return DEFAULT_CLUSTER;
 }
@@ -125,7 +122,7 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
 
     useEffect(() => {
         if (cluster === Cluster.Custom && persistedCluster?.startsWith(SAVED_CLUSTER_PREFIX)) return;
-        setPersistedCluster(clusterSlug(cluster));
+        setPersistedCluster(null);
     }, [cluster]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Reconnect to cluster when params change
