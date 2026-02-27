@@ -48,7 +48,7 @@
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 6.15 kB | 937 kB |
 | Static | `/tos` | 326 B | 161 kB |
-| Dynamic | `/tx/[signature]` | 43.3 kB | 1.41 MB |
+| Dynamic | `/tx/[signature]` | 43.4 kB | 1.41 MB |
 | Dynamic | `/tx/[signature]/inspect` | 610 B | 1.2 MB |
 | Static | `/tx/inspector` | 624 B | 1.2 MB |
 | Static | `/verified-programs` | 6.12 kB | 169 kB |

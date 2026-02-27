@@ -3,6 +3,7 @@ import { type GA4EventName, trackEvent } from './track-event';
 export enum ReceiptEvent {
     ButtonClicked = 'rcpt_button_clicked',
     NoReceipt = 'rcpt_no_receipt',
+    NoReceiptAutoRedirect = 'rcpt_no_receipt_auto_redirect',
     ViewTxClicked = 'rcpt_view_tx_clicked',
     Viewed = 'rcpt_viewed',
 }
@@ -19,6 +20,10 @@ export const receiptAnalytics = {
 
     trackNoReceipt(signature: string): void {
         trackEvent(ReceiptEvent.NoReceipt, { signature });
+    },
+
+    trackNoReceiptAutoRedirect(signature: string): void {
+        trackEvent(ReceiptEvent.NoReceiptAutoRedirect, { signature });
     },
 
     trackViewTxClicked(signature: string): void {

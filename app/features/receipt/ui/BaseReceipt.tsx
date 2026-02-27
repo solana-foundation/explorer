@@ -1,13 +1,14 @@
+'use client';
+
 import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
 import { cn } from '@components/shared/utils';
 import { displayTimestamp } from '@utils/date';
 import Link from 'next/link';
-import { Info } from 'react-feather';
+import { useEffect, useState } from 'react';
 
 import type { FormattedExtendedReceipt } from '../types';
-import { BlurredCircle } from './Receipt';
 
 interface BaseReceiptProps {
     data: FormattedExtendedReceipt;
@@ -222,20 +223,31 @@ function Footer({
     );
 }
 
-export function Zigzag() {
-    return <div className="zigzag e-bg-outer-space-900 e-pb-6" />;
-}
+const REDIRECT_COUNTDOWN = 5;
 
 export function NoReceipt({
     transactionPath,
     timestamp,
     onViewTxClick,
+    onRedirect,
 }: {
     transactionPath: string;
     timestamp?: number | null;
     onViewTxClick?: () => void;
+    onRedirect?: () => void;
 }) {
     const date = timestamp ? { timestamp: timestamp * 1000, utc: new Date(timestamp * 1000).toISOString() } : undefined;
+    const [countdown, setCountdown] = useState(REDIRECT_COUNTDOWN);
+
+    useEffect(() => {
+        if (countdown <= 0) {
+            onRedirect?.();
+            return;
+        }
+
+        const timer = setTimeout(() => setCountdown(prev => prev - 1), 1000);
+        return () => clearTimeout(timer);
+    }, [countdown, onRedirect]);
 
     return (
         <div className="container e-flex e-min-h-[90vh] e-flex-col e-items-center e-justify-center e-gap-6 e-px-5 e-py-10">
@@ -244,19 +256,31 @@ export function NoReceipt({
             <div className="e-w-full e-max-w-lg">
                 <div className="e-min-h-96 e-bg-outer-space-900">
                     <Header date={date} />
-                    <div className="e-space-x-1 e-p-6 e-text-destructive">
-                        <Info size={16} />
-                        <span>There is no receipt for this transaction</span>
+                    <div className="e-p-6 e-text-sm e-text-gray-400">
+                        <p className="e-m-0">
+                            Receipts can only be generated for transactions that only contain a single transfer.
+                        </p>
+                        <p className="e-m-0 e-mt-4">Forwarding to transaction view in {countdown}...</p>
                     </div>
                 </div>
                 <Zigzag />
             </div>
 
             <Button size="sm" className="e-me-2" asChild>
-                <Link href={transactionPath} target="_blank" rel="noopener noreferrer" onClick={onViewTxClick}>
+                <Link href={transactionPath} onClick={onViewTxClick}>
                     View transaction in Explorer
                 </Link>
             </Button>
         </div>
+    );
+}
+
+export function Zigzag() {
+    return <div className="zigzag e-bg-outer-space-900 e-pb-6" />;
+}
+
+export function BlurredCircle() {
+    return (
+        <div className="e-absolute e-left-[50%] e-top-[55%] e-z-[-1] e-h-2/5 e-w-1/3 e-translate-x-[-50%] e-translate-y-[-50%] e-rounded-full e-bg-emerald-700 e-blur-[150px]" />
     );
 }
