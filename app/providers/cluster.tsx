@@ -53,7 +53,7 @@ function clusterReducer(state: State, action: Action): State {
     }
 }
 
-function parseQuery(searchParams: ReadonlyURLSearchParams | null, persisted: string | null): Cluster {
+export function parseQuery(searchParams: ReadonlyURLSearchParams | null, persisted: string | null): Cluster {
     const clusterParam = searchParams?.get('cluster');
     if (clusterParam) {
         return clusterFromSlug(clusterParam) ?? DEFAULT_CLUSTER;
