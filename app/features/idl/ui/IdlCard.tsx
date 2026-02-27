@@ -11,7 +11,6 @@ import { BaseWarningCard } from '../interactive-idl/ui/BaseWarningCard';
 import { IdlVariant, useIdlLastTransactionDate } from '../model/use-idl-last-transaction-date';
 import { IdlInstructionSection } from './IdlInstructionSection';
 import { IdlSection } from './IdlSection';
-import { Keypair } from '@solana/web3.js';
 
 type IdlTab = {
     id: IdlVariant;
@@ -109,11 +108,7 @@ export function IdlCard({ programId }: { programId: string }) {
     }
 
     const activeTab = tabs[activeTabIndex];
-    console.log({ activeTab, programId });
-    const isMismatch = isIdlProgramIdMismatch(
-        activeTab.idl,
-        activeTab.id === 'anchor' ? Keypair.generate().publicKey : programId
-    ); //programId);
+    const isMismatch = isIdlProgramIdMismatch(activeTab.idl, programId);
 
     return (
         <div className="card">
