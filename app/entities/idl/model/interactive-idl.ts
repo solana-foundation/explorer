@@ -37,7 +37,11 @@ export function isIdlProgramIdMismatch(idl: SupportedIdl, programAddress: string
     const idlAddress = (idl as Idl).address; // cast idl to omit error for currently unsupported Codama standard
     if (!idlAddress) return false;
 
-    const idlKey = new PublicKey(idlAddress);
-    const programKey = new PublicKey(programAddress);
-    return !idlKey.equals(programKey);
+    try {
+        const idlKey = new PublicKey(idlAddress);
+        const programKey = new PublicKey(programAddress);
+        return !idlKey.equals(programKey);
+    } catch {
+        return true; // unparseable address → treat as mismatch
+    }
 }
