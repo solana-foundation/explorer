@@ -13,6 +13,7 @@ import { TransactionSignature } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect } from 'react';
 import useSWR from 'swr';
 
@@ -23,7 +24,7 @@ import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app
 import { usePrimaryDomain } from '../lib/use-primary-domain';
 import { extractReceiptData } from '../model/create-receipt';
 import type { FormattedReceipt } from '../types';
-import { BaseReceipt, NoReceipt } from './BaseReceipt';
+import { BaseReceipt, BlurredCircle, NoReceipt } from './BaseReceipt';
 
 interface ReceiptProps {
     signature: TransactionSignature;
@@ -81,6 +82,13 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
         }
     }, [showNoReceipt, signature]);
 
+    const router = useRouter();
+
+    const handleRedirect = useCallback(() => {
+        receiptAnalytics.trackNoReceiptAutoRedirect(signature);
+        router.push(transactionPath);
+    }, [router, transactionPath, signature]);
+
     const handleViewTxClick = useCallback(() => {
         receiptAnalytics.trackViewTxClicked(signature);
     }, [signature]);
@@ -89,12 +97,22 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
     if (isStatusFailed) return <ErrorCard retry={() => fetchStatus(signature)} text="Fetch Failed" />;
     if (hasNoTxInfo)
         return (
-            <NoReceipt transactionPath={transactionPath} timestamp={tx?.blockTime} onViewTxClick={handleViewTxClick} />
+            <NoReceipt
+                transactionPath={transactionPath}
+                timestamp={tx?.blockTime}
+                onViewTxClick={handleViewTxClick}
+                onRedirect={handleRedirect}
+            />
         );
     if (isDetailsLoading || isReceiptLoading) return <LoadingCard message="Loading receipt" />;
     if (!receipt)
         return (
-            <NoReceipt transactionPath={transactionPath} timestamp={tx?.blockTime} onViewTxClick={handleViewTxClick} />
+            <NoReceipt
+                transactionPath={transactionPath}
+                timestamp={tx?.blockTime}
+                onViewTxClick={handleViewTxClick}
+                onRedirect={handleRedirect}
+            />
         );
 
     return <ReceiptContent receipt={receipt} signature={signature} status={status} transactionPath={transactionPath} />;
@@ -149,11 +167,5 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                 </Button>
             </div>
         </SignatureContext.Provider>
-    );
-}
-
-export function BlurredCircle() {
-    return (
-        <div className="e-absolute e-left-[50%] e-top-[55%] e-z-[-1] e-h-2/5 e-w-1/3 e-translate-x-[-50%] e-translate-y-[-50%] e-rounded-full e-bg-emerald-700 e-blur-[150px]" />
     );
 }
