@@ -1,7 +1,5 @@
 'use client';
 
-import { Address } from '@components/common/Address';
-import { BalanceDelta } from '@components/common/BalanceDelta';
 import { DownloadableDropdown } from '@components/common/Downloadable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { InfoTooltip } from '@components/common/InfoTooltip';
@@ -15,6 +13,8 @@ import { InstructionsSection } from '@components/transaction/InstructionsSection
 import { ProgramLogSection } from '@components/transaction/ProgramLogSection';
 import { TokenBalancesCard } from '@components/transaction/TokenBalancesCard';
 import { CUProfilingSection } from '@features/cu-profiling';
+import { Receipt, ViewReceiptButton } from '@features/receipt';
+import { isReceiptEnabled } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import {
@@ -32,26 +32,27 @@ import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
 import useTabVisibility from '@utils/use-tab-visibility';
-import { BigNumber } from 'bignumber.js';
 import bs58 from 'bs58';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
 import { RefreshCw, Settings } from 'react-feather';
 
+import { AccountsCard } from '@/app/components/transaction/AccountsCard';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
-const AUTO_REFRESH_INTERVAL = 2000;
+export const AUTO_REFRESH_INTERVAL = 2000;
 const ZERO_CONFIRMATION_BAILOUT = 5;
 
-enum AutoRefresh {
+export enum AutoRefresh {
     Active,
     Inactive,
     BailedOut,
 }
 
-type AutoRefreshProps = {
+export type AutoRefreshProps = {
     autoRefresh: AutoRefresh;
 };
 
@@ -74,8 +75,8 @@ function getTransactionErrorReason(
 
     const { InsufficientFundsForRent } = info.result.err as { InsufficientFundsForRent?: { account_index: number } };
     if (InsufficientFundsForRent !== undefined) {
-        if (tx) {
-            const address = tx.message.accountKeys[InsufficientFundsForRent.account_index].pubkey;
+        const address = tx?.message.accountKeys[InsufficientFundsForRent.account_index]?.pubkey;
+        if (address) {
             return { errorLink: `/address/${address}`, errorReason: `Insufficient Funds For Rent: ${address}` };
         }
         return { errorReason: `Insufficient Funds For Rent: Account #${InsufficientFundsForRent.account_index + 1}` };
@@ -86,6 +87,7 @@ function getTransactionErrorReason(
 
 export default function TransactionDetailsPageClient({ params: { signature: raw } }: Props) {
     let signature: TransactionSignature | undefined;
+    const searchParams = useSearchParams();
 
     try {
         const decoded = bs58.decode(raw);
@@ -122,6 +124,10 @@ export default function TransactionDetailsPageClient({ params: { signature: raw 
         }
     }, [status, autoRefresh, setZeroConfirmationRetries]);
 
+    if (isReceiptEnabled && searchParams.get('view') === 'receipt' && signature) {
+        return <Receipt signature={signature} autoRefresh={autoRefresh} />;
+    }
+
     return (
         <div className="container mt-n3">
             <div className="header">
@@ -154,6 +160,10 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
     const rawDetails = useRawTransactionDetails(signature);
     const { cluster, clusterInfo, name: clusterName, status: clusterStatus, url: clusterUrl } = useCluster();
     const inspectPath = useClusterPath({ pathname: `/tx/${signature}/inspect` });
+    const receiptPath = useClusterPath({
+        additionalParams: new URLSearchParams({ view: 'receipt' }),
+        pathname: `/tx/${signature}`,
+    });
 
     useEffect(() => {
         if (!rawDetails && clusterStatus === ClusterStatus.Connected) {
@@ -248,6 +258,11 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
         <div className="card">
             <div className="card-header align-items-center">
                 <h3 className="card-header-title">Overview</h3>
+                <ViewReceiptButton
+                    signature={signature}
+                    transactionWithMeta={transactionWithMeta}
+                    receiptPath={receiptPath}
+                />
                 <Link className="btn btn-white btn-sm me-2" href={inspectPath}>
                     <Settings className="align-text-top me-2" size={13} />
                     Inspect
@@ -414,82 +429,12 @@ function DetailsSection({ signature }: SignatureProps) {
     return (
         <>
             <CUProfilingSection signature={signature} />
-            <AccountsCard signature={signature} />
+            <Suspense fallback={<LoadingCard message="Loading accounts" />}>
+                <AccountsCard signature={signature} />
+            </Suspense>
             <TokenBalancesCard signature={signature} />
             <InstructionsSection signature={signature} />
             <ProgramLogSection signature={signature} />
         </>
-    );
-}
-
-function AccountsCard({ signature }: SignatureProps) {
-    const details = useTransactionDetails(signature);
-
-    const transactionWithMeta = details?.data?.transactionWithMeta;
-    if (!transactionWithMeta) {
-        return null;
-    }
-
-    const { meta, transaction } = transactionWithMeta;
-    const { message } = transaction;
-
-    if (!meta) {
-        return <ErrorCard text="Transaction metadata is missing" />;
-    }
-
-    const accountRows = message.accountKeys.map((account, index) => {
-        const pre = meta.preBalances[index];
-        const post = meta.postBalances[index];
-        const pubkey = account.pubkey;
-        const key = account.pubkey.toBase58();
-        const delta = new BigNumber(post).minus(new BigNumber(pre));
-
-        return (
-            <tr key={key}>
-                <td>{index + 1}</td>
-                <td>
-                    <Address pubkey={pubkey} link fetchTokenLabelInfo />
-                </td>
-                <td>
-                    <BalanceDelta delta={delta} isSol />
-                </td>
-                <td>
-                    <SolBalance lamports={post} />
-                </td>
-                <td>
-                    {index === 0 && <span className="badge bg-info-soft me-1">Fee Payer</span>}
-                    {account.signer && <span className="badge bg-info-soft me-1">Signer</span>}
-                    {account.writable && <span className="badge bg-danger-soft me-1">Writable</span>}
-                    {message.instructions.find(ix => ix.programId.equals(pubkey)) && (
-                        <span className="badge bg-warning-soft me-1">Program</span>
-                    )}
-                    {account.source === 'lookupTable' && (
-                        <span className="badge bg-gray-soft me-1">Address Table Lookup</span>
-                    )}
-                </td>
-            </tr>
-        );
-    });
-
-    return (
-        <div className="card">
-            <div className="card-header">
-                <h3 className="card-header-title">Account Input(s)</h3>
-            </div>
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">#</th>
-                            <th className="text-muted">Address</th>
-                            <th className="text-muted">Change (SOL)</th>
-                            <th className="text-muted">Post Balance (SOL)</th>
-                            <th className="text-muted">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">{accountRows}</tbody>
-                </table>
-            </div>
-        </div>
     );
 }

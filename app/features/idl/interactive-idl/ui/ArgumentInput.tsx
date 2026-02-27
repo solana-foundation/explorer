@@ -41,6 +41,7 @@ const ArrayArgumentInput = forwardRef<HTMLInputElement, ArrayArgumentInputProps>
         };
 
         const handleItemChange = (index: number, newValue: string) => {
+            // eslint-disable-next-line no-restricted-syntax -- remove commas from array item input
             const sanitizeArrayItem = (value: string) => value.replace(/,/g, '');
             const sanitizedValue = sanitizeArrayItem(newValue);
             const newValues = [...values];

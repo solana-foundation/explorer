@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, no-restricted-globals -- test assertions use RegExp for pattern matching */
 import { SystemProgram } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -72,7 +73,13 @@ async function waitForTimeout(fn: () => void, params: object = DEFAULT_INTERVAL)
 // Mock SWR
 vi.mock('swr', () => ({
     __esModule: true,
-    default: vi.fn(),
+    default: vi.fn(() => ({
+        data: undefined,
+        error: undefined,
+        isLoading: false,
+        isValidating: false,
+        mutate: vi.fn(),
+    })),
 }));
 
 // Mock next/navigation

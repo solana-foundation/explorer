@@ -3,6 +3,7 @@ import type { Decorator, Parameters } from '@storybook/react';
 import React from 'react';
 
 import { MockAccountsProvider } from './__mocks__/MockAccountsProvider';
+import { MockTokenInfoBatchProvider } from './__mocks__/MockTokenInfoBatchProvider';
 
 /** Wraps stories with ClusterProvider. Usage: `decorators: [withCluster]` */
 export const withCluster: Decorator = Story => (
@@ -36,6 +37,13 @@ export const withCardTableField: Decorator = Story => (
             </div>
         </MockAccountsProvider>
     </ClusterProvider>
+);
+
+/** Wraps stories with MockTokenInfoBatchProvider. Usage: `decorators: [withTokenInfoBatch]` */
+export const withTokenInfoBatch: Decorator = Story => (
+    <MockTokenInfoBatchProvider>
+        <Story />
+    </MockTokenInfoBatchProvider>
 );
 
 type NextjsNavigationOptions = {

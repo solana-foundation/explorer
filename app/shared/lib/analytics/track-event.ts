@@ -1,12 +1,4 @@
-type EventParams = {
-    [key: string]: string | number | boolean | undefined;
-};
-
-type DataLayer = Array<Record<string, unknown>>;
-
-// Type definitions for provider-specific window extensions
-type WindowWithDataLayer = Window & { dataLayer: DataLayer };
-type WindowWithGtag = Window & { gtag: (...args: unknown[]) => void };
+import type { EventParams, WindowWithDataLayer, WindowWithGtag } from './types';
 
 function getDataLayer(win: Window): WindowWithDataLayer | undefined {
     if ('dataLayer' in win && Array.isArray((win as WindowWithDataLayer).dataLayer)) {
@@ -27,9 +19,16 @@ interface AnalyticsProvider {
     track(win: Window, eventName: string, params?: EventParams): void;
 }
 
+/**
+ * Analytics providers in priority order.
+ *
+ * gtag: Standard method for GA4 and GTM. Uses gtag('event', name, params)
+ * dataLayer: Fallback for pure GTM setups without gtag. Pushes {event, ...params} directly
+ */
 const dataLayerProvider: AnalyticsProvider = {
     canUse(win: Window): boolean {
-        return getDataLayer(win) !== undefined;
+        // Fallback for pure GTM setups without gtag
+        return getDataLayer(win) !== undefined && getGtag(win) === undefined;
     },
     track(win: Window, eventName: string, params?: EventParams): void {
         getDataLayer(win)?.dataLayer.push({ event: eventName, ...params });
@@ -45,7 +44,7 @@ const gtagProvider: AnalyticsProvider = {
     },
 };
 
-const providers: AnalyticsProvider[] = [dataLayerProvider, gtagProvider];
+const providers: AnalyticsProvider[] = [gtagProvider, dataLayerProvider];
 
 function resolveProvider(win: Window): AnalyticsProvider | undefined {
     return providers.find(provider => provider.canUse(win));
@@ -54,6 +53,8 @@ function resolveProvider(win: Window): AnalyticsProvider | undefined {
 function isAnalyticsEnabled(): boolean {
     return Boolean(process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID?.trim());
 }
+
+export type { GA4EventName } from './types';
 
 export function trackEvent(eventName: string, params?: EventParams): void {
     if (typeof window === 'undefined') {

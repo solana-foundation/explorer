@@ -5,6 +5,7 @@ import type {
     IdlSeedAccount,
     IdlSeedArg,
     IdlSeedConst,
+    IdlType,
 } from '@coral-xyz/anchor/dist/cjs/idl';
 import type { SupportedIdl } from '@entities/idl';
 import type { PublicKey } from '@solana/web3.js';
@@ -19,7 +20,7 @@ export type PdaAccount = Pick<IdlInstructionAccount, 'name' | 'pda'>;
  */
 export interface PdaArgument {
     name: string;
-    type: string;
+    type: IdlType;
 }
 
 /**

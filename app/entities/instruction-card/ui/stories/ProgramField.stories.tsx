@@ -1,14 +1,15 @@
+/* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
 import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { SystemProgram } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
 
-import { nextjsParameters, withCardTableField } from '../../../../../.storybook/decorators';
+import { nextjsParameters, withCardTableField, withTokenInfoBatch } from '../../../../../.storybook/decorators';
 import { ProgramField } from '../ProgramField';
 
 const meta = {
     component: ProgramField,
-    decorators: [withCardTableField],
+    decorators: [withCardTableField, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs'],
     title: 'Entities/Instruction Card/UI/Field/ProgramField',

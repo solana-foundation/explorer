@@ -15,6 +15,10 @@ import dynamic from 'next/dynamic';
 import { Rubik } from 'next/font/google';
 import { Metadata } from 'next/types';
 
+import { TokenInfoBatchProvider } from '@/app/entities/token-info';
+import { CookieConsent } from '@/app/features/cookie';
+import { VisibilityProvider } from '@/app/shared/lib/visibility';
+
 import { botIdProtectedRoutes } from '../middleware';
 
 const SearchBar = dynamic(() => import('@components/SearchBar'), {
@@ -54,24 +58,29 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
             <body>
                 <ScrollAnchorProvider>
                     <ClusterProvider>
-                        <ClusterModal />
-                        <div className="main-content pb-4">
-                            <Navbar>
-                                <SearchBar />
-                            </Navbar>
-                            <MessageBanner />
-                            <div className="container my-3 d-xl-none">
-                                <SearchBar />
-                            </div>
-                            <div className="container my-3 d-lg-none">
-                                <ClusterStatusButton />
-                            </div>
-                            {children}
-                        </div>
-                        <Toaster position="bottom-center" toastOptions={{ duration: 5_000 }} />
+                        <VisibilityProvider>
+                            <TokenInfoBatchProvider>
+                                <ClusterModal />
+                                <div className="main-content pb-4">
+                                    <Navbar>
+                                        <SearchBar />
+                                    </Navbar>
+                                    <MessageBanner />
+                                    <div className="container my-3 d-xl-none">
+                                        <SearchBar />
+                                    </div>
+                                    <div className="container my-3 d-lg-none">
+                                        <ClusterStatusButton />
+                                    </div>
+                                    {children}
+                                </div>
+                                <Toaster position="bottom-center" toastOptions={{ duration: 5_000 }} />
+                            </TokenInfoBatchProvider>
+                        </VisibilityProvider>
                     </ClusterProvider>
                 </ScrollAnchorProvider>
                 {analytics}
+                <CookieConsent />
             </body>
         </html>
     );

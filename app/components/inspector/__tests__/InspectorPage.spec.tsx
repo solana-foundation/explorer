@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import type { AccountInfo } from '@solana/web3.js';
 import { generated, PROGRAM_ID } from '@sqds/multisig';
 import { render, screen } from '@testing-library/react';
@@ -14,7 +15,7 @@ import { TransactionInspectorPage } from '../InspectorPage';
 
 vi.mock('swr', () => ({
     __esModule: true,
-    default: vi.fn(),
+    default: vi.fn(() => ({ data: undefined })),
 }));
 
 vi.mock('next/navigation', () => ({

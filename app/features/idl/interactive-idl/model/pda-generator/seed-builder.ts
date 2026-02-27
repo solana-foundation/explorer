@@ -2,22 +2,17 @@ import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
 import { camelCase } from 'change-case';
 
-import type { IdlSeed, IdlSeedAccount, IdlSeedArg, IdlSeedConst, PdaInstruction } from './types';
+import { parseArrayInput } from '../anchor/array-parser';
+import type { IdlSeed, IdlSeedAccount, IdlSeedArg, IdlSeedConst, PdaArgument, PdaInstruction } from './types';
 
 export interface SeedInfo {
     buffers: Buffer[] | null;
     info: { value: string | null; name: string }[];
 }
 
-interface ProcessedSeed {
-    buffer: Buffer | null;
-    info: { value: string | null; name: string };
-}
-
 /**
- * Build seed buffers and info from PDA seeds, form arguments, and accounts
- * Always includes all seeds in info, even when values are missing (null)
- * Returns null buffers if any required seed value is missing or invalid
+ * Build seed buffers and info from PDA seeds, form arguments, and accounts.
+ * Always includes all seeds in info; buffers are null if any required value is missing or invalid.
  */
 export function buildSeedsWithInfo(
     seeds: IdlSeed[],
@@ -25,31 +20,17 @@ export function buildSeedsWithInfo(
     accounts: Record<string, string | Record<string, string | undefined> | undefined>,
     instruction: PdaInstruction
 ): SeedInfo {
-    const processedSeeds = seeds.map(seed => processSeed(seed, args, accounts, instruction));
-
-    const seedBuffers: Buffer[] = [];
-    const seedInfo: { value: string | null; name: string }[] = [];
-    let buffersValid = true;
-
-    for (const processed of processedSeeds) {
-        seedInfo.push(processed.info);
-
-        if (processed.buffer) {
-            seedBuffers.push(processed.buffer);
-        } else {
-            buffersValid = false;
-        }
-    }
-
-    return {
-        buffers: buffersValid ? seedBuffers : null,
-        info: seedInfo,
-    };
+    const processed = seeds.map(seed => processSeed(seed, args, accounts, instruction));
+    const info = processed.map(p => p.info);
+    const buffers = processed.every(p => p.buffer !== null) ? (processed.map(p => p.buffer) as Buffer[]) : null;
+    return { buffers, info };
 }
 
-/**
- * Process a single seed and return its buffer and info
- */
+interface ProcessedSeed {
+    buffer: Buffer | null;
+    info: { value: string | null; name: string };
+}
+
 function processSeed(
     seed: IdlSeed,
     args: Record<string, string | undefined>,
@@ -64,21 +45,14 @@ function processSeed(
         case 'account':
             return processAccountSeed(seed, accounts);
         default:
-            return {
-                buffer: null,
-                info: { name: 'unknown', value: null },
-            };
+            return { buffer: null, info: { name: 'unknown', value: null } };
     }
 }
 
 function processConstSeed(seed: IdlSeedConst): ProcessedSeed {
     const buffer = Buffer.from(seed.value);
-    const hexValue = buffer.toString('hex');
-
-    return {
-        buffer,
-        info: { name: `0x${hexValue}`, value: `0x${hexValue}` },
-    };
+    const hex = buffer.toString('hex');
+    return { buffer, info: { name: `0x${hex}`, value: `0x${hex}` } };
 }
 
 function processArgSeed(
@@ -87,28 +61,17 @@ function processArgSeed(
     instruction: PdaInstruction
 ): ProcessedSeed {
     const camelPath = camelCase(seed.path);
-    const argValue = args[camelPath];
-
-    if (!argValue) {
-        return {
-            buffer: null,
-            info: { name: camelPath, value: null },
-        };
+    const value = args[camelPath];
+    if (value === undefined) {
+        return { buffer: null, info: { name: camelPath, value: null } };
     }
-
-    const argDef = findArgDefinition(seed.path, camelPath, instruction);
-    if (!argDef) {
-        return {
-            buffer: null,
-            info: { name: camelPath, value: argValue },
-        };
+    const argDef =
+        instruction.args.find(a => a.name === seed.path) ?? instruction.args.find(a => camelCase(a.name) === camelPath);
+    if (argDef?.type === undefined) {
+        return { buffer: null, info: { name: camelPath, value } };
     }
-
-    const buffer = convertArgToSeedBuffer(argValue, argDef.type);
-    return {
-        buffer,
-        info: { name: camelPath, value: argValue },
-    };
+    const buffer = argToSeedBuffer(value, argDef.type);
+    return { buffer, info: { name: camelPath, value } };
 }
 
 function processAccountSeed(
@@ -116,84 +79,119 @@ function processAccountSeed(
     accounts: Record<string, string | Record<string, string | undefined> | undefined>
 ): ProcessedSeed {
     const camelPath = camelCase(seed.path);
-    const accountValue = getAccountValue(accounts, camelPath);
-
-    if (!accountValue) {
-        return {
-            buffer: null,
-            info: { name: camelPath, value: null },
-        };
+    const raw = accounts[camelPath];
+    const value = typeof raw === 'string' ? raw : null;
+    if (!value) {
+        return { buffer: null, info: { name: camelPath, value: null } };
     }
-
     try {
-        const pubkey = new PublicKey(accountValue);
-        return {
-            buffer: pubkey.toBuffer(),
-            info: { name: camelPath, value: accountValue },
-        };
+        return { buffer: new PublicKey(value).toBuffer(), info: { name: camelPath, value } };
     } catch {
-        return {
-            buffer: null,
-            info: { name: camelPath, value: accountValue },
-        };
+        return { buffer: null, info: { name: camelPath, value } };
     }
 }
 
-/**
- * Find argument definition by matching seed path with instruction args
- * Handles cases where seed.path might not exactly match arg.name (e.g., "poll_id" vs "_poll_id")
- */
-function findArgDefinition(seedPath: string, camelPath: string, instruction: PdaInstruction) {
-    return (
-        instruction.args.find(a => a.name === seedPath) || instruction.args.find(a => camelCase(a.name) === camelPath)
-    );
-}
-
-const INTEGER_SIZE_MAP: Record<string, number> = {
+const INTEGER_SEED_SIZES: Record<string, number> = {
     i128: 16,
     i16: 2,
+    i256: 32,
     i32: 4,
     i64: 8,
     i8: 1,
     u128: 16,
     u16: 2,
+    u256: 32,
     u32: 4,
     u64: 8,
     u8: 1,
-} as const;
-/**
- * Convert argument value to seed buffer based on type
- */
-function convertArgToSeedBuffer(value: string, type: unknown): Buffer | null {
-    if (!value || typeof type !== 'string') {
-        return null;
-    }
+};
 
-    const size = INTEGER_SIZE_MAP[type];
-    if (size !== undefined) {
+function argToSeedBuffer(value: string, type: PdaArgument['type']): Buffer | null {
+    if (!value.trim()) return null;
+
+    const primitiveSize =
+        typeof type === 'string' ? INTEGER_SEED_SIZES[type as keyof typeof INTEGER_SEED_SIZES] : undefined;
+    if (primitiveSize !== undefined) return integerToSeedBuffer(value, primitiveSize);
+
+    if (type === 'string' || type === 'bytes') return Buffer.from(value);
+    if (type === 'pubkey') {
         try {
-            const bn = new BN(value);
-            return bn.toArrayLike(Buffer, 'le', size);
+            return new PublicKey(value).toBuffer();
         } catch {
-            // Value cannot be converted to a number
             return null;
         }
     }
+    if (type === 'bool') {
+        if (value === 'true') return Buffer.from([1]);
+        if (value === 'false') return Buffer.from([0]);
+        return null;
+    }
 
-    if (type === 'string' || type === 'bytes') {
-        return Buffer.from(value);
+    if (typeof type !== 'object' || type === null) return null;
+
+    if ('option' in type || 'coption' in type) {
+        const inner = 'option' in type ? type.option : type.coption;
+        if (isOptionalValue(value)) return null;
+        return argToSeedBuffer(value, inner);
+    }
+    if ('array' in type) {
+        const [elementType, sizeDef] = type.array;
+        const length = typeof sizeDef === 'number' ? sizeDef : null;
+        if (length === null) return null;
+        const trimmed = value.trim();
+        const bytes =
+            typeof elementType === 'string' && elementType === 'u8'
+                ? parseU8ArrayFromHex(trimmed, length) ?? parseIntegerArray(value, 'u8', length)
+                : typeof elementType === 'string'
+                ? parseIntegerArray(value, elementType, length)
+                : null;
+        return bytes ? Buffer.from(bytes) : null;
     }
 
     return null;
 }
 
-/**
- * Get account value from accounts record
- */
-function getAccountValue(
-    accounts: Record<string, string | Record<string, string | undefined> | undefined>,
-    path: string
-): string | null {
-    const value = accounts[path];
-    return typeof value === 'string' ? value : null;
+function integerToSeedBuffer(value: string, size: number): Buffer | null {
+    try {
+        return new BN(value).toArrayLike(Buffer, 'le', size);
+    } catch {
+        return null;
+    }
+}
+
+function parseU8ArrayFromHex(value: string, length: number): number[] | null {
+    const hex = value.startsWith('0x') ? value.slice(2) : value;
+    /* eslint-disable-next-line no-restricted-syntax -- validate hex string format */
+    if (!/^[0-9a-fA-F]+$/.test(hex) || hex.length !== length * 2) return null;
+    const bytes: number[] = [];
+    for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.slice(i, i + 2), 16));
+    return bytes;
+}
+
+function parseIntegerArray(value: string, elementType: string, length: number): number[] | null {
+    let arr: string[];
+    try {
+        arr = parseArrayInput(value.trim()).map(String);
+    } catch {
+        return null;
+    }
+    if (arr.length !== length) return null;
+
+    const size = INTEGER_SEED_SIZES[elementType];
+    if (size === undefined) return null;
+
+    const bytes: number[] = [];
+    for (const item of arr) {
+        try {
+            const buf = new BN(item).toArrayLike(Buffer, 'le', size);
+            for (let i = 0; i < buf.length; i++) bytes.push(buf[i]);
+        } catch {
+            return null;
+        }
+    }
+    return bytes.length === length * size ? bytes : null;
+}
+
+function isOptionalValue(value: string): boolean {
+    return value === '' || value === 'null' || value === 'undefined';
 }

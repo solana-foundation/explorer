@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* eslint-disable -- mock data file */
 export default {
     additionalPrograms: [],
     kind: 'rootNode',

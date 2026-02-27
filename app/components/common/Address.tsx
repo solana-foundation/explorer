@@ -1,5 +1,6 @@
 'use client';
 
+import { useTokenInfo } from '@entities/token-info';
 import { Connection, programs } from '@metaplex/js';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
@@ -11,7 +12,7 @@ import { useState } from 'react';
 import useAsyncEffect from 'use-async-effect';
 
 import { EditIcon, NicknameEditor, useNickname } from '@/app/features/nicknames';
-import { getTokenInfoWithoutOnChainFallback } from '@/app/utils/token-info';
+import { useVisibility } from '@/app/shared/lib/visibility';
 
 import { Copyable } from './Copyable';
 
@@ -43,10 +44,11 @@ export function Address({
     fetchTokenLabelInfo,
 }: Props) {
     const address = pubkey.toBase58();
-    const { cluster } = useCluster();
+    const { cluster, clusterInfo } = useCluster();
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
     const [showNicknameEditor, setShowNicknameEditor] = useState(false);
     const nickname = useNickname(address);
+    const { ref: containerRef, isVisible } = useVisibility(fetchTokenLabelInfo);
 
     const display = displayAddress(address, cluster, tokenLabelInfo);
     if (truncateUnknown && address === display) {
@@ -60,7 +62,8 @@ export function Address({
         addressLabel = metaplexData.data.data.name;
     }
 
-    const tokenInfo = useTokenInfo(fetchTokenLabelInfo, address);
+    const shouldFetchTokenInfo = fetchTokenLabelInfo && isVisible;
+    const tokenInfo = useTokenInfo(shouldFetchTokenInfo, address, cluster, clusterInfo?.genesisHash);
     if (tokenInfo) {
         addressLabel = displayAddress(address, cluster, tokenInfo);
     }
@@ -127,14 +130,15 @@ export function Address({
     );
 
     return (
-        <>
+        <span ref={containerRef}>
             <div className={`d-none d-lg-flex align-items-center ${alignRight ? 'justify-content-end' : ''}`}>
                 {content}
             </div>
             <div className="d-flex d-lg-none align-items-center">{content}</div>
-        </>
+        </span>
     );
 }
+
 const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
     const [data, setData] = useState<programs.metadata.MetadataData>();
     const { url } = useCluster();
@@ -160,30 +164,4 @@ const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
         [useMetadata, pubkey, url, data, setData]
     );
     return { data };
-};
-
-const useTokenInfo = (fetchTokenLabelInfo: boolean | undefined, pubkey: string) => {
-    const [info, setInfo] = useState<TokenLabelInfo>();
-    const { cluster, url } = useCluster();
-
-    useAsyncEffect(
-        async isMounted => {
-            if (!fetchTokenLabelInfo) return;
-            if (!info) {
-                try {
-                    const token = await getTokenInfoWithoutOnChainFallback(new PublicKey(pubkey), cluster);
-                    if (isMounted()) {
-                        setInfo(token);
-                    }
-                } catch {
-                    if (isMounted()) {
-                        setInfo(undefined);
-                    }
-                }
-            }
-        },
-        [fetchTokenLabelInfo, pubkey, cluster, url, info, setInfo]
-    );
-
-    return info;
 };

@@ -156,7 +156,7 @@ function Token22MintHeader({
 }) {
     const tokenMetadata = create(metadataExtension.state, TokenMetadata);
     const { metadataAddress } = create(metadataPointerExtension.state, MetadataPointer);
-    const metadata = useMetadataJsonLink(getProxiedUri(tokenMetadata.uri), { suspense: true });
+    const metadata = useMetadataJsonLink(getProxiedUri(tokenMetadata.uri));
 
     const headerTokenMetadata = {
         logoURI: '',
