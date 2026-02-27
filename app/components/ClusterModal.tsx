@@ -1,16 +1,17 @@
 'use client';
 
+import {
+    addSavedClusterAtom,
+    persistedClusterAtom,
+    removeSavedClusterAtom,
+    SAVED_CLUSTER_PREFIX,
+    type SavedCluster,
+    savedClustersAtom,
+} from '@features/custom-cluster';
 import { useCluster, useClusterModal, useUpdateCustomUrl } from '@providers/cluster';
 import { useDebounceCallback } from '@react-hook/debounce';
 import { Cluster, clusterName, CLUSTERS, clusterSlug, ClusterStatus, DEFAULT_CLUSTER } from '@utils/cluster';
-import {
-    addSavedCluster,
-    getSavedClusters,
-    removeSavedCluster,
-    SAVED_CLUSTER_PREFIX,
-    type SavedCluster,
-    setPersistedCluster,
-} from '@features/custom-cluster';
+import { useAtomValue, useSetAtom } from 'jotai';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -47,10 +48,12 @@ export function ClusterModal() {
     );
 }
 
-type InputProps = { activeSuffix: string; active: boolean; onSaved: () => void; savedClusters: SavedCluster[] };
-function CustomClusterInput({ activeSuffix, active, onSaved, savedClusters }: InputProps) {
+type InputProps = { activeSuffix: string; active: boolean; savedClusters: SavedCluster[] };
+function CustomClusterInput({ activeSuffix, active, savedClusters }: InputProps) {
     const { customUrl } = useCluster();
     const updateCustomUrl = useUpdateCustomUrl();
+    const addSavedCluster = useSetAtom(addSavedClusterAtom);
+    const setPersistedCluster = useSetAtom(persistedClusterAtom);
     const [editing, setEditing] = React.useState(false);
     const [saving, setSaving] = React.useState(false);
     const [savedName, setSavedName] = React.useState('');
@@ -79,7 +82,6 @@ function CustomClusterInput({ activeSuffix, active, onSaved, savedClusters }: In
         setPersistedCluster(`${SAVED_CLUSTER_PREFIX}${savedName.trim()}`);
         setSavedName('');
         setSaving(false);
-        onSaved();
     };
 
     return (
@@ -169,6 +171,7 @@ function SavedClusterItem({
     isActive: boolean;
     onDelete: (name: string) => void;
 }) {
+    const setPersistedCluster = useSetAtom(persistedClusterAtom);
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
@@ -203,16 +206,10 @@ function SavedClusterItem({
     );
 }
 
-function SavedClustersSection({
-    activeSuffix,
-    savedClusters,
-    onChanged,
-}: {
-    activeSuffix: string;
-    savedClusters: SavedCluster[];
-    onChanged: () => void;
-}) {
+function SavedClustersSection({ activeSuffix, savedClusters }: { activeSuffix: string; savedClusters: SavedCluster[] }) {
     const { customUrl, cluster } = useCluster();
+    const removeSavedCluster = useSetAtom(removeSavedClusterAtom);
+    const setPersistedCluster = useSetAtom(persistedClusterAtom);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -223,7 +220,6 @@ function SavedClustersSection({
             setPersistedCluster(clusterSlug(DEFAULT_CLUSTER));
             router.push(pathname);
         }
-        onChanged();
     };
 
     if (savedClusters.length === 0) return null;
@@ -247,12 +243,7 @@ function SavedClustersSection({
 
 function ClusterToggle() {
     const { status, cluster } = useCluster();
-    const [savedClusters, setSavedClusters] = React.useState<SavedCluster[]>([]);
-    const refreshSaved = React.useCallback(() => setSavedClusters(getSavedClusters()), []);
-
-    React.useEffect(() => {
-        setSavedClusters(getSavedClusters());
-    }, []);
+    const savedClusters = useAtomValue(savedClustersAtom);
 
     let activeSuffix = '';
     switch (status) {
@@ -280,7 +271,6 @@ function ClusterToggle() {
                             key={index}
                             activeSuffix={activeSuffix}
                             active={active}
-                            onSaved={refreshSaved}
                             savedClusters={savedClusters}
                         />
                     );
@@ -300,7 +290,7 @@ function ClusterToggle() {
                     </Link>
                 );
             })}
-            <SavedClustersSection activeSuffix={activeSuffix} savedClusters={savedClusters} onChanged={refreshSaved} />
+            <SavedClustersSection activeSuffix={activeSuffix} savedClusters={savedClusters} />
         </div>
     );
 }

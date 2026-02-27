@@ -1,10 +1,9 @@
 export {
-    addSavedCluster,
+    addSavedClusterAtom,
     findSavedClusterUrl,
-    getPersistedCluster,
-    getSavedClusters,
-    removeSavedCluster,
+    persistedClusterAtom,
+    removeSavedClusterAtom,
     SAVED_CLUSTER_PREFIX,
-    setPersistedCluster,
+    savedClustersAtom,
 } from './lib/cluster-storage';
 export type { SavedCluster } from './lib/cluster-storage';

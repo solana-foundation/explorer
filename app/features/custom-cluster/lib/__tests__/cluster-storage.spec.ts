@@ -1,158 +1,127 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createStore } from 'jotai';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
-    addSavedCluster,
+    addSavedClusterAtom,
     findSavedClusterUrl,
-    getPersistedCluster,
-    getSavedClusters,
-    removeSavedCluster,
-    setPersistedCluster,
+    persistedClusterAtom,
+    removeSavedClusterAtom,
+    savedClustersAtom,
 } from '../cluster-storage';
 
-vi.mock('@utils/local-storage', () => ({
-    localStorageIsAvailable: vi.fn(() => true),
-}));
-
-import { localStorageIsAvailable } from '@utils/local-storage';
-
-describe('cluster-storage', () => {
+describe('cluster-storage atoms', () => {
     beforeEach(() => {
         localStorage.clear();
-        vi.mocked(localStorageIsAvailable).mockReturnValue(true);
     });
 
     afterEach(() => {
-        vi.restoreAllMocks();
+        localStorage.clear();
     });
 
-    describe('getPersistedCluster', () => {
-        it('returns null when no cluster is stored', () => {
-            expect(getPersistedCluster()).toBeNull();
+    describe('persistedClusterAtom', () => {
+        it('defaults to null', () => {
+            const store = createStore();
+            expect(store.get(persistedClusterAtom)).toBeNull();
         });
 
-        it('returns the stored cluster slug', () => {
-            localStorage.setItem('explorer:selectedCluster', 'devnet');
-            expect(getPersistedCluster()).toBe('devnet');
-        });
-
-        it('returns null when localStorage is unavailable', () => {
-            vi.mocked(localStorageIsAvailable).mockReturnValue(false);
-            localStorage.setItem('explorer:selectedCluster', 'devnet');
-            expect(getPersistedCluster()).toBeNull();
-        });
-    });
-
-    describe('setPersistedCluster', () => {
-        it('writes the cluster slug to localStorage', () => {
-            setPersistedCluster('testnet');
-            expect(localStorage.getItem('explorer:selectedCluster')).toBe('testnet');
+        it('stores and returns a cluster slug', () => {
+            const store = createStore();
+            store.set(persistedClusterAtom, 'devnet');
+            expect(store.get(persistedClusterAtom)).toBe('devnet');
         });
 
         it('overwrites a previous value', () => {
-            setPersistedCluster('devnet');
-            setPersistedCluster('testnet');
-            expect(localStorage.getItem('explorer:selectedCluster')).toBe('testnet');
+            const store = createStore();
+            store.set(persistedClusterAtom, 'devnet');
+            store.set(persistedClusterAtom, 'testnet');
+            expect(store.get(persistedClusterAtom)).toBe('testnet');
         });
 
-        it('does nothing when localStorage is unavailable', () => {
-            vi.mocked(localStorageIsAvailable).mockReturnValue(false);
-            setPersistedCluster('devnet');
-            expect(localStorage.getItem('explorer:selectedCluster')).toBeNull();
-        });
-    });
-
-    describe('getSavedClusters', () => {
-        it('returns empty array when nothing is stored', () => {
-            expect(getSavedClusters()).toEqual([]);
-        });
-
-        it('returns parsed array of saved clusters', () => {
-            const clusters = [{ name: 'Local', url: 'http://localhost:8899' }];
-            localStorage.setItem('explorer:savedClusters', JSON.stringify(clusters));
-            expect(getSavedClusters()).toEqual(clusters);
-        });
-
-        it('returns empty array and clears key on corrupted JSON', () => {
-            localStorage.setItem('explorer:savedClusters', 'not-json');
-            expect(getSavedClusters()).toEqual([]);
-            expect(localStorage.getItem('explorer:savedClusters')).toBeNull();
-        });
-
-        it('returns empty array and clears key when stored value is not an array', () => {
-            localStorage.setItem('explorer:savedClusters', JSON.stringify({ name: 'test' }));
-            expect(getSavedClusters()).toEqual([]);
-            expect(localStorage.getItem('explorer:savedClusters')).toBeNull();
-        });
-
-        it('returns empty array when localStorage is unavailable', () => {
-            vi.mocked(localStorageIsAvailable).mockReturnValue(false);
-            expect(getSavedClusters()).toEqual([]);
+        it('removes the key when set to null', () => {
+            const store = createStore();
+            store.set(persistedClusterAtom, 'devnet');
+            store.set(persistedClusterAtom, null);
+            expect(store.get(persistedClusterAtom)).toBeNull();
         });
     });
 
-    describe('addSavedCluster', () => {
+    describe('savedClustersAtom', () => {
+        it('defaults to empty array', () => {
+            const store = createStore();
+            expect(store.get(savedClustersAtom)).toEqual([]);
+        });
+    });
+
+    describe('addSavedClusterAtom', () => {
         it('adds a cluster to an empty list', () => {
-            addSavedCluster({ name: 'Local', url: 'http://localhost:8899' });
-            expect(getSavedClusters()).toEqual([{ name: 'Local', url: 'http://localhost:8899' }]);
+            const store = createStore();
+            store.set(addSavedClusterAtom, { name: 'Local', url: 'http://localhost:8899' });
+            expect(store.get(savedClustersAtom)).toEqual([{ name: 'Local', url: 'http://localhost:8899' }]);
         });
 
         it('appends to existing clusters', () => {
-            addSavedCluster({ name: 'Local', url: 'http://localhost:8899' });
-            addSavedCluster({ name: 'Staging', url: 'http://staging.example.com' });
-            expect(getSavedClusters()).toHaveLength(2);
-            expect(getSavedClusters()[1].name).toBe('Staging');
+            const store = createStore();
+            store.set(addSavedClusterAtom, { name: 'Local', url: 'http://localhost:8899' });
+            store.set(addSavedClusterAtom, { name: 'Staging', url: 'http://staging.example.com' });
+            expect(store.get(savedClustersAtom)).toHaveLength(2);
+            expect(store.get(savedClustersAtom)[1].name).toBe('Staging');
         });
 
         it('replaces an existing cluster with the same name', () => {
-            addSavedCluster({ name: 'Local', url: 'http://localhost:8899' });
-            addSavedCluster({ name: 'Local', url: 'http://localhost:9999' });
-            expect(getSavedClusters()).toEqual([{ name: 'Local', url: 'http://localhost:9999' }]);
+            const store = createStore();
+            store.set(addSavedClusterAtom, { name: 'Local', url: 'http://localhost:8899' });
+            store.set(addSavedClusterAtom, { name: 'Local', url: 'http://localhost:9999' });
+            expect(store.get(savedClustersAtom)).toEqual([{ name: 'Local', url: 'http://localhost:9999' }]);
         });
 
-        it('does nothing when localStorage is unavailable', () => {
-            vi.mocked(localStorageIsAvailable).mockReturnValue(false);
-            addSavedCluster({ name: 'Local', url: 'http://localhost:8899' });
-            vi.mocked(localStorageIsAvailable).mockReturnValue(true);
-            expect(getSavedClusters()).toEqual([]);
+        it('allows the same URL under different names', () => {
+            const store = createStore();
+            store.set(addSavedClusterAtom, { name: 'Local', url: 'http://localhost:8899' });
+            store.set(addSavedClusterAtom, { name: 'Also Local', url: 'http://localhost:8899' });
+            expect(store.get(savedClustersAtom)).toEqual([
+                { name: 'Local', url: 'http://localhost:8899' },
+                { name: 'Also Local', url: 'http://localhost:8899' },
+            ]);
         });
     });
 
-    describe('removeSavedCluster', () => {
+    describe('removeSavedClusterAtom', () => {
         it('removes a cluster by name', () => {
-            addSavedCluster({ name: 'Local', url: 'http://localhost:8899' });
-            addSavedCluster({ name: 'Staging', url: 'http://staging.example.com' });
-            removeSavedCluster('Local');
-            expect(getSavedClusters()).toEqual([{ name: 'Staging', url: 'http://staging.example.com' }]);
+            const store = createStore();
+            store.set(addSavedClusterAtom, { name: 'Local', url: 'http://localhost:8899' });
+            store.set(addSavedClusterAtom, { name: 'Staging', url: 'http://staging.example.com' });
+            store.set(removeSavedClusterAtom, 'Local');
+            expect(store.get(savedClustersAtom)).toEqual([{ name: 'Staging', url: 'http://staging.example.com' }]);
+        });
+
+        it('produces an empty list when removing the last cluster', () => {
+            const store = createStore();
+            store.set(addSavedClusterAtom, { name: 'Local', url: 'http://localhost:8899' });
+            store.set(removeSavedClusterAtom, 'Local');
+            expect(store.get(savedClustersAtom)).toEqual([]);
         });
 
         it('does nothing when name does not exist', () => {
-            addSavedCluster({ name: 'Local', url: 'http://localhost:8899' });
-            removeSavedCluster('Nonexistent');
-            expect(getSavedClusters()).toHaveLength(1);
-        });
-
-        it('does nothing when localStorage is unavailable', () => {
-            addSavedCluster({ name: 'Local', url: 'http://localhost:8899' });
-            vi.mocked(localStorageIsAvailable).mockReturnValue(false);
-            removeSavedCluster('Local');
-            vi.mocked(localStorageIsAvailable).mockReturnValue(true);
-            expect(getSavedClusters()).toHaveLength(1);
+            const store = createStore();
+            store.set(addSavedClusterAtom, { name: 'Local', url: 'http://localhost:8899' });
+            store.set(removeSavedClusterAtom, 'Nonexistent');
+            expect(store.get(savedClustersAtom)).toHaveLength(1);
         });
     });
 
     describe('findSavedClusterUrl', () => {
         it('returns the URL for a matching saved cluster', () => {
-            addSavedCluster({ name: 'Local', url: 'http://localhost:8899' });
-            expect(findSavedClusterUrl('custom:Local')).toBe('http://localhost:8899');
+            const clusters = [{ name: 'Local', url: 'http://localhost:8899' }];
+            expect(findSavedClusterUrl(clusters, 'custom:Local')).toBe('http://localhost:8899');
         });
 
         it('returns undefined for a slug without the custom: prefix', () => {
-            addSavedCluster({ name: 'Local', url: 'http://localhost:8899' });
-            expect(findSavedClusterUrl('devnet')).toBeUndefined();
+            const clusters = [{ name: 'Local', url: 'http://localhost:8899' }];
+            expect(findSavedClusterUrl(clusters, 'devnet')).toBeUndefined();
         });
 
         it('returns undefined when the named cluster does not exist', () => {
-            expect(findSavedClusterUrl('custom:Nonexistent')).toBeUndefined();
+            expect(findSavedClusterUrl([], 'custom:Nonexistent')).toBeUndefined();
         });
     });
 });
