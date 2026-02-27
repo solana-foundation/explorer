@@ -18,8 +18,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { Trash2 } from 'react-feather';
 
-import { cn } from './shared/utils';
 import { Overlay } from './common/Overlay';
+import { cn } from './shared/utils';
 
 const ClusterModalDeveloperSettings = dynamic(() => import('./ClusterModalDeveloperSettings'), { ssr: false });
 

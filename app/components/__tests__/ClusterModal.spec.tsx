@@ -1,10 +1,10 @@
+import type { SavedCluster } from '@features/custom-cluster';
+import { persistedClusterAtom, savedClustersAtom } from '@features/custom-cluster';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createStore, Provider } from 'jotai';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster, ClusterStatus } from '@/app/utils/cluster';
-import { persistedClusterAtom, savedClustersAtom } from '@features/custom-cluster';
-import type { SavedCluster } from '@features/custom-cluster';
 
 vi.mock('next/navigation', () => ({
     usePathname: () => '/',

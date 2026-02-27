@@ -1,7 +1,6 @@
-import { describe, expect, it } from 'vitest';
-
 import { SAVED_CLUSTER_PREFIX } from '@features/custom-cluster';
 import { Cluster, DEFAULT_CLUSTER } from '@utils/cluster';
+import { describe, expect, it } from 'vitest';
 
 import { parseQuery } from '../cluster';
 
