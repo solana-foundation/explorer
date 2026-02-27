@@ -193,7 +193,7 @@ function Footer({
                                         className="e-flex-shrink-0"
                                     />
                                 ))}
-                            <span className="e-text-2xl e-text-white">
+                            <span className="e-text-2xl e-text-white e-whitespace-nowrap">
                                 {total.formatted} {total.unit}
                             </span>
                         </div>
