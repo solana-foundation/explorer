@@ -2,7 +2,7 @@
 
 import { findSavedClusterUrl, persistedClusterAtom, SAVED_CLUSTER_PREFIX, savedClustersAtom } from '@features/custom-cluster';
 import { createSolanaRpc } from '@solana/kit';
-import { Cluster, clusterFromSlug, clusterName, clusterSlug, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
+import { Cluster, clusterFromSlug, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
 import { localStorageIsAvailable } from '@utils/local-storage';
 import { useAtom, useAtomValue } from 'jotai';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
