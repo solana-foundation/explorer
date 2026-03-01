@@ -35,7 +35,14 @@ function renderWithStore(initialClusters: SavedCluster[] = []) {
     if (initialClusters.length > 0) {
         store.set(savedClustersAtom, initialClusters);
     }
-    return { store, ...render(<Provider store={store}><ClusterModal /></Provider>) };
+    return {
+        store,
+        ...render(
+            <Provider store={store}>
+                <ClusterModal />
+            </Provider>
+        ),
+    };
 }
 
 describe('ClusterModal', () => {

@@ -184,7 +184,10 @@ function SavedClusterItem({
     return (
         <div className="position-relative col-12 mb-3" data-testid={`saved-cluster-${cluster.name}`}>
             <Link
-                className={cn('btn col-12 text-center', isActive ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white')}
+                className={cn(
+                    'btn col-12 text-center',
+                    isActive ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white'
+                )}
                 href={clusterUrl}
                 onClick={() => setPersistedCluster(`${SAVED_CLUSTER_PREFIX}${cluster.name}`)}
             >
@@ -206,7 +209,13 @@ function SavedClusterItem({
     );
 }
 
-function SavedClustersSection({ activeSuffix, savedClusters }: { activeSuffix: string; savedClusters: SavedCluster[] }) {
+function SavedClustersSection({
+    activeSuffix,
+    savedClusters,
+}: {
+    activeSuffix: string;
+    savedClusters: SavedCluster[];
+}) {
     const { customUrl, cluster } = useCluster();
     const removeSavedCluster = useSetAtom(removeSavedClusterAtom);
     const setPersistedCluster = useSetAtom(persistedClusterAtom);
@@ -285,7 +294,14 @@ function ClusterToggle() {
                 const nextQueryString = nextSearchParams.toString();
                 const clusterUrl = `${pathname}${nextQueryString ? `?${nextQueryString}` : ''}`;
                 return (
-                    <Link key={index} className={cn('btn col-12 mb-3', active ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white')} href={clusterUrl}>
+                    <Link
+                        key={index}
+                        className={cn(
+                            'btn col-12 mb-3',
+                            active ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white'
+                        )}
+                        href={clusterUrl}
+                    >
                         {clusterName(net)}
                     </Link>
                 );

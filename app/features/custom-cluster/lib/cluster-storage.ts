@@ -8,19 +8,13 @@ export interface SavedCluster {
 
 export const SAVED_CLUSTER_PREFIX = 'custom:';
 
-export const persistedClusterAtom = atomWithStorage<string | null>(
-    'explorer:selectedCluster',
-    null,
-    undefined,
-    { getOnInit: true }
-);
+export const persistedClusterAtom = atomWithStorage<string | null>('explorer:selectedCluster', null, undefined, {
+    getOnInit: true,
+});
 
-export const savedClustersAtom = atomWithStorage<SavedCluster[]>(
-    'explorer:savedClusters',
-    [],
-    undefined,
-    { getOnInit: true }
-);
+export const savedClustersAtom = atomWithStorage<SavedCluster[]>('explorer:savedClusters', [], undefined, {
+    getOnInit: true,
+});
 
 export const addSavedClusterAtom = atom(null, (get, set, cluster: SavedCluster) => {
     set(savedClustersAtom, [...get(savedClustersAtom).filter(c => c.name !== cluster.name), cluster]);

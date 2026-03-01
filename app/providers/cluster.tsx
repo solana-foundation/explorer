@@ -1,6 +1,11 @@
 'use client';
 
-import { findSavedClusterUrl, persistedClusterAtom, SAVED_CLUSTER_PREFIX, savedClustersAtom } from '@features/custom-cluster';
+import {
+    findSavedClusterUrl,
+    persistedClusterAtom,
+    SAVED_CLUSTER_PREFIX,
+    savedClustersAtom,
+} from '@features/custom-cluster';
 import { createSolanaRpc } from '@solana/kit';
 import { Cluster, clusterFromSlug, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
 import { localStorageIsAvailable } from '@utils/local-storage';
@@ -100,7 +105,9 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
 
     const urlFromParams = enableCustomUrl ? searchParams?.get('customUrl') || null : null;
     const urlFromSaved =
-        cluster === Cluster.Custom && !urlFromParams ? findSavedClusterUrl(savedClusters, persistedCluster ?? '') : undefined;
+        cluster === Cluster.Custom && !urlFromParams
+            ? findSavedClusterUrl(savedClusters, persistedCluster ?? '')
+            : undefined;
     const customUrl = urlFromParams ?? urlFromSaved ?? state.customUrl;
     const pathname = usePathname();
     const router = useRouter();
