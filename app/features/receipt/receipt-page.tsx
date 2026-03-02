@@ -3,7 +3,6 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SignatureContext } from '@components/instruction/SignatureContext';
-import { Button } from '@components/shared/ui/button';
 import { useExplorerLink } from '@entities/cluster';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
@@ -12,7 +11,6 @@ import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import { TransactionSignature } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect } from 'react';
 import useSWR from 'swr';
@@ -21,10 +19,11 @@ import { getProxiedUri } from '@/app/features/metadata';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app/tx/[signature]/page-client';
 
-import { usePrimaryDomain } from '../lib/use-primary-domain';
-import { extractReceiptData } from '../model/create-receipt';
-import type { FormattedReceipt } from '../types';
-import { BaseReceipt, BlurredCircle, NoReceipt } from './BaseReceipt';
+import { usePrimaryDomain } from './lib/use-primary-domain';
+import { extractReceiptData } from './model/create-receipt';
+import type { FormattedReceipt } from './types';
+import { NoReceipt } from './ui/BaseReceipt';
+import { ReceiptView } from './ui/ReceiptView';
 
 interface ReceiptProps {
     signature: TransactionSignature;
@@ -141,31 +140,20 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
 
     return (
         <SignatureContext.Provider value={signature}>
-            <div className="container e-flex e-min-h-[90vh] e-flex-col e-items-center e-justify-center e-gap-6 e-px-5 e-py-10">
-                <BlurredCircle />
-                <BaseReceipt
-                    data={{
-                        ...receipt,
-                        confirmationStatus: status.data?.info?.confirmationStatus,
-                        logoURI,
-                        receiver: { ...receipt.receiver, domain: receiverDomain },
-                        receiverHref: receiverLink.link,
-                        sender: { ...receipt.sender, domain: senderDomain },
-                        senderHref: senderLink.link,
-                        tokenHref: tokenLink.link,
-                    }}
-                />
-                <Button size="sm" className="e-me-2" asChild>
-                    <Link
-                        href={transactionPath}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => receiptAnalytics.trackViewTxClicked(signature)}
-                    >
-                        View transaction in Explorer
-                    </Link>
-                </Button>
-            </div>
+            <ReceiptView
+                data={{
+                    ...receipt,
+                    confirmationStatus: status.data?.info?.confirmationStatus,
+                    logoURI,
+                    receiver: { ...receipt.receiver, domain: receiverDomain },
+                    receiverHref: receiverLink.link,
+                    sender: { ...receipt.sender, domain: senderDomain },
+                    senderHref: senderLink.link,
+                    tokenHref: tokenLink.link,
+                }}
+                transactionPath={transactionPath}
+                onViewTxClick={() => receiptAnalytics.trackViewTxClicked(signature)}
+            />
         </SignatureContext.Provider>
     );
 }
