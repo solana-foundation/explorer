@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 
 import { BaseShareButton } from '../BaseShareButton';
+import { CopyLinkShareItem } from '../CopyLinkShareItem';
 
 const meta: Meta<typeof BaseShareButton> = {
     args: {
-        onCopyLink: fn(),
+        children: <CopyLinkShareItem />,
     },
     component: BaseShareButton,
     tags: ['autodocs', 'test'],
@@ -16,7 +17,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-    play: async ({ canvasElement, args }) => {
+    play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
         // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
@@ -30,19 +31,6 @@ export const Default: Story = {
         await expect(copyButton).toBeInTheDocument();
 
         await userEvent.click(copyButton);
-        await expect(args.onCopyLink).toHaveBeenCalledOnce();
-    },
-};
-
-export const Copied: Story = {
-    args: {
-        copied: true,
-    },
-    play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
-
-        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
-        await userEvent.click(canvas.getByRole('button', { name: /share/i }));
 
         // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         const copiedButton = await within(document.body).findByRole('button', { name: /copied/i });
