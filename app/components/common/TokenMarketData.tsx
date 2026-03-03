@@ -1,7 +1,8 @@
 import { LoadingCard } from '@components/shared/LoadingCard';
-import { CoinGeckoResult, CoingeckoStatus, CoinInfo } from '@utils/coingecko';
 import { useRef } from 'react';
 
+import { cn } from '@/app/components/shared/utils';
+import { CoinGeckoResult, CoingeckoStatus, CoinInfo } from '@/app/features/token-verification-badge';
 import { FullLegacyTokenInfo, FullTokenInfo } from '@/app/utils/token-info';
 
 import { MarketData } from './token-market-data/MarketData';
@@ -29,7 +30,13 @@ export function TokenMarketData({
     return (
         <>
             {isLoadingFromCoingecko && (
-                <LoadingCard className="e-mb-0 e-px-3 e-py-4" message="Loading token price data" />
+                <LoadingCard
+                    className={cn(
+                        'e-m-0 e-grid e-w-full e-place-items-center e-rounded e-border e-border-solid e-border-black e-bg-[#1C2120] e-px-2 e-py-1 e-text-sm',
+                        'md:e-min-h-[69px]'
+                    )}
+                    message="Loading token price data"
+                />
             )}
             {!isLoadingFromCoingecko && tokenPriceInfo.current && (
                 <MarketData.Series
