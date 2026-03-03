@@ -76,7 +76,7 @@ export function CompressedNftCard({ account }: { account: Account }) {
     );
 }
 
-export function CompressedNftAccountHeader({ account }: { account: Account }) {
+export function CompressedNftAccountHeader({ account, fallback }: { account: Account, fallback?: React.ReactElement }) {
     const { url } = useCluster();
     const compressedNft = useCompressedNft({ address: account.pubkey.toString(), url });
 
@@ -87,7 +87,7 @@ export function CompressedNftAccountHeader({ account }: { account: Account }) {
             </Suspense>
         );
     }
-    return <div />;
+    return fallback || <div />;
 }
 
 export function CompressedNFTHeader({ compressedNft }: { compressedNft: CompressedNft }) {

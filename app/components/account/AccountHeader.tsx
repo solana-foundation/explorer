@@ -81,7 +81,7 @@ export function AccountHeader({
         return (
             <ErrorBoundary fallback={fallback}>
                 <Suspense fallback={fallback}>
-                    <CompressedNftAccountHeader account={account} />
+                    <CompressedNftAccountHeader account={account} fallback={fallback} />
                 </Suspense>
             </ErrorBoundary>
         );
