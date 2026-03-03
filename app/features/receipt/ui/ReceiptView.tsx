@@ -3,15 +3,16 @@
 import { Button } from '@components/shared/ui/button';
 import { TransactionSignature } from '@solana/web3.js';
 import Link from 'next/link';
-import { Share2 } from 'react-feather';
+import { Download, Share2 } from 'react-feather';
 
 import { useToast } from '@/app/components/shared/ui/sonner/use-toast';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { useCanNativeShare } from '@/app/shared/lib/use-can-native-share';
 
-import type { FormattedExtendedReceipt } from '../types';
+import type { DownloadReceiptFn, FormattedExtendedReceipt } from '../types';
 import { BaseReceipt, BlurredCircle } from './BaseReceipt';
 import { CopyLinkShareItem } from './CopyLinkShareItem';
+import { DownloadReceiptItem } from './DownloadReceiptItem';
 import { PopoverButton } from './PopoverButton';
 import { ShareOnXShareItem } from './ShareOnXShareItem';
 
@@ -19,12 +20,10 @@ interface ReceiptViewProps {
     data: FormattedExtendedReceipt;
     signature: TransactionSignature;
     transactionPath: string;
+    download: DownloadReceiptFn;
 }
 
-export function ReceiptView({ data, signature, transactionPath }: ReceiptViewProps) {
-    const canNativeShare = useCanNativeShare();
-    const toast = useToast();
-
+export function ReceiptView({ data, signature, transactionPath, download }: ReceiptViewProps) {
     function handleViewTxClick() {
         receiptAnalytics.trackViewTxClicked(signature);
     }
@@ -84,6 +83,11 @@ export function ReceiptView({ data, signature, transactionPath }: ReceiptViewPro
                             <CopyLinkShareItem onCopy={() => receiptAnalytics.trackShareCopyLink(signature)} />
                         </PopoverButton>
                     )}
+                </div>
+                <div className="e-flex e-items-start e-gap-0.5">
+                    <PopoverButton icon={<Download size={12} />} label="Download">
+                        <DownloadReceiptItem icon={<Download size={11} />} label="Download PNG" download={download} />
+                    </PopoverButton>
                 </div>
             </div>
         </div>
