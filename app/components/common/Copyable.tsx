@@ -1,22 +1,32 @@
 'use client';
 
-import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { CheckCircle, Copy, Loader, XCircle } from 'react-feather';
 
-type CopyState = 'copy' | 'copied' | 'errored' | 'loading';
+import { CopyState, useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
 export function Copyable({ text, children }: { text: string | null; children: ReactNode }) {
-    const [state, setState] = useState<CopyState>('copy');
+    const [clipboardState, copy] = useCopyToClipboard(1000);
+    const [loading, setLoading] = useState(false);
 
-    const handleClick = async () => {
+    const handleClick = () => {
         if (typeof text !== 'string') {
-            setState('loading');
+            setLoading(true);
             return;
         }
-        proceedCopy(text);
+        copy(text);
     };
 
-    const copyStrategy: Record<CopyState, JSX.Element> = {
+    useEffect(() => {
+        if (loading && typeof text === 'string') {
+            copy(text);
+            setLoading(false);
+        }
+    }, [text, loading, copy]);
+
+    const state: CopyState | 'loading' = loading ? 'loading' : clipboardState;
+
+    const copyStrategy: Record<CopyState | 'loading', JSX.Element> = {
         copied: <CheckCircle className="align-text-top" size={13} />,
         copy: <Copy className="align-text-top c-pointer" onClick={handleClick} size={13} />,
         errored: (
@@ -31,25 +41,6 @@ export function Copyable({ text, children }: { text: string | null; children: Re
         return copyStrategy[state] || null;
     }
 
-    const proceedCopy = useCallback(
-        async (textToCopy: string) => {
-            try {
-                await navigator.clipboard.writeText(textToCopy);
-                setState('copied');
-            } catch (err) {
-                setState('errored');
-            }
-            setTimeout(() => setState('copy'), 1000);
-        },
-        [setState]
-    );
-
-    useEffect(() => {
-        if (state === 'loading' && typeof text === 'string') {
-            proceedCopy(text);
-        }
-    }, [text, state, proceedCopy]);
-
     let textColor = '';
     if (state === 'copied' || state === 'loading') {
         textColor = 'text-info';
@@ -57,18 +48,14 @@ export function Copyable({ text, children }: { text: string | null; children: Re
         textColor = 'text-danger';
     }
 
-    function PrependCopyIcon() {
-        return (
-            <>
-                <span className="font-size-tiny me-2" style={{ fontSize: '12px' }}>
-                    <span className={textColor}>
-                        <CopyIcon />
-                    </span>
+    return (
+        <>
+            <span className="font-size-tiny me-2" style={{ fontSize: '12px' }}>
+                <span className={textColor}>
+                    <CopyIcon />
                 </span>
-                {children}
-            </>
-        );
-    }
-
-    return <PrependCopyIcon />;
+            </span>
+            {children}
+        </>
+    );
 }
