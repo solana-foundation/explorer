@@ -219,6 +219,9 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
         fetchFullTokenInfo
     );
 
+    const isAccountLoading = !info || info.status === FetchStatus.Fetching;
+    const isTokenInfoLoading = isAccountLoading || isFullTokenInfoLoading;
+
     // Fetch account on load
     React.useEffect(() => {
         if (!info && status === ClusterStatus.Connected && pubkey) {
@@ -232,7 +235,7 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
                 address={address}
                 account={info?.data}
                 tokenInfo={fullTokenInfo}
-                isTokenInfoLoading={isFullTokenInfoLoading}
+                isTokenInfoLoading={isTokenInfoLoading}
             />
             {!pubkey ? (
                 <ErrorCard text={`Address "${address}" is not valid`} />
@@ -241,7 +244,7 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
                     info={info}
                     pubkey={pubkey}
                     tokenInfo={fullTokenInfo}
-                    isTokenInfoLoading={isFullTokenInfoLoading}
+                    isTokenInfoLoading={isTokenInfoLoading}
                     notification={<SecurityNotification parsedData={infoParsed} address={address} />}
                 >
                     {children}
