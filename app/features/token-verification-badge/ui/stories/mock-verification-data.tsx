@@ -95,7 +95,7 @@ export const mockDangerousTokenSources = (): VerificationSource[] => [
     mockCoinGeckoSource({ isVerificationFound: false, verified: false }),
     mockJupiterSource({ isVerificationFound: false, verified: false }),
     mockSolflareSource({ isVerificationFound: false, verified: false }),
-    mockRugCheckSource({ level: ERiskLevel.Danger, score: 85 }),
+    mockRugCheckSource({ level: ERiskLevel.Danger, score: 85, verified: false }),
 ];
 
 // Helper to create TokenVerificationResult
