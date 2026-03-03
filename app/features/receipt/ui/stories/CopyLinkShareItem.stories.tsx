@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { withClipboardMock } from '@storybook-config/decorators';
 import { expect, userEvent, within } from 'storybook/test';
 
 import { CopyLinkShareItem } from '../CopyLinkShareItem';
-import { withClipboardMock } from './decorators';
 
 const meta: Meta<typeof CopyLinkShareItem> = {
     component: CopyLinkShareItem,
