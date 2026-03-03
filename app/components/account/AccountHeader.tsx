@@ -42,6 +42,15 @@ export function AccountHeader({
     const isProgram = parsedData && isUpgradeableLoaderAccountData(parsedData) && parsedData?.parsed.type === 'program';
     const isNativeProgram = Boolean(account?.executable);
 
+    const fallback = (
+        <div className="e-flex e-flex-col">
+            <h6 className="header-pretitle">Details</h6>
+            <h2 className="header-title">Account</h2>
+        </div>
+    );
+
+    if (isTokenInfoLoading) return fallback;
+
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
     }
@@ -68,12 +77,6 @@ export function AccountHeader({
         return <ProgramHeader address={address} />;
     }
 
-    const fallback = (
-        <div className="e-flex e-flex-col">
-            <h6 className="header-pretitle">Details</h6>
-            <h2 className="header-title">Account</h2>
-        </div>
-    );
     if (account) {
         return (
             <ErrorBoundary fallback={fallback}>
@@ -105,12 +108,7 @@ function TokenMintHeader({
     );
 
     const defaultCard = useMemo(
-        () => (
-            <TokenMintHeaderCard
-                token={tokenInfo ? tokenInfo : { logoURI: undefined, name: undefined }}
-                unverified={tokenInfo ? !tokenInfo.verified : false}
-            />
-        ),
+        () => <TokenMintHeaderCard token={tokenInfo ? tokenInfo : { logoURI: undefined, name: undefined }} />,
         [tokenInfo]
     );
 
@@ -138,7 +136,7 @@ function TokenMintHeader({
             name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
             symbol: parsedData?.nftData?.metadata.data.symbol,
         };
-        return <TokenMintHeaderCard token={token} unverified={!tokenInfo?.verified} />;
+        return <TokenMintHeaderCard token={token} />;
     } else if (tokenInfo) {
         return defaultCard;
     }
@@ -170,46 +168,19 @@ function Token22MintHeader({
     // Handles the basic case where MetadataPointer is referencing the Token Metadata extension directly
     // Does not handle the case where MetadataPointer is pointing at a separate account.
     if (metadataAddress?.toString() === address) {
-        return <TokenMintHeaderCard token={headerTokenMetadata} unverified={false} />;
+        return <TokenMintHeaderCard token={headerTokenMetadata} />;
     }
     throw new Error('Metadata loading for non-token 2022 programs is not yet supported');
 }
 
 function TokenMintHeaderCard({
     token,
-    unverified,
 }: {
     token: { name?: string | undefined; logoURI?: string | undefined; symbol?: string | undefined };
-    unverified: boolean;
 }) {
     const logoURI = token.logoURI ? getProxiedUri(token.logoURI) : undefined;
     return (
         <div className="row align-items-center">
-            {unverified && (
-                <div className="alert alert-warning alert-scam" role="alert">
-                    Warning! Token names and logos are not unique. This token may have spoofed its name and logo to look
-                    like another token. Verify the token&apos;s mint address to ensure it is correct. If you are the
-                    token creator, please verify your token on{' '}
-                    <a
-                        href="https://support.coingecko.com/hc/en-us/articles/23725417857817-Verification-Guide-for-Listing-Update-Requests-on-CoinGecko"
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{ color: 'white', textDecoration: 'underline' }}
-                    >
-                        Coingecko
-                    </a>{' '}
-                    or on{' '}
-                    <a
-                        href="https://verify.jup.ag/"
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{ color: 'white', textDecoration: 'underline' }}
-                    >
-                        Jupiter
-                    </a>
-                    .
-                </div>
-            )}
             <div className="col-auto">
                 <div className="avatar avatar-lg header-avatar-top">
                     {logoURI ? (
