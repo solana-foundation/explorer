@@ -17,7 +17,7 @@ export function DownloadReceiptItem({ icon, label, download }: DownloadReceiptIt
     const [state, trigger] = useDownloadReceipt(download);
 
     function getIcon() {
-        if (state === 'downloading') return <Loader size={11} />;
+        if (state === 'downloading') return <Loader size={11} className="e-animate-spin" />;
         if (state === 'downloaded') return <Check size={11} />;
         if (state === 'errored') return <XCircle size={11} />;
         return icon;
