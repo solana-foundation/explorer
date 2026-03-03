@@ -19,11 +19,13 @@ export const Default: Story = {
     play: async ({ canvasElement, args }) => {
         const canvas = within(canvasElement);
 
+        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         const trigger = canvas.getByRole('button', { name: /share/i });
         await expect(trigger).toBeInTheDocument();
 
         await userEvent.click(trigger);
 
+        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         const copyButton = await within(document.body).findByRole('button', { name: /copy link/i });
         await expect(copyButton).toBeInTheDocument();
 
@@ -39,8 +41,10 @@ export const Copied: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
+        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         await userEvent.click(canvas.getByRole('button', { name: /share/i }));
 
+        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         const copiedButton = await within(document.body).findByRole('button', { name: /copied/i });
         await expect(copiedButton).toBeInTheDocument();
     },

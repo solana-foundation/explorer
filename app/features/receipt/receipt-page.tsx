@@ -151,7 +151,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                     senderHref: senderLink.link,
                     tokenHref: tokenLink.link,
                 }}
-                onViewTxClick={() => receiptAnalytics.trackViewTxClicked(signature)}
+                signature={signature}
                 transactionPath={transactionPath}
             />
         </SignatureContext.Provider>

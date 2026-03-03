@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, within } from 'storybook/test';
+import { expect, within } from 'storybook/test';
 
 import { ReceiptView } from '../ReceiptView';
 import {
@@ -12,7 +12,7 @@ import {
 
 const meta: Meta<typeof ReceiptView> = {
     args: {
-        onViewTxClick: fn(),
+        signature: 'ExampleTransactionSignature',
         transactionPath: 'https://example.com/tx/ExampleTransactionSignature',
     },
     component: ReceiptView,
@@ -30,6 +30,7 @@ export const Default: Story = {
         const canvas = within(canvasElement);
         expect(canvas.getByText('Solana Receipt')).toBeInTheDocument();
         expect(canvas.getByText('Open transaction in Explorer')).toBeInTheDocument();
+        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         expect(canvas.getByRole('button', { name: /share/i })).toBeInTheDocument();
     },
 };
