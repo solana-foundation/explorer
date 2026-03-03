@@ -1,5 +1,6 @@
-import { useState } from 'react';
 import { Copy } from 'react-feather';
+
+import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
 interface IIdlInstructionSectionProps {
     title: string;
@@ -8,14 +9,11 @@ interface IIdlInstructionSectionProps {
 }
 
 export function IdlInstructionSection({ title, description, commands }: IIdlInstructionSectionProps) {
-    const [copied, setCopied] = useState(false);
+    const [state, copy] = useCopyToClipboard();
 
-    const handleCopy = () => {
-        const allCommands = commands.join('\n');
-        navigator.clipboard.writeText(allCommands);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
+    function handleCopy() {
+        copy(commands.join('\n'));
+    }
 
     return (
         <div className="card">
@@ -39,9 +37,9 @@ export function IdlInstructionSection({ title, description, commands }: IIdlInst
                     onClick={handleCopy}
                     type="button"
                     className="btn btn-white btn-sm e-flex-shrink-0"
-                    aria-label={copied ? 'Copied' : 'Copy'}
+                    aria-label={state === 'copied' ? 'Copied' : 'Copy'}
                 >
-                    {copied ? (
+                    {state === 'copied' ? (
                         <span className="e-text-green-400">Copied</span>
                     ) : (
                         <>
