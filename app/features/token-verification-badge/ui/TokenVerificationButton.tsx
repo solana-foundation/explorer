@@ -60,12 +60,7 @@ export const TokenVerificationButton = React.forwardRef<HTMLButtonElement, Token
         const hasVerification = verificationFoundSources.length > 0;
 
         return (
-            <button
-                ref={ref}
-                type="button"
-                className={cn(buttonVariants({ isLoading, isOpen }), className)}
-                {...props}
-            >
+            <button ref={ref} type="button" className={cn(buttonVariants({ isLoading, isOpen }), className)} {...props}>
                 <div className="e-flex e-w-full e-items-center e-gap-2 md:e-mb-2">
                     <p className="e-m-0 e-text-sm e-text-white">Verification</p>
 
