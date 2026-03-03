@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react';
 
-interface ShareMenuItemProps {
+interface PopoverMenuItemProps {
     icon: ReactNode;
     label: string;
     onClick: () => void;
 }
 
-export function ShareMenuItem({ icon, label, onClick }: ShareMenuItemProps) {
+export function PopoverMenuItem({ icon, label, onClick }: PopoverMenuItemProps) {
     return (
         <button
             type="button"

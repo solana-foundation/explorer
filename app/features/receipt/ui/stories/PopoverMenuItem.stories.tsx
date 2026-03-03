@@ -2,17 +2,17 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Link } from 'react-feather';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
-import { ShareMenuItem } from '../ShareMenuItem';
+import { PopoverMenuItem } from '../PopoverMenuItem';
 
-const meta: Meta<typeof ShareMenuItem> = {
+const meta: Meta<typeof PopoverMenuItem> = {
     args: {
         icon: <Link size={11} />,
         label: 'Copy link',
         onClick: fn(),
     },
-    component: ShareMenuItem,
+    component: PopoverMenuItem,
     tags: ['autodocs', 'test'],
-    title: 'Features/Receipt/ShareMenuItem',
+    title: 'Features/Receipt/PopoverMenuItem',
 };
 
 export default meta;

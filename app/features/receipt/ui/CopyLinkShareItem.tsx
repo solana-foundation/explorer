@@ -4,7 +4,7 @@ import { Check, Link, XCircle } from 'react-feather';
 
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
-import { ShareMenuItem } from './ShareMenuItem';
+import { PopoverMenuItem } from './PopoverMenuItem';
 
 interface CopyLinkShareItemProps {
     onCopy?: () => void;
@@ -30,5 +30,5 @@ export function CopyLinkShareItem({ onCopy }: CopyLinkShareItemProps) {
         return 'Copy link';
     }
 
-    return <ShareMenuItem icon={getIcon()} label={getLabel()} onClick={handleClick} />;
+    return <PopoverMenuItem icon={getIcon()} label={getLabel()} onClick={handleClick} />;
 }

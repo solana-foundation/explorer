@@ -1,24 +1,27 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { withClipboardMock } from '@storybook-config/decorators';
+import { Share2 } from 'react-feather';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { BaseShareButton } from '../BaseShareButton';
 import { CopyLinkShareItem } from '../CopyLinkShareItem';
+import { PopoverButton } from '../PopoverButton';
 
-const meta: Meta<typeof BaseShareButton> = {
+const meta: Meta<typeof PopoverButton> = {
     args: {
         children: <CopyLinkShareItem />,
+        icon: <Share2 size={12} />,
+        label: 'Share',
     },
-    component: BaseShareButton,
+    component: PopoverButton,
     decorators: [withClipboardMock],
     tags: ['autodocs', 'test'],
-    title: 'Features/Receipt/BaseShareButton',
+    title: 'Features/Receipt/PopoverButton',
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const WithCopyLink: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 

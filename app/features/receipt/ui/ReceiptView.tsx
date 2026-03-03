@@ -3,13 +3,14 @@
 import { Button } from '@components/shared/ui/button';
 import { TransactionSignature } from '@solana/web3.js';
 import Link from 'next/link';
+import { Share2 } from 'react-feather';
 
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 
 import type { FormattedExtendedReceipt } from '../types';
 import { BaseReceipt, BlurredCircle } from './BaseReceipt';
-import { BaseShareButton } from './BaseShareButton';
 import { CopyLinkShareItem } from './CopyLinkShareItem';
+import { PopoverButton } from './PopoverButton';
 
 interface ReceiptViewProps {
     data: FormattedExtendedReceipt;
@@ -32,9 +33,9 @@ export function ReceiptView({ data, signature, transactionPath }: ReceiptViewPro
                         Open transaction in Explorer
                     </Link>
                 </Button>
-                <BaseShareButton>
+                <PopoverButton icon={<Share2 size={12} />} label="Share">
                     <CopyLinkShareItem onCopy={() => receiptAnalytics.trackShareCopyLink(signature)} />
-                </BaseShareButton>
+                </PopoverButton>
             </div>
         </div>
     );
