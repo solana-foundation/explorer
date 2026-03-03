@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 
 import { BaseShareButton } from '../BaseShareButton';
 import { CopyLinkShareItem } from '../CopyLinkShareItem';
