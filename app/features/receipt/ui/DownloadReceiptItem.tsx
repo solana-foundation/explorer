@@ -8,7 +8,7 @@ import type { DownloadReceiptFn } from '../types';
 import { PopoverMenuItem } from './PopoverMenuItem';
 
 interface DownloadReceiptItemProps {
-    icon: ReactNode;
+    icon?: ReactNode;
     label: string;
     download: DownloadReceiptFn;
 }
