@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 interface PopoverMenuItemProps {
-    icon: ReactNode;
+    icon?: ReactNode;
     label: string;
     onClick: () => void;
 }

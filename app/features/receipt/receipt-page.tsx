@@ -11,18 +11,20 @@ import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import { TransactionSignature } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import useSWR from 'swr';
 
 import { getProxiedUri } from '@/app/features/metadata';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app/tx/[signature]/page-client';
 
+import { generateReceiptPdf } from './lib/generate-receipt-pdf';
 import { usePrimaryDomain } from './lib/use-primary-domain';
 import { extractReceiptData } from './model/create-receipt';
 import type { FormattedReceipt } from './types';
 import { NoReceipt } from './ui/BaseReceipt';
+import { PrintableReceiptView } from './ui/PrintableReceiptView';
 import { ReceiptView } from './ui/ReceiptView';
 
 interface ReceiptProps {
@@ -126,6 +128,9 @@ interface ReceiptContentProps {
 
 function ReceiptContent({ receipt, signature, status, transactionPath }: ReceiptContentProps) {
     const receiptType = 'mint' in receipt ? 'token' : 'sol';
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const mode = searchParams.get('mode');
 
     useEffect(() => {
         receiptAnalytics.trackViewed(signature, receiptType);
@@ -138,9 +143,36 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const tokenLink = useExplorerLink('mint' in receipt ? `/address/${receipt.mint}` : '');
     const logoURI = receipt.logoURI ? getProxiedUri(receipt.logoURI) : undefined;
 
-    const download = useCallback(async () => {
-        throw new Error('Download is not yet implemented');
-    }, []);
+    const downloadPdf = useMemo(
+        () => () => generateReceiptPdf(receipt, signature, window.location.href),
+        [receipt, signature]
+    );
+
+    const handlePrintClick = useCallback(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('mode', 'print');
+        router.push(`?${params.toString()}`);
+    }, [searchParams, router]);
+
+    const handleBackFromPrint = useCallback(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('mode');
+        const qs = params.toString();
+        router.push(qs ? `?${qs}` : window.location.pathname);
+    }, [searchParams, router]);
+
+    if (mode === 'print') {
+        return (
+            <PrintableReceiptView
+                data={{
+                    ...receipt,
+                    confirmationStatus: status.data?.info?.confirmationStatus,
+                    signature,
+                }}
+                onBack={handleBackFromPrint}
+            />
+        );
+    }
 
     return (
         <SignatureContext.Provider value={signature}>
@@ -157,7 +189,8 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                 }}
                 signature={signature}
                 transactionPath={transactionPath}
-                download={download}
+                downloadPdf={downloadPdf}
+                onPrintClick={handlePrintClick}
             />
         </SignatureContext.Provider>
     );
