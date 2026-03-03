@@ -24,19 +24,19 @@ const buttonVariants = cva(
         'md:e-h-[stretch] md:e-max-h-fit md:e-min-h-[69px] md:e-w-[160px] md:e-flex-col md:e-items-start md:e-px-3 md:e-py-2',
     ],
     {
-        variants: {
-            isOpen: {
-                true: 'e-border-green-400',
-                false: 'e-border-black',
-            },
-            isLoading: {
-                true: 'e-cursor-not-allowed',
-                false: 'e-cursor-pointer',
-            },
-        },
         defaultVariants: {
-            isOpen: false,
             isLoading: false,
+            isOpen: false,
+        },
+        variants: {
+            isLoading: {
+                false: 'e-cursor-pointer',
+                true: 'e-cursor-not-allowed',
+            },
+            isOpen: {
+                false: 'e-border-black',
+                true: 'e-border-green-400',
+            },
         },
     }
 );
@@ -63,7 +63,7 @@ export const TokenVerificationButton = React.forwardRef<HTMLButtonElement, Token
             <button
                 ref={ref}
                 type="button"
-                className={cn(buttonVariants({ isOpen, isLoading }), className)}
+                className={cn(buttonVariants({ isLoading, isOpen }), className)}
                 {...props}
             >
                 <div className="e-flex e-w-full e-items-center e-gap-2 md:e-mb-2">
