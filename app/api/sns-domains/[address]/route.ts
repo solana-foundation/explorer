@@ -4,7 +4,6 @@ import Logger from '@utils/logger';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
 
 const CACHE_HEADERS = { 'Cache-Control': 'public, s-maxage=43200, stale-while-revalidate=3600' };
 
