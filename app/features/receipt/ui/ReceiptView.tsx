@@ -33,7 +33,7 @@ export function ReceiptView({ data, signature, transactionPath }: ReceiptViewPro
                     </Link>
                 </Button>
                 <BaseShareButton>
-                    <CopyLinkShareItem />
+                    <CopyLinkShareItem onCopy={() => receiptAnalytics.trackShareCopyLink(signature)} />
                 </BaseShareButton>
             </div>
         </div>

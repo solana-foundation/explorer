@@ -6,11 +6,16 @@ import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
 import { ShareMenuItem } from './ShareMenuItem';
 
-export function CopyLinkShareItem() {
+interface CopyLinkShareItemProps {
+    onCopy?: () => void;
+}
+
+export function CopyLinkShareItem({ onCopy }: CopyLinkShareItemProps) {
     const [state, copy] = useCopyToClipboard();
 
     function handleClick() {
         copy(globalThis.location.href);
+        onCopy?.();
     }
 
     function getIcon() {
