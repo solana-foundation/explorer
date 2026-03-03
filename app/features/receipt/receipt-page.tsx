@@ -138,6 +138,10 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const tokenLink = useExplorerLink('mint' in receipt ? `/address/${receipt.mint}` : '');
     const logoURI = receipt.logoURI ? getProxiedUri(receipt.logoURI) : undefined;
 
+    const download = useCallback(async () => {
+        // TODO: implement download logic
+    }, []);
+
     return (
         <SignatureContext.Provider value={signature}>
             <ReceiptView
@@ -153,6 +157,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                 }}
                 signature={signature}
                 transactionPath={transactionPath}
+                download={download}
             />
         </SignatureContext.Provider>
     );
