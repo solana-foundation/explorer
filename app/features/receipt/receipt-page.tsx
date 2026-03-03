@@ -139,7 +139,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const logoURI = receipt.logoURI ? getProxiedUri(receipt.logoURI) : undefined;
 
     const download = useCallback(async () => {
-        // TODO: implement download logic
+        throw new Error('Download is not yet implemented');
     }, []);
 
     return (

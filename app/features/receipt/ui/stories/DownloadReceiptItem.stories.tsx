@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { Download } from 'react-feather';
-import { expect, userEvent, within } from 'storybook/test';
-import { fn } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { DownloadReceiptItem } from '../DownloadReceiptItem';
 

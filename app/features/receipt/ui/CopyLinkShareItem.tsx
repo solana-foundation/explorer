@@ -14,7 +14,9 @@ export function CopyLinkShareItem({ onCopy }: CopyLinkShareItemProps) {
     const [state, copy] = useCopyToClipboard();
 
     function handleClick() {
-        copy(globalThis.location.href);
+        const href = globalThis.location?.href;
+        if (!href) return;
+        copy(href);
         onCopy?.();
     }
 

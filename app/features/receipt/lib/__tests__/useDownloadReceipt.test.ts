@@ -1,8 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
-// import type { DownloadState } from '../useDownloadReceipt';
-
 describe('useDownloadReceipt', () => {
     let useDownloadReceipt: typeof import('../useDownloadReceipt').useDownloadReceipt;
 
@@ -23,7 +21,7 @@ describe('useDownloadReceipt', () => {
     });
 
     it('should transition to downloading then downloaded on success', async () => {
-        let resolve: () => void;
+        let resolve: () => void = () => {};
         const download = vi.fn().mockReturnValue(
             new Promise<void>(r => {
                 resolve = r;
@@ -39,7 +37,7 @@ describe('useDownloadReceipt', () => {
         expect(result.current[0]).toBe('downloading');
 
         await act(async () => {
-            resolve!();
+            resolve();
         });
 
         expect(result.current[0]).toBe('downloaded');
@@ -91,7 +89,7 @@ describe('useDownloadReceipt', () => {
     });
 
     it('should ignore clicks while downloading', async () => {
-        let resolve: () => void;
+        let resolve: () => void = () => {};
         const download = vi.fn().mockReturnValue(
             new Promise<void>(r => {
                 resolve = r;
@@ -113,8 +111,32 @@ describe('useDownloadReceipt', () => {
         expect(download).toHaveBeenCalledTimes(1);
 
         await act(async () => {
-            resolve!();
+            resolve();
         });
+    });
+
+    it('should allow re-download after reset', async () => {
+        const download = vi.fn().mockResolvedValue(undefined);
+        const { result } = renderHook(() => useDownloadReceipt(download, 500));
+
+        await act(async () => {
+            result.current[1]();
+        });
+
+        expect(result.current[0]).toBe('downloaded');
+
+        act(() => {
+            vi.advanceTimersByTime(500);
+        });
+
+        expect(result.current[0]).toBe('idle');
+
+        await act(async () => {
+            result.current[1]();
+        });
+
+        expect(result.current[0]).toBe('downloaded');
+        expect(download).toHaveBeenCalledTimes(2);
     });
 
     it('should clean up timeout on unmount', async () => {
