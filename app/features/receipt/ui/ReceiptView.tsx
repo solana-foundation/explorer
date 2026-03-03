@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@components/shared/ui/button';
+import { TransactionSignature } from '@solana/web3.js';
 import Link from 'next/link';
 
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
@@ -12,7 +13,7 @@ import { CopyLinkShareItem } from './CopyLinkShareItem';
 
 interface ReceiptViewProps {
     data: FormattedExtendedReceipt;
-    signature: string;
+    signature: TransactionSignature;
     transactionPath: string;
 }
 

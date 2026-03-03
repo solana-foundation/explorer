@@ -95,6 +95,34 @@ describe('useCopyToClipboard', () => {
         expect(result.current[0]).toBe('copy');
     });
 
+    it('should reset to copy after resetMs when errored', async () => {
+        vi.mocked(navigator.clipboard.writeText).mockRejectedValueOnce(new Error('denied'));
+        const { result } = renderHook(() => useCopyToClipboard(500));
+
+        await act(async () => {
+            result.current[1]('hello');
+        });
+
+        expect(result.current[0]).toBe('errored');
+
+        act(() => {
+            vi.advanceTimersByTime(500);
+        });
+
+        expect(result.current[0]).toBe('copy');
+    });
+
+    it('should set errored when clipboard API is unavailable', async () => {
+        vi.stubGlobal('navigator', {});
+        const { result } = renderHook(() => useCopyToClipboard());
+
+        await act(async () => {
+            result.current[1]('hello');
+        });
+
+        expect(result.current[0]).toBe('errored');
+    });
+
     it('should clean up timeout on unmount', async () => {
         const { result, unmount } = renderHook(() => useCopyToClipboard(1000));
 

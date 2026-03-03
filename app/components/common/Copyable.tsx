@@ -1,9 +1,9 @@
 'use client';
 
-import React, { ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { CheckCircle, Copy, Loader, XCircle } from 'react-feather';
 
-import { CopyState, useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
+import { type CopyState, useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
 export function Copyable({ text, children }: { text: string | null; children: ReactNode }) {
     const [clipboardState, copy] = useCopyToClipboard(1000);

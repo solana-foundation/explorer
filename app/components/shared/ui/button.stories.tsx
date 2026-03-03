@@ -8,10 +8,11 @@ import { Button, buttonVariants } from './button';
 type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>['size']>;
 type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>['variant']>;
 
-const sizeOptions = ['default', 'sm', 'lg', 'icon'] as const satisfies readonly ButtonSize[];
+const sizeOptions = ['default', 'sm', 'lg', 'icon', 'compact'] as const satisfies readonly ButtonSize[];
 const variantOptions = [
     'default',
     'accent',
+    'compact',
     'destructive',
     'ghost',
     'link',
@@ -21,6 +22,7 @@ const variantOptions = [
 
 const variantIcons: Record<ButtonVariant, typeof Check | typeof X | typeof Download | typeof ArrowRight> = {
     accent: Check,
+    compact: Check,
     default: Check,
     destructive: X,
     ghost: ArrowRight,
@@ -102,6 +104,7 @@ export const WithIcons: Story = {
             }
         > = {
             accent: { icon: Check, label: 'Success' },
+            compact: { icon: Check, label: 'Compact' },
             default: { icon: Check, label: 'Success' },
             destructive: { icon: X, label: 'Delete' },
             ghost: { icon: ArrowRight, label: 'Continue', position: 'right' },
@@ -157,6 +160,7 @@ export const IconOnly: Story = {
 export const VariantsBySize: Story = {
     render: () => {
         const sizeLabels: Record<ButtonSize, string> = {
+            compact: 'Compact',
             default: 'Default',
             icon: 'Icon',
             lg: 'Large',

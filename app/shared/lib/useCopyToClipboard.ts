@@ -20,12 +20,20 @@ export function useCopyToClipboard(resetMs = 2000): readonly [CopyState, (text: 
         (text: string) => {
             clearTimeout(timeoutRef.current);
 
+            if (typeof navigator === 'undefined' || !navigator.clipboard) {
+                console.error('Clipboard API is not available');
+                setState('errored');
+                scheduleReset();
+                return;
+            }
+
             navigator.clipboard.writeText(text).then(
                 () => {
                     setState('copied');
                     scheduleReset();
                 },
-                () => {
+                (error: unknown) => {
+                    console.error('Clipboard write failed:', error);
                     setState('errored');
                     scheduleReset();
                 }

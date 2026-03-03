@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Link } from 'react-feather';
+import { Check, Link, XCircle } from 'react-feather';
 
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
@@ -13,11 +13,17 @@ export function CopyLinkShareItem() {
         copy(globalThis.location.href);
     }
 
-    return (
-        <ShareMenuItem
-            icon={state === 'copied' ? <Check size={11} /> : <Link size={11} />}
-            label={state === 'copied' ? 'Copied!' : 'Copy link'}
-            onClick={handleClick}
-        />
-    );
+    function getIcon() {
+        if (state === 'copied') return <Check size={11} />;
+        if (state === 'errored') return <XCircle size={11} />;
+        return <Link size={11} />;
+    }
+
+    function getLabel() {
+        if (state === 'copied') return 'Copied!';
+        if (state === 'errored') return 'Failed to copy';
+        return 'Copy link';
+    }
+
+    return <ShareMenuItem icon={getIcon()} label={getLabel()} onClick={handleClick} />;
 }

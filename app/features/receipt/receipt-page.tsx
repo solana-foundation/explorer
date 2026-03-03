@@ -54,7 +54,7 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
         if (!details && clusterStatus === ClusterStatus.Connected && status?.status === FetchStatus.Fetched) {
             fetchDetails(signature);
         }
-    }, [signature, clusterStatus, status, fetchDetails, details]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [signature, clusterStatus, status, fetchDetails, details]); // eslint-disable-line react-hooks/exhaustive-deps -- fetchStatus is intentionally omitted to prevent re-fetch loops
 
     useEffect(() => {
         if (autoRefresh === AutoRefresh.Active) {

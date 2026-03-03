@@ -1,4 +1,4 @@
-import { Copy } from 'react-feather';
+import { Copy, XCircle } from 'react-feather';
 
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
@@ -37,10 +37,14 @@ export function IdlInstructionSection({ title, description, commands }: IIdlInst
                     onClick={handleCopy}
                     type="button"
                     className="btn btn-white btn-sm e-flex-shrink-0"
-                    aria-label={state === 'copied' ? 'Copied' : 'Copy'}
+                    aria-label={state === 'copied' ? 'Copied' : state === 'errored' ? 'Copy failed' : 'Copy'}
                 >
                     {state === 'copied' ? (
                         <span className="e-text-green-400">Copied</span>
+                    ) : state === 'errored' ? (
+                        <span className="e-text-red-400">
+                            <XCircle size={16} /> Failed
+                        </span>
                     ) : (
                         <>
                             <Copy size={16} /> Copy
