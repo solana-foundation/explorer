@@ -24,6 +24,7 @@ const buttonVariants = cva(
                 default: 'e-h-9 e-px-2 e-text-xs',
                 icon: 'e-h-9 e-w-9',
                 lg: 'e-h-10 e-px-8',
+                compact: 'e-px-2 e-py-1.5 !e-text-[11px] !e-font-normal',
                 sm: 'e-h-7 e-px-2 e-text-xs',
             },
             variant: {
@@ -35,6 +36,8 @@ const buttonVariants = cva(
                 link: 'e-text-neutral-900 e-underline-offset-4 hover:e-underline',
                 outline:
                     'e-border e-border-neutral-600 e-bg-transparent e-text-white hover:e-bg-neutral-600/10 focus-visible:e-ring-1 focus-visible:e-ring-offset-1 focus-visible:e-ring-neutral-950',
+                compact:
+                    'e-border e-border-outer-space-800 e-bg-outer-space-900 e-text-neutral-200 e-rounded-sm e-leading-none e-tracking-[-0.44px]',
                 secondary: 'e-bg-neutral-100 e-text-neutral-900 e-shadow-sm hover:e-bg-neutral-100/80',
             },
         },

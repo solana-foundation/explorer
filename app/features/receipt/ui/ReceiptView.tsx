@@ -1,25 +1,40 @@
+'use client';
+
 import { Button } from '@components/shared/ui/button';
 import Link from 'next/link';
+import { useCallback, useState } from 'react';
 
 import type { FormattedExtendedReceipt } from '../types';
 import { BaseReceipt, BlurredCircle } from './BaseReceipt';
+import { BaseShareButton } from './BaseShareButton';
 
 interface ReceiptViewProps {
     data: FormattedExtendedReceipt;
-    transactionPath: string;
     onViewTxClick: () => void;
+    transactionPath: string;
 }
 
-export function ReceiptView({ data, transactionPath, onViewTxClick }: ReceiptViewProps) {
+export function ReceiptView({ data, onViewTxClick, transactionPath }: ReceiptViewProps) {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopyLink = useCallback(() => {
+        navigator.clipboard.writeText(window.location.href);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    }, []);
+
     return (
-        <div className="container e-flex e-min-h-[90vh] e-flex-col e-items-center e-justify-center e-gap-6 e-px-5 e-py-10">
+        <div className="container e-flex e-min-h-[90vh] e-min-w-[390px] e-flex-col e-items-center e-justify-center e-gap-6 e-px-5 e-py-10">
             <BlurredCircle />
             <BaseReceipt data={data} />
-            <Button size="sm" className="e-me-2" asChild>
-                <Link href={transactionPath} target="_blank" rel="noopener noreferrer" onClick={onViewTxClick}>
-                    View transaction in Explorer
-                </Link>
-            </Button>
+            <div className="e-flex e-items-start e-gap-0.5">
+                <Button variant="compact" size="compact" asChild>
+                    <Link href={transactionPath} target="_blank" rel="noopener noreferrer" onClick={onViewTxClick}>
+                        Open transaction in Explorer
+                    </Link>
+                </Button>
+                <BaseShareButton copied={copied} onCopyLink={handleCopyLink} />
+            </div>
         </div>
     );
 }

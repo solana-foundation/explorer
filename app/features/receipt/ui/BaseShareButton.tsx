@@ -1,3 +1,4 @@
+import { Button } from '@components/shared/ui/button';
 import * as Popover from '@radix-ui/react-popover';
 import { Check, ChevronDown, Link, Share2 } from 'react-feather';
 
@@ -10,14 +11,11 @@ export function BaseShareButton({ copied, onCopyLink }: BaseShareButtonProps) {
     return (
         <Popover.Root>
             <Popover.Trigger asChild>
-                <button
-                    type="button"
-                    className="e-flex e-items-center e-gap-1 e-rounded-sm e-border e-border-solid e-border-outer-space-800 e-bg-outer-space-900 e-px-2 e-py-1.5 e-text-[11px] e-leading-none e-tracking-[-0.44px] e-text-neutral-200"
-                >
+                <Button variant="compact" size="compact">
                     <Share2 size={12} />
                     Share
                     <ChevronDown size={12} />
-                </button>
+                </Button>
             </Popover.Trigger>
 
             <Popover.Portal>
