@@ -3,6 +3,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const USER_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 
+const mockFetchFn = vi.fn();
+
+vi.mock('node-fetch', () => ({
+    default: mockFetchFn,
+}));
+
 vi.mock('@bonfida/spl-name-service', () => ({
     getHashedName: vi.fn().mockImplementation(() => Promise.resolve(Buffer.alloc(32))),
     getNameAccountKey: vi.fn().mockImplementation(() => Promise.resolve(PublicKey.unique())),
@@ -68,9 +74,9 @@ describe('fetchSnsDomains', () => {
 
 function mockFetch(body: unknown, opts: { ok?: boolean; status?: number } = {}) {
     const { ok = true, status = 200 } = opts;
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    mockFetchFn.mockResolvedValue({
         json: () => Promise.resolve(body),
         ok,
         status,
-    } as Response);
+    });
 }
