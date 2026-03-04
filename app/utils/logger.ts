@@ -1,4 +1,5 @@
 enum LOG_LEVEL {
+    PANIC,
     ERROR,
     WARN,
     INFO,
@@ -9,15 +10,15 @@ enum LOG_LEVEL {
  * Determines if a log message should be output based on its level and the current logging threshold.
  *
  * Compares the expected log level against the NEXT_LOG_LEVEL environment variable.
- * Lower numbers have higher priority (e.g., ERROR=0, WARN=1, INFO=2, DEBUG=3).
+ * Lower numbers have higher priority (e.g., PANIC=0, ERROR=1, WARN=2, INFO=3, DEBUG=4).
  *
  * @param expectedLevel - The log level of the message to be logged
  * @returns True if the message should be logged, false otherwise. Returns false if NEXT_LOG_LEVEL is not set or invalid.
  *
  * @example
- * // With NEXT_LOG_LEVEL=2 (INFO level)
- * isLoggable(LOG_LEVEL.ERROR)  // returns true (0 <= 2)
- * isLoggable(LOG_LEVEL.DEBUG)  // returns false (3 > 2)
+ * // With NEXT_LOG_LEVEL=3 (INFO level)
+ * isLoggable(LOG_LEVEL.ERROR)  // returns true (1 <= 3)
+ * isLoggable(LOG_LEVEL.DEBUG)  // returns false (4 > 3)
  */
 function isLoggable(expectedLevel: LOG_LEVEL) {
     const currentLevel = process.env.NEXT_LOG_LEVEL ? parseInt(process.env.NEXT_LOG_LEVEL) : undefined;
@@ -34,23 +35,28 @@ function isLoggable(expectedLevel: LOG_LEVEL) {
  * A log message won't be shown if its level is greater than the NEXT_LOG_LEVEL environment variable.
  */
 export default class StraightforwardLogger {
-    static error(maybeError: any, ...other: any[]) {
+    static panic(error: Error, ...context: unknown[]) {
+        isLoggable(LOG_LEVEL.PANIC) && console.error(error, ...context);
+    }
+    static error(error: Error, ...context: unknown[]): void;
+    static error(maybeError: unknown, ...context: unknown[]): void;
+    static error(maybeError: unknown, ...other: unknown[]) {
         let error;
         if (maybeError instanceof Error) {
             error = maybeError;
         } else {
             error = new Error('Unrecognized error');
-            isLoggable(3) && console.debug(maybeError);
+            isLoggable(LOG_LEVEL.DEBUG) && console.debug(maybeError);
         }
-        isLoggable(0) && console.error(error, ...other);
+        isLoggable(LOG_LEVEL.ERROR) && console.error(error, ...other);
     }
-    static warn(message: any, ...other: any[]) {
-        isLoggable(1) && console.warn(message, ...other);
+    static warn(message: unknown, ...other: unknown[]) {
+        isLoggable(LOG_LEVEL.WARN) && console.warn(message, ...other);
     }
-    static info(message: any, ...other: any[]) {
-        isLoggable(2) && console.info(message, ...other);
+    static info(message: unknown, ...other: unknown[]) {
+        isLoggable(LOG_LEVEL.INFO) && console.info(message, ...other);
     }
-    static debug(message: any, ...other: any[]) {
-        isLoggable(3) && console.debug(message, ...other);
+    static debug(message: unknown, ...other: unknown[]) {
+        isLoggable(LOG_LEVEL.DEBUG) && console.debug(message, ...other);
     }
 }
