@@ -1,3 +1,4 @@
+import fetch from 'node-fetch';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import Logger from '@/app/utils/logger';
@@ -10,7 +11,9 @@ vi.mock('@/app/utils/logger', () => ({
     },
 }));
 
-global.fetch = vi.fn();
+vi.mock('node-fetch', () => ({
+    default: vi.fn(),
+}));
 
 describe('GET /api/verified-programs/list/[page]', () => {
     const mockRequest = new Request('http://localhost:3000/api/verified-programs/list/1');
