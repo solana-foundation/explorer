@@ -1,13 +1,15 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import type { Idl } from '@coral-xyz/anchor';
 import * as anchorModule from '@entities/idl';
-import { PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
 
+import { GENESIS_HASHES } from '@/app/entities/chain-id';
 import * as programMetadataIdlModule from '@/app/entities/program-metadata';
 import { ClusterProvider } from '@/app/providers/cluster';
+import { Cluster, clusterSlug } from '@/app/utils/cluster';
 
 import { IdlCard } from '../IdlCard';
 
@@ -41,46 +43,55 @@ vi.mock('@solana/kit', () => ({
         getFirstAvailableBlock: vi.fn(() => ({
             send: vi.fn().mockResolvedValue(0n),
         })),
+        getGenesisHash: vi.fn(() => ({
+            send: vi.fn().mockResolvedValue(GENESIS_HASHES.MAINNET),
+        })),
     })),
 }));
 
-const mockAnchorIdl: Idl = {
-    accounts: [],
-    address: PublicKey.default.toString(),
-    constants: [],
-    errors: [],
-    events: [],
-    instructions: [],
-    metadata: {
-        name: 'anchor_program',
-        spec: '0.1.0',
-        version: '0.1.0',
-    },
-    types: [],
-};
+const DEFAULT_ADDRESS = PublicKey.default.toBase58();
 
-const mockProgramMetadataIdl = {
-    kind: 'rootNode',
-    name: 'metadata_program',
-    program: {
+function createMockAnchorIdl(address = DEFAULT_ADDRESS): Idl {
+    return {
         accounts: [],
-        definedTypes: [],
+        address,
+        constants: [],
         errors: [],
+        events: [],
         instructions: [],
-        pdas: [],
-    },
-    standard: 'codama',
-    version: '1.2.11',
-};
+        metadata: {
+            name: 'anchor_program',
+            spec: '0.1.0',
+            version: '0.1.0',
+        },
+        types: [],
+    };
+}
+
+function createMockProgramMetadataIdl() {
+    return {
+        kind: 'rootNode' as const,
+        name: 'metadata_program',
+        program: {
+            accounts: [],
+            definedTypes: [],
+            errors: [],
+            instructions: [],
+            pdas: [],
+        },
+        standard: 'codama',
+        version: '1.2.11',
+    };
+}
 
 describe('IdlCard', () => {
-    const programId = 'CmAwXVg7R7LVmKqVg9EyVHYF9U4VLVsXoP2RG7Zra6XY';
+    const programId = DEFAULT_ADDRESS;
 
     beforeEach(() => {
         vi.clearAllMocks();
 
         (useSearchParams as ReturnType<typeof vi.fn>).mockReturnValue({
-            get: () => 'mainnet-beta',
+            get: () => clusterSlug(Cluster.MainnetBeta),
             has: (_query?: string) => false,
             toString: () => '',
         });
@@ -101,7 +112,7 @@ describe('IdlCard', () => {
         });
 
         vi.spyOn(programMetadataIdlModule, 'useProgramMetadataIdl').mockReturnValue({
-            programMetadataIdl: mockProgramMetadataIdl,
+            programMetadataIdl: createMockProgramMetadataIdl(),
         });
 
         render(
@@ -119,7 +130,7 @@ describe('IdlCard', () => {
 
     test('should render IdlCard with Anchor IDL when anchorIdl exists', async () => {
         vi.spyOn(anchorModule, 'useAnchorProgram').mockReturnValue({
-            idl: mockAnchorIdl,
+            idl: createMockAnchorIdl(),
             program: null,
         });
 
@@ -142,12 +153,12 @@ describe('IdlCard', () => {
 
     test('should render IdlCard tabs when both IDLs exist', async () => {
         vi.spyOn(anchorModule, 'useAnchorProgram').mockReturnValue({
-            idl: mockAnchorIdl,
+            idl: createMockAnchorIdl(),
             program: null,
         });
 
         vi.spyOn(programMetadataIdlModule, 'useProgramMetadataIdl').mockReturnValue({
-            programMetadataIdl: mockProgramMetadataIdl,
+            programMetadataIdl: createMockProgramMetadataIdl(),
         });
 
         render(
@@ -163,6 +174,41 @@ describe('IdlCard', () => {
         const button = screen.getByRole('button', { name: 'Anchor' });
         fireEvent.click(button);
         expect(screen.getByText(/Anchor IDL/)).toBeInTheDocument();
+    });
+
+    test('should render BaseWarningCard when Anchor IDL address mismatches programId', async () => {
+        vi.spyOn(anchorModule, 'useAnchorProgram').mockReturnValue({
+            idl: createMockAnchorIdl(Keypair.generate().publicKey.toBase58()), // imitate malicious IDL
+            program: null,
+        });
+
+        vi.spyOn(programMetadataIdlModule, 'useProgramMetadataIdl').mockReturnValue({
+            programMetadataIdl: createMockAnchorIdl(), // but use normal one for PMP program
+        });
+
+        render(
+            <ClusterProvider>
+                <IdlCard programId={programId} />
+            </ClusterProvider>
+        );
+
+        // PMP tab is active first
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: 'Anchor' })).toBeInTheDocument();
+        });
+
+        // Switch to Anchor tab to trigger the mismatch
+        fireEvent.click(screen.getByRole('button', { name: 'Anchor' }));
+
+        expect(screen.getByText('IDL Program ID Mismatch')).toBeInTheDocument();
+        expect(screen.getByText(/does not match the program being viewed/)).toBeInTheDocument();
+        expect(screen.queryByText(/Anchor IDL/)).not.toBeInTheDocument();
+
+        // Switch back to PMP tab - should render IDL normally
+        fireEvent.click(screen.getByRole('button', { name: 'Program Metadata' }));
+
+        expect(screen.queryByText('IDL Program ID Mismatch')).not.toBeInTheDocument();
+        expect(screen.getByText('0.30.1 Program Metadata IDL')).toBeInTheDocument();
     });
 
     test('should not render IdlCard when both IDLs are null', async () => {
