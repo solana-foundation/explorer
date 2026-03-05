@@ -21,7 +21,7 @@ const buttonVariants = cva(
         },
         variants: {
             size: {
-                compact: 'e-px-2 e-py-1.5 !e-text-[11px] !e-font-normal',
+                compact: 'e-h-6 e-px-2 !e-text-[11px] !e-font-normal',
                 default: 'e-h-9 e-px-2 e-text-xs',
                 icon: 'e-h-9 e-w-9',
                 lg: 'e-h-10 e-px-8',
