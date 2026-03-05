@@ -37,22 +37,22 @@ type TextStyle = {
 };
 
 const TEXT_STYLES = {
-    caption:      { color: COLORS.light, font: HELVETICA, size: 6,  weight: NORMAL },
-    disclaimer:   { color: COLORS.light, font: HELVETICA, size: 7,  weight: NORMAL },
-    label:        { color: COLORS.mid,   font: HELVETICA, size: 8,  weight: NORMAL },
-    logoFallback: { color: COLORS.dark,  font: HELVETICA, size: 9,  weight: BOLD },
-    sectionTitle: { color: COLORS.dark,  font: HELVETICA, size: 10, weight: BOLD },
-    subtitle:     { color: COLORS.light, font: HELVETICA, size: 9,  weight: NORMAL },
-    title:        { color: COLORS.dark,  font: HELVETICA, size: 16, weight: BOLD },
-    totalLabel:   { color: COLORS.dark,  font: HELVETICA, size: 8,  weight: BOLD },
-    value:        { color: COLORS.dark,  font: HELVETICA, size: 8,  weight: NORMAL },
-    valueMono:    { color: COLORS.dark,  font: COURIER,   size: 8,  weight: NORMAL },
+    caption: { color: COLORS.light, font: HELVETICA, size: 6, weight: NORMAL },
+    disclaimer: { color: COLORS.light, font: HELVETICA, size: 7, weight: NORMAL },
+    label: { color: COLORS.mid, font: HELVETICA, size: 8, weight: NORMAL },
+    logoFallback: { color: COLORS.dark, font: HELVETICA, size: 9, weight: BOLD },
+    sectionTitle: { color: COLORS.dark, font: HELVETICA, size: 10, weight: BOLD },
+    subtitle: { color: COLORS.light, font: HELVETICA, size: 9, weight: NORMAL },
+    title: { color: COLORS.dark, font: HELVETICA, size: 16, weight: BOLD },
+    totalLabel: { color: COLORS.dark, font: HELVETICA, size: 8, weight: BOLD },
+    value: { color: COLORS.dark, font: HELVETICA, size: 8, weight: NORMAL },
+    valueMono: { color: COLORS.dark, font: COURIER, size: 8, weight: NORMAL },
 } as const satisfies Record<string, TextStyle>;
 
 type LineStyle = { color: string; width: number };
 
 const LINE_STYLES = {
-    border:  { color: COLORS.border,  width: 0.2 },
+    border: { color: COLORS.border, width: 0.2 },
     divider: { color: COLORS.divider, width: 0.3 },
 } as const satisfies Record<string, LineStyle>;
 
@@ -107,7 +107,13 @@ function drawSectionTitle(doc: jsPDF, title: string, y: number): number {
     return y + 6;
 }
 
-function drawDetailRow(doc: jsPDF, label: string, value: string, y: number, style: TextStyle = TEXT_STYLES.value): number {
+function drawDetailRow(
+    doc: jsPDF,
+    label: string,
+    value: string,
+    y: number,
+    style: TextStyle = TEXT_STYLES.value
+): number {
     const labelX = PAGE.marginX;
     const valueX = PAGE.marginX + 55;
     const maxValueWidth = PAGE.contentWidth - 55;
@@ -116,7 +122,7 @@ function drawDetailRow(doc: jsPDF, label: string, value: string, y: number, styl
     doc.text(label, labelX, y);
 
     applyTextStyle(doc, style);
-    const textWidth = doc.getStringUnitWidth(value) * doc.getFontSize() / doc.internal.scaleFactor;
+    const textWidth = (doc.getStringUnitWidth(value) * doc.getFontSize()) / doc.internal.scaleFactor;
     if (textWidth > maxValueWidth) {
         doc.setFontSize(style.size * (maxValueWidth / textWidth));
     }
@@ -154,13 +160,7 @@ function addEditableField(
     doc.addField(field);
 }
 
-function drawLabeledField(
-    doc: jsPDF,
-    label: string,
-    fieldName: string,
-    y: number,
-    defaultValue = ''
-): number {
+function drawLabeledField(doc: jsPDF, label: string, fieldName: string, y: number, defaultValue = ''): number {
     applyTextStyle(doc, TEXT_STYLES.label);
     doc.text(label, PAGE.marginX, y);
 
@@ -173,7 +173,12 @@ export async function loadPdfDeps(): Promise<PdfDeps> {
     return { JsPDF, qrToDataURL };
 }
 
-export async function generateReceiptPdf(deps: PdfDeps, receipt: FormattedReceipt, signature: string, receiptUrl: string): Promise<void> {
+export async function generateReceiptPdf(
+    deps: PdfDeps,
+    receipt: FormattedReceipt,
+    signature: string,
+    receiptUrl: string
+): Promise<void> {
     const doc = new deps.JsPDF({ format: 'a4', unit: 'mm' });
 
     let y = 25;
