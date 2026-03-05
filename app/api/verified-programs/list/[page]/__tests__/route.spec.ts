@@ -206,7 +206,9 @@ describe('GET /api/verified-programs/list/[page]', () => {
 
             await GET(mockRequest, params);
 
-            expect(Logger.error).toHaveBeenCalledWith(expect.objectContaining({ message: 'Failed to fetch verified programs page 1: HTTP 503' }));
+            expect(Logger.error).toHaveBeenCalledWith(
+                expect.objectContaining({ message: 'Failed to fetch verified programs page 1: HTTP 503' })
+            );
         });
 
         it('handles network errors', async () => {
@@ -230,7 +232,9 @@ describe('GET /api/verified-programs/list/[page]', () => {
 
             await GET(mockRequest, params);
 
-            expect(Logger.error).toHaveBeenCalledWith(expect.objectContaining({ cause: networkError, message: 'Error in verified-programs list API' }));
+            expect(Logger.error).toHaveBeenCalledWith(
+                expect.objectContaining({ cause: networkError, message: 'Error in verified-programs list API' })
+            );
         });
     });
 });
