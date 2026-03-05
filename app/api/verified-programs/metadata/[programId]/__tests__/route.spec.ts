@@ -215,7 +215,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
 
             await GET(mockRequest, params);
 
-            expect(Logger.error).toHaveBeenCalledWith(`Error fetching metadata for ${mockProgramId}:`, networkError);
+            expect(Logger.error).toHaveBeenCalledWith(expect.objectContaining({ cause: networkError, message: `Error fetching metadata for ${mockProgramId}` }));
         });
     });
 });
