@@ -24,27 +24,29 @@ const PAGE = {
     width: 210,
 } as const;
 
-const FONT = 'helvetica' as const;
+const HELVETICA = 'helvetica' as const;
+const COURIER = 'courier' as const;
 const NORMAL = 'normal' as const;
 const BOLD = 'bold' as const;
 
 type TextStyle = {
-    font: typeof FONT;
+    font: typeof HELVETICA | typeof COURIER;
     weight: typeof NORMAL | typeof BOLD;
     size: number;
     color: string;
 };
 
 const TEXT_STYLES = {
-    caption:      { color: COLORS.light, font: FONT, size: 6,  weight: NORMAL },
-    disclaimer:   { color: COLORS.light, font: FONT, size: 7,  weight: NORMAL },
-    label:        { color: COLORS.mid,   font: FONT, size: 8,  weight: NORMAL },
-    logoFallback: { color: COLORS.dark,  font: FONT, size: 9,  weight: BOLD },
-    sectionTitle: { color: COLORS.dark,  font: FONT, size: 10, weight: BOLD },
-    subtitle:     { color: COLORS.light, font: FONT, size: 9,  weight: NORMAL },
-    title:        { color: COLORS.dark,  font: FONT, size: 16, weight: BOLD },
-    totalLabel:   { color: COLORS.dark,  font: FONT, size: 8,  weight: BOLD },
-    value:        { color: COLORS.dark,  font: FONT, size: 8,  weight: NORMAL },
+    caption:      { color: COLORS.light, font: HELVETICA, size: 6,  weight: NORMAL },
+    disclaimer:   { color: COLORS.light, font: HELVETICA, size: 7,  weight: NORMAL },
+    label:        { color: COLORS.mid,   font: HELVETICA, size: 8,  weight: NORMAL },
+    logoFallback: { color: COLORS.dark,  font: HELVETICA, size: 9,  weight: BOLD },
+    sectionTitle: { color: COLORS.dark,  font: HELVETICA, size: 10, weight: BOLD },
+    subtitle:     { color: COLORS.light, font: HELVETICA, size: 9,  weight: NORMAL },
+    title:        { color: COLORS.dark,  font: HELVETICA, size: 16, weight: BOLD },
+    totalLabel:   { color: COLORS.dark,  font: HELVETICA, size: 8,  weight: BOLD },
+    value:        { color: COLORS.dark,  font: HELVETICA, size: 8,  weight: NORMAL },
+    valueMono:    { color: COLORS.dark,  font: COURIER,   size: 8,  weight: NORMAL },
 } as const satisfies Record<string, TextStyle>;
 
 type LineStyle = { color: string; width: number };
@@ -105,7 +107,7 @@ function drawSectionTitle(doc: jsPDF, title: string, y: number): number {
     return y + 6;
 }
 
-function drawDetailRow(doc: jsPDF, label: string, value: string, y: number): number {
+function drawDetailRow(doc: jsPDF, label: string, value: string, y: number, style: TextStyle = TEXT_STYLES.value): number {
     const labelX = PAGE.marginX;
     const valueX = PAGE.marginX + 55;
     const maxValueWidth = PAGE.contentWidth - 55;
@@ -113,11 +115,14 @@ function drawDetailRow(doc: jsPDF, label: string, value: string, y: number): num
     applyTextStyle(doc, TEXT_STYLES.label);
     doc.text(label, labelX, y);
 
-    applyTextStyle(doc, TEXT_STYLES.value);
-    const lines = doc.splitTextToSize(value, maxValueWidth);
-    doc.text(lines, valueX, y);
+    applyTextStyle(doc, style);
+    const textWidth = doc.getStringUnitWidth(value) * doc.getFontSize() / doc.internal.scaleFactor;
+    if (textWidth > maxValueWidth) {
+        doc.setFontSize(style.size * (maxValueWidth / textWidth));
+    }
+    doc.text(value, valueX, y);
 
-    return y + lines.length * 4 + 2;
+    return y + 6;
 }
 
 function addEditableField(
@@ -191,9 +196,9 @@ export async function generateReceiptPdf(deps: PdfDeps, receipt: FormattedReceip
     y = drawDetailRow(doc, 'Payment Date', receipt.date.utc, y);
     y = drawDetailRow(doc, 'Original Amount', `${receipt.total.formatted} ${receipt.total.unit}`, y);
     y = drawDetailRow(doc, 'Network Fee', `${receipt.fee.formatted} SOL`, y);
-    y = drawDetailRow(doc, 'Sender Address', receipt.sender.address, y);
-    y = drawDetailRow(doc, 'Receiver Address', receipt.receiver.address, y);
-    y = drawDetailRow(doc, 'Transaction Signature', signature, y);
+    y = drawDetailRow(doc, 'Sender Address', receipt.sender.address, y, TEXT_STYLES.valueMono);
+    y = drawDetailRow(doc, 'Receiver Address', receipt.receiver.address, y, TEXT_STYLES.valueMono);
+    y = drawDetailRow(doc, 'Transaction Signature', signature, y, TEXT_STYLES.valueMono);
 
     if (receipt.memo) {
         y = drawDetailRow(doc, 'Transaction Memo', receipt.memo, y);
