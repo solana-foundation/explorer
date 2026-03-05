@@ -64,20 +64,23 @@ const RECEIPT_URL = 'https://explorer.solana.com/receipt/5UfDuX7hXbGjGHqPXRGaHdS
 
 describe('generateReceiptPdf', () => {
     let generateReceiptPdf: typeof import('../generate-receipt-pdf').generateReceiptPdf;
+    let loadPdfDeps: typeof import('../generate-receipt-pdf').loadPdfDeps;
 
     beforeEach(async () => {
         vi.clearAllMocks();
-        ({ generateReceiptPdf } = await import('../generate-receipt-pdf'));
+        ({ generateReceiptPdf, loadPdfDeps } = await import('../generate-receipt-pdf'));
     });
 
     it('should create jsPDF instance with A4 format', async () => {
         const { jsPDF } = await import('jspdf');
-        await generateReceiptPdf(RECEIPT, SIGNATURE, RECEIPT_URL);
+        const deps = await loadPdfDeps();
+        await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
         expect(jsPDF).toHaveBeenCalledWith({ format: 'a4', unit: 'mm' });
     });
 
     it('should add pre-filled text for all payment detail fields', async () => {
-        await generateReceiptPdf(RECEIPT, SIGNATURE, RECEIPT_URL);
+        const deps = await loadPdfDeps();
+        await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         const textCalls = mockText.mock.calls.map(([text]: [string | string[]]) =>
             Array.isArray(text) ? text.join(' ') : text
@@ -94,7 +97,8 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should create AcroForm text fields for editable sections', async () => {
-        await generateReceiptPdf(RECEIPT, SIGNATURE, RECEIPT_URL);
+        const deps = await loadPdfDeps();
+        await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         const fieldNames = mockTextField.mock.results
             .map(r => r.value.fieldName)
@@ -102,12 +106,12 @@ describe('generateReceiptPdf', () => {
 
         expect(fieldNames).toContain('supplier_name');
         expect(fieldNames).toContain('supplier_address');
-        expect(fieldNames.some((n: string) => n.startsWith('item_0_'))).toBe(true);
-        expect(fieldNames.some((n: string) => n.startsWith('item_3_'))).toBe(true);
+        expect(fieldNames).toContain('items_description');
     });
 
     it('should render Total as static text, not an editable field', async () => {
-        await generateReceiptPdf(RECEIPT, SIGNATURE, RECEIPT_URL);
+        const deps = await loadPdfDeps();
+        await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         const fieldNames = mockTextField.mock.results
             .map(r => r.value.fieldName)
@@ -122,15 +126,17 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should call doc.save with full signature filename', async () => {
-        await generateReceiptPdf(RECEIPT, SIGNATURE, RECEIPT_URL);
+        const deps = await loadPdfDeps();
+        await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
     });
 
     it('should handle missing memo gracefully', async () => {
         const receiptWithoutMemo: FormattedReceipt = { ...RECEIPT, memo: undefined };
+        const deps = await loadPdfDeps();
 
-        await generateReceiptPdf(receiptWithoutMemo, SIGNATURE, RECEIPT_URL);
+        await generateReceiptPdf(deps, receiptWithoutMemo, SIGNATURE, RECEIPT_URL);
 
         const textCalls = mockText.mock.calls.map(([text]: [string | string[]]) =>
             Array.isArray(text) ? text.join(' ') : text
@@ -142,14 +148,16 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should add editable fields via addField for each AcroForm field', async () => {
-        await generateReceiptPdf(RECEIPT, SIGNATURE, RECEIPT_URL);
+        const deps = await loadPdfDeps();
+        await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         expect(mockAddField).toHaveBeenCalled();
         expect(mockAddField.mock.calls.length).toBeGreaterThan(0);
     });
 
     it('should include memo in text when present', async () => {
-        await generateReceiptPdf(RECEIPT, SIGNATURE, RECEIPT_URL);
+        const deps = await loadPdfDeps();
+        await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         const textCalls = mockText.mock.calls.map(([text]: [string | string[]]) =>
             Array.isArray(text) ? text.join(' ') : text
@@ -161,9 +169,10 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should embed QR code image in the PDF', async () => {
-        await generateReceiptPdf(RECEIPT, SIGNATURE, RECEIPT_URL);
+        const deps = await loadPdfDeps();
+        await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
-        expect(mockToDataURL).toHaveBeenCalledWith(RECEIPT_URL, { width: 200, margin: 0 });
+        expect(mockToDataURL).toHaveBeenCalledWith(RECEIPT_URL, { margin: 0, width: 200 });
 
         const addImageCalls = mockAddImage.mock.calls;
         const qrCall = addImageCalls.find(
@@ -180,8 +189,9 @@ describe('generateReceiptPdf', () => {
 
     it('should handle QR code generation failure gracefully', async () => {
         mockToDataURL.mockRejectedValueOnce(new Error('QR generation failed'));
+        const deps = await loadPdfDeps();
 
-        await generateReceiptPdf(RECEIPT, SIGNATURE, RECEIPT_URL);
+        await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
     });

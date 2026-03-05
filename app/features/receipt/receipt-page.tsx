@@ -12,14 +12,14 @@ import { TransactionSignature } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import useSWR from 'swr';
 
 import { getProxiedUri } from '@/app/features/metadata';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app/tx/[signature]/page-client';
 
-import { generateReceiptPdf } from './lib/generate-receipt-pdf';
+import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
 import { usePrimaryDomain } from './lib/use-primary-domain';
 import { extractReceiptData } from './model/create-receipt';
 import type { FormattedReceipt } from './types';
@@ -139,10 +139,10 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const tokenLink = useExplorerLink('mint' in receipt ? `/address/${receipt.mint}` : '');
     const logoURI = receipt.logoURI ? getProxiedUri(receipt.logoURI) : undefined;
 
-    const downloadPdf = useMemo(
-        () => () => generateReceiptPdf(receipt, signature, window.location.href),
-        [receipt, signature]
-    );
+    const downloadPdf = useCallback(async () => {
+        const deps = await loadPdfDeps();
+        await generateReceiptPdf(deps, receipt, signature, window.location.href);
+    }, [receipt, signature]);
 
     return (
         <SignatureContext.Provider value={signature}>
