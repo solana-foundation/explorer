@@ -10,6 +10,8 @@ import {
 import { Market } from '@project-serum/serum';
 import { AccountInfo, AccountMeta, Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 // note: mainnet.1 suffices since its a superset of mainnet.0
 const mangoGroups = Config.ids().groups.filter(group => group.name !== 'mainnet.0');
 
@@ -294,7 +296,7 @@ export type OrderLotDetails = {
 ////
 
 export function logAllKeys(keys: AccountMeta[]) {
-    keys.map(key => console.log(key.pubkey.toBase58()));
+    Logger.debug('[components:ix-mango] Account keys', { keys: keys.map(k => k.pubkey.toBase58()) });
 }
 
 export function getSpotMarketFromInstruction(

@@ -5,6 +5,8 @@ import { createSolanaRpc } from '@solana/kit';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 export enum Status {
     Idle,
     Disconnected,
@@ -66,7 +68,7 @@ async function fetch(dispatch: Dispatch, cluster: Cluster, url: string) {
         });
     } catch (err) {
         if (cluster !== Cluster.Custom) {
-            console.error(err, { url });
+            Logger.error('[providers:supply] Failed to fetch supply', { error: err, url });
         }
         dispatch('Failed to fetch supply');
     }
