@@ -1,7 +1,7 @@
 'use client';
 
 import { createSolanaRpc } from '@solana/kit';
-import { Cluster, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
+import { Cluster, clusterFromSlug, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
 import { localStorageIsAvailable } from '@utils/local-storage';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
@@ -51,21 +51,12 @@ function clusterReducer(state: State, action: Action): State {
     }
 }
 
-function parseQuery(searchParams: ReadonlyURLSearchParams | null): Cluster {
+export function parseQuery(searchParams: ReadonlyURLSearchParams | null): Cluster {
     const clusterParam = searchParams?.get('cluster');
-    switch (clusterParam) {
-        case 'custom':
-            return Cluster.Custom;
-        case 'devnet':
-            return Cluster.Devnet;
-        case 'testnet':
-            return Cluster.Testnet;
-        case 'simd296':
-            return Cluster.Simd296;
-        case 'mainnet-beta':
-        default:
-            return Cluster.MainnetBeta;
+    if (clusterParam) {
+        return clusterFromSlug(clusterParam) ?? DEFAULT_CLUSTER;
     }
+    return DEFAULT_CLUSTER;
 }
 
 const ModalContext = createContext<[boolean, SetShowModal] | undefined>(undefined);
@@ -99,11 +90,11 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
         cluster === Cluster.Custom ||
         (localStorageIsAvailable() && localStorage.getItem('enableCustomUrl') !== null) ||
         isWhitelistedRpc(state.customUrl);
-    const customUrl = (enableCustomUrl && searchParams?.get('customUrl')) || state.customUrl;
+
+    const customUrl = (enableCustomUrl ? searchParams?.get('customUrl') : undefined) ?? state.customUrl;
     const pathname = usePathname();
     const router = useRouter();
 
-    // Remove customUrl param if dev setting is disabled
     useEffect(() => {
         if (!enableCustomUrl && searchParams?.has('customUrl')) {
             const newSearchParams = new URLSearchParams();
