@@ -1,6 +1,6 @@
 import { Metadata } from 'next/types';
 
-import { withSentryTraceData } from '@/app/utils/with-sentry-trace-data';
+import { withTraceData } from '@/app/shared/lib/sentry';
 
 import InspectPageClient from './page-client';
 
@@ -11,7 +11,7 @@ type Props = Readonly<{
 }>;
 
 export async function generateMetadata({ params: { signature } }: Props): Promise<Metadata> {
-    return withSentryTraceData({
+    return withTraceData({
         description: `Interactively inspect the transaction with signature ${signature} on Solana`,
         title: `Transaction Inspector | ${signature} | Solana`,
     });

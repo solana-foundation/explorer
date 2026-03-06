@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 
 import { getMetadataEndpointUrl } from '@/app/entities/program-metadata/api/getMetadataEndpointUrl';
 import { errors, getProgramCanonicalMetadata } from '@/app/entities/program-metadata/api/getProgramCanonicalMetadata';
+import { Logger } from '@/app/shared/lib/logger';
 import { normalizeUnknownError } from '@/app/shared/unknown-error';
-import Logger from '@/app/utils/logger';
 
 const CACHE_DURATION = 30 * 60; // 30 minutes
 
@@ -67,13 +67,13 @@ export async function GET(request: Request) {
             );
         } else if (error instanceof Error && error.cause) {
             // Log extra data if cause is present
-            Logger.error(error.cause);
+            Logger.error('[api:programMetadataIdl] Error with cause', { error: error.cause });
         }
 
         let displayError;
         if (error instanceof Error && isSolanaError(error)) {
             // log other errors that are SolanaError to keep track of them
-            Logger.error(error);
+            Logger.error('[api:programMetadataIdl] Solana error fetching program metadata', { error });
 
             // do not show underlying error to preserve existing logic
             displayError = normalizeUnknownError(errors[500]);

@@ -20,6 +20,7 @@ import Moment from 'react-moment';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
@@ -283,7 +284,8 @@ function getTransfer(
             }
         } catch (error) {
             if (cluster === Cluster.MainnetBeta) {
-                console.error(error, {
+                Logger.error('[components:token-transfers] Failed to parse token transfer', {
+                    error,
                     signature,
                 });
             }

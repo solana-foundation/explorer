@@ -3,6 +3,8 @@ import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
 import { AuthorizeDetailsCard } from './AuthorizeDetailsCard';
 import { DeactivateDetailsCard } from './DeactivateDetailsCard';
@@ -67,7 +69,8 @@ export function StakeDetailsCard(props: DetailsProps) {
                 return <UnknownDetailsCard {...props} />;
         }
     } catch (error) {
-        console.error(error, {
+        Logger.error('[components:ix-stake] Failed to decode instruction', {
+            error,
             signature: props.tx.signatures[0],
         });
         return <UnknownDetailsCard {...props} />;

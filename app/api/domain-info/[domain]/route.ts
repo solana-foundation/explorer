@@ -1,8 +1,9 @@
 import { type ResolvedDomainInfo, resolveDomain } from '@entities/domain/api/resolve-domain';
 import { Domain } from '@entities/domain/lib/domain-struct';
-import Logger from '@utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 import { NextResponse } from 'next/server';
 import { is } from 'superstruct';
+
 
 type Params = {
     params: {
@@ -18,7 +19,7 @@ const NO_CACHE_HEADERS = { 'Cache-Control': 'no-store' };
 
 export async function GET(_request: Request, { params: { domain } }: Params) {
     if (!is(domain, Domain)) {
-        Logger.warn(new Error(`Invalid domain input rejected: ${domain}`));
+        Logger.warn(`Invalid domain input rejected: ${domain}`);
         return NextResponse.json(null, { headers: NO_CACHE_HEADERS, status: 400 });
     }
 
@@ -27,7 +28,7 @@ export async function GET(_request: Request, { params: { domain } }: Params) {
 
         return NextResponse.json(domainInfo, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.error(error, `Failed to resolve domain: ${domain}`);
+        Logger.error('[api:domain-info] Failed to resolve domain', { domain, error });
         return NextResponse.json(null, { headers: NO_CACHE_HEADERS, status: 500 });
     }
 }

@@ -3,6 +3,8 @@ import { sha256 } from '@noble/hashes/sha256';
 import { Connection, PublicKey } from '@solana/web3.js';
 import useSWRImmutable from 'swr/immutable';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { useCluster } from '../providers/cluster';
 import { ProgramDataAccountInfo } from '../validators/accounts/upgradeable-program';
 import { Cluster } from './cluster';
@@ -211,7 +213,7 @@ function useEnrichedOsecInfo({
                 }
                 return pdaAccountInfo;
             } catch (error) {
-                console.error('Error fetching on-chain PDA', error);
+                Logger.error('[utils:verified-builds] Error fetching on-chain PDA', { error });
                 return null;
             }
         },

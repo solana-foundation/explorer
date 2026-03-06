@@ -14,6 +14,7 @@ import { ActionMeta, components, ControlProps, InputActionMeta, SelectInstance }
 import AsyncSelect from 'react-select/async';
 import { is } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
 import FEATURES from '@/app/utils/feature-gate/featureGates.json';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
@@ -506,7 +507,7 @@ function buildAppendableSearchOptions(
 ): SearchOptions[] {
     if (!searchOptions) return [];
     if (searchOptions.status === 'rejected') {
-        console.error(`Failed to build ${name} options for search: ${searchOptions.reason}`);
+        Logger.error('[components:search-bar] Failed to build search options', { error: searchOptions.reason, name });
         return [];
     }
     return searchOptions.value

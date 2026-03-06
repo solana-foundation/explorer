@@ -1,5 +1,7 @@
 'use client';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 /**
  * Utility functions for managing wallet address nicknames in localStorage
  */
@@ -14,7 +16,7 @@ export const getNickname = (address: string): string | null => {
         const nicknames = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
         return nicknames[address] || null;
     } catch (error) {
-        console.error('Error reading nicknames from localStorage:', error);
+        Logger.error('[nicknames] Error reading nicknames from localStorage', { error });
         return null;
     }
 };
@@ -36,7 +38,7 @@ export const setNickname = (address: string, nickname: string): void => {
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('nicknameUpdated', { detail: { address } }));
     } catch (error) {
-        console.error('Error saving nickname to localStorage:', error);
+        Logger.error('[nicknames] Error saving nickname to localStorage', { error });
     }
 };
 
@@ -51,6 +53,6 @@ export const removeNickname = (address: string): void => {
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('nicknameUpdated', { detail: { address } }));
     } catch (error) {
-        console.error('Error removing nickname from localStorage:', error);
+        Logger.error('[nicknames] Error removing nickname from localStorage', { error });
     }
 };

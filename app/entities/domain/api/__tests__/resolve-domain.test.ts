@@ -5,10 +5,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { resolveDomain } from '../resolve-domain';
 
 vi.mock('@onsol/tldparser', async importOriginal => {
-    const actual = await importOriginal<typeof import('@onsol/tldparser')>();
+    const mod = await importOriginal<typeof import('@onsol/tldparser')>();
     return {
-        ...actual,
-        getDomainKey: vi.fn().mockImplementation(actual.getDomainKey),
+        ...mod,
+        getDomainKey: vi.fn(mod.getDomainKey),
     };
 });
 
@@ -86,13 +86,6 @@ describe('resolveDomain', () => {
         });
 
         it('should return null when no account info exists for ANS domain', async () => {
-            const MOCK_PUBKEY = PublicKey.default;
-            vi.mocked(getDomainKey).mockResolvedValueOnce({
-                hashed: Buffer.alloc(32),
-                isSub: false,
-                parent: PublicKey.default,
-                pubkey: MOCK_PUBKEY,
-            });
             const connection = mockConnection(null);
 
             const result = await resolveDomain('test.co', connection);

@@ -8,6 +8,7 @@ import {
 } from 'sas-lib';
 
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
+import { Logger } from '@/app/shared/lib/logger';
 import {
     decodeAccount,
     decodeWithType,
@@ -66,7 +67,7 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
             decoded = deserializeAttestationDataWithBorsh200(schema, Uint8Array.from(attestation.data));
         }
     } catch (e) {
-        console.error(e);
+        Logger.error('[components:attestation-data] Failed to decode attestation data', { error: e });
     }
 
     return (

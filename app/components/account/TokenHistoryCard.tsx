@@ -29,6 +29,7 @@ import React, { useCallback } from 'react';
 import { ChevronDown, MinusSquare, PlusSquare, RefreshCw } from 'react-feather';
 
 import { INITIAL_TOKENS_TO_FETCH, INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
+import { Logger } from '@/app/shared/lib/logger';
 
 const TRUNCATE_TOKEN_LENGTH = 10;
 const ALL_TOKENS = '';
@@ -548,28 +549,40 @@ function InstructionDetailsCell({
                 try {
                     name = parseSerumInstructionTitle(transactionInstruction);
                 } catch (error) {
-                    console.error(error, { signature: tx.signature });
+                    Logger.error('[components:token-history] Failed to parse Serum instruction', {
+                        error,
+                        signature: tx.signature,
+                    });
                     return undefined;
                 }
             } else if (transactionInstruction && isTokenSwapInstruction(transactionInstruction)) {
                 try {
                     name = parseTokenSwapInstructionTitle(transactionInstruction);
                 } catch (error) {
-                    console.error(error, { signature: tx.signature });
+                    Logger.error('[components:token-history] Failed to parse TokenSwap instruction', {
+                        error,
+                        signature: tx.signature,
+                    });
                     return undefined;
                 }
             } else if (transactionInstruction && isTokenLendingInstruction(transactionInstruction)) {
                 try {
                     name = parseTokenLendingInstructionTitle(transactionInstruction);
                 } catch (error) {
-                    console.error(error, { signature: tx.signature });
+                    Logger.error('[components:token-history] Failed to parse TokenLending instruction', {
+                        error,
+                        signature: tx.signature,
+                    });
                     return undefined;
                 }
             } else if (transactionInstruction && isMangoInstruction(transactionInstruction)) {
                 try {
                     name = parseMangoInstructionTitle(transactionInstruction);
                 } catch (error) {
-                    console.error(error, { signature: tx.signature });
+                    Logger.error('[components:token-history] Failed to parse Mango instruction', {
+                        error,
+                        signature: tx.signature,
+                    });
                     return undefined;
                 }
             } else {

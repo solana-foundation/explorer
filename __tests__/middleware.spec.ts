@@ -8,7 +8,7 @@ vi.mock('botid/server', () => ({
     checkBotId: vi.fn(),
 }));
 
-import Logger from '@utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 import { checkBotId } from 'botid/server';
 
 import { middleware } from '../middleware';
@@ -78,7 +78,8 @@ describe('middleware', () => {
                 expect(response.status).toBe(200);
                 expect(checkBotId).not.toHaveBeenCalled();
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
-                    expect.stringContaining('[middleware] No x-is-human header')
+                    '[middleware] No x-is-human header, allowing',
+                    expect.objectContaining({ pathname: '/api/test' })
                 );
             });
         });
@@ -98,10 +99,13 @@ describe('middleware', () => {
                 expect(response.status).toBe(200);
                 expect(checkBotId).toHaveBeenCalled();
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
-                    expect.stringContaining('[middleware] BotId verification'),
+                    '[middleware] BotId verification',
                     expect.objectContaining({ isHuman: true })
                 );
-                expect(loggerInfoSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Human verified'));
+                expect(loggerInfoSpy).toHaveBeenCalledWith(
+                    '[middleware] Human verified',
+                    expect.objectContaining({ pathname: '/api/test' })
+                );
             });
 
             it('should allow bot requests when challenge mode is disabled and log warning', async () => {
@@ -116,7 +120,10 @@ describe('middleware', () => {
                 const response = await middleware(request);
 
                 expect(response.status).toBe(200);
-                expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Bot detected'));
+                expect(loggerWarnSpy).toHaveBeenCalledWith(
+                    '[middleware] Bot detected',
+                    expect.objectContaining({ pathname: '/api/test' })
+                );
             });
         });
 
@@ -139,11 +146,13 @@ describe('middleware', () => {
                 expect(response.status).toBe(401);
                 const body = await response.json();
                 expect(body).toEqual({ error: 'Access denied: request identified as automated bot' });
-                expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Bot detected'));
+                expect(loggerWarnSpy).toHaveBeenCalledWith(
+                    '[middleware] Bot detected',
+                    expect.objectContaining({ pathname: '/api/test' })
+                );
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
-                    expect.objectContaining({
-                        message: expect.stringContaining('[middleware] Challenge mode enabled, blocking'),
-                    })
+                    '[middleware] Challenge mode enabled, blocking',
+                    expect.objectContaining({ pathname: '/api/test' })
                 );
             });
 
@@ -160,9 +169,8 @@ describe('middleware', () => {
 
                 expect(response.status).toBe(401);
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
-                    expect.objectContaining({
-                        message: expect.stringContaining('[middleware] Challenge mode enabled, blocking'),
-                    })
+                    '[middleware] Challenge mode enabled, blocking',
+                    expect.objectContaining({ pathname: '/api/test' })
                 );
             });
 
@@ -178,7 +186,10 @@ describe('middleware', () => {
                 const response = await middleware(request);
 
                 expect(response.status).toBe(200);
-                expect(loggerInfoSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Human verified'));
+                expect(loggerInfoSpy).toHaveBeenCalledWith(
+                    '[middleware] Human verified',
+                    expect.objectContaining({ pathname: '/api/test' })
+                );
             });
         });
     });
@@ -199,7 +210,10 @@ describe('middleware', () => {
             const response = await middleware(request);
 
             expect(response.status).toBe(200);
-            expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Bot detected'));
+            expect(loggerWarnSpy).toHaveBeenCalledWith(
+                '[middleware] Bot detected',
+                expect.objectContaining({ pathname: '/api/test' })
+            );
         });
 
         it('should block request when both simulate bot mode and challenge mode are enabled', async () => {
@@ -219,9 +233,8 @@ describe('middleware', () => {
 
             expect(response.status).toBe(401);
             expect(loggerErrorSpy).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    message: expect.stringContaining('[middleware] Challenge mode enabled, blocking'),
-                })
+                '[middleware] Challenge mode enabled, blocking',
+                expect.objectContaining({ pathname: '/api/test' })
             );
         });
     });

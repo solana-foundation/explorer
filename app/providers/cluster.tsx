@@ -6,6 +6,8 @@ import { localStorageIsAvailable } from '@utils/local-storage';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { EpochSchedule } from '../utils/epoch-schedule';
 
 type Action = State;
@@ -161,7 +163,10 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
         });
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            console.error(error, { clusterUrl: clusterUrl(cluster, customUrl) });
+            Logger.error('[providers:cluster] Failed to connect', {
+                clusterUrl: clusterUrl(cluster, customUrl),
+                error,
+            });
         }
         dispatch({
             cluster,

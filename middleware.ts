@@ -1,5 +1,5 @@
 import { isEnvEnabled } from '@utils/env';
-import Logger from '@utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 import { checkBotId } from 'botid/server';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
 
     // Allow requests without x-is-human header (direct API calls)
     if (!request.headers.has('x-is-human')) {
-        Logger.info(`[middleware] No x-is-human header, allowing: ${pathname}`);
+        Logger.info('[middleware] No x-is-human header, allowing', { pathname });
         return NextResponse.next();
     }
 
@@ -25,7 +25,8 @@ export async function middleware(request: NextRequest) {
         },
     });
 
-    Logger.info(`[middleware] BotId verification for ${pathname}:`, {
+    Logger.info('[middleware] BotId verification', {
+        pathname,
         isBot: verification.isBot,
         isHuman: verification.isHuman,
         isVerifiedBot: verification.isVerifiedBot,
@@ -34,14 +35,14 @@ export async function middleware(request: NextRequest) {
 
     // Block bots only when challenge mode is enabled
     if (verification.isBot) {
-        Logger.warn(`[middleware] Bot detected: ${pathname}`);
+        Logger.warn('[middleware] Bot detected', { pathname });
 
         if (isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_CHALLENGE_MODE_ENABLED)) {
-            Logger.error(new Error(`[middleware] Challenge mode enabled, blocking: ${pathname}`));
+            Logger.error('[middleware] Challenge mode enabled, blocking', { pathname });
             return NextResponse.json(BOT_RESPONSE.body, { status: BOT_RESPONSE.status });
         }
     } else {
-        Logger.info(`[middleware] Human verified, allowing: ${pathname}`);
+        Logger.info('[middleware] Human verified', { pathname });
     }
 
     return NextResponse.next();

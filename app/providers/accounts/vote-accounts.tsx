@@ -3,6 +3,8 @@ import { createSolanaRpc } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 type VoteAccountInfo = Readonly<{
     activatedStake: bigint;
 }>;
@@ -29,7 +31,7 @@ async function fetchVoteAccounts(
         setVoteAccounts(voteAccounts);
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
+            Logger.error('[providers:vote-accounts] Failed to fetch vote accounts', { error, url });
         }
     }
 }

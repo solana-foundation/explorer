@@ -8,6 +8,7 @@ import { fetchMetadataFromSeeds } from '@solana-program/program-metadata';
 import { useEffect, useState } from 'react';
 
 import { IDL_SEED } from '@/app/entities/program-metadata/api/getProgramCanonicalMetadata';
+import { Logger } from '@/app/shared/lib/logger';
 
 export enum IdlVariant {
     Anchor = 'anchor',
@@ -74,7 +75,7 @@ export function useIdlLastTransactionDate(
                 }
             } catch (error) {
                 if (!abortController.signal.aborted) {
-                    console.error('[IDL Comparison] Error:', error);
+                    Logger.error('[idl] IDL comparison error', { error });
                 }
             }
         }
