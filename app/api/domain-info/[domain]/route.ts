@@ -12,7 +12,7 @@ type Params = {
 
 export type FetchedDomainInfo = ResolvedDomainInfo;
 
-const CACHE_HEADERS = { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=3600' };
+const CACHE_HEADERS = { 'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600' };
 
 const NO_CACHE_HEADERS = { 'Cache-Control': 'no-store' };
 
