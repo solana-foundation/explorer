@@ -1,15 +1,8 @@
 'use client';
 
-import {
-    findSavedClusterUrl,
-    persistedClusterAtom,
-    SAVED_CLUSTER_PREFIX,
-    savedClustersAtom,
-} from '@features/custom-cluster';
 import { createSolanaRpc } from '@solana/kit';
 import { Cluster, clusterFromSlug, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
 import { localStorageIsAvailable } from '@utils/local-storage';
-import { useAtom, useAtomValue } from 'jotai';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
 
@@ -58,14 +51,11 @@ function clusterReducer(state: State, action: Action): State {
     }
 }
 
-export function parseQuery(searchParams: ReadonlyURLSearchParams | null, persisted: string | null): Cluster {
+export function parseQuery(searchParams: ReadonlyURLSearchParams | null): Cluster {
     const clusterParam = searchParams?.get('cluster');
     if (clusterParam) {
         return clusterFromSlug(clusterParam) ?? DEFAULT_CLUSTER;
     }
-
-    if (persisted?.startsWith(SAVED_CLUSTER_PREFIX)) return Cluster.Custom;
-
     return DEFAULT_CLUSTER;
 }
 
@@ -95,24 +85,16 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
     });
     const modalState = useState(false);
     const searchParams = useSearchParams();
-    const [persistedCluster, setPersistedCluster] = useAtom(persistedClusterAtom);
-    const savedClusters = useAtomValue(savedClustersAtom);
-    const cluster = parseQuery(searchParams, persistedCluster);
+    const cluster = parseQuery(searchParams);
     const enableCustomUrl =
         cluster === Cluster.Custom ||
         (localStorageIsAvailable() && localStorage.getItem('enableCustomUrl') !== null) ||
         isWhitelistedRpc(state.customUrl);
 
-    const urlFromParams = enableCustomUrl ? searchParams?.get('customUrl') || null : null;
-    const urlFromSaved =
-        cluster === Cluster.Custom && !urlFromParams
-            ? findSavedClusterUrl(savedClusters, persistedCluster ?? '')
-            : undefined;
-    const customUrl = urlFromParams ?? urlFromSaved ?? state.customUrl;
+    const customUrl = (enableCustomUrl ? searchParams?.get('customUrl') : undefined) ?? state.customUrl;
     const pathname = usePathname();
     const router = useRouter();
 
-    // Remove customUrl param if dev setting is disabled
     useEffect(() => {
         if (!enableCustomUrl && searchParams?.has('customUrl')) {
             const newSearchParams = new URLSearchParams();
@@ -126,11 +108,6 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
             router.push(`${pathname}${nextQueryString ? `?${nextQueryString}` : ''}`);
         }
     }, [enableCustomUrl]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    useEffect(() => {
-        if (cluster === Cluster.Custom && persistedCluster?.startsWith(SAVED_CLUSTER_PREFIX)) return;
-        setPersistedCluster(null);
-    }, [cluster]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Reconnect to cluster when params change
     useEffect(() => {

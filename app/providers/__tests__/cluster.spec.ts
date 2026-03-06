@@ -1,4 +1,3 @@
-import { SAVED_CLUSTER_PREFIX } from '@features/custom-cluster';
 import { Cluster, DEFAULT_CLUSTER } from '@utils/cluster';
 import { describe, expect, it } from 'vitest';
 
@@ -9,31 +8,23 @@ function makeSearchParams(params: Record<string, string> = {}): URLSearchParams 
 }
 
 describe('parseQuery', () => {
-    it('returns the cluster from URL params when present', () => {
-        expect(parseQuery(makeSearchParams({ cluster: 'devnet' }), null)).toBe(Cluster.Devnet);
+    it('should return the cluster from URL params when present', () => {
+        expect(parseQuery(makeSearchParams({ cluster: 'devnet' }))).toBe(Cluster.Devnet);
     });
 
-    it('ignores persisted built-in cluster slugs', () => {
-        expect(parseQuery(makeSearchParams(), 'devnet')).toBe(DEFAULT_CLUSTER);
+    it('should return default cluster when no params are provided', () => {
+        expect(parseQuery(makeSearchParams())).toBe(DEFAULT_CLUSTER);
     });
 
-    it('returns Custom when persisted value has saved-cluster prefix', () => {
-        expect(parseQuery(makeSearchParams(), `${SAVED_CLUSTER_PREFIX}My Local`)).toBe(Cluster.Custom);
+    it('should return default cluster for empty cluster param', () => {
+        expect(parseQuery(makeSearchParams({ cluster: '' }))).toBe(DEFAULT_CLUSTER);
     });
 
-    it('returns default cluster when persisted slug is unrecognized', () => {
-        expect(parseQuery(makeSearchParams(), 'bogus-cluster')).toBe(DEFAULT_CLUSTER);
+    it('should return default cluster for unrecognized cluster param', () => {
+        expect(parseQuery(makeSearchParams({ cluster: 'bogus-cluster' }))).toBe(DEFAULT_CLUSTER);
     });
 
-    it('returns default cluster when both params and persisted are empty', () => {
-        expect(parseQuery(makeSearchParams(), null)).toBe(DEFAULT_CLUSTER);
-    });
-
-    it('URL params take precedence over persisted value', () => {
-        expect(parseQuery(makeSearchParams({ cluster: 'testnet' }), 'devnet')).toBe(Cluster.Testnet);
-    });
-
-    it('returns default cluster for empty cluster param', () => {
-        expect(parseQuery(makeSearchParams({ cluster: '' }), null)).toBe(DEFAULT_CLUSTER);
+    it('should return testnet when cluster param is testnet', () => {
+        expect(parseQuery(makeSearchParams({ cluster: 'testnet' }))).toBe(Cluster.Testnet);
     });
 });

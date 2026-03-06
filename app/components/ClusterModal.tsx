@@ -1,16 +1,10 @@
 'use client';
 
-import {
-    addSavedClusterAtom,
-    persistedClusterAtom,
-    removeSavedClusterAtom,
-    SAVED_CLUSTER_PREFIX,
-    type SavedCluster,
-    savedClustersAtom,
-} from '@features/custom-cluster';
+import { addSavedClusterAtom, removeSavedClusterAtom, type SavedCluster, savedClustersAtom } from '@features/custom-cluster';
 import { useCluster, useClusterModal, useUpdateCustomUrl } from '@providers/cluster';
 import { useDebounceCallback } from '@react-hook/debounce';
 import { Cluster, clusterName, CLUSTERS, clusterSlug, ClusterStatus, DEFAULT_CLUSTER } from '@utils/cluster';
+import { cva } from 'class-variance-authority';
 import { useAtomValue, useSetAtom } from 'jotai';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -22,6 +16,28 @@ import { Overlay } from './common/Overlay';
 import { cn } from './shared/utils';
 
 const ClusterModalDeveloperSettings = dynamic(() => import('./ClusterModalDeveloperSettings'), { ssr: false });
+
+const clusterButtonVariants = cva('btn col-12', {
+    compoundVariants: [
+        { active: true, className: 'border-primary text-primary', status: ClusterStatus.Connected },
+        { active: true, className: 'border-warning text-warning', status: ClusterStatus.Connecting },
+        { active: true, className: 'border-danger text-danger', status: ClusterStatus.Failure },
+    ],
+    defaultVariants: {
+        active: false,
+    },
+    variants: {
+        active: {
+            false: 'btn-white',
+            true: '',
+        },
+        status: {
+            [ClusterStatus.Connected]: '',
+            [ClusterStatus.Connecting]: '',
+            [ClusterStatus.Failure]: '',
+        },
+    },
+});
 
 export function ClusterModal() {
     const [show, setShow] = useClusterModal();
@@ -48,15 +64,15 @@ export function ClusterModal() {
     );
 }
 
-type InputProps = { activeSuffix: string; active: boolean; savedClusters: SavedCluster[] };
-function CustomClusterInput({ activeSuffix, active, savedClusters }: InputProps) {
+type InputProps = { status: ClusterStatus; active: boolean; savedClusters: SavedCluster[] };
+function CustomClusterInput({ status, active, savedClusters }: InputProps) {
     const { customUrl } = useCluster();
     const updateCustomUrl = useUpdateCustomUrl();
     const addSavedCluster = useSetAtom(addSavedClusterAtom);
-    const setPersistedCluster = useSetAtom(persistedClusterAtom);
     const [editing, setEditing] = React.useState(false);
     const [saving, setSaving] = React.useState(false);
     const [savedName, setSavedName] = React.useState('');
+    const [saveError, setSaveError] = React.useState<string | null>(null);
     const [localUrl, setLocalUrl] = React.useState(customUrl);
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -78,16 +94,20 @@ function CustomClusterInput({ activeSuffix, active, savedClusters }: InputProps)
 
     const handleSave = () => {
         if (!savedName.trim()) return;
-        addSavedCluster({ name: savedName.trim(), url: customUrl });
-        setPersistedCluster(`${SAVED_CLUSTER_PREFIX}${savedName.trim()}`);
-        setSavedName('');
-        setSaving(false);
+        setSaveError(null);
+        try {
+            addSavedCluster({ name: savedName.trim(), url: customUrl });
+            setSavedName('');
+            setSaving(false);
+        } catch {
+            setSaveError('Not enough storage space to save the cluster. Try removing unused clusters.');
+        }
     };
 
     return (
         <>
             <Link
-                className={cn('btn col-12 mb-3', active ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white')}
+                className={cn(clusterButtonVariants({ active, status }), 'mb-3')}
                 href={{ query: { cluster: 'custom', ...(customUrl.length > 0 ? { customUrl } : null) } }}
             >
                 Custom RPC URL
@@ -97,6 +117,7 @@ function CustomClusterInput({ activeSuffix, active, savedClusters }: InputProps)
                     <input
                         type="url"
                         value={localUrl}
+                        aria-label="Custom RPC URL"
                         className={cn('form-control', !editing && 'text-muted')}
                         onFocus={() => setEditing(true)}
                         onBlur={() => setEditing(false)}
@@ -110,6 +131,7 @@ function CustomClusterInput({ activeSuffix, active, savedClusters }: InputProps)
                             <input
                                 type="text"
                                 className="form-control mb-2"
+                                aria-label="Cluster name"
                                 placeholder="Cluster name"
                                 value={savedName}
                                 onChange={e => setSavedName(e.target.value)}
@@ -120,6 +142,11 @@ function CustomClusterInput({ activeSuffix, active, savedClusters }: InputProps)
                                 <small className="text-muted" data-testid="name-required-hint">
                                     Name is required
                                 </small>
+                            )}
+                            {saveError && (
+                                <div className="alert alert-danger mt-2 mb-0 py-2" data-testid="save-cluster-error">
+                                    {saveError}
+                                </div>
                             )}
                             <div className="d-flex gap-2 mt-1">
                                 <button
@@ -135,6 +162,7 @@ function CustomClusterInput({ activeSuffix, active, savedClusters }: InputProps)
                                     onClick={() => {
                                         setSaving(false);
                                         setSavedName('');
+                                        setSaveError(null);
                                     }}
                                 >
                                     Cancel
@@ -156,22 +184,17 @@ function CustomClusterInput({ activeSuffix, active, savedClusters }: InputProps)
     );
 }
 
-function assertUnreachable(_x: never): never {
-    throw new Error('Unreachable!');
-}
-
 function SavedClusterItem({
     cluster,
-    activeSuffix,
+    status,
     isActive,
     onDelete,
 }: {
     cluster: SavedCluster;
-    activeSuffix: string;
+    status: ClusterStatus;
     isActive: boolean;
     onDelete: (name: string) => void;
 }) {
-    const setPersistedCluster = useSetAtom(persistedClusterAtom);
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
@@ -184,12 +207,8 @@ function SavedClusterItem({
     return (
         <div className="position-relative col-12 mb-3" data-testid={`saved-cluster-${cluster.name}`}>
             <Link
-                className={cn(
-                    'btn col-12 text-center',
-                    isActive ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white'
-                )}
+                className={cn(clusterButtonVariants({ active: isActive, status }), 'text-center')}
                 href={clusterUrl}
-                onClick={() => setPersistedCluster(`${SAVED_CLUSTER_PREFIX}${cluster.name}`)}
             >
                 {cluster.name}
             </Link>
@@ -210,15 +229,14 @@ function SavedClusterItem({
 }
 
 function SavedClustersSection({
-    activeSuffix,
+    status,
     savedClusters,
 }: {
-    activeSuffix: string;
+    status: ClusterStatus;
     savedClusters: SavedCluster[];
 }) {
     const { customUrl, cluster } = useCluster();
     const removeSavedCluster = useSetAtom(removeSavedClusterAtom);
-    const setPersistedCluster = useSetAtom(persistedClusterAtom);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -226,7 +244,6 @@ function SavedClustersSection({
         const isActive = cluster === Cluster.Custom && savedClusters.find(c => c.name === name)?.url === customUrl;
         removeSavedCluster(name);
         if (isActive) {
-            setPersistedCluster(clusterSlug(DEFAULT_CLUSTER));
             router.push(pathname);
         }
     };
@@ -241,7 +258,7 @@ function SavedClustersSection({
                 <SavedClusterItem
                     key={sc.name}
                     cluster={sc}
-                    activeSuffix={activeSuffix}
+                    status={status}
                     isActive={cluster === Cluster.Custom && customUrl === sc.url}
                     onDelete={handleDelete}
                 />
@@ -253,21 +270,6 @@ function SavedClustersSection({
 function ClusterToggle() {
     const { status, cluster } = useCluster();
     const savedClusters = useAtomValue(savedClustersAtom);
-
-    let activeSuffix = '';
-    switch (status) {
-        case ClusterStatus.Connected:
-            activeSuffix = 'primary';
-            break;
-        case ClusterStatus.Connecting:
-            activeSuffix = 'warning';
-            break;
-        case ClusterStatus.Failure:
-            activeSuffix = 'danger';
-            break;
-        default:
-            assertUnreachable(status);
-    }
     const pathname = usePathname();
     const searchParams = useSearchParams();
     return (
@@ -278,7 +280,7 @@ function ClusterToggle() {
                     return (
                         <CustomClusterInput
                             key={index}
-                            activeSuffix={activeSuffix}
+                            status={status}
                             active={active}
                             savedClusters={savedClusters}
                         />
@@ -296,17 +298,14 @@ function ClusterToggle() {
                 return (
                     <Link
                         key={index}
-                        className={cn(
-                            'btn col-12 mb-3',
-                            active ? `border-${activeSuffix} text-${activeSuffix}` : 'btn-white'
-                        )}
+                        className={cn(clusterButtonVariants({ active, status }), 'mb-3')}
                         href={clusterUrl}
                     >
                         {clusterName(net)}
                     </Link>
                 );
             })}
-            <SavedClustersSection activeSuffix={activeSuffix} savedClusters={savedClusters} />
+            <SavedClustersSection status={status} savedClusters={savedClusters} />
         </div>
     );
 }
