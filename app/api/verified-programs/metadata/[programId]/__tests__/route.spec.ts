@@ -1,3 +1,4 @@
+import fetch from 'node-fetch';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import Logger from '@/app/utils/logger';
@@ -11,7 +12,9 @@ vi.mock('@/app/utils/logger', () => ({
     },
 }));
 
-global.fetch = vi.fn();
+vi.mock('node-fetch', () => ({
+    default: vi.fn(),
+}));
 
 describe('GET /api/verified-programs/metadata/[programId]', () => {
     const mockProgramId = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
@@ -212,7 +215,12 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
 
             await GET(mockRequest, params);
 
-            expect(Logger.error).toHaveBeenCalledWith(`Error fetching metadata for ${mockProgramId}:`, networkError);
+            expect(Logger.error).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    cause: networkError,
+                    message: `Error fetching metadata for ${mockProgramId}`,
+                })
+            );
         });
     });
 });

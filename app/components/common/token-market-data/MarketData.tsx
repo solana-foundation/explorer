@@ -21,7 +21,7 @@ type MarketDataProps = {
     label: string;
     lastUpdatedAt?: Date;
     rank?: number;
-    value: { price: number; trend: number; precision: number } | { volume: number };
+    value: { price: number; trend?: number; precision: number } | { volume: number };
 };
 
 export function MarketData({ label, lastUpdatedAt, value, rank }: MarketDataProps) {
@@ -29,7 +29,7 @@ export function MarketData({ label, lastUpdatedAt, value, rank }: MarketDataProp
     return (
         <div
             aria-label="market-data"
-            className="e-w-[160px] e-rounded e-border e-border-solid e-border-black e-bg-[#1C2120] e-px-3 e-py-2 e-text-sm"
+            className="e-w-full e-rounded e-border e-border-solid e-border-black e-bg-[#1C2120] e-px-3 e-py-2 e-text-sm md:e-w-[160px]"
         >
             <div className="e-mb-1 e-flex e-items-center e-gap-2">
                 <span
@@ -73,11 +73,11 @@ export function MarketData({ label, lastUpdatedAt, value, rank }: MarketDataProp
                         <span className={dynamicVariant({ trend })}>
                             {trend === 'up' ? (
                                 <>
-                                    <span className="e-text-[8px]">&uarr;</span> {value.trend.toFixed(2)}%
+                                    <span className="e-text-[8px]">&uarr;</span> {value.trend?.toFixed(2)}%
                                 </>
                             ) : trend === 'down' ? (
                                 <>
-                                    <span className="e-text-[8px]">&darr;</span> {value.trend.toFixed(2)}%
+                                    <span className="e-text-[8px]">&darr;</span> {value.trend?.toFixed(2)}%
                                 </>
                             ) : (
                                 '0%'
@@ -90,7 +90,8 @@ export function MarketData({ label, lastUpdatedAt, value, rank }: MarketDataProp
     );
 }
 
-function getDynamicTrend(dynamic: number) {
+function getDynamicTrend(dynamic?: number) {
+    if (dynamic === undefined) return 'neutral';
     if (dynamic > 0) return 'up';
     else if (dynamic < 0) return 'down';
     else return 'neutral';
@@ -98,7 +99,7 @@ function getDynamicTrend(dynamic: number) {
 
 MarketData.Series = function MarketDataSeries({ data }: { data: MarketDataProps[] }) {
     return (
-        <div className="e-flex e-flex-col e-gap-1 xs:e-flex-row sm:e-gap-2">
+        <div className="e-flex e-w-full e-flex-col e-gap-1 sm:e-gap-2 md:e-w-auto md:e-flex-row">
             {data.map((props, index) => (
                 <MarketData key={`market-data-${index}`} {...props} />
             ))}

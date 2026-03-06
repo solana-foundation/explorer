@@ -172,7 +172,7 @@ export async function getFullTokenInfo(
         address: sdkTokenInfo.address,
         chainId,
         decimals: sdkTokenInfo.decimals ?? 0,
-        extensions: legacyCdnTokenInfo?.extensions,
+        extensions: legacyCdnTokenInfo?.extensions || (sdkTokenInfo as { extensions?: TokenExtensions })?.extensions,
         logoURI: sdkTokenInfo.logoURI ?? undefined,
         name: sdkTokenInfo.name,
         symbol: sdkTokenInfo.symbol,

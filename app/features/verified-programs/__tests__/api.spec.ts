@@ -347,7 +347,9 @@ describe('fetchProgramsPage', () => {
                 // Expected to throw
             }
 
-            expect(Logger.error).toHaveBeenCalledWith('Failed to fetch programs page 1', expect.any(Error));
+            expect(Logger.error).toHaveBeenCalledWith(
+                expect.objectContaining({ message: 'Failed to fetch programs page 1' })
+            );
         });
 
         it('throws error on network failure', async () => {
@@ -367,7 +369,9 @@ describe('fetchProgramsPage', () => {
                 // Expected to throw
             }
 
-            expect(Logger.error).toHaveBeenCalledWith('Failed to fetch programs page 1', networkError);
+            expect(Logger.error).toHaveBeenCalledWith(
+                expect.objectContaining({ cause: networkError, message: 'Failed to fetch programs page 1' })
+            );
         });
 
         it('logs debug message for failed metadata fetch', async () => {
@@ -440,7 +444,12 @@ describe('fetchProgramsPage', () => {
 
             await fetchProgramsPage(1);
 
-            expect(Logger.error).toHaveBeenCalledWith(`Failed to fetch metadata for ${mockProgramIds[0]}`, fetchError);
+            expect(Logger.error).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    cause: fetchError,
+                    message: `Failed to fetch metadata for ${mockProgramIds[0]}`,
+                })
+            );
         });
     });
 

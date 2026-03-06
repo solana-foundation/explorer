@@ -21,7 +21,7 @@ async function fetchProgramMetadata(programId: string): Promise<ProgramMetadata 
         }
         return data[0];
     } catch (error) {
-        Logger.error(`Failed to fetch metadata for ${programId}`, error);
+        Logger.error(new Error(`Failed to fetch metadata for ${programId}`, { cause: error }));
         return null;
     }
 }
@@ -74,7 +74,7 @@ export async function fetchProgramsPage(page: number): Promise<{
             totalPages,
         };
     } catch (error) {
-        Logger.error(`Failed to fetch programs page ${page}`, error);
+        Logger.error(new Error(`Failed to fetch programs page ${page}`, { cause: error }));
         throw error;
     }
 }
