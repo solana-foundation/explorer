@@ -6,9 +6,7 @@ export interface SavedCluster {
     url: string;
 }
 
-export const savedClustersAtom = atomWithStorage<SavedCluster[]>('explorer:savedClusters', [], undefined, {
-    getOnInit: true,
-});
+export const savedClustersAtom = atomWithStorage<SavedCluster[]>('explorer:savedClusters', []);
 
 export const addSavedClusterAtom = atom(null, (get, set, cluster: SavedCluster) => {
     set(savedClustersAtom, [...get(savedClustersAtom).filter(c => c.name !== cluster.name), cluster]);
