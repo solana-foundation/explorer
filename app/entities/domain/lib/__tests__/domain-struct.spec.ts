@@ -25,6 +25,7 @@ describe('Domain struct', () => {
         ['a..b', 'consecutive dots'],
         ['...', 'only dots'],
         ['test.sol.', 'trailing dot with TLD'],
+        ['1.2.3.4', 'IPv4 address'],
     ])('should reject invalid input: %s (%s)', (input) => {
         expect(is(input, Domain)).toBe(false);
     });

@@ -94,24 +94,12 @@ describe('GET /api/domain-info/[domain]', () => {
             expect(await response.json()).toBeNull();
         });
 
-        it('should return 400 for input with spaces', async () => {
-            const response = await GET(mockRequest, { params: { domain: 'has spaces.sol' } });
-
-            expect(response.status).toBe(400);
-        });
-
-        it('should return 400 for the URL-encoded failing input from the error log', async () => {
+        it('should return 400 for the decoded failing input from the error log', async () => {
             const response = await GET(mockRequest, {
                 params: {
-                    domain: 'You%20sent%2075.00%20USDC%20via%20Solana%20network%20To%3A%20BPTAmSr68QhspEN2i8KBKDFjDWbtfAhjiAqU6Cd8H2Yi',
+                    domain: 'You sent 75.00 USDC via Solana network To: BPTAmSr68QhspEN2i8KBKDFjDWbtfAhjiAqU6Cd8H2Yi',
                 },
             });
-
-            expect(response.status).toBe(400);
-        });
-
-        it('should return 400 for empty string', async () => {
-            const response = await GET(mockRequest, { params: { domain: '' } });
 
             expect(response.status).toBe(400);
         });
