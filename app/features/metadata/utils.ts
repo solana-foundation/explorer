@@ -26,8 +26,9 @@ export const getProxiedUri = (uri: string): string | '' => {
 };
 
 const resolveIpfsUri = (url: URL): string => {
+    // eslint-disable-next-line no-restricted-syntax -- Strips redundant "ipfs/" prefix from the path for a clean gateway URL.
     const path = (url.host + url.pathname).replace(/^ipfs\//, '');
     return `${IPFS_GATEWAY}/${path}${url.search}`;
 };
 
-const proxyUri = (uri: string): string => `/api/metadata/proxy?uri=${encodeURIComponent(uri)}`
+const proxyUri = (uri: string): string => `/api/metadata/proxy?uri=${encodeURIComponent(uri)}`;
