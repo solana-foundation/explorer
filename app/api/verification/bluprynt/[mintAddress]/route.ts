@@ -1,10 +1,9 @@
-import * as Sentry from '@sentry/nextjs';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
 import { NextResponse } from 'next/server';
 import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
 
@@ -50,8 +49,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
 
         return NextResponse.json({ verified }, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.error(new Error('Bluprynt verification error', { cause: error }));
-        Sentry.captureException(error);
+        Logger.panic('[api:bluprynt] Bluprynt verification error', { error });
         return NextResponse.json(
             { error: 'Failed to verify bluprynt data' },
             { headers: NO_STORE_HEADERS, status: 500 }

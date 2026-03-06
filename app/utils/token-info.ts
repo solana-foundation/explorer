@@ -2,8 +2,9 @@ import { getChainId } from '@entities/token-info';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { ChainId, Client, Token, UtlConfig } from '@solflare-wallet/utl-sdk';
 import { Cluster } from '@utils/cluster';
-import Logger from '@utils/logger';
 import { TokenExtension } from '@validators/accounts/token-extension';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 type TokenExtensions = {
     readonly website?: string;
@@ -88,7 +89,7 @@ export async function getTokenInfoWithoutOnChainFallback(
         const data = (await response.json()) as { content?: Token };
         return data.content;
     } catch (error) {
-        Logger.warn(`Failed to fetch token info for ${address}`, error);
+        Logger.warn('[utils:token-info] Failed to fetch token info', { address: address.toString(), error });
         return undefined;
     }
 }
@@ -101,7 +102,7 @@ async function getFullLegacyTokenInfoUsingCdn(
         'https://cdn.jsdelivr.net/gh/solana-labs/token-list@latest/src/tokens/solana.tokenlist.json'
     );
     if (tokenListResponse.status >= 400) {
-        console.error(new Error('Error fetching token list from CDN'));
+        Logger.error('[utils:token-info] Error fetching token list from CDN');
         return undefined;
     }
     const { tokens } = (await tokenListResponse.json()) as FullLegacyTokenInfoList;

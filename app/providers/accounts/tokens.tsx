@@ -10,6 +10,7 @@ import { TokenAccountInfo } from '@validators/accounts/token';
 import React from 'react';
 import { create } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { getCurrentTokenScaledUiAmountMultiplier, getTokenInfos } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
 
@@ -117,7 +118,7 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
         status = FetchStatus.Fetched;
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
+            Logger.error('[providers:tokens] Failed to fetch account tokens', { error, url });
         }
         status = FetchStatus.FetchFailed;
     }

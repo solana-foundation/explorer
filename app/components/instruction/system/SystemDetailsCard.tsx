@@ -3,6 +3,8 @@ import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
 import { AllocateDetailsCard } from './AllocateDetailsCard';
 import { AllocateWithSeedDetailsCard } from './AllocateWithSeedDetailsCard';
@@ -104,7 +106,8 @@ export function SystemDetailsCard(props: DetailsProps) {
                 return <UnknownDetailsCard {...props} />;
         }
     } catch (error) {
-        console.error(error, {
+        Logger.error('[components:ix-system] Failed to decode instruction', {
+            error,
             signature: props.tx.signatures[0],
         });
         return <UnknownDetailsCard {...props} />;

@@ -5,7 +5,7 @@
 /**
  * Creates the common Sentry configuration for all runtimes
  * @param {RuntimeContext} _context - The runtime context (client, server, or edge)
- * @returns {Object} Sentry configuration options
+ * @returns {import('@sentry/core').Options} Sentry configuration options
  */
 export function createSentryConfig(_context) {
     return {
@@ -49,7 +49,7 @@ export function createSentryConfig(_context) {
 
 /**
  * Creates the Sentry build configuration for webpack plugin
- * @returns {Object} Sentry build configuration options
+ * @returns {import('@sentry/nextjs').SentryBuildOptions} Sentry build configuration options
  */
 export function createSentryBuildConfig() {
     // Respect the SENTRY_TELEMETRY_DISABLE environment variable
@@ -71,10 +71,15 @@ export function createSentryBuildConfig() {
         // Upload a larger set of source maps for prettier stack traces (increases build time)
         widenClientFileUpload: true,
 
-        // Automatically tree-shake Sentry logger statements to reduce bundle size
-        disableLogger: true, // eslint-disable-line sort-keys-fix/sort-keys-fix,
-
-        // Enables automatic instrumentation of Vercel Cron Monitors
-        automaticVercelMonitors: true, // eslint-disable-line sort-keys-fix/sort-keys-fix
+        // Webpack plugin options
+        webpack: {
+            // eslint-disable-line sort-keys-fix/sort-keys-fix
+            // Enables automatic instrumentation of Vercel Cron Monitors
+            automaticVercelMonitors: true,
+            // Automatically tree-shake Sentry logger statements to reduce bundle size
+            treeshake: {
+                removeDebugLogging: true,
+            },
+        },
     };
 }

@@ -2,7 +2,8 @@ import { getHashedName, getNameAccountKey, getNameOwner } from '@bonfida/spl-nam
 import { getDomainKey as getANSDomainKey, getNameOwner as getANSNameOwner } from '@onsol/tldparser';
 import { Connection } from '@solana/web3.js';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
-import Logger from '@utils/logger';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 import { SOL_TLD_AUTHORITY } from './constants';
 
@@ -32,7 +33,7 @@ async function resolveSnsDomain(domain: string, connection: Connection): Promise
               }
             : null;
     } catch (e) {
-        Logger.error(e, `Failed to resolve SNS domain: ${domain}`);
+        Logger.error('[domain] Failed to resolve SNS domain', { domain, error: e });
         return null;
     }
 }
@@ -48,7 +49,7 @@ async function resolveAnsDomain(domainTld: string, connection: Connection): Prom
               }
             : null;
     } catch (e) {
-        Logger.error(e, `Failed to resolve ANS domain: ${domainTld}`);
+        Logger.error('[domain] Failed to resolve ANS domain', { domain: domainTld, error: e });
         return null;
     }
 }

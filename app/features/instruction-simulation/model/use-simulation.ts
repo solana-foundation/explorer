@@ -20,6 +20,8 @@ import { InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import { BN } from 'bn.js';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { getMintDecimals, isTokenProgramBase58 } from '../lib/tokenAccountParsing';
 import type { SolBalanceChange } from '../lib/types';
 import { useEpochInfo } from './use-epoch-info';
@@ -233,7 +235,7 @@ export function useSimulation(
                     setError('TransactionError');
                 }
             } catch (err) {
-                console.error(err);
+                Logger.error('[instruction-simulation] Simulation failed', { error: err });
                 setLogs(null);
                 if (err instanceof Error) {
                     setError(err.message);

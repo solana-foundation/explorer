@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
 import type { Meta, StoryObj } from '@storybook/react';
 import { toast as sonnerToast } from 'sonner';
-import { expect, within } from 'storybook/test';
+import { expect, fn, within } from 'storybook/test';
 
 import { Button } from '../button';
 import { CustomToast } from './custom';
@@ -222,6 +222,7 @@ export const WithCustomDescription: Story = {
         expect(closeButton.length).toBeGreaterThan(0);
     },
     render: args => {
+        const onViewTransaction = fn();
         const description = (
             <div className="e-text-xs e-text-neutral-300">
                 <p className="e-mb-1">Transaction signature: 5X5s...GnDZ</p>
@@ -230,7 +231,7 @@ export const WithCustomDescription: Story = {
                     className="e-text-indigo-400 e-underline hover:e-text-indigo-300"
                     onClick={e => {
                         e.preventDefault();
-                        console.log('View transaction clicked');
+                        onViewTransaction();
                     }}
                 >
                     View on Explorer

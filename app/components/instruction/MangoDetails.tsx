@@ -1,6 +1,8 @@
 import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { InstructionCard } from './InstructionCard';
 import { AddOracleDetailsCard } from './mango/AddOracleDetailsCard';
 import { AddPerpMarketDetailsCard } from './mango/AddPerpMarketDetailsCard';
@@ -92,9 +94,10 @@ export function MangoDetailsCard(props: {
                 return <AddSpotMarketDetailsCard info={decodeAddSpotMarket(ix)} {...props} />;
         }
     } catch (error) {
-        console.error(error, {
-            signature: signature,
-            url: url,
+        Logger.error('[components:ix-mango] Failed to decode instruction', {
+            error,
+            signature,
+            url,
         });
     }
 

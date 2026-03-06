@@ -20,6 +20,7 @@ import { useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
+import { Logger } from '@/app/shared/lib/logger';
 import { clusterUrl } from '@/app/utils/cluster';
 import { getTransactionInstructionError } from '@/app/utils/program-err';
 
@@ -152,7 +153,7 @@ export function useInstruction({
         } catch (error) {
             const errorMessage = handleInitializeError(error);
 
-            console.error('Program initialization failed:', errorMessage);
+            Logger.error('[idl] Program initialization failed', { error: errorMessage });
             setInitializationError(errorMessage);
             setProgram(undefined);
         } finally {
@@ -415,7 +416,7 @@ function useInvocationState({
     };
 
     const handleTxError = (error: unknown | Error, transaction: Transaction | undefined) => {
-        console.error('Instruction execution failed:', { error, transaction });
+        Logger.error('[idl] Instruction execution failed', { error, transaction });
         const errorMessage = handleInvokeError(error);
         setLastError({ finishedAt: new Date(), message: errorMessage });
         if (error instanceof SendTransactionError) {
@@ -525,7 +526,7 @@ function serializeTransactionMessage(transaction: Transaction | undefined): stri
     try {
         return Buffer.from(transaction.serializeMessage()).toString('base64');
     } catch (error) {
-        console.warn('Failed to serialize transaction message:', error);
+        Logger.warn('[idl] Failed to serialize transaction message', { error });
         return null;
     }
 }
