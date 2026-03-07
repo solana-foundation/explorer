@@ -1,6 +1,6 @@
 import { default as fetch, Headers, Response as NodeFetchResponse } from 'node-fetch';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import {
     errors,
@@ -56,7 +56,7 @@ async function requestResource(
         if (e instanceof Error) {
             error = e;
         } else {
-            Logger.debug('Debug:', e);
+            Logger.debug('[api:metadata-proxy] Failed to fetch resource', { error: e });
             error = new Error('Cannot fetch resource');
         }
     }

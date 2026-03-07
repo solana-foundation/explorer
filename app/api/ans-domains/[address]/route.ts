@@ -1,7 +1,8 @@
 import { fetchAnsDomains } from '@entities/domain/api/fetch-ans-domains';
 import { PublicKey } from '@solana/web3.js';
-import Logger from '@utils/logger';
 import { NextResponse } from 'next/server';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 const CACHE_HEADERS = { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=3600' };
 
@@ -22,7 +23,7 @@ export async function GET(_request: Request, { params: { address } }: Params) {
         const domains = await fetchAnsDomains(address);
         return NextResponse.json({ domains }, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.error(error, `Failed to fetch ANS domains for ${address}`);
+        Logger.error('[api:ans-domains] Failed to fetch ANS domains', { address, error });
         return NextResponse.json({ domains: [] }, { headers: { 'Cache-Control': 'no-store' } });
     }
 }

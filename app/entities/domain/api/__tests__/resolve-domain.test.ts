@@ -3,10 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { resolveDomain } from '../resolve-domain';
 
-vi.mock('@utils/logger', () => ({
-    default: { error: vi.fn() },
-}));
-
 const KNOWN_OWNER = new PublicKey('86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdRrbukszb');
 const NAME_SERVICE_PROGRAM = new PublicKey('namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX');
 

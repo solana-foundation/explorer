@@ -22,7 +22,8 @@
                 "message": "RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why"
             }
         ],
-        "@eslint-community/eslint-comments/no-unlimited-disable": "error"
+        "@eslint-community/eslint-comments/no-unlimited-disable": "error",
+        "no-console": "error"
     },
     "overrides": [
         // Only uses Testing Library lint rules in test files
@@ -35,6 +36,31 @@
             "files": ["**/mocks/**/*.[jt]s?(x)"],
             "rules": {
                 "@eslint-community/eslint-comments/no-unlimited-disable": "off"
+            }
+        },
+        // Allow console.* in the Logger implementation, scripts, and pnpm hooks
+        {
+            "files": ["app/shared/lib/logger.ts", "scripts/**", ".pnpmfile.cjs"],
+            "rules": {
+                "no-console": "off"
+            }
+        },
+        // Forbid direct @sentry/nextjs imports in app code — use @/app/shared/lib/sentry instead
+        {
+            "files": ["app/**/*.[jt]s?(x)"],
+            "excludedFiles": ["app/shared/lib/sentry/**", "app/shared/lib/logger.ts"],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "paths": [
+                            {
+                                "name": "@sentry/nextjs",
+                                "message": "Import from '@/app/shared/lib/sentry' instead. For logging, use the Logger from '@/app/shared/lib/logger'."
+                            }
+                        ]
+                    }
+                ]
             }
         }
     ]

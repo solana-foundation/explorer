@@ -1,17 +1,12 @@
 import { fetchAnsDomains } from '@entities/domain/api/fetch-ans-domains';
-import Logger from '@utils/logger';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 import { GET } from '../route';
 
 vi.mock('@entities/domain/api/fetch-ans-domains', () => ({
     fetchAnsDomains: vi.fn(),
-}));
-
-vi.mock('@utils/logger', () => ({
-    default: {
-        error: vi.fn(),
-    },
 }));
 
 const VALID_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
@@ -83,7 +78,10 @@ describe('GET /api/ans-domains/[address]', () => {
 
             await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
-            expect(Logger.error).toHaveBeenCalledWith(error, `Failed to fetch ANS domains for ${VALID_ADDRESS}`);
+            expect(Logger.error).toHaveBeenCalledWith('[api:ans-domains] Failed to fetch ANS domains', {
+                address: VALID_ADDRESS,
+                error,
+            });
         });
 
         it('does not cache error responses', async () => {

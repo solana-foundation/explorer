@@ -1,6 +1,7 @@
 import { type ResolvedDomainInfo, resolveDomain } from '@entities/domain/api/resolve-domain';
-import Logger from '@utils/logger';
 import { NextResponse } from 'next/server';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 type Params = {
     params: {
@@ -18,7 +19,7 @@ export async function GET(_request: Request, { params: { domain } }: Params) {
 
         return NextResponse.json(domainInfo, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.error(error, `Failed to resolve domain: ${domain}`);
+        Logger.error('[api:domain-info] Failed to resolve domain', { domain, error });
         return NextResponse.json(null, {
             headers: {
                 'Cache-Control': 'no-store',

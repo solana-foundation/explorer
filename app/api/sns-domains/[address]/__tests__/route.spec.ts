@@ -1,17 +1,12 @@
 import { fetchSnsDomains } from '@entities/domain/api/fetch-sns-domains';
-import Logger from '@utils/logger';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 import { GET } from '../route';
 
 vi.mock('@entities/domain/api/fetch-sns-domains', () => ({
     fetchSnsDomains: vi.fn(),
-}));
-
-vi.mock('@utils/logger', () => ({
-    default: {
-        error: vi.fn(),
-    },
 }));
 
 const VALID_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
@@ -83,7 +78,10 @@ describe('GET /api/sns-domains/[address]', () => {
 
             await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
-            expect(Logger.error).toHaveBeenCalledWith(error, `Failed to fetch SNS domains for ${VALID_ADDRESS}`);
+            expect(Logger.error).toHaveBeenCalledWith('[api:sns-domains] Failed to fetch SNS domains', {
+                address: VALID_ADDRESS,
+                error,
+            });
         });
 
         it('does not cache error responses', async () => {

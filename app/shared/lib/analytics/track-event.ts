@@ -1,3 +1,5 @@
+import { Logger } from '@/app/shared/lib/logger';
+
 import type { EventParams, WindowWithDataLayer, WindowWithGtag } from './types';
 
 function getDataLayer(win: Window): WindowWithDataLayer | undefined {
@@ -69,6 +71,6 @@ export function trackEvent(eventName: string, params?: EventParams): void {
         const provider = resolveProvider(window);
         provider?.track(window, eventName, params);
     } catch (error) {
-        console.error('Analytics error:', error);
+        Logger.error('[analytics] Analytics error', { error });
     }
 }

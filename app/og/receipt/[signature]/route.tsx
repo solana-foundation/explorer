@@ -10,7 +10,7 @@ import { assertIsSignature } from '@solana/kit';
 import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 export const runtime = 'edge';
 
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest, { params }: Props) {
             headers: { ...cacheHeaders, 'Content-Type': 'image/png' },
         });
     } catch (e) {
-        Logger.error(`Failed to process receipt for signature ${signature}:`, e);
+        Logger.error('[og:receipt] Failed to process receipt', { error: e, signature });
 
         const status = e instanceof ReceiptError ? e.status : 500;
         const body = status === 404 ? 'Receipt not found' : 'Failed to process request';

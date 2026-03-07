@@ -2,6 +2,7 @@ import { truncateAddress } from '@entities/address';
 import { ParsedTransactionWithMeta } from '@solana/web3.js';
 import { lamportsToSolString } from '@utils/index';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, clusterName } from '@/app/utils/cluster';
 import { displayTimestampUtc } from '@/app/utils/date';
 
@@ -75,7 +76,7 @@ async function getParsedTokenInfo(mint: string | undefined, cluster: Cluster): P
         const tokenInfo = await getTokenInfo(mint, cluster);
         return tokenInfo;
     } catch (error) {
-        console.error('Unable to get token info', error);
+        Logger.error('[receipt] Unable to get token info', { error });
         return undefined;
     }
 }

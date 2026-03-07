@@ -1,19 +1,11 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { fetchProgramsPage } from '../api';
 import { getProgramName } from '../model';
 import { ProgramMetadata, VerifiedProgramsResponse } from '../types';
-
-// Mock Logger
-vi.mock('@/app/utils/logger', () => ({
-    default: {
-        debug: vi.fn(),
-        error: vi.fn(),
-    },
-}));
 
 // Mock getProgramName
 vi.mock('../model', () => ({
@@ -347,9 +339,10 @@ describe('fetchProgramsPage', () => {
                 // Expected to throw
             }
 
-            expect(Logger.error).toHaveBeenCalledWith(
-                expect.objectContaining({ message: 'Failed to fetch programs page 1' })
-            );
+            expect(Logger.error).toHaveBeenCalledWith('[verified-programs] Failed to fetch programs page', {
+                error: expect.any(Error),
+                page: 1,
+            });
         });
 
         it('throws error on network failure', async () => {
@@ -369,9 +362,10 @@ describe('fetchProgramsPage', () => {
                 // Expected to throw
             }
 
-            expect(Logger.error).toHaveBeenCalledWith(
-                expect.objectContaining({ cause: networkError, message: 'Failed to fetch programs page 1' })
-            );
+            expect(Logger.error).toHaveBeenCalledWith('[verified-programs] Failed to fetch programs page', {
+                error: networkError,
+                page: 1,
+            });
         });
 
         it('logs debug message for failed metadata fetch', async () => {
@@ -398,7 +392,10 @@ describe('fetchProgramsPage', () => {
 
             await fetchProgramsPage(1);
 
-            expect(Logger.debug).toHaveBeenCalledWith(`Metadata fetch failed for ${mockProgramIds[0]}: HTTP 404`);
+            expect(Logger.debug).toHaveBeenCalledWith('[verified-programs] Metadata fetch failed', {
+                programId: mockProgramIds[0],
+                status: 404,
+            });
         });
 
         it('logs debug message for empty metadata', async () => {
@@ -418,7 +415,8 @@ describe('fetchProgramsPage', () => {
             await fetchProgramsPage(1);
 
             expect(Logger.debug).toHaveBeenCalledWith(
-                `Metadata is empty for ${mockProgramIds[0]}: API returned empty array`
+                '[verified-programs] Metadata is empty, API returned empty array',
+                { programId: mockProgramIds[0] }
             );
         });
 
@@ -444,12 +442,10 @@ describe('fetchProgramsPage', () => {
 
             await fetchProgramsPage(1);
 
-            expect(Logger.error).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    cause: fetchError,
-                    message: `Failed to fetch metadata for ${mockProgramIds[0]}`,
-                })
-            );
+            expect(Logger.error).toHaveBeenCalledWith('[verified-programs] Failed to fetch metadata', {
+                error: fetchError,
+                programId: mockProgramIds[0],
+            });
         });
     });
 

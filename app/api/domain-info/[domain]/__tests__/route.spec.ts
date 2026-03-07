@@ -1,17 +1,12 @@
 import { resolveDomain } from '@entities/domain/api/resolve-domain';
-import Logger from '@utils/logger';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 import { GET } from '../route';
 
 vi.mock('@entities/domain/api/resolve-domain', () => ({
     resolveDomain: vi.fn(),
-}));
-
-vi.mock('@utils/logger', () => ({
-    default: {
-        error: vi.fn(),
-    },
 }));
 
 const mockRequest = new Request('http://localhost:3000/api/domain-info/test.sol');
@@ -74,6 +69,9 @@ describe('GET /api/domain-info/[domain]', () => {
 
         await GET(mockRequest, { params: { domain: 'test.sol' } });
 
-        expect(Logger.error).toHaveBeenCalledWith(error, 'Failed to resolve domain: test.sol');
+        expect(Logger.error).toHaveBeenCalledWith('[api:domain-info] Failed to resolve domain', {
+            domain: 'test.sol',
+            error,
+        });
     });
 });

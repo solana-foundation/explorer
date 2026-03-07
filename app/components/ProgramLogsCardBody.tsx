@@ -14,6 +14,8 @@ import { usePathname } from 'next/navigation';
 import React from 'react';
 import { ChevronsUp } from 'react-feather';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 const NATIVE_PROGRAMS_MISSING_INVOKE_LOG: string[] = [
     'AddressLookupTab1e1111111111111111111111111',
     'ZkTokenProof1111111111111111111111111111111',
@@ -222,7 +224,7 @@ function ProgramLogRow({
                 }
             }
         } catch (error) {
-            console.error('Failed to decode instruction name:', error);
+            Logger.error('[components:program-logs] Failed to decode instruction name', { error });
         }
     }
 
