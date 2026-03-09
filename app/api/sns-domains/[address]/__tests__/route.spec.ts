@@ -23,7 +23,7 @@ describe('GET /api/sns-domains/[address]', () => {
     });
 
     describe('validation', () => {
-        it('rejects an invalid wallet address', async () => {
+        it('should reject an invalid wallet address', async () => {
             const response = await GET(mockRequest, { params: { address: 'not-a-pubkey' } });
 
             expect(response.status).toBe(400);
@@ -38,7 +38,7 @@ describe('GET /api/sns-domains/[address]', () => {
             { address: 'addr2', name: 'bob.sol' },
         ];
 
-        it('returns domains from fetchSnsDomains', async () => {
+        it('should return domains from fetchSnsDomains', async () => {
             vi.mocked(fetchSnsDomains).mockResolvedValueOnce(mockDomains);
 
             const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
@@ -48,7 +48,7 @@ describe('GET /api/sns-domains/[address]', () => {
             expect(data.domains).toEqual(mockDomains);
         });
 
-        it('calls fetchSnsDomains with the address', async () => {
+        it('should call fetchSnsDomains with the address', async () => {
             vi.mocked(fetchSnsDomains).mockResolvedValueOnce([]);
 
             await GET(mockRequest, { params: { address: VALID_ADDRESS } });
@@ -56,7 +56,7 @@ describe('GET /api/sns-domains/[address]', () => {
             expect(fetchSnsDomains).toHaveBeenCalledWith(VALID_ADDRESS);
         });
 
-        it('returns cache headers with 43200s max-age', async () => {
+        it('should return cache headers with 43200s max-age', async () => {
             vi.mocked(fetchSnsDomains).mockResolvedValueOnce([]);
 
             const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
@@ -66,7 +66,7 @@ describe('GET /api/sns-domains/[address]', () => {
     });
 
     describe('error handling', () => {
-        it('returns empty domains array on fetch error', async () => {
+        it('should return empty domains array on fetch error', async () => {
             const error = new Error('Bonfida API down');
             vi.mocked(fetchSnsDomains).mockRejectedValueOnce(error);
 
@@ -77,7 +77,7 @@ describe('GET /api/sns-domains/[address]', () => {
             expect(data.domains).toEqual([]);
         });
 
-        it('logs the error on fetch failure', async () => {
+        it('should log the error on fetch failure', async () => {
             const error = new Error('Bonfida API down');
             vi.mocked(fetchSnsDomains).mockRejectedValueOnce(error);
 
@@ -86,7 +86,7 @@ describe('GET /api/sns-domains/[address]', () => {
             expect(Logger.error).toHaveBeenCalledWith(error, `Failed to fetch SNS domains for ${VALID_ADDRESS}`);
         });
 
-        it('does not cache error responses', async () => {
+        it('should not cache error responses', async () => {
             vi.mocked(fetchSnsDomains).mockRejectedValueOnce(new Error('fail'));
 
             const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
