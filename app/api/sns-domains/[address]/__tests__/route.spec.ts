@@ -66,8 +66,8 @@ describe('GET /api/sns-domains/[address]', () => {
         });
     });
 
-    describe('Bonfida 404', () => {
-        it('should return 404 with empty domains without caching when Bonfida returns 404', async () => {
+    describe('not found', () => {
+        it('should return 404 when no domains found', async () => {
             vi.mocked(fetchSnsDomains).mockResolvedValueOnce(undefined);
 
             const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
@@ -76,21 +76,12 @@ describe('GET /api/sns-domains/[address]', () => {
             const data = await response.json();
             expect(data.domains).toEqual([]);
             expect(response.headers.get('Cache-Control')).toBe('no-store');
-        });
-
-        it('should log info when Bonfida returns 404', async () => {
-            vi.mocked(fetchSnsDomains).mockResolvedValueOnce(undefined);
-
-            await GET(mockRequest, { params: { address: VALID_ADDRESS } });
-
-            expect(Logger.info).toHaveBeenCalledWith(
-                `Bonfida API returned 404 for address: ${VALID_ADDRESS}`
-            );
+            expect(Logger.info).toHaveBeenCalledWith(`Bonfida API returned 404 for address: ${VALID_ADDRESS}`);
         });
     });
 
     describe('error handling', () => {
-        it('should return empty domains array on fetch error', async () => {
+        it('should return 200 with empty domains on fetch failure', async () => {
             const error = new Error('Bonfida API down');
             vi.mocked(fetchSnsDomains).mockRejectedValueOnce(error);
 
@@ -99,23 +90,8 @@ describe('GET /api/sns-domains/[address]', () => {
             expect(response.status).toBe(200);
             const data = await response.json();
             expect(data.domains).toEqual([]);
-        });
-
-        it('should log the error on fetch failure', async () => {
-            const error = new Error('Bonfida API down');
-            vi.mocked(fetchSnsDomains).mockRejectedValueOnce(error);
-
-            await GET(mockRequest, { params: { address: VALID_ADDRESS } });
-
-            expect(Logger.error).toHaveBeenCalledWith(error, `Failed to fetch SNS domains for ${VALID_ADDRESS}`);
-        });
-
-        it('should not cache error responses', async () => {
-            vi.mocked(fetchSnsDomains).mockRejectedValueOnce(new Error('fail'));
-
-            const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
-
             expect(response.headers.get('Cache-Control')).toBe('no-store');
+            expect(Logger.error).toHaveBeenCalledWith(error, `Failed to fetch SNS domains for ${VALID_ADDRESS}`);
         });
     });
 });
