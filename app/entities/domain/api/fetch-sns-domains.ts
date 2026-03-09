@@ -1,13 +1,16 @@
 import { getHashedName, getNameAccountKey } from '@bonfida/spl-name-service';
 import fetch from 'node-fetch';
+import { array, is, record, string, unknown } from 'superstruct';
 
 import type { DomainInfo } from '../model/types';
 import { SOL_TLD_AUTHORITY } from './constants';
 
 const BONFIDA_API = 'https://sns-api.bonfida.com/v2/user/domains';
 
-export async function fetchSnsDomains(address: string): Promise<DomainInfo[]> {
+export async function fetchSnsDomains(address: string): Promise<DomainInfo[] | undefined> {
     const response = await fetch(`${BONFIDA_API}/${address}`);
+
+    if (response.status === 404) return undefined;
 
     if (!response.ok) {
         throw new Error('Failed to fetch domains from Bonfida API');
@@ -25,10 +28,21 @@ export async function fetchSnsDomains(address: string): Promise<DomainInfo[]> {
     );
 }
 
+const BonfidaResponse = record(string(), unknown());
+const DomainNames = array(string());
+
 function parseBonfidaResponse(data: unknown, address: string): string[] {
-    if (!data || typeof data !== 'object' || !Array.isArray((data as Record<string, unknown>)[address])) {
+    // arrays satisfy record() – exclude explicitly
+    if (!is(data, BonfidaResponse) || Array.isArray(data)) {
         throw new Error('Unexpected Bonfida API response format');
     }
-    const entries = (data as Record<string, unknown>)[address] as unknown[];
-    return entries.filter((name): name is string => typeof name === 'string');
+
+    const value = data[address];
+    if (value === undefined) return [];
+
+    if (!is(value, DomainNames)) {
+        throw new Error('Unexpected Bonfida API response format');
+    }
+
+    return value;
 }

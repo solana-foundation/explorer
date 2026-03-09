@@ -20,9 +20,15 @@ export async function GET(_request: Request, { params: { address } }: Params) {
 
     try {
         const domains = await fetchSnsDomains(address);
+
+        if (!domains) {
+            Logger.info(`Bonfida API returned 404 for address: ${address}`);
+            return NextResponse.json({ domains: [] }, { headers: { 'Cache-Control': 'no-store' }, status: 404 });
+        }
+
         return NextResponse.json({ domains }, { headers: CACHE_HEADERS });
     } catch (error) {
         Logger.error(error, `Failed to fetch SNS domains for ${address}`);
-        return NextResponse.json({ domains: [] }, { headers: { 'Cache-Control': 'no-store' } });
+        return NextResponse.json({ domains: [] }, { headers: { 'Cache-Control': 'no-store' }, status: 500 });
     }
 }

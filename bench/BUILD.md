@@ -5,7 +5,7 @@
 | Dynamic | `/address/[address]` | 14.9 kB | 943 kB |
 | Dynamic | `/address/[address]/anchor-account` | 6.22 kB | 1 MB |
 | Dynamic | `/address/[address]/anchor-program` | 3.23 kB | 890 kB |
-| Dynamic | `/address/[address]/attestation` | 7.11 kB | 980 kB |
+| Dynamic | `/address/[address]/attestation` | 7.12 kB | 980 kB |
 | Dynamic | `/address/[address]/attributes` | 2.96 kB | 934 kB |
 | Dynamic | `/address/[address]/blockhashes` | 2.35 kB | 933 kB |
 | Dynamic | `/address/[address]/compression` | 5.28 kB | 962 kB |

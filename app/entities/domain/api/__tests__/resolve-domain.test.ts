@@ -1,11 +1,16 @@
+import { getDomainKey } from '@onsol/tldparser';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { resolveDomain } from '../resolve-domain';
 
-vi.mock('@utils/logger', () => ({
-    default: { error: vi.fn() },
-}));
+vi.mock('@onsol/tldparser', async importOriginal => {
+    const actual = await importOriginal<typeof import('@onsol/tldparser')>();
+    return {
+        ...actual,
+        getDomainKey: vi.fn().mockImplementation(actual.getDomainKey),
+    };
+});
 
 const KNOWN_OWNER = new PublicKey('86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdRrbukszb');
 const NAME_SERVICE_PROGRAM = new PublicKey('namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX');
@@ -16,7 +21,7 @@ describe('resolveDomain', () => {
     });
 
     describe('SNS domains (.sol)', () => {
-        it('resolves a .sol domain when account exists', async () => {
+        it('should resolve a .sol domain when account exists', async () => {
             const connection = mockConnection(createSnsAccountData(KNOWN_OWNER));
 
             const result = await resolveDomain('test.sol', connection);
@@ -26,7 +31,7 @@ describe('resolveDomain', () => {
             expect(result?.address).toBeTruthy();
         });
 
-        it('returns null when account does not exist', async () => {
+        it('should return null when account does not exist', async () => {
             const connection = mockConnection(null);
 
             const result = await resolveDomain('nonexistent.sol', connection);
@@ -34,7 +39,16 @@ describe('resolveDomain', () => {
             expect(result).toBeNull();
         });
 
-        it('strips .sol suffix before hashing', async () => {
+        it('should return null when no account info exists for SNS domain', async () => {
+            const connection = mockConnection(null);
+
+            const result = await resolveDomain('nonexistent.sol', connection);
+
+            expect(result).toBeNull();
+            expect(connection.getAccountInfo).toHaveBeenCalledTimes(1);
+        });
+
+        it('should strip .sol suffix before hashing', async () => {
             const connection = mockConnection(createSnsAccountData(KNOWN_OWNER));
 
             const result1 = await resolveDomain('alice.sol', connection);
@@ -43,10 +57,17 @@ describe('resolveDomain', () => {
             // Different domain names should derive different addresses
             expect(result1?.address).not.toBe(result2?.address);
         });
+
+        it('should throw when getAccountInfo rejects for SNS domain', async () => {
+            const connection = mockConnection(null);
+            vi.mocked(connection.getAccountInfo).mockRejectedValueOnce(new Error('RPC failure'));
+
+            await expect(resolveDomain('test.sol', connection)).rejects.toThrow('RPC failure');
+        });
     });
 
     describe('ANS domains (non-.sol)', () => {
-        it('resolves an ANS domain when account exists', async () => {
+        it('should resolve an ANS domain when account exists', async () => {
             const connection = mockConnection(createAnsAccountData(KNOWN_OWNER));
 
             const result = await resolveDomain('test.bonk', connection);
@@ -56,7 +77,7 @@ describe('resolveDomain', () => {
             expect(result?.address).toBeTruthy();
         });
 
-        it('returns null when account does not exist', async () => {
+        it('should return null when account does not exist', async () => {
             const connection = mockConnection(null);
 
             const result = await resolveDomain('nonexistent.bonk', connection);
@@ -64,7 +85,30 @@ describe('resolveDomain', () => {
             expect(result).toBeNull();
         });
 
-        it('lowercases the domain before lookup', async () => {
+        it('should return null when no account info exists for ANS domain', async () => {
+            const MOCK_PUBKEY = PublicKey.default;
+            vi.mocked(getDomainKey).mockResolvedValueOnce({
+                hashed: Buffer.alloc(32),
+                isSub: false,
+                parent: PublicKey.default,
+                pubkey: MOCK_PUBKEY,
+            });
+            const connection = mockConnection(null);
+
+            const result = await resolveDomain('test.co', connection);
+
+            expect(result).toBeNull();
+            expect(connection.getAccountInfo).toHaveBeenCalledTimes(1);
+        });
+
+        it('should throw when getDomainKey rejects for ANS domain', async () => {
+            vi.mocked(getDomainKey).mockRejectedValueOnce(new Error('ANS lookup failed'));
+            const connection = mockConnection(null);
+
+            await expect(resolveDomain('test.bonk', connection)).rejects.toThrow('ANS lookup failed');
+        });
+
+        it('should lowercase the domain before lookup', async () => {
             const upper = mockConnection(createAnsAccountData(KNOWN_OWNER));
             const lower = mockConnection(createAnsAccountData(KNOWN_OWNER));
 
@@ -76,7 +120,7 @@ describe('resolveDomain', () => {
     });
 
     describe('routing', () => {
-        it('routes .sol to SNS and non-.sol to ANS', async () => {
+        it('should route .sol to SNS and non-.sol to ANS', async () => {
             const snsConn = mockConnection(createSnsAccountData(KNOWN_OWNER));
             const ansConn = mockConnection(createAnsAccountData(KNOWN_OWNER));
 
