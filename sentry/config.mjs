@@ -68,9 +68,6 @@ export function createSentryBuildConfig() {
         // This will be false in CI (disabled) and true in production (enabled)
         telemetry: !telemetryDisabled,
 
-        // Upload a larger set of source maps for prettier stack traces (increases build time)
-        widenClientFileUpload: true,
-
         // Webpack plugin options
         webpack: {
             // eslint-disable-line sort-keys-fix/sort-keys-fix
@@ -81,5 +78,8 @@ export function createSentryBuildConfig() {
                 removeDebugLogging: true,
             },
         },
+
+        // Upload a larger set of source maps for prettier stack traces (increases build time)
+        widenClientFileUpload: true,
     };
 }
