@@ -1,4 +1,5 @@
 import { getHashedName, getNameAccountKey } from '@bonfida/spl-name-service';
+import fetch from 'node-fetch';
 
 import type { DomainInfo } from '../model/types';
 import { SOL_TLD_AUTHORITY } from './constants';
