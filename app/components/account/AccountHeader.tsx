@@ -43,7 +43,7 @@ export function AccountHeader({
     const isNativeProgram = Boolean(account?.executable);
 
     const fallback = (
-        <div className="e-flex e-flex-col">
+        <div className="e-flex e-flex-col e-justify-center e-gap-1 md:e-min-h-[69px]">
             <h6 className="header-pretitle">Details</h6>
             <h2 className="header-title">Account</h2>
         </div>
@@ -81,7 +81,7 @@ export function AccountHeader({
         return (
             <ErrorBoundary fallback={fallback}>
                 <Suspense fallback={fallback}>
-                    <CompressedNftAccountHeader account={account} />
+                    <CompressedNftAccountHeader account={account} fallback={fallback} />
                 </Suspense>
             </ErrorBoundary>
         );

@@ -45,6 +45,7 @@ export default defineConfig({
             '@providers': path.resolve(__dirname, './app/providers'),
             '@shared': path.resolve(__dirname, './app/components/shared'),
             '@utils': path.resolve(__dirname, './app/utils'),
+            '@storybook-config': path.resolve(__dirname, './.storybook'),
             '@validators': path.resolve(__dirname, './app/validators'),
         },
         conditions: ['browser', 'default'],

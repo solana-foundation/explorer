@@ -1,8 +1,8 @@
-import { getHashedName, getNameAccountKey, getNameOwner } from '@bonfida/spl-name-service';
-import { getDomainKey as getANSDomainKey, getNameOwner as getANSNameOwner } from '@onsol/tldparser';
+import { getHashedName, getNameAccountKey, NameRegistryState } from '@bonfida/spl-name-service';
+import { getDomainKey as getANSDomainKey, NameRecordHeader } from '@onsol/tldparser';
 import { Connection } from '@solana/web3.js';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
-import Logger from '@utils/logger';
+import { deserializeUnchecked } from 'borsh';
 
 import { SOL_TLD_AUTHORITY } from './constants';
 
@@ -21,34 +21,24 @@ export async function resolveDomain(
 }
 
 async function resolveSnsDomain(domain: string, connection: Connection): Promise<ResolvedDomainInfo> {
-    try {
-        const hashedName = await getHashedName(domain.slice(0, -4)); // remove .sol
-        const nameKey = await getNameAccountKey(hashedName, undefined, SOL_TLD_AUTHORITY);
-        const registry = await getNameOwner(connection, nameKey);
-        return registry && registry.registry.owner
-            ? {
-                  address: nameKey.toString(),
-                  owner: registry.registry.owner.toString(),
-              }
-            : null;
-    } catch (e) {
-        Logger.error(e, `Failed to resolve SNS domain: ${domain}`);
-        return null;
-    }
+    const hashedName = await getHashedName(domain.slice(0, -4)); // remove .sol
+    const nameKey = await getNameAccountKey(hashedName, undefined, SOL_TLD_AUTHORITY);
+    const accountInfo = await connection.getAccountInfo(nameKey);
+    if (accountInfo === null) return null;
+
+    const registry = deserializeUnchecked(NameRegistryState.schema, NameRegistryState, accountInfo.data);
+    return registry.owner ? { address: nameKey.toString(), owner: registry.owner.toString() } : null;
 }
 
 async function resolveAnsDomain(domainTld: string, connection: Connection): Promise<ResolvedDomainInfo> {
-    try {
-        const derivedDomainKey = await getANSDomainKey(domainTld.toLowerCase());
-        const owner = await getANSNameOwner(connection, derivedDomainKey.pubkey);
-        return owner
-            ? {
-                  address: derivedDomainKey.pubkey.toString(),
-                  owner: owner.toString(),
-              }
-            : null;
-    } catch (e) {
-        Logger.error(e, `Failed to resolve ANS domain: ${domainTld}`);
-        return null;
-    }
+    const derivedDomainKey = await getANSDomainKey(domainTld.toLowerCase());
+    const accountInfo = await connection.getAccountInfo(derivedDomainKey.pubkey);
+    if (accountInfo === null) return null;
+
+    const nameRecord = NameRecordHeader.fromAccountInfo(accountInfo);
+    if (!nameRecord.isValid) return null;
+
+    return nameRecord.owner
+        ? { address: derivedDomainKey.pubkey.toString(), owner: nameRecord.owner.toString() }
+        : null;
 }
