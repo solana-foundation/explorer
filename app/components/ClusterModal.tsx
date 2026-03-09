@@ -1,6 +1,11 @@
 'use client';
 
-import { addSavedClusterAtom, removeSavedClusterAtom, type SavedCluster, savedClustersAtom } from '@features/custom-cluster';
+import {
+    addSavedClusterAtom,
+    removeSavedClusterAtom,
+    type SavedCluster,
+    savedClustersAtom,
+} from '@features/custom-cluster';
 import { useCluster, useClusterModal, useUpdateCustomUrl } from '@providers/cluster';
 import { useDebounceCallback } from '@react-hook/debounce';
 import { Cluster, clusterName, CLUSTERS, clusterSlug, ClusterStatus, DEFAULT_CLUSTER } from '@utils/cluster';
@@ -206,10 +211,7 @@ function SavedClusterItem({
 
     return (
         <div className="position-relative col-12 mb-3" data-testid={`saved-cluster-${cluster.name}`}>
-            <Link
-                className={cn(clusterButtonVariants({ active: isActive, status }), 'text-center')}
-                href={clusterUrl}
-            >
+            <Link className={cn(clusterButtonVariants({ active: isActive, status }), 'text-center')} href={clusterUrl}>
                 {cluster.name}
             </Link>
             <button
@@ -228,13 +230,7 @@ function SavedClusterItem({
     );
 }
 
-function SavedClustersSection({
-    status,
-    savedClusters,
-}: {
-    status: ClusterStatus;
-    savedClusters: SavedCluster[];
-}) {
+function SavedClustersSection({ status, savedClusters }: { status: ClusterStatus; savedClusters: SavedCluster[] }) {
     const { customUrl, cluster } = useCluster();
     const removeSavedCluster = useSetAtom(removeSavedClusterAtom);
     const router = useRouter();
@@ -278,12 +274,7 @@ function ClusterToggle() {
                 const active = net === cluster;
                 if (net === Cluster.Custom)
                     return (
-                        <CustomClusterInput
-                            key={index}
-                            status={status}
-                            active={active}
-                            savedClusters={savedClusters}
-                        />
+                        <CustomClusterInput key={index} status={status} active={active} savedClusters={savedClusters} />
                     );
 
                 const nextSearchParams = new URLSearchParams(searchParams?.toString());
