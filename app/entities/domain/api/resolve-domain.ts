@@ -1,8 +1,9 @@
-import { getHashedName, getNameAccountKey } from '@bonfida/spl-name-service';
+import { getHashedName, getNameAccountKey, NameRegistryState } from '@bonfida/spl-name-service';
 import { getDomainKey as getANSDomainKey, NameRecordHeader } from '@onsol/tldparser';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection } from '@solana/web3.js';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
 import Logger from '@utils/logger';
+import { deserializeUnchecked } from 'borsh';
 
 import { SOL_TLD_AUTHORITY } from './constants';
 
@@ -27,9 +28,10 @@ async function resolveSnsDomain(domain: string, connection: Connection): Promise
         const accountInfo = await connection.getAccountInfo(nameKey);
         if (accountInfo === null) return null;
 
-        // SNS NameRegistryState header: parentName(32) | owner(32) | class(32)
-        const owner = new PublicKey(accountInfo.data.subarray(32, 64));
-        return { address: nameKey.toString(), owner: owner.toString() };
+        const registry = deserializeUnchecked(NameRegistryState.schema, NameRegistryState, accountInfo.data);
+        return registry.owner
+            ? { address: nameKey.toString(), owner: registry.owner.toString() }
+            : null;
     } catch (e) {
         Logger.error(e, `Failed to resolve SNS domain: ${domain}`);
         return null;
