@@ -1,7 +1,8 @@
 import { isEnvEnabled } from '@utils/env';
-import { Logger } from '@/app/shared/lib/logger';
 import { checkBotId } from 'botid/server';
-import { NextResponse, type NextRequest } from 'next/server';
+import { type NextRequest,NextResponse } from 'next/server';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 const BOT_RESPONSE = { body: { error: 'Access denied: request identified as automated bot' }, status: 401 } as const;
 
@@ -26,11 +27,11 @@ export async function middleware(request: NextRequest) {
     });
 
     Logger.info('[middleware] BotId verification', {
-        pathname,
+        bypassed: verification.bypassed,
         isBot: verification.isBot,
         isHuman: verification.isHuman,
         isVerifiedBot: verification.isVerifiedBot,
-        bypassed: verification.bypassed,
+        pathname,
     });
 
     // Block bots only when challenge mode is enabled
@@ -53,4 +54,4 @@ export const config = {
 };
 
 // BotIdClient protected routes - only API routes need protection
-export const botIdProtectedRoutes: { path: string; method: string }[] = [{ path: '/api/*', method: '*' }];
+export const botIdProtectedRoutes: { path: string; method: string }[] = [{ method: '*', path: '/api/*' }];
