@@ -1,4 +1,6 @@
+import { getDomainKey, getNameOwner } from '@onsol/tldparser';
 import { Connection, PublicKey } from '@solana/web3.js';
+import Logger from '@utils/logger';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { resolveDomain } from '../resolve-domain';
@@ -6,6 +8,15 @@ import { resolveDomain } from '../resolve-domain';
 vi.mock('@utils/logger', () => ({
     default: { error: vi.fn() },
 }));
+
+vi.mock('@onsol/tldparser', async importOriginal => {
+    const actual = await importOriginal<typeof import('@onsol/tldparser')>();
+    return {
+        ...actual,
+        getDomainKey: vi.fn().mockImplementation(actual.getDomainKey),
+        getNameOwner: vi.fn().mockImplementation(actual.getNameOwner),
+    };
+});
 
 const KNOWN_OWNER = new PublicKey('86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdRrbukszb');
 const NAME_SERVICE_PROGRAM = new PublicKey('namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX');
@@ -62,6 +73,23 @@ describe('resolveDomain', () => {
             const result = await resolveDomain('nonexistent.bonk', connection);
 
             expect(result).toBeNull();
+        });
+
+        it('should return null without error when no account info exists for ANS domain', async () => {
+            const MOCK_PUBKEY = PublicKey.default;
+            vi.mocked(getDomainKey).mockResolvedValueOnce({
+                hashed: Buffer.alloc(32),
+                isSub: false,
+                parent: PublicKey.default,
+                pubkey: MOCK_PUBKEY,
+            });
+            const connection = mockConnection(null);
+
+            const result = await resolveDomain('test.co', connection);
+
+            expect(result).toBeNull();
+            expect(Logger.error).not.toHaveBeenCalled();
+            expect(vi.mocked(getNameOwner)).not.toHaveBeenCalled();
         });
 
         it('lowercases the domain before lookup', async () => {

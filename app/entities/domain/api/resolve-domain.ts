@@ -40,6 +40,9 @@ async function resolveSnsDomain(domain: string, connection: Connection): Promise
 async function resolveAnsDomain(domainTld: string, connection: Connection): Promise<ResolvedDomainInfo> {
     try {
         const derivedDomainKey = await getANSDomainKey(domainTld.toLowerCase());
+        const accountInfo = await connection.getAccountInfo(derivedDomainKey.pubkey);
+        if (accountInfo === null) return null;
+
         const owner = await getANSNameOwner(connection, derivedDomainKey.pubkey);
         return owner
             ? {
