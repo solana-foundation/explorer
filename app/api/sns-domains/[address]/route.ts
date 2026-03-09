@@ -22,7 +22,7 @@ export async function GET(_request: Request, { params: { address } }: Params) {
         const domains = await fetchSnsDomains(address);
 
         if (!domains) {
-            Logger.info(`Bonfida response does not contain address: ${address}`);
+            Logger.info(`Bonfida API returned 404 for address: ${address}`);
             return NextResponse.json({ domains: [] }, { headers: { 'Cache-Control': 'no-store' }, status: 404 });
         }
 

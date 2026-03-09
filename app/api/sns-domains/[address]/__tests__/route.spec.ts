@@ -66,8 +66,8 @@ describe('GET /api/sns-domains/[address]', () => {
         });
     });
 
-    describe('missing address in Bonfida response', () => {
-        it('should return 404 with empty domains without caching when address is not found', async () => {
+    describe('Bonfida 404', () => {
+        it('should return 404 with empty domains without caching when Bonfida returns 404', async () => {
             vi.mocked(fetchSnsDomains).mockResolvedValueOnce(undefined);
 
             const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
@@ -78,13 +78,13 @@ describe('GET /api/sns-domains/[address]', () => {
             expect(response.headers.get('Cache-Control')).toBe('no-store');
         });
 
-        it('should log info when address is not found in Bonfida response', async () => {
+        it('should log info when Bonfida returns 404', async () => {
             vi.mocked(fetchSnsDomains).mockResolvedValueOnce(undefined);
 
             await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
             expect(Logger.info).toHaveBeenCalledWith(
-                `Bonfida response does not contain address: ${VALID_ADDRESS}`
+                `Bonfida API returned 404 for address: ${VALID_ADDRESS}`
             );
         });
     });
