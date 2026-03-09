@@ -1,6 +1,6 @@
 import { isEnvEnabled } from '@utils/env';
 import { checkBotId } from 'botid/server';
-import { type NextRequest,NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
 
