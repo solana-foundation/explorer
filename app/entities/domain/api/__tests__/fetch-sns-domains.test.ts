@@ -21,7 +21,7 @@ describe('fetchSnsDomains', () => {
         vi.clearAllMocks();
     });
 
-    it('returns domains from a valid Bonfida response', async () => {
+    it('should return domains from a valid Bonfida response', async () => {
         mockFetch({ [USER_ADDRESS]: ['alice', 'bob'] });
 
         const result = await fetchSnsDomains(USER_ADDRESS);
@@ -31,44 +31,48 @@ describe('fetchSnsDomains', () => {
         expect(result[1].name).toBe('bob.sol');
     });
 
-    it('throws when Bonfida API returns non-200', async () => {
+    it('should throw when Bonfida API returns non-200', async () => {
         mockFetch(null, { ok: false, status: 500 });
 
         await expect(fetchSnsDomains(USER_ADDRESS)).rejects.toThrow('Failed to fetch domains from Bonfida API');
     });
 
-    it('throws when response is not an object', async () => {
+    it('should throw when response is not an object', async () => {
         mockFetch('not-json-object');
 
         await expect(fetchSnsDomains(USER_ADDRESS)).rejects.toThrow('Unexpected Bonfida API response format');
     });
 
-    it('throws when response is null', async () => {
+    it('should throw when response is null', async () => {
         mockFetch(null);
 
         await expect(fetchSnsDomains(USER_ADDRESS)).rejects.toThrow('Unexpected Bonfida API response format');
     });
 
-    it('throws when address key is missing', async () => {
-        mockFetch({ someOtherKey: ['alice'] });
+    it('should throw when address key has non-string array values', async () => {
+        mockFetch({ [USER_ADDRESS]: [42, null] });
 
         await expect(fetchSnsDomains(USER_ADDRESS)).rejects.toThrow('Unexpected Bonfida API response format');
     });
 
-    it('throws when address key is not an array', async () => {
+    it('should throw when address value is not an array', async () => {
         mockFetch({ [USER_ADDRESS]: 'not-an-array' });
 
         await expect(fetchSnsDomains(USER_ADDRESS)).rejects.toThrow('Unexpected Bonfida API response format');
     });
 
-    it('filters out non-string entries in the domain list', async () => {
-        mockFetch({ [USER_ADDRESS]: ['alice', 42, null, 'bob', undefined] });
+    it('should return empty array when address key is missing (empty object)', async () => {
+        mockFetch({});
 
         const result = await fetchSnsDomains(USER_ADDRESS);
+        expect(result).toEqual([]);
+    });
 
-        expect(result).toHaveLength(2);
-        expect(result[0].name).toBe('alice.sol');
-        expect(result[1].name).toBe('bob.sol');
+    it('should return empty array when another address has domains', async () => {
+        mockFetch({ someOtherAddress: ['alice'] });
+
+        const result = await fetchSnsDomains(USER_ADDRESS);
+        expect(result).toEqual([]);
     });
 });
 
