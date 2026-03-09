@@ -4,12 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { Domain } from '../domain-struct';
 
 describe('Domain struct', () => {
-    it.each([
-        ['test.sol'],
-        ['sub.domain.sol'],
-        ['a.b'],
-        ['UPPER.SOL'],
-    ])('should accept valid domain: %s', (input) => {
+    it.each([['test.sol'], ['sub.domain.sol'], ['a.b'], ['UPPER.SOL']])('should accept valid domain: %s', input => {
         expect(is(input, Domain)).toBe(true);
     });
 
@@ -26,7 +21,7 @@ describe('Domain struct', () => {
         ['...', 'only dots'],
         ['test.sol.', 'trailing dot with TLD'],
         ['1.2.3.4', 'IPv4 address'],
-    ])('should reject invalid input: %s (%s)', (input) => {
+    ])('should reject invalid input: %s (%s)', input => {
         expect(is(input, Domain)).toBe(false);
     });
 });
