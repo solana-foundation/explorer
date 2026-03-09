@@ -32,6 +32,7 @@ const BonfidaResponse = record(string(), unknown());
 const DomainNames = array(string());
 
 function parseBonfidaResponse(data: unknown, address: string): string[] {
+    // arrays satisfy record() – exclude explicitly
     if (!is(data, BonfidaResponse) || Array.isArray(data)) {
         throw new Error('Unexpected Bonfida API response format');
     }
