@@ -61,18 +61,37 @@ describe('fetchSnsDomains', () => {
         await expect(fetchSnsDomains(USER_ADDRESS)).rejects.toThrow('Unexpected Bonfida API response format');
     });
 
-    it('should return empty array when address key is missing (empty object)', async () => {
+    it('should return undefined when address key is missing (empty object)', async () => {
         mockFetch({});
+
+        const result = await fetchSnsDomains(USER_ADDRESS);
+        expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when another address has domains', async () => {
+        mockFetch({ someOtherAddress: ['alice'] });
+
+        const result = await fetchSnsDomains(USER_ADDRESS);
+        expect(result).toBeUndefined();
+    });
+
+    it('should return empty array when address key maps to empty array', async () => {
+        mockFetch({ [USER_ADDRESS]: [] });
 
         const result = await fetchSnsDomains(USER_ADDRESS);
         expect(result).toEqual([]);
     });
 
-    it('should return empty array when another address has domains', async () => {
-        mockFetch({ someOtherAddress: ['alice'] });
+    it('should throw when array contains mix of strings and non-strings', async () => {
+        mockFetch({ [USER_ADDRESS]: ['alice', 42, 'bob'] });
 
-        const result = await fetchSnsDomains(USER_ADDRESS);
-        expect(result).toEqual([]);
+        await expect(fetchSnsDomains(USER_ADDRESS)).rejects.toThrow('Unexpected Bonfida API response format');
+    });
+
+    it('should throw when response contains non-conforming values for other keys', async () => {
+        mockFetch({ [USER_ADDRESS]: ['alice'], stats: 'not-an-array' });
+
+        await expect(fetchSnsDomains(USER_ADDRESS)).rejects.toThrow('Unexpected Bonfida API response format');
     });
 });
 

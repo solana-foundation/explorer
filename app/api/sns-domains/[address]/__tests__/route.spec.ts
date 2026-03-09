@@ -11,6 +11,7 @@ vi.mock('@entities/domain/api/fetch-sns-domains', () => ({
 vi.mock('@utils/logger', () => ({
     default: {
         error: vi.fn(),
+        info: vi.fn(),
     },
 }));
 
@@ -62,6 +63,29 @@ describe('GET /api/sns-domains/[address]', () => {
             const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
             expect(response.headers.get('Cache-Control')).toBe('public, s-maxage=43200, stale-while-revalidate=3600');
+        });
+    });
+
+    describe('missing address in Bonfida response', () => {
+        it('should return 404 with empty domains without caching when address is not found', async () => {
+            vi.mocked(fetchSnsDomains).mockResolvedValueOnce(undefined);
+
+            const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
+
+            expect(response.status).toBe(404);
+            const data = await response.json();
+            expect(data.domains).toEqual([]);
+            expect(response.headers.get('Cache-Control')).toBe('no-store');
+        });
+
+        it('should log info when address is not found in Bonfida response', async () => {
+            vi.mocked(fetchSnsDomains).mockResolvedValueOnce(undefined);
+
+            await GET(mockRequest, { params: { address: VALID_ADDRESS } });
+
+            expect(Logger.info).toHaveBeenCalledWith(
+                `Bonfida response does not contain address: ${VALID_ADDRESS}`
+            );
         });
     });
 

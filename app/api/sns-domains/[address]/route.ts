@@ -20,6 +20,12 @@ export async function GET(_request: Request, { params: { address } }: Params) {
 
     try {
         const domains = await fetchSnsDomains(address);
+
+        if (!domains) {
+            Logger.info(`Bonfida response does not contain address: ${address}`);
+            return NextResponse.json({ domains: [] }, { headers: { 'Cache-Control': 'no-store' }, status: 404 });
+        }
+
         return NextResponse.json({ domains }, { headers: CACHE_HEADERS });
     } catch (error) {
         Logger.error(error, `Failed to fetch SNS domains for ${address}`);

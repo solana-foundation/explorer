@@ -27,7 +27,7 @@ describe('resolveDomain', () => {
     });
 
     describe('SNS domains (.sol)', () => {
-        it('resolves a .sol domain when account exists', async () => {
+        it('should resolve a .sol domain when account exists', async () => {
             const connection = mockConnection(createSnsAccountData(KNOWN_OWNER));
 
             const result = await resolveDomain('test.sol', connection);
@@ -37,7 +37,7 @@ describe('resolveDomain', () => {
             expect(result?.address).toBeTruthy();
         });
 
-        it('returns null when account does not exist', async () => {
+        it('should return null when account does not exist', async () => {
             const connection = mockConnection(null);
 
             const result = await resolveDomain('nonexistent.sol', connection);
@@ -45,7 +45,7 @@ describe('resolveDomain', () => {
             expect(result).toBeNull();
         });
 
-        it('strips .sol suffix before hashing', async () => {
+        it('should strip .sol suffix before hashing', async () => {
             const connection = mockConnection(createSnsAccountData(KNOWN_OWNER));
 
             const result1 = await resolveDomain('alice.sol', connection);
@@ -57,7 +57,7 @@ describe('resolveDomain', () => {
     });
 
     describe('ANS domains (non-.sol)', () => {
-        it('resolves an ANS domain when account exists', async () => {
+        it('should resolve an ANS domain when account exists', async () => {
             const connection = mockConnection(createAnsAccountData(KNOWN_OWNER));
 
             const result = await resolveDomain('test.bonk', connection);
@@ -67,7 +67,7 @@ describe('resolveDomain', () => {
             expect(result?.address).toBeTruthy();
         });
 
-        it('returns null when account does not exist', async () => {
+        it('should return null when account does not exist', async () => {
             const connection = mockConnection(null);
 
             const result = await resolveDomain('nonexistent.bonk', connection);
@@ -92,7 +92,20 @@ describe('resolveDomain', () => {
             expect(vi.mocked(getNameOwner)).not.toHaveBeenCalled();
         });
 
-        it('lowercases the domain before lookup', async () => {
+        it('should return null and log error when getDomainKey rejects for ANS domain', async () => {
+            vi.mocked(getDomainKey).mockRejectedValueOnce(new Error('ANS lookup failed'));
+            const connection = mockConnection(null);
+
+            const result = await resolveDomain('test.bonk', connection);
+
+            expect(result).toBeNull();
+            expect(Logger.error).toHaveBeenCalledWith(
+                expect.any(Error),
+                'Failed to resolve ANS domain: test.bonk'
+            );
+        });
+
+        it('should lowercase the domain before lookup', async () => {
             const upper = mockConnection(createAnsAccountData(KNOWN_OWNER));
             const lower = mockConnection(createAnsAccountData(KNOWN_OWNER));
 
@@ -104,7 +117,7 @@ describe('resolveDomain', () => {
     });
 
     describe('routing', () => {
-        it('routes .sol to SNS and non-.sol to ANS', async () => {
+        it('should route .sol to SNS and non-.sol to ANS', async () => {
             const snsConn = mockConnection(createSnsAccountData(KNOWN_OWNER));
             const ansConn = mockConnection(createAnsAccountData(KNOWN_OWNER));
 

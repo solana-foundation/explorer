@@ -24,6 +24,9 @@ async function resolveSnsDomain(domain: string, connection: Connection): Promise
     try {
         const hashedName = await getHashedName(domain.slice(0, -4)); // remove .sol
         const nameKey = await getNameAccountKey(hashedName, undefined, SOL_TLD_AUTHORITY);
+        const accountInfo = await connection.getAccountInfo(nameKey);
+        if (accountInfo === null) return null;
+
         const registry = await getNameOwner(connection, nameKey);
         return registry && registry.registry.owner
             ? {
