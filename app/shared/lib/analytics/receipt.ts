@@ -5,6 +5,7 @@ export enum ReceiptEvent {
     NoReceipt = 'rcpt_no_receipt',
     NoReceiptAutoRedirect = 'rcpt_no_receipt_auto_redirect',
     ViewTxClicked = 'rcpt_view_tx_clicked',
+    ShareCopyLink = 'rcpt_share_copy_link',
     Viewed = 'rcpt_viewed',
 }
 
@@ -24,6 +25,10 @@ export const receiptAnalytics = {
 
     trackNoReceiptAutoRedirect(signature: string): void {
         trackEvent(ReceiptEvent.NoReceiptAutoRedirect, { signature });
+    },
+
+    trackShareCopyLink(signature: string): void {
+        trackEvent(ReceiptEvent.ShareCopyLink, { signature });
     },
 
     trackViewTxClicked(signature: string): void {
