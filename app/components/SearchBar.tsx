@@ -1,5 +1,6 @@
 'use client';
 
+import { Domain } from '@entities/domain/lib/domain-struct';
 import { useHotkeys } from '@mantine/hooks';
 import { useCluster } from '@providers/cluster';
 import { VersionedMessage } from '@solana/web3.js';
@@ -11,6 +12,7 @@ import React, { MouseEventHandler, TouchEventHandler, useCallback, useId, useMem
 import { Search, X } from 'react-feather';
 import { ActionMeta, components, ControlProps, InputActionMeta, SelectInstance } from 'react-select';
 import AsyncSelect from 'react-select/async';
+import { is } from 'superstruct';
 
 import FEATURES from '@/app/utils/feature-gate/featureGates.json';
 
@@ -26,10 +28,6 @@ interface SearchOptions {
     label: string;
     options: SearchElement[];
 }
-
-const hasDomainSyntax = (value: string) => {
-    return value.length > 3 && value.split('.').length === 2;
-};
 
 const RESET_VALUE = '' as any;
 
@@ -77,7 +75,7 @@ export function SearchBar() {
         const [tokenOptions, domainOptions] = await Promise.allSettled([
             buildTokenOptions(search, cluster),
             // buildFeatureOptions(search),
-            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? buildDomainOptions(search) : [],
+            is(search, Domain) && cluster === Cluster.MainnetBeta ? buildDomainOptions(search) : [],
         ]);
 
         const tokenOptionsAppendable = buildAppendableSearchOptions(tokenOptions, 'token');
