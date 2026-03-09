@@ -72,7 +72,7 @@ describe('GET /api/ans-domains/[address]', () => {
 
             const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
-            expect(response.status).toBe(200);
+            expect(response.status).toBe(500);
             const data = await response.json();
             expect(data.domains).toEqual([]);
         });

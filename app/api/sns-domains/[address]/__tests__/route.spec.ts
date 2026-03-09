@@ -81,13 +81,13 @@ describe('GET /api/sns-domains/[address]', () => {
     });
 
     describe('error handling', () => {
-        it('should return 200 with empty domains on fetch failure', async () => {
+        it('should return 500 with empty domains on fetch failure', async () => {
             const error = new Error('Bonfida API down');
             vi.mocked(fetchSnsDomains).mockRejectedValueOnce(error);
 
             const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
-            expect(response.status).toBe(200);
+            expect(response.status).toBe(500);
             const data = await response.json();
             expect(data.domains).toEqual([]);
             expect(response.headers.get('Cache-Control')).toBe('no-store');
