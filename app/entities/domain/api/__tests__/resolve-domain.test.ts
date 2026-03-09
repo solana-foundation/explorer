@@ -1,4 +1,4 @@
-import { getDomainKey, getNameOwner } from '@onsol/tldparser';
+import { getDomainKey } from '@onsol/tldparser';
 import { Connection, PublicKey } from '@solana/web3.js';
 import Logger from '@utils/logger';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -14,7 +14,6 @@ vi.mock('@onsol/tldparser', async importOriginal => {
     return {
         ...actual,
         getDomainKey: vi.fn().mockImplementation(actual.getDomainKey),
-        getNameOwner: vi.fn().mockImplementation(actual.getNameOwner),
     };
 });
 
@@ -43,6 +42,16 @@ describe('resolveDomain', () => {
             const result = await resolveDomain('nonexistent.sol', connection);
 
             expect(result).toBeNull();
+        });
+
+        it('should return null without error when no account info exists for SNS domain', async () => {
+            const connection = mockConnection(null);
+
+            const result = await resolveDomain('nonexistent.sol', connection);
+
+            expect(result).toBeNull();
+            expect(Logger.error).not.toHaveBeenCalled();
+            expect(connection.getAccountInfo).toHaveBeenCalledTimes(1);
         });
 
         it('should strip .sol suffix before hashing', async () => {
@@ -89,7 +98,7 @@ describe('resolveDomain', () => {
 
             expect(result).toBeNull();
             expect(Logger.error).not.toHaveBeenCalled();
-            expect(vi.mocked(getNameOwner)).not.toHaveBeenCalled();
+            expect(connection.getAccountInfo).toHaveBeenCalledTimes(1);
         });
 
         it('should return null and log error when getDomainKey rejects for ANS domain', async () => {

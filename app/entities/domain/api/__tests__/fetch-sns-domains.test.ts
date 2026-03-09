@@ -27,8 +27,8 @@ describe('fetchSnsDomains', () => {
         const result = await fetchSnsDomains(USER_ADDRESS);
 
         expect(result).toHaveLength(2);
-        expect(result[0].name).toBe('alice.sol');
-        expect(result[1].name).toBe('bob.sol');
+        expect(result?.[0]?.name).toBe('alice.sol');
+        expect(result?.[1]?.name).toBe('bob.sol');
     });
 
     it('should throw when Bonfida API returns non-200', async () => {
@@ -88,10 +88,13 @@ describe('fetchSnsDomains', () => {
         await expect(fetchSnsDomains(USER_ADDRESS)).rejects.toThrow('Unexpected Bonfida API response format');
     });
 
-    it('should throw when response contains non-conforming values for other keys', async () => {
+    it('should ignore non-conforming values for other keys', async () => {
         mockFetch({ [USER_ADDRESS]: ['alice'], stats: 'not-an-array' });
 
-        await expect(fetchSnsDomains(USER_ADDRESS)).rejects.toThrow('Unexpected Bonfida API response format');
+        const result = await fetchSnsDomains(USER_ADDRESS);
+
+        expect(result).toHaveLength(1);
+        expect(result?.[0]?.name).toBe('alice.sol');
     });
 });
 
