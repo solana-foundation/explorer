@@ -1,13 +1,8 @@
 import { getDomainKey } from '@onsol/tldparser';
 import { Connection, PublicKey } from '@solana/web3.js';
-import Logger from '@utils/logger';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { resolveDomain } from '../resolve-domain';
-
-vi.mock('@utils/logger', () => ({
-    default: { error: vi.fn() },
-}));
 
 vi.mock('@onsol/tldparser', async importOriginal => {
     const actual = await importOriginal<typeof import('@onsol/tldparser')>();
@@ -44,13 +39,12 @@ describe('resolveDomain', () => {
             expect(result).toBeNull();
         });
 
-        it('should return null without error when no account info exists for SNS domain', async () => {
+        it('should return null when no account info exists for SNS domain', async () => {
             const connection = mockConnection(null);
 
             const result = await resolveDomain('nonexistent.sol', connection);
 
             expect(result).toBeNull();
-            expect(Logger.error).not.toHaveBeenCalled();
             expect(connection.getAccountInfo).toHaveBeenCalledTimes(1);
         });
 
@@ -62,6 +56,13 @@ describe('resolveDomain', () => {
 
             // Different domain names should derive different addresses
             expect(result1?.address).not.toBe(result2?.address);
+        });
+
+        it('should throw when getAccountInfo rejects for SNS domain', async () => {
+            const connection = mockConnection(null);
+            vi.mocked(connection.getAccountInfo).mockRejectedValueOnce(new Error('RPC failure'));
+
+            await expect(resolveDomain('test.sol', connection)).rejects.toThrow('RPC failure');
         });
     });
 
@@ -84,7 +85,7 @@ describe('resolveDomain', () => {
             expect(result).toBeNull();
         });
 
-        it('should return null without error when no account info exists for ANS domain', async () => {
+        it('should return null when no account info exists for ANS domain', async () => {
             const MOCK_PUBKEY = PublicKey.default;
             vi.mocked(getDomainKey).mockResolvedValueOnce({
                 hashed: Buffer.alloc(32),
@@ -97,21 +98,14 @@ describe('resolveDomain', () => {
             const result = await resolveDomain('test.co', connection);
 
             expect(result).toBeNull();
-            expect(Logger.error).not.toHaveBeenCalled();
             expect(connection.getAccountInfo).toHaveBeenCalledTimes(1);
         });
 
-        it('should return null and log error when getDomainKey rejects for ANS domain', async () => {
+        it('should throw when getDomainKey rejects for ANS domain', async () => {
             vi.mocked(getDomainKey).mockRejectedValueOnce(new Error('ANS lookup failed'));
             const connection = mockConnection(null);
 
-            const result = await resolveDomain('test.bonk', connection);
-
-            expect(result).toBeNull();
-            expect(Logger.error).toHaveBeenCalledWith(
-                expect.any(Error),
-                'Failed to resolve ANS domain: test.bonk'
-            );
+            await expect(resolveDomain('test.bonk', connection)).rejects.toThrow('ANS lookup failed');
         });
 
         it('should lowercase the domain before lookup', async () => {
