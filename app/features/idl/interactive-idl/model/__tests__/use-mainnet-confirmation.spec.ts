@@ -253,7 +253,9 @@ describe('useMainnetConfirmation', () => {
             const mockAction = vi.fn();
             const { result } = renderHook(() => useMainnetConfirmation());
 
+            await act(async () => {
                 await result.current.requireConfirmation(mockAction);
+            });
 
             expect(mockAction).toHaveBeenCalledTimes(1);
             expect(result.current.hasPendingAction).toBe(false);
