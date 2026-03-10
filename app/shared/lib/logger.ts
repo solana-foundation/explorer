@@ -31,12 +31,7 @@ class StraightforwardLogger {
     panic(message: string, context: PanicContext) {
         // Sentry capture is intentionally not gated by isLoggable — panics must
         // always reach error tracking regardless of the console log level.
-        // Libraries and boundary code (try/catch of unknown, promise rejections, fetch
-        // failures) can surface non-Error values — strings, numbers, null, or plain
-        // objects. Sentry groups and tracks real Error instances far better (stack traces,
-        // deduplication), so we wrap non-Error values to preserve that behavior.
-        const error = context.error instanceof Error ? context.error : new Error(String(context.error));
-        captureException(error, context.hint);
+        captureException(resolveError(context.error), context.hint);
         isLoggable(LOG_LEVEL.PANIC) && console.error(...formatArgs(message, context));
     }
     error(message: string, context?: SentryContext) {
@@ -85,6 +80,17 @@ function isLoggable(expectedLevel: LOG_LEVEL) {
 
     // do not log if expected level is greater than current one
     return !isNullish(currentLevel) && Number.isFinite(currentLevel) && expectedLevel <= currentLevel;
+}
+
+/**
+ * Preserve the original error when it's a real Error instance; otherwise
+ * create a sentinel so Sentry still gets a proper stack trace, and log
+ * the raw value at debug level for inspection.
+ */
+function resolveError(value: unknown): Error {
+    if (value instanceof Error) return value;
+    isLoggable(LOG_LEVEL.DEBUG) && console.debug('[resolveError] raw value:', value);
+    return new Error('Unrecognized error');
 }
 
 /**

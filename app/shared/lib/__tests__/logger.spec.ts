@@ -143,16 +143,18 @@ describe('Logger', () => {
             expect(spy).not.toHaveBeenCalled();
         });
 
-        it('should wrap non-Error values before sending to Sentry', () => {
-            vi.stubEnv('NEXT_LOG_LEVEL', '0');
+        it('should send "Unrecognized error" to Sentry for non-Error values and log the raw value at debug level', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '4');
             vi.spyOn(console, 'error').mockImplementation(() => {});
+            const debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
 
             Logger.panic('something broke', { error: 'string error' });
 
             expect(captureException).toHaveBeenCalledWith(
-                expect.objectContaining({ message: 'string error' }),
+                expect.objectContaining({ message: 'Unrecognized error' }),
                 undefined
             );
+            expect(debugSpy).toHaveBeenCalledWith('[resolveError] raw value:', 'string error');
         });
     });
 
@@ -184,4 +186,5 @@ describe('Logger', () => {
             expect(spy).toHaveBeenCalledWith('rate limit hit', { route: '/api' });
         });
     });
+
 });
