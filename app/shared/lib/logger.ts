@@ -38,6 +38,9 @@ class StraightforwardLogger {
         if (context?.sentry) {
             captureMessage(message, 'error');
         }
+        if (context && 'error' in context) {
+            warnIfNotError(context.error);
+        }
         isLoggable(LOG_LEVEL.ERROR) && console.error(...formatArgs(message, context));
     }
     warn(message: string, context?: SentryContext) {
@@ -82,15 +85,20 @@ function isLoggable(expectedLevel: LOG_LEVEL) {
     return !isNullish(currentLevel) && Number.isFinite(currentLevel) && expectedLevel <= currentLevel;
 }
 
+/** Logs a debug warning when the error field is not a real Error instance. */
+function warnIfNotError(value: unknown) {
+    if (value instanceof Error) return;
+    isLoggable(LOG_LEVEL.DEBUG) && console.debug('[Logger] non-Error value in error field:', value);
+}
+
 /**
  * Preserve the original error when it's a real Error instance; otherwise
  * create a sentinel so Sentry still gets a proper stack trace, and log
  * the raw value at debug level for inspection.
  */
 function resolveError(value: unknown): Error {
-    if (value instanceof Error) return value;
-    isLoggable(LOG_LEVEL.DEBUG) && console.debug('[resolveError] raw value:', value);
-    return new Error('Unrecognized error');
+    warnIfNotError(value);
+    return value instanceof Error ? value : new Error('Unrecognized error');
 }
 
 /**
