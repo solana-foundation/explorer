@@ -65,7 +65,8 @@ export const Logger = new StraightforwardLogger();
  * Lower numbers have higher priority (e.g., PANIC=0, ERROR=1, WARN=2, INFO=3, DEBUG=4).
  *
  * @param expectedLevel - The log level of the message to be logged
- * @returns True if the message should be logged, false otherwise. Returns false if NEXT_LOG_LEVEL is not set or invalid.
+ * @returns True if the message should be logged, false otherwise.
+ *          **All logging is suppressed when NEXT_LOG_LEVEL is not set.**
  *
  * @example
  * // With NEXT_LOG_LEVEL=3 (INFO level)
