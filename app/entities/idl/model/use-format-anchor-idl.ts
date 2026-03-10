@@ -300,9 +300,10 @@ export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
         };
 
         if (formattingErrors.length) {
-            formattingErrors.forEach(([err, acc]) =>
-                Logger.panic('[idl] Formatting error', { error: err, hint: { extra: { acc } } })
-            );
+            Logger.warn(`[idl] Formatting errors in ${idl.metadata.name} (${idl.address})`, {
+                accounts: formattingErrors.map(([, acc]) => acc),
+                sentry: true,
+            });
         }
 
         return formattedIdl;
