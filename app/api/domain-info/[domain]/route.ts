@@ -1,9 +1,9 @@
 import { type ResolvedDomainInfo, resolveDomain } from '@entities/domain/api/resolve-domain';
 import { Domain } from '@entities/domain/lib/domain-struct';
-import { Logger } from '@/app/shared/lib/logger';
 import { NextResponse } from 'next/server';
 import { is } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
 
 type Params = {
     params: {
