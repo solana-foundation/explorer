@@ -156,30 +156,30 @@ describe('Logger', () => {
         });
     });
 
-    describe('warn with sentry', () => {
+    describe('error with sentry', () => {
         it('should call captureMessage when sentry flag is true', () => {
-            vi.stubEnv('NEXT_LOG_LEVEL', '2');
-            vi.spyOn(console, 'warn').mockImplementation(() => {});
+            vi.stubEnv('NEXT_LOG_LEVEL', '1');
+            vi.spyOn(console, 'error').mockImplementation(() => {});
 
-            Logger.warn('rate limit hit', { sentry: true });
+            Logger.error('rate limit hit', { sentry: true });
 
-            expect(captureMessage).toHaveBeenCalledWith('rate limit hit', 'warning');
+            expect(captureMessage).toHaveBeenCalledWith('rate limit hit', 'error');
         });
 
         it('should not call captureMessage by default', () => {
-            vi.stubEnv('NEXT_LOG_LEVEL', '2');
-            vi.spyOn(console, 'warn').mockImplementation(() => {});
+            vi.stubEnv('NEXT_LOG_LEVEL', '1');
+            vi.spyOn(console, 'error').mockImplementation(() => {});
 
-            Logger.warn('normal warning');
+            Logger.error('normal error');
 
             expect(captureMessage).not.toHaveBeenCalled();
         });
 
         it('should not leak sentry flag into console output', () => {
-            vi.stubEnv('NEXT_LOG_LEVEL', '2');
-            const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            vi.stubEnv('NEXT_LOG_LEVEL', '1');
+            const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-            Logger.warn('rate limit hit', { route: '/api', sentry: true });
+            Logger.error('rate limit hit', { route: '/api', sentry: true });
 
             expect(spy).toHaveBeenCalledWith('rate limit hit', { route: '/api' });
         });

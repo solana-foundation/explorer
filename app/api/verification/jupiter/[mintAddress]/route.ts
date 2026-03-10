@@ -43,7 +43,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
 
         if (!response.ok) {
             if (response.status === 429) {
-                Logger.warn('[api:jupiter] Rate limit exceeded', { sentry: true });
+                Logger.error('[api:jupiter] Rate limit exceeded', { sentry: true });
             } else {
                 Logger.panic('[api:jupiter] API error', { error: new Error(`Jupiter API error: ${response.status}`) });
             }

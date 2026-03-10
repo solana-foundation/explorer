@@ -44,7 +44,7 @@ export async function GET(_request: Request, { params: { coinId } }: Params) {
 
         if (!response.ok) {
             if (response.status === 429) {
-                Logger.warn('[api:coingecko] Rate limit exceeded', { sentry: true });
+                Logger.error('[api:coingecko] Rate limit exceeded', { sentry: true });
             } else {
                 Logger.panic('[api:coingecko] API error', {
                     error: new Error(`Coingecko API error: ${response.status}`),
