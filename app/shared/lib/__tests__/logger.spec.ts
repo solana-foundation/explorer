@@ -186,5 +186,4 @@ describe('Logger', () => {
             expect(spy).toHaveBeenCalledWith('rate limit hit', { route: '/api' });
         });
     });
-
 });
