@@ -13,8 +13,8 @@ type PanicContext = Record<string, unknown> & {
     hint?: Parameters<typeof captureException>[1];
 };
 
-type WarnContext = Record<string, unknown> & {
-    /** When true, the warning is also sent to Sentry via captureMessage. */
+type SentryContext = Record<string, unknown> & {
+    /** When true, the message is also sent to Sentry via captureMessage. */
     sentry?: boolean;
 };
 
@@ -39,10 +39,13 @@ class StraightforwardLogger {
         captureException(error, context.hint);
         isLoggable(LOG_LEVEL.PANIC) && console.error(...formatArgs(message, context));
     }
-    error(message: string, context?: Record<string, unknown>) {
+    error(message: string, context?: SentryContext) {
+        if (context?.sentry) {
+            captureMessage(message, 'error');
+        }
         isLoggable(LOG_LEVEL.ERROR) && console.error(...formatArgs(message, context));
     }
-    warn(message: string, context?: WarnContext) {
+    warn(message: string, context?: SentryContext) {
         if (context?.sentry) {
             captureMessage(message, 'warning');
         }
