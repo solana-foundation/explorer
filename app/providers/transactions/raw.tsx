@@ -7,6 +7,8 @@ import { Connection, DecompileArgs, TransactionMessage, TransactionSignature, Ve
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 export interface Details {
     raw?: {
         message: VersionedMessage;
@@ -88,7 +90,7 @@ async function fetchRawTransaction(dispatch: Dispatch, signature: TransactionSig
         });
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
+            Logger.error('[providers:transactions] Failed to fetch raw transaction', { error, url });
         }
     }
 }

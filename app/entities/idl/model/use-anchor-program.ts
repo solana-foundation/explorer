@@ -3,6 +3,7 @@
 import { Idl, Program } from '@coral-xyz/anchor';
 import { useMemo } from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
 import { formatSerdeIdl, getFormattedIdl } from './formatters/format';
@@ -24,7 +25,7 @@ export function useAnchorProgram(
             const program = new Program(getFormattedIdl(formatSerdeIdl, idl, programAddress), getProvider(url));
             return program;
         } catch (e) {
-            console.error('Error creating anchor program for', programAddress, e, { idl });
+            Logger.error('[idl] Error creating anchor program', { error: e, idl, programAddress });
             return null;
         }
     }, [idl, programAddress, url]);

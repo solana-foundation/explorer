@@ -73,7 +73,6 @@ describe('Implementation for `formatSerdeIdl`', () => {
         expect('0.1.0').toBe(anchor030.metadata.version);
         expect(() => {
             idl = formatSerdeIdl(anchor030, address);
-            console.log({ idl });
             expect(idl?.metadata).toStrictEqual({
                 description: 'Created with Anchor',
                 name: 'idl',

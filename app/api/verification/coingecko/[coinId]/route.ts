@@ -1,8 +1,7 @@
-import * as Sentry from '@sentry/nextjs';
 import { NextResponse } from 'next/server';
 import fetch from 'node-fetch';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
 
@@ -45,9 +44,11 @@ export async function GET(_request: Request, { params: { coinId } }: Params) {
 
         if (!response.ok) {
             if (response.status === 429) {
-                Sentry.captureMessage('Coingecko API rate limit exceeded', { level: 'warning' });
+                Logger.error('[api:coingecko] Rate limit exceeded', { sentry: true });
             } else {
-                Sentry.captureException(new Error(`Coingecko API error: ${response.status}`));
+                Logger.panic('[api:coingecko] API error', {
+                    error: new Error(`Coingecko API error: ${response.status}`),
+                });
             }
             return NextResponse.json(
                 { error: 'Failed to fetch coingecko data' },
@@ -58,8 +59,7 @@ export async function GET(_request: Request, { params: { coinId } }: Params) {
         const data = await response.json();
         return NextResponse.json(data, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.error(new Error('Coingecko API error', { cause: error }));
-        Sentry.captureException(error);
+        Logger.panic('[api:coingecko] Coingecko API error', { error });
         return NextResponse.json(
             { error: 'Failed to fetch coingecko data' },
             { headers: NO_STORE_HEADERS, status: 500 }

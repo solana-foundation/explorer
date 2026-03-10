@@ -2,6 +2,8 @@ import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { InstructionCard } from './InstructionCard';
 import { parseTokenSwapInstructionTitle } from './token-swap/types';
 
@@ -26,9 +28,10 @@ export function TokenSwapDetailsCard({
     try {
         title = parseTokenSwapInstructionTitle(ix);
     } catch (error) {
-        console.error(error, {
-            signature: signature,
-            url: url,
+        Logger.error('[components:ix-token-swap] Failed to parse instruction title', {
+            error,
+            signature,
+            url,
         });
     }
 

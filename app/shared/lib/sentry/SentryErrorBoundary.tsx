@@ -1,12 +1,10 @@
 'use client';
 
-import { captureException } from '@sentry/nextjs';
+import { ErrorCard } from '@components/common/ErrorCard';
 import { ReactNode } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { ErrorCard } from './ErrorCard';
-
-const isSentryEnabled = process.env.NEXT_PUBLIC_ENABLE_CATCH_EXCEPTIONS === '1';
+import { Logger } from '@/app/shared/lib/logger';
 
 type Props = Readonly<{
     children: ReactNode;
@@ -17,9 +15,7 @@ export function SentryErrorBoundary({ children, fallbackMessage = 'Failed to loa
     return (
         <ErrorBoundary
             onError={(error: Error) => {
-                if (isSentryEnabled) {
-                    captureException(error);
-                }
+                Logger.panic('[error-boundary] Component error', { error });
             }}
             fallbackRender={({ error }) => <ErrorCard text={`${fallbackMessage}: ${error.message}`} />}
         >

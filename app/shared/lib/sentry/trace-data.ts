@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
-import { Metadata } from 'next/types';
+import type { Metadata } from 'next/types';
 
 /**
  *
@@ -7,7 +7,7 @@ import { Metadata } from 'next/types';
  * @param metadata.others Allow to specify additional arguments. Overwrites default ones
  * @returns
  */
-export function withSentryTraceData(
+export function withTraceData(
     metadata: Metadata & {
         others?: ReturnType<typeof Sentry.getTraceData>;
     }

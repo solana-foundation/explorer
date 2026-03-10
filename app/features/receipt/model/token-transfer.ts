@@ -4,6 +4,8 @@ import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { validate } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import type { TokenInfo } from '../api/get-token-info';
 import { extractMemoFromTransaction } from './memo';
 import { TokenTransferPayload } from './schemas';
@@ -69,7 +71,7 @@ export async function createTokenTransferReceipt(
 
     const [err, validated] = validate(raw, TokenTransferPayload, { coerce: true });
     if (err) {
-        console.error('Error validating token transfer payload', err);
+        Logger.error('[receipt] Error validating token transfer payload', { error: err });
         return undefined;
     }
 

@@ -3,6 +3,8 @@
 import { usePathname, useSearchParams } from 'next/navigation';
 import React, { createContext, ReactNode, RefCallback, useCallback, useContext, useEffect, useRef } from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 type URLFragment = string;
 
 type RegisterScrollAnchorFn = (key: string, element: HTMLElement) => void;
@@ -10,10 +12,7 @@ type RegisterScrollAnchorFn = (key: string, element: HTMLElement) => void;
 const ScrollAnchorContext = createContext<RegisterScrollAnchorFn>(
     typeof WeakRef !== 'undefined'
         ? (key: string) => {
-              console.warn(
-                  `Ignoring registration of scroll anchor for key \`${key}\`.` +
-                      'Did you forget to wrap your app in a `ScrollAnchorProvider`?'
-              );
+              Logger.warn('[providers:scroll-anchor] Ignoring registration, missing ScrollAnchorProvider', { key });
           }
         : // This entire implementation gets disabled if WeakRef is not supported
           () => {

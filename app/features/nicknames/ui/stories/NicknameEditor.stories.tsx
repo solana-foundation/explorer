@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from 'storybook/test';
 
 import { NicknameEditor } from '../NicknameEditor';
 
@@ -32,14 +33,14 @@ type Story = StoryObj<typeof meta>;
 export const Primary: Story = {
     args: {
         address: 'DXhYDXhYDXhYDXhYDXhYDXhYDXhYDXhYDXhYDXhYDXhY',
-        onClose: () => console.log('Close clicked'),
+        onClose: fn(),
     },
 };
 
 export const WithExistingNickname: Story = {
     args: {
         address: 'So11111111111111111111111111111111111111112',
-        onClose: () => console.log('Close clicked'),
+        onClose: fn(),
     },
     beforeEach: () => {
         // Set up a nickname in localStorage for this story
@@ -53,6 +54,6 @@ export const WithExistingNickname: Story = {
 export const LongAddress: Story = {
     args: {
         address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-        onClose: () => console.log('Close clicked'),
+        onClose: fn(),
     },
 };

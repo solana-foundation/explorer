@@ -34,6 +34,7 @@ import React from 'react';
 import { create } from 'superstruct';
 
 import { getProxiedUri } from '@/app/features/metadata/utils';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { HistoryProvider } from './history';
 import { RewardsProvider } from './rewards';
@@ -270,7 +271,11 @@ async function fetchMultipleAccounts({
                         try {
                             parsedData = await handleParsedAccountData(connection, pubkey, accountData);
                         } catch (error) {
-                            console.error(error, { address: pubkey.toBase58(), url });
+                            Logger.error('[providers:accounts] Failed to parse account data', {
+                                address: pubkey.toBase58(),
+                                error,
+                                url,
+                            });
                         }
                     }
 
@@ -305,7 +310,7 @@ async function fetchMultipleAccounts({
             }
         } catch (error) {
             if (cluster !== Cluster.Custom) {
-                console.error(error, { url });
+                Logger.error('[providers:accounts] Failed to fetch accounts batch', { error, url });
             }
 
             for (const pubkey of batch) {
@@ -481,7 +486,7 @@ const getMetaDataJSON = async (
                     resolve(undefined);
                 });
         } catch (ex) {
-            console.error(ex);
+            Logger.error('[providers:accounts] Failed to fetch metadata JSON', { error: ex });
             resolve(undefined);
         }
     });
@@ -528,7 +533,7 @@ export function useMintAccountInfo(address: string | undefined): MintAccountInfo
 
             return create(parsedData.parsed.info, MintAccountInfo);
         } catch (err) {
-            console.error(err, { address });
+            Logger.error('[providers:accounts] Failed to parse mint info', { address, error: err });
         }
     }, [address, accountInfo]);
 }
@@ -548,7 +553,7 @@ export function useTokenAccountInfo(address: string | undefined): TokenAccountIn
 
             return create(parsedData.parsed.info, TokenAccountInfo);
         } catch (err) {
-            console.error(err, { address });
+            Logger.error('[providers:accounts] Failed to parse token info', { address, error: err });
         }
     }, [address, accountInfo]);
 }

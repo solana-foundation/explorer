@@ -8,6 +8,8 @@
 
 import { Address } from '@solana/kit';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { Cluster } from './cluster';
 
 type TokenSearchApiResponseToken = {
@@ -60,14 +62,17 @@ export async function searchTokens(search: string, cluster: Cluster): Promise<Se
         if (apiResponse.status >= 400) {
             try {
                 const errorJsonBody = await apiResponse.json();
-                console.error(new Error('Error calling token search API'), {
+                Logger.error('[utils:token-search] Error calling token search API', {
                     chainId: chainId.toString(),
                     errorJsonBody,
                     search,
                 });
             } catch {
                 // no JSON body for error
-                console.error(new Error('Error calling token search API'), { chainId: chainId.toString(), search });
+                Logger.error('[utils:token-search] Error calling token search API', {
+                    chainId: chainId.toString(),
+                    search,
+                });
             }
             return [];
         }
@@ -79,7 +84,10 @@ export async function searchTokens(search: string, cluster: Cluster): Promise<Se
             value: [token.name, token.symbol, token.address],
         }));
     } catch (error) {
-        console.error(new Error('Error parsing token search API response'), { chainId: chainId.toString(), search });
+        Logger.error('[utils:token-search] Error parsing token search API response', {
+            chainId: chainId.toString(),
+            search,
+        });
         return [];
     }
 }

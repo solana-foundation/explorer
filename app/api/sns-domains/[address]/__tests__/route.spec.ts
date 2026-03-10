@@ -1,18 +1,12 @@
 import { fetchSnsDomains } from '@entities/domain/api/fetch-sns-domains';
-import Logger from '@utils/logger';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 import { GET } from '../route';
 
 vi.mock('@entities/domain/api/fetch-sns-domains', () => ({
     fetchSnsDomains: vi.fn(),
-}));
-
-vi.mock('@utils/logger', () => ({
-    default: {
-        error: vi.fn(),
-        info: vi.fn(),
-    },
 }));
 
 const VALID_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
@@ -85,13 +79,27 @@ describe('GET /api/sns-domains/[address]', () => {
             const error = new Error('Bonfida API down');
             vi.mocked(fetchSnsDomains).mockRejectedValueOnce(error);
 
+            await GET(mockRequest, { params: { address: VALID_ADDRESS } });
+
+            expect(Logger.error).toHaveBeenCalledWith('[api:sns-domains] Failed to fetch SNS domains', {
+                address: VALID_ADDRESS,
+                error,
+            });
+        });
+
+        it('does not cache error responses', async () => {
+            vi.mocked(fetchSnsDomains).mockRejectedValueOnce(new Error('fail'));
+
             const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
             expect(response.status).toBe(500);
             const data = await response.json();
             expect(data.domains).toEqual([]);
             expect(response.headers.get('Cache-Control')).toBe('no-store');
-            expect(Logger.error).toHaveBeenCalledWith(error, `Failed to fetch SNS domains for ${VALID_ADDRESS}`);
+            expect(Logger.error).toHaveBeenCalledWith('[api:sns-domains] Failed to fetch SNS domains', {
+                address: VALID_ADDRESS,
+                error: expect.any(Error),
+            });
         });
     });
 });

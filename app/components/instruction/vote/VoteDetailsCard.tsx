@@ -8,6 +8,8 @@ import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create, Struct } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { InstructionCard } from '../InstructionCard';
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
 import {
@@ -40,7 +42,8 @@ export function VoteDetailsCard(props: InstructionDetailsProps) {
                 return renderDetails<VoteSwitchInfo>(props, parsed, VoteSwitchInfo);
         }
     } catch (error) {
-        console.error(error, {
+        Logger.error('[components:ix-vote] Failed to decode instruction', {
+            error,
             url,
         });
     }

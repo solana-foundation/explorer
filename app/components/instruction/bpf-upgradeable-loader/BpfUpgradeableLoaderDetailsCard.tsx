@@ -5,6 +5,8 @@ import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create, Struct } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { InstructionCard } from '../InstructionCard';
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
 import {
@@ -55,7 +57,8 @@ export function BpfUpgradeableLoaderDetailsCard(props: DetailsProps) {
                 return <UnknownDetailsCard {...props} />;
         }
     } catch (error) {
-        console.error(error, {
+        Logger.error('[components:ix-bpf-upgradeable-loader] Failed to decode instruction', {
+            error,
             signature: props.tx.signatures[0],
         });
         return <UnknownDetailsCard {...props} />;
