@@ -41,7 +41,7 @@ export function ReceiptView({ data, signature, transactionPath }: ReceiptViewPro
                 title: 'Solana Transaction Receipt',
                 url: globalThis.location.href,
             };
-            
+
             if (!navigator.canShare?.(shareData)) return;
             await navigator.share(shareData);
             receiptAnalytics.trackShareNative(signature);
