@@ -37,7 +37,9 @@ export function ReceiptView({ data, signature, transactionPath }: ReceiptViewPro
 
     async function handleNativeShare() {
         try {
-            await navigator.share({ url: globalThis.location.href });
+            const shareData = { url: globalThis.location.href };
+            if (!navigator.canShare?.(shareData)) return;
+            await navigator.share(shareData);
             receiptAnalytics.trackShareNative(signature);
         } catch (e) {
             if (e instanceof Error && e.name === 'AbortError') return;

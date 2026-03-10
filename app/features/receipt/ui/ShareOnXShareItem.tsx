@@ -10,7 +10,7 @@ interface ShareOnXShareItemProps {
 export function ShareOnXShareItem({ onShare }: ShareOnXShareItemProps) {
     function handleClick() {
         const url = encodeURIComponent(globalThis.location.href);
-        globalThis.open(`https://twitter.com/intent/tweet?url=${url}`, '_blank', 'noopener,noreferrer');
+        globalThis.open(`https://x.com/intent/tweet?url=${url}`, '_blank', 'noopener,noreferrer');
         onShare?.();
     }
 
