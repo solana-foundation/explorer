@@ -1,6 +1,11 @@
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('@sentry/nextjs', () => ({
+    captureException: vi.fn(),
+    init: vi.fn(),
+}));
+
 vi.mock('next/og', () => ({
     ImageResponse: vi.fn(() => {
         return new Response('mock-image-response', {
