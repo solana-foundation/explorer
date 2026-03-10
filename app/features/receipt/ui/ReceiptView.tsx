@@ -37,7 +37,11 @@ export function ReceiptView({ data, signature, transactionPath }: ReceiptViewPro
 
     async function handleNativeShare() {
         try {
-            const shareData = { url: globalThis.location.href };
+            const shareData = {
+                title: 'Solana Transaction Receipt',
+                url: globalThis.location.href,
+            };
+            
             if (!navigator.canShare?.(shareData)) return;
             await navigator.share(shareData);
             receiptAnalytics.trackShareNative(signature);
