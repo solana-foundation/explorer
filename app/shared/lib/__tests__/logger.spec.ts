@@ -154,7 +154,7 @@ describe('Logger', () => {
                 expect.objectContaining({ message: 'Unrecognized error' }),
                 undefined
             );
-            expect(debugSpy).toHaveBeenCalledWith('[resolveError] raw value:', 'string error');
+            expect(debugSpy).toHaveBeenCalledWith('[Logger] non-Error value in error field:', 'string error');
         });
     });
 
