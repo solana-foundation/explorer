@@ -7,7 +7,7 @@ interface PopoverButtonProps {
     icon: ReactNode;
     label: string;
     children: ReactNode;
-    className: string;
+    className?: string;
 }
 
 export function PopoverButton({ icon, label, children, className }: PopoverButtonProps) {
