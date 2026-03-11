@@ -39,6 +39,7 @@ export function ReceiptView({ data, signature, transactionPath }: ReceiptViewPro
             receiptAnalytics.trackShareNative(signature);
         } catch (e) {
             if (e instanceof Error && e.name === 'AbortError') return;
+            throw e;
         }
     }
 
