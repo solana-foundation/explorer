@@ -77,7 +77,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
     const [editing, setEditing] = React.useState(false);
     const [saving, setSaving] = React.useState(false);
     const [savedName, setSavedName] = React.useState('');
-    const [saveError, setSaveError] = React.useState<string | null>(null);
+    const [saveError, setSaveError] = React.useState<Error | undefined>(undefined);
     const [localUrl, setLocalUrl] = React.useState(customUrl);
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -98,14 +98,19 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
     }, 500);
 
     const handleSave = () => {
-        if (!savedName.trim()) return;
-        setSaveError(null);
+        const name = savedName.trim();
+        if (!name) return;
+        setSaveError(undefined);
         try {
-            addSavedCluster({ name: savedName.trim(), url: customUrl });
+            addSavedCluster({ name, url: localUrl });
             setSavedName('');
             setSaving(false);
-        } catch {
-            setSaveError('Not enough storage space to save the cluster. Try removing unused clusters.');
+        } catch (error) {
+            setSaveError(
+                new Error('Not enough storage space to save the cluster. Try removing unused clusters.', {
+                    cause: error,
+                })
+            );
         }
     };
 
@@ -150,7 +155,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                             )}
                             {saveError && (
                                 <div className="alert alert-danger mt-2 mb-0 py-2" data-testid="save-cluster-error">
-                                    {saveError}
+                                    {saveError.message}
                                 </div>
                             )}
                             <div className="d-flex gap-2 mt-1">
@@ -167,14 +172,14 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                                     onClick={() => {
                                         setSaving(false);
                                         setSavedName('');
-                                        setSaveError(null);
+                                        setSaveError(undefined);
                                     }}
                                 >
                                     Cancel
                                 </button>
                             </div>
                         </div>
-                    ) : !savedClusters.some(sc => sc.url === customUrl) ? (
+                    ) : !savedClusters.some(sc => sc.url === localUrl) ? (
                         <button
                             className="btn btn-sm btn-white col-12 mt-2 mb-3"
                             onClick={() => setSaving(true)}
@@ -215,8 +220,7 @@ function SavedClusterItem({
                 {cluster.name}
             </Link>
             <button
-                className="btn btn-sm position-absolute"
-                style={{ right: 4, top: '50%', transform: 'translateY(-50%)' }}
+                className="btn btn-sm position-absolute e-right-1 e-top-1/2 -e-translate-y-1/2"
                 onClick={e => {
                     e.stopPropagation();
                     onDelete(cluster.name);
@@ -237,9 +241,11 @@ function SavedClustersSection({ status, savedClusters }: { status: ClusterStatus
     const pathname = usePathname();
 
     const handleDelete = (name: string) => {
-        const isActive = cluster === Cluster.Custom && savedClusters.find(c => c.name === name)?.url === customUrl;
+        const deletedCluster = savedClusters.find(c => c.name === name);
+        const isActive = cluster === Cluster.Custom && deletedCluster?.url === customUrl;
         removeSavedCluster(name);
-        if (isActive) {
+        const remaining = savedClusters.filter(c => c.name !== name);
+        if (isActive && !remaining.some(c => c.url === customUrl)) {
             router.push(pathname);
         }
     };

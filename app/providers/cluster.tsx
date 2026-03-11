@@ -91,10 +91,11 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
         (localStorageIsAvailable() && localStorage.getItem('enableCustomUrl') !== null) ||
         isWhitelistedRpc(state.customUrl);
 
-    const customUrl = (enableCustomUrl ? searchParams?.get('customUrl') : undefined) ?? state.customUrl;
+    const customUrl = (enableCustomUrl ? searchParams?.get('customUrl') || undefined : undefined) ?? state.customUrl;
     const pathname = usePathname();
     const router = useRouter();
 
+    // Remove customUrl param if dev setting is disabled
     useEffect(() => {
         if (!enableCustomUrl && searchParams?.has('customUrl')) {
             const newSearchParams = new URLSearchParams();
