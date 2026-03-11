@@ -1,13 +1,12 @@
 'use client';
 
 import { Button } from '@components/shared/ui/button';
-import * as Sentry from '@sentry/nextjs';
 import { TransactionSignature } from '@solana/web3.js';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { Share2 } from 'react-feather';
 
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
+import { useCanNativeShare } from '@/app/shared/lib/use-can-native-share';
 
 import type { FormattedExtendedReceipt } from '../types';
 import { BaseReceipt, BlurredCircle } from './BaseReceipt';
@@ -22,14 +21,7 @@ interface ReceiptViewProps {
 }
 
 export function ReceiptView({ data, signature, transactionPath }: ReceiptViewProps) {
-    const [canNativeShare, setCanNativeShare] = useState(false);
-
-    useEffect(() => {
-        const hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
-        const hasNoHover = window.matchMedia('(hover: none)').matches;
-
-        setCanNativeShare(typeof navigator.share === 'function' && hasCoarsePointer && hasNoHover);
-    }, []);
+    const canNativeShare = useCanNativeShare();
 
     function handleViewTxClick() {
         receiptAnalytics.trackViewTxClicked(signature);
@@ -47,7 +39,6 @@ export function ReceiptView({ data, signature, transactionPath }: ReceiptViewPro
             receiptAnalytics.trackShareNative(signature);
         } catch (e) {
             if (e instanceof Error && e.name === 'AbortError') return;
-            Sentry.captureException(e);
         }
     }
 

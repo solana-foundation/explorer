@@ -5,7 +5,7 @@ import {
     OG_IMAGE_SIZE,
     parseCompositeSignature,
     ReceiptError,
-} from '@features/receipt';
+} from '@features/receipt/server';
 import { assertIsSignature } from '@solana/kit';
 import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
