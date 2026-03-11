@@ -12,7 +12,7 @@ const JupiterPriceTokenSchema = type({
     usdPrice: number(),
 });
 
-type JupiterPriceV3Response = Record<string, { usdPrice: number; }>;
+type JupiterPriceV3Response = Record<string, { usdPrice: number }>;
 
 const JUPITER_API_KEY = process.env.JUPITER_API_KEY;
 

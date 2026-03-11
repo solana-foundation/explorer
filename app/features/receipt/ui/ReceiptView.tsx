@@ -56,7 +56,12 @@ export function ReceiptView({ data, signature, transactionPath, downloadPdf }: R
             <div className="e-flex e-flex-row e-items-center e-gap-1">
                 <div className="e-flex e-items-start e-gap-0.5">
                     <Button variant="compact" size="compact" asChild>
-                        <Link href={transactionPath} target="_blank" rel="noopener noreferrer" onClick={handleViewTxClick}>
+                        <Link
+                            href={transactionPath}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={handleViewTxClick}
+                        >
                             View transaction in Explorer
                         </Link>
                     </Button>

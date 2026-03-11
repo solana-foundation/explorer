@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { Download } from 'react-feather';
+import { vi } from 'vitest';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { DownloadReceiptItem } from '../DownloadReceiptItem';
@@ -20,6 +21,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+    beforeEach({ args }) {
+        vi.mocked(args.download).mockResolvedValue(undefined);
+    },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
