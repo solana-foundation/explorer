@@ -25,8 +25,13 @@ const mockDoc = {
     },
     addField: mockAddField,
     addImage: mockAddImage,
+    getFontSize: vi.fn().mockReturnValue(8),
+    getStringUnitWidth: vi.fn().mockReturnValue(0),
+    internal: { scaleFactor: 1 },
     line: vi.fn(),
+    link: vi.fn(),
     rect: vi.fn(),
+    roundedRect: vi.fn(),
     save: mockSave,
     setDrawColor: vi.fn(),
     setFillColor: vi.fn(),
@@ -82,13 +87,11 @@ describe('generateReceiptPdf', () => {
         const deps = await loadPdfDeps();
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
-        const textCalls = mockText.mock.calls.map(([text]: [string | string[]]) =>
-            Array.isArray(text) ? text.join(' ') : text
-        );
+        const textCalls = mockText.mock.calls.map(([text]) => (Array.isArray(text) ? text.join(' ') : text));
         const allText = textCalls.join(' ');
 
         expect(allText).toContain('Solana Payment Receipt');
-        expect(allText).toContain('Solana Blockchain');
+        expect(allText).toContain('Solana (SOL)');
         expect(allText).toContain('2023-11-14 22:13:20 UTC');
         expect(allText).toContain('1.0 SOL');
         expect(allText).toContain('SenderAddr111111111111111111111111111111111');
@@ -100,29 +103,23 @@ describe('generateReceiptPdf', () => {
         const deps = await loadPdfDeps();
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
-        const fieldNames = mockTextField.mock.results
-            .map(r => r.value.fieldName)
-            .filter(Boolean);
+        const fieldNames = mockTextField.mock.results.map(r => r.value.fieldName).filter(Boolean);
 
         expect(fieldNames).toContain('supplier_name');
         expect(fieldNames).toContain('supplier_address');
         expect(fieldNames).toContain('items_description');
     });
 
-    it('should render Total as static text, not an editable field', async () => {
+    it('should render Total as a pre-filled editable field', async () => {
         const deps = await loadPdfDeps();
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
-        const fieldNames = mockTextField.mock.results
-            .map(r => r.value.fieldName)
-            .filter(Boolean);
-        expect(fieldNames).not.toContain('total');
+        const fieldNames = mockTextField.mock.results.map(r => r.value.fieldName).filter(Boolean);
+        expect(fieldNames).toContain('total');
 
-        const textCalls = mockText.mock.calls.map(([text]: [string | string[]]) =>
-            Array.isArray(text) ? text.join(' ') : text
-        );
+        const textCalls = mockText.mock.calls.map(([text]) => (Array.isArray(text) ? text.join(' ') : text));
         const allText = textCalls.join(' ');
-        expect(allText).toContain('1.0 SOL');
+        expect(allText).toContain('TOTAL');
     });
 
     it('should call doc.save with full signature filename', async () => {
@@ -138,9 +135,7 @@ describe('generateReceiptPdf', () => {
 
         await generateReceiptPdf(deps, receiptWithoutMemo, SIGNATURE, RECEIPT_URL);
 
-        const textCalls = mockText.mock.calls.map(([text]: [string | string[]]) =>
-            Array.isArray(text) ? text.join(' ') : text
-        );
+        const textCalls = mockText.mock.calls.map(([text]) => (Array.isArray(text) ? text.join(' ') : text));
         const allText = textCalls.join(' ');
 
         expect(allText).not.toContain('Transaction Memo');
@@ -159,12 +154,10 @@ describe('generateReceiptPdf', () => {
         const deps = await loadPdfDeps();
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
-        const textCalls = mockText.mock.calls.map(([text]: [string | string[]]) =>
-            Array.isArray(text) ? text.join(' ') : text
-        );
+        const textCalls = mockText.mock.calls.map(([text]) => (Array.isArray(text) ? text.join(' ') : text));
         const allText = textCalls.join(' ');
 
-        expect(allText).toContain('Transaction Memo');
+        expect(allText).toContain('TRANSACTION MEMO');
         expect(allText).toContain('Payment for services');
     });
 
@@ -175,14 +168,10 @@ describe('generateReceiptPdf', () => {
         expect(mockToDataURL).toHaveBeenCalledWith(RECEIPT_URL, { margin: 0, width: 200 });
 
         const addImageCalls = mockAddImage.mock.calls;
-        const qrCall = addImageCalls.find(
-            ([dataUrl]: [string]) => dataUrl === 'data:image/png;base64,qrcode'
-        );
+        const qrCall = addImageCalls.find(([dataUrl]) => dataUrl === 'data:image/png;base64,qrcode');
         expect(qrCall).toBeDefined();
 
-        const textCalls = mockText.mock.calls.map(([text]: [string | string[]]) =>
-            Array.isArray(text) ? text.join(' ') : text
-        );
+        const textCalls = mockText.mock.calls.map(([text]) => (Array.isArray(text) ? text.join(' ') : text));
         const allText = textCalls.join(' ');
         expect(allText).toContain('Verify on Solana Explorer');
     });
