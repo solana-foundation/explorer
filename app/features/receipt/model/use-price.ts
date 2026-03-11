@@ -60,6 +60,8 @@ export function useTokenPrice(mintAddress?: string): PriceResult | undefined {
     const swrKey = getPriceSwrKey(cluster, mintAddress);
     const { data, isLoading } = useSWR(swrKey, fetchPrice, PRICE_SWR_CONFIG);
 
+    if (!swrKey) return undefined;
+
     if (isLoading && !data) {
         return { price: null, status: PriceStatus.Loading };
     }

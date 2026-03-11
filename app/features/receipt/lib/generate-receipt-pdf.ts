@@ -71,6 +71,7 @@ function drawStackedRow(
         doc.setFontSize(style.size * (PAGE.contentWidth / textWidth));
     }
     doc.text(value, PAGE.marginX, y);
+    doc.setFontSize(style.size); // reset after potential overflow scaling
 
     return y + 8;
 }
@@ -135,7 +136,7 @@ function drawLabeledField(
 
 const FOOTER_LABEL_X = PAGE.marginX + 90;
 const FOOTER_FIELD_X = FOOTER_LABEL_X + 30;
-const FOOTER_FIELD_WIDTH = PAGE.contentWidth - 90 - 30; // 50mm
+const FOOTER_FIELD_WIDTH = PAGE.marginX + PAGE.contentWidth - FOOTER_FIELD_X;
 const FOOTER_FONT_SIZE = 10;
 const FOOTER_CELL_HEIGHT = 6;
 

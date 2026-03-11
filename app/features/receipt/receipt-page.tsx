@@ -143,8 +143,9 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
 
     const mint = 'mint' in receipt ? receipt.mint : undefined;
     const priceResult = useTokenPrice(mint);
+    const totalAmountStr = receipt.total.formatted;
     const usdValue =
-        priceResult?.price != null ? formatUsdValue(parseFloat(receipt.total.formatted), priceResult.price) : undefined;
+        priceResult?.price != null ? formatUsdValue(parseFloat(totalAmountStr), priceResult.price) : undefined;
 
     const downloadPdf = useCallback(async () => {
         const deps = await loadPdfDeps();
