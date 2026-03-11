@@ -61,6 +61,13 @@ export function lamportsToSolString(lamports: number | bigint, maximumFractionDi
     return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(sol);
 }
 
+export function formatUsdValue(amount: number, price: number): string {
+    return `$${(amount * price).toLocaleString('en-US', {
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2,
+    })}`;
+}
+
 export function numberWithSeparator(s: string) {
     // eslint-disable-next-line no-restricted-syntax -- insert thousands separator
     return s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
