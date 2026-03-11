@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, within } from 'storybook/test';
+import { expect, fn, within } from 'storybook/test';
 
 import { ReceiptView } from '../ReceiptView';
 import {
@@ -12,6 +12,7 @@ import {
 
 const meta: Meta<typeof ReceiptView> = {
     args: {
+        downloadPdf: fn().mockResolvedValue(undefined),
         signature: 'ExampleTransactionSignature',
         transactionPath: 'https://example.com/tx/ExampleTransactionSignature',
     },
@@ -30,7 +31,7 @@ export const Default: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         expect(canvas.getByText('Solana Receipt')).toBeInTheDocument();
-        expect(canvas.getByText('Open transaction in Explorer')).toBeInTheDocument();
+        expect(canvas.getByText('View transaction in Explorer')).toBeInTheDocument();
         // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         expect(canvas.getByRole('button', { name: /share/i })).toBeInTheDocument();
     },
