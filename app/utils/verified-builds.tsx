@@ -132,7 +132,7 @@ export function useIsProgramVerified({
 }) {
     return useSWRImmutable(
         ['is-program-verified', programId.toBase58(), hashProgramData(programData), programData.authority],
-        async ([_prefix, programId, hash, authority]) => {
+        async ([_prefix, programId, hash]) => {
             if (!programId) {
                 return false;
             }
