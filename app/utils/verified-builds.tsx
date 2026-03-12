@@ -140,13 +140,7 @@ export function useIsProgramVerified({
             const response = await fetch(`${OSEC_REGISTRY_URL}/status/${programId}`);
             const osecInfo = (await response.json()) as OsecInfo;
 
-            // A null authority means the program is immutable (cannot be upgraded),
-            // so the API result can be trusted without on-chain hash re-validation.
-            if (authority === null) {
-                return osecInfo.is_verified;
-            }
-
-            // Otherwise, let's just double check that the on-chain hash matches the reported hash for verification
+            // Cross-check the on-chain hash to stay consistent with useVerifiedProgramRegistry
             return osecInfo.is_verified && hash === osecInfo['on_chain_hash'];
         }
     );
