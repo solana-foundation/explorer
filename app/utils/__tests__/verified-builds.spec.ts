@@ -19,10 +19,7 @@ function makeProgramData({ authority, rawBytes }: { authority: PublicKey | null;
 
 describe('hashProgramData', () => {
     // Simulated stale authority pubkey area (non-zero, as seen on mainnet for revoked authorities)
-    const staleAuthorityBytes = Buffer.from(
-        '51b4de5a0619575adb04c439878648ac81487e8529cded2b1fccb55115ef7247',
-        'hex'
-    );
+    const staleAuthorityBytes = Buffer.from('51b4de5a0619575adb04c439878648ac81487e8529cded2b1fccb55115ef7247', 'hex');
     // Simulated program binary (starts with ELF magic header)
     const programBytes = Buffer.from([0x7f, 0x45, 0x4c, 0x46, 0xde, 0xad, 0xbe, 0xef]);
     // Trailing zeros that should be stripped

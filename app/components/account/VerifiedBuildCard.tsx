@@ -173,8 +173,13 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 <td className="text-lg-end">
                     {value && (value as string).length > 1 ? (
                         <div className="d-flex align-items-center justify-content-end">
-                            <Copyable text={value as string}><span /></Copyable>
-                            <pre className="text-start mb-0 font-monospace" style={{ overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
+                            <Copyable text={value as string}>
+                                <span />
+                            </Copyable>
+                            <pre
+                                className="text-start mb-0 font-monospace"
+                                style={{ overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}
+                            >
                                 {value}
                             </pre>
                         </div>
