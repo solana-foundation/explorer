@@ -2,14 +2,14 @@ import * as Sentry from '@sentry/nextjs';
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import fetch from 'node-fetch';
-import { is, number, type } from 'superstruct';
+import { is, number, refine, type } from 'superstruct';
 
 import Logger from '@/app/utils/logger';
 
 import { CACHE_HEADERS, NO_STORE_HEADERS } from './config';
 
 const JupiterPriceTokenSchema = type({
-    usdPrice: number(),
+    usdPrice: refine(number(), 'positive', value => value > 0),
 });
 
 type JupiterPriceV3Response = Record<string, { usdPrice: number }>;

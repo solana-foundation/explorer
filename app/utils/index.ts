@@ -62,7 +62,9 @@ export function lamportsToSolString(lamports: number | bigint, maximumFractionDi
 }
 
 export function formatUsdValue(amount: number, price: number): string {
-    return `$${(amount * price).toLocaleString('en-US', {
+    const value = amount * price;
+    if (isNaN(value) || value < 0) return '$0.00';
+    return `$${value.toLocaleString('en-US', {
         maximumFractionDigits: 2,
         minimumFractionDigits: 2,
     })}`;

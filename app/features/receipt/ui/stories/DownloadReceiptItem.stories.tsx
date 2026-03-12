@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { Download } from 'react-feather';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import { vi } from 'vitest';
 
 import { DownloadReceiptItem } from '../DownloadReceiptItem';
 
@@ -13,6 +12,13 @@ const meta: Meta<typeof DownloadReceiptItem> = {
         label: 'Download PNG',
     },
     component: DownloadReceiptItem,
+    decorators: [
+        Story => (
+            <div style={{ width: 150 }}>
+                <Story />
+            </div>
+        ),
+    ],
     tags: ['autodocs', 'test'],
     title: 'Features/Receipt/DownloadReceiptItem',
 };
@@ -22,7 +28,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     beforeEach({ args }) {
-        vi.mocked(args.download).mockResolvedValue(undefined);
+        (args.download as ReturnType<typeof fn>).mockResolvedValue(undefined);
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
