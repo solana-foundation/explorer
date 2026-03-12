@@ -1,4 +1,8 @@
+import * as Sentry from '@sentry/nextjs';
 import { NextResponse } from 'next/server';
+import fetch from 'node-fetch';
+
+import Logger from '@/app/utils/logger';
 
 type Params = {
     params: {
@@ -21,29 +25,35 @@ export type ValidatorsAppPingStats = {
 const PING_INTERVALS: number[] = [1, 3, 12];
 
 export async function GET(_request: Request, { params: { network } }: Params) {
-    const responses = await Promise.all(
-        PING_INTERVALS.map(interval =>
-            fetch(`https://www.validators.app/api/v1/ping-thing-stats/${network}.json?interval=${interval}`, {
-                headers: {
-                    Token: process.env.PING_API_KEY || '',
-                },
-                next: {
-                    revalidate: 60,
-                },
+    try {
+        const responses = await Promise.all(
+            PING_INTERVALS.map(interval =>
+                fetch(`https://www.validators.app/api/v1/ping-thing-stats/${network}.json?interval=${interval}`, {
+                    headers: {
+                        Token: process.env.PING_API_KEY || '',
+                    },
+                })
+            )
+        );
+        const data: { [interval: number]: ValidatorsAppPingStats[] } = {};
+        await Promise.all(
+            responses.map(async (response, index) => {
+                const interval = PING_INTERVALS[index];
+                data[interval] = (await response.json()) as ValidatorsAppPingStats[];
             })
-        )
-    );
-    const data: { [interval: number]: ValidatorsAppPingStats[] } = {};
-    await Promise.all(
-        responses.map(async (response, index) => {
-            const interval = PING_INTERVALS[index];
-            data[interval] = await response.json();
-        })
-    );
+        );
 
-    return NextResponse.json(data, {
-        headers: {
-            'Cache-Control': 'no-store, max-age=0',
-        },
-    });
+        return NextResponse.json(data, {
+            headers: {
+                'Cache-Control': 'no-store, max-age=0',
+            },
+        });
+    } catch (error) {
+        Logger.error(new Error('Ping API error', { cause: error }));
+        Sentry.captureException(error);
+        return NextResponse.json(
+            { error: 'Failed to fetch ping data' },
+            { headers: { 'Cache-Control': 'no-store, max-age=0' }, status: 500 }
+        );
+    }
 }
