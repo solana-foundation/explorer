@@ -2,11 +2,11 @@ import { act, renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
 describe('useDownloadReceipt', () => {
-    let useDownloadReceipt: typeof import('../useDownloadReceipt').useDownloadReceipt;
+    let useDownloadReceipt: typeof import('../use-download-receipt').useDownloadReceipt;
 
     beforeEach(async () => {
         vi.useFakeTimers();
-        ({ useDownloadReceipt } = await import('../useDownloadReceipt'));
+        ({ useDownloadReceipt } = await import('../use-download-receipt'));
     });
 
     afterEach(() => {
@@ -140,6 +140,7 @@ describe('useDownloadReceipt', () => {
     });
 
     it('should clean up timeout on unmount', async () => {
+        const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
         const download = vi.fn().mockResolvedValue(undefined);
         const { result, unmount } = renderHook(() => useDownloadReceipt(download, 1000));
 
@@ -147,7 +148,11 @@ describe('useDownloadReceipt', () => {
             result.current[1]();
         });
 
+        expect(result.current[0]).toBe('downloaded');
+
         unmount();
+
+        expect(clearTimeoutSpy).toHaveBeenCalled();
 
         act(() => {
             vi.advanceTimersByTime(1000);

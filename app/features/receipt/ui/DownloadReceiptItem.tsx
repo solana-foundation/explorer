@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { Check, Loader, XCircle } from 'react-feather';
 
-import { useDownloadReceipt } from '../lib/useDownloadReceipt';
+import { useDownloadReceipt } from '../lib/use-download-receipt';
 import type { DownloadReceiptFn } from '../types';
 import { PopoverMenuItem } from './PopoverMenuItem';
 
