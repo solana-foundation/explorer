@@ -156,7 +156,7 @@
         "eslint-plugin-simple-import-sort": "12.1.1",
         "eslint-plugin-storybook": "9.1.10",
         "eslint-plugin-testing-library": "6.2.0",
-        "fast-xml-parser": "5.3.3",
+        "fast-xml-parser": "5.3.4",
         "jest-environment-jsdom": "29.5.0",
         "jsdom": "26.0.0",
         "playwright": "1.57.0",
