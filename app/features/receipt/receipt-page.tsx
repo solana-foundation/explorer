@@ -10,6 +10,7 @@ import { useFetchTransactionStatus, useTransactionDetails, useTransactionStatus 
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import { TransactionSignature } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
+import { formatUsdValue } from '@utils/index';
 import { useClusterPath } from '@utils/url';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect } from 'react';
@@ -19,8 +20,10 @@ import { getProxiedUri } from '@/app/features/metadata';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app/tx/[signature]/page-client';
 
+import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
 import { usePrimaryDomain } from './lib/use-primary-domain';
 import { extractReceiptData } from './model/create-receipt';
+import { useTokenPrice } from './model/use-price';
 import type { FormattedReceipt } from './types';
 import { NoReceipt } from './ui/BaseReceipt';
 import { ReceiptView } from './ui/ReceiptView';
@@ -138,6 +141,18 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const tokenLink = useExplorerLink('mint' in receipt ? `/address/${receipt.mint}` : '');
     const logoURI = receipt.logoURI ? getProxiedUri(receipt.logoURI) : undefined;
 
+    const mint = 'mint' in receipt ? receipt.mint : undefined;
+    const priceResult = useTokenPrice(mint);
+    const totalAmountStr = receipt.total.formatted;
+    const usdValue =
+        priceResult?.price != null ? formatUsdValue(parseFloat(totalAmountStr), priceResult.price) : undefined;
+
+    const downloadPdf = useCallback(async () => {
+        const deps = await loadPdfDeps();
+        const transactionUrl = window.location.origin + transactionPath;
+        await generateReceiptPdf(deps, receipt, signature, window.location.href, transactionUrl, usdValue);
+    }, [receipt, signature, transactionPath, usdValue]);
+
     return (
         <SignatureContext.Provider value={signature}>
             <ReceiptView
@@ -153,6 +168,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                 }}
                 signature={signature}
                 transactionPath={transactionPath}
+                downloadPdf={downloadPdf}
             />
         </SignatureContext.Provider>
     );

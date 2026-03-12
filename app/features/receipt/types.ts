@@ -42,3 +42,5 @@ export type FormattedExtendedReceipt = FormattedReceipt & {
     receiverHref?: string | undefined;
     tokenHref?: string | undefined;
 };
+
+export type DownloadReceiptFn = () => Promise<void>;
