@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { Download } from 'react-feather';
 import { expect, fn, userEvent, within } from 'storybook/test';
+import { vi } from 'vitest';
 
 import { DownloadReceiptItem } from '../DownloadReceiptItem';
 
