@@ -104,8 +104,21 @@ export function useVerifiedProgramRegistry({
             }
         }
     } else {
-        orderedVerifiedEntries = registryData
-            .filter(entry => entry.is_verified && entry.is_frozen)
+        // Program is immutable (no authority) — trust verified entries from:
+        // 1. Frozen programs
+        // 2. Trusted signers
+        const trustedEntries = registryData.filter(
+            entry => entry.is_verified && (entry.is_frozen || TRUSTED_SIGNERS[entry.signer])
+        );
+
+        // Re-validate hashes (same as the authority branch)
+        const hash = hashProgramData(programData);
+        trustedEntries.forEach(entry => {
+            entry.is_verified = hash === entry['on_chain_hash'];
+        });
+
+        orderedVerifiedEntries = trustedEntries
+            .filter(entry => entry.is_verified)
             .sort((a, b) => new Date(a.last_verified_at).getTime() - new Date(b.last_verified_at).getTime());
     }
 
@@ -129,8 +142,8 @@ export function useIsProgramVerified({
             const response = await fetch(`${OSEC_REGISTRY_URL}/status/${programId}`);
             const osecInfo = (await response.json()) as OsecInfo;
 
-            // If the program data is frozen, then we can trust the API
-            if (osecInfo.is_frozen && authority === null) {
+            // If the program is immutable (no authority), trust the API
+            if (authority === null) {
                 return osecInfo.is_verified;
             }
 
@@ -271,12 +284,17 @@ function isMainnet(currentCluster: Cluster): boolean {
 // Helper function to hash program data
 export function hashProgramData(programData: ProgramDataAccountInfo): string {
     const buffer = Buffer.from(programData.data[0], 'base64');
+    // When authority is null, jsonParsed includes 32 unused authority placeholder bytes
+    // that solana-verify strips (it uses a fixed 45-byte header offset).
+    // Skip them to produce the same hash.
+    const offset = programData.authority === null ? 32 : 0;
+    const data = buffer.slice(offset);
     // Truncate null bytes at the end of the buffer
     let truncatedBytes = 0;
-    while (buffer[buffer.length - 1 - truncatedBytes] === 0) {
+    while (data[data.length - 1 - truncatedBytes] === 0) {
         truncatedBytes++;
     }
     // Hash the binary
-    const c = Buffer.from(buffer.slice(0, buffer.length - truncatedBytes));
+    const c = Buffer.from(data.slice(0, data.length - truncatedBytes));
     return Buffer.from(sha256(c)).toString('hex');
 }

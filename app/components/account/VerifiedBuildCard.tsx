@@ -170,20 +170,14 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
             );
         case DisplayType.LongString:
             return (
-                <td
-                    className="text-lg-end font-monospace"
-                    style={{
-                        overflowWrap: 'break-word',
-                        position: 'relative',
-                        whiteSpace: 'pre-wrap',
-                        wordWrap: 'break-word',
-                    }}
-                >
+                <td className="text-lg-end">
                     {value && (value as string).length > 1 ? (
-                        <>
-                            <Copyable text={value as string}> </Copyable>
-                            <span>{value}</span>
-                        </>
+                        <div className="d-flex align-items-center justify-content-center">
+                            <Copyable text={value as string}><span /></Copyable>
+                            <pre className="text-start mb-0 font-monospace" style={{ whiteSpace: 'pre-wrap', overflowWrap: 'break-word' }}>
+                                {value}
+                            </pre>
+                        </div>
                     ) : (
                         '-'
                     )}
