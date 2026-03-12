@@ -83,16 +83,17 @@ export function useVerifiedProgramRegistry({
                 (TRUSTED_SIGNERS[entry.signer] || entry.signer === programAuthority?.toBase58()) && entry.is_verified
         );
 
-        // Update the verification status of the trusted entries based on the on-chain hash
+        // Re-validate the on-chain hash locally (the registry's is_verified flag may be stale)
         const hash = hashProgramData(programData);
-        trustedEntries.forEach(entry => {
-            entry.is_verified = hash === entry['on_chain_hash'];
-        });
+        const validatedEntries = trustedEntries.map(entry => ({
+            ...entry,
+            is_verified: hash === entry['on_chain_hash'],
+        }));
 
         const mappedBySigner: Record<string, OsecInfo> = {};
 
         // Map the registryData by signer in order to enforce hierarchy of trust
-        trustedEntries.forEach(entry => {
+        validatedEntries.forEach(entry => {
             mappedBySigner[entry.signer] = entry;
         });
 
@@ -104,20 +105,17 @@ export function useVerifiedProgramRegistry({
             }
         }
     } else {
-        // Program is immutable (no authority) — trust verified entries from:
-        // 1. Frozen programs
-        // 2. Trusted signers
+        // Program is immutable (no authority) — trust verified entries from
+        // frozen programs or trusted signers. Since immutable programs cannot
+        // be changed, verification from any trusted source remains valid.
         const trustedEntries = registryData.filter(
             entry => entry.is_verified && (entry.is_frozen || TRUSTED_SIGNERS[entry.signer])
         );
 
-        // Re-validate hashes (same as the authority branch)
+        // Re-validate against on-chain data since the registry's is_verified flag may be stale
         const hash = hashProgramData(programData);
-        trustedEntries.forEach(entry => {
-            entry.is_verified = hash === entry['on_chain_hash'];
-        });
-
         orderedVerifiedEntries = trustedEntries
+            .map(entry => ({ ...entry, is_verified: hash === entry['on_chain_hash'] }))
             .filter(entry => entry.is_verified)
             .sort((a, b) => new Date(a.last_verified_at).getTime() - new Date(b.last_verified_at).getTime());
     }
@@ -142,7 +140,8 @@ export function useIsProgramVerified({
             const response = await fetch(`${OSEC_REGISTRY_URL}/status/${programId}`);
             const osecInfo = (await response.json()) as OsecInfo;
 
-            // If the program is immutable (no authority), trust the API
+            // A null authority means the program is immutable (cannot be upgraded),
+            // so the API result can be trusted without on-chain hash re-validation.
             if (authority === null) {
                 return osecInfo.is_verified;
             }
@@ -284,14 +283,15 @@ function isMainnet(currentCluster: Cluster): boolean {
 // Helper function to hash program data
 export function hashProgramData(programData: ProgramDataAccountInfo): string {
     const buffer = Buffer.from(programData.data[0], 'base64');
-    // When authority is null, jsonParsed includes 32 unused authority placeholder bytes
-    // that solana-verify strips (it uses a fixed 45-byte header offset).
-    // Skip them to produce the same hash.
+    // The jsonParsed RPC response includes the 32-byte pubkey field from the raw
+    // account header when authority is None (may contain stale data from a previous
+    // authority). Skip them so the hash matches what solana-verify computes from
+    // raw account data at the fixed 45-byte offset.
     const offset = programData.authority === null ? 32 : 0;
     const data = buffer.slice(offset);
     // Truncate null bytes at the end of the buffer
     let truncatedBytes = 0;
-    while (data[data.length - 1 - truncatedBytes] === 0) {
+    while (truncatedBytes < data.length && data[data.length - 1 - truncatedBytes] === 0) {
         truncatedBytes++;
     }
     // Hash the binary

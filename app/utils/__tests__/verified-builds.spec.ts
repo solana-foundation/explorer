@@ -18,25 +18,29 @@ function makeProgramData({ authority, rawBytes }: { authority: PublicKey | null;
 }
 
 describe('hashProgramData', () => {
-    // 32 zero bytes representing the unused authority placeholder
-    const authorityPlaceholder = Buffer.alloc(32, 0);
+    // Simulated stale authority pubkey area (non-zero, as seen on mainnet for revoked authorities)
+    const staleAuthorityBytes = Buffer.from(
+        '51b4de5a0619575adb04c439878648ac81487e8529cded2b1fccb55115ef7247',
+        'hex'
+    );
+    // Simulated program binary (starts with ELF magic header)
     const programBytes = Buffer.from([0x7f, 0x45, 0x4c, 0x46, 0xde, 0xad, 0xbe, 0xef]);
     // Trailing zeros that should be stripped
     const trailingZeros = Buffer.alloc(16, 0);
 
-    it('should produce the same hash for null-authority data with placeholder as for raw program data', () => {
-        // Simulate jsonParsed output for authority=null: 32 zero bytes + program data + trailing zeros
-        const withPlaceholder = Buffer.concat([authorityPlaceholder, programBytes, trailingZeros]);
+    it('should produce the same hash for null-authority data with stale pubkey as for raw program data', () => {
+        // Simulate jsonParsed output for authority=null: 32-byte stale pubkey + program data + trailing zeros
+        const withStaleAuthority = Buffer.concat([staleAuthorityBytes, programBytes, trailingZeros]);
         const programDataNullAuth = makeProgramData({
             authority: null,
-            rawBytes: withPlaceholder,
+            rawBytes: withStaleAuthority,
         });
 
-        // Simulate data without the placeholder (what solana-verify sees after stripping 45-byte header)
-        const withoutPlaceholder = Buffer.concat([programBytes, trailingZeros]);
+        // Simulate jsonParsed output for authority=Some: no prefix bytes, just program data + trailing zeros
+        const withoutPrefix = Buffer.concat([programBytes, trailingZeros]);
         const programDataWithAuth = makeProgramData({
             authority: PublicKey.default,
-            rawBytes: withoutPlaceholder,
+            rawBytes: withoutPrefix,
         });
 
         const hashNull = hashProgramData(programDataNullAuth);
@@ -60,7 +64,7 @@ describe('hashProgramData', () => {
     });
 
     it('should strip exactly the first 32 bytes when authority is null', () => {
-        const dataWithPlaceholder = Buffer.concat([authorityPlaceholder, programBytes]);
+        const dataWithPlaceholder = Buffer.concat([staleAuthorityBytes, programBytes]);
         const programData = makeProgramData({
             authority: null,
             rawBytes: dataWithPlaceholder,
@@ -110,5 +114,17 @@ describe('hashProgramData', () => {
         });
 
         expect(hashProgramData(programData)).toBe(hashProgramData(dataNoTrailing));
+    });
+
+    it('should handle all-zero data after offset when authority is null', () => {
+        const zeroData = Buffer.concat([staleAuthorityBytes, Buffer.alloc(8, 0)]);
+        const programData = makeProgramData({
+            authority: null,
+            rawBytes: zeroData,
+        });
+
+        // All-zero program data produces a hash of empty data (no crash)
+        const emptyHash = Buffer.from(sha256(Buffer.alloc(0))).toString('hex');
+        expect(hashProgramData(programData)).toBe(emptyHash);
     });
 });
