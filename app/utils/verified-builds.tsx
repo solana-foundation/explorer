@@ -83,16 +83,17 @@ export function useVerifiedProgramRegistry({
                 (TRUSTED_SIGNERS[entry.signer] || entry.signer === programAuthority?.toBase58()) && entry.is_verified
         );
 
-        // Update the verification status of the trusted entries based on the on-chain hash
+        // Re-validate the on-chain hash locally (the registry's is_verified flag may be stale)
         const hash = hashProgramData(programData);
-        trustedEntries.forEach(entry => {
-            entry.is_verified = hash === entry['on_chain_hash'];
-        });
+        const validatedEntries = trustedEntries.map(entry => ({
+            ...entry,
+            is_verified: hash === entry['on_chain_hash'],
+        }));
 
         const mappedBySigner: Record<string, OsecInfo> = {};
 
         // Map the registryData by signer in order to enforce hierarchy of trust
-        trustedEntries.forEach(entry => {
+        validatedEntries.forEach(entry => {
             mappedBySigner[entry.signer] = entry;
         });
 
@@ -104,8 +105,18 @@ export function useVerifiedProgramRegistry({
             }
         }
     } else {
-        orderedVerifiedEntries = registryData
-            .filter(entry => entry.is_verified && entry.is_frozen)
+        // Program is immutable (no authority) — trust verified entries from
+        // frozen programs or trusted signers. Since immutable programs cannot
+        // be changed, verification from any trusted source remains valid.
+        const trustedEntries = registryData.filter(
+            entry => entry.is_verified && (entry.is_frozen || TRUSTED_SIGNERS[entry.signer])
+        );
+
+        // Re-validate against on-chain data since the registry's is_verified flag may be stale
+        const hash = hashProgramData(programData);
+        orderedVerifiedEntries = trustedEntries
+            .map(entry => ({ ...entry, is_verified: hash === entry['on_chain_hash'] }))
+            .filter(entry => entry.is_verified)
             .sort((a, b) => new Date(a.last_verified_at).getTime() - new Date(b.last_verified_at).getTime());
     }
 
@@ -121,7 +132,7 @@ export function useIsProgramVerified({
 }) {
     return useSWRImmutable(
         ['is-program-verified', programId.toBase58(), hashProgramData(programData), programData.authority],
-        async ([_prefix, programId, hash, authority]) => {
+        async ([_prefix, programId, hash]) => {
             if (!programId) {
                 return false;
             }
@@ -129,12 +140,7 @@ export function useIsProgramVerified({
             const response = await fetch(`${OSEC_REGISTRY_URL}/status/${programId}`);
             const osecInfo = (await response.json()) as OsecInfo;
 
-            // If the program data is frozen, then we can trust the API
-            if (osecInfo.is_frozen && authority === null) {
-                return osecInfo.is_verified;
-            }
-
-            // Otherwise, let's just double check that the on-chain hash matches the reported hash for verification
+            // Cross-check the on-chain hash to stay consistent with useVerifiedProgramRegistry
             return osecInfo.is_verified && hash === osecInfo['on_chain_hash'];
         }
     );
@@ -271,12 +277,18 @@ function isMainnet(currentCluster: Cluster): boolean {
 // Helper function to hash program data
 export function hashProgramData(programData: ProgramDataAccountInfo): string {
     const buffer = Buffer.from(programData.data[0], 'base64');
+    // The jsonParsed RPC response includes the 32-byte pubkey field from the raw
+    // account header when authority is None (may contain stale data from a previous
+    // authority). Skip them so the hash matches what solana-verify computes from
+    // raw account data at the fixed 45-byte offset.
+    const offset = programData.authority === null ? 32 : 0;
+    const data = buffer.slice(offset);
     // Truncate null bytes at the end of the buffer
     let truncatedBytes = 0;
-    while (buffer[buffer.length - 1 - truncatedBytes] === 0) {
+    while (truncatedBytes < data.length && data[data.length - 1 - truncatedBytes] === 0) {
         truncatedBytes++;
     }
     // Hash the binary
-    const c = Buffer.from(buffer.slice(0, buffer.length - truncatedBytes));
+    const c = Buffer.from(data.slice(0, data.length - truncatedBytes));
     return Buffer.from(sha256(c)).toString('hex');
 }
