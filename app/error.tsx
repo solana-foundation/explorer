@@ -12,7 +12,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 
     return (
         <div className="container mt-4">
-            <ErrorCard text={error.message} retry={reset} />
+            <ErrorCard text="Something went wrong" retry={reset} />
         </div>
     );
 }
