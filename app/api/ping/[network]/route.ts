@@ -38,6 +38,10 @@ export async function GET(_request: Request, { params: { network } }: Params) {
         const data: { [interval: number]: ValidatorsAppPingStats[] } = {};
         await Promise.all(
             responses.map(async (response, index) => {
+                if (!response.ok) {
+                    throw new Error(`Upstream API error: ${response.status} ${response.statusText}`);
+                }
+
                 const interval = PING_INTERVALS[index];
                 data[interval] = (await response.json()) as ValidatorsAppPingStats[];
             })
@@ -45,7 +49,7 @@ export async function GET(_request: Request, { params: { network } }: Params) {
 
         return NextResponse.json(data, {
             headers: {
-                'Cache-Control': 'no-store, max-age=0',
+                'Cache-Control': 'public, max-age=60, s-maxage=60',
             },
         });
     } catch (error) {
