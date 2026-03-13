@@ -17,7 +17,7 @@ export function PopoverButton({ icon, label, children, className }: PopoverButto
                 <Button variant="compact" size="compact" className={className}>
                     {icon}
                     {label}
-                    <ChevronDown size={12} />
+                    <ChevronDown size={12} aria-hidden="true" />
                 </Button>
             </PopoverTrigger>
 
