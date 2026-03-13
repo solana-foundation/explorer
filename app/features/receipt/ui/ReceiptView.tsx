@@ -63,11 +63,15 @@ export function ReceiptView({ data, signature, transactionPath }: ReceiptViewPro
                 <div className="e-flex e-items-start e-gap-0.5">
                     {canNativeShare ? (
                         <Button variant="compact" size="compact" onClick={handleNativeShare} className="e-max-h-[25px]">
-                            <Share2 size={12} />
+                            <Share2 size={12} aria-hidden="true" />
                             Share
                         </Button>
                     ) : (
-                        <PopoverButton icon={<Share2 size={12} />} label="Share" className="e-max-h-[25px]">
+                        <PopoverButton
+                            icon={<Share2 size={12} aria-hidden="true" />}
+                            label="Share"
+                            className="e-max-h-[25px]"
+                        >
                             <ShareOnXShareItem onShare={() => receiptAnalytics.trackShareOnX(signature)} />
                             <CopyLinkShareItem onCopy={() => receiptAnalytics.trackShareCopyLink(signature)} />
                         </PopoverButton>
