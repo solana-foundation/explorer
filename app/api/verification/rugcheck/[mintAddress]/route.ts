@@ -45,9 +45,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
             if (response.status === 429) {
                 Logger.error('[api:rugcheck] Rate limit exceeded', { sentry: true });
             } else {
-                Logger.panic('[api:rugcheck] API error', {
-                    error: new Error(`Rugcheck API error: ${response.status}`),
-                });
+                Logger.panic(new Error(`Rugcheck API error: ${response.status}`));
             }
             return NextResponse.json(
                 { error: 'Failed to fetch rugcheck data' },
@@ -66,7 +64,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
 
         return NextResponse.json({ score: data.score_normalised }, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.panic('[api:rugcheck] Rugcheck API error', { error });
+        Logger.panic(error instanceof Error ? error : new Error('Failed to fetch rugcheck data'));
         return NextResponse.json(
             { error: 'Failed to fetch rugcheck data' },
             { headers: NO_STORE_HEADERS, status: 500 }

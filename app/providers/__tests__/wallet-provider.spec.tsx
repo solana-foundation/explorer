@@ -56,7 +56,7 @@ describe('WalletProvider', () => {
         capturedOnError?.(error);
 
         expect(Logger.error).toHaveBeenCalledTimes(1);
-        expect(Logger.error).toHaveBeenCalledWith('[providers:wallet] Wallet error', { error });
+        expect(Logger.error).toHaveBeenCalledWith(error);
         expect(mockToastCustom).toHaveBeenCalledWith({
             description: 'Test error message',
             title: 'Wallet Error',
@@ -75,7 +75,7 @@ describe('WalletProvider', () => {
         capturedOnError?.(error);
 
         expect(Logger.error).toHaveBeenCalledTimes(1);
-        expect(Logger.error).toHaveBeenCalledWith('[providers:wallet] Wallet error', { error });
+        expect(Logger.error).toHaveBeenCalledWith(error);
         expect(mockToastCustom).not.toHaveBeenCalled();
     });
 });

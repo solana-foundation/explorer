@@ -244,7 +244,7 @@ export function RawInput({
             try {
                 buffer = Uint8Array.from(atob(input), c => c.charCodeAt(0));
             } catch (err) {
-                Logger.error('[components:raw-input] Failed to decode input', { error: err });
+                Logger.error(err);
                 setError('Input must be base58/base64 encoded or a valid account address');
                 return;
             }

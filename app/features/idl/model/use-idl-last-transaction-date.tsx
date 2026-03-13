@@ -75,7 +75,7 @@ export function useIdlLastTransactionDate(
                 }
             } catch (error) {
                 if (!abortController.signal.aborted) {
-                    Logger.error('[idl] IDL comparison error', { error });
+                    Logger.error(error);
                 }
             }
         }

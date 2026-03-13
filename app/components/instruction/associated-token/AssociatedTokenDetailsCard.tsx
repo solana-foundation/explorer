@@ -41,8 +41,7 @@ export function AssociatedTokenDetailsCard(props: DetailsProps) {
                 return <UnknownDetailsCard {...props} />;
         }
     } catch (error) {
-        Logger.error('[components:ix-associated-token] Failed to decode instruction', {
-            error,
+        Logger.error(error, {
             signature: props.tx.signatures[0],
         });
         return <UnknownDetailsCard {...props} />;

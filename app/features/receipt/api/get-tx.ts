@@ -56,7 +56,7 @@ async function findTransactionCluster(signature: string): Promise<Cluster | unde
 
     // Fail on mainnet network error - don't silently probe other clusters
     if ('left' in mainnetResult) {
-        Logger.error('[receipt] Mainnet signature status check failed', { error: mainnetResult.left });
+        Logger.error(mainnetResult.left);
         throw new ReceiptError(`Failed to check the ${clusterSlug(Cluster.MainnetBeta)}`, {
             cause: mainnetResult.left,
             status: 502,
@@ -81,7 +81,7 @@ async function findTransactionCluster(signature: string): Promise<Cluster | unde
         const result = await getSignatureStatus(signature, cluster);
 
         if ('left' in result) {
-            Logger.error('[receipt] Cluster signature status check failed', { cluster, error: result.left });
+            Logger.error(result.left, { cluster });
             throw new ReceiptError(`Failed to check the ${clusterSlug(cluster)}`, { cause: result.left, status: 502 });
         }
 
@@ -106,7 +106,7 @@ async function getSignatureStatus(signature: string, cluster: Cluster): Promise<
         });
         return { right: status?.value !== null };
     } catch (error) {
-        Logger.error('[receipt] Failed to get signature status', { cluster, error, signature });
+        Logger.error(error, { cluster, signature });
         return { left: error instanceof Error ? error : new Error(String(error)) };
     }
 }

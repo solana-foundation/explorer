@@ -49,7 +49,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
 
         return NextResponse.json({ verified }, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.panic('[api:bluprynt] Bluprynt verification error', { error });
+        Logger.panic(error instanceof Error ? error : new Error('Failed to verify bluprynt data'));
         return NextResponse.json(
             { error: 'Failed to verify bluprynt data' },
             { headers: NO_STORE_HEADERS, status: 500 }

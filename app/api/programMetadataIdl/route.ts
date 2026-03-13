@@ -67,13 +67,13 @@ export async function GET(request: Request) {
             );
         } else if (error instanceof Error && error.cause) {
             // Log extra data if cause is present
-            Logger.error('[api:programMetadataIdl] Error with cause', { error: error.cause });
+            Logger.error(error.cause);
         }
 
         let displayError;
         if (error instanceof Error && isSolanaError(error)) {
             // log other errors that are SolanaError to keep track of them
-            Logger.error('[api:programMetadataIdl] Solana error fetching program metadata', { error });
+            Logger.error(error);
 
             // do not show underlying error to preserve existing logic
             displayError = normalizeUnknownError(errors[500]);

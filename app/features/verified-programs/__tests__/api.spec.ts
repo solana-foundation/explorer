@@ -339,10 +339,7 @@ describe('fetchProgramsPage', () => {
                 // Expected to throw
             }
 
-            expect(Logger.error).toHaveBeenCalledWith('[verified-programs] Failed to fetch programs page', {
-                error: expect.any(Error),
-                page: 1,
-            });
+            expect(Logger.error).toHaveBeenCalledWith(expect.any(Error), { page: 1 });
         });
 
         it('throws error on network failure', async () => {
@@ -362,10 +359,7 @@ describe('fetchProgramsPage', () => {
                 // Expected to throw
             }
 
-            expect(Logger.error).toHaveBeenCalledWith('[verified-programs] Failed to fetch programs page', {
-                error: networkError,
-                page: 1,
-            });
+            expect(Logger.error).toHaveBeenCalledWith(networkError, { page: 1 });
         });
 
         it('logs debug message for failed metadata fetch', async () => {
@@ -442,10 +436,7 @@ describe('fetchProgramsPage', () => {
 
             await fetchProgramsPage(1);
 
-            expect(Logger.error).toHaveBeenCalledWith('[verified-programs] Failed to fetch metadata', {
-                error: fetchError,
-                programId: mockProgramIds[0],
-            });
+            expect(Logger.error).toHaveBeenCalledWith(fetchError, { programId: mockProgramIds[0] });
         });
     });
 

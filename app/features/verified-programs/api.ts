@@ -21,7 +21,7 @@ async function fetchProgramMetadata(programId: string): Promise<ProgramMetadata 
         }
         return data[0];
     } catch (error) {
-        Logger.error('[verified-programs] Failed to fetch metadata', { error, programId });
+        Logger.error(error, { programId });
         return null;
     }
 }
@@ -74,7 +74,7 @@ export async function fetchProgramsPage(page: number): Promise<{
             totalPages,
         };
     } catch (error) {
-        Logger.error('[verified-programs] Failed to fetch programs page', { error, page });
+        Logger.error(error, { page });
         throw error;
     }
 }

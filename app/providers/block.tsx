@@ -108,7 +108,7 @@ export async function fetchBlock(dispatch: Dispatch, url: string, cluster: Clust
     } catch (err) {
         status = FetchStatus.FetchFailed;
         if (cluster !== Cluster.Custom) {
-            Logger.error('[providers:block] Failed to fetch block', { error: err, url });
+            Logger.error(err, { url });
         }
     }
 

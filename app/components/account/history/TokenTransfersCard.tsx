@@ -284,8 +284,7 @@ function getTransfer(
             }
         } catch (error) {
             if (cluster === Cluster.MainnetBeta) {
-                Logger.error('[components:token-transfers] Failed to parse token transfer', {
-                    error,
+                Logger.error(error, {
                     signature,
                 });
             }

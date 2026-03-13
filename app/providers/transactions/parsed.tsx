@@ -53,7 +53,7 @@ async function fetchDetails(dispatch: Dispatch, signature: TransactionSignature,
         fetchStatus = FetchStatus.Fetched;
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            Logger.error('[providers:transactions] Failed to fetch parsed transaction', { error, url });
+            Logger.error(error, { url });
         }
         fetchStatus = FetchStatus.FetchFailed;
     }

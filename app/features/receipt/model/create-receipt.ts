@@ -76,7 +76,7 @@ async function getParsedTokenInfo(mint: string | undefined, cluster: Cluster): P
         const tokenInfo = await getTokenInfo(mint, cluster);
         return tokenInfo;
     } catch (error) {
-        Logger.error('[receipt] Unable to get token info', { error });
+        Logger.error(error);
         return undefined;
     }
 }

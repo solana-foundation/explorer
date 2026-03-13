@@ -11,7 +11,7 @@ export function percentage(numerator: bigint, denominator: bigint, decimals: num
     try {
         return Number((numerator * BigInt(100 * pow)) / denominator) / pow;
     } catch (e) {
-        Logger.error('[utils:math] Error calculating percentage', { error: e });
+        Logger.error(e);
         return 0;
     }
 }

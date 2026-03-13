@@ -213,7 +213,7 @@ function useEnrichedOsecInfo({
                 }
                 return pdaAccountInfo;
             } catch (error) {
-                Logger.error('[utils:verified-builds] Error fetching on-chain PDA', { error });
+                Logger.error(error);
                 return null;
             }
         },

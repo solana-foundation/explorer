@@ -28,8 +28,7 @@ export function TokenLendingDetailsCard({
     try {
         title = parseTokenLendingInstructionTitle(ix);
     } catch (error) {
-        Logger.error('[components:ix-token-lending] Failed to parse instruction title', {
-            error,
+        Logger.error(error, {
             signature,
             url,
         });

@@ -25,7 +25,7 @@ export const WalletProvider: FC<
 
     const onError = useCallback(
         (error: WalletError) => {
-            Logger.error('[providers:wallet] Wallet error', { error });
+            Logger.error(error);
             if (!skipToast) {
                 toast.custom({ description: error.message, title: 'Wallet Error', type: 'error' });
             }

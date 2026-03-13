@@ -45,7 +45,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
             if (response.status === 429) {
                 Logger.error('[api:jupiter] Rate limit exceeded', { sentry: true });
             } else {
-                Logger.panic('[api:jupiter] API error', { error: new Error(`Jupiter API error: ${response.status}`) });
+                Logger.panic(new Error(`Jupiter API error: ${response.status}`));
             }
             return NextResponse.json(
                 { error: 'Failed to fetch jupiter data' },
@@ -62,7 +62,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
         const token = data.find(t => t.id === mintAddress);
         return NextResponse.json({ verified: token?.isVerified === true }, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.panic('[api:jupiter] Jupiter API error', { error });
+        Logger.panic(error instanceof Error ? error : new Error('Failed to fetch jupiter data'));
         return NextResponse.json({ error: 'Failed to fetch jupiter data' }, { headers: NO_STORE_HEADERS, status: 500 });
     }
 }

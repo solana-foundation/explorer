@@ -67,7 +67,7 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
             decoded = deserializeAttestationDataWithBorsh200(schema, Uint8Array.from(attestation.data));
         }
     } catch (e) {
-        Logger.error('[components:attestation-data] Failed to decode attestation data', { error: e });
+        Logger.error(e);
     }
 
     return (

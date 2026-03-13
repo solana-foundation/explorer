@@ -46,9 +46,7 @@ export async function GET(_request: Request, { params: { coinId } }: Params) {
             if (response.status === 429) {
                 Logger.error('[api:coingecko] Rate limit exceeded', { sentry: true });
             } else {
-                Logger.panic('[api:coingecko] API error', {
-                    error: new Error(`Coingecko API error: ${response.status}`),
-                });
+                Logger.panic(new Error(`Coingecko API error: ${response.status}`));
             }
             return NextResponse.json(
                 { error: 'Failed to fetch coingecko data' },
@@ -59,7 +57,7 @@ export async function GET(_request: Request, { params: { coinId } }: Params) {
         const data = await response.json();
         return NextResponse.json(data, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.panic('[api:coingecko] Coingecko API error', { error });
+        Logger.panic(error instanceof Error ? error : new Error('Failed to fetch coingecko data'));
         return NextResponse.json(
             { error: 'Failed to fetch coingecko data' },
             { headers: NO_STORE_HEADERS, status: 500 }

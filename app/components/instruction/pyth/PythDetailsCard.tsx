@@ -71,8 +71,7 @@ export function PythDetailsCard(props: {
                 return <SetMinPublishersDetailsCard info={PythInstruction.decodeSetMinPublishers(ix)} {...props} />;
         }
     } catch (error) {
-        Logger.error('[components:ix-pyth] Failed to decode instruction', {
-            error,
+        Logger.error(error, {
             signature,
             url,
         });

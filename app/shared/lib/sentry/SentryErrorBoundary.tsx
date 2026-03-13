@@ -15,7 +15,7 @@ export function SentryErrorBoundary({ children, fallbackMessage = 'Failed to loa
     return (
         <ErrorBoundary
             onError={(error: Error) => {
-                Logger.panic('[error-boundary] Component error', { error });
+                Logger.panic(error);
             }}
             fallbackRender={({ error }) => <ErrorCard text={`${fallbackMessage}: ${error.message}`} />}
         >

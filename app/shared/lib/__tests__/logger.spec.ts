@@ -3,12 +3,14 @@ import { beforeEach, vi } from 'vitest';
 // Undo the global Logger mock so we can test the real implementation.
 vi.unmock('@/app/shared/lib/logger');
 
-// Mock @sentry/nextjs since Logger imports captureException/captureMessage directly from it.
+// Mock @sentry/nextjs since Logger imports captureException/captureMessage/withScope directly from it.
 const captureException = vi.fn();
 const captureMessage = vi.fn();
+const mockScope = { setExtras: vi.fn(), setLevel: vi.fn() };
 vi.mock('@sentry/nextjs', () => ({
     captureException: (...args: unknown[]) => captureException(...args),
     captureMessage: (...args: unknown[]) => captureMessage(...args),
+    withScope: (cb: (scope: typeof mockScope) => void) => cb(mockScope),
 }));
 
 const { Logger } = await import('../logger');
@@ -19,6 +21,8 @@ describe('Logger', () => {
         vi.unstubAllEnvs();
         captureException.mockClear();
         captureMessage.mockClear();
+        mockScope.setLevel.mockClear();
+        mockScope.setExtras.mockClear();
     });
 
     describe('isLoggable gating', () => {
@@ -43,10 +47,11 @@ describe('Logger', () => {
         it('should log error when NEXT_LOG_LEVEL >= ERROR (1)', () => {
             vi.stubEnv('NEXT_LOG_LEVEL', '1');
             const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const err = new Error('boom');
 
-            Logger.error('boom');
+            Logger.error(err);
 
-            expect(spy).toHaveBeenCalledWith('boom');
+            expect(spy).toHaveBeenCalledWith(err);
         });
 
         it('should suppress debug when NEXT_LOG_LEVEL = INFO (3)', () => {
@@ -89,47 +94,67 @@ describe('Logger', () => {
             expect(spy).toHaveBeenCalledWith('request failed', { status: 500, url: '/api' });
         });
 
-        it('should extract error from context as a separate trailing argument', () => {
+        it('should log Error with context when first arg is an Error', () => {
             const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
             const err = new Error('oops');
 
-            Logger.error('crash', { error: err, module: 'x' });
+            Logger.error(err, { module: 'x' });
 
-            expect(spy).toHaveBeenCalledWith('crash', { module: 'x' }, err);
+            expect(spy).toHaveBeenCalledWith(err, { module: 'x' });
         });
 
-        it('should pass error alone (without empty rest) when context only has error', () => {
-            const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-            const err = new Error('warn');
+        it('should log Error alone when no context is given', () => {
+            const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const err = new Error('oops');
 
-            Logger.warn('warning', { error: err });
+            Logger.error(err);
 
-            expect(spy).toHaveBeenCalledWith('warning', err);
+            expect(spy).toHaveBeenCalledWith(err);
         });
     });
 
     describe('panic', () => {
-        it('should call captureException and log the error', () => {
+        it('should call captureException with fatal level', () => {
             vi.stubEnv('NEXT_LOG_LEVEL', '0');
-            const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            vi.spyOn(console, 'error').mockImplementation(() => {});
             const err = new Error('fatal');
 
-            Logger.panic('fatal crash', { error: err });
+            Logger.panic(err);
 
-            expect(captureException).toHaveBeenCalledWith(err, undefined);
-            expect(spy).toHaveBeenCalledWith('fatal crash', err);
+            expect(mockScope.setLevel).toHaveBeenCalledWith('fatal');
+            expect(captureException).toHaveBeenCalledWith(err);
         });
 
-        it('should forward hint to captureException', () => {
+        it('should forward sentryExtras to Sentry scope', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '0');
+            vi.spyOn(console, 'error').mockImplementation(() => {});
+            const err = new Error('fatal');
+
+            Logger.panic(err, { sentryExtras: { endpoint: '/api', module: 'rpc' } });
+
+            expect(mockScope.setLevel).toHaveBeenCalledWith('fatal');
+            expect(mockScope.setExtras).toHaveBeenCalledWith({ endpoint: '/api', module: 'rpc' });
+            expect(captureException).toHaveBeenCalledWith(err);
+        });
+
+        it('should not call setExtras when sentryExtras is not provided', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '0');
+            vi.spyOn(console, 'error').mockImplementation(() => {});
+            const err = new Error('fatal');
+
+            Logger.panic(err);
+
+            expect(mockScope.setExtras).not.toHaveBeenCalled();
+        });
+
+        it('should not leak sentryExtras into console output', () => {
             vi.stubEnv('NEXT_LOG_LEVEL', '0');
             const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
             const err = new Error('fatal');
-            const hint = { data: { route: '/api/test' } };
 
-            Logger.panic('fatal crash', { error: err, hint });
+            Logger.panic(err, { route: '/api', sentryExtras: { module: 'rpc' } });
 
-            expect(captureException).toHaveBeenCalledWith(err, hint);
-            expect(spy).toHaveBeenCalledWith('fatal crash', err);
+            expect(spy).toHaveBeenCalledWith(err, { route: '/api' });
         });
 
         it('should call captureException even when logging is suppressed', () => {
@@ -137,10 +162,65 @@ describe('Logger', () => {
             const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
             const err = new Error('fatal');
 
-            Logger.panic('fatal crash', { error: err });
+            Logger.panic(err);
 
-            expect(captureException).toHaveBeenCalledWith(err, undefined);
+            expect(captureException).toHaveBeenCalledWith(err);
             expect(spy).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('error with sentry', () => {
+        it('should call captureException with error level when sentry flag is true', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '1');
+            vi.spyOn(console, 'error').mockImplementation(() => {});
+            const err = new Error('rate limit hit');
+
+            Logger.error(err, { sentry: true });
+
+            expect(mockScope.setLevel).toHaveBeenCalledWith('error');
+            expect(captureException).toHaveBeenCalledWith(err);
+        });
+
+        it('should forward sentryExtras to Sentry scope with error level', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '1');
+            vi.spyOn(console, 'error').mockImplementation(() => {});
+            const err = new Error('rate limit hit');
+
+            Logger.error(err, { sentry: true, sentryExtras: { route: '/api', status: 429 } });
+
+            expect(mockScope.setLevel).toHaveBeenCalledWith('error');
+            expect(mockScope.setExtras).toHaveBeenCalledWith({ route: '/api', status: 429 });
+            expect(captureException).toHaveBeenCalledWith(err);
+        });
+
+        it('should not leak sentryExtras into console output', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '1');
+            const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const err = new Error('rate limit hit');
+
+            Logger.error(err, { route: '/api', sentry: true, sentryExtras: { internal: true } });
+
+            expect(spy).toHaveBeenCalledWith(err, { route: '/api' });
+        });
+
+        it('should not call captureException by default', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '1');
+            vi.spyOn(console, 'error').mockImplementation(() => {});
+            const err = new Error('normal error');
+
+            Logger.error(err);
+
+            expect(captureException).not.toHaveBeenCalled();
+        });
+
+        it('should not leak sentry flag into console output', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '1');
+            const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const err = new Error('rate limit hit');
+
+            Logger.error(err, { route: '/api', sentry: true });
+
+            expect(spy).toHaveBeenCalledWith(err, { route: '/api' });
         });
 
         it('should send "Unrecognized error" to Sentry for non-Error values and log the raw value at debug level', () => {
@@ -148,42 +228,81 @@ describe('Logger', () => {
             vi.spyOn(console, 'error').mockImplementation(() => {});
             const debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
 
-            Logger.panic('something broke', { error: 'string error' });
+            Logger.error('string error', { sentry: true });
 
-            expect(captureException).toHaveBeenCalledWith(
-                expect.objectContaining({ message: 'Unrecognized error' }),
-                undefined
-            );
+            expect(captureException).toHaveBeenCalledWith(expect.objectContaining({ message: 'Unrecognized error' }));
+            expect(mockScope.setLevel).toHaveBeenCalledWith('error');
             expect(debugSpy).toHaveBeenCalledWith('[Logger] non-Error value in error field:', 'string error');
         });
     });
 
-    describe('error with sentry', () => {
-        it('should call captureMessage when sentry flag is true', () => {
-            vi.stubEnv('NEXT_LOG_LEVEL', '1');
-            vi.spyOn(console, 'error').mockImplementation(() => {});
+    describe('info', () => {
+        it('should log when NEXT_LOG_LEVEL >= INFO (3)', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '3');
+            const spy = vi.spyOn(console, 'info').mockImplementation(() => {});
 
-            Logger.error('rate limit hit', { sentry: true });
+            Logger.info('starting up');
 
-            expect(captureMessage).toHaveBeenCalledWith('rate limit hit', 'error');
+            expect(spy).toHaveBeenCalledWith('starting up');
+        });
+
+        it('should suppress when NEXT_LOG_LEVEL < INFO', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '2');
+            const spy = vi.spyOn(console, 'info').mockImplementation(() => {});
+
+            Logger.info('starting up');
+
+            expect(spy).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('warn with sentry', () => {
+        it('should call captureMessage with warning level when sentry flag is true', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '2');
+            vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+            Logger.warn('[api] rate limited', { sentry: true });
+
+            expect(mockScope.setLevel).toHaveBeenCalledWith('warning');
+            expect(captureMessage).toHaveBeenCalledWith('[api] rate limited');
+        });
+
+        it('should forward sentryExtras to Sentry scope with warning level', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '2');
+            vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+            Logger.warn('[api] rate limited', { sentry: true, sentryExtras: { route: '/tokens', status: 429 } });
+
+            expect(mockScope.setLevel).toHaveBeenCalledWith('warning');
+            expect(mockScope.setExtras).toHaveBeenCalledWith({ route: '/tokens', status: 429 });
+            expect(captureMessage).toHaveBeenCalledWith('[api] rate limited');
+        });
+
+        it('should not leak sentryExtras into console output', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '2');
+            const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+            Logger.warn('[api] rate limited', { route: '/tokens', sentry: true, sentryExtras: { internal: true } });
+
+            expect(spy).toHaveBeenCalledWith('[api] rate limited', { route: '/tokens' });
         });
 
         it('should not call captureMessage by default', () => {
-            vi.stubEnv('NEXT_LOG_LEVEL', '1');
-            vi.spyOn(console, 'error').mockImplementation(() => {});
+            vi.stubEnv('NEXT_LOG_LEVEL', '2');
+            vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-            Logger.error('normal error');
+            Logger.warn('just a warning');
 
             expect(captureMessage).not.toHaveBeenCalled();
         });
 
         it('should not leak sentry flag into console output', () => {
-            vi.stubEnv('NEXT_LOG_LEVEL', '1');
-            const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            vi.stubEnv('NEXT_LOG_LEVEL', '2');
+            const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-            Logger.error('rate limit hit', { route: '/api', sentry: true });
+            Logger.warn('[api] rate limited', { route: '/tokens', sentry: true });
 
-            expect(spy).toHaveBeenCalledWith('rate limit hit', { route: '/api' });
+            expect(spy).toHaveBeenCalledWith('[api] rate limited', { route: '/tokens' });
         });
     });
 });

@@ -73,7 +73,7 @@ async function fetch(dispatch: Dispatch, cluster: Cluster, url: string) {
         });
     } catch (err) {
         if (cluster !== Cluster.Custom) {
-            Logger.error('[providers:rich-list] Failed to fetch top accounts', { error: err, url });
+            Logger.error(err, { url });
         }
         dispatch('Failed to fetch top accounts');
     }

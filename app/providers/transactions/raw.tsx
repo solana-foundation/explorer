@@ -90,7 +90,7 @@ async function fetchRawTransaction(dispatch: Dispatch, signature: TransactionSig
         });
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            Logger.error('[providers:transactions] Failed to fetch raw transaction', { error, url });
+            Logger.error(error, { url });
         }
     }
 }

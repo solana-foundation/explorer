@@ -151,7 +151,7 @@ describe('middleware', () => {
                     expect.objectContaining({ pathname: '/api/test' })
                 );
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
-                    '[middleware] Challenge mode enabled, blocking',
+                    new Error('[middleware] Challenge mode enabled, blocking'),
                     expect.objectContaining({ pathname: '/api/test' })
                 );
             });
@@ -169,7 +169,7 @@ describe('middleware', () => {
 
                 expect(response.status).toBe(401);
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
-                    '[middleware] Challenge mode enabled, blocking',
+                    new Error('[middleware] Challenge mode enabled, blocking'),
                     expect.objectContaining({ pathname: '/api/test' })
                 );
             });
@@ -233,7 +233,7 @@ describe('middleware', () => {
 
             expect(response.status).toBe(401);
             expect(loggerErrorSpy).toHaveBeenCalledWith(
-                '[middleware] Challenge mode enabled, blocking',
+                new Error('[middleware] Challenge mode enabled, blocking'),
                 expect.objectContaining({ pathname: '/api/test' })
             );
         });

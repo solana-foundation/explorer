@@ -40,7 +40,7 @@ export function useAnchorVerifiableBuild(programAddress: PublicKey) {
         getAnchorVerifiableBuild(programAddress)
             .then(setVerifiableBuild)
             .catch(error => {
-                Logger.error('[utils:program-verification] Failed to get anchor verifiable build', { error });
+                Logger.error(error);
                 setVerifiableBuild(defaultAnchorBuild);
             })
             .finally(() => setLoading(false));

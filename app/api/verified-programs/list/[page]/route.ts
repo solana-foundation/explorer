@@ -38,7 +38,7 @@ export async function GET(_request: Request, { params: { page } }: Params) {
             },
         });
     } catch (error) {
-        Logger.error('[api:verified-programs] Error in verified-programs list API', { error });
+        Logger.error(error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

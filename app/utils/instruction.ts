@@ -67,10 +67,7 @@ export function getTokenProgramInstructionName(ix: ParsedInstruction, signatureI
         const type = create(rawType, TokenInstructionType);
         return IX_TITLES[type];
     } catch (err) {
-        Logger.error('[utils:instruction] Failed to get token program instruction name', {
-            error: err,
-            signature: signatureInfo.signature,
-        });
+        Logger.error(err, { signature: signatureInfo.signature });
         return 'Unknown';
     }
 }
@@ -105,10 +102,7 @@ export function getTokenInstructionName(
                 return parseTokenLendingInstructionTitle(transactionInstruction);
             }
         } catch (error) {
-            Logger.error('[utils:instruction] Failed to get token instruction name', {
-                error,
-                signature: signatureInfo.signature,
-            });
+            Logger.error(error, { signature: signatureInfo.signature });
             return undefined;
         }
     }

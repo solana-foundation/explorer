@@ -1,4 +1,5 @@
-import { captureException, captureMessage } from '@sentry/nextjs';
+import type { SeverityLevel } from '@sentry/core';
+import { captureException, captureMessage, withScope } from '@sentry/nextjs';
 
 enum LOG_LEVEL {
     PANIC,
@@ -8,52 +9,66 @@ enum LOG_LEVEL {
     DEBUG,
 }
 
-type PanicContext = Record<string, unknown> & {
-    error: unknown;
-    hint?: Parameters<typeof captureException>[1];
+type LogContext = Record<string, unknown>;
+
+type SentryExtras = Record<string, unknown>;
+
+type SentryContext = LogContext & {
+    /** When true, the event is also sent to Sentry. */
+    sentry?: boolean;
+    /** Extra data sent exclusively to Sentry (not included in console output). */
+    sentryExtras?: SentryExtras;
 };
 
-type SentryContext = Record<string, unknown> & {
-    /** When true, the message is also sent to Sentry via captureMessage. */
-    sentry?: boolean;
+type PanicContext = LogContext & {
+    /** Extra data sent exclusively to Sentry (not included in console output). */
+    sentryExtras?: SentryExtras;
 };
 
 /**
  * A log message won't be shown if its level is greater than the NEXT_LOG_LEVEL environment variable.
  *
- * All methods use a uniform signature: (message: string, context?: Record<string, unknown>)
+ * `panic` requires an `Error` instance. `error` accepts any value as the first argument —
+ * when an `Error` is passed it is forwarded directly; otherwise a sentinel
+ * `Error('Unrecognized error')` is created so Sentry always receives a proper stack trace,
+ * and the raw value is logged at debug level.
  * - Tags are inline in the message: `[module]` or `[section:module]`
  * - Dynamic values go in the context object for searchable stable messages
- * - Errors go in context as `{ error }` — formatArgs extracts them as separate console arguments
- *   to preserve stack traces in Vercel
+ *
+ * Sentry integration (each method always sets the correct severity level via `withScope`):
+ * - `panic` (level: `fatal`) — always calls `captureException`.
+ * - `error` (level: `error`) — calls `captureException` when `{ sentry: true }`.
+ * - `warn`  (level: `warning`) — calls `captureMessage` when `{ sentry: true }`.
+ *
+ * Use `sentryExtras` to attach data exclusively to the Sentry event.
+ * Context fields outside `sentryExtras` are only sent to the console.
+ * Internal keys (`sentry`, `sentryExtras`) are always stripped from console output.
  */
 class StraightforwardLogger {
-    panic(message: string, context: PanicContext) {
+    panic(error: Error, context?: PanicContext) {
         // Sentry capture is intentionally not gated by isLoggable — panics must
         // always reach error tracking regardless of the console log level.
-        captureException(resolveError(context.error), context.hint);
-        isLoggable(LOG_LEVEL.PANIC) && console.error(...formatArgs(message, context));
+        withSentryLevel('fatal', context, () => captureException(error));
+        isLoggable(LOG_LEVEL.PANIC) && console.error(error, ...consoleArgs(context));
     }
-    error(message: string, context?: SentryContext) {
+    error(maybeError: unknown, context?: SentryContext) {
+        const error = resolveError(maybeError);
         if (context?.sentry) {
-            captureMessage(message, 'error');
+            withSentryLevel('error', context, () => captureException(error));
         }
-        if (context && 'error' in context) {
-            warnIfNotError(context.error);
-        }
-        isLoggable(LOG_LEVEL.ERROR) && console.error(...formatArgs(message, context));
+        isLoggable(LOG_LEVEL.ERROR) && console.error(error, ...consoleArgs(context));
     }
     warn(message: string, context?: SentryContext) {
         if (context?.sentry) {
-            captureMessage(message, 'warning');
+            withSentryLevel('warning', context, () => captureMessage(message));
         }
-        isLoggable(LOG_LEVEL.WARN) && console.warn(...formatArgs(message, context));
+        isLoggable(LOG_LEVEL.WARN) && console.warn(message, ...consoleArgs(context));
     }
-    info(message: string, context?: Record<string, unknown>) {
-        isLoggable(LOG_LEVEL.INFO) && console.info(...formatArgs(message, context));
+    info(message: string, context?: LogContext) {
+        isLoggable(LOG_LEVEL.INFO) && console.info(message, ...consoleArgs(context));
     }
-    debug(message: string, context?: Record<string, unknown>) {
-        isLoggable(LOG_LEVEL.DEBUG) && console.debug(...formatArgs(message, context));
+    debug(message: string, context?: LogContext) {
+        isLoggable(LOG_LEVEL.DEBUG) && console.debug(message, ...consoleArgs(context));
     }
 }
 
@@ -101,24 +116,29 @@ function resolveError(value: unknown): Error {
     return value instanceof Error ? value : new Error('Unrecognized error');
 }
 
-/**
- * Builds console arguments from a message and optional context object.
- * Extracts `error` from context and passes it as a separate argument to preserve stack traces.
- */
-function formatArgs(message: string, context?: Record<string, unknown>): unknown[] {
-    if (!context) return [message];
-
+/** Strips internal keys, returning the user-provided fields or undefined if nothing remains. */
+function cleanContext(context?: LogContext): Record<string, unknown> | undefined {
+    if (!context) return undefined;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { error, hint: _hint, sentry: _sentry, ...rest } = context;
-    const args: unknown[] = [message];
+    const { sentry: _sentry, sentryExtras: _sentryExtras, ...rest } = context;
+    return Object.keys(rest).length > 0 ? rest : undefined;
+}
 
-    if (Object.keys(rest).length > 0) {
-        args.push(rest);
-    }
+/** Sets the severity level and sentryExtras on a Sentry scope, then runs the capture callback. */
+function withSentryLevel(
+    level: SeverityLevel,
+    context: (LogContext & { sentryExtras?: SentryExtras }) | undefined,
+    capture: () => void
+) {
+    withScope(scope => {
+        scope.setLevel(level);
+        if (context?.sentryExtras) scope.setExtras(context.sentryExtras);
+        capture();
+    });
+}
 
-    if (error !== undefined) {
-        args.push(error);
-    }
-
-    return args;
+/** Returns cleaned context as a single-element array for spreading into console calls. */
+function consoleArgs(context?: LogContext): unknown[] {
+    const clean = cleanContext(context);
+    return clean ? [clean] : [];
 }

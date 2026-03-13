@@ -21,7 +21,7 @@ export function ConnectWallet() {
             disconnect();
         } else if (wallet) {
             connect().catch(e => {
-                Logger.error('[idl] Wallet connect error', { error: e });
+                Logger.error(e);
             });
         } else {
             setVisible(true);

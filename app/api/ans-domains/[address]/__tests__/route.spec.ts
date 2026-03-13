@@ -78,10 +78,7 @@ describe('GET /api/ans-domains/[address]', () => {
 
             await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
-            expect(Logger.error).toHaveBeenCalledWith('[api:ans-domains] Failed to fetch ANS domains', {
-                address: VALID_ADDRESS,
-                error,
-            });
+            expect(Logger.error).toHaveBeenCalledWith(error, { address: VALID_ADDRESS });
         });
 
         it('should not cache error responses', async () => {

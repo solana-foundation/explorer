@@ -28,7 +28,7 @@ export async function GET(_request: Request, { params: { domain } }: Params) {
 
         return NextResponse.json(domainInfo, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.error('[api:domain-info] Failed to resolve domain', { domain, error });
+        Logger.error(error, { domain });
         return NextResponse.json(null, { headers: NO_CACHE_HEADERS, status: 500 });
     }
 }

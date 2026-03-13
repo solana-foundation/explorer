@@ -549,8 +549,7 @@ function InstructionDetailsCell({
                 try {
                     name = parseSerumInstructionTitle(transactionInstruction);
                 } catch (error) {
-                    Logger.error('[components:token-history] Failed to parse Serum instruction', {
-                        error,
+                    Logger.error(error, {
                         signature: tx.signature,
                     });
                     return undefined;
@@ -559,8 +558,7 @@ function InstructionDetailsCell({
                 try {
                     name = parseTokenSwapInstructionTitle(transactionInstruction);
                 } catch (error) {
-                    Logger.error('[components:token-history] Failed to parse TokenSwap instruction', {
-                        error,
+                    Logger.error(error, {
                         signature: tx.signature,
                     });
                     return undefined;
@@ -569,8 +567,7 @@ function InstructionDetailsCell({
                 try {
                     name = parseTokenLendingInstructionTitle(transactionInstruction);
                 } catch (error) {
-                    Logger.error('[components:token-history] Failed to parse TokenLending instruction', {
-                        error,
+                    Logger.error(error, {
                         signature: tx.signature,
                     });
                     return undefined;
@@ -579,8 +576,7 @@ function InstructionDetailsCell({
                 try {
                     name = parseMangoInstructionTitle(transactionInstruction);
                 } catch (error) {
-                    Logger.error('[components:token-history] Failed to parse Mango instruction', {
-                        error,
+                    Logger.error(error, {
                         signature: tx.signature,
                     });
                     return undefined;

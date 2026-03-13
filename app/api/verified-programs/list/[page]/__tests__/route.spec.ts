@@ -227,9 +227,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
 
             await GET(mockRequest, params);
 
-            expect(Logger.error).toHaveBeenCalledWith('[api:verified-programs] Error in verified-programs list API', {
-                error: networkError,
-            });
+            expect(Logger.error).toHaveBeenCalledWith(networkError);
         });
     });
 });

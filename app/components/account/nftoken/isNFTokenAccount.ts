@@ -41,7 +41,7 @@ export const parseNFTokenNFTAccount = (account: Account): NftokenTypes.NftAccoun
             metadata_url: parsed.metadata_url?.replace(/\0/g, '') ?? null,
         };
     } catch (e) {
-        Logger.error('[components:nftoken] Failed to parse NFToken NFT account', { error: e });
+        Logger.error(e);
         return null;
     }
 };
@@ -70,7 +70,7 @@ export const parseNFTokenCollectionAccount = (account: Account): NftokenTypes.Co
             metadata_url: parsed.metadata_url?.replace(/\0/g, '') ?? null,
         };
     } catch (e) {
-        Logger.error('[components:nftoken] Failed to parse NFToken Collection account', { error: e });
+        Logger.error(e);
         return null;
     }
 };
