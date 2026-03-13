@@ -49,7 +49,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
             }
             return NextResponse.json(
                 { error: 'Failed to fetch price data' },
-                { headers: NO_STORE_HEADERS, status: response.status }
+                { headers: NO_STORE_HEADERS, status: response.status === 429 ? 429 : 502 }
             );
         }
 
