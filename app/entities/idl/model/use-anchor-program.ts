@@ -25,7 +25,7 @@ export function useAnchorProgram(
             const program = new Program(getFormattedIdl(formatSerdeIdl, idl, programAddress), getProvider(url));
             return program;
         } catch (e) {
-            Logger.error('[idl] Error creating anchor program', { error: e, idl, programAddress });
+            Logger.error(new Error('[idl] Error creating anchor program', { cause: e }), { idl, programAddress });
             return null;
         }
     }, [idl, programAddress, url]);

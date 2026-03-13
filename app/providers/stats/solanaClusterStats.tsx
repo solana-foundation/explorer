@@ -259,7 +259,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
             data: 'Cluster stats timed out',
             type: PerformanceInfoActionType.SetError,
         });
-        Logger.error('[providers:cluster-stats] Cluster stats timed out');
+        Logger.error(new Error('[providers:cluster-stats] Cluster stats timed out'));
         setActive(false);
     }, []);
 

@@ -62,14 +62,14 @@ export async function searchTokens(search: string, cluster: Cluster): Promise<Se
         if (apiResponse.status >= 400) {
             try {
                 const errorJsonBody = await apiResponse.json();
-                Logger.error('[utils:token-search] Error calling token search API', {
+                Logger.error(new Error('[utils:token-search] Error calling token search API'), {
                     chainId: chainId.toString(),
                     errorJsonBody,
                     search,
                 });
             } catch {
                 // no JSON body for error
-                Logger.error('[utils:token-search] Error calling token search API', {
+                Logger.error(new Error('[utils:token-search] Error calling token search API'), {
                     chainId: chainId.toString(),
                     search,
                 });
@@ -84,7 +84,7 @@ export async function searchTokens(search: string, cluster: Cluster): Promise<Se
             value: [token.name, token.symbol, token.address],
         }));
     } catch (error) {
-        Logger.error('[utils:token-search] Error parsing token search API response', {
+        Logger.error(new Error('[utils:token-search] Error parsing token search API response'), {
             chainId: chainId.toString(),
             search,
         });

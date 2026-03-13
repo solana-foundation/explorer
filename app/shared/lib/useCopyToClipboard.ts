@@ -23,7 +23,7 @@ export function useCopyToClipboard(resetMs = 2000): readonly [CopyState, (text: 
             clearTimeout(timeoutRef.current);
 
             if (typeof navigator === 'undefined' || !navigator.clipboard) {
-                Logger.error('Clipboard API is not available');
+                Logger.error(new Error('Clipboard API is not available'));
                 setState('errored');
                 scheduleReset();
                 return;
@@ -35,7 +35,7 @@ export function useCopyToClipboard(resetMs = 2000): readonly [CopyState, (text: 
                     scheduleReset();
                 },
                 (error: unknown) => {
-                    Logger.error('Clipboard write failed', { error });
+                    Logger.error(new Error('Clipboard write failed', { cause: error }));
                     setState('errored');
                     scheduleReset();
                 }

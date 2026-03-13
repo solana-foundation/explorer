@@ -21,7 +21,7 @@ export async function getTokenInfo(mintAddress: string, cluster: Cluster): Promi
     });
 
     if (response.status >= 400) {
-        Logger.error('[receipt] Error calling UTL API', { chainId, mintAddress, status: response.status });
+        Logger.error(new Error('[receipt] Error calling UTL API'), { chainId, mintAddress, status: response.status });
         return undefined;
     }
 

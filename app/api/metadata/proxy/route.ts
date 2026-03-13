@@ -44,13 +44,13 @@ export async function GET(request: Request, { params: _params }: Params) {
 
         // check that uri has supported protocol despite of any other checks
         if (!isHTTPProtocol(parsedUrl)) {
-            Logger.error('[api:metadata-proxy] Unsupported protocol', { protocol: parsedUrl.protocol });
+            Logger.error(new Error('[api:metadata-proxy] Unsupported protocol'), { protocol: parsedUrl.protocol });
             return respondWithError(400);
         }
 
         const isPrivate = await checkURLForPrivateIP(parsedUrl);
         if (isPrivate) {
-            Logger.error('[api:metadata-proxy] Private IP detected', { hostname: parsedUrl.hostname });
+            Logger.error(new Error('[api:metadata-proxy] Private IP detected'), { hostname: parsedUrl.hostname });
             return respondWithError(403);
         }
     } catch (error) {

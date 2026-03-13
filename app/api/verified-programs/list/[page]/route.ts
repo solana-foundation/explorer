@@ -23,7 +23,7 @@ export async function GET(_request: Request, { params: { page } }: Params) {
         const response = await fetch(`${OSEC_REGISTRY_URL}/verified-programs/${pageNumber}`);
 
         if (!response.ok) {
-            Logger.error('[api:verified-programs] Failed to fetch verified programs page', {
+            Logger.error(new Error('[api:verified-programs] Failed to fetch verified programs page'), {
                 page: pageNumber,
                 status: response.status,
             });

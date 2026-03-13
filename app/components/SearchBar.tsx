@@ -507,7 +507,7 @@ function buildAppendableSearchOptions(
 ): SearchOptions[] {
     if (!searchOptions) return [];
     if (searchOptions.status === 'rejected') {
-        Logger.error(searchOptions.reason, { name });
+        Logger.error(new Error('Search failed', { cause: searchOptions.reason }), { name });
         return [];
     }
     return searchOptions.value
