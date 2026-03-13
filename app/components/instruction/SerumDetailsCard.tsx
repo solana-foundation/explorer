@@ -98,8 +98,7 @@ export function SerumDetailsCard(initialProps: {
                 return <ConsumeEventsPermissionedDetailsCard info={decodeConsumeEventsPermissioned(ix)} {...props} />;
         }
     } catch (error) {
-        Logger.error('[components:ix-serum] Failed to decode instruction', {
-            error,
+        Logger.error(error, {
             signature,
             url,
         });

@@ -28,8 +28,7 @@ export function TokenSwapDetailsCard({
     try {
         title = parseTokenSwapInstructionTitle(ix);
     } catch (error) {
-        Logger.error('[components:ix-token-swap] Failed to parse instruction title', {
-            error,
+        Logger.error(error, {
             signature,
             url,
         });

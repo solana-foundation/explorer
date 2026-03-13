@@ -33,7 +33,7 @@ export function useSquadsMultisigLookup(programAuthority: PublicKey | null | und
                 const data = await response.json();
                 return 'error' in data ? null : (data as SquadsMultisigMapInfo);
             } catch (error) {
-                Logger.error('[providers:squads-multisig] Error fetching squads information', { error });
+                Logger.error(error);
                 return null;
             }
         },

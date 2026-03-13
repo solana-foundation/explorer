@@ -507,7 +507,7 @@ function buildAppendableSearchOptions(
 ): SearchOptions[] {
     if (!searchOptions) return [];
     if (searchOptions.status === 'rejected') {
-        Logger.error('[components:search-bar] Failed to build search options', { error: searchOptions.reason, name });
+        Logger.error(searchOptions.reason, { name });
         return [];
     }
     return searchOptions.value

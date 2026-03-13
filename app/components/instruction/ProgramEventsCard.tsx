@@ -23,7 +23,7 @@ export function ProgramEventsCard({
             try {
                 return decodeEventFromLog(eventData, program);
             } catch (error) {
-                Logger.error('[components:ix-program-events] Failed to decode event', { error });
+                Logger.error(error);
                 return null;
             }
         })

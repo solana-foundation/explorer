@@ -118,7 +118,7 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
         status = FetchStatus.Fetched;
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            Logger.error('[providers:tokens] Failed to fetch account tokens', { error, url });
+            Logger.error(error, { url });
         }
         status = FetchStatus.FetchFailed;
     }

@@ -224,7 +224,7 @@ function ProgramLogRow({
                 }
             }
         } catch (error) {
-            Logger.error('[components:program-logs] Failed to decode instruction name', { error });
+            Logger.error(error);
         }
     }
 

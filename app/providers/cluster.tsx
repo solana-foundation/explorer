@@ -170,9 +170,8 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
         });
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            Logger.error('[providers:cluster] Failed to connect', {
+            Logger.error(error, {
                 clusterUrl: clusterUrl(cluster, customUrl),
-                error,
             });
         }
         dispatch({

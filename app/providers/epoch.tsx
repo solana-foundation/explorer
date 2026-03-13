@@ -115,7 +115,7 @@ export async function fetchEpoch(
     } catch (err) {
         status = FetchStatus.FetchFailed;
         if (cluster !== Cluster.Custom) {
-            Logger.error('[providers:epoch] Failed to fetch epoch', { epoch: epoch.toString(), error: err });
+            Logger.error(err, { epoch: epoch.toString() });
         }
     }
 

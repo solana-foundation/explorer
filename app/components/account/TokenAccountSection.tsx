@@ -110,9 +110,8 @@ export function TokenAccountSection({
         }
     } catch (err) {
         if (cluster !== Cluster.Custom) {
-            Logger.error('[components:token-account] Failed to parse token account', {
+            Logger.error(err, {
                 address: account.pubkey.toBase58(),
-                error: err,
             });
         }
     }

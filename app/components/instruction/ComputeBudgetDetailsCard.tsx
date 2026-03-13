@@ -200,8 +200,7 @@ export function ComputeBudgetDetailsCard({
             }
         }
     } catch (error) {
-        Logger.error('[components:ix-compute-budget] Failed to decode instruction', {
-            error,
+        Logger.error(error, {
             signature,
             url,
         });

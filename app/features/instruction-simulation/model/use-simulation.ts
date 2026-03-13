@@ -235,7 +235,7 @@ export function useSimulation(
                     setError('TransactionError');
                 }
             } catch (err) {
-                Logger.error('[instruction-simulation] Simulation failed', { error: err });
+                Logger.error(err);
                 setLogs(null);
                 if (err instanceof Error) {
                     setError(err.message);

@@ -42,8 +42,7 @@ export function VoteDetailsCard(props: InstructionDetailsProps) {
                 return renderDetails<VoteSwitchInfo>(props, parsed, VoteSwitchInfo);
         }
     } catch (error) {
-        Logger.error('[components:ix-vote] Failed to decode instruction', {
-            error,
+        Logger.error(error, {
             url,
         });
     }

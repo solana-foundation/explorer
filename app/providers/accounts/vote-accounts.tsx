@@ -31,7 +31,7 @@ async function fetchVoteAccounts(
         setVoteAccounts(voteAccounts);
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            Logger.error('[providers:vote-accounts] Failed to fetch vote accounts', { error, url });
+            Logger.error(error, { url });
         }
     }
 }

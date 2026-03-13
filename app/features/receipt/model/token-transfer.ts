@@ -71,7 +71,7 @@ export async function createTokenTransferReceipt(
 
     const [err, validated] = validate(raw, TokenTransferPayload, { coerce: true });
     if (err) {
-        Logger.error('[receipt] Error validating token transfer payload', { error: err });
+        Logger.error(err);
         return undefined;
     }
 

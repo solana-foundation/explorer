@@ -29,7 +29,7 @@ export async function GET(_request: Request, { params: { address } }: Params) {
 
         return NextResponse.json({ domains }, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.error('[api:sns-domains] Failed to fetch SNS domains', { address, error });
+        Logger.error(error, { address });
         return NextResponse.json({ domains: [] }, { headers: { 'Cache-Control': 'no-store' }, status: 500 });
     }
 }

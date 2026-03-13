@@ -147,7 +147,7 @@ async function fetchAccountHistory(
         status = FetchStatus.Fetched;
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            Logger.error('[providers:account-history] Fetch failed', { error, url });
+            Logger.error(error, { url });
         }
         status = FetchStatus.FetchFailed;
     }
@@ -159,7 +159,7 @@ async function fetchAccountHistory(
             transactionMap = await fetchParsedTransactions(url, signatures);
         } catch (error) {
             if (cluster !== Cluster.Custom) {
-                Logger.error('[providers:account-history] Fetch failed', { error, url });
+                Logger.error(error, { url });
             }
             status = FetchStatus.FetchFailed;
         }
@@ -239,11 +239,11 @@ export function useFetchAccountHistory(limit = 25) {
                         fetchTransactions,
                         additionalSignatures
                     )
-                ).catch(e => Logger.error('[providers:account-history] Fetch failed', { error: e }));
+                ).catch(e => Logger.error(e));
             } else {
                 fetchOnce(pubkey.toBase58(), inFlight, () =>
                     fetchAccountHistory(dispatch, pubkey, cluster, url, { limit }, fetchTransactions)
-                ).catch(e => Logger.error('[providers:account-history] Fetch failed', { error: e }));
+                ).catch(e => Logger.error(e));
             }
         },
         [limit, state, dispatch, cluster, url, inFlight]

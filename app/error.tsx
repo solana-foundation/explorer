@@ -7,7 +7,7 @@ import { Logger } from '@/app/shared/lib/logger';
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
     useEffect(() => {
-        Logger.panic('[error-boundary] Unhandled error', { error });
+        Logger.panic(error);
     }, [error]);
 
     return (

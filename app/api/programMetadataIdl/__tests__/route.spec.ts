@@ -95,9 +95,7 @@ describe('GET api/programMetadataIdl', () => {
         const request = createRequest(mockAddress, Cluster.MainnetBeta, 'idl');
         const res = await GET(request);
         expect(res.status).toBe(200);
-        expect(Logger.error).toHaveBeenCalledWith('[api:programMetadataIdl] Solana error fetching program metadata', {
-            error: expectedError,
-        });
+        expect(Logger.error).toHaveBeenCalledWith(expectedError);
         expect(await res.json()).toEqual({ details: {}, error: 'Metadata fetch failed' });
     });
 
@@ -116,9 +114,7 @@ describe('GET api/programMetadataIdl', () => {
         const request = createRequest(mockAddress, Cluster.MainnetBeta, 'idl');
         const res = await GET(request);
         expect(res.status).toBe(200);
-        expect(Logger.error).toHaveBeenCalledWith('[api:programMetadataIdl] Error with cause', {
-            error: expectedError.cause,
-        });
+        expect(Logger.error).toHaveBeenCalledWith(expectedError.cause);
         expect(await res.json()).toEqual({ details: { cause: {} }, error: expectedError.message });
     });
 

@@ -81,10 +81,7 @@ describe('GET /api/sns-domains/[address]', () => {
 
             await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
-            expect(Logger.error).toHaveBeenCalledWith('[api:sns-domains] Failed to fetch SNS domains', {
-                address: VALID_ADDRESS,
-                error,
-            });
+            expect(Logger.error).toHaveBeenCalledWith(error, { address: VALID_ADDRESS });
         });
 
         it('does not cache error responses', async () => {
@@ -96,10 +93,7 @@ describe('GET /api/sns-domains/[address]', () => {
             const data = await response.json();
             expect(data.domains).toEqual([]);
             expect(response.headers.get('Cache-Control')).toBe('no-store');
-            expect(Logger.error).toHaveBeenCalledWith('[api:sns-domains] Failed to fetch SNS domains', {
-                address: VALID_ADDRESS,
-                error: expect.any(Error),
-            });
+            expect(Logger.error).toHaveBeenCalledWith(expect.any(Error), { address: VALID_ADDRESS });
         });
     });
 });

@@ -93,7 +93,7 @@ export async function fetchTransactionStatus(
                 blockTime = await connection.getBlockTime(value.slot);
             } catch (error) {
                 if (cluster === Cluster.MainnetBeta && confirmations === 'max') {
-                    Logger.error('[providers:transactions] Failed to get block time', { error, slot: `${value.slot}` });
+                    Logger.error(error, { slot: `${value.slot}` });
                 }
             }
             const timestamp: Timestamp = blockTime !== null ? blockTime : 'unavailable';
@@ -110,7 +110,7 @@ export async function fetchTransactionStatus(
         fetchStatus = FetchStatus.Fetched;
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            Logger.error('[providers:transactions] Failed to fetch transaction status', { error, url });
+            Logger.error(error, { url });
         }
         fetchStatus = FetchStatus.FetchFailed;
     }

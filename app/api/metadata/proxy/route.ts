@@ -54,7 +54,7 @@ export async function GET(request: Request, { params: _params }: Params) {
             return respondWithError(403);
         }
     } catch (error) {
-        Logger.error('[api:metadata-proxy] Failed to parse request URL', { error });
+        Logger.error(error);
         return respondWithError(400);
     }
 

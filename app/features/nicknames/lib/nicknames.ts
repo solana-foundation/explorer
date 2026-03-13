@@ -16,7 +16,7 @@ export const getNickname = (address: string): string | null => {
         const nicknames = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
         return nicknames[address] || null;
     } catch (error) {
-        Logger.error('[nicknames] Error reading nicknames from localStorage', { error });
+        Logger.error(error);
         return null;
     }
 };
@@ -38,7 +38,7 @@ export const setNickname = (address: string, nickname: string): void => {
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('nicknameUpdated', { detail: { address } }));
     } catch (error) {
-        Logger.error('[nicknames] Error saving nickname to localStorage', { error });
+        Logger.error(error);
     }
 };
 
@@ -53,6 +53,6 @@ export const removeNickname = (address: string): void => {
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('nicknameUpdated', { detail: { address } }));
     } catch (error) {
-        Logger.error('[nicknames] Error removing nickname from localStorage', { error });
+        Logger.error(error);
     }
 };

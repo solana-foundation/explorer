@@ -28,8 +28,7 @@ export function WormholeDetailsCard({
     try {
         title = parsWormholeInstructionTitle(ix);
     } catch (error) {
-        Logger.error('[components:ix-wormhole] Failed to parse instruction title', {
-            error,
+        Logger.error(error, {
             signature,
             url,
         });

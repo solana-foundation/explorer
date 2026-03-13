@@ -79,10 +79,7 @@ describe('GET /api/domain-info/[domain]', () => {
 
         await GET(mockRequest, { params: { domain: 'test.sol' } });
 
-        expect(Logger.error).toHaveBeenCalledWith('[api:domain-info] Failed to resolve domain', {
-            domain: 'test.sol',
-            error,
-        });
+        expect(Logger.error).toHaveBeenCalledWith(error, { domain: 'test.sol' });
     });
 
     describe('invalid domain input', () => {

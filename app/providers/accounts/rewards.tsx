@@ -95,7 +95,7 @@ async function fetchRewards(
             fromEpoch = epochInfo.epoch - 1;
         } catch (error) {
             if (cluster !== Cluster.Custom) {
-                Logger.error('[providers:rewards] Fetch failed', { error, url });
+                Logger.error(error, { url });
             }
 
             return dispatch({
@@ -117,7 +117,7 @@ async function fetchRewards(
             return result[0];
         } catch (error) {
             if (cluster !== Cluster.Custom) {
-                Logger.error('[providers:rewards] Fetch failed', { error, url });
+                Logger.error(error, { url });
             }
         }
         return null;

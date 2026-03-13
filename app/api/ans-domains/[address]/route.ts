@@ -23,7 +23,7 @@ export async function GET(_request: Request, { params: { address } }: Params) {
         const domains = await fetchAnsDomains(address);
         return NextResponse.json({ domains }, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.error('[api:ans-domains] Failed to fetch ANS domains', { address, error });
+        Logger.error(error, { address });
         return NextResponse.json({ domains: [] }, { headers: { 'Cache-Control': 'no-store' }, status: 500 });
     }
 }

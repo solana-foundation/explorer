@@ -40,7 +40,7 @@ export async function GET(_request: Request, { params: { programId } }: Params) 
             },
         });
     } catch (error) {
-        Logger.error('[api:verified-programs] Error fetching metadata', { error, programId });
+        Logger.error(error, { programId });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

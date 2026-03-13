@@ -94,8 +94,7 @@ export function MangoDetailsCard(props: {
                 return <AddSpotMarketDetailsCard info={decodeAddSpotMarket(ix)} {...props} />;
         }
     } catch (error) {
-        Logger.error('[components:ix-mango] Failed to decode instruction', {
-            error,
+        Logger.error(error, {
             signature,
             url,
         });

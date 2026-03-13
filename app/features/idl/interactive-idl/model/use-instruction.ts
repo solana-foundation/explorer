@@ -153,7 +153,7 @@ export function useInstruction({
         } catch (error) {
             const errorMessage = handleInitializeError(error);
 
-            Logger.error('[idl] Program initialization failed', { error: errorMessage });
+            Logger.error(errorMessage);
             setInitializationError(errorMessage);
             setProgram(undefined);
         } finally {
@@ -416,7 +416,7 @@ function useInvocationState({
     };
 
     const handleTxError = (error: unknown | Error, transaction: Transaction | undefined) => {
-        Logger.error('[idl] Instruction execution failed', { error, transaction });
+        Logger.error(error, { transaction });
         const errorMessage = handleInvokeError(error);
         setLastError({ finishedAt: new Date(), message: errorMessage });
         if (error instanceof SendTransactionError) {

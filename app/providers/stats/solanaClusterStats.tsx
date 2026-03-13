@@ -116,7 +116,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
                 });
             } catch (error) {
                 if (cluster !== Cluster.Custom) {
-                    Logger.error('[providers:cluster-stats] Fetch failed', { error, url });
+                    Logger.error(error, { url });
                 }
                 if (error instanceof Error) {
                     dispatchPerformanceInfo({
@@ -144,7 +144,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
                 });
             } catch (error) {
                 if (cluster !== Cluster.Custom) {
-                    Logger.error('[providers:cluster-stats] Fetch failed', { error, url });
+                    Logger.error(error, { url });
                 }
                 if (error instanceof Error) {
                     dispatchPerformanceInfo({
@@ -178,7 +178,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
                 });
             } catch (error) {
                 if (cluster !== Cluster.Custom) {
-                    Logger.error('[providers:cluster-stats] Fetch failed', { error, url });
+                    Logger.error(error, { url });
                 }
                 if (error instanceof Error) {
                     dispatchDashboardInfo({
