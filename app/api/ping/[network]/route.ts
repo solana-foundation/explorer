@@ -49,7 +49,7 @@ export async function GET(_request: Request, { params: { network } }: Params) {
 
         return NextResponse.json(data, {
             headers: {
-                'Cache-Control': 'public, max-age=60, s-maxage=60',
+                'Cache-Control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=30',
             },
         });
     } catch (error) {
