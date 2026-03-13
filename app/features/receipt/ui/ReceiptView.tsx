@@ -6,11 +6,13 @@ import Link from 'next/link';
 import { Share2 } from 'react-feather';
 
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
+import { useCanNativeShare } from '@/app/shared/lib/use-can-native-share';
 
 import type { FormattedExtendedReceipt } from '../types';
 import { BaseReceipt, BlurredCircle } from './BaseReceipt';
 import { CopyLinkShareItem } from './CopyLinkShareItem';
 import { PopoverButton } from './PopoverButton';
+import { ShareOnXShareItem } from './ShareOnXShareItem';
 
 interface ReceiptViewProps {
     data: FormattedExtendedReceipt;
@@ -19,8 +21,26 @@ interface ReceiptViewProps {
 }
 
 export function ReceiptView({ data, signature, transactionPath }: ReceiptViewProps) {
+    const canNativeShare = useCanNativeShare();
+
     function handleViewTxClick() {
         receiptAnalytics.trackViewTxClicked(signature);
+    }
+
+    async function handleNativeShare() {
+        try {
+            const shareData = {
+                title: 'Solana Transaction Receipt',
+                url: globalThis.location.href,
+            };
+
+            if (!navigator.canShare?.(shareData)) return;
+            await navigator.share(shareData);
+            receiptAnalytics.trackShareNative(signature);
+        } catch (e) {
+            if (e instanceof Error && e.name === 'AbortError') return;
+            throw e;
+        }
     }
 
     return (
@@ -41,9 +61,21 @@ export function ReceiptView({ data, signature, transactionPath }: ReceiptViewPro
                     </Button>
                 </div>
                 <div className="e-flex e-items-start e-gap-0.5">
-                    <PopoverButton icon={<Share2 size={12} />} label="Share">
-                        <CopyLinkShareItem onCopy={() => receiptAnalytics.trackShareCopyLink(signature)} />
-                    </PopoverButton>
+                    {canNativeShare ? (
+                        <Button variant="compact" size="compact" onClick={handleNativeShare} className="e-max-h-[25px]">
+                            <Share2 size={12} aria-hidden="true" />
+                            Share
+                        </Button>
+                    ) : (
+                        <PopoverButton
+                            icon={<Share2 size={12} aria-hidden="true" />}
+                            label="Share"
+                            className="e-max-h-[25px]"
+                        >
+                            <ShareOnXShareItem onShare={() => receiptAnalytics.trackShareOnX(signature)} />
+                            <CopyLinkShareItem onCopy={() => receiptAnalytics.trackShareCopyLink(signature)} />
+                        </PopoverButton>
+                    )}
                 </div>
             </div>
         </div>
