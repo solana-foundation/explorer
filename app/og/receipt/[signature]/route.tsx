@@ -45,7 +45,7 @@ export async function GET(request: NextRequest, { params }: Props) {
             headers: { ...cacheHeaders, 'Content-Type': 'image/png' },
         });
     } catch (e) {
-        Logger.error('[og:receipt] Failed to process receipt', { error: e, signature });
+        Logger.error(new Error('[og:receipt] Failed to process receipt', { cause: e }), { signature });
 
         const status = e instanceof ReceiptError ? e.status : 500;
         const body = status === 404 ? 'Receipt not found' : 'Failed to process request';

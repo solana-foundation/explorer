@@ -71,6 +71,6 @@ export function trackEvent(eventName: string, params?: EventParams): void {
         const provider = resolveProvider(window);
         provider?.track(window, eventName, params);
     } catch (error) {
-        Logger.error('[analytics] Analytics error', { error });
+        Logger.error(new Error('[analytics] Analytics error', { cause: error }));
     }
 }

@@ -102,7 +102,7 @@ async function getFullLegacyTokenInfoUsingCdn(
         'https://cdn.jsdelivr.net/gh/solana-labs/token-list@latest/src/tokens/solana.tokenlist.json'
     );
     if (tokenListResponse.status >= 400) {
-        Logger.error('[utils:token-info] Error fetching token list from CDN');
+        Logger.error(new Error('[utils:token-info] Error fetching token list from CDN'));
         return undefined;
     }
     const { tokens } = (await tokenListResponse.json()) as FullLegacyTokenInfoList;

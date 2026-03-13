@@ -67,7 +67,7 @@ export function TokenInfoBatchProvider({ children }: { children: React.ReactNode
                     mutate(getTokenInfoSwrKey(missing, cluster, genesisHash), undefined, false);
                 }
             } catch (e) {
-                Logger.error('[token-info] Batch fetch failed', { error: e });
+                Logger.error(new Error('[token-info] Batch fetch failed', { cause: e }));
             }
         }
     }, [clearTimers]);

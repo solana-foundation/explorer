@@ -67,7 +67,7 @@ export async function GET(request: Request) {
             );
         } else if (error instanceof Error && error.cause) {
             // Log extra data if cause is present
-            Logger.error(error.cause);
+            Logger.error(new Error('[api:programMetadataIdl] Request failed', { cause: error.cause }));
         }
 
         let displayError;

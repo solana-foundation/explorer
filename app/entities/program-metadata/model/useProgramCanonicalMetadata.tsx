@@ -65,7 +65,7 @@ export function useProgramCanonicalMetadata(
 
                     // In case of 403, we have ok response but it contains {details: {error: string}} data
                     if (details?.error) {
-                        Logger.error('[program-metadata] API returned error', { error: details.error });
+                        Logger.error(new Error('[program-metadata] API returned error'), { error: details.error });
                         return null;
                     }
 
@@ -74,7 +74,9 @@ export function useProgramCanonicalMetadata(
 
                 return null;
             } catch (error) {
-                Logger.error('[program-metadata] Error fetching canonical metadata', { error, seed });
+                Logger.error(new Error('[program-metadata] Error fetching canonical metadata', { cause: error }), {
+                    seed,
+                });
                 return null;
             }
         },

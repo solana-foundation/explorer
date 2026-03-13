@@ -153,7 +153,7 @@ export function useInstruction({
         } catch (error) {
             const errorMessage = handleInitializeError(error);
 
-            Logger.error(errorMessage);
+            Logger.error(new Error(errorMessage));
             setInitializationError(errorMessage);
             setProgram(undefined);
         } finally {
