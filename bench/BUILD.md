@@ -25,7 +25,7 @@
 | Dynamic | `/address/[address]/token-extensions` | 11.5 kB | 1 MB |
 | Dynamic | `/address/[address]/tokens` | 23.2 kB | 1.14 MB |
 | Dynamic | `/address/[address]/transfers` | 3.02 kB | 1.07 MB |
-| Dynamic | `/address/[address]/verified-build` | 6.39 kB | 1.01 MB |
+| Dynamic | `/address/[address]/verified-build` | 6.43 kB | 1.01 MB |
 | Dynamic | `/address/[address]/vote-history` | 4.22 kB | 946 kB |
 | Dynamic | `/api/anchor` | 0 B | 0 B |
 | Dynamic | `/api/ans-domains/[address]` | 0 B | 0 B |
