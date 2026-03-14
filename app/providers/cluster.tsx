@@ -91,6 +91,7 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
         (localStorageIsAvailable() && localStorage.getItem('enableCustomUrl') !== null) ||
         isWhitelistedRpc(state.customUrl);
 
+    // `|| undefined` converts an empty string to undefined, so `??` falls back to state.customUrl
     const customUrl = (enableCustomUrl ? searchParams?.get('customUrl') || undefined : undefined) ?? state.customUrl;
     const pathname = usePathname();
     const router = useRouter();
