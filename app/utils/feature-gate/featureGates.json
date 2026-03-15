@@ -1000,7 +1000,7 @@
     "testnet_activation_epoch": 830,
     "devnet_activation_epoch": 934,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 842,
     "description": ""
   },
   {
@@ -1134,6 +1134,496 @@
     "min_agave_versions": [
       "v3.0.0"
     ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "bnYzodLwmybj7e1HAe98yZrdJTd7we69eMMLgCXqKZm",
+    "title": "SIMD-0334: Fix alt_bn128_pairing Syscall Length Check",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0334-fix-alt-bn128-pairing-length-check.md"
+    ],
+    "simds": [
+      "0334"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.806.30102"
+    ],
+    "min_jito_versions": [
+      "v3.1.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 906,
+    "devnet_activation_epoch": 1015,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "rent6iVy6PDoViPBeJ6k5EJQrkj62h7DPyLbWGHwjrC",
+    "title": "SIMD-0194: Deprecate rent exemption threshold",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0194-deprecate-rent-exemption-threshold.md"
+    ],
+    "simds": [
+      "0194"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.806.30102"
+    ],
+    "min_jito_versions": [
+      "v3.1.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 907,
+    "devnet_activation_epoch": 1023,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "CHaChatUnR3s6cPyPMMGNJa3VdQQ8PNH2JqdD4LpCKnB",
+    "title": "SIMD-0332: Reduce ChaCha rounds for Turbine from 20 to 8",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0332-cha-cha-8.md"
+    ],
+    "simds": [
+      "0332"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.812.30108"
+    ],
+    "min_jito_versions": [
+      "v3.1.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 909,
+    "devnet_activation_epoch": 1029,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "Gx4XFcrVMt4HUvPzTpTSVkdDVgcDSjKhDN1RqRS6KDuZ",
+    "title": "SIMD-0185: Vote Account V4",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0185-vote-account-v4.md"
+    ],
+    "simds": [
+      "0185"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.811.30108"
+    ],
+    "min_jito_versions": [
+      "v3.1.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 910,
+    "devnet_activation_epoch": 1033,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "5xXZc66h4UdB6Yq7FzdBxBiRAFMMScMLwHxk2QZDaNZL",
+    "title": "SIMD-0321: Instruction Data Pointer in VM Register 2",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0321-vm-r2-instruction-data-pointer.md"
+    ],
+    "simds": [
+      "0321"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [
+      "v0.806.30102"
+    ],
+    "min_jito_versions": [
+      "v3.1.0"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 911,
+    "devnet_activation_epoch": 1034,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "4WeHX6QoXCCwqbSFgi6dxnB6QsPo6YApaNTH7P4MLQ99",
+    "title": "SIMD-0083: Relax intrabatch account locks",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0083-relax-entry-constraints.md"
+    ],
+    "simds": [
+      "0083"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.7"
+    ],
+    "min_fd_versions": [
+      "v0.811.30108"
+    ],
+    "min_jito_versions": [
+      "v3.1.7"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": 915,
+    "devnet_activation_epoch": 1036,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "rexav5eNTUSNT1K2N7cfRjnthwhcP5BC25v2tA4rW4h",
+    "title": "SIMD-0444: Relax program data account check in migration",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0444-relaxing-program-data-account-requirements.md"
+    ],
+    "simds": [
+      "0444"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.8"
+    ],
+    "min_fd_versions": [
+      "v0.811.30108"
+    ],
+    "min_jito_versions": [
+      "v3.1.8"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "ptokFjwyJtrwCa9Kgo9xoDS59V4QccBGEaRFnRPnSdP",
+    "title": "SIMD-0266: Efficient Token program",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0266-efficient-token-program.md"
+    ],
+    "simds": [
+      "0266"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.8"
+    ],
+    "min_fd_versions": [
+      "v0.811.30108"
+    ],
+    "min_jito_versions": [
+      "v3.1.8"
+    ],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "2GCrNXbzmt4xrwdcKS2RdsLzsgu4V5zHAemW57pcHT6a",
+    "title": "SIMD-0458: Stop use static SimpleVote transaction cost",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0458-stop-using-static-simplevote-transaction-cost.md"
+    ],
+    "simds": [
+      "0458"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "8MhfKhoZEoiySpVe248bDkisyEcBA7JQLyUS94xoTSqN",
+    "title": "SIMD-0337: Markers for Alpenglow Fast Leader Handover, DATA_COMPLETE_SHRED placement rules",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0337-parent-ready-update-marker.md"
+    ],
+    "simds": [
+      "0337"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v3.1.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "6sPDzwyARRExKH52LECxcGoqziH8G7SZofwuxi8Ja331",
+    "title": "SIMD-0312: CreateAccountAllowPrefund",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0312-create-account-allow-prefund.md"
+    ],
+    "simds": [
+      "0312"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "bn2oPgpkzQPT3tohMaAsMVGjhDmmDa4jCaVPqCFmtxM",
+    "title": "SIMD-0284: Add little-endian compatibility for alt_bn128",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0284-alt-bn128-little-endian.md"
+    ],
+    "simds": [
+      "0284"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "bn1hKNURMGQaQoEVxahcEAcqiX3NwRs6hgKKNSLeKxH",
+    "title": "SIMD-0302: Add alt_bn128 G2 syscalls",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0302-bn254-g2-syscalls.md"
+    ],
+    "simds": [
+      "0302"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "76dHtohc2s5dR3ahJyBxs7eJJVipFkaPdih9CLgTTb4B",
+    "title": "SIMD-0249: Delay Commission Updates",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0249-delay-commission-updates.md"
+    ],
+    "simds": [
+      "0249"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "6aHuNsUmwSzCEMjrBzBCYaxHAyAcQBjVES92JigHBDuC",
+    "title": "SIMD-0406: Maximum instruction accounts",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0406-maximum-instruction-accounts.md"
+    ],
+    "simds": [
+      "0406"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "vbiddkDHTSHSvL8B21AetWvTBLxxUZ1FmU6DFjztyRn",
+    "title": "SIMD-0340 validate chained block id",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0340-validate-chained-block-id.md"
+    ],
+    "simds": [
+      "0340"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "b1sgUiJ3qu7hYm3tNDyyqZNQd6gLGJmJppnLNa93PCQ",
+    "title": "SIMD-0388: BLS12-381 syscalls",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0388-bls12-381-syscalls.md"
+    ],
+    "simds": [
+      "0388"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "2uxQgtKa2ECHGs67Zdj7dgmzn2w9HiqhdcedwCWfYzzq",
+    "title": "SIMD-0387: BLS Pubkey Management in Vote Account",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0387-bls-pubkey-management-in-vote-account.md"
+    ],
+    "simds": [
+      "0387"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "VATtb1DepUwdPh5bFVasdtkbeDNsftZSRzr2aKpKWJA",
+    "title": "SIMD-0357: Alpenglow VAT implementation",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0357-alpenglow_validator_admission_ticket.md"
+    ],
+    "simds": [
+      "0357"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "zkexuyPRdyTVbZqEAREueqL2xvvoBhRgth9xGSc1tMN",
+    "title": "Re-enables zk-elgamal-proof program",
+    "simd_link": [
+      ""
+    ],
+    "simds": [],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "ptrXWLkSDMZZmZN8GAT6W5yW4EvYByfw6cRRHbXwQNS",
+    "title": "SIMD-0449: Direct Account Pointers in Program Input",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0449-direct-account-pointers-in-program-input.md"
+    ],
+    "simds": [
+      "0449"
+    ],
+    "owners": [],
+    "min_agave_versions": [],
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
