@@ -2,7 +2,7 @@ name: Update Feature Gates
 on:
   workflow_dispatch:
   schedule:
-    - cron: '23 3 * * *' # Daily at 3:23 am UTC
+    - cron: "23 3 * * *" # Daily at 3:23 am UTC
 
 permissions:
   contents: write
@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
@@ -32,12 +32,12 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          branch-token: ${{ secrets.GITHUB_TOKEN }}
           sign-commits: true
-          commit-message: 'Update feature gates from Agave wiki'
-          title: 'Automated Feature Gates Update'
-          body: 'Auto-generated PR from daily feature gates check'
-          branch: 'feature-gates-update'
+          commit-message: "Update feature gates from Agave wiki"
+          title: "Automated Feature Gates Update"
+          body: "Auto-generated PR from daily feature gates check"
+          branch: "feature-gates-update"
           base: master
           maintainer-can-modify: true
           delete-branch: true
