@@ -22,6 +22,7 @@ import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { Logger } from '@/app/shared/lib/logger';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app/tx/[signature]/page-client';
 
+import { generateReceiptCsv } from './lib/generate-receipt-csv';
 import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
 import { usePrimaryDomain } from './lib/use-primary-domain';
 import { extractReceiptData } from './model/create-receipt';
@@ -150,6 +151,10 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const amount = receipt.kind === 'sol' ? lamportsToSol(receipt.total.raw) : receipt.total.raw;
     const usdValue = priceResult?.price != null ? formatUsdValue(amount, priceResult.price) : undefined;
 
+    const downloadCsv = useCallback(async () => {
+        generateReceiptCsv(receipt, signature, usdValue);
+    }, [receipt, signature, usdValue]);
+
     const downloadPdf = useCallback(async () => {
         const deps = await loadPdfDeps();
         const transactionUrl = window.location.origin + transactionPath;
@@ -176,9 +181,10 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                     senderHref: senderLink.link,
                     tokenHref: tokenLink.link,
                 }}
+                downloadCsv={downloadCsv}
+                downloadPdf={downloadPdf}
                 signature={signature}
                 transactionPath={transactionPath}
-                downloadPdf={downloadPdf}
             />
         </SignatureContext.Provider>
     );

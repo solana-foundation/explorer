@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { ReceiptView } from '../ReceiptView';
 import {
@@ -12,6 +12,7 @@ import {
 
 const meta: Meta<typeof ReceiptView> = {
     args: {
+        downloadCsv: fn().mockResolvedValue(undefined),
         downloadPdf: fn().mockResolvedValue(undefined),
         signature: 'ExampleTransactionSignature',
         transactionPath: 'https://example.com/tx/ExampleTransactionSignature',
@@ -34,6 +35,27 @@ export const Default: Story = {
         expect(canvas.getByText('View transaction in Explorer')).toBeInTheDocument();
         // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         expect(canvas.getByRole('button', { name: /share/i })).toBeInTheDocument();
+    },
+};
+
+export const DownloadOptions: Story = {
+    args: {
+        data: forBaseReceipt(defaultReceipt),
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+
+        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
+        const downloadButton = canvas.getByRole('button', { name: /download/i });
+        await userEvent.click(downloadButton);
+
+        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
+        const csvButton = await within(document.body).findByRole('button', { name: /^csv$/i });
+        await expect(csvButton).toBeInTheDocument();
+
+        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
+        const pdfButton = await within(document.body).findByRole('button', { name: /^pdf$/i });
+        await expect(pdfButton).toBeInTheDocument();
     },
 };
 

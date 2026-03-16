@@ -15,12 +15,13 @@ import { PopoverButton } from './PopoverButton';
 
 interface ReceiptViewProps {
     data: FormattedExtendedReceipt;
+    downloadCsv: DownloadReceiptFn;
+    downloadPdf: DownloadReceiptFn;
     signature: TransactionSignature;
     transactionPath: string;
-    downloadPdf: DownloadReceiptFn;
 }
 
-export function ReceiptView({ data, signature, transactionPath, downloadPdf }: ReceiptViewProps) {
+export function ReceiptView({ data, downloadCsv, downloadPdf, signature, transactionPath }: ReceiptViewProps) {
     function handleViewTxClick() {
         receiptAnalytics.trackViewTxClicked(signature);
     }
@@ -49,6 +50,7 @@ export function ReceiptView({ data, signature, transactionPath, downloadPdf }: R
                 </div>
                 <div className="e-flex e-items-start e-gap-0.5">
                     <PopoverButton icon={<Download size={12} />} label="Download">
+                        <DownloadReceiptItem label="CSV" download={downloadCsv} signature={signature} />
                         <DownloadReceiptItem label="PDF" download={downloadPdf} signature={signature} />
                     </PopoverButton>
                 </div>
