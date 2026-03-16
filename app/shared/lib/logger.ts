@@ -84,6 +84,10 @@ export const Logger = new StraightforwardLogger();
  * @returns True if the message should be logged, false otherwise.
  *          **All logging is suppressed when NEXT_LOG_LEVEL is not set.**
  *
+ * NOTE: NEXT_LOG_LEVEL is a server-side env var (`process.env`) and is not
+ * exposed to the browser. Console logging from client-side code is therefore
+ * always suppressed — only Sentry captures still work on the client.
+ *
  * @example
  * // With NEXT_LOG_LEVEL=3 (INFO level)
  * isLoggable(LOG_LEVEL.ERROR)  // returns true (1 <= 3)
