@@ -5,6 +5,7 @@ import { TransactionSignature } from '@solana/web3.js';
 import Link from 'next/link';
 import { Share2 } from 'react-feather';
 
+import { useToast } from '@/app/components/shared/ui/sonner/use-toast';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { useCanNativeShare } from '@/app/shared/lib/use-can-native-share';
 
@@ -22,6 +23,7 @@ interface ReceiptViewProps {
 
 export function ReceiptView({ data, signature, transactionPath }: ReceiptViewProps) {
     const canNativeShare = useCanNativeShare();
+    const toast = useToast();
 
     function handleViewTxClick() {
         receiptAnalytics.trackViewTxClicked(signature);
@@ -39,7 +41,7 @@ export function ReceiptView({ data, signature, transactionPath }: ReceiptViewPro
             receiptAnalytics.trackShareNative(signature);
         } catch (e) {
             if (e instanceof Error && e.name === 'AbortError') return;
-            throw e;
+            toast.custom({ title: 'Failed to share', type: 'error' });
         }
     }
 
