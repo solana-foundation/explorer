@@ -9,6 +9,7 @@ describe('ShareOnXShareItem', () => {
         const openSpy = vi.spyOn(globalThis, 'open').mockReturnValue(null);
 
         render(<ShareOnXShareItem />);
+        // eslint-disable-next-line no-restricted-syntax -- RegExp used for accessible name pattern matching in test assertions
         await userEvent.click(screen.getByRole('button', { name: /share on x/i }));
 
         expect(openSpy).toHaveBeenCalledWith(
@@ -25,6 +26,7 @@ describe('ShareOnXShareItem', () => {
         const onShare = vi.fn();
 
         render(<ShareOnXShareItem onShare={onShare} />);
+        // eslint-disable-next-line no-restricted-syntax -- RegExp used for accessible name pattern matching in test assertions
         await userEvent.click(screen.getByRole('button', { name: /share on x/i }));
 
         expect(onShare).toHaveBeenCalledOnce();
@@ -36,6 +38,7 @@ describe('ShareOnXShareItem', () => {
         vi.spyOn(globalThis, 'open').mockReturnValue(null);
 
         render(<ShareOnXShareItem />);
+        // eslint-disable-next-line no-restricted-syntax -- RegExp used for accessible name pattern matching in test assertions
         await userEvent.click(screen.getByRole('button', { name: /share on x/i }));
 
         vi.restoreAllMocks();
