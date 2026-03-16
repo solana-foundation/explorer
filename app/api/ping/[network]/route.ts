@@ -22,6 +22,8 @@ export type ValidatorsAppPingStats = {
     tps: number;
 };
 
+const CACHE_HEADERS = { 'Cache-Control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=30' };
+
 const PING_INTERVALS: number[] = [1, 3, 12];
 
 export async function GET(_request: Request, { params: { network } }: Params) {
@@ -47,11 +49,7 @@ export async function GET(_request: Request, { params: { network } }: Params) {
             })
         );
 
-        return NextResponse.json(data, {
-            headers: {
-                'Cache-Control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=30',
-            },
-        });
+        return NextResponse.json(data, { headers: CACHE_HEADERS });
     } catch (error) {
         Logger.error(new Error('Ping API error', { cause: error }));
         Sentry.captureException(error);
