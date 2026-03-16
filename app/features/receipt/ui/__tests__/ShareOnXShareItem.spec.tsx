@@ -13,7 +13,7 @@ describe('ShareOnXShareItem', () => {
         await userEvent.click(screen.getByRole('button', { name: /share on x/i }));
 
         expect(openSpy).toHaveBeenCalledWith(
-            expect.stringContaining('https://x.com/intent/tweet?url='),
+            `https://x.com/intent/tweet?url=${encodeURIComponent(globalThis.location.href)}`,
             '_blank',
             'noreferrer'
         );
