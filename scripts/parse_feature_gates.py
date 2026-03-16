@@ -166,6 +166,7 @@ MAX_RETRIES = 3
 
 async def fetch_activation_epoch(connection: AsyncClient, epoch_schedule, key: str, backup_epoch: int | None) -> int | None:
     """Fetch the activation epoch for a single feature gate from on-chain data."""
+    account = None
     for attempt in range(MAX_RETRIES):
         try:
             await asyncio.sleep(RATE_LIMIT_DELAY)
@@ -179,6 +180,9 @@ async def fetch_activation_epoch(connection: AsyncClient, epoch_schedule, key: s
             else:
                 print(f"Failed to fetch {key}: {e}")
                 return backup_epoch
+
+    if account is None:
+        return backup_epoch
 
     if account.value and account.value.data:
         # First byte indicates if activated (1) or not (0)
