@@ -102,6 +102,12 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
         if (!name) return;
         setSaveError(undefined);
         try {
+            new URL(localUrl);
+        } catch {
+            setSaveError(new Error('Please enter a valid URL before saving.'));
+            return;
+        }
+        try {
             addSavedCluster({ name, url: localUrl });
             setSavedName('');
             setSaving(false);
