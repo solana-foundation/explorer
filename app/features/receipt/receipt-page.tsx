@@ -141,7 +141,8 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const tokenLink = useExplorerLink('mint' in receipt ? `/address/${receipt.mint}` : '');
     const logoURI = receipt.logoURI ? getProxiedUri(receipt.logoURI) : undefined;
 
-    const mint = 'mint' in receipt ? receipt.mint : undefined;
+    const WRAPPED_SOL_MINT = 'So11111111111111111111111111111111111111112';
+    const mint = 'mint' in receipt ? receipt.mint : WRAPPED_SOL_MINT;
     const priceResult = useTokenPrice(mint);
     const totalAmountStr = receipt.total.formatted;
     const usdValue =
