@@ -12,6 +12,8 @@ from solders.pubkey import Pubkey
 from fetch_mainnet_activations import get_epoch_for_slot
 
 FEATURE_GATES_PATH = 'app/utils/feature-gate/featureGates.json'
+DEVNET_RPC_URL = 'https://api.devnet.solana.com'
+TESTNET_RPC_URL = 'https://api.testnet.solana.com'
 
 IntOrBlank = Annotated[
     Optional[int],
@@ -205,20 +207,21 @@ async def fetch_cluster_activations(cluster_url: str, features_to_check: list[tu
     if not features_to_check:
         return
 
-    connection = AsyncClient(cluster_url)
-    epoch_schedule = (await connection.get_epoch_schedule()).value
     cluster_name = "devnet" if "devnet" in cluster_url else "testnet" if "testnet" in cluster_url else cluster_url
 
-    for existing, new_feature in features_to_check:
-        if 'devnet' in cluster_url:
-            existing.devnet_activation_epoch = await fetch_activation_epoch(
-                connection, epoch_schedule, existing.key, new_feature.devnet_activation_epoch
-            )
-        elif 'testnet' in cluster_url:
-            existing.testnet_activation_epoch = await fetch_activation_epoch(
-                connection, epoch_schedule, existing.key, new_feature.testnet_activation_epoch
-            )
-        print(f"  [{cluster_name}] Checked {existing.key}")
+    async with AsyncClient(cluster_url) as connection:
+        epoch_schedule = (await connection.get_epoch_schedule()).value
+
+        for existing, new_feature in features_to_check:
+            if 'devnet' in cluster_url:
+                existing.devnet_activation_epoch = await fetch_activation_epoch(
+                    connection, epoch_schedule, existing.key, new_feature.devnet_activation_epoch
+                )
+            elif 'testnet' in cluster_url:
+                existing.testnet_activation_epoch = await fetch_activation_epoch(
+                    connection, epoch_schedule, existing.key, new_feature.testnet_activation_epoch
+                )
+            print(f"  [{cluster_name}] Checked {existing.key}")
 
 
 async def parse_wiki():
@@ -280,8 +283,8 @@ async def parse_wiki():
             del features_by_key[existing.key]
 
     print(f"Checking {len(features_to_check)} features against devnet and testnet...")
-    await fetch_cluster_activations("https://api.devnet.solana.com", features_to_check)
-    await fetch_cluster_activations("https://api.testnet.solana.com", features_to_check)
+    await fetch_cluster_activations(DEVNET_RPC_URL, features_to_check)
+    await fetch_cluster_activations(TESTNET_RPC_URL, features_to_check)
     
     # Print new features that were found
     new_features = list(features_by_key.values())
