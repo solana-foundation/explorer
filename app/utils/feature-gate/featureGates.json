@@ -1163,8 +1163,8 @@
       "v3.1.0"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 906,
-    "devnet_activation_epoch": 1015,
+    "testnet_activation_epoch": 907,
+    "devnet_activation_epoch": 1016,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1189,8 +1189,8 @@
       "v3.1.0"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 907,
-    "devnet_activation_epoch": 1023,
+    "testnet_activation_epoch": 908,
+    "devnet_activation_epoch": 1024,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1215,8 +1215,8 @@
       "v3.1.0"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 909,
-    "devnet_activation_epoch": 1029,
+    "testnet_activation_epoch": 910,
+    "devnet_activation_epoch": 1030,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1241,8 +1241,8 @@
       "v3.1.0"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 910,
-    "devnet_activation_epoch": 1033,
+    "testnet_activation_epoch": 911,
+    "devnet_activation_epoch": 1034,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1267,8 +1267,8 @@
       "v3.1.0"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 911,
-    "devnet_activation_epoch": 1034,
+    "testnet_activation_epoch": 912,
+    "devnet_activation_epoch": 1035,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1293,8 +1293,8 @@
       "v3.1.7"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 915,
-    "devnet_activation_epoch": 1036,
+    "testnet_activation_epoch": 916,
+    "devnet_activation_epoch": 1037,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
