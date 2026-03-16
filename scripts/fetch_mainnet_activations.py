@@ -6,6 +6,9 @@ from solders.pubkey import Pubkey
 import json
 
 FEATURE_GATES_PATH = 'app/utils/feature-gate/featureGates.json'
+RATE_LIMIT_DELAY = 0.5
+MAX_RETRIES = 3
+
 def get_features():
     with open(FEATURE_GATES_PATH, 'r') as f:
         return json.load(f)
@@ -44,7 +47,24 @@ async def main():
     for feature in features:
         if feature['devnet_activation_epoch'] and feature['testnet_activation_epoch'] and not feature['mainnet_activation_epoch']:
             print("Fetching feature gate", feature['key'])
-            account = await connection.get_account_info(Pubkey.from_string(feature['key']))
+
+            account = None
+            for attempt in range(MAX_RETRIES):
+                try:
+                    await asyncio.sleep(RATE_LIMIT_DELAY)
+                    account = await connection.get_account_info(Pubkey.from_string(feature['key']))
+                    break
+                except Exception as e:
+                    if '429' in str(e) and attempt < MAX_RETRIES - 1:
+                        wait = 2 ** (attempt + 1)
+                        print(f"Rate limited on {feature['key']}, retrying in {wait}s...")
+                        await asyncio.sleep(wait)
+                    else:
+                        print(f"Failed to fetch {feature['key']}: {e}")
+                        break
+
+            if account is None:
+                continue
 
             if account.value and account.value.data:
                 # First byte indicates if activated (1) or not (0)

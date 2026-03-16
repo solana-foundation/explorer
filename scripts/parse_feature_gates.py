@@ -203,7 +203,7 @@ async def fetch_cluster_activations(cluster_url: str, features_to_check: list[tu
 
     connection = AsyncClient(cluster_url)
     epoch_schedule = (await connection.get_epoch_schedule()).value
-    cluster_name = cluster_url.split('.')[-2]
+    cluster_name = "devnet" if "devnet" in cluster_url else "testnet" if "testnet" in cluster_url else cluster_url
 
     for existing, new_feature in features_to_check:
         if 'devnet' in cluster_url:
