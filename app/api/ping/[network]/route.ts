@@ -52,8 +52,9 @@ export async function GET(_request: Request, { params: { network } }: Params) {
 
         return NextResponse.json(data, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.error(new Error('Ping API error', { cause: error }));
-        Sentry.captureException(error);
+        const wrappedError = new Error('Ping API error', { cause: error });
+        Logger.error(wrappedError);
+        Sentry.captureException(wrappedError);
         return NextResponse.json(
             { error: 'Failed to fetch ping data' },
             { headers: { 'Cache-Control': 'no-store, max-age=0' }, status: 500 }
