@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ShareOnXShareItem } from '../ShareOnXShareItem';
 
@@ -12,6 +12,9 @@ vi.mock('@/app/components/shared/ui/sonner/use-toast', () => ({
 }));
 
 describe('ShareOnXShareItem', () => {
+    beforeEach(() => {
+        mockCustomToast.mockClear();
+    });
     it('should open X share URL when clicked', async () => {
         const openSpy = vi.spyOn(globalThis, 'open').mockReturnValue(window);
 
