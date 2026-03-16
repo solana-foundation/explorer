@@ -211,15 +211,18 @@ async def fetch_cluster_activations(cluster_url: str, features_to_check: list[tu
 
     async with AsyncClient(cluster_url) as connection:
         epoch_schedule = (await connection.get_epoch_schedule()).value
+        if epoch_schedule is None:
+            print(f"[{cluster_name}] Failed to fetch epoch schedule, skipping cluster.")
+            return
 
         for existing, new_feature in features_to_check:
             if 'devnet' in cluster_url:
                 existing.devnet_activation_epoch = await fetch_activation_epoch(
-                    connection, epoch_schedule, existing.key, new_feature.devnet_activation_epoch
+                    connection, epoch_schedule, existing.key, existing.devnet_activation_epoch
                 )
             elif 'testnet' in cluster_url:
                 existing.testnet_activation_epoch = await fetch_activation_epoch(
-                    connection, epoch_schedule, existing.key, new_feature.testnet_activation_epoch
+                    connection, epoch_schedule, existing.key, existing.testnet_activation_epoch
                 )
             print(f"  [{cluster_name}] Checked {existing.key}")
 
