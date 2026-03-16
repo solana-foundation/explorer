@@ -32,7 +32,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
-          branch-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           sign-commits: true
           commit-message: 'Update feature gates from Agave wiki'
           title: 'Automated Feature Gates Update'
