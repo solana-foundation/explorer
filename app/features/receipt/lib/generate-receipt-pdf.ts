@@ -68,7 +68,7 @@ function drawStackedRow(
     y += 4;
 
     applyTextStyle(doc, style);
-    const textWidth = (doc.getStringUnitWidth(value) * doc.getFontSize()) / doc.internal.scaleFactor;
+    const textWidth = doc.getTextWidth(value);
     if (textWidth > PAGE.contentWidth) {
         doc.setFontSize(style.size * (PAGE.contentWidth / textWidth));
     }
@@ -234,10 +234,10 @@ export async function generateReceiptPdf(
     y = drawStackedRow(doc, 'Receiver Wallet Address', receipt.receiver.address, y, TEXT_STYLES.valueMono);
 
     // Transaction Signature — clickable if transactionUrl provided
+    const sigStartY = y;
     y = drawStackedRow(doc, 'Transaction Signature', signature, y, TEXT_STYLES.valueMono);
     if (transactionUrl) {
-        const sigY = y - 8;
-        doc.link(PAGE.marginX, sigY - 3, PAGE.contentWidth, 5, { url: transactionUrl });
+        doc.link(PAGE.marginX, sigStartY + 3, PAGE.contentWidth, 5, { url: transactionUrl });
     }
 
     if (receipt.memo) {
