@@ -217,7 +217,7 @@ export async function generateReceiptPdf(
         doc.text(usdValue, col2X, y);
         y += 4;
         applyTextStyle(doc, TEXT_STYLES.caption);
-        doc.text('Estimated value at time of transfer provided by Jupiter API', col2X, y);
+        doc.text('Estimated current value at time of download provided by Jupiter API', col2X, y);
         y += 8;
     } else {
         y = drawStackedRow(
@@ -269,7 +269,12 @@ export async function generateReceiptPdf(
     y = drawTotalRow(doc, 'TOTAL', 'total', `${receipt.total.formatted} ${receipt.total.unit}`, y);
     // ----- END ITEMS / SERVICES -----
 
-    // Footer
+    // add a new page if the footer won't fit
+    const FOOTER_HEIGHT = 55; // divider + disclaimer + logo/QR + caption
+    if (y > PAGE.height - FOOTER_HEIGHT) {
+        doc.addPage();
+        y = 20;
+    }
     y = drawDivider(doc, y);
 
     applyTextStyle(doc, TEXT_STYLES.disclaimer);
