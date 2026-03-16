@@ -114,7 +114,9 @@ describe('GET api/programMetadataIdl', () => {
         const request = createRequest(mockAddress, Cluster.MainnetBeta, 'idl');
         const res = await GET(request);
         expect(res.status).toBe(200);
-        expect(Logger.error).toHaveBeenCalledWith(expectedError.cause);
+        expect(Logger.error).toHaveBeenCalledWith(
+            new Error('[api:programMetadataIdl] Request failed', { cause: expectedError.cause })
+        );
         expect(await res.json()).toEqual({ details: { cause: {} }, error: expectedError.message });
     });
 

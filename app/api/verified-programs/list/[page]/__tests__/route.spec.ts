@@ -201,7 +201,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
             await GET(mockRequest, params);
 
             expect(Logger.error).toHaveBeenCalledWith(
-                '[api:verified-programs] Failed to fetch verified programs page',
+                new Error('[api:verified-programs] Failed to fetch verified programs page'),
                 { page: 1, status: 503 }
             );
         });
