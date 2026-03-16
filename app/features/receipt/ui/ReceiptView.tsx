@@ -36,7 +36,10 @@ export function ReceiptView({ data, signature, transactionPath }: ReceiptViewPro
                 url: globalThis.location.href,
             };
 
-            if (!navigator.canShare?.(shareData)) return;
+            if (!navigator.canShare?.(shareData)) {
+                toast.custom({ title: 'Sharing not supported for this content', type: 'error' });
+                return;
+            }
             await navigator.share(shareData);
             receiptAnalytics.trackShareNative(signature);
         } catch (e) {
