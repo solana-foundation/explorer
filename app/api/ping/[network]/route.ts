@@ -41,6 +41,7 @@ export async function GET(_request: Request, { params: { network } }: Params) {
         await Promise.all(
             responses.map(async (response, index) => {
                 if (!response.ok) {
+                    await response.text().catch(() => undefined); // drain body to release socket
                     throw new Error(`Upstream API error: ${response.status} ${response.statusText}`);
                 }
 
