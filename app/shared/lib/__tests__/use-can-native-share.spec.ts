@@ -5,8 +5,7 @@ import { useCanNativeShare } from '../use-can-native-share';
 
 function mockMatchMedia(pointerCoarse: boolean, hoverNone: boolean) {
     vi.spyOn(globalThis, 'matchMedia').mockImplementation((query: string) => {
-        const matches =
-            (query === '(pointer: coarse)' && pointerCoarse) || (query === '(hover: none)' && hoverNone);
+        const matches = (query === '(pointer: coarse)' && pointerCoarse) || (query === '(hover: none)' && hoverNone);
         return { matches } as MediaQueryList;
     });
 }
