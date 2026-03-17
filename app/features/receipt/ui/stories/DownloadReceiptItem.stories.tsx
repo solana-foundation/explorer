@@ -10,6 +10,7 @@ const meta: Meta<typeof DownloadReceiptItem> = {
         download: fn().mockResolvedValue(undefined),
         icon: <Download size={11} />,
         label: 'Download PNG',
+        signature: '5UfDuX7hXbGjGHqPXRGaHdSecretSignature1234567890abcdef',
     },
     component: DownloadReceiptItem,
     decorators: [

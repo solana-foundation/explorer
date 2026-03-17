@@ -43,7 +43,7 @@ export function useDownloadReceipt(download: DownloadReceiptFn, resetMs = 2000):
             },
             (error: unknown) => {
                 if (!mountedRef.current) return;
-                Logger.error('Download failed:', error);
+                Logger.error(new Error('Download failed', { cause: error }));
                 stateRef.current = 'errored';
                 setState('errored');
                 scheduleReset();

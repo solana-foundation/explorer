@@ -6,7 +6,7 @@ import { is, number, refine, type } from 'superstruct';
 
 import Logger from '@/app/utils/logger';
 
-import { CACHE_HEADERS, NO_STORE_HEADERS } from './config';
+import { CACHE_HEADERS, JUPITER_PRICE_ENDPOINT, NO_STORE_HEADERS } from './config';
 
 const JupiterPriceTokenSchema = type({
     usdPrice: refine(number(), 'positive', value => value > 0),
@@ -34,7 +34,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
     }
 
     try {
-        const response = await fetch(`https://api.jup.ag/price/v3?ids=${mintAddress}`, {
+        const response = await fetch(`${JUPITER_PRICE_ENDPOINT}?ids=${mintAddress}`, {
             headers: {
                 'Content-Type': 'application/json',
                 'x-api-key': JUPITER_API_KEY,
@@ -57,7 +57,10 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
         const token = data?.[mintAddress];
 
         if (!is(token, JupiterPriceTokenSchema)) {
-            return NextResponse.json({ price: null }, { headers: CACHE_HEADERS });
+            const err = new Error(`Jupiter price API returned unexpected schema for ${mintAddress}`);
+            Logger.error(err);
+            Sentry.captureException(err);
+            return NextResponse.json({ price: null }, { headers: NO_STORE_HEADERS });
         }
 
         return NextResponse.json({ price: token.usdPrice }, { headers: CACHE_HEADERS });

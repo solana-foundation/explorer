@@ -16,6 +16,7 @@ import { LOGO_SVG } from './logo-svg';
 
 export type PdfDeps = {
     JsPDF: typeof import('jspdf').jsPDF;
+    onError?: (error: unknown) => void;
     qrToDataURL: typeof ToDataURL;
 };
 
@@ -192,7 +193,7 @@ export async function generateReceiptPdf(
     y = drawSectionTitle(doc, 'Payment Details', y);
     y += 2;
 
-    const paymentMethod = 'mint' in receipt && receipt.symbol ? `Solana (${receipt.symbol})` : 'Solana (SOL)';
+    const paymentMethod = receipt.kind === 'token' && receipt.symbol ? `Solana (${receipt.symbol})` : 'Solana (SOL)';
     const col2X = PAGE.marginX + PAGE.contentWidth / 2;
 
     // Row 1: Payment Method (left) + Payment Date (right) — stacked 2-column
@@ -296,7 +297,8 @@ export async function generateReceiptPdf(
         const logoWidth = 50;
         const logoHeight = (28 / 229) * logoWidth;
         doc.addImage(logoDataUrl, 'PNG', PAGE.marginX, y, logoWidth, logoHeight);
-    } catch {
+    } catch (error) {
+        deps.onError?.(error);
         // Fallback: render text if canvas is unavailable (e.g. in tests)
         applyTextStyle(doc, TEXT_STYLES.logoFallback);
         doc.text('Solana Explorer', PAGE.marginX, y + 4);
@@ -307,8 +309,8 @@ export async function generateReceiptPdf(
         doc.addImage(qrDataUrl, 'PNG', qrX, y, qrSize, qrSize);
         applyTextStyle(doc, TEXT_STYLES.caption);
         doc.text('Verify on Solana Explorer', qrX + qrSize / 2, y + qrSize + 3, { align: 'center' });
-    } catch {
-        // Skip QR code silently if generation fails
+    } catch (error) {
+        deps.onError?.(error);
     }
 
     doc.save(`solana-receipt-${signature}.pdf`);

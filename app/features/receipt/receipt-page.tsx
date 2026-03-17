@@ -19,6 +19,7 @@ import useSWR from 'swr';
 import { getProxiedUri } from '@/app/features/metadata';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app/tx/[signature]/page-client';
+import Logger from '@/app/utils/logger';
 
 import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
 import { usePrimaryDomain } from './lib/use-primary-domain';
@@ -128,7 +129,7 @@ interface ReceiptContentProps {
 }
 
 function ReceiptContent({ receipt, signature, status, transactionPath }: ReceiptContentProps) {
-    const receiptType = 'mint' in receipt ? 'token' : 'sol';
+    const receiptType = receipt.kind;
 
     useEffect(() => {
         receiptAnalytics.trackViewed(signature, receiptType);
@@ -138,11 +139,11 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const receiverDomain = usePrimaryDomain(receipt.receiver.address);
     const senderLink = useExplorerLink(`/address/${receipt.sender.address}`);
     const receiverLink = useExplorerLink(`/address/${receipt.receiver.address}`);
-    const tokenLink = useExplorerLink('mint' in receipt ? `/address/${receipt.mint}` : '');
+    const tokenLink = useExplorerLink(receipt.kind === 'token' ? `/address/${receipt.mint}` : '');
     const logoURI = receipt.logoURI ? getProxiedUri(receipt.logoURI) : undefined;
 
     const WRAPPED_SOL_MINT = 'So11111111111111111111111111111111111111112';
-    const mint = 'mint' in receipt ? receipt.mint : WRAPPED_SOL_MINT;
+    const mint = receipt.kind === 'token' ? receipt.mint : WRAPPED_SOL_MINT;
     const priceResult = useTokenPrice(mint);
     const totalAmountStr = receipt.total.formatted;
     const usdValue =
@@ -151,7 +152,14 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const downloadPdf = useCallback(async () => {
         const deps = await loadPdfDeps();
         const transactionUrl = window.location.origin + transactionPath;
-        await generateReceiptPdf(deps, receipt, signature, window.location.href, transactionUrl, usdValue);
+        await generateReceiptPdf(
+            { ...deps, onError: Logger.error },
+            receipt,
+            signature,
+            window.location.href,
+            transactionUrl,
+            usdValue
+        );
     }, [receipt, signature, transactionPath, usdValue]);
 
     return (

@@ -17,10 +17,11 @@ export enum PriceStatus {
     Success,
 }
 
-export type PriceResult = {
-    price: number | null;
-    status: PriceStatus;
-};
+export type PriceResult =
+    | { status: PriceStatus.FetchFailed; price: null }
+    | { status: PriceStatus.Loading; price: null }
+    | { status: PriceStatus.RateLimited; price: null }
+    | { status: PriceStatus.Success; price: number | null };
 
 type PriceSwrKey = ['receipt-price', string];
 

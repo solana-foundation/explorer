@@ -1,21 +1,23 @@
 'use client';
 
+import type { TransactionSignature } from '@solana/web3.js';
 import type { ReactNode } from 'react';
 import { Check, Loader, XCircle } from 'react-feather';
 
-import { useDownloadReceipt } from '../lib/use-download-receipt';
+import { receiptAnalytics } from '@/app/shared/lib/analytics';
+
+import { type DownloadState, useDownloadReceipt } from '../model/use-download-receipt';
 import type { DownloadReceiptFn } from '../types';
 import { PopoverMenuItem } from './PopoverMenuItem';
 
-interface DownloadReceiptItemProps {
+interface DownloadReceiptItemBaseProps {
     icon?: ReactNode;
     label: string;
-    download: DownloadReceiptFn;
+    state: DownloadState;
+    onTrigger: () => void;
 }
 
-export function DownloadReceiptItem({ icon, label, download }: DownloadReceiptItemProps) {
-    const [state, trigger] = useDownloadReceipt(download);
-
+export function DownloadReceiptItemBase({ icon, label, state, onTrigger }: DownloadReceiptItemBaseProps) {
     function getIcon() {
         if (state === 'downloading') return <Loader size={11} className="e-animate-spin" />;
         if (state === 'downloaded') return <Check size={11} />;
@@ -30,5 +32,23 @@ export function DownloadReceiptItem({ icon, label, download }: DownloadReceiptIt
         return label;
     }
 
-    return <PopoverMenuItem icon={getIcon()} label={getLabel()} onClick={trigger} />;
+    return <PopoverMenuItem icon={getIcon()} label={getLabel()} onClick={onTrigger} />;
+}
+
+interface DownloadReceiptItemProps {
+    icon?: ReactNode;
+    label: string;
+    download: DownloadReceiptFn;
+    signature: TransactionSignature;
+}
+
+export function DownloadReceiptItem({ icon, label, download, signature }: DownloadReceiptItemProps) {
+    const [state, trigger] = useDownloadReceipt(download);
+
+    function handleTrigger() {
+        receiptAnalytics.trackDownload(signature);
+        trigger();
+    }
+
+    return <DownloadReceiptItemBase icon={icon} label={label} state={state} onTrigger={handleTrigger} />;
 }

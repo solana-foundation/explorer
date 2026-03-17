@@ -56,6 +56,7 @@ vi.mock('qrcode', () => ({
 const RECEIPT: FormattedReceipt = {
     date: { timestamp: 1700000000, utc: '2023-11-14 22:13:20 UTC' },
     fee: { formatted: '0.000005', raw: 5000 },
+    kind: 'sol',
     memo: 'Payment for services',
     network: 'mainnet-beta',
     receiver: { address: 'ReceiverAddr2222222222222222222222222222222', truncated: 'Recv...2222' },
@@ -173,6 +174,27 @@ describe('generateReceiptPdf', () => {
         const textCalls = mockText.mock.calls.map(([text]) => (Array.isArray(text) ? text.join(' ') : text));
         const allText = textCalls.join(' ');
         expect(allText).toContain('Verify on Solana Explorer');
+    });
+
+    it('should render usdValue when provided', async () => {
+        const deps = await loadPdfDeps();
+        await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL, undefined, '$200.00');
+
+        const textCalls = mockText.mock.calls.map(([text]) => (Array.isArray(text) ? text.join(' ') : text));
+        const allText = textCalls.join(' ');
+
+        expect(allText).toContain('AMOUNT (USD)');
+        expect(allText).toContain('$200.00');
+    });
+
+    it('should not render usdValue section when not provided', async () => {
+        const deps = await loadPdfDeps();
+        await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
+
+        const textCalls = mockText.mock.calls.map(([text]) => (Array.isArray(text) ? text.join(' ') : text));
+        const allText = textCalls.join(' ');
+
+        expect(allText).not.toContain('AMOUNT (USD)');
     });
 
     it('should handle QR code generation failure gracefully', async () => {

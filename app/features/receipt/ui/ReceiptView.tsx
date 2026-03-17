@@ -73,7 +73,7 @@ export function ReceiptView({ data, signature, transactionPath, downloadPdf }: R
                 </div>
                 <div className="e-flex e-items-start e-gap-0.5">
                     <PopoverButton icon={<Download size={12} />} label="Download">
-                        <DownloadReceiptItem label="PDF" download={downloadPdf} />
+                        <DownloadReceiptItem label="PDF" download={downloadPdf} signature={signature} />
                     </PopoverButton>
                 </div>
             </div>
