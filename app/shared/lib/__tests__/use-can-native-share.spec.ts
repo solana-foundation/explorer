@@ -17,20 +17,20 @@ describe('useCanNativeShare', () => {
         Object.defineProperty(navigator, 'canShare', { configurable: true, value: undefined, writable: true });
     });
 
-    it('returns false when navigator.share is not available', () => {
+    it('should return false when navigator.share is not available', () => {
         mockMatchMedia(true, true);
         const { result } = renderHook(() => useCanNativeShare());
         expect(result.current).toBe(false);
     });
 
-    it('returns false when navigator.canShare is not available', () => {
+    it('should return false when navigator.canShare is not available', () => {
         mockMatchMedia(true, true);
         Object.defineProperty(navigator, 'share', { configurable: true, value: vi.fn() });
         const { result } = renderHook(() => useCanNativeShare());
         expect(result.current).toBe(false);
     });
 
-    it('returns false when device is not mobile (no coarse pointer)', () => {
+    it('should return false when device is not mobile (no coarse pointer)', () => {
         mockMatchMedia(false, true);
         Object.defineProperty(navigator, 'share', { configurable: true, value: vi.fn() });
         Object.defineProperty(navigator, 'canShare', { configurable: true, value: vi.fn() });
@@ -38,7 +38,7 @@ describe('useCanNativeShare', () => {
         expect(result.current).toBe(false);
     });
 
-    it('returns false when device is not mobile (has hover support)', () => {
+    it('should return false when device is not mobile (has hover support)', () => {
         mockMatchMedia(true, false);
         Object.defineProperty(navigator, 'share', { configurable: true, value: vi.fn() });
         Object.defineProperty(navigator, 'canShare', { configurable: true, value: vi.fn() });
@@ -46,7 +46,7 @@ describe('useCanNativeShare', () => {
         expect(result.current).toBe(false);
     });
 
-    it('returns true when share APIs are available and device is mobile', () => {
+    it('should return true when share APIs are available and device is mobile', () => {
         mockMatchMedia(true, true);
         Object.defineProperty(navigator, 'share', { configurable: true, value: vi.fn() });
         Object.defineProperty(navigator, 'canShare', { configurable: true, value: vi.fn() });
