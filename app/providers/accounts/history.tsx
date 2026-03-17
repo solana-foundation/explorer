@@ -16,6 +16,8 @@ import { fetchOnce } from '@utils/fetch-once';
 import { withBackoff } from '@utils/with-backoff';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 type TransactionMap = Map<string, ParsedTransactionWithMeta>;
 
 type AccountHistory = {
@@ -145,7 +147,7 @@ async function fetchAccountHistory(
         status = FetchStatus.Fetched;
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
+            Logger.error(error, { url });
         }
         status = FetchStatus.FetchFailed;
     }
@@ -157,7 +159,7 @@ async function fetchAccountHistory(
             transactionMap = await fetchParsedTransactions(url, signatures);
         } catch (error) {
             if (cluster !== Cluster.Custom) {
-                console.error(error, { url });
+                Logger.error(error, { url });
             }
             status = FetchStatus.FetchFailed;
         }
@@ -237,11 +239,11 @@ export function useFetchAccountHistory(limit = 25) {
                         fetchTransactions,
                         additionalSignatures
                     )
-                ).catch(console.error);
+                ).catch(e => Logger.error(e));
             } else {
                 fetchOnce(pubkey.toBase58(), inFlight, () =>
                     fetchAccountHistory(dispatch, pubkey, cluster, url, { limit }, fetchTransactions)
-                ).catch(console.error);
+                ).catch(e => Logger.error(e));
             }
         },
         [limit, state, dispatch, cluster, url, inFlight]

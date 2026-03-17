@@ -1,16 +1,9 @@
 import fetch from 'node-fetch';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { GET } from '../route';
-
-vi.mock('@/app/utils/logger', () => ({
-    default: {
-        debug: vi.fn(),
-        error: vi.fn(),
-    },
-}));
 
 vi.mock('node-fetch', () => ({
     default: vi.fn(),
@@ -163,7 +156,10 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
 
             await GET(mockRequest, params);
 
-            expect(Logger.debug).toHaveBeenCalledWith(`Failed to fetch metadata for ${mockProgramId}: HTTP 404`);
+            expect(Logger.debug).toHaveBeenCalledWith('[api:verified-programs] Failed to fetch metadata', {
+                programId: mockProgramId,
+                status: 404,
+            });
         });
 
         it('returns error on 500 from osec.io', async () => {
@@ -191,7 +187,10 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
 
             await GET(mockRequest, params);
 
-            expect(Logger.debug).toHaveBeenCalledWith(`Failed to fetch metadata for ${mockProgramId}: HTTP 503`);
+            expect(Logger.debug).toHaveBeenCalledWith('[api:verified-programs] Failed to fetch metadata', {
+                programId: mockProgramId,
+                status: 503,
+            });
         });
 
         it('handles network errors', async () => {
@@ -215,12 +214,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
 
             await GET(mockRequest, params);
 
-            expect(Logger.error).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    cause: networkError,
-                    message: `Error fetching metadata for ${mockProgramId}`,
-                })
-            );
+            expect(Logger.error).toHaveBeenCalledWith(networkError, { programId: mockProgramId });
         });
     });
 });

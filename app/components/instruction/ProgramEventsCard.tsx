@@ -7,6 +7,8 @@ import { Buffer } from 'buffer';
 import React, { useState } from 'react';
 import { Code } from 'react-feather';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 export function ProgramEventsCard({
     eventDataList,
     program,
@@ -21,7 +23,7 @@ export function ProgramEventsCard({
             try {
                 return decodeEventFromLog(eventData, program);
             } catch (error) {
-                console.error('Error decoding event:', error);
+                Logger.error(error);
                 return null;
             }
         })

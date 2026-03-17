@@ -1,7 +1,7 @@
 import { Connection, type ParsedTransactionWithMeta } from '@solana/web3.js';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, clusterSlug, serverClusterUrl } from '@/app/utils/cluster';
-import Logger from '@/app/utils/logger';
 
 import { isClusterProbeEnabled } from '../env';
 import { ReceiptError } from './errors';
@@ -37,7 +37,7 @@ export async function getTx(
     const foundCluster = await findClusterFn(signature);
 
     if (foundCluster === undefined) {
-        Logger.warn(`Cluster not found for signature ${signature}`);
+        Logger.warn('[receipt] Cluster not found for signature', { signature });
         throw new ReceiptError('Cluster not found', { status: 404 });
     }
 
@@ -64,29 +64,29 @@ async function findTransactionCluster(signature: string): Promise<Cluster | unde
     }
 
     if (mainnetResult.right) {
-        Logger.info(`Transaction found on mainnet: ${signature}`);
+        Logger.info('[receipt] Transaction found on mainnet', { signature });
         return Cluster.MainnetBeta;
     }
 
     // Skip probing other clusters if disabled
     if (!isClusterProbeEnabled) {
-        Logger.info(`Cluster probing disabled, won't lookup for it at other cluster: ${signature}`);
+        Logger.info('[receipt] Cluster probing disabled, skipping other clusters', { signature });
         return undefined;
     } else {
         // Transaction not found on mainnet - probe other clusters
-        Logger.warn(`Transaction not found on mainnet, probing other clusters: ${signature}`);
+        Logger.warn('[receipt] Transaction not found on mainnet, probing other clusters', { signature });
     }
 
     for (const cluster of CLUSTERS_TO_PROBE) {
         const result = await getSignatureStatus(signature, cluster);
 
         if ('left' in result) {
-            Logger.error(result.left);
+            Logger.error(result.left, { cluster });
             throw new ReceiptError(`Failed to check the ${clusterSlug(cluster)}`, { cause: result.left, status: 502 });
         }
 
         if (result.right) {
-            Logger.info(`Transaction found on ${cluster}: ${signature}`);
+            Logger.info('[receipt] Transaction found on cluster', { cluster, signature });
             return cluster;
         }
     }
@@ -106,7 +106,7 @@ async function getSignatureStatus(signature: string, cluster: Cluster): Promise<
         });
         return { right: status?.value !== null };
     } catch (error) {
-        Logger.error(error);
+        Logger.error(error, { cluster, signature });
         return { left: error instanceof Error ? error : new Error(String(error)) };
     }
 }

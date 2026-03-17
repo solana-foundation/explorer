@@ -2,8 +2,8 @@ import { SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND, SolanaError } from '@solana/
 import { PublicKey } from '@solana/web3.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
-import Logger from '@/app/utils/logger';
 
 vi.mock('@/app/entities/program-metadata/api/getProgramCanonicalMetadata', async () => {
     const originalImpl = await vi.importActual('@/app/entities/program-metadata/api/getProgramCanonicalMetadata');
@@ -23,12 +23,6 @@ vi.mock('@/app/entities/program-metadata/api/getProgramCanonicalMetadata', async
             }),
     };
 });
-
-vi.mock('@/app/utils/logger', () => ({
-    default: {
-        error: vi.fn(),
-    },
-}));
 
 async function importRoute() {
     return await import('../route');
@@ -120,7 +114,9 @@ describe('GET api/programMetadataIdl', () => {
         const request = createRequest(mockAddress, Cluster.MainnetBeta, 'idl');
         const res = await GET(request);
         expect(res.status).toBe(200);
-        expect(Logger.error).toHaveBeenCalledWith(expectedError.cause);
+        expect(Logger.error).toHaveBeenCalledWith(
+            new Error('[api:programMetadataIdl] Request failed', { cause: expectedError.cause })
+        );
         expect(await res.json()).toEqual({ details: { cause: {} }, error: expectedError.message });
     });
 

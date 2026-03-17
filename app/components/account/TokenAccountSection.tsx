@@ -46,6 +46,7 @@ import { ExternalLink, RefreshCw } from 'react-feather';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { TokenExtensionsStatusRow } from './token-extensions/TokenExtensionsStatusRow';
@@ -109,7 +110,7 @@ export function TokenAccountSection({
         }
     } catch (err) {
         if (cluster !== Cluster.Custom) {
-            console.error(err, {
+            Logger.error(err, {
                 address: account.pubkey.toBase58(),
             });
         }

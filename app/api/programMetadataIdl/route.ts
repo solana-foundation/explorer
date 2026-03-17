@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 
 import { getMetadataEndpointUrl } from '@/app/entities/program-metadata/api/getMetadataEndpointUrl';
 import { errors, getProgramCanonicalMetadata } from '@/app/entities/program-metadata/api/getProgramCanonicalMetadata';
+import { Logger } from '@/app/shared/lib/logger';
 import { normalizeUnknownError } from '@/app/shared/unknown-error';
-import Logger from '@/app/utils/logger';
 
 const CACHE_DURATION = 30 * 60; // 30 minutes
 
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
             );
         } else if (error instanceof Error && error.cause) {
             // Log extra data if cause is present
-            Logger.error(error.cause);
+            Logger.error(new Error('[api:programMetadataIdl] Request failed', { cause: error.cause }));
         }
 
         let displayError;

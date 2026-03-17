@@ -1,7 +1,8 @@
 import { fetchSnsDomains } from '@entities/domain/api/fetch-sns-domains';
 import { PublicKey } from '@solana/web3.js';
-import Logger from '@utils/logger';
 import { NextResponse } from 'next/server';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 const CACHE_HEADERS = { 'Cache-Control': 'public, s-maxage=43200, stale-while-revalidate=3600' };
 
@@ -28,7 +29,7 @@ export async function GET(_request: Request, { params: { address } }: Params) {
 
         return NextResponse.json({ domains }, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.error(error, `Failed to fetch SNS domains for ${address}`);
+        Logger.error(error, { address });
         return NextResponse.json({ domains: [] }, { headers: { 'Cache-Control': 'no-store' }, status: 500 });
     }
 }

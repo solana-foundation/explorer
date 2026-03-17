@@ -1,3 +1,5 @@
+import { Logger } from '@/app/shared/lib/logger';
+
 type BackoffOptions = {
     maxRetries?: number;
     initialDelay?: number;
@@ -12,7 +14,7 @@ export function withBackoff<T>(fn: () => Promise<T>, options?: BackoffOptions): 
             return await fn();
         } catch (error) {
             if (retries <= 0) throw error;
-            console.debug(`[withBackoff] Retrying in ${delay}ms (${retries} retries left)`, error);
+            Logger.debug('[utils:with-backoff] Retrying after failure', { delay, error, retriesLeft: retries });
             await new Promise(resolve => setTimeout(resolve, delay));
             return attempt(retries - 1, delay * factor);
         }

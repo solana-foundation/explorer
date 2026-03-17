@@ -2,7 +2,7 @@
 
 import { TransactionInspectorPage } from '@components/inspector/InspectorPage';
 
-import { SentryErrorBoundary } from '@/app/components/common/SentryErrorBoundary';
+import { SentryErrorBoundary } from '@/app/shared/lib/sentry';
 
 export default function InspectPageClient({ signature }: Readonly<{ signature: string }>) {
     return (

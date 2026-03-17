@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 export type CopyState = 'copy' | 'copied' | 'errored';
 
 export function useCopyToClipboard(resetMs = 2000): readonly [CopyState, (text: string) => void] {
@@ -21,7 +23,7 @@ export function useCopyToClipboard(resetMs = 2000): readonly [CopyState, (text: 
             clearTimeout(timeoutRef.current);
 
             if (typeof navigator === 'undefined' || !navigator.clipboard) {
-                console.error('Clipboard API is not available');
+                Logger.error(new Error('Clipboard API is not available'));
                 setState('errored');
                 scheduleReset();
                 return;
@@ -33,7 +35,7 @@ export function useCopyToClipboard(resetMs = 2000): readonly [CopyState, (text: 
                     scheduleReset();
                 },
                 (error: unknown) => {
-                    console.error('Clipboard write failed:', error);
+                    Logger.error(new Error('Clipboard write failed', { cause: error }));
                     setState('errored');
                     scheduleReset();
                 }

@@ -1,6 +1,8 @@
 import { PublicKey } from '@solana/web3.js';
 import { useEffect, useState } from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 export type VerifiableBuild =
     | {
           label: string;
@@ -38,7 +40,7 @@ export function useAnchorVerifiableBuild(programAddress: PublicKey) {
         getAnchorVerifiableBuild(programAddress)
             .then(setVerifiableBuild)
             .catch(error => {
-                console.log(error);
+                Logger.error(error);
                 setVerifiableBuild(defaultAnchorBuild);
             })
             .finally(() => setLoading(false));
