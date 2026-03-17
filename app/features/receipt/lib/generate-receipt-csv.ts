@@ -1,3 +1,5 @@
+import { writeToString } from 'fast-csv';
+
 import type { FormattedReceipt } from '../types';
 
 const CSV_HEADERS = [
@@ -14,24 +16,10 @@ const CSV_HEADERS = [
     'Memo',
 ] as const;
 
-function needsQuoting(value: string): boolean {
-    // eslint-disable-next-line no-restricted-syntax -- regex is needed to detect CSV special characters
-    return /[",\n\r]/.test(value);
-}
-
-function csvEscape(value: string | undefined): string {
-    if (!value) return '';
-    if (needsQuoting(value)) {
-        // eslint-disable-next-line no-restricted-syntax -- regex is needed to escape double quotes per RFC 4180
-        return `"${value.replace(/"/g, '""')}"`;
-    }
-    return value;
-}
-
-export function buildReceiptCsvRow(receipt: FormattedReceipt, signature: string, usdValue?: string): string {
+export function buildReceiptCsvRow(receipt: FormattedReceipt, signature: string, usdValue?: string): string[] {
     const mint = 'mint' in receipt ? receipt.mint : undefined;
 
-    const fields: (string | undefined)[] = [
+    return [
         receipt.date.utc,
         signature,
         receipt.network,
@@ -39,19 +27,20 @@ export function buildReceiptCsvRow(receipt: FormattedReceipt, signature: string,
         receipt.receiver.address,
         receipt.total.formatted,
         receipt.total.unit,
-        mint,
-        usdValue,
+        mint ?? '',
+        usdValue ?? '',
         receipt.fee.formatted,
-        receipt.memo,
+        receipt.memo ?? '',
     ];
-
-    return fields.map(f => csvEscape(f)).join(',');
 }
 
-export function generateReceiptCsv(receipt: FormattedReceipt, signature: string, usdValue?: string): void {
-    const header = CSV_HEADERS.join(',');
+export async function generateReceiptCsv(
+    receipt: FormattedReceipt,
+    signature: string,
+    usdValue?: string
+): Promise<void> {
     const row = buildReceiptCsvRow(receipt, signature, usdValue);
-    const csv = `${header}\n${row}`;
+    const csv = await writeToString([row], { headers: [...CSV_HEADERS] });
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);

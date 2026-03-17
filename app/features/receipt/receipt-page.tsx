@@ -152,7 +152,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const usdValue = priceResult?.price != null ? formatUsdValue(amount, priceResult.price) : undefined;
 
     const downloadCsv = useCallback(async () => {
-        generateReceiptCsv(receipt, signature, usdValue);
+        await generateReceiptCsv(receipt, signature, usdValue);
     }, [receipt, signature, usdValue]);
 
     const downloadPdf = useCallback(async () => {
