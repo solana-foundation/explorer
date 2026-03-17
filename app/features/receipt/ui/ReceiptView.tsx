@@ -43,7 +43,10 @@ export function ReceiptView({ data, signature, transactionPath }: ReceiptViewPro
             await navigator.share(shareData);
             receiptAnalytics.trackShareNative(signature);
         } catch (e) {
-            if (e instanceof Error && e.name === 'AbortError') return;
+            if (e instanceof Error && e.name === 'AbortError') {
+                // Dismissing the native share sheet is an expected cancel path, not a share failure.
+                return;
+            }
             toast.custom({ title: 'Failed to share', type: 'error' });
         }
     }
