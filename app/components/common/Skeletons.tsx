@@ -6,7 +6,7 @@ type ColDef = {
 };
 
 export function TableRowSkeleton({
-    cols = [{ skeleton: 'e-h-4 e-w-36', td: 'w-100' }, { skeleton: 'e-h-4 e-w-20' }],
+    cols = [{ skeleton: 'e-h-4 e-w-36', td: 'e-w-full' }, { skeleton: 'e-h-4 e-w-20' }],
 }: {
     cols?: ColDef[];
 }) {
@@ -25,8 +25,8 @@ export function RichRowSkeleton() {
     return (
         <tr>
             <td>
-                <Skeleton className="mb-2 e-h-3 e-w-3/5" />
-                <Skeleton className="mb-2 e-h-3 e-w-full" />
+                <Skeleton className="e-mb-2 e-h-3 e-w-3/5" />
+                <Skeleton className="e-mb-2 e-h-3 e-w-full" />
                 <Skeleton className="e-h-3 e-w-2/5" />
             </td>
         </tr>
@@ -38,7 +38,7 @@ export function SimpleCardSkeleton({ withTitle = false }: { withTitle?: boolean 
         <div className="card">
             {withTitle && (
                 <div className="card-header">
-                    <div className="row align-items-center">
+                    <div className="row e-items-center">
                         <div className="col">
                             <Skeleton className="e-h-5 e-w-40" />
                         </div>
@@ -46,8 +46,8 @@ export function SimpleCardSkeleton({ withTitle = false }: { withTitle?: boolean 
                 </div>
             )}
             <div className="card-body">
-                <Skeleton className="mb-2 e-h-7 e-w-3/5" />
-                <Skeleton className="mb-2 e-h-12 e-w-full" />
+                <Skeleton className="e-mb-2 e-h-7 e-w-3/5" />
+                <Skeleton className="e-mb-2 e-h-12 e-w-full" />
                 <Skeleton className="e-h-6 e-w-2/5" />
             </div>
         </div>
@@ -56,7 +56,7 @@ export function SimpleCardSkeleton({ withTitle = false }: { withTitle?: boolean 
 
 export function RichListSkeleton({ rows = 2 }: { rows?: number }) {
     return (
-        <div className="card flex-grow-1">
+        <div className="card e-flex-1">
             <div className="card-header">
                 <div className="row align-items-center">
                     <div className="col">
@@ -64,7 +64,7 @@ export function RichListSkeleton({ rows = 2 }: { rows?: number }) {
                     </div>
                 </div>
             </div>
-            <div className="table-responsive mb-0">
+            <div className="table-responsive e-mb-0">
                 <table className="table table-sm card-table table-nowrap">
                     <tbody className="list">
                         {Array.from({ length: rows }).map((_, i) => (
@@ -79,7 +79,7 @@ export function RichListSkeleton({ rows = 2 }: { rows?: number }) {
 
 export function StatsTableSkeleton({ rows = 8 }: { rows?: number }) {
     return (
-        <div className="card flex-grow-1">
+        <div className="card e-flex-1">
             <div className="card-header">
                 <div className="row align-items-center">
                     <div className="col">
@@ -87,7 +87,7 @@ export function StatsTableSkeleton({ rows = 8 }: { rows?: number }) {
                     </div>
                 </div>
             </div>
-            <div className="table-responsive mb-0">
+            <div className="table-responsive e-mb-0">
                 <table className="table table-sm card-table table-nowrap">
                     <tbody className="list">
                         {Array.from({ length: rows }).map((_, i) => (
@@ -136,10 +136,10 @@ export function TableCardSkeleton({ cols = 4, rows = 6 }: { cols?: number; rows?
 
 function ImageSliderCardSkeleton() {
     return (
-        <div style={{ height: '200px', minWidth: '250px', width: '250px' }}>
-            <Skeleton className="mb-3 e-w-full" style={{ height: '120px' }} />
-            <Skeleton className="mb-1 e-h-4 e-w-4/5" />
-            <Skeleton className="mb-1 e-h-3 e-w-full" />
+        <div className="e-h-[200px] e-w-[250px] e-min-w-[250px]">
+            <Skeleton className="e-mb-3 e-h-[120px] e-w-full" />
+            <Skeleton className="e-mb-1 e-h-4 e-w-4/5" />
+            <Skeleton className="e-mb-1 e-h-3 e-w-full" />
             <Skeleton className="e-h-3 e-w-3/4" />
         </div>
     );
@@ -149,11 +149,11 @@ export function ImageSliderSkeleton() {
     return (
         <div className="card">
             <div className="card-body">
-                <div className="d-flex justify-content-between border-bottom border-gray-300 pb-2 mb-3">
+                <div className="e-mb-3 e-flex e-justify-between e-border-b e-border-gray-300 e-pb-2">
                     <Skeleton className="e-h-5 e-w-80" />
                     <Skeleton className="e-h-4 e-w-40" />
                 </div>
-                <div className="d-flex gap-4 pb-3 overflow-auto">
+                <div className="e-flex e-gap-4 e-overflow-auto e-pb-3">
                     <ImageSliderCardSkeleton />
                     <ImageSliderCardSkeleton />
                     <ImageSliderCardSkeleton />

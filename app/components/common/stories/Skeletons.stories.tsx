@@ -16,7 +16,7 @@ const hasPulse = (canvasElement: HTMLElement) =>
 
 function TableWrapper({ children }: { children: React.ReactNode }) {
     return (
-        <div className="table-responsive mb-0">
+        <div className="table-responsive e-mb-0">
             <table className="table table-sm card-table table-nowrap">
                 <tbody className="list">{children}</tbody>
             </table>

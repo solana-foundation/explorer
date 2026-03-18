@@ -44,11 +44,11 @@ function PageSkeleton() {
                 </div>
             </div>
 
-            <div className="row d-flex">
-                <div className="col-md-6 d-flex">
+            <div className="row e-flex">
+                <div className="col-md-6 e-flex">
                     <StatsTableSkeleton />
                 </div>
-                <div className="col-md-6 d-flex">
+                <div className="col-md-6 e-flex">
                     <LiveTransactionStatsCardSkeleton />
                 </div>
             </div>
@@ -99,11 +99,11 @@ function PageContent() {
         <>
             <StakingDisplay />
 
-            <div className="row d-flex">
-                <div className="col-md-6 d-flex">
+            <div className="row e-flex">
+                <div className="col-md-6 e-flex">
                     <StatsCardBody />
                 </div>
-                <div className="col-md-6 d-flex">
+                <div className="col-md-6 e-flex">
                     <LiveTransactionStatsCard />
                 </div>
             </div>
@@ -228,9 +228,9 @@ function StatsCardBody() {
     const { blockHeight, absoluteSlot } = epochInfo;
 
     return (
-        <div className="card flex-grow-1">
+        <div className="card e-flex-1">
             <div className="card-header">
-                <div className="row align-items-center">
+                <div className="row e-items-center">
                     <div className="col">
                         <h4 className="card-header-title">Live Cluster Stats</h4>
                     </div>
