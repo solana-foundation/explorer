@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { expect } from 'storybook/test';
 
 import {
-    ImageSliderCardSkeleton,
     ImageSliderSkeleton,
     RichListSkeleton,
     RichRowSkeleton,

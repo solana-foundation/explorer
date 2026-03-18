@@ -134,7 +134,7 @@ export function TableCardSkeleton({ cols = 4, rows = 6 }: { cols?: number; rows?
     );
 }
 
-export function ImageSliderCardSkeleton() {
+function ImageSliderCardSkeleton() {
     return (
         <div style={{ height: '200px', minWidth: '250px', width: '250px' }}>
             <Skeleton className="mb-3 e-w-full" style={{ height: '120px' }} />
