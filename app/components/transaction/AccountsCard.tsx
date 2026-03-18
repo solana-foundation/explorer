@@ -219,6 +219,7 @@ function DataRow({
 }) {
     const [isDataVisible, setIsDataVisible] = useState(false);
 
+    const hexData = useMemo(() => (data && data.length > 0 ? toHex(data) : null), [data]);
     const isTruncated = data && data.length > MAX_DISPLAY_BYTES;
     const displayData = data && isTruncated ? data.slice(0, MAX_DISPLAY_BYTES) : data;
 
@@ -236,10 +237,11 @@ function DataRow({
                         </div>
 
                         <div className="d-flex align-items-center gap-2">
-                            {data && data.length > 0 && (
-                                <Copyable text={toHex(data)}>
-                                    <DownloadableDropdown data={data} filename={account.pubkey.toBase58()} />
-                                </Copyable>
+                            {hexData && (
+                                <>
+                                    <Copyable text={hexData} />
+                                    <DownloadableDropdown data={data!} filename={account.pubkey.toBase58()} />
+                                </>
                             )}
                             <button
                                 className={`btn btn-sm d-flex ${isDataVisible ? 'btn-black active' : 'btn-white'}`}
