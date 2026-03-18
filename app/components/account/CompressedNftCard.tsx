@@ -1,3 +1,4 @@
+import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { createRef, Suspense } from 'react';
@@ -12,7 +13,6 @@ import { Address } from '../common/Address';
 import { InfoTooltip } from '../common/InfoTooltip';
 import { LoadingArtPlaceholder } from '../common/LoadingArtPlaceholder';
 import { ArtContent } from '../common/NFTArt';
-import { TableCardBody } from '../common/TableCardBody';
 import { getCreatorDropdownItems, getIsMutablePill, getVerifiedCollectionPill } from './MetaplexNFTHeader';
 import { UnknownAccountCard } from './UnknownAccountCard';
 
@@ -25,54 +25,49 @@ export function CompressedNftCard({ account }: { account: Account }) {
     const updateAuthority = compressedNft.authorities.find(authority => authority.scopes.includes('full'))?.address;
 
     return (
-        <div className="card">
-            <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Overview</h3>
-            </div>
-            <TableCardBody>
-                <tr>
-                    <td>Address</td>
-                    <td className="text-lg-end">
-                        <Address pubkey={account.pubkey} alignRight raw />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Owner</td>
-                    <td className="text-lg-end">
-                        <Address pubkey={new PublicKey(compressedNft.ownership.owner)} alignRight link />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Verified Collection Address</td>
-                    <td className="text-lg-end">
-                        {collectionGroup ? (
-                            <Address pubkey={new PublicKey(collectionGroup.group_value)} alignRight link />
-                        ) : (
-                            'None'
-                        )}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Update Authority</td>
-                    <td className="text-lg-end">
-                        {updateAuthority ? <Address pubkey={new PublicKey(updateAuthority)} alignRight link /> : 'None'}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Website</td>
-                    <td className="text-lg-end">
-                        <a rel="noopener noreferrer" target="_blank" href={compressedNft.content.links.external_url}>
-                            {compressedNft.content.links.external_url}
-                            <ExternalLink className="align-text-top ms-2" size={13} />
-                        </a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Seller Fee</td>
-                    <td className="text-lg-end">{`${compressedNft.royalty.basis_points / 100}%`}</td>
-                </tr>
-            </TableCardBody>
-        </div>
+        <AccountCard title="Overview" account={account}>
+            <tr>
+                <td>Address</td>
+                <td className="text-lg-end">
+                    <Address pubkey={account.pubkey} alignRight raw />
+                </td>
+            </tr>
+            <tr>
+                <td>Owner</td>
+                <td className="text-lg-end">
+                    <Address pubkey={new PublicKey(compressedNft.ownership.owner)} alignRight link />
+                </td>
+            </tr>
+            <tr>
+                <td>Verified Collection Address</td>
+                <td className="text-lg-end">
+                    {collectionGroup ? (
+                        <Address pubkey={new PublicKey(collectionGroup.group_value)} alignRight link />
+                    ) : (
+                        'None'
+                    )}
+                </td>
+            </tr>
+            <tr>
+                <td>Update Authority</td>
+                <td className="text-lg-end">
+                    {updateAuthority ? <Address pubkey={new PublicKey(updateAuthority)} alignRight link /> : 'None'}
+                </td>
+            </tr>
+            <tr>
+                <td>Website</td>
+                <td className="text-lg-end">
+                    <a rel="noopener noreferrer" target="_blank" href={compressedNft.content.links.external_url}>
+                        {compressedNft.content.links.external_url}
+                        <ExternalLink className="align-text-top ms-2" size={13} />
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>Seller Fee</td>
+                <td className="text-lg-end">{`${compressedNft.royalty.basis_points / 100}%`}</td>
+            </tr>
+        </AccountCard>
     );
 }
 

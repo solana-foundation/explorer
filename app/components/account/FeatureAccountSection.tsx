@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { Slot } from '@components/common/Slot';
-import { TableCardBody } from '@components/common/TableCardBody';
+import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { parseFeatureAccount, useFeatureAccount } from '@utils/parseFeatureAccount';
@@ -33,7 +33,12 @@ export function FeatureAccountSection({ account }: { account: Account }) {
                 <FeatureCard account={account} />
             ) : (
                 // feature that is preset at JSON would not have data about slot. leave it as null
-                <BaseFeatureCard activatedAt={null} address={address} featureInfo={maybeFeatureInfo} />
+                <BaseFeatureCard
+                    account={account}
+                    activatedAt={null}
+                    address={address}
+                    featureInfo={maybeFeatureInfo}
+                />
             )}
         </ErrorBoundary>
     );
@@ -47,14 +52,22 @@ const FeatureCard = ({ account }: Props) => {
     const feature = parseFeatureAccount(account);
     const featureInfo = useMemo(() => getFeatureInfo(feature.address), [feature.address]);
 
-    return <BaseFeatureCard address={feature.address} activatedAt={feature.activatedAt} featureInfo={featureInfo} />;
+    return (
+        <BaseFeatureCard
+            account={account}
+            address={feature.address}
+            activatedAt={feature.activatedAt}
+            featureInfo={featureInfo}
+        />
+    );
 };
 
 const BaseFeatureCard = ({
+    account,
     activatedAt,
     address,
     featureInfo,
-}: ReturnType<typeof parseFeatureAccount> & { featureInfo?: FeatureInfoType }) => {
+}: ReturnType<typeof parseFeatureAccount> & { account: Account; featureInfo?: FeatureInfoType }) => {
     const { cluster, clusterInfo } = useCluster();
 
     let activatedAtSlot;
@@ -96,55 +109,47 @@ const BaseFeatureCard = ({
     }
 
     return (
-        <div className="card">
-            <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">
-                    {featureInfo?.title ?? 'Feature Activation'}
-                </h3>
-            </div>
+        <AccountCard title={featureInfo?.title ?? 'Feature Activation'} account={account} layout="expanded">
+            <tr>
+                <td>Address</td>
+                <td>
+                    <Address pubkey={new PublicKey(address)} alignRight raw />
+                </td>
+            </tr>
 
-            <TableCardBody layout="expanded">
+            <tr>
+                <td className="text-nowrap">Activated?</td>
+                <td className="text-lg-end">
+                    {activatedAt !== null ? (
+                        <span className="badge bg-success">Active on {clusterName(cluster)}</span>
+                    ) : (
+                        <code>Not yet activated on {clusterName(cluster)}</code>
+                    )}
+                </td>
+            </tr>
+
+            {activatedAtSlot}
+
+            <tr>
+                <td className="text-nowrap">Cluster Activation</td>
+                <td className="text-lg-end">
+                    <ClusterActivationEpochAtCluster
+                        cluster={cluster}
+                        clusterInfo={clusterInfo}
+                        activatedAt={activatedAt}
+                    />
+                </td>
+            </tr>
+
+            {featureInfo?.description && (
                 <tr>
-                    <td>Address</td>
-                    <td>
-                        <Address pubkey={new PublicKey(address)} alignRight raw />
-                    </td>
+                    <td>Description</td>
+                    <td className="text-lg-end">{featureInfo?.description}</td>
                 </tr>
+            )}
 
-                <tr>
-                    <td className="text-nowrap">Activated?</td>
-                    <td className="text-lg-end">
-                        {activatedAt !== null ? (
-                            <span className="badge bg-success">Active on {clusterName(cluster)}</span>
-                        ) : (
-                            <code>Not yet activated on {clusterName(cluster)}</code>
-                        )}
-                    </td>
-                </tr>
-
-                {activatedAtSlot}
-
-                <tr>
-                    <td className="text-nowrap">Cluster Activation</td>
-                    <td className="text-lg-end">
-                        <ClusterActivationEpochAtCluster
-                            cluster={cluster}
-                            clusterInfo={clusterInfo}
-                            activatedAt={activatedAt}
-                        />
-                    </td>
-                </tr>
-
-                {featureInfo?.description && (
-                    <tr>
-                        <td>Description</td>
-                        <td className="text-lg-end">{featureInfo?.description}</td>
-                    </tr>
-                )}
-
-                {simdLink}
-            </TableCardBody>
-        </div>
+            {simdLink}
+        </AccountCard>
     );
 };
 

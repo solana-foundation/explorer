@@ -1,9 +1,8 @@
 import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
-import { TableCardBody } from '@components/common/TableCardBody';
 import { useRefreshAccount } from '@entities/account';
-import { AccountDownloadDropdown } from '@features/account';
+import { AccountCard } from '@features/account';
 import { Account, NFTData, TokenProgramData } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID, useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
@@ -44,7 +43,7 @@ import {
 import { BigNumber } from 'bignumber.js';
 import { capitalCase } from 'change-case';
 import { useEffect, useMemo, useState } from 'react';
-import { ExternalLink, RefreshCw } from 'react-feather';
+import { ExternalLink } from 'react-feather';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
@@ -140,111 +139,105 @@ function FungibleTokenMintAccountCard({
     const scaledUiAmountMultiplier = getCurrentTokenScaledUiAmountMultiplier(mintExtensions);
 
     return (
-        <div className="card">
-            <div className="card-header e-gap-2">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">
-                    {tokenInfo
-                        ? 'Overview'
-                        : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58()
-                          ? 'Token-2022 Mint'
-                          : 'Token Mint'}
-                </h3>
-                <button className="btn btn-white btn-sm" onClick={refresh}>
-                    <RefreshCw className="align-text-top me-2" size={13} />
-                    Refresh
-                </button>
-                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
-            </div>
-            <TableCardBody>
+        <AccountCard
+            title={
+                tokenInfo
+                    ? 'Overview'
+                    : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58()
+                      ? 'Token-2022 Mint'
+                      : 'Token Mint'
+            }
+            account={account}
+            refresh={refresh}
+        >
+            <tr>
+                <td>Address</td>
+                <td className="text-lg-end">
+                    <Address pubkey={account.pubkey} alignRight raw />
+                </td>
+            </tr>
+            <tr>
+                <td>{mintInfo.mintAuthority === null ? 'Fixed Supply' : 'Current Supply'}</td>
+                <td className="text-lg-end">
+                    <span>
+                        {normalizeTokenAmount(
+                            Number(mintInfo.supply) * Number(scaledUiAmountMultiplier),
+                            mintInfo.decimals,
+                        ).toLocaleString('en-US', {
+                            maximumFractionDigits: 20,
+                        })}
+                    </span>
+                    <ScaledUiAmountMultiplierTooltip
+                        rawAmount={normalizeTokenAmount(Number(mintInfo.supply), mintInfo.decimals).toString()}
+                        scaledUiAmountMultiplier={scaledUiAmountMultiplier}
+                    />
+                </td>
+            </tr>
+            {tokenInfo?.extensions?.website && (
                 <tr>
-                    <td>Address</td>
+                    <td>Website</td>
                     <td className="text-lg-end">
-                        <Address pubkey={account.pubkey} alignRight raw />
+                        <a rel="noopener noreferrer" target="_blank" href={tokenInfo.extensions.website}>
+                            {tokenInfo.extensions.website}
+                            <ExternalLink className="align-text-top ms-2" size={13} />
+                        </a>
                     </td>
                 </tr>
+            )}
+            {mintInfo.mintAuthority && (
                 <tr>
-                    <td>{mintInfo.mintAuthority === null ? 'Fixed Supply' : 'Current Supply'}</td>
+                    <td>Mint Authority</td>
                     <td className="text-lg-end">
-                        <span>
-                            {normalizeTokenAmount(
-                                Number(mintInfo.supply) * Number(scaledUiAmountMultiplier),
-                                mintInfo.decimals,
-                            ).toLocaleString('en-US', {
-                                maximumFractionDigits: 20,
-                            })}
-                        </span>
-                        <ScaledUiAmountMultiplierTooltip
-                            rawAmount={normalizeTokenAmount(Number(mintInfo.supply), mintInfo.decimals).toString()}
-                            scaledUiAmountMultiplier={scaledUiAmountMultiplier}
-                        />
+                        <Address pubkey={mintInfo.mintAuthority} alignRight link />
                     </td>
                 </tr>
-                {tokenInfo?.extensions?.website && (
-                    <tr>
-                        <td>Website</td>
-                        <td className="text-lg-end">
-                            <a rel="noopener noreferrer" target="_blank" href={tokenInfo.extensions.website}>
-                                {tokenInfo.extensions.website}
-                                <ExternalLink className="align-text-top ms-2" size={13} />
+            )}
+            {mintInfo.freezeAuthority && (
+                <tr>
+                    <td>Freeze Authority</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={mintInfo.freezeAuthority} alignRight link />
+                    </td>
+                </tr>
+            )}
+            <tr>
+                <td>Decimals</td>
+                <td className="text-lg-end">{mintInfo.decimals}</td>
+            </tr>
+            {!mintInfo.isInitialized && (
+                <tr>
+                    <td>Status</td>
+                    <td className="text-lg-end">Uninitialized</td>
+                </tr>
+            )}
+            {tokenInfo?.extensions?.bridgeContract && bridgeContractAddress && (
+                <tr>
+                    <td>Bridge Contract</td>
+                    <td className="text-lg-end">
+                        <Copyable text={bridgeContractAddress}>
+                            <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
+                                {bridgeContractAddress}
                             </a>
-                        </td>
-                    </tr>
-                )}
-                {mintInfo.mintAuthority && (
-                    <tr>
-                        <td>Mint Authority</td>
-                        <td className="text-lg-end">
-                            <Address pubkey={mintInfo.mintAuthority} alignRight link />
-                        </td>
-                    </tr>
-                )}
-                {mintInfo.freezeAuthority && (
-                    <tr>
-                        <td>Freeze Authority</td>
-                        <td className="text-lg-end">
-                            <Address pubkey={mintInfo.freezeAuthority} alignRight link />
-                        </td>
-                    </tr>
-                )}
-                <tr>
-                    <td>Decimals</td>
-                    <td className="text-lg-end">{mintInfo.decimals}</td>
+                        </Copyable>
+                    </td>
                 </tr>
-                {!mintInfo.isInitialized && (
-                    <tr>
-                        <td>Status</td>
-                        <td className="text-lg-end">Uninitialized</td>
-                    </tr>
-                )}
-                {tokenInfo?.extensions?.bridgeContract && bridgeContractAddress && (
-                    <tr>
-                        <td>Bridge Contract</td>
-                        <td className="text-lg-end">
-                            <Copyable text={bridgeContractAddress}>
-                                <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
-                                    {bridgeContractAddress}
-                                </a>
-                            </Copyable>
-                        </td>
-                    </tr>
-                )}
-                {tokenInfo?.extensions?.assetContract && assetContractAddress && (
-                    <tr>
-                        <td>Bridged Asset Contract</td>
-                        <td className="text-lg-end">
-                            <Copyable text={assetContractAddress}>
-                                <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
-                                    {assetContractAddress}
-                                </a>
-                            </Copyable>
-                        </td>
-                    </tr>
-                )}
-                {mintExtensions && (
-                    <TokenExtensionsStatusRow address={account.pubkey.toBase58()} extensions={mintExtensions} />
-                )}
-            </TableCardBody>
-        </div>
+            )}
+            {tokenInfo?.extensions?.assetContract && assetContractAddress && (
+                <tr>
+                    <td>Bridged Asset Contract</td>
+                    <td className="text-lg-end">
+                        <Copyable text={assetContractAddress}>
+                            <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
+                                {assetContractAddress}
+                            </a>
+                        </Copyable>
+                    </td>
+                </tr>
+            )}
+            {mintExtensions && (
+                <TokenExtensionsStatusRow address={account.pubkey.toBase58()} extensions={mintExtensions} />
+            )}
+        </AccountCard>
     );
 }
 
@@ -262,97 +255,87 @@ function NonFungibleTokenMintAccountCard({
 
     const collection = nftData.metadata.collection;
     return (
-        <div className="card">
-            <div className="card-header e-gap-2">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Overview</h3>
-                <button className="btn btn-white btn-sm" onClick={refresh}>
-                    <RefreshCw className="align-text-top me-2" size={13} />
-                    Refresh
-                </button>
-                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
-            </div>
-            <TableCardBody>
+        <AccountCard title="Overview" account={account} refresh={refresh}>
+            <tr>
+                <td>Address</td>
+                <td className="text-lg-end">
+                    <Address pubkey={account.pubkey} alignRight raw />
+                </td>
+            </tr>
+            <tr>
+                <td>Owner</td>
+                <td className="text-lg-end">
+                    <Address pubkey={account.owner} alignRight link />
+                </td>
+            </tr>
+            {nftData.editionInfo.masterEdition?.maxSupply && (
                 <tr>
-                    <td>Address</td>
+                    <td>Max Total Supply</td>
                     <td className="text-lg-end">
-                        <Address pubkey={account.pubkey} alignRight raw />
+                        {nftData.editionInfo.masterEdition.maxSupply.toNumber() === 0
+                            ? 1
+                            : nftData.editionInfo.masterEdition.maxSupply.toNumber()}
                     </td>
                 </tr>
+            )}
+            {nftData?.editionInfo.masterEdition?.supply && (
                 <tr>
-                    <td>Owner</td>
+                    <td>Current Supply</td>
                     <td className="text-lg-end">
-                        <Address pubkey={account.owner} alignRight link />
+                        {nftData.editionInfo.masterEdition.supply.toNumber() === 0
+                            ? 1
+                            : nftData.editionInfo.masterEdition.supply.toNumber()}
                     </td>
                 </tr>
-                {nftData.editionInfo.masterEdition?.maxSupply && (
-                    <tr>
-                        <td>Max Total Supply</td>
-                        <td className="text-lg-end">
-                            {nftData.editionInfo.masterEdition.maxSupply.toNumber() === 0
-                                ? 1
-                                : nftData.editionInfo.masterEdition.maxSupply.toNumber()}
-                        </td>
-                    </tr>
-                )}
-                {nftData?.editionInfo.masterEdition?.supply && (
-                    <tr>
-                        <td>Current Supply</td>
-                        <td className="text-lg-end">
-                            {nftData.editionInfo.masterEdition.supply.toNumber() === 0
-                                ? 1
-                                : nftData.editionInfo.masterEdition.supply.toNumber()}
-                        </td>
-                    </tr>
-                )}
-                {!!collection?.verified && (
-                    <tr>
-                        <td>Verified Collection Address</td>
-                        <td className="text-lg-end">
-                            <Address pubkey={new PublicKey(collection.key)} alignRight link />
-                        </td>
-                    </tr>
-                )}
-                {mintInfo.mintAuthority && (
-                    <tr>
-                        <td>Mint Authority</td>
-                        <td className="text-lg-end">
-                            <Address pubkey={mintInfo.mintAuthority} alignRight link />
-                        </td>
-                    </tr>
-                )}
-                {mintInfo.freezeAuthority && (
-                    <tr>
-                        <td>Freeze Authority</td>
-                        <td className="text-lg-end">
-                            <Address pubkey={mintInfo.freezeAuthority} alignRight link />
-                        </td>
-                    </tr>
-                )}
+            )}
+            {!!collection?.verified && (
                 <tr>
-                    <td>Update Authority</td>
+                    <td>Verified Collection Address</td>
                     <td className="text-lg-end">
-                        <Address pubkey={new PublicKey(nftData.metadata.updateAuthority)} alignRight link />
+                        <Address pubkey={new PublicKey(collection.key)} alignRight link />
                     </td>
                 </tr>
-                {nftData?.json && nftData.json.external_url && (
-                    <tr>
-                        <td>Website</td>
-                        <td className="text-lg-end">
-                            <a rel="noopener noreferrer" target="_blank" href={nftData.json.external_url}>
-                                {nftData.json.external_url}
-                                <ExternalLink className="align-text-top ms-2" size={13} />
-                            </a>
-                        </td>
-                    </tr>
-                )}
-                {nftData?.metadata.data && (
-                    <tr>
-                        <td>Seller Fee</td>
-                        <td className="text-lg-end">{`${nftData?.metadata.data.sellerFeeBasisPoints / 100}%`}</td>
-                    </tr>
-                )}
-            </TableCardBody>
-        </div>
+            )}
+            {mintInfo.mintAuthority && (
+                <tr>
+                    <td>Mint Authority</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={mintInfo.mintAuthority} alignRight link />
+                    </td>
+                </tr>
+            )}
+            {mintInfo.freezeAuthority && (
+                <tr>
+                    <td>Freeze Authority</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={mintInfo.freezeAuthority} alignRight link />
+                    </td>
+                </tr>
+            )}
+            <tr>
+                <td>Update Authority</td>
+                <td className="text-lg-end">
+                    <Address pubkey={new PublicKey(nftData.metadata.updateAuthority)} alignRight link />
+                </td>
+            </tr>
+            {nftData?.json && nftData.json.external_url && (
+                <tr>
+                    <td>Website</td>
+                    <td className="text-lg-end">
+                        <a rel="noopener noreferrer" target="_blank" href={nftData.json.external_url}>
+                            {nftData.json.external_url}
+                            <ExternalLink className="align-text-top ms-2" size={13} />
+                        </a>
+                    </td>
+                </tr>
+            )}
+            {nftData?.metadata.data && (
+                <tr>
+                    <td>Seller Fee</td>
+                    <td className="text-lg-end">{`${nftData?.metadata.data.sellerFeeBasisPoints / 100}%`}</td>
+                </tr>
+            )}
+        </AccountCard>
     );
 }
 
@@ -390,106 +373,98 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
     }, [tokenInfo, info]);
 
     return (
-        <div className="card">
-            <div className="card-header e-gap-2">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">
-                    Token{account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() && '-2022'} Account
-                </h3>
-                <button className="btn btn-white btn-sm" onClick={() => refresh(account.pubkey, 'parsed')}>
-                    <RefreshCw className="align-text-top me-2" size={13} />
-                    Refresh
-                </button>
-                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
-            </div>
-            <TableCardBody>
+        <AccountCard
+            title={<>Token{account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() && '-2022'} Account</>}
+            account={account}
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        >
+            <tr>
+                <td>Address</td>
+                <td className="text-lg-end">
+                    <Address pubkey={account.pubkey} alignRight raw />
+                </td>
+            </tr>
+            {label && (
                 <tr>
-                    <td>Address</td>
+                    <td>Address Label</td>
+                    <td className="text-lg-end">{label}</td>
+                </tr>
+            )}
+            <tr>
+                <td>Mint</td>
+                <td className="text-lg-end">
+                    <Address pubkey={info.mint} alignRight link tokenLabelInfo={tokenInfo} />
+                </td>
+            </tr>
+            <tr>
+                <td>Owner</td>
+                <td className="text-lg-end">
+                    <Address pubkey={info.owner} alignRight link />
+                </td>
+            </tr>
+            <tr>
+                <td>Token balance {typeof symbol === 'string' && `(${symbol})`}</td>
+                <td className="text-lg-end">
+                    {balance}
+                    <ScaledUiAmountMultiplierTooltip
+                        rawAmount={normalizeTokenAmount(
+                            Number(info.tokenAmount.amount),
+                            info.tokenAmount.decimals || 0
+                        ).toString()}
+                        scaledUiAmountMultiplier={scaledUiAmountMultiplier}
+                    />
+                </td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td className="text-lg-end">
+                    <StatusBadge status={info.state} />
+                </td>
+            </tr>
+            {info.rentExemptReserve && (
+                <tr>
+                    <td>Rent-exempt reserve (SOL)</td>
                     <td className="text-lg-end">
-                        <Address pubkey={account.pubkey} alignRight raw />
+                        <>
+                            ◎
+                            <span className="font-monospace">
+                                {new BigNumber(info.rentExemptReserve.uiAmountString).toFormat(9)}
+                            </span>
+                        </>
                     </td>
                 </tr>
-                {label && (
+            )}
+            {info.delegate && (
+                <>
                     <tr>
-                        <td>Address Label</td>
-                        <td className="text-lg-end">{label}</td>
-                    </tr>
-                )}
-                <tr>
-                    <td>Mint</td>
-                    <td className="text-lg-end">
-                        <Address pubkey={info.mint} alignRight link tokenLabelInfo={tokenInfo} />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Owner</td>
-                    <td className="text-lg-end">
-                        <Address pubkey={info.owner} alignRight link />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Token balance {typeof symbol === 'string' && `(${symbol})`}</td>
-                    <td className="text-lg-end">
-                        {balance}
-                        <ScaledUiAmountMultiplierTooltip
-                            rawAmount={normalizeTokenAmount(
-                                Number(info.tokenAmount.amount),
-                                info.tokenAmount.decimals || 0,
-                            ).toString()}
-                            scaledUiAmountMultiplier={scaledUiAmountMultiplier}
-                        />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Status</td>
-                    <td className="text-lg-end">
-                        <StatusBadge status={info.state} />
-                    </td>
-                </tr>
-                {info.rentExemptReserve && (
-                    <tr>
-                        <td>Rent-exempt reserve (SOL)</td>
+                        <td>Delegate</td>
                         <td className="text-lg-end">
-                            <>
-                                ◎
-                                <span className="font-monospace">
-                                    {new BigNumber(info.rentExemptReserve.uiAmountString).toFormat(9)}
-                                </span>
-                            </>
+                            <Address pubkey={info.delegate} alignRight link />
                         </td>
                     </tr>
-                )}
-                {info.delegate && (
-                    <>
-                        <tr>
-                            <td>Delegate</td>
-                            <td className="text-lg-end">
-                                <Address pubkey={info.delegate} alignRight link />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Delegated amount {typeof symbol === 'string' && `(${symbol})`}</td>
-                            <td className="text-lg-end">
-                                {info.isNative ? (
-                                    <>
-                                        {'\u25ce'}
-                                        <span className="font-monospace">
-                                            {new BigNumber(
-                                                info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0',
-                                            ).toFormat(9)}
-                                        </span>
-                                    </>
-                                ) : (
-                                    <>{info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0'}</>
-                                )}
-                            </td>
-                        </tr>
-                    </>
-                )}
-                {accountExtensions && (
-                    <TokenExtensionsStatusRow address={account.pubkey.toBase58()} extensions={accountExtensions} />
-                )}
-            </TableCardBody>
-        </div>
+                    <tr>
+                        <td>Delegated amount {typeof symbol === 'string' && `(${symbol})`}</td>
+                        <td className="text-lg-end">
+                            {info.isNative ? (
+                                <>
+                                    {'\u25ce'}
+                                    <span className="font-monospace">
+                                        {new BigNumber(
+                                            info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0',
+                                        ).toFormat(9)}
+                                    </span>
+                                </>
+                            ) : (
+                                <>{info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0'}</>
+                            )}
+                        </td>
+                    </tr>
+                </>
+            )}
+            {accountExtensions && (
+                <TokenExtensionsStatusRow address={account.pubkey.toBase58()} extensions={accountExtensions} />
+            )}
+        </AccountCard>
     );
 }
 
@@ -497,46 +472,36 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
     const refresh = useRefreshAccount();
 
     return (
-        <div className="card">
-            <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Multisig Account</h3>
-                <button className="btn btn-white btn-sm" onClick={() => refresh(account.pubkey, 'parsed')}>
-                    <RefreshCw className="align-text-top ms-2" size={13} />
-                    Refresh
-                </button>
-            </div>
-
-            <TableCardBody>
-                <tr>
-                    <td>Address</td>
+        <AccountCard title="Multisig Account" account={account} refresh={() => refresh(account.pubkey, 'parsed')}>
+            <tr>
+                <td>Address</td>
+                <td className="text-lg-end">
+                    <Address pubkey={account.pubkey} alignRight raw />
+                </td>
+            </tr>
+            <tr>
+                <td>Required Signers</td>
+                <td className="text-lg-end">{info.numRequiredSigners}</td>
+            </tr>
+            <tr>
+                <td>Valid Signers</td>
+                <td className="text-lg-end">{info.numValidSigners}</td>
+            </tr>
+            {info.signers.map(signer => (
+                <tr key={signer.toString()}>
+                    <td>Signer</td>
                     <td className="text-lg-end">
-                        <Address pubkey={account.pubkey} alignRight raw />
+                        <Address pubkey={signer} alignRight link />
                     </td>
                 </tr>
+            ))}
+            {!info.isInitialized && (
                 <tr>
-                    <td>Required Signers</td>
-                    <td className="text-lg-end">{info.numRequiredSigners}</td>
+                    <td>Status</td>
+                    <td className="text-lg-end">Uninitialized</td>
                 </tr>
-                <tr>
-                    <td>Valid Signers</td>
-                    <td className="text-lg-end">{info.numValidSigners}</td>
-                </tr>
-                {info.signers.map(signer => (
-                    <tr key={signer.toString()}>
-                        <td>Signer</td>
-                        <td className="text-lg-end">
-                            <Address pubkey={signer} alignRight link />
-                        </td>
-                    </tr>
-                ))}
-                {!info.isInitialized && (
-                    <tr>
-                        <td>Status</td>
-                        <td className="text-lg-end">Uninitialized</td>
-                    </tr>
-                )}
-            </TableCardBody>
-        </div>
+            )}
+        </AccountCard>
     );
 }
 
