@@ -35,10 +35,7 @@ export function ViewReceiptButton({ signature, receiptPath, transactionWithMeta 
 
     return (
         <Button variant="outline" size="sm" asChild>
-            <Link
-                href={receiptPath}
-                onClick={() => receiptAnalytics.trackButtonClicked(signature)}
-            >
+            <Link href={receiptPath} onClick={() => receiptAnalytics.trackButtonClicked(signature)}>
                 View Receipt
             </Link>
         </Button>
