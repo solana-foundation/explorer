@@ -3,6 +3,7 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { InfoTooltip } from '@components/common/InfoTooltip';
 import { Signature } from '@components/common/Signature';
+import { TableCardSkeleton } from '@components/common/Skeletons';
 import { Slot } from '@components/common/Slot';
 import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
@@ -38,7 +39,6 @@ import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { RefreshCw, ZoomIn } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
-import { TableCardSkeleton } from '@components/common/Skeletons';
 import { AccountsCard } from '@/app/components/transaction/AccountsCard';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
