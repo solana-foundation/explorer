@@ -428,13 +428,13 @@ function DetailsSection({ signature }: SignatureProps) {
 
     return (
         <>
-            <CUProfilingSection signature={signature} />
             <Suspense fallback={<LoadingCard message="Loading accounts" />}>
                 <AccountsCard signature={signature} />
             </Suspense>
             <TokenBalancesCard signature={signature} />
             <InstructionsSection signature={signature} />
             <ProgramLogSection signature={signature} />
+            <CUProfilingSection signature={signature} />
         </>
     );
 }

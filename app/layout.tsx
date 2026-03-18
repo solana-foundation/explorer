@@ -3,6 +3,7 @@ import './styles.css';
 
 import { ClusterModal } from '@components/ClusterModal';
 import { ClusterStatusButton } from '@components/ClusterStatusButton';
+import { Footer } from '@components/Footer';
 import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';
 import { ClusterProvider } from '@providers/cluster';
@@ -61,18 +62,21 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                         <VisibilityProvider>
                             <TokenInfoBatchProvider>
                                 <ClusterModal />
-                                <div className="main-content pb-4">
-                                    <Navbar>
-                                        <SearchBar />
-                                    </Navbar>
-                                    <MessageBanner />
-                                    <div className="container my-3 d-xl-none">
-                                        <SearchBar />
+                                <div className="e-flex e-min-h-screen e-flex-col">
+                                    <div className="main-content pb-4 e-flex-1">
+                                        <Navbar>
+                                            <SearchBar />
+                                        </Navbar>
+                                        <MessageBanner />
+                                        <div className="container my-3 d-xl-none">
+                                            <SearchBar />
+                                        </div>
+                                        <div className="container my-3 d-lg-none">
+                                            <ClusterStatusButton />
+                                        </div>
+                                        {children}
                                     </div>
-                                    <div className="container my-3 d-lg-none">
-                                        <ClusterStatusButton />
-                                    </div>
-                                    {children}
+                                    <Footer />
                                 </div>
                                 <Toaster position="bottom-center" toastOptions={{ duration: 5_000 }} />
                             </TokenInfoBatchProvider>

@@ -1,6 +1,7 @@
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { Copyable } from '@components/common/Copyable';
+import { DownloadableDropdown } from '@components/common/Downloadable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { HexData } from '@components/common/HexData';
 import { SolBalance } from '@components/common/SolBalance';
@@ -68,9 +69,15 @@ export function AccountsCard({ signature }: SignatureProps) {
                     {loading ? (
                         <span className="text-muted">Loading...</span>
                     ) : accountInfo ? (
-                        <Copyable text={hexData}>
+                        accountInfo.size > 0 ? (
+                            <div className="e-flex e-items-center">
+                                <span className="e-mr-3">{accountInfo.size.toLocaleString('en-US')}</span>
+                                <Copyable text={hexData} />
+                                <DownloadableDropdown data={accountInfo.data} filename={key} iconButton />
+                            </div>
+                        ) : (
                             <span>{accountInfo.size.toLocaleString('en-US')}</span>
-                        </Copyable>
+                        )
                     ) : (
                         <span className="text-muted">-</span>
                     )}
@@ -109,6 +116,13 @@ export function AccountsCard({ signature }: SignatureProps) {
                     {expanded ? 'Collapse' : 'Expand'}
                 </button>
             </div>
+            {expanded && (
+                <div className="px-4 py-2 border-bottom">
+                    <small className="text-muted">
+                        Account data is fetched at the current time and may differ from the state at transaction time.
+                    </small>
+                </div>
+            )}
             {expanded &&
                 (showRaw ? (
                     <div className="card-body">
@@ -221,12 +235,19 @@ function DataRow({
                             </div>
                         </div>
 
-                        <button
-                            className={`btn btn-sm d-flex ${isDataVisible ? 'btn-black active' : 'btn-white'}`}
-                            onClick={() => setIsDataVisible(!isDataVisible)}
-                        >
-                            {isDataVisible ? 'Hide Data' : 'Show Data'}
-                        </button>
+                        <div className="d-flex align-items-center gap-2">
+                            {data && data.length > 0 && (
+                                <Copyable text={toHex(data)}>
+                                    <DownloadableDropdown data={data} filename={account.pubkey.toBase58()} />
+                                </Copyable>
+                            )}
+                            <button
+                                className={`btn btn-sm d-flex ${isDataVisible ? 'btn-black active' : 'btn-white'}`}
+                                onClick={() => setIsDataVisible(!isDataVisible)}
+                            >
+                                {isDataVisible ? 'Hide Data' : 'Show Data'}
+                            </button>
+                        </div>
                     </div>
 
                     {isDataVisible && (
