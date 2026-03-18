@@ -257,14 +257,14 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
 
     return (
         <div className="card">
-            <div className="card-header align-items-center" style={{ gap: '0.5rem' }}>
+            <div className="card-header align-items-center gap-2">
                 <h3 className="card-header-title">Overview</h3>
                 <ViewReceiptButton
                     signature={signature}
                     transactionWithMeta={transactionWithMeta}
                     receiptPath={receiptPath}
                 />
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="outline" size="sm" asChild aria-label="Inspect">
                     <Link href={inspectPath}>
                         <Settings size={12} />
                         <span className="d-none d-md-inline">Inspect</span>
@@ -273,7 +273,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                 {autoRefresh === AutoRefresh.Active ? (
                     <span className="spinner-grow spinner-grow-sm"></span>
                 ) : (
-                    <Button variant="outline" size="sm" onClick={() => fetchStatus(signature)}>
+                    <Button variant="outline" size="sm" aria-label="Refresh" onClick={() => fetchStatus(signature)}>
                         <RefreshCw size={12} />
                         <span className="d-none d-md-inline">Refresh</span>
                     </Button>

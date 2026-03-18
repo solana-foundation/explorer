@@ -74,7 +74,7 @@ export function DownloadableDropdown({
     return (
         <Dropdown dropdownRef={dropdownRef} options={dropdownOptions}>
             <div className="dropdown e-overflow-visible">
-                <Button variant="outline" size="sm" ref={dropdownRef} data-bs-toggle="dropdown" type="button">
+                <Button variant="outline" size="sm" ref={dropdownRef} data-bs-toggle="dropdown" type="button" aria-label="Download">
                     <Download size={12} />
                     <span className="d-none d-md-inline">Download</span>
                 </Button>
