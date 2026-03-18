@@ -11,6 +11,7 @@ export function Footer() {
     const featureGatesPath = useClusterPath({ pathname: '/feature-gates' });
     const supplyPath = useClusterPath({ pathname: '/supply' });
     const programsPath = useClusterPath({ pathname: '/verified-programs' });
+    const tosPath = useClusterPath({ pathname: '/tos' });
     const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const selectedLayoutSegments = useSelectedLayoutSegments();
@@ -39,6 +40,9 @@ export function Footer() {
                         </Link>
                         <Link className={linkClass(isInspectorActive)} href={inspectorPath}>
                             Inspector
+                        </Link>
+                        <Link className={linkClass(selectedLayoutSegment === 'tos')} href={tosPath}>
+                            ToS
                         </Link>
                         <a
                             href="https://github.com/solana-foundation/explorer"
