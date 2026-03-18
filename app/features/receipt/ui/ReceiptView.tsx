@@ -5,9 +5,7 @@ import { TransactionSignature } from '@solana/web3.js';
 import Link from 'next/link';
 import { Download, Share2 } from 'react-feather';
 
-import { useToast } from '@/app/components/shared/ui/sonner/use-toast';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
-import { useCanNativeShare } from '@/app/shared/lib/use-can-native-share';
 
 import type { DownloadReceiptFn, FormattedExtendedReceipt } from '../types';
 import { BaseReceipt, BlurredCircle } from './BaseReceipt';
@@ -25,28 +23,6 @@ interface ReceiptViewProps {
 export function ReceiptView({ data, signature, transactionPath, downloadPdf }: ReceiptViewProps) {
     function handleViewTxClick() {
         receiptAnalytics.trackViewTxClicked(signature);
-    }
-
-    async function handleNativeShare() {
-        try {
-            const shareData = {
-                title: 'Solana Transaction Receipt',
-                url: globalThis.location.href,
-            };
-
-            if (!navigator.canShare?.(shareData)) {
-                toast.custom({ title: 'Sharing not supported for this content', type: 'error' });
-                return;
-            }
-            await navigator.share(shareData);
-            receiptAnalytics.trackShareNative(signature);
-        } catch (e) {
-            if (e instanceof Error && e.name === 'AbortError') {
-                // Dismissing the native share sheet is an expected cancel path, not a share failure.
-                return;
-            }
-            toast.custom({ title: 'Failed to share', type: 'error' });
-        }
     }
 
     return (

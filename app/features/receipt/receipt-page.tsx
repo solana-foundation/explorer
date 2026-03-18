@@ -8,6 +8,7 @@ import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { useFetchTransactionStatus, useTransactionDetails, useTransactionStatus } from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
+import { NATIVE_MINT } from '@solana/spl-token';
 import { TransactionSignature } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { formatUsdValue } from '@utils/index';
@@ -142,12 +143,9 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const tokenLink = useExplorerLink(receipt.kind === 'token' ? `/address/${receipt.mint}` : '');
     const logoURI = receipt.logoURI ? getProxiedUri(receipt.logoURI) : undefined;
 
-    const WRAPPED_SOL_MINT = 'So11111111111111111111111111111111111111112';
-    const mint = receipt.kind === 'token' ? receipt.mint : WRAPPED_SOL_MINT;
+    const mint = receipt.kind === 'token' ? receipt.mint : NATIVE_MINT.toBase58();
     const priceResult = useTokenPrice(mint);
-    const totalAmountStr = receipt.total.formatted;
-    const usdValue =
-        priceResult?.price != null ? formatUsdValue(parseFloat(totalAmountStr), priceResult.price) : undefined;
+    const usdValue = priceResult?.price != null ? formatUsdValue(receipt.total.raw, priceResult.price) : undefined;
 
     const downloadPdf = useCallback(async () => {
         const deps = await loadPdfDeps();
