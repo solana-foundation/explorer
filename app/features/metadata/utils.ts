@@ -1,3 +1,5 @@
+import { CID } from 'multiformats/cid';
+
 const IPFS_GATEWAY = 'https://ipfs.io/ipfs';
 
 export const getProxiedUri = (uri: string): string | '' => {
@@ -15,6 +17,7 @@ export const getProxiedUri = (uri: string): string | '' => {
 
     if (url.protocol === 'ipfs:') {
         const gatewayUri = resolveIpfsUri(url);
+        if (gatewayUri === '') return '';
         return isProxyEnabled ? proxyUri(gatewayUri) : gatewayUri;
     }
 
@@ -28,7 +31,20 @@ export const getProxiedUri = (uri: string): string | '' => {
 const resolveIpfsUri = (url: URL): string => {
     // eslint-disable-next-line no-restricted-syntax -- Strips redundant "ipfs/" prefix from the path for a clean gateway URL.
     const path = (url.host + url.pathname).replace(/^ipfs\//, '');
+    if (!verifyCID(path)) {
+        console.warn(`[metadata] Cannot fetch a malformed CID: ${path}`);
+        return '';
+    }
     return `${IPFS_GATEWAY}/${path}${url.search}`;
 };
 
 const proxyUri = (uri: string): string => `/api/metadata/proxy?uri=${encodeURIComponent(uri)}`;
+
+export const verifyCID = (cid: string): boolean => {
+    try {
+        CID.parse(cid);
+        return true;
+    } catch {
+        return false;
+    }
+};
