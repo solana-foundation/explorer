@@ -2,10 +2,10 @@
 
 import { Epoch } from '@components/common/Epoch';
 import { ErrorCard } from '@components/common/ErrorCard';
-import { LoadingCard } from '@components/common/LoadingCard';
 import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { TimestampToggle } from '@components/common/TimestampToggle';
+import { LiveTransactionStatsCardSkeleton } from '@components/HomepageSkeletons';
 import { LiveTransactionStatsCard } from '@components/LiveTransactionStatsCard';
 import { StatsNotReady } from '@components/StatsNotReady';
 import { useVoteAccounts } from '@providers/accounts/vote-accounts';
@@ -23,48 +23,106 @@ import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/ind
 import { percentage } from '@utils/math';
 import React from 'react';
 
+import {
+    ImageSliderSkeleton,
+    SimpleCardSkeleton,
+    StatsTableSkeleton,
+    TableCardSkeleton,
+} from './components/common/Skeletons';
 import { DeveloperResources } from './components/DeveloperResources';
 import { UpcomingFeatures } from './utils/feature-gate/UpcomingFeatures';
+
+function PageSkeleton() {
+    return (
+        <>
+            <div className="row staking-card">
+                <div className="col-6 col-xl">
+                    <SimpleCardSkeleton />
+                </div>
+                <div className="col-6 col-xl">
+                    <SimpleCardSkeleton />
+                </div>
+            </div>
+
+            <div className="row d-flex">
+                <div className="col-md-6 d-flex">
+                    <StatsTableSkeleton />
+                </div>
+                <div className="col-md-6 d-flex">
+                    <LiveTransactionStatsCardSkeleton />
+                </div>
+            </div>
+
+            <ImageSliderSkeleton />
+
+            <TableCardSkeleton />
+        </>
+    );
+}
 
 export default function Page() {
     return (
         <StatsProvider>
             <SupplyProvider>
                 <div className="container mt-4">
-                    <StakingComponent />
-
-                    <div className="row d-flex">
-                        <div className="col-md-6 d-flex">
-                            <StatsCardBody />
-                        </div>
-                        <div className="col-md-6 d-flex">
-                            <LiveTransactionStatsCard />
-                        </div>
-                    </div>
-
-                    <DeveloperResources />
-
-                    <UpcomingFeatures />
+                    <PageContent />
                 </div>
             </SupplyProvider>
         </StatsProvider>
     );
 }
 
-function StakingComponent() {
-    const { status } = useCluster();
+function PageContent() {
     const supply = useSupply();
+    const { status } = useCluster();
     const fetchSupply = useFetchSupply();
-    const { fetchVoteAccounts, voteAccounts } = useVoteAccounts();
-
-    function fetchData() {
-        fetchSupply();
-        fetchVoteAccounts();
-    }
 
     React.useEffect(() => {
         if (status === ClusterStatus.Connected) {
-            fetchData();
+            fetchSupply();
+        }
+    }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    if (supply === Status.Disconnected) {
+        return null;
+    }
+
+    if (supply === Status.Idle || supply === Status.Connecting) {
+        return <PageSkeleton />;
+    }
+
+    if (typeof supply === 'string') {
+        return <ErrorCard text={supply} />;
+    }
+
+    return (
+        <>
+            <StakingDisplay />
+
+            <div className="row d-flex">
+                <div className="col-md-6 d-flex">
+                    <StatsCardBody />
+                </div>
+                <div className="col-md-6 d-flex">
+                    <LiveTransactionStatsCard />
+                </div>
+            </div>
+
+            <DeveloperResources />
+
+            <UpcomingFeatures />
+        </>
+    );
+}
+
+function StakingDisplay() {
+    const supply = useSupply();
+    const { status } = useCluster();
+    const { fetchVoteAccounts, voteAccounts } = useVoteAccounts();
+
+    React.useEffect(() => {
+        if (status === ClusterStatus.Connected) {
+            fetchVoteAccounts();
         }
     }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -83,15 +141,8 @@ function StakingComponent() {
         }
     }, [voteAccounts, delinquentStake]);
 
-    if (supply === Status.Disconnected) {
-        // we'll return here to prevent flicker
+    if (typeof supply !== 'object') {
         return null;
-    }
-
-    if (supply === Status.Idle || supply === Status.Connecting) {
-        return <LoadingCard message="Loading supply data" />;
-    } else if (typeof supply === 'string') {
-        return <ErrorCard text={supply} retry={fetchData} />;
     }
 
     // Don't display the staking card if the supply is 0
@@ -162,7 +213,10 @@ function StatsCardBody() {
     if (performanceInfo.status !== ClusterStatsStatus.Ready || dashboardInfo.status !== ClusterStatsStatus.Ready) {
         const error =
             performanceInfo.status === ClusterStatsStatus.Error || dashboardInfo.status === ClusterStatsStatus.Error;
-        return <StatsNotReady error={error} />;
+        if (error) {
+            return <StatsNotReady error={true} />;
+        }
+        return <StatsTableSkeleton />;
     }
 
     const { avgSlotTime_1h, avgSlotTime_1min, epochInfo, blockTime } = dashboardInfo;

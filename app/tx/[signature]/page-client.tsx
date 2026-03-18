@@ -2,7 +2,6 @@
 
 import { ErrorCard } from '@components/common/ErrorCard';
 import { InfoTooltip } from '@components/common/InfoTooltip';
-import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
 import { SolBalance } from '@components/common/SolBalance';
@@ -11,6 +10,7 @@ import { SignatureContext } from '@components/instruction/SignatureContext';
 import { InstructionsSection } from '@components/transaction/InstructionsSection';
 import { ProgramLogSection } from '@components/transaction/ProgramLogSection';
 import { TokenBalancesCard } from '@components/transaction/TokenBalancesCard';
+import { TransactionDetailsSkeleton, TransactionPageSkeleton } from '@components/transaction/TransactionSkeletons';
 import { CUProfilingSection } from '@features/cu-profiling';
 import { Receipt, ViewReceiptButton } from '@features/receipt';
 import { isReceiptEnabled } from '@features/receipt';
@@ -38,6 +38,7 @@ import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { RefreshCw, ZoomIn } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
+import { TableCardSkeleton } from '@/app/components/common/Skeletons';
 import { AccountsCard } from '@/app/components/transaction/AccountsCard';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
@@ -144,7 +145,7 @@ export default function TransactionDetailsPageClient({ params: { signature: raw 
             ) : (
                 <SignatureContext.Provider value={signature}>
                     <StatusCard signature={signature} autoRefresh={autoRefresh} />
-                    <Suspense fallback={<LoadingCard message="Loading transaction details" />}>
+                    <Suspense fallback={<TransactionDetailsSkeleton />}>
                         <DetailsSection signature={signature} />
                     </Suspense>
                 </SignatureContext.Provider>
@@ -194,7 +195,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
     }, [autoRefresh, fetchStatus, signature]);
 
     if (!status || (status.status === FetchStatus.Fetching && autoRefresh === AutoRefresh.Inactive)) {
-        return <LoadingCard />;
+        return <TransactionPageSkeleton />;
     } else if (status.status === FetchStatus.FetchFailed) {
         return <ErrorCard retry={() => fetchStatus(signature)} text="Fetch Failed" />;
     } else if (!status.data?.info) {
@@ -433,7 +434,7 @@ function DetailsSection({ signature }: SignatureProps) {
     if (!status?.data?.info) {
         return null;
     } else if (!details || details.status === FetchStatus.Fetching) {
-        return <LoadingCard />;
+        return <TransactionDetailsSkeleton />;
     } else if (details.status === FetchStatus.FetchFailed) {
         return <ErrorCard retry={refreshDetails} text="Failed to fetch details" />;
     } else if (!transactionWithMeta || !message) {
@@ -442,7 +443,7 @@ function DetailsSection({ signature }: SignatureProps) {
 
     return (
         <>
-            <Suspense fallback={<LoadingCard message="Loading accounts" />}>
+            <Suspense fallback={<TableCardSkeleton cols={5} rows={4} />}>
                 <AccountsCard signature={signature} />
             </Suspense>
             <TokenBalancesCard signature={signature} />
