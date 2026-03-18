@@ -37,7 +37,7 @@ const buttonVariants = cva(
                 ghost: 'hover:e-bg-neutral-100 hover:e-text-neutral-900',
                 link: 'e-text-neutral-900 e-underline-offset-4 hover:e-underline',
                 outline:
-                    'e-border e-border-neutral-600 e-bg-transparent e-text-white hover:e-bg-neutral-600/10 focus-visible:e-ring-1 focus-visible:e-ring-offset-1 focus-visible:e-ring-neutral-950',
+                    'e-border e-border-neutral-600 e-bg-transparent e-text-white hover:e-bg-neutral-600/10 hover:e-text-white focus-visible:e-ring-1 focus-visible:e-ring-offset-1 focus-visible:e-ring-neutral-950',
                 secondary: 'e-bg-neutral-100 e-text-neutral-900 e-shadow-sm hover:e-bg-neutral-100/80',
             },
         },

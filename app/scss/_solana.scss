@@ -202,6 +202,29 @@ h4.slot-pill {
     line-height: 1.5rem;
 }
 
+// Prevent navbar and content from breaking at very narrow viewports
+.main-content {
+    min-width: 292px;
+}
+
+// Restore padding on desktop that navbar-expand-lg zeroes out
+nav.navbar .navbar-container {
+
+    @include media-breakpoint-up(lg) {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+// Align visible Solana icon with search bar magnifying glass on mobile.
+// The logo SVG has ~8px internal whitespace before the green S mark,
+// while the search icon has ~1px. This negative margin compensates.
+.navbar-container > a:first-child {
+    @include media-breakpoint-down(xl) {
+        margin-left: -6px;
+    }
+}
+
 .search-bar__control {
     border-radius: $border-radius !important;
     padding: 2px 16px;

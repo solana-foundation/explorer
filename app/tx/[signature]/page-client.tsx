@@ -38,6 +38,7 @@ import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
 import { RefreshCw, Settings } from 'react-feather';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { AccountsCard } from '@/app/components/transaction/AccountsCard';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@/app/utils/compute-units-schedule';
@@ -256,26 +257,27 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
 
     return (
         <div className="card">
-            <div className="card-header align-items-center">
+            <div className="card-header align-items-center" style={{ gap: '0.5rem' }}>
                 <h3 className="card-header-title">Overview</h3>
                 <ViewReceiptButton
                     signature={signature}
                     transactionWithMeta={transactionWithMeta}
                     receiptPath={receiptPath}
                 />
-                <Link className="btn btn-white btn-sm me-2" href={inspectPath}>
-                    <Settings className="align-text-top me-2" size={13} />
-                    Inspect
-                </Link>
+                <Button variant="outline" size="sm" asChild>
+                    <Link href={inspectPath}>
+                        <Settings size={12} />
+                        <span className="d-none d-md-inline">Inspect</span>
+                    </Link>
+                </Button>
                 {autoRefresh === AutoRefresh.Active ? (
                     <span className="spinner-grow spinner-grow-sm"></span>
                 ) : (
-                    <button className="btn btn-white btn-sm" onClick={() => fetchStatus(signature)}>
-                        <RefreshCw className="align-text-top me-2" size={13} />
-                        Refresh
-                    </button>
+                    <Button variant="outline" size="sm" onClick={() => fetchStatus(signature)}>
+                        <RefreshCw size={12} />
+                        <span className="d-none d-md-inline">Refresh</span>
+                    </Button>
                 )}
-                <span className="me-2"></span>
                 <DownloadableDropdown filename={signature} data={rawDetails?.data?.raw?.message.serialize() || null} />
             </div>
 

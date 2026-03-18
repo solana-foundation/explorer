@@ -26,7 +26,7 @@ export function Navbar({ children }: INavbarProps) {
     const selectedLayoutSegments = useSelectedLayoutSegments();
     return (
         <nav className="navbar navbar-expand-lg navbar-light">
-            <div className="container px-4">
+            <div className="container navbar-container">
                 <Link href={homePath}>
                     <Image alt="Solana Explorer" height={22} src={Logo} width={214} priority />
                 </Link>
