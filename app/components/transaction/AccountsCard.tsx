@@ -6,11 +6,11 @@ import { SolBalance } from '@components/common/SolBalance';
 import { type AccountInfo, useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
+import { Button } from '@shared/ui/button';
 import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
-import { Button } from '@shared/ui/button';
 import React, { useMemo, useState } from 'react';
 import { Code, Download } from 'react-feather';
 
@@ -70,11 +70,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                     ) : accountInfo ? (
                         accountInfo.size > 0 ? (
                             <div className="e-flex e-items-center">
-                                <DownloadDropdown
-                                    data={accountInfo.data}
-                                    encodings={['hex', 'base64']}
-                                    filename={key}
-                                >
+                                <DownloadDropdown data={accountInfo.data} encodings={['hex', 'base64']} filename={key}>
                                     <Button variant="ghost" size="icon">
                                         <Download size={12} />
                                     </Button>

@@ -26,7 +26,7 @@ vi.mock('@solana/web3.js', async () => {
 describe('useAccountsInfo', () => {
     beforeEach(() => {
         vi.mocked(useSWR).mockImplementation(
-            () => ({ data: undefined, error: undefined, isLoading: false } as ReturnType<typeof useSWR>)
+            () => ({ data: undefined, error: undefined, isLoading: false }) as ReturnType<typeof useSWR>,
         );
     });
 
@@ -41,7 +41,7 @@ describe('useAccountsInfo', () => {
 
         expect(useSWR).toHaveBeenCalledWith(
             ['accounts-info', MOCK_PUBKEY_1.toBase58(), MOCK_URL],
-            expect.any(Function)
+            expect.any(Function),
         );
     });
 

@@ -29,7 +29,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
             'focus:e-bg-outer-space-800 data-[state=open]:e-bg-outer-space-800',
             '[&_svg]:e-pointer-events-none [&_svg]:e-size-4 [&_svg]:e-shrink-0',
             inset && 'e-pl-8',
-            className
+            className,
         )}
         {...props}
     >
@@ -53,7 +53,7 @@ const DropdownMenuSubContent = React.forwardRef<
             'data-[state=closed]:e-zoom-out-95 data-[state=open]:e-zoom-in-95',
             'data-[side=bottom]:e-slide-in-from-top-2 data-[side=left]:e-slide-in-from-right-2',
             'data-[side=right]:e-slide-in-from-left-2 data-[side=top]:e-slide-in-from-bottom-2',
-            className
+            className,
         )}
         {...props}
     />
@@ -76,7 +76,7 @@ const DropdownMenuContent = React.forwardRef<
                 'data-[state=closed]:e-zoom-out-95 data-[state=open]:e-zoom-in-95',
                 'data-[side=bottom]:e-slide-in-from-top-2 data-[side=left]:e-slide-in-from-right-2',
                 'data-[side=right]:e-slide-in-from-left-2 data-[side=top]:e-slide-in-from-bottom-2',
-                className
+                className,
             )}
             {...props}
         />
@@ -98,7 +98,7 @@ const DropdownMenuItem = React.forwardRef<
             'data-[disabled]:e-pointer-events-none data-[disabled]:e-opacity-50',
             '[&>svg]:e-size-4 [&>svg]:e-shrink-0',
             inset && 'e-pl-8',
-            className
+            className,
         )}
         {...props}
     />
@@ -115,7 +115,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
             'e-relative e-flex e-cursor-default e-select-none e-items-center e-rounded-sm e-py-1.5 e-pl-8 e-pr-2 e-text-sm e-outline-none e-transition-colors',
             'focus:e-bg-outer-space-800 focus:e-text-outer-space-50',
             'data-[disabled]:e-pointer-events-none data-[disabled]:e-opacity-50',
-            className
+            className,
         )}
         checked={checked}
         {...props}
@@ -140,7 +140,7 @@ const DropdownMenuRadioItem = React.forwardRef<
             'e-relative e-flex e-cursor-default e-select-none e-items-center e-rounded-sm e-py-1.5 e-pl-8 e-pr-2 e-text-sm e-outline-none e-transition-colors',
             'focus:e-bg-outer-space-800 focus:e-text-outer-space-50',
             'data-[disabled]:e-pointer-events-none data-[disabled]:e-opacity-50',
-            className
+            className,
         )}
         {...props}
     >

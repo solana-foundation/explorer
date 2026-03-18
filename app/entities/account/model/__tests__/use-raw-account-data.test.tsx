@@ -30,7 +30,7 @@ vi.mock('@solana/web3.js', async () => {
 describe('useRawAccountData', () => {
     beforeEach(() => {
         vi.mocked(useSWRImmutable).mockImplementation(
-            () => ({ data: undefined } as ReturnType<typeof useSWRImmutable>)
+            () => ({ data: undefined }) as ReturnType<typeof useSWRImmutable>,
         );
     });
 
@@ -61,7 +61,7 @@ describe('useRawAccountData', () => {
 
         expect(useSWRImmutable).toHaveBeenCalledWith(
             ['rawAccountData', MOCK_URL, MOCK_PUBKEY.toBase58()],
-            expect.any(Function)
+            expect.any(Function),
         );
     });
 
