@@ -92,7 +92,7 @@ function PageContent() {
     }
 
     if (typeof supply === 'string') {
-        return <ErrorCard text={supply} />;
+        return <ErrorCard text={supply} retry={fetchSupply} />;
     }
 
     return (

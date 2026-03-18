@@ -38,7 +38,7 @@ import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { RefreshCw, ZoomIn } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
-import { TableCardSkeleton } from '@/app/components/common/Skeletons';
+import { TableCardSkeleton } from '@components/common/Skeletons';
 import { AccountsCard } from '@/app/components/transaction/AccountsCard';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
