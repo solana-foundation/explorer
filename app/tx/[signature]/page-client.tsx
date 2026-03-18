@@ -1,6 +1,5 @@
 'use client';
 
-import { DownloadableDropdown } from '@components/common/Downloadable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { InfoTooltip } from '@components/common/InfoTooltip';
 import { LoadingCard } from '@components/common/LoadingCard';
@@ -41,6 +40,7 @@ import { RefreshCw, ZoomIn } from 'react-feather';
 import { Button } from '@/app/components/shared/ui/button';
 import { AccountsCard } from '@/app/components/transaction/AccountsCard';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
+import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
@@ -257,7 +257,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
 
     return (
         <div className="card">
-            <div className="card-header align-items-center gap-2">
+            <div className="card-header align-items-center e-gap-2">
                 <h3 className="card-header-title">Overview</h3>
                 <ViewReceiptButton
                     signature={signature}
@@ -278,7 +278,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                         <span className="d-none d-md-inline">Refresh</span>
                     </Button>
                 )}
-                <DownloadableDropdown filename={signature} data={rawDetails?.data?.raw?.message.serialize() || null} />
+                <DownloadDropdown filename={signature} data={rawDetails?.data?.raw?.message.serialize() || null} />
             </div>
 
             <TableCardBody>

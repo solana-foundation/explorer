@@ -3,6 +3,7 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
+import { AccountDownloadDropdown } from '@features/account';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { address as createAddress, createSolanaRpc } from '@solana/kit';
@@ -20,6 +21,7 @@ export function UnknownAccountCard({ account }: { account: Account }) {
         <div className="card">
             <div className="card-header align-items-center">
                 <h3 className="card-header-title">Overview</h3>
+                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
             </div>
 
             <TableCardBody>

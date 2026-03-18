@@ -5,6 +5,7 @@ import { InfoTooltip } from '@components/common/InfoTooltip';
 import { Slot } from '@components/common/Slot';
 import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
+import { AccountDownloadDropdown } from '@features/account';
 import { Account, useFetchAccountInfo } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
@@ -75,7 +76,7 @@ export function UpgradeableProgramSection({
 
     return (
         <div className="card">
-            <div className="card-header">
+            <div className="card-header e-gap-2">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">
                     {programData === undefined && 'Closed '}Program Account
                 </h3>
@@ -83,6 +84,7 @@ export function UpgradeableProgramSection({
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>
+                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
             </div>
 
             <TableCardBody>

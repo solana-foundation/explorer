@@ -12,10 +12,10 @@ import React, { useCallback, useMemo } from 'react';
 import Moment from 'react-moment';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
+import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
 import { Copyable } from '../../common/Copyable';
-import { DownloadableDropdown } from '../../common/Downloadable';
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
@@ -126,7 +126,7 @@ function TransactionRawDataDownloadField({ signature }: { signature: string }) {
     return (
         <div className="d-flex align-items-center gap-1" onMouseEnter={handleHover}>
             <Copyable text={transactionData ? toBase64(transactionData) : null}>
-                <DownloadableDropdown data={transactionData} filename={signature} />
+                <DownloadDropdown data={transactionData} filename={signature} />
             </Copyable>
         </div>
     );

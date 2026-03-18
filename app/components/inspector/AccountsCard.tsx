@@ -1,10 +1,10 @@
 import { Copyable } from '@components/common/Copyable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { TableCardBody } from '@components/common/TableCardBody';
+import { type AccountInfo, useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
 import { cn } from '@shared/utils';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
-import { AccountInfo, useAccountsInfo } from '@utils/use-accounts-info';
 import React, { useMemo } from 'react';
 
 import { toHex } from '@/app/shared/lib/bytes';
