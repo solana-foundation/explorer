@@ -3,6 +3,8 @@ import { Cluster } from '@utils/cluster';
 import { getTransactionInstructionError } from '@utils/program-err';
 import { getProgramName } from '@utils/tx';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 export type LogMessage = {
     text: string;
     prefix: string;
@@ -26,10 +28,9 @@ export function parseProgramLogs(logs: string[], error: TransactionError | null,
     ) {
         let prefix;
         if (indentLevel <= 0) {
-            console.warn(
-                `Tried to build a prefix for a program log at indent level \`${indentLevel}\`. ` +
-                    'Logs should only ever be built at indent level 1 or higher.'
-            );
+            Logger.warn('[utils:program-logs] Tried to build a prefix for a program log at invalid indent level', {
+                indentLevel,
+            });
             prefix = '';
         } else {
             prefix = new Array(indentLevel - 1).fill('\u00A0\u00A0').join('');

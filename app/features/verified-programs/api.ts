@@ -1,4 +1,4 @@
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { getProgramName } from './model';
 import { ProgramMetadata, VerifiedProgramInfo, VerifiedProgramsResponse } from './types';
@@ -9,19 +9,19 @@ async function fetchProgramMetadata(programId: string): Promise<ProgramMetadata 
     try {
         const response = await fetch(`${API_BASE_URL}/metadata/${programId}`);
         if (!response.ok) {
-            Logger.debug(`Metadata fetch failed for ${programId}: HTTP ${response.status}`);
+            Logger.debug('[verified-programs] Metadata fetch failed', { programId, status: response.status });
             return null;
         }
 
         const data: ProgramMetadata[] = await response.json();
 
         if (data.length === 0) {
-            Logger.debug(`Metadata is empty for ${programId}: API returned empty array`);
+            Logger.debug('[verified-programs] Metadata is empty, API returned empty array', { programId });
             return null;
         }
         return data[0];
     } catch (error) {
-        Logger.error(new Error(`Failed to fetch metadata for ${programId}`, { cause: error }));
+        Logger.error(error, { programId });
         return null;
     }
 }
@@ -74,7 +74,7 @@ export async function fetchProgramsPage(page: number): Promise<{
             totalPages,
         };
     } catch (error) {
-        Logger.error(new Error(`Failed to fetch programs page ${page}`, { cause: error }));
+        Logger.error(error, { page });
         throw error;
     }
 }

@@ -3,6 +3,8 @@ import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import useSWRImmutable from 'swr/immutable';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 export const SQUADS_V3_ADDRESS = 'SMPLecH534NA9acpos4G6x7uf3LWbCAwZQE9e8ZekMu';
 export const SQUADS_V4_ADDRESS = 'SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf';
 
@@ -31,7 +33,7 @@ export function useSquadsMultisigLookup(programAuthority: PublicKey | null | und
                 const data = await response.json();
                 return 'error' in data ? null : (data as SquadsMultisigMapInfo);
             } catch (error) {
-                console.error('Error fetching squads information', error);
+                Logger.error(error);
                 return null;
             }
         },

@@ -10,6 +10,8 @@ import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/
 import React, { Fragment, ReactNode, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 const ANCHOR_SELF_CPI_TAG = Buffer.from('1d9acb512ea545e4', 'hex').reverse();
 const ANCHOR_SELF_CPI_NAME = 'Anchor Self Invocation';
 
@@ -198,13 +200,11 @@ export function getAnchorNameForInstruction(ix: TransactionInstruction, program:
         try {
             decodedIx = coder.decode(ix.data);
         } catch (error) {
-            console.log(
-                'Error while decoding instruction for program',
-                program.programId.toString(),
-                'with discriminator',
-                ix.data.slice(0, Math.min(8, ix.data.length)),
-                error
-            );
+            Logger.debug('[utils:anchor] Error while decoding instruction for program', {
+                discriminator: ix.data.slice(0, Math.min(8, ix.data.length)),
+                error,
+                programId: program.programId.toString(),
+            });
         }
     }
 
@@ -303,7 +303,7 @@ export function mapIxArgsToRows(ixArgs: any, ixType: IdlInstruction, idl: Idl) {
             }
             return mapField(key, value, fieldDef.type, idl);
         } catch (error: any) {
-            console.log('Error while displaying IDL-based account data', error);
+            Logger.debug('[utils:anchor] Error while displaying IDL-based account data', { error });
             return (
                 <tr key={key}>
                     <td>{key}</td>
@@ -341,7 +341,7 @@ export function mapAccountToRows(accountData: any, accountType: IdlTypeDef, idl:
             }
             return mapField(key, value as any, fieldDef, idl);
         } catch (error: any) {
-            console.log('Error while displaying IDL-based account data', error);
+            Logger.debug('[utils:anchor] Error while displaying IDL-based account data', { error });
             return (
                 <tr key={key}>
                     <td>{key}</td>
@@ -575,7 +575,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
             </ExpandableRow>
         );
     } else {
-        console.log('Impossible type:', type);
+        Logger.debug('[utils:anchor] Impossible type', { type: type as unknown as string });
         return (
             <tr key={keySuffix ? `${key}-${keySuffix}` : key}>
                 <td>{camelToTitleCase(key)}</td>

@@ -2,6 +2,8 @@ import { useWalletMultiButton } from '@solana/wallet-adapter-base-ui';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { BaseConnectWallet } from './BaseConnectWallet';
 
 export function ConnectWallet() {
@@ -19,7 +21,7 @@ export function ConnectWallet() {
             disconnect();
         } else if (wallet) {
             connect().catch(e => {
-                console.error('Wallet Connect Error:', e);
+                Logger.error(e);
             });
         } else {
             setVisible(true);

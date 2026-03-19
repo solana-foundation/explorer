@@ -7,6 +7,8 @@ import { useCluster } from '@providers/cluster';
 import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
 import React, { useMemo } from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 export function AnchorAccountCard({ account }: { account: Account }) {
     const { lamports } = account;
     const { url, cluster } = useCluster();
@@ -27,7 +29,7 @@ export function AnchorAccountCard({ account }: { account: Account }) {
                 try {
                     decodedAccountData = coder.decode(account.name, rawData);
                 } catch (err) {
-                    console.log(err);
+                    Logger.debug('[components:anchor-account] Failed to decode account data', { error: err });
                 }
             }
         }

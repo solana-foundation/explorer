@@ -15,6 +15,8 @@ import {
 import { microLamportsToLamportsString } from '@utils/index';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { InstructionCard } from './InstructionCard';
 
 export function ComputeBudgetDetailsCard({
@@ -198,9 +200,9 @@ export function ComputeBudgetDetailsCard({
             }
         }
     } catch (error) {
-        console.error(error, {
-            signature: signature,
-            url: url,
+        Logger.error(error, {
+            signature,
+            url,
         });
     }
 

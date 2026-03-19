@@ -3,8 +3,8 @@
 import { fetch } from 'cross-fetch';
 import useSWRImmutable from 'swr/immutable';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
-import Logger from '@/app/utils/logger';
 
 import { getProgramCanonicalMetadata } from '../api/getProgramCanonicalMetadata';
 
@@ -65,7 +65,7 @@ export function useProgramCanonicalMetadata(
 
                     // In case of 403, we have ok response but it contains {details: {error: string}} data
                     if (details?.error) {
-                        Logger.error(new Error(details.error));
+                        Logger.error(new Error('[program-metadata] API returned error'), { error: details.error });
                         return null;
                     }
 
@@ -74,7 +74,9 @@ export function useProgramCanonicalMetadata(
 
                 return null;
             } catch (error) {
-                Logger.error(`Error fetching canonical metadata, seed ${seed}`, error);
+                Logger.error(new Error('[program-metadata] Error fetching canonical metadata', { cause: error }), {
+                    seed,
+                });
                 return null;
             }
         },

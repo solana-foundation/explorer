@@ -1,6 +1,8 @@
 import { type ParsedInstruction, type ParsedTransactionWithMeta, PartiallyDecodedInstruction } from '@solana/web3.js';
 import { validate } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { isJitoTransfer } from './jito';
 import { extractMemoFromTransaction } from './memo';
 import { SolTransferPayload, SystemTransferInstructionRefinedSchema } from './schemas';
@@ -16,7 +18,7 @@ export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta)
 
     const [err, validated] = validate(raw, SolTransferPayload, { coerce: true });
     if (err) {
-        console.error('Error validating sol transfer payload', err);
+        Logger.error(err);
         return undefined;
     }
 

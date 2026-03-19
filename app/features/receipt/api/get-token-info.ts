@@ -1,3 +1,4 @@
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
 export type TokenInfo = {
@@ -20,9 +21,7 @@ export async function getTokenInfo(mintAddress: string, cluster: Cluster): Promi
     });
 
     if (response.status >= 400) {
-        console.error(
-            `Error calling UTL API for address ${mintAddress} on chain ID ${chainId}. Status ${response.status}`
-        );
+        Logger.error(new Error('[receipt] Error calling UTL API'), { chainId, mintAddress, status: response.status });
         return undefined;
     }
 

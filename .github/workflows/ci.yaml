@@ -4,7 +4,6 @@ on:
   push:
     branches: [master, development, 'development-*']
   pull_request:
-    branches: [master, development, 'development-*']
 
 env:
   # cache affixes and folders
@@ -12,7 +11,6 @@ env:
   PNPM_CACHE_FOLDER: ~/.pnpm-store
   PW_CACHE_AFFIX: pw
   PW_CACHE_FOLDER: ~/.cache/ms-playwright
-  SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING: 1
   SENTRY_TELEMETRY_DISABLE: true
   STORYBOOK_DISABLE_TELEMETRY: 1
 

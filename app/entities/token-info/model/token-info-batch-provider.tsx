@@ -5,6 +5,8 @@ import { getTokenInfoSwrKey } from '@utils/token-info';
 import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 import { mutate } from 'swr';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { getTokenInfos } from '../lib/fetch-token-mints';
 
 type RequestTokenInfo = (address: string, cluster: Cluster, genesisHash?: string) => void;
@@ -65,7 +67,7 @@ export function TokenInfoBatchProvider({ children }: { children: React.ReactNode
                     mutate(getTokenInfoSwrKey(missing, cluster, genesisHash), undefined, false);
                 }
             } catch (e) {
-                console.error('Batch fetch failed:', e);
+                Logger.error(new Error('[token-info] Batch fetch failed', { cause: e }));
             }
         }
     }, [clearTimers]);

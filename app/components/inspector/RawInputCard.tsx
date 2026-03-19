@@ -3,6 +3,8 @@ import base58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import type { InspectorData } from './InspectorPage';
 
 function getMessageDataFromBytes(bytes: Uint8Array): {
@@ -242,7 +244,7 @@ export function RawInput({
             try {
                 buffer = Uint8Array.from(atob(input), c => c.charCodeAt(0));
             } catch (err) {
-                console.error(err);
+                Logger.error(err);
                 setError('Input must be base58/base64 encoded or a valid account address');
                 return;
             }

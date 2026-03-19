@@ -2,6 +2,8 @@ import { WalletError } from '@solana/wallet-adapter-base';
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { WalletProvider } from '../wallet-provider';
 
 const mockToastCustom = vi.fn();
@@ -35,8 +37,7 @@ vi.mock('@solana/wallet-adapter-react-ui', () => ({
 describe('WalletProvider', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        vi.spyOn(console, 'error').mockImplementation(() => {});
+        vi.spyOn(Logger, 'error').mockImplementation(() => {});
         capturedOnError = undefined;
     });
 
@@ -54,8 +55,8 @@ describe('WalletProvider', () => {
         const error = new WalletError('Test error message');
         capturedOnError?.(error);
 
-        expect(console.error).toHaveBeenCalledTimes(1);
-        expect(console.error).toHaveBeenCalledWith(error);
+        expect(Logger.error).toHaveBeenCalledTimes(1);
+        expect(Logger.error).toHaveBeenCalledWith(error);
         expect(mockToastCustom).toHaveBeenCalledWith({
             description: 'Test error message',
             title: 'Wallet Error',
@@ -73,8 +74,8 @@ describe('WalletProvider', () => {
         const error = new WalletError('Test error message');
         capturedOnError?.(error);
 
-        expect(console.error).toHaveBeenCalledTimes(1);
-        expect(console.error).toHaveBeenCalledWith(error);
+        expect(Logger.error).toHaveBeenCalledTimes(1);
+        expect(Logger.error).toHaveBeenCalledWith(error);
         expect(mockToastCustom).not.toHaveBeenCalled();
     });
 });

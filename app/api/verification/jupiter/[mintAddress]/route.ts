@@ -1,10 +1,9 @@
-import * as Sentry from '@sentry/nextjs';
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import fetch from 'node-fetch';
 import { array, boolean, is, optional, string, type } from 'superstruct';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
 
@@ -44,9 +43,9 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
 
         if (!response.ok) {
             if (response.status === 429) {
-                Sentry.captureMessage('Jupiter API rate limit exceeded', { level: 'warning' });
+                Logger.warn('[api:jupiter] Rate limit exceeded', { sentry: true });
             } else {
-                Sentry.captureException(new Error(`Jupiter API error: ${response.status}`));
+                Logger.panic(new Error(`Jupiter API error: ${response.status}`));
             }
             return NextResponse.json(
                 { error: 'Failed to fetch jupiter data' },
@@ -63,8 +62,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
         const token = data.find(t => t.id === mintAddress);
         return NextResponse.json({ verified: token?.isVerified === true }, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.error(new Error('Jupiter API error', { cause: error }));
-        Sentry.captureException(error);
+        Logger.panic(error instanceof Error ? error : new Error('Failed to fetch jupiter data'));
         return NextResponse.json({ error: 'Failed to fetch jupiter data' }, { headers: NO_STORE_HEADERS, status: 500 });
     }
 }
