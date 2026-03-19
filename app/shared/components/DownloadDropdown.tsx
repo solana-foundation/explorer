@@ -44,7 +44,7 @@ export function DownloadDropdown({
                     encodings.map(encoding => (
                         <DropdownMenuItem
                             key={encoding}
-                            disabled={!data}
+                            disabled={loading || !data}
                             onClick={() => data && handleDownload(data, encoding, filename)}
                         >
                             {loading ? `Loading ${encoding}…` : `Download ${encoding}`}
