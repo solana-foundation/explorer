@@ -2,6 +2,7 @@ import { TableCardBody } from '@components/common/TableCardBody';
 import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
+import { cn } from '@shared/utils';
 import { SignatureProps } from '@utils/index';
 import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
@@ -30,7 +31,10 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                 <div className="card-header">
                     <h3 className="card-header-title">Program Instruction Logs</h3>
                     <button
-                        className={`btn btn-sm d-flex align-items-center ${showRaw ? 'btn-black active' : 'btn-white'}`}
+                        className={cn(
+                            'btn btn-sm d-flex align-items-center',
+                            showRaw ? 'btn-black active' : 'btn-white',
+                        )}
                         onClick={() => setShowRaw(r => !r)}
                     >
                         <Code className="me-2" size={13} /> Raw

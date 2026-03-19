@@ -10,6 +10,7 @@ import {
     useScaledUiAmountForMint,
 } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
+import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
 import Image from 'next/image';
@@ -334,13 +335,13 @@ const DisplayDropdown = ({ display, toggle, show }: DropdownProps) => {
             <button className="btn btn-white btn-sm" type="button" onClick={toggle}>
                 {display === 'detail' ? 'Detailed' : 'Summary'} <ChevronDown size={15} className="align-text-top" />
             </button>
-            <div className={`dropdown-menu-end dropdown-menu${show ? 'show' : ''}`}>
+            <div className={cn('dropdown-menu-end dropdown-menu', show && 'show')}>
                 {DISPLAY_OPTIONS.map(displayOption => {
                     return (
                         <Link
                             key={displayOption || 'null'}
                             href={buildLocation(displayOption)}
-                            className={`dropdown-item${displayOption === display ? 'active' : ''}`}
+                            className={cn('dropdown-item', displayOption === display && 'active')}
                             onClick={toggle}
                         >
                             {displayOption === 'detail' ? 'Detailed' : 'Summary'}

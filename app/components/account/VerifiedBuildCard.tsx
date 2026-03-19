@@ -1,6 +1,7 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { UpgradeableLoaderAccountData } from '@providers/accounts';
+import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 import { ExternalLink } from 'react-feather';
@@ -150,7 +151,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
         case DisplayType.Boolean:
             return (
                 <td className={'text-lg-end font-monospace'}>
-                    <span className={`badge bg-${value ? 'success' : 'warning'}-soft`}>{new String(value)}</span>
+                    <span className={cn('badge', `bg-${value ? 'success' : 'warning'}-soft`)}>{new String(value)}</span>
                 </td>
             );
         case DisplayType.String:

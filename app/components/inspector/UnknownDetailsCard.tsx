@@ -1,6 +1,7 @@
 import { TableCardBody } from '@components/common/TableCardBody';
 import { ProgramField } from '@entities/instruction-card';
 import { useScrollAnchor } from '@providers/scroll-anchor';
+import { cn } from '@shared/utils';
 import { TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
@@ -23,14 +24,14 @@ export function UnknownDetailsCard({
 
     return (
         <div className="card" ref={scrollAnchorRef}>
-            <div className={`card-header${!expanded ? 'border-bottom-none' : ''}`}>
+            <div className={cn('card-header', !expanded && 'border-bottom-none')}>
                 <h3 className="card-header-title mb-0 d-flex align-items-center">
                     <span className={`badge bg-info-soft me-2`}>#{index + 1}</span>
                     {programName} Instruction
                 </h3>
 
                 <button
-                    className={`btn btn-sm d-flex ${expanded ? 'btn-black active' : 'btn-white'}`}
+                    className={cn('btn btn-sm d-flex', expanded ? 'btn-black active' : 'btn-white')}
                     onClick={() => setExpanded(e => !e)}
                 >
                     {expanded ? 'Collapse' : 'Expand'}

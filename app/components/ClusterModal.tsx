@@ -50,7 +50,7 @@ export function ClusterModal() {
 
     return (
         <>
-            <div className={`offcanvas offcanvas-end${show ? 'show' : ''}`}>
+            <div className={cn('offcanvas offcanvas-end', show && 'show')}>
                 <div className="modal-body" onClick={e => e.stopPropagation()}>
                     <span className="c-pointer" onClick={onClose}>
                         &times;

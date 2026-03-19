@@ -4,6 +4,7 @@ import { BorshEventCoder, BorshInstructionCoder, Idl, Program } from '@coral-xyz
 import { IdlDefinedFields } from '@coral-xyz/anchor/dist/cjs/idl';
 import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { useAnchorProgram } from '@entities/idl';
+import { cn } from '@shared/utils';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/index';
@@ -606,7 +607,7 @@ function SimpleRow({
     }
     itemKey = camelToTitleCase(itemKey);
     return (
-        <tr className={nestingLevel > 0 ? 'table-nested-account' : ''}>
+        <tr className={cn(nestingLevel > 0 && 'table-nested-account')}>
             <td>
                 <div className="d-flex flex-row align-items-center">
                     {nestingLevel > 0 && <CornerDownRight className="me-2 mb-1" size={14} />}

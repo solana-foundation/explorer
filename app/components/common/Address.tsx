@@ -3,6 +3,7 @@
 import { useTokenInfo } from '@entities/token-info';
 import { Connection, programs } from '@metaplex/js';
 import { useCluster } from '@providers/cluster';
+import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { displayAddress, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
@@ -131,7 +132,7 @@ export function Address({
 
     return (
         <span ref={containerRef}>
-            <div className={`d-none d-lg-flex align-items-center ${alignRight ? 'justify-content-end' : ''}`}>
+            <div className={cn('d-none d-lg-flex align-items-center', alignRight && 'justify-content-end')}>
                 {content}
             </div>
             <div className="d-flex d-lg-none align-items-center">{content}</div>

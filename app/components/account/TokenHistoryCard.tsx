@@ -18,6 +18,7 @@ import { isTokenProgramId, TokenInfoWithPubkey, useAccountOwnedTokens } from '@p
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Details, useFetchTransactionDetails, useTransactionDetailsCache } from '@providers/transactions/parsed';
+import { cn } from '@shared/utils';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT } from '@utils/index';
@@ -344,13 +345,13 @@ const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
                 {filter === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filter)}{' '}
                 <ChevronDown size={15} className="align-text-top" />
             </button>
-            <div className={`token-filter dropdown-menu-end dropdown-menu${show ? 'show' : ''}`}>
+            <div className={cn('token-filter dropdown-menu-end dropdown-menu', show && 'show')}>
                 {filterOptions.map(filterOption => {
                     return (
                         <Link
                             key={filterOption}
                             href={buildLocation(filterOption)}
-                            className={`dropdown-item${filterOption === filter ? 'active' : ''}`}
+                            className={cn('dropdown-item', filterOption === filter && 'active')}
                             onClick={toggle}
                         >
                             {filterOption === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filterOption) || filterOption}

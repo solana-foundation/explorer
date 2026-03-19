@@ -2,6 +2,7 @@
 
 import Logo from '@img/logos-solana/dark-explorer-logo.svg';
 import { useDisclosure } from '@mantine/hooks';
+import { cn } from '@shared/utils';
 import { useClusterPath } from '@utils/url';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -24,8 +25,6 @@ export function Navbar({ children }: INavbarProps) {
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const selectedLayoutSegments = useSelectedLayoutSegments();
 
-    const linkClass = (active: boolean) => `nav-link${active ? ' active' : ''}`;
-
     return (
         <nav className="navbar navbar-expand-lg navbar-light">
             <div className="container navbar-container">
@@ -44,24 +43,27 @@ export function Navbar({ children }: INavbarProps) {
                     {children}
                 </div>
 
-                <div className={`collapse navbar-collapse ms-auto ${navOpened ? 'show' : ''} flex-shrink-0`}>
+                <div className={cn('collapse navbar-collapse ms-auto', navOpened && 'show', 'flex-shrink-0')}>
                     <ul className="navbar-nav me-auto">
                         <li className="nav-item">
                             <Link
-                                className={linkClass(selectedLayoutSegment === 'feature-gates')}
+                                className={cn('nav-link', selectedLayoutSegment === 'feature-gates' && 'active')}
                                 href={featureGatesPath}
                             >
                                 Feature Gates
                             </Link>
                         </li>
                         <li className="nav-item">
-                            <Link className={linkClass(selectedLayoutSegment === 'supply')} href={supplyPath}>
+                            <Link
+                                className={cn('nav-link', selectedLayoutSegment === 'supply' && 'active')}
+                                href={supplyPath}
+                            >
                                 Supply
                             </Link>
                         </li>
                         <li className="nav-item">
                             <Link
-                                className={linkClass(selectedLayoutSegment === 'verified-programs')}
+                                className={cn('nav-link', selectedLayoutSegment === 'verified-programs' && 'active')}
                                 href={programsPath}
                             >
                                 Programs
@@ -69,8 +71,11 @@ export function Navbar({ children }: INavbarProps) {
                         </li>
                         <li className="nav-item">
                             <Link
-                                className={linkClass(
-                                    selectedLayoutSegments[0] === 'tx' && selectedLayoutSegments[1] === '(inspector)'
+                                className={cn(
+                                    'nav-link',
+                                    selectedLayoutSegments[0] === 'tx' &&
+                                        selectedLayoutSegments[1] === '(inspector)' &&
+                                        'active'
                                 )}
                                 href={inspectorPath}
                             >

@@ -3,6 +3,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { Signature } from '@components/common/Signature';
 import { SolBalance } from '@components/common/SolBalance';
 import { useCluster } from '@providers/cluster';
+import { cn } from '@shared/utils';
 import {
     ConfirmedTransactionMeta,
     PublicKey,
@@ -498,7 +499,7 @@ function FilterLink({
         return `${currentPathname}${nextQueryString ? `?${nextQueryString}` : ''}`;
     }, [currentPathname, currentSearchParams, name, programId]);
     return (
-        <Link className={`dropdown-item${programId === currentFilter ? 'active' : ''}`} href={href} key={programId}>
+        <Link className={cn('dropdown-item', programId === currentFilter && 'active')} href={href} key={programId}>
             {`${name} (${transactionCount})`}
         </Link>
     );
