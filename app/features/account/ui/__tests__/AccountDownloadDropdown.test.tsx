@@ -4,14 +4,25 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { AccountDownloadDropdown } from '../AccountDownloadDropdown';
 
-const mockFetchRaw = vi.fn();
+const mockMutate = vi.fn();
+const mockRawData: Buffer | null = null;
+let mockIsLoading = false;
+
 vi.mock('@entities/account', () => ({
-    useRawAccountData: () => [null, mockFetchRaw],
+    useRawAccountData: () => ({ data: mockRawData, mutate: mockMutate, isLoading: mockIsLoading }),
 }));
 
 vi.mock('@/app/shared/components/DownloadDropdown', () => ({
-    DownloadDropdown: ({ filename, onOpenChange }: { filename: string; onOpenChange?: (open: boolean) => void }) => (
-        <div data-testid="download-dropdown" data-filename={filename}>
+    DownloadDropdown: ({
+        filename,
+        loading,
+        onOpenChange,
+    }: {
+        filename: string;
+        loading?: boolean;
+        onOpenChange?: (open: boolean) => void;
+    }) => (
+        <div data-testid="download-dropdown" data-filename={filename} data-loading={String(loading ?? false)}>
             <button onClick={() => onOpenChange?.(true)}>Download</button>
         </div>
     ),
@@ -38,6 +49,13 @@ describe('AccountDownloadDropdown', () => {
     it('should fetch raw data when dropdown opens', () => {
         render(<AccountDownloadDropdown pubkey={PUBKEY} />);
         screen.getByText('Download').click();
-        expect(mockFetchRaw).toHaveBeenCalled();
+        expect(mockMutate).toHaveBeenCalled();
+    });
+
+    it('should pass loading state to the download dropdown', () => {
+        mockIsLoading = true;
+        render(<AccountDownloadDropdown pubkey={PUBKEY} />);
+        expect(screen.getByTestId('download-dropdown')).toHaveAttribute('data-loading', 'true');
+        mockIsLoading = false;
     });
 });

@@ -1,23 +1,30 @@
 import { useCluster } from '@providers/cluster';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { useState } from 'react';
-import useSWRImmutable from 'swr/immutable';
+import { useCallback } from 'react';
+import useSWR, { useSWRConfig } from 'swr';
 
-export function useRawAccountData(pubkey: PublicKey): [Uint8Array | null, () => void] {
+export const rawAccountDataKey = (url: string, address: string) => ['raw-account-data', url, address] as const;
+
+export function useRawAccountData(address: string) {
     const { url } = useCluster();
-    const [enabled, setEnabled] = useState(false);
-
-    const { data } = useSWRImmutable(enabled ? getRawAccountDataKey(url, pubkey) : null, fetchRawAccountData);
-
-    return [data ?? null, () => setEnabled(true)];
+    return useSWR(rawAccountDataKey(url, address), () => fetchRawAccountData(url, address), {
+        revalidateOnFocus: false,
+        revalidateOnMount: false,
+        revalidateOnReconnect: false,
+    });
 }
 
-function getRawAccountDataKey(url: string, pubkey: PublicKey) {
-    return ['rawAccountData', url, pubkey.toBase58()];
+export function useRefreshRawAccountData(address: string) {
+    const { url } = useCluster();
+    const { mutate } = useSWRConfig();
+
+    return useCallback(() => {
+        mutate(rawAccountDataKey(url, address));
+    }, [mutate, url, address]);
 }
 
-async function fetchRawAccountData([, url, address]: [string, string, string]): Promise<Uint8Array | null> {
+async function fetchRawAccountData(url: string, address: string): Promise<Uint8Array | undefined> {
     const connection = new Connection(url, 'confirmed');
     const info = await connection.getAccountInfo(new PublicKey(address));
-    return info ? Uint8Array.from(info.data) : null;
+    return info?.data ? new Uint8Array(info.data) : undefined;
 }

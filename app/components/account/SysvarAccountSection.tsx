@@ -2,7 +2,8 @@ import { AccountAddressRow, AccountBalanceRow, AccountHeader } from '@components
 import { Epoch } from '@components/common/Epoch';
 import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { Account, useFetchAccountInfo } from '@providers/accounts';
+import { useRefreshAccount } from '@entities/account';
+import { Account } from '@providers/accounts';
 import { displayTimestamp } from '@utils/date';
 import {
     SysvarAccount,
@@ -47,7 +48,7 @@ function SysvarAccountRecentBlockhashesCard({
     account: Account;
     sysvarAccount: SysvarRecentBlockhashesAccount;
 }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     return (
         <div className="card">
             <AccountHeader title="Sysvar: Recent Blockhashes" refresh={() => refresh(account.pubkey, 'parsed')} />
@@ -61,7 +62,7 @@ function SysvarAccountRecentBlockhashesCard({
 }
 
 function SysvarAccountSlotHashes({ account }: { account: Account; sysvarAccount: SysvarSlotHashesAccount }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     return (
         <div className="card">
             <AccountHeader title="Sysvar: Slot Hashes" refresh={() => refresh(account.pubkey, 'parsed')} />
@@ -81,7 +82,7 @@ function SysvarAccountSlotHistory({
     account: Account;
     sysvarAccount: SysvarSlotHistoryAccount;
 }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     const history = Array.from(
         {
             length: 100,
@@ -114,7 +115,7 @@ function SysvarAccountSlotHistory({
 }
 
 function SysvarAccountStakeHistory({ account }: { account: Account; sysvarAccount: SysvarStakeHistoryAccount }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     return (
         <div className="card">
             <AccountHeader title="Sysvar: Stake History" refresh={() => refresh(account.pubkey, 'parsed')} />
@@ -128,7 +129,7 @@ function SysvarAccountStakeHistory({ account }: { account: Account; sysvarAccoun
 }
 
 function SysvarAccountFeesCard({ account, sysvarAccount }: { account: Account; sysvarAccount: SysvarFeesAccount }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     return (
         <div className="card">
             <AccountHeader title="Sysvar: Fees" refresh={() => refresh(account.pubkey, 'parsed')} />
@@ -153,7 +154,7 @@ function SysvarAccountEpochScheduleCard({
     account: Account;
     sysvarAccount: SysvarEpochScheduleAccount;
 }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     return (
         <div className="card">
             <AccountHeader title="Sysvar: Epoch Schedule" refresh={() => refresh(account.pubkey, 'parsed')} />
@@ -196,7 +197,7 @@ function SysvarAccountEpochScheduleCard({
 }
 
 function SysvarAccountClockCard({ account, sysvarAccount }: { account: Account; sysvarAccount: SysvarClockAccount }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     return (
         <div className="card">
             <AccountHeader title="Sysvar: Clock" refresh={() => refresh(account.pubkey, 'parsed')} />
@@ -238,7 +239,7 @@ function SysvarAccountClockCard({ account, sysvarAccount }: { account: Account; 
 }
 
 function SysvarAccountRentCard({ account, sysvarAccount }: { account: Account; sysvarAccount: SysvarRentAccount }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     return (
         <div className="card">
             <AccountHeader title="Sysvar: Rent" refresh={() => refresh(account.pubkey, 'parsed')} />
@@ -273,7 +274,7 @@ function SysvarAccountRewardsCard({
     account: Account;
     sysvarAccount: SysvarRewardsAccount;
 }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
 
     const validatorPointValueFormatted = new Intl.NumberFormat('en-US', {
         maximumSignificantDigits: 20,

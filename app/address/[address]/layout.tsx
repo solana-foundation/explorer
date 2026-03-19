@@ -19,6 +19,7 @@ import { VoteAccountSection } from '@components/account/VoteAccountSection';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Header } from '@components/Header';
+import { useRefreshAccount } from '@entities/account';
 import { useAnchorProgram } from '@entities/idl';
 import { SecurityNotification } from '@features/security-txt';
 import {
@@ -280,13 +281,13 @@ function DetailsSections({
     tokenInfo?: FullTokenInfo;
     isTokenInfoLoading: boolean;
 }) {
-    const fetchAccount = useFetchAccountInfo();
+    const refreshAccount = useRefreshAccount();
     const address = pubkey.toBase58();
 
     if (!info || info.status === FetchStatus.Fetching || isTokenInfoLoading) {
         return <LoadingCard />;
     } else if (info.status === FetchStatus.FetchFailed || info.data?.lamports === undefined) {
-        return <ErrorCard retry={() => fetchAccount(pubkey, 'parsed')} text="Fetch Failed" />;
+        return <ErrorCard retry={() => refreshAccount(pubkey, 'parsed')} text="Fetch Failed" />;
     }
 
     const account = info.data;

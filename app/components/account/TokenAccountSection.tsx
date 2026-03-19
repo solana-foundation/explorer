@@ -2,8 +2,9 @@ import ScaledUiAmountMultiplierTooltip from '@components/account/token-extension
 import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
 import { TableCardBody } from '@components/common/TableCardBody';
+import { useRefreshAccount } from '@entities/account';
 import { AccountDownloadDropdown } from '@features/account';
-import { Account, NFTData, TokenProgramData, useFetchAccountInfo } from '@providers/accounts';
+import { Account, NFTData, TokenProgramData } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID, useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useCluster } from '@providers/cluster';
@@ -128,7 +129,7 @@ function FungibleTokenMintAccountCard({
     mintInfo: MintAccountInfo;
     tokenInfo?: FullLegacyTokenInfo;
 }) {
-    const fetchInfo = useFetchAccountInfo();
+    const fetchInfo = useRefreshAccount();
     const refresh = () => fetchInfo(account.pubkey, 'parsed');
 
     const bridgeContractAddress = getEthAddress(tokenInfo?.extensions?.bridgeContract);
@@ -256,7 +257,7 @@ function NonFungibleTokenMintAccountCard({
     nftData: NFTData;
     mintInfo: MintAccountInfo;
 }) {
-    const fetchInfo = useFetchAccountInfo();
+    const fetchInfo = useRefreshAccount();
     const refresh = () => fetchInfo(account.pubkey, 'parsed');
 
     const collection = nftData.metadata.collection;
@@ -360,7 +361,7 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
 }
 
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(info.mint.toBase58(), info.tokenAmount.amount);
     const { cluster, url } = useCluster();
     const label = addressLabel(account.pubkey.toBase58(), cluster);
@@ -493,7 +494,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
 }
 
 function MultisigAccountCard({ account, info }: { account: Account; info: MultisigAccountInfo }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
 
     return (
         <div className="card">

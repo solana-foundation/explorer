@@ -6,9 +6,17 @@ import { PublicKey } from '@solana/web3.js';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 
 export function AccountDownloadDropdown({ pubkey, space }: { pubkey: PublicKey; space?: number }) {
-    const [rawData, fetchRaw] = useRawAccountData(pubkey);
+    const address = pubkey.toBase58();
+    const { data: rawData, mutate, isLoading } = useRawAccountData(address);
 
     if (space === 0) return null;
 
-    return <DownloadDropdown data={rawData} filename={pubkey.toBase58()} onOpenChange={open => open && fetchRaw()} />;
+    return (
+        <DownloadDropdown
+            data={rawData}
+            loading={isLoading}
+            filename={address}
+            onOpenChange={open => open && mutate()}
+        />
+    );
 }

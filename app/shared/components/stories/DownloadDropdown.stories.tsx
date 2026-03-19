@@ -26,7 +26,16 @@ export const WithData: Story = {
 
 export const Loading: Story = {
     args: {
-        data: null,
+        data: undefined,
+        filename: 'test-transaction',
+        loading: true,
+    },
+};
+
+export const Error: Story = {
+    args: {
+        data: undefined,
+        error: new window.Error('RPC timeout'),
         filename: 'test-transaction',
     },
 };
@@ -66,9 +75,24 @@ export const OpenWithData: Story = {
     },
 };
 
-export const OpenWithoutData: Story = {
+export const OpenLoading: Story = {
     args: {
-        data: null,
+        data: undefined,
+        filename: 'test-transaction',
+        loading: true,
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        const trigger = canvas.getByRole('button', { name: /download/i });
+        await userEvent.click(trigger);
+        expect(trigger).toHaveAttribute('data-state', 'open');
+    },
+};
+
+export const OpenError: Story = {
+    args: {
+        data: undefined,
+        error: new window.Error('RPC timeout'),
         filename: 'test-transaction',
     },
     play: async ({ canvasElement }) => {

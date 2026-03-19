@@ -1,7 +1,8 @@
 import { AccountAddressRow, AccountBalanceRow, AccountHeader } from '@components/common/Account';
 import { Address } from '@components/common/Address';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { Account, useFetchAccountInfo } from '@providers/accounts';
+import { useRefreshAccount } from '@entities/account';
+import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { ConfigAccount, StakeConfigInfoAccount, ValidatorInfoAccount } from '@validators/accounts/config';
 import React from 'react';
@@ -18,7 +19,7 @@ export function ConfigAccountSection({ account, configAccount }: { account: Acco
 }
 
 function StakeConfigCard({ account, configAccount }: { account: Account; configAccount: StakeConfigInfoAccount }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
 
     const warmupCooldownFormatted = new Intl.NumberFormat('en-US', {
         maximumFractionDigits: 2,
@@ -53,7 +54,7 @@ function StakeConfigCard({ account, configAccount }: { account: Account; configA
 }
 
 function ValidatorInfoCard({ account, configAccount }: { account: Account; configAccount: ValidatorInfoAccount }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     return (
         <div className="card">
             <AccountHeader title="Validator Info" refresh={() => refresh(account.pubkey, 'parsed')} />

@@ -1,3 +1,4 @@
+import { useRefreshAccount } from '@entities/account';
 import { SystemProgram } from '@solana/web3.js';
 import React from 'react';
 import { Attestation as SasAttestation, Credential as SasCredential, Schema as SasSchema } from 'sas-lib';
@@ -5,7 +6,7 @@ import { Attestation as SasAttestation, Credential as SasCredential, Schema as S
 import { AccountAddressRow, AccountHeader } from '@/app/components/common/Account';
 import { Address } from '@/app/components/common/Address';
 import { TableCardBody } from '@/app/components/common/TableCardBody';
-import { Account, useFetchAccountInfo } from '@/app/providers/accounts';
+import { Account } from '@/app/providers/accounts';
 import { decodeAccount } from '@/app/utils/attestation-service';
 import { decodeString, mapToPublicKey } from '@/app/utils/kit-wrapper';
 
@@ -109,7 +110,7 @@ function SolanaAttestationCard({ attestation }: { attestation: SasAttestation })
 }
 
 export function SolanaAttestationServiceCard({ account }: { account: Account }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
 
     const decoded = decodeAccount(account);
     let content = null;

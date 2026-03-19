@@ -19,7 +19,7 @@ export function UnknownAccountCard({ account }: { account: Account }) {
     const label = addressLabel(account.pubkey.toBase58(), cluster);
     return (
         <div className="card">
-            <div className="card-header align-items-center">
+            <div className="card-header align-items-center e-gap-2">
                 <h3 className="card-header-title">Overview</h3>
                 <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
             </div>

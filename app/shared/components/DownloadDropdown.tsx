@@ -19,12 +19,16 @@ const DefaultTrigger = (
 
 export function DownloadDropdown({
     data,
+    loading = false,
+    error,
     filename,
     encodings = DEFAULT_ENCODINGS,
     onOpenChange,
     children,
 }: {
-    data: ByteArray | null;
+    data: ByteArray | undefined;
+    loading?: boolean;
+    error?: Error;
     filename: string;
     encodings?: EncodingFormat[];
     onOpenChange?: (open: boolean) => void;
@@ -34,15 +38,19 @@ export function DownloadDropdown({
         <DropdownMenu onOpenChange={onOpenChange}>
             <DropdownMenuTrigger asChild>{children ?? DefaultTrigger}</DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                {encodings.map(encoding => (
-                    <DropdownMenuItem
-                        key={encoding}
-                        disabled={!data}
-                        onClick={() => data && handleDownload(data, encoding, filename)}
-                    >
-                        {data ? `Download ${encoding}` : `Loading ${encoding}…`}
-                    </DropdownMenuItem>
-                ))}
+                {error ? (
+                    <DropdownMenuItem disabled>Failed to load data</DropdownMenuItem>
+                ) : (
+                    encodings.map(encoding => (
+                        <DropdownMenuItem
+                            key={encoding}
+                            disabled={!data}
+                            onClick={() => data && handleDownload(data, encoding, filename)}
+                        >
+                            {loading ? `Loading ${encoding}…` : `Download ${encoding}`}
+                        </DropdownMenuItem>
+                    ))
+                )}
             </DropdownMenuContent>
         </DropdownMenu>
     );
