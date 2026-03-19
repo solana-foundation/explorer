@@ -17,6 +17,8 @@ export function AccountDownloadDropdown({ pubkey, space }: { pubkey: PublicKey; 
             loading={isLoading}
             error={error}
             filename={address}
+            // Lazy-fetch: raw data is only fetched when the dropdown opens to avoid unnecessary RPC calls.
+            // Trade-off: the first open shows "Loading…" items instead of being instant.
             onOpenChange={open => open && mutate()}
         />
     );
