@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import type { DownloadReceiptFn } from '../types';
 
