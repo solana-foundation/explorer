@@ -48,12 +48,7 @@ export async function GET(request: Request) {
                     status: 200,
                 }
             );
-        } else if (error instanceof Error && error.cause) {
-            // Log extra data if cause is present
-            Logger.error(new Error('[api:program-metadata-idl] Request failed', { cause: error.cause }));
-        }
-
-        if (error instanceof Error && isSolanaError(error)) {
+        } else if (error instanceof Error && isSolanaError(error)) {
             Logger.error(error);
         } else {
             Logger.error(new Error('[api:program-metadata-idl] Request failed', { cause: error }));
