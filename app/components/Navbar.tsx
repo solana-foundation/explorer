@@ -75,7 +75,7 @@ export function Navbar({ children }: INavbarProps) {
                                     'nav-link',
                                     selectedLayoutSegments[0] === 'tx' &&
                                         selectedLayoutSegments[1] === '(inspector)' &&
-                                        'active'
+                                        'active',
                                 )}
                                 href={inspectorPath}
                             >

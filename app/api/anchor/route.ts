@@ -42,7 +42,7 @@ export async function GET(request: Request) {
             {
                 headers: CACHE_HEADERS,
                 status: 200,
-            }
+            },
         );
     } catch (error) {
         Logger.error(new Error('[api:anchor] Failed to fetch IDL', { cause: error }));

@@ -107,7 +107,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                     className={cn(
                         'btn btn-sm d-flex align-items-center',
                         showRaw ? 'btn-black active' : 'btn-white',
-                        'me-2'
+                        'me-2',
                     )}
                     onClick={() => setShowRaw(r => !r)}
                 >

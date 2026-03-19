@@ -1,7 +1,6 @@
 import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
-import { DownloadableDropdown } from '@components/common/Downloadable';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { Account, NFTData, TokenProgramData, useFetchAccountInfo } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID, useScaledUiAmountForMint } from '@providers/accounts/tokens';
@@ -152,8 +151,6 @@ function FungibleTokenMintAccountCard({
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>
-                <span className="me-2"></span>
-                <DownloadableDropdown filename={account.pubkey.toBase58()} data={account.data.raw || null} />
             </div>
             <TableCardBody>
                 <tr>
@@ -269,8 +266,6 @@ function NonFungibleTokenMintAccountCard({
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>
-                <span className="me-2"></span>
-                <DownloadableDropdown filename={account.pubkey.toBase58()} data={account.data.raw || null} />
             </div>
             <TableCardBody>
                 <tr>
@@ -400,8 +395,6 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>
-                <span className="me-2"></span>
-                <DownloadableDropdown filename={account.pubkey.toBase58()} data={account.data.raw || null} />
             </div>
             <TableCardBody>
                 <tr>

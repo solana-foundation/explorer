@@ -39,7 +39,7 @@ export function useProgramCanonicalMetadata(
     url: string,
     cluster: Cluster,
     enabled: boolean,
-    useSuspense = false
+    useSuspense = false,
 ) {
     const { data } = useSWRImmutable(
         `program-metadata-${programAddress}-${url}-${seed}`,
@@ -57,7 +57,7 @@ export function useProgramCanonicalMetadata(
 
                 // For known clusters, use the API route (benefits from caching)
                 const response = await fetch(
-                    `/api/program-metadata-idl?programAddress=${programAddress}&cluster=${cluster}&seed=${seed}`
+                    `/api/program-metadata-idl?programAddress=${programAddress}&cluster=${cluster}&seed=${seed}`,
                 );
                 if (response.ok) {
                     const data = await response.json();
@@ -72,7 +72,7 @@ export function useProgramCanonicalMetadata(
                 return null;
             }
         },
-        { suspense: useSuspense }
+        { suspense: useSuspense },
     );
     return { programMetadata: data };
 }
