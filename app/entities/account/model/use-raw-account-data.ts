@@ -1,7 +1,6 @@
 import { useCluster } from '@providers/cluster';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { useCallback } from 'react';
-import useSWR, { useSWRConfig } from 'swr';
+import useSWR from 'swr';
 
 export const rawAccountDataKey = (url: string, address: string) => ['raw-account-data', url, address] as const;
 
@@ -12,15 +11,6 @@ export function useRawAccountData(address: string) {
         revalidateOnMount: false,
         revalidateOnReconnect: false,
     });
-}
-
-export function useRefreshRawAccountData(address: string) {
-    const { url } = useCluster();
-    const { mutate } = useSWRConfig();
-
-    return useCallback(() => {
-        mutate(rawAccountDataKey(url, address));
-    }, [mutate, url, address]);
 }
 
 async function fetchRawAccountData(url: string, address: string): Promise<Uint8Array | undefined> {
