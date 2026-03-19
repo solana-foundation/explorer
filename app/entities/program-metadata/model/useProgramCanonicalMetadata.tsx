@@ -57,7 +57,7 @@ export function useProgramCanonicalMetadata(
 
                 // For known clusters, use the API route (benefits from caching)
                 const response = await fetch(
-                    `/api/programMetadataIdl?programAddress=${programAddress}&cluster=${cluster}&seed=${seed}`
+                    `/api/program-metadata-idl?programAddress=${programAddress}&cluster=${cluster}&seed=${seed}`
                 );
                 if (response.ok) {
                     const data = await response.json();
