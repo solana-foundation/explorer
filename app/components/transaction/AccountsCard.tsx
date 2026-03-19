@@ -237,10 +237,10 @@ function DataRow({
                         </div>
 
                         <div className="d-flex align-items-center gap-2">
-                            {hexData && (
+                            {data?.length && (
                                 <>
                                     <Copyable text={hexData} />
-                                    <DownloadableDropdown data={data!} filename={account.pubkey.toBase58()} />
+                                    <DownloadableDropdown data={data} filename={account.pubkey.toBase58()} />
                                 </>
                             )}
                             <button
