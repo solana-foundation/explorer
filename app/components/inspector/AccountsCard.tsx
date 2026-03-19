@@ -100,7 +100,7 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
 
     const totalAccountSize = React.useMemo(
         () => Array.from(accounts.values()).reduce((acc, account) => acc + account.size, 0),
-        [accounts]
+        [accounts],
     );
 
     if (fetchError) {

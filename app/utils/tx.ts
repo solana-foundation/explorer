@@ -55,7 +55,7 @@ export function displayAddress(address: string, cluster: Cluster, tokenInfo?: To
 
 export function intoTransactionInstruction(
     tx: ParsedTransaction,
-    instruction: ParsedInstruction | PartiallyDecodedInstruction
+    instruction: ParsedInstruction | PartiallyDecodedInstruction,
 ): TransactionInstruction | undefined {
     const message = tx.message;
     if ('parsed' in instruction) return;

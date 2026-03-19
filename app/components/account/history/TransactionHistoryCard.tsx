@@ -82,7 +82,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                     </td>
                 </tr>
             );
-        }
+        },
     );
 
     const fetching = history.status === FetchStatus.Fetching;

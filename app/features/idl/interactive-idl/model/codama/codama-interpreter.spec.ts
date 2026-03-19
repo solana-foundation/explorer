@@ -88,7 +88,7 @@ describe('CodamaInterpreter', () => {
             };
 
             await expect(
-                interpreter.createProgram(mockConnection, mockWallet, mockProgramId, codamaIdl)
+                interpreter.createProgram(mockConnection, mockWallet, mockProgramId, codamaIdl),
             ).rejects.toThrow('Codama IDL format is not yet supported for interactive features');
         });
     });
@@ -100,7 +100,7 @@ describe('CodamaInterpreter', () => {
             const mockArgs: any[] = [];
 
             await expect(
-                interpreter.createInstruction(mockProgram, 'testInstruction', mockAccounts, mockArgs)
+                interpreter.createInstruction(mockProgram, 'testInstruction', mockAccounts, mockArgs),
             ).rejects.toThrow('Codama IDL format is not yet supported for interactive features');
         });
     });

@@ -23,7 +23,7 @@ export const HighlightNode = React.memo(
                 {children}
             </BaseHighlightNode>
         );
-    })
+    }),
 );
 HighlightNode.displayName = 'HighlightNode';
 

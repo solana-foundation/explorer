@@ -36,7 +36,7 @@ const cardVariants = cva(
                 true: 'e-opacity-50 e-cursor-not-allowed',
             },
         },
-    }
+    },
 );
 
 type BaseConnectWalletProps = {
@@ -133,7 +133,7 @@ export function BaseConnectWallet({
                     clickable: isClickable,
                     disabled: isDisabled,
                 }),
-                className
+                className,
             )}
             onClick={handleClick}
         >

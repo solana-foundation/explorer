@@ -47,7 +47,7 @@ function parseValueNodeValue(valueNode: ValueNode): string {
                 valueNode.entries.map(entry => ({
                     key: parseValueNodeValue(entry.key),
                     value: parseValueNodeValue(entry.value),
-                }))
+                })),
             );
         case 'noneValueNode':
             return 'none';
@@ -68,7 +68,7 @@ function parseValueNodeValue(valueNode: ValueNode): string {
                 valueNode.fields.map(field => ({
                     name: field.name,
                     value: parseValueNodeValue(field.value),
-                }))
+                })),
             );
         case 'tupleValueNode':
             return `tuple(${valueNode.items.map(item => parseValueNodeValue(item)).join(', ')})`;

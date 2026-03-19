@@ -49,7 +49,7 @@ export function InspectorInstructionCard({
         return setShowRaw(r => !r);
     };
     const scrollAnchorRef = useScrollAnchor(
-        getInstructionCardScrollAnchorId(childIndex != null ? [index + 1, childIndex + 1] : [index + 1])
+        getInstructionCardScrollAnchorId(childIndex != null ? [index + 1, childIndex + 1] : [index + 1]),
     );
 
     return (

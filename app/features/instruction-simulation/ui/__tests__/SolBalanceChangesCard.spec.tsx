@@ -30,7 +30,7 @@ describe('SolBalanceChangesCard', () => {
         pubkeyString: string,
         delta: string,
         preBalance: string,
-        postBalance: string
+        postBalance: string,
     ): SolBalanceChange {
         return {
             delta: new BN(delta),
@@ -78,13 +78,13 @@ describe('SolBalanceChangesCard', () => {
                 'GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS',
                 '1000000000',
                 '2000000000',
-                '3000000000'
+                '3000000000',
             ),
             createMockBalanceChange(
                 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
                 '2000000000',
                 '3000000000',
-                '5000000000'
+                '5000000000',
             ),
             createMockBalanceChange('11111111111111111111111111111111', '-500000000', '1000000000', '500000000'),
         ];
@@ -108,7 +108,7 @@ describe('SolBalanceChangesCard', () => {
                 'GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS',
                 '-1000000000',
                 '2000000000',
-                '1000000000'
+                '1000000000',
             ),
         ];
 

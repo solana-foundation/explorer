@@ -49,7 +49,7 @@ describe('anchor utilities - number overflow handling', () => {
             const { container } = render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should display the full number without precision loss
@@ -75,7 +75,7 @@ describe('anchor utilities - number overflow handling', () => {
             const { container } = render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should display the full number
@@ -102,7 +102,7 @@ describe('anchor utilities - number overflow handling', () => {
             const { container } = render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should display the full number without scientific notation
@@ -131,7 +131,7 @@ describe('anchor utilities - number overflow handling', () => {
             const { container } = render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             expect(container.textContent).toContain('1,000,000');
@@ -159,7 +159,7 @@ describe('anchor utilities - number overflow handling', () => {
             const { container } = render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should display without precision loss
@@ -193,7 +193,7 @@ describe('anchor utilities - number overflow handling', () => {
             render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should have logged the error
@@ -234,7 +234,7 @@ describe('anchor utilities - number overflow handling', () => {
             render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should have logged the error
@@ -275,7 +275,7 @@ describe('anchor utilities - number overflow handling', () => {
             render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should have logged the error
@@ -310,7 +310,7 @@ describe('anchor utilities - number overflow handling', () => {
             render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should have logged the error

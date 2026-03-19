@@ -15,7 +15,7 @@ export type EditionInfo = {
 
 export default async function getEditionInfo(
     metadata: programs.metadata.Metadata,
-    connection: Connection
+    connection: Connection,
 ): Promise<EditionInfo> {
     try {
         const edition = (await Metadata.getEdition(connection, metadata.data.mint)).data;

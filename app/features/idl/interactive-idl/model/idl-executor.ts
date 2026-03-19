@@ -78,7 +78,7 @@ export class IdlExecutor implements IdlExecutorSpec {
         idl: T,
         programId: PublicKey | string,
         wallet?: UnifiedWallet,
-        interpreterName?: string
+        interpreterName?: string,
     ) {
         const interpreter = this.selectInterpreter(idl, interpreterName);
 
@@ -98,7 +98,7 @@ export class IdlExecutor implements IdlExecutorSpec {
         accs: Record<string, string> | UnifiedAccounts,
         args: UnifiedArguments,
         idl: T,
-        interpreterName: string
+        interpreterName: string,
     ) {
         const interpreter = this.selectInterpreter(idl, interpreterName);
         const instructionArguments = normalizeArguments(args, interpreterName);
@@ -120,13 +120,16 @@ export class IdlExecutor implements IdlExecutorSpec {
  */
 export function populateAccounts(
     accounts: Record<string, string>,
-    instructionName: string
+    instructionName: string,
 ): Record<string, string> | UnifiedAccounts {
-    return Object.keys(accounts).reduce((acc, k) => {
-        const { field, value } = populateValue(accounts, k, instructionName);
-        acc[field] = String(value);
-        return acc;
-    }, {} as Record<string, string>);
+    return Object.keys(accounts).reduce(
+        (acc, k) => {
+            const { field, value } = populateValue(accounts, k, instructionName);
+            acc[field] = String(value);
+            return acc;
+        },
+        {} as Record<string, string>,
+    );
 }
 
 /**

@@ -40,7 +40,7 @@ export async function fetchFeatureGateInformation(featureInfo?: FeatureInfoType)
                 Logger.debug('[feature-gate] Cannot fetch link', { link });
                 return 'No data';
             }
-        })
+        }),
     );
 
     return results;

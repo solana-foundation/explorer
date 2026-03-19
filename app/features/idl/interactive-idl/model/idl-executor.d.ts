@@ -16,7 +16,7 @@ interface IdlExecutorSpec {
         idl: T,
         programId: PublicKey,
         wallet?: UnifiedWallet,
-        interpreterName?: string
+        interpreterName?: string,
     ): Promise<UnifiedProgram>;
 
     getInstruction<T extends BaseIdl>(
@@ -25,7 +25,7 @@ interface IdlExecutorSpec {
         accs: Record<string, string> | UnifiedAccounts,
         args: UnifiedArguments,
         idl: T,
-        interpreterName: string
+        interpreterName: string,
     ): Promise<TransactionInstruction | VersionedMessage>;
 
     setConnection(connection: Connection): void;

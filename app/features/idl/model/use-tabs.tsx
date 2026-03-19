@@ -55,7 +55,7 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, pro
         const createTabRenderer = <K extends IdlDataKeys>(
             Component: React.ComponentType<FormattedIdlDataView<K>>,
             data: FormattedIdl[K] | undefined,
-            tabName: string
+            tabName: string,
         ) => {
             const TabRenderer = () => {
                 if (hasSearch && (!data || data.length === 0)) {
@@ -198,8 +198,8 @@ function InteractWithIdlTabName({
     const tooltipMessage = isProgramIdMismatch
         ? 'IDL program address does not match the current program'
         : isInteractDisabled
-        ? 'Currently we support only modern Anchor IDL >= 0.30.1'
-        : "Launch Anchor's instructions";
+          ? 'Currently we support only modern Anchor IDL >= 0.30.1'
+          : "Launch Anchor's instructions";
 
     return (
         <Tooltip>

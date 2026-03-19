@@ -62,7 +62,7 @@ function isMultisigTransfer(info: Record<string, unknown>): info is MultisigTran
 
 export async function createTokenTransferReceipt(
     transaction: ParsedTransactionWithMeta,
-    getTokenInfo: (mint: string | undefined) => Promise<TokenInfo | undefined>
+    getTokenInfo: (mint: string | undefined) => Promise<TokenInfo | undefined>,
 ): Promise<ReceiptToken | undefined> {
     const instruction = getSingleTokenTransferInstruction(transaction);
     if (!instruction) return undefined;
@@ -87,10 +87,10 @@ export async function createTokenTransferReceipt(
 
 // We support only single token transfer instruction per transaction by design.
 function getSingleTokenTransferInstruction(
-    transaction: ParsedTransactionWithMeta
+    transaction: ParsedTransactionWithMeta,
 ): TokenTransferInstruction | undefined {
     const instructions = transaction.transaction.message.instructions.filter(
-        (instruction): instruction is TokenTransferInstruction => isTokenTransfer(instruction)
+        (instruction): instruction is TokenTransferInstruction => isTokenTransfer(instruction),
     );
     return instructions.length === 1 ? instructions[0] : undefined;
 }
@@ -130,7 +130,7 @@ function extractTokenMint(transaction: ParsedTransactionWithMeta, parsed: TokenT
     const destinationTokenAccount = parsed.info.destination?.toString();
 
     const accountIndex = transaction.transaction.message.accountKeys.findIndex(
-        account => account.pubkey.toString() === destinationTokenAccount
+        account => account.pubkey.toString() === destinationTokenAccount,
     );
 
     const tokenBalance = transaction.meta?.postTokenBalances?.find(balance => balance.accountIndex === accountIndex);
@@ -140,14 +140,14 @@ function extractTokenMint(transaction: ParsedTransactionWithMeta, parsed: TokenT
 
 function extractTokenReceiver(
     transaction: ParsedTransactionWithMeta,
-    destinationTokenAccount: string | undefined
+    destinationTokenAccount: string | undefined,
 ): string | undefined {
     if (!destinationTokenAccount) {
         return undefined;
     }
 
     const accountIndex = transaction.transaction.message.accountKeys.findIndex(
-        account => account.pubkey.toString() === destinationTokenAccount
+        account => account.pubkey.toString() === destinationTokenAccount,
     );
 
     const tokenBalance = transaction.meta?.postTokenBalances?.find(balance => balance.accountIndex === accountIndex);
@@ -174,13 +174,13 @@ function extractTotal(parsed: TokenTransferParsed, transaction: ParsedTransactio
 
 function getTokenDecimals(
     transaction: ParsedTransactionWithMeta,
-    tokenAccount: string | undefined
+    tokenAccount: string | undefined,
 ): number | undefined {
     if (!tokenAccount) {
         return undefined;
     }
     const accountIndex = transaction.transaction.message.accountKeys.findIndex(
-        account => account.pubkey.toString() === tokenAccount
+        account => account.pubkey.toString() === tokenAccount,
     );
 
     const tokenBalance = transaction.meta?.postTokenBalances?.find(balance => balance.accountIndex === accountIndex);

@@ -59,7 +59,7 @@ export function MarketData({ label, lastUpdatedAt, value, rank }: MarketDataProp
                 {'volume' in value ? (
                     <span
                         title={`${Intl.NumberFormat('en-US', { currency: 'USD', style: 'currency' }).format(
-                            value.volume
+                            value.volume,
                         )}`}
                         className="e-cursor-help"
                     >

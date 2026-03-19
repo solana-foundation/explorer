@@ -143,7 +143,7 @@ function TokenBalanceRow({
 export function generateTokenBalanceRows(
     preTokenBalances: TokenBalance[],
     postTokenBalances: TokenBalance[],
-    accounts: ParsedMessageAccount[]
+    accounts: ParsedMessageAccount[],
 ): TokenBalanceRow[] {
     const preBalanceMap: { [index: number]: TokenBalance } = {};
     const postBalanceMap: { [index: number]: TokenBalance } = {};

@@ -15,8 +15,8 @@ type State = 'hide' | 'show';
 function Popover({ state, bottom, right, text }: { state: State; bottom?: boolean; right?: boolean; text: string }) {
     if (state === 'hide') return null;
     return (
-        <div className={`popover bs-popover-${bottom ? 'bottom' : 'top'}${right ? ' right' : ''} show`}>
-            <div className={`arrow${right ? ' right' : ''}`} />
+        <div className={`popover bs-popover-${bottom ? 'bottom' : 'top'}${right ? 'right' : ''} show`}>
+            <div className={`arrow${right ? 'right' : ''}`} />
             <div className="popover-body">{text}</div>
         </div>
     );

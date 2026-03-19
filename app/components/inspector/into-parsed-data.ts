@@ -423,7 +423,7 @@ export function intoParsedTransaction(
     transactionInstruction: TransactionInstruction,
     versionedMessage: VersionedMessage,
     instructions: ParsedMessage['instructions'] = [],
-    signatures: string[] = []
+    signatures: string[] = [],
 ): ParsedTransaction {
     const { keys } = transactionInstruction;
     const { addressTableLookups, recentBlockhash } = versionedMessage;
@@ -447,8 +447,8 @@ export function upcastAccountMeta({ pubkey, isSigner, isWritable }: LegacyAccoun
                 ? AccountRole.WRITABLE_SIGNER
                 : AccountRole.READONLY_SIGNER
             : isWritable
-            ? AccountRole.WRITABLE
-            : AccountRole.READONLY,
+              ? AccountRole.WRITABLE
+              : AccountRole.READONLY,
     };
 }
 

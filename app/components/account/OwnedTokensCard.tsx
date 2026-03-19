@@ -325,7 +325,7 @@ const DisplayDropdown = ({ display, toggle, show }: DropdownProps) => {
             const nextQueryString = params.toString();
             return `${currentPath}${nextQueryString ? `?${nextQueryString}` : ''}`;
         },
-        [currentPath, currentSearchParams]
+        [currentPath, currentSearchParams],
     );
 
     const DISPLAY_OPTIONS: Display[] = [null, 'detail'];
@@ -334,13 +334,13 @@ const DisplayDropdown = ({ display, toggle, show }: DropdownProps) => {
             <button className="btn btn-white btn-sm" type="button" onClick={toggle}>
                 {display === 'detail' ? 'Detailed' : 'Summary'} <ChevronDown size={15} className="align-text-top" />
             </button>
-            <div className={`dropdown-menu-end dropdown-menu${show ? ' show' : ''}`}>
+            <div className={`dropdown-menu-end dropdown-menu${show ? 'show' : ''}`}>
                 {DISPLAY_OPTIONS.map(displayOption => {
                     return (
                         <Link
                             key={displayOption || 'null'}
                             href={buildLocation(displayOption)}
-                            className={`dropdown-item${displayOption === display ? ' active' : ''}`}
+                            className={`dropdown-item${displayOption === display ? 'active' : ''}`}
                             onClick={toggle}
                         >
                             {displayOption === 'detail' ? 'Detailed' : 'Summary'}

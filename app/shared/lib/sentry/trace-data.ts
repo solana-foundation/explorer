@@ -10,7 +10,7 @@ import type { Metadata } from 'next/types';
 export function withTraceData(
     metadata: Metadata & {
         others?: ReturnType<typeof Sentry.getTraceData>;
-    }
+    },
 ) {
     return {
         ...metadata,

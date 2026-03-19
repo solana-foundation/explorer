@@ -37,7 +37,7 @@ export async function generateMetadata({ params: { signature }, searchParams }: 
         const compositeSignature = buildCompositeSignature(
             signature,
             RECEIPT_OG_IMAGE_VERSION || undefined,
-            clusterEnum
+            clusterEnum,
         );
         const ogImageUrl = `${baseUrl}/og/receipt/${compositeSignature}`;
         return {

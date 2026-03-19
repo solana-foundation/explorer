@@ -27,7 +27,7 @@ export function InteractInstructions({
             setExpandedSections(value);
             onSectionsExpanded?.(value);
         },
-        [onSectionsExpanded, setExpandedSections]
+        [onSectionsExpanded, setExpandedSections],
     );
 
     return (

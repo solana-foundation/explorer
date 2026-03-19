@@ -105,7 +105,7 @@ describe('AnchorInterpreter', () => {
                     payer: new PublicKey('11111111111111111111111111111111'),
                     tokenAccount: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
                 },
-                [new BN('1000'), true, 'Hello World', new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v')]
+                [new BN('1000'), true, 'Hello World', new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v')],
             );
         });
 
@@ -145,7 +145,7 @@ describe('AnchorInterpreter', () => {
                     optionalAccount: null,
                     payer: new PublicKey('11111111111111111111111111111111'),
                 },
-                []
+                [],
             );
         });
 
@@ -327,7 +327,7 @@ describe('AnchorInterpreter', () => {
             } as unknown as AnchorUnifiedProgram;
 
             await expect(interpreter.createInstruction(mockProgram, 'nonExistentInstruction', {}, [])).rejects.toThrow(
-                'Instruction definition not found for "nonExistentInstruction"'
+                'Instruction definition not found for "nonExistentInstruction"',
             );
         });
 
@@ -348,7 +348,7 @@ describe('AnchorInterpreter', () => {
             } as unknown as AnchorUnifiedProgram;
 
             await expect(
-                interpreter.createInstruction(mockProgram, 'testInstruction', {}, ['100', '200', 'extra'])
+                interpreter.createInstruction(mockProgram, 'testInstruction', {}, ['100', '200', 'extra']),
             ).rejects.toThrow('Argument at index 2 not found in instruction definition');
         });
 

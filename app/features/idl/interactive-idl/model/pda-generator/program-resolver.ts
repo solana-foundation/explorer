@@ -23,7 +23,7 @@ interface ResolverContext {
 export function resolveProgramId(
     defaultProgramId: PublicKey,
     pdaProgram: IdlSeed | undefined,
-    context: ResolverContext
+    context: ResolverContext,
 ): PublicKey | null {
     if (!pdaProgram) {
         return defaultProgramId;

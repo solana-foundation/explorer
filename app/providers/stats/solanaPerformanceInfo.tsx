@@ -79,7 +79,7 @@ export function performanceInfoReducer(state: PerformanceInfo, action: Performan
             const historyMaxTps = Math.max(
                 Math.max(...perfHistory.short),
                 Math.max(...perfHistory.medium),
-                Math.max(...perfHistory.long)
+                Math.max(...perfHistory.long),
             );
 
             const status = state.transactionCount !== BigInt(0) ? ClusterStatsStatus.Ready : ClusterStatsStatus.Loading;

@@ -70,7 +70,7 @@ export function DownloadableDropdown({
                 return { strategy: 'fixed' as const };
             },
         }),
-        []
+        [],
     );
 
     return (
@@ -123,7 +123,7 @@ function DownloadableDropdownButton({
             const encoded = encodeTransactionData(data, encoding);
             triggerDownloadText(encoded, `${filename}_${encoding}.txt`);
         },
-        [data, filename]
+        [data, filename],
     );
 
     const handleDownload = (encoding: EncodingFormat) => {

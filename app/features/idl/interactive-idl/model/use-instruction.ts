@@ -52,13 +52,13 @@ interface UseInstructionReturn {
         params: {
             accounts: any;
             arguments: Record<string, string>;
-        }
+        },
     ) => Promise<void>;
 
     // Validation helpers
     validateInstruction: (
         instructionName: string,
-        instruction: InstructionData
+        instruction: InstructionData,
     ) => { isValid: boolean; errors: string[] };
 
     // Status
@@ -219,7 +219,7 @@ export function useInstruction({
             params: {
                 accounts: any;
                 arguments: Record<string, string>;
-            }
+            },
         ): Promise<void> => {
             if (!connected || !publicKey || !wallet.signTransaction) {
                 const error = 'Wallet not connected';
@@ -243,7 +243,7 @@ export function useInstruction({
                     populateAccounts(params.accounts, instructionName),
                     populateArguments(params.arguments, instructionName),
                     idl,
-                    interpreterName
+                    interpreterName,
                 );
 
                 if (ix instanceof TransactionInstruction) {
@@ -263,7 +263,7 @@ export function useInstruction({
                     new VersionedTransaction(transaction.compileMessage()),
                     {
                         commitment: simulationCommitment,
-                    }
+                    },
                 );
                 handleSimulatedTxResult(simulatedTx);
 
@@ -280,7 +280,7 @@ export function useInstruction({
                         lastValidBlockHeight,
                         signature,
                     },
-                    commitment
+                    commitment,
                 );
 
                 if (confirmed.value?.err) {
@@ -316,7 +316,7 @@ export function useInstruction({
             handleTxEnd,
             handleSimulatedTxResult,
             onPreInvocationError,
-        ]
+        ],
     );
 
     return {

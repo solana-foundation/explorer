@@ -58,7 +58,7 @@ const nextConfig = {
                     destination: '/' + ['address', path].join('/'),
                     permanent: true,
                     source: '/' + [oldRoot, path].join('/'),
-                }))
+                })),
             ),
             ...TX_ALIASES.map(oldRoot => ({
                 destination: '/' + ['tx', ':signature'].join('/'),

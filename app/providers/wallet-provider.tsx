@@ -30,7 +30,7 @@ export const WalletProvider: FC<
                 toast.custom({ description: error.message, title: 'Wallet Error', type: 'error' });
             }
         },
-        [toast, skipToast]
+        [toast, skipToast],
     );
 
     // use an empty array to allow detect wallets automatically

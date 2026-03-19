@@ -11,7 +11,7 @@ export function useCanNativeShare() {
             globalThis.matchMedia('(pointer: coarse)').matches && globalThis.matchMedia('(hover: none)').matches;
 
         setCanNativeShare(
-            typeof navigator.share === 'function' && typeof navigator.canShare === 'function' && isMobileDevice
+            typeof navigator.share === 'function' && typeof navigator.canShare === 'function' && isMobileDevice,
         );
     }, []);
 

@@ -207,12 +207,12 @@ describe('fetchProgramsPage', () => {
 
             expect(getProgramName).toHaveBeenCalledWith(
                 mockProgramIds[0],
-                'https://github.com/solana-labs/solana-program-library'
+                'https://github.com/solana-labs/solana-program-library',
             );
             expect(getProgramName).toHaveBeenCalledWith(mockProgramIds[1], 'https://github.com/solana-labs/token-2022');
             expect(getProgramName).toHaveBeenCalledWith(
                 mockProgramIds[2],
-                'https://github.com/Ellipsis-Labs/phoenix-v1'
+                'https://github.com/Ellipsis-Labs/phoenix-v1',
             );
         });
     });
@@ -410,7 +410,7 @@ describe('fetchProgramsPage', () => {
 
             expect(Logger.debug).toHaveBeenCalledWith(
                 '[verified-programs] Metadata is empty, API returned empty array',
-                { programId: mockProgramIds[0] }
+                { programId: mockProgramIds[0] },
             );
         });
 

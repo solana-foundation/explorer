@@ -29,7 +29,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
     if (!RUGCHECK_API_KEY) {
         return NextResponse.json(
             { error: 'Rugcheck API is misconfigured' },
-            { headers: NO_STORE_HEADERS, status: 500 }
+            { headers: NO_STORE_HEADERS, status: 500 },
         );
     }
 
@@ -49,7 +49,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
             }
             return NextResponse.json(
                 { error: 'Failed to fetch rugcheck data' },
-                { headers: NO_STORE_HEADERS, status: response.status }
+                { headers: NO_STORE_HEADERS, status: response.status },
             );
         }
 
@@ -58,7 +58,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
         if (!is(data, RugCheckResponseSchema)) {
             return NextResponse.json(
                 { error: 'Invalid response from rugcheck API' },
-                { headers: NO_STORE_HEADERS, status: 502 }
+                { headers: NO_STORE_HEADERS, status: 502 },
             );
         }
 
@@ -67,7 +67,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
         Logger.panic(error instanceof Error ? error : new Error('Failed to fetch rugcheck data'));
         return NextResponse.json(
             { error: 'Failed to fetch rugcheck data' },
-            { headers: NO_STORE_HEADERS, status: 500 }
+            { headers: NO_STORE_HEADERS, status: 500 },
         );
     }
 }

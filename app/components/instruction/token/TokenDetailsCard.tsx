@@ -103,7 +103,7 @@ function TokenInstruction({
     const { cluster, url } = useCluster();
     const { data: tokenDetails } = useSWR(
         mintAddress ? getTokenInfoSwrKey(mintAddress, cluster, url) : null,
-        fetchTokenInfo
+        fetchTokenInfo,
     );
     const attributes: JSX.Element[] = [];
     let decimals = mintInfo?.decimals;
@@ -124,7 +124,7 @@ function TokenInstruction({
                 <td className="text-lg-end">
                     <Address pubkey={new PublicKey(mintAddress)} alignRight link fetchTokenLabelInfo />
                 </td>
-            </tr>
+            </tr>,
         );
     }
 
@@ -144,7 +144,7 @@ function TokenInstruction({
                         <td className="text-lg-end">
                             <Address pubkey={publicKey} alignRight link />
                         </td>
-                    </tr>
+                    </tr>,
                 );
             }
             continue;
@@ -185,7 +185,7 @@ function TokenInstruction({
             <tr key={key}>
                 <td>{label}</td>
                 <td className="text-lg-end">{tag}</td>
-            </tr>
+            </tr>,
         );
     }
 

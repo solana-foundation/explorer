@@ -6,7 +6,7 @@ import { BaseSecurityNotification } from './BaseSecurityNotification';
 export function SecurityNotification({ parsedData, address }: { parsedData: ParsedData | undefined; address: string }) {
     const securityTxt = useSecurityTxt(
         address,
-        parsedData && isUpgradeableLoaderAccountData(parsedData) ? { programData: parsedData.programData } : undefined
+        parsedData && isUpgradeableLoaderAccountData(parsedData) ? { programData: parsedData.programData } : undefined,
     );
 
     if (!parsedData || !isUpgradeableLoaderAccountData(parsedData)) return null;

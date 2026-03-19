@@ -40,7 +40,7 @@ describe('usePrimaryDomain', () => {
             swrStyle([
                 { address: 'addr1', name: 'alex.sol' },
                 { address: 'addr2', name: 'bob.sol' },
-            ]) as ReturnType<typeof useUserSnsDomains>
+            ]) as ReturnType<typeof useUserSnsDomains>,
         );
 
         const { result } = renderHook(() => usePrimaryDomain(VALID_ADDRESS));
@@ -53,7 +53,7 @@ describe('usePrimaryDomain', () => {
             swrStyle([
                 { address: 'addr1', name: 'alice.abc' },
                 { address: 'addr2', name: 'charlie.abc' },
-            ]) as ReturnType<typeof useUserANSDomains>
+            ]) as ReturnType<typeof useUserANSDomains>,
         );
 
         const { result } = renderHook(() => usePrimaryDomain(VALID_ADDRESS));
@@ -62,10 +62,10 @@ describe('usePrimaryDomain', () => {
 
     it('prefers SOL domain over ANS when both exist', () => {
         vi.mocked(useUserSnsDomains).mockReturnValue(
-            swrStyle([{ address: 'addr1', name: 'user.sol' }]) as ReturnType<typeof useUserSnsDomains>
+            swrStyle([{ address: 'addr1', name: 'user.sol' }]) as ReturnType<typeof useUserSnsDomains>,
         );
         vi.mocked(useUserANSDomains).mockReturnValue(
-            swrStyle([{ address: 'addr2', name: 'user.abc' }]) as ReturnType<typeof useUserANSDomains>
+            swrStyle([{ address: 'addr2', name: 'user.abc' }]) as ReturnType<typeof useUserANSDomains>,
         );
 
         const { result } = renderHook(() => usePrimaryDomain(VALID_ADDRESS));
@@ -75,7 +75,7 @@ describe('usePrimaryDomain', () => {
     it('returns ANS domain when SOL is empty and ANS has domains', () => {
         vi.mocked(useUserSnsDomains).mockReturnValue(swrStyle([]) as ReturnType<typeof useUserSnsDomains>);
         vi.mocked(useUserANSDomains).mockReturnValue(
-            swrStyle([{ address: 'addr1', name: 'fallback.abc' }]) as ReturnType<typeof useUserANSDomains>
+            swrStyle([{ address: 'addr1', name: 'fallback.abc' }]) as ReturnType<typeof useUserANSDomains>,
         );
 
         const { result } = renderHook(() => usePrimaryDomain(VALID_ADDRESS));

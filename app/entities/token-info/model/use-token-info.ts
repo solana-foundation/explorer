@@ -12,7 +12,7 @@ export function useTokenInfo(
     fetchTokenLabelInfo: boolean | undefined,
     pubkey: string,
     cluster: Cluster,
-    genesisHash?: string
+    genesisHash?: string,
 ): Token | undefined {
     const requestTokenInfo = useTokenInfoBatch();
 
@@ -24,7 +24,7 @@ export function useTokenInfo(
 
     const { data } = useSWR<Token | undefined>(
         fetchTokenLabelInfo ? getTokenInfoSwrKey(pubkey, cluster, genesisHash) : null,
-        null
+        null,
     );
 
     return data;

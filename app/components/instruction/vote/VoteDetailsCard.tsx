@@ -68,7 +68,7 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
                     <td className="text-lg-end">
                         <pre className="d-inline-block text-start mb-0">{value.hash}</pre>
                     </td>
-                </tr>
+                </tr>,
             );
 
             if (value.timestamp) {
@@ -76,7 +76,7 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
                     <tr key="timestamp">
                         <td>Timestamp</td>
                         <td className="text-lg-end font-monospace">{displayTimestamp(value.timestamp * 1000)}</td>
-                    </tr>
+                    </tr>,
                 );
             }
 
@@ -86,14 +86,14 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
                     <td className="text-lg-end font-monospace">
                         <pre className="d-inline-block text-start mb-0">{value.slots.join('\n')}</pre>
                     </td>
-                </tr>
+                </tr>,
             );
         } else {
             attributes.push(
                 <tr key={key}>
                     <td>{camelToTitleCase(key)} </td>
                     <td className="text-lg-end">{value}</td>
-                </tr>
+                </tr>,
             );
         }
     }

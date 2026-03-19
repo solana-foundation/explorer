@@ -62,7 +62,7 @@ export async function fetchTransactionStatus(
     dispatch: Dispatch,
     signature: TransactionSignature,
     cluster: Cluster,
-    url: string
+    url: string,
 ) {
     dispatch({
         key: signature,
@@ -125,7 +125,7 @@ export async function fetchTransactionStatus(
 }
 
 export function useTransactionStatus(
-    signature: TransactionSignature | undefined
+    signature: TransactionSignature | undefined,
 ): Cache.CacheEntry<TransactionStatus> | undefined {
     const context = React.useContext(StateContext);
 
@@ -151,6 +151,6 @@ export function useFetchTransactionStatus() {
         (signature: TransactionSignature) => {
             fetchTransactionStatus(dispatch, signature, cluster, url);
         },
-        [dispatch, cluster, url]
+        [dispatch, cluster, url],
     );
 }

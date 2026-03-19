@@ -32,7 +32,7 @@ import { UnknownDetailsCard } from './UnknownDetailsCard';
 export function InstructionsSection({ message }: { message: VersionedMessage }) {
     // Fetch all address lookup tables
     const hydratedTables = useAddressLookupTables(
-        message.addressTableLookups.map(lookup => lookup.accountKey.toString())
+        message.addressTableLookups.map(lookup => lookup.accountKey.toString()),
     );
     for (let i = 0; i < hydratedTables.length; i++) {
         const table = hydratedTables[i];
@@ -48,14 +48,14 @@ export function InstructionsSection({ message }: { message: VersionedMessage }) 
     }
 
     const allDefined = hydratedTables.every(
-        table => table !== undefined && table[0] instanceof AddressLookupTableAccount
+        table => table !== undefined && table[0] instanceof AddressLookupTableAccount,
     );
     if (!allDefined) {
         return <LoadingCard />;
     }
 
     const addressLookupTableAccounts = (hydratedTables as any as Array<[AddressLookupTableAccount, FetchStatus]>).map(
-        table => table[0]
+        table => table[0],
     );
     const transactionMessage = TransactionMessage.decompile(message, { addressLookupTableAccounts });
 

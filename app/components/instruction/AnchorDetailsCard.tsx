@@ -84,7 +84,7 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                     decodedIxData = coder.decode(ix.data.slice(8).toString('base64'));
                 }
                 const ixEventDef = anchorProgram.idl.events?.find(
-                    ixDef => ixDef.name === decodedIxData?.name
+                    ixDef => ixDef.name === decodedIxData?.name,
                 ) as IdlEvent;
 
                 const ixEventFields = anchorProgram.idl.types?.find((type: any) => type.name === ixEventDef.name);
@@ -208,7 +208,7 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                                 // Render group header
                                 const groupHeaderIndex = accountInfoIndex;
                                 const isExpanded = !collapsedGroups.has(groupHeaderIndex);
-                                skipUntilLevel = isExpanded ? null : currentInfo.nestingLevel ?? 0;
+                                skipUntilLevel = isExpanded ? null : (currentInfo.nestingLevel ?? 0);
 
                                 rows.push(
                                     <tr key={`group-${groupHeaderIndex}`} className="table-group-header">
@@ -228,7 +228,7 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                                                 )}
                                             </div>
                                         </td>
-                                    </tr>
+                                    </tr>,
                                 );
                                 accountInfoIndex++;
                             } else {
@@ -270,8 +270,8 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                                         {accountInfo
                                             ? `${camelToTitleCase(accountInfo.name)}`
                                             : ixAccounts
-                                            ? `Remaining Account #${keyIndex + 1 - actualAccountCount}`
-                                            : `Account #${keyIndex + 1}`}
+                                              ? `Remaining Account #${keyIndex + 1 - actualAccountCount}`
+                                              : `Account #${keyIndex + 1}`}
                                     </div>
                                     {isWritable && <span className="badge bg-danger-soft me-1">Writable</span>}
                                     {isSigner && <span className="badge bg-info-soft me-1">Signer</span>}
@@ -280,7 +280,7 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                             <td className="text-lg-end" colSpan={2}>
                                 <Address pubkey={pubkey} alignRight link />
                             </td>
-                        </tr>
+                        </tr>,
                     );
 
                     accountInfoIndex++;

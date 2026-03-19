@@ -15,7 +15,7 @@ export type ResolvedDomainInfo = {
 // until an actual RPC call is made. Safe to create per-request in a short-lived API route handler.
 export async function resolveDomain(
     domain: string,
-    connection: Connection = new Connection(serverClusterUrl(Cluster.MainnetBeta, ''), 'confirmed')
+    connection: Connection = new Connection(serverClusterUrl(Cluster.MainnetBeta, ''), 'confirmed'),
 ): Promise<ResolvedDomainInfo> {
     return domain.endsWith('.sol') ? resolveSnsDomain(domain, connection) : resolveAnsDomain(domain, connection);
 }

@@ -60,7 +60,7 @@ function TransferRow({
     const { signature, blockTime, statusText, statusClass, transfer, index, childIndex, amountString, units } = data;
     const [amountWithScaledUiAmountMultiplier, scaledUiAmountMultiplier] = useScaledUiAmountForMint(
         tokenAddress,
-        amountString
+        amountString,
     );
 
     return (
@@ -270,7 +270,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
 function getTransfer(
     instruction: ParsedInstruction | PartiallyDecodedInstruction,
     cluster: Cluster,
-    signature: string
+    signature: string,
 ): Transfer | TransferChecked | undefined {
     if ('parsed' in instruction && isTokenProgramData(instruction)) {
         try {

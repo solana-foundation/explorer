@@ -13,7 +13,7 @@ export const programAtom = atom(
     },
     (_get, set, next: UnifiedProgram | undefined) => {
         set(program, next);
-    }
+    },
 );
 
 // Original IDL atom
@@ -26,7 +26,7 @@ export const originalIdlAtom = atom(
     },
     (_get, set, next: BaseIdl) => {
         set(originalIdl, next);
-    }
+    },
 );
 
 export const unsetOriginalIdl = atom(null, (_, set) => {
@@ -40,7 +40,7 @@ export const programIdAtom = atom(
     get => get(programId),
     (_get, set, next: PublicKey) => {
         set(programId, next);
-    }
+    },
 );
 
 export const unsetProgramId = atom(null, (_, set) => {

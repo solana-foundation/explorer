@@ -94,7 +94,7 @@ describe('VerifiedProgramsCard', () => {
             () =>
                 new Promise(() => {
                     // Never resolves
-                })
+                }),
         );
 
         render(<VerifiedProgramsCard />);

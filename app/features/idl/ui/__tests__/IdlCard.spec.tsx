@@ -118,7 +118,7 @@ describe('IdlCard', () => {
         render(
             <ClusterProvider>
                 <IdlCard programId={programId} />
-            </ClusterProvider>
+            </ClusterProvider>,
         );
 
         await waitFor(() => {
@@ -141,7 +141,7 @@ describe('IdlCard', () => {
         render(
             <ClusterProvider>
                 <IdlCard programId={programId} />
-            </ClusterProvider>
+            </ClusterProvider>,
         );
 
         await waitFor(() => {
@@ -164,7 +164,7 @@ describe('IdlCard', () => {
         render(
             <ClusterProvider>
                 <IdlCard programId={programId} />
-            </ClusterProvider>
+            </ClusterProvider>,
         );
 
         await waitFor(() => {
@@ -189,7 +189,7 @@ describe('IdlCard', () => {
         render(
             <ClusterProvider>
                 <IdlCard programId={programId} />
-            </ClusterProvider>
+            </ClusterProvider>,
         );
 
         // PMP tab is active first
@@ -224,7 +224,7 @@ describe('IdlCard', () => {
         render(
             <ClusterProvider>
                 <IdlCard programId={programId} />
-            </ClusterProvider>
+            </ClusterProvider>,
         );
 
         await waitFor(() => {

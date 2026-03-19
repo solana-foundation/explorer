@@ -27,7 +27,7 @@ export enum IdlVariant {
 export function useIdlLastTransactionDate(
     programId: string | null,
     hasAnchorIdl: boolean,
-    hasPmpIdl: boolean
+    hasPmpIdl: boolean,
 ): IdlVariant {
     const { url } = useCluster();
     const [preferredVariant, setPreferredVariant] = useState<IdlVariant>(IdlVariant.ProgramMetadata);

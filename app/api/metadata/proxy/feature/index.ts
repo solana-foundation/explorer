@@ -40,7 +40,7 @@ async function requestResource(
     uri: string,
     headers: Headers,
     timeout: number,
-    size: number
+    size: number,
 ): Promise<[Error, void] | [void, NodeFetchResponse]> {
     let response: NodeFetchResponse | undefined;
     let error;
@@ -68,7 +68,7 @@ export async function fetchResource(
     uri: string,
     headers: Headers,
     timeout: number,
-    size: number
+    size: number,
 ): Promise<
     Awaited<ReturnType<typeof processBinary> | ReturnType<typeof processJson> | ReturnType<typeof processTextAsJson>>
 > {

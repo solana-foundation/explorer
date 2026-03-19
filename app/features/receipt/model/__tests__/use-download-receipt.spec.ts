@@ -25,7 +25,7 @@ describe('useDownloadReceipt', () => {
         const download = vi.fn().mockReturnValue(
             new Promise<void>(r => {
                 resolve = r;
-            })
+            }),
         );
 
         const { result } = renderHook(() => useDownloadReceipt(download));
@@ -93,7 +93,7 @@ describe('useDownloadReceipt', () => {
         const download = vi.fn().mockReturnValue(
             new Promise<void>(r => {
                 resolve = r;
-            })
+            }),
         );
 
         const { result } = renderHook(() => useDownloadReceipt(download));

@@ -48,7 +48,7 @@ export function BaseInstructionCard({
         return setShowRaw(r => !r);
     };
     const scrollAnchorRef = useScrollAnchor(
-        getInstructionCardScrollAnchorId(childIndex != null ? [index + 1, childIndex + 1] : [index + 1])
+        getInstructionCardScrollAnchorId(childIndex != null ? [index + 1, childIndex + 1] : [index + 1]),
     );
     return (
         <div className="card" ref={scrollAnchorRef}>

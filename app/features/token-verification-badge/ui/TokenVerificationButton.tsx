@@ -38,7 +38,7 @@ const buttonVariants = cva(
                 true: 'e-border-green-400',
             },
         },
-    }
+    },
 );
 
 function getSourceBorderTone(source: VerificationSource): ERiskLevel {
@@ -84,7 +84,7 @@ export const TokenVerificationButton = React.forwardRef<HTMLButtonElement, Token
                 )}
             </button>
         );
-    }
+    },
 );
 
 TokenVerificationButton.displayName = 'TokenVerificationButton';

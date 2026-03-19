@@ -33,7 +33,7 @@ describe('normalizeSearchParams', () => {
                 'amp;cluster': 'devnet',
                 'amp;customUrl': 'https://example.com',
                 view: 'receipt',
-            })
+            }),
         ).toEqual({
             cluster: 'devnet',
             customUrl: 'https://example.com',
@@ -57,7 +57,7 @@ describe('normalizeSearchParams', () => {
                 'amp;cluster': 'devnet',
                 'amp;customUrl': 'https://example.com',
                 'amp;view': 'receipt',
-            })
+            }),
         ).toEqual({
             a: '1',
             b: '2',
@@ -77,7 +77,7 @@ describe('normalizeSearchParams', () => {
                 cluster: 'testnet',
                 customUrl: 'https://correct.com',
                 view: 'receipt',
-            })
+            }),
         ).toEqual({
             cluster: 'testnet',
             customUrl: 'https://correct.com',
@@ -91,7 +91,7 @@ describe('normalizeSearchParams', () => {
                 'amp;bar': 'y',
                 'amp;baz': 'z',
                 'amp;foo': 'x',
-            })
+            }),
         ).toEqual({
             bar: 'y',
             baz: 'z',

@@ -235,7 +235,7 @@ describe('fetchAnsDomains', () => {
             makeTlds([
                 { name: '.abc', parentAccount: parentAbc },
                 { name: '.bonk', parentAccount: parentBonk },
-            ])
+            ]),
         );
 
         const nameAccount1 = PublicKey.unique();

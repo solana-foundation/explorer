@@ -50,7 +50,7 @@ export function ClusterModal() {
 
     return (
         <>
-            <div className={`offcanvas offcanvas-end${show ? ' show' : ''}`}>
+            <div className={`offcanvas offcanvas-end${show ? 'show' : ''}`}>
                 <div className="modal-body" onClick={e => e.stopPropagation()}>
                     <span className="c-pointer" onClick={onClose}>
                         &times;
@@ -115,7 +115,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
             setSaveError(
                 new Error('Not enough storage space to save the cluster. Try removing unused clusters.', {
                     cause: error,
-                })
+                }),
             );
         }
     };

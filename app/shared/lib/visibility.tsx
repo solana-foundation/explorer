@@ -25,7 +25,7 @@ export function VisibilityProvider({ children }: { children: ReactNode }) {
                         }
                     });
                 },
-                { rootMargin: '50px' }
+                { rootMargin: '50px' },
             );
         }
         return observerRef.current;
@@ -42,7 +42,7 @@ export function VisibilityProvider({ children }: { children: ReactNode }) {
                 callbacksRef.current.delete(el);
             };
         },
-        [getObserver]
+        [getObserver],
     );
 
     useEffect(() => {

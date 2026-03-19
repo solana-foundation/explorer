@@ -57,7 +57,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
     });
@@ -94,7 +94,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
     });
@@ -132,7 +132,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/Associated Token Program: Recover Nested/)).toBeInTheDocument();
     });

@@ -75,7 +75,7 @@ export function getTokenProgramInstructionName(ix: ParsedInstruction, signatureI
 export function getTokenInstructionName(
     transactionWithMeta: ParsedTransactionWithMeta,
     ix: ParsedInstruction | PartiallyDecodedInstruction,
-    signatureInfo: ConfirmedSignatureInfo
+    signatureInfo: ConfirmedSignatureInfo,
 ) {
     let name = 'Unknown';
 
@@ -120,7 +120,7 @@ export function getTokenInstructionType(
     transactionWithMeta: ParsedTransactionWithMeta,
     ix: ParsedInstruction | PartiallyDecodedInstruction,
     signatureInfo: ConfirmedSignatureInfo,
-    index: number
+    index: number,
 ): InstructionType | undefined {
     const innerInstructions: (ParsedInstruction | PartiallyDecodedInstruction)[] = [];
 

@@ -49,7 +49,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
             }
             return NextResponse.json(
                 { error: 'Failed to fetch jupiter data' },
-                { headers: NO_STORE_HEADERS, status: response.status }
+                { headers: NO_STORE_HEADERS, status: response.status },
             );
         }
 

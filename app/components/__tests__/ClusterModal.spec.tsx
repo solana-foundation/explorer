@@ -40,7 +40,7 @@ function renderWithStore(initialClusters: SavedCluster[] = []) {
         ...render(
             <Provider store={store}>
                 <ClusterModal />
-            </Provider>
+            </Provider>,
         ),
     };
 }

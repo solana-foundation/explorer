@@ -4,7 +4,7 @@ import { isTokenProgramData, ParsedData, TokenProgramData } from '..';
 
 export default function isMetaplexNFT(
     parsedData?: ParsedData,
-    mintInfo?: MintAccountInfo
+    mintInfo?: MintAccountInfo,
 ): parsedData is TokenProgramData {
     return !!(
         parsedData &&

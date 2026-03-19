@@ -24,7 +24,7 @@ const PopoverContent = React.forwardRef<
                 'data-[state=closed]:e-zoom-out-95 data-[state=open]:e-zoom-in-95',
                 'data-[side=bottom]:e-slide-in-from-top-2 data-[side=left]:e-slide-in-from-right-2',
                 'data-[side=right]:e-slide-in-from-left-2 data-[side=top]:e-slide-in-from-bottom-2',
-                className
+                className,
             )}
             {...props}
         />

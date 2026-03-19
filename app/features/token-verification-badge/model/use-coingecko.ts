@@ -36,7 +36,7 @@ const CoinInfoResultSchema = type({
         price_change_percentage_24h_in_currency: optional(
             type({
                 usd: optional(number()),
-            })
+            }),
         ),
         total_volume: type({
             usd: number(),
@@ -54,7 +54,7 @@ type CoinGeckoSwrKey = ['coingecko', string];
 function getCoinGeckoSwrKey(
     cluster: Cluster,
     coinId: string | undefined,
-    isTabVisible: boolean
+    isTabVisible: boolean,
 ): CoinGeckoSwrKey | null {
     if (coinId === 'solana') {
         return null;

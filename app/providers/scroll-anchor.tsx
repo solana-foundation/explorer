@@ -17,7 +17,7 @@ const ScrollAnchorContext = createContext<RegisterScrollAnchorFn>(
         : // This entire implementation gets disabled if WeakRef is not supported
           () => {
               /* empty */
-          }
+          },
 );
 
 export const ScrollAnchorProvider =
@@ -59,7 +59,7 @@ export const ScrollAnchorProvider =
                       targets.unshift(new WeakRef(element));
                       maybeScroll();
                   },
-                  [maybeScroll]
+                  [maybeScroll],
               );
               useEffect(() => {
                   let distanceScrolled = 0;
@@ -101,6 +101,6 @@ export function useScrollAnchor(key: URLFragment): RefCallback<HTMLElement> {
             }
             registerScrollTarget(key, instance);
         },
-        [key, registerScrollTarget]
+        [key, registerScrollTarget],
     );
 }

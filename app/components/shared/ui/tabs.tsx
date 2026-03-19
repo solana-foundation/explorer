@@ -26,7 +26,7 @@ const TabsTrigger = React.forwardRef<
             'e-px-0 e-py-4',
             'e-text-sm e-font-normal e-text-outer-space-200 data-[state=active]:e-text-white',
             'disabled:e-pointer-events-none disabled:e-cursor-not-allowed disabled:e-opacity-50',
-            className
+            className,
         )}
         {...props}
     />

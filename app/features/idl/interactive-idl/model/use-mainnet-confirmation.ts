@@ -27,7 +27,7 @@ export function useMainnetConfirmation<T = unknown>() {
                 await action();
             }
         },
-        [currentCluster]
+        [currentCluster],
     );
 
     const confirm = useCallback(async () => {

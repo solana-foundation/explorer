@@ -172,7 +172,7 @@ const FilterDropdown = ({ filter }: DropdownProps) => {
                 dropdown.dispose();
             }
         },
-        [dropdownRef]
+        [dropdownRef],
     );
     return (
         <div className="dropdown">
@@ -205,7 +205,7 @@ function FilterLink({ currentFilter, filterOption }: { currentFilter: Filter; fi
         <Link
             key={filterOption || 'null'}
             href={href}
-            className={`dropdown-item${filterOption === currentFilter ? ' active' : ''}`}
+            className={`dropdown-item${filterOption === currentFilter ? 'active' : ''}`}
         >
             {filterTitle(filterOption)}
         </Link>

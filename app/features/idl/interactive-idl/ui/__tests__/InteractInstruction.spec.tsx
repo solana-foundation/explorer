@@ -32,7 +32,7 @@ describe('InteractInstruction', () => {
                     onExecuteInstruction={vi.fn()}
                     isExecuting={false}
                 />
-            </Accordion>
+            </Accordion>,
         );
     };
 

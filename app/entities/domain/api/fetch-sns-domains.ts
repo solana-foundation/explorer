@@ -24,7 +24,7 @@ export async function fetchSnsDomains(address: string): Promise<DomainInfo[] | u
             const hashedName = await getHashedName(name);
             const nameAccountKey = await getNameAccountKey(hashedName, undefined, SOL_TLD_AUTHORITY);
             return { address: nameAccountKey.toBase58(), name: `${name}.sol` };
-        })
+        }),
     );
 }
 

@@ -10,7 +10,7 @@ export function useProgramMetadataSecurityTxt(
     programAddress: string,
     url: string,
     cluster: Cluster,
-    useSuspense = false
+    useSuspense = false,
 ) {
     const { programMetadata } = useProgramCanonicalMetadata(
         programAddress,
@@ -18,7 +18,7 @@ export function useProgramMetadataSecurityTxt(
         url,
         cluster,
         PMP_SECURITY_TXT_ENABLED,
-        useSuspense
+        useSuspense,
     );
     return { programMetadataSecurityTxt: programMetadata };
 }
