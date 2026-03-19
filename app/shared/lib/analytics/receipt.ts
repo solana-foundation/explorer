@@ -6,6 +6,8 @@ export enum ReceiptEvent {
     NoReceipt = 'rcpt_no_receipt',
     NoReceiptAutoRedirect = 'rcpt_no_receipt_auto_redirect',
     ShareCopyLink = 'rcpt_share_copy_link',
+    ShareNative = 'rcpt_share_native',
+    ShareOnX = 'rcpt_share_on_x',
     ViewTxClicked = 'rcpt_view_tx_clicked',
     Viewed = 'rcpt_viewed',
 }

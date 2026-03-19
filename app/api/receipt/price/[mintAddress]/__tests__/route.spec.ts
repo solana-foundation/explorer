@@ -1,19 +1,15 @@
-import * as Sentry from '@sentry/nextjs';
 import fetch from 'node-fetch';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { CACHE_HEADERS, JUPITER_PRICE_ENDPOINT, NO_STORE_HEADERS } from '../config';
 
-vi.mock('@sentry/nextjs', () => ({
-    captureException: vi.fn(),
-    captureMessage: vi.fn(),
-}));
-
-vi.mock('@/app/utils/logger', () => ({
-    default: {
+vi.mock('@/app/shared/lib/logger', () => ({
+    Logger: {
         error: vi.fn(),
+        panic: vi.fn(),
+        warn: vi.fn(),
     },
 }));
 
@@ -62,7 +58,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
     });
 
     describe('Jupiter API errors', () => {
-        it('returns 429 and calls Sentry.captureMessage on rate limit', async () => {
+        it('returns 429 and calls Logger.warn on rate limit', async () => {
             vi.resetModules();
             const { GET } = await import('../route');
             vi.mocked(fetch).mockResolvedValueOnce({ ok: false, status: 429 } as ReturnType<
@@ -74,13 +70,11 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
             const response = await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
 
             expect(response.status).toBe(429);
-            expect(Sentry.captureMessage).toHaveBeenCalledWith('Jupiter price API rate limit exceeded', {
-                level: 'warning',
-            });
+            expect(Logger.warn).toHaveBeenCalledWith('Jupiter price API rate limit exceeded', { sentry: true });
             expect(response.headers.get('Cache-Control')).toBe(NO_STORE_HEADERS['Cache-Control']);
         });
 
-        it('returns 502 and calls Sentry.captureException on non-rate-limit HTTP error', async () => {
+        it('returns 502 and calls Logger.error on non-rate-limit HTTP error', async () => {
             vi.resetModules();
             const { GET } = await import('../route');
             vi.mocked(fetch).mockResolvedValueOnce({ ok: false, status: 503 } as ReturnType<
@@ -92,7 +86,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
             const response = await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
 
             expect(response.status).toBe(502);
-            expect(Sentry.captureException).toHaveBeenCalledWith(new Error('Jupiter price API error: 503'));
+            expect(Logger.error).toHaveBeenCalledWith(new Error('Jupiter price API error: 503'), { sentry: true });
             expect(response.headers.get('Cache-Control')).toBe(NO_STORE_HEADERS['Cache-Control']);
         });
     });
@@ -114,7 +108,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
             expect(response.headers.get('Cache-Control')).toBe(NO_STORE_HEADERS['Cache-Control']);
         });
 
-        it('logs and captures the error in Sentry on schema mismatch', async () => {
+        it('logs and captures the error on schema mismatch', async () => {
             vi.resetModules();
             const { GET } = await import('../route');
             vi.mocked(fetch).mockResolvedValueOnce({
@@ -125,8 +119,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
             await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
 
             const expectedErr = new Error(`Jupiter price API returned unexpected schema for ${VALID_MINT}`);
-            expect(Logger.error).toHaveBeenCalledWith(expectedErr);
-            expect(Sentry.captureException).toHaveBeenCalledWith(expectedErr);
+            expect(Logger.error).toHaveBeenCalledWith(expectedErr, { sentry: true });
         });
     });
 
@@ -162,7 +155,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
     });
 
     describe('fetch exception', () => {
-        it('returns 500 and logs/captures in Sentry on unexpected error', async () => {
+        it('returns 500 and calls Logger.panic on unexpected error', async () => {
             vi.resetModules();
             const { GET } = await import('../route');
             const error = new Error('Network failure');
@@ -173,8 +166,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
             expect(response.status).toBe(500);
             const data = await response.json();
             expect(data).toEqual({ error: 'Failed to fetch price data' });
-            expect(Logger.error).toHaveBeenCalledWith(new Error('Jupiter price API error', { cause: error }));
-            expect(Sentry.captureException).toHaveBeenCalledWith(error);
+            expect(Logger.panic).toHaveBeenCalledWith(new Error('Jupiter price API error', { cause: error }));
             expect(response.headers.get('Cache-Control')).toBe(NO_STORE_HEADERS['Cache-Control']);
         });
     });

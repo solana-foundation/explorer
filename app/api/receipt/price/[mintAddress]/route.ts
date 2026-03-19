@@ -1,10 +1,9 @@
-import * as Sentry from '@sentry/nextjs';
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import fetch from 'node-fetch';
 import { is, number, refine, type } from 'superstruct';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { CACHE_HEADERS, JUPITER_PRICE_ENDPOINT, NO_STORE_HEADERS } from './config';
 
@@ -43,9 +42,9 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
 
         if (!response.ok) {
             if (response.status === 429) {
-                Sentry.captureMessage('Jupiter price API rate limit exceeded', { level: 'warning' });
+                Logger.warn('Jupiter price API rate limit exceeded', { sentry: true });
             } else {
-                Sentry.captureException(new Error(`Jupiter price API error: ${response.status}`));
+                Logger.error(new Error(`Jupiter price API error: ${response.status}`), { sentry: true });
             }
             return NextResponse.json(
                 { error: 'Failed to fetch price data' },
@@ -58,15 +57,13 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
 
         if (!is(token, JupiterPriceTokenSchema)) {
             const err = new Error(`Jupiter price API returned unexpected schema for ${mintAddress}`);
-            Logger.error(err);
-            Sentry.captureException(err);
+            Logger.error(err, { sentry: true });
             return NextResponse.json({ price: null }, { headers: NO_STORE_HEADERS });
         }
 
         return NextResponse.json({ price: token.usdPrice }, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.error(new Error('Jupiter price API error', { cause: error }));
-        Sentry.captureException(error);
+        Logger.panic(new Error('Jupiter price API error', { cause: error }));
         return NextResponse.json({ error: 'Failed to fetch price data' }, { headers: NO_STORE_HEADERS, status: 500 });
     }
 }
