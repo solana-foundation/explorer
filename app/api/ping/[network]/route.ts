@@ -1,8 +1,7 @@
-import * as Sentry from '@sentry/nextjs';
 import { NextResponse } from 'next/server';
 import fetch from 'node-fetch';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 type Params = {
     params: {
@@ -53,8 +52,7 @@ export async function GET(_request: Request, { params: { network } }: Params) {
         return NextResponse.json(data, { headers: CACHE_HEADERS });
     } catch (error) {
         const wrappedError = new Error('Ping API error', { cause: error });
-        Logger.error(wrappedError);
-        Sentry.captureException(wrappedError);
+        Logger.error(wrappedError, { sentry: true });
         return NextResponse.json(
             { error: 'Failed to fetch ping data' },
             { headers: { 'Cache-Control': 'no-store, max-age=0' }, status: 500 }
