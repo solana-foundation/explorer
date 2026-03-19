@@ -34,6 +34,13 @@ describe('GET /api/program-metadata-idl', () => {
         }
     });
 
+    it('should return 400 for an invalid program address', async () => {
+        const { GET } = await importRoute();
+        const res = await GET(createRequest('not-a-pubkey', Cluster.MainnetBeta, 'idl'));
+        expect(res.status).toBe(400);
+        expect(await res.json()).toEqual({ error: 'Invalid program address' });
+    });
+
     it('should return 400 for an invalid cluster', async () => {
         const { GET } = await importRoute();
         const res = await GET(createRequest(mockAddress, 999 as Cluster, 'idl'));

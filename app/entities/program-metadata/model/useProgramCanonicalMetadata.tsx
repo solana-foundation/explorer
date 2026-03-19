@@ -61,15 +61,7 @@ export function useProgramCanonicalMetadata(
                 );
                 if (response.ok) {
                     const data = await response.json();
-                    const { details, programMetadata } = data;
-
-                    // In case of 403, we have ok response but it contains {details: {error: string}} data
-                    if (details?.error) {
-                        Logger.error(new Error('[program-metadata] API returned error'), { error: details.error });
-                        return null;
-                    }
-
-                    return programMetadata || null;
+                    return data.programMetadata || null;
                 }
 
                 return null;

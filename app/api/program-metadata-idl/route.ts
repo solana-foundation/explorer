@@ -1,4 +1,5 @@
-import { isSolanaError, SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND, SolanaErrorCode } from '@solana/kit';
+import { isSolanaError, SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND, type SolanaErrorCode } from '@solana/kit';
+import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 
 import { errors, getMetadataEndpointUrl, getProgramCanonicalMetadata } from '@/app/entities/program-metadata/server';
@@ -22,6 +23,12 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Invalid query params' }, { status: 400 });
     }
 
+    try {
+        new PublicKey(programAddress);
+    } catch {
+        return NextResponse.json({ error: 'Invalid program address' }, { status: 400 });
+    }
+
     const url = getMetadataEndpointUrl(Number(clusterProp));
     if (!url) {
         return NextResponse.json({ error: 'Invalid cluster' }, { status: 400 });
@@ -39,8 +46,7 @@ export async function GET(request: Request) {
         );
     } catch (error) {
         // Handle expected Solana errors (like metadata not found) gracefully
-        if (error instanceof Error && isExpectedSolanaError(error)) {
-            // Return null IDL if error is expected
+        if (isExpectedSolanaError(error)) {
             return NextResponse.json(
                 { programMetadata: null },
                 {
@@ -48,12 +54,9 @@ export async function GET(request: Request) {
                     status: 200,
                 }
             );
-        } else if (error instanceof Error && isSolanaError(error)) {
-            Logger.error(error);
-        } else {
-            Logger.error(new Error('[api:program-metadata-idl] Request failed', { cause: error }));
         }
 
+        Logger.error(new Error('[api:program-metadata-idl] Request failed', { cause: error }));
         return NextResponse.json({ error: errors[500] }, { status: 502 });
     }
 }
@@ -61,14 +64,8 @@ export async function GET(request: Request) {
 /**
  * Check that provided error is a proper SolanaError and has the specific code
  */
-function isExpectedSolanaError(error: Error) {
-    let result = false;
-    EXPECTED_SOLANA_ERRORS.forEach(errorCode => {
-        if (isSolanaError<typeof errorCode>(error) && error.context.__code === errorCode) {
-            result = true;
-            return;
-        }
-    });
-
-    return result;
+function isExpectedSolanaError(error: unknown) {
+    return EXPECTED_SOLANA_ERRORS.some(
+        errorCode => isSolanaError<typeof errorCode>(error) && error.context.__code === errorCode
+    );
 }
