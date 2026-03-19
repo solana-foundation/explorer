@@ -115,7 +115,8 @@ export function TransactionHistoryCard({ address }: { address: string }) {
 
 function TransactionRawDataDownloadField({ signature }: { signature: string }) {
     const fetchRaw = useFetchRawTransaction();
-    const transactionData = useRawTransactionDetails(signature)?.data?.raw?.message.serialize() || null;
+    const serialized = useRawTransactionDetails(signature)?.data?.raw?.message.serialize();
+    const transactionData = useMemo(() => serialized && new Uint8Array(serialized), [serialized]);
 
     const handleHover = useCallback(() => {
         if (!transactionData) {

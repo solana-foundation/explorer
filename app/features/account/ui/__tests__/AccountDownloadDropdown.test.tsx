@@ -9,7 +9,7 @@ const mockRawData: Buffer | null = null;
 let mockIsLoading = false;
 
 vi.mock('@entities/account', () => ({
-    useRawAccountData: () => ({ data: mockRawData, mutate: mockMutate, isLoading: mockIsLoading }),
+    useRawAccountData: () => ({ data: mockRawData, isLoading: mockIsLoading, mutate: mockMutate }),
 }));
 
 vi.mock('@/app/shared/components/DownloadDropdown', () => ({
