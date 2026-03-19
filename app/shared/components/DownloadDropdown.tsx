@@ -1,6 +1,7 @@
 'use client';
 
-import { type ByteArray, encodeTransactionData, type EncodingFormat } from '@entities/transaction-data';
+// TODO: encodeTransactionData is generic byte encoding — move to a shared entity (e.g. @shared/bytes)
+import { type ByteArray, encodeTransactionData as encodeBytes, type EncodingFormat } from '@entities/transaction-data';
 import { Button } from '@shared/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@shared/ui/dropdown-menu';
 import React from 'react';
@@ -57,6 +58,6 @@ export function DownloadDropdown({
 }
 
 function handleDownload(data: ByteArray, encoding: EncodingFormat, filename: string) {
-    const encoded = encodeTransactionData(data, encoding);
+    const encoded = encodeBytes(data, encoding);
     triggerDownloadText(encoded, `${filename}_${encoding}.txt`);
 }
