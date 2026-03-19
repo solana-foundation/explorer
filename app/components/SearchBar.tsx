@@ -18,6 +18,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import FEATURES from '@/app/utils/feature-gate/featureGates.json';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
+import { parseExternalExplorerUrl } from '../utils/external-explorer-url';
 import { FeatureInfoType } from '../utils/feature-gate/types';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
 import { searchTokens } from '../utils/token-search';
@@ -44,17 +45,19 @@ export function SearchBar() {
             setSearch('');
             return;
         }
-        const { pathname } = option;
+        const { pathname, preserveSearchParams } = option;
         if (meta.action === 'select-option') {
             // Always use the pathname directly if it contains query params
             if (pathname.includes('?')) {
                 const [path, currentSearchParamsString] = pathname.split('?');
-                // break pathname to preserve existing params and allow to keep same cluster
-                const nextPath = pickClusterParams(
-                    path,
-                    new URLSearchParams(currentSearchParamsString),
-                    new URLSearchParams(`cluster=${clusterSlug(cluster)}`)
-                );
+                const pathnameParams = new URLSearchParams(currentSearchParamsString);
+                const currentClusterParams = new URLSearchParams(`cluster=${clusterSlug(cluster)}`);
+
+                // When preserveSearchParams is set (external explorer URLs), the pathname's
+                // params take priority over the current cluster context.
+                const nextPath = preserveSearchParams
+                    ? pickClusterParams(path, currentClusterParams, pathnameParams)
+                    : pickClusterParams(path, pathnameParams, currentClusterParams);
                 router.push(nextPath);
             } else {
                 // Only preserve existing query params for paths without their own params
@@ -309,6 +312,11 @@ function buildFeatureGateOptions(search: string) {
 function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint) {
     const search = rawSearch.trim();
     if (search.length === 0) return [];
+
+    const externalUrl = parseExternalExplorerUrl(search);
+    if (externalUrl) {
+        return [{ label: 'External Explorer', options: [externalUrl] }];
+    }
 
     const options = [];
 

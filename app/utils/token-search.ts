@@ -32,6 +32,12 @@ export type SearchElement = {
     label: string;
     value: string[];
     pathname: string;
+    /**
+     * When true, the pathname's query params take priority over the
+     * current cluster context. Used for external explorer URLs that
+     * carry their own cluster (e.g. ?cluster=devnet).
+     */
+    preserveSearchParams?: boolean;
 };
 
 export async function searchTokens(search: string, cluster: Cluster): Promise<SearchElement[]> {
