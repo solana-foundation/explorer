@@ -7,7 +7,7 @@ import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 
 export function AccountDownloadDropdown({ pubkey, space }: { pubkey: PublicKey; space?: number }) {
     const address = pubkey.toBase58();
-    const { data: rawData, mutate, isLoading } = useRawAccountData(address);
+    const { data: rawData, error, mutate, isLoading } = useRawAccountData(address);
 
     if (space === 0) return null;
 
@@ -15,6 +15,7 @@ export function AccountDownloadDropdown({ pubkey, space }: { pubkey: PublicKey; 
         <DownloadDropdown
             data={rawData}
             loading={isLoading}
+            error={error}
             filename={address}
             onOpenChange={open => open && mutate()}
         />
