@@ -93,10 +93,16 @@ describe('parseExternalExplorerUrl', () => {
             expect(result?.preserveSearchParams).toBe(true);
         });
 
-        it('omits mainnet-beta cluster (default) and does not set preserveSearchParams', () => {
+        it('omits mainnet-beta cluster param from pathname (default) but does not set preserveSearchParams', () => {
             const result = parseExternalExplorerUrl(`https://solscan.io/account/${ADDR}`);
             expect(result?.pathname).toBe(`/address/${ADDR}`);
             expect(result?.preserveSearchParams).toBeUndefined();
+        });
+
+        it('sets preserveSearchParams for explicit mainnet-beta cluster to override current cluster', () => {
+            const result = parseExternalExplorerUrl(`https://solscan.io/account/${ADDR}?cluster=mainnet-beta`);
+            expect(result?.pathname).toBe(`/address/${ADDR}`);
+            expect(result?.preserveSearchParams).toBe(true);
         });
 
         it('ignores unknown cluster values and does not set preserveSearchParams', () => {

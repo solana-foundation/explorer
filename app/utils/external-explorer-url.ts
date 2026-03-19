@@ -78,8 +78,8 @@ export function parseExternalExplorerUrl(input: string): SearchElement | null {
         // Build local pathname, optionally with cluster param
         let pathname = `${route.localPrefix}/${identifier}`;
         const cluster = url.searchParams.get('cluster');
-        const hasNonDefaultCluster = cluster !== null && KNOWN_CLUSTERS.has(cluster) && cluster !== 'mainnet-beta';
-        if (hasNonDefaultCluster) {
+        const hasExplicitCluster = cluster !== null && KNOWN_CLUSTERS.has(cluster);
+        if (hasExplicitCluster && cluster !== 'mainnet-beta') {
             pathname += `?cluster=${cluster}`;
         }
 
@@ -87,7 +87,7 @@ export function parseExternalExplorerUrl(input: string): SearchElement | null {
             label: identifier,
             pathname,
             value: [input, identifier],
-            ...(hasNonDefaultCluster ? { preserveSearchParams: true } : {}),
+            ...(hasExplicitCluster ? { preserveSearchParams: true } : {}),
         };
     }
 
