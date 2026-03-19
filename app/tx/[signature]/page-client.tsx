@@ -278,7 +278,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                         <span className="d-none d-md-inline">Refresh</span>
                     </Button>
                 )}
-                <DownloadDropdown filename={signature} data={rawDetails?.data?.raw?.message.serialize() || null} />
+                <DownloadDropdown filename={signature} data={rawDetails?.data?.raw?.message.serialize()} />
             </div>
 
             <TableCardBody>
