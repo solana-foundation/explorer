@@ -56,10 +56,12 @@ export function DownloadableDropdown({
     data,
     encodings = ['hex', 'base58', 'base64'],
     filename,
+    iconButton = false,
 }: {
     filename: string;
     data: ByteArray | null;
     encodings?: EncodingFormat[];
+    iconButton?: boolean;
 }) {
     const dropdownRef = createRef<HTMLButtonElement>();
     const dropdownOptions = useMemo(
@@ -77,13 +79,14 @@ export function DownloadableDropdown({
                 <Button
                     variant="outline"
                     size="sm"
+                    className={iconButton ? 'e-border-none e-px-2' : ''}
                     ref={dropdownRef}
                     data-bs-toggle="dropdown"
                     type="button"
                     aria-label="Download"
                 >
                     <Download size={12} />
-                    <span className="d-none d-md-inline">Download</span>
+                    {!iconButton && <span className="d-none d-md-inline">Download</span>}
                 </Button>
                 <div className="dropdown-menu-end dropdown-menu e-z-10">
                     <div className="d-flex e-flex-col">

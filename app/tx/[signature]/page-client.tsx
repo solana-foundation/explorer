@@ -36,7 +36,7 @@ import bs58 from 'bs58';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
-import { RefreshCw, Settings } from 'react-feather';
+import { RefreshCw, ZoomIn } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
 import { AccountsCard } from '@/app/components/transaction/AccountsCard';
@@ -266,7 +266,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                 />
                 <Button variant="outline" size="sm" asChild aria-label="Inspect">
                     <Link href={inspectPath}>
-                        <Settings size={12} />
+                        <ZoomIn size={12} />
                         <span className="d-none d-md-inline">Inspect</span>
                     </Link>
                 </Button>
@@ -430,13 +430,13 @@ function DetailsSection({ signature }: SignatureProps) {
 
     return (
         <>
-            <CUProfilingSection signature={signature} />
             <Suspense fallback={<LoadingCard message="Loading accounts" />}>
                 <AccountsCard signature={signature} />
             </Suspense>
             <TokenBalancesCard signature={signature} />
             <InstructionsSection signature={signature} />
             <ProgramLogSection signature={signature} />
+            <CUProfilingSection signature={signature} />
         </>
     );
 }

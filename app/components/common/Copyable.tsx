@@ -5,7 +5,7 @@ import { CheckCircle, Copy, Loader, XCircle } from 'react-feather';
 
 import { type CopyState, useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
-export function Copyable({ text, children }: { text: string | null; children: ReactNode }) {
+export function Copyable({ text, children }: { text: string | null; children?: ReactNode }) {
     const [clipboardState, copy] = useCopyToClipboard(1000);
     const [loading, setLoading] = useState(false);
 

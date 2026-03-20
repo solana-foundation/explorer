@@ -58,7 +58,7 @@ export function HexData({
             <div className={cn('d-none d-lg-flex align-items-center justify-content-end', className)}>
                 <Content />
             </div>
-            <div className="d-flex d-lg-none align-items-center">
+            <div className={cn('d-flex d-lg-none align-items-center', className)}>
                 <Content />
             </div>
         </>
