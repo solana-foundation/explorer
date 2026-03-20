@@ -3,12 +3,13 @@ import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
 const CACHE_DURATION = 60 * 60; // 60 minutes
 
 const CACHE_HEADERS = {
-    'Cache-Control': `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=60`,
+    'Cache-Control': `public, max-age=${CACHE_DURATION}, s-maxage=${CACHE_DURATION}, stale-while-revalidate=60`,
 };
 
 export async function GET(request: Request) {
@@ -26,7 +27,13 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Invalid cluster' }, { status: 400 });
     }
 
-    const programId = new PublicKey(programAddress);
+    let programId: PublicKey;
+    try {
+        programId = new PublicKey(programAddress);
+    } catch {
+        return NextResponse.json({ error: 'Invalid program address' }, { status: 400 });
+    }
+
     try {
         const provider = new AnchorProvider(new Connection(url), new NodeWallet(Keypair.generate()), {});
         const idl = await Program.fetchIdl<Idl>(programId, provider);
@@ -38,12 +45,7 @@ export async function GET(request: Request) {
             }
         );
     } catch (error) {
-        return NextResponse.json(
-            { details: error, error: error instanceof Error ? error.message : 'Unknown error' },
-            {
-                headers: CACHE_HEADERS,
-                status: 200,
-            }
-        );
+        Logger.error(new Error('[api:anchor] Failed to fetch IDL', { cause: error }));
+        return NextResponse.json({ error: 'Failed to fetch IDL' }, { status: 502 });
     }
 }
