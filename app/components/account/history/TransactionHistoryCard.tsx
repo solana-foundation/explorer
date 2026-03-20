@@ -115,8 +115,10 @@ export function TransactionHistoryCard({ address }: { address: string }) {
 
 function TransactionRawDataDownloadField({ signature }: { signature: string }) {
     const fetchRaw = useFetchRawTransaction();
-    const serialized = useRawTransactionDetails(signature)?.data?.raw?.message.serialize();
+    const rawDetails = useRawTransactionDetails(signature);
+    const serialized = rawDetails?.data?.raw?.message.serialize();
     const transactionData = useMemo(() => serialized && new Uint8Array(serialized), [serialized]);
+    const loading = rawDetails?.status === FetchStatus.Fetching;
 
     const handleHover = useCallback(() => {
         if (!transactionData) {
@@ -127,7 +129,7 @@ function TransactionRawDataDownloadField({ signature }: { signature: string }) {
     return (
         <div className="d-flex align-items-center gap-1" onMouseEnter={handleHover}>
             <Copyable text={transactionData ? toBase64(transactionData) : null}>
-                <DownloadDropdown data={transactionData} filename={signature} />
+                <DownloadDropdown data={transactionData} loading={loading} filename={signature} />
             </Copyable>
         </div>
     );
