@@ -77,10 +77,10 @@ export function AccountsCard({ signature }: SignatureProps) {
                                 <span>{accountInfo.size.toLocaleString('en-US')}</span>
                             </div>
                         ) : (
-                            <span>{accountInfo.size.toLocaleString('en-US')}</span>
+                            <span className='e-ml-7'>{accountInfo.size.toLocaleString('en-US')}</span>
                         )
                     ) : (
-                        <span className="text-muted">-</span>
+                        <span className="text-muted e-ml-7">-</span>
                     )}
                 </td>
                 <td>
@@ -150,7 +150,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                                             </p>
                                         </td>
                                         <td>
-                                            <span className="text-white">
+                                            <span className="text-white e-ml-7">
                                                 {totalAccountSize.toLocaleString('en-US')}
                                             </span>
                                         </td>
