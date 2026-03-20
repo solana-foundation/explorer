@@ -59,6 +59,10 @@ export function SearchBar() {
                     ? pickClusterParams(path, currentClusterParams, pathnameParams)
                     : pickClusterParams(path, pathnameParams, currentClusterParams);
                 router.push(nextPath);
+            } else if (preserveSearchParams) {
+                // External explorer URL without cluster suffix (mainnet default) —
+                // navigate directly without inheriting current cluster context.
+                router.push(pathname);
             } else {
                 // Only preserve existing query params for paths without their own params
                 const nextQueryString = searchParams?.toString();

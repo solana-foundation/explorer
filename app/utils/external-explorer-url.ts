@@ -68,7 +68,10 @@ export function parseExternalExplorerUrl(input: string): SearchElement | null {
         }
 
         const entityType = segments[1];
-        const identifier = segments[2];
+        const identifier = decodeURIComponent(segments[2]).trim();
+        if (!identifier || identifier.includes('/')) {
+            return null;
+        }
 
         const route = explorer.routes.find(r => r.sourcePrefix === entityType);
         if (!route) {
@@ -78,16 +81,16 @@ export function parseExternalExplorerUrl(input: string): SearchElement | null {
         // Build local pathname, optionally with cluster param
         let pathname = `${route.localPrefix}/${identifier}`;
         const cluster = url.searchParams.get('cluster');
-        const hasExplicitCluster = cluster !== null && KNOWN_CLUSTERS.has(cluster);
-        if (hasExplicitCluster && cluster !== 'mainnet-beta') {
+        const isNonDefaultCluster = cluster !== null && KNOWN_CLUSTERS.has(cluster) && cluster !== 'mainnet-beta';
+        if (isNonDefaultCluster) {
             pathname += `?cluster=${cluster}`;
         }
 
         return {
             label: identifier,
             pathname,
+            preserveSearchParams: true,
             value: [input, identifier],
-            ...(hasExplicitCluster ? { preserveSearchParams: true } : {}),
         };
     }
 
