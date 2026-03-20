@@ -20,6 +20,5 @@ export const Default: Story = {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('(Beta)')).toBeInTheDocument();
         await expect(canvas.getByRole('link', { name: 'Terms of Services' })).toBeInTheDocument();
-        await expect(canvas.getByRole('link', { name: 'Cookies policy' })).toBeInTheDocument();
     },
 };

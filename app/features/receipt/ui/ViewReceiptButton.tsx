@@ -5,6 +5,7 @@ import { ParsedTransactionWithMeta } from '@solana/web3.js';
 import Link from 'next/link';
 import useSWR from 'swr';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 
 import { isReceiptEnabled } from '../env';
@@ -33,12 +34,10 @@ export function ViewReceiptButton({ signature, receiptPath, transactionWithMeta 
     }
 
     return (
-        <Link
-            className="btn btn-white btn-sm me-2"
-            href={receiptPath}
-            onClick={() => receiptAnalytics.trackButtonClicked(signature)}
-        >
-            View Receipt
-        </Link>
+        <Button variant="outline" size="sm" asChild>
+            <Link href={receiptPath} onClick={() => receiptAnalytics.trackButtonClicked(signature)}>
+                View Receipt
+            </Link>
+        </Button>
     );
 }

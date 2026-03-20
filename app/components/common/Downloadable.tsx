@@ -83,9 +83,10 @@ export function DownloadableDropdown({
                     ref={dropdownRef}
                     data-bs-toggle="dropdown"
                     type="button"
+                    aria-label="Download"
                 >
                     <Download size={12} />
-                    {!iconButton && 'Download'}
+                    {!iconButton && <span className="d-none d-md-inline">Download</span>}
                 </Button>
                 <div className="dropdown-menu-end dropdown-menu e-z-10">
                     <div className="d-flex e-flex-col">
