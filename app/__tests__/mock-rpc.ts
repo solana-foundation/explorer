@@ -1,10 +1,9 @@
 import { vi } from 'vitest';
 
+import { gen } from '@/app/__fixtures__/gen';
 import { GENESIS_HASHES } from '@/app/entities/chain-id';
 import type { ClusterInfo } from '@/app/providers/cluster';
 import type { EpochSchedule } from '@/app/utils/epoch-schedule';
-
-import { gen } from '@/app/__fixtures__/gen';
 
 interface EpochInfo {
     absoluteSlot: bigint;
