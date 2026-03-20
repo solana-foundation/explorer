@@ -4,6 +4,8 @@ import { GENESIS_HASHES } from '@/app/entities/chain-id';
 import type { ClusterInfo } from '@/app/providers/cluster';
 import type { EpochSchedule } from '@/app/utils/epoch-schedule';
 
+import { gen } from '@/app/__fixtures__/gen';
+
 interface EpochInfo {
     absoluteSlot: bigint;
     blockHeight: bigint;
@@ -13,24 +15,24 @@ interface EpochInfo {
 }
 
 export const mockEpochInfo = (overrides?: Partial<EpochInfo>): EpochInfo => ({
-    absoluteSlot: 0n,
-    blockHeight: 0n,
-    epoch: 0n,
-    slotIndex: 0n,
+    absoluteSlot: gen.slot(),
+    blockHeight: gen.blockHeight(),
+    epoch: gen.epoch(),
+    slotIndex: gen.bigint(432_000n),
     slotsInEpoch: 432_000n,
     ...overrides,
 });
 
 export const mockEpochSchedule = (overrides?: Partial<EpochSchedule>): EpochSchedule => ({
-    firstNormalEpoch: 0n,
-    firstNormalSlot: 0n,
+    firstNormalEpoch: gen.epoch(),
+    firstNormalSlot: gen.slot(),
     slotsPerEpoch: 432_000n,
     ...overrides,
 });
 
 export const mockGenesisHash = (hash?: string): string => hash ?? GENESIS_HASHES.MAINNET;
 
-export const mockFirstAvailableBlock = (block?: bigint): bigint => block ?? 0n;
+export const mockFirstAvailableBlock = (block?: bigint): bigint => block ?? gen.slot();
 
 /** Creates a mock RPC object matching the shape returned by createSolanaRpc() */
 export const mockSolanaRpc = (overrides?: Partial<ClusterInfo>) => ({
