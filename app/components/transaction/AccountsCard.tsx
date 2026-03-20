@@ -1,6 +1,5 @@
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
-import { Copyable } from '@components/common/Copyable';
 import { DownloadableDropdown } from '@components/common/Downloadable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { HexData } from '@components/common/HexData';
@@ -14,7 +13,7 @@ import { BigNumber } from 'bignumber.js';
 import React, { useMemo, useState } from 'react';
 import { Code } from 'react-feather';
 
-import { ByteArray, toHex } from '@/app/shared/lib/bytes';
+import { ByteArray } from '@/app/shared/lib/bytes';
 
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
@@ -51,8 +50,6 @@ export function AccountsCard({ signature }: SignatureProps) {
         const key = pubkey.toBase58();
         const delta = new BigNumber(post).minus(new BigNumber(pre));
         const accountInfo = accounts.get(key);
-        const hexData = accountInfo ? toHex(accountInfo.data) : null;
-
         return (
             <tr key={key}>
                 <td>{index + 1}</td>
@@ -71,9 +68,13 @@ export function AccountsCard({ signature }: SignatureProps) {
                     ) : accountInfo ? (
                         accountInfo.size > 0 ? (
                             <div className="e-flex e-items-center">
-                                <span className="e-mr-3">{accountInfo.size.toLocaleString('en-US')}</span>
-                                <Copyable text={hexData} />
-                                <DownloadableDropdown data={accountInfo.data} filename={key} iconButton />
+                                <DownloadableDropdown
+                                    data={accountInfo.data}
+                                    encodings={['hex', 'base64']}
+                                    filename={key}
+                                    iconButton
+                                />
+                                <span>{accountInfo.size.toLocaleString('en-US')}</span>
                             </div>
                         ) : (
                             <span>{accountInfo.size.toLocaleString('en-US')}</span>
@@ -116,13 +117,6 @@ export function AccountsCard({ signature }: SignatureProps) {
                     {expanded ? 'Collapse' : 'Expand'}
                 </button>
             </div>
-            {expanded && (
-                <div className="px-4 py-2 border-bottom">
-                    <small className="text-muted">
-                        Account data is fetched at the current time and may differ from the state at transaction time.
-                    </small>
-                </div>
-            )}
             {expanded &&
                 (showRaw ? (
                     <div className="card-body">
@@ -145,7 +139,11 @@ export function AccountsCard({ signature }: SignatureProps) {
                             {totalAccountSize > 0 && (
                                 <tfoot>
                                     <tr>
-                                        <td colSpan={3} />
+                                        <td colSpan={3} className="align-bottom">
+                                            <p className="text-muted e-m-0 e-text-right e-text-[0.625rem]">
+                                                reflects current account state
+                                            </p>
+                                        </td>
                                         <td className="align-bottom">
                                             <p className="text-muted e-m-0 e-text-[0.625rem] e-uppercase">
                                                 Total Account Size:
@@ -219,7 +217,6 @@ function DataRow({
 }) {
     const [isDataVisible, setIsDataVisible] = useState(false);
 
-    const hexData = useMemo(() => (data && data.length > 0 ? toHex(data) : null), [data]);
     const isTruncated = data && data.length > MAX_DISPLAY_BYTES;
     const displayData = data && isTruncated ? data.slice(0, MAX_DISPLAY_BYTES) : data;
 
@@ -237,11 +234,12 @@ function DataRow({
                         </div>
 
                         <div className="d-flex align-items-center gap-2">
-                            {data?.length && (
-                                <>
-                                    <Copyable text={hexData} />
-                                    <DownloadableDropdown data={data} filename={account.pubkey.toBase58()} />
-                                </>
+                            {!!data?.length && (
+                                <DownloadableDropdown
+                                    data={data}
+                                    encodings={['hex', 'base64']}
+                                    filename={account.pubkey.toBase58()}
+                                />
                             )}
                             <button
                                 className={`btn btn-sm d-flex ${isDataVisible ? 'btn-black active' : 'btn-white'}`}
@@ -253,12 +251,12 @@ function DataRow({
                     </div>
 
                     {isDataVisible && (
-                        <div className="e-items-end e-text-end">
+                        <div className="md:e-items-end xl:e-text-end">
                             {displayData && displayData.length > 0 ? (
                                 <>
                                     <HexData raw={displayData} copyableRaw={data} className="!e-items-baseline" />
                                     {isTruncated && (
-                                        <span className="text-muted e-mt-1 e-text-xs">
+                                        <span className="text-muted e-ml-5 e-mt-1 e-text-xs xl:e-ml-0">
                                             Showing first {MAX_DISPLAY_BYTES.toLocaleString()} of{' '}
                                             {data.length.toLocaleString()} bytes
                                         </span>
