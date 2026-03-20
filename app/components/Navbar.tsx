@@ -18,12 +18,14 @@ export function Navbar({ children }: INavbarProps) {
     const [navOpened, navHandlers] = useDisclosure(false);
     const homePath = useClusterPath({ pathname: '/' });
     const featureGatesPath = useClusterPath({ pathname: '/feature-gates' });
-    const tosPath = useClusterPath({ pathname: '/tos' });
     const supplyPath = useClusterPath({ pathname: '/supply' });
     const programsPath = useClusterPath({ pathname: '/verified-programs' });
     const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const selectedLayoutSegments = useSelectedLayoutSegments();
+
+    const linkClass = (active: boolean) => `nav-link${active ? ' active' : ''}`;
+
     return (
         <nav className="navbar navbar-expand-lg navbar-light">
             <div className="container px-4">
@@ -46,23 +48,20 @@ export function Navbar({ children }: INavbarProps) {
                     <ul className="navbar-nav me-auto">
                         <li className="nav-item">
                             <Link
-                                className={`nav-link${selectedLayoutSegment === 'feature-gates' ? ' active' : ''}`}
+                                className={linkClass(selectedLayoutSegment === 'feature-gates')}
                                 href={featureGatesPath}
                             >
                                 Feature Gates
                             </Link>
                         </li>
                         <li className="nav-item">
-                            <Link
-                                className={`nav-link${selectedLayoutSegment === 'supply' ? ' active' : ''}`}
-                                href={supplyPath}
-                            >
+                            <Link className={linkClass(selectedLayoutSegment === 'supply')} href={supplyPath}>
                                 Supply
                             </Link>
                         </li>
                         <li className="nav-item">
                             <Link
-                                className={`nav-link${selectedLayoutSegment === 'programs' ? ' active' : ''}`}
+                                className={linkClass(selectedLayoutSegment === 'verified-programs')}
                                 href={programsPath}
                             >
                                 Programs
@@ -70,22 +69,12 @@ export function Navbar({ children }: INavbarProps) {
                         </li>
                         <li className="nav-item">
                             <Link
-                                className={`nav-link${
+                                className={linkClass(
                                     selectedLayoutSegments[0] === 'tx' && selectedLayoutSegments[1] === '(inspector)'
-                                        ? ' active'
-                                        : ''
-                                }`}
+                                )}
                                 href={inspectorPath}
                             >
                                 Inspector
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link
-                                className={`nav-link${selectedLayoutSegment === 'tos' ? ' active' : ''}`}
-                                href={tosPath}
-                            >
-                                ToS
                             </Link>
                         </li>
                         <li className="nav-item align-items-center justify-content-center pt-2">

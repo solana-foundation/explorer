@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
-import { Copyable } from '@components/common/Copyable';
+import { DownloadableDropdown } from '@components/common/Downloadable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { HexData } from '@components/common/HexData';
 import { SolBalance } from '@components/common/SolBalance';
@@ -13,7 +13,7 @@ import { BigNumber } from 'bignumber.js';
 import React, { useMemo, useState } from 'react';
 import { Code } from 'react-feather';
 
-import { ByteArray, toHex } from '@/app/shared/lib/bytes';
+import { ByteArray } from '@/app/shared/lib/bytes';
 
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
@@ -50,8 +50,6 @@ export function AccountsCard({ signature }: SignatureProps) {
         const key = pubkey.toBase58();
         const delta = new BigNumber(post).minus(new BigNumber(pre));
         const accountInfo = accounts.get(key);
-        const hexData = accountInfo ? toHex(accountInfo.data) : null;
-
         return (
             <tr key={key}>
                 <td>{index + 1}</td>
@@ -68,11 +66,21 @@ export function AccountsCard({ signature }: SignatureProps) {
                     {loading ? (
                         <span className="text-muted">Loading...</span>
                     ) : accountInfo ? (
-                        <Copyable text={hexData}>
-                            <span>{accountInfo.size.toLocaleString('en-US')}</span>
-                        </Copyable>
+                        accountInfo.size > 0 ? (
+                            <div className="e-flex e-items-center">
+                                <DownloadableDropdown
+                                    data={accountInfo.data}
+                                    encodings={['hex', 'base64']}
+                                    filename={key}
+                                    iconButton
+                                />
+                                <span>{accountInfo.size.toLocaleString('en-US')}</span>
+                            </div>
+                        ) : (
+                            <span className="e-ml-7">{accountInfo.size.toLocaleString('en-US')}</span>
+                        )
                     ) : (
-                        <span className="text-muted">-</span>
+                        <span className="text-muted e-ml-7">-</span>
                     )}
                 </td>
                 <td>
@@ -131,14 +139,18 @@ export function AccountsCard({ signature }: SignatureProps) {
                             {totalAccountSize > 0 && (
                                 <tfoot>
                                     <tr>
-                                        <td colSpan={3} />
+                                        <td colSpan={3} className="align-bottom">
+                                            <p className="text-muted e-m-0 e-text-right e-text-[0.625rem]">
+                                                reflects current account state
+                                            </p>
+                                        </td>
                                         <td className="align-bottom">
                                             <p className="text-muted e-m-0 e-text-[0.625rem] e-uppercase">
                                                 Total Account Size:
                                             </p>
                                         </td>
                                         <td>
-                                            <span className="text-white">
+                                            <span className="text-white e-ml-7">
                                                 {totalAccountSize.toLocaleString('en-US')}
                                             </span>
                                         </td>
@@ -221,21 +233,30 @@ function DataRow({
                             </div>
                         </div>
 
-                        <button
-                            className={`btn btn-sm d-flex ${isDataVisible ? 'btn-black active' : 'btn-white'}`}
-                            onClick={() => setIsDataVisible(!isDataVisible)}
-                        >
-                            {isDataVisible ? 'Hide Data' : 'Show Data'}
-                        </button>
+                        <div className="d-flex align-items-center gap-2">
+                            {!!data?.length && (
+                                <DownloadableDropdown
+                                    data={data}
+                                    encodings={['hex', 'base64']}
+                                    filename={account.pubkey.toBase58()}
+                                />
+                            )}
+                            <button
+                                className={`btn btn-sm d-flex ${isDataVisible ? 'btn-black active' : 'btn-white'}`}
+                                onClick={() => setIsDataVisible(!isDataVisible)}
+                            >
+                                {isDataVisible ? 'Hide Data' : 'Show Data'}
+                            </button>
+                        </div>
                     </div>
 
                     {isDataVisible && (
-                        <div className="e-items-end e-text-end">
+                        <div className="md:e-items-end xl:e-text-end">
                             {displayData && displayData.length > 0 ? (
                                 <>
                                     <HexData raw={displayData} copyableRaw={data} className="!e-items-baseline" />
                                     {isTruncated && (
-                                        <span className="text-muted e-mt-1 e-text-xs">
+                                        <span className="text-muted e-ml-5 e-mt-1 e-text-xs xl:e-ml-0">
                                             Showing first {MAX_DISPLAY_BYTES.toLocaleString()} of{' '}
                                             {data.length.toLocaleString()} bytes
                                         </span>
