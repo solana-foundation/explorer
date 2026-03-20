@@ -65,9 +65,9 @@ export function formatReceiptData(receipt: Receipt, cluster: Cluster): Formatted
         },
     };
     if (isTokenReceipt(receipt)) {
-        return { ...base, mint: receipt.mint, symbol: receipt.symbol };
+        return { ...base, kind: 'token' as const, mint: receipt.mint, symbol: receipt.symbol };
     }
-    return base;
+    return { ...base, kind: 'sol' as const };
 }
 
 async function getParsedTokenInfo(mint: string | undefined, cluster: Cluster): Promise<TokenInfo | undefined> {

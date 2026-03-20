@@ -8,8 +8,10 @@ import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { useFetchTransactionStatus, useTransactionDetails, useTransactionStatus } from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
+import { NATIVE_MINT } from '@solana/spl-token';
 import { TransactionSignature } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
+import { formatUsdValue } from '@utils/index';
 import { useClusterPath } from '@utils/url';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect } from 'react';
@@ -17,10 +19,13 @@ import useSWR from 'swr';
 
 import { getProxiedUri } from '@/app/features/metadata';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
+import { Logger } from '@/app/shared/lib/logger';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app/tx/[signature]/page-client';
 
+import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
 import { usePrimaryDomain } from './lib/use-primary-domain';
 import { extractReceiptData } from './model/create-receipt';
+import { useTokenPrice } from './model/use-price';
 import type { FormattedReceipt } from './types';
 import { NoReceipt } from './ui/BaseReceipt';
 import { ReceiptView } from './ui/ReceiptView';
@@ -125,7 +130,7 @@ interface ReceiptContentProps {
 }
 
 function ReceiptContent({ receipt, signature, status, transactionPath }: ReceiptContentProps) {
-    const receiptType = 'mint' in receipt ? 'token' : 'sol';
+    const receiptType = receipt.kind;
 
     useEffect(() => {
         receiptAnalytics.trackViewed(signature, receiptType);
@@ -135,8 +140,25 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const receiverDomain = usePrimaryDomain(receipt.receiver.address);
     const senderLink = useExplorerLink(`/address/${receipt.sender.address}`);
     const receiverLink = useExplorerLink(`/address/${receipt.receiver.address}`);
-    const tokenLink = useExplorerLink('mint' in receipt ? `/address/${receipt.mint}` : '');
+    const tokenLink = useExplorerLink(receipt.kind === 'token' ? `/address/${receipt.mint}` : '');
     const logoURI = receipt.logoURI ? getProxiedUri(receipt.logoURI) : undefined;
+
+    const mint = receipt.kind === 'token' ? receipt.mint : NATIVE_MINT.toBase58();
+    const priceResult = useTokenPrice(mint);
+    const usdValue = priceResult?.price != null ? formatUsdValue(receipt.total.raw, priceResult.price) : undefined;
+
+    const downloadPdf = useCallback(async () => {
+        const deps = await loadPdfDeps();
+        const transactionUrl = window.location.origin + transactionPath;
+        await generateReceiptPdf(
+            { ...deps, onError: Logger.error },
+            receipt,
+            signature,
+            window.location.href,
+            transactionUrl,
+            usdValue
+        );
+    }, [receipt, signature, transactionPath, usdValue]);
 
     return (
         <SignatureContext.Provider value={signature}>
@@ -153,6 +175,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                 }}
                 signature={signature}
                 transactionPath={transactionPath}
+                downloadPdf={downloadPdf}
             />
         </SignatureContext.Provider>
     );
