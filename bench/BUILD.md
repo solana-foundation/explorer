@@ -2,7 +2,7 @@
 |------|-------|------|---------------|
 | Static | `/` | 14.6 kB | 1.02 MB |
 | Static | `/_not-found` | 326 B | 164 kB |
-| Dynamic | `/address/[address]` | 15.1 kB | 946 kB |
+| Dynamic | `/address/[address]` | 12.2 kB | 947 kB |
 | Dynamic | `/address/[address]/anchor-account` | 6.27 kB | 1 MB |
 | Dynamic | `/address/[address]/anchor-program` | 335 B | 893 kB |
 | Dynamic | `/address/[address]/attestation` | 7.12 kB | 983 kB |
@@ -19,7 +19,7 @@
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 6.81 kB | 978 kB |
 | Dynamic | `/address/[address]/program-multisig` | 3.86 kB | 1 MB |
 | Dynamic | `/address/[address]/rewards` | 4.32 kB | 941 kB |
-| Dynamic | `/address/[address]/security` | 11.4 kB | 1.03 MB |
+| Dynamic | `/address/[address]/security` | 8.59 kB | 1.03 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 4.21 kB | 941 kB |
 | Dynamic | `/address/[address]/stake-history` | 4.34 kB | 941 kB |
 | Dynamic | `/address/[address]/token-extensions` | 11.5 kB | 996 kB |
@@ -53,7 +53,7 @@
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 6.19 kB | 941 kB |
 | Static | `/tos` | 325 B | 164 kB |
-| Dynamic | `/tx/[signature]` | 48.6 kB | 1.43 MB |
+| Dynamic | `/tx/[signature]` | 48.5 kB | 1.43 MB |
 | Dynamic | `/tx/[signature]/inspect` | 622 B | 1.21 MB |
 | Static | `/tx/inspector` | 629 B | 1.21 MB |
 | Static | `/verified-programs` | 6.34 kB | 173 kB |
