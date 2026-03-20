@@ -13,14 +13,18 @@ interface EpochInfo {
     slotsInEpoch: bigint;
 }
 
-export const mockEpochInfo = (overrides?: Partial<EpochInfo>): EpochInfo => ({
-    absoluteSlot: gen.slot(),
-    blockHeight: gen.blockHeight(),
-    epoch: gen.epoch(),
-    slotIndex: gen.bigint(432_000n),
-    slotsInEpoch: 432_000n,
-    ...overrides,
-});
+export const mockEpochInfo = (overrides?: Partial<EpochInfo>): EpochInfo => {
+    const slotsInEpoch = 432_000n;
+    const absoluteSlot = gen.slot();
+    return {
+        absoluteSlot,
+        blockHeight: gen.blockHeight(),
+        epoch: absoluteSlot / slotsInEpoch,
+        slotIndex: absoluteSlot % slotsInEpoch,
+        slotsInEpoch,
+        ...overrides,
+    };
+};
 
 export const mockEpochSchedule = (overrides?: Partial<EpochSchedule>): EpochSchedule => ({
     firstNormalEpoch: gen.epoch(),
