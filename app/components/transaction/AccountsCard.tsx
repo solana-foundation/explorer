@@ -77,7 +77,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                                 <span>{accountInfo.size.toLocaleString('en-US')}</span>
                             </div>
                         ) : (
-                            <span className='e-ml-7'>{accountInfo.size.toLocaleString('en-US')}</span>
+                            <span className="e-ml-7">{accountInfo.size.toLocaleString('en-US')}</span>
                         )
                     ) : (
                         <span className="text-muted e-ml-7">-</span>
