@@ -130,7 +130,7 @@ export function TokenVerificationContent({
                 </div>
             ) : (
                 <span className="e-mb-2 e-text-xs e-text-heavy-metal-400">
-                    This doesn&apos;t mean it&apos;s scam, just make double check if it&apos;s what you need.
+                    This doesn&apos;t mean it&apos;s a scam, just double-check if it&apos;s what you need.
                 </span>
             )}
 
