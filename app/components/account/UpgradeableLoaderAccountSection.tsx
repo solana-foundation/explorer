@@ -175,7 +175,7 @@ function MultisigBadge({ pubkey }: { pubkey: PublicKey }) {
 
 function VerifiedLabel() {
     return (
-        <InfoTooltip text="Verified builds allow users can ensure that the hash of the on-chain program matches the hash of the program of the given codebase (registry hosted by osec.io).">
+        <InfoTooltip text="Verified builds allow users to ensure that the hash of the on-chain program matches the hash of the program of the given codebase (registry hosted by osec.io).">
             <Link
                 rel="noopener noreferrer"
                 target="_blank"
