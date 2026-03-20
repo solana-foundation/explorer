@@ -57,19 +57,11 @@ export function useProgramCanonicalMetadata(
 
                 // For known clusters, use the API route (benefits from caching)
                 const response = await fetch(
-                    `/api/programMetadataIdl?programAddress=${programAddress}&cluster=${cluster}&seed=${seed}`
+                    `/api/program-metadata-idl?programAddress=${programAddress}&cluster=${cluster}&seed=${seed}`
                 );
                 if (response.ok) {
                     const data = await response.json();
-                    const { details, programMetadata } = data;
-
-                    // In case of 403, we have ok response but it contains {details: {error: string}} data
-                    if (details?.error) {
-                        Logger.error(new Error('[program-metadata] API returned error'), { error: details.error });
-                        return null;
-                    }
-
-                    return programMetadata || null;
+                    return data.programMetadata || null;
                 }
 
                 return null;

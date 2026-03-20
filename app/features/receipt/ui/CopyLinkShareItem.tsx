@@ -14,14 +14,16 @@ export function CopyLinkShareItem({ onCopy }: CopyLinkShareItemProps) {
     const [state, copy] = useCopyToClipboard();
 
     function handleClick() {
-        copy(globalThis.location.href);
+        const href = globalThis.location?.href;
+        if (!href) return;
+        copy(href);
         onCopy?.();
     }
 
     function getIcon() {
-        if (state === 'copied') return <Check size={11} />;
-        if (state === 'errored') return <XCircle size={11} />;
-        return <Link size={11} />;
+        if (state === 'copied') return <Check size={11} aria-hidden="true" />;
+        if (state === 'errored') return <XCircle size={11} aria-hidden="true" />;
+        return <Link size={11} aria-hidden="true" />;
     }
 
     function getLabel() {

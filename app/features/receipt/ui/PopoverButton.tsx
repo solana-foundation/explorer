@@ -7,16 +7,17 @@ interface PopoverButtonProps {
     icon: ReactNode;
     label: string;
     children: ReactNode;
+    className?: string;
 }
 
-export function PopoverButton({ icon, label, children }: PopoverButtonProps) {
+export function PopoverButton({ icon, label, children, className }: PopoverButtonProps) {
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <Button variant="compact" size="compact">
+                <Button variant="compact" size="compact" className={className}>
                     {icon}
                     {label}
-                    <ChevronDown size={12} />
+                    <ChevronDown size={12} aria-hidden="true" />
                 </Button>
             </PopoverTrigger>
 

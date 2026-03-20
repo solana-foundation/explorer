@@ -7,7 +7,7 @@
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
     --border: oklch(0.922 0 0);
-    
+
     /* Tailwind variables - compatibility only, values don't matter
      * Required because @tailwind base is skipped to avoid conflicts
      * with Bootstrap/Dashkit reset styles. Ring utilities override these. */
@@ -18,7 +18,7 @@
     --tw-skew-y: 0;
     --tw-scale-x: 1;
     --tw-scale-y: 1;
-    --tw-ring-inset: var(--tw-empty,/*!*/ /*!*/);
+    --tw-ring-inset: var(--tw-empty, /*!*/ /*!*/);
     --tw-ring-offset-width: 0px;
     --tw-ring-offset-color: #fff;
     --tw-ring-color: rgb(59 130 246 / 0.5);
@@ -137,6 +137,6 @@
 
 @layer components {
     .zigzag {
-        mask: conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/21px 100%
+        mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50%/21px 100%;
     }
 }

@@ -2,10 +2,13 @@ import { type GA4EventName, trackEvent } from './track-event';
 
 export enum ReceiptEvent {
     ButtonClicked = 'rcpt_button_clicked',
+    Download = 'rcpt_download',
     NoReceipt = 'rcpt_no_receipt',
     NoReceiptAutoRedirect = 'rcpt_no_receipt_auto_redirect',
-    ViewTxClicked = 'rcpt_view_tx_clicked',
     ShareCopyLink = 'rcpt_share_copy_link',
+    ShareNative = 'rcpt_share_native',
+    ShareOnX = 'rcpt_share_on_x',
+    ViewTxClicked = 'rcpt_view_tx_clicked',
     Viewed = 'rcpt_viewed',
 }
 
@@ -19,6 +22,10 @@ export const receiptAnalytics = {
         trackEvent(ReceiptEvent.ButtonClicked, { signature });
     },
 
+    trackDownload(signature: string): void {
+        trackEvent(ReceiptEvent.Download, { signature });
+    },
+
     trackNoReceipt(signature: string): void {
         trackEvent(ReceiptEvent.NoReceipt, { signature });
     },
@@ -29,6 +36,14 @@ export const receiptAnalytics = {
 
     trackShareCopyLink(signature: string): void {
         trackEvent(ReceiptEvent.ShareCopyLink, { signature });
+    },
+
+    trackShareNative(signature: string): void {
+        trackEvent(ReceiptEvent.ShareNative, { signature });
+    },
+
+    trackShareOnX(signature: string): void {
+        trackEvent(ReceiptEvent.ShareOnX, { signature });
     },
 
     trackViewTxClicked(signature: string): void {

@@ -13,7 +13,7 @@
 | Dynamic | `/address/[address]/domains` | 2.94 kB | 932 kB |
 | Dynamic | `/address/[address]/entries` | 3.57 kB | 950 kB |
 | Dynamic | `/address/[address]/feature-gate` | 335 B | 893 kB |
-| Dynamic | `/address/[address]/idl` | 126 kB | 1.2 MB |
+| Dynamic | `/address/[address]/idl` | 129 kB | 1.2 MB |
 | Dynamic | `/address/[address]/instructions` | 1.59 kB | 1.04 MB |
 | Dynamic | `/address/[address]/metadata` | 9.86 kB | 951 kB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 6.81 kB | 978 kB |
@@ -52,7 +52,7 @@
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 6.14 kB | 940 kB |
 | Static | `/tos` | 325 B | 164 kB |
-| Dynamic | `/tx/[signature]` | 44.4 kB | 1.43 MB |
+| Dynamic | `/tx/[signature]` | 45.5 kB | 1.44 MB |
 | Dynamic | `/tx/[signature]/inspect` | 622 B | 1.21 MB |
 | Static | `/tx/inspector` | 629 B | 1.21 MB |
 | Static | `/verified-programs` | 6.34 kB | 173 kB |
