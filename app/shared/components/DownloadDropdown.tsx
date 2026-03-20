@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import React from 'react';
 import { Download } from 'react-feather';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { triggerDownloadText } from '@/app/shared/lib/triggerDownload';
 
 const DEFAULT_ENCODINGS: EncodingFormat[] = ['hex', 'base58', 'base64'];
@@ -58,6 +59,10 @@ export function DownloadDropdown({
 }
 
 function handleDownload(data: ByteArray, encoding: EncodingFormat, filename: string) {
-    const encoded = encodeBytes(data, encoding);
-    triggerDownloadText(encoded, `${filename}_${encoding}.txt`);
+    try {
+        const encoded = encodeBytes(data, encoding);
+        triggerDownloadText(encoded, `${filename}_${encoding}.txt`);
+    } catch (err) {
+        Logger.error(new Error(`Failed to download ${encoding} file`, { cause: err }));
+    }
 }
