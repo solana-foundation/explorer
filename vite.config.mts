@@ -73,6 +73,8 @@ export default defineConfig({
                     ],
                 },
                 plugins: [
+                    // The plugin will run tests for the stories defined in your Storybook config
+                    // See options at: https://storybook.js.org/docs/writing-tests/test-addon#storybooktest
                     storybookTest({
                         configDir: path.join(dirname, '.storybook'),
                         tags: {
@@ -86,6 +88,7 @@ export default defineConfig({
                     browser: {
                         enabled: true,
                         headless: true,
+                        // Firefox is disabled in CI due to flaky connection timeouts
                         instances: process.env.CI
                             ? [{ browser: 'chromium' }]
                             : [{ browser: 'chromium' }, { browser: 'firefox' }],
