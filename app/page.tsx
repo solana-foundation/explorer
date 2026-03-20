@@ -32,6 +32,8 @@ import {
 import { DeveloperResources } from './components/DeveloperResources';
 import { UpcomingFeatures } from './utils/feature-gate/UpcomingFeatures';
 
+const CLUSTER_STATS_TIMEOUT = 5000;
+
 function PageSkeleton() {
     return (
         <>
@@ -60,11 +62,35 @@ function PageSkeleton() {
     );
 }
 
+function StatsActivator() {
+    const { setActive, setTimedOut } = useStatsProvider();
+    const dashboardInfo = useDashboardInfo();
+    const performanceInfo = usePerformanceInfo();
+    const { cluster } = useCluster();
+
+    React.useEffect(() => {
+        setActive(true);
+        return () => setActive(false);
+    }, [setActive, cluster]);
+
+    const statsLoading =
+        performanceInfo.status === ClusterStatsStatus.Loading || dashboardInfo.status === ClusterStatsStatus.Loading;
+
+    React.useEffect(() => {
+        if (!statsLoading) return;
+        const timeout = setTimeout(setTimedOut, CLUSTER_STATS_TIMEOUT);
+        return () => clearTimeout(timeout);
+    }, [statsLoading, setTimedOut, cluster]);
+
+    return null;
+}
+
 export default function Page() {
     return (
         <StatsProvider>
             <SupplyProvider>
                 <div className="container mt-4">
+                    <StatsActivator />
                     <PageContent />
                 </div>
             </SupplyProvider>
@@ -76,6 +102,8 @@ function PageContent() {
     const supply = useSupply();
     const { status } = useCluster();
     const fetchSupply = useFetchSupply();
+    const dashboardInfo = useDashboardInfo();
+    const performanceInfo = usePerformanceInfo();
 
     React.useEffect(() => {
         if (status === ClusterStatus.Connected) {
@@ -87,12 +115,16 @@ function PageContent() {
         return null;
     }
 
-    if (supply === Status.Idle || supply === Status.Connecting) {
-        return <PageSkeleton />;
-    }
-
     if (typeof supply === 'string') {
         return <ErrorCard text={supply} retry={fetchSupply} />;
+    }
+
+    const supplyLoading = supply === Status.Idle || supply === Status.Connecting;
+    const statsLoading =
+        performanceInfo.status === ClusterStatsStatus.Loading || dashboardInfo.status === ClusterStatsStatus.Loading;
+
+    if (supplyLoading || statsLoading) {
+        return <PageSkeleton />;
     }
 
     return (
@@ -202,21 +234,11 @@ function displayLamports(value: number | bigint) {
 function StatsCardBody() {
     const dashboardInfo = useDashboardInfo();
     const performanceInfo = usePerformanceInfo();
-    const { setActive } = useStatsProvider();
-    const { cluster } = useCluster();
-
-    React.useEffect(() => {
-        setActive(true);
-        return () => setActive(false);
-    }, [setActive, cluster]);
 
     if (performanceInfo.status !== ClusterStatsStatus.Ready || dashboardInfo.status !== ClusterStatsStatus.Ready) {
         const error =
             performanceInfo.status === ClusterStatsStatus.Error || dashboardInfo.status === ClusterStatsStatus.Error;
-        if (error) {
-            return <StatsNotReady error={true} />;
-        }
-        return <StatsTableSkeleton />;
+        return <StatsNotReady error={error} />;
     }
 
     const { avgSlotTime_1h, avgSlotTime_1min, epochInfo, blockTime } = dashboardInfo;
