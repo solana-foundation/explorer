@@ -42,7 +42,7 @@ overrides:
   ws@>=8.0.0 <8.17.1: 8.17.1
   ws@>=7.0.0 <7.5.10: 7.5.10
 
-pnpmfileChecksum: sha256-bCN69KYaivHDyas8gFyAgJdUrsSkpkmHm7kiGtwSLjI=
+pnpmfileChecksum: sha256-BfkWczcQHe8lZlLbAuHsrj1b6UroZcYpYDwSzrgMhb8=
 
 patchedDependencies:
   '@solana-developers/helpers@2.8.1':
