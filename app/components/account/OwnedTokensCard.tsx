@@ -68,7 +68,7 @@ export function OwnedTokensCard({ address }: { address: string }) {
     }
 
     if (tokens.length > 100) {
-        return <ErrorCard text="Token holdings is not available for accounts with over 100 token accounts" />;
+        return <ErrorCard text="Token holdings are not available for accounts with over 100 token accounts" />;
     }
     const showLogos = tokens.some(t => t.logoURI !== undefined);
 
