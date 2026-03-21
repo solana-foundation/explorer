@@ -38,10 +38,10 @@ export function createSentryConfig(_context) {
         },
 
         // Enable logs to be sent to Sentry
-        enableLogs: false, // eslint-disable-line sort-keys-fix/sort-keys-fix
+        enableLogs: false,
 
         // Setting this option to true will print useful information to the console while you're setting up Sentry.
-        debug: false, // eslint-disable-line sort-keys-fix/sort-keys-fix
+        debug: false,
 
         environment: process.env.NODE_ENV,
     };

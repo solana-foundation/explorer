@@ -26,7 +26,6 @@ export default tseslint.config(
     ...compat.extends('next/core-web-vitals'),
 
     // Base configs (after compat so tseslint parser takes precedence)
-    js.configs.recommended,
     ...tseslint.configs.recommended,
 
     // Main config
@@ -38,10 +37,6 @@ export default tseslint.config(
             globals: {
                 ...globals.browser,
                 ...globals.node,
-                ...globals.es2020,
-            },
-            parserOptions: {
-                sourceType: 'module',
             },
         },
         plugins: {
@@ -117,7 +112,7 @@ export default tseslint.config(
 
     // Allow console in logger, scripts, standalone files, pnpmfile
     {
-        files: ['app/shared/lib/logger.ts', 'scripts/**', '*.mjs', '.pnpmfile.cjs'],
+        files: ['app/shared/lib/logger.ts', 'scripts/**', '**/*.mjs', '**/*.cjs'],
         rules: {
             'no-console': 'off',
         },
@@ -125,7 +120,7 @@ export default tseslint.config(
 
     // Relax sort-keys in config/tooling files (not linted by next lint before)
     {
-        files: ['*.config.*', '*.mjs', '*.cjs', '.storybook/**', 'scripts/**', '.pnpmfile.cjs', '.prettierrc.cjs'],
+        files: ['*.config.*', '**/*.mjs', '**/*.cjs', '.storybook/**', 'scripts/**', '.prettierrc.cjs'],
         rules: {
             'sort-keys-fix/sort-keys-fix': 'off',
         },
