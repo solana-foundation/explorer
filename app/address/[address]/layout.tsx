@@ -376,6 +376,13 @@ function getNavigationTabs(pubkey: PublicKey, account: Account): AddressTab[] {
         tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplexNFT`]);
     }
 
+    // Compressed NFTs: show tabs immediately for accounts with no data
+    if ((!account.data.raw || account.data.raw.length === 0) && !account.data.parsed) {
+        tabs.push({ path: 'metadata', title: 'Metadata' });
+        tabs.push({ path: 'attributes', title: 'Attributes' });
+        tabs.push({ path: 'compression', title: 'Compression' });
+    }
+
     if (hasTokenMetadata(parsedData)) {
         tabs.push({ path: 'metadata', title: 'Metadata' });
     }
