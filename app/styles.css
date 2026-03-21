@@ -156,7 +156,7 @@
 
 @layer components {
     .navigation-tabs-select {
-        @apply e-w-auto e-cursor-pointer e-appearance-none e-rounded e-border
+        @apply e-cursor-pointer e-appearance-none e-rounded e-border
                e-border-solid e-border-outer-space-950
                e-bg-heavy-metal-900 e-px-4 e-py-2.5 e-text-sm
                e-text-neutral-200 e-outline-none;
