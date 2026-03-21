@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-redeclare */
+ 
 
 import { any, Infer, string, type } from 'superstruct';
 

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-redeclare */
+ 
 
 import { ParsedInfo } from '@validators/index';
 import { PublicKeyFromString } from '@validators/pubkey';

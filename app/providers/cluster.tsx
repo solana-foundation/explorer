@@ -116,7 +116,7 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
     // Reconnect to cluster when params change
     useEffect(() => {
         updateCluster(dispatch, cluster, customUrl);
-    }, [cluster, customUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [cluster, customUrl]);  
 
     return (
         <StateContext.Provider value={state}>

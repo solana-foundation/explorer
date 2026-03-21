@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-redeclare */
+ 
 
 import { array, boolean, Infer, literal, number, record, string, type, union } from 'superstruct';
 

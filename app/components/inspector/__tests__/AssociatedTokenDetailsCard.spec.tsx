@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax, no-restricted-globals -- test assertions use RegExp for pattern matching */
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import * as spl from '@solana/spl-token';
 import { TransactionMessage } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';

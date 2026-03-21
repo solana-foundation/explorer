@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-redeclare */
+ 
 
 import { TokenExtension } from '@validators/accounts/token-extension';
 import { PublicKeyFromString } from '@validators/pubkey';

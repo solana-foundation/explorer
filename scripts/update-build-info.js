@@ -149,6 +149,7 @@ function formatTableLines(lines) {
 
     for (const line of lines) {
         // Parse route lines (e.g., "├ ○ /path  123 kB  456 kB")
+        // eslint-disable-next-line no-restricted-syntax -- Parsing Next.js build output requires regex pattern matching
         const match = line.match(/[├└┌]\s+([○ƒ])\s+(\/[^\s]*)\s+(\S+\s+\S+)\s+(\S+.*)/);
         if (match) {
             const [, type, route, size, firstLoad] = match;
