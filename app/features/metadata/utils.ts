@@ -1,4 +1,5 @@
 import { parseUrl, SAFE_EXTERNAL_PROTOCOLS } from '@/app/shared/lib/url';
+import Logger from '@utils/logger';
 import { CID } from 'multiformats/cid';
 
 const IPFS_GATEWAY = 'https://ipfs.io/ipfs';
@@ -35,7 +36,7 @@ const resolveIpfsUri = (url: URL): string => {
     // eslint-disable-next-line no-restricted-syntax -- Strips redundant "ipfs/" prefix from the path for a clean gateway URL.
     const path = (url.host + url.pathname).replace(/^ipfs\//, '');
     if (!verifyCID(path)) {
-        console.warn(`[metadata] Cannot fetch a malformed CID: ${path}`);
+        Logger.warn(`[metadata] Cannot fetch a malformed CID: ${path}`);
         return '';
     }
     return `${IPFS_GATEWAY}/${path}${url.search}`;
