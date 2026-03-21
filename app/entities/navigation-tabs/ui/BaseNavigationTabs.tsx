@@ -27,15 +27,17 @@ export function BaseNavigationTabs({
 }: BaseNavigationTabsProps) {
     const { registeredTabs, registerTab, unregisterTab } = useTabRegistration();
 
+    const staticPaths = React.useMemo(() => new Set(tabs.map(t => t.path)), [tabs]);
+
     const contextValue = React.useMemo(
-        () => ({ activeValue, buildHref, registerTab, unregisterTab }),
-        [activeValue, buildHref, registerTab, unregisterTab]
+        () => ({ activeValue, buildHref, registerTab, staticPaths, unregisterTab }),
+        [activeValue, buildHref, registerTab, staticPaths, unregisterTab]
     );
 
-    const allTabs = React.useMemo(() => {
-        const staticPaths = new Set(tabs.map(t => t.path));
-        return [...tabs, ...registeredTabs.filter(t => !staticPaths.has(t.path))];
-    }, [tabs, registeredTabs]);
+    const allTabs = React.useMemo(
+        () => [...tabs, ...registeredTabs.filter(t => !staticPaths.has(t.path))],
+        [tabs, registeredTabs, staticPaths]
+    );
 
     return (
         <NavigationTabsContext.Provider value={contextValue}>

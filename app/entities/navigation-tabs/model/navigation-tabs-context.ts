@@ -8,6 +8,7 @@ export type NavigationTabsContextValue = {
     activeValue: string;
     buildHref: (path: string) => string;
     registerTab: (tab: NavigationTab) => void;
+    staticPaths: Set<string>;
     unregisterTab: (path: string) => void;
 };
 

@@ -377,7 +377,9 @@ function getNavigationTabs(pubkey: PublicKey, account: Account): AddressTab[] {
         tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplexNFT`]);
     }
 
-    // Compressed NFTs: show tabs immediately for accounts with no data
+    // Compressed NFTs: show tabs immediately for accounts with no data.
+    // TODO: duplicates with async CompressedNftTabs on desktop tablist — refactor
+    // to a single source once NavigationTabLink supports static deduplication.
     if ((!account.data.raw || account.data.raw.length === 0) && !account.data.parsed) {
         tabs.push({ path: 'metadata', title: 'Metadata' });
         tabs.push({ path: 'attributes', title: 'Attributes' });

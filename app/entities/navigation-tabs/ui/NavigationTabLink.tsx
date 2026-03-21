@@ -16,5 +16,7 @@ export function NavigationTabLink({ path, title, className }: { path: string; ti
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [path, title]);
 
+    if (ctx.staticPaths.has(path)) return null;
+
     return <TabLink path={path} title={title} className={className} />;
 }

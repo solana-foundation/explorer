@@ -118,8 +118,8 @@ export const OverlappingAsyncTabs: Story = {
         const tablist = canvas.getByRole('tablist', { hidden: true });
         const tabs = within(tablist).getAllByRole('tab', { hidden: true });
 
-        // Desktop tablist: 4 static + 2 children rendered (both appear in DOM)
-        expect(tabs).toHaveLength(6);
+        // Desktop tablist: 4 static + 1 new (overlapping "rewards" is deduplicated)
+        expect(tabs).toHaveLength(5);
 
         // Mobile select: should deduplicate "rewards", so 4 static + 1 new = 5
         const select = canvasElement.querySelector('select') as HTMLSelectElement;
