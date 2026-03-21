@@ -81,6 +81,16 @@ describe('GET /api/anchor', () => {
         expect(res.headers.get('Cache-Control')).toContain('max-age=');
     });
 
+    it('should return 502 when RangeError has no ERR_BUFFER_OUT_OF_BOUNDS code', async () => {
+        vi.mocked(Program.fetchIdl).mockRejectedValueOnce(new RangeError('index out of range'));
+
+        const { GET } = await importRoute();
+        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: VALID_ADDRESS }));
+
+        expect(res.status).toBe(502);
+        expect(await res.json()).toEqual({ error: 'Failed to fetch IDL' });
+    });
+
     it('should return 502 with a generic message when fetchIdl throws', async () => {
         const internalError = Object.assign(new Error('AccountNotFoundError'), {
             context: { rpcUrl: 'https://internal-rpc.company.com:8899' },
