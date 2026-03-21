@@ -69,8 +69,7 @@ export function createSentryBuildConfig() {
         telemetry: !telemetryDisabled,
 
         // Webpack plugin options
-        webpack: {
-            // eslint-disable-line sort-keys-fix/sort-keys-fix
+        webpack: {  
             // Enables automatic instrumentation of Vercel Cron Monitors
             automaticVercelMonitors: true,
             // Automatically tree-shake Sentry logger statements to reduce bundle size

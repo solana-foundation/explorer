@@ -99,7 +99,7 @@ const config: Config = {
                 '12-ext': 'repeat(12, minmax(0, 1fr))',
             },
         },
-        /* eslint-disable sort-keys-fix/sort-keys-fix */
+         
         screens: {
             'max-sm': getScreenDim('sm', -1),
             'max-md': getScreenDim('md', -1),
@@ -115,7 +115,7 @@ const config: Config = {
             laptop: getScreenDim('lg'),
             desktop: getScreenDim('xl'),
         },
-        /* eslint-enable sort-keys-fix/sort-keys-fix */
+         
     },
 };
 
