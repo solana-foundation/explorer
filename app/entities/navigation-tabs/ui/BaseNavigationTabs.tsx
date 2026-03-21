@@ -32,7 +32,10 @@ export function BaseNavigationTabs({
         [activeValue, buildHref, registerTab, unregisterTab]
     );
 
-    const allTabs = React.useMemo(() => [...tabs, ...registeredTabs], [tabs, registeredTabs]);
+    const allTabs = React.useMemo(() => {
+        const staticPaths = new Set(tabs.map(t => t.path));
+        return [...tabs, ...registeredTabs.filter(t => !staticPaths.has(t.path))];
+    }, [tabs, registeredTabs]);
 
     return (
         <NavigationTabsContext.Provider value={contextValue}>
