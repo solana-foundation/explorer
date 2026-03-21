@@ -113,13 +113,6 @@ export const OverlappingAsyncTabs: Story = {
         activeValue: '',
         tabs: BLOCK_TABS,
     },
-    render: args => (
-        <BaseNavigationTabs {...args}>
-            {/* "rewards" overlaps with static tab, "extra" is new */}
-            <NavigationTabLink path="rewards" title="Rewards" />
-            <NavigationTabLink path="extra" title="Extra Tab" />
-        </BaseNavigationTabs>
-    ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         const tablist = canvas.getByRole('tablist', { hidden: true });
@@ -133,4 +126,11 @@ export const OverlappingAsyncTabs: Story = {
         expect(select.options).toHaveLength(5);
         expect(select.options[4]).toHaveTextContent('Extra Tab');
     },
+    render: args => (
+        <BaseNavigationTabs {...args}>
+            {/* "rewards" overlaps with static tab, "extra" is new */}
+            <NavigationTabLink path="rewards" title="Rewards" />
+            <NavigationTabLink path="extra" title="Extra Tab" />
+        </BaseNavigationTabs>
+    ),
 };
