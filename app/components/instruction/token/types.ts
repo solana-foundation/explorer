@@ -1,5 +1,3 @@
- 
-
 import { PublicKeyFromString } from '@validators/pubkey';
 import { array, boolean, enums, Infer, nullable, number, optional, string, type, union } from 'superstruct';
 

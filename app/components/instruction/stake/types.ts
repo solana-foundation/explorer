@@ -1,5 +1,3 @@
- 
-
 import { PublicKeyFromString } from '@validators/pubkey';
 import { enums, Infer, number, string, type } from 'superstruct';
 

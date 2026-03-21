@@ -1,5 +1,3 @@
- 
-
 import { TokenExtension } from '@validators/accounts/token-extension';
 import { PublicKeyFromString } from '@validators/pubkey';
 import { any, array, boolean, enums, Infer, nullable, number, optional, string, type } from 'superstruct';

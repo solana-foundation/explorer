@@ -99,7 +99,7 @@ const config: Config = {
                 '12-ext': 'repeat(12, minmax(0, 1fr))',
             },
         },
-         
+
         screens: {
             'max-sm': getScreenDim('sm', -1),
             'max-md': getScreenDim('md', -1),
@@ -115,7 +115,6 @@ const config: Config = {
             laptop: getScreenDim('lg'),
             desktop: getScreenDim('xl'),
         },
-         
     },
 };
 

@@ -282,7 +282,7 @@ export function RawInput({
             input.value = value;
             onInput();
         }
-    }, [value, onInput]);  
+    }, [value, onInput]);
 
     const placeholder = 'Paste a raw base58/base64 encoded transaction message or Squads vault transaction account';
     return (

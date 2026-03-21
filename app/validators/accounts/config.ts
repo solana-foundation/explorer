@@ -1,5 +1,3 @@
- 
-
 import { array, boolean, Infer, literal, number, record, string, type, union } from 'superstruct';
 
 export type StakeConfigInfo = Infer<typeof StakeConfigInfo>;

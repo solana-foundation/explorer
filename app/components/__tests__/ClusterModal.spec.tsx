@@ -27,7 +27,7 @@ vi.mock('./ClusterModalDeveloperSettings', () => ({
 }));
 
 // Must import after mocks
- 
+
 import { ClusterModal } from '../ClusterModal';
 
 function renderWithStore(initialClusters: SavedCluster[] = []) {

@@ -69,7 +69,7 @@ export function createSentryBuildConfig() {
         telemetry: !telemetryDisabled,
 
         // Webpack plugin options
-        webpack: {  
+        webpack: {
             // Enables automatic instrumentation of Vercel Cron Monitors
             automaticVercelMonitors: true,
             // Automatically tree-shake Sentry logger statements to reduce bundle size

@@ -1,5 +1,3 @@
- 
-
 import { any, Infer, string, type } from 'superstruct';
 
 export type ParsedInfo = Infer<typeof ParsedInfo>;
