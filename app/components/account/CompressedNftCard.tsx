@@ -112,7 +112,7 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
                 dropdown.dispose();
             }
         },
-        [dropdownRef]
+        [dropdownRef],
     );
 
     return (

@@ -79,7 +79,7 @@ describe('middleware', () => {
                 expect(checkBotId).not.toHaveBeenCalled();
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
                     '[middleware] No x-is-human header, allowing',
-                    expect.objectContaining({ pathname: '/api/test' })
+                    expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
         });
@@ -100,11 +100,11 @@ describe('middleware', () => {
                 expect(checkBotId).toHaveBeenCalled();
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
                     '[middleware] BotId verification',
-                    expect.objectContaining({ isHuman: true })
+                    expect.objectContaining({ isHuman: true }),
                 );
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
                     '[middleware] Human verified',
-                    expect.objectContaining({ pathname: '/api/test' })
+                    expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
 
@@ -122,7 +122,7 @@ describe('middleware', () => {
                 expect(response.status).toBe(200);
                 expect(loggerWarnSpy).toHaveBeenCalledWith(
                     '[middleware] Bot detected',
-                    expect.objectContaining({ pathname: '/api/test' })
+                    expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
         });
@@ -148,11 +148,11 @@ describe('middleware', () => {
                 expect(body).toEqual({ error: 'Access denied: request identified as automated bot' });
                 expect(loggerWarnSpy).toHaveBeenCalledWith(
                     '[middleware] Bot detected',
-                    expect.objectContaining({ pathname: '/api/test' })
+                    expect.objectContaining({ pathname: '/api/test' }),
                 );
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
                     new Error('[middleware] Challenge mode enabled, blocking'),
-                    expect.objectContaining({ pathname: '/api/test' })
+                    expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
 
@@ -170,7 +170,7 @@ describe('middleware', () => {
                 expect(response.status).toBe(401);
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
                     new Error('[middleware] Challenge mode enabled, blocking'),
-                    expect.objectContaining({ pathname: '/api/test' })
+                    expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
 
@@ -188,7 +188,7 @@ describe('middleware', () => {
                 expect(response.status).toBe(200);
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
                     '[middleware] Human verified',
-                    expect.objectContaining({ pathname: '/api/test' })
+                    expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
         });
@@ -212,7 +212,7 @@ describe('middleware', () => {
             expect(response.status).toBe(200);
             expect(loggerWarnSpy).toHaveBeenCalledWith(
                 '[middleware] Bot detected',
-                expect.objectContaining({ pathname: '/api/test' })
+                expect.objectContaining({ pathname: '/api/test' }),
             );
         });
 
@@ -234,7 +234,7 @@ describe('middleware', () => {
             expect(response.status).toBe(401);
             expect(loggerErrorSpy).toHaveBeenCalledWith(
                 new Error('[middleware] Challenge mode enabled, blocking'),
-                expect.objectContaining({ pathname: '/api/test' })
+                expect.objectContaining({ pathname: '/api/test' }),
             );
         });
     });

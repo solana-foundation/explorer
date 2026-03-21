@@ -24,7 +24,7 @@ export function parseProgramLogs(logs: string[], error: TransactionError | null,
     const prettyLogs: InstructionLogs[] = [];
     function prefixBuilder(
         // Indent level starts at 1.
-        indentLevel: number
+        indentLevel: number,
     ) {
         let prefix;
         if (indentLevel <= 0) {

@@ -73,7 +73,7 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
             pubkey,
             {
                 programId: TOKEN_2022_PROGRAM_ID,
-            }
+            },
         );
 
         const tokens: TokenInfoWithPubkey[] = tokenAccounts
@@ -89,7 +89,7 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
         const tokenMintInfos = await getTokenInfos(
             tokens.map(t => t.info.mint),
             cluster,
-            url
+            url,
         );
         if (tokenMintInfos) {
             const mappedTokenInfos = Object.fromEntries(
@@ -100,7 +100,7 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
                         name: t.name,
                         symbol: t.symbol,
                     },
-                ])
+                ]),
             );
             tokens.forEach(t => {
                 const tokenInfo = mappedTokenInfos[t.info.mint.toString()];
@@ -146,7 +146,7 @@ export function useFetchAccountOwnedTokens() {
         (pubkey: PublicKey) => {
             fetchAccountTokens(dispatch, pubkey, cluster, url);
         },
-        [dispatch, cluster, url]
+        [dispatch, cluster, url],
     );
 }
 

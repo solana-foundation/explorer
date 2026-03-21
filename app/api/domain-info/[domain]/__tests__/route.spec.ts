@@ -51,7 +51,7 @@ describe('GET /api/domain-info/[domain]', () => {
         const response = await GET(mockRequest, { params: { domain: 'test.sol' } });
 
         expect(response.headers.get('Cache-Control')).toBe(
-            'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600'
+            'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600',
         );
     });
 

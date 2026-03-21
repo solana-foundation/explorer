@@ -80,7 +80,7 @@ export async function getAnchorVerifiableBuild(programId: PublicKey): Promise<Ve
 
     // Filter out all non successful builds.
     const latestBuilds = (await latestBuildsResp.json()).filter(
-        (b: AnchorBuild) => !b.aborted && b.state === 'Built' && b.verified === 'Verified'
+        (b: AnchorBuild) => !b.aborted && b.state === 'Built' && b.verified === 'Verified',
     ) as AnchorBuild[];
 
     if (latestBuilds.length === 0) {

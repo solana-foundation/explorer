@@ -72,7 +72,7 @@ describe('AccountHeader', () => {
                     account={account}
                     tokenInfo={undefined}
                     isTokenInfoLoading={false}
-                />
+                />,
             );
 
             expect(screen.getByText('Program account')).toBeInTheDocument();
@@ -90,7 +90,7 @@ describe('AccountHeader', () => {
                     account={account}
                     tokenInfo={undefined}
                     isTokenInfoLoading={false}
-                />
+                />,
             );
 
             expect(screen.getByText('Program account')).toBeInTheDocument();
@@ -110,7 +110,7 @@ describe('AccountHeader', () => {
                     account={account}
                     tokenInfo={undefined}
                     isTokenInfoLoading={false}
-                />
+                />,
             );
 
             expect(screen.getByText('Program account')).toBeInTheDocument();
@@ -135,7 +135,7 @@ describe('AccountHeader', () => {
                     account={account}
                     tokenInfo={undefined}
                     isTokenInfoLoading={false}
-                />
+                />,
             );
 
             expect(screen.getByText('Program account')).toBeInTheDocument();
@@ -160,7 +160,7 @@ describe('AccountHeader', () => {
                     account={account}
                     tokenInfo={undefined}
                     isTokenInfoLoading={false}
-                />
+                />,
             );
 
             const logoImg = screen.getByAltText('Program logo');
@@ -179,7 +179,7 @@ describe('AccountHeader', () => {
                     account={account}
                     tokenInfo={undefined}
                     isTokenInfoLoading={false}
-                />
+                />,
             );
 
             expect(screen.getByText('Program account')).toBeInTheDocument();
@@ -202,7 +202,7 @@ describe('AccountHeader', () => {
                     account={account}
                     tokenInfo={undefined}
                     isTokenInfoLoading={false}
-                />
+                />,
             );
 
             expect(screen.getByText('Program account')).toBeInTheDocument();
@@ -224,7 +224,7 @@ describe('AccountHeader', () => {
                     account={account}
                     tokenInfo={undefined}
                     isTokenInfoLoading={false}
-                />
+                />,
             );
 
             expect(screen.getByRole('heading', { name: 'Program Account' })).toBeInTheDocument();
@@ -243,7 +243,7 @@ describe('AccountHeader', () => {
                     account={account}
                     tokenInfo={undefined}
                     isTokenInfoLoading={false}
-                />
+                />,
             );
 
             expect(screen.getByLabelText('Self-reported program')).toBeInTheDocument();
@@ -254,7 +254,7 @@ describe('AccountHeader', () => {
                 Object.entries(PROGRAM_INFO_BY_ID)
                     .filter(([_, info]) => info.deployments.includes(Cluster.MainnetBeta))
                     .slice(0, 3)
-                    .map(([address, info]) => ({ address, name: info.name }))
+                    .map(([address, info]) => ({ address, name: info.name })),
             )('should not show self-reported warning for $name even with securityTxt', ({ address }) => {
                 const pmpSecurityTxt = createPmpSecurityTxt();
                 vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
@@ -266,7 +266,7 @@ describe('AccountHeader', () => {
                         account={account}
                         tokenInfo={undefined}
                         isTokenInfoLoading={false}
-                    />
+                    />,
                 );
 
                 expect(screen.queryByLabelText('Self-reported program')).not.toBeInTheDocument();
@@ -284,7 +284,7 @@ describe('AccountHeader', () => {
                         account={account}
                         tokenInfo={undefined}
                         isTokenInfoLoading={false}
-                    />
+                    />,
                 );
 
                 expect(screen.getByLabelText('Self-reported program')).toBeInTheDocument();

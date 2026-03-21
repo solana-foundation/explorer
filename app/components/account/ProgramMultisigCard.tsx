@@ -29,13 +29,13 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
     const anchorProgram = useAnchorProgram(
         squadMapInfo?.version === 'v3' ? SQUADS_V3_ADDRESS : SQUADS_V4_ADDRESS,
         url,
-        cluster
+        cluster,
     );
     const { data: squadInfo } = useSquadsMultisig(
         anchorProgram.program,
         squadMapInfo?.multisig,
         cluster,
-        squadMapInfo?.version
+        squadMapInfo?.version,
     );
 
     let members: PublicKey[];

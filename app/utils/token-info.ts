@@ -61,7 +61,7 @@ export function getTokenInfoSwrKey(address: string, cluster: Cluster, genesisHas
 export async function getTokenInfo(
     address: PublicKey,
     cluster: Cluster,
-    genesisHash?: string
+    genesisHash?: string,
 ): Promise<Token | undefined> {
     return getTokenInfoWithoutOnChainFallback(address, cluster, genesisHash);
 }
@@ -72,7 +72,7 @@ export async function getTokenInfo(
 export async function getTokenInfoWithoutOnChainFallback(
     address: PublicKey,
     cluster: Cluster,
-    genesisHash?: string
+    genesisHash?: string,
 ): Promise<Token | undefined> {
     const chainId = getChainId(cluster, genesisHash);
     if (!chainId) return undefined;
@@ -96,10 +96,10 @@ export async function getTokenInfoWithoutOnChainFallback(
 
 async function getFullLegacyTokenInfoUsingCdn(
     address: PublicKey,
-    chainId: ChainId
+    chainId: ChainId,
 ): Promise<FullLegacyTokenInfo | undefined> {
     const tokenListResponse = await fetch(
-        'https://cdn.jsdelivr.net/gh/solana-labs/token-list@latest/src/tokens/solana.tokenlist.json'
+        'https://cdn.jsdelivr.net/gh/solana-labs/token-list@latest/src/tokens/solana.tokenlist.json',
     );
     if (tokenListResponse.status >= 400) {
         Logger.error(new Error('[utils:token-info] Error fetching token list from CDN'));
@@ -131,7 +131,7 @@ export function getFullTokenInfoSwrKey(
     address: string,
     cluster: Cluster,
     url: string,
-    genesisHash?: string
+    genesisHash?: string,
 ): FullTokenInfoSwrKey {
     return ['get-full-token-info', address, cluster, url, genesisHash];
 }
@@ -143,7 +143,7 @@ export async function fetchFullTokenInfo([_, pubkey, cluster, _url, genesisHash]
 export async function getFullTokenInfo(
     address: PublicKey,
     cluster: Cluster,
-    genesisHash?: string
+    genesisHash?: string,
 ): Promise<FullTokenInfo | undefined> {
     if (isRedactedTokenAddress(address.toBase58())) {
         return undefined;
@@ -186,7 +186,7 @@ export async function getTokenInfos(
     addresses: PublicKey[],
     cluster: Cluster,
     connectionString: string,
-    genesisHash?: string
+    genesisHash?: string,
 ): Promise<Token[] | undefined> {
     const client = makeUtlClient(cluster, connectionString, genesisHash);
     if (!client) return undefined;

@@ -162,7 +162,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -202,7 +202,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -243,7 +243,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -279,7 +279,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -313,7 +313,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -350,7 +350,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -386,7 +386,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -424,7 +424,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -461,7 +461,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately

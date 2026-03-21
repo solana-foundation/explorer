@@ -17,7 +17,7 @@ export function isTokenProgramBase58(programIdBase58: string): boolean {
 export function getMintDecimals(
     accountKeys: PublicKey[],
     parsedAccountsPre: (AccountInfo<ParsedAccountData | Buffer> | null)[],
-    accountDatasPost: SimulatedTransactionAccountInfo[]
+    accountDatasPost: SimulatedTransactionAccountInfo[],
 ): { [mintPk: string]: number } {
     const mintToDecimals: { [mintPk: string]: number } = {};
     // Get all the necessary mint decimals by looking at parsed token accounts

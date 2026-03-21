@@ -42,7 +42,7 @@ export function useTokenVerification(tokenInfo?: FullTokenInfo | FullLegacyToken
                 'https://support.coingecko.com/hc/en-us/articles/23725417857817-Verification-Guide-for-Listing-Update-Requests-on-CoinGecko',
             isRateLimited: coinInfo?.status === CoingeckoStatus.RateLimited,
             isVerificationFound: Boolean(
-                tokenInfo?.extensions?.coingeckoId && coinInfo?.status === CoingeckoStatus.Success
+                tokenInfo?.extensions?.coingeckoId && coinInfo?.status === CoingeckoStatus.Success,
             ),
             name: EVerificationSource.CoinGecko,
             url: `https://www.coingecko.com/en/coins/${tokenInfo?.extensions?.coingeckoId}`,

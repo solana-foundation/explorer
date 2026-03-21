@@ -17,7 +17,7 @@ type VoteAccounts = Readonly<{
 async function fetchVoteAccounts(
     cluster: Cluster,
     url: string,
-    setVoteAccounts: React.Dispatch<React.SetStateAction<VoteAccounts | undefined>>
+    setVoteAccounts: React.Dispatch<React.SetStateAction<VoteAccounts | undefined>>,
 ) {
     try {
         const rpc = createSolanaRpc(url);

@@ -22,7 +22,7 @@ export function AnchorAccountCard({ account }: { account: Account }) {
         if (anchorProgram && rawData) {
             const coder = new BorshAccountsCoder(anchorProgram.idl);
             const account = anchorProgram.idl.accounts?.find((accountType: any) =>
-                (rawData as Buffer).slice(0, 8).equals(coder.accountDiscriminator(accountType.name))
+                (rawData as Buffer).slice(0, 8).equals(coder.accountDiscriminator(accountType.name)),
             );
             if (account) {
                 accountDef = anchorProgram.idl.types?.find((type: any) => type.name === account.name);

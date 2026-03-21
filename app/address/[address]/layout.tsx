@@ -33,6 +33,7 @@ import {
 import FLAGGED_ACCOUNTS_WARNING from '@providers/accounts/flagged-accounts';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
+import { cn } from '@shared/utils';
 import { Address } from '@solana/kit';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
@@ -216,7 +217,7 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
         infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey;
     const { data: fullTokenInfo, isLoading: isFullTokenInfoLoading } = useSWRImmutable(
         shouldFetchTokenInfo ? getFullTokenInfoSwrKey(address, cluster, url, clusterInfo?.genesisHash) : null,
-        fetchFullTokenInfo
+        fetchFullTokenInfo,
     );
 
     const isAccountLoading = !info || info.status === FetchStatus.Fetching;
@@ -478,7 +479,7 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
                 slug: 'attributes',
                 title: 'Attributes',
             },
-            { compressed: true, path: 'compression', slug: 'compression', title: 'Compression' }
+            { compressed: true, path: 'compression', slug: 'compression', title: 'Compression' },
         );
     }
 
@@ -545,7 +546,7 @@ function Tab({ address, path, title }: { address: string; path: string; title: s
     const isActive = (selectedLayoutSegment === null && path === '') || selectedLayoutSegment === path;
     return (
         <li className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath} scroll={false}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={tabPath} scroll={false}>
                 {title}
             </Link>
         </li>
@@ -642,7 +643,7 @@ function ProgramIdlLink({ tab, address, account }: { tab: Tab; address: string; 
 
     return (
         <li key={tab.slug} className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={anchorProgramPath}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={anchorProgramPath}>
                 {tab.title}
             </Link>
         </li>
@@ -661,7 +662,7 @@ function AccountDataLink({ address, tab, programId }: { address: string; tab: Ta
 
     return (
         <li key={tab.slug} className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={accountDataPath}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={accountDataPath}>
                 {tab.title}
             </Link>
         </li>
@@ -680,7 +681,7 @@ function FeatureGateLink({ address, tab }: { address: string; tab: Tab }) {
 
     return (
         <li key={tab.slug} className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={accountDataPath}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={accountDataPath}>
                 {tab.title}
             </Link>
         </li>
@@ -702,7 +703,7 @@ function CompressedNftLink({ tab, address, pubkey }: { tab: Tab; address: string
 
     return (
         <li key={tab.slug} className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={tabPath}>
                 {tab.title}
             </Link>
         </li>
@@ -730,7 +731,7 @@ function ProgramMultisigLink({
 
     return (
         <li key={tab.slug} className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={tabPath}>
                 {tab.title}
             </Link>
         </li>
@@ -744,7 +745,7 @@ function TokenExtensionsLink({ address, tab }: { address: string; tab: Tab }) {
 
     return (
         <li key={tab.slug} className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={accountDataPath}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={accountDataPath}>
                 {tab.title}
             </Link>
         </li>

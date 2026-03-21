@@ -6,6 +6,7 @@ import { HexData } from '@components/common/HexData';
 import { SolBalance } from '@components/common/SolBalance';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
+import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
 import { AccountInfo, useAccountsInfo } from '@utils/use-accounts-info';
@@ -100,18 +101,20 @@ export function AccountsCard({ signature }: SignatureProps) {
 
     return (
         <div className="card">
-            <div className={`card-header ${!expanded ? 'border-0' : ''}`}>
+            <div className={cn('card-header', !expanded && 'border-0')}>
                 <h3 className="card-header-title">{`Account Input(s) (${message.accountKeys.length})`}</h3>
                 <button
-                    className={`btn btn-sm d-flex align-items-center ${
-                        showRaw ? 'btn-black active' : 'btn-white'
-                    } me-2`}
+                    className={cn(
+                        'btn btn-sm d-flex align-items-center',
+                        showRaw ? 'btn-black active' : 'btn-white',
+                        'me-2',
+                    )}
                     onClick={() => setShowRaw(r => !r)}
                 >
                     <Code className="me-2" size={13} /> Raw
                 </button>
                 <button
-                    className={`btn btn-sm d-flex ${expanded ? 'btn-black active' : 'btn-white'}`}
+                    className={cn('btn btn-sm d-flex', expanded ? 'btn-black active' : 'btn-white')}
                     onClick={() => setExpanded(e => !e)}
                 >
                     {expanded ? 'Collapse' : 'Expand'}
@@ -233,21 +236,12 @@ function DataRow({
                             </div>
                         </div>
 
-                        <div className="d-flex align-items-center gap-2">
-                            {!!data?.length && (
-                                <DownloadableDropdown
-                                    data={data}
-                                    encodings={['hex', 'base64']}
-                                    filename={account.pubkey.toBase58()}
-                                />
-                            )}
-                            <button
-                                className={`btn btn-sm d-flex ${isDataVisible ? 'btn-black active' : 'btn-white'}`}
-                                onClick={() => setIsDataVisible(!isDataVisible)}
-                            >
-                                {isDataVisible ? 'Hide Data' : 'Show Data'}
-                            </button>
-                        </div>
+                        <button
+                            className={cn('btn btn-sm d-flex', isDataVisible ? 'btn-black active' : 'btn-white')}
+                            onClick={() => setIsDataVisible(!isDataVisible)}
+                        >
+                            {isDataVisible ? 'Hide Data' : 'Show Data'}
+                        </button>
                     </div>
 
                     {isDataVisible && (

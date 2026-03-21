@@ -77,7 +77,7 @@ async function fetchRewards(
     cluster: Cluster,
     url: string,
     fromEpoch?: number,
-    highestEpoch?: number
+    highestEpoch?: number,
 ) {
     dispatch({
         key: pubkey.toBase58(),
@@ -176,12 +176,12 @@ export function useFetchRewards() {
                     cluster,
                     url,
                     before.data.lowestFetchedEpoch ? before.data.lowestFetchedEpoch - 1 : undefined,
-                    highestEpoch
+                    highestEpoch,
                 );
             } else {
                 fetchRewards(dispatch, pubkey, cluster, url, undefined, highestEpoch);
             }
         },
-        [state, dispatch, cluster, url]
+        [state, dispatch, cluster, url],
     );
 }

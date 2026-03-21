@@ -1,3 +1,4 @@
+import { cn } from '@shared/utils';
 import { TransactionSignature } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
@@ -21,7 +22,7 @@ export function Signature({ signature, alignRight, link, truncate, truncateChars
     }
     const transactionPath = useClusterPath({ pathname: `/tx/${signature}` });
     return (
-        <div className={`d-flex align-items-center ${alignRight ? 'justify-content-end' : ''}`}>
+        <div className={cn('d-flex align-items-center', alignRight && 'justify-content-end')}>
             <Copyable text={signature}>
                 <span className="font-monospace">
                     {link ? (

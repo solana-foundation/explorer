@@ -86,7 +86,7 @@ describe('Implementation for `formatSerdeIdl`', () => {
         let idl: AnchorIdl;
         const address = extractProgramAddressFromIdlData(
             anchorLegacy094ShankWave,
-            'waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF'
+            'waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF',
         );
         expect('0.9.4').toBe(anchorLegacy094ShankWave.version);
         expect(() => {
@@ -98,7 +98,7 @@ describe('Implementation for `formatSerdeIdl`', () => {
             });
             expect(idl?.address).toBe(address);
             expect([5, 0, 30, 0, 56, 16]).toEqual(
-                getFieldLengths(['accounts', 'constants', 'errors', 'events', 'instructions', 'types'], idl)
+                getFieldLengths(['accounts', 'constants', 'errors', 'events', 'instructions', 'types'], idl),
             );
         }).not.toThrowError();
     });

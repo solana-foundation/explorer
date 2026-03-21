@@ -65,7 +65,7 @@ function createMockLookupTable(accountKey: PublicKey): AddressLookupTableAccount
  * ```
  */
 export function resolveAddressLookupTables(
-    addressTableLookups: Array<{ accountKey: PublicKey }>
+    addressTableLookups: Array<{ accountKey: PublicKey }>,
 ): AddressLookupTableAccount[] {
     return addressTableLookups
         .map(lookup => createMockLookupTable(lookup.accountKey))

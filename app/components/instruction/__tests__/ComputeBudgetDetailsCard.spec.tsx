@@ -43,7 +43,7 @@ describe('instruction::ComputeBudgetDetailsCard', () => {
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/7.187812 lamports per compute unit/)).toBeInTheDocument();
     });
@@ -69,7 +69,7 @@ describe('instruction::ComputeBudgetDetailsCard', () => {
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/155.666 compute units/)).toBeInTheDocument();
     }, 15000);

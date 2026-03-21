@@ -81,7 +81,7 @@ test.describe('when feature enabled', () => {
                     text.includes('Error')
                 );
             },
-            { timeout: CONTENT_TIMEOUT }
+            { timeout: CONTENT_TIMEOUT },
         );
 
         const text = await page.textContent('body');

@@ -49,7 +49,7 @@ describe('WalletProvider', () => {
         render(
             <WalletProvider>
                 <div>Test</div>
-            </WalletProvider>
+            </WalletProvider>,
         );
 
         const error = new WalletError('Test error message');
@@ -68,7 +68,7 @@ describe('WalletProvider', () => {
         render(
             <WalletProvider skipToast={true}>
                 <div>Test</div>
-            </WalletProvider>
+            </WalletProvider>,
         );
 
         const error = new WalletError('Test error message');

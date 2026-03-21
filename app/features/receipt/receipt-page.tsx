@@ -49,7 +49,7 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
             if (!tx) return undefined;
             return extractReceiptData(tx, cluster);
         },
-        { revalidateOnFocus: false }
+        { revalidateOnFocus: false },
     );
 
     useEffect(() => {
@@ -156,7 +156,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
             signature,
             window.location.href,
             transactionUrl,
-            usdValue
+            usdValue,
         );
     }, [receipt, signature, transactionPath, usdValue]);
 

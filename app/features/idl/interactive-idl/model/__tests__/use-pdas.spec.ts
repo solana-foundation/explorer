@@ -163,7 +163,7 @@ describe('usePdas', () => {
     it('should skip nested account groups', () => {
         const { createMockForm, mockIdl, mockInstruction, renderUsePdas } = setup(
             votingIdl030Variations,
-            'instruction_with_nested'
+            'instruction_with_nested',
         );
         const form = createMockForm();
         form.setValue('arguments.instructionWithNested.pollId', '999');
@@ -178,7 +178,7 @@ describe('usePdas', () => {
     it('should handle account seeds', () => {
         const { createMockForm, mockIdl, mockInstruction, renderUsePdas } = setup(
             votingIdl030Variations,
-            'instruction_with_account_seed'
+            'instruction_with_account_seed',
         );
         const form = createMockForm();
         const accountPubkey = PublicKey.default.toString();
@@ -196,7 +196,7 @@ describe('usePdas', () => {
     it('should handle const seeds', () => {
         const { createMockForm, mockIdl, mockInstruction, renderUsePdas } = setup(
             votingIdl030Variations,
-            'instruction_with_const_seed'
+            'instruction_with_const_seed',
         );
         const form = createMockForm();
 
@@ -211,7 +211,7 @@ describe('usePdas', () => {
     it('should return null when account seed value is missing', () => {
         const { createMockForm, mockIdl, mockInstruction, renderUsePdas } = setup(
             votingIdl030Variations,
-            'instruction_with_account_seed'
+            'instruction_with_account_seed',
         );
         const form = createMockForm();
 
@@ -226,7 +226,7 @@ describe('usePdas', () => {
         const DONATE_KEY = 'closeDonationEpochV1';
         const { createMockForm, mockIdl, mockInstruction, renderUsePdas } = setup(
             donateIdl0301,
-            'close_donation_epoch_v1'
+            'close_donation_epoch_v1',
         );
 
         function runDonateTest(formValues: { accounts?: Record<string, string>; arguments?: Record<string, string> }) {
@@ -331,7 +331,7 @@ function setup(idl: unknown, instructionName: string) {
         return renderHook(() =>
             useForm<InstructionFormData>({
                 defaultValues: { accounts: {}, arguments: {} },
-            })
+            }),
         ).result.current;
     };
 

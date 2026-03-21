@@ -62,7 +62,7 @@ export function deserializeMessageV0(message: string): VersionedMessage {
                         readonlyIndexes: atl.readonlyIndexes,
                         writableIndexes: atl.writableIndexes,
                     };
-                }
+                },
             ) ?? [],
         compiledInstructions: m.compiledInstructions.map(
             (ci: {
@@ -82,7 +82,7 @@ export function deserializeMessageV0(message: string): VersionedMessage {
                     data: data,
                     programIdIndex: ci.programIdIndex,
                 };
-            }
+            },
         ),
         header: m.header,
         recentBlockhash: m.recentBlockhash,

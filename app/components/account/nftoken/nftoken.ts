@@ -128,7 +128,7 @@ export namespace NftokenFetcher {
                 } catch {
                     metadataMap.set(url, null);
                 }
-            })
+            }),
         );
         await Promise.all(promises);
 

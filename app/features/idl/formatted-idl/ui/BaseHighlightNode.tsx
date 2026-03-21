@@ -19,7 +19,7 @@ export const BaseHighlightNode = React.forwardRef<HTMLElement, BaseHighlightNode
                     // TODO: Background color is inline, because e-bg-accent-900/50 is not working
                     // Update when fixed
                     'e-bg-[color-mix(in_oklch,theme(colors.accent.900),transparent_50%)]',
-                    className
+                    className,
                 )}
                 {...props}
                 ref={ref}
@@ -27,6 +27,6 @@ export const BaseHighlightNode = React.forwardRef<HTMLElement, BaseHighlightNode
                 {children}
             </mark>
         );
-    }
+    },
 );
 BaseHighlightNode.displayName = 'BaseHighlightNode';

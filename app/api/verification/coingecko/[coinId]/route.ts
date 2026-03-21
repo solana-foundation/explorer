@@ -50,7 +50,7 @@ export async function GET(_request: Request, { params: { coinId } }: Params) {
             }
             return NextResponse.json(
                 { error: 'Failed to fetch coingecko data' },
-                { headers: NO_STORE_HEADERS, status: response.status }
+                { headers: NO_STORE_HEADERS, status: response.status },
             );
         }
 
@@ -60,7 +60,7 @@ export async function GET(_request: Request, { params: { coinId } }: Params) {
         Logger.panic(error instanceof Error ? error : new Error('Failed to fetch coingecko data'));
         return NextResponse.json(
             { error: 'Failed to fetch coingecko data' },
-            { headers: NO_STORE_HEADERS, status: 500 }
+            { headers: NO_STORE_HEADERS, status: 500 },
         );
     }
 }

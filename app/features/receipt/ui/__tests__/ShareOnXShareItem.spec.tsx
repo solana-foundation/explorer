@@ -15,7 +15,7 @@ describe('ShareOnXShareItem', () => {
         expect(openSpy).toHaveBeenCalledWith(
             `https://x.com/intent/tweet?url=${encodeURIComponent(globalThis.location.href)}`,
             '_blank',
-            'noreferrer'
+            'noreferrer',
         );
 
         openSpy.mockRestore();

@@ -40,7 +40,7 @@ describe('parseHomogeneousTuple', () => {
             parseHomogeneousTuple([
                 ['u8', 32],
                 ['u8', 32],
-            ])
+            ]),
         ).toBeNull();
     });
 });

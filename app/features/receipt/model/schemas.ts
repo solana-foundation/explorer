@@ -24,7 +24,7 @@ export const TokenTransferPayload = assign(
     BaseTransferPayload,
     type({
         mint: string(),
-    })
+    }),
 );
 
 export const SolTransferParsedSchema = type({
@@ -44,5 +44,5 @@ export const SystemTransferInstructionSchema = type({
 export const SystemTransferInstructionRefinedSchema = refine(
     SystemTransferInstructionSchema,
     'SystemTransferInstruction',
-    value => SystemProgram.programId.equals(value.programId)
+    value => SystemProgram.programId.equals(value.programId),
 );

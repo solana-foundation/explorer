@@ -101,15 +101,15 @@ function TokenMintHeader({
     parsedData?: TokenProgramData;
 }): JSX.Element {
     const metadataExtension = mintInfo?.extensions?.find(
-        ({ extension }: { extension: string }) => extension === 'tokenMetadata'
+        ({ extension }: { extension: string }) => extension === 'tokenMetadata',
     );
     const metadataPointerExtension = mintInfo?.extensions?.find(
-        ({ extension }: { extension: string }) => extension === 'metadataPointer'
+        ({ extension }: { extension: string }) => extension === 'metadataPointer',
     );
 
     const defaultCard = useMemo(
         () => <TokenMintHeaderCard token={tokenInfo ? tokenInfo : { logoURI: undefined, name: undefined }} />,
-        [tokenInfo]
+        [tokenInfo],
     );
 
     if (metadataPointerExtension && metadataExtension) {

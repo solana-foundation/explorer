@@ -33,8 +33,8 @@ export async function GET(_request: Request, { params: { network } }: Params) {
                     headers: {
                         Token: process.env.PING_API_KEY || '',
                     },
-                })
-            )
+                }),
+            ),
         );
         const data: { [interval: number]: ValidatorsAppPingStats[] } = {};
         await Promise.all(
@@ -46,7 +46,7 @@ export async function GET(_request: Request, { params: { network } }: Params) {
 
                 const interval = PING_INTERVALS[index];
                 data[interval] = (await response.json()) as ValidatorsAppPingStats[];
-            })
+            }),
         );
 
         return NextResponse.json(data, { headers: CACHE_HEADERS });
@@ -55,7 +55,7 @@ export async function GET(_request: Request, { params: { network } }: Params) {
         Logger.error(wrappedError, { sentry: true });
         return NextResponse.json(
             { error: 'Failed to fetch ping data' },
-            { headers: { 'Cache-Control': 'no-store, max-age=0' }, status: 500 }
+            { headers: { 'Cache-Control': 'no-store, max-age=0' }, status: 500 },
         );
     }
 }

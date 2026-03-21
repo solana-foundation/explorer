@@ -6,7 +6,7 @@ function populateSolanaDevelopersLink(component: string) {
 }
 
 export function populatePartialParsedTokenExtension(
-    extension: TokenExtensionType
+    extension: TokenExtensionType,
 ): Omit<ParsedTokenExtension, 'parsed' | 'extension'> {
     function populateExternalLinks(url: string) {
         return [{ label: 'Docs', url }];

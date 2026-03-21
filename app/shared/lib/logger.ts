@@ -132,7 +132,7 @@ function cleanContext(context?: LogContext): Record<string, unknown> | undefined
 function withSentryLevel(
     level: SeverityLevel,
     context: (LogContext & { sentryExtras?: SentryExtras }) | undefined,
-    capture: () => void
+    capture: () => void,
 ) {
     withScope(scope => {
         scope.setLevel(level);

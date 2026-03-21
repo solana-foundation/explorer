@@ -20,7 +20,7 @@ export interface IdlInterpreter<TIdl extends BaseIdl = BaseIdl, TProgram extends
         connection: Connection,
         wallet: UnifiedWallet,
         programId: PublicKey | string,
-        idl: TIdl
+        idl: TIdl,
     ): Promise<TProgram>;
 
     /**
@@ -30,6 +30,6 @@ export interface IdlInterpreter<TIdl extends BaseIdl = BaseIdl, TProgram extends
         program: TProgram,
         instructionName: string,
         accounts: Record<string, string> | UnifiedAccounts,
-        args: UnifiedArguments
+        args: UnifiedArguments,
     ): Promise<TransactionInstruction | VersionedMessage>;
 }

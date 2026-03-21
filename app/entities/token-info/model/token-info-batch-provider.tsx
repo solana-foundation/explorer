@@ -83,7 +83,7 @@ export function TokenInfoBatchProvider({ children }: { children: React.ReactNode
                 maxTimer.current = setTimeout(flush, MAX_WAIT_MS);
             }
         },
-        [flush]
+        [flush],
     );
 
     useEffect(() => {

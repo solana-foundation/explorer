@@ -203,7 +203,7 @@ describe('createReceipt', () => {
             });
             expect(getTokenInfo).toHaveBeenCalledWith(
                 '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
-                Cluster.MainnetBeta
+                Cluster.MainnetBeta,
             );
         });
 
@@ -305,7 +305,7 @@ describe('createReceipt', () => {
             });
             expect(getTokenInfo).toHaveBeenCalledWith(
                 '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
-                Cluster.MainnetBeta
+                Cluster.MainnetBeta,
             );
         });
 
@@ -343,7 +343,7 @@ describe('createReceipt', () => {
             });
             expect(getTokenInfo).toHaveBeenCalledWith(
                 'AN8h2reVWuPAWXhfJQounhTMqb5bvwVKumX6pMmSK25U',
-                Cluster.MainnetBeta
+                Cluster.MainnetBeta,
             );
         });
 

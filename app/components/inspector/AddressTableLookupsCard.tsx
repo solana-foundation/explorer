@@ -1,6 +1,7 @@
 import { Address } from '@components/common/Address';
 import { useAddressLookupTable } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
+import { cn } from '@shared/utils';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
@@ -35,7 +36,7 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
             <div className="card-header">
                 <h3 className="card-header-title">Address Table Lookup(s)</h3>
                 <button
-                    className={`btn btn-sm d-flex ${expanded ? 'btn-black active' : 'btn-white'}`}
+                    className={cn('btn btn-sm d-flex', expanded ? 'btn-black active' : 'btn-white')}
                     onClick={() => setExpanded(e => !e)}
                 >
                     {expanded ? 'Collapse' : 'Expand'}

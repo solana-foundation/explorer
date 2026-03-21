@@ -4,6 +4,7 @@ import { BorshEventCoder, BorshInstructionCoder, Idl, Program } from '@coral-xyz
 import { IdlDefinedFields } from '@coral-xyz/anchor/dist/cjs/idl';
 import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { useAnchorProgram } from '@entities/idl';
+import { cn } from '@shared/utils';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/index';
@@ -57,7 +58,7 @@ export function decodeEventWithCustomDiscriminator(eventData: string, program: P
                 const modifiedIdl: Idl = {
                     ...program.idl,
                     events: program.idl.events.map(ev =>
-                        ev.name === event.name ? { ...ev, discriminator: paddedDiscriminator } : { ...ev }
+                        ev.name === event.name ? { ...ev, discriminator: paddedDiscriminator } : { ...ev },
                     ),
                 };
 
@@ -151,7 +152,7 @@ export function decodeInstructionWithCustomDiscriminator(ixData: Buffer | Uint8A
                 const modifiedIdl: Idl = {
                     ...program.idl,
                     instructions: program.idl.instructions.map(ix =>
-                        ix.name === instruction.name ? { ...ix, discriminator: paddedDiscriminator } : { ...ix }
+                        ix.name === instruction.name ? { ...ix, discriminator: paddedDiscriminator } : { ...ix },
                     ),
                 };
 
@@ -279,7 +280,7 @@ function flattenIdlAccounts(accounts: IdlAccountItem[], nestingLevel = 0): Flatt
 
 export function getAnchorAccountsFromInstruction(
     decodedIx: { name: string } | null,
-    program: Program
+    program: Program,
 ): FlattenedIdlAccount[] | null {
     if (decodedIx) {
         // get ix accounts
@@ -475,7 +476,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                             const innerFieldType = getFieldDef(structFields, innerKey, 0);
                             if (!innerFieldType) {
                                 throw Error(
-                                    `Could not type definition for ${innerKey} field in user-defined struct ${fieldType.name}`
+                                    `Could not type definition for ${innerKey} field in user-defined struct ${fieldType.name}`,
                                 );
                             }
                             return mapField(innerKey, innerValue, innerFieldType, idl, key, nestingLevel + 1);
@@ -486,7 +487,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
         } else if (fieldType.type.kind === 'enum') {
             const enumVariantName = Object.keys(value)[0];
             const variant = fieldType.type.variants.find(
-                val => val.name.toLocaleLowerCase() === enumVariantName.toLocaleLowerCase()
+                val => val.name.toLocaleLowerCase() === enumVariantName.toLocaleLowerCase(),
             );
 
             return variant && variant.fields ? (
@@ -501,7 +502,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                             const innerFieldType = variant.fields![index];
                             if (!innerFieldType) {
                                 throw Error(
-                                    `Could not type definition for ${innerKey} field in user-defined struct ${fieldType.name}`
+                                    `Could not type definition for ${innerKey} field in user-defined struct ${fieldType.name}`,
                                 );
                             }
                             return mapField(
@@ -512,7 +513,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                                     : (innerFieldType as IdlType),
                                 idl,
                                 key,
-                                nestingLevel + 1
+                                nestingLevel + 1,
                             );
                         })}
                     </Fragment>
@@ -606,7 +607,7 @@ function SimpleRow({
     }
     itemKey = camelToTitleCase(itemKey);
     return (
-        <tr className={nestingLevel > 0 ? 'table-nested-account' : ''}>
+        <tr className={cn(nestingLevel > 0 && 'table-nested-account')}>
             <td>
                 <div className="d-flex flex-row align-items-center">
                     {nestingLevel > 0 && <CornerDownRight className="me-2 mb-1" size={14} />}
@@ -667,7 +668,7 @@ function typeDisplayName(
         | IdlType
         | {
               enum: string;
-          }
+          },
 ): string {
     switch (type) {
         case 'bool':

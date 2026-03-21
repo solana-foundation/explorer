@@ -26,7 +26,7 @@ export function ViewReceiptButton({ signature, receiptPath, transactionWithMeta 
             if (!transactionWithMeta) return undefined;
             return extractReceiptData(transactionWithMeta, cluster);
         },
-        { revalidateOnFocus: false }
+        { revalidateOnFocus: false },
     );
 
     if (!isReceiptEnabled || !receipt) {

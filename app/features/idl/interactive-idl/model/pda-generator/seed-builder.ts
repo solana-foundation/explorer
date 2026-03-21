@@ -18,7 +18,7 @@ export function buildSeedsWithInfo(
     seeds: IdlSeed[],
     args: Record<string, string | undefined>,
     accounts: Record<string, string | Record<string, string | undefined> | undefined>,
-    instruction: PdaInstruction
+    instruction: PdaInstruction,
 ): SeedInfo {
     const processed = seeds.map(seed => processSeed(seed, args, accounts, instruction));
     const info = processed.map(p => p.info);
@@ -35,7 +35,7 @@ function processSeed(
     seed: IdlSeed,
     args: Record<string, string | undefined>,
     accounts: Record<string, string | Record<string, string | undefined> | undefined>,
-    instruction: PdaInstruction
+    instruction: PdaInstruction,
 ): ProcessedSeed {
     switch (seed.kind) {
         case 'const':
@@ -58,7 +58,7 @@ function processConstSeed(seed: IdlSeedConst): ProcessedSeed {
 function processArgSeed(
     seed: IdlSeedArg,
     args: Record<string, string | undefined>,
-    instruction: PdaInstruction
+    instruction: PdaInstruction,
 ): ProcessedSeed {
     const camelPath = camelCase(seed.path);
     const value = args[camelPath];
@@ -76,7 +76,7 @@ function processArgSeed(
 
 function processAccountSeed(
     seed: IdlSeedAccount,
-    accounts: Record<string, string | Record<string, string | undefined> | undefined>
+    accounts: Record<string, string | Record<string, string | undefined> | undefined>,
 ): ProcessedSeed {
     const camelPath = camelCase(seed.path);
     const raw = accounts[camelPath];
@@ -141,10 +141,10 @@ function argToSeedBuffer(value: string, type: PdaArgument['type']): Buffer | nul
         const trimmed = value.trim();
         const bytes =
             typeof elementType === 'string' && elementType === 'u8'
-                ? parseU8ArrayFromHex(trimmed, length) ?? parseIntegerArray(value, 'u8', length)
+                ? (parseU8ArrayFromHex(trimmed, length) ?? parseIntegerArray(value, 'u8', length))
                 : typeof elementType === 'string'
-                ? parseIntegerArray(value, elementType, length)
-                : null;
+                  ? parseIntegerArray(value, elementType, length)
+                  : null;
         return bytes ? Buffer.from(bytes) : null;
     }
 

@@ -47,7 +47,7 @@ export function useDownloadReceipt(download: DownloadReceiptFn, resetMs = 2000):
                 stateRef.current = 'errored';
                 setState('errored');
                 scheduleReset();
-            }
+            },
         );
     }, [download, scheduleReset]);
 

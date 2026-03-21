@@ -139,7 +139,7 @@ function mockConnection(accountData: Buffer | null): Connection {
                   owner: NAME_SERVICE_PROGRAM,
                   rentEpoch: 0,
               }
-            : null
+            : null,
     );
     return connection;
 }

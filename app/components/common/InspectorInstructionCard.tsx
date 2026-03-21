@@ -1,5 +1,6 @@
 import { ProgramField } from '@entities/instruction-card';
 import { useScrollAnchor } from '@providers/scroll-anchor';
+import { cn } from '@shared/utils';
 import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import React from 'react';
@@ -49,7 +50,7 @@ export function InspectorInstructionCard({
         return setShowRaw(r => !r);
     };
     const scrollAnchorRef = useScrollAnchor(
-        getInstructionCardScrollAnchorId(childIndex != null ? [index + 1, childIndex + 1] : [index + 1])
+        getInstructionCardScrollAnchorId(childIndex != null ? [index + 1, childIndex + 1] : [index + 1]),
     );
 
     return (
@@ -65,7 +66,7 @@ export function InspectorInstructionCard({
 
                 <button
                     disabled={defaultRaw}
-                    className={`btn btn-sm d-flex align-items-center ${showRaw ? 'btn-black active' : 'btn-white'}`}
+                    className={cn('btn btn-sm d-flex align-items-center', showRaw ? 'btn-black active' : 'btn-white')}
                     onClick={rawClickHandler}
                 >
                     <Code className="me-2" size={13} /> Raw

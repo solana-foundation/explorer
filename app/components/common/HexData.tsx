@@ -34,7 +34,7 @@ export function HexData({
         spans.push(
             <span key={i} className={color}>
                 {chunks.slice(i, i + SPAN_SIZE).join(' ')}&emsp;
-            </span>
+            </span>,
         );
 
         if (i % ROW_SIZE === ROW_SIZE - SPAN_SIZE || i >= chunks.length - SPAN_SIZE) {

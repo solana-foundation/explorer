@@ -62,7 +62,7 @@ function drawStackedRow(
     label: string,
     value: string,
     y: number,
-    style: TextStyle = TEXT_STYLES.value
+    style: TextStyle = TEXT_STYLES.value,
 ): number {
     applyTextStyle(doc, TEXT_STYLES.label);
     doc.text(formatText(label, TEXT_STYLES.label), PAGE.marginX, y);
@@ -92,7 +92,7 @@ function addEditableField(
     multiline = false,
     textAlign = 0,
     bold = false,
-    fontSize = 8
+    fontSize = 8,
 ): void {
     doc.setFillColor(COLORS.fieldBg);
     applyLineStyle(doc, LINE_STYLES.border);
@@ -126,7 +126,7 @@ function drawLabeledField(
     y: number,
     defaultValue = '',
     multiline = false,
-    height = 6
+    height = 6,
 ): number {
     applyTextStyle(doc, TEXT_STYLES.label);
     doc.text(formatText(label, TEXT_STYLES.label), PAGE.marginX, y);
@@ -157,7 +157,7 @@ function drawTotalRow(doc: jsPDF, label: string, fieldName: string, value: strin
         false,
         0,
         true,
-        FOOTER_FONT_SIZE
+        FOOTER_FONT_SIZE,
     );
     return y + FOOTER_CELL_HEIGHT + 6;
 }
@@ -173,7 +173,7 @@ export async function generateReceiptPdf(
     signature: string,
     receiptUrl: string,
     transactionUrl?: string,
-    usdValue?: string
+    usdValue?: string,
 ): Promise<void> {
     const doc = new deps.JsPDF({ format: 'a4', unit: 'mm' });
 
@@ -226,7 +226,7 @@ export async function generateReceiptPdf(
             'Original Amount',
             `${receipt.total.formatted} ${receipt.total.unit}`,
             y,
-            TEXT_STYLES.totalLabel
+            TEXT_STYLES.totalLabel,
         );
     }
 

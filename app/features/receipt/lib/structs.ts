@@ -7,5 +7,5 @@ import { coerce, instance, string, union } from 'superstruct';
  */
 export const publicKeyString = () =>
     coerce(string(), union([string(), instance(PublicKey)]), value =>
-        typeof value === 'string' ? value : value.toString()
+        typeof value === 'string' ? value : value.toString(),
     );

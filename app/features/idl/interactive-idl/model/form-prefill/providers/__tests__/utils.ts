@@ -32,7 +32,7 @@ export function createTestInstruction(accounts: PlainAccountInput[], name = 'tes
 
 export function createNestedTestAccount(
     groupName: string,
-    accounts: PlainAccountInput[]
+    accounts: PlainAccountInput[],
 ): NestedInstructionAccountsData {
     return {
         accounts: accounts.map(toPlainAccount),

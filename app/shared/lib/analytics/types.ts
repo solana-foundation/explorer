@@ -14,8 +14,8 @@ type FitsIn<S extends string, N extends number, Acc extends unknown[] = []> = Ac
         ? true
         : false
     : S extends `${string}${infer Rest}`
-    ? FitsIn<Rest, N, [...Acc, unknown]>
-    : true;
+      ? FitsIn<Rest, N, [...Acc, unknown]>
+      : true;
 
 /** Resolves to S if within 40 chars, otherwise never */
 export type GA4EventName<S extends string> = FitsIn<S, 40> extends true ? S : never;

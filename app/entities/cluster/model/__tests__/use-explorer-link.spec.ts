@@ -59,7 +59,7 @@ describe('useExplorerLink', () => {
             const { result } = renderHook(() => useExplorerLink('/address/123'));
 
             expect(result.current.link).toBe(
-                'https://explorer.solana.com/address/123?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899'
+                'https://explorer.solana.com/address/123?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899',
             );
         });
 
@@ -84,7 +84,7 @@ describe('useExplorerLink', () => {
             const { result } = renderHook(() => useExplorerLink('/tx/abc'));
 
             expect(result.current.link).toBe(
-                'https://explorer.solana.com/tx/abc?cluster=custom&customUrl=https%3A%2F%2Fapi.custom.solana.com%3A8080%2Fpath'
+                'https://explorer.solana.com/tx/abc?cluster=custom&customUrl=https%3A%2F%2Fapi.custom.solana.com%3A8080%2Fpath',
             );
         });
     });
@@ -172,7 +172,7 @@ describe('useExplorerLink', () => {
             const { result, rerender } = renderHook(() => useExplorerLink('/address/123'));
 
             expect(result.current.link).toBe(
-                'https://explorer.solana.com/address/123?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899'
+                'https://explorer.solana.com/address/123?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899',
             );
 
             // Change customUrl
@@ -184,7 +184,7 @@ describe('useExplorerLink', () => {
             rerender();
 
             expect(result.current.link).toBe(
-                'https://explorer.solana.com/address/123?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A9999'
+                'https://explorer.solana.com/address/123?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A9999',
             );
         });
     });

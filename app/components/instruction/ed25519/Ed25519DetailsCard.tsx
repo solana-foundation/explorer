@@ -63,7 +63,7 @@ const extractData = (
     instructionIndex: number,
     sourceData: Buffer,
     dataOffset: number,
-    dataLength: number
+    dataLength: number,
 ): Uint8Array | null => {
     if (instructionIndex === ED25519_SELF_REFERENCE_INSTRUCTION_INDEX) {
         return sourceData.slice(dataOffset, dataOffset + dataLength);
@@ -104,7 +104,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                     offset.signatureInstructionIndex,
                     ix.data,
                     offset.signatureOffset,
-                    64
+                    64,
                 );
 
                 const pubkey = extractData(tx, offset.publicKeyInstructionIndex, ix.data, offset.publicKeyOffset, 32);
@@ -114,7 +114,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                     offset.messageInstructionIndex,
                     ix.data,
                     offset.messageDataOffset,
-                    offset.messageDataSize
+                    offset.messageDataSize,
                 );
 
                 return (

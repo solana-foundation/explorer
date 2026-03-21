@@ -28,7 +28,7 @@ describe('BaseInstructionCard', () => {
                 <ClusterProvider>
                     <BaseInstructionCard ix={ti} index={index} title="Program: Instruction" result={{ err: null }} />
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         // check that card is rendered with proper title
         expect(screen.getByText(/Program: Instruction/)).toBeInTheDocument();
@@ -55,7 +55,7 @@ describe('BaseInstructionCard', () => {
                         defaultRaw
                     />
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         // instruction should relate to specific program
         expect(await screen.findAllByText(/Associated Token Program/)).toHaveLength(2);

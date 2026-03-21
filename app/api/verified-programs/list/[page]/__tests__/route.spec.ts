@@ -202,7 +202,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
 
             expect(Logger.error).toHaveBeenCalledWith(
                 new Error('[api:verified-programs] Failed to fetch verified programs page'),
-                { page: 1, status: 503 }
+                { page: 1, status: 503 },
             );
         });
 

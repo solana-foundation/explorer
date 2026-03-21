@@ -106,6 +106,6 @@ export function useFetchRawTransaction() {
         (signature: TransactionSignature) => {
             url && fetchRawTransaction(dispatch, signature, cluster, url);
         },
-        [dispatch, cluster, url]
+        [dispatch, cluster, url],
     );
 }

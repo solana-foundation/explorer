@@ -107,7 +107,7 @@ export function CookieCard({ children, className }: { children: React.ReactNode;
         <div
             className={cn(
                 'e-fixed e-bottom-2.5 e-left-2.5 e-right-2.5 e-z-[1200] e-rounded-lg e-border e-border-slate-100 e-bg-black e-p-4 [border-style:solid] md:e-right-auto md:e-max-w-[400px]',
-                className
+                className,
             )}
         >
             {children}

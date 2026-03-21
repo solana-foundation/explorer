@@ -1,4 +1,5 @@
 import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
+import { cn } from '@shared/utils';
 import { ConcurrentMerkleTreeAccount, MerkleTree } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';
@@ -104,7 +105,7 @@ function DasCompressionInfoCard({ proof, compressedNft }: { proof: CompressedNft
 function getVerifiedProofPill(verified: boolean) {
     return (
         <div className={'d-inline-flex align-items-center ms-2'}>
-            <span className={`badge badge-pill bg-dark ${verified ? '' : 'bg-danger-soft'}`}>{`Proof ${
+            <span className={cn('badge badge-pill bg-dark', !verified && 'bg-danger-soft')}>{`Proof ${
                 verified ? '' : 'Not'
             } Verified`}</span>
         </div>

@@ -12,7 +12,7 @@ import { getProvider, useIdlFromAnchorProgramSeed } from './use-idl-from-anchor-
 export function useAnchorProgram(
     programAddress: string,
     url: string,
-    cluster?: Cluster
+    cluster?: Cluster,
 ): { program: Program | null; idl: Idl | null } {
     // TODO(ngundotra): Rewrite this to be more efficient
     // const idlFromBinary = useIdlFromSolanaProgramBinary(programAddress);

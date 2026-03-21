@@ -21,7 +21,7 @@ export async function getTx(
         findCluster?: (signature: string) => Promise<Cluster | undefined>;
         fetchDetails?: (signature: string, rpcUrl: string) => Promise<ParsedTransactionWithMeta>;
     },
-    cluster?: Cluster
+    cluster?: Cluster,
 ): Promise<ApiData> {
     const findClusterFn = dependencies?.findCluster ?? findTransactionCluster;
     const fetchDetailsFn = dependencies?.fetchDetails ?? fetchTransactionDetails;

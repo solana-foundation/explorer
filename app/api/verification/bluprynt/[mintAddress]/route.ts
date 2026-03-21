@@ -25,7 +25,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
     if (!BLUPRYNT_CREDENTIAL) {
         return NextResponse.json(
             { error: 'Bluprynt API is misconfigured' },
-            { headers: NO_STORE_HEADERS, status: 500 }
+            { headers: NO_STORE_HEADERS, status: 500 },
         );
     }
 
@@ -52,7 +52,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
         Logger.panic(error instanceof Error ? error : new Error('Failed to verify bluprynt data'));
         return NextResponse.json(
             { error: 'Failed to verify bluprynt data' },
-            { headers: NO_STORE_HEADERS, status: 500 }
+            { headers: NO_STORE_HEADERS, status: 500 },
         );
     }
 }

@@ -70,7 +70,7 @@ export function useVerifiedProgramRegistry({
 
             return response.json() as Promise<OsecInfo[]>;
         },
-        { suspense: options?.suspense }
+        { suspense: options?.suspense },
     );
 
     if (!programData || !registryData) {
@@ -82,7 +82,7 @@ export function useVerifiedProgramRegistry({
     if (programAuthority) {
         const trustedEntries = registryData.filter(
             entry =>
-                (TRUSTED_SIGNERS[entry.signer] || entry.signer === programAuthority?.toBase58()) && entry.is_verified
+                (TRUSTED_SIGNERS[entry.signer] || entry.signer === programAuthority?.toBase58()) && entry.is_verified,
         );
 
         // Re-validate the on-chain hash locally (the registry's is_verified flag may be stale)
@@ -111,7 +111,7 @@ export function useVerifiedProgramRegistry({
         // frozen programs or trusted signers. Since immutable programs cannot
         // be changed, verification from any trusted source remains valid.
         const trustedEntries = registryData.filter(
-            entry => entry.is_verified && (entry.is_frozen || TRUSTED_SIGNERS[entry.signer])
+            entry => entry.is_verified && (entry.is_frozen || TRUSTED_SIGNERS[entry.signer]),
         );
 
         // Re-validate against on-chain data since the registry's is_verified flag may be stale
@@ -144,7 +144,7 @@ export function useIsProgramVerified({
 
             // Cross-check the on-chain hash to stay consistent with useVerifiedProgramRegistry
             return osecInfo.is_verified && hash === osecInfo['on_chain_hash'];
-        }
+        },
     );
 }
 
@@ -204,7 +204,7 @@ function useEnrichedOsecInfo({
             try {
                 const [pda] = PublicKey.findProgramAddressSync(
                     [Buffer.from('otter_verify'), new PublicKey(osecInfo.signer).toBuffer(), programId.toBuffer()],
-                    new PublicKey(VERIFY_PROGRAM_ID)
+                    new PublicKey(VERIFY_PROGRAM_ID),
                 );
 
                 const pdaAccountInfo = await (accountAnchorProgram.account as any).buildParams.fetch(pda);
@@ -217,7 +217,7 @@ function useEnrichedOsecInfo({
                 return null;
             }
         },
-        { suspense: options?.suspense }
+        { suspense: options?.suspense },
     );
 
     if (!osecInfo || pdaError) {
@@ -230,8 +230,8 @@ function useEnrichedOsecInfo({
     const message = TRUSTED_SIGNERS[osecInfo?.signer || '']
         ? 'Verification information provided by a trusted signer.'
         : osecInfo.is_frozen
-        ? 'Verification information provided by the program deployer.'
-        : 'Verification information provided by the program authority.';
+          ? 'Verification information provided by the program deployer.'
+          : 'Verification information provided by the program authority.';
 
     const enrichedOsecInfo: OsecRegistryInfo = {
         ...osecInfo,
@@ -240,8 +240,8 @@ function useEnrichedOsecInfo({
         verification_status: osecInfo.is_verified
             ? VerificationStatus.Verified
             : pdaData
-            ? VerificationStatus.PdaUploaded
-            : VerificationStatus.NotVerified,
+              ? VerificationStatus.PdaUploaded
+              : VerificationStatus.NotVerified,
         verify_command: '',
     };
     enrichedOsecInfo.repo_url = pdaData.gitUrl;

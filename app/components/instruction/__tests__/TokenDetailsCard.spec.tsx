@@ -51,7 +51,7 @@ describe('instruction::TokenDetailsCard', () => {
                         />
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/Token Program: Transfer/)).toBeInTheDocument();
     });
@@ -82,7 +82,7 @@ describe('instruction::TokenDetailsCard', () => {
                         />
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/Token Program: Transfer \(Checked\)/)).toBeInTheDocument();
     });

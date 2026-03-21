@@ -33,7 +33,7 @@ export const defaultReceipt: FormattedReceipt = formatReceiptData(baseSolReceipt
 
 export const receiptWithMemo: FormattedReceipt = formatReceiptData(
     { ...baseSolReceipt, memo: longMemoText, total: 50000000000 },
-    CLUSTER
+    CLUSTER,
 );
 
 export const receiptLargeAmount: FormattedReceipt = (() => {
@@ -46,7 +46,7 @@ export const receiptLargeAmount: FormattedReceipt = (() => {
 
 export const receiptLargeAmountWithMemo: FormattedReceipt = formatReceiptData(
     { ...baseSolReceipt, memo: 'Large transfer', total: 100000000000 },
-    CLUSTER
+    CLUSTER,
 );
 
 export const receiptWithDomains: FormattedReceipt = (() => {
@@ -74,7 +74,7 @@ export const receiptTokenTransfer: FormattedReceipt = formatReceiptData(
         total: 1250.75,
         type: 'token',
     },
-    CLUSTER
+    CLUSTER,
 );
 
 export const receiptTokenTransferSimple: FormattedReceipt = formatReceiptData(
@@ -90,12 +90,12 @@ export const receiptTokenTransferSimple: FormattedReceipt = formatReceiptData(
         total: 1250.75,
         type: 'token',
     },
-    CLUSTER
+    CLUSTER,
 );
 
 export function forBaseReceipt(
     data: FormattedReceipt,
-    overrides?: Partial<FormattedExtendedReceipt>
+    overrides?: Partial<FormattedExtendedReceipt>,
 ): FormattedExtendedReceipt {
     return {
         ...data,

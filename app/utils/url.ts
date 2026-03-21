@@ -23,7 +23,7 @@ export function useClusterPath({ additionalParams, pathname }: Config) {
         () =>
             pickClusterParams(pathnameWithoutHash, currentSearchParams ?? undefined, additionalParams) +
             (hash ? `#${hash}` : ''),
-        [additionalParams, currentSearchParams, hash, pathnameWithoutHash]
+        [additionalParams, currentSearchParams, hash, pathnameWithoutHash],
     );
 }
 
@@ -31,7 +31,7 @@ const MAINNET_MONIKER = clusterSlug(Cluster.MainnetBeta);
 export function pickClusterParams(
     pathname: string,
     currentSearchParams?: { toString(): string; get(key: string): string | null },
-    additionalParams?: { get(key: string): string | null }
+    additionalParams?: { get(key: string): string | null },
 ): string {
     let nextSearchParams: URLSearchParams | undefined;
 

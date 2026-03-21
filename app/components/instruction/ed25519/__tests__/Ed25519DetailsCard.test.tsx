@@ -54,8 +54,8 @@ describe('Ed25519DetailsCard', () => {
             data: bs58.encode(
                 Buffer.from(
                     '3259784efe0f688cec00000037d6acf4b3c9628b3485f398ed7baa20c37c4dff8ebee937456adea100d27c923e097cb0f41c9ff752efc7ed06db3c28bcf867f3ca203cde9222e72d1e93d503395311d51c1b87fd56c3b5872d1041111e51f399b12d291d981a0ea3834072958a00303030313031303034303432306630303030303030303030303030303030303030303030303030303031303030303030303030303030303030303031633830313939353235653733313730303030303030313330646465643337313730303030303030303030633866373165313530303030303030303334373337303431353433343533343830303030',
-                    'hex'
-                )
+                    'hex',
+                ),
             ),
             keys: [
                 {
@@ -114,7 +114,7 @@ describe('Ed25519DetailsCard', () => {
         expect(card).toHaveTextContent('Signature Reference');
         expect(card).toHaveTextContent('Instruction 1, Offset 12');
         expect(card).toHaveTextContent(
-            'N9as9LPJYos0hfOY7XuqIMN8Tf+Ovuk3RWreoQDSfJI+CXyw9Byf91Lvx+0G2zwovPhn88ogPN6SIuctHpPVAw=='
+            'N9as9LPJYos0hfOY7XuqIMN8Tf+Ovuk3RWreoQDSfJI+CXyw9Byf91Lvx+0G2zwovPhn88ogPN6SIuctHpPVAw==',
         );
 
         // Check public key details
@@ -126,7 +126,7 @@ describe('Ed25519DetailsCard', () => {
         expect(card).toHaveTextContent('Message Reference');
         expect(card).toHaveTextContent('Instruction 1, Offset 110, Size 138');
         expect(card).toHaveTextContent(
-            'MDAwMTAxMDA0MDQyMGYwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAxMDAwMDAwMDAwMDAwMDAwMDAxYzgwMTk5NTI1ZTczMTcwMDAwMDAwMTMwZGRlZDM3MTcwMDAwMDAwMDAwYzhmNzFlMTUwMDAwMDAwMDM0NzM3MDQxNTQzNDUzNDgwMDAw'
+            'MDAwMTAxMDA0MDQyMGYwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAxMDAwMDAwMDAwMDAwMDAwMDAxYzgwMTk5NTI1ZTczMTcwMDAwMDAwMTMwZGRlZDM3MTcwMDAwMDAwMDAwYzhmNzFlMTUwMDAwMDAwMDM0NzM3MDQxNTQzNDUzNDgwMDAw',
         );
     });
 
@@ -137,7 +137,7 @@ describe('Ed25519DetailsCard', () => {
         const ed25519x = {
             data: Buffer.from(
                 '01003000ffff1000ffff70002000ffff8f2ed8bcd09b724040a0fc59ce9b5ea78525b6054def83d68f3a3930aa76e5bd4c105e1989c4d276372c97a5efb79d89bcc78f094f155be1b369e62e8b7eb42f42b3341f6be3b5c6f13a176fd7ca32323bf759c547126117365dccdae56e180f07932bbeab087035132975788c9af2a2c1a63e371e0866efcdb5a1952a1d2422',
-                'hex'
+                'hex',
             ),
             keys: [],
             programId: new PublicKey('Ed25519SigVerify111111111111111111111111111'),
@@ -162,7 +162,7 @@ describe('Ed25519DetailsCard', () => {
         expect(card).toHaveTextContent('Signature Reference');
         expect(card).toHaveTextContent('This instruction, Offset 48');
         expect(card).toHaveTextContent(
-            'TBBeGYnE0nY3LJel77edibzHjwlPFVvhs2nmLot+tC9CszQfa+O1xvE6F2/XyjIyO/dZxUcSYRc2Xcza5W4YDw=='
+            'TBBeGYnE0nY3LJel77edibzHjwlPFVvhs2nmLot+tC9CszQfa+O1xvE6F2/XyjIyO/dZxUcSYRc2Xcza5W4YDw==',
         );
 
         // Check public key details
@@ -183,7 +183,7 @@ describe('Ed25519DetailsCard', () => {
         const ed25519x = {
             data: Buffer.from(
                 '01003000fffe1000fffe70002000fffe8f2ed8bcd09b724040a0fc59ce9b5ea78525b6054def83d68f3a3930aa76e5bd4c105e1989c4d276372c97a5efb79d89bcc78f094f155be1b369e62e8b7eb42f42b3341f6be3b5c6f13a176fd7ca32323bf759c547126117365dccdae56e180f07932bbeab087035132975788c9af2a2c1a63e371e0866efcdb5a1952a1d2422',
-                'hex'
+                'hex',
             ),
             keys: [],
             programId: new PublicKey('Ed25519SigVerify111111111111111111111111111'),

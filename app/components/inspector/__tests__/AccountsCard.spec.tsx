@@ -20,7 +20,7 @@ describe('inspector::AccountsCard', () => {
                 <AccountsProvider>
                     <AccountsCard message={m} />
                 </AccountsProvider>
-            </ClusterProvider>
+            </ClusterProvider>,
         );
 
         // Should show account list header
@@ -38,7 +38,7 @@ describe('inspector::AccountsCard', () => {
                 <AccountsProvider>
                     <AccountsCard message={m} />
                 </AccountsProvider>
-            </ClusterProvider>
+            </ClusterProvider>,
         );
 
         // Should show account list header

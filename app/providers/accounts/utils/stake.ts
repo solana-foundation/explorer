@@ -67,7 +67,7 @@ function getStakeHistoryEntry(epoch: bigint, stakeHistory: StakeHistoryEntry[]):
 function getStakeAndActivating(
     delegation: Delegation,
     targetEpoch: bigint,
-    stakeHistory: StakeHistoryEntry[]
+    stakeHistory: StakeHistoryEntry[],
 ): EffectiveAndActivating {
     if (delegation.activationEpoch === delegation.deactivationEpoch) {
         // activated but instantly deactivated; no stake at all regardless of target_epoch
@@ -131,7 +131,7 @@ function getStakeAndActivating(
 function getStakeActivatingAndDeactivating(
     delegation: Delegation,
     targetEpoch: bigint,
-    stakeHistory: StakeHistoryEntry[]
+    stakeHistory: StakeHistoryEntry[],
 ): StakeActivatingAndDeactivating {
     const { effective, activating } = getStakeAndActivating(delegation, targetEpoch, stakeHistory);
 
@@ -223,7 +223,7 @@ export async function getStakeActivation(connection: Connection, stakeAddress: P
     const { effective, activating, deactivating } = getStakeActivatingAndDeactivating(
         { ...stakeAccount.stake.delegation, voterPubkey: stakeAccount.stake.delegation.voterPubkey },
         BigInt(epochInfo.epoch),
-        stakeHistory
+        stakeHistory,
     );
 
     let status;
@@ -246,7 +246,7 @@ export async function getStakeActivation(connection: Connection, stakeAddress: P
 }
 
 const getStakeAccount = function (
-    parsedData: RpcResponseAndContext<AccountInfo<ParsedAccountData | Buffer> | null>
+    parsedData: RpcResponseAndContext<AccountInfo<ParsedAccountData | Buffer> | null>,
 ): StakeAccount {
     let discriminant = BigInt(0);
     if (parsedData.value === null || parsedData.value.data instanceof Buffer) {
@@ -284,7 +284,7 @@ const getStakeAccount = function (
 };
 
 const getStakeHistory = function (
-    parsedData: RpcResponseAndContext<AccountInfo<ParsedAccountData | Buffer> | null>
+    parsedData: RpcResponseAndContext<AccountInfo<ParsedAccountData | Buffer> | null>,
 ): StakeHistoryEntry[] {
     if (parsedData.value === null || parsedData.value.data instanceof Buffer) {
         throw new Error('Account not found');

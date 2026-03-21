@@ -12,7 +12,7 @@ export function BaseDomainsCard({ domains }: { domains: DomainInfo[] }) {
             domains
                 .map(domain => ({ ...domain, pubkey: tryPublicKey(domain.address) }))
                 .filter((d): d is DomainInfo & { pubkey: PublicKey } => d.pubkey !== null),
-        [domains]
+        [domains],
     );
 
     return (

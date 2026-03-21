@@ -13,7 +13,7 @@ export function useProgramMetadataIdl(programAddress: string, url: string, clust
         url,
         cluster,
         PMP_IDL_ENABLED,
-        useSuspense
+        useSuspense,
     );
     return { programMetadataIdl: programMetadata };
 }

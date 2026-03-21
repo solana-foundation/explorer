@@ -144,8 +144,8 @@ function FungibleTokenMintAccountCard({
                     {tokenInfo
                         ? 'Overview'
                         : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58()
-                        ? 'Token-2022 Mint'
-                        : 'Token Mint'}
+                          ? 'Token-2022 Mint'
+                          : 'Token Mint'}
                 </h3>
                 <button className="btn btn-white btn-sm" onClick={refresh}>
                     <RefreshCw className="align-text-top me-2" size={13} />
@@ -165,7 +165,7 @@ function FungibleTokenMintAccountCard({
                         <span>
                             {normalizeTokenAmount(
                                 Number(mintInfo.supply) * Number(scaledUiAmountMultiplier),
-                                mintInfo.decimals
+                                mintInfo.decimals,
                             ).toLocaleString('en-US', {
                                 maximumFractionDigits: 20,
                             })}
@@ -428,7 +428,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                         <ScaledUiAmountMultiplierTooltip
                             rawAmount={normalizeTokenAmount(
                                 Number(info.tokenAmount.amount),
-                                info.tokenAmount.decimals || 0
+                                info.tokenAmount.decimals || 0,
                             ).toString()}
                             scaledUiAmountMultiplier={scaledUiAmountMultiplier}
                         />
@@ -469,7 +469,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                                         {'\u25ce'}
                                         <span className="font-monospace">
                                             {new BigNumber(
-                                                info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0'
+                                                info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0',
                                             ).toFormat(9)}
                                         </span>
                                     </>
@@ -591,7 +591,7 @@ export function TokenExtensionRow(
     maybeEpoch: bigint | undefined,
     decimals: number,
     symbol: string | undefined,
-    headerStyle: 'header' | 'omit' = 'header'
+    headerStyle: 'header' | 'omit' = 'header',
 ) {
     const epoch = maybeEpoch || 0n; // fallback to 0 if not provided
     switch (tokenExtension.extension) {
@@ -650,7 +650,7 @@ export function TokenExtensionRow(
                                 'en-US',
                                 {
                                     maximumFractionDigits: 20,
-                                }
+                                },
                             )}
                         </td>
                     </tr>
@@ -672,7 +672,7 @@ export function TokenExtensionRow(
                                 'en-US',
                                 {
                                     maximumFractionDigits: 20,
-                                }
+                                },
                             )}
                         </td>
                     </tr>

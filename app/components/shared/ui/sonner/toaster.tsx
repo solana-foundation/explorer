@@ -12,7 +12,7 @@ export const Toaster = ({ toastOptions, ...props }: Props) => {
                 className: cn(
                     '!e-px-4 !e-py-2',
                     'data-[type=success]:!e-bg-accent-secondary data-[type=success]:!e-border-accent-secondary data-[type=success]:!e-text-foreground',
-                    'data-[type=error]:!e-bg-destructive data-[type=error]:!e-border-destructive data-[type=error]:!e-text-foreground'
+                    'data-[type=error]:!e-bg-destructive data-[type=error]:!e-border-destructive data-[type=error]:!e-text-foreground',
                 ),
                 ...toastOptions,
             }}

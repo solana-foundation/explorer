@@ -8,7 +8,7 @@ import type { InstructionAccountData, InstructionData, NestedInstructionAccounts
  */
 export type AccountTraversalCallback = (
     account: InstructionAccountData,
-    parentGroup?: NestedInstructionAccountsData
+    parentGroup?: NestedInstructionAccountsData,
 ) => void;
 
 /**

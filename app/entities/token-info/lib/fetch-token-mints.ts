@@ -11,7 +11,7 @@ export async function getTokenInfos(
     addresses: string[],
     cluster: Cluster,
     genesisHash?: string,
-    config?: FetchConfig
+    config?: FetchConfig,
 ): Promise<TokenInfo[]> {
     if (addresses.length === 0) return [];
 
@@ -51,7 +51,7 @@ export async function getTokenInfo(
     address: string,
     cluster: Cluster,
     genesisHash?: string,
-    config?: FetchConfig
+    config?: FetchConfig,
 ): Promise<TokenInfo | undefined> {
     const tokens = await getTokenInfos([address], cluster, genesisHash, config);
     return tokens[0];

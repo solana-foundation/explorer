@@ -38,10 +38,10 @@ export function useCopyToClipboard(resetMs = 2000): readonly [CopyState, (text: 
                     Logger.error(new Error('Clipboard write failed', { cause: error }));
                     setState('errored');
                     scheduleReset();
-                }
+                },
             );
         },
-        [scheduleReset]
+        [scheduleReset],
     );
 
     return [state, copy] as const;

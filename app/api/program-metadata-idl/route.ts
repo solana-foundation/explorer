@@ -42,7 +42,7 @@ export async function GET(request: Request) {
             {
                 headers: CACHE_HEADERS,
                 status: 200,
-            }
+            },
         );
     } catch (error) {
         // Handle expected Solana errors (like metadata not found) gracefully
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
                 {
                     headers: CACHE_HEADERS,
                     status: 200,
-                }
+                },
             );
         }
 
@@ -66,6 +66,6 @@ export async function GET(request: Request) {
  */
 function isExpectedSolanaError(error: unknown) {
     return EXPECTED_SOLANA_ERRORS.some(
-        errorCode => isSolanaError<typeof errorCode>(error) && error.context.__code === errorCode
+        errorCode => isSolanaError<typeof errorCode>(error) && error.context.__code === errorCode,
     );
 }

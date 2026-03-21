@@ -62,7 +62,7 @@ describe('GET /api/program-metadata-idl', () => {
     it('should return null when account-not-found SolanaError is thrown', async () => {
         const mock = await mockGetProgramCanonicalMetadata();
         mock.mockRejectedValueOnce(
-            new SolanaError(SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND, { address: mockAddress })
+            new SolanaError(SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND, { address: mockAddress }),
         );
 
         const { GET } = await importRoute();

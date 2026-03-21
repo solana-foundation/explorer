@@ -23,7 +23,7 @@ describe('getTokenInfo', () => {
             vi.fn().mockResolvedValueOnce({
                 json: () => Promise.resolve({ content: [tokenInfo] }),
                 status: 200,
-            })
+            }),
         );
 
         const result = await getTokenInfo(mintAddress, Cluster.MainnetBeta);
@@ -37,7 +37,7 @@ describe('getTokenInfo', () => {
             vi.fn().mockResolvedValueOnce({
                 json: () => Promise.resolve({}),
                 status: 200,
-            })
+            }),
         );
 
         const result = await getTokenInfo(mintAddress, Cluster.MainnetBeta);

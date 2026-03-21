@@ -66,7 +66,7 @@ export default function FeatureGatesPageClient() {
                                         <td className="px-3">
                                             <Link
                                                 href={`/epoch/${feature.clusterActivationEpoch}?cluster=${clusterSlug(
-                                                    cluster
+                                                    cluster,
                                                 )}`}
                                                 className="epoch-link mb-1"
                                             >

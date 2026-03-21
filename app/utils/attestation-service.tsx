@@ -12,7 +12,7 @@ import {
 export function decodeWithType(
     account: Account,
     type: 'attestation' | 'credential' | 'schema',
-    func: typeof decodeAttestation | typeof decodeCredential | typeof decodeSchema
+    func: typeof decodeAttestation | typeof decodeCredential | typeof decodeSchema,
 ) {
     try {
         const input = {

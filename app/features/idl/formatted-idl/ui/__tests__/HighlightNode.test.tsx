@@ -11,7 +11,7 @@ describe('HighlightNode', () => {
             render(
                 <HighlightNode>
                     <span>Test Text</span>
-                </HighlightNode>
+                </HighlightNode>,
             );
 
             const textElement = screen.getByText('Test Text');
@@ -28,7 +28,7 @@ describe('HighlightNode', () => {
                     <HighlightNode>
                         <span>Test Text</span>
                     </HighlightNode>
-                </SearchHighlightProvider>
+                </SearchHighlightProvider>,
             );
 
             const textElement = screen.getByText('Test Text');
@@ -43,7 +43,7 @@ describe('HighlightNode', () => {
                     <HighlightNode>
                         <span>Test Text</span>
                     </HighlightNode>
-                </SearchHighlightProvider>
+                </SearchHighlightProvider>,
             );
 
             const markElement = screen.getByRole('mark');
@@ -57,7 +57,7 @@ describe('HighlightNode', () => {
                     <HighlightNode>
                         <span>Test Text</span>
                     </HighlightNode>
-                </SearchHighlightProvider>
+                </SearchHighlightProvider>,
             );
 
             const textElement = screen.getByText('Test Text');
@@ -72,7 +72,7 @@ describe('HighlightNode', () => {
             render(
                 <SearchHighlightProvider searchStr="hello">
                     <HighlightNode>hello world</HighlightNode>
-                </SearchHighlightProvider>
+                </SearchHighlightProvider>,
             );
 
             const markElement = screen.getByRole('mark');
@@ -84,7 +84,7 @@ describe('HighlightNode', () => {
             render(
                 <SearchHighlightProvider searchStr="42">
                     <HighlightNode>{42}</HighlightNode>
-                </SearchHighlightProvider>
+                </SearchHighlightProvider>,
             );
 
             const markElement = screen.getByRole('mark');
@@ -99,7 +99,7 @@ describe('HighlightNode', () => {
                         <span>Hello</span>
                         <span>World</span>
                     </HighlightNode>
-                </SearchHighlightProvider>
+                </SearchHighlightProvider>,
             );
 
             const markElement = screen.getByRole('mark');
@@ -116,7 +116,7 @@ describe('HighlightNode', () => {
                             <span>Text</span>
                         </div>
                     </HighlightNode>
-                </SearchHighlightProvider>
+                </SearchHighlightProvider>,
             );
 
             const markElement = screen.getByRole('mark');
@@ -131,7 +131,7 @@ describe('HighlightNode', () => {
                         <span>Hello</span> {123}
                         <span>World</span>
                     </HighlightNode>
-                </SearchHighlightProvider>
+                </SearchHighlightProvider>,
             );
 
             const markElement = screen.getByRole('mark');
@@ -143,7 +143,7 @@ describe('HighlightNode', () => {
             render(
                 <SearchHighlightProvider searchStr="test">
                     <HighlightNode>{null}</HighlightNode>
-                </SearchHighlightProvider>
+                </SearchHighlightProvider>,
             );
 
             const markElement = screen.queryByRole('mark');

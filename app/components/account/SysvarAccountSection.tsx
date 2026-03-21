@@ -86,7 +86,7 @@ function SysvarAccountSlotHistory({
         {
             length: 100,
         },
-        (v, k) => sysvarAccount.info.nextSlot - k
+        (v, k) => sysvarAccount.info.nextSlot - k,
     );
     return (
         <div className="card">

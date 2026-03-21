@@ -15,7 +15,7 @@ describe('useFormPrefill', () => {
                     externalDependencies: [],
                 },
                 form,
-            })
+            }),
         );
 
         expect(result.current).toBeUndefined();
@@ -27,7 +27,7 @@ describe('useFormPrefill', () => {
             useFormPrefill({
                 config: {},
                 form,
-            })
+            }),
         );
 
         expect(result.current).toBeUndefined();
@@ -54,7 +54,7 @@ describe('useFormPrefill', () => {
             },
             {
                 initialProps: { value: 'initial-value' },
-            }
+            },
         );
 
         expect(onValueChange).toHaveBeenCalledTimes(1);
@@ -84,7 +84,7 @@ describe('useFormPrefill', () => {
             },
             {
                 initialProps: {},
-            }
+            },
         );
 
         expect(onValueChange).toHaveBeenCalledTimes(1);
@@ -110,7 +110,7 @@ describe('useFormPrefill', () => {
                     externalDependencies: [dependency],
                 },
                 form,
-            })
+            }),
         );
 
         expect(onValueChange).toHaveBeenCalled();
@@ -154,7 +154,7 @@ describe('useFormPrefill', () => {
             },
             {
                 initialProps: { value1: 'value-1', value2: 'value-2' },
-            }
+            },
         );
 
         expect(onValueChange1).toHaveBeenCalledTimes(1);
@@ -181,7 +181,7 @@ describe('useFormPrefill', () => {
                     externalDependencies: [dependency],
                 },
                 form,
-            })
+            }),
         );
 
         expect(onValueChange).toHaveBeenCalledWith('test-value', form);
@@ -194,7 +194,7 @@ function setup() {
         useInstructionForm({
             instruction,
             onSubmit: vi.fn(),
-        })
+        }),
     );
     return { form: result.current.form };
 }

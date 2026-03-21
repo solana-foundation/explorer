@@ -205,7 +205,7 @@ describe('useClusterPath', () => {
 
             const additionalParams = new URLSearchParams('customUrl=http://test.com');
             const { result } = renderHook(() =>
-                useClusterPath({ additionalParams, pathname: '/address/abc123#tokens' })
+                useClusterPath({ additionalParams, pathname: '/address/abc123#tokens' }),
             );
 
             expect(result.current).toBe('/address/abc123?cluster=devnet&customUrl=http%3A%2F%2Ftest.com#tokens');

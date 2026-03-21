@@ -183,7 +183,7 @@ export function estimateRequestedComputeUnits(
         };
     },
     epoch: bigint | undefined,
-    cluster: Cluster
+    cluster: Cluster,
 ): number {
     // First, check for explicit compute budget instructions
     let totalReservedUnits = 0;
@@ -221,7 +221,7 @@ export function estimateRequestedComputeUnitsForParsedTransaction(
         };
     },
     epoch: bigint | undefined,
-    cluster: Cluster
+    cluster: Cluster,
 ): number {
     let totalReservedUnits = 0;
     for (const instruction of parsedTransaction.message.instructions) {

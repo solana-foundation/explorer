@@ -37,7 +37,7 @@ export function useSquadsMultisigLookup(programAuthority: PublicKey | null | und
                 return null;
             }
         },
-        { suspense: true }
+        { suspense: true },
     );
 }
 
@@ -45,7 +45,7 @@ export function useSquadsMultisig(
     anchorProgram: Program | null | undefined,
     multisig: string | undefined,
     cluster: Cluster,
-    version: SquadsMultisigVersion | undefined
+    version: SquadsMultisigVersion | undefined,
 ) {
     return useSWRImmutable<MinimalMultisigInfo | null>(
         ['squadsMultisig', multisig, cluster],
@@ -56,7 +56,7 @@ export function useSquadsMultisig(
             if (version === 'v4') {
                 const multisigInfo = await (anchorProgram?.account as unknown as any).multisig.fetch(
                     multisig,
-                    'confirmed'
+                    'confirmed',
                 );
                 return {
                     multisig: multisigInfo,
@@ -71,6 +71,6 @@ export function useSquadsMultisig(
             } else {
                 return null;
             }
-        }
+        },
     );
 }

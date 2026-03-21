@@ -90,8 +90,8 @@ export const triggerDownload = async (data: string, filename: string, options?: 
     if (estimatedDecodedSize > maxSize) {
         throw new Error(
             `File size (estimated ${formatBytes(estimatedDecodedSize)}) exceeds maximum allowed size (${formatBytes(
-                maxSize
-            )})`
+                maxSize,
+            )})`,
         );
     }
 
@@ -119,7 +119,7 @@ export const triggerDownloadText = async (text: string, filename: string, option
 
     if (text.length > maxSize) {
         throw new Error(
-            `File size (${formatBytes(text.length)}) exceeds maximum allowed size (${formatBytes(maxSize)})`
+            `File size (${formatBytes(text.length)}) exceeds maximum allowed size (${formatBytes(maxSize)})`,
         );
     }
 

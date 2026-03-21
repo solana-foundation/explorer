@@ -28,7 +28,7 @@ vi.mock('@utils/token-info', () => ({
 describe('useTokenInfo', () => {
     beforeEach(() => {
         mockRequestTokenInfo.mockClear();
-        vi.mocked(useSWR).mockImplementation(() => ({ data: undefined } as ReturnType<typeof useSWR>));
+        vi.mocked(useSWR).mockImplementation(() => ({ data: undefined }) as ReturnType<typeof useSWR>);
     });
 
     it.each([

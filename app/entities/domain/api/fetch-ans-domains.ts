@@ -69,7 +69,7 @@ type ReverseLookupEntry = { nameAccountAddress: string; tldName: string; reverse
 // Derive a reverse-lookup PDA for each name account so we can resolve the human-readable domain name.
 async function deriveReverseLookupPdas(
     userAccounts: { pubkey: PublicKey; parentName: string }[],
-    parentToTld: Map<string, SerializedTldInfo>
+    parentToTld: Map<string, SerializedTldInfo>,
 ): Promise<ReverseLookupEntry[]> {
     const entries = await Promise.all(
         userAccounts.map(async ({ pubkey, parentName }) => {
@@ -79,7 +79,7 @@ async function deriveReverseLookupPdas(
             const hashedName = await getHashedName(pubkey.toBase58());
             const [reversePda] = getNameAccountKeyWithBump(hashedName, new PublicKey(tld.tldHouse));
             return { nameAccountAddress: pubkey.toBase58(), reversePda, tldName: tld.tldName };
-        })
+        }),
     );
 
     return entries.filter((e): e is ReverseLookupEntry => e !== null);
@@ -111,7 +111,7 @@ async function fetchDomainNames(connection: Connection, entries: ReverseLookupEn
 
 async function fetchAllUserNameAccounts(
     connection: Connection,
-    user: PublicKey
+    user: PublicKey,
 ): Promise<{ pubkey: PublicKey; parentName: string }[]> {
     const OWNER_OFFSET = 8 + 32; // 40
 

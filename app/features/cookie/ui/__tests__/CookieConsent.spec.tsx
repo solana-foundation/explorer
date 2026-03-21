@@ -17,7 +17,7 @@ describe('CookieConsent', () => {
         vi.mocked(getCookie).mockReturnValue(null);
         vi.stubGlobal(
             'fetch',
-            vi.fn(() => Promise.resolve({ json: () => Promise.resolve({ isEU: true }) }))
+            vi.fn(() => Promise.resolve({ json: () => Promise.resolve({ isEU: true }) })),
         );
     });
 
@@ -31,7 +31,7 @@ describe('CookieConsent', () => {
     it('does not render for non-EU users and auto-grants consent', async () => {
         vi.stubGlobal(
             'fetch',
-            vi.fn(() => Promise.resolve({ json: () => Promise.resolve({ isEU: false }) }))
+            vi.fn(() => Promise.resolve({ json: () => Promise.resolve({ isEU: false }) })),
         );
         render(<CookieConsent />);
         await waitFor(() => expect(fetch).toHaveBeenCalled());
@@ -42,7 +42,7 @@ describe('CookieConsent', () => {
     it('auto-grants consent when geo-location fails', async () => {
         vi.stubGlobal(
             'fetch',
-            vi.fn(() => Promise.reject(new Error('Network error')))
+            vi.fn(() => Promise.reject(new Error('Network error'))),
         );
         render(<CookieConsent />);
         await waitFor(() => expect(fetch).toHaveBeenCalled());

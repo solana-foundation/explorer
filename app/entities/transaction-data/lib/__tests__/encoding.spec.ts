@@ -126,7 +126,7 @@ describe('transaction-data encoding', () => {
         it('should throw if data is not Uint8Array or Buffer', () => {
             const invalidData = 'not a Uint8Array';
             expect(() => encodeTransactionData(invalidData as unknown as Uint8Array, 'hex')).toThrow(
-                'encodeTransactionData expects Uint8Array or Buffer'
+                'encodeTransactionData expects Uint8Array or Buffer',
             );
         });
 
