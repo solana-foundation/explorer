@@ -56,7 +56,7 @@ function decodeParam(params: URLSearchParams, name: string): string | boolean {
     if (param === null) return false;
     try {
         return decodeURIComponent(param);
-    } catch (err) {
+    } catch (_err) {
         return true;
     }
 }
@@ -66,7 +66,7 @@ function decodeSignatures(signaturesParam: string): (string | null)[] {
     let signatures;
     try {
         signatures = JSON.parse(signaturesParam);
-    } catch (err) {
+    } catch (_err) {
         throw new Error('Signatures param is not valid JSON');
     }
 
@@ -88,7 +88,7 @@ function decodeSignatures(signaturesParam: string): (string | null)[] {
         try {
             bs58.decode(signature);
             validSignatures.push(signature);
-        } catch (err) {
+        } catch (_err) {
             throw new Error('Signature is not valid base58');
         }
     }
@@ -118,7 +118,7 @@ function decodeUrlParams(
             // Validate that it's a valid public key
             new PublicKey(squadsTxParam);
             return [{ account: squadsTxParam }, params, refreshUrl];
-        } catch (err) {
+        } catch (_err) {
             params.delete('squadsTx');
             refreshUrl = true;
         }
@@ -137,7 +137,7 @@ function decodeUrlParams(
     if (typeof signaturesParam === 'string') {
         try {
             signatures = decodeSignatures(signaturesParam);
-        } catch (err) {
+        } catch (_err) {
             params.delete('signatures');
             refreshUrl = true;
         }
@@ -157,7 +157,7 @@ function decodeUrlParams(
             signatures,
         };
         return [data, params, refreshUrl];
-    } catch (err) {
+    } catch (_err) {
         params.delete('message');
         refreshUrl = true;
         return [messageParam, params, true];

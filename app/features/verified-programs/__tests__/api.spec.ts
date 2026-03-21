@@ -335,7 +335,7 @@ describe('fetchProgramsPage', () => {
 
             try {
                 await fetchProgramsPage(1);
-            } catch (error) {
+            } catch (_error) {
                 // Expected to throw
             }
 
@@ -355,7 +355,7 @@ describe('fetchProgramsPage', () => {
 
             try {
                 await fetchProgramsPage(1);
-            } catch (error) {
+            } catch (_error) {
                 // Expected to throw
             }
 

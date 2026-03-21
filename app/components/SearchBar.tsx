@@ -393,7 +393,7 @@ function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint
                 ],
             });
         }
-    } catch (err) {
+    } catch (_err) {
         // If bs58 decoding fails, check if it's a valid base64 string
         if (isValidBase64(search)) {
             const decodedTx = decodeTransactionFromBase64(search);
@@ -469,7 +469,7 @@ function decodeTransactionFromBase64(base64String: string): {
         return {
             message: base64String,
         };
-    } catch (err) {
+    } catch (_err) {
         return null;
     }
 }
@@ -478,7 +478,7 @@ function isValidBase64(str: string): boolean {
     try {
         Buffer.from(str, 'base64');
         return true;
-    } catch (err) {
+    } catch (_err) {
         return false;
     }
 }

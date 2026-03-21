@@ -520,7 +520,7 @@ export function isTokenProgram(program: string): program is TokenProgram {
     try {
         assertIsTokenProgram(program);
         return true;
-    } catch (e) {
+    } catch (_e) {
         return false;
     }
 }

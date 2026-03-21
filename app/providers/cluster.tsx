@@ -73,7 +73,7 @@ const WHITELISTED_RPCS = [
 function isWhitelistedRpc(url: string) {
     try {
         return WHITELISTED_RPCS.includes(new URL(url).hostname);
-    } catch (e) {
+    } catch (_e) {
         return false;
     }
 }

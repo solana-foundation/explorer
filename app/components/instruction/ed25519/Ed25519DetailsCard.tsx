@@ -72,7 +72,7 @@ const extractData = (
     const targetIx = tx.message.instructions[instructionIndex] as PartiallyDecodedInstruction;
     try {
         return bs58.decode(targetIx.data).slice(dataOffset, dataOffset + dataLength);
-    } catch (err) {
+    } catch (_err) {
         return null;
     }
 };

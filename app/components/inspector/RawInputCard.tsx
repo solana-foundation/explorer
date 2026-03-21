@@ -236,7 +236,7 @@ export function RawInput({
         try {
             // Try base58 decode, use result as Uint8Array
             buffer = new Uint8Array(base58.decode(input));
-        } catch (err) {
+        } catch (_err) {
             // If base58 fails, try base64
             try {
                 buffer = Uint8Array.from(atob(input), c => c.charCodeAt(0));

@@ -99,7 +99,7 @@ async function fetchAnchorIdlTimestamp(connection: Connection, programAddress: A
             return signatures[0].blockTime;
         }
         return null;
-    } catch (error) {
+    } catch (_error) {
         return null;
     }
 }
@@ -120,7 +120,7 @@ async function fetchPmpIdlTimestamp(connection: Connection, programAddress: Addr
             return signatures[0].blockTime;
         }
         return null;
-    } catch (error) {
+    } catch (_error) {
         return null;
     }
 }

@@ -59,7 +59,8 @@ export default tseslint.config(
                 {
                     argsIgnorePattern: '^_',
                     destructuredArrayIgnorePattern: '^_',
-                    caughtErrors: 'none',
+                    caughtErrors: 'all',
+                    caughtErrorsIgnorePattern: '^_',
                 },
             ],
             '@typescript-eslint/no-empty-object-type': ['error', { allowInterfaces: 'with-single-extends' }],
@@ -94,7 +95,7 @@ export default tseslint.config(
 
     // Allow require() in CommonJS and script files
     {
-        files: ['**/*.cjs', '**/*.js', '**/*.mjs'],
+        files: ['**/*.cjs', '**/*.js'],
         rules: {
             '@typescript-eslint/no-require-imports': 'off',
         },

@@ -20,7 +20,7 @@ export async function getProgramCanonicalMetadata(programAddress: string, seed: 
         const content = await unpackAndFetchData({ rpc, ...metadata.data });
         const parsed = JSON.parse(content);
         return parsed;
-    } catch (error) {
+    } catch (_error) {
         throw new Error(errors[422]);
     }
 }
