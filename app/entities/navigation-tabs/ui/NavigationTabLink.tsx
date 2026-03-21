@@ -12,7 +12,9 @@ export function NavigationTabLink({ path, title, className }: { path: string; ti
     React.useEffect(() => {
         ctx.registerTab({ path, title });
         return () => ctx.unregisterTab(path);
-    }, [path, title]); // eslint-disable-line react-hooks/exhaustive-deps
+        // registerTab/unregisterTab are stable (useCallback with []), ctx excluded intentionally
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [path, title]);
 
     return <TabLink path={path} title={title} className={className} />;
 }
