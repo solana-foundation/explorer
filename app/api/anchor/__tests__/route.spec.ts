@@ -67,6 +67,20 @@ describe('GET /api/anchor', () => {
         expect(res.headers.get('Cache-Control')).toContain('max-age=');
     });
 
+    it('should return null IDL with 200 when program has non-IDL data at PDA', async () => {
+        const bufferError = Object.assign(new RangeError('Attempt to access memory outside buffer bounds'), {
+            code: 'ERR_BUFFER_OUT_OF_BOUNDS',
+        });
+        vi.mocked(Program.fetchIdl).mockRejectedValueOnce(bufferError);
+
+        const { GET } = await importRoute();
+        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: VALID_ADDRESS }));
+
+        expect(res.status).toBe(200);
+        expect(await res.json()).toEqual({ idl: null });
+        expect(res.headers.get('Cache-Control')).toContain('max-age=');
+    });
+
     it('should return 502 with a generic message when fetchIdl throws', async () => {
         const internalError = Object.assign(new Error('AccountNotFoundError'), {
             context: { rpcUrl: 'https://internal-rpc.company.com:8899' },

@@ -12,6 +12,10 @@ const CACHE_HEADERS = {
     'Cache-Control': `public, max-age=${CACHE_DURATION}, s-maxage=${CACHE_DURATION}, stale-while-revalidate=60`,
 };
 
+function isBufferOutOfBounds(error: unknown): boolean {
+    return error instanceof RangeError && (error as NodeJS.ErrnoException).code === 'ERR_BUFFER_OUT_OF_BOUNDS';
+}
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const clusterProp = searchParams.get('cluster');
@@ -45,6 +49,11 @@ export async function GET(request: Request) {
             },
         );
     } catch (error) {
+        if (isBufferOutOfBounds(error)) {
+            Logger.warn(`[api:anchor] Program ${programAddress} is not an Anchor program`);
+            return NextResponse.json({ idl: null }, { headers: CACHE_HEADERS, status: 200 });
+        }
+
         Logger.error(new Error('[api:anchor] Failed to fetch IDL', { cause: error }));
         return NextResponse.json({ error: 'Failed to fetch IDL' }, { status: 502 });
     }
