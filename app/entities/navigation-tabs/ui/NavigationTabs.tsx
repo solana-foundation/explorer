@@ -21,7 +21,7 @@ export function NavigationTabs({ buildHref, tabs, children, className }: Navigat
 
     const onSelectChange = React.useCallback(
         (path: string) => {
-            router.push(buildHref(path));
+            router.push(buildHref(path), { scroll: false });
         },
         [router, buildHref]
     );
