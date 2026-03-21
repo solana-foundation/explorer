@@ -41,7 +41,7 @@ const resolveIpfsUri = (url: URL): string => {
 
 const proxyUri = (uri: string): string => `/api/metadata/proxy?uri=${encodeURIComponent(uri)}`;
 
-export const verifyCID = (cid: string): boolean => {
+const verifyCID = (cid: string): boolean => {
     try {
         CID.parse(cid);
         return true;
