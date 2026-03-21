@@ -61,34 +61,6 @@ import {
 } from '@/app/utils/token-info';
 import { pickClusterParams } from '@/app/utils/url';
 
-export type AddressTabPath =
-    | ''
-    | 'anchor-account'
-    | 'attestation'
-    | 'attributes'
-    | 'blockhashes'
-    | 'compression'
-    | 'concurrent-merkle-tree'
-    | 'domains'
-    | 'entries'
-    | 'feature-gate'
-    | 'idl'
-    | 'instructions'
-    | 'metadata'
-    | 'nftoken-collection-nfts'
-    | 'program-multisig'
-    | 'rewards'
-    | 'security'
-    | 'slot-hashes'
-    | 'stake-history'
-    | 'token-extensions'
-    | 'tokens'
-    | 'transfers'
-    | 'verified-build'
-    | 'vote-history';
-
-type AddressTab = NavigationTab<AddressTabPath>;
-
 const TABS_LOOKUP: Record<string, AddressTab[]> = {
     'address-lookup-table': [{ path: 'entries', title: 'Table Entries' }],
     attestation: [{ path: 'attestation', title: 'Attestation Service' }],
@@ -124,6 +96,34 @@ const TABS_LOOKUP: Record<string, AddressTab[]> = {
 };
 
 const TOKEN_TABS_HIDDEN = ['spl-token:mint', 'spl-token-2022:mint', 'config', 'vote', 'sysvar'];
+
+export type AddressTabPath =
+    | ''
+    | 'anchor-account'
+    | 'attestation'
+    | 'attributes'
+    | 'blockhashes'
+    | 'compression'
+    | 'concurrent-merkle-tree'
+    | 'domains'
+    | 'entries'
+    | 'feature-gate'
+    | 'idl'
+    | 'instructions'
+    | 'metadata'
+    | 'nftoken-collection-nfts'
+    | 'program-multisig'
+    | 'rewards'
+    | 'security'
+    | 'slot-hashes'
+    | 'stake-history'
+    | 'token-extensions'
+    | 'tokens'
+    | 'transfers'
+    | 'verified-build'
+    | 'vote-history';
+
+type AddressTab = NavigationTab<AddressTabPath>;
 
 type Props = PropsWithChildren<{ params: { address: string } }>;
 
