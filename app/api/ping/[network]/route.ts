@@ -52,7 +52,7 @@ export async function GET(_request: Request, { params: { network } }: Params) {
         return NextResponse.json(data, { headers: CACHE_HEADERS });
     } catch (error) {
         const wrappedError = new Error('Ping API error', { cause: error });
-        Logger.error(wrappedError, { sentry: true });
+        Logger.panic(wrappedError);
         return NextResponse.json(
             { error: 'Failed to fetch ping data' },
             { headers: { 'Cache-Control': 'no-store, max-age=0' }, status: 500 },
