@@ -70,6 +70,12 @@ export const WithChildren: Story = {
         expect(tabs).toHaveLength(6);
         expect(tabs[4]).toHaveTextContent('Async Tab 1');
         expect(tabs[5]).toHaveTextContent('Async Tab 2');
+
+        // Async tabs should register into the select as well
+        const select = canvasElement.querySelector('select') as HTMLSelectElement;
+        expect(select.options).toHaveLength(6);
+        expect(select.options[4]).toHaveTextContent('Async Tab 1');
+        expect(select.options[5]).toHaveTextContent('Async Tab 2');
     },
     render: args => (
         <BaseNavigationTabs {...args}>
