@@ -5,7 +5,6 @@ import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
-import { sleep } from '@/app/__tests__/mocks';
 import { GET } from '@/app/api/anchor/route';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
@@ -120,9 +119,6 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
     }
 
     beforeEach(async () => {
-        // sleep to allow not facing 429s
-        await sleep();
-
         // Setup router mock
         const mockRouter = { push: vi.fn(), replace: vi.fn() };
         vi.spyOn(await import('next/navigation'), 'useRouter').mockReturnValue(mockRouter as any);

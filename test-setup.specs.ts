@@ -23,3 +23,14 @@ vi.mock('@/app/entities/token-info/model/token-info-batch-provider', async () =>
         useTokenInfoBatch: () => () => {},
     };
 });
+
+// Global mock for @solana/kit to prevent real RPC calls (429s) in tests.
+// Tests that need custom RPC behavior should override with a local vi.mock().
+vi.mock('@solana/kit', async () => {
+    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
+    const { mockSolanaRpc } = await import('./app/__tests__/mock-rpc');
+    return {
+        ...actual,
+        createSolanaRpc: vi.fn(() => mockSolanaRpc()),
+    };
+});
