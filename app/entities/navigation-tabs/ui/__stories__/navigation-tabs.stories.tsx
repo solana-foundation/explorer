@@ -107,3 +107,30 @@ export const MobileSelect: Story = {
         expect(args.onSelectChange).toHaveBeenCalledWith('programs');
     },
 };
+
+export const OverlappingAsyncTabs: Story = {
+    args: {
+        activeValue: '',
+        tabs: BLOCK_TABS,
+    },
+    render: args => (
+        <BaseNavigationTabs {...args}>
+            {/* "rewards" overlaps with static tab, "extra" is new */}
+            <NavigationTabLink path="rewards" title="Rewards" />
+            <NavigationTabLink path="extra" title="Extra Tab" />
+        </BaseNavigationTabs>
+    ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        const tablist = canvas.getByRole('tablist', { hidden: true });
+        const tabs = within(tablist).getAllByRole('tab', { hidden: true });
+
+        // Desktop tablist: 4 static + 2 children rendered (both appear in DOM)
+        expect(tabs).toHaveLength(6);
+
+        // Mobile select: should deduplicate "rewards", so 4 static + 1 new = 5
+        const select = canvasElement.querySelector('select') as HTMLSelectElement;
+        expect(select.options).toHaveLength(5);
+        expect(select.options[4]).toHaveTextContent('Extra Tab');
+    },
+};
