@@ -33,16 +33,13 @@ import {
 import FLAGGED_ACCOUNTS_WARNING from '@providers/accounts/flagged-accounts';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { cn } from '@shared/utils';
 import { Address } from '@solana/kit';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
-import { useClusterPath } from '@utils/url';
-import Link from 'next/link';
-import { redirect, useSelectedLayoutSegment } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import React, { PropsWithChildren, Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
@@ -50,6 +47,7 @@ import useSWRImmutable from 'swr/immutable';
 
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
+import { type NavigationTab, NavigationTabLink, NavigationTabs } from '@/app/entities/navigation-tabs';
 import { hasTokenMetadata } from '@/app/features/metadata';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
@@ -61,139 +59,71 @@ import {
     getFullTokenInfoSwrKey,
     isRedactedTokenAddress,
 } from '@/app/utils/token-info';
+import { pickClusterParams } from '@/app/utils/url';
 
-const TABS_LOOKUP: { [id: string]: Tab[] } = {
-    'address-lookup-table': [
-        {
-            path: 'entries',
-            slug: 'entries',
-            title: 'Table Entries',
-        },
-    ],
-    attestation: [
-        {
-            path: 'attestation',
-            slug: 'attestation',
-            title: 'Attestation Service',
-        },
-    ],
+export type AddressTabPath =
+    | ''
+    | 'anchor-account'
+    | 'attestation'
+    | 'attributes'
+    | 'blockhashes'
+    | 'compression'
+    | 'concurrent-merkle-tree'
+    | 'domains'
+    | 'entries'
+    | 'feature-gate'
+    | 'idl'
+    | 'instructions'
+    | 'metadata'
+    | 'nftoken-collection-nfts'
+    | 'program-multisig'
+    | 'rewards'
+    | 'security'
+    | 'slot-hashes'
+    | 'stake-history'
+    | 'token-extensions'
+    | 'tokens'
+    | 'transfers'
+    | 'verified-build'
+    | 'vote-history';
+
+type AddressTab = NavigationTab<AddressTabPath>;
+
+const TABS_LOOKUP: Record<string, AddressTab[]> = {
+    'address-lookup-table': [{ path: 'entries', title: 'Table Entries' }],
+    attestation: [{ path: 'attestation', title: 'Attestation Service' }],
     'bpf-upgradeable-loader': [
-        {
-            path: 'security',
-            slug: 'security',
-            title: 'Security',
-        },
-        {
-            path: 'verified-build',
-            slug: 'verified-build',
-            title: 'Verified Build',
-        },
+        { path: 'security', title: 'Security' },
+        { path: 'verified-build', title: 'Verified Build' },
     ],
-    'nftoken:collection': [
-        {
-            path: 'nfts',
-            slug: 'nftoken-collection-nfts',
-            title: 'NFTs',
-        },
-    ],
-    'spl-account-compression': [
-        {
-            path: 'concurrent-merkle-tree',
-            slug: 'concurrent-merkle-tree',
-            title: 'Concurrent Merkle Tree',
-        },
-    ],
+    'spl-account-compression': [{ path: 'concurrent-merkle-tree', title: 'Concurrent Merkle Tree' }],
     'spl-token-2022:mint': [
-        {
-            path: 'transfers',
-            slug: 'transfers',
-            title: 'Transfers',
-        },
-        {
-            path: 'instructions',
-            slug: 'instructions',
-            title: 'Instructions',
-        },
+        { path: 'transfers', title: 'Transfers' },
+        { path: 'instructions', title: 'Instructions' },
     ],
     'spl-token-2022:mint:metaplexNFT': [
-        {
-            path: 'metadata',
-            slug: 'metadata',
-            title: 'Metadata',
-        },
-        {
-            path: 'attributes',
-            slug: 'attributes',
-            title: 'Attributes',
-        },
+        { path: 'metadata', title: 'Metadata' },
+        { path: 'attributes', title: 'Attributes' },
     ],
     'spl-token:mint': [
-        {
-            path: 'transfers',
-            slug: 'transfers',
-            title: 'Transfers',
-        },
-        {
-            path: 'instructions',
-            slug: 'instructions',
-            title: 'Instructions',
-        },
+        { path: 'transfers', title: 'Transfers' },
+        { path: 'instructions', title: 'Instructions' },
     ],
     'spl-token:mint:metaplexNFT': [
-        {
-            path: 'metadata',
-            slug: 'metadata',
-            title: 'Metadata',
-        },
-        {
-            path: 'attributes',
-            slug: 'attributes',
-            title: 'Attributes',
-        },
+        { path: 'metadata', title: 'Metadata' },
+        { path: 'attributes', title: 'Attributes' },
     ],
-    stake: [
-        {
-            path: 'rewards',
-            slug: 'rewards',
-            title: 'Rewards',
-        },
-    ],
-    'sysvar:recentBlockhashes': [
-        {
-            path: 'blockhashes',
-            slug: 'blockhashes',
-            title: 'Blockhashes',
-        },
-    ],
-    'sysvar:slotHashes': [
-        {
-            path: 'slot-hashes',
-            slug: 'slot-hashes',
-            title: 'Slot Hashes',
-        },
-    ],
-    'sysvar:stakeHistory': [
-        {
-            path: 'stake-history',
-            slug: 'stake-history',
-            title: 'Stake History',
-        },
-    ],
+    stake: [{ path: 'rewards', title: 'Rewards' }],
+    'sysvar:recentBlockhashes': [{ path: 'blockhashes', title: 'Blockhashes' }],
+    'sysvar:slotHashes': [{ path: 'slot-hashes', title: 'Slot Hashes' }],
+    'sysvar:stakeHistory': [{ path: 'stake-history', title: 'Stake History' }],
     vote: [
-        {
-            path: 'vote-history',
-            slug: 'vote-history',
-            title: 'Vote History',
-        },
-        {
-            path: 'rewards',
-            slug: 'rewards',
-            title: 'Rewards',
-        },
+        { path: 'vote-history', title: 'Vote History' },
+        { path: 'rewards', title: 'Rewards' },
     ],
 };
 
-const TOKEN_TABS_HIDDEN = ['spl-token:mint', 'spl-token-2022:mint', 'config', 'vote', 'sysvar', 'config'];
+const TOKEN_TABS_HIDDEN = ['spl-token:mint', 'spl-token-2022:mint', 'config', 'vote', 'sysvar'];
 
 type Props = PropsWithChildren<{ params: { address: string } }>;
 
@@ -266,7 +196,6 @@ export default function AddressLayout({ children, params }: Props) {
 function DetailsSections({
     children,
     pubkey,
-    tab,
     info,
     tokenInfo,
     isTokenInfoLoading,
@@ -275,7 +204,6 @@ function DetailsSections({
     children: React.ReactNode;
     notification: React.ReactNode;
     pubkey: PublicKey;
-    tab?: string;
     info?: CacheEntry<Account>;
     tokenInfo?: FullTokenInfo;
     isTokenInfoLoading: boolean;
@@ -290,18 +218,35 @@ function DetailsSections({
     }
 
     const account = info.data;
-    const tabComponents = getTabs(pubkey, account).concat(getCustomLinkedTabs(pubkey, account));
+    const navigationTabs = getNavigationTabs(pubkey, account);
 
-    if (tab && tabComponents.filter(tabComponent => tabComponent.tab.slug === tab).length === 0) {
-        redirect(`/address/${address}`);
-    }
+    const hasNoAccountData = (!account.data.raw || account.data.raw.length === 0) && !account.data.parsed;
+    const authority = (account.data.parsed as UpgradeableLoaderAccountData | undefined)?.programData?.authority;
+
+    const asyncTabChildren = (
+        <>
+            {hasNoAccountData && (
+                <Suspense fallback={null}>
+                    <CompressedNftTabs pubkey={pubkey} />
+                </Suspense>
+            )}
+            <Suspense fallback={null}>
+                <ProgramMultisigTab authority={authority} />
+            </Suspense>
+            <Suspense fallback={null}>
+                <AccountDataTab programId={account.owner} />
+            </Suspense>
+        </>
+    );
 
     return (
         <>
             {FLAGGED_ACCOUNTS_WARNING[address] ?? null}
             <InfoSection account={account} tokenInfo={tokenInfo} />
             {notification}
-            <MoreSection tabs={tabComponents.map(({ component }) => component)}>{children}</MoreSection>
+            <MoreSection baseUrl={`/address/${address}`} tabs={navigationTabs} asyncChildren={asyncTabChildren}>
+                {children}
+            </MoreSection>
         </>
     );
 }
@@ -366,50 +311,31 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
     }
 }
 
-type Tab = {
-    slug: MoreTabs;
-    title: string;
-    path: string;
-};
+function MoreSection({
+    children,
+    baseUrl,
+    tabs,
+    asyncChildren,
+}: {
+    children: React.ReactNode;
+    baseUrl: string;
+    tabs: AddressTab[];
+    asyncChildren?: React.ReactNode;
+}) {
+    const searchParams = useSearchParams();
+    const buildHref = React.useCallback(
+        (path: string) => pickClusterParams(`${baseUrl}/${path}`, searchParams ?? undefined),
+        [baseUrl, searchParams],
+    );
 
-type TabComponent = {
-    tab: Tab;
-    component: JSX.Element | null;
-};
-
-export type MoreTabs =
-    | 'history'
-    | 'tokens'
-    | 'nftoken-collection-nfts'
-    | 'vote-history'
-    | 'slot-hashes'
-    | 'stake-history'
-    | 'blockhashes'
-    | 'transfers'
-    | 'instructions'
-    | 'rewards'
-    | 'metadata'
-    | 'attributes'
-    | 'domains'
-    | 'security'
-    | 'idl'
-    | 'anchor-account'
-    | 'entries'
-    | 'concurrent-merkle-tree'
-    | 'compression'
-    | 'verified-build'
-    | 'program-multisig'
-    | 'feature-gate'
-    | 'token-extensions'
-    | 'attestation';
-
-function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
         <>
             <div className="container">
                 <div className="header">
                     <div className="header-body pt-0">
-                        <ul className="nav nav-tabs nav-overflow header-tabs">{tabs}</ul>
+                        <NavigationTabs buildHref={buildHref} tabs={tabs}>
+                            {asyncChildren}
+                        </NavigationTabs>
                     </div>
                 </div>
             </div>
@@ -418,16 +344,10 @@ function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX
     );
 }
 
-function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
+function getNavigationTabs(pubkey: PublicKey, account: Account): AddressTab[] {
     const address = pubkey.toBase58();
     const parsedData = account.data.parsed;
-    const tabs: (Tab & { compressed?: boolean })[] = [
-        {
-            path: '',
-            slug: 'history',
-            title: 'History',
-        },
-    ];
+    const tabs: AddressTab[] = [{ path: '', title: 'History' }];
 
     let programTypeKey = '';
     if (parsedData) {
@@ -442,56 +362,29 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
         tabs.push(...TABS_LOOKUP[programTypeKey]);
     }
 
-    // Add the key for address lookup tables
+    // Address lookup tables
     if (account.data.raw && isAddressLookupTableAccount(account.owner.toBase58() as Address, account.data.raw)) {
         tabs.push(...TABS_LOOKUP['address-lookup-table']);
     }
 
-    // Add the key for Metaplex NFTs
+    // Metaplex NFTs
     if (
         parsedData &&
-        (programTypeKey === 'spl-token:mint' || programTypeKey == 'spl-token-2022:mint') &&
+        (programTypeKey === 'spl-token:mint' || programTypeKey === 'spl-token-2022:mint') &&
         (parsedData as TokenProgramData).nftData
     ) {
         tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplexNFT`]);
     }
 
     if (hasTokenMetadata(parsedData)) {
-        tabs.push({
-            path: 'metadata',
-            slug: 'metadata',
-            title: 'Metadata',
-        });
-    }
-
-    // Compressed NFT tabs
-    if ((!account.data.raw || account.data.raw.length === 0) && !account.data.parsed) {
-        tabs.push(
-            {
-                compressed: true,
-                path: 'metadata',
-                slug: 'metadata',
-                title: 'Metadata',
-            },
-            {
-                compressed: true,
-                path: 'attributes',
-                slug: 'attributes',
-                title: 'Attributes',
-            },
-            { compressed: true, path: 'compression', slug: 'compression', title: 'Compression' },
-        );
+        tabs.push({ path: 'metadata', title: 'Metadata' });
     }
 
     const isNFToken = account && isNFTokenAccount(account);
     if (isNFToken) {
         const collection = parseNFTokenCollectionAccount(account);
         if (collection) {
-            tabs.push({
-                path: 'nftoken-collection-nfts',
-                slug: 'nftoken-collection-nfts',
-                title: 'NFTs',
-            });
+            tabs.push({ path: 'nftoken-collection-nfts', title: 'NFTs' });
         }
     }
 
@@ -499,16 +392,8 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
         !isNFToken &&
         (!parsedData || !(TOKEN_TABS_HIDDEN.includes(parsedData.program) || TOKEN_TABS_HIDDEN.includes(programTypeKey)))
     ) {
-        tabs.push({
-            path: 'tokens',
-            slug: 'tokens',
-            title: 'Tokens',
-        });
-        tabs.push({
-            path: 'domains',
-            slug: 'domains',
-            title: 'Domains',
-        });
+        tabs.push({ path: 'tokens', title: 'Tokens' });
+        tabs.push({ path: 'domains', title: 'Domains' });
     }
 
     if (account.owner.toBase58() === ACCOUNT_COMPRESSION_ID.toBase58()) {
@@ -520,234 +405,67 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
     }
 
     if (isRedactedTokenAddress(address)) {
-        const metadataIndex = tabs.findIndex(tab => tab.slug === 'metadata');
+        const metadataIndex = tabs.findIndex(tab => tab.path === 'metadata');
         if (metadataIndex !== -1) {
             tabs.splice(metadataIndex, 1);
         }
     }
 
-    return tabs.map(tab => {
-        return {
-            component: !tab.compressed ? (
-                <Tab address={address} key={tab.slug} path={tab.path} title={tab.title} />
-            ) : (
-                <React.Suspense key={tab.slug} fallback={<></>}>
-                    <CompressedNftLink tab={tab} address={pubkey.toString()} pubkey={pubkey} />
-                </React.Suspense>
-            ),
-            tab,
-        };
-    });
-}
+    // Sync-conditional: IDL (only for executable accounts)
+    if (account.executable) {
+        tabs.push({ path: 'idl', title: 'Program IDL' });
+    }
 
-function Tab({ address, path, title }: { address: string; path: string; title: string }) {
-    const tabPath = useClusterPath({ pathname: `/address/${address}/${path}` });
-    const selectedLayoutSegment = useSelectedLayoutSegment();
-    const isActive = (selectedLayoutSegment === null && path === '') || selectedLayoutSegment === path;
-    return (
-        <li className="nav-item">
-            <Link className={cn(isActive && 'active', 'nav-link')} href={tabPath} scroll={false}>
-                {title}
-            </Link>
-        </li>
-    );
-}
-
-function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
-    const tabComponents = [];
-    const programMultisigTab: Tab = {
-        path: 'program-multisig',
-        slug: 'program-multisig',
-        title: 'Program Multisig',
-    };
-    tabComponents.push({
-        component: (
-            <React.Suspense key={programMultisigTab.slug} fallback={<></>}>
-                <ProgramMultisigLink
-                    tab={programMultisigTab}
-                    address={pubkey.toString()}
-                    authority={
-                        (account.data.parsed as UpgradeableLoaderAccountData | undefined)?.programData?.authority
-                    }
-                />
-            </React.Suspense>
-        ),
-        tab: programMultisigTab,
-    });
-
-    // Add extensions tab for Token Extensions program accounts
+    // Sync-conditional: Token Extensions (only for Token-2022 accounts)
     if (account.owner.toBase58() === TOKEN_2022_PROGRAM_ADDRESS) {
-        const extensionsTab: Tab = {
-            path: 'token-extensions',
-            slug: 'token-extensions',
-            title: 'Extensions',
-        };
-        tabComponents.push({
-            component: <TokenExtensionsLink key={extensionsTab.slug} tab={extensionsTab} address={pubkey.toString()} />,
-            tab: extensionsTab,
-        });
+        tabs.push({ path: 'token-extensions', title: 'Extensions' });
     }
 
-    const idlProgramTab: Tab = {
-        path: 'idl',
-        slug: 'idl',
-        title: 'Program IDL',
-    };
-    tabComponents.push({
-        component: (
-            <React.Suspense key={idlProgramTab.slug} fallback={<></>}>
-                <ProgramIdlLink tab={idlProgramTab} address={pubkey.toString()} account={account} />
-            </React.Suspense>
-        ),
-        tab: idlProgramTab,
-    });
-
-    const accountDataTab: Tab = {
-        path: 'anchor-account',
-        slug: 'anchor-account',
-        title: 'Anchor Data',
-    };
-    tabComponents.push({
-        component: (
-            <React.Suspense key={accountDataTab.slug} fallback={<></>}>
-                <AccountDataLink tab={accountDataTab} address={pubkey.toString()} programId={account.owner} />
-            </React.Suspense>
-        ),
-        tab: accountDataTab,
-    });
-
-    // Feature-specific information
+    // Sync-conditional: Feature Gate
     if (getFeatureInfo(pubkey.toBase58())) {
-        const featureInfoTab: Tab = {
-            path: 'feature-gate',
-            slug: 'feature-gate',
-            title: 'Feature Gate',
-        };
-        tabComponents.push({
-            component: <FeatureGateLink key={featureInfoTab.slug} tab={featureInfoTab} address={pubkey.toString()} />,
-            tab: featureInfoTab,
-        });
+        tabs.push({ path: 'feature-gate', title: 'Feature Gate' });
     }
 
-    return tabComponents;
+    return tabs;
 }
 
-function ProgramIdlLink({ tab, address, account }: { tab: Tab; address: string; account: Account }) {
-    const anchorProgramPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
-    const selectedLayoutSegment = useSelectedLayoutSegment();
-    const isActive = selectedLayoutSegment === tab.path;
+// --- Async tab triggers (rendered inside NavigationTabs on desktop via context) ---
 
-    if (!account.executable) {
-        return null;
-    }
-
-    return (
-        <li key={tab.slug} className="nav-item">
-            <Link className={cn(isActive && 'active', 'nav-link')} href={anchorProgramPath}>
-                {tab.title}
-            </Link>
-        </li>
-    );
-}
-
-function AccountDataLink({ address, tab, programId }: { address: string; tab: Tab; programId: PublicKey }) {
-    const { url, cluster } = useCluster();
-    const { program: accountAnchorProgram } = useAnchorProgram(programId.toString(), url, cluster);
-    const accountDataPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
-    const selectedLayoutSegment = useSelectedLayoutSegment();
-    const isActive = selectedLayoutSegment === tab.path;
-    if (!accountAnchorProgram) {
-        return null;
-    }
-
-    return (
-        <li key={tab.slug} className="nav-item">
-            <Link className={cn(isActive && 'active', 'nav-link')} href={accountDataPath}>
-                {tab.title}
-            </Link>
-        </li>
-    );
-}
-
-function FeatureGateLink({ address, tab }: { address: string; tab: Tab }) {
-    const accountDataPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
-    const selectedLayoutSegment = useSelectedLayoutSegment();
-    const isActive = selectedLayoutSegment === tab.path;
-    const featureInfo = useFeatureInfo({ address });
-    // Do not render "Feature Gate" tab on absent feature data
-    if (!featureInfo) {
-        return null;
-    }
-
-    return (
-        <li key={tab.slug} className="nav-item">
-            <Link className={cn(isActive && 'active', 'nav-link')} href={accountDataPath}>
-                {tab.title}
-            </Link>
-        </li>
-    );
-}
-
-// Checks that a compressed NFT exists at the given address and returns a link to the tab
-function CompressedNftLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
+function CompressedNftTabs({ pubkey }: { pubkey: PublicKey }) {
     const { url } = useCluster();
     const compressedNft = useCompressedNft({ address: pubkey.toString(), url });
-    const tabPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
-
-    const selectedLayoutSegment = useSelectedLayoutSegment();
-    const isActive = selectedLayoutSegment === tab.path;
 
     if (!compressedNft || !compressedNft.compression.compressed) {
         return null;
     }
 
     return (
-        <li key={tab.slug} className="nav-item">
-            <Link className={cn(isActive && 'active', 'nav-link')} href={tabPath}>
-                {tab.title}
-            </Link>
-        </li>
+        <>
+            <NavigationTabLink path="metadata" title="Metadata" />
+            <NavigationTabLink path="attributes" title="Attributes" />
+            <NavigationTabLink path="compression" title="Compression" />
+        </>
     );
 }
 
-// Checks that a program multisig exists at the given address and returns a link to the tab
-function ProgramMultisigLink({
-    tab,
-    address,
-    authority,
-}: {
-    tab: Tab;
-    address: string;
-    authority: PublicKey | null | undefined;
-}) {
+function ProgramMultisigTab({ authority }: { authority: PublicKey | null | undefined }) {
     const { cluster } = useCluster();
     const { data: squadMapInfo, error } = useSquadsMultisigLookup(authority, cluster);
-    const tabPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
-    const selectedLayoutSegment = useSelectedLayoutSegment();
-    const isActive = selectedLayoutSegment === tab.path;
+
     if (!squadMapInfo || error || !squadMapInfo.isSquad) {
         return null;
     }
 
-    return (
-        <li key={tab.slug} className="nav-item">
-            <Link className={cn(isActive && 'active', 'nav-link')} href={tabPath}>
-                {tab.title}
-            </Link>
-        </li>
-    );
+    return <NavigationTabLink path="program-multisig" title="Program Multisig" />;
 }
 
-function TokenExtensionsLink({ address, tab }: { address: string; tab: Tab }) {
-    const accountDataPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
-    const selectedLayoutSegment = useSelectedLayoutSegment();
-    const isActive = selectedLayoutSegment === tab.path;
+function AccountDataTab({ programId }: { programId: PublicKey }) {
+    const { url, cluster } = useCluster();
+    const { program: accountAnchorProgram } = useAnchorProgram(programId.toString(), url, cluster);
 
-    return (
-        <li key={tab.slug} className="nav-item">
-            <Link className={cn(isActive && 'active', 'nav-link')} href={accountDataPath}>
-                {tab.title}
-            </Link>
-        </li>
-    );
+    if (!accountAnchorProgram) {
+        return null;
+    }
+
+    return <NavigationTabLink path="anchor-account" title="Anchor Data" />;
 }

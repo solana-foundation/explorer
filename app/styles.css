@@ -140,3 +140,32 @@
         mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50%/21px 100%;
     }
 }
+
+/* Override Dashkit header spacing around navigation tabs */
+.header-body:has(.navigation-tabs-select) {
+    padding-bottom: 0 !important;
+}
+@media (max-width: 767px) {
+    .header:has(.navigation-tabs-select) {
+        margin-bottom: 0.75rem !important;
+    }
+    .header-body:has(.navigation-tabs-select) {
+        padding-bottom: 0.75rem !important;
+    }
+}
+
+@layer components {
+    .navigation-tabs-select {
+        @apply e-w-auto e-cursor-pointer e-appearance-none e-rounded e-border
+               e-border-solid e-border-outer-space-950
+               e-bg-heavy-metal-900 e-px-4 e-py-2.5 e-text-sm
+               e-text-neutral-200 e-outline-none;
+        margin-left: -12px;
+        margin-right: -12px;
+        width: calc(100% + 24px);
+        background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24'><path d='m6 9 6 6 6-6'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 1rem;
+    }
+}
