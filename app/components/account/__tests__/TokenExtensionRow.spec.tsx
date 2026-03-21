@@ -14,6 +14,19 @@ import { TokenExtension } from '@/app/validators/accounts/token-extension';
 import { TokenExtensionRow } from '../TokenAccountSection';
 
 vi.mock('next/navigation');
+vi.mock('@solana/kit', async () => {
+    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
+    const rpcMethod = () => ({ send: () => new Promise(() => {}) });
+    return {
+        ...actual,
+        createSolanaRpc: vi.fn(() => ({
+            getEpochInfo: rpcMethod,
+            getEpochSchedule: rpcMethod,
+            getFirstAvailableBlock: rpcMethod,
+            getGenesisHash: rpcMethod,
+        })),
+    };
+});
 // @ts-expect-error does not contain `mockReturnValue`
 useSearchParams.mockReturnValue({
     get: () => 'mainnet-beta',
