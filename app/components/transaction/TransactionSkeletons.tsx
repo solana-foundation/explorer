@@ -25,11 +25,11 @@ function InstructionsSectionSkeleton() {
 export function TransactionDetailsSkeleton() {
     return (
         <>
-            <SimpleCardSkeleton withTitle />
             <TableCardSkeleton cols={5} rows={4} />
             <TableCardSkeleton rows={4} />
             <InstructionsSectionSkeleton />
             <RichListSkeleton />
+            <SimpleCardSkeleton withTitle />
         </>
     );
 }
