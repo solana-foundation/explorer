@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import type { DownloadReceiptFn } from '../types';
 
@@ -43,7 +43,7 @@ export function useDownloadReceipt(download: DownloadReceiptFn, resetMs = 2000):
             },
             (error: unknown) => {
                 if (!mountedRef.current) return;
-                Logger.error('Download failed:', error);
+                Logger.error(error);
                 stateRef.current = 'errored';
                 setState('errored');
                 scheduleReset();
