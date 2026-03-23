@@ -81,7 +81,7 @@ test.describe('when feature enabled', () => {
                     text.includes('Error')
                 );
             },
-            { timeout: CONTENT_TIMEOUT },
+            { timeout: CONTENT_TIMEOUT }
         );
 
         const text = await page.textContent('body');
@@ -91,6 +91,67 @@ test.describe('when feature enabled', () => {
             text?.includes('Error');
 
         expect(showsError).toBe(true);
+    });
+
+    test('shows CSV and PDF options in download menu', async ({ page }) => {
+        await waitForPage(page, VALID_TX, 'receipt');
+
+        await page
+            .locator('h3:has-text("Solana Receipt")')
+            .or(page.locator('text=Not Found'))
+            .or(page.locator('text=Receipts can only be generated'))
+            .first()
+            .waitFor({ state: 'visible', timeout: CONTENT_TIMEOUT });
+
+        const hasReceipt = await hasElement(page, 'h3:has-text("Solana Receipt")');
+        if (!hasReceipt) return;
+
+        await page.locator('button:has-text("Download")').click();
+        await expect(page.locator('button:has-text("CSV")')).toBeVisible({ timeout: CONTENT_TIMEOUT });
+        await expect(page.locator('button:has-text("PDF")')).toBeVisible({ timeout: CONTENT_TIMEOUT });
+    });
+
+    test('triggers CSV download with correct filename', async ({ page }) => {
+        await waitForPage(page, VALID_TX, 'receipt');
+
+        await page
+            .locator('h3:has-text("Solana Receipt")')
+            .or(page.locator('text=Not Found'))
+            .or(page.locator('text=Receipts can only be generated'))
+            .first()
+            .waitFor({ state: 'visible', timeout: CONTENT_TIMEOUT });
+
+        const hasReceipt = await hasElement(page, 'h3:has-text("Solana Receipt")');
+        if (!hasReceipt) return;
+
+        await page.locator('button:has-text("Download")').click();
+
+        const [download] = await Promise.all([
+            page.waitForEvent('download'),
+            page.locator('button:has-text("CSV")').click(),
+        ]);
+
+        // eslint-disable-next-line no-restricted-syntax -- regex needed to validate filename pattern: solana-receipt-<signature>.csv
+        expect(download.suggestedFilename()).toMatch(/^solana-receipt-.+\.csv$/);
+    });
+
+    test('shows Downloaded! state after CSV download completes', async ({ page }) => {
+        await waitForPage(page, VALID_TX, 'receipt');
+
+        await page
+            .locator('h3:has-text("Solana Receipt")')
+            .or(page.locator('text=Not Found'))
+            .or(page.locator('text=Receipts can only be generated'))
+            .first()
+            .waitFor({ state: 'visible', timeout: CONTENT_TIMEOUT });
+
+        const hasReceipt = await hasElement(page, 'h3:has-text("Solana Receipt")');
+        if (!hasReceipt) return;
+
+        await page.locator('button:has-text("Download")').click();
+        await page.locator('button:has-text("CSV")').click();
+
+        await expect(page.locator('button:has-text("Downloaded!")')).toBeVisible({ timeout: CONTENT_TIMEOUT });
     });
 
     test('shows View Receipt button', async ({ page }) => {
