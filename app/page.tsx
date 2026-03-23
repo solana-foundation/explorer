@@ -123,22 +123,40 @@ function PageContent() {
     const statsLoading =
         performanceInfo.status === ClusterStatsStatus.Loading || dashboardInfo.status === ClusterStatsStatus.Loading;
 
-    if (supplyLoading || statsLoading) {
-        return <PageSkeleton />;
-    }
-
     return (
         <>
-            <StakingDisplay />
+            {supplyLoading ? (
+                <div className="row staking-card">
+                    <div className="col-6 col-xl">
+                        <SimpleCardSkeleton />
+                    </div>
+                    <div className="col-6 col-xl">
+                        <SimpleCardSkeleton />
+                    </div>
+                </div>
+            ) : (
+                <StakingDisplay />
+            )}
 
-            <div className="row e-flex">
-                <div className="col-md-6 e-flex">
-                    <StatsCardBody />
+            {statsLoading ? (
+                <div className="row e-flex">
+                    <div className="col-md-6 e-flex">
+                        <StatsTableSkeleton />
+                    </div>
+                    <div className="col-md-6 e-flex">
+                        <LiveTransactionStatsCardSkeleton />
+                    </div>
                 </div>
-                <div className="col-md-6 e-flex">
-                    <LiveTransactionStatsCard />
+            ) : (
+                <div className="row e-flex">
+                    <div className="col-md-6 e-flex">
+                        <StatsCardBody />
+                    </div>
+                    <div className="col-md-6 e-flex">
+                        <LiveTransactionStatsCard />
+                    </div>
                 </div>
-            </div>
+            )}
 
             <DeveloperResources />
 
