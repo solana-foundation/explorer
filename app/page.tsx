@@ -23,44 +23,11 @@ import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/ind
 import { percentage } from '@utils/math';
 import React from 'react';
 
-import {
-    ImageSliderSkeleton,
-    SimpleCardSkeleton,
-    StatsTableSkeleton,
-    TableCardSkeleton,
-} from './components/common/Skeletons';
+import { SimpleCardSkeleton, StatsTableSkeleton } from './components/common/Skeletons';
 import { DeveloperResources } from './components/DeveloperResources';
 import { UpcomingFeatures } from './utils/feature-gate/UpcomingFeatures';
 
 const CLUSTER_STATS_TIMEOUT = 5000;
-
-function PageSkeleton() {
-    return (
-        <>
-            <div className="row staking-card">
-                <div className="col-6 col-xl">
-                    <SimpleCardSkeleton />
-                </div>
-                <div className="col-6 col-xl">
-                    <SimpleCardSkeleton />
-                </div>
-            </div>
-
-            <div className="row e-flex">
-                <div className="col-md-6 e-flex">
-                    <StatsTableSkeleton />
-                </div>
-                <div className="col-md-6 e-flex">
-                    <LiveTransactionStatsCardSkeleton />
-                </div>
-            </div>
-
-            <ImageSliderSkeleton />
-
-            <TableCardSkeleton />
-        </>
-    );
-}
 
 function StatsActivator() {
     const { setActive, setTimedOut } = useStatsProvider();
