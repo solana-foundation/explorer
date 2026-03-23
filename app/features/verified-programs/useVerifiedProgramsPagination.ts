@@ -63,7 +63,7 @@ export function useVerifiedProgramsPagination(searchQuery: string) {
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
             return programs.filter(
-                p => p.name.toLowerCase().includes(query) || p.programId.toLowerCase().includes(query)
+                p => p.name.toLowerCase().includes(query) || p.programId.toLowerCase().includes(query),
             );
         }
 

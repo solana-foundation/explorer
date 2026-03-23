@@ -20,6 +20,8 @@ import { InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import { BN } from 'bn.js';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { getMintDecimals, isTokenProgramBase58 } from '../lib/tokenAccountParsing';
 import type { SolBalanceChange } from '../lib/types';
 import { useEpochInfo } from './use-epoch-info';
@@ -29,7 +31,7 @@ export function useSimulation(
     accountBalances?: {
         preBalances: number[];
         postBalances: number[];
-    }
+    },
 ) {
     const { cluster, url } = useCluster();
     const { epoch: cachedEpoch } = useEpochInfo();
@@ -61,12 +63,12 @@ export function useSimulation(
                 const addressTableLookupKeys: PublicKey[] = addressTableLookups.map(
                     (addressTableLookup: MessageAddressTableLookup) => {
                         return addressTableLookup.accountKey;
-                    }
+                    },
                 );
                 const addressTableLookupsFetched: (AccountInfo<Buffer> | null)[] =
                     await connection.getMultipleAccountsInfo(addressTableLookupKeys);
                 const nonNullAddressTableLookups: AccountInfo<Buffer>[] = addressTableLookupsFetched.filter(
-                    (o): o is AccountInfo<Buffer> => !!o
+                    (o): o is AccountInfo<Buffer> => !!o,
                 );
 
                 const addressLookupTablesParsed: AddressLookupTableAccount[] = nonNullAddressTableLookups.map(
@@ -75,7 +77,7 @@ export function useSimulation(
                             key: addressTableLookupKeys[index],
                             state: AddressLookupTableAccount.deserialize(addressTableLookup.data),
                         });
-                    }
+                    },
                 );
 
                 // Fetch all the accounts before simulating
@@ -105,7 +107,7 @@ export function useSimulation(
                 const mintToDecimals: { [mintPk: string]: number } = getMintDecimals(
                     accountKeys,
                     parsedAccountsPre.value,
-                    accountsPost as SimulatedTransactionAccountInfo[]
+                    accountsPost as SimulatedTransactionAccountInfo[],
                 );
 
                 const preTokenBalances: TokenBalance[] = [];
@@ -173,7 +175,7 @@ export function useSimulation(
                 const tokenBalanceRows = generateTokenBalanceRows(
                     preTokenBalances,
                     postTokenBalances,
-                    tokenAccountKeys
+                    tokenAccountKeys,
                 );
                 if (tokenBalanceRows) {
                     setTokenBalanceRows({ rows: tokenBalanceRows });
@@ -233,7 +235,7 @@ export function useSimulation(
                     setError('TransactionError');
                 }
             } catch (err) {
-                console.error(err);
+                Logger.error(err);
                 setLogs(null);
                 if (err instanceof Error) {
                     setError(err.message);

@@ -41,7 +41,7 @@ describe('instruction::SystemDetailsCard', () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/System Program: Transfer/)).toBeInTheDocument();
     });
@@ -71,7 +71,7 @@ describe('instruction::SystemDetailsCard', () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/System Program: Transfer w\/ Seed/)).toBeInTheDocument();
     });

@@ -57,7 +57,7 @@ describe('fetchAnsDomains', () => {
         vi.mocked(getAllTld).mockResolvedValue(makeTlds([{ name: '.bonk', parentAccount: PARENT_ACCOUNT }]));
     });
 
-    it('returns empty array when user has no name accounts', async () => {
+    it('should return empty array when user has no name accounts', async () => {
         mockGetProgramAccounts.mockResolvedValue([]);
 
         const result = await fetchAnsDomains(USER_ADDRESS);
@@ -66,7 +66,7 @@ describe('fetchAnsDomains', () => {
         expect(mockGetMultipleAccountsInfo).not.toHaveBeenCalled();
     });
 
-    it('returns domains with name and address', async () => {
+    it('should return domains with name and address', async () => {
         const nameAccountPubkey = PublicKey.unique();
 
         mockGetProgramAccounts.mockResolvedValue([
@@ -91,7 +91,7 @@ describe('fetchAnsDomains', () => {
         ]);
     });
 
-    it('filters out accounts whose parent does not match any TLD', async () => {
+    it('should filter out accounts whose parent does not match any TLD', async () => {
         const unknownParent = PublicKey.unique();
 
         mockGetProgramAccounts.mockResolvedValue([
@@ -107,7 +107,7 @@ describe('fetchAnsDomains', () => {
         expect(mockGetMultipleAccountsInfo).not.toHaveBeenCalled();
     });
 
-    it('skips reverse-lookup accounts that return null', async () => {
+    it('should skip reverse-lookup accounts that return null', async () => {
         const nameAccount1 = PublicKey.unique();
         const nameAccount2 = PublicKey.unique();
 
@@ -137,7 +137,7 @@ describe('fetchAnsDomains', () => {
         expect(result[0].name).toBe('bob.bonk');
     });
 
-    it('skips reverse-lookup accounts with empty domain names (only null bytes)', async () => {
+    it('should skip reverse-lookup accounts with empty domain names (only null bytes)', async () => {
         const nameAccount1 = PublicKey.unique();
         const nameAccount2 = PublicKey.unique();
 
@@ -167,7 +167,7 @@ describe('fetchAnsDomains', () => {
         expect(result[0].name).toBe('alice.bonk');
     });
 
-    it('strips trailing null bytes from domain names', async () => {
+    it('should strip trailing null bytes from domain names', async () => {
         mockGetProgramAccounts.mockResolvedValue([
             {
                 account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS)) },
@@ -187,7 +187,7 @@ describe('fetchAnsDomains', () => {
         expect(result[0].name.length).toBe('padded.bonk'.length);
     });
 
-    it('batches getMultipleAccountsInfo calls when entries exceed max', async () => {
+    it('should batch getMultipleAccountsInfo calls when entries exceed max', async () => {
         const count = 150; // exceeds MULTIPLE_ACCOUNT_INFO_MAX of 100
         const accounts = Array.from({ length: count }, () => ({
             account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS)) },
@@ -209,7 +209,7 @@ describe('fetchAnsDomains', () => {
         expect(result).toHaveLength(150);
     });
 
-    it('hashes each name account pubkey for reverse PDA derivation', async () => {
+    it('should hash each name account pubkey for reverse PDA derivation', async () => {
         const nameAccountPubkey = PublicKey.unique();
 
         mockGetProgramAccounts.mockResolvedValue([
@@ -227,7 +227,7 @@ describe('fetchAnsDomains', () => {
         expect(getHashedName).toHaveBeenCalledWith(nameAccountPubkey.toBase58());
     });
 
-    it('handles multiple TLDs correctly', async () => {
+    it('should handle multiple TLDs correctly', async () => {
         const parentAbc = PublicKey.unique();
         const parentBonk = PARENT_ACCOUNT;
 
@@ -235,7 +235,7 @@ describe('fetchAnsDomains', () => {
             makeTlds([
                 { name: '.abc', parentAccount: parentAbc },
                 { name: '.bonk', parentAccount: parentBonk },
-            ])
+            ]),
         );
 
         const nameAccount1 = PublicKey.unique();
@@ -265,13 +265,13 @@ describe('fetchAnsDomains', () => {
         expect(names).toEqual(['alice.abc', 'bob.bonk']);
     });
 
-    it('propagates RPC errors', async () => {
+    it('should propagate RPC errors', async () => {
         mockGetProgramAccounts.mockRejectedValue(new Error('RPC timeout'));
 
         await expect(fetchAnsDomains(USER_ADDRESS)).rejects.toThrow('RPC timeout');
     });
 
-    it('filters expired domains while keeping active and non-expiring ones', async () => {
+    it('should filter expired domains while keeping active and non-expiring ones', async () => {
         const past = BigInt(Math.floor(Date.now() / 1000) - 46 * 24 * 60 * 60); // 46 days ago — beyond the 45-day grace period
         const future = BigInt(Math.floor(Date.now() / 1000) + 86400);
         const noExpiry = 0n;

@@ -18,6 +18,7 @@ import { isTokenProgramId, TokenInfoWithPubkey, useAccountOwnedTokens } from '@p
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Details, useFetchTransactionDetails, useTransactionDetailsCache } from '@providers/transactions/parsed';
+import { cn } from '@shared/utils';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT } from '@utils/index';
@@ -29,6 +30,7 @@ import React, { useCallback } from 'react';
 import { ChevronDown, MinusSquare, PlusSquare, RefreshCw } from 'react-feather';
 
 import { INITIAL_TOKENS_TO_FETCH, INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
+import { Logger } from '@/app/shared/lib/logger';
 
 const TRUNCATE_TOKEN_LENGTH = 10;
 const ALL_TOKENS = '';
@@ -85,13 +87,13 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 }
                 return token.info.mint.toBase58() === filter;
             }),
-        [tokens, filter]
+        [tokens, filter],
     );
 
     // Slice tokens - this controls what gets fetched
     const tokensToFetch = React.useMemo(
         () => filteredTokens.slice(0, tokensToFetchCount),
-        [filteredTokens, tokensToFetchCount]
+        [filteredTokens, tokensToFetchCount],
     );
 
     const fetchHistories = React.useCallback(
@@ -100,7 +102,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 fetchAccountHistory(token.pubkey, false, refresh);
             });
         },
-        [tokensToFetch, fetchAccountHistory]
+        [tokensToFetch, fetchAccountHistory],
     );
 
     // Fetch histories when tokensToFetch expands (user clicks Load More)
@@ -166,7 +168,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
             (history?.data?.fetched as ConfirmedSignatureInfo[]).map(tx => ({
                 mint,
                 tx,
-            }))
+            })),
         )
         .filter(({ tx }) => {
             if (sigSet.has(tx.signature)) return false;
@@ -322,7 +324,7 @@ const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
             const nextQueryString = params.toString();
             return `${currentPathname}${nextQueryString ? `?${nextQueryString}` : ''}`;
         },
-        [currentPathname, currentSearchParams]
+        [currentPathname, currentSearchParams],
     );
 
     const filterOptions: string[] = [ALL_TOKENS];
@@ -339,17 +341,17 @@ const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
     return (
         <div className="dropdown me-2">
             <small className="me-2">Filter:</small>
-            <button className="btn btn-white btn-sm " type="button" onClick={toggle}>
+            <button className="btn btn-white btn-sm" type="button" onClick={toggle}>
                 {filter === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filter)}{' '}
                 <ChevronDown size={15} className="align-text-top" />
             </button>
-            <div className={`token-filter dropdown-menu-end dropdown-menu${show ? ' show' : ''}`}>
+            <div className={cn('token-filter dropdown-menu-end dropdown-menu', show && 'show')}>
                 {filterOptions.map(filterOption => {
                     return (
                         <Link
                             key={filterOption}
                             href={buildLocation(filterOption)}
-                            className={`dropdown-item${filterOption === filter ? ' active' : ''}`}
+                            className={cn('dropdown-item', filterOption === filter && 'active')}
                             onClick={toggle}
                         >
                             {filterOption === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filterOption) || filterOption}
@@ -548,28 +550,36 @@ function InstructionDetailsCell({
                 try {
                     name = parseSerumInstructionTitle(transactionInstruction);
                 } catch (error) {
-                    console.error(error, { signature: tx.signature });
+                    Logger.error(error, {
+                        signature: tx.signature,
+                    });
                     return undefined;
                 }
             } else if (transactionInstruction && isTokenSwapInstruction(transactionInstruction)) {
                 try {
                     name = parseTokenSwapInstructionTitle(transactionInstruction);
                 } catch (error) {
-                    console.error(error, { signature: tx.signature });
+                    Logger.error(error, {
+                        signature: tx.signature,
+                    });
                     return undefined;
                 }
             } else if (transactionInstruction && isTokenLendingInstruction(transactionInstruction)) {
                 try {
                     name = parseTokenLendingInstructionTitle(transactionInstruction);
                 } catch (error) {
-                    console.error(error, { signature: tx.signature });
+                    Logger.error(error, {
+                        signature: tx.signature,
+                    });
                     return undefined;
                 }
             } else if (transactionInstruction && isMangoInstruction(transactionInstruction)) {
                 try {
                     name = parseMangoInstructionTitle(transactionInstruction);
                 } catch (error) {
-                    console.error(error, { signature: tx.signature });
+                    Logger.error(error, {
+                        signature: tx.signature,
+                    });
                     return undefined;
                 }
             } else {

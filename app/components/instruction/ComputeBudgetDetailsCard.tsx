@@ -15,6 +15,8 @@ import {
 import { microLamportsToLamportsString } from '@utils/index';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { InstructionCard } from './InstructionCard';
 
 export function ComputeBudgetDetailsCard({
@@ -63,7 +65,7 @@ export function ComputeBudgetDetailsCard({
                         <tr>
                             <td>Requested Compute Units</td>
                             <td className="text-lg-end font-monospace">{`${new Intl.NumberFormat('en-US').format(
-                                units
+                                units,
                             )} compute units`}</td>
                         </tr>
 
@@ -128,7 +130,7 @@ export function ComputeBudgetDetailsCard({
                         <tr>
                             <td>Compute Unit Limit</td>
                             <td className="text-lg-end font-monospace">{`${new Intl.NumberFormat('en-US').format(
-                                units
+                                units,
                             )} compute units`}</td>
                         </tr>
                     </InstructionCardComponent>
@@ -160,7 +162,7 @@ export function ComputeBudgetDetailsCard({
                         <tr>
                             <td>Compute Unit Price</td>
                             <td className="text-lg-end font-monospace">{`${microLamportsToLamportsString(
-                                microLamports
+                                microLamports,
                             )} lamports per compute unit`}</td>
                         </tr>
                     </InstructionCardComponent>
@@ -198,9 +200,9 @@ export function ComputeBudgetDetailsCard({
             }
         }
     } catch (error) {
-        console.error(error, {
-            signature: signature,
-            url: url,
+        Logger.error(error, {
+            signature,
+            url,
         });
     }
 

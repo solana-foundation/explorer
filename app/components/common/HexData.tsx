@@ -34,7 +34,7 @@ export function HexData({
         spans.push(
             <span key={i} className={color}>
                 {chunks.slice(i, i + SPAN_SIZE).join(' ')}&emsp;
-            </span>
+            </span>,
         );
 
         if (i % ROW_SIZE === ROW_SIZE - SPAN_SIZE || i >= chunks.length - SPAN_SIZE) {
@@ -58,7 +58,7 @@ export function HexData({
             <div className={cn('d-none d-lg-flex align-items-center justify-content-end', className)}>
                 <Content />
             </div>
-            <div className="d-flex d-lg-none align-items-center">
+            <div className={cn('d-flex d-lg-none align-items-center', className)}>
                 <Content />
             </div>
         </>

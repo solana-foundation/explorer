@@ -19,6 +19,8 @@ import { camelCase } from 'change-case';
 import { useMemo } from 'react';
 import { array, Infer, literal, nullable, object, optional, string, union, validate } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { safeJsonParse } from '../lib/utils';
 import type { FieldType, FormattedIdl, PdaData, StructField } from './formatters/formatted-idl';
 
@@ -297,9 +299,11 @@ export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
                 })),
         };
 
-        // Log formatting errors with Sentry upon its delivery. Just show them at this point
         if (formattingErrors.length) {
-            console.error('Formatting Errors:', formattingErrors);
+            Logger.warn(`[idl] Formatting errors in ${idl.metadata.name} (${idl.address})`, {
+                accounts: formattingErrors.map(([, acc]) => acc),
+                sentry: true,
+            });
         }
 
         return formattedIdl;

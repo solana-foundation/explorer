@@ -2,6 +2,7 @@ import { truncateAddress } from '@entities/address';
 import { ParsedTransactionWithMeta } from '@solana/web3.js';
 import { lamportsToSolString } from '@utils/index';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, clusterName } from '@/app/utils/cluster';
 import { displayTimestampUtc } from '@/app/utils/date';
 
@@ -20,10 +21,10 @@ export async function createReceipt(signature: string, cluster?: QueryCluster): 
 
 export async function extractReceiptData(
     tx: ParsedTransactionWithMeta,
-    cluster: Cluster
+    cluster: Cluster,
 ): Promise<FormattedReceipt | undefined> {
     let receipt: Receipt | undefined = await createTokenTransferReceipt(tx, (mint: string | undefined) =>
-        getParsedTokenInfo(mint, cluster)
+        getParsedTokenInfo(mint, cluster),
     );
     if (!receipt) {
         receipt = createSolTransferReceipt(tx);
@@ -64,9 +65,9 @@ export function formatReceiptData(receipt: Receipt, cluster: Cluster): Formatted
         },
     };
     if (isTokenReceipt(receipt)) {
-        return { ...base, mint: receipt.mint, symbol: receipt.symbol };
+        return { ...base, kind: 'token' as const, mint: receipt.mint, symbol: receipt.symbol };
     }
-    return base;
+    return { ...base, kind: 'sol' as const };
 }
 
 async function getParsedTokenInfo(mint: string | undefined, cluster: Cluster): Promise<TokenInfo | undefined> {
@@ -75,7 +76,7 @@ async function getParsedTokenInfo(mint: string | undefined, cluster: Cluster): P
         const tokenInfo = await getTokenInfo(mint, cluster);
         return tokenInfo;
     } catch (error) {
-        console.error('Unable to get token info', error);
+        Logger.error(error);
         return undefined;
     }
 }

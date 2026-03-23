@@ -12,7 +12,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.MainnetBeta,
                     epoch: 758n,
                     programId: '11111111111111111111111111111111', // System Program
-                })
+                }),
             ).toEqual(200_000);
 
             expect(
@@ -20,7 +20,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.MainnetBeta,
                     epoch: 0n,
                     programId: 'Vote111111111111111111111111111111111111111', // Vote Program
-                })
+                }),
             ).toEqual(200_000);
         });
 
@@ -31,7 +31,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.MainnetBeta,
                     epoch: 759n,
                     programId: '11111111111111111111111111111111', // System Program
-                })
+                }),
             ).toEqual(3_000);
 
             expect(
@@ -39,7 +39,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.MainnetBeta,
                     epoch: 1000n,
                     programId: 'Vote111111111111111111111111111111111111111', // Vote Program
-                })
+                }),
             ).toEqual(3_000);
 
             expect(
@@ -47,7 +47,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.MainnetBeta,
                     epoch: 759n,
                     programId: 'ComputeBudget111111111111111111111111111111', // Compute Budget
-                })
+                }),
             ).toEqual(3_000);
         });
 
@@ -57,7 +57,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.MainnetBeta,
                     epoch: 759n,
                     programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', // Token Program
-                })
+                }),
             ).toEqual(200_000);
         });
 
@@ -68,7 +68,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.MainnetBeta,
                     epoch: 752n,
                     programId: 'Feature111111111111111111111111111111111111',
-                })
+                }),
             ).toEqual(200_000); // Before builtin optimization
 
             // After builtin optimization but before migration
@@ -77,7 +77,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.MainnetBeta,
                     epoch: 758n, // After 753 but before 759
                     programId: 'Feature111111111111111111111111111111111111',
-                })
+                }),
             ).toEqual(200_000); // Still default because migration happened before builtin optimization
 
             // After both migration and builtin optimization
@@ -86,7 +86,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.MainnetBeta,
                     epoch: 759n,
                     programId: 'Feature111111111111111111111111111111111111',
-                })
+                }),
             ).toEqual(200_000); // Now BPF, uses default
         });
     });
@@ -99,7 +99,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.Devnet,
                     epoch: 841n,
                     programId: '11111111111111111111111111111111',
-                })
+                }),
             ).toEqual(200_000);
 
             // After epoch 842 on devnet
@@ -108,7 +108,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.Devnet,
                     epoch: 842n,
                     programId: '11111111111111111111111111111111',
-                })
+                }),
             ).toEqual(3_000);
         });
     });
@@ -121,7 +121,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.Testnet,
                     epoch: 749n,
                     programId: '11111111111111111111111111111111',
-                })
+                }),
             ).toEqual(200_000);
 
             // After epoch 750 on testnet
@@ -130,7 +130,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.Testnet,
                     epoch: 750n,
                     programId: '11111111111111111111111111111111',
-                })
+                }),
             ).toEqual(3_000);
         });
     });
@@ -142,7 +142,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.Custom,
                     epoch: 0n,
                     programId: '11111111111111111111111111111111',
-                })
+                }),
             ).toEqual(3_000);
 
             expect(
@@ -150,7 +150,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.Custom,
                     epoch: 1000n,
                     programId: 'Feature111111111111111111111111111111111111',
-                })
+                }),
             ).toEqual(200_000);
         });
     });
@@ -161,7 +161,7 @@ describe('getReservedComputeUnits', () => {
                 getReservedComputeUnits({
                     cluster: Cluster.MainnetBeta,
                     programId: '11111111111111111111111111111111',
-                })
+                }),
             ).toEqual(200_000);
         });
 
@@ -171,7 +171,7 @@ describe('getReservedComputeUnits', () => {
                     cluster: Cluster.MainnetBeta,
                     epoch: -1n,
                     programId: '11111111111111111111111111111111',
-                })
+                }),
             ).toEqual(200_000);
         });
     });
@@ -182,7 +182,7 @@ describe('estimateRequestedComputeUnits', () => {
         instructions: Array<{
             programId: string;
             data: Uint8Array;
-        }>
+        }>,
     ): Parameters<typeof estimateRequestedComputeUnits>[0] => {
         const staticAccountKeys = [...new Set(instructions.map(ix => ix.programId))].map(id => new PublicKey(id));
 

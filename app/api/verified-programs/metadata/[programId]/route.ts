@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
+import fetch from 'node-fetch';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const PROGRAM_METADATA_CACHE_SECONDS = 3600;
@@ -20,7 +21,7 @@ export async function GET(_request: Request, { params: { programId } }: Params) 
         const response = await fetch(`${OSEC_REGISTRY_URL}/status-all/${programId}`);
 
         if (!response.ok) {
-            Logger.debug(`Failed to fetch metadata for ${programId}: HTTP ${response.status}`);
+            Logger.debug('[api:verified-programs] Failed to fetch metadata', { programId, status: response.status });
             if (response.status === 404) {
                 return NextResponse.json([], {
                     headers: {
@@ -39,7 +40,7 @@ export async function GET(_request: Request, { params: { programId } }: Params) 
             },
         });
     } catch (error) {
-        Logger.error(`Error fetching metadata for ${programId}:`, error);
+        Logger.error(error, { programId });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

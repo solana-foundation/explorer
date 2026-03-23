@@ -16,7 +16,7 @@ describe('createKnownAccountsPrefillDependency', () => {
             useInstructionForm({
                 instruction,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 
@@ -36,7 +36,7 @@ describe('createKnownAccountsPrefillDependency', () => {
             useInstructionForm({
                 instruction,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 
@@ -56,7 +56,7 @@ describe('createKnownAccountsPrefillDependency', () => {
             useInstructionForm({
                 instruction,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 
@@ -67,7 +67,7 @@ describe('createKnownAccountsPrefillDependency', () => {
         dependency.onValueChange(instruction.name, form);
 
         expect(form.getValues('accounts.testInstruction.associatedTokenProgram')).toBe(
-            ASSOCIATED_TOKEN_PROGRAM_ID.toBase58()
+            ASSOCIATED_TOKEN_PROGRAM_ID.toBase58(),
         );
     });
 
@@ -78,7 +78,7 @@ describe('createKnownAccountsPrefillDependency', () => {
             useInstructionForm({
                 instruction,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 
@@ -99,7 +99,7 @@ describe('createKnownAccountsPrefillDependency', () => {
             useInstructionForm({
                 instruction,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 
@@ -124,7 +124,7 @@ describe('createKnownAccountsPrefillDependency', () => {
             useInstructionForm({
                 instruction,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 
@@ -153,7 +153,7 @@ describe('createKnownAccountsPrefillDependency', () => {
             useInstructionForm({
                 instruction,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 
@@ -184,7 +184,7 @@ describe('createKnownAccountsPrefillDependency', () => {
             useInstructionForm({
                 instruction,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 

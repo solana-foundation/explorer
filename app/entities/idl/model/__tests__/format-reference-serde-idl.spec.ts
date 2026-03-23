@@ -87,7 +87,7 @@ describe('Reference implementation for formatIdl', () => {
         let idl: AnchorIdl;
         const address = extractProgramAddressFromIdlData(
             anchorLegacy094ShankWave,
-            'waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF'
+            'waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF',
         );
         expect('0.9.4').toBe(anchorLegacy094ShankWave.version);
         expect(() => {

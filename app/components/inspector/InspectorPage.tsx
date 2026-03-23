@@ -100,7 +100,7 @@ function decodeSignatures(signaturesParam: string): (string | null)[] {
 // URL params are returned as a string that will prefill the transaction
 // message input field for debugging. Returns a tuple of [result, shouldRefreshUrl]
 function decodeUrlParams(
-    params: URLSearchParams
+    params: URLSearchParams,
 ): [TransactionData | string | SquadsProposalAccountData, URLSearchParams, boolean] {
     const messageParam = decodeParam(params, 'message');
     const signaturesParam = decodeParam(params, 'signatures');

@@ -101,4 +101,8 @@ export function serverClusterUrl(cluster: Cluster, customUrl: string): string {
     }
 }
 
+export function clusterFromSlug(slug: string): Cluster | null {
+    return CLUSTERS.find(c => clusterSlug(c) === slug) ?? null;
+}
+
 export const DEFAULT_CLUSTER = Cluster.MainnetBeta;

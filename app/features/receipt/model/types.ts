@@ -40,7 +40,7 @@ export type SolTransferParsed = {
 };
 
 export function isParsedInstruction(
-    instruction: ParsedInstruction | PartiallyDecodedInstruction
+    instruction: ParsedInstruction | PartiallyDecodedInstruction,
 ): instruction is ParsedInstruction {
     return 'parsed' in instruction;
 }

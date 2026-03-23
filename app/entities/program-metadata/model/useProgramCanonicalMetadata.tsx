@@ -3,8 +3,8 @@
 import { fetch } from 'cross-fetch';
 import useSWRImmutable from 'swr/immutable';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
-import Logger from '@/app/utils/logger';
 
 import { getProgramCanonicalMetadata } from '../api/getProgramCanonicalMetadata';
 
@@ -39,7 +39,7 @@ export function useProgramCanonicalMetadata(
     url: string,
     cluster: Cluster,
     enabled: boolean,
-    useSuspense = false
+    useSuspense = false,
 ) {
     const { data } = useSWRImmutable(
         `program-metadata-${programAddress}-${url}-${seed}`,
@@ -57,28 +57,22 @@ export function useProgramCanonicalMetadata(
 
                 // For known clusters, use the API route (benefits from caching)
                 const response = await fetch(
-                    `/api/programMetadataIdl?programAddress=${programAddress}&cluster=${cluster}&seed=${seed}`
+                    `/api/program-metadata-idl?programAddress=${programAddress}&cluster=${cluster}&seed=${seed}`,
                 );
                 if (response.ok) {
                     const data = await response.json();
-                    const { details, programMetadata } = data;
-
-                    // In case of 403, we have ok response but it contains {details: {error: string}} data
-                    if (details?.error) {
-                        Logger.error(new Error(details.error));
-                        return null;
-                    }
-
-                    return programMetadata || null;
+                    return data.programMetadata || null;
                 }
 
                 return null;
             } catch (error) {
-                Logger.error(`Error fetching canonical metadata, seed ${seed}`, error);
+                Logger.error(new Error('[program-metadata] Error fetching canonical metadata', { cause: error }), {
+                    seed,
+                });
                 return null;
             }
         },
-        { suspense: useSuspense }
+        { suspense: useSuspense },
     );
     return { programMetadata: data };
 }

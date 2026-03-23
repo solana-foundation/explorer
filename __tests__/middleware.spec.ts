@@ -8,8 +8,9 @@ vi.mock('botid/server', () => ({
     checkBotId: vi.fn(),
 }));
 
-import Logger from '@utils/logger';
 import { checkBotId } from 'botid/server';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 import { middleware } from '../middleware';
 
@@ -54,8 +55,8 @@ describe('middleware', () => {
         });
 
         it.each<{ headers: Record<string, string>; description: string }>([
-            { headers: { 'x-is-human': 'true' }, description: 'with x-is-human header' },
-            { headers: {}, description: 'without x-is-human header' },
+            { description: 'with x-is-human header', headers: { 'x-is-human': 'true' } },
+            { description: 'without x-is-human header', headers: {} },
         ])('should allow request to pass through $description', async ({ headers }) => {
             const request = createRequest('/api/test', headers);
             const response = await middleware(request);
@@ -78,7 +79,8 @@ describe('middleware', () => {
                 expect(response.status).toBe(200);
                 expect(checkBotId).not.toHaveBeenCalled();
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
-                    expect.stringContaining('[middleware] No x-is-human header')
+                    '[middleware] No x-is-human header, allowing',
+                    expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
         });
@@ -86,10 +88,10 @@ describe('middleware', () => {
         describe('with x-is-human header', () => {
             it('should allow human requests and log verification info', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
-                    isBot: false,
-                    isVerifiedBot: false,
-                    isHuman: true,
                     bypassed: false,
+                    isBot: false,
+                    isHuman: true,
+                    isVerifiedBot: false,
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
@@ -98,25 +100,31 @@ describe('middleware', () => {
                 expect(response.status).toBe(200);
                 expect(checkBotId).toHaveBeenCalled();
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
-                    expect.stringContaining('[middleware] BotId verification'),
-                    expect.objectContaining({ isHuman: true })
+                    '[middleware] BotId verification',
+                    expect.objectContaining({ isHuman: true }),
                 );
-                expect(loggerInfoSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Human verified'));
+                expect(loggerInfoSpy).toHaveBeenCalledWith(
+                    '[middleware] Human verified',
+                    expect.objectContaining({ pathname: '/api/test' }),
+                );
             });
 
             it('should allow bot requests when challenge mode is disabled and log warning', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
-                    isBot: true,
-                    isVerifiedBot: false,
-                    isHuman: false,
                     bypassed: false,
+                    isBot: true,
+                    isHuman: false,
+                    isVerifiedBot: false,
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
                 const response = await middleware(request);
 
                 expect(response.status).toBe(200);
-                expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Bot detected'));
+                expect(loggerWarnSpy).toHaveBeenCalledWith(
+                    '[middleware] Bot detected',
+                    expect.objectContaining({ pathname: '/api/test' }),
+                );
             });
         });
 
@@ -127,10 +135,10 @@ describe('middleware', () => {
 
             it('should block bot requests with 401 and log error', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
-                    isBot: true,
-                    isVerifiedBot: false,
-                    isHuman: false,
                     bypassed: false,
+                    isBot: true,
+                    isHuman: false,
+                    isVerifiedBot: false,
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
@@ -139,20 +147,22 @@ describe('middleware', () => {
                 expect(response.status).toBe(401);
                 const body = await response.json();
                 expect(body).toEqual({ error: 'Access denied: request identified as automated bot' });
-                expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Bot detected'));
+                expect(loggerWarnSpy).toHaveBeenCalledWith(
+                    '[middleware] Bot detected',
+                    expect.objectContaining({ pathname: '/api/test' }),
+                );
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
-                    expect.objectContaining({
-                        message: expect.stringContaining('[middleware] Challenge mode enabled, blocking'),
-                    })
+                    new Error('[middleware] Challenge mode enabled, blocking'),
+                    expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
 
             it('should block verified bot requests and log error', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
-                    isBot: true,
-                    isVerifiedBot: true,
-                    isHuman: false,
                     bypassed: false,
+                    isBot: true,
+                    isHuman: false,
+                    isVerifiedBot: true,
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
@@ -160,25 +170,27 @@ describe('middleware', () => {
 
                 expect(response.status).toBe(401);
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
-                    expect.objectContaining({
-                        message: expect.stringContaining('[middleware] Challenge mode enabled, blocking'),
-                    })
+                    new Error('[middleware] Challenge mode enabled, blocking'),
+                    expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
 
             it('should allow human requests and log info', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
-                    isBot: false,
-                    isVerifiedBot: false,
-                    isHuman: true,
                     bypassed: false,
+                    isBot: false,
+                    isHuman: true,
+                    isVerifiedBot: false,
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
                 const response = await middleware(request);
 
                 expect(response.status).toBe(200);
-                expect(loggerInfoSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Human verified'));
+                expect(loggerInfoSpy).toHaveBeenCalledWith(
+                    '[middleware] Human verified',
+                    expect.objectContaining({ pathname: '/api/test' }),
+                );
             });
         });
     });
@@ -189,17 +201,20 @@ describe('middleware', () => {
             process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT = 'true';
 
             vi.mocked(checkBotId).mockResolvedValue({
-                isBot: true,
-                isVerifiedBot: false,
-                isHuman: false,
                 bypassed: true,
+                isBot: true,
+                isHuman: false,
+                isVerifiedBot: false,
             });
 
             const request = createRequest('/api/test', { 'x-is-human': 'true' });
             const response = await middleware(request);
 
             expect(response.status).toBe(200);
-            expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('[middleware] Bot detected'));
+            expect(loggerWarnSpy).toHaveBeenCalledWith(
+                '[middleware] Bot detected',
+                expect.objectContaining({ pathname: '/api/test' }),
+            );
         });
 
         it('should block request when both simulate bot mode and challenge mode are enabled', async () => {
@@ -208,10 +223,10 @@ describe('middleware', () => {
             process.env.NEXT_PUBLIC_BOTID_CHALLENGE_MODE_ENABLED = 'true';
 
             vi.mocked(checkBotId).mockResolvedValue({
-                isBot: true,
-                isVerifiedBot: false,
-                isHuman: false,
                 bypassed: true,
+                isBot: true,
+                isHuman: false,
+                isVerifiedBot: false,
             });
 
             const request = createRequest('/api/test', { 'x-is-human': 'true' });
@@ -219,9 +234,8 @@ describe('middleware', () => {
 
             expect(response.status).toBe(401);
             expect(loggerErrorSpy).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    message: expect.stringContaining('[middleware] Challenge mode enabled, blocking'),
-                })
+                new Error('[middleware] Challenge mode enabled, blocking'),
+                expect.objectContaining({ pathname: '/api/test' }),
             );
         });
     });

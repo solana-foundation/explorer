@@ -65,7 +65,7 @@ describe('triggerDownload', () => {
 
         it('should throw error if data is invalid base64', async () => {
             await expect(triggerDownload('Hello World!', 'file.txt')).rejects.toThrow(
-                'Invalid data: not a valid base64 string'
+                'Invalid data: not a valid base64 string',
             );
         });
     });

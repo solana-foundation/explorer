@@ -62,7 +62,7 @@ describe('useUserSnsDomains', () => {
         expect(useSWR).toHaveBeenCalledWith(
             ['user-sns-domains', USER_ADDRESS],
             expect.any(Function),
-            expect.objectContaining({ revalidateOnFocus: false })
+            expect.objectContaining({ revalidateOnFocus: false }),
         );
     });
 
@@ -77,7 +77,7 @@ describe('useUserSnsDomains', () => {
         expect(useSWR).toHaveBeenCalledWith(
             ['user-sns-domains', USER_ADDRESS],
             expect.any(Function),
-            expect.any(Object)
+            expect.any(Object),
         );
     });
 

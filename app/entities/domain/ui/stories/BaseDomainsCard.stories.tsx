@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
 
-import { nextjsParameters, withClusterAndAccounts } from '../../../../../.storybook/decorators';
+import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
 import { BaseDomainsCard } from '../BaseDomainsCard';
 
 const meta = {
     component: BaseDomainsCard,
-    decorators: [withClusterAndAccounts],
+    decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Entities/Domain/UI/BaseDomainsCard',

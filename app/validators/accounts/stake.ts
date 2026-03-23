@@ -34,7 +34,7 @@ export const StakeAccountInfo = type({
                 voter: PublicKeyFromString,
                 warmupCooldownRate: number(),
             }),
-        })
+        }),
     ),
 });
 

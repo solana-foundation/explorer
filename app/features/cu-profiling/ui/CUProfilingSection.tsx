@@ -21,7 +21,7 @@ export function CUProfilingSection({ signature }: SignatureProps) {
 
     const instructionLogs: InstructionLogs[] = React.useMemo(
         () => formatTransactionLogs(transactionWithMeta, cluster),
-        [transactionWithMeta, cluster]
+        [transactionWithMeta, cluster],
     );
 
     const instructionsForCU = React.useMemo(() => {

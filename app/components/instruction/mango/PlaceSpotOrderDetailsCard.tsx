@@ -35,7 +35,7 @@ export function PlaceSpotOrderDetailsCard(props: {
             const mangoSpotMarket = await getSpotMarketFromSpotMarketConfig(
                 ix.programId,
                 cluster.url,
-                mangoSpotMarketConfig
+                mangoSpotMarketConfig,
             );
             if (mangoSpotMarket === undefined) {
                 return;

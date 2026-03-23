@@ -28,6 +28,7 @@
             "@providers/*": ["./app/providers/*"],
             "@shared/*": ["./app/components/shared/*"],
             "@utils/*": ["./app/utils/*"],
+            "@storybook-config/*": ["./.storybook/*"],
             "@validators/*": ["./app/validators/*"]
         }
     },

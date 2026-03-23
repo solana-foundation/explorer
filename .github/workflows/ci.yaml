@@ -4,7 +4,6 @@ on:
   push:
     branches: [master, development, 'development-*']
   pull_request:
-    branches: [master, development, 'development-*']
 
 env:
   # cache affixes and folders
@@ -12,7 +11,6 @@ env:
   PNPM_CACHE_FOLDER: ~/.pnpm-store
   PW_CACHE_AFFIX: pw
   PW_CACHE_FOLDER: ~/.cache/ms-playwright
-  SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING: 1
   SENTRY_TELEMETRY_DISABLE: true
   STORYBOOK_DISABLE_TELEMETRY: 1
 
@@ -55,14 +53,14 @@ jobs:
         run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Setup Additional Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: additional_cache
         with:
           path: |
@@ -108,14 +106,14 @@ jobs:
         run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ needs.read-nvmrc.outputs.node-version }}
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.PNPM_CACHE_FOLDER }}
           key: ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -152,14 +150,14 @@ jobs:
         run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.PNPM_CACHE_FOLDER }}
           key: ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -167,7 +165,7 @@ jobs:
             ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: pw_cache
         with:
           path: ${{ env.PW_CACHE_FOLDER }}

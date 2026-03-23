@@ -23,7 +23,7 @@ describe('nicknames', () => {
                 'solana-explorer-nicknames',
                 JSON.stringify({
                     TestAddress123: 'My Wallet',
-                })
+                }),
             );
 
             const result = getNickname('TestAddress123');
@@ -85,7 +85,7 @@ describe('nicknames', () => {
             expect(listener).toHaveBeenCalledWith(
                 expect.objectContaining({
                     detail: { address: 'TestAddress123' },
-                })
+                }),
             );
 
             window.removeEventListener('nicknameUpdated', listener);
@@ -134,7 +134,7 @@ describe('nicknames', () => {
             expect(listener).toHaveBeenCalledWith(
                 expect.objectContaining({
                     detail: { address: 'TestAddress123' },
-                })
+                }),
             );
 
             window.removeEventListener('nicknameUpdated', listener);

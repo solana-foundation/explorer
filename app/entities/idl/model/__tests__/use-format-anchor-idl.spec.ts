@@ -239,7 +239,7 @@ describe('useFormatAnchorIdl', () => {
 
         expect(types?.[1].fieldType?.kind).toBe('unknown');
         expect((types?.[1].fieldType as UnknownFieldType)?.type).toBe(
-            '{"data":[{"name":"test","type":"u64"},{"name":"active","type":"bool"}],"kind":"test"}'
+            '{"data":[{"name":"test","type":"u64"},{"name":"active","type":"bool"}],"kind":"test"}',
         );
     });
 

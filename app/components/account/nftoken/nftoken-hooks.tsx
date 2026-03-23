@@ -37,7 +37,7 @@ const getMetadataFetcher = async (metadataUrl: string) => {
 };
 
 export const useNftokenMetadata = (
-    metadataUrl: string | null | undefined
+    metadataUrl: string | null | undefined,
 ): {
     data: NftokenTypes.Metadata | null;
     error: any;

@@ -3,6 +3,8 @@ import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { InstructionCard } from '../InstructionCard';
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
 import { CreateDetailsCard } from './CreateDetailsCard';
@@ -39,7 +41,7 @@ export function AssociatedTokenDetailsCard(props: DetailsProps) {
                 return <UnknownDetailsCard {...props} />;
         }
     } catch (error) {
-        console.error(error, {
+        Logger.error(error, {
             signature: props.tx.signatures[0],
         });
         return <UnknownDetailsCard {...props} />;

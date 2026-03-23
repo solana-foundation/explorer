@@ -6,6 +6,8 @@ import { Connection } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { EpochSchedule, getFirstSlotInEpoch, getLastSlotInEpoch } from '../utils/epoch-schedule';
 
 export enum FetchStatus {
@@ -65,7 +67,7 @@ export async function fetchEpoch(
     cluster: Cluster,
     epochSchedule: EpochSchedule,
     currentEpoch: bigint,
-    epoch: number
+    epoch: number,
 ) {
     dispatch({
         key: epoch,
@@ -113,7 +115,7 @@ export async function fetchEpoch(
     } catch (err) {
         status = FetchStatus.FetchFailed;
         if (cluster !== Cluster.Custom) {
-            console.error(err, { epoch: epoch.toString() });
+            Logger.error(err, { epoch: epoch.toString() });
         }
     }
 
@@ -136,6 +138,6 @@ export function useFetchEpoch() {
     return React.useCallback(
         (key: number, currentEpoch: bigint, epochSchedule: EpochSchedule) =>
             fetchEpoch(dispatch, url, cluster, epochSchedule, currentEpoch, key),
-        [dispatch, cluster, url]
+        [dispatch, cluster, url],
     );
 }

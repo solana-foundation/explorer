@@ -17,7 +17,7 @@ import { intoInstructionData } from '../into-parsed-data';
  * Parser for SPL Token Program instructions.
  */
 export function parseTokenProgramInstruction(
-    instruction: TransactionInstruction
+    instruction: TransactionInstruction,
 ): { type: TokenInstructionType; info: unknown } | null {
     const { data } = instruction;
 

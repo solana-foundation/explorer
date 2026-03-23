@@ -3,13 +3,18 @@ import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
 const CACHE_DURATION = 60 * 60; // 60 minutes
 
 const CACHE_HEADERS = {
-    'Cache-Control': `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=60`,
+    'Cache-Control': `public, max-age=${CACHE_DURATION}, s-maxage=${CACHE_DURATION}, stale-while-revalidate=60`,
 };
+
+function isBufferOutOfBounds(error: unknown): boolean {
+    return error instanceof RangeError && (error as NodeJS.ErrnoException).code === 'ERR_BUFFER_OUT_OF_BOUNDS';
+}
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -26,7 +31,13 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Invalid cluster' }, { status: 400 });
     }
 
-    const programId = new PublicKey(programAddress);
+    let programId: PublicKey;
+    try {
+        programId = new PublicKey(programAddress);
+    } catch {
+        return NextResponse.json({ error: 'Invalid program address' }, { status: 400 });
+    }
+
     try {
         const provider = new AnchorProvider(new Connection(url), new NodeWallet(Keypair.generate()), {});
         const idl = await Program.fetchIdl<Idl>(programId, provider);
@@ -35,15 +46,15 @@ export async function GET(request: Request) {
             {
                 headers: CACHE_HEADERS,
                 status: 200,
-            }
+            },
         );
     } catch (error) {
-        return NextResponse.json(
-            { details: error, error: error instanceof Error ? error.message : 'Unknown error' },
-            {
-                headers: CACHE_HEADERS,
-                status: 200,
-            }
-        );
+        if (isBufferOutOfBounds(error)) {
+            Logger.warn(`[api:anchor] Program ${programAddress} is not an Anchor program`);
+            return NextResponse.json({ idl: null }, { headers: CACHE_HEADERS, status: 200 });
+        }
+
+        Logger.error(new Error('[api:anchor] Failed to fetch IDL', { cause: error }));
+        return NextResponse.json({ error: 'Failed to fetch IDL' }, { status: 502 });
     }
 }

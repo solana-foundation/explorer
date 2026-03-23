@@ -56,10 +56,12 @@ export function DownloadableDropdown({
     data,
     encodings = ['hex', 'base58', 'base64'],
     filename,
+    iconButton = false,
 }: {
     filename: string;
     data: ByteArray | null;
     encodings?: EncodingFormat[];
+    iconButton?: boolean;
 }) {
     const dropdownRef = createRef<HTMLButtonElement>();
     const dropdownOptions = useMemo(
@@ -68,15 +70,23 @@ export function DownloadableDropdown({
                 return { strategy: 'fixed' as const };
             },
         }),
-        []
+        [],
     );
 
     return (
         <Dropdown dropdownRef={dropdownRef} options={dropdownOptions}>
             <div className="dropdown e-overflow-visible">
-                <Button variant="outline" size="sm" ref={dropdownRef} data-bs-toggle="dropdown" type="button">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className={iconButton ? 'e-border-none e-px-2' : ''}
+                    ref={dropdownRef}
+                    data-bs-toggle="dropdown"
+                    type="button"
+                    aria-label="Download"
+                >
                     <Download size={12} />
-                    Download
+                    {!iconButton && <span className="d-none d-md-inline">Download</span>}
                 </Button>
                 <div className="dropdown-menu-end dropdown-menu e-z-10">
                     <div className="d-flex e-flex-col">
@@ -113,7 +123,7 @@ function DownloadableDropdownButton({
             const encoded = encodeTransactionData(data, encoding);
             triggerDownloadText(encoded, `${filename}_${encoding}.txt`);
         },
-        [data, filename]
+        [data, filename],
     );
 
     const handleDownload = (encoding: EncodingFormat) => {

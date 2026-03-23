@@ -13,7 +13,7 @@ describe('intoParsedData', () => {
         const message = mock.deserializeMessage(stubs.aTokenCreateMsgWithInnerCards);
         const instruction = intoTransactionInstructionFromVersionedMessage(
             message.compiledInstructions[index],
-            message
+            message,
         );
         const data = privateIntoParsedData(instruction);
         expect(data.type).toBe('create');
@@ -45,7 +45,7 @@ describe('intoParsedData', () => {
         const message = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
         const instruction = intoTransactionInstructionFromVersionedMessage(
             message.compiledInstructions[index],
-            message
+            message,
         );
         const data = privateIntoParsedData(instruction);
         expect(data.type).toBe('createIdempotent');
@@ -77,7 +77,7 @@ describe('intoParsedData', () => {
         const message = mock.deserializeMessage(stubs.aTokenRecoverNestedMsg);
         const instruction = intoTransactionInstructionFromVersionedMessage(
             message.compiledInstructions[index],
-            message
+            message,
         );
         const data = privateIntoParsedData(instruction);
         expect(data.type).toBe('recoverNested');

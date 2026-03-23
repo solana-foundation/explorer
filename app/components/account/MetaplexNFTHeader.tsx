@@ -42,7 +42,7 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
                 dropdown.dispose();
             }
         },
-        [dropdownRef]
+        [dropdownRef],
     );
     return (
         <div className="row">
@@ -147,8 +147,8 @@ function getEditionPill(editionInfo: EditionInfo) {
                 edition && masterEdition
                     ? `Edition ${edition.edition.toNumber()} / ${masterEdition.supply.toNumber()}`
                     : masterEdition
-                    ? 'Master Edition'
-                    : 'No Master Edition Information'
+                      ? 'Master Edition'
+                      : 'No Master Edition Information'
             }`}</span>
         </div>
     );

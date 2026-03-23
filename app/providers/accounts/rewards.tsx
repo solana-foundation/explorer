@@ -8,6 +8,8 @@ import { Connection, InflationReward, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 const REWARDS_AVAILABLE_EPOCH = new Map<Cluster, number>([
     [Cluster.MainnetBeta, 132],
     [Cluster.Testnet, 43],
@@ -75,7 +77,7 @@ async function fetchRewards(
     cluster: Cluster,
     url: string,
     fromEpoch?: number,
-    highestEpoch?: number
+    highestEpoch?: number,
 ) {
     dispatch({
         key: pubkey.toBase58(),
@@ -93,7 +95,7 @@ async function fetchRewards(
             fromEpoch = epochInfo.epoch - 1;
         } catch (error) {
             if (cluster !== Cluster.Custom) {
-                console.error(error, { url });
+                Logger.error(error, { url });
             }
 
             return dispatch({
@@ -115,7 +117,7 @@ async function fetchRewards(
             return result[0];
         } catch (error) {
             if (cluster !== Cluster.Custom) {
-                console.error(error, { url });
+                Logger.error(error, { url });
             }
         }
         return null;
@@ -174,12 +176,12 @@ export function useFetchRewards() {
                     cluster,
                     url,
                     before.data.lowestFetchedEpoch ? before.data.lowestFetchedEpoch - 1 : undefined,
-                    highestEpoch
+                    highestEpoch,
                 );
             } else {
                 fetchRewards(dispatch, pubkey, cluster, url, undefined, highestEpoch);
             }
         },
-        [state, dispatch, cluster, url]
+        [state, dispatch, cluster, url],
     );
 }

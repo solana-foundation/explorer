@@ -386,7 +386,7 @@ export class PythInstruction {
     static decodeUpdatePriceNoFailOnError(instruction: TransactionInstruction): UpdatePriceParams {
         const { status, price, conf, publishSlot } = decodeData(
             PYTH_INSTRUCTION_LAYOUTS.UpdatePriceNoFailOnError,
-            instruction.data
+            instruction.data,
         );
 
         return {

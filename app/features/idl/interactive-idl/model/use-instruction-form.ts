@@ -20,7 +20,7 @@ export type FormValue = Parameters<UseFormSetValue<InstructionFormData>>[1];
 export type InstructionFormFieldNames = {
     account: (
         account: InstructionAccountData | NestedInstructionAccountsData,
-        nestedAccount?: InstructionAccountData
+        nestedAccount?: InstructionAccountData,
     ) => Path<InstructionFormData>;
     argument: (arg: ArgField) => Path<InstructionFormData>;
 };
@@ -48,7 +48,7 @@ export function useInstructionForm({
         fieldNames: {
             account: (
                 account: InstructionAccountData | NestedInstructionAccountsData,
-                nestedAccount?: InstructionAccountData
+                nestedAccount?: InstructionAccountData,
             ): Path<InstructionFormData> =>
                 nestedAccount
                     ? (`accounts.${instruction.name}.${account.name}.${nestedAccount.name}` as Path<InstructionFormData>)
@@ -102,18 +102,21 @@ function createDefaultValues(instruction: InstructionData): InstructionFormData 
 
     return {
         accounts: accountsDefault,
-        arguments: instruction.args.reduce((acc, arg) => {
-            if (!acc[instruction.name]) {
-                acc[instruction.name] = {};
-            }
-            acc[instruction.name][arg.name] = findDefaultValueForArgumentType(arg.rawType || arg.type);
-            return acc;
-        }, {} as Record<string, Record<string, string>>),
+        arguments: instruction.args.reduce(
+            (acc, arg) => {
+                if (!acc[instruction.name]) {
+                    acc[instruction.name] = {};
+                }
+                acc[instruction.name][arg.name] = findDefaultValueForArgumentType(arg.rawType || arg.type);
+                return acc;
+            },
+            {} as Record<string, Record<string, string>>,
+        ),
     };
 }
 
 export function flattenNestedRecord(
-    nested: Record<string, AccountFormValueMap> | Record<string, Record<string, string>>
+    nested: Record<string, AccountFormValueMap> | Record<string, Record<string, string>>,
 ): Record<string, string> {
     const result: Record<string, string> = {};
 

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from 'storybook/test';
 
 import { BaseClusterSelector } from '../BaseClusterSelector';
 
@@ -27,14 +28,14 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
     args: {
         currentCluster: 'Devnet',
-        onClusterChange: () => console.log('Cluster change clicked'),
+        onClusterChange: fn(),
     },
 };
 
 export const MainnetWithWarning: Story = {
     args: {
         currentCluster: 'Mainnet Beta',
-        onClusterChange: () => console.log('Cluster change clicked'),
+        onClusterChange: fn(),
         showMainnetWarning: true,
     },
 };
@@ -42,14 +43,14 @@ export const MainnetWithWarning: Story = {
 export const Testnet: Story = {
     args: {
         currentCluster: 'Testnet',
-        onClusterChange: () => console.log('Cluster change clicked'),
+        onClusterChange: fn(),
     },
 };
 
 export const Custom: Story = {
     args: {
         currentCluster: 'Custom',
-        onClusterChange: () => console.log('Cluster change clicked'),
+        onClusterChange: fn(),
     },
 };
 

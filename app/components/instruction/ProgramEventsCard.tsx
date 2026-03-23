@@ -1,11 +1,14 @@
 import { HexData } from '@components/common/HexData';
 import { Program } from '@coral-xyz/anchor';
 import { IdlField, IdlTypeDefTyStruct } from '@coral-xyz/anchor/dist/cjs/idl';
+import { cn } from '@shared/utils';
 import { decodeEventFromLog, mapIxArgsToRows } from '@utils/anchor';
 import { camelToTitleCase } from '@utils/index';
 import { Buffer } from 'buffer';
 import React, { useState } from 'react';
 import { Code } from 'react-feather';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 export function ProgramEventsCard({
     eventDataList,
@@ -21,7 +24,7 @@ export function ProgramEventsCard({
             try {
                 return decodeEventFromLog(eventData, program);
             } catch (error) {
-                console.error('Error decoding event:', error);
+                Logger.error(error);
                 return null;
             }
         })
@@ -77,7 +80,7 @@ function EventCard({
                     {camelToTitleCase(event.name)}
                 </h3>
                 <button
-                    className={`btn btn-sm d-flex align-items-center ${showRaw ? 'btn-black active' : 'btn-white'}`}
+                    className={cn('btn btn-sm d-flex align-items-center', showRaw ? 'btn-black active' : 'btn-white')}
                     onClick={() => setShowRaw(r => !r)}
                 >
                     <Code className="me-2" size={13} /> Raw

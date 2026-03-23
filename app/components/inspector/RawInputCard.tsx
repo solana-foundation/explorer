@@ -1,7 +1,10 @@
+import { cn } from '@shared/utils';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import base58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 import type { InspectorData } from './InspectorPage';
 
@@ -154,7 +157,7 @@ function TabInstructions() {
                 {tabs.map(tab => (
                     <button
                         key={tab.id}
-                        className={`me-3 nav-link ${activeTab === tab.id ? 'active' : ''}`}
+                        className={cn('me-3 nav-link', activeTab === tab.id && 'active')}
                         onClick={() => setActiveTab(tab.id)}
                     >
                         {tab.label}
@@ -163,11 +166,7 @@ function TabInstructions() {
             </div>
             <div className="tab-content">
                 {tabs.map(tab => (
-                    <div
-                        key={tab.id}
-                        className={`tab-pane ${activeTab === tab.id ? 'show active' : ''}`}
-                        role="tabpanel"
-                    >
+                    <div key={tab.id} className={cn('tab-pane', activeTab === tab.id && 'show active')} role="tabpanel">
                         {tab.content}
                     </div>
                 ))}
@@ -242,7 +241,7 @@ export function RawInput({
             try {
                 buffer = Uint8Array.from(atob(input), c => c.charCodeAt(0));
             } catch (err) {
-                console.error(err);
+                Logger.error(err);
                 setError('Input must be base58/base64 encoded or a valid account address');
                 return;
             }

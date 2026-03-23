@@ -58,7 +58,7 @@ const nextConfig = {
                     destination: '/' + ['address', path].join('/'),
                     permanent: true,
                     source: '/' + [oldRoot, path].join('/'),
-                }))
+                })),
             ),
             ...TX_ALIASES.map(oldRoot => ({
                 destination: '/' + ['tx', ':signature'].join('/'),
@@ -89,33 +89,3 @@ const nextConfig = {
 
 /// Add wrapper to track errors with Sentry and BotID for bot protection
 export default withBotId(withSentryConfig(nextConfig, createSentryBuildConfig()));
-
-/// We going to handle Sentry errors step-by-step by cathcing unhandled exceptions route-wise
-/// See: https://nextjs.org/docs/app/getting-started/error-handling#nested-error-boundaries
-/// FEAT: Next step would be adding a layer to catch errors globally.
-/// At this point we catch just the errors for a new functionality
-/// Use the code below to enable it globally in the future
-/// #<PROJECT_ROOT>/app/global-error.tsx
-// 'use client';
-
-// import * as Sentry from '@sentry/nextjs';
-// import NextError from 'next/error';
-// import { useEffect } from 'react';
-
-// export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
-//     useEffect(() => {
-//         Sentry.captureException(error);
-//     }, [error]);
-
-//     return (
-//         <html>
-//             <body>
-//                 {/* `NextError` is the default Next.js error page component. Its type
-//                 definition requires a `statusCode` prop. However, since the App Router
-//                 does not expose status codes for errors, we simply pass 0 to render a
-//                 generic error message. */}
-//                 <NextError statusCode={0} />
-//             </body>
-//         </html>
-//     );
-// }

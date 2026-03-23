@@ -2,6 +2,7 @@ import { Copyable } from '@components/common/Copyable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useCluster } from '@providers/cluster';
+import { cn } from '@shared/utils';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import { AccountInfo, useAccountsInfo } from '@utils/use-accounts-info';
 import React, { useMemo } from 'react';
@@ -100,7 +101,7 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
 
     const totalAccountSize = React.useMemo(
         () => Array.from(accounts.values()).reduce((acc, account) => acc + account.size, 0),
-        [accounts]
+        [accounts],
     );
 
     if (fetchError) {
@@ -113,10 +114,10 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
 
     return (
         <div className="card">
-            <div className={`card-header ${!expanded ? 'border-0' : ''}`}>
+            <div className={cn('card-header', !expanded && 'border-0')}>
                 <h3 className="card-header-title">{`Account List (${numAccounts})`}</h3>
                 <button
-                    className={`btn btn-sm d-flex ${expanded ? 'btn-black active' : 'btn-white'}`}
+                    className={cn('btn btn-sm d-flex', expanded ? 'btn-black active' : 'btn-white')}
                     onClick={() => setExpanded(current => !current)}
                 >
                     {expanded ? 'Collapse' : 'Expand'}

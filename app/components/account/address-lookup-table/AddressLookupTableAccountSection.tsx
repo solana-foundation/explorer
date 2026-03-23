@@ -17,7 +17,7 @@ export function AddressLookupTableAccountSection(
         | {
               account: Account;
               lookupTableAccount: AddressLookupTableAccountInfo;
-          }
+          },
 ) {
     const account = params.account;
     const lookupTableState = React.useMemo(() => {

@@ -12,7 +12,7 @@ const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 function recordToAutocompleteItems(
     record: Record<string, string>,
     group: string,
-    transformLabel?: (label: string) => string
+    transformLabel?: (label: string) => string,
 ): AutocompleteItem[] {
     return Object.entries(record).map(([value, label]) => ({
         group,

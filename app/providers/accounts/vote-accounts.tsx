@@ -3,6 +3,8 @@ import { createSolanaRpc } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 type VoteAccountInfo = Readonly<{
     activatedStake: bigint;
 }>;
@@ -15,7 +17,7 @@ type VoteAccounts = Readonly<{
 async function fetchVoteAccounts(
     cluster: Cluster,
     url: string,
-    setVoteAccounts: React.Dispatch<React.SetStateAction<VoteAccounts | undefined>>
+    setVoteAccounts: React.Dispatch<React.SetStateAction<VoteAccounts | undefined>>,
 ) {
     try {
         const rpc = createSolanaRpc(url);
@@ -29,7 +31,7 @@ async function fetchVoteAccounts(
         setVoteAccounts(voteAccounts);
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
+            Logger.error(error, { url });
         }
     }
 }

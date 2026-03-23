@@ -1,6 +1,7 @@
 import { ClusterProvider } from '@providers/cluster';
 import type { Decorator, Parameters } from '@storybook/react';
 import React from 'react';
+import { fn } from 'storybook/test';
 
 import { MockAccountsProvider } from './__mocks__/MockAccountsProvider';
 import { MockTokenInfoBatchProvider } from './__mocks__/MockTokenInfoBatchProvider';
@@ -63,3 +64,13 @@ export const createNextjsParameters = (options?: NextjsNavigationOptions): Param
 });
 
 export const nextjsParameters: Parameters = createNextjsParameters();
+
+/** Mocks navigator.clipboard.writeText for stories that copy text. Usage: `decorators: [withClipboardMock]` */
+export const withClipboardMock: Decorator = Story => {
+    Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: { writeText: fn().mockResolvedValue(undefined) },
+    });
+
+    return <Story />;
+};

@@ -20,6 +20,7 @@ import { useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
+import { Logger } from '@/app/shared/lib/logger';
 import { clusterUrl } from '@/app/utils/cluster';
 import { getTransactionInstructionError } from '@/app/utils/program-err';
 
@@ -51,13 +52,13 @@ interface UseInstructionReturn {
         params: {
             accounts: any;
             arguments: Record<string, string>;
-        }
+        },
     ) => Promise<void>;
 
     // Validation helpers
     validateInstruction: (
         instructionName: string,
-        instruction: InstructionData
+        instruction: InstructionData,
     ) => { isValid: boolean; errors: string[] };
 
     // Status
@@ -152,7 +153,7 @@ export function useInstruction({
         } catch (error) {
             const errorMessage = handleInitializeError(error);
 
-            console.error('Program initialization failed:', errorMessage);
+            Logger.error(new Error(errorMessage));
             setInitializationError(errorMessage);
             setProgram(undefined);
         } finally {
@@ -218,7 +219,7 @@ export function useInstruction({
             params: {
                 accounts: any;
                 arguments: Record<string, string>;
-            }
+            },
         ): Promise<void> => {
             if (!connected || !publicKey || !wallet.signTransaction) {
                 const error = 'Wallet not connected';
@@ -242,7 +243,7 @@ export function useInstruction({
                     populateAccounts(params.accounts, instructionName),
                     populateArguments(params.arguments, instructionName),
                     idl,
-                    interpreterName
+                    interpreterName,
                 );
 
                 if (ix instanceof TransactionInstruction) {
@@ -262,7 +263,7 @@ export function useInstruction({
                     new VersionedTransaction(transaction.compileMessage()),
                     {
                         commitment: simulationCommitment,
-                    }
+                    },
                 );
                 handleSimulatedTxResult(simulatedTx);
 
@@ -279,7 +280,7 @@ export function useInstruction({
                         lastValidBlockHeight,
                         signature,
                     },
-                    commitment
+                    commitment,
                 );
 
                 if (confirmed.value?.err) {
@@ -315,7 +316,7 @@ export function useInstruction({
             handleTxEnd,
             handleSimulatedTxResult,
             onPreInvocationError,
-        ]
+        ],
     );
 
     return {
@@ -415,7 +416,7 @@ function useInvocationState({
     };
 
     const handleTxError = (error: unknown | Error, transaction: Transaction | undefined) => {
-        console.error('Instruction execution failed:', { error, transaction });
+        Logger.error(error, { transaction });
         const errorMessage = handleInvokeError(error);
         setLastError({ finishedAt: new Date(), message: errorMessage });
         if (error instanceof SendTransactionError) {
@@ -525,7 +526,7 @@ function serializeTransactionMessage(transaction: Transaction | undefined): stri
     try {
         return Buffer.from(transaction.serializeMessage()).toString('base64');
     } catch (error) {
-        console.warn('Failed to serialize transaction message:', error);
+        Logger.warn('[idl] Failed to serialize transaction message', { error });
         return null;
     }
 }

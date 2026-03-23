@@ -85,5 +85,5 @@ export const UpgradeableLoaderAccount = coerce(
                 throw new Error(`Unknown program account type: ${value.type}`);
             }
         }
-    }
+    },
 );

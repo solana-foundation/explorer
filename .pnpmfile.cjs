@@ -29,7 +29,7 @@ function overridesPeerDependencies(pkg) {
                         console.log(
                             `    - Overriding ${pkg.name}@${pkg.version} peerDependency ${dep.peerDependency}@${
                                 pkg.peerDependencies[dep.peerDependency]
-                            }`
+                            }`,
                         );
 
                         // First add a new dependency to the package and then remove the peer dependency.
@@ -40,7 +40,7 @@ function overridesPeerDependencies(pkg) {
                         console.log(
                             `      - Overrode ${pkg.name}@${pkg.version} peerDependency ${dep.peerDependency}@${
                                 pkg.dependencies[dep.peerDependency]
-                            }`
+                            }`,
                         );
                     } catch (err) {
                         console.error(err);

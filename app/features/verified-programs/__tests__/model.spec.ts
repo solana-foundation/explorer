@@ -41,8 +41,8 @@ describe('getProgramName', () => {
         expect(
             getProgramName(
                 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-                'https://github.com/solana-labs/solana-program-library'
-            )
+                'https://github.com/solana-labs/solana-program-library',
+            ),
         ).toBe('Solana Program Library');
     });
 

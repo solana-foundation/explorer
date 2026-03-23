@@ -1,6 +1,8 @@
 import { PublicKey } from '@solana/web3.js';
 import { useEffect, useState } from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 export type VerifiableBuild =
     | {
           label: string;
@@ -38,7 +40,7 @@ export function useAnchorVerifiableBuild(programAddress: PublicKey) {
         getAnchorVerifiableBuild(programAddress)
             .then(setVerifiableBuild)
             .catch(error => {
-                console.log(error);
+                Logger.error(error);
                 setVerifiableBuild(defaultAnchorBuild);
             })
             .finally(() => setLoading(false));
@@ -78,7 +80,7 @@ export async function getAnchorVerifiableBuild(programId: PublicKey): Promise<Ve
 
     // Filter out all non successful builds.
     const latestBuilds = (await latestBuildsResp.json()).filter(
-        (b: AnchorBuild) => !b.aborted && b.state === 'Built' && b.verified === 'Verified'
+        (b: AnchorBuild) => !b.aborted && b.state === 'Built' && b.verified === 'Verified',
     ) as AnchorBuild[];
 
     if (latestBuilds.length === 0) {

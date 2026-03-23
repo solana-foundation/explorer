@@ -21,7 +21,7 @@ export function PmpSecurityTxtTable({ data }: { data: Record<string, any> }) {
                 }
                 return acc;
             },
-            { additional: [] as [string, any][], main: [] as [string, any][] }
+            { additional: [] as [string, any][], main: [] as [string, any][] },
         );
     }, [data]);
 

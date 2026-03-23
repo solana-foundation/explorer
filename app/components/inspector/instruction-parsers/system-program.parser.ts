@@ -93,7 +93,7 @@ function convertCreateAccountWithSeedInfo(parsed: ParsedCreateAccountWithSeed): 
  * Currently only handles CreateAccountWithSeed instruction.
  */
 export function parseSystemProgramInstruction(
-    instruction: TransactionInstruction
+    instruction: TransactionInstruction,
 ): { type: string; info: CreateAccountWithSeedInfo } | null {
     const { data } = instruction;
 

@@ -26,7 +26,7 @@ beforeEach(() => {
                 unobserve: mockUnobserve,
             };
             return instance;
-        })
+        }),
     );
 });
 

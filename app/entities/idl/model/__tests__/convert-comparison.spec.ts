@@ -53,7 +53,7 @@ describe('convert idl comparison', () => {
                 `should parse leaf type "${leavesTypeArg.type.vec.defined}" with $name`,
                 ({ input, convertType, expected }) => {
                     expect(convertType(input.type)).toEqual(expected);
-                }
+                },
             );
         });
 
@@ -91,7 +91,7 @@ describe('convert idl comparison', () => {
                         expected: { option: { array: ['u64', 2] } },
                         name: 'convertLegacy',
                     },
-                ].map(a => ({ ...a, input: u64TupleOption }))
+                ].map(a => ({ ...a, input: u64TupleOption })),
             )(
                 `should parse tuple type "${u64TupleOption.option.tuple}" with $name`,
                 //@ts-expect-error expected | expectedToThrow
@@ -101,7 +101,7 @@ describe('convert idl comparison', () => {
                     } else if (expectedToThrow) {
                         expect(() => convertType(input)).toThrow(expectedToThrow);
                     }
-                }
+                },
             );
 
             it.each(
@@ -134,7 +134,7 @@ describe('convert idl comparison', () => {
                         expected: { vec: { array: ['string', 2] } },
                         name: 'convertLegacy',
                     },
-                ].map(a => ({ ...a, input: stringTupleVec }))
+                ].map(a => ({ ...a, input: stringTupleVec })),
             )(
                 `should parse tuple type "${stringTupleVec.vec.tuple}" with $name`,
                 //@ts-expect-error expected | expectedToThrow
@@ -144,7 +144,7 @@ describe('convert idl comparison', () => {
                     } else if (expectedToThrow) {
                         expect(() => convertType(input)).toThrow(expectedToThrow);
                     }
-                }
+                },
             );
         });
     });

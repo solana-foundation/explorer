@@ -83,7 +83,7 @@ describe('useIdlLastTransactionDate', () => {
             () => {
                 expect(result.current).toBe(IdlVariant.Anchor);
             },
-            { timeout: 1000 }
+            { timeout: 1000 },
         );
     });
 
@@ -106,7 +106,7 @@ describe('useIdlLastTransactionDate', () => {
             () => {
                 expect(result.current).toBe(IdlVariant.ProgramMetadata);
             },
-            { timeout: 1000 }
+            { timeout: 1000 },
         );
     });
 
@@ -128,7 +128,7 @@ describe('useIdlLastTransactionDate', () => {
             () => {
                 expect(result.current).toBe(IdlVariant.ProgramMetadata);
             },
-            { timeout: 1000 }
+            { timeout: 1000 },
         );
     });
 
@@ -150,7 +150,7 @@ describe('useIdlLastTransactionDate', () => {
             () => {
                 expect(result.current).toBe(IdlVariant.Anchor);
             },
-            { timeout: 1000 }
+            { timeout: 1000 },
         );
     });
 
@@ -172,7 +172,7 @@ describe('useIdlLastTransactionDate', () => {
             () => {
                 expect(result.current).toBe(IdlVariant.ProgramMetadata);
             },
-            { timeout: 1000 }
+            { timeout: 1000 },
         );
     });
 
@@ -190,7 +190,7 @@ describe('useIdlLastTransactionDate', () => {
             () => {
                 expect(result.current).toBe(IdlVariant.ProgramMetadata);
             },
-            { timeout: 1000 }
+            { timeout: 1000 },
         );
     });
 });

@@ -133,7 +133,7 @@ export function InteractInstruction({
                                             getAutocompleteItems={getAutocompleteItems}
                                             seeds={pdas[account.name]?.seeds || []}
                                         />
-                                    )
+                                    ),
                                 )}
                             </div>
                         </CardSection>

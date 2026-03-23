@@ -1,16 +1,13 @@
+import fetch from 'node-fetch';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { GET } from '../route';
 
-vi.mock('@/app/utils/logger', () => ({
-    default: {
-        error: vi.fn(),
-    },
+vi.mock('node-fetch', () => ({
+    default: vi.fn(),
 }));
-
-global.fetch = vi.fn();
 
 describe('GET /api/verified-programs/list/[page]', () => {
     const mockRequest = new Request('http://localhost:3000/api/verified-programs/list/1');
@@ -203,7 +200,10 @@ describe('GET /api/verified-programs/list/[page]', () => {
 
             await GET(mockRequest, params);
 
-            expect(Logger.error).toHaveBeenCalledWith('Failed to fetch verified programs page 1: HTTP 503');
+            expect(Logger.error).toHaveBeenCalledWith(
+                new Error('[api:verified-programs] Failed to fetch verified programs page'),
+                { page: 1, status: 503 },
+            );
         });
 
         it('handles network errors', async () => {
@@ -227,7 +227,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
 
             await GET(mockRequest, params);
 
-            expect(Logger.error).toHaveBeenCalledWith('Error in verified-programs list API:', networkError);
+            expect(Logger.error).toHaveBeenCalledWith(networkError);
         });
     });
 });

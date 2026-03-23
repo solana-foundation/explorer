@@ -8,7 +8,7 @@ const badgeVariants = cva(
     cn(
         'e-inline-flex e-items-center e-justify-center',
         'e-px-2 e-py-0.5 e-font-medium e-w-fit e-whitespace-nowrap e-shrink-0',
-        '[&_svg]:e-size-3 e-gap-1 [&_svg]:e-pointer-events-none'
+        '[&_svg]:e-size-3 e-gap-1 [&_svg]:e-pointer-events-none',
     ),
     {
         compoundVariants: [
@@ -66,7 +66,7 @@ const badgeVariants = cva(
                 warning: 'e-border-transparent e-bg-orange-950 e-text-orange-400',
             },
         },
-    }
+    },
 );
 
 function Badge({

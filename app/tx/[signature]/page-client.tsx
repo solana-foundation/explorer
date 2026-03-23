@@ -36,8 +36,9 @@ import bs58 from 'bs58';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
-import { RefreshCw, Settings } from 'react-feather';
+import { RefreshCw, ZoomIn } from 'react-feather';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { AccountsCard } from '@/app/components/transaction/AccountsCard';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@/app/utils/compute-units-schedule';
@@ -62,7 +63,7 @@ type Props = Readonly<{
 
 function getTransactionErrorReason(
     info: TransactionStatusInfo,
-    tx: ParsedTransaction | undefined
+    tx: ParsedTransaction | undefined,
 ): { errorReason: string; errorLink?: string } {
     if (typeof info.result.err === 'string') {
         return { errorReason: `Runtime Error: "${info.result.err}"` };
@@ -256,26 +257,27 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
 
     return (
         <div className="card">
-            <div className="card-header align-items-center">
+            <div className="card-header align-items-center gap-2">
                 <h3 className="card-header-title">Overview</h3>
                 <ViewReceiptButton
                     signature={signature}
                     transactionWithMeta={transactionWithMeta}
                     receiptPath={receiptPath}
                 />
-                <Link className="btn btn-white btn-sm me-2" href={inspectPath}>
-                    <Settings className="align-text-top me-2" size={13} />
-                    Inspect
-                </Link>
+                <Button variant="outline" size="sm" asChild aria-label="Inspect">
+                    <Link href={inspectPath}>
+                        <ZoomIn size={12} />
+                        <span className="d-none d-md-inline">Inspect</span>
+                    </Link>
+                </Button>
                 {autoRefresh === AutoRefresh.Active ? (
                     <span className="spinner-grow spinner-grow-sm"></span>
                 ) : (
-                    <button className="btn btn-white btn-sm" onClick={() => fetchStatus(signature)}>
-                        <RefreshCw className="align-text-top me-2" size={13} />
-                        Refresh
-                    </button>
+                    <Button variant="outline" size="sm" aria-label="Refresh" onClick={() => fetchStatus(signature)}>
+                        <RefreshCw size={12} />
+                        <span className="d-none d-md-inline">Refresh</span>
+                    </Button>
                 )}
-                <span className="me-2"></span>
                 <DownloadableDropdown filename={signature} data={rawDetails?.data?.raw?.message.serialize() || null} />
             </div>
 
@@ -428,13 +430,13 @@ function DetailsSection({ signature }: SignatureProps) {
 
     return (
         <>
-            <CUProfilingSection signature={signature} />
             <Suspense fallback={<LoadingCard message="Loading accounts" />}>
                 <AccountsCard signature={signature} />
             </Suspense>
             <TokenBalancesCard signature={signature} />
             <InstructionsSection signature={signature} />
             <ProgramLogSection signature={signature} />
+            <CUProfilingSection signature={signature} />
         </>
     );
 }

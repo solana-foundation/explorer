@@ -24,7 +24,7 @@ export interface PdaGenerationResult {
 export function computePdas(
     idl: SupportedIdl | undefined,
     instruction: InstructionData,
-    formValues: DeepPartial<InstructionFormData>
+    formValues: DeepPartial<InstructionFormData>,
 ): Record<string, PdaGenerationResult> {
     if (!idl) {
         return {};
@@ -66,7 +66,7 @@ export function computePdas(
                 account.pda.seeds,
                 args,
                 accounts,
-                idlInstruction
+                idlInstruction,
             );
 
             const derivationProgramId = resolveProgramId(programId, account.pda.program, { accounts, args });

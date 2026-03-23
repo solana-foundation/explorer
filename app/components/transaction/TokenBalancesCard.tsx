@@ -1,6 +1,7 @@
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { useTransactionDetails } from '@providers/transactions';
+import { cn } from '@shared/utils';
 import { ParsedMessageAccount, PublicKey, TokenBalance } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
@@ -66,10 +67,10 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
 
     return (
         <div className="card">
-            <div className={`card-header ${!expanded ? 'border-0' : ''}`}>
+            <div className={cn('card-header', !expanded && 'border-0')}>
                 <h3 className="card-header-title">Token Balances</h3>
                 <button
-                    className={`btn btn-sm d-flex ${expanded ? 'btn-black active' : 'btn-white'}`}
+                    className={cn('btn btn-sm d-flex', expanded ? 'btn-black active' : 'btn-white')}
                     onClick={() => setExpanded(current => !current)}
                 >
                     {expanded ? 'Collapse' : 'Expand'}
@@ -143,7 +144,7 @@ function TokenBalanceRow({
 export function generateTokenBalanceRows(
     preTokenBalances: TokenBalance[],
     postTokenBalances: TokenBalance[],
-    accounts: ParsedMessageAccount[]
+    accounts: ParsedMessageAccount[],
 ): TokenBalanceRow[] {
     const preBalanceMap: { [index: number]: TokenBalance } = {};
     const postBalanceMap: { [index: number]: TokenBalance } = {};

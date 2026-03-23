@@ -15,7 +15,7 @@ function AccordionItem({ className, ...props }: React.ComponentProps<typeof Acco
             data-value={props.value}
             className={cn(
                 'e-border-b e-border-l-0 e-border-r-0 e-border-t-0 e-border-solid e-border-neutral-700 e-px-4 last:e-border-b-0',
-                className
+                className,
             )}
             {...props}
         />
@@ -38,7 +38,7 @@ const AccordionTrigger = React.forwardRef<
                     'focus-visible:e-border-neutral-950 focus-visible:e-ring-2 focus-visible:e-ring-neutral-950/50',
                     'disabled:e-pointer-events-none disabled:e-opacity-50',
                     '[&[data-state=open]>svg]:e-rotate-90',
-                    className
+                    className,
                 )}
                 {...props}
             >

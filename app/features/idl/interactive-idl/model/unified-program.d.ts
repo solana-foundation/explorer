@@ -28,7 +28,7 @@ export interface UnifiedProgram {
     buildInstruction(
         instructionName: string,
         accounts: UnifiedAccounts,
-        args: UnifiedArguments
+        args: UnifiedArguments,
     ): Promise<TransactionInstruction>;
 }
 

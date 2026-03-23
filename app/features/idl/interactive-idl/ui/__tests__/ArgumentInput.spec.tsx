@@ -196,7 +196,7 @@ describe('ArgumentInput', () => {
             await user.type(firstInput, '{Enter}');
 
             const addCalls = handleChange.mock.calls.filter(
-                call => call[0].target.value.includes(', ') && call[0].target.value.split(', ').length > 2
+                call => call[0].target.value.includes(', ') && call[0].target.value.split(', ').length > 2,
             );
             expect(addCalls.length).toBe(0);
         });

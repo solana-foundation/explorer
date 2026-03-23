@@ -98,7 +98,7 @@ describe('Metadata Proxy Route', () => {
                 'Content-Length': '140',
                 'Content-Type': 'application/json',
                 Etag: 'random-etag',
-            })
+            }),
         );
         // @ts-expect-error lookup does not have mocked fn
         dns.lookup.mockResolvedValueOnce([{ address: '8.8.8.8' }]);

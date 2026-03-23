@@ -1,6 +1,6 @@
 import { default as fetch, Headers, Response as NodeFetchResponse } from 'node-fetch';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import {
     errors,
@@ -40,7 +40,7 @@ async function requestResource(
     uri: string,
     headers: Headers,
     timeout: number,
-    size: number
+    size: number,
 ): Promise<[Error, void] | [void, NodeFetchResponse]> {
     let response: NodeFetchResponse | undefined;
     let error;
@@ -56,7 +56,7 @@ async function requestResource(
         if (e instanceof Error) {
             error = e;
         } else {
-            Logger.debug('Debug:', e);
+            Logger.debug('[api:metadata-proxy] Failed to fetch resource', { error: e });
             error = new Error('Cannot fetch resource');
         }
     }
@@ -68,7 +68,7 @@ export async function fetchResource(
     uri: string,
     headers: Headers,
     timeout: number,
-    size: number
+    size: number,
 ): Promise<
     Awaited<ReturnType<typeof processBinary> | ReturnType<typeof processJson> | ReturnType<typeof processTextAsJson>>
 > {

@@ -27,19 +27,19 @@ export type FormattedBaseReceipt = {
     logoURI?: string | undefined;
 };
 
-export type FormattedReceiptSol = FormattedBaseReceipt;
-
 export type FormattedReceiptToken = FormattedBaseReceipt & {
+    kind: 'token';
     mint?: string | undefined;
     symbol?: string | undefined;
 };
 
-export type FormattedReceipt = FormattedReceiptSol | FormattedReceiptToken;
+export type FormattedReceipt = (FormattedBaseReceipt & { kind: 'sol' }) | FormattedReceiptToken;
 
 export type FormattedExtendedReceipt = FormattedReceipt & {
     confirmationStatus: string | undefined;
-    logoURI?: string | undefined;
     senderHref?: string | undefined;
     receiverHref?: string | undefined;
     tokenHref?: string | undefined;
 };
+
+export type DownloadReceiptFn = () => Promise<void>;

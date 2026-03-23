@@ -78,7 +78,7 @@ export function InteractWithIdl({
                 setCurrentInstruction(null);
             }
         },
-        [toast, currentInstruction, onTransactionConfirmed]
+        [toast, currentInstruction, onTransactionConfirmed],
     );
 
     const handleTransactionError = useCallback(
@@ -90,7 +90,7 @@ export function InteractWithIdl({
                 setCurrentInstruction(null);
             }
         },
-        [toast, currentInstruction, onTransactionFailed]
+        [toast, currentInstruction, onTransactionFailed],
     );
 
     const { invokeInstruction, initializationError, isExecuting, lastResult, parseLogs } = useInstruction({
@@ -118,10 +118,10 @@ export function InteractWithIdl({
                 async () => {
                     await invokeInstruction(data.name, data, params);
                 },
-                { data, params }
+                { data, params },
             );
         },
-        [invokeInstruction, requireConfirmation, progId, onTransactionSubmitted]
+        [invokeInstruction, requireConfirmation, progId, onTransactionSubmitted],
     );
 
     if (initializationError) {
