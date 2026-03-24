@@ -16,6 +16,10 @@ const CSV_HEADERS = [
     'Memo',
 ] as const;
 
+function sanitizeCsvField(value: string): string {
+    return /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+}
+
 export function buildReceiptCsvRow(receipt: FormattedReceipt, signature: string, usdValue?: string): string[] {
     const mint = 'mint' in receipt ? receipt.mint : undefined;
 
@@ -30,7 +34,7 @@ export function buildReceiptCsvRow(receipt: FormattedReceipt, signature: string,
         mint ?? '',
         usdValue ?? '',
         receipt.fee.formatted,
-        receipt.memo ?? '',
+        sanitizeCsvField(receipt.memo ?? ''),
     ];
 }
 
