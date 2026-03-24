@@ -37,7 +37,7 @@ export function buildReceiptCsvRow(receipt: FormattedReceipt, signature: string,
 export async function generateReceiptCsv(
     receipt: FormattedReceipt,
     signature: string,
-    usdValue?: string
+    usdValue?: string,
 ): Promise<void> {
     const row = buildReceiptCsvRow(receipt, signature, usdValue);
     const csv = await writeToString([row], { headers: [...CSV_HEADERS] });
