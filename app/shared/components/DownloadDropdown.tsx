@@ -13,9 +13,9 @@ import { triggerDownloadText } from '@/app/shared/lib/triggerDownload';
 const DEFAULT_ENCODINGS: EncodingFormat[] = ['hex', 'base58', 'base64'];
 
 const DefaultTrigger = (
-    <Button variant="outline" size="sm">
+    <Button variant="outline" size="sm" aria-label="Download">
         <Download size={12} />
-        Download
+        <span className="e-hidden sm:e-inline">Download</span>
     </Button>
 );
 
