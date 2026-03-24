@@ -17,6 +17,7 @@ const CSV_HEADERS = [
 ] as const;
 
 function sanitizeCsvField(value: string): string {
+    // eslint-disable-next-line no-restricted-syntax -- regex is the clearest way to express CSV formula injection chars
     return /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
 }
 
