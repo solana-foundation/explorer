@@ -36,6 +36,15 @@ const toHexFallback = (bytes: ByteArray): string => {
 };
 
 /**
+ * Convert Uint8Array to Buffer.
+ * Use only when an external API (e.g. @solana/web3.js TransactionInstruction) requires Buffer.
+ */
+export function toBuffer(bytes: ByteArray): Buffer {
+    if (Buffer.isBuffer(bytes)) return bytes;
+    return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+}
+
+/**
  * Encode Uint8Array to hex string
  * Replaces: buffer.toString('hex')
  *

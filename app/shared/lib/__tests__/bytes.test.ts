@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { toBase64, toHex } from '../bytes';
+import { toBase64, toBuffer, toHex } from '../bytes';
 
 // Note: Buffer is used in tests for decoding since tests run in Node.js environment.
 // The production code uses only Uint8Array for browser compatibility.
@@ -27,6 +27,43 @@ describe('toHex', () => {
     it('should match Buffer.toString("hex")', () => {
         const data = new Uint8Array([72, 101, 108, 108, 111]); // "Hello"
         expect(toHex(data)).toBe(Buffer.from(data).toString('hex'));
+    });
+});
+
+describe('toBuffer', () => {
+    it('should convert empty Uint8Array', () => {
+        const result = toBuffer(new Uint8Array([]));
+        expect(result).toBeInstanceOf(Buffer);
+        expect(result.length).toBe(0);
+    });
+
+    it('should preserve bytes', () => {
+        const input = new Uint8Array([1, 2, 3, 255]);
+        const result = toBuffer(input);
+        expect(result).toBeInstanceOf(Buffer);
+        expect([...result]).toEqual([1, 2, 3, 255]);
+    });
+
+    it('should share the same underlying memory', () => {
+        const input = new Uint8Array([10, 20, 30]);
+        const result = toBuffer(input);
+        input[0] = 99;
+        expect(result[0]).toBe(99);
+    });
+
+    it('should return the same Buffer when given a Buffer', () => {
+        const input = Buffer.from([1, 2, 3]);
+        const result = toBuffer(input);
+        expect(result).toBe(input);
+    });
+
+    it('should handle a Uint8Array view over a larger ArrayBuffer', () => {
+        const backing = new ArrayBuffer(16);
+        const view = new Uint8Array(backing, 4, 3);
+        view.set([0xaa, 0xbb, 0xcc]);
+        const result = toBuffer(view);
+        expect(result.length).toBe(3);
+        expect([...result]).toEqual([0xaa, 0xbb, 0xcc]);
     });
 });
 
