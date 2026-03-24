@@ -282,6 +282,18 @@ describe('decodeSubInstructionParams', () => {
         expect(decodeSubInstructionParams('SetAuthority', data, [])).toBeUndefined();
     });
 
+    it('should show (truncated) for SetAuthority with Some tag but missing pubkey', () => {
+        // 3 bytes: discriminator(6) + authority_type(0) + option_tag(1=Some), but no pubkey follows
+        const data = new Uint8Array([6, 0, 1]);
+        const decoded = decodeSubInstructionParams('SetAuthority', data, [makeAccount(), makeAccount(false, true)]);
+
+        if (!decoded) throw new Error('Expected decoded to be defined');
+        expect(decoded.fields).toEqual([
+            { label: 'Authority Type', value: 'MintTokens' },
+            { label: 'New Authority', value: '(truncated)' },
+        ]);
+    });
+
     it('should return undefined for empty CloseAccount data', () => {
         const data = new Uint8Array([]);
         expect(decodeSubInstructionParams('CloseAccount', data, [])).toBeUndefined();

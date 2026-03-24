@@ -197,9 +197,8 @@ function labelAccounts(accounts: AccountEntry[], layout: AccountLayout): Labeled
 // Layout: [discriminator(1), authority_type(1), option_tag(1), ?new_authority(32)]
 // The option_tag byte is 1 (Some) when a new authority is present, 0 (None) otherwise.
 function readOptionalAuthority(data: Uint8Array): string {
-    const hasAuthority =
-        data.length >= SET_AUTHORITY_MIN_LEN_WITH_PUBKEY && data[SET_AUTHORITY_OPTION_TAG_OFFSET] === OPTION_SOME;
-    if (!hasAuthority) return '(none)';
+    if (data[SET_AUTHORITY_OPTION_TAG_OFFSET] !== OPTION_SOME) return '(none)';
+    if (data.length < SET_AUTHORITY_MIN_LEN_WITH_PUBKEY) return '(truncated)';
     return new PublicKey(data.slice(SET_AUTHORITY_PUBKEY_OFFSET, SET_AUTHORITY_MIN_LEN_WITH_PUBKEY)).toBase58();
 }
 
