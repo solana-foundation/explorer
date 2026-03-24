@@ -34,7 +34,7 @@ import useTabVisibility from '@utils/use-tab-visibility';
 import bs58 from 'bs58';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { RefreshCw, ZoomIn } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
@@ -166,6 +166,9 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
         pathname: `/tx/${signature}`,
     });
 
+    const rawMessage = rawDetails?.data?.raw?.message;
+    const serializedRawData = useMemo(() => rawMessage?.serialize(), [rawMessage]);
+
     useEffect(() => {
         if (!rawDetails && clusterStatus === ClusterStatus.Connected) {
             fetchRaw(signature);
@@ -280,7 +283,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                 )}
                 <DownloadDropdown
                     filename={signature}
-                    data={rawDetails?.data?.raw?.message.serialize()}
+                    data={serializedRawData}
                     loading={rawDetails?.status === FetchStatus.Fetching}
                     error={
                         rawDetails?.status === FetchStatus.FetchFailed
