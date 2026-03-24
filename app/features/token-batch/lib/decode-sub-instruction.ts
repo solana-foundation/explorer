@@ -1,21 +1,27 @@
-// Manual decoder for SPL Token sub-instructions embedded in a batched token instruction.
+// Decoder for SPL Token sub-instructions embedded in a batched token instruction.
 //
-// Why not use @solana/spl-token or @solana-program/token?
-// Neither package (as of spl-token 0.4.14 / @solana-program/token 0.9.0) includes
-// a batch sub-instruction decoder. Their `decodeInstruction` expects a full
-// `TransactionInstruction` object — we only have the raw bytes and account list
-// extracted from the batch payload, so a mapping layer would still be needed.
+// Uses @solana-program/token-2022 instruction data decoders for field extraction.
+// The batch wire format itself has no SDK decoder — only individual sub-instruction
+// data payloads are decoded here.
 //
-// Discriminators and data layouts follow the SPL Token instruction enum defined in:
-//   https://github.com/solana-program/token/blob/main/interface/src/instruction.rs#L22
-//
-// Only the most common sub-instructions are decoded here. Others (e.g. InitializeMint,
+// Only the most common sub-instructions are decoded. Others (e.g. InitializeMint,
 // InitializeAccount, Revoke, FreezeAccount) fall through to the default case,
 // which returns `undefined` and the UI renders as raw hex.
 
 import { PublicKey } from '@solana/web3.js';
+import {
+    AuthorityType,
+    getApproveCheckedInstructionDataDecoder,
+    getApproveInstructionDataDecoder,
+    getBurnCheckedInstructionDataDecoder,
+    getBurnInstructionDataDecoder,
+    getMintToCheckedInstructionDataDecoder,
+    getMintToInstructionDataDecoder,
+    getSetAuthorityInstructionDataDecoder,
+    getTransferCheckedInstructionDataDecoder,
+    getTransferInstructionDataDecoder,
+} from '@solana-program/token-2022';
 
-import { readU8, readU64LE } from './bytes';
 import type { TokenInstructionName } from './const';
 
 type AccountEntry = { pubkey: PublicKey; isSigner: boolean; isWritable: boolean };
@@ -26,43 +32,6 @@ export type DecodedParams = {
     fields: { label: string; value: string }[];
     accounts: LabeledAccount[];
 };
-
-// ── Byte-layout constants ──────────────────────────────────────────────
-// SPL Token instruction data is packed as: [discriminator(1), ...payload]
-const AFTER_DISCRIMINATOR = 1;
-const AMOUNT_LEN = 8;
-const AFTER_AMOUNT = AFTER_DISCRIMINATOR + AMOUNT_LEN; // u64 amount ends at byte 9
-const DECIMALS_LEN = 1;
-const PUBKEY_LEN = 32;
-
-// Minimum data length required to decode each instruction type.
-// If data is shorter, the decoder falls back to raw hex to avoid showing wrong values.
-const MIN_LEN_AMOUNT = AFTER_DISCRIMINATOR + AMOUNT_LEN; // 9: Transfer, Approve, MintTo, Burn
-const MIN_LEN_AMOUNT_DECIMALS = MIN_LEN_AMOUNT + DECIMALS_LEN; // 10: TransferChecked, etc.
-const MIN_LEN_CLOSE = AFTER_DISCRIMINATOR; // 1: CloseAccount (discriminator only)
-const MIN_LEN_SET_AUTHORITY = 3; // discriminator + authority_type + option_tag
-
-// SetAuthority layout: [discriminator(1), authority_type(1), option_tag(1), ?new_authority(32)]
-const SET_AUTHORITY_TYPE_OFFSET = AFTER_DISCRIMINATOR;
-const SET_AUTHORITY_OPTION_TAG_OFFSET = 2;
-const SET_AUTHORITY_PUBKEY_OFFSET = 3;
-const SET_AUTHORITY_MIN_LEN_WITH_PUBKEY = SET_AUTHORITY_PUBKEY_OFFSET + PUBKEY_LEN;
-const OPTION_SOME = 1;
-
-/* eslint-disable sort-keys-fix/sort-keys-fix */
-const MIN_DATA_LEN: Partial<Record<TokenInstructionName, number>> = {
-    Transfer: MIN_LEN_AMOUNT,
-    Approve: MIN_LEN_AMOUNT,
-    MintTo: MIN_LEN_AMOUNT,
-    Burn: MIN_LEN_AMOUNT,
-    CloseAccount: MIN_LEN_CLOSE,
-    SetAuthority: MIN_LEN_SET_AUTHORITY,
-    TransferChecked: MIN_LEN_AMOUNT_DECIMALS,
-    ApproveChecked: MIN_LEN_AMOUNT_DECIMALS,
-    MintToChecked: MIN_LEN_AMOUNT_DECIMALS,
-    BurnChecked: MIN_LEN_AMOUNT_DECIMALS,
-};
-/* eslint-enable sort-keys-fix/sort-keys-fix */
 
 // ── Account layouts ────────────────────────────────────────────────────
 // Each SPL Token instruction expects a fixed sequence of named accounts,
@@ -90,92 +59,133 @@ const LAYOUT = {
     transferChecked: roles('Source', 'Mint', 'Destination', 'Owner/Delegate'),
 };
 
+// Lazily initialized decoders — created once on first use.
+const decoders = {
+    approve: getApproveInstructionDataDecoder(),
+    approveChecked: getApproveCheckedInstructionDataDecoder(),
+    burn: getBurnInstructionDataDecoder(),
+    burnChecked: getBurnCheckedInstructionDataDecoder(),
+    mintTo: getMintToInstructionDataDecoder(),
+    mintToChecked: getMintToCheckedInstructionDataDecoder(),
+    setAuthority: getSetAuthorityInstructionDataDecoder(),
+    transfer: getTransferInstructionDataDecoder(),
+    transferChecked: getTransferCheckedInstructionDataDecoder(),
+};
+
 export function decodeSubInstructionParams(
     typeName: TokenInstructionName | 'Unknown',
     data: Uint8Array,
     accounts: AccountEntry[],
 ): DecodedParams | undefined {
-    // `typeName` comes from `typeNameByDiscriminator` in const.ts, which maps
-    // the first byte of instruction data (Rust enum variant index) to a human-readable name.
-    const minLen = typeName !== 'Unknown' ? MIN_DATA_LEN[typeName] : undefined;
-    if (minLen !== undefined && data.length < minLen) return undefined;
+    try {
+        return decodeByType(typeName, data, accounts);
+    } catch {
+        // Decoder throws on truncated/malformed data — fall back to raw hex.
+        return undefined;
+    }
+}
 
+function decodeByType(
+    typeName: TokenInstructionName | 'Unknown',
+    data: Uint8Array,
+    accounts: AccountEntry[],
+): DecodedParams | undefined {
     switch (typeName) {
-        case 'Transfer':
+        case 'Transfer': {
+            const { amount } = decoders.transfer.decode(data);
             return {
                 accounts: labelAccounts(accounts, LAYOUT.transfer),
-                fields: [{ label: 'Amount', value: readU64LE(data, AFTER_DISCRIMINATOR).toString() }],
+                fields: [{ label: 'Amount', value: amount.toString() }],
             };
+        }
 
-        case 'Approve':
+        case 'Approve': {
+            const { amount } = decoders.approve.decode(data);
             return {
                 accounts: labelAccounts(accounts, LAYOUT.approve),
-                fields: [{ label: 'Amount', value: readU64LE(data, AFTER_DISCRIMINATOR).toString() }],
+                fields: [{ label: 'Amount', value: amount.toString() }],
             };
+        }
 
-        case 'MintTo':
+        case 'MintTo': {
+            const { amount } = decoders.mintTo.decode(data);
             return {
                 accounts: labelAccounts(accounts, LAYOUT.mintTo),
-                fields: [{ label: 'Amount', value: readU64LE(data, AFTER_DISCRIMINATOR).toString() }],
+                fields: [{ label: 'Amount', value: amount.toString() }],
             };
+        }
 
-        case 'Burn':
+        case 'Burn': {
+            const { amount } = decoders.burn.decode(data);
             return {
                 accounts: labelAccounts(accounts, LAYOUT.burn),
-                fields: [{ label: 'Amount', value: readU64LE(data, AFTER_DISCRIMINATOR).toString() }],
+                fields: [{ label: 'Amount', value: amount.toString() }],
             };
+        }
 
         case 'CloseAccount':
+            // CloseAccount has no payload beyond the discriminator, but we still
+            // need at least 1 byte (the discriminator itself) to consider it valid.
+            if (data.length < 1) return undefined;
             return {
                 accounts: labelAccounts(accounts, LAYOUT.closeAccount),
                 fields: [],
             };
 
-        case 'SetAuthority':
-            // See AuthorityType enum: https://github.com/solana-program/token/blob/main/interface/src/instruction.rs#L748
+        case 'SetAuthority': {
+            const { authorityType, newAuthority } = decoders.setAuthority.decode(data);
             return {
                 accounts: labelAccounts(accounts, LAYOUT.setAuthority),
                 fields: [
-                    { label: 'Authority Type', value: authorityTypeName(readU8(data, SET_AUTHORITY_TYPE_OFFSET)) },
-                    { label: 'New Authority', value: readOptionalAuthority(data) },
+                    { label: 'Authority Type', value: AuthorityType[authorityType] ?? `Unknown (${authorityType})` },
+                    { label: 'New Authority', value: newAuthority.__option === 'Some' ? newAuthority.value : '(none)' },
                 ],
             };
+        }
 
-        case 'TransferChecked':
+        case 'TransferChecked': {
+            const { amount, decimals } = decoders.transferChecked.decode(data);
             return {
                 accounts: labelAccounts(accounts, LAYOUT.transferChecked),
                 fields: [
-                    { label: 'Amount', value: readU64LE(data, AFTER_DISCRIMINATOR).toString() },
-                    { label: 'Decimals', value: readU8(data, AFTER_AMOUNT).toString() },
+                    { label: 'Amount', value: amount.toString() },
+                    { label: 'Decimals', value: decimals.toString() },
                 ],
             };
+        }
 
-        case 'ApproveChecked':
+        case 'ApproveChecked': {
+            const { amount, decimals } = decoders.approveChecked.decode(data);
             return {
                 accounts: labelAccounts(accounts, LAYOUT.approveChecked),
                 fields: [
-                    { label: 'Amount', value: readU64LE(data, AFTER_DISCRIMINATOR).toString() },
-                    { label: 'Decimals', value: readU8(data, AFTER_AMOUNT).toString() },
+                    { label: 'Amount', value: amount.toString() },
+                    { label: 'Decimals', value: decimals.toString() },
                 ],
             };
+        }
 
-        case 'MintToChecked':
+        case 'MintToChecked': {
+            const { amount, decimals } = decoders.mintToChecked.decode(data);
             return {
                 accounts: labelAccounts(accounts, LAYOUT.mintToChecked),
                 fields: [
-                    { label: 'Amount', value: readU64LE(data, AFTER_DISCRIMINATOR).toString() },
-                    { label: 'Decimals', value: readU8(data, AFTER_AMOUNT).toString() },
+                    { label: 'Amount', value: amount.toString() },
+                    { label: 'Decimals', value: decimals.toString() },
                 ],
             };
+        }
 
-        case 'BurnChecked':
+        case 'BurnChecked': {
+            const { amount, decimals } = decoders.burnChecked.decode(data);
             return {
                 accounts: labelAccounts(accounts, LAYOUT.burnChecked),
                 fields: [
-                    { label: 'Amount', value: readU64LE(data, AFTER_DISCRIMINATOR).toString() },
-                    { label: 'Decimals', value: readU8(data, AFTER_AMOUNT).toString() },
+                    { label: 'Amount', value: amount.toString() },
+                    { label: 'Decimals', value: decimals.toString() },
                 ],
             };
+        }
 
         default:
             return undefined;
@@ -191,30 +201,4 @@ function labelAccounts(accounts: AccountEntry[], layout: AccountLayout): Labeled
         ...account,
         label: i < layout.length ? layout[i].role : `Signer ${i - layout.length + 1}`,
     }));
-}
-
-// Reads the COption<Pubkey> from a SetAuthority instruction.
-// Layout: [discriminator(1), authority_type(1), option_tag(1), ?new_authority(32)]
-// The option_tag byte is 1 (Some) when a new authority is present, 0 (None) otherwise.
-function readOptionalAuthority(data: Uint8Array): string {
-    if (data[SET_AUTHORITY_OPTION_TAG_OFFSET] !== OPTION_SOME) return '(none)';
-    if (data.length < SET_AUTHORITY_MIN_LEN_WITH_PUBKEY) return '(truncated)';
-    return new PublicKey(data.slice(SET_AUTHORITY_PUBKEY_OFFSET, SET_AUTHORITY_MIN_LEN_WITH_PUBKEY)).toBase58();
-}
-
-// Maps the AuthorityType enum to a human-readable name.
-// https://github.com/solana-program/token/blob/main/interface/src/instruction.rs#L748
-function authorityTypeName(type: number): string {
-    switch (type) {
-        case 0:
-            return 'MintTokens';
-        case 1:
-            return 'FreezeAccount';
-        case 2:
-            return 'AccountOwner';
-        case 3:
-            return 'CloseAccount';
-        default:
-            return `Unknown (${type})`;
-    }
 }

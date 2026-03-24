@@ -6,9 +6,9 @@ import { expect, within } from 'storybook/test';
 
 import { toBuffer } from '@/app/shared/lib/bytes';
 
+import { makeAccount, makeBatchIx, makeBatchIxWithKeys, makeSetAuthorityData } from '../../lib/__tests__/test-utils';
 import { concatBytes, writeU64LE } from '../../lib/bytes';
 import { BATCH_DISCRIMINATOR } from '../../lib/const';
-import { makeAccount, makeBatchIx, makeBatchIxWithKeys, makeSetAuthorityData } from '../../lib/__tests__/test-utils';
 import { TokenBatchCard } from '../TokenBatchCard';
 
 const meta = {
