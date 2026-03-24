@@ -3,7 +3,7 @@
 import { useRouter, useSelectedLayoutSegment } from 'next/navigation';
 import React from 'react';
 
-import { type NavigationTab } from '@/app/entities/navigation-tabs/model/types';
+import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
 
 import { BaseNavigationTabs } from './BaseNavigationTabs';
 
@@ -23,7 +23,7 @@ export function NavigationTabs({ buildHref, tabs, children, className }: Navigat
         (path: string) => {
             router.push(buildHref(path), { scroll: false });
         },
-        [router, buildHref]
+        [router, buildHref],
     );
 
     return (

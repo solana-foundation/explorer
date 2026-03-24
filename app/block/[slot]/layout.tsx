@@ -16,7 +16,7 @@ import { notFound, useSearchParams } from 'next/navigation';
 import React, { PropsWithChildren } from 'react';
 import { ExternalLink } from 'react-feather';
 
-import { type NavigationTab, NavigationTabs } from '@/app/entities/navigation-tabs';
+import { type NavigationTab, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
 import { estimateRequestedComputeUnits } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot, getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
 import { pickClusterParams } from '@/app/utils/url';

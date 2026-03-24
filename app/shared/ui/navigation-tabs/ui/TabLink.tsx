@@ -4,7 +4,7 @@ import Link from 'next/link';
 import React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
-import { useNavigationTabsContext } from '@/app/entities/navigation-tabs/model/navigation-tabs-context';
+import { useNavigationTabsContext } from '@/app/shared/ui/navigation-tabs/model/navigation-tabs-context';
 
 const tabLinkClassName = cn(
     'e-appearance-none e-border-solid e-shadow-none e-outline-none',
@@ -12,7 +12,7 @@ const tabLinkClassName = cn(
     'e-bg-transparent',
     'e-px-0 e-py-4',
     'e-text-sm e-font-normal e-text-outer-space-200 data-[state=active]:e-text-white',
-    'e-no-underline'
+    'e-no-underline',
 );
 
 export function TabLink({ path, title, className }: { path: string; title: string; className?: string }) {

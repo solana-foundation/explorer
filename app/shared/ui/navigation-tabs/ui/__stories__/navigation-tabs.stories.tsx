@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, within } from 'storybook/test';
 
-import { type NavigationTab } from '@/app/entities/navigation-tabs/model/types';
-import { BaseNavigationTabs } from '@/app/entities/navigation-tabs/ui/BaseNavigationTabs';
-import { NavigationTabLink } from '@/app/entities/navigation-tabs/ui/NavigationTabLink';
+import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
+import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
+import { NavigationTabLink } from '@/app/shared/ui/navigation-tabs/ui/NavigationTabLink';
 
 const BLOCK_TABS: NavigationTab[] = [
     { path: '', title: 'Transactions' },
@@ -91,8 +91,8 @@ export const MobileSelect: Story = {
         tabs: BLOCK_TABS,
     },
     parameters: {
-        viewport: {
-            defaultViewport: 'mobile1',
+        globals: {
+            viewport: { isRotated: false, value: 'mobile1' },
         },
     },
     play: async ({ canvasElement, args }) => {

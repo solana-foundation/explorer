@@ -3,8 +3,8 @@ import React from 'react';
 import {
     NavigationTabsContext,
     useTabRegistration,
-} from '@/app/entities/navigation-tabs/model/navigation-tabs-context';
-import { type NavigationTab } from '@/app/entities/navigation-tabs/model/types';
+} from '@/app/shared/ui/navigation-tabs/model/navigation-tabs-context';
+import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
 
 import { TabLink } from './TabLink';
 
@@ -31,12 +31,12 @@ export function BaseNavigationTabs({
 
     const contextValue = React.useMemo(
         () => ({ activeValue, buildHref, registerTab, staticPaths, unregisterTab }),
-        [activeValue, buildHref, registerTab, staticPaths, unregisterTab]
+        [activeValue, buildHref, registerTab, staticPaths, unregisterTab],
     );
 
     const allTabs = React.useMemo(
         () => [...tabs, ...registeredTabs.filter(t => !staticPaths.has(t.path))],
-        [tabs, registeredTabs, staticPaths]
+        [tabs, registeredTabs, staticPaths],
     );
 
     return (
