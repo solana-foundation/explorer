@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AccountDownloadDropdown } from '../AccountDownloadDropdown';
 
 const mockMutate = vi.fn();
-const mockRawData: Buffer | null = null;
+const mockRawData: Uint8Array | undefined = undefined;
 let mockIsLoading = false;
 
 vi.mock('@entities/account', () => ({

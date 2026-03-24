@@ -2,6 +2,7 @@ import { Address } from '@components/common/Address';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useRefreshAccount } from '@entities/account';
 import { Account } from '@providers/accounts';
+import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { Suspense, useState } from 'react';
 import { RefreshCw } from 'react-feather';

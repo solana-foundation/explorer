@@ -278,7 +278,16 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                         <span className="d-none d-md-inline">Refresh</span>
                     </Button>
                 )}
-                <DownloadDropdown filename={signature} data={rawDetails?.data?.raw?.message.serialize()} />
+                <DownloadDropdown
+                    filename={signature}
+                    data={rawDetails?.data?.raw?.message.serialize()}
+                    loading={rawDetails?.status === FetchStatus.Fetching}
+                    error={
+                        rawDetails?.status === FetchStatus.FetchFailed
+                            ? new Error('Failed to fetch raw transaction')
+                            : undefined
+                    }
+                />
             </div>
 
             <TableCardBody>
