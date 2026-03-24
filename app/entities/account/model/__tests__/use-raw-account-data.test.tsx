@@ -48,7 +48,7 @@ describe('useRawAccountData', () => {
         const mockData = new Uint8Array([4, 5, 6]);
 
         vi.mocked(Connection).mockImplementation(
-            () => ({ getAccountInfo: vi.fn().mockResolvedValue({ data: mockData }) } as unknown as Connection)
+            () => ({ getAccountInfo: vi.fn().mockResolvedValue({ data: mockData }) }) as unknown as Connection,
         );
 
         const { result } = renderHook(() => useRawAccountData(MOCK_ADDRESS), { wrapper });
@@ -73,7 +73,7 @@ describe('useRawAccountData', () => {
             .mockResolvedValueOnce({ data: mockData2 });
 
         vi.mocked(Connection).mockImplementation(
-            () => ({ getAccountInfo: mockGetAccountInfo } as unknown as Connection)
+            () => ({ getAccountInfo: mockGetAccountInfo }) as unknown as Connection,
         );
 
         const { result } = renderHook(() => useRawAccountData(MOCK_ADDRESS), { wrapper });

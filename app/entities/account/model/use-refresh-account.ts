@@ -21,6 +21,6 @@ export function useRefreshAccount() {
             fetchAccount(pubkey, dataMode);
             mutate(rawAccountDataKey(url, pubkey.toBase58()));
         },
-        [fetchAccount, mutate, url]
+        [fetchAccount, mutate, url],
     );
 }
