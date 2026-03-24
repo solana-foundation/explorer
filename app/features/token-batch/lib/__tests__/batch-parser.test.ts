@@ -6,7 +6,7 @@ import { isTokenBatchInstruction, parseBatchInstruction } from '../batch-parser'
 import { concatBytes, writeU64LE } from '../bytes';
 import { BATCH_DISCRIMINATOR } from '../const';
 import { decodeSubInstructionParams } from '../decode-sub-instruction';
-import { buildBatchData, makeAccount, makeTransferCheckedData, makeTransferData } from '../test-utils';
+import { buildBatchData, makeAccount, makeTransferCheckedData, makeTransferData } from './test-utils';
 
 describe('isTokenBatchInstruction', () => {
     it('should detect batch instruction for Token Program', () => {

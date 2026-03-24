@@ -8,7 +8,7 @@ import { toBuffer } from '@/app/shared/lib/bytes';
 
 import { concatBytes, writeU64LE } from '../../lib/bytes';
 import { BATCH_DISCRIMINATOR } from '../../lib/const';
-import { makeAccount, makeBatchIx, makeBatchIxWithKeys, makeSetAuthorityData } from '../../lib/test-utils';
+import { makeAccount, makeBatchIx, makeBatchIxWithKeys, makeSetAuthorityData } from '../../lib/__tests__/test-utils';
 import { TokenBatchCard } from '../TokenBatchCard';
 
 const meta = {

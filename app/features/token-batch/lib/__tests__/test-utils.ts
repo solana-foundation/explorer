@@ -3,8 +3,8 @@ import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 import { toBuffer } from '@/app/shared/lib/bytes';
 
-import { concatBytes, writeU64LE } from './bytes';
-import { BATCH_DISCRIMINATOR } from './const';
+import { concatBytes, writeU64LE } from '../bytes';
+import { BATCH_DISCRIMINATOR } from '../const';
 
 export function makeAccount(writable = true, signer = false) {
     return {
