@@ -47,16 +47,7 @@ test.describe('when feature enabled', () => {
     });
 
     test('renders receipt for valid transaction', async ({ page }) => {
-        await waitForPage(page, VALID_TX, 'receipt');
-
-        await page
-            .locator('h3:has-text("Solana Receipt")')
-            .or(page.locator('text=Not Found'))
-            .or(page.locator('text=Receipts can only be generated'))
-            .first()
-            .waitFor({ state: 'visible', timeout: CONTENT_TIMEOUT });
-
-        const hasReceipt = await hasElement(page, 'h3:has-text("Solana Receipt")');
+        const hasReceipt = await navigateToReceipt(page);
         const hasError = await hasElement(page, 'text=Not Found');
         const hasNoReceipt = await hasElement(page, 'text=Receipts can only be generated');
 
@@ -94,16 +85,7 @@ test.describe('when feature enabled', () => {
     });
 
     test('shows CSV and PDF options in download menu', async ({ page }) => {
-        await waitForPage(page, VALID_TX, 'receipt');
-
-        await page
-            .locator('h3:has-text("Solana Receipt")')
-            .or(page.locator('text=Not Found'))
-            .or(page.locator('text=Receipts can only be generated'))
-            .first()
-            .waitFor({ state: 'visible', timeout: CONTENT_TIMEOUT });
-
-        const hasReceipt = await hasElement(page, 'h3:has-text("Solana Receipt")');
+        const hasReceipt = await navigateToReceipt(page);
         if (!hasReceipt) return;
 
         await page.locator('button:has-text("Download")').click();
@@ -112,16 +94,7 @@ test.describe('when feature enabled', () => {
     });
 
     test('triggers CSV download with correct filename', async ({ page }) => {
-        await waitForPage(page, VALID_TX, 'receipt');
-
-        await page
-            .locator('h3:has-text("Solana Receipt")')
-            .or(page.locator('text=Not Found'))
-            .or(page.locator('text=Receipts can only be generated'))
-            .first()
-            .waitFor({ state: 'visible', timeout: CONTENT_TIMEOUT });
-
-        const hasReceipt = await hasElement(page, 'h3:has-text("Solana Receipt")');
+        const hasReceipt = await navigateToReceipt(page);
         if (!hasReceipt) return;
 
         await page.locator('button:has-text("Download")').click();
@@ -136,16 +109,7 @@ test.describe('when feature enabled', () => {
     });
 
     test('shows Downloaded! state after CSV download completes', async ({ page }) => {
-        await waitForPage(page, VALID_TX, 'receipt');
-
-        await page
-            .locator('h3:has-text("Solana Receipt")')
-            .or(page.locator('text=Not Found'))
-            .or(page.locator('text=Receipts can only be generated'))
-            .first()
-            .waitFor({ state: 'visible', timeout: CONTENT_TIMEOUT });
-
-        const hasReceipt = await hasElement(page, 'h3:has-text("Solana Receipt")');
+        const hasReceipt = await navigateToReceipt(page);
         if (!hasReceipt) return;
 
         await page.locator('button:has-text("Download")').click();
@@ -218,6 +182,19 @@ async function hasElement(page: Page, selector: string, timeout = 10000): Promis
     } catch {
         return false;
     }
+}
+
+async function navigateToReceipt(page: Page): Promise<boolean> {
+    await waitForPage(page, VALID_TX, 'receipt');
+
+    await page
+        .locator('h3:has-text("Solana Receipt")')
+        .or(page.locator('text=Not Found'))
+        .or(page.locator('text=Receipts can only be generated'))
+        .first()
+        .waitFor({ state: 'visible', timeout: CONTENT_TIMEOUT });
+
+    return hasElement(page, 'h3:has-text("Solana Receipt")');
 }
 
 async function waitForPage(page: Page, tx: string, view?: 'receipt') {

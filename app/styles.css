@@ -141,20 +141,6 @@
     }
 }
 
-@media print {
-    .print\:e-hidden {
-        display: none !important;
-    }
-
-    .print\:e-border-transparent {
-        border-color: transparent !important;
-    }
-
-    .print\:e-bg-transparent {
-        background-color: transparent !important;
-    }
-}
-
 /* When a printable receipt is present, hide everything else during print */
 @media print {
     body:has(.printable-receipt) {

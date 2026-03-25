@@ -22,7 +22,7 @@ function sanitizeCsvField(value: string): string {
 }
 
 export function buildReceiptCsvRow(receipt: FormattedReceipt, signature: string, usdValue?: string): string[] {
-    const mint = 'mint' in receipt ? receipt.mint : undefined;
+    const mint = receipt.kind === 'token' ? receipt.mint : undefined;
 
     return [
         receipt.date.utc,
