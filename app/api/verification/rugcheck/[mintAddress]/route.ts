@@ -42,17 +42,16 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
         });
 
         if (!response.ok) {
-            if (response.status === 404) {
+            if (response.status === 400 || response.status === 404) {
+                // Rugcheck returns 400 {"error":"not found"} for unrecognized tokens instead of 404
                 Logger.debug('[api:rugcheck] Token not found', { mintAddress });
             } else if (response.status === 429) {
                 Logger.warn('[api:rugcheck] Rate limit exceeded', { sentry: true });
             } else {
                 Logger.panic(new Error(`Rugcheck API error: ${response.status}`));
             }
-            return NextResponse.json(
-                { error: 'Failed to fetch rugcheck data' },
-                { headers: NO_STORE_HEADERS, status: response.status },
-            );
+            const status = response.status === 400 || response.status === 404 ? 404 : response.status;
+            return NextResponse.json({ error: 'Failed to fetch rugcheck data' }, { headers: NO_STORE_HEADERS, status });
         }
 
         const data = await response.json();
