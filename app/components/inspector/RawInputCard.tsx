@@ -236,7 +236,7 @@ export function RawInput({
         try {
             // Try base58 decode, use result as Uint8Array
             buffer = new Uint8Array(base58.decode(input));
-        } catch (err) {
+        } catch (_err) {
             // If base58 fails, try base64
             try {
                 buffer = Uint8Array.from(atob(input), c => c.charCodeAt(0));
@@ -282,7 +282,7 @@ export function RawInput({
             input.value = value;
             onInput();
         }
-    }, [value, onInput]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [value, onInput]);
 
     const placeholder = 'Paste a raw base58/base64 encoded transaction message or Squads vault transaction account';
     return (

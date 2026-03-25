@@ -36,7 +36,7 @@ export async function fetchFeatureGateInformation(featureInfo?: FeatureInfoType)
                 if (!resp.ok) return 'No data';
 
                 return resp.text();
-            } catch (e) {
+            } catch (_e) {
                 Logger.debug('[feature-gate] Cannot fetch link', { link });
                 return 'No data';
             }

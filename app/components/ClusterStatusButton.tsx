@@ -12,7 +12,7 @@ function getCustomUrlClusterName(customUrl: string) {
             return customUrl;
         }
         return `${url.protocol}//${url.hostname}`;
-    } catch (e) {
+    } catch (_e) {
         return customUrl;
     }
 }

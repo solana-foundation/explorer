@@ -27,7 +27,7 @@ vi.mock('./ClusterModalDeveloperSettings', () => ({
 }));
 
 // Must import after mocks
-// eslint-disable-next-line simple-import-sort/imports
+
 import { ClusterModal } from '../ClusterModal';
 
 function renderWithStore(initialClusters: SavedCluster[] = []) {

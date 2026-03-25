@@ -72,7 +72,7 @@ export function decodeEventWithCustomDiscriminator(eventData: string, program: P
                     const coder = new BorshEventCoder(modifiedIdl);
                     const decoded = coder.decode(Buffer.from(paddedData).toString('base64'));
                     return decoded;
-                } catch (error) {
+                } catch (_error) {
                     return { data: {}, name: event.name };
                 }
             } else {
@@ -81,7 +81,7 @@ export function decodeEventWithCustomDiscriminator(eventData: string, program: P
                     const coder = new BorshEventCoder(program.idl);
                     const decoded = coder.decode(eventData);
                     return decoded;
-                } catch (error) {
+                } catch (_error) {
                     return { data: {}, name: event.name };
                 }
             }
@@ -166,7 +166,7 @@ export function decodeInstructionWithCustomDiscriminator(ixData: Buffer | Uint8A
                     const coder = new BorshInstructionCoder(modifiedIdl);
                     const decoded = coder.decode(Buffer.from(paddedData) as any);
                     return decoded;
-                } catch (error) {
+                } catch (_error) {
                     // If Borsh decoding fails, return basic instruction info
                     return { data: {}, name: instruction.name };
                 }
@@ -176,7 +176,7 @@ export function decodeInstructionWithCustomDiscriminator(ixData: Buffer | Uint8A
                     const coder = new BorshInstructionCoder(program.idl);
                     const decoded = coder.decode(data as any);
                     return decoded;
-                } catch (error) {
+                } catch (_error) {
                     // If Borsh decoding fails, return basic instruction info
                     return { data: {}, name: instruction.name };
                 }

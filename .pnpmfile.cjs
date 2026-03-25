@@ -4,8 +4,6 @@
 // https://github.com/pnpm/pnpm/issues/4214
 // https://github.com/pnpm/pnpm/issues/5391
 
-const rootPkg = require('./package.json');
-
 console.log(`Checking for package peerDependency overrides`);
 
 const remapPeerDependencies = [

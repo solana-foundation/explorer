@@ -73,7 +73,7 @@ const WHITELISTED_RPCS = [
 function isWhitelistedRpc(url: string) {
     try {
         return WHITELISTED_RPCS.includes(new URL(url).hostname);
-    } catch (e) {
+    } catch (_e) {
         return false;
     }
 }
@@ -116,7 +116,7 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
     // Reconnect to cluster when params change
     useEffect(() => {
         updateCluster(dispatch, cluster, customUrl);
-    }, [cluster, customUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [cluster, customUrl]);
 
     return (
         <StateContext.Provider value={state}>

@@ -6,7 +6,7 @@ export function localStorageIsAvailable() {
             localStorage.setItem(test, test);
             localStorage.removeItem(test);
             localStorageIsAvailableDecision = true;
-        } catch (e) {
+        } catch (_e) {
             localStorageIsAvailableDecision = false;
         }
     }

@@ -15,10 +15,10 @@
  *   - public/accounts-sitemap.xml (known program addresses)
  */
 
+import { XMLValidator } from 'fast-xml-parser';
 import { readFile, writeFile } from 'fs/promises';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { XMLValidator } from 'fast-xml-parser';
 
 import { Cluster } from '../app/utils/cluster';
 import { LOADER_IDS, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS, TOKEN_IDS } from '../app/utils/programs';
@@ -124,6 +124,7 @@ function parseBuildMd(content: string): BuildRoute[] {
         const [, type, routeCell, size, firstLoadJs] = cells;
         if (type !== 'Static' && type !== 'Dynamic') continue;
 
+        // eslint-disable-next-line no-restricted-syntax -- Stripping markdown backticks from route cell
         const route = routeCell.replace(/`/g, '');
         routes.push({ type, route, size, firstLoadJs });
     }

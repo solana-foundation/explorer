@@ -1,11 +1,10 @@
-import type { Preview } from '@storybook/react';
-import React, { useEffect } from 'react';
-
-import { Rubik } from 'next/font/google';
-
 import './layout.min.css'; // uncomment this line to see Dashkit styles. TODO: remove upon migrating from Dashkit to Tailwind
 import './dashkit-polyfill.css';
 import '@/app/styles.css';
+
+import type { Preview } from '@storybook/react';
+import { Rubik } from 'next/font/google';
+import React, { useEffect } from 'react';
 
 // Load font with display: swap for better loading behavior
 const rubikFont = Rubik({
@@ -29,7 +28,9 @@ const preview: Preview = {
         },
         controls: {
             matchers: {
+                // eslint-disable-next-line no-restricted-syntax -- Storybook controls matcher requires regex to match arg names
                 color: /(background|color)$/i,
+                // eslint-disable-next-line no-restricted-syntax -- Storybook controls matcher requires regex to match arg names
                 date: /Date$/i,
             },
         },
@@ -41,7 +42,7 @@ const preview: Preview = {
             // Add useEffect to ensure font is properly loaded
             useEffect(() => {
                 document.getElementById('storybook-outer')?.classList.add(rubikFont.className);
-            }, [rubikFont]);
+            }, []);
 
             return (
                 <div id="storybook-outer" className={rubikFont.className}>

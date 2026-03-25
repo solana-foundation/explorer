@@ -137,7 +137,7 @@ function useClusterAccountSearch(address: string, currentCluster: Cluster, _enab
                         // not only prevent span but allow component to react properly without making the structure complex
                         await sleep();
                     }
-                } catch (error) {
+                } catch (_error) {
                     // Check if this search is still active before continuing
                     if (searchIdRef.current !== currentSearchId) return;
                     // Continue to next cluster

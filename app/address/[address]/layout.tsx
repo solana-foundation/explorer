@@ -206,7 +206,7 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
 
     try {
         pubkey = new PublicKey(address);
-    } catch (err) {
+    } catch (_err) {
         /* empty */
     }
 
