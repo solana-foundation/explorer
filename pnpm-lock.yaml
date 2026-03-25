@@ -232,7 +232,7 @@ importers:
         specifier: 7.0.6
         version: 7.0.6
       fast-csv:
-        specifier: ^5.0.5
+        specifier: 5.0.5
         version: 5.0.5
       fuse.js:
         specifier: 7.1.0
