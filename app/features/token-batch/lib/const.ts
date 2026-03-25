@@ -5,8 +5,10 @@
 export const BATCH_DISCRIMINATOR = 0xff;
 
 // Maps SPL Token sub-instruction discriminators to human-readable names.
-// Variants from the `TokenInstruction` enum:
+// Base instructions (0–24, 38, 45):
 // https://github.com/solana-program/token/blob/065786e/pinocchio/interface/src/instruction.rs#L9-L551
+// Token-2022 extension instructions (25–44):
+// https://github.com/solana-program/token-2022/blob/main/interface/src/instruction.rs
 /* eslint-disable sort-keys-fix/sort-keys-fix */
 const DISCRIMINATOR_TO_TYPE_NAME = {
     0: 'InitializeMint',
@@ -34,7 +36,28 @@ const DISCRIMINATOR_TO_TYPE_NAME = {
     22: 'InitializeImmutableOwner',
     23: 'AmountToUiAmount',
     24: 'UiAmountToAmount',
+    // Token-2022 extension instructions (discriminators 25–44).
+    // Each extension group uses a sub-discriminator in the second data byte
+    // to distinguish individual operations within the group.
+    25: 'InitializeMintCloseAuthority',
+    26: 'TransferFeeExtension',
+    27: 'ConfidentialTransferExtension',
+    28: 'DefaultAccountStateExtension',
+    29: 'Reallocate',
+    30: 'MemoTransferExtension',
+    31: 'CreateNativeMint',
+    32: 'InitializeNonTransferableMint',
+    33: 'InterestBearingMintExtension',
+    34: 'CpiGuardExtension',
+    35: 'InitializePermanentDelegate',
+    36: 'TransferHookExtension',
+    37: 'ConfidentialTransferFeeExtension',
     38: 'WithdrawExcessLamports',
+    39: 'MetadataPointerExtension',
+    40: 'GroupPointerExtension',
+    41: 'GroupMemberPointerExtension',
+    43: 'ScaledUiAmountExtension',
+    44: 'PausableExtension',
     45: 'UnwrapLamports',
 } as const;
 /* eslint-enable sort-keys-fix/sort-keys-fix */

@@ -3,10 +3,6 @@
 // Uses @solana-program/token-2022 instruction data decoders for field extraction.
 // The batch wire format itself has no SDK decoder — only individual sub-instruction
 // data payloads are decoded here.
-//
-// Only the most common sub-instructions are decoded. Others (e.g. InitializeMint,
-// InitializeAccount, Revoke, FreezeAccount) fall through to the default case,
-// which returns `undefined` and the UI renders as raw hex.
 
 import { PublicKey } from '@solana/web3.js';
 import {
@@ -85,6 +81,9 @@ export function decodeSubInstructionParams(
     }
 }
 
+// Token-2022 extension instructions use a nested sub-discriminator scheme
+// that varies per extension, so we only decode the common base instructions
+// where the wire format is straightforward.
 function decodeByType(
     typeName: TokenInstructionName | 'Unknown',
     data: Uint8Array,
