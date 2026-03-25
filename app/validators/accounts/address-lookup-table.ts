@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-redeclare */
-
 import { BigIntFromString, NumberFromString } from '@validators/number';
 import { PublicKeyFromString } from '@validators/pubkey';
 import { array, enums, Infer, number, optional, type } from 'superstruct';

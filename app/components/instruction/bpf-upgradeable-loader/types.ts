@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-redeclare */
-
 import { PublicKeyFromString } from '@validators/pubkey';
 import { enums, Infer, nullable, number, optional, string, type } from 'superstruct';
 

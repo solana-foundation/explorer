@@ -205,7 +205,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
                         },
                         type: DashboardInfoActionType.SetLastBlockTime,
                     });
-                } catch (error) {
+                } catch (_error) {
                     // let this fail gracefully
                 }
             }

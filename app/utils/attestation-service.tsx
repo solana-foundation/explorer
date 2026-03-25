@@ -21,7 +21,7 @@ export function decodeWithType(
         };
         const data = (func as any)(input as any);
         return { data, type };
-    } catch (e) {
+    } catch (_e) {
         // pass
         return null;
     }
@@ -52,7 +52,7 @@ export function isAttestationAccount(account: Account) {
         return (
             account.owner.toBase58() === SAS_PROGRAM_ID && (accountType === 'attestation' || accountType === 'schema')
         );
-    } catch (e) {
+    } catch (_e) {
         return false;
     }
 }

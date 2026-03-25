@@ -113,14 +113,14 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
 
                 logTruncated = parsedLogs[parsedLogs.length - 1].truncated;
                 computeUnits = parsedLogs.map(({ computeUnits }) => computeUnits).reduce((sum, next) => sum + next);
-            } catch (err) {
+            } catch (_err) {
                 // ignore parsing errors because some old logs aren't parsable
             }
 
             let costUnits: number | undefined = undefined;
             try {
                 costUnits = tx.meta?.costUnits ?? 0;
-            } catch (err) {
+            } catch (_err) {
                 // ignore parsing errors because some old logs aren't parsable
             }
 

@@ -88,7 +88,7 @@ export async function fetchBlock(dispatch: Dispatch, url: string, cluster: Clust
                 const lastLeaderSlot = childSlot !== undefined ? childSlot : slot;
                 const slotLeadersLimit = lastLeaderSlot - block.parentSlot + 1;
                 leaders = await connection.getSlotLeaders(firstLeaderSlot, slotLeadersLimit);
-            } catch (err) {
+            } catch (_err) {
                 // ignore errors
             }
 

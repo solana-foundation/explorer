@@ -51,7 +51,7 @@ function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: string 
             } else {
                 throw new Error('Attributes is not an array');
             }
-        } catch (error) {
+        } catch (_error) {
             setStatus('error');
         }
     }

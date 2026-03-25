@@ -95,7 +95,7 @@ export default function TransactionDetailsPageClient({ params: { signature: raw 
         if (decoded.length === 64) {
             signature = raw;
         }
-    } catch (err) {
+    } catch (_err) {
         /* empty */
     }
 

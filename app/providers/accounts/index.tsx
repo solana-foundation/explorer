@@ -70,7 +70,7 @@ export function isTokenProgramData(data: { program: string }): data is TokenProg
     try {
         assertIsTokenProgram(data.program);
         return true;
-    } catch (e) {
+    } catch (_e) {
         return false;
     }
 }
@@ -427,7 +427,7 @@ async function handleParsedAccountData(
                         };
                     }
                 }
-            } catch (error) {
+            } catch (_error) {
                 // unable to find NFT metadata account
             }
 

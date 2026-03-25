@@ -229,7 +229,7 @@ function isValidLink(value: string) {
     try {
         const url = new URL(value);
         return ['http:', 'https:'].includes(url.protocol);
-    } catch (err) {
+    } catch (_err) {
         return false;
     }
 }

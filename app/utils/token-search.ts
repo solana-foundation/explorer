@@ -83,7 +83,7 @@ export async function searchTokens(search: string, cluster: Cluster): Promise<Se
             pathname: '/address/' + token.address,
             value: [token.name, token.symbol, token.address],
         }));
-    } catch (error) {
+    } catch (_error) {
         Logger.error(new Error('[utils:token-search] Error parsing token search API response'), {
             chainId: chainId.toString(),
             search,
