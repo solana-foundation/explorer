@@ -35,8 +35,12 @@ describe('Rugcheck API Route', () => {
         expect(await response.json()).toEqual({ error: 'Invalid mint address' });
     });
 
-    // RUGCHECK_API_KEY is captured at module load time, so it cannot be
-    // unset within a single test run. Skipping this scenario.
+    it('should return 500 when API key is missing', async () => {
+        delete process.env.RUGCHECK_API_KEY;
+        const response = await callRoute(VALID_MINT);
+        expect(response.status).toBe(500);
+        expect(await response.json()).toEqual({ error: 'Rugcheck API is misconfigured' });
+    });
 
     it('should return 404 when rugcheck responds with 400 (not found)', async () => {
         mockFetchResponse(400, { error: 'not found' });
