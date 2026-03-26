@@ -4,9 +4,7 @@
 // The batch wire format itself has no SDK decoder — only individual sub-instruction
 // data payloads are decoded here.
 
-import { PublicKey } from '@solana/web3.js';
 import {
-    AuthorityType,
     getApproveCheckedInstructionDataDecoder,
     getApproveInstructionDataDecoder,
     getBurnCheckedInstructionDataDecoder,
@@ -19,53 +17,18 @@ import {
 } from '@solana-program/token-2022';
 
 import type { TokenInstructionName } from './const';
+import { formatDecoded } from './format-sub-instruction';
+import type {
+    AccountEntry,
+    DecodedParams,
+    RawAmount,
+    RawCheckedAmount,
+    RawCloseAccount,
+    RawDecoded,
+    RawSetAuthority,
+} from './types';
 
-type AccountEntry = { pubkey: PublicKey; isSigner: boolean; isWritable: boolean };
-
-export type LabeledAccount = AccountEntry & { label: string };
-
-export type DecodedParams = {
-    fields: { label: string; value: string }[];
-    accounts: LabeledAccount[];
-};
-
-// ── Account layouts ────────────────────────────────────────────────────
-// Each SPL Token instruction expects a fixed sequence of named accounts,
-// optionally followed by multisig signer accounts. The layout defines the
-// role of each positional account.
-// See: https://github.com/solana-program/token/blob/main/interface/src/instruction.rs
-
-type AccountRole = { role: string };
-type AccountLayout = readonly AccountRole[];
-
-function roles(...names: string[]): AccountLayout {
-    return names.map(role => ({ role }));
-}
-
-const LAYOUT = {
-    approve: roles('Source', 'Delegate', 'Owner'),
-    approveChecked: roles('Source', 'Mint', 'Delegate', 'Owner'),
-    burn: roles('Account', 'Mint', 'Owner/Delegate'),
-    burnChecked: roles('Account', 'Mint', 'Owner/Delegate'),
-    closeAccount: roles('Account', 'Destination', 'Owner'),
-    mintTo: roles('Mint', 'Destination', 'Mint Authority'),
-    mintToChecked: roles('Mint', 'Destination', 'Mint Authority'),
-    setAuthority: roles('Account', 'Current Authority'),
-    transfer: roles('Source', 'Destination', 'Owner/Delegate'),
-    transferChecked: roles('Source', 'Mint', 'Destination', 'Owner/Delegate'),
-};
-
-const decoders = {
-    approve: getApproveInstructionDataDecoder(),
-    approveChecked: getApproveCheckedInstructionDataDecoder(),
-    burn: getBurnInstructionDataDecoder(),
-    burnChecked: getBurnCheckedInstructionDataDecoder(),
-    mintTo: getMintToInstructionDataDecoder(),
-    mintToChecked: getMintToCheckedInstructionDataDecoder(),
-    setAuthority: getSetAuthorityInstructionDataDecoder(),
-    transfer: getTransferInstructionDataDecoder(),
-    transferChecked: getTransferCheckedInstructionDataDecoder(),
-};
+export type { DecodedParams, LabeledAccount } from './types';
 
 export function decodeSubInstructionParams(
     typeName: TokenInstructionName | 'Unknown',
@@ -74,7 +37,9 @@ export function decodeSubInstructionParams(
     decimals?: number,
 ): DecodedParams | undefined {
     try {
-        return decodeByType(typeName, data, accounts, decimals);
+        const raw = decodeByType(typeName, data, accounts);
+        if (!raw) return undefined;
+        return formatDecoded(raw, decimals);
     } catch {
         // Decoder throws on truncated/malformed data — fall back to raw hex.
         return undefined;
@@ -88,138 +53,88 @@ function decodeByType(
     typeName: TokenInstructionName | 'Unknown',
     data: Uint8Array,
     accounts: AccountEntry[],
-    decimals?: number,
-): DecodedParams | undefined {
+): RawDecoded | undefined {
     switch (typeName) {
-        case 'Transfer': {
-            const { amount } = decoders.transfer.decode(data);
-            return {
-                accounts: labelAccounts(accounts, LAYOUT.transfer),
-                fields: [{ label: 'Amount', value: formatAmount(amount, decimals) }],
-            };
-        }
-
-        case 'Approve': {
-            const { amount } = decoders.approve.decode(data);
-            return {
-                accounts: labelAccounts(accounts, LAYOUT.approve),
-                fields: [{ label: 'Amount', value: formatAmount(amount, decimals) }],
-            };
-        }
-
-        case 'MintTo': {
-            const { amount } = decoders.mintTo.decode(data);
-            return {
-                accounts: labelAccounts(accounts, LAYOUT.mintTo),
-                fields: [{ label: 'Amount', value: formatAmount(amount, decimals) }],
-            };
-        }
-
-        case 'Burn': {
-            const { amount } = decoders.burn.decode(data);
-            return {
-                accounts: labelAccounts(accounts, LAYOUT.burn),
-                fields: [{ label: 'Amount', value: formatAmount(amount, decimals) }],
-            };
-        }
-
+        case 'Transfer':
+            return decodeTransfer(data, accounts);
+        case 'Approve':
+            return decodeApprove(data, accounts);
+        case 'MintTo':
+            return decodeMintTo(data, accounts);
+        case 'Burn':
+            return decodeBurn(data, accounts);
         case 'CloseAccount':
-            // CloseAccount has no payload beyond the discriminator, but we still
-            // need at least 1 byte (the discriminator itself) to consider it valid.
-            if (data.length < 1) return undefined;
-            return {
-                accounts: labelAccounts(accounts, LAYOUT.closeAccount),
-                fields: [],
-            };
-
-        case 'SetAuthority': {
-            const { authorityType, newAuthority } = decoders.setAuthority.decode(data);
-            return {
-                accounts: labelAccounts(accounts, LAYOUT.setAuthority),
-                fields: [
-                    { label: 'Authority Type', value: AuthorityType[authorityType] ?? `Unknown (${authorityType})` },
-                    { label: 'New Authority', value: newAuthority.__option === 'Some' ? newAuthority.value : '(none)' },
-                ],
-            };
-        }
-
-        case 'TransferChecked': {
-            const { amount, decimals } = decoders.transferChecked.decode(data);
-            return {
-                accounts: labelAccounts(accounts, LAYOUT.transferChecked),
-                fields: [
-                    { label: 'Amount', value: formatTokenAmount(amount, decimals) },
-                    { label: 'Decimals', value: decimals.toString() },
-                ],
-            };
-        }
-
-        case 'ApproveChecked': {
-            const { amount, decimals } = decoders.approveChecked.decode(data);
-            return {
-                accounts: labelAccounts(accounts, LAYOUT.approveChecked),
-                fields: [
-                    { label: 'Amount', value: formatTokenAmount(amount, decimals) },
-                    { label: 'Decimals', value: decimals.toString() },
-                ],
-            };
-        }
-
-        case 'MintToChecked': {
-            const { amount, decimals } = decoders.mintToChecked.decode(data);
-            return {
-                accounts: labelAccounts(accounts, LAYOUT.mintToChecked),
-                fields: [
-                    { label: 'Amount', value: formatTokenAmount(amount, decimals) },
-                    { label: 'Decimals', value: decimals.toString() },
-                ],
-            };
-        }
-
-        case 'BurnChecked': {
-            const { amount, decimals } = decoders.burnChecked.decode(data);
-            return {
-                accounts: labelAccounts(accounts, LAYOUT.burnChecked),
-                fields: [
-                    { label: 'Amount', value: formatTokenAmount(amount, decimals) },
-                    { label: 'Decimals', value: decimals.toString() },
-                ],
-            };
-        }
-
+            return decodeCloseAccount(data, accounts);
+        case 'SetAuthority':
+            return decodeSetAuthority(data, accounts);
+        case 'TransferChecked':
+            return decodeTransferChecked(data, accounts);
+        case 'ApproveChecked':
+            return decodeApproveChecked(data, accounts);
+        case 'MintToChecked':
+            return decodeMintToChecked(data, accounts);
+        case 'BurnChecked':
+            return decodeBurnChecked(data, accounts);
         default:
             return undefined;
     }
 }
 
-// Format amount using decimals when available, otherwise show raw value.
-function formatAmount(amount: bigint, decimals: number | undefined): string {
-    if (decimals === undefined) return amount.toString();
-    return formatTokenAmount(amount, decimals);
+// ── Per-instruction decoders ─────────────────────────────────────────
+
+function decodeTransfer(data: Uint8Array, accounts: AccountEntry[]): RawAmount {
+    const { amount } = getTransferInstructionDataDecoder().decode(data);
+    return { accounts, amount, type: 'transfer' };
 }
 
-// Format a raw token amount using its decimals (e.g. 1500000 with 6 decimals → "1.5").
-function formatTokenAmount(amount: bigint, decimals: number): string {
-    if (decimals === 0) return amount.toString();
-
-    const divisor = 10n ** BigInt(decimals);
-    const whole = amount / divisor;
-    const fractional = amount % divisor;
-
-    if (fractional === 0n) return whole.toString();
-
-    // eslint-disable-next-line no-restricted-syntax -- Trimming trailing zeros from a decimal string; a simple replace is clearer than a manual loop
-    const fractionalStr = fractional.toString().padStart(decimals, '0').replace(/0+$/, '');
-    return `${whole}.${fractionalStr}`;
+function decodeApprove(data: Uint8Array, accounts: AccountEntry[]): RawAmount {
+    const { amount } = getApproveInstructionDataDecoder().decode(data);
+    return { accounts, amount, type: 'approve' };
 }
 
-// SPL Token instructions support multisig owners/delegates. The `layout` defines the
-// named positional accounts; any remaining accounts are additional signers required to
-// meet the multisig threshold.
-// See: https://github.com/solana-program/token/blob/main/program/src/processor.rs#L988
-function labelAccounts(accounts: AccountEntry[], layout: AccountLayout): LabeledAccount[] {
-    return accounts.map((account, i) => ({
-        ...account,
-        label: i < layout.length ? layout[i].role : `Signer ${i - layout.length + 1}`,
-    }));
+function decodeMintTo(data: Uint8Array, accounts: AccountEntry[]): RawAmount {
+    const { amount } = getMintToInstructionDataDecoder().decode(data);
+    return { accounts, amount, type: 'mintTo' };
+}
+
+function decodeBurn(data: Uint8Array, accounts: AccountEntry[]): RawAmount {
+    const { amount } = getBurnInstructionDataDecoder().decode(data);
+    return { accounts, amount, type: 'burn' };
+}
+
+// CloseAccount has no payload beyond the discriminator, but we still
+// need at least 1 byte (the discriminator itself) to consider it valid.
+function decodeCloseAccount(data: Uint8Array, accounts: AccountEntry[]): RawCloseAccount | undefined {
+    if (data.length < 1) return undefined;
+    return { accounts, type: 'closeAccount' };
+}
+
+function decodeSetAuthority(data: Uint8Array, accounts: AccountEntry[]): RawSetAuthority {
+    const { authorityType, newAuthority } = getSetAuthorityInstructionDataDecoder().decode(data);
+    return {
+        accounts,
+        authorityType,
+        newAuthority: newAuthority.__option === 'Some' ? newAuthority.value : undefined,
+        type: 'setAuthority',
+    };
+}
+
+function decodeTransferChecked(data: Uint8Array, accounts: AccountEntry[]): RawCheckedAmount {
+    const { amount, decimals } = getTransferCheckedInstructionDataDecoder().decode(data);
+    return { accounts, amount, decimals, type: 'transferChecked' };
+}
+
+function decodeApproveChecked(data: Uint8Array, accounts: AccountEntry[]): RawCheckedAmount {
+    const { amount, decimals } = getApproveCheckedInstructionDataDecoder().decode(data);
+    return { accounts, amount, decimals, type: 'approveChecked' };
+}
+
+function decodeMintToChecked(data: Uint8Array, accounts: AccountEntry[]): RawCheckedAmount {
+    const { amount, decimals } = getMintToCheckedInstructionDataDecoder().decode(data);
+    return { accounts, amount, decimals, type: 'mintToChecked' };
+}
+
+function decodeBurnChecked(data: Uint8Array, accounts: AccountEntry[]): RawCheckedAmount {
+    const { amount, decimals } = getBurnCheckedInstructionDataDecoder().decode(data);
+    return { accounts, amount, decimals, type: 'burnChecked' };
 }
