@@ -72,9 +72,10 @@ export function decodeSubInstructionParams(
     typeName: TokenInstructionName | 'Unknown',
     data: Uint8Array,
     accounts: AccountEntry[],
+    decimals?: number,
 ): DecodedParams | undefined {
     try {
-        return decodeByType(typeName, data, accounts);
+        return decodeByType(typeName, data, accounts, decimals);
     } catch {
         // Decoder throws on truncated/malformed data — fall back to raw hex.
         return undefined;
@@ -88,13 +89,14 @@ function decodeByType(
     typeName: TokenInstructionName | 'Unknown',
     data: Uint8Array,
     accounts: AccountEntry[],
+    decimals?: number,
 ): DecodedParams | undefined {
     switch (typeName) {
         case 'Transfer': {
             const { amount } = decoders.transfer.decode(data);
             return {
                 accounts: labelAccounts(accounts, LAYOUT.transfer),
-                fields: [{ label: 'Amount', value: amount.toString() }],
+                fields: [{ label: 'Amount', value: formatAmount(amount, decimals) }],
             };
         }
 
@@ -102,7 +104,7 @@ function decodeByType(
             const { amount } = decoders.approve.decode(data);
             return {
                 accounts: labelAccounts(accounts, LAYOUT.approve),
-                fields: [{ label: 'Amount', value: amount.toString() }],
+                fields: [{ label: 'Amount', value: formatAmount(amount, decimals) }],
             };
         }
 
@@ -110,7 +112,7 @@ function decodeByType(
             const { amount } = decoders.mintTo.decode(data);
             return {
                 accounts: labelAccounts(accounts, LAYOUT.mintTo),
-                fields: [{ label: 'Amount', value: amount.toString() }],
+                fields: [{ label: 'Amount', value: formatAmount(amount, decimals) }],
             };
         }
 
@@ -118,7 +120,7 @@ function decodeByType(
             const { amount } = decoders.burn.decode(data);
             return {
                 accounts: labelAccounts(accounts, LAYOUT.burn),
-                fields: [{ label: 'Amount', value: amount.toString() }],
+                fields: [{ label: 'Amount', value: formatAmount(amount, decimals) }],
             };
         }
 
@@ -147,7 +149,7 @@ function decodeByType(
             return {
                 accounts: labelAccounts(accounts, LAYOUT.transferChecked),
                 fields: [
-                    { label: 'Amount', value: amount.toString() },
+                    { label: 'Amount', value: formatTokenAmount(amount, decimals) },
                     { label: 'Decimals', value: decimals.toString() },
                 ],
             };
@@ -158,7 +160,7 @@ function decodeByType(
             return {
                 accounts: labelAccounts(accounts, LAYOUT.approveChecked),
                 fields: [
-                    { label: 'Amount', value: amount.toString() },
+                    { label: 'Amount', value: formatTokenAmount(amount, decimals) },
                     { label: 'Decimals', value: decimals.toString() },
                 ],
             };
@@ -169,7 +171,7 @@ function decodeByType(
             return {
                 accounts: labelAccounts(accounts, LAYOUT.mintToChecked),
                 fields: [
-                    { label: 'Amount', value: amount.toString() },
+                    { label: 'Amount', value: formatTokenAmount(amount, decimals) },
                     { label: 'Decimals', value: decimals.toString() },
                 ],
             };
@@ -180,7 +182,7 @@ function decodeByType(
             return {
                 accounts: labelAccounts(accounts, LAYOUT.burnChecked),
                 fields: [
-                    { label: 'Amount', value: amount.toString() },
+                    { label: 'Amount', value: formatTokenAmount(amount, decimals) },
                     { label: 'Decimals', value: decimals.toString() },
                 ],
             };
@@ -189,6 +191,27 @@ function decodeByType(
         default:
             return undefined;
     }
+}
+
+// Format amount using decimals when available, otherwise show raw value.
+function formatAmount(amount: bigint, decimals: number | undefined): string {
+    if (decimals === undefined) return amount.toString();
+    return formatTokenAmount(amount, decimals);
+}
+
+// Format a raw token amount using its decimals (e.g. 1500000 with 6 decimals → "1.5").
+function formatTokenAmount(amount: bigint, decimals: number): string {
+    if (decimals === 0) return amount.toString();
+
+    const divisor = 10n ** BigInt(decimals);
+    const whole = amount / divisor;
+    const fractional = amount % divisor;
+
+    if (fractional === 0n) return whole.toString();
+
+    // eslint-disable-next-line no-restricted-syntax -- Trimming trailing zeros from a decimal string; a simple replace is clearer than a manual loop
+    const fractionalStr = fractional.toString().padStart(decimals, '0').replace(/0+$/, '');
+    return `${whole}.${fractionalStr}`;
 }
 
 // SPL Token instructions support multisig owners/delegates. The `layout` defines the

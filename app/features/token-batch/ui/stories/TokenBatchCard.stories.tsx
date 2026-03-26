@@ -64,7 +64,7 @@ export const SingleSubInstruction: Story = {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Batch (1 instruction)', { exact: false })).toBeInTheDocument();
         await expect(canvas.getByText('TransferChecked')).toBeInTheDocument();
-        await expect(canvas.getByText('5000000')).toBeInTheDocument();
+        await expect(canvas.getByText('5')).toBeInTheDocument();
         await expect(canvas.getByText('Decimals:')).toBeInTheDocument();
         await expect(canvas.getByText('6')).toBeInTheDocument();
     },

@@ -2,9 +2,9 @@
 
 import { InstructionCard } from '@components/instruction/InstructionCard';
 import type { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import React from 'react';
 
 import { parseBatchInstruction, type ParsedSubInstruction } from '../lib/batch-parser';
+import { useBatchDecimals } from '../model/use-batch-decimals';
 import { SubInstructionRow } from './SubInstructionRow';
 
 export function TokenBatchCard({
@@ -29,6 +29,7 @@ export function TokenBatchCard({
         }
     })();
 
+    const decimalsMap = useBatchDecimals(subInstructions);
     const title = `Token Program: Batch (${subInstructions.length} instruction${subInstructions.length !== 1 ? 's' : ''})`;
 
     return (
@@ -42,7 +43,11 @@ export function TokenBatchCard({
                             </div>
                         )}
                         {subInstructions.map(subIx => (
-                            <SubInstructionRow key={subIx.index} subIx={subIx} />
+                            <SubInstructionRow
+                                key={subIx.index}
+                                subIx={subIx}
+                                decimals={decimalsMap.get(subIx.index)}
+                            />
                         ))}
                         {subInstructions.length === 0 && !error && (
                             <div className="e-text-sm e-text-neutral-500" data-testid="batch-empty">

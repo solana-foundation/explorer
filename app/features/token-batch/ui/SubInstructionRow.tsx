@@ -8,8 +8,8 @@ import { toHex } from '@/app/shared/lib/bytes';
 import type { ParsedSubInstruction } from '../lib/batch-parser';
 import { type DecodedParams, decodeSubInstructionParams, type LabeledAccount } from '../lib/decode-sub-instruction';
 
-export function SubInstructionRow({ subIx }: { subIx: ParsedSubInstruction }) {
-    const decoded = decodeSubInstructionParams(subIx.typeName, subIx.data, subIx.accounts);
+export function SubInstructionRow({ subIx, decimals }: { subIx: ParsedSubInstruction; decimals?: number }) {
+    const decoded = decodeSubInstructionParams(subIx.typeName, subIx.data, subIx.accounts, decimals);
 
     return (
         <div

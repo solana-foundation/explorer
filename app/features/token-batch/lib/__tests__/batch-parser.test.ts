@@ -196,7 +196,7 @@ describe('decodeSubInstructionParams', () => {
 
         if (!decoded) throw new Error('Expected decoded to be defined');
         expect(decoded.fields).toEqual([
-            { label: 'Amount', value: '1000000' },
+            { label: 'Amount', value: '0.001' },
             { label: 'Decimals', value: '9' },
         ]);
         expect(decoded.accounts.map(a => a.label)).toEqual(['Source', 'Mint', 'Destination', 'Owner/Delegate']);
