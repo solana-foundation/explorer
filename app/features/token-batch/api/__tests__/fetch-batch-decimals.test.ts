@@ -15,10 +15,10 @@ describe('fetchDecimals', () => {
 
         const result = await fetchDecimals([{ kind: 'mint', mintAddress: mintAddr, subIndex: 0 }], fetcher);
 
-        expect(result.get(0)).toBe(9);
+        expect(result.get(0)).toEqual({ decimals: 9, mint: mintAddr });
     });
 
-    it('should resolve decimals for a token account lookup (Transfer) via two hops', async () => {
+    it('should resolve decimals and mint for a token account lookup (Transfer) via two hops', async () => {
         const sourceAddr = Keypair.generate().publicKey.toBase58();
         const mintAddr = Keypair.generate().publicKey.toBase58();
 
@@ -32,7 +32,7 @@ describe('fetchDecimals', () => {
             fetcher,
         );
 
-        expect(result.get(0)).toBe(6);
+        expect(result.get(0)).toEqual({ decimals: 6, mint: mintAddr });
     });
 
     it('should skip second hop when mint was already fetched', async () => {
@@ -60,8 +60,8 @@ describe('fetchDecimals', () => {
         );
 
         expect(fetchCount).toBe(1);
-        expect(result.get(0)).toBe(6);
-        expect(result.get(1)).toBe(6);
+        expect(result.get(0)).toEqual({ decimals: 6, mint: mintAddr });
+        expect(result.get(1)).toEqual({ decimals: 6, mint: mintAddr });
     });
 
     it('should deduplicate addresses across lookups', async () => {
@@ -89,8 +89,8 @@ describe('fetchDecimals', () => {
 
         // Only one unique address in the first RPC call
         expect(requestedKeys[0]).toHaveLength(1);
-        expect(result.get(0)).toBe(9);
-        expect(result.get(1)).toBe(9);
+        expect(result.get(0)).toEqual({ decimals: 9, mint: mintAddr });
+        expect(result.get(1)).toEqual({ decimals: 9, mint: mintAddr });
     });
 
     it('should return empty map when account is null', async () => {
@@ -147,8 +147,8 @@ describe('fetchDecimals', () => {
             fetcher,
         );
 
-        expect(result.get(0)).toBe(6);
-        expect(result.get(1)).toBe(9);
+        expect(result.get(0)).toEqual({ decimals: 6, mint: mintAddr });
+        expect(result.get(1)).toEqual({ decimals: 9, mint: discoveredMint });
     });
 });
 

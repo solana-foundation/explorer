@@ -391,20 +391,26 @@ describe('decodeSubInstructionParams', () => {
     it('should format Transfer amount with decimals when provided', () => {
         const data = makeTransferData(1500000n);
         const accounts = [makeAccount(), makeAccount(), makeAccount(false, true)];
+        const mint = Keypair.generate().publicKey.toBase58();
 
-        const decoded = decodeSubInstructionParams('Transfer', data, accounts, 6);
+        const decoded = decodeSubInstructionParams('Transfer', data, accounts, { decimals: 6, mint });
 
         if (!decoded) throw new Error('Expected decoded to be defined');
         expect(decoded.fields).toEqual([{ label: 'Amount', value: '1.5' }]);
+        expect(decoded.accounts[1].label).toBe('Mint');
+        expect(decoded.accounts[1].pubkey.toBase58()).toBe(mint);
     });
 
     it('should format Approve amount with decimals when provided', () => {
         const data = makeApproveData(25000000n);
         const accounts = [makeAccount(), makeAccount(), makeAccount(false, true)];
+        const mint = Keypair.generate().publicKey.toBase58();
 
-        const decoded = decodeSubInstructionParams('Approve', data, accounts, 8);
+        const decoded = decodeSubInstructionParams('Approve', data, accounts, { decimals: 8, mint });
 
         if (!decoded) throw new Error('Expected decoded to be defined');
         expect(decoded.fields).toEqual([{ label: 'Amount', value: '0.25' }]);
+        expect(decoded.accounts[1].label).toBe('Mint');
+        expect(decoded.accounts[1].pubkey.toBase58()).toBe(mint);
     });
 });

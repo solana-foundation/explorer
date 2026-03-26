@@ -37,3 +37,8 @@ export type RawSetAuthority = {
 };
 
 export type RawDecoded = RawAmount | RawCheckedAmount | RawCloseAccount | RawSetAuthority;
+
+// Resolved mint info returned from the RPC fetch pipeline.
+// For unchecked Transfer/Approve the mint is discovered via a 2-hop lookup;
+// for MintTo/Burn it comes directly from the accounts.
+export type MintInfo = { decimals: number; mint?: string };

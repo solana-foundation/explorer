@@ -2,8 +2,9 @@
 // for display in the UI.
 
 import { AuthorityType } from '@solana-program/token-2022';
+import { PublicKey } from '@solana/web3.js';
 
-import type { AccountEntry, DecodedParams, LabeledAccount, RawDecoded } from './types';
+import type { AccountEntry, DecodedParams, LabeledAccount, MintInfo, RawDecoded } from './types';
 
 // Account layouts: each SPL Token instruction expects a fixed sequence of named
 // accounts, optionally followed by multisig signer accounts.
@@ -21,10 +22,27 @@ const ACCOUNT_ROLES: Record<RawDecoded['type'], readonly string[]> = {
     transferChecked: ['Source', 'Mint', 'Destination', 'Owner/Delegate'],
 };
 
-export function formatDecoded(raw: RawDecoded, externalDecimals?: number): DecodedParams {
+// Unchecked Transfer and Approve don't include the mint in their on-chain
+// account list. When the mint address has been resolved via RPC, we inject
+// a synthetic "Mint" account so the UI matches TransferChecked's layout.
+const MINT_INJECT_TYPES = new Set<RawDecoded['type']>(['transfer', 'approve']);
+
+export function formatDecoded(raw: RawDecoded, mintInfo?: MintInfo): DecodedParams {
+    const accounts = labelAccounts(raw.accounts, ACCOUNT_ROLES[raw.type]);
+
+    if (mintInfo?.mint && MINT_INJECT_TYPES.has(raw.type)) {
+        // Insert Mint right after Source (index 0), mirroring TransferChecked layout.
+        accounts.splice(1, 0, {
+            isWritable: false,
+            isSigner: false,
+            label: 'Mint',
+            pubkey: new PublicKey(mintInfo.mint),
+        });
+    }
+
     return {
-        accounts: labelAccounts(raw.accounts, ACCOUNT_ROLES[raw.type]),
-        fields: formatFields(raw, externalDecimals),
+        accounts,
+        fields: formatFields(raw, mintInfo?.decimals),
     };
 }
 

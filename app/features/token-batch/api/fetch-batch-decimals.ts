@@ -8,6 +8,7 @@ import { type Connection, PublicKey } from '@solana/web3.js';
 import { number, string, type as sType } from 'superstruct';
 
 import type { LookupEntry } from '../lib/collect-lookups';
+import type { MintInfo } from '../lib/types';
 
 // Pick the single method we need so tests can pass a lightweight stub.
 export type ParsedAccountFetcher = Pick<Connection, 'getMultipleParsedAccounts'>;
@@ -15,7 +16,7 @@ export type ParsedAccountFetcher = Pick<Connection, 'getMultipleParsedAccounts'>
 export async function fetchDecimals(
     lookups: LookupEntry[],
     connection: ParsedAccountFetcher,
-): Promise<Map<number, number>> {
+): Promise<Map<number, MintInfo>> {
     if (lookups.length === 0) return new Map();
 
     const parsed = await fetchWithHops(
@@ -23,23 +24,27 @@ export async function fetchDecimals(
         connection,
     );
 
-    const result = new Map<number, number>();
+    const result = new Map<number, MintInfo>();
     for (const lookup of lookups) {
-        const decimals = resolveDecimals(lookup, parsed);
-        if (decimals !== undefined) result.set(lookup.subIndex, decimals);
+        const info = resolveMintInfo(lookup, parsed);
+        if (info) result.set(lookup.subIndex, info);
     }
     return result;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
-function resolveDecimals(lookup: LookupEntry, parsed: Map<string, ParsedData>): number | undefined {
+function resolveMintInfo(lookup: LookupEntry, parsed: Map<string, ParsedData>): MintInfo | undefined {
     if (lookup.kind === 'mint') {
-        return extractDecimals(parsed.get(lookup.mintAddress));
+        const decimals = extractDecimals(parsed.get(lookup.mintAddress));
+        if (decimals === undefined) return undefined;
+        return { decimals, mint: lookup.mintAddress };
     }
     const mint = extractMintAddress(parsed.get(lookup.tokenAccountAddress));
     if (!mint) return undefined;
-    return extractDecimals(parsed.get(mint));
+    const decimals = extractDecimals(parsed.get(mint));
+    if (decimals === undefined) return undefined;
+    return { decimals, mint };
 }
 
 // Fetches all addresses, then automatically fetches any mints discovered

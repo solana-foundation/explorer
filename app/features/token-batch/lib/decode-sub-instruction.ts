@@ -21,6 +21,7 @@ import { formatDecoded } from './format-sub-instruction';
 import type {
     AccountEntry,
     DecodedParams,
+    MintInfo,
     RawAmount,
     RawCheckedAmount,
     RawCloseAccount,
@@ -34,12 +35,12 @@ export function decodeSubInstructionParams(
     typeName: TokenInstructionName | 'Unknown',
     data: Uint8Array,
     accounts: AccountEntry[],
-    decimals?: number,
+    mintInfo?: MintInfo,
 ): DecodedParams | undefined {
     try {
         const raw = decodeByType(typeName, data, accounts);
         if (!raw) return undefined;
-        return formatDecoded(raw, decimals);
+        return formatDecoded(raw, mintInfo);
     } catch {
         // Decoder throws on truncated/malformed data — fall back to raw hex.
         return undefined;

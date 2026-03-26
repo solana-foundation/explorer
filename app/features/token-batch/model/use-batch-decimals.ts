@@ -7,15 +7,16 @@ import useSWR from 'swr';
 import { fetchDecimals } from '../api/fetch-batch-decimals';
 import type { ParsedSubInstruction } from '../lib/batch-parser';
 import { collectLookups } from '../lib/collect-lookups';
+import type { MintInfo } from '../lib/types';
 
-export function useBatchDecimals(subInstructions: ParsedSubInstruction[]): Map<number, number> {
+export function useBatchMintInfo(subInstructions: ParsedSubInstruction[]): Map<number, MintInfo> {
     const { url } = useCluster();
     const lookups = collectLookups(subInstructions);
 
     const swrKey =
         lookups.length > 0
             ? [
-                  'batch-decimals',
+                  'batch-mint-info',
                   lookups.map(l => (l.kind === 'mint' ? l.mintAddress : l.tokenAccountAddress)).join(','),
                   url,
               ]

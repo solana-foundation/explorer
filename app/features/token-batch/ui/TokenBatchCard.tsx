@@ -4,7 +4,7 @@ import { InstructionCard } from '@components/instruction/InstructionCard';
 import type { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 
 import { parseBatchInstruction, type ParsedSubInstruction } from '../lib/batch-parser';
-import { useBatchDecimals } from '../model/use-batch-decimals';
+import { useBatchMintInfo } from '../model/use-batch-decimals';
 import { SubInstructionRow } from './SubInstructionRow';
 
 export function TokenBatchCard({
@@ -29,7 +29,7 @@ export function TokenBatchCard({
         }
     })();
 
-    const decimalsMap = useBatchDecimals(subInstructions);
+    const mintInfoMap = useBatchMintInfo(subInstructions);
     const title = `Token Program: Batch (${subInstructions.length} instruction${subInstructions.length !== 1 ? 's' : ''})`;
 
     return (
@@ -46,7 +46,7 @@ export function TokenBatchCard({
                             <SubInstructionRow
                                 key={subIx.index}
                                 subIx={subIx}
-                                decimals={decimalsMap.get(subIx.index)}
+                                mintInfo={mintInfoMap.get(subIx.index)}
                             />
                         ))}
                         {subInstructions.length === 0 && !error && (

@@ -7,9 +7,10 @@ import { toHex } from '@/app/shared/lib/bytes';
 
 import type { ParsedSubInstruction } from '../lib/batch-parser';
 import { type DecodedParams, decodeSubInstructionParams, type LabeledAccount } from '../lib/decode-sub-instruction';
+import type { MintInfo } from '../lib/types';
 
-export function SubInstructionRow({ subIx, decimals }: { subIx: ParsedSubInstruction; decimals?: number }) {
-    const decoded = decodeSubInstructionParams(subIx.typeName, subIx.data, subIx.accounts, decimals);
+export function SubInstructionRow({ subIx, mintInfo }: { subIx: ParsedSubInstruction; mintInfo?: MintInfo }) {
+    const decoded = decodeSubInstructionParams(subIx.typeName, subIx.data, subIx.accounts, mintInfo);
 
     return (
         <div
