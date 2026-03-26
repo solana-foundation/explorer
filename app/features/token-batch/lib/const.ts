@@ -7,7 +7,7 @@ export const BATCH_DISCRIMINATOR = 0xff;
 // Maps SPL Token sub-instruction discriminators to human-readable names.
 // Base instructions (0–24, 38, 45):
 // https://github.com/solana-program/token/blob/065786e/pinocchio/interface/src/instruction.rs#L9-L551
-// Token-2022 extension instructions (25–44):
+// Token-2022 extension instructions (25–37, 39–44):
 // https://github.com/solana-program/token-2022/blob/main/interface/src/instruction.rs
 /* eslint-disable sort-keys-fix/sort-keys-fix */
 const DISCRIMINATOR_TO_TYPE_NAME = {
@@ -36,7 +36,7 @@ const DISCRIMINATOR_TO_TYPE_NAME = {
     22: 'InitializeImmutableOwner',
     23: 'AmountToUiAmount',
     24: 'UiAmountToAmount',
-    // Token-2022 extension instructions (discriminators 25–44).
+    // Token-2022 extension instructions (discriminators 25–37, 39–44).
     // Each extension group uses a sub-discriminator in the second data byte
     // to distinguish individual operations within the group.
     25: 'InitializeMintCloseAuthority',
@@ -56,6 +56,7 @@ const DISCRIMINATOR_TO_TYPE_NAME = {
     39: 'MetadataPointerExtension',
     40: 'GroupPointerExtension',
     41: 'GroupMemberPointerExtension',
+    42: 'ConfidentialMintBurnExtension',
     43: 'ScaledUiAmountExtension',
     44: 'PausableExtension',
     45: 'UnwrapLamports',

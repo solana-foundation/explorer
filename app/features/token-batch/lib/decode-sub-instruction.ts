@@ -55,7 +55,6 @@ const LAYOUT = {
     transferChecked: roles('Source', 'Mint', 'Destination', 'Owner/Delegate'),
 };
 
-// Lazily initialized decoders — created once on first use.
 const decoders = {
     approve: getApproveInstructionDataDecoder(),
     approveChecked: getApproveCheckedInstructionDataDecoder(),

@@ -13,9 +13,9 @@
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import type { AccountMeta, PublicKey } from '@solana/web3.js';
 
+import { readU8 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
-import { readU8 } from './bytes';
 import { BATCH_DISCRIMINATOR, type TokenInstructionName, typeNameByDiscriminator } from './const';
 
 export type ParsedBatchSubInstruction<T> = {

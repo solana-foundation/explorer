@@ -2,8 +2,9 @@ import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tok
 import { Keypair } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
+import { concatBytes, writeU64LE } from '@/app/shared/lib/bytes';
+
 import { isTokenBatchInstruction, parseBatchInstruction } from '../batch-parser';
-import { concatBytes, writeU64LE } from '../bytes';
 import { BATCH_DISCRIMINATOR } from '../const';
 import { decodeSubInstructionParams } from '../decode-sub-instruction';
 import { buildBatchData, makeAccount, makeTransferCheckedData, makeTransferData } from './test-utils';

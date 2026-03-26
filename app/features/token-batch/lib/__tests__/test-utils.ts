@@ -1,9 +1,8 @@
 import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
 import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
 
-import { toBuffer } from '@/app/shared/lib/bytes';
+import { concatBytes, toBuffer, writeU64LE } from '@/app/shared/lib/bytes';
 
-import { concatBytes, writeU64LE } from '../bytes';
 import { BATCH_DISCRIMINATOR } from '../const';
 
 export function makeAccount(writable = true, signer = false) {
