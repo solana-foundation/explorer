@@ -1192,7 +1192,7 @@
     "testnet_activation_epoch": 908,
     "devnet_activation_epoch": 1024,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 944,
     "description": ""
   },
   {
@@ -1218,7 +1218,7 @@
     "testnet_activation_epoch": 910,
     "devnet_activation_epoch": 1030,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 947,
     "description": ""
   },
   {
@@ -1320,7 +1320,7 @@
     ],
     "planned_testnet_order": null,
     "testnet_activation_epoch": 929,
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1044,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1345,8 +1345,8 @@
       "v3.1.8"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
-    "devnet_activation_epoch": null,
+    "testnet_activation_epoch": 931,
+    "devnet_activation_epoch": 1045,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1624,6 +1624,72 @@
     ],
     "owners": [],
     "min_agave_versions": [],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "shredXP8xLjJWp1AWh3gAFsFn4GSH1vohhCMDHw5koU",
+    "title": "SIMD-0337: Markers for Alpenglow Fast Leader Handover, DATA_COMPLETE_SHRED placement rules",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0337-parent-ready-update-marker.md"
+    ],
+    "simds": [
+      "0337"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "vcmrbYbiMVKaq1snKP6eCacNDcr6qZvpCNUjmk6gxvZ",
+    "title": "SIMD-0340 validate chained block id",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0340-validate-chained-block-id.md"
+    ],
+    "simds": [
+      "0340"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0-beta.x"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "STk5Xj8hdAx3sTzmtJ3QysKkq6X2A3yj73JtxttiRyk",
+    "title": "SIMD-0490: Upgrade BPF Stake Program to v5.0.0",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0490-upgrade-stake-to-v5.md"
+    ],
+    "simds": [
+      "490"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
