@@ -31,6 +31,26 @@ export function makeTransferCheckedData(amount: bigint, decimals: number): Uint8
     return concatBytes(new Uint8Array([12]), writeU64LE(amount), new Uint8Array([decimals]));
 }
 
+export function makeApproveData(amount: bigint): Uint8Array {
+    return concatBytes(new Uint8Array([4]), writeU64LE(amount));
+}
+
+export function makeApproveCheckedData(amount: bigint, decimals: number): Uint8Array {
+    return concatBytes(new Uint8Array([13]), writeU64LE(amount), new Uint8Array([decimals]));
+}
+
+export function makeMintToCheckedData(amount: bigint, decimals: number): Uint8Array {
+    return concatBytes(new Uint8Array([14]), writeU64LE(amount), new Uint8Array([decimals]));
+}
+
+export function makeBurnData(amount: bigint): Uint8Array {
+    return concatBytes(new Uint8Array([8]), writeU64LE(amount));
+}
+
+export function makeBurnCheckedData(amount: bigint, decimals: number): Uint8Array {
+    return concatBytes(new Uint8Array([15]), writeU64LE(amount), new Uint8Array([decimals]));
+}
+
 // SetAuthority: [discriminator(6), authority_type(u8), option_tag(u8), ?new_authority(32)]
 export function makeSetAuthorityData(authorityType: number, newAuthority?: PublicKey): Uint8Array {
     if (newAuthority) {
