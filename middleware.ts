@@ -20,11 +20,19 @@ export async function middleware(request: NextRequest) {
     }
 
     // Verify requests with x-is-human header (browser requests via BotIdClient)
-    const verification = await checkBotId({
-        developmentOptions: {
-            bypass: isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT) ? 'BAD-BOT' : undefined,
-        },
-    });
+    let verification;
+    try {
+        verification = await checkBotId({
+            developmentOptions: {
+                bypass: isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT) ? 'BAD-BOT' : undefined,
+            },
+        });
+    } catch (error) {
+        // checkBotId can throw SyntaxError when Vercel's bot-protection API
+        // returns a non-JSON response (e.g. 504 with HTML body).
+        Logger.warn('[middleware] BotId verification failed, allowing request', { error, pathname });
+        return NextResponse.next();
+    }
 
     Logger.info('[middleware] BotId verification', {
         bypassed: verification.bypassed,

@@ -85,6 +85,21 @@ describe('middleware', () => {
             });
         });
 
+        describe('when checkBotId throws', () => {
+            it('should allow request and log warning when verification fails', async () => {
+                vi.mocked(checkBotId).mockRejectedValue(new SyntaxError('Unexpected token < in JSON'));
+
+                const request = createRequest('/api/test', { 'x-is-human': 'true' });
+                const response = await middleware(request);
+
+                expect(response.status).toBe(200);
+                expect(loggerWarnSpy).toHaveBeenCalledWith(
+                    '[middleware] BotId verification failed, allowing request',
+                    expect.objectContaining({ pathname: '/api/test' }),
+                );
+            });
+        });
+
         describe('with x-is-human header', () => {
             it('should allow human requests and log verification info', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
