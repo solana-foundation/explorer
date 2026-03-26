@@ -50,8 +50,18 @@ export function ReceiptView({ data, downloadCsv, downloadPdf, signature, transac
                 </div>
                 <div className="e-flex e-items-start e-gap-0.5">
                     <PopoverButton icon={<Download size={12} />} label="Download">
-                        <DownloadReceiptItem format={EReceiptDownloadFormat.Csv} label="CSV" download={downloadCsv} signature={signature} />
-                        <DownloadReceiptItem format={EReceiptDownloadFormat.Pdf} label="PDF" download={downloadPdf} signature={signature} />
+                        <DownloadReceiptItem
+                            format={EReceiptDownloadFormat.Csv}
+                            label="CSV"
+                            download={downloadCsv}
+                            signature={signature}
+                        />
+                        <DownloadReceiptItem
+                            format={EReceiptDownloadFormat.Pdf}
+                            label="PDF"
+                            download={downloadPdf}
+                            signature={signature}
+                        />
                     </PopoverButton>
                 </div>
             </div>
