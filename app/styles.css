@@ -154,20 +154,11 @@
     }
 }
 
-@layer components {
-    .navigation-tabs-select {
-        @apply e-cursor-pointer e-appearance-none e-rounded e-border
-               e-border-solid e-border-outer-space-950
-               e-bg-heavy-metal-900 e-px-4 e-py-2.5 e-text-sm
-               e-text-neutral-200 e-outline-none;
-        /* Negative margins bleed the select to the edges of the card body,
-           compensating for the Bootstrap card-body px-3 (12px) horizontal padding */
-        margin-left: -12px;
-        margin-right: -12px;
-        width: calc(100% + 24px);
-        background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24'><path d='m6 9 6 6 6-6'/></svg>");
-        background-repeat: no-repeat;
-        background-position: right 0.75rem center;
-        background-size: 1rem;
-    }
+/* Negative margins bleed the select to the edges of the card body,
+   compensating for the Bootstrap card-body px-3 (12px) horizontal padding.
+   Visual styles are handled by BaseNativeSelect CVA variants. */
+.navigation-tabs-select {
+    margin-left: -12px;
+    margin-right: -12px;
+    width: calc(100% + 24px);
 }

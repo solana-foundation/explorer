@@ -5,6 +5,7 @@ import {
     useTabRegistration,
 } from '@/app/shared/ui/navigation-tabs/model/navigation-tabs-context';
 import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
+import { BaseNativeSelect } from '@/app/shared/ui/native-select';
 
 import { TabLink } from './TabLink';
 
@@ -42,9 +43,11 @@ export function BaseNavigationTabs({
     return (
         <NavigationTabsContext.Provider value={contextValue}>
             <div className={className}>
-                <select
+                <BaseNativeSelect
                     aria-label="Navigation"
                     className="navigation-tabs-select md:e-hidden"
+                    variant="navigation"
+                    icon="menu"
                     value={activeValue}
                     onChange={e => onSelectChange(e.target.value)}
                 >
@@ -53,7 +56,7 @@ export function BaseNavigationTabs({
                             {tab.title}
                         </option>
                     ))}
-                </select>
+                </BaseNativeSelect>
 
                 <div role="tablist" className="e-hidden e-gap-3 md:e-inline-flex">
                     {tabs.map(tab => (
