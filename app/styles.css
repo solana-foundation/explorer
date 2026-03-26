@@ -173,8 +173,4 @@
         visibility: visible !important;
     }
 
-    @page {
-        margin: 0.5in;
-        size: A4;
-    }
 }
