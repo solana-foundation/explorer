@@ -41,7 +41,9 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
         });
 
         if (!response.ok) {
-            if (response.status === 429) {
+            if (response.status === 404) {
+                Logger.debug('[api:jupiter-price] Token not found', { mintAddress });
+            } else if (response.status === 429) {
                 Logger.warn('Jupiter price API rate limit exceeded', { sentry: true });
             } else {
                 Logger.error(new Error(`Jupiter price API error: ${response.status}`), { sentry: true });
