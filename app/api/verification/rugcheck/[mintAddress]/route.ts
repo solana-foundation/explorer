@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import fetch from 'node-fetch';
-import { is, number, type } from 'superstruct';
+import { is, literal, number, type } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -42,16 +42,21 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
         });
 
         if (!response.ok) {
-            if (response.status === 400 || response.status === 404) {
-                // Rugcheck returns 400 {"error":"not found"} for unrecognized tokens instead of 404
+            if (response.status === 404 || (await isNotFoundResponse(response))) {
                 Logger.debug('[api:rugcheck] Token not found', { mintAddress });
+                return NextResponse.json(
+                    { error: 'Failed to fetch rugcheck data' },
+                    { headers: NO_STORE_HEADERS, status: 404 },
+                );
             } else if (response.status === 429) {
                 Logger.warn('[api:rugcheck] Rate limit exceeded', { sentry: true });
             } else {
                 Logger.panic(new Error(`Rugcheck API error: ${response.status}`));
             }
-            const status = response.status === 400 || response.status === 404 ? 404 : response.status;
-            return NextResponse.json({ error: 'Failed to fetch rugcheck data' }, { headers: NO_STORE_HEADERS, status });
+            return NextResponse.json(
+                { error: 'Failed to fetch rugcheck data' },
+                { headers: NO_STORE_HEADERS, status: response.status },
+            );
         }
 
         const data = await response.json();
@@ -70,5 +75,20 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
             { error: 'Failed to fetch rugcheck data' },
             { headers: NO_STORE_HEADERS, status: 500 },
         );
+    }
+}
+
+const RugCheckNotFoundSchema = type({
+    error: literal('not found'),
+});
+
+// Rugcheck returns 400 {"error":"not found"} for unrecognized tokens instead of 404
+async function isNotFoundResponse(response: import('node-fetch').Response): Promise<boolean> {
+    if (response.status !== 400) return false;
+    try {
+        const body = await response.json();
+        return is(body, RugCheckNotFoundSchema);
+    } catch {
+        return false;
     }
 }

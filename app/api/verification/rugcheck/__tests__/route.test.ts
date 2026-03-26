@@ -49,6 +49,13 @@ describe('Rugcheck API Route', () => {
         expect(await response.json()).toEqual({ error: 'Failed to fetch rugcheck data' });
     });
 
+    it('should return 400 and report to sentry when rugcheck responds with 400 and unexpected body', async () => {
+        mockFetchResponse(400, { error: 'bad request' });
+        const response = await callRoute(VALID_MINT);
+        expect(response.status).toBe(400);
+        expect(Logger.panic).toHaveBeenCalled();
+    });
+
     it('should return 404 when rugcheck responds with 404', async () => {
         mockFetchResponse(404);
         const response = await callRoute(VALID_MINT);
