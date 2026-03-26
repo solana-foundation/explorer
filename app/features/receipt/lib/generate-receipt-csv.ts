@@ -16,6 +16,9 @@ const CSV_HEADERS = [
     'Memo',
 ] as const;
 
+// Prevents CSV formula injection by prefixing dangerous leading characters with a single quote.
+// fast-csv handles CSV formatting (quoting, delimiter escaping) but not application-level injection.
+// Sanitize any field sourced from user-controlled or on-chain data (memo, token symbol).
 function sanitizeCsvField(value: string): string {
     // eslint-disable-next-line no-restricted-syntax -- regex is the clearest way to express CSV formula injection chars
     return /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
@@ -31,7 +34,7 @@ export function buildReceiptCsvRow(receipt: FormattedReceipt, signature: string,
         receipt.sender.address,
         receipt.receiver.address,
         receipt.total.formatted,
-        receipt.total.unit,
+        sanitizeCsvField(receipt.total.unit), // token symbol comes from on-chain metadata
         mint ?? '',
         usdValue ?? '',
         receipt.fee.formatted,

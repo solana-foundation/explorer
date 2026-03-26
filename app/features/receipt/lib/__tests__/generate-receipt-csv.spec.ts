@@ -57,6 +57,24 @@ describe('buildReceiptCsvRow', () => {
         const row = buildReceiptCsvRow(receiptNoMemo, SIGNATURE);
         expect(row[10]).toBe('');
     });
+
+    it('should sanitize memo with formula-injection prefix', () => {
+        const receipt: FormattedReceipt = { ...RECEIPT, memo: '=SUM(A1)' };
+        const row = buildReceiptCsvRow(receipt, SIGNATURE);
+        expect(row[10]).toBe("'=SUM(A1)");
+    });
+
+    it('should sanitize token symbol with formula-injection prefix', () => {
+        const receipt: FormattedReceipt = {
+            ...RECEIPT,
+            kind: 'token',
+            mint: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
+            symbol: '=EVIL',
+            total: { formatted: '100', raw: 100, unit: '=EVIL' },
+        };
+        const row = buildReceiptCsvRow(receipt, SIGNATURE);
+        expect(row[6]).toBe("'=EVIL");
+    });
 });
 
 describe('generateReceiptCsv', () => {
