@@ -2,7 +2,9 @@ import ScaledUiAmountMultiplierTooltip from '@components/account/token-extension
 import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { Account, NFTData, TokenProgramData, useFetchAccountInfo } from '@providers/accounts';
+import { useRefreshAccount } from '@entities/account';
+import { AccountDownloadDropdown } from '@features/account';
+import { Account, NFTData, TokenProgramData } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID, useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useCluster } from '@providers/cluster';
@@ -127,7 +129,7 @@ function FungibleTokenMintAccountCard({
     mintInfo: MintAccountInfo;
     tokenInfo?: FullLegacyTokenInfo;
 }) {
-    const fetchInfo = useFetchAccountInfo();
+    const fetchInfo = useRefreshAccount();
     const refresh = () => fetchInfo(account.pubkey, 'parsed');
 
     const bridgeContractAddress = getEthAddress(tokenInfo?.extensions?.bridgeContract);
@@ -139,7 +141,7 @@ function FungibleTokenMintAccountCard({
 
     return (
         <div className="card">
-            <div className="card-header">
+            <div className="card-header e-gap-2">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">
                     {tokenInfo
                         ? 'Overview'
@@ -151,6 +153,7 @@ function FungibleTokenMintAccountCard({
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>
+                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
             </div>
             <TableCardBody>
                 <tr>
@@ -254,18 +257,19 @@ function NonFungibleTokenMintAccountCard({
     nftData: NFTData;
     mintInfo: MintAccountInfo;
 }) {
-    const fetchInfo = useFetchAccountInfo();
+    const fetchInfo = useRefreshAccount();
     const refresh = () => fetchInfo(account.pubkey, 'parsed');
 
     const collection = nftData.metadata.collection;
     return (
         <div className="card">
-            <div className="card-header">
+            <div className="card-header e-gap-2">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">Overview</h3>
                 <button className="btn btn-white btn-sm" onClick={refresh}>
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>
+                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
             </div>
             <TableCardBody>
                 <tr>
@@ -357,7 +361,7 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
 }
 
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(info.mint.toBase58(), info.tokenAmount.amount);
     const { cluster, url } = useCluster();
     const label = addressLabel(account.pubkey.toBase58(), cluster);
@@ -387,7 +391,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
 
     return (
         <div className="card">
-            <div className="card-header">
+            <div className="card-header e-gap-2">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">
                     Token{account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() && '-2022'} Account
                 </h3>
@@ -395,6 +399,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>
+                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
             </div>
             <TableCardBody>
                 <tr>
@@ -489,7 +494,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
 }
 
 function MultisigAccountCard({ account, info }: { account: Account; info: MultisigAccountInfo }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
 
     return (
         <div className="card">

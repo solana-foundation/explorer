@@ -2,13 +2,14 @@ import { AccountAddressRow, AccountBalanceRow, AccountHeader } from '@components
 import { Address } from '@components/common/Address';
 import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { Account, useFetchAccountInfo } from '@providers/accounts';
+import { useRefreshAccount } from '@entities/account';
+import { Account } from '@providers/accounts';
 import { displayTimestamp } from '@utils/date';
 import { VoteAccount } from '@validators/accounts/vote';
 import React from 'react';
 
 export function VoteAccountSection({ account, voteAccount }: { account: Account; voteAccount: VoteAccount }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     const rootSlot = voteAccount.info.rootSlot;
     return (
         <div className="card">

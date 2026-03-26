@@ -1,19 +1,20 @@
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
-import { DownloadableDropdown } from '@components/common/Downloadable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { HexData } from '@components/common/HexData';
 import { SolBalance } from '@components/common/SolBalance';
+import { type AccountInfo, useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
+import { Button } from '@shared/ui/button';
 import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
-import { AccountInfo, useAccountsInfo } from '@utils/use-accounts-info';
 import { BigNumber } from 'bignumber.js';
 import React, { useMemo, useState } from 'react';
-import { Code } from 'react-feather';
+import { Code, Download } from 'react-feather';
 
+import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { ByteArray } from '@/app/shared/lib/bytes';
 
 export function AccountsCard({ signature }: SignatureProps) {
@@ -69,12 +70,11 @@ export function AccountsCard({ signature }: SignatureProps) {
                     ) : accountInfo ? (
                         accountInfo.size > 0 ? (
                             <div className="e-flex e-items-center">
-                                <DownloadableDropdown
-                                    data={accountInfo.data}
-                                    encodings={['hex', 'base64']}
-                                    filename={key}
-                                    iconButton
-                                />
+                                <DownloadDropdown data={accountInfo.data} encodings={['hex', 'base64']} filename={key}>
+                                    <Button variant="ghost" size="icon">
+                                        <Download size={12} />
+                                    </Button>
+                                </DownloadDropdown>
                                 <span>{accountInfo.size.toLocaleString('en-US')}</span>
                             </div>
                         ) : (

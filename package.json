@@ -38,6 +38,7 @@
         "@project-serum/serum": "0.13.61",
         "@radix-ui/react-accordion": "1.2.3",
         "@radix-ui/react-dialog": "1.1.15",
+        "@radix-ui/react-dropdown-menu": "2.1.16",
         "@radix-ui/react-label": "2.1.8",
         "@radix-ui/react-popover": "1.1.15",
         "@radix-ui/react-slot": "1.1.2",

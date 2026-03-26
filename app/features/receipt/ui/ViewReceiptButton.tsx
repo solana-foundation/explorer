@@ -3,6 +3,7 @@
 import { useCluster } from '@providers/cluster';
 import { ParsedTransactionWithMeta } from '@solana/web3.js';
 import Link from 'next/link';
+import { FileText } from 'react-feather';
 import useSWR from 'swr';
 
 import { Button } from '@/app/components/shared/ui/button';
@@ -35,8 +36,13 @@ export function ViewReceiptButton({ signature, receiptPath, transactionWithMeta 
 
     return (
         <Button variant="outline" size="sm" asChild>
-            <Link href={receiptPath} onClick={() => receiptAnalytics.trackButtonClicked(signature)}>
-                View Receipt
+            <Link
+                href={receiptPath}
+                onClick={() => receiptAnalytics.trackButtonClicked(signature)}
+                aria-label="View Receipt"
+            >
+                <FileText />
+                <span className="e-hidden sm:e-inline">View Receipt</span>
             </Link>
         </Button>
     );

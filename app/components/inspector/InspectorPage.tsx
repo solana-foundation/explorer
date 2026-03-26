@@ -1,6 +1,5 @@
 'use client';
 
-import { DownloadableDropdown } from '@components/common/Downloadable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SolBalance } from '@components/common/SolBalance';
@@ -19,6 +18,7 @@ import React from 'react';
 import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
+import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';
@@ -463,13 +463,12 @@ function OverviewCard({
     return (
         <>
             <div className="card">
-                <div className="card-header">
+                <div className="card-header e-gap-2">
                     <h3 className="card-header-title">Transaction Overview</h3>
                     <button className="btn btn-sm d-flex btn-white" onClick={onClear}>
                         Clear
                     </button>
-                    <span className="me-2"></span>
-                    <DownloadableDropdown filename={signature || 'signature'} data={raw} />
+                    <DownloadDropdown filename={signature || 'signature'} data={raw} />
                 </div>
                 <TableCardBody>
                     <tr>
