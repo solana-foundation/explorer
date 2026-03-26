@@ -121,6 +121,43 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
             const expectedErr = new Error(`Jupiter price API returned unexpected schema for ${VALID_MINT}`);
             expect(Logger.error).toHaveBeenCalledWith(expectedErr, { sentry: true });
         });
+
+        it('should log an error when mint address is missing from response', async () => {
+            vi.resetModules();
+            const { GET } = await import('../route');
+            vi.mocked(fetch).mockResolvedValueOnce({
+                json: async () => ({}),
+                ok: true,
+            } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
+
+            const response = await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
+
+            expect(response.status).toBe(200);
+            const data = await response.json();
+            expect(data).toEqual({ price: null });
+            expect(Logger.error).toHaveBeenCalledWith(
+                new Error(`Jupiter price API returned unexpected schema for ${VALID_MINT}`),
+                { sentry: true },
+            );
+            expect(response.headers.get('Cache-Control')).toBe(NO_STORE_HEADERS['Cache-Control']);
+        });
+
+        it('should not log an error when token has no usdPrice field', async () => {
+            vi.resetModules();
+            const { GET } = await import('../route');
+            vi.mocked(fetch).mockResolvedValueOnce({
+                json: async () => ({ [VALID_MINT]: { blockId: 408752772, decimals: 8, liquidity: 856.71 } }),
+                ok: true,
+            } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
+
+            const response = await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
+
+            expect(response.status).toBe(200);
+            const data = await response.json();
+            expect(data).toEqual({ price: null });
+            expect(Logger.error).not.toHaveBeenCalled();
+            expect(response.headers.get('Cache-Control')).toBe(CACHE_HEADERS['Cache-Control']);
+        });
     });
 
     describe('successful response', () => {
