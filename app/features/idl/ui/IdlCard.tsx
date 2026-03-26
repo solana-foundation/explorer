@@ -7,6 +7,8 @@ import { cn } from '@shared/utils';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'react-feather';
 
+import { clusterSlug } from '@/app/utils/cluster';
+
 import { BaseWarningCard } from '../interactive-idl/ui/BaseWarningCard';
 import { IdlVariant, useIdlLastTransactionDate } from '../model/use-idl-last-transaction-date';
 import { IdlInstructionSection } from './IdlInstructionSection';
@@ -21,6 +23,7 @@ type IdlTab = {
 
 export function IdlCard({ programId }: { programId: string }) {
     const { url, cluster } = useCluster();
+    const network = clusterSlug(cluster);
     const { idl } = useAnchorProgram(programId, url, cluster);
     const { programMetadataIdl } = useProgramMetadataIdl(programId, url, cluster);
     const [activeTabIndex, setActiveTabIndex] = useState<number>();
@@ -149,6 +152,8 @@ export function IdlCard({ programId }: { programId: string }) {
                             </Badge>
                         }
                         idl={activeTab.idl}
+                        idlSource={activeTab.id}
+                        network={network}
                         programId={programId}
                         searchStr={searchStr}
                         onSearchChange={setSearchStr}
