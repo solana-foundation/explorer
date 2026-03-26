@@ -126,6 +126,29 @@ describe('IdlCard', () => {
         });
         expect(screen.getByText(/Program Metadata IDL/)).toBeInTheDocument();
         expect(screen.queryByText(/Anchor IDL/)).not.toBeInTheDocument();
+
+        const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+        const downloadButton = screen.getByRole('button', { name: 'Download' });
+        fireEvent.click(downloadButton);
+        const generateSdkButton = screen.getByRole('button', { name: 'Generate SDK' });
+        fireEvent.click(generateSdkButton);
+
+        expect(screen.getByText('Leaving Solana Explorer')).toBeInTheDocument();
+        expect(screen.getByText('You are now leaving Explorer and going to Castaway.')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+        expect(windowOpenSpy).toHaveBeenCalledTimes(1);
+        const [openedUrl, target, features] = windowOpenSpy.mock.calls[0]!;
+        const castawayUrl = new URL(openedUrl as string);
+        expect(castawayUrl.origin).toBe('https://www.castaway.lol');
+        expect(castawayUrl.pathname).toBe('/');
+        expect(castawayUrl.searchParams.get('program')).toBe(programId);
+        expect(castawayUrl.searchParams.get('idlSource')).toBe('program-metadata');
+        expect(castawayUrl.searchParams.get('network')).toBe('mainnet-beta');
+        expect(target).toBe('_blank');
+        expect(features).toBe('noopener,noreferrer');
+        windowOpenSpy.mockRestore();
     });
 
     test('should render IdlCard with Anchor IDL when anchorIdl exists', async () => {
@@ -149,6 +172,29 @@ describe('IdlCard', () => {
         });
         expect(screen.getByText(/Anchor IDL/)).toBeInTheDocument();
         expect(screen.queryByText(/Program Metadata IDL/)).not.toBeInTheDocument();
+
+        const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+        const downloadButton = screen.getByRole('button', { name: 'Download' });
+        fireEvent.click(downloadButton);
+        const generateSdkButton = screen.getByRole('button', { name: 'Generate SDK' });
+        fireEvent.click(generateSdkButton);
+
+        expect(screen.getByText('Leaving Solana Explorer')).toBeInTheDocument();
+        expect(screen.getByText('You are now leaving Explorer and going to Castaway.')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+        expect(windowOpenSpy).toHaveBeenCalledTimes(1);
+        const [openedUrl, target, features] = windowOpenSpy.mock.calls[0]!;
+        const castawayUrl = new URL(openedUrl as string);
+        expect(castawayUrl.origin).toBe('https://www.castaway.lol');
+        expect(castawayUrl.pathname).toBe('/');
+        expect(castawayUrl.searchParams.get('program')).toBe(programId);
+        expect(castawayUrl.searchParams.get('idlSource')).toBe('anchor');
+        expect(castawayUrl.searchParams.get('network')).toBe('mainnet-beta');
+        expect(target).toBe('_blank');
+        expect(features).toBe('noopener,noreferrer');
+        windowOpenSpy.mockRestore();
     });
 
     test('should render IdlCard tabs when both IDLs exist', async () => {
