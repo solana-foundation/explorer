@@ -52,6 +52,7 @@ export function parseBatchInstruction<T>(data: Uint8Array, accounts: T[]): Parse
         if (offset + 2 > data.length) {
             throw new Error(`Truncated data: expected num_accounts and data_len at offset ${offset}`);
         }
+        // Wire format packs both fields as single u8 values (see header comment link)
         const numAccounts = readU8(data, offset);
         const dataLen = readU8(data, offset + 1);
         offset += 2;
