@@ -5,7 +5,7 @@ import { TransactionSignature } from '@solana/web3.js';
 import Link from 'next/link';
 import { Download, Share2 } from 'react-feather';
 
-import { receiptAnalytics } from '@/app/shared/lib/analytics';
+import { EReceiptDownloadFormat, receiptAnalytics } from '@/app/shared/lib/analytics';
 
 import type { DownloadReceiptFn, FormattedExtendedReceipt } from '../types';
 import { BaseReceipt, BlurredCircle } from './BaseReceipt';
@@ -50,8 +50,8 @@ export function ReceiptView({ data, downloadCsv, downloadPdf, signature, transac
                 </div>
                 <div className="e-flex e-items-start e-gap-0.5">
                     <PopoverButton icon={<Download size={12} />} label="Download">
-                        <DownloadReceiptItem label="CSV" download={downloadCsv} signature={signature} />
-                        <DownloadReceiptItem label="PDF" download={downloadPdf} signature={signature} />
+                        <DownloadReceiptItem format={EReceiptDownloadFormat.Csv} label="CSV" download={downloadCsv} signature={signature} />
+                        <DownloadReceiptItem format={EReceiptDownloadFormat.Pdf} label="PDF" download={downloadPdf} signature={signature} />
                     </PopoverButton>
                 </div>
             </div>

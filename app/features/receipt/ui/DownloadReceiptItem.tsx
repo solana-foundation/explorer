@@ -4,7 +4,7 @@ import type { TransactionSignature } from '@solana/web3.js';
 import type { ReactNode } from 'react';
 import { Check, Loader, XCircle } from 'react-feather';
 
-import { receiptAnalytics } from '@/app/shared/lib/analytics';
+import { EReceiptDownloadFormat, receiptAnalytics } from '@/app/shared/lib/analytics';
 
 import { type DownloadState, useDownloadReceipt } from '../model/use-download-receipt';
 import type { DownloadReceiptFn } from '../types';
@@ -39,14 +39,15 @@ interface DownloadReceiptItemProps {
     icon?: ReactNode;
     label: string;
     download: DownloadReceiptFn;
+    format: EReceiptDownloadFormat;
     signature: TransactionSignature;
 }
 
-export function DownloadReceiptItem({ icon, label, download, signature }: DownloadReceiptItemProps) {
+export function DownloadReceiptItem({ icon, label, download, format, signature }: DownloadReceiptItemProps) {
     const [state, trigger] = useDownloadReceipt(download);
 
     function handleTrigger() {
-        receiptAnalytics.trackDownload(signature);
+        receiptAnalytics.trackDownload(signature, format);
         trigger();
     }
 
