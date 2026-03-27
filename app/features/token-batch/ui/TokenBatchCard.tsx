@@ -1,5 +1,3 @@
-'use client';
-
 import { InstructionCard } from '@components/instruction/InstructionCard';
 import type { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 
