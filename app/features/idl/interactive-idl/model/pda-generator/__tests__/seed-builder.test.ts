@@ -144,18 +144,15 @@ describe('seed-builder', () => {
                 expect(result.info[0].value).toBe(DEFAULT_PUBKEY);
             });
 
-            it.each(INVALID_ACCOUNT_TEST_CASES)(
-                'should return null buffer for $description',
-                ({ value, description }) => {
-                    const seeds: PdaSeed[] = [{ kind: 'account', path: 'owner' }];
-                    const accounts = value !== undefined ? { owner: value } : {};
+            it.each(INVALID_ACCOUNT_TEST_CASES)('should return null buffer for $description', ({ value }) => {
+                const seeds: PdaSeed[] = [{ kind: 'account', path: 'owner' }];
+                const accounts = value !== undefined ? { owner: value } : {};
 
-                    const result = buildSeedsWithInfo(seeds, {}, accounts, EMPTY_INSTRUCTION);
+                const result = buildSeedsWithInfo(seeds, {}, accounts, EMPTY_INSTRUCTION);
 
-                    expect(result.buffers).toBeNull();
-                    expect(result.info[0].name).toBe('owner');
-                }
-            );
+                expect(result.buffers).toBeNull();
+                expect(result.info[0].name).toBe('owner');
+            });
 
             it('should return null buffer for missing account', () => {
                 const seeds: PdaSeed[] = [{ kind: 'account', path: 'owner' }];

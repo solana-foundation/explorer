@@ -21,6 +21,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
 import { Logger } from '@/app/shared/lib/logger';
+import { toBase64 } from '@/app/shared/lib/bytes';
 import { clusterUrl } from '@/app/utils/cluster';
 import { getTransactionInstructionError } from '@/app/utils/program-err';
 
@@ -524,13 +525,7 @@ function handleInvokeError(error: unknown | Error, message = 'Failed to invoke i
 function serializeTransactionMessage(transaction: Transaction | undefined): string | null {
     if (!transaction) return null;
     try {
-        const message = transaction.serializeMessage();
-        // Use native btoa for base64 encoding
-        let binaryString = '';
-        for (let i = 0; i < message.length; i++) {
-            binaryString += String.fromCharCode(message[i]);
-        }
-        return btoa(binaryString);
+        return toBase64(transaction.serializeMessage());
     } catch (error) {
         Logger.warn('[idl] Failed to serialize transaction message', { error });
         return null;
