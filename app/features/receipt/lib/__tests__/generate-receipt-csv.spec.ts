@@ -120,7 +120,7 @@ describe('generateReceiptCsv', () => {
 
     it('should pass a Blob with CSV mime type to createObjectURL', async () => {
         await generateReceiptCsv(RECEIPT, SIGNATURE);
-        // eslint-disable-next-line no-restricted-syntax -- accessing vitest mock internals for assertion
+
         const blobArg = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls[0][0] as Blob;
         expect(blobArg).toBeInstanceOf(Blob);
         expect(blobArg.type).toBe('text/csv;charset=utf-8;');
@@ -128,7 +128,7 @@ describe('generateReceiptCsv', () => {
 
     it('should pass a non-empty Blob to createObjectURL', async () => {
         await generateReceiptCsv(RECEIPT, SIGNATURE);
-        // eslint-disable-next-line no-restricted-syntax -- accessing vitest mock internals for assertion
+
         const blobArg = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls[0][0] as Blob;
         expect(blobArg.size).toBeGreaterThan(0);
     });

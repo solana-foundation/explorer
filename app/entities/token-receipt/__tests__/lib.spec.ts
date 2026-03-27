@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { FormattedReceipt } from '../types';
-
 import { getReceiptAmount, getReceiptMint, getReceiptSymbol } from '../lib';
+import type { FormattedReceipt } from '../types';
 
 const SOL_RECEIPT: FormattedReceipt = {
     date: { timestamp: 1700000000, utc: '2023-11-14 22:13:20 UTC' },
