@@ -140,37 +140,3 @@
         mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50%/21px 100%;
     }
 }
-
-/* When a printable receipt is present, hide everything else during print */
-@media print {
-    body:has(.printable-receipt) {
-        margin: 0 !important;
-        padding: 0 !important;
-        background: white !important;
-    }
-
-    body:has(.printable-receipt) > *:not(script) {
-        visibility: hidden !important;
-        height: 0 !important;
-        overflow: hidden !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    .printable-receipt {
-        visibility: visible !important;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: auto !important;
-        overflow: visible !important;
-        background: white !important;
-        z-index: 999999 !important;
-    }
-
-    .printable-receipt * {
-        visibility: visible !important;
-    }
-
-}
