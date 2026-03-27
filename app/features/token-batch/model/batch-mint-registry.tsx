@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
 import type { MintInfo } from '../lib/types';
 

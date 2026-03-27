@@ -5,8 +5,6 @@ export type FormatOptions = {
     intl?: Intl.NumberFormatOptions;
 };
 
-// Format a raw token amount using its decimals (e.g. 1500000n with 6 decimals → "1.5").
-// Bigint amounts use lossless arithmetic. Number amounts use Intl.NumberFormat.
 export function formatTokenAmount({ amount, decimals }: TokenAmount, options: FormatOptions = {}): string {
     if (typeof amount === 'bigint' && !options.locale && !options.intl) {
         return formatBigint(amount, decimals);
@@ -14,7 +12,6 @@ export function formatTokenAmount({ amount, decimals }: TokenAmount, options: Fo
     return formatWithIntl({ amount, decimals }, options);
 }
 
-// Convert a raw token amount to a JS number using its decimals.
 // Note: precision loss is possible for bigint amounts exceeding Number.MAX_SAFE_INTEGER.
 export function tokenAmountToNumber({ amount, decimals }: TokenAmount): number {
     const num = typeof amount === 'bigint' ? Number(amount) : amount;
@@ -22,12 +19,10 @@ export function tokenAmountToNumber({ amount, decimals }: TokenAmount): number {
     return num / 10 ** decimals;
 }
 
-// Convert a token amount to its fiat equivalent using a per-token price.
 export function tokenAmountToFiat(tokenAmount: TokenAmount, pricePerToken: number): number {
     return tokenAmountToNumber(tokenAmount) * pricePerToken;
 }
 
-// Lossless bigint formatting — no Number conversion.
 function formatBigint(amount: bigint, decimals: number): string {
     if (decimals === 0) return amount.toString();
 
@@ -37,11 +32,16 @@ function formatBigint(amount: bigint, decimals: number): string {
 
     if (fractional === 0n) return whole.toString();
 
-    const fractionalStr = fractional.toString().padStart(decimals, '0').replace(/0+$/, '');
-    return `${whole}.${fractionalStr}`;
+    const padded = fractional.toString().padStart(decimals, '0');
+    return `${whole}.${trimTrailingZeros(padded)}`;
 }
 
-// Intl.NumberFormat path — used for number amounts or when locale/formatting options are requested.
+function trimTrailingZeros(str: string): string {
+    let end = str.length;
+    while (end > 0 && str[end - 1] === '0') end--;
+    return str.slice(0, end);
+}
+
 function formatWithIntl({ amount, decimals }: TokenAmount, options: FormatOptions = {}): string {
     const { locale = 'en-US', intl } = options;
     const value = tokenAmountToNumber({ amount, decimals });
