@@ -35,7 +35,7 @@ function DecodedContent({ decoded }: { decoded: DecodedParams }) {
             {decoded.fields.map(field => (
                 <div key={field.label} className="e-flex e-items-center e-gap-2 e-text-sm">
                     <span className="e-min-w-[120px] e-text-neutral-500">{field.label}:</span>
-                    <span className="e-font-mono">{field.value}</span>
+                    <span className="e-font-mono e-text-xs">{field.value}</span>
                 </div>
             ))}
             {decoded.accounts.map((account, i) => (
