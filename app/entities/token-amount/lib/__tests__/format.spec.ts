@@ -25,6 +25,16 @@ describe('formatTokenAmount', () => {
         expect(formatTokenAmount({ amount: raw, decimals: 6 })).toBe('1');
         expect(formatTokenAmount({ amount: raw, decimals: 9 })).toBe('0.001');
     });
+
+    // Number amounts
+    it.each([
+        { amount: 1_000_000, decimals: 6, expected: '1', label: 'number: USDC 1.0' },
+        { amount: 1_500_000, decimals: 6, expected: '1.5', label: 'number: USDC 1.5' },
+        { amount: 42, decimals: 0, expected: '42', label: 'number: zero-decimal' },
+        { amount: 0, decimals: 6, expected: '0', label: 'number: zero amount' },
+    ])('should format $label → $expected', ({ amount, decimals, expected }) => {
+        expect(formatTokenAmount({ amount, decimals })).toBe(expected);
+    });
 });
 
 describe('tokenAmountToNumber', () => {
@@ -41,6 +51,13 @@ describe('tokenAmountToNumber', () => {
         const raw = 1_000_000n;
         expect(tokenAmountToNumber({ amount: raw, decimals: 6 })).toBe(1);
         expect(tokenAmountToNumber({ amount: raw, decimals: 9 })).toBe(0.001);
+    });
+
+    it.each([
+        { amount: 1_500_000, decimals: 6, expected: 1.5, label: 'number: USDC 1.5' },
+        { amount: 42, decimals: 0, expected: 42, label: 'number: zero-decimal' },
+    ])('should convert number $label → $expected', ({ amount, decimals, expected }) => {
+        expect(tokenAmountToNumber({ amount, decimals })).toBe(expected);
     });
 });
 

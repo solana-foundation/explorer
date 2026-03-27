@@ -1,6 +1,7 @@
 // Converts raw decoded wire data into labeled, human-readable output
 // for display in the UI.
 
+import { formatTokenAmount } from '@entities/token-amount';
 import { PublicKey } from '@solana/web3.js';
 import { AuthorityType } from '@solana-program/token-2022';
 
@@ -52,7 +53,15 @@ function formatFields(raw: RawDecoded, externalDecimals?: number): { label: stri
         case 'approve':
         case 'mintTo':
         case 'burn':
-            return [{ label: 'Amount', value: formatAmount(raw.amount, externalDecimals) }];
+            return [
+                {
+                    label: 'Amount',
+                    value:
+                        externalDecimals === undefined
+                            ? raw.amount.toString()
+                            : formatTokenAmount({ amount: raw.amount, decimals: externalDecimals }),
+                },
+            ];
 
         case 'transferChecked':
         case 'approveChecked':
@@ -60,7 +69,7 @@ function formatFields(raw: RawDecoded, externalDecimals?: number): { label: stri
         case 'burnChecked':
             return [
                 { label: 'Decimals', value: raw.decimals.toString() },
-                { label: 'Amount', value: formatTokenAmount(raw.amount, raw.decimals) },
+                { label: 'Amount', value: formatTokenAmount({ amount: raw.amount, decimals: raw.decimals }) },
             ];
 
         case 'closeAccount':
@@ -75,27 +84,6 @@ function formatFields(raw: RawDecoded, externalDecimals?: number): { label: stri
                 { label: 'New Authority', value: raw.newAuthority ?? '(none)' },
             ];
     }
-}
-
-// Format amount using decimals when available, otherwise show raw value.
-function formatAmount(amount: bigint, decimals: number | undefined): string {
-    if (decimals === undefined) return amount.toString();
-    return formatTokenAmount(amount, decimals);
-}
-
-// Format a raw token amount using its decimals (e.g. 1500000 with 6 decimals → "1.5").
-function formatTokenAmount(amount: bigint, decimals: number): string {
-    if (decimals === 0) return amount.toString();
-
-    const divisor = 10n ** BigInt(decimals);
-    const whole = amount / divisor;
-    const fractional = amount % divisor;
-
-    if (fractional === 0n) return whole.toString();
-
-    // eslint-disable-next-line no-restricted-syntax -- Trimming trailing zeros from a decimal string; a simple replace is clearer than a manual loop
-    const fractionalStr = fractional.toString().padStart(decimals, '0').replace(/0+$/, '');
-    return `${whole}.${fractionalStr}`;
 }
 
 // SPL Token instructions support multisig owners/delegates. The `layout` defines the

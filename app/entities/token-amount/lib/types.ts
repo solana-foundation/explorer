@@ -1,4 +1,4 @@
 export type TokenAmount = {
-    amount: bigint;
+    amount: bigint | number;
     decimals: number;
 };
