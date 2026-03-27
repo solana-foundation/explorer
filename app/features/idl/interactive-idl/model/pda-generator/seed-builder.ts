@@ -191,7 +191,7 @@ function parseIntegerArray(value: string, elementType: string, length: number): 
     const bytes: number[] = [];
     for (const item of arr) {
         try {
-            const buf = new BN(item).toArrayLike(Buffer, 'le', size);
+            const buf = bnToBytes(new BN(item), 'le', size);
             for (let i = 0; i < buf.length; i++) bytes.push(buf[i]);
         } catch {
             return null;

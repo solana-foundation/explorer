@@ -66,7 +66,7 @@ describe('seed-builder', () => {
                     expect(Array.from(result.buffers![0])).toEqual(value);
                     expect(result.info[0].name).toBe(expectedHex);
                     expect(result.info[0].value).toBe(expectedHex);
-                }
+                },
             );
 
             it('should return null buffer when const seed has no value', () => {
@@ -95,7 +95,7 @@ describe('seed-builder', () => {
 
                     expect(result.buffers).not.toBeNull();
                     expect(Array.from(result.buffers![0])).toEqual(expected);
-                }
+                },
             );
 
             it.each(SIGNED_INTEGER_TEST_CASES)(
@@ -112,8 +112,22 @@ describe('seed-builder', () => {
 
                     expect(result.buffers).not.toBeNull();
                     expect(result.buffers![0].length).toBe(expectedLength);
-                }
+                },
             );
+
+            it('should encode integer arrays using shared bnToBytes-compatible little-endian bytes', () => {
+                const seeds: IdlSeed[] = [{ kind: 'arg', path: 'values' }];
+                const instruction: PdaInstruction = {
+                    accounts: [],
+                    args: [{ name: 'values', type: { array: ['u16', 3] } }],
+                    name: 'test',
+                };
+
+                const result = buildSeedsWithInfo(seeds, { values: '[1,256,1000]' }, {}, instruction);
+
+                expect(result.buffers).not.toBeNull();
+                expect(Array.from(result.buffers![0])).toEqual([1, 0, 0, 1, 232, 3]);
+            });
         });
 
         describe('arg seeds with string/bytes types', () => {

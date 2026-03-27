@@ -204,7 +204,7 @@ function useEnrichedOsecInfo({
 
             try {
                 const [pda] = PublicKey.findProgramAddressSync(
-                    [fromUtf8('otter_verify'), new PublicKey(osecInfo.signer).toBuffer(), programId.toBuffer()],
+                    [fromUtf8('otter_verify'), new PublicKey(osecInfo.signer).toBytes(), programId.toBytes()],
                     new PublicKey(VERIFY_PROGRAM_ID)
                 );
 

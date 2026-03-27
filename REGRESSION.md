@@ -4,8 +4,10 @@ This document tracks the `Buffer` -> `Uint8Array` migration and the remaining in
 
 ## Migration Policy
 
--   Application code should prefer `Uint8Array` and helpers from `app/shared/lib/bytes.ts`.
--   `app/shared/lib/bytes.ts` is the only app-owned place that should construct `Buffer`.
+- Application code should prefer `Uint8Array` and helpers from `app/shared/lib/bytes.ts`.
+- `app/shared/lib/bytes.ts` is the only app-owned place that should construct `Buffer`.
+- `toBuffer(...)` is the approved adapter when external libraries still require `Buffer`.
+- Some SDK/library boundaries intentionally remain Buffer-backed and are called out below.
 
 ## Test URLs
 

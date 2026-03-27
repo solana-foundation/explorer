@@ -13,6 +13,9 @@ import {
     fromUtf8,
     isByteArray,
     isValidBase64,
+    readUint8,
+    readUint16LE,
+    readUint32LE,
     toBase64,
     toHex,
     toUint8Array,
@@ -124,7 +127,7 @@ describe('bytes helpers', () => {
                         const bufferResult = Buffer.from(base64, 'base64');
                         expect(Array.from(result)).toEqual(expected);
                         expect(Array.from(result)).toEqual(Array.from(bufferResult));
-                    }
+                    },
                 );
 
                 it.runIf(hasNative)('should handle binary data with all byte values', () => {
@@ -208,7 +211,7 @@ describe('bytes helpers', () => {
                         const bufferResult = Buffer.from(input).toString('base64');
                         expect(result).toBe(expected);
                         expect(result).toBe(bufferResult);
-                    }
+                    },
                 );
 
                 it.runIf(hasNative)('should handle binary data with all byte values', () => {
@@ -255,7 +258,7 @@ describe('bytes helpers', () => {
                     expect(Array.from(withoutPrefix)).toEqual(expected);
                     expect(Array.from(withPrefix)).toEqual(expected);
                     expect(Array.from(withPrefix)).toEqual(Array.from(withoutPrefix));
-                }
+                },
             );
 
             it('should match Buffer.from behavior', () => {
@@ -302,7 +305,7 @@ describe('bytes helpers', () => {
                     (hex, expected) => {
                         const result = fromHex(hex);
                         expect(Array.from(result)).toEqual(expected);
-                    }
+                    },
                 );
 
                 it.runIf(hasNative)('should handle binary data with all byte values', () => {
@@ -370,7 +373,7 @@ describe('bytes helpers', () => {
                     (expected, input) => {
                         const result = toHex(new Uint8Array(input));
                         expect(result).toBe(expected);
-                    }
+                    },
                 );
 
                 it.runIf(hasNative)('should handle binary data with all byte values', () => {
@@ -381,7 +384,7 @@ describe('bytes helpers', () => {
             });
         });
 
-         it('should convert empty array', () => {
+        it('should convert empty array', () => {
             expect(toHex(new Uint8Array([]))).toBe('');
         });
 
@@ -480,7 +483,7 @@ describe('bytes helpers', () => {
                 bufferResult.writeUInt32LE(Number(value), 0);
                 expect(Array.from(data)).toEqual(expected);
                 expect(Array.from(data)).toEqual(Array.from(bufferResult));
-            }
+            },
         );
 
         it('should write at specified offset', () => {
@@ -489,6 +492,75 @@ describe('bytes helpers', () => {
             data[5] = 0xee;
             writeUint32LE(data, 300000, 1);
             expect(Array.from(data)).toEqual([0xff, 224, 147, 4, 0, 0xee]);
+        });
+    });
+
+    describe('readUint8', () => {
+        it('should read a byte at the specified offset', () => {
+            const data = new Uint8Array([0x00, 0x7f, 0xff]);
+
+            expect(readUint8(data, 0)).toBe(0x00);
+            expect(readUint8(data, 1)).toBe(0x7f);
+            expect(readUint8(data, 2)).toBe(0xff);
+        });
+
+        it('should return 0 for out-of-bounds reads', () => {
+            expect(readUint8(new Uint8Array([1, 2, 3]), 9)).toBe(0);
+        });
+
+        it('should match Buffer.readUInt8 behavior for valid offsets', () => {
+            const input = [0x12, 0x34, 0xab, 0xcd];
+            const data = new Uint8Array(input);
+            const buffer = Buffer.from(input);
+
+            for (let offset = 0; offset < input.length; offset++) {
+                expect(readUint8(data, offset)).toBe(buffer.readUInt8(offset));
+            }
+        });
+    });
+
+    describe('readUint16LE', () => {
+        it('should read little-endian 16-bit values', () => {
+            const data = new Uint8Array([0x34, 0x12, 0xcd, 0xab]);
+
+            expect(readUint16LE(data, 0)).toBe(0x1234);
+            expect(readUint16LE(data, 2)).toBe(0xabcd);
+        });
+
+        it('should read at a non-zero offset', () => {
+            const data = new Uint8Array([0xff, 0x78, 0x56, 0xee]);
+            expect(readUint16LE(data, 1)).toBe(0x5678);
+        });
+
+        it('should match Buffer.readUInt16LE behavior', () => {
+            const input = [0x10, 0x32, 0x54, 0x76];
+            const data = new Uint8Array(input);
+            const buffer = Buffer.from(input);
+
+            expect(readUint16LE(data, 0)).toBe(buffer.readUInt16LE(0));
+            expect(readUint16LE(data, 1)).toBe(buffer.readUInt16LE(1));
+            expect(readUint16LE(data, 2)).toBe(buffer.readUInt16LE(2));
+        });
+    });
+
+    describe('readUint32LE', () => {
+        it.each(Object.entries(writeUint32LETestCases))('should read %d as little-endian bytes', (value, expected) => {
+            expect(readUint32LE(new Uint8Array(expected), 0)).toBe(Number(value) >>> 0);
+        });
+
+        it('should read at the specified offset', () => {
+            const data = new Uint8Array([0xff, 224, 147, 4, 0, 0xee]);
+            expect(readUint32LE(data, 1)).toBe(300000);
+        });
+
+        it('should match Buffer.readUInt32LE behavior', () => {
+            const input = [0xaa, 0x78, 0x56, 0x34, 0x12, 0xbb];
+            const data = new Uint8Array(input);
+            const buffer = Buffer.from(input);
+
+            expect(readUint32LE(data, 0)).toBe(buffer.readUInt32LE(0));
+            expect(readUint32LE(data, 1)).toBe(buffer.readUInt32LE(1));
+            expect(readUint32LE(data, 2)).toBe(buffer.readUInt32LE(2));
         });
     });
 
