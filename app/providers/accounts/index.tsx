@@ -34,8 +34,8 @@ import React from 'react';
 import { create } from 'superstruct';
 
 import { getProxiedUri } from '@/app/features/metadata/utils';
-import { Logger } from '@/app/shared/lib/logger';
 import { alloc } from '@/app/shared/lib/bytes';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { HistoryProvider } from './history';
 import { RewardsProvider } from './rewards';

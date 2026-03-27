@@ -11,8 +11,8 @@ import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/
 import React, { Fragment, ReactNode, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 
-import { Logger } from '@/app/shared/lib/logger';
 import { equals, fromBase64, fromHex, toBase64 } from '@/app/shared/lib/bytes';
+import { Logger } from '@/app/shared/lib/logger';
 
 const ANCHOR_SELF_CPI_TAG = fromHex('1d9acb512ea545e4').reverse();
 const ANCHOR_SELF_CPI_NAME = 'Anchor Self Invocation';

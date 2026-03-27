@@ -2,7 +2,7 @@ import { PublicKey } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { buildSeedsWithInfo } from '../seed-builder';
-import type { PdaInstruction, PdaSeed } from '../types';
+import type { IdlSeed, PdaArgument, PdaInstruction } from '../types';
 
 // Common test fixtures
 const EMPTY_INSTRUCTION: PdaInstruction = { accounts: [], args: [], name: 'test' };
@@ -22,7 +22,7 @@ const CONST_SEED_TEST_CASES: Array<{ value: number[]; expectedHex: string }> = [
 ];
 
 // Integer encoding test cases: { input, type, expectedBytes }
-const INTEGER_TEST_CASES: Array<{ expected: number[]; input: string; type: string }> = [
+const INTEGER_TEST_CASES: Array<{ expected: number[]; input: string; type: PdaArgument['type'] }> = [
     { expected: [42], input: '42', type: 'u8' },
     { expected: [0xe8, 0x03], input: '1000', type: 'u16' },
     { expected: [0, 0, 0, 1], input: '16777216', type: 'u32' },
@@ -32,7 +32,7 @@ const INTEGER_TEST_CASES: Array<{ expected: number[]; input: string; type: strin
 ];
 
 // Signed integer test cases
-const SIGNED_INTEGER_TEST_CASES: Array<{ expectedLength: number; input: string; type: string }> = [
+const SIGNED_INTEGER_TEST_CASES: Array<{ expectedLength: number; input: string; type: PdaArgument['type'] }> = [
     { expectedLength: 1, input: '127', type: 'i8' },
     { expectedLength: 2, input: '256', type: 'i16' },
     { expectedLength: 4, input: '256', type: 'i32' },
@@ -41,7 +41,7 @@ const SIGNED_INTEGER_TEST_CASES: Array<{ expectedLength: number; input: string; 
 ];
 
 // String/bytes arg test cases
-const STRING_BYTES_TEST_CASES: Array<{ input: string; type: string }> = [
+const STRING_BYTES_TEST_CASES: Array<{ input: string; type: PdaArgument['type'] }> = [
     { input: 'hello', type: 'string' },
     { input: 'test', type: 'bytes' },
 ];
@@ -58,7 +58,7 @@ describe('seed-builder', () => {
             it.each(CONST_SEED_TEST_CASES)(
                 'should build const seed and return hex info "$expectedHex"',
                 ({ value, expectedHex }) => {
-                    const seeds: PdaSeed[] = [{ kind: 'const', value }];
+                    const seeds: IdlSeed[] = [{ kind: 'const', value }];
 
                     const result = buildSeedsWithInfo(seeds, {}, {}, EMPTY_INSTRUCTION);
 
@@ -70,7 +70,7 @@ describe('seed-builder', () => {
             );
 
             it('should return null buffer when const seed has no value', () => {
-                const seeds: PdaSeed[] = [{ kind: 'const' }];
+                const seeds: IdlSeed[] = [{ kind: 'const', value: [] }];
 
                 const result = buildSeedsWithInfo(seeds, {}, {}, EMPTY_INSTRUCTION);
 
@@ -84,7 +84,7 @@ describe('seed-builder', () => {
             it.each(INTEGER_TEST_CASES)(
                 'should encode $type "$input" as little-endian bytes',
                 ({ input, type, expected }) => {
-                    const seeds: PdaSeed[] = [{ kind: 'arg', path: 'value' }];
+                    const seeds: IdlSeed[] = [{ kind: 'arg', path: 'value' }];
                     const instruction: PdaInstruction = {
                         accounts: [],
                         args: [{ name: 'value', type }],
@@ -101,7 +101,7 @@ describe('seed-builder', () => {
             it.each(SIGNED_INTEGER_TEST_CASES)(
                 'should encode $type with correct byte length ($expectedLength)',
                 ({ input, type, expectedLength }) => {
-                    const seeds: PdaSeed[] = [{ kind: 'arg', path: 'value' }];
+                    const seeds: IdlSeed[] = [{ kind: 'arg', path: 'value' }];
                     const instruction: PdaInstruction = {
                         accounts: [],
                         args: [{ name: 'value', type }],
@@ -118,7 +118,7 @@ describe('seed-builder', () => {
 
         describe('arg seeds with string/bytes types', () => {
             it.each(STRING_BYTES_TEST_CASES)('should build $type arg seed as UTF-8 bytes', ({ input, type }) => {
-                const seeds: PdaSeed[] = [{ kind: 'arg', path: 'data' }];
+                const seeds: IdlSeed[] = [{ kind: 'arg', path: 'data' }];
                 const instruction: PdaInstruction = {
                     accounts: [],
                     args: [{ name: 'data', type }],
@@ -134,7 +134,7 @@ describe('seed-builder', () => {
 
         describe('account seeds', () => {
             it('should build account seed from PublicKey', () => {
-                const seeds: PdaSeed[] = [{ kind: 'account', path: 'owner' }];
+                const seeds: IdlSeed[] = [{ kind: 'account', path: 'owner' }];
 
                 const result = buildSeedsWithInfo(seeds, {}, { owner: DEFAULT_PUBKEY }, EMPTY_INSTRUCTION);
 
@@ -145,7 +145,7 @@ describe('seed-builder', () => {
             });
 
             it.each(INVALID_ACCOUNT_TEST_CASES)('should return null buffer for $description', ({ value }) => {
-                const seeds: PdaSeed[] = [{ kind: 'account', path: 'owner' }];
+                const seeds: IdlSeed[] = [{ kind: 'account', path: 'owner' }];
                 const accounts = value !== undefined ? { owner: value } : {};
 
                 const result = buildSeedsWithInfo(seeds, {}, accounts, EMPTY_INSTRUCTION);
@@ -155,7 +155,7 @@ describe('seed-builder', () => {
             });
 
             it('should return null buffer for missing account', () => {
-                const seeds: PdaSeed[] = [{ kind: 'account', path: 'owner' }];
+                const seeds: IdlSeed[] = [{ kind: 'account', path: 'owner' }];
 
                 const result = buildSeedsWithInfo(seeds, {}, {}, EMPTY_INSTRUCTION);
 
@@ -167,7 +167,7 @@ describe('seed-builder', () => {
 
         describe('multiple seeds', () => {
             it('should build multiple seed buffers in order', () => {
-                const seeds: PdaSeed[] = [
+                const seeds: IdlSeed[] = [
                     { kind: 'const', value: [0x01, 0x02] },
                     { kind: 'arg', path: 'index' },
                     { kind: 'account', path: 'user' },
@@ -188,7 +188,7 @@ describe('seed-builder', () => {
             });
 
             it('should return null buffers if any seed fails', () => {
-                const seeds: PdaSeed[] = [
+                const seeds: IdlSeed[] = [
                     { kind: 'const', value: [0x01] },
                     { kind: 'arg', path: 'missing' },
                 ];
@@ -207,7 +207,7 @@ describe('seed-builder', () => {
 
         describe('camelCase path handling', () => {
             it('should handle snake_case arg paths', () => {
-                const seeds: PdaSeed[] = [{ kind: 'arg', path: 'poll_id' }];
+                const seeds: IdlSeed[] = [{ kind: 'arg', path: 'poll_id' }];
                 const instruction: PdaInstruction = {
                     accounts: [],
                     args: [{ name: 'poll_id', type: 'u64' }],
@@ -221,7 +221,7 @@ describe('seed-builder', () => {
             });
 
             it('should handle snake_case account paths', () => {
-                const seeds: PdaSeed[] = [{ kind: 'account', path: 'token_owner' }];
+                const seeds: IdlSeed[] = [{ kind: 'account', path: 'token_owner' }];
 
                 const result = buildSeedsWithInfo(seeds, {}, { tokenOwner: DEFAULT_PUBKEY }, EMPTY_INSTRUCTION);
 
@@ -240,7 +240,8 @@ describe('seed-builder', () => {
             });
 
             it('should handle unknown seed kind', () => {
-                const seeds: PdaSeed[] = [{ kind: 'unknown' as any }];
+                // @ts-expect-error — testing runtime handling of unexpected seed kind
+                const seeds: IdlSeed[] = [{ kind: 'unknown' }];
 
                 const result = buildSeedsWithInfo(seeds, {}, {}, EMPTY_INSTRUCTION);
 
@@ -249,7 +250,7 @@ describe('seed-builder', () => {
             });
 
             it('should handle invalid number in arg', () => {
-                const seeds: PdaSeed[] = [{ kind: 'arg', path: 'value' }];
+                const seeds: IdlSeed[] = [{ kind: 'arg', path: 'value' }];
                 const instruction: PdaInstruction = {
                     accounts: [],
                     args: [{ name: 'value', type: 'u64' }],

@@ -2,9 +2,10 @@ import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
 import { camelCase } from 'change-case';
 
+import { bnToBytes, fromUtf8, toHex } from '@/app/shared/lib/bytes';
+
 import { parseArrayInput } from '../anchor/array-parser';
 import type { IdlSeed, IdlSeedAccount, IdlSeedArg, IdlSeedConst, PdaArgument, PdaInstruction } from './types';
-import { bnToBytes, fromUtf8, toHex } from '@/app/shared/lib/bytes';
 
 export interface SeedInfo {
     buffers: Uint8Array[] | null;
@@ -54,6 +55,9 @@ function processSeed(
 }
 
 function processConstSeed(seed: IdlSeedConst): ProcessedSeed {
+    if (!seed.value?.length) {
+        return { buffer: null, info: { name: 'const', value: null } };
+    }
     const buffer = new Uint8Array(seed.value);
     const hex = toHex(buffer);
     return { buffer, info: { name: `0x${hex}`, value: `0x${hex}` } };

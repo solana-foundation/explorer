@@ -7,8 +7,8 @@ import { camelToTitleCase } from '@utils/index';
 import React, { useState } from 'react';
 import { Code } from 'react-feather';
 
-import { Logger } from '@/app/shared/lib/logger';
 import { fromBase64 } from '@/app/shared/lib/bytes';
+import { Logger } from '@/app/shared/lib/logger';
 
 export function ProgramEventsCard({
     eventDataList,

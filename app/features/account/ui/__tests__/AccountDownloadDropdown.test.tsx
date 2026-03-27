@@ -1,5 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AccountDownloadDropdown } from '../AccountDownloadDropdown';
@@ -46,9 +47,9 @@ describe('AccountDownloadDropdown', () => {
         expect(screen.getByTestId('download-dropdown')).toHaveAttribute('data-filename', PUBKEY.toBase58());
     });
 
-    it('should fetch raw data when dropdown opens', () => {
+    it('should fetch raw data when dropdown opens', async () => {
         render(<AccountDownloadDropdown pubkey={PUBKEY} />);
-        screen.getByText('Download').click();
+        await userEvent.click(screen.getByText('Download'));
         expect(mockMutate).toHaveBeenCalled();
     });
 

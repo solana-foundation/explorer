@@ -20,8 +20,8 @@ import { useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
-import { Logger } from '@/app/shared/lib/logger';
 import { toBase64 } from '@/app/shared/lib/bytes';
+import { Logger } from '@/app/shared/lib/logger';
 import { clusterUrl } from '@/app/utils/cluster';
 import { getTransactionInstructionError } from '@/app/utils/program-err';
 

@@ -8,8 +8,8 @@ import {
 } from 'sas-lib';
 
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
-import { Logger } from '@/app/shared/lib/logger';
 import { toBase64 } from '@/app/shared/lib/bytes';
+import { Logger } from '@/app/shared/lib/logger';
 import {
     decodeAccount,
     decodeWithType,

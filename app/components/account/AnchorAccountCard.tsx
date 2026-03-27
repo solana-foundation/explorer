@@ -7,8 +7,8 @@ import { useCluster } from '@providers/cluster';
 import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
 import React, { useMemo } from 'react';
 
-import { Logger } from '@/app/shared/lib/logger';
 import { equals, toBuffer } from '@/app/shared/lib/bytes';
+import { Logger } from '@/app/shared/lib/logger';
 
 export function AnchorAccountCard({ account }: { account: Account }) {
     const { lamports } = account;

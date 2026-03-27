@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 
-import { Logger } from '@/app/shared/lib/logger';
 import { toBase64 } from '@/app/shared/lib/bytes';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { Account } from '../../../providers/accounts';
 import { NFTOKEN_ADDRESS } from './nftoken';
