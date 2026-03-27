@@ -1,11 +1,16 @@
 # Regression Testing: Buffer to Uint8Array Migration
 
-This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toString('base64')` were replaced with `fromBase64()` / `toBase64()` helpers.
+This document tracks the `Buffer` -> `Uint8Array` migration and the remaining intentional Buffer interop boundaries.
+
+## Migration Policy
+
+-   Application code should prefer `Uint8Array` and helpers from `app/shared/lib/bytes.ts`.
+-   `app/shared/lib/bytes.ts` is the only app-owned place that should construct `Buffer`.
 
 ## Test URLs
 
-| Feature | Local | Production |
-|---------|-------|------------|
+| Feature  | Local                 | Production                  |
+| -------- | --------------------- | --------------------------- |
 | Base URL | http://localhost:3000 | https://explorer.solana.com |
 
 ---
@@ -18,8 +23,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Any page with downloadable base64 content (e.g., IDL downloads)
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
 ---
@@ -32,8 +37,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** NFToken account pages
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/NFTUkR4u7wKxy9QLaX2TGvd9oZSWoMo4jqSJqdMb7Nk?cluster=mainnet | https://explorer.solana.com/address/NFTUkR4u7wKxy9QLaX2TGvd9oZSWoMo4jqSJqdMb7Nk |
 
 ---
@@ -42,15 +47,18 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **File:** `app/components/instruction/ed25519/Ed25519DetailsCard.tsx`
 
-**Change:** `Buffer.from(signature).toString('base64')` → `toBase64(signature)`
+**Changes:**
+
+-   `Buffer.from(signature).toString('base64')` → `toBase64(signature)`
+-   instruction decoding changed from Buffer read APIs to shared `Uint8Array` byte helpers in `app/shared/lib/bytes.ts`
 
 **Test:** Transaction with Ed25519 signature verification instruction
 
-| Local | Production |
-|-------|------------|
+| Local                                                                        | Production                                                         |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | http://localhost:3000/tx/5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp...?cluster=mainnet | https://explorer.solana.com/tx/5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp... |
 
-*Note: Find a transaction that uses Ed25519 program for verification*
+_Note: Find a transaction that uses Ed25519 program for verification_
 
 ---
 
@@ -62,11 +70,11 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Transaction with Anchor program events
 
-| Local | Production |
-|-------|------------|
+| Local                                              | Production                               |
+| -------------------------------------------------- | ---------------------------------------- |
 | http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
 
-*Note: Use any Anchor program transaction that emits events*
+_Note: Use any Anchor program transaction that emits events_
 
 ---
 
@@ -74,14 +82,14 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **File:** `app/components/ProgramLogsCardBody.tsx`
 
-**Change:** `Buffer.from(instruction.data, 'base64')` → `Buffer.from(fromBase64(instruction.data))`
+**Change:** direct `Buffer.from(...)` wrappers → `toBuffer(...)` only where `TransactionInstruction` still requires Buffer interop
 
-**Note:** `Buffer.from()` wrapper is required because `TransactionInstruction` expects `Buffer` type (see #32)
+**Note:** base64 decoding still uses `fromBase64(...)`; Buffer interop is centralized through `toBuffer(...)`.
 
 **Test:** Any transaction details page with program logs
 
-| Local | Production |
-|-------|------------|
+| Local                                                                      | Production                                                       |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | http://localhost:3000/tx/5wHu1qwD7q4KqgrCvAWNGP6Z9b9wNv...?cluster=mainnet | https://explorer.solana.com/tx/5wHu1qwD7q4KqgrCvAWNGP6Z9b9wNv... |
 
 ---
@@ -91,13 +99,28 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 **File:** `app/utils/anchor.tsx`
 
 **Changes:**
-- `Buffer.from(eventData, 'base64')` → `fromBase64(eventData)`
-- `Buffer.from(paddedData).toString('base64')` → `toBase64(paddedData)`
+
+-   `Buffer.from(eventData, 'base64')` → `fromBase64(eventData)`
+-   `Buffer.from(paddedData).toString('base64')` → `toBase64(paddedData)`
 
 **Test:** Transaction with Anchor program that has custom events
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
+
+---
+
+## 6a. Anchor Details Card Event Base64 Encoding
+
+**File:** `app/components/instruction/AnchorDetailsCard.tsx`
+
+**Change:** `ix.data.slice(8).toString('base64')` → `toBase64(ix.data.slice(8))`
+
+**Test:** Anchor self-CPI / event transactions still decode event payloads correctly
+
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
 ---
@@ -110,8 +133,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Transaction inspector with token transfer simulation
 
-| Local | Production |
-|-------|------------|
+| Local                                              | Production                               |
+| -------------------------------------------------- | ---------------------------------------- |
 | http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
 
 ---
@@ -124,8 +147,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Transaction simulation in inspector
 
-| Local | Production |
-|-------|------------|
+| Local                                              | Production                               |
+| -------------------------------------------------- | ---------------------------------------- |
 | http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
 
 ---
@@ -138,8 +161,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Program account with security.txt
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
 ---
@@ -152,8 +175,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Security.txt display on program pages
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD?cluster=mainnet | https://explorer.solana.com/address/MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD |
 
 ---
@@ -166,8 +189,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** IDL download button on program pages
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
 ---
@@ -180,8 +203,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Any file download functionality
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
 ---
@@ -194,8 +217,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Program with verified build status
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
 ---
@@ -210,8 +233,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** NFToken collection fetching
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/NFTUkR4u7wKxy9QLaX2TGvd9oZSWoMo4jqSJqdMb7Nk?cluster=mainnet | https://explorer.solana.com/address/NFTUkR4u7wKxy9QLaX2TGvd9oZSWoMo4jqSJqdMb7Nk |
 
 ---
@@ -224,8 +247,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Transaction with Anchor self-CPI instructions
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
 ---
@@ -239,16 +262,17 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 **Test:** Pages displaying raw instruction data in hex format
 
 **Used in:**
-- `BaseRawDetails` → instruction cards showing raw hex data
-- `ProgramEventsCard` → raw event data display
-- Transaction Inspector → unknown instruction cards
 
-| Local | Production |
-|-------|------------|
-| http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
+-   `BaseRawDetails` → instruction cards showing raw hex data
+-   `ProgramEventsCard` → raw event data display
+-   Transaction Inspector → unknown instruction cards
+
+| Local                                                                                                                             | Production                                                                                                              |
+| --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| http://localhost:3000/tx/inspector?cluster=mainnet                                                                                | https://explorer.solana.com/tx/inspector                                                                                |
 | http://localhost:3000/tx/5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d6G6PP6V7eMLoUpYA1uoJeWs2XNmey8q1aMiP4stXm6Ar?cluster=mainnet | https://explorer.solana.com/tx/5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d6G6PP6V7eMLoUpYA1uoJeWs2XNmey8q1aMiP4stXm6Ar |
 
-*Note: Open "Raw" tab on any instruction card to see HexData component*
+_Note: Open "Raw" tab on any instruction card to see HexData component_
 
 ---
 
@@ -260,11 +284,11 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** PDA generation in interactive IDL forms
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
-*Note: Use interactive IDL form to generate PDAs*
+_Note: Use interactive IDL form to generate PDAs_
 
 ---
 
@@ -276,8 +300,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Program verified build hash computation
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
 ---
@@ -292,8 +316,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Security.txt display and export on program pages
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD?cluster=mainnet | https://explorer.solana.com/address/MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD |
 
 ---
@@ -306,8 +330,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** IDL download button on program pages
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
 ---
@@ -320,11 +344,11 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** PDA generation with string seeds in interactive IDL forms
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
-*Note: Use interactive IDL form with string-type PDA seeds*
+_Note: Use interactive IDL form with string-type PDA seeds_
 
 ---
 
@@ -336,8 +360,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Anchor instruction building with bytes arguments
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
 ---
@@ -350,8 +374,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Verified build status check using OtterSec verification
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
 ---
@@ -364,8 +388,8 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Solana Kit integration string decoding
 
-| Local | Production |
-|-------|------------|
+| Local                                              | Production                               |
+| -------------------------------------------------- | ---------------------------------------- |
 | http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
 
 ---
@@ -378,11 +402,11 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Search bar accepts valid base64-encoded data
 
-| Local | Production |
-|-------|------------|
+| Local                  | Production                   |
+| ---------------------- | ---------------------------- |
 | http://localhost:3000/ | https://explorer.solana.com/ |
 
-*Test: Enter a valid base64 string in search bar (e.g., transaction signature in base64)*
+_Test: Enter a valid base64 string in search bar (e.g., transaction signature in base64)_
 
 ---
 
@@ -396,11 +420,11 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Transaction inspector with Associated Token Program instructions
 
-| Local | Production |
-|-------|------------|
+| Local                                              | Production                               |
+| -------------------------------------------------- | ---------------------------------------- |
 | http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
 
-*Test: Load a transaction with ATA creation instruction*
+_Test: Load a transaction with ATA creation instruction_
 
 ---
 
@@ -412,11 +436,11 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **Test:** Account pages for non-existent accounts
 
-| Local | Production |
-|-------|------------|
+| Local                                                                          | Production                                                           |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
 | http://localhost:3000/address/11111111111111111111111111111112?cluster=mainnet | https://explorer.solana.com/address/11111111111111111111111111111112 |
 
-*Test: Load any non-existent account address*
+_Test: Load any non-existent account address_
 
 ---
 
@@ -424,15 +448,18 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **File:** `app/components/instruction/pyth/program.ts`
 
-**Change:** `uint8ArrayToBuffer(b).slice(...).toString('utf-8')` → `toUtf8(b.slice(...))`
+**Changes:**
+
+-   `uint8ArrayToBuffer(b).slice(...).toString('utf-8')` → `toUtf8(b.slice(...))`
+-   `decodeData(..., buffer: Buffer)` widened to `decodeData(..., buffer: Uint8Array)`
 
 **Test:** Transaction with Pyth oracle instructions
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                      | Production                                                                       |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
 | http://localhost:3000/address/FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH?cluster=mainnet | https://explorer.solana.com/address/FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH |
 
-*Note: Pyth program address for testing oracle-related transactions*
+_Note: Pyth program address for testing oracle-related transactions_
 
 ---
 
@@ -440,32 +467,35 @@ This document lists all locations where `Buffer.from(x, 'base64')` / `buffer.toS
 
 **File:** `app/providers/accounts/index.tsx`
 
-**Change:** `raw?: Buffer` → `raw?: Uint8Array` in `AccountData` interface
+**Changes:**
+
+-   `raw?: Buffer` → `raw?: Uint8Array` in `AccountData` interface
+-   local raw-data handling now uses `Uint8Array | undefined` instead of `Buffer | undefined`
 
 **Test:** All account pages that access raw data
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
 ---
 
 # Buffer.from Compatibility Wrappers
 
-These locations retain `Buffer.from()` wrappers because external libraries require `Buffer` type.
+These locations retain Buffer interop because external libraries still require `Buffer` type. Application code should call `toBuffer(...)` from `app/shared/lib/bytes.ts` instead of `Buffer.from(...)` directly.
 
 ## 30. Anchor Account Decoding
 
 **File:** `app/components/account/AnchorAccountCard.tsx`
 
-**Kept:** `Buffer.from(rawData)` wrapper for `coder.decode()`
+**Kept:** `toBuffer(rawData)` wrapper for `coder.decode()`
 
 **Reason:** `@coral-xyz/anchor` `BorshAccountsCoder.decode()` expects `Buffer` parameter
 
 **Test:** Anchor program account pages with decoded data
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
 
 ---
@@ -474,73 +504,140 @@ These locations retain `Buffer.from()` wrappers because external libraries requi
 
 **File:** `app/components/account/CompressedNFTInfoCard.tsx`
 
-**Kept:** `Buffer.from(treeAccountInfo.data.data.raw)` wrapper for `ConcurrentMerkleTreeAccount.fromBuffer()`
+**Kept:** `toBuffer(treeAccountInfo.data.data.raw)` wrapper for `ConcurrentMerkleTreeAccount.fromBuffer()`
 
 **Reason:** `@solana/spl-account-compression` `ConcurrentMerkleTreeAccount.fromBuffer()` signature requires `Buffer`
 
 **Test:** Compressed NFT account pages
 
-| Local | Production |
-|-------|------------|
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | http://localhost:3000/address/SMBH3wF6baUj6JWtzYvqcKuj2XCKWDqQxzspY12xPND?cluster=mainnet | https://explorer.solana.com/address/SMBH3wF6baUj6JWtzYvqcKuj2XCKWDqQxzspY12xPND |
 
-*Note: Compressed NFT example address*
+_Note: Compressed NFT example address_
 
 ---
 
 ## 32. TransactionInstruction Data
 
-**File:** `app/components/ProgramLogsCardBody.tsx`
+**Files:**
 
-**Kept:** `Buffer.from(fromBase64(instruction.data))` wrapper
+-   `app/components/ProgramLogsCardBody.tsx`
+-   `app/components/inspector/utils.ts`
 
-**Reason:** `@solana/web3.js` `TransactionInstruction` constructor expects `Buffer` for `data` field
+**Kept:** `toBuffer(...)` wrapper when constructing `TransactionInstruction`
 
-**Test:** Transaction pages with program logs
+**Reason:** `@solana/web3.js` types still require `Buffer` for `data` in these paths
 
-| Local | Production |
-|-------|------------|
-| http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
+**Test:** Transaction pages with program logs and transaction inspector flows
+
+| Local                                                                                                                            | Production                                                                                                              |
+| -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| http://localhost:3000/tx/inspector?cluster=mainnet                                                                               | https://explorer.solana.com/tx/inspector                                                                                |
+| http://localhost:3000/tx/44Z9x5jpA9MzimpKq7ididJUdzjzuUpHjPmi8PjTLExRWddwgbThdnhs2ipKsJi6M8bM2iGKMag4nF7UniXLnDtH?cluster=devnet | https://explorer.solana.com/tx/2xiTSpSLwZ46Pr9om4rXKXZdGNunwRpLArimTLdndfrx1yVJaBSUayndorZ1Y6DL3ZTkXGFXQkYXsdK9T3xaiacd |
+
+---
+
+## 33. Transaction Message Serialization
+
+**File:** `app/features/idl/interactive-idl/model/use-instruction.ts`
+
+**Change:** manual `btoa` byte loop → `toBase64(transaction.serializeMessage())`
+
+**Test:** Interactive IDL instruction execution and error display with serialized transaction message
+
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| http://localhost:3000/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv?cluster=mainnet | https://explorer.solana.com/address/JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv |
+
+---
+
+## 34. Inspector Associated Token Discriminator
+
+**File:** `app/components/inspector/into-parsed-data.ts`
+
+**Change:** `Buffer.from([discriminator])` → `bytes([discriminator])`, with `toBuffer(...)` only at the final interop boundary
+
+**Test:** Transaction inspector with Associated Token Program `create` instruction
+
+| Local                                                                                                                                     | Production                                                                                                                      |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| http://localhost:3000/tx/inspector?cluster=mainnet                                                                                        | https://explorer.solana.com/tx/inspector                                                                                        |
+| http://localhost:3000/tx/2crntTzKKWQ87sTXyCmDFLYNuGme1Cponcvz5SD2DQNdDtvLStbpEZg2Pk5VQVjJ2M5BpUmg5gbU3W3EVgpvkUmM/inspect?cluster=mainnet | https://explorer.solana.com/tx/2crntTzKKWQ87sTXyCmDFLYNuGme1Cponcvz5SD2DQNdDtvLStbpEZg2Pk5VQVjJ2M5BpUmg5gbU3W3EVgpvkUmM/inspect |
+
+---
+
+## 35. Serum Instruction Code Parsing
+
+**File:** `app/components/instruction/serum/types.ts`
+
+**Change:** `instruction.data.slice(1, 5).readUInt32LE(0)` → `readUint32LE(instruction.data, 1)` via `app/shared/lib/bytes.ts`
+
+**Test:** Serum / OpenBook transaction pages that decode instruction titles
+
+Serum Program ids: `srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX`, `4ckmDgGdxQoPDLUkDT3vHgSAkzA3QRdNq5ywwY4sUSJn`,
+`9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin`,
+
+| Local                                                                                                                             | Production                                                                                                              |
+| --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| http://localhost:3000/tx/inspector?cluster=mainnet                                                                                | https://explorer.solana.com/tx/inspector                                                                                |
+| http://localhost:3000/tx/35oVAqDXbd4cukgWL34KtBj1Ldp48idpMTtfWpD5j7bSneGse2bQSsZxSpyAyhvnyc9yFNM8dyyZxv4dM6njRoye?cluster=mainnet | https://explorer.solana.com/tx/35oVAqDXbd4cukgWL34KtBj1Ldp48idpMTtfWpD5j7bSneGse2bQSsZxSpyAyhvnyc9yFNM8dyyZxv4dM6njRoye |
 
 ---
 
 ## Quick Test Checklist
 
 ### Base64 Conversions
-- [ ] **IDL Download**: Go to Jupiter program, click Download IDL, verify JSON file is valid
-- [ ] **Security.txt**: Check program pages show security.txt info correctly
-- [ ] **Transaction Logs**: Open any transaction, verify logs display correctly
-- [ ] **Transaction Inspector**: Load a transaction in inspector, verify simulation works
-- [ ] **Verified Builds**: Check verified build badge appears on supported programs
-- [ ] **NFToken Accounts**: If available, verify NFToken account parsing works
-- [ ] **Ed25519 Signatures**: Find Ed25519 transaction, verify signature display
+
+-   [ ] **IDL Download**: Go to Jupiter program, click Download IDL, verify JSON file is valid
+-   [ ] **Security.txt**: Check program pages show security.txt info correctly
+-   [ ] **Transaction Logs**: Open any transaction, verify logs display correctly
+-   [ ] **Transaction Inspector**: Load a transaction in inspector, verify simulation works
+-   [ ] **Interactive IDL Errors**: Trigger an instruction error and verify serialized transaction message is still valid base64
+-   [ ] **Verified Builds**: Check verified build badge appears on supported programs
+-   [ ] **NFToken Accounts**: If available, verify NFToken account parsing works
+-   [ ] **Ed25519 Signatures**: Find Ed25519 transaction, verify signature display
+-   [ ] **Anchor Self-CPI Events**: Verify Anchor self-CPI / event decoding still works with `toBase64(...)`
 
 ### Hex Conversions
-- [ ] **Hex Data Display**: In transaction inspector, verify hex data displays correctly
-- [ ] **PDA Generation**: Use interactive IDL form, verify PDA seeds show correct hex values
-- [ ] **Verified Build Hash**: Verify program hash matches expected value on verified programs
-- [ ] **Anchor Self-CPI**: Find transaction with Anchor self-CPI, verify detection works
+
+-   [ ] **Hex Data Display**: In transaction inspector, verify hex data displays correctly
+-   [ ] **PDA Generation**: Use interactive IDL form, verify PDA seeds show correct hex values
+-   [ ] **Verified Build Hash**: Verify program hash matches expected value on verified programs
+-   [ ] **Anchor Self-CPI**: Find transaction with Anchor self-CPI, verify detection works
+-   [ ] **Serum/OpenBook Titles**: Verify Serum/OpenBook instruction titles still decode correctly
 
 ### UTF-8 Conversions
-- [ ] **IDL Download**: Go to Jupiter program, click Download IDL, verify JSON file contains valid UTF-8 characters
-- [ ] **Security.txt Export**: Check security.txt base64 export works correctly
-- [ ] **PDA String Seeds**: Use interactive IDL with string seeds, verify PDA generation works
-- [ ] **Verified Builds**: Verify OtterSec verification check works
+
+-   [ ] **IDL Download**: Go to Jupiter program, click Download IDL, verify JSON file contains valid UTF-8 characters
+-   [ ] **Security.txt Export**: Check security.txt base64 export works correctly
+-   [ ] **PDA String Seeds**: Use interactive IDL with string seeds, verify PDA generation works
+-   [ ] **Verified Builds**: Verify OtterSec verification check works
 
 ### Buffer.alloc Replacements
-- [ ] **Transaction Inspector**: Load ATA creation transaction, verify parsing works correctly
-- [ ] **Non-existent Account**: Load a non-existent account address, verify page loads without errors
+
+-   [ ] **Transaction Inspector**: Load ATA creation transaction, verify parsing works correctly
+-   [ ] **Non-existent Account**: Load a non-existent account address, verify page loads without errors
+
+### Intentional Buffer Interop
+
+-   [ ] **Anchor Account Decode**: Verify Anchor account decoding still works via `toBuffer(...)`
+-   [ ] **Compressed NFT Tree**: Verify compressed NFT canopy depth still loads correctly via `toBuffer(...)`
+-   [ ] **Program Logs / Inspector**: Verify `TransactionInstruction` construction still works with `toBuffer(...)`
 
 ---
 
 ## Sample Test Addresses/Transactions
 
 ### Programs with IDL
-- Jupiter: `JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv`
-- Marinade: `MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD`
+
+-   Jupiter: `JUP6LkMUe1WjxTH7NJD5o3RQGTX8Zdb5v3aKC1oNnLv`
+-   Marinade: `MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD`
 
 ### Token Accounts
-- Any SPL token account for simulation testing
+
+-   Any SPL token account for simulation testing
 
 ### Transactions
-- Use recent transactions from the homepage for general testing
+
+-   Use recent transactions from the homepage for general testing
