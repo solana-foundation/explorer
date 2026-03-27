@@ -1,37 +1,33 @@
 'use client';
 
-import { type ReactNode, createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { type ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 import type { MintInfo } from '../lib/types';
 
 type BatchMintRegistry = {
-    // Register a discovered mint from a resolved sub-instruction.
     register: (mint: string, decimals: number) => void;
-    // Get the unique mint if all resolved sub-instructions agree on one mint.
-    // Returns undefined if no mints registered or if there are multiple different mints.
     getUniqueMint: () => MintInfo | undefined;
 };
 
 const BatchMintRegistryContext = createContext<BatchMintRegistry | undefined>(undefined);
 
 export function BatchMintRegistryProvider({ children }: { children: ReactNode }) {
-    const mintsRef = useRef(new Map<string, number>());
-    const [revision, setRevision] = useState(0);
+    const [mints, setMints] = useState<Map<string, number>>(new Map());
 
     const register = useCallback((mint: string, decimals: number) => {
-        const current = mintsRef.current;
-        if (current.get(mint) === decimals) return;
-        current.set(mint, decimals);
-        setRevision(r => r + 1);
+        setMints(prev => {
+            if (prev.get(mint) === decimals) return prev;
+            const next = new Map(prev);
+            next.set(mint, decimals);
+            return next;
+        });
     }, []);
 
     const getUniqueMint = useCallback((): MintInfo | undefined => {
-        const entries = [...mintsRef.current.entries()];
-        if (entries.length !== 1) return undefined;
-        const [mint, decimals] = entries[0];
+        if (mints.size !== 1) return undefined;
+        const [mint, decimals] = [...mints.entries()][0];
         return { decimals, mint };
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- revision triggers recalculation
-    }, [revision]);
+    }, [mints]);
 
     const value = useMemo(() => ({ getUniqueMint, register }), [getUniqueMint, register]);
 
