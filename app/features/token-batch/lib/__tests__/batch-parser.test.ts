@@ -20,49 +20,14 @@ import {
 } from './test-utils';
 
 describe('isTokenBatchInstruction', () => {
-    it('should detect batch instruction for Token Program', () => {
-        const ix = {
-            data: new Uint8Array([0xff, 3, 9, 3, 0, 0, 0, 0, 0, 0, 0, 1]),
-            keys: [],
-            programId: TOKEN_PROGRAM_ID,
-        };
-        expect(isTokenBatchInstruction(ix)).toBe(true);
-    });
-
-    it('should detect batch instruction for Token-2022 Program', () => {
-        const ix = {
-            data: new Uint8Array([0xff]),
-            keys: [],
-            programId: TOKEN_2022_PROGRAM_ID,
-        };
-        expect(isTokenBatchInstruction(ix)).toBe(true);
-    });
-
-    it('should reject non-batch instruction', () => {
-        const ix = {
-            data: new Uint8Array([3, 0, 0, 0, 0, 0, 0, 0, 1]),
-            keys: [],
-            programId: TOKEN_PROGRAM_ID,
-        };
-        expect(isTokenBatchInstruction(ix)).toBe(false);
-    });
-
-    it('should reject non-token program', () => {
-        const ix = {
-            data: new Uint8Array([0xff]),
-            keys: [],
-            programId: Keypair.generate().publicKey,
-        };
-        expect(isTokenBatchInstruction(ix)).toBe(false);
-    });
-
-    it('should reject empty data', () => {
-        const ix = {
-            data: new Uint8Array(0),
-            keys: [],
-            programId: TOKEN_PROGRAM_ID,
-        };
-        expect(isTokenBatchInstruction(ix)).toBe(false);
+    it.each([
+        { data: new Uint8Array([0xff, 3, 9, 3, 0, 0, 0, 0, 0, 0, 0, 1]), expected: true, label: 'Token Program batch', programId: TOKEN_PROGRAM_ID },
+        { data: new Uint8Array([0xff]), expected: true, label: 'Token-2022 batch', programId: TOKEN_2022_PROGRAM_ID },
+        { data: new Uint8Array([3, 0, 0, 0, 0, 0, 0, 0, 1]), expected: false, label: 'non-batch discriminator', programId: TOKEN_PROGRAM_ID },
+        { data: new Uint8Array([0xff]), expected: false, label: 'non-token program', programId: Keypair.generate().publicKey },
+        { data: new Uint8Array(0), expected: false, label: 'empty data', programId: TOKEN_PROGRAM_ID },
+    ])('should return $expected for $label', ({ data, programId, expected }) => {
+        expect(isTokenBatchInstruction({ data, keys: [], programId })).toBe(expected);
     });
 });
 
@@ -188,38 +153,45 @@ describe('parseBatchInstruction', () => {
 });
 
 describe('decodeSubInstructionParams', () => {
-    it('should decode Transfer params', () => {
-        const data = makeTransferData(42000n);
-        const accounts = [makeAccount(), makeAccount(), makeAccount(false, true)];
+    // Unchecked amount instructions — raw amount, no decimals in data
+    it.each([
+        { amount: 42000n, data: makeTransferData(42000n), expected: '42000', labels: ['Source', 'Destination', 'Owner/Delegate'], numAccounts: 3, type: 'Transfer' as const },
+        { amount: 500n, data: makeApproveData(500n), expected: '500', labels: ['Source', 'Delegate', 'Owner'], numAccounts: 3, type: 'Approve' as const },
+        { amount: 5000n, data: concatBytes(new Uint8Array([7]), writeU64LE(5000n)), expected: '5000', labels: ['Mint', 'Destination', 'Mint Authority'], numAccounts: 3, type: 'MintTo' as const },
+        { amount: 3000n, data: concatBytes(new Uint8Array([8]), writeU64LE(3000n)), expected: '3000', labels: ['Account', 'Mint', 'Owner/Delegate'], numAccounts: 3, type: 'Burn' as const },
+    ])('should decode $type with amount $expected', ({ type, data, numAccounts, expected, labels }) => {
+        const accounts = Array.from({ length: numAccounts }, (_, i) => makeAccount(i < numAccounts - 1, i === numAccounts - 1));
+        const decoded = decodeSubInstructionParams(type, data, accounts);
 
-        const decoded = decodeSubInstructionParams('Transfer', data, accounts);
-
-        if (!decoded) throw new Error('Expected decoded to be defined');
-        expect(decoded.fields).toEqual([{ label: 'Amount', value: '42000' }]);
-        expect(decoded.accounts.map(a => a.label)).toEqual(['Source', 'Destination', 'Owner/Delegate']);
+        if (!decoded) throw new Error(`Expected ${type} to decode`);
+        expect(decoded.fields).toEqual([{ label: 'Amount', value: expected }]);
+        expect(decoded.accounts.map(a => a.label)).toEqual(labels);
     });
 
-    it('should decode TransferChecked params', () => {
-        const data = makeTransferCheckedData(1000000n, 9);
-        const accounts = [makeAccount(), makeAccount(), makeAccount(), makeAccount(false, true)];
+    // Checked amount instructions — amount + decimals in data
+    it.each([
+        { data: makeTransferCheckedData(1000000n, 9), expectedAmount: '0.001', expectedDecimals: '9', labels: ['Source', 'Mint', 'Destination', 'Owner/Delegate'], numAccounts: 4, type: 'TransferChecked' as const },
+        { data: makeApproveCheckedData(2000000n, 6), expectedAmount: '2', expectedDecimals: '6', labels: ['Source', 'Mint', 'Delegate', 'Owner'], numAccounts: 4, type: 'ApproveChecked' as const },
+        { data: makeMintToCheckedData(50000000n, 8), expectedAmount: '0.5', expectedDecimals: '8', labels: ['Mint', 'Destination', 'Mint Authority'], numAccounts: 3, type: 'MintToChecked' as const },
+        { data: makeBurnCheckedData(1500000000n, 9), expectedAmount: '1.5', expectedDecimals: '9', labels: ['Account', 'Mint', 'Owner/Delegate'], numAccounts: 3, type: 'BurnChecked' as const },
+    ])('should decode $type with amount $expectedAmount', ({ type, data, numAccounts, expectedAmount, expectedDecimals, labels }) => {
+        const accounts = Array.from({ length: numAccounts }, (_, i) => makeAccount(i < numAccounts - 1, i === numAccounts - 1));
+        const decoded = decodeSubInstructionParams(type, data, accounts);
 
-        const decoded = decodeSubInstructionParams('TransferChecked', data, accounts);
-
-        if (!decoded) throw new Error('Expected decoded to be defined');
+        if (!decoded) throw new Error(`Expected ${type} to decode`);
         expect(decoded.fields).toEqual([
-            { label: 'Amount', value: '0.001' },
-            { label: 'Decimals', value: '9' },
+            { label: 'Amount', value: expectedAmount },
+            { label: 'Decimals', value: expectedDecimals },
         ]);
-        expect(decoded.accounts.map(a => a.label)).toEqual(['Source', 'Mint', 'Destination', 'Owner/Delegate']);
+        expect(decoded.accounts.map(a => a.label)).toEqual(labels);
     });
 
     it('should decode CloseAccount params', () => {
         const data = new Uint8Array([9]);
         const accounts = [makeAccount(), makeAccount(), makeAccount(false, true)];
-
         const decoded = decodeSubInstructionParams('CloseAccount', data, accounts);
 
-        if (!decoded) throw new Error('Expected decoded to be defined');
+        if (!decoded) throw new Error('Expected CloseAccount to decode');
         expect(decoded.fields).toEqual([]);
         expect(decoded.accounts.map(a => a.label)).toEqual(['Account', 'Destination', 'Owner']);
     });
@@ -233,10 +205,9 @@ describe('decodeSubInstructionParams', () => {
             makeAccount(false, true),
             makeAccount(false, true),
         ];
-
         const decoded = decodeSubInstructionParams('Transfer', data, accounts);
 
-        if (!decoded) throw new Error('Expected decoded to be defined');
+        if (!decoded) throw new Error('Expected Transfer to decode');
         expect(decoded.accounts.map(a => a.label)).toEqual([
             'Source',
             'Destination',
@@ -246,127 +217,12 @@ describe('decodeSubInstructionParams', () => {
         ]);
     });
 
-    it('should return undefined for unknown discriminators', () => {
-        const data = new Uint8Array([0xfe, 1, 2, 3]);
-        const decoded = decodeSubInstructionParams('Unknown', data, []);
-
-        expect(decoded).toBeUndefined();
-    });
-
-    it('should decode MintTo params', () => {
-        const data = concatBytes(new Uint8Array([7]), writeU64LE(5000n));
-        const accounts = [makeAccount(), makeAccount(), makeAccount(false, true)];
-
-        const decoded = decodeSubInstructionParams('MintTo', data, accounts);
-
-        if (!decoded) throw new Error('Expected decoded to be defined');
-        expect(decoded.fields).toEqual([{ label: 'Amount', value: '5000' }]);
-        expect(decoded.accounts.map(a => a.label)).toEqual(['Mint', 'Destination', 'Mint Authority']);
-    });
-
-    it('should decode Burn params', () => {
-        const data = concatBytes(new Uint8Array([8]), writeU64LE(3000n));
-        const accounts = [makeAccount(), makeAccount(), makeAccount(false, true)];
-
-        const decoded = decodeSubInstructionParams('Burn', data, accounts);
-
-        if (!decoded) throw new Error('Expected decoded to be defined');
-        expect(decoded.fields).toEqual([{ label: 'Amount', value: '3000' }]);
-        expect(decoded.accounts.map(a => a.label)).toEqual(['Account', 'Mint', 'Owner/Delegate']);
-    });
-
-    it('should return undefined for truncated Transfer data', () => {
-        // Transfer needs 9 bytes (1 discriminator + 8 amount), only 4 provided
-        const data = new Uint8Array([3, 0, 0, 0]);
-        expect(decodeSubInstructionParams('Transfer', data, [])).toBeUndefined();
-    });
-
-    it('should return undefined for truncated TransferChecked data', () => {
-        // TransferChecked needs 10 bytes (1 + 8 + 1), only 9 provided
-        const data = concatBytes(new Uint8Array([12]), writeU64LE(100n));
-        expect(decodeSubInstructionParams('TransferChecked', data, [])).toBeUndefined();
-    });
-
-    it('should return undefined for truncated SetAuthority data', () => {
-        // SetAuthority needs at least 3 bytes (1 + 1 + 1), only discriminator provided
-        const data = new Uint8Array([6]);
-        expect(decodeSubInstructionParams('SetAuthority', data, [])).toBeUndefined();
-    });
-
-    it('should return undefined for SetAuthority with Some tag but missing pubkey', () => {
-        // 3 bytes: discriminator(6) + authority_type(0) + option_tag(1=Some), but no pubkey follows.
-        // The SDK decoder throws on truncated data, so we fall back to undefined.
-        const data = new Uint8Array([6, 0, 1]);
-        expect(
-            decodeSubInstructionParams('SetAuthority', data, [makeAccount(), makeAccount(false, true)]),
-        ).toBeUndefined();
-    });
-
-    it('should return undefined for empty CloseAccount data', () => {
-        const data = new Uint8Array([]);
-        expect(decodeSubInstructionParams('CloseAccount', data, [])).toBeUndefined();
-    });
-
-    it('should decode Approve params', () => {
-        const data = makeApproveData(500n);
-        const accounts = [makeAccount(), makeAccount(), makeAccount(false, true)];
-
-        const decoded = decodeSubInstructionParams('Approve', data, accounts);
-
-        if (!decoded) throw new Error('Expected decoded to be defined');
-        expect(decoded.fields).toEqual([{ label: 'Amount', value: '500' }]);
-        expect(decoded.accounts.map(a => a.label)).toEqual(['Source', 'Delegate', 'Owner']);
-    });
-
-    it('should decode ApproveChecked params', () => {
-        const data = makeApproveCheckedData(2000000n, 6);
-        const accounts = [makeAccount(), makeAccount(), makeAccount(), makeAccount(false, true)];
-
-        const decoded = decodeSubInstructionParams('ApproveChecked', data, accounts);
-
-        if (!decoded) throw new Error('Expected decoded to be defined');
-        expect(decoded.fields).toEqual([
-            { label: 'Amount', value: '2' },
-            { label: 'Decimals', value: '6' },
-        ]);
-        expect(decoded.accounts.map(a => a.label)).toEqual(['Source', 'Mint', 'Delegate', 'Owner']);
-    });
-
-    it('should decode MintToChecked params', () => {
-        const data = makeMintToCheckedData(50000000n, 8);
-        const accounts = [makeAccount(), makeAccount(), makeAccount(false, true)];
-
-        const decoded = decodeSubInstructionParams('MintToChecked', data, accounts);
-
-        if (!decoded) throw new Error('Expected decoded to be defined');
-        expect(decoded.fields).toEqual([
-            { label: 'Amount', value: '0.5' },
-            { label: 'Decimals', value: '8' },
-        ]);
-        expect(decoded.accounts.map(a => a.label)).toEqual(['Mint', 'Destination', 'Mint Authority']);
-    });
-
-    it('should decode BurnChecked params', () => {
-        const data = makeBurnCheckedData(1500000000n, 9);
-        const accounts = [makeAccount(), makeAccount(), makeAccount(false, true)];
-
-        const decoded = decodeSubInstructionParams('BurnChecked', data, accounts);
-
-        if (!decoded) throw new Error('Expected decoded to be defined');
-        expect(decoded.fields).toEqual([
-            { label: 'Amount', value: '1.5' },
-            { label: 'Decimals', value: '9' },
-        ]);
-        expect(decoded.accounts.map(a => a.label)).toEqual(['Account', 'Mint', 'Owner/Delegate']);
-    });
-
     it('should decode SetAuthority with new authority set to None', () => {
         const data = makeSetAuthorityData(1);
         const accounts = [makeAccount(), makeAccount(false, true)];
-
         const decoded = decodeSubInstructionParams('SetAuthority', data, accounts);
 
-        if (!decoded) throw new Error('Expected decoded to be defined');
+        if (!decoded) throw new Error('Expected SetAuthority to decode');
         expect(decoded.fields).toEqual([
             { label: 'Authority Type', value: 'FreezeAccount' },
             { label: 'New Authority', value: '(none)' },
@@ -378,38 +234,38 @@ describe('decodeSubInstructionParams', () => {
         const newAuth = Keypair.generate().publicKey;
         const data = makeSetAuthorityData(0, newAuth);
         const accounts = [makeAccount(), makeAccount(false, true)];
-
         const decoded = decodeSubInstructionParams('SetAuthority', data, accounts);
 
-        if (!decoded) throw new Error('Expected decoded to be defined');
+        if (!decoded) throw new Error('Expected SetAuthority to decode');
         expect(decoded.fields).toEqual([
             { label: 'Authority Type', value: 'MintTokens' },
             { label: 'New Authority', value: newAuth.toBase58() },
         ]);
     });
 
-    it('should format Transfer amount with decimals when provided', () => {
-        const data = makeTransferData(1500000n);
-        const accounts = [makeAccount(), makeAccount(), makeAccount(false, true)];
-        const mint = Keypair.generate().publicKey.toBase58();
-
-        const decoded = decodeSubInstructionParams('Transfer', data, accounts, { decimals: 6, mint });
-
-        if (!decoded) throw new Error('Expected decoded to be defined');
-        expect(decoded.fields).toEqual([{ label: 'Amount', value: '1.5' }]);
-        expect(decoded.accounts[1].label).toBe('Mint');
-        expect(decoded.accounts[1].pubkey.toBase58()).toBe(mint);
+    // Truncated / malformed data — all return undefined
+    it.each([
+        { data: new Uint8Array([0xfe, 1, 2, 3]), label: 'unknown discriminator', type: 'Unknown' as const },
+        { data: new Uint8Array([3, 0, 0, 0]), label: 'truncated Transfer', type: 'Transfer' as const },
+        { data: concatBytes(new Uint8Array([12]), writeU64LE(100n)), label: 'truncated TransferChecked', type: 'TransferChecked' as const },
+        { data: new Uint8Array([6]), label: 'truncated SetAuthority', type: 'SetAuthority' as const },
+        { data: new Uint8Array([6, 0, 1]), label: 'SetAuthority with Some but missing pubkey', type: 'SetAuthority' as const },
+        { data: new Uint8Array([]), label: 'empty CloseAccount', type: 'CloseAccount' as const },
+    ])('should return undefined for $label', ({ type, data }) => {
+        expect(decodeSubInstructionParams(type, data, [makeAccount(), makeAccount(false, true)])).toBeUndefined();
     });
 
-    it('should format Approve amount with decimals when provided', () => {
-        const data = makeApproveData(25000000n);
+    // External mintInfo — formats unchecked amount with provided decimals
+    it.each([
+        { amount: 1500000n, data: makeTransferData(1500000n), decimals: 6, expected: '1.5', type: 'Transfer' as const },
+        { amount: 25000000n, data: makeApproveData(25000000n), decimals: 8, expected: '0.25', type: 'Approve' as const },
+    ])('should format $type amount as $expected when mintInfo provides $decimals decimals', ({ type, data, decimals, expected }) => {
         const accounts = [makeAccount(), makeAccount(), makeAccount(false, true)];
         const mint = Keypair.generate().publicKey.toBase58();
+        const decoded = decodeSubInstructionParams(type, data, accounts, { decimals, mint });
 
-        const decoded = decodeSubInstructionParams('Approve', data, accounts, { decimals: 8, mint });
-
-        if (!decoded) throw new Error('Expected decoded to be defined');
-        expect(decoded.fields).toEqual([{ label: 'Amount', value: '0.25' }]);
+        if (!decoded) throw new Error(`Expected ${type} to decode`);
+        expect(decoded.fields).toEqual([{ label: 'Amount', value: expected }]);
         expect(decoded.accounts[1].label).toBe('Mint');
         expect(decoded.accounts[1].pubkey.toBase58()).toBe(mint);
     });

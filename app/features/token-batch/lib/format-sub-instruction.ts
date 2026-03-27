@@ -1,8 +1,8 @@
 // Converts raw decoded wire data into labeled, human-readable output
 // for display in the UI.
 
-import { AuthorityType } from '@solana-program/token-2022';
 import { PublicKey } from '@solana/web3.js';
+import { AuthorityType } from '@solana-program/token-2022';
 
 import type { AccountEntry, DecodedParams, LabeledAccount, MintInfo, RawDecoded } from './types';
 
@@ -33,8 +33,8 @@ export function formatDecoded(raw: RawDecoded, mintInfo?: MintInfo): DecodedPara
     if (mintInfo?.mint && MINT_INJECT_TYPES.has(raw.type)) {
         // Insert Mint right after Source (index 0), mirroring TransferChecked layout.
         accounts.splice(1, 0, {
-            isWritable: false,
             isSigner: false,
+            isWritable: false,
             label: 'Mint',
             pubkey: new PublicKey(mintInfo.mint),
         });

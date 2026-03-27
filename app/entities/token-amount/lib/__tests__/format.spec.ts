@@ -47,11 +47,11 @@ describe('tokenAmountToNumber', () => {
 describe('tokenAmountToFiat', () => {
     it.each([
         // 1.5 SOL at $150/SOL = $225
-        { amount: 1_500_000_000n, decimals: 9, price: 150, expected: 225, label: 'wSOL at 150' },
+        { amount: 1_500_000_000n, decimals: 9, expected: 225, label: 'wSOL at 150', price: 150 },
         // 1 USDC at $1/USDC = $1
-        { amount: 1_000_000n, decimals: 6, price: 1, expected: 1, label: 'USDC at 1' },
+        { amount: 1_000_000n, decimals: 6, expected: 1, label: 'USDC at 1', price: 1 },
         // 0.5 USDC at $1/USDC = $0.5
-        { amount: 500_000n, decimals: 6, price: 1, expected: 0.5, label: 'USDC at 1 (half)' },
+        { amount: 500_000n, decimals: 6, expected: 0.5, label: 'USDC at 1 (half)', price: 1 },
     ])('should convert $label → $expected', ({ amount, decimals, price, expected }) => {
         expect(tokenAmountToFiat({ amount, decimals }, price)).toBe(expected);
     });
