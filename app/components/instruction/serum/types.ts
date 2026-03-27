@@ -3,6 +3,8 @@ import { AccountMeta, PublicKey, SignatureResult, TransactionInstruction } from 
 import { BigIntFromString } from '@validators/number';
 import { create, enums, Infer, number, type } from 'superstruct';
 
+import { readUint32LE } from '@/app/shared/lib/bytes';
+
 export const OPEN_BOOK_PROGRAM_ID = 'srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX';
 
 const SERUM_PROGRAM_IDS = [
@@ -566,7 +568,7 @@ const SERUM_CODE_LOOKUP: { [key: number]: string } = {
 };
 
 export function parseSerumInstructionCode(instruction: TransactionInstruction) {
-    return instruction.data.slice(1, 5).readUInt32LE(0);
+    return readUint32LE(instruction.data, 1);
 }
 
 export function parseSerumInstructionTitle(instruction: TransactionInstruction): string {

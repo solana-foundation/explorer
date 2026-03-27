@@ -139,6 +139,32 @@ export function writeUint32LE(bytes: Uint8Array, value: number, offset: number):
 }
 
 /**
+ * Read an 8-bit unsigned integer
+ * Replaces: buffer.readUInt8(offset)
+ */
+export function readUint8(bytes: Uint8Array, offset: number): number {
+    return bytes[offset] ?? 0;
+}
+
+/**
+ * Read a 16-bit unsigned integer in little-endian format
+ * Replaces: buffer.readUInt16LE(offset)
+ */
+export function readUint16LE(bytes: Uint8Array, offset: number): number {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    return view.getUint16(offset, true);
+}
+
+/**
+ * Read a 32-bit unsigned integer in little-endian format
+ * Replaces: buffer.readUInt32LE(offset)
+ */
+export function readUint32LE(bytes: Uint8Array, offset: number): number {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    return view.getUint32(offset, true);
+}
+
+/**
  * Concatenate multiple Uint8Arrays
  * Replaces: Buffer.concat([...])
  */
