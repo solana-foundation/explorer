@@ -27,7 +27,7 @@ export function headerLayout(property = 'header') {
     return BufferLayout.struct([BufferLayout.u32('version'), BufferLayout.u32('type')], property);
 }
 
-function decodeData(type: any, buffer: Buffer): any {
+function decodeData(type: any, buffer: Uint8Array): any {
     let data;
     try {
         data = type.layout.decode(buffer);

@@ -59,7 +59,7 @@ import {
 } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
-import { alloc, equals } from '@/app/shared/lib/bytes';
+import { alloc, bytes, equals, toBuffer } from '@/app/shared/lib/bytes';
 
 import { parseTokenProgramInstruction } from './instruction-parsers/spl-token.parser';
 import { parseSystemProgramInstruction } from './instruction-parsers/system-program.parser';
@@ -177,8 +177,8 @@ function convertUpgradeNonceInfo(parsed: any): UpgradeNonceInfo {
     };
 }
 
-function discriminatorToBuffer(discrimnator: number): Buffer {
-    return Buffer.from([discrimnator]);
+function discriminatorToBytes(discrimnator: number): Uint8Array {
+    return bytes([discrimnator]);
 }
 
 function intoProgramName(programId: PublicKey): string | undefined {
@@ -209,7 +209,7 @@ function intoParsedData(instruction: TransactionInstruction, parsed?: any): any 
 
         // workaround for "create" instructions
         if (isDataEqual(data, alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
-            instructionData = discriminatorToBuffer(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR);
+            instructionData = toBuffer(discriminatorToBytes(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR));
             instruction.data = instructionData; // overwrite original data with the modified one
         }
 

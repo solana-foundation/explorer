@@ -281,7 +281,7 @@ async function fetchMultipleAccounts({
 
                     // If we cannot parse account layout as native spl account
                     // then keep raw data for other components to decode
-                    let rawData: Buffer | undefined;
+                    let rawData: Uint8Array | undefined;
                     if (!parsedData && !('parsed' in result.data) && dataMode !== 'skip') {
                         space = result.data.length;
                         rawData = result.data;
