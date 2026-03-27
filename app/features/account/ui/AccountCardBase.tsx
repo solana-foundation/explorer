@@ -34,6 +34,7 @@ export function AccountCardBase({
                         variant={showRaw ? 'default' : 'outline'}
                         size="sm"
                         aria-label="Raw"
+                        className={showRaw ? 'e-shadow-active-sm' : undefined}
                         onClick={() => setShowRaw(r => !r)}
                     >
                         <Code size={12} />
