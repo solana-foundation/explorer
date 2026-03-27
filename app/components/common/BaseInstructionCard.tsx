@@ -23,6 +23,10 @@ type InstructionProps = {
     raw?: TransactionInstruction;
     // will be triggered on requesting raw data for instruction, if present
     onRequestRaw?: () => void;
+    // Extra buttons rendered in the card header next to Raw
+    headerButtons?: React.ReactNode;
+    // Show a Collapse/Expand button that hides all card content
+    collapsible?: boolean;
 };
 
 export function BaseInstructionCard({
@@ -37,9 +41,12 @@ export function BaseInstructionCard({
     childIndex,
     raw,
     onRequestRaw,
+    headerButtons,
+    collapsible = false,
 }: InstructionProps) {
     const [resultClass] = ixResult(result, index);
     const [showRaw, setShowRaw] = React.useState(defaultRaw || false);
+    const [expanded, setExpanded] = React.useState(true);
     const rawClickHandler = () => {
         if (!defaultRaw && !showRaw && !raw) {
             // trigger handler to simulate behaviour for the InstructionCard for the transcation which contains logic in it to fetch raw transaction data
@@ -62,14 +69,30 @@ export function BaseInstructionCard({
                     {title}
                 </h3>
 
-                <button
-                    disabled={defaultRaw}
-                    className={cn('btn btn-sm d-flex align-items-center', showRaw ? 'btn-black active' : 'btn-white')}
-                    onClick={rawClickHandler}
-                >
-                    <Code className="me-2" size={13} /> Raw
-                </button>
+                <div className="d-flex align-items-center gap-2">
+                    {headerButtons}
+                    {collapsible && (
+                        <button
+                            className="btn btn-sm d-flex align-items-center btn-white"
+                            onClick={() => setExpanded(v => !v)}
+                        >
+                            {expanded ? 'Collapse' : 'Expand'}
+                        </button>
+                    )}
+                    <button
+                        disabled={defaultRaw || !expanded}
+                        className={cn(
+                            'btn btn-sm d-flex align-items-center',
+                            showRaw ? 'btn-black active' : 'btn-white',
+                            (defaultRaw || !expanded) && 'e-cursor-not-allowed !e-pointer-events-auto',
+                        )}
+                        onClick={rawClickHandler}
+                    >
+                        <Code className="me-2" size={13} /> Raw
+                    </button>
+                </div>
             </div>
+            {expanded && (
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <tbody className="list">
@@ -99,7 +122,9 @@ export function BaseInstructionCard({
                                 </tr>
                                 <tr>
                                     <td colSpan={3}>
-                                        <div className="inner-cards">{innerCards}</div>
+                                        {/* !e-m-0 overrides the 1.5rem margin from inner-cards
+                                            so the card aligns with the "Inner Instructions" label above */}
+                                        <div className="inner-cards !e-m-0">{innerCards}</div>
                                     </td>
                                 </tr>
                             </>
@@ -119,6 +144,7 @@ export function BaseInstructionCard({
                     </tbody>
                 </table>
             </div>
+            )}
         </div>
     );
 }

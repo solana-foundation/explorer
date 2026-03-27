@@ -1,3 +1,5 @@
+'use client';
+
 import { InstructionCard } from '@components/instruction/InstructionCard';
 import type { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 
@@ -30,20 +32,22 @@ export function TokenBatchCard({
     const title = `Token Program: Batch (${subInstructions.length} instruction${subInstructions.length !== 1 ? 's' : ''})`;
 
     return (
-        <InstructionCard title={title} {...{ childIndex, index, innerCards, ix, result }}>
+        <InstructionCard title={title} collapsible {...{ childIndex, index, innerCards, ix, result }}>
             <tr>
                 <td colSpan={3} className="e-p-0">
-                    <div className="e-px-4 e-pb-2">
+                    <div className="e-pb-2">
                         {error && (
                             <div className="e-mb-2 e-text-sm e-text-red-500" data-testid="batch-error">
                                 Parse error: {error}
                             </div>
                         )}
-                        <BatchMintRegistryProvider>
-                            {subInstructions.map(subIx => (
-                                <SubInstructionRow key={subIx.index} subIx={subIx} />
-                            ))}
-                        </BatchMintRegistryProvider>
+                        {subInstructions.length > 0 && (
+                            <BatchMintRegistryProvider>
+                                {subInstructions.map(subIx => (
+                                    <SubInstructionRow key={subIx.index} subIx={subIx} />
+                                ))}
+                            </BatchMintRegistryProvider>
+                        )}
                         {subInstructions.length === 0 && !error && (
                             <div className="e-text-sm e-text-neutral-500" data-testid="batch-empty">
                                 No sub-instructions found

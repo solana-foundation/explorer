@@ -77,12 +77,15 @@ export function HexData({
     copyableRaw,
     truncate = false,
     inverted = false,
+    align = 'end',
 }: {
     raw: ByteArray;
     copyableRaw?: ByteArray;
     className?: string;
     truncate?: boolean;
     inverted?: boolean;
+    // 'end' is the legacy default (right-aligned in table cells).
+    align?: 'start' | 'end';
 }) {
     if (!raw || raw.length === 0) {
         return <span>No data</span>;
@@ -95,7 +98,7 @@ export function HexData({
         return <TruncatedContent hexString={hexString} copyText={copyText} raw={raw} inverted={inverted} />;
     }
 
-    return <FullContent hexString={hexString} copyText={copyText} className={className} inverted={inverted} />;
+    return <FullContent hexString={hexString} copyText={copyText} className={className} inverted={inverted} align={align} />;
 }
 
 const hexSpanVariants = cva('', {
@@ -148,16 +151,27 @@ function TruncatedContent({
     );
 }
 
+const fullContentVariants = cva('e-items-center', {
+    variants: {
+        align: {
+            end: 'e-justify-end',
+            start: 'e-justify-start',
+        },
+    },
+});
+
 function FullContent({
     hexString,
     copyText,
     className,
     inverted,
+    align,
 }: {
     hexString: string;
     copyText: string;
     className?: string;
     inverted: boolean;
+    align: 'start' | 'end';
 }) {
     const spans = formatHexSpans(splitHexPairs(hexString), { inverted });
     const rows = groupHexRows(spans);
@@ -174,12 +188,12 @@ function FullContent({
 
     return (
         <>
-            <div className={cn('e-hidden e-items-center e-justify-end lg:e-flex', className)}>
+            <div className={cn('e-hidden lg:e-flex', fullContentVariants({ align }), className)}>
                 <Copyable text={copyText}>
                     <pre className="e-mb-0 e-inline-block e-text-left">{divs}</pre>
                 </Copyable>
             </div>
-            <div className={cn('e-flex e-items-center lg:e-hidden', className)}>
+            <div className={cn('e-flex lg:e-hidden', fullContentVariants({ align }), className)}>
                 <Copyable text={copyText}>
                     <pre className="e-mb-0 e-inline-block e-text-left">{divs}</pre>
                 </Copyable>
