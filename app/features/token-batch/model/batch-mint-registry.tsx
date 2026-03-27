@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { type ReactNode, createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
 import type { MintInfo } from '../lib/types';
 
@@ -12,20 +12,20 @@ type BatchMintRegistry = {
     getUniqueMint: () => MintInfo | undefined;
 };
 
-const BatchMintRegistryContext = React.createContext<BatchMintRegistry | undefined>(undefined);
+const BatchMintRegistryContext = createContext<BatchMintRegistry | undefined>(undefined);
 
-export function BatchMintRegistryProvider({ children }: { children: React.ReactNode }) {
-    const mintsRef = React.useRef(new Map<string, number>());
-    const [revision, setRevision] = React.useState(0);
+export function BatchMintRegistryProvider({ children }: { children: ReactNode }) {
+    const mintsRef = useRef(new Map<string, number>());
+    const [revision, setRevision] = useState(0);
 
-    const register = React.useCallback((mint: string, decimals: number) => {
+    const register = useCallback((mint: string, decimals: number) => {
         const current = mintsRef.current;
         if (current.get(mint) === decimals) return;
         current.set(mint, decimals);
         setRevision(r => r + 1);
     }, []);
 
-    const getUniqueMint = React.useCallback((): MintInfo | undefined => {
+    const getUniqueMint = useCallback((): MintInfo | undefined => {
         const entries = [...mintsRef.current.entries()];
         if (entries.length !== 1) return undefined;
         const [mint, decimals] = entries[0];
@@ -33,11 +33,11 @@ export function BatchMintRegistryProvider({ children }: { children: React.ReactN
         // eslint-disable-next-line react-hooks/exhaustive-deps -- revision triggers recalculation
     }, [revision]);
 
-    const value = React.useMemo(() => ({ getUniqueMint, register }), [getUniqueMint, register]);
+    const value = useMemo(() => ({ getUniqueMint, register }), [getUniqueMint, register]);
 
     return <BatchMintRegistryContext.Provider value={value}>{children}</BatchMintRegistryContext.Provider>;
 }
 
 export function useBatchMintRegistry(): BatchMintRegistry | undefined {
-    return React.useContext(BatchMintRegistryContext);
+    return useContext(BatchMintRegistryContext);
 }
