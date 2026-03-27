@@ -6,6 +6,8 @@ import type { Account } from '@providers/accounts';
 import React from 'react';
 import { Code, RefreshCw } from 'react-feather';
 
+import { Button } from '@/app/components/shared/ui/button';
+
 export type AccountCardBaseProps = TableCardBodyProps & {
     title: React.ReactNode;
     rawContent?: React.ReactNode;
@@ -28,18 +30,21 @@ export function AccountCardBase({
             <div className="card-header e-gap-2">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">{title}</h3>
                 {showRawButton && (
-                    <button
-                        className={`btn btn-sm d-flex align-items-center ${showRaw ? 'btn-black active' : 'btn-white'}`}
+                    <Button
+                        variant={showRaw ? 'default' : 'outline'}
+                        size="sm"
+                        aria-label="Raw"
                         onClick={() => setShowRaw(r => !r)}
                     >
-                        <Code className="me-2" size={13} /> Raw
-                    </button>
+                        <Code size={12} />
+                        <span className="d-none d-md-inline">Raw</span>
+                    </Button>
                 )}
                 {refresh && (
-                    <button className="btn btn-white btn-sm" onClick={refresh}>
-                        <RefreshCw className="align-text-top me-2" size={13} />
-                        Refresh
-                    </button>
+                    <Button variant="outline" size="sm" aria-label="Refresh" onClick={refresh}>
+                        <RefreshCw size={12} />
+                        <span className="d-none d-md-inline">Refresh</span>
+                    </Button>
                 )}
             </div>
 
