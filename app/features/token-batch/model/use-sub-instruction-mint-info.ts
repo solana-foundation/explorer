@@ -19,10 +19,9 @@ export function useSubInstructionMintInfo(
     const lookup = resolveLookupAddress(typeName, accounts);
 
     // Hop 1: For Transfer/Approve, fetch the token account to discover its mint.
-    const tokenAccountQuery = useAccountQuery(
-        lookup?.kind === 'tokenAccount' ? [lookup.address] : undefined,
-        { select: selectTokenAccountMint },
-    );
+    const tokenAccountQuery = useAccountQuery(lookup?.kind === 'tokenAccount' ? [lookup.address] : undefined, {
+        select: selectTokenAccountMint,
+    });
 
     // The mint address is either known directly (MintTo/Burn) or discovered
     // from the token account query (Transfer/Approve).
@@ -37,9 +36,7 @@ export function useSubInstructionMintInfo(
     return { decimals: mintQuery.data, mint: mintAddress };
 }
 
-type LookupAddress =
-    | { kind: 'mint'; address: string }
-    | { kind: 'tokenAccount'; address: string };
+type LookupAddress = { kind: 'mint'; address: string } | { kind: 'tokenAccount'; address: string };
 
 function resolveLookupAddress(
     typeName: TokenInstructionName | 'Unknown',

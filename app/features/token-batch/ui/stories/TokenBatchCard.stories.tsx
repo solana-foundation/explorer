@@ -93,7 +93,7 @@ export const UnknownDiscriminator: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Unknown')).toBeInTheDocument();
-        await expect(canvas.getByText('feabcd')).toBeInTheDocument();
+        await expect(canvas.getByText('fe ab cd')).toBeInTheDocument();
     },
 };
 

@@ -59,8 +59,8 @@ function formatFields(raw: RawDecoded, externalDecimals?: number): { label: stri
         case 'mintToChecked':
         case 'burnChecked':
             return [
-                { label: 'Amount', value: formatTokenAmount(raw.amount, raw.decimals) },
                 { label: 'Decimals', value: raw.decimals.toString() },
+                { label: 'Amount', value: formatTokenAmount(raw.amount, raw.decimals) },
             ];
 
         case 'closeAccount':

@@ -28,9 +28,7 @@ export const FullShort: Story = {
 };
 
 // Multi-row data with alternating color spans
-const multiRowData = new Uint8Array(
-    Array.from({ length: 32 }, (_, i) => i),
-);
+const multiRowData = new Uint8Array(Array.from({ length: 32 }, (_, i) => i));
 
 export const FullMultiRow: Story = {
     args: { raw: multiRowData },
@@ -65,14 +63,13 @@ export const TruncatedShort: Story = {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('fe ab cd')).toBeInTheDocument();
         // No byte count shown for short data
+        // eslint-disable-next-line no-restricted-syntax -- Testing Library partial text match requires regexp
         expect(canvas.queryByText(/bytes/)).toBeNull();
     },
 };
 
 // Long data in truncate mode — ellipsis + byte count
-const truncateLongData = new Uint8Array(
-    Array.from({ length: 67 }, (_, i) => i),
-);
+const truncateLongData = new Uint8Array(Array.from({ length: 67 }, (_, i) => i));
 
 export const TruncatedLong: Story = {
     args: { raw: truncateLongData, truncate: true },
@@ -82,6 +79,7 @@ export const TruncatedLong: Story = {
         await expect(canvas.getAllByText('00 01 02 03').length).toBeGreaterThan(0);
         await expect(canvas.getAllByText('04 05 06 07').length).toBeGreaterThan(0);
         // Ellipsis
+        // eslint-disable-next-line no-restricted-syntax -- Testing Library partial text match requires regexp
         await expect(canvas.getByText(/\u2026/)).toBeInTheDocument();
         // Byte count
         await expect(canvas.getByText('(67 bytes)')).toBeInTheDocument();
@@ -89,9 +87,7 @@ export const TruncatedLong: Story = {
 };
 
 // Exactly at threshold (16 bytes) — no truncation
-const atThreshold = new Uint8Array(
-    Array.from({ length: 16 }, (_, i) => i + 0xa0),
-);
+const atThreshold = new Uint8Array(Array.from({ length: 16 }, (_, i) => i + 0xa0));
 
 export const TruncatedAtThreshold: Story = {
     args: { raw: atThreshold, truncate: true },
@@ -100,7 +96,9 @@ export const TruncatedAtThreshold: Story = {
         // All bytes shown in colored spans, no ellipsis or byte count
         await expect(canvas.getAllByText('a0 a1 a2 a3').length).toBeGreaterThan(0);
         await expect(canvas.getAllByText('ac ad ae af').length).toBeGreaterThan(0);
+        // eslint-disable-next-line no-restricted-syntax -- Testing Library partial text match requires regexp
         expect(canvas.queryByText(/\u2026/)).toBeNull();
+        // eslint-disable-next-line no-restricted-syntax -- Testing Library partial text match requires regexp
         expect(canvas.queryByText(/bytes/)).toBeNull();
     },
 };

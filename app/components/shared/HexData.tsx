@@ -122,7 +122,17 @@ function ColoredSpans({ spans }: { spans: HexSpan[] }) {
     );
 }
 
-function TruncatedContent({ hexString, copyText, raw, inverted }: { hexString: string; copyText: string; raw: ByteArray; inverted: boolean }) {
+function TruncatedContent({
+    hexString,
+    copyText,
+    raw,
+    inverted,
+}: {
+    hexString: string;
+    copyText: string;
+    raw: ByteArray;
+    inverted: boolean;
+}) {
     const { pairs: truncatedPairs, truncated } = truncateHexPairs(splitHexPairs(hexString));
     const spans = formatHexSpans(truncatedPairs, { inverted });
 
@@ -138,7 +148,17 @@ function TruncatedContent({ hexString, copyText, raw, inverted }: { hexString: s
     );
 }
 
-function FullContent({ hexString, copyText, className, inverted }: { hexString: string; copyText: string; className?: string; inverted: boolean }) {
+function FullContent({
+    hexString,
+    copyText,
+    className,
+    inverted,
+}: {
+    hexString: string;
+    copyText: string;
+    className?: string;
+    inverted: boolean;
+}) {
     const spans = formatHexSpans(splitHexPairs(hexString), { inverted });
     const rows = groupHexRows(spans);
 
@@ -154,14 +174,14 @@ function FullContent({ hexString, copyText, className, inverted }: { hexString: 
 
     return (
         <>
-            <div className={cn('e-hidden lg:e-flex e-items-center e-justify-end', className)}>
+            <div className={cn('e-hidden e-items-center e-justify-end lg:e-flex', className)}>
                 <Copyable text={copyText}>
-                    <pre className="e-inline-block e-text-left e-mb-0">{divs}</pre>
+                    <pre className="e-mb-0 e-inline-block e-text-left">{divs}</pre>
                 </Copyable>
             </div>
-            <div className={cn('e-flex lg:e-hidden e-items-center', className)}>
+            <div className={cn('e-flex e-items-center lg:e-hidden', className)}>
                 <Copyable text={copyText}>
-                    <pre className="e-inline-block e-text-left e-mb-0">{divs}</pre>
+                    <pre className="e-mb-0 e-inline-block e-text-left">{divs}</pre>
                 </Copyable>
             </div>
         </>

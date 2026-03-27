@@ -22,10 +22,7 @@ function makeAccount(pubkey: string): Account {
     };
 }
 
-function createWrapper(
-    entries: Record<string, { status: FetchStatus; data?: Account }> = {},
-    fetchSpy = vi.fn(),
-) {
+function createWrapper(entries: Record<string, { status: FetchStatus; data?: Account }> = {}, fetchSpy = vi.fn()) {
     const state = { entries, url: MAINNET_BETA_URL };
     const fetchers = {
         parsed: { fetch: fetchSpy },
@@ -38,11 +35,7 @@ function createWrapper(
             React.createElement(
                 StateContext.Provider,
                 { value: state },
-                React.createElement(
-                    FetchersContext.Provider,
-                    { value: fetchers as any },
-                    children,
-                ),
+                React.createElement(FetchersContext.Provider, { value: fetchers as any }, children),
             ),
     };
 }
