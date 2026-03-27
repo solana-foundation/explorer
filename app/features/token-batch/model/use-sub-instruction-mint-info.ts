@@ -68,6 +68,8 @@ function resolveLookupAddress(
     switch (typeName) {
         case 'Transfer':
         case 'Approve':
+        case 'CloseAccount':
+        case 'Revoke':
             return accounts[0] ? { address: accounts[0].pubkey.toBase58(), kind: 'tokenAccount' } : undefined;
         case 'MintTo':
             return accounts[0] ? { address: accounts[0].pubkey.toBase58(), kind: 'mint' } : undefined;

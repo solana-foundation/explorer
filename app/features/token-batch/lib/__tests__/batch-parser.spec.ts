@@ -360,7 +360,7 @@ describe('decodeSubInstructionParams', () => {
 
             if (!decoded) throw new Error(`Expected ${type} to decode`);
             expect(decoded.fields).toEqual([{ label: 'Amount', value: expected }]);
-            expect(decoded.accounts[1].label).toBe('Mint');
+            expect(decoded.accounts[1].label).toBe('Mint*');
             expect(decoded.accounts[1].pubkey.toBase58()).toBe(mint);
         },
     );

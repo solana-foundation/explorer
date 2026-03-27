@@ -28,20 +28,19 @@ const ACCOUNT_ROLES: Record<RawDecoded['type'], readonly string[]> = {
     transferChecked: ['Source', 'Mint', 'Destination', 'Owner/Delegate'],
 };
 
-// Unchecked Transfer and Approve don't include the mint in their on-chain
-// account list. When the mint address has been resolved via RPC, we inject
-// a synthetic "Mint" account so the UI matches TransferChecked's layout.
-const MINT_INJECT_TYPES = new Set<RawDecoded['type']>(['transfer', 'approve']);
+// These instructions don't include the mint in their on-chain account list.
+// When the mint address has been resolved via RPC, we inject a synthetic
+// "Mint" account after the first account (index 0).
+const MINT_INJECT_TYPES = new Set<RawDecoded['type']>(['transfer', 'approve', 'closeAccount', 'revoke']);
 
 export function formatDecoded(raw: RawDecoded, mintInfo?: MintInfo): DecodedParams {
     const accounts = labelAccounts(raw.accounts, ACCOUNT_ROLES[raw.type]);
 
     if (mintInfo?.mint && MINT_INJECT_TYPES.has(raw.type)) {
-        // Insert Mint right after Source (index 0), mirroring TransferChecked layout.
         accounts.splice(1, 0, {
             isSigner: false,
             isWritable: false,
-            label: 'Mint',
+            label: 'Mint*',
             pubkey: new PublicKey(mintInfo.mint),
         });
     }
