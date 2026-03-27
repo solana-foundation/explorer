@@ -84,7 +84,7 @@ export function BaseInstructionCard({
                         className={cn(
                             'btn btn-sm d-flex align-items-center',
                             showRaw ? 'btn-black active' : 'btn-white',
-                            (defaultRaw || !expanded) && 'e-cursor-not-allowed !e-pointer-events-auto',
+                            (defaultRaw || !expanded) && '!e-pointer-events-auto e-cursor-not-allowed',
                         )}
                         onClick={rawClickHandler}
                     >
@@ -93,57 +93,57 @@ export function BaseInstructionCard({
                 </div>
             </div>
             {expanded && (
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <tbody className="list">
-                        {showRaw ? (
-                            <>
-                                <tr>
-                                    <td>Program</td>
-                                    <td className="text-lg-end">
-                                        <Address pubkey={ix.programId} alignRight link />
-                                    </td>
-                                </tr>
-                                {'parsed' in ix ? (
-                                    <BaseRawParsedDetails ix={ix}>
-                                        {raw ? <BaseRawDetails ix={raw} /> : null}
-                                    </BaseRawParsedDetails>
-                                ) : (
-                                    <BaseRawDetails ix={ix} />
-                                )}
-                            </>
-                        ) : (
-                            children
-                        )}
-                        {innerCards && innerCards.length > 0 && (
-                            <>
-                                <tr className="table-sep">
-                                    <td colSpan={3}>Inner Instructions</td>
-                                </tr>
-                                <tr>
-                                    <td colSpan={3}>
-                                        {/* !e-m-0 overrides the 1.5rem margin from inner-cards
+                <div className="table-responsive mb-0">
+                    <table className="table table-sm table-nowrap card-table">
+                        <tbody className="list">
+                            {showRaw ? (
+                                <>
+                                    <tr>
+                                        <td>Program</td>
+                                        <td className="text-lg-end">
+                                            <Address pubkey={ix.programId} alignRight link />
+                                        </td>
+                                    </tr>
+                                    {'parsed' in ix ? (
+                                        <BaseRawParsedDetails ix={ix}>
+                                            {raw ? <BaseRawDetails ix={raw} /> : null}
+                                        </BaseRawParsedDetails>
+                                    ) : (
+                                        <BaseRawDetails ix={ix} />
+                                    )}
+                                </>
+                            ) : (
+                                children
+                            )}
+                            {innerCards && innerCards.length > 0 && (
+                                <>
+                                    <tr className="table-sep">
+                                        <td colSpan={3}>Inner Instructions</td>
+                                    </tr>
+                                    <tr>
+                                        <td colSpan={3}>
+                                            {/* !e-m-0 overrides the 1.5rem margin from inner-cards
                                             so the card aligns with the "Inner Instructions" label above */}
-                                        <div className="inner-cards !e-m-0">{innerCards}</div>
-                                    </td>
-                                </tr>
-                            </>
-                        )}
-                        {eventCards && eventCards.length > 0 && (
-                            <>
-                                <tr className="table-sep">
-                                    <td colSpan={3}>Events</td>
-                                </tr>
-                                <tr>
-                                    <td colSpan={3}>
-                                        <div className="inner-cards">{eventCards}</div>
-                                    </td>
-                                </tr>
-                            </>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                                            <div className="inner-cards !e-m-0">{innerCards}</div>
+                                        </td>
+                                    </tr>
+                                </>
+                            )}
+                            {eventCards && eventCards.length > 0 && (
+                                <>
+                                    <tr className="table-sep">
+                                        <td colSpan={3}>Events</td>
+                                    </tr>
+                                    <tr>
+                                        <td colSpan={3}>
+                                            <div className="inner-cards">{eventCards}</div>
+                                        </td>
+                                    </tr>
+                                </>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             )}
         </div>
     );

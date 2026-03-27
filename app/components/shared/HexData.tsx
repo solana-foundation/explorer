@@ -96,7 +96,15 @@ export function HexData({
         return <TruncatedContent hexString={hexString} copyText={copyText} raw={raw} inverted={inverted} />;
     }
 
-    return <FullContent hexString={hexString} copyText={copyText} className={className} inverted={inverted} align={align} />;
+    return (
+        <FullContent
+            hexString={hexString}
+            copyText={copyText}
+            className={className}
+            inverted={inverted}
+            align={align}
+        />
+    );
 }
 
 const hexSpanVariants = cva('', {
