@@ -69,8 +69,6 @@ export function groupHexRows(spans: HexSpan[]): HexRow[] {
     return rows;
 }
 
-// ── Component ────────────────────────────────────────────────────────
-
 export function HexData({
     raw,
     className,
