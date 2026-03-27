@@ -2,9 +2,11 @@
 
 import { selectMintDecimals, selectTokenAccountMint, useAccountQuery } from '@entities/account';
 import type { AccountMeta } from '@solana/web3.js';
+import { useEffect } from 'react';
 
 import type { TokenInstructionName } from '../lib/const';
 import type { MintInfo } from '../lib/types';
+import { useBatchMintRegistry } from './batch-mint-registry';
 
 // Resolves mint decimals for a single batch sub-instruction using AccountsProvider.
 //
@@ -12,10 +14,15 @@ import type { MintInfo } from '../lib/types';
 // - MintTo: 1 hop (accounts[0] IS the mint)
 // - Burn: 1 hop (accounts[1] IS the mint)
 // - Checked variants / others: no lookup needed
+//
+// When the on-chain lookup fails (e.g. closed token account), falls back to
+// the batch-level mint registry if all other sub-instructions resolved to
+// the same mint.
 export function useSubInstructionMintInfo(
     typeName: TokenInstructionName | 'Unknown',
     accounts: AccountMeta[],
 ): MintInfo | undefined {
+    const registry = useBatchMintRegistry();
     const lookup = resolveLookupAddress(typeName, accounts);
 
     // Hop 1: For Transfer/Approve, fetch the token account to discover its mint.
@@ -32,8 +39,24 @@ export function useSubInstructionMintInfo(
         select: selectMintDecimals,
     });
 
-    if (mintQuery.data === undefined || mintAddress === undefined) return undefined;
-    return { decimals: mintQuery.data, mint: mintAddress };
+    const decimals = mintQuery.data;
+    const resolved = decimals !== undefined && mintAddress !== undefined ? { decimals, mint: mintAddress } : undefined;
+
+    // Register discovered mint so other sub-instructions can use it as fallback.
+    useEffect(() => {
+        if (mintAddress === undefined || decimals === undefined) return;
+        registry?.register(mintAddress, decimals);
+    }, [mintAddress, decimals, registry]);
+
+    if (resolved) return resolved;
+
+    // Fallback: if this sub-instruction needs decimals but couldn't resolve
+    // (e.g. closed token account), use the batch-wide unique mint.
+    if (lookup && !resolved) {
+        return registry?.getUniqueMint();
+    }
+
+    return undefined;
 }
 
 type LookupAddress = { kind: 'mint'; address: string } | { kind: 'tokenAccount'; address: string };

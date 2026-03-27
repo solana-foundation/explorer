@@ -2,6 +2,7 @@ import { InstructionCard } from '@components/instruction/InstructionCard';
 import type { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 
 import { parseBatchInstruction, type ParsedSubInstruction } from '../lib/batch-parser';
+import { BatchMintRegistryProvider } from '../model/batch-mint-registry';
 import { SubInstructionRow } from './SubInstructionRow';
 
 export function TokenBatchCard({
@@ -38,9 +39,11 @@ export function TokenBatchCard({
                                 Parse error: {error}
                             </div>
                         )}
-                        {subInstructions.map(subIx => (
-                            <SubInstructionRow key={subIx.index} subIx={subIx} />
-                        ))}
+                        <BatchMintRegistryProvider>
+                            {subInstructions.map(subIx => (
+                                <SubInstructionRow key={subIx.index} subIx={subIx} />
+                            ))}
+                        </BatchMintRegistryProvider>
                         {subInstructions.length === 0 && !error && (
                             <div className="e-text-sm e-text-neutral-500" data-testid="batch-empty">
                                 No sub-instructions found
