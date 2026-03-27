@@ -15,7 +15,7 @@ import React from 'react';
 import { ChevronsUp } from 'react-feather';
 
 import { Logger } from '@/app/shared/lib/logger';
-import { fromBase64 } from '@/app/shared/lib/bytes';
+import { fromBase64, toBuffer } from '@/app/shared/lib/bytes';
 
 const NATIVE_PROGRAMS_MISSING_INVOKE_LOG: string[] = [
     'AddressLookupTab1e1111111111111111111111111',
@@ -196,7 +196,7 @@ function ProgramLogRow({
                 });
 
                 txInstruction = new TransactionInstruction({
-                    data: Buffer.from(instruction.data),
+                    data: toBuffer(instruction.data),
                     keys: accounts,
                     programId,
                 });
@@ -212,7 +212,7 @@ function ProgramLogRow({
                 });
 
                 txInstruction = new TransactionInstruction({
-                    data: Buffer.from(fromBase64(instruction.data)), // TransactionInstruction expects Buffer, convert from Uint8Array
+                    data: toBuffer(fromBase64(instruction.data)),
                     keys,
                     programId,
                 });

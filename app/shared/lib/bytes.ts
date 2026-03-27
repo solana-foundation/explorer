@@ -323,3 +323,14 @@ export function bytes(input: string | ArrayLike<number> | ArrayBufferLike, encod
     // Handle array-like (number[])
     return new Uint8Array(input as ArrayLike<number>);
 }
+
+/**
+ * Fallback for external libraries that require Buffer
+ */
+export function toBuffer(bytes: ByteArray): Buffer {
+    if (bytes instanceof Buffer) {
+        return bytes;
+    }
+    // Otherwise, create a Buffer from the Uint8Array
+    return Buffer.from(bytes);
+}

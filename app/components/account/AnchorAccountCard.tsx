@@ -8,7 +8,7 @@ import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
 import React, { useMemo } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
-import { equals } from '@/app/shared/lib/bytes';
+import { equals, toBuffer } from '@/app/shared/lib/bytes';
 
 export function AnchorAccountCard({ account }: { account: Account }) {
     const { lamports } = account;
@@ -28,7 +28,7 @@ export function AnchorAccountCard({ account }: { account: Account }) {
             if (account) {
                 accountDef = anchorProgram.idl.types?.find((type: any) => type.name === account.name);
                 try {
-                    decodedAccountData = coder.decode(account.name, Buffer.from(rawData));
+                    decodedAccountData = coder.decode(account.name, toBuffer(rawData));
                 } catch (err) {
                     Logger.debug('[components:anchor-account] Failed to decode account data', { error: err });
                 }
