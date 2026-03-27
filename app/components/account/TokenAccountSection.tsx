@@ -409,7 +409,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                     <ScaledUiAmountMultiplierTooltip
                         rawAmount={normalizeTokenAmount(
                             Number(info.tokenAmount.amount),
-                            info.tokenAmount.decimals || 0
+                            info.tokenAmount.decimals || 0,
                         ).toString()}
                         scaledUiAmountMultiplier={scaledUiAmountMultiplier}
                     />
