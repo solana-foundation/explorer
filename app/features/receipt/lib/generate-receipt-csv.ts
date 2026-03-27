@@ -1,4 +1,4 @@
-import { writeToString } from 'fast-csv';
+import { writeToString } from '@fast-csv/format';
 
 import type { FormattedReceipt } from '../types';
 
