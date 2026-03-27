@@ -11,12 +11,13 @@ import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import { NATIVE_MINT } from '@solana/spl-token';
 import { TransactionSignature } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
-import { formatUsdValue, lamportsToSol } from '@utils/index';
+import { formatUsdValue } from '@utils/index';
 import { useClusterPath } from '@utils/url';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect } from 'react';
 import useSWR from 'swr';
 
+import { getReceiptAmount, getReceiptMint } from '@/app/entities/token-receipt';
 import { getProxiedUri } from '@/app/features/metadata';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { Logger } from '@/app/shared/lib/logger';
@@ -141,14 +142,12 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const receiverDomain = usePrimaryDomain(receipt.receiver.address);
     const senderLink = useExplorerLink(`/address/${receipt.sender.address}`);
     const receiverLink = useExplorerLink(`/address/${receipt.receiver.address}`);
-    const tokenLink = useExplorerLink(receipt.kind === 'token' ? `/address/${receipt.mint}` : '');
+    const receiptMint = getReceiptMint(receipt);
+    const tokenLink = useExplorerLink(receiptMint ? `/address/${receiptMint}` : '');
     const logoURI = receipt.logoURI ? getProxiedUri(receipt.logoURI) : undefined;
 
-    const mint = receipt.kind === 'token' ? receipt.mint : NATIVE_MINT.toBase58();
-    const priceResult = useTokenPrice(mint);
-    // SOL receipts store total.raw in lamports; token receipts store it as a UI amount.
-    // The price is always per 1 whole unit, so lamports must be converted to SOL first.
-    const amount = receipt.kind === 'sol' ? lamportsToSol(receipt.total.raw) : receipt.total.raw;
+    const priceResult = useTokenPrice(receiptMint ?? NATIVE_MINT.toBase58());
+    const amount = getReceiptAmount(receipt);
     const usdValue = priceResult?.price != null ? formatUsdValue(amount, priceResult.price) : undefined;
 
     const downloadCsv = useCallback(async () => {

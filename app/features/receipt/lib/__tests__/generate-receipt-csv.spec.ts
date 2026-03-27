@@ -39,6 +39,11 @@ describe('buildReceiptCsvRow', () => {
         expect(row[8]).toBe('$150.00');
     });
 
+    it('should leave mint field empty for SOL receipts', () => {
+        const row = buildReceiptCsvRow(RECEIPT, SIGNATURE);
+        expect(row[7]).toBe('');
+    });
+
     it('should include mint address for token receipts', () => {
         const tokenReceipt: FormattedReceipt = {
             ...RECEIPT,

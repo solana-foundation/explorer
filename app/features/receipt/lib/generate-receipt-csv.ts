@@ -1,5 +1,7 @@
 import { writeToString } from '@fast-csv/format';
 
+import { getReceiptMint } from '@/app/entities/token-receipt';
+
 import type { FormattedReceipt } from '../types';
 
 const CSV_HEADERS = [
@@ -25,7 +27,7 @@ function sanitizeCsvField(value: string): string {
 }
 
 export function buildReceiptCsvRow(receipt: FormattedReceipt, signature: string, usdValue?: string): string[] {
-    const mint = receipt.kind === 'token' ? receipt.mint : undefined;
+    const mint = getReceiptMint(receipt);
 
     return [
         receipt.date.utc,
@@ -38,7 +40,7 @@ export function buildReceiptCsvRow(receipt: FormattedReceipt, signature: string,
         mint ?? '',
         usdValue ?? '',
         receipt.fee.formatted,
-        sanitizeCsvField(receipt.memo ?? ''),
+        receipt.memo ? sanitizeCsvField(receipt.memo) : '',
     ];
 }
 
