@@ -4,8 +4,10 @@ export type AccountEntry = { pubkey: PublicKey; isSigner: boolean; isWritable: b
 
 export type LabeledAccount = AccountEntry & { label: string };
 
+export type DecodedField = { label: string; value: string; isAddress?: boolean };
+
 export type DecodedParams = {
-    fields: { label: string; value: string }[];
+    fields: DecodedField[];
     accounts: LabeledAccount[];
 };
 
@@ -36,7 +38,33 @@ export type RawSetAuthority = {
     accounts: AccountEntry[];
 };
 
-export type RawDecoded = RawAmount | RawCheckedAmount | RawCloseAccount | RawSetAuthority;
+export type RawAccountsOnly = {
+    type: 'freezeAccount' | 'thawAccount' | 'revoke';
+    accounts: AccountEntry[];
+};
+
+export type RawInitializeMint2 = {
+    type: 'initializeMint2';
+    decimals: number;
+    mintAuthority: string;
+    freezeAuthority: string | undefined;
+    accounts: AccountEntry[];
+};
+
+export type RawInitializeAccount3 = {
+    type: 'initializeAccount3';
+    owner: string;
+    accounts: AccountEntry[];
+};
+
+export type RawDecoded =
+    | RawAmount
+    | RawCheckedAmount
+    | RawCloseAccount
+    | RawSetAuthority
+    | RawAccountsOnly
+    | RawInitializeMint2
+    | RawInitializeAccount3;
 
 // Resolved mint info returned from the RPC fetch pipeline.
 // For unchecked Transfer/Approve the mint is discovered via a 2-hop lookup;

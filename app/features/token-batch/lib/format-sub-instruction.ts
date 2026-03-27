@@ -5,7 +5,7 @@ import { formatTokenAmount } from '@entities/token-amount';
 import { PublicKey } from '@solana/web3.js';
 import { AuthorityType } from '@solana-program/token-2022';
 
-import type { AccountEntry, DecodedParams, LabeledAccount, MintInfo, RawDecoded } from './types';
+import type { AccountEntry, DecodedField, DecodedParams, LabeledAccount, MintInfo, RawDecoded } from './types';
 
 // Account layouts: each SPL Token instruction expects a fixed sequence of named
 // accounts, optionally followed by multisig signer accounts.
@@ -16,9 +16,14 @@ const ACCOUNT_ROLES: Record<RawDecoded['type'], readonly string[]> = {
     burn: ['Account', 'Mint', 'Owner/Delegate'],
     burnChecked: ['Account', 'Mint', 'Owner/Delegate'],
     closeAccount: ['Account', 'Destination', 'Owner'],
+    freezeAccount: ['Account', 'Mint', 'Freeze Authority'],
+    initializeAccount3: ['Account', 'Mint'],
+    initializeMint2: ['Mint'],
     mintTo: ['Mint', 'Destination', 'Mint Authority'],
     mintToChecked: ['Mint', 'Destination', 'Mint Authority'],
+    revoke: ['Source', 'Owner'],
     setAuthority: ['Account', 'Current Authority'],
+    thawAccount: ['Account', 'Mint', 'Freeze Authority'],
     transfer: ['Source', 'Destination', 'Owner/Delegate'],
     transferChecked: ['Source', 'Mint', 'Destination', 'Owner/Delegate'],
 };
@@ -47,7 +52,7 @@ export function formatDecoded(raw: RawDecoded, mintInfo?: MintInfo): DecodedPara
     };
 }
 
-function formatFields(raw: RawDecoded, externalDecimals?: number): { label: string; value: string }[] {
+function formatFields(raw: RawDecoded, externalDecimals?: number): DecodedField[] {
     switch (raw.type) {
         case 'transfer':
         case 'approve':
@@ -73,7 +78,22 @@ function formatFields(raw: RawDecoded, externalDecimals?: number): { label: stri
             ];
 
         case 'closeAccount':
+        case 'freezeAccount':
+        case 'thawAccount':
+        case 'revoke':
             return [];
+
+        case 'initializeMint2':
+            return [
+                { label: 'Decimals', value: raw.decimals.toString() },
+                { isAddress: true, label: 'Mint Authority', value: raw.mintAuthority },
+                ...(raw.freezeAuthority
+                    ? [{ isAddress: true, label: 'Freeze Authority', value: raw.freezeAuthority }]
+                    : [{ label: 'Freeze Authority', value: '(none)' }]),
+            ];
+
+        case 'initializeAccount3':
+            return [{ isAddress: true, label: 'Owner', value: raw.owner }];
 
         case 'setAuthority':
             return [
@@ -81,7 +101,9 @@ function formatFields(raw: RawDecoded, externalDecimals?: number): { label: stri
                     label: 'Authority Type',
                     value: AuthorityType[raw.authorityType] ?? `Unknown (${raw.authorityType})`,
                 },
-                { label: 'New Authority', value: raw.newAuthority ?? '(none)' },
+                ...(raw.newAuthority
+                    ? [{ isAddress: true, label: 'New Authority', value: raw.newAuthority }]
+                    : [{ label: 'New Authority', value: '(none)' }]),
             ];
     }
 }

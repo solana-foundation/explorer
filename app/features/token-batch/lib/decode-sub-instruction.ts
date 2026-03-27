@@ -9,6 +9,8 @@ import {
     getApproveInstructionDataDecoder,
     getBurnCheckedInstructionDataDecoder,
     getBurnInstructionDataDecoder,
+    getInitializeAccount3InstructionDataDecoder,
+    getInitializeMint2InstructionDataDecoder,
     getMintToCheckedInstructionDataDecoder,
     getMintToInstructionDataDecoder,
     getSetAuthorityInstructionDataDecoder,
@@ -22,10 +24,13 @@ import type {
     AccountEntry,
     DecodedParams,
     MintInfo,
+    RawAccountsOnly,
     RawAmount,
     RawCheckedAmount,
     RawCloseAccount,
     RawDecoded,
+    RawInitializeAccount3,
+    RawInitializeMint2,
     RawSetAuthority,
 } from './types';
 
@@ -76,6 +81,16 @@ function decodeByType(
             return decodeMintToChecked(data, accounts);
         case 'BurnChecked':
             return decodeBurnChecked(data, accounts);
+        case 'FreezeAccount':
+            return decodeAccountsOnly(data, accounts, 'freezeAccount');
+        case 'ThawAccount':
+            return decodeAccountsOnly(data, accounts, 'thawAccount');
+        case 'Revoke':
+            return decodeAccountsOnly(data, accounts, 'revoke');
+        case 'InitializeMint2':
+            return decodeInitializeMint2(data, accounts);
+        case 'InitializeAccount3':
+            return decodeInitializeAccount3(data, accounts);
         default:
             return undefined;
     }
@@ -138,4 +153,25 @@ function decodeMintToChecked(data: Uint8Array, accounts: AccountEntry[]): RawChe
 function decodeBurnChecked(data: Uint8Array, accounts: AccountEntry[]): RawCheckedAmount {
     const { amount, decimals } = getBurnCheckedInstructionDataDecoder().decode(data);
     return { accounts, amount, decimals, type: 'burnChecked' };
+}
+
+function decodeAccountsOnly(data: Uint8Array, accounts: AccountEntry[], type: RawAccountsOnly['type']): RawAccountsOnly | undefined {
+    if (data.length < 1) return undefined;
+    return { accounts, type };
+}
+
+function decodeInitializeMint2(data: Uint8Array, accounts: AccountEntry[]): RawInitializeMint2 {
+    const { decimals, mintAuthority, freezeAuthority } = getInitializeMint2InstructionDataDecoder().decode(data);
+    return {
+        accounts,
+        decimals,
+        freezeAuthority: freezeAuthority.__option === 'Some' ? freezeAuthority.value : undefined,
+        mintAuthority,
+        type: 'initializeMint2',
+    };
+}
+
+function decodeInitializeAccount3(data: Uint8Array, accounts: AccountEntry[]): RawInitializeAccount3 {
+    const { owner } = getInitializeAccount3InstructionDataDecoder().decode(data);
+    return { accounts, owner, type: 'initializeAccount3' };
 }

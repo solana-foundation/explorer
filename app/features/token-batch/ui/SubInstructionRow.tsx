@@ -3,9 +3,11 @@
 import { Address } from '@components/common/Address';
 import { HexData } from '@shared/HexData';
 import { Badge } from '@shared/ui/badge';
+import { PublicKey } from '@solana/web3.js';
 
 import type { ParsedSubInstruction } from '../lib/batch-parser';
 import { type DecodedParams, decodeSubInstructionParams, type LabeledAccount } from '../lib/decode-sub-instruction';
+import type { DecodedField } from '../lib/types';
 import { useSubInstructionMintInfo } from '../model/use-sub-instruction-mint-info';
 
 export function SubInstructionRow({ subIx }: { subIx: ParsedSubInstruction }) {
@@ -33,10 +35,7 @@ function DecodedContent({ decoded }: { decoded: DecodedParams }) {
     return (
         <div className="e-ml-6 e-space-y-1">
             {decoded.fields.map(field => (
-                <div key={field.label} className="e-flex e-items-center e-gap-2 e-text-sm">
-                    <span className="e-min-w-[120px] e-text-neutral-500">{field.label}:</span>
-                    <span className="e-font-mono e-text-xs">{field.value}</span>
-                </div>
+                <FieldRow key={field.label} field={field} />
             ))}
             {decoded.accounts.map((account, i) => (
                 <AccountRow key={i} account={account} />
@@ -56,6 +55,19 @@ function RawContent({ subIx }: { subIx: ParsedSubInstruction }) {
             {accounts.map((account, i) => (
                 <AccountRow key={i} account={account} />
             ))}
+        </div>
+    );
+}
+
+function FieldRow({ field }: { field: DecodedField }) {
+    return (
+        <div className="e-flex e-items-center e-gap-2 e-text-sm">
+            <span className="e-min-w-[120px] e-text-neutral-500">{field.label}:</span>
+            {field.isAddress ? (
+                <Address pubkey={new PublicKey(field.value)} link truncateUnknown aria-label={field.value} />
+            ) : (
+                <span className="e-font-mono e-text-xs">{field.value}</span>
+            )}
         </div>
     );
 }

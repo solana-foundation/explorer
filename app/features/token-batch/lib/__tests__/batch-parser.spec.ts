@@ -317,7 +317,7 @@ describe('decodeSubInstructionParams', () => {
         if (!decoded) throw new Error('Expected SetAuthority to decode');
         expect(decoded.fields).toEqual([
             { label: 'Authority Type', value: 'MintTokens' },
-            { label: 'New Authority', value: newAuth.toBase58() },
+            { isAddress: true, label: 'New Authority', value: newAuth.toBase58() },
         ]);
     });
 

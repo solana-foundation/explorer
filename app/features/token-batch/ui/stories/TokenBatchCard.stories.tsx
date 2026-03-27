@@ -150,7 +150,7 @@ export const SetAuthorityWithNewAuthority: Story = {
         await expect(canvas.getByText('Authority Type:')).toBeInTheDocument();
         await expect(canvas.getByText('MintTokens')).toBeInTheDocument();
         await expect(canvas.getByText('New Authority:')).toBeInTheDocument();
-        await expect(canvas.getByText(newAuthority.toBase58())).toBeInTheDocument();
+        await expect(canvasElement.querySelector(`[aria-label="${newAuthority.toBase58()}"]`)).toBeTruthy();
     },
 };
 
