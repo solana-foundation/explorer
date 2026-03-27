@@ -18,7 +18,7 @@ export function SubInstructionRow({ subIx }: { subIx: ParsedSubInstruction }) {
             data-testid={`sub-ix-${subIx.index}`}
         >
             <div className="e-mb-2 e-flex e-items-center e-gap-2">
-                <span className="e-text-sm e-font-medium e-text-neutral-500">#{subIx.index + 1}</span>
+                <span className="badge bg-success-soft">#{subIx.index + 1}</span>
                 <Badge variant="info" size="sm">
                     {subIx.typeName}
                 </Badge>
