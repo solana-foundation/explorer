@@ -1,7 +1,7 @@
 'use client';
 
+import { useTokenMetadata } from '@entities/nft';
 import { useTokenInfo } from '@entities/token-info';
-import { Connection, programs } from '@metaplex/js';
 import { useCluster } from '@providers/cluster';
 import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
@@ -10,7 +10,6 @@ import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
 import { useState } from 'react';
-import useAsyncEffect from 'use-async-effect';
 
 import { EditIcon, NicknameEditor, useNickname } from '@/app/features/nicknames';
 import { useVisibility } from '@/app/shared/lib/visibility';
@@ -60,7 +59,7 @@ export function Address({
 
     const metaplexData = useTokenMetadata(useMetadata, address);
     if (metaplexData && metaplexData.data) {
-        addressLabel = metaplexData.data.data.name;
+        addressLabel = metaplexData.data.name;
     }
 
     const shouldFetchTokenInfo = fetchTokenLabelInfo && isVisible;
@@ -139,30 +138,3 @@ export function Address({
         </span>
     );
 }
-
-const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
-    const [data, setData] = useState<programs.metadata.MetadataData>();
-    const { url } = useCluster();
-
-    useAsyncEffect(
-        async isMounted => {
-            if (!useMetadata) return;
-            if (pubkey && !data) {
-                try {
-                    const pda = await programs.metadata.Metadata.getPDA(pubkey);
-                    const connection = new Connection(url);
-                    const metadata = await programs.metadata.Metadata.load(connection, pda);
-                    if (isMounted()) {
-                        setData(metadata.data);
-                    }
-                } catch {
-                    if (isMounted()) {
-                        setData(undefined);
-                    }
-                }
-            }
-        },
-        [useMetadata, pubkey, url, data, setData],
-    );
-    return { data };
-};
