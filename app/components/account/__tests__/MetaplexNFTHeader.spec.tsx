@@ -5,6 +5,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { MetaplexNFTHeader, getCreatorDropdownItems, getIsMutablePill } from '@/app/components/account/MetaplexNFTHeader';
 import type { NFTData } from '@/app/providers/accounts';
 
 vi.mock('@providers/cluster', () => ({
@@ -73,11 +74,6 @@ function makeNftData(
         } as any,
     };
 }
-
-// Dynamic import to avoid hoisting issues with vi.mock
-const { MetaplexNFTHeader, getCreatorDropdownItems, getIsMutablePill } = await import(
-    '@/app/components/account/MetaplexNFTHeader'
-);
 
 describe('MetaplexNFTHeader', () => {
     it('renders NFT name', () => {

@@ -1,9 +1,11 @@
 import { none, some } from '@metaplex-foundation/umi';
+import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { MetaplexNFTAttributesCard } from '@/app/components/account/MetaplexNFTAttributesCard';
 import type { Account, TokenProgramData } from '@/app/providers/accounts';
 
 vi.mock('@/app/providers/cluster', () => ({
@@ -51,13 +53,11 @@ function makeAccount(metadataUri: string): Account {
         data: { parsed: parsedData, raw: Buffer.alloc(0) },
         executable: false,
         lamports: 1_000_000,
-        owner: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+        owner: TOKEN_PROGRAM_ID,
         pubkey: PublicKey.default,
         space: 0,
     };
 }
-
-const { MetaplexNFTAttributesCard } = await import('@/app/components/account/MetaplexNFTAttributesCard');
 
 describe('MetaplexNFTAttributesCard', () => {
     beforeEach(() => {
