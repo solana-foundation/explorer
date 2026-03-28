@@ -3,7 +3,8 @@ import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
-import { AccountCardBase, BaseRawAccountRows } from '../AccountCardBase';
+import { BaseAccountCard } from '../BaseAccountCard';
+import { BaseRawAccountRows } from '../BaseRawAccountRows';
 
 const mockAccount: Account = {
     data: {},
@@ -19,15 +20,15 @@ const mockRawData = new Uint8Array([
     0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20,
 ]);
 
-const meta: Meta<typeof AccountCardBase> = {
-    component: AccountCardBase,
+const meta: Meta<typeof BaseAccountCard> = {
+    component: BaseAccountCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
-    title: 'Features/Account/AccountCardBase',
+    title: 'Features/Account/BaseAccountCard',
 };
 
 export default meta;
-type Story = StoryObj<typeof AccountCardBase>;
+type Story = StoryObj<typeof BaseAccountCard>;
 
 /** Default card showing parsed rows as children. */
 export const Default: Story = {
@@ -35,7 +36,7 @@ export const Default: Story = {
         title: 'Token Account',
     },
     render: args => (
-        <AccountCardBase {...args}>
+        <BaseAccountCard {...args}>
             <tr>
                 <td>Token Balance</td>
                 <td className="text-lg-end">1,000.00</td>
@@ -44,7 +45,7 @@ export const Default: Story = {
                 <td>Mint</td>
                 <td className="text-lg-end">So11...1112</td>
             </tr>
-        </AccountCardBase>
+        </BaseAccountCard>
     ),
 };
 
@@ -55,12 +56,12 @@ export const WithRefresh: Story = {
         title: 'Unknown Account',
     },
     render: args => (
-        <AccountCardBase {...args}>
+        <BaseAccountCard {...args}>
             <tr>
                 <td>Owner</td>
                 <td className="text-lg-end">System Program</td>
             </tr>
-        </AccountCardBase>
+        </BaseAccountCard>
     ),
 };
 
@@ -71,27 +72,27 @@ export const WithoutRawButton: Story = {
         title: 'Nonce Account',
     },
     render: args => (
-        <AccountCardBase {...args}>
+        <BaseAccountCard {...args}>
             <tr>
                 <td>Authority</td>
                 <td className="text-lg-end">4TPT...oH7e</td>
             </tr>
-        </AccountCardBase>
+        </BaseAccountCard>
     ),
 };
 
 /** Card with rawContent provided — clicking Raw toggles to BaseRawAccountRows. */
 export const WithRawContent: Story = {
     args: {
-        rawContent: <BaseRawAccountRows account={mockAccount} rawData={mockRawData} />,
+        rawContent: <BaseRawAccountRows account={mockAccount} rawData={mockRawData} isLoading={false} />,
         title: 'Token Account',
     },
     render: args => (
-        <AccountCardBase {...args}>
+        <BaseAccountCard {...args}>
             <tr>
                 <td>Token Balance</td>
                 <td className="text-lg-end">1,000.00</td>
             </tr>
-        </AccountCardBase>
+        </BaseAccountCard>
     ),
 };

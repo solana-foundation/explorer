@@ -2,7 +2,8 @@ import { TableCardBodyProps } from '@components/common/TableCardBody';
 import { useRawAccountDataOnMount } from '@entities/account';
 import type { Account } from '@providers/accounts';
 
-import { AccountCardBase, BaseRawAccountRows } from './AccountCardBase';
+import { BaseAccountCard } from './BaseAccountCard';
+import { BaseRawAccountRows } from './BaseRawAccountRows';
 
 type AccountCardProps = TableCardBodyProps & {
     title: React.ReactNode;
@@ -13,14 +14,14 @@ type AccountCardProps = TableCardBodyProps & {
 
 export function AccountCard({ account, children, ...rest }: AccountCardProps) {
     return (
-        <AccountCardBase rawContent={<RawAccountRows account={account} />} {...rest}>
+        <BaseAccountCard rawContent={<RawAccountRows account={account} />} {...rest}>
             {children}
-        </AccountCardBase>
+        </BaseAccountCard>
     );
 }
 
 function RawAccountRows({ account }: { account: Account }) {
-    const rawData = useRawAccountDataOnMount(account.pubkey);
+    const { data, isLoading } = useRawAccountDataOnMount(account.pubkey);
 
-    return <BaseRawAccountRows account={account} rawData={rawData} />;
+    return <BaseRawAccountRows account={account} rawData={data} isLoading={isLoading} />;
 }

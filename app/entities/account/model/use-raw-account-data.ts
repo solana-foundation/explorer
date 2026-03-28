@@ -15,14 +15,14 @@ export function useRawAccountData(address: string) {
 }
 
 /** Eager variant — fetches immediately on mount. Used by RawAccountRows in AccountCard. */
-export function useRawAccountDataOnMount(pubkey: PublicKey): Uint8Array | null {
+export function useRawAccountDataOnMount(pubkey: PublicKey): { data: Uint8Array | undefined; isLoading: boolean } {
     const { url } = useCluster();
 
-    const { data } = useSWRImmutable(rawAccountDataKey(url, pubkey.toBase58()), () =>
+    const { data, isLoading } = useSWRImmutable(rawAccountDataKey(url, pubkey.toBase58()), () =>
         fetchRawAccountData(url, pubkey.toBase58()),
     );
 
-    return data ?? null;
+    return { data, isLoading };
 }
 
 async function fetchRawAccountData(url: string, address: string): Promise<Uint8Array | undefined> {

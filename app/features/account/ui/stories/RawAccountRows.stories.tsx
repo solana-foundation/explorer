@@ -3,7 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { nextjsParameters, withCardTableField, withTokenInfoBatch } from '../../../../../.storybook/decorators';
-import { BaseRawAccountRows } from '../AccountCardBase';
+import { BaseRawAccountRows } from '../BaseRawAccountRows';
 
 const mockAccount: Account = {
     data: {},
@@ -33,6 +33,7 @@ type Story = StoryObj<typeof BaseRawAccountRows>;
 export const WithData: Story = {
     args: {
         account: mockAccount,
+        isLoading: false,
         rawData: mockRawData,
     },
 };
@@ -41,7 +42,15 @@ export const WithData: Story = {
 export const Loading: Story = {
     args: {
         account: mockAccount,
-        rawData: null,
+        isLoading: true,
+    },
+};
+
+/** Account not found on chain. */
+export const NotFound: Story = {
+    args: {
+        account: mockAccount,
+        isLoading: false,
     },
 };
 
@@ -49,6 +58,7 @@ export const Loading: Story = {
 export const EmptyData: Story = {
     args: {
         account: { ...mockAccount, space: 0 },
+        isLoading: false,
         rawData: new Uint8Array(0),
     },
 };
@@ -57,6 +67,7 @@ export const EmptyData: Story = {
 export const Executable: Story = {
     args: {
         account: { ...mockAccount, executable: true, space: 36 },
+        isLoading: false,
         rawData: mockRawData,
     },
 };
