@@ -425,12 +425,9 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                 <tr>
                     <td>Rent-exempt reserve (SOL)</td>
                     <td className="text-lg-end">
-                        <>
-                            ◎
-                            <span className="font-monospace">
-                                {new BigNumber(info.rentExemptReserve.uiAmountString).toFormat(9)}
-                            </span>
-                        </>
+                        <span className="font-monospace">
+                            ◎{new BigNumber(info.rentExemptReserve.uiAmountString).toFormat(9)}
+                        </span>
                     </td>
                 </tr>
             )}

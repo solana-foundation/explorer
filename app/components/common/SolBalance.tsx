@@ -9,8 +9,6 @@ export function SolBalance({
     maximumFractionDigits?: number;
 }) {
     return (
-        <span>
-            ◎<span className="font-monospace">{lamportsToSolString(lamports, maximumFractionDigits)}</span>
-        </span>
+        <span className="font-monospace">◎{lamportsToSolString(lamports, maximumFractionDigits)}</span>
     );
 }
