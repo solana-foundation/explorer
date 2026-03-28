@@ -1,5 +1,6 @@
 import type { EditionInfo } from '@entities/nft';
 import { none, some } from '@metaplex-foundation/umi';
+import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -58,15 +59,15 @@ function makeNftData(
             header: {} as any,
             isMutable: true,
             key: 4,
-            mint: '11111111111111111111111111111111' as any,
+            mint: PublicKey.default.toString() as any,
             name,
             primarySaleHappened: false,
             programmableConfig: none(),
-            publicKey: '11111111111111111111111111111111' as any,
+            publicKey: PublicKey.default.toString() as any,
             sellerFeeBasisPoints: 500,
             symbol,
             tokenStandard: some(0),
-            updateAuthority: '11111111111111111111111111111111' as any,
+            updateAuthority: PublicKey.default.toString() as any,
             uri: 'https://example.com/metadata.json',
             uses: none(),
         } as any,
@@ -81,25 +82,25 @@ const { MetaplexNFTHeader, getCreatorDropdownItems, getIsMutablePill } = await i
 describe('MetaplexNFTHeader', () => {
     it('renders NFT name', () => {
         const nftData = makeNftData({ name: 'Cool NFT #42' });
-        render(<MetaplexNFTHeader nftData={nftData} address="11111111111111111111111111111111" />);
+        render(<MetaplexNFTHeader nftData={nftData} address={PublicKey.default.toString()} />);
         expect(screen.getByText('Cool NFT #42')).toBeDefined();
     });
 
     it('shows fallback when name is empty', () => {
         const nftData = makeNftData({ name: '' });
-        render(<MetaplexNFTHeader nftData={nftData} address="11111111111111111111111111111111" />);
+        render(<MetaplexNFTHeader nftData={nftData} address={PublicKey.default.toString()} />);
         expect(screen.getByText('No NFT name was found')).toBeDefined();
     });
 
     it('renders symbol', () => {
         const nftData = makeNftData({ symbol: 'MYSYM' });
-        render(<MetaplexNFTHeader nftData={nftData} address="11111111111111111111111111111111" />);
+        render(<MetaplexNFTHeader nftData={nftData} address={PublicKey.default.toString()} />);
         expect(screen.getByText('MYSYM')).toBeDefined();
     });
 
     it('shows fallback when symbol is empty', () => {
         const nftData = makeNftData({ symbol: '' });
-        render(<MetaplexNFTHeader nftData={nftData} address="11111111111111111111111111111111" />);
+        render(<MetaplexNFTHeader nftData={nftData} address={PublicKey.default.toString()} />);
         expect(screen.getByText('No Symbol was found')).toBeDefined();
     });
 
@@ -109,7 +110,7 @@ describe('MetaplexNFTHeader', () => {
             masterEdition: { key: 6, maxSupply: some(100n), supply: 0n } as any,
         };
         const nftData = makeNftData({ editionInfo });
-        render(<MetaplexNFTHeader nftData={nftData} address="11111111111111111111111111111111" />);
+        render(<MetaplexNFTHeader nftData={nftData} address={PublicKey.default.toString()} />);
         expect(screen.getByText('Master Edition')).toBeDefined();
     });
 
@@ -119,19 +120,19 @@ describe('MetaplexNFTHeader', () => {
             masterEdition: { key: 6, maxSupply: some(100n), supply: 10n } as any,
         };
         const nftData = makeNftData({ editionInfo });
-        render(<MetaplexNFTHeader nftData={nftData} address="11111111111111111111111111111111" />);
+        render(<MetaplexNFTHeader nftData={nftData} address={PublicKey.default.toString()} />);
         expect(screen.getByText('Edition 3 / 10')).toBeDefined();
     });
 
     it('shows Primary Market pill when primarySaleHappened is false', () => {
         const nftData = makeNftData();
-        render(<MetaplexNFTHeader nftData={nftData} address="11111111111111111111111111111111" />);
+        render(<MetaplexNFTHeader nftData={nftData} address={PublicKey.default.toString()} />);
         expect(screen.getByText('Primary Market')).toBeDefined();
     });
 
     it('shows Mutable pill when isMutable is true', () => {
         const nftData = makeNftData();
-        render(<MetaplexNFTHeader nftData={nftData} address="11111111111111111111111111111111" />);
+        render(<MetaplexNFTHeader nftData={nftData} address={PublicKey.default.toString()} />);
         expect(screen.getByText('Mutable')).toBeDefined();
     });
 });
