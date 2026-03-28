@@ -1,4 +1,3 @@
-import { none, some } from '@metaplex-foundation/umi';
 import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -6,6 +5,7 @@ import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MetaplexNFTAttributesCard } from '@/app/components/account/MetaplexNFTAttributesCard';
+import { makeMetadata } from '@/app/entities/nft/lib/__tests__/make-nft-data';
 import type { Account, TokenProgramData } from '@/app/providers/accounts';
 
 vi.mock('@/app/providers/cluster', () => ({
@@ -25,26 +25,7 @@ function makeAccount(metadataUri: string): Account {
         nftData: {
             editionInfo: {},
             json: undefined,
-            metadata: {
-                collection: none(),
-                collectionDetails: none(),
-                creators: none(),
-                editionNonce: some(255),
-                header: {} as any,
-                isMutable: true,
-                key: 4,
-                mint: PublicKey.default.toString() as any,
-                name: 'Test NFT',
-                primarySaleHappened: false,
-                programmableConfig: none(),
-                publicKey: PublicKey.default.toString() as any,
-                sellerFeeBasisPoints: 500,
-                symbol: 'TEST',
-                tokenStandard: some(0),
-                updateAuthority: PublicKey.default.toString() as any,
-                uri: metadataUri,
-                uses: none(),
-            } as any,
+            metadata: makeMetadata({ uri: metadataUri }),
         },
         parsed: { info: {}, type: 'mint' } as any,
         program: 'spl-token' as const,

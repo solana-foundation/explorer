@@ -1,11 +1,12 @@
 import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
-import { none, some } from '@metaplex-foundation/umi';
-import { PublicKey } from '@solana/web3.js';
+import { some } from '@metaplex-foundation/umi';
 import { describe, expect, it } from 'vitest';
 
 import { isMetaplexNFT } from '@/app/entities/nft';
 import type { TokenProgramData } from '@/app/providers/accounts';
 import type { MintAccountInfo } from '@/app/validators/accounts/token';
+
+import { makeMetadata } from './make-nft-data';
 
 function makeMintInfo(overrides: Partial<MintAccountInfo> = {}): MintAccountInfo {
     return {
@@ -27,26 +28,7 @@ function makeTokenProgramData(
             ? {
                   editionInfo: {},
                   json: undefined,
-                  metadata: {
-                      collection: none(),
-                      collectionDetails: none(),
-                      creators: none(),
-                      editionNonce: some(255),
-                      header: {} as any,
-                      isMutable: true,
-                      key: 4,
-                      mint: PublicKey.default.toString() as any,
-                      name: 'Test NFT',
-                      primarySaleHappened: false,
-                      programmableConfig: none(),
-                      publicKey: PublicKey.default.toString() as any,
-                      sellerFeeBasisPoints: 500,
-                      symbol: 'TEST',
-                      tokenStandard: tokenStandard != null ? some(tokenStandard) : none(),
-                      updateAuthority: PublicKey.default.toString() as any,
-                      uri: 'https://example.com/metadata.json',
-                      uses: none(),
-                  } as any,
+                  metadata: makeMetadata(tokenStandard != null ? { tokenStandard: some(tokenStandard) } : {}),
               }
             : undefined,
         parsed: { info: {}, type: 'mint' } as any,

@@ -1,12 +1,16 @@
 import type { EditionInfo } from '@entities/nft';
-import { none, some } from '@metaplex-foundation/umi';
+import { some } from '@metaplex-foundation/umi';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { MetaplexNFTHeader, getCreatorDropdownItems, getIsMutablePill } from '@/app/components/account/MetaplexNFTHeader';
-import type { NFTData } from '@/app/providers/accounts';
+import {
+    getCreatorDropdownItems,
+    getIsMutablePill,
+    MetaplexNFTHeader,
+} from '@/app/components/account/MetaplexNFTHeader';
+import { makeNftData } from '@/app/entities/nft/lib/__tests__/make-nft-data';
 
 vi.mock('@providers/cluster', () => ({
     useCluster: vi.fn(() => ({ cluster: 'mainnet-beta', url: 'https://api.mainnet-beta.solana.com' })),
@@ -32,48 +36,6 @@ vi.mock('use-async-effect', () => ({
         // Don't run async effects in tests
     },
 }));
-
-function makeNftData(
-    overrides: {
-        name?: string;
-        symbol?: string;
-        editionInfo?: EditionInfo;
-        collection?: { key: string; verified: boolean } | null;
-        creators?: Array<{ address: string; verified: boolean; share: number }> | null;
-    } = {},
-): NFTData {
-    const {
-        name = 'Test NFT',
-        symbol = 'TNFT',
-        editionInfo = { edition: undefined, masterEdition: undefined },
-        collection = null,
-        creators = null,
-    } = overrides;
-    return {
-        editionInfo,
-        json: { image: 'https://example.com/image.png', name },
-        metadata: {
-            collection: collection ? some(collection) : none(),
-            collectionDetails: none(),
-            creators: creators ? some(creators) : none(),
-            editionNonce: some(255),
-            header: {} as any,
-            isMutable: true,
-            key: 4,
-            mint: PublicKey.default.toString() as any,
-            name,
-            primarySaleHappened: false,
-            programmableConfig: none(),
-            publicKey: PublicKey.default.toString() as any,
-            sellerFeeBasisPoints: 500,
-            symbol,
-            tokenStandard: some(0),
-            updateAuthority: PublicKey.default.toString() as any,
-            uri: 'https://example.com/metadata.json',
-            uses: none(),
-        } as any,
-    };
-}
 
 describe('MetaplexNFTHeader', () => {
     it('renders NFT name', () => {
