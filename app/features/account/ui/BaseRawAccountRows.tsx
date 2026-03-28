@@ -1,7 +1,7 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
-import { HexData } from '@shared/HexData';
 import type { Account } from '@providers/accounts';
+import { HexData } from '@shared/HexData';
 
 export type BaseRawAccountRowsProps = {
     account: Account;
