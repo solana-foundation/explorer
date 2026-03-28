@@ -25,7 +25,7 @@ const formStateCache = new WeakMap<UseFormReturn<InstructionFormData>, Map<strin
 export function createPdaPrefillDependency(
     idl: SupportedIdl | undefined,
     instruction: InstructionData,
-    fieldNames: Pick<InstructionFormFieldNames, 'account'>
+    fieldNames: Pick<InstructionFormFieldNames, 'account'>,
 ): ExternalDependency<string> {
     const pdaAccountPaths = new Map<string, FieldPath<InstructionFormData>>();
 

@@ -1,5 +1,5 @@
-import { ClientOptions } from '@sentry/core';
-import { SentryBuildOptions } from '@sentry/nextjs';
+import type { Options } from '@sentry/core';
+import type { SentryBuildOptions } from '@sentry/nextjs';
 
 // Import the actual implementations from the .mjs file
 import {
@@ -9,17 +9,12 @@ import {
 
 type RuntimeContext = 'client' | 'server' | 'edge';
 
-// Extend ClientOptions to include telemetry option
-interface SentryConfig extends Partial<ClientOptions> {
-    telemetry?: boolean;
-}
-
 /**
  * Type-safe wrapper for the Sentry configuration
  */
-export const createSentryConfig = createSentryConfigMjs as (context: RuntimeContext) => SentryConfig;
+export const createSentryConfig = createSentryConfigMjs as (context: RuntimeContext) => Options;
 
 /**
  * Type-safe wrapper for the Sentry build configuration
  */
-export const createSentryBuildConfig = createSentryBuildConfigMjs as () => Partial<SentryBuildOptions>;
+export const createSentryBuildConfig = createSentryBuildConfigMjs as () => SentryBuildOptions;

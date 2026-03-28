@@ -1,8 +1,9 @@
-import { Connection } from '@solana/web3.js';
+import { type ResolvedDomainInfo, resolveDomain } from '@entities/domain/api/resolve-domain';
+import { Domain } from '@entities/domain/lib/domain-struct';
 import { NextResponse } from 'next/server';
+import { is } from 'superstruct';
 
-import { MAINNET_BETA_URL } from '@/app/utils/cluster';
-import { getANSDomainInfo, getDomainInfo } from '@/app/utils/domain-info';
+import { Logger } from '@/app/shared/lib/logger';
 
 type Params = {
     params: {
@@ -10,21 +11,24 @@ type Params = {
     };
 };
 
-export type FetchedDomainInfo = Awaited<ReturnType<typeof getDomainInfo>>;
+export type FetchedDomainInfo = ResolvedDomainInfo;
+
+const CACHE_HEADERS = { 'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600' };
+
+const NO_CACHE_HEADERS = { 'Cache-Control': 'no-store' };
 
 export async function GET(_request: Request, { params: { domain } }: Params) {
-    // Intentionally using legacy web3js for compatibility with bonfida library
-    // This is an API route so won't affect client bundle
-    // We only fetch domains on mainnet
-    const connection = new Connection(MAINNET_BETA_URL);
-    const domainInfo = await (domain.substring(domain.length - 4) === '.sol'
-        ? getDomainInfo(domain, connection)
-        : getANSDomainInfo(domain, connection));
+    if (!is(domain, Domain)) {
+        Logger.warn(`Invalid domain input rejected: ${domain}`);
+        return NextResponse.json(null, { headers: NO_CACHE_HEADERS, status: 400 });
+    }
 
-    return NextResponse.json(domainInfo, {
-        headers: {
-            // 24 hours
-            'Cache-Control': 'max-age=86400',
-        },
-    });
+    try {
+        const domainInfo = await resolveDomain(domain);
+
+        return NextResponse.json(domainInfo, { headers: CACHE_HEADERS });
+    } catch (error) {
+        Logger.error(error, { domain });
+        return NextResponse.json(null, { headers: NO_CACHE_HEADERS, status: 500 });
+    }
 }

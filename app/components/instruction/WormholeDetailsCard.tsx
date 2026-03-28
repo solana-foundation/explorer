@@ -2,6 +2,8 @@ import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { InstructionCard } from './InstructionCard';
 import { parsWormholeInstructionTitle } from './wormhole/types';
 
@@ -26,9 +28,9 @@ export function WormholeDetailsCard({
     try {
         title = parsWormholeInstructionTitle(ix);
     } catch (error) {
-        console.error(error, {
-            signature: signature,
-            url: url,
+        Logger.error(error, {
+            signature,
+            url,
         });
     }
 

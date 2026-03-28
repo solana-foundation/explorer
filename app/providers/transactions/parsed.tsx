@@ -7,6 +7,8 @@ import { Connection, ParsedTransactionWithMeta, TransactionSignature } from '@so
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 export interface Details {
     transactionWithMeta?: ParsedTransactionWithMeta | null;
 }
@@ -51,7 +53,7 @@ async function fetchDetails(dispatch: Dispatch, signature: TransactionSignature,
         fetchStatus = FetchStatus.Fetched;
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
+            Logger.error(error, { url });
         }
         fetchStatus = FetchStatus.FetchFailed;
     }
@@ -75,7 +77,7 @@ export function useFetchTransactionDetails() {
         (signature: TransactionSignature) => {
             url && fetchDetails(dispatch, signature, cluster, url);
         },
-        [dispatch, cluster, url]
+        [dispatch, cluster, url],
     );
 }
 

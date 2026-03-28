@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import * as spl from '@solana/spl-token';
 import { PublicKey, TransactionMessage } from '@solana/web3.js';
@@ -56,7 +57,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
     });
@@ -93,7 +94,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
     });
@@ -131,7 +132,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/Associated Token Program: Recover Nested/)).toBeInTheDocument();
     });

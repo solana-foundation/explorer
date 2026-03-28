@@ -3,6 +3,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { Signature } from '@components/common/Signature';
 import { SolBalance } from '@components/common/SolBalance';
 import { useCluster } from '@providers/cluster';
+import { cn } from '@shared/utils';
 import {
     ConfirmedTransactionMeta,
     PublicKey,
@@ -85,7 +86,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                 .concat(
                     tx.meta?.innerInstructions?.flatMap(ix => {
                         return ix.instructions.map(ix => ix.programIdIndex);
-                    }) || []
+                    }) || [],
                 );
 
             const indexMap = new Map<number, number>();
@@ -112,14 +113,14 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
 
                 logTruncated = parsedLogs[parsedLogs.length - 1].truncated;
                 computeUnits = parsedLogs.map(({ computeUnits }) => computeUnits).reduce((sum, next) => sum + next);
-            } catch (err) {
+            } catch (_err) {
                 // ignore parsing errors because some old logs aren't parsable
             }
 
             let costUnits: number | undefined = undefined;
             try {
                 costUnits = tx.meta?.costUnits ?? 0;
-            } catch (err) {
+            } catch (_err) {
                 // ignore parsing errors because some old logs aren't parsable
             }
 
@@ -230,7 +231,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.delete('sort');
                                         router.push(
-                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams)
+                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams),
                                         );
                                     }}
                                 >
@@ -244,7 +245,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'fee');
                                         router.push(
-                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams)
+                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams),
                                         );
                                     }}
                                 >
@@ -256,7 +257,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'reservedCUs');
                                         router.push(
-                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams)
+                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams),
                                         );
                                     }}
                                 >
@@ -267,15 +268,15 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                         className="text-muted c-pointer"
                                         onClick={() => {
                                             const additionalParams = new URLSearchParams(
-                                                currentSearchParams?.toString()
+                                                currentSearchParams?.toString(),
                                             );
                                             additionalParams.set('sort', 'compute');
                                             router.push(
                                                 pickClusterParams(
                                                     currentPathname,
                                                     currentSearchParams,
-                                                    additionalParams
-                                                )
+                                                    additionalParams,
+                                                ),
                                             );
                                         }}
                                     >
@@ -288,7 +289,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'txnCost');
                                         router.push(
-                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams)
+                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams),
                                         );
                                     }}
                                 >
@@ -451,7 +452,7 @@ const FilterDropdown = ({ filter, invokedPrograms, totalTransactionCount }: Filt
                 dropdown.dispose();
             }
         },
-        [dropdownRef]
+        [dropdownRef],
     );
 
     return (
@@ -498,7 +499,7 @@ function FilterLink({
         return `${currentPathname}${nextQueryString ? `?${nextQueryString}` : ''}`;
     }, [currentPathname, currentSearchParams, name, programId]);
     return (
-        <Link className={`dropdown-item${programId === currentFilter ? ' active' : ''}`} href={href} key={programId}>
+        <Link className={cn('dropdown-item', programId === currentFilter && 'active')} href={href} key={programId}>
             {`${name} (${transactionCount})`}
         </Link>
     );

@@ -23,7 +23,7 @@ const HEADER = '=======BEGIN SECURITY.TXT V1=======\0';
 const FOOTER = '=======END SECURITY.TXT V1=======\0';
 
 export const fromProgramData = (
-    programData: ProgramDataAccountInfo
+    programData: ProgramDataAccountInfo,
 ): { securityTXT?: NeodymeSecurityTXT; error?: string } => {
     const [data, encoding] = programData.data;
     if (!(data && encoding === 'base64')) return { error: 'Failed to decode program data', securityTXT: undefined };
@@ -54,7 +54,7 @@ export const fromProgramData = (
                 }
                 return prev;
             },
-            [[]]
+            [[]],
         )
         .map(c => String.fromCharCode(...c))
         .reduce<{ map: { [key: string]: string }; key: string | undefined }>(
@@ -75,7 +75,7 @@ export const fromProgramData = (
                     };
                 }
             },
-            { key: undefined, map: {} }
+            { key: undefined, map: {} },
         ).map;
     if (!REQUIRED_KEYS.every(k => k in map)) {
         return {

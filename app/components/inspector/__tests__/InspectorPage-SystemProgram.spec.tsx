@@ -1,10 +1,10 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { SystemProgram } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
-import { sleep } from '@/app/__tests__/mocks';
 import { GET } from '@/app/api/anchor/route';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
@@ -72,7 +72,13 @@ async function waitForTimeout(fn: () => void, params: object = DEFAULT_INTERVAL)
 // Mock SWR
 vi.mock('swr', () => ({
     __esModule: true,
-    default: vi.fn(() => ({ data: undefined })),
+    default: vi.fn(() => ({
+        data: undefined,
+        error: undefined,
+        isLoading: false,
+        isValidating: false,
+        mutate: vi.fn(),
+    })),
 }));
 
 // Mock next/navigation
@@ -113,9 +119,6 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
     }
 
     beforeEach(async () => {
-        // sleep to allow not facing 429s
-        await sleep();
-
         // Setup router mock
         const mockRouter = { push: vi.fn(), replace: vi.fn() };
         vi.spyOn(await import('next/navigation'), 'useRouter').mockReturnValue(mockRouter as any);
@@ -155,7 +158,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -195,7 +198,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -236,7 +239,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -272,7 +275,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -306,7 +309,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -343,7 +346,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -379,7 +382,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -417,7 +420,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately
@@ -454,7 +457,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         // Wait for initial and temporary elements to disappear separately

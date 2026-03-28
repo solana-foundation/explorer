@@ -22,7 +22,7 @@ export const programDataWithSecurityTxt = {
 };
 
 export function encodeSecurityTxt(
-    data: Pick<NeodymeSecurityTXT, 'name' | 'project_url' | 'contacts' | 'policy'>
+    data: Pick<NeodymeSecurityTXT, 'name' | 'project_url' | 'contacts' | 'policy'>,
 ): string {
     const HEADER = '=======BEGIN SECURITY.TXT V1=======\0';
     const FOOTER = '=======END SECURITY.TXT V1=======\0';
@@ -71,7 +71,7 @@ export function createNeodymeSecurityTxt(overrides: Partial<NeodymeSecurityTXT> 
 }
 
 export function createNeodymeSecurityTxtWithOptionalFields(
-    overrides: Partial<NeodymeSecurityTXT> = {}
+    overrides: Partial<NeodymeSecurityTXT> = {},
 ): NeodymeSecurityTXT {
     return {
         ...createNeodymeSecurityTxt(),

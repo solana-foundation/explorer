@@ -5,6 +5,8 @@ import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create, Struct } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { InstructionCard } from '../InstructionCard';
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
 import {
@@ -55,7 +57,7 @@ export function BpfUpgradeableLoaderDetailsCard(props: DetailsProps) {
                 return <UnknownDetailsCard {...props} />;
         }
     } catch (error) {
-        console.error(error, {
+        Logger.error(error, {
             signature: props.tx.signatures[0],
         });
         return <UnknownDetailsCard {...props} />;
@@ -83,7 +85,7 @@ function renderDetails<T extends object>(props: DetailsProps, parsed: ParsedInfo
                     {camelToTitleCase(key)} {key === 'bytes' && <span className="text-muted">(Base 64)</span>}
                 </td>
                 <td className="text-lg-end">{value}</td>
-            </tr>
+            </tr>,
         );
     }
 

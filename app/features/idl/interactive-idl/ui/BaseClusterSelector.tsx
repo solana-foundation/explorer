@@ -65,7 +65,7 @@ export function BaseClusterSelector({
                 cardVariants({
                     disabled: isDisabled,
                 }),
-                className
+                className,
             )}
         >
             {content}
@@ -84,5 +84,5 @@ const cardVariants = cva(
                 true: 'e-opacity-50 e-cursor-not-allowed',
             },
         },
-    }
+    },
 );

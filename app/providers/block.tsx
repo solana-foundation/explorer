@@ -6,6 +6,8 @@ import { Connection, PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 export enum FetchStatus {
     Fetching,
     FetchFailed,
@@ -86,7 +88,7 @@ export async function fetchBlock(dispatch: Dispatch, url: string, cluster: Clust
                 const lastLeaderSlot = childSlot !== undefined ? childSlot : slot;
                 const slotLeadersLimit = lastLeaderSlot - block.parentSlot + 1;
                 leaders = await connection.getSlotLeaders(firstLeaderSlot, slotLeadersLimit);
-            } catch (err) {
+            } catch (_err) {
                 // ignore errors
             }
 
@@ -106,7 +108,7 @@ export async function fetchBlock(dispatch: Dispatch, url: string, cluster: Clust
     } catch (err) {
         status = FetchStatus.FetchFailed;
         if (cluster !== Cluster.Custom) {
-            console.error(err, { tags: { url } });
+            Logger.error(err, { url });
         }
     }
 

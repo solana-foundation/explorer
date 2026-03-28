@@ -5,6 +5,8 @@ import { mapAccountToRows, mapIxArgsToRows } from '@utils/anchor';
 import BN from 'bn.js';
 import { vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 vi.mock('@components/common/JsonViewer', () => ({
     SolarizedJsonViewer: ({ src }: { src: any }) => <div data-testid="json-viewer">{JSON.stringify(src)}</div>,
 }));
@@ -47,7 +49,7 @@ describe('anchor utilities - number overflow handling', () => {
             const { container } = render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should display the full number without precision loss
@@ -73,7 +75,7 @@ describe('anchor utilities - number overflow handling', () => {
             const { container } = render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should display the full number
@@ -100,7 +102,7 @@ describe('anchor utilities - number overflow handling', () => {
             const { container } = render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should display the full number without scientific notation
@@ -129,7 +131,7 @@ describe('anchor utilities - number overflow handling', () => {
             const { container } = render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             expect(container.textContent).toContain('1,000,000');
@@ -157,7 +159,7 @@ describe('anchor utilities - number overflow handling', () => {
             const { container } = render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should display without precision loss
@@ -167,8 +169,7 @@ describe('anchor utilities - number overflow handling', () => {
 
     describe('error handling with proper table structure', () => {
         beforeEach(() => {
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            vi.spyOn(console, 'log').mockImplementation(() => {});
+            vi.spyOn(Logger, 'debug').mockImplementation(() => {});
         });
 
         afterEach(() => {
@@ -192,15 +193,14 @@ describe('anchor utilities - number overflow handling', () => {
             render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should have logged the error
-            expect(console.log).toHaveBeenCalledTimes(1);
-            expect(console.log).toHaveBeenCalledWith(
-                'Error while displaying IDL-based account data',
-                expect.any(Error)
-            );
+            expect(Logger.debug).toHaveBeenCalledTimes(1);
+            expect(Logger.debug).toHaveBeenCalledWith('[utils:anchor] Error while displaying IDL-based account data', {
+                error: expect.any(Error),
+            });
 
             // Should have proper 3-column structure
             const cells = screen.getAllByRole('cell');
@@ -234,15 +234,14 @@ describe('anchor utilities - number overflow handling', () => {
             render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should have logged the error
-            expect(console.log).toHaveBeenCalledTimes(1);
-            expect(console.log).toHaveBeenCalledWith(
-                'Error while displaying IDL-based account data',
-                expect.any(Error)
-            );
+            expect(Logger.debug).toHaveBeenCalledTimes(1);
+            expect(Logger.debug).toHaveBeenCalledWith('[utils:anchor] Error while displaying IDL-based account data', {
+                error: expect.any(Error),
+            });
 
             // Should have proper 3-column structure
             const cells = screen.getAllByRole('cell');
@@ -276,15 +275,14 @@ describe('anchor utilities - number overflow handling', () => {
             render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should have logged the error
-            expect(console.log).toHaveBeenCalledTimes(1);
-            expect(console.log).toHaveBeenCalledWith(
-                'Error while displaying IDL-based account data',
-                expect.any(Error)
-            );
+            expect(Logger.debug).toHaveBeenCalledTimes(1);
+            expect(Logger.debug).toHaveBeenCalledWith('[utils:anchor] Error while displaying IDL-based account data', {
+                error: expect.any(Error),
+            });
 
             // Should render JSON viewer for non-struct types
             expect(screen.getByTestId('json-viewer')).toBeInTheDocument();
@@ -312,15 +310,14 @@ describe('anchor utilities - number overflow handling', () => {
             render(
                 <table>
                     <tbody>{rows}</tbody>
-                </table>
+                </table>,
             );
 
             // Should have logged the error
-            expect(console.log).toHaveBeenCalledTimes(1);
-            expect(console.log).toHaveBeenCalledWith(
-                'Error while displaying IDL-based account data',
-                expect.any(Error)
-            );
+            expect(Logger.debug).toHaveBeenCalledTimes(1);
+            expect(Logger.debug).toHaveBeenCalledWith('[utils:anchor] Error while displaying IDL-based account data', {
+                error: expect.any(Error),
+            });
 
             // Should render JSON viewer for type alias
             expect(screen.getByTestId('json-viewer')).toBeInTheDocument();

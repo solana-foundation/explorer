@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
 import { ClusterProvider } from '@providers/cluster';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -8,7 +9,7 @@ import { DispatchContext, FetchersContext, State, StateContext } from '@/app/pro
 import { FetchStatus } from '@/app/providers/cache';
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
 
-import { nextjsParameters } from '../../../../.storybook/decorators';
+import { nextjsParameters, withTokenInfoBatch } from '../../../../.storybook/decorators';
 import { AccountsCard } from '../AccountsCard';
 
 // No-op function for mock fetchers
@@ -89,6 +90,7 @@ function MockAccountsProvider({ children }: { children: React.ReactNode }) {
 
 const meta = {
     component: AccountsCard,
+    decorators: [withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs'],
     title: 'Components/Inspector/AccountsCard',

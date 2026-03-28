@@ -1,5 +1,6 @@
 'use client';
 
+import { Domain } from '@entities/domain/lib/domain-struct';
 import { useHotkeys } from '@mantine/hooks';
 import { useCluster } from '@providers/cluster';
 import { VersionedMessage } from '@solana/web3.js';
@@ -11,7 +12,9 @@ import React, { MouseEventHandler, TouchEventHandler, useCallback, useId, useMem
 import { Search, X } from 'react-feather';
 import { ActionMeta, components, ControlProps, InputActionMeta, SelectInstance } from 'react-select';
 import AsyncSelect from 'react-select/async';
+import { is } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
 import FEATURES from '@/app/utils/feature-gate/featureGates.json';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
@@ -26,10 +29,6 @@ interface SearchOptions {
     label: string;
     options: SearchElement[];
 }
-
-const hasDomainSyntax = (value: string) => {
-    return value.length > 3 && value.split('.').length === 2;
-};
 
 const RESET_VALUE = '' as any;
 
@@ -54,7 +53,7 @@ export function SearchBar() {
                 const nextPath = pickClusterParams(
                     path,
                     new URLSearchParams(currentSearchParamsString),
-                    new URLSearchParams(`cluster=${clusterSlug(cluster)}`)
+                    new URLSearchParams(`cluster=${clusterSlug(cluster)}`),
                 );
                 router.push(nextPath);
             } else {
@@ -77,7 +76,7 @@ export function SearchBar() {
         const [tokenOptions, domainOptions] = await Promise.allSettled([
             buildTokenOptions(search, cluster),
             // buildFeatureOptions(search),
-            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? buildDomainOptions(search) : [],
+            is(search, Domain) && cluster === Cluster.MainnetBeta ? buildDomainOptions(search) : [],
         ]);
 
         const tokenOptionsAppendable = buildAppendableSearchOptions(tokenOptions, 'token');
@@ -101,7 +100,7 @@ export function SearchBar() {
                         selectRef.current?.clearValue();
                         selectRef.current?.blur();
                     },
-                    []
+                    [],
                 );
                 const hasValue = Boolean(selectRef.current?.inputRef?.value);
 
@@ -117,7 +116,7 @@ export function SearchBar() {
                     </components.Control>
                 );
             },
-        [setSearch, selectRef]
+        [setSearch, selectRef],
     );
 
     const onHotKeyPressHandler = useCallback(() => {
@@ -130,7 +129,7 @@ export function SearchBar() {
             ['/', onHotKeyPressHandler],
             ['mod+k', onHotKeyPressHandler],
         ],
-        ['INPUT', 'TEXTAREA']
+        ['INPUT', 'TEXTAREA'],
     );
 
     const noOptionsMessageHandler = useCallback(() => 'No Results', []);
@@ -290,7 +289,7 @@ function buildFeatureGateOptions(search: string) {
     let features: FeatureInfoType[] = [];
     if (search) {
         features = (FEATURES as FeatureInfoType[]).filter(feature =>
-            feature.title.toUpperCase().includes(search.toUpperCase())
+            feature.title.toUpperCase().includes(search.toUpperCase()),
         );
     }
 
@@ -351,6 +350,7 @@ function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint
         });
 
         // Parse as BigInt but not if it starts eg 0x or 0b
+        // eslint-disable-next-line no-restricted-syntax -- check for hex/binary prefix to avoid BigInt parsing error
         if (currentEpoch !== undefined && !/^0\w/.test(search) && BigInt(search) <= currentEpoch + 1n) {
             options.push({
                 label: 'Epoch',
@@ -393,7 +393,7 @@ function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint
                 ],
             });
         }
-    } catch (err) {
+    } catch (_err) {
         // If bs58 decoding fails, check if it's a valid base64 string
         if (isValidBase64(search)) {
             const decodedTx = decodeTransactionFromBase64(search);
@@ -469,7 +469,7 @@ function decodeTransactionFromBase64(base64String: string): {
         return {
             message: base64String,
         };
-    } catch (err) {
+    } catch (_err) {
         return null;
     }
 }
@@ -478,7 +478,7 @@ function isValidBase64(str: string): boolean {
     try {
         Buffer.from(str, 'base64');
         return true;
-    } catch (err) {
+    } catch (_err) {
         return false;
     }
 }
@@ -503,11 +503,11 @@ function ClearIndicator({
 
 function buildAppendableSearchOptions(
     searchOptions: PromiseSettledResult<SearchOptions | SearchOptions[] | undefined> | undefined,
-    name: string
+    name: string,
 ): SearchOptions[] {
     if (!searchOptions) return [];
     if (searchOptions.status === 'rejected') {
-        console.error(`Failed to build ${name} options for search: ${searchOptions.reason}`);
+        Logger.error(new Error('Search failed', { cause: searchOptions.reason }), { name });
         return [];
     }
     return searchOptions.value

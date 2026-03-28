@@ -18,7 +18,7 @@ const KNOWN_ACCOUNTS: Record<string, readonly string[]> = Object.entries(PROGRAM
             }
             return acc;
         },
-        { ...KNOWN_ACCOUNT_PATTERNS } as Record<string, readonly string[]>
+        { ...KNOWN_ACCOUNT_PATTERNS } as Record<string, readonly string[]>,
     );
 
 /**
@@ -31,7 +31,7 @@ const KNOWN_ACCOUNTS: Record<string, readonly string[]> = Object.entries(PROGRAM
  */
 export function createKnownAccountsPrefillDependency(
     instruction: InstructionData,
-    fieldNames: Pick<InstructionFormFieldNames, 'account'>
+    fieldNames: Pick<InstructionFormFieldNames, 'account'>,
 ): ExternalDependency<string> {
     // Map of program addresses to their field paths
     const programPathsMap = new Map<string, FieldPath<InstructionFormData>[]>();

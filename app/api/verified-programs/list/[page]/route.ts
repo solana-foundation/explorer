@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
+import fetch from 'node-fetch';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const PROGRAM_LIST_CACHE_SECONDS = 300;
@@ -22,7 +23,10 @@ export async function GET(_request: Request, { params: { page } }: Params) {
         const response = await fetch(`${OSEC_REGISTRY_URL}/verified-programs/${pageNumber}`);
 
         if (!response.ok) {
-            Logger.error(`Failed to fetch verified programs page ${pageNumber}: HTTP ${response.status}`);
+            Logger.error(new Error('[api:verified-programs] Failed to fetch verified programs page'), {
+                page: pageNumber,
+                status: response.status,
+            });
             return NextResponse.json({ error: 'Failed to fetch verified programs' }, { status: response.status });
         }
 
@@ -34,7 +38,7 @@ export async function GET(_request: Request, { params: { page } }: Params) {
             },
         });
     } catch (error) {
-        Logger.error('Error in verified-programs list API:', error);
+        Logger.error(error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

@@ -11,7 +11,7 @@ const inputVariants = cva(
         'e-px-4 e-py-2.5 e-text-xs',
         'focus-visible:e-outline-none focus-visible:e-ring-2 focus-visible:e-ring-offset-2 focus-visible:e-ring-offset-neutral-900',
         'disabled:e-cursor-not-allowed disabled:e-opacity-50',
-        'aria-[invalid="true"]:!e-border-destructive aria-[invalid="true"]:focus-visible:e-ring-destructive'
+        'aria-[invalid="true"]:!e-border-destructive aria-[invalid="true"]:focus-visible:e-ring-destructive',
     ),
     {
         defaultVariants: {
@@ -24,7 +24,7 @@ const inputVariants = cva(
                     'e-border-neutral-200 e-bg-transparent e-text-neutral-200 placeholder:e-text-neutral-300 focus-visible:e-ring-neutral-300 focus-visible:e-ring-offset-neutral-900',
             },
         },
-    }
+    },
 );
 
 export interface InputProps extends React.ComponentProps<'input'>, VariantProps<typeof inputVariants> {}

@@ -1,17 +1,19 @@
+import { getCookie, setCookie } from '@features/cookie';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { Cluster, clusterName, DEVNET_URL, MAINNET_BETA_URL, SIMD296_URL, TESTNET_URL } from '@utils/cluster';
+import { Cluster, clusterName, ClusterStatus, clusterUrl } from '@utils/cluster';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { useCluster } from '@/app/providers/cluster';
 
 import { useMainnetConfirmation } from '../use-mainnet-confirmation';
 
-const mockUseCluster = vi.fn();
-vi.mock('@/app/providers/cluster', () => ({
-    useCluster: () => mockUseCluster(),
-}));
+vi.mock('@/app/providers/cluster');
+vi.mock('@features/cookie');
 
 describe('useMainnetConfirmation', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.mocked(getCookie).mockReturnValue(null);
     });
 
     describe('when cluster is Mainnet Beta', () => {
@@ -225,23 +227,67 @@ describe('useMainnetConfirmation', () => {
             expect(result.current.isOpen).toBe(false);
         });
     });
+
+    describe('cookie persistence', () => {
+        it('should set disclaimer cookie when user confirms', async () => {
+            setup();
+
+            const mockAction = vi.fn();
+            const { result } = renderHook(() => useMainnetConfirmation());
+
+            await act(async () => {
+                await result.current.requireConfirmation(mockAction);
+            });
+
+            await act(async () => {
+                await result.current.confirm();
+            });
+
+            expect(setCookie).toHaveBeenCalledWith('idl_mainnet_accepted', 'true', 182 * 24 * 60 * 60);
+        });
+
+        it('should skip dialog on mainnet when disclaimer cookie exists', async () => {
+            setup();
+            vi.mocked(getCookie).mockReturnValue('true');
+
+            const mockAction = vi.fn();
+            const { result } = renderHook(() => useMainnetConfirmation());
+
+            await act(async () => {
+                await result.current.requireConfirmation(mockAction);
+            });
+
+            expect(mockAction).toHaveBeenCalledTimes(1);
+            expect(result.current.hasPendingAction).toBe(false);
+            expect(result.current.isOpen).toBe(false);
+        });
+
+        it('should not set cookie when user cancels', async () => {
+            setup();
+
+            const mockAction = vi.fn();
+            const { result } = renderHook(() => useMainnetConfirmation());
+
+            await act(async () => {
+                await result.current.requireConfirmation(mockAction);
+            });
+
+            act(() => {
+                result.current.cancel();
+            });
+
+            expect(setCookie).not.toHaveBeenCalled();
+        });
+    });
 });
 
-const clusterUrls: Record<Cluster, string> = {
-    [Cluster.MainnetBeta]: MAINNET_BETA_URL,
-    [Cluster.Testnet]: TESTNET_URL,
-    [Cluster.Devnet]: DEVNET_URL,
-    [Cluster.Simd296]: SIMD296_URL,
-    [Cluster.Custom]: 'http://localhost:8899',
-};
-
 function setup(cluster: Cluster = Cluster.MainnetBeta) {
-    mockUseCluster.mockReturnValue({
+    vi.mocked(useCluster).mockReturnValue({
         cluster,
         clusterInfo: undefined,
         customUrl: '',
         name: clusterName(cluster),
-        status: 'connected',
-        url: clusterUrls[cluster],
+        status: ClusterStatus.Connected,
+        url: clusterUrl(cluster, ''),
     });
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { ComputeBudgetProgram, TransactionMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
@@ -42,7 +43,7 @@ describe('instruction::ComputeBudgetDetailsCard', () => {
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/7.187812 lamports per compute unit/)).toBeInTheDocument();
     });
@@ -68,7 +69,7 @@ describe('instruction::ComputeBudgetDetailsCard', () => {
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/155.666 compute units/)).toBeInTheDocument();
     }, 15000);

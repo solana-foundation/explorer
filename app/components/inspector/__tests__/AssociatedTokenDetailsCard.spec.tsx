@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import * as spl from '@solana/spl-token';
 import { TransactionMessage } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -33,14 +34,14 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
                         <AssociatedTokenDetailsCard ix={ix} raw={ti} message={m} index={index} result={{ err: null }} />
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         await waitFor(
             () => {
                 expect(screen.queryByText(/Loading/i)).toBeNull();
             },
-            { interval: 50, timeout: 10000 }
+            { interval: 50, timeout: 10000 },
         );
         [/Source/, /Account/, /Mint/, /Wallet/].forEach(pattern => {
             expect(screen.getByText(pattern)).toBeInTheDocument();
@@ -68,7 +69,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
                         <AssociatedTokenDetailsCard ix={ix} raw={ti} message={m} index={index} result={{ err: null }} />
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
         [/Source/, /Account/, /Mint/, /Wallet/].forEach(pattern => {
@@ -97,7 +98,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
                         <AssociatedTokenDetailsCard ix={ix} raw={ti} message={m} index={index} result={{ err: null }} />
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.getByText(/Associated Token Program: Recover Nested/)).toBeInTheDocument();
         [/Destination/, /Nested Mint/, /Nested Owner/, /Nested Source/, /Owner Mint/, /^Owner$/].forEach(pattern => {
@@ -128,7 +129,7 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
                         <AssociatedTokenDetailsCard ix={ix} raw={ti} message={m} index={index} result={{ err: null }} />
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
         expect(screen.queryByText(/Inner Instructions/)).not.toBeInTheDocument();
     });

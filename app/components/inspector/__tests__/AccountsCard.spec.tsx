@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 
@@ -19,7 +20,7 @@ describe('inspector::AccountsCard', () => {
                 <AccountsProvider>
                     <AccountsCard message={m} />
                 </AccountsProvider>
-            </ClusterProvider>
+            </ClusterProvider>,
         );
 
         // Should show account list header
@@ -37,7 +38,7 @@ describe('inspector::AccountsCard', () => {
                 <AccountsProvider>
                     <AccountsCard message={m} />
                 </AccountsProvider>
-            </ClusterProvider>
+            </ClusterProvider>,
         );
 
         // Should show account list header

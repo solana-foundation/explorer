@@ -1,6 +1,5 @@
 'use client';
 
-import { DownloadableDropdown } from '@components/common/Downloadable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SolBalance } from '@components/common/SolBalance';
@@ -19,6 +18,7 @@ import React from 'react';
 import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
+import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';
@@ -56,7 +56,7 @@ function decodeParam(params: URLSearchParams, name: string): string | boolean {
     if (param === null) return false;
     try {
         return decodeURIComponent(param);
-    } catch (err) {
+    } catch (_err) {
         return true;
     }
 }
@@ -66,7 +66,7 @@ function decodeSignatures(signaturesParam: string): (string | null)[] {
     let signatures;
     try {
         signatures = JSON.parse(signaturesParam);
-    } catch (err) {
+    } catch (_err) {
         throw new Error('Signatures param is not valid JSON');
     }
 
@@ -88,7 +88,7 @@ function decodeSignatures(signaturesParam: string): (string | null)[] {
         try {
             bs58.decode(signature);
             validSignatures.push(signature);
-        } catch (err) {
+        } catch (_err) {
             throw new Error('Signature is not valid base58');
         }
     }
@@ -100,7 +100,7 @@ function decodeSignatures(signaturesParam: string): (string | null)[] {
 // URL params are returned as a string that will prefill the transaction
 // message input field for debugging. Returns a tuple of [result, shouldRefreshUrl]
 function decodeUrlParams(
-    params: URLSearchParams
+    params: URLSearchParams,
 ): [TransactionData | string | SquadsProposalAccountData, URLSearchParams, boolean] {
     const messageParam = decodeParam(params, 'message');
     const signaturesParam = decodeParam(params, 'signatures');
@@ -118,7 +118,7 @@ function decodeUrlParams(
             // Validate that it's a valid public key
             new PublicKey(squadsTxParam);
             return [{ account: squadsTxParam }, params, refreshUrl];
-        } catch (err) {
+        } catch (_err) {
             params.delete('squadsTx');
             refreshUrl = true;
         }
@@ -137,7 +137,7 @@ function decodeUrlParams(
     if (typeof signaturesParam === 'string') {
         try {
             signatures = decodeSignatures(signaturesParam);
-        } catch (err) {
+        } catch (_err) {
             params.delete('signatures');
             refreshUrl = true;
         }
@@ -157,7 +157,7 @@ function decodeUrlParams(
             signatures,
         };
         return [data, params, refreshUrl];
-    } catch (err) {
+    } catch (_err) {
         params.delete('message');
         refreshUrl = true;
         return [messageParam, params, true];
@@ -463,13 +463,12 @@ function OverviewCard({
     return (
         <>
             <div className="card">
-                <div className="card-header">
+                <div className="card-header e-gap-2">
                     <h3 className="card-header-title">Transaction Overview</h3>
                     <button className="btn btn-sm d-flex btn-white" onClick={onClear}>
                         Clear
                     </button>
-                    <span className="me-2"></span>
-                    <DownloadableDropdown filename={signature || 'signature'} data={raw} />
+                    <DownloadDropdown filename={signature || 'signature'} data={raw} />
                 </div>
                 <TableCardBody>
                     <tr>

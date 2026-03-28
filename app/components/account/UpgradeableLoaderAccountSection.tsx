@@ -5,7 +5,9 @@ import { InfoTooltip } from '@components/common/InfoTooltip';
 import { Slot } from '@components/common/Slot';
 import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { Account, useFetchAccountInfo } from '@providers/accounts';
+import { useRefreshAccount } from '@entities/account';
+import { AccountDownloadDropdown } from '@features/account';
+import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { addressLabel } from '@utils/tx';
@@ -67,7 +69,7 @@ export function UpgradeableProgramSection({
     programAccount: ProgramAccountInfo;
     programData: ProgramDataAccountInfo | undefined;
 }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     const { cluster } = useCluster();
     const { data: squadMapInfo } = useSquadsMultisigLookup(programData?.authority, cluster);
 
@@ -75,7 +77,7 @@ export function UpgradeableProgramSection({
 
     return (
         <div className="card">
-            <div className="card-header">
+            <div className="card-header e-gap-2">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">
                     {programData === undefined && 'Closed '}Program Account
                 </h3>
@@ -83,6 +85,7 @@ export function UpgradeableProgramSection({
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>
+                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
             </div>
 
             <TableCardBody>
@@ -175,7 +178,7 @@ function MultisigBadge({ pubkey }: { pubkey: PublicKey }) {
 
 function VerifiedLabel() {
     return (
-        <InfoTooltip text="Verified builds allow users can ensure that the hash of the on-chain program matches the hash of the program of the given codebase (registry hosted by osec.io).">
+        <InfoTooltip text="Verified builds allow users to ensure that the hash of the on-chain program matches the hash of the program of the given codebase (registry hosted by osec.io).">
             <Link
                 rel="noopener noreferrer"
                 target="_blank"
@@ -195,7 +198,7 @@ export function UpgradeableProgramDataSection({
     account: Account;
     programData: ProgramDataAccountInfo;
 }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     return (
         <div className="card">
             <div className="card-header">
@@ -259,7 +262,7 @@ export function UpgradeableProgramBufferSection({
     account: Account;
     programBuffer: ProgramBufferAccountInfo;
 }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     return (
         <div className="card">
             <div className="card-header">

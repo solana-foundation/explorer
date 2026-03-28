@@ -1,37 +1,89 @@
 import type { SupportedIdl } from '@entities/idl';
 import { Button } from '@shared/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@shared/ui/dialog';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 import { Switch } from '@shared/ui/switch';
-import { useMemo, useState } from 'react';
-import { Code, Download, Search } from 'react-feather';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AlertCircle, Code, Download, ExternalLink, Search } from 'react-feather';
 
 import { WalletProvider } from '@/app/providers/wallet-provider';
 import { triggerDownload } from '@/app/shared/lib/triggerDownload';
 
+import { type IdlVariant } from '../model/use-idl-last-transaction-date';
 import { IdlRenderer } from './IdlRenderer';
 
 export function IdlSection({
     idl,
     badge,
     programId,
+    idlSource,
+    network,
     searchStr,
     onSearchChange,
 }: {
     idl: SupportedIdl;
     badge: React.ReactNode;
     programId: string;
+    idlSource: IdlVariant;
+    network: string;
     searchStr: string;
     onSearchChange: (str: string) => void;
 }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isRawIdlView, setIsRawIdlView] = useState(false);
+    const [isCastawayDialogOpen, setIsCastawayDialogOpen] = useState(false);
+    const downloadDropdownRef = useRef<HTMLButtonElement>(null);
 
     const idlBase64 = useMemo(() => {
         return Buffer.from(JSON.stringify(idl, null, 2)).toString('base64');
     }, [idl]);
+    const castawayUrl = useMemo(() => {
+        const params = new URLSearchParams({ idlSource, network, program: programId });
+        return `https://www.castaway.lol/?${params.toString()}`;
+    }, [idlSource, network, programId]);
+
+    useEffect(() => {
+        if (!downloadDropdownRef.current) {
+            return;
+        }
+
+        let isMounted = true;
+        let dropdown: { dispose: () => void } | null = null;
+
+        void import('bootstrap/js/dist/dropdown').then(module => {
+            if (!isMounted || !downloadDropdownRef.current) {
+                return;
+            }
+
+            const BsDropdown = module.default;
+            dropdown = new BsDropdown(downloadDropdownRef.current, {
+                popperConfig() {
+                    return { strategy: 'fixed' as const };
+                },
+            });
+        });
+
+        return () => {
+            isMounted = false;
+            dropdown?.dispose();
+        };
+    }, []);
 
     const handleDownloadIdl = () => triggerDownload(idlBase64, `${programId}-idl.json`);
+    const handleOpenCastawayDialog = () => setIsCastawayDialogOpen(true);
+    const handleCastawayContinue = () => {
+        window.open(castawayUrl, '_blank', 'noopener,noreferrer');
+        setIsCastawayDialogOpen(false);
+    };
 
     return (
         <>
@@ -58,10 +110,55 @@ export function IdlSection({
                         </div>
                     )}
                     <div className="e-flex e-items-center e-gap-2">
-                        <Button variant="outline" size="sm" onClick={handleDownloadIdl}>
-                            <Download size={12} />
-                            Download
-                        </Button>
+                        <div className="dropdown e-overflow-visible">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                ref={downloadDropdownRef}
+                                data-bs-toggle="dropdown"
+                                type="button"
+                                aria-label="Download"
+                            >
+                                <Download size={12} />
+                                Download
+                            </Button>
+                            <div className="dropdown-menu-end dropdown-menu e-z-10">
+                                <div className="d-flex e-flex-col">
+                                    <Button onClick={handleDownloadIdl}>Download IDL</Button>
+                                    <Button onClick={handleOpenCastawayDialog}>Generate SDK</Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <Dialog open={isCastawayDialogOpen} onOpenChange={setIsCastawayDialogOpen}>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle className="e-flex e-items-center e-gap-2">
+                                        <AlertCircle className="e-text-destructive" size={16} />
+                                        Leaving Solana Explorer
+                                    </DialogTitle>
+                                </DialogHeader>
+                                <div className="e-space-y-2 e-pl-6">
+                                    <DialogDescription>
+                                        You are now leaving Explorer and going to Castaway.
+                                    </DialogDescription>
+                                    <DialogDescription className="e-break-all e-font-mono e-text-xs">
+                                        {castawayUrl}
+                                    </DialogDescription>
+                                </div>
+                                <DialogFooter>
+                                    <DialogClose asChild>
+                                        <Button variant="outline" size="sm">
+                                            Cancel
+                                        </Button>
+                                    </DialogClose>
+                                    <Button variant="default" size="sm" onClick={handleCastawayContinue}>
+                                        Continue
+                                        <ExternalLink size={12} />
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
 
                         <Button
                             variant={isRawIdlView ? 'accent' : 'outline'}

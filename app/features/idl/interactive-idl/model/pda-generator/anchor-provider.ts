@@ -3,7 +3,7 @@ import type { AnchorIdl, SupportedIdl } from '@entities/idl';
 import { PublicKey } from '@solana/web3.js';
 import { camelCase } from 'change-case';
 
-import type { PdaAccount, PdaArgument, PdaInstruction, PdaProvider } from './types';
+import type { PdaAccount, PdaInstruction, PdaProvider } from './types';
 
 /**
  * PDA provider for Anchor IDL format
@@ -31,13 +31,6 @@ function getPda(acc: IdlInstructionAccountItem): IdlPda | undefined {
     return acc.pda;
 }
 
-function mapArgs(args: IdlInstruction['args']): PdaArgument[] {
-    return args.map(arg => ({
-        name: arg.name,
-        type: typeof arg.type === 'string' ? arg.type : 'unknown',
-    }));
-}
-
 function canHandle(idl: SupportedIdl): boolean {
     return 'instructions' in idl && 'address' in idl;
 }
@@ -57,7 +50,7 @@ function findInstruction(idl: SupportedIdl, instructionName: string): PdaInstruc
 
     return {
         accounts: mapAccounts(idlInstruction.accounts),
-        args: mapArgs(idlInstruction.args),
+        args: idlInstruction.args,
         name: idlInstruction.name,
     };
 }

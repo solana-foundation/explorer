@@ -9,6 +9,7 @@ import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { BlockProvider, FetchStatus, useBlock, useFetchBlock } from '@providers/block';
 import { useCluster } from '@providers/cluster';
+import { cn } from '@shared/utils';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { IBRL_EXPLORER_URL } from '@utils/env';
@@ -290,7 +291,7 @@ function TabLink({ path, slot, title }: { path: string; slot: number; title: str
     const isActive = (selectedLayoutSegment === null && path === '') || selectedLayoutSegment === path;
     return (
         <li className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath} scroll={false}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={tabPath} scroll={false}>
                 {title}
             </Link>
         </li>

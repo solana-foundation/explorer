@@ -20,7 +20,7 @@ export class CodamaInterpreter implements IdlInterpreter<any, UnifiedProgram> {
         _connection: Connection,
         _wallet: UnifiedWallet,
         _programId: PublicKey | string,
-        _idl: any
+        _idl: any,
     ): Promise<UnifiedProgram> {
         throw new Error('Codama IDL format is not yet supported for interactive features.');
     }
@@ -29,7 +29,7 @@ export class CodamaInterpreter implements IdlInterpreter<any, UnifiedProgram> {
         _program: UnifiedProgram,
         _instructionName: string,
         _accounts: UnifiedAccounts,
-        _args: UnifiedArguments
+        _args: UnifiedArguments,
     ): Promise<TransactionInstruction | VersionedMessage> {
         throw new Error('Codama IDL format is not yet supported for interactive features.');
     }

@@ -44,7 +44,7 @@ describe('getTokenInfos', () => {
             expect.any(String),
             expect.objectContaining({
                 signal: abortController.signal,
-            })
+            }),
         );
     });
 
@@ -65,7 +65,7 @@ describe('getTokenInfos', () => {
             expect.any(String),
             expect.objectContaining({
                 next: nextOptions,
-            })
+            }),
         );
     });
 

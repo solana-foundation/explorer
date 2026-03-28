@@ -35,7 +35,7 @@ export function TokenExtensionsSection({
         (id: string) => {
             setSelectedExtension(id === selectedExtension ? undefined : id);
         },
-        [selectedExtension, setSelectedExtension]
+        [selectedExtension, setSelectedExtension],
     );
 
     // handle accordion item click to change the selected extension
@@ -46,7 +46,7 @@ export function TokenExtensionsSection({
                 setSelectedExtension(undefined);
             }
         },
-        [selectedExtension, setSelectedExtension]
+        [selectedExtension, setSelectedExtension],
     );
 
     return (

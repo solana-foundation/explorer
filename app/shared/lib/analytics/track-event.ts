@@ -1,12 +1,6 @@
-type EventParams = {
-    [key: string]: string | number | boolean | undefined;
-};
+import { Logger } from '@/app/shared/lib/logger';
 
-type DataLayer = Array<Record<string, unknown>>;
-
-// Type definitions for provider-specific window extensions
-type WindowWithDataLayer = Window & { dataLayer: DataLayer };
-type WindowWithGtag = Window & { gtag: (...args: unknown[]) => void };
+import type { EventParams, WindowWithDataLayer, WindowWithGtag } from './types';
 
 function getDataLayer(win: Window): WindowWithDataLayer | undefined {
     if ('dataLayer' in win && Array.isArray((win as WindowWithDataLayer).dataLayer)) {
@@ -62,6 +56,8 @@ function isAnalyticsEnabled(): boolean {
     return Boolean(process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID?.trim());
 }
 
+export type { GA4EventName } from './types';
+
 export function trackEvent(eventName: string, params?: EventParams): void {
     if (typeof window === 'undefined') {
         return;
@@ -75,6 +71,6 @@ export function trackEvent(eventName: string, params?: EventParams): void {
         const provider = resolveProvider(window);
         provider?.track(window, eventName, params);
     } catch (error) {
-        console.error('Analytics error:', error);
+        Logger.error(new Error('[analytics] Analytics error', { cause: error }));
     }
 }

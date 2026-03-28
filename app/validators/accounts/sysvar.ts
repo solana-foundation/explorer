@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-redeclare */
-
 import { array, boolean, enums, Infer, literal, number, string, type, union } from 'superstruct';
 
 export type SysvarAccountType = Infer<typeof SysvarAccountType>;

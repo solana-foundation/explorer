@@ -22,7 +22,7 @@ const DialogOverlay = React.forwardRef<
             'e-fixed e-inset-0 e-z-50 e-bg-black/80',
             'data-[state=open]:e-animate-in data-[state=closed]:e-animate-out',
             'data-[state=closed]:e-fade-out-0 data-[state=open]:e-fade-in-0',
-            className
+            className,
         )}
         {...props}
     />
@@ -47,7 +47,7 @@ const DialogContent = React.forwardRef<
                 'data-[state=closed]:e-slide-out-to-left-1/2 data-[state=closed]:e-slide-out-to-top-[48%]',
                 'data-[state=open]:e-slide-in-from-left-1/2 data-[state=open]:e-slide-in-from-top-[48%]',
                 'sm:e-rounded-lg',
-                className
+                className,
             )}
             {...props}
         >
@@ -59,7 +59,7 @@ const DialogContent = React.forwardRef<
                     'e-ring-offset-white e-transition-opacity',
                     'hover:e-opacity-100',
                     'focus:e-outline-none focus:e-ring-2 focus:e-ring-neutral-950 focus:e-ring-offset-2',
-                    'disabled:e-pointer-events-none'
+                    'disabled:e-pointer-events-none',
                 )}
             >
                 <X size={16} />

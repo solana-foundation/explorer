@@ -27,6 +27,7 @@ function isOnDesiredPage() {
 }
 
 function populateUri(path: string, component: string, searchParams: URLSearchParams, hash: string) {
+    // eslint-disable-next-line no-restricted-syntax -- remove slashes from URL component
     const sanitizeComponent = (component: string) => component.replace(/\//g, '');
     return `${path}/${sanitizeComponent(component)}?${searchParams.toString()}#${hash}`;
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { describe, expect, it } from 'vitest';
 
 import { isLeafTupleU8String, parseAnchorType_U8_PathTuple } from './leaf-tuple-type-handler';
@@ -20,7 +21,7 @@ describe('parseAnchorType_U8_PathTuple', () => {
 
     it('rejects extra tuple items', () => {
         expect(() => parseAnchorType_U8_PathTuple('(u8,[u8;32],u8)')).toThrow(
-            /Too many tuple items|Expected exactly two tuple items|Expected array like/i
+            /Too many tuple items|Expected exactly two tuple items|Expected array like/i,
         );
     });
 

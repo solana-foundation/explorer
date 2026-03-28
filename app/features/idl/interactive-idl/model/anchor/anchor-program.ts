@@ -7,13 +7,17 @@ import type { UnifiedAccounts, UnifiedArguments, UnifiedProgram } from '../unifi
  * Unified program implementation for Anchor
  */
 export class AnchorUnifiedProgram implements UnifiedProgram {
-    constructor(public programId: PublicKey, public idl: AnchorIdl, private program: AnchorProgram) {}
+    constructor(
+        public programId: PublicKey,
+        public idl: AnchorIdl,
+        private program: AnchorProgram,
+    ) {}
 
     // Build the instruction using Anchor's methods
     async _buildInstruction(
         instructionName: string,
         accounts: UnifiedAccounts,
-        args: UnifiedArguments
+        args: UnifiedArguments,
     ): Promise<TransactionInstruction> {
         try {
             const instruction = this.program.methods[instructionName];
@@ -25,7 +29,7 @@ export class AnchorUnifiedProgram implements UnifiedProgram {
             throw new Error(
                 `Failed to build instruction "${instructionName}": ${
                     error instanceof Error ? error.message : String(error)
-                }`
+                }`,
             );
         }
     }
@@ -33,11 +37,11 @@ export class AnchorUnifiedProgram implements UnifiedProgram {
     async buildInstruction(
         instructionName: string,
         ixAccounts: UnifiedAccounts,
-        ixArguments: Array<any> // define a type that satisfies Anchor's arguments type
+        ixArguments: Array<any>, // define a type that satisfies Anchor's arguments type
     ): Promise<TransactionInstruction> {
         if (!(instructionName in this.program.methods)) {
             throw new Error(
-                `Instruction "${instructionName}" not found. Available: ${Object.keys(this.program.methods).join(', ')}`
+                `Instruction "${instructionName}" not found. Available: ${Object.keys(this.program.methods).join(', ')}`,
             );
         }
 

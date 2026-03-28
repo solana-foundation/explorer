@@ -1,6 +1,6 @@
 import { Response as NodeFetchResponse } from 'node-fetch';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { errors, matchMaxSizeError } from './errors';
 
@@ -19,7 +19,7 @@ export async function processBinary(data: NodeFetchResponse) {
         if (matchMaxSizeError(error)) {
             throw errors[413];
         } else {
-            Logger.debug('Debug:', error);
+            Logger.debug('[api:metadata-proxy] Failed to process binary data', { error });
             throw errors[500];
         }
     }
@@ -42,7 +42,7 @@ export async function processJson(data: NodeFetchResponse) {
             // Handle JSON syntax errors specifically
             throw errors[415];
         } else {
-            Logger.debug('Debug:', error);
+            Logger.debug('[api:metadata-proxy] Failed to process JSON data', { error });
             throw errors[500];
         }
     }
@@ -57,6 +57,7 @@ export async function processTextAsJson(data: NodeFetchResponse) {
     try {
         const text = await data.text();
         // Remove trailing/leading whitespace and normalize line endings
+        // eslint-disable-next-line no-restricted-syntax -- normalize CRLF to LF line endings
         const cleanedText = text.trim().replace(/\r\n/g, '\n');
         const json = JSON.parse(cleanedText);
 
@@ -67,7 +68,7 @@ export async function processTextAsJson(data: NodeFetchResponse) {
         } else if (error instanceof SyntaxError) {
             throw errors[415];
         } else {
-            Logger.debug('Debug:', error);
+            Logger.debug('[api:metadata-proxy] Failed to process text-as-JSON data', { error });
             throw errors[500];
         }
     }

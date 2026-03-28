@@ -123,7 +123,7 @@ export function dashboardInfoReducer(state: DashboardInfo, action: DashboardInfo
                 blockTime = Number(
                     BigInt(state.lastBlockTime.blockTime) +
                         (action.data.absoluteSlot - state.lastBlockTime.slot) *
-                            BigInt(Math.floor(state.avgSlotTime_1h * 1000))
+                            BigInt(Math.floor(state.avgSlotTime_1h * 1000)),
                 );
             }
 

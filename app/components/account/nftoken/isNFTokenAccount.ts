@@ -1,5 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { Account } from '../../../providers/accounts';
 import { NFTOKEN_ADDRESS } from './nftoken';
 import { NftokenTypes } from './nftoken-types';
@@ -35,10 +37,11 @@ export const parseNFTokenNFTAccount = (account: Account): NftokenTypes.NftAccoun
             delegate: new PublicKey(parsed.delegate).toBase58(),
             holder: new PublicKey(parsed.holder).toBase58(),
 
+            // eslint-disable-next-line no-restricted-syntax -- remove null bytes from metadata URL
             metadata_url: parsed.metadata_url?.replace(/\0/g, '') ?? null,
         };
     } catch (e) {
-        console.error('Problem parsing NFToken NFT...', e);
+        Logger.error(e);
         return null;
     }
 };
@@ -63,10 +66,11 @@ export const parseNFTokenCollectionAccount = (account: Account): NftokenTypes.Co
             address: account.pubkey.toBase58(),
             authority: parsed.authority,
             authority_can_update: Boolean(parsed.authority_can_update),
+            // eslint-disable-next-line no-restricted-syntax -- remove null bytes from metadata URL
             metadata_url: parsed.metadata_url?.replace(/\0/g, '') ?? null,
         };
     } catch (e) {
-        console.error('Problem parsing NFToken Collection...', e);
+        Logger.error(e);
         return null;
     }
 };

@@ -1,10 +1,12 @@
 'use client';
 
 import { createSolanaRpc } from '@solana/kit';
-import { Cluster, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
+import { Cluster, clusterFromSlug, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
 import { localStorageIsAvailable } from '@utils/local-storage';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 import { EpochSchedule } from '../utils/epoch-schedule';
 
@@ -51,21 +53,12 @@ function clusterReducer(state: State, action: Action): State {
     }
 }
 
-function parseQuery(searchParams: ReadonlyURLSearchParams | null): Cluster {
+export function parseQuery(searchParams: ReadonlyURLSearchParams | null): Cluster {
     const clusterParam = searchParams?.get('cluster');
-    switch (clusterParam) {
-        case 'custom':
-            return Cluster.Custom;
-        case 'devnet':
-            return Cluster.Devnet;
-        case 'testnet':
-            return Cluster.Testnet;
-        case 'simd296':
-            return Cluster.Simd296;
-        case 'mainnet-beta':
-        default:
-            return Cluster.MainnetBeta;
+    if (clusterParam) {
+        return clusterFromSlug(clusterParam) ?? DEFAULT_CLUSTER;
     }
+    return DEFAULT_CLUSTER;
 }
 
 const ModalContext = createContext<[boolean, SetShowModal] | undefined>(undefined);
@@ -80,7 +73,7 @@ const WHITELISTED_RPCS = [
 function isWhitelistedRpc(url: string) {
     try {
         return WHITELISTED_RPCS.includes(new URL(url).hostname);
-    } catch (e) {
+    } catch (_e) {
         return false;
     }
 }
@@ -99,7 +92,9 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
         cluster === Cluster.Custom ||
         (localStorageIsAvailable() && localStorage.getItem('enableCustomUrl') !== null) ||
         isWhitelistedRpc(state.customUrl);
-    const customUrl = (enableCustomUrl && searchParams?.get('customUrl')) || state.customUrl;
+
+    // `|| undefined` converts an empty string to undefined, so `??` falls back to state.customUrl
+    const customUrl = (enableCustomUrl ? searchParams?.get('customUrl') || undefined : undefined) ?? state.customUrl;
     const pathname = usePathname();
     const router = useRouter();
 
@@ -121,7 +116,7 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
     // Reconnect to cluster when params change
     useEffect(() => {
         updateCluster(dispatch, cluster, customUrl);
-    }, [cluster, customUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [cluster, customUrl]);
 
     return (
         <StateContext.Provider value={state}>
@@ -168,7 +163,9 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
         });
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            console.error(error, { clusterUrl: clusterUrl(cluster, customUrl) });
+            Logger.error(error, {
+                clusterUrl: clusterUrl(cluster, customUrl),
+            });
         }
         dispatch({
             cluster,

@@ -1,3 +1,4 @@
+import { cn } from '@shared/utils';
 import React from 'react';
 
 type OverlayProps = {
@@ -5,5 +6,5 @@ type OverlayProps = {
 };
 
 export function Overlay({ show }: OverlayProps) {
-    return <div className={`modal-backdrop fade ${show ? 'show' : 'disable-pointer-events'}`}></div>;
+    return <div className={cn('modal-backdrop fade', show ? 'show' : 'disable-pointer-events')}></div>;
 }

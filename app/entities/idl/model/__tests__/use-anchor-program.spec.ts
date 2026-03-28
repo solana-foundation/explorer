@@ -77,7 +77,7 @@ describe('Create program instance from idl@0.30+', () => {
                 const p = new Program(formattedIdl, getProvider(url));
                 expect(programId).toBe(p.programId.toString());
             }).not.toThrowError();
-        }
+        },
     );
 });
 

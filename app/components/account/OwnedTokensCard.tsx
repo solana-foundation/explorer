@@ -10,6 +10,7 @@ import {
     useScaledUiAmountForMint,
 } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
+import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
 import Image from 'next/image';
@@ -19,6 +20,7 @@ import React, { useCallback, useMemo } from 'react';
 import { ChevronDown } from 'react-feather';
 
 import { getProxiedUri } from '@/app/features/metadata/utils';
+import { INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import TokenLogoPlaceholder from '@/app/img/logos-solana/low-contrast-solana-logo.svg';
 import { normalizeTokenAmount } from '@/app/utils';
 
@@ -40,6 +42,7 @@ export function OwnedTokensCard({ address }: { address: string }) {
     const fetchAccountTokens = useFetchAccountOwnedTokens();
     const refresh = () => fetchAccountTokens(pubkey);
     const [showDropdown, setDropdown] = React.useState(false);
+    const [visibleCount, setVisibleCount] = React.useState(INITIAL_VISIBLE_COUNT);
     const display = useQueryDisplay();
 
     // Fetch owned tokens
@@ -65,7 +68,7 @@ export function OwnedTokensCard({ address }: { address: string }) {
     }
 
     if (tokens.length > 100) {
-        return <ErrorCard text="Token holdings is not available for accounts with over 100 token accounts" />;
+        return <ErrorCard text="Token holdings are not available for accounts with over 100 token accounts" />;
     }
     const showLogos = tokens.some(t => t.logoURI !== undefined);
 
@@ -90,12 +93,17 @@ export function OwnedTokensCard({ address }: { address: string }) {
                             </tr>
                         </thead>
                         {display === 'detail' ? (
-                            <HoldingsDetail tokens={tokens} showLogos={showLogos} />
+                            <HoldingsDetail tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
                         ) : (
-                            <HoldingsSummary tokens={tokens} showLogos={showLogos} />
+                            <HoldingsSummary tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
                         )}
                     </table>
                 </div>
+                <TokensCardFooter
+                    tokens={tokens}
+                    visibleCount={visibleCount}
+                    loadMore={() => setVisibleCount(c => c + LOAD_MORE_COUNT)}
+                />
             </div>
         </>
     );
@@ -111,7 +119,15 @@ type MappedToken = {
     symbol?: string;
 };
 
-function HoldingsDetail({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[]; showLogos: boolean }) {
+function HoldingsDetail({
+    tokens,
+    showLogos,
+    visibleCount,
+}: {
+    tokens: TokenInfoWithPubkey[];
+    showLogos: boolean;
+    visibleCount: number;
+}) {
     const mappedTokens = useMemo(() => {
         const tokensMap = new Map<string, MappedToken>();
 
@@ -141,9 +157,11 @@ function HoldingsDetail({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[]; 
         return tokensMap;
     }, [tokens]);
 
+    const visibleTokens = Array.from(mappedTokens.entries()).slice(0, visibleCount);
+
     return (
         <tbody className="list">
-            {Array.from(mappedTokens.entries()).map(([mintAddress, token]) => (
+            {visibleTokens.map(([mintAddress, token]) => (
                 <TokenRow
                     key={mintAddress}
                     mintAddress={mintAddress}
@@ -156,30 +174,43 @@ function HoldingsDetail({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[]; 
     );
 }
 
-function HoldingsSummary({ tokens, showLogos }: { tokens: TokenInfoWithPubkey[]; showLogos: boolean }) {
-    const mappedTokens = new Map<string, MappedToken>();
-    for (const { info: token, logoURI, symbol, name } of tokens) {
-        const mintAddress = token.mint.toBase58();
-        const totalByMint = mappedTokens.get(mintAddress)?.amount;
+function HoldingsSummary({
+    tokens,
+    showLogos,
+    visibleCount,
+}: {
+    tokens: TokenInfoWithPubkey[];
+    showLogos: boolean;
+    visibleCount: number;
+}) {
+    const mappedTokens = useMemo(() => {
+        const tokensMap = new Map<string, MappedToken>();
+        for (const { info: token, logoURI, symbol, name } of tokens) {
+            const mintAddress = token.mint.toBase58();
+            const totalByMint = tokensMap.get(mintAddress)?.amount;
 
-        let amount = token.tokenAmount.uiAmountString;
-        if (totalByMint !== undefined) {
-            amount = new BigNumber(totalByMint).plus(token.tokenAmount.uiAmountString).toString();
+            let amount = token.tokenAmount.uiAmountString;
+            if (totalByMint !== undefined) {
+                amount = new BigNumber(totalByMint).plus(token.tokenAmount.uiAmountString).toString();
+            }
+
+            tokensMap.set(mintAddress, {
+                amount,
+                decimals: token.tokenAmount.decimals,
+                logoURI,
+                name,
+                rawAmount: token.tokenAmount.amount,
+                symbol,
+            });
         }
+        return tokensMap;
+    }, [tokens]);
 
-        mappedTokens.set(mintAddress, {
-            amount,
-            decimals: token.tokenAmount.decimals,
-            logoURI,
-            name,
-            rawAmount: token.tokenAmount.amount,
-            symbol,
-        });
-    }
+    const visibleTokens = Array.from(mappedTokens.entries()).slice(0, visibleCount);
 
     return (
         <tbody className="list">
-            {Array.from(mappedTokens.entries()).map(([mintAddress, token]) => (
+            {visibleTokens.map(([mintAddress, token]) => (
                 <TokenRow
                     key={mintAddress}
                     mintAddress={mintAddress}
@@ -230,11 +261,11 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
             )}
             {showAccountAddress && token.pubkey && (
                 <td>
-                    <Address pubkey={new PublicKey(token.pubkey)} link tokenLabelInfo={token} useMetadata />
+                    <Address pubkey={new PublicKey(token.pubkey)} link tokenLabelInfo={token} />
                 </td>
             )}
             <td>
-                <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={token} useMetadata />
+                <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={token} />
             </td>
             <td>
                 {token.amount} {token.symbol}
@@ -244,6 +275,34 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
                 />
             </td>
         </tr>
+    );
+}
+
+function TokensCardFooter({
+    tokens,
+    visibleCount,
+    loadMore,
+}: {
+    tokens: TokenInfoWithPubkey[];
+    visibleCount: number;
+    loadMore: () => void;
+}) {
+    // Count unique mints to get actual token count (not account count)
+    const totalCount = useMemo(() => {
+        const uniqueMints = new Set(tokens.map(t => t.info.mint.toBase58()));
+        return uniqueMints.size;
+    }, [tokens]);
+
+    if (visibleCount >= totalCount) {
+        return null;
+    }
+
+    return (
+        <div className="card-footer">
+            <button className="btn btn-primary w-100" onClick={loadMore}>
+                Load More ({visibleCount} of {totalCount})
+            </button>
+        </div>
     );
 }
 
@@ -267,7 +326,7 @@ const DisplayDropdown = ({ display, toggle, show }: DropdownProps) => {
             const nextQueryString = params.toString();
             return `${currentPath}${nextQueryString ? `?${nextQueryString}` : ''}`;
         },
-        [currentPath, currentSearchParams]
+        [currentPath, currentSearchParams],
     );
 
     const DISPLAY_OPTIONS: Display[] = [null, 'detail'];
@@ -276,13 +335,13 @@ const DisplayDropdown = ({ display, toggle, show }: DropdownProps) => {
             <button className="btn btn-white btn-sm" type="button" onClick={toggle}>
                 {display === 'detail' ? 'Detailed' : 'Summary'} <ChevronDown size={15} className="align-text-top" />
             </button>
-            <div className={`dropdown-menu-end dropdown-menu${show ? ' show' : ''}`}>
+            <div className={cn('dropdown-menu-end dropdown-menu', show && 'show')}>
                 {DISPLAY_OPTIONS.map(displayOption => {
                     return (
                         <Link
                             key={displayOption || 'null'}
                             href={buildLocation(displayOption)}
-                            className={`dropdown-item${displayOption === display ? ' active' : ''}`}
+                            className={cn('dropdown-item', displayOption === display && 'active')}
                             onClick={toggle}
                         >
                             {displayOption === 'detail' ? 'Detailed' : 'Summary'}

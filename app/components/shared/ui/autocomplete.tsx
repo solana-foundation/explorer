@@ -227,7 +227,7 @@ function AutocompleteItemComponent<Item extends AutocompleteItem = AutocompleteI
 
 function renderItemContentDefault<Item extends AutocompleteItem = AutocompleteItem>(
     option: Item,
-    renderItemLabel: (option: Item) => React.ReactNode
+    renderItemLabel: (option: Item) => React.ReactNode,
 ) {
     return (
         <div className="e-flex e-w-full e-items-center e-justify-between e-px-4 e-py-1.5 e-text-xs">

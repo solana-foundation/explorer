@@ -10,6 +10,7 @@ import { TokenAccountInfo } from '@validators/accounts/token';
 import React from 'react';
 import { create } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { getCurrentTokenScaledUiAmountMultiplier, getTokenInfos } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
 
@@ -72,7 +73,7 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
             pubkey,
             {
                 programId: TOKEN_2022_PROGRAM_ID,
-            }
+            },
         );
 
         const tokens: TokenInfoWithPubkey[] = tokenAccounts
@@ -88,7 +89,7 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
         const tokenMintInfos = await getTokenInfos(
             tokens.map(t => t.info.mint),
             cluster,
-            url
+            url,
         );
         if (tokenMintInfos) {
             const mappedTokenInfos = Object.fromEntries(
@@ -99,7 +100,7 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
                         name: t.name,
                         symbol: t.symbol,
                     },
-                ])
+                ]),
             );
             tokens.forEach(t => {
                 const tokenInfo = mappedTokenInfos[t.info.mint.toString()];
@@ -117,7 +118,7 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
         status = FetchStatus.Fetched;
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
+            Logger.error(error, { url });
         }
         status = FetchStatus.FetchFailed;
     }
@@ -145,7 +146,7 @@ export function useFetchAccountOwnedTokens() {
         (pubkey: PublicKey) => {
             fetchAccountTokens(dispatch, pubkey, cluster, url);
         },
-        [dispatch, cluster, url]
+        [dispatch, cluster, url],
     );
 }
 

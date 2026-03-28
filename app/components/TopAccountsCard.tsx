@@ -4,6 +4,7 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { SolBalance } from '@components/common/SolBalance';
 import { Status, useFetchRichList, useRichList } from '@providers/richList';
 import { useSupply } from '@providers/supply';
+import { cn } from '@shared/utils';
 import { AccountBalancePair } from '@solana/web3.js';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -172,7 +173,7 @@ const FilterDropdown = ({ filter }: DropdownProps) => {
                 dropdown.dispose();
             }
         },
-        [dropdownRef]
+        [dropdownRef],
     );
     return (
         <div className="dropdown">
@@ -205,7 +206,7 @@ function FilterLink({ currentFilter, filterOption }: { currentFilter: Filter; fi
         <Link
             key={filterOption || 'null'}
             href={href}
-            className={`dropdown-item${filterOption === currentFilter ? ' active' : ''}`}
+            className={cn('dropdown-item', filterOption === currentFilter && 'active')}
         >
             {filterTitle(filterOption)}
         </Link>

@@ -1,8 +1,8 @@
 import fetch from 'cross-fetch';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 import { FeatureInfoType } from '@/app/utils/feature-gate/types';
-import Logger from '@/app/utils/logger';
 
 // Good candidate to move to environment variables, but at the moment repository is public, so we leave them hardcoded (could be changed later)
 const OWNER = 'solana-foundation';
@@ -36,11 +36,11 @@ export async function fetchFeatureGateInformation(featureInfo?: FeatureInfoType)
                 if (!resp.ok) return 'No data';
 
                 return resp.text();
-            } catch (e) {
-                Logger.debug('Debug: can not fetch link', link);
+            } catch (_e) {
+                Logger.debug('[feature-gate] Cannot fetch link', { link });
                 return 'No data';
             }
-        })
+        }),
     );
 
     return results;

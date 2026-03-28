@@ -10,6 +10,8 @@ import {
 import { Market } from '@project-serum/serum';
 import { AccountInfo, AccountMeta, Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 // note: mainnet.1 suffices since its a superset of mainnet.0
 const mangoGroups = Config.ids().groups.filter(group => group.name !== 'mainnet.0');
 
@@ -294,19 +296,19 @@ export type OrderLotDetails = {
 ////
 
 export function logAllKeys(keys: AccountMeta[]) {
-    keys.map(key => console.log(key.pubkey.toBase58()));
+    Logger.debug('[components:ix-mango] Account keys', { keys: keys.map(k => k.pubkey.toBase58()) });
 }
 
 export function getSpotMarketFromInstruction(
     ix: TransactionInstruction,
-    spotMarket: AccountMeta
+    spotMarket: AccountMeta,
 ): SpotMarketConfig | undefined {
     const groupConfig = findGroupConfig(ix.programId);
     if (groupConfig === undefined) {
         return;
     }
     const spotMarketConfigs = groupConfig.spotMarkets.filter(mangoSpotMarket =>
-        spotMarket.pubkey.equals(mangoSpotMarket.publicKey)
+        spotMarket.pubkey.equals(mangoSpotMarket.publicKey),
     );
     if (spotMarketConfigs.length) {
         return spotMarketConfigs[0];
@@ -316,7 +318,7 @@ export function getSpotMarketFromInstruction(
 export async function getSpotMarketFromSpotMarketConfig(
     programId: PublicKey,
     clusterUrl: string,
-    mangoSpotMarketConfig: SpotMarketConfig
+    mangoSpotMarketConfig: SpotMarketConfig,
 ): Promise<Market | undefined> {
     const connection = new Connection(clusterUrl);
     const groupConfig = findGroupConfig(programId);
@@ -328,14 +330,14 @@ export async function getSpotMarketFromSpotMarketConfig(
 
 export function getPerpMarketFromInstruction(
     ix: TransactionInstruction,
-    perpMarket: AccountMeta
+    perpMarket: AccountMeta,
 ): PerpMarketConfig | undefined {
     const groupConfig = findGroupConfig(ix.programId);
     if (groupConfig === undefined) {
         return;
     }
     const perpMarketConfigs = groupConfig.perpMarkets.filter(mangoPerpMarket =>
-        perpMarket.pubkey.equals(mangoPerpMarket.publicKey)
+        perpMarket.pubkey.equals(mangoPerpMarket.publicKey),
     );
     if (perpMarketConfigs.length) {
         return perpMarketConfigs[0];
@@ -344,7 +346,7 @@ export function getPerpMarketFromInstruction(
 
 export async function getPerpMarketFromPerpMarketConfig(
     clusterUrl: string,
-    mangoPerpMarketConfig: PerpMarketConfig
+    mangoPerpMarketConfig: PerpMarketConfig,
 ): Promise<PerpMarket> {
     const acc = await getAccountInfo(clusterUrl, mangoPerpMarketConfig.publicKey);
     const decoded = PerpMarketLayout.decode(acc?.data);
@@ -353,7 +355,7 @@ export async function getPerpMarketFromPerpMarketConfig(
         mangoPerpMarketConfig.publicKey,
         mangoPerpMarketConfig.baseDecimals,
         mangoPerpMarketConfig.quoteDecimals,
-        decoded
+        decoded,
     );
 }
 
@@ -363,7 +365,7 @@ export function spotMarketFromIndex(ix: TransactionInstruction, marketIndex: num
         return;
     }
     const spotMarketConfigs = groupConfig.spotMarkets.filter(
-        spotMarketConfig => spotMarketConfig.marketIndex === marketIndex
+        spotMarketConfig => spotMarketConfig.marketIndex === marketIndex,
     );
     if (!spotMarketConfigs.length) {
         return 'UNKNOWN';

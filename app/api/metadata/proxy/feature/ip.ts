@@ -1,7 +1,7 @@
 import _dns from 'dns';
 import Address, { parse } from 'ipaddr.js';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 const dns = _dns.promises;
 
@@ -98,7 +98,7 @@ export async function checkURLForPrivateIP(uri: URL | string) {
 
         return false;
     } catch (error) {
-        Logger.debug(`Debug: error while processing URL ${uri.toString()}:`, error);
+        Logger.debug('[api:metadata-proxy] Error while processing URL', { error, url: uri.toString() });
         return true;
     }
 }

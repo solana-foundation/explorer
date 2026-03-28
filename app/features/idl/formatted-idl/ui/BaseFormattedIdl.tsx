@@ -12,10 +12,11 @@ import type { FormattedIdlViewProps } from './types';
 export function BaseFormattedIdl({
     idl,
     originalIdl,
+    programId,
     searchStr,
 }: FormattedIdlViewProps<Idl> | FormattedIdlViewProps<RootNode>) {
     const [activeTabIndex, setActiveTabIndex] = useState<number | null>(null);
-    const tabs = useTabs(idl, originalIdl, searchStr);
+    const tabs = useTabs(idl, originalIdl, programId, searchStr);
 
     useEffect(() => {
         if (typeof activeTabIndex === 'number') return;

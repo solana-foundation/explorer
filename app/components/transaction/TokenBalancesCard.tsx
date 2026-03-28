@@ -1,6 +1,7 @@
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { useTransactionDetails } from '@providers/transactions';
+import { cn } from '@shared/utils';
 import { ParsedMessageAccount, PublicKey, TokenBalance } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
@@ -53,6 +54,7 @@ export type TokenBalancesCardInnerProps = {
 export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     const { cluster, url } = useCluster();
     const [tokenSymbols, setTokenSymbols] = useState<Map<string, string>>(new Map());
+    const [expanded, setExpanded] = useState(true);
 
     useAsyncEffect(async isMounted => {
         const mints = rows.map(r => new PublicKey(r.mint));
@@ -65,30 +67,38 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
 
     return (
         <div className="card">
-            <div className="card-header">
+            <div className={cn('card-header', !expanded && 'border-0')}>
                 <h3 className="card-header-title">Token Balances</h3>
+                <button
+                    className={cn('btn btn-sm d-flex', expanded ? 'btn-black active' : 'btn-white')}
+                    onClick={() => setExpanded(current => !current)}
+                >
+                    {expanded ? 'Collapse' : 'Expand'}
+                </button>
             </div>
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">Address</th>
-                            <th className="text-muted">Token</th>
-                            <th className="text-muted">Change</th>
-                            <th className="text-muted">Post Balance</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">
-                        {rows.map(row => (
-                            <TokenBalanceRow
-                                key={row.account.toBase58() + row.mint}
-                                {...row}
-                                units={tokenSymbols.get(row.mint) || 'tokens'}
-                            />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            {expanded && (
+                <div className="table-responsive mb-0">
+                    <table className="table table-sm table-nowrap card-table">
+                        <thead>
+                            <tr>
+                                <th className="text-muted">Address</th>
+                                <th className="text-muted">Token</th>
+                                <th className="text-muted">Change</th>
+                                <th className="text-muted">Post Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody className="list">
+                            {rows.map(row => (
+                                <TokenBalanceRow
+                                    key={row.account.toBase58() + row.mint}
+                                    {...row}
+                                    units={tokenSymbols.get(row.mint) || 'tokens'}
+                                />
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }
@@ -134,7 +144,7 @@ function TokenBalanceRow({
 export function generateTokenBalanceRows(
     preTokenBalances: TokenBalance[],
     postTokenBalances: TokenBalance[],
-    accounts: ParsedMessageAccount[]
+    accounts: ParsedMessageAccount[],
 ): TokenBalanceRow[] {
     const preBalanceMap: { [index: number]: TokenBalance } = {};
     const postBalanceMap: { [index: number]: TokenBalance } = {};

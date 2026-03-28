@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, no-restricted-globals -- test assertions use RegExp for pattern matching */
 import { TableCardBody } from '@components/common/TableCardBody';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
@@ -5,7 +6,6 @@ import { useSearchParams } from 'next/navigation';
 import { describe, vi } from 'vitest';
 
 import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
-import { sleep } from '@/app/__tests__/mocks';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
@@ -14,6 +14,19 @@ import { TokenExtension } from '@/app/validators/accounts/token-extension';
 import { TokenExtensionRow } from '../TokenAccountSection';
 
 vi.mock('next/navigation');
+vi.mock('@solana/kit', async () => {
+    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
+    const rpcMethod = () => ({ send: () => new Promise(() => {}) });
+    return {
+        ...actual,
+        createSolanaRpc: vi.fn(() => ({
+            getEpochInfo: rpcMethod,
+            getEpochSchedule: rpcMethod,
+            getFirstAvailableBlock: rpcMethod,
+            getGenesisHash: rpcMethod,
+        })),
+    };
+});
 // @ts-expect-error does not contain `mockReturnValue`
 useSearchParams.mockReturnValue({
     get: () => 'mainnet-beta',
@@ -22,9 +35,6 @@ useSearchParams.mockReturnValue({
 });
 
 describe('TokenExtensionRow', () => {
-    // sleep to allow not facing 429s
-    beforeEach(async () => await sleep());
-
     test('should render mintCloseAuthority extension', async () => {
         const data = {
             extension: 'mintCloseAuthority',
@@ -41,7 +51,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText(/Close Authority/)).toBeInTheDocument();
@@ -63,7 +73,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, 'TEST')}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText(/Withheld Amount \(TEST\)/)).toBeInTheDocument();
@@ -80,7 +90,7 @@ describe('TokenExtensionRow', () => {
                         </TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Transfer Fee Config')).toBeInTheDocument();
@@ -113,7 +123,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Confidential Transfer')).toBeInTheDocument();
@@ -141,7 +151,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, 'TEST')}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Confidential Transfer Fee')).toBeInTheDocument();
@@ -167,7 +177,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('DefaultAccountState')).toBeInTheDocument();
@@ -187,7 +197,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Non-Transferable')).toBeInTheDocument();
@@ -213,7 +223,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Interest-Bearing')).toBeInTheDocument();
@@ -240,7 +250,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Scaled UI Amount')).toBeInTheDocument();
@@ -261,7 +271,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Pausable Account')).toBeInTheDocument();
@@ -284,7 +294,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Pausable')).toBeInTheDocument();
@@ -306,7 +316,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Permanent Delegate')).toBeInTheDocument();
@@ -329,7 +339,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Transfer Hook Program Id')).toBeInTheDocument();
@@ -352,7 +362,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Metadata')).toBeInTheDocument();
@@ -375,7 +385,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Token Group')).toBeInTheDocument();
@@ -398,7 +408,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Token Group Member')).toBeInTheDocument();
@@ -425,7 +435,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Metadata')).toBeInTheDocument();
@@ -452,7 +462,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('CPI Guard')).toBeInTheDocument();
@@ -485,7 +495,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Confidential Transfer')).toBeInTheDocument();
@@ -521,7 +531,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Immutable Owner')).toBeInTheDocument();
@@ -543,7 +553,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Require Memo on Incoming Transfers')).toBeInTheDocument();
@@ -565,7 +575,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Transfer Hook Status')).toBeInTheDocument();
@@ -585,7 +595,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Non-Transferable')).toBeInTheDocument();
@@ -607,7 +617,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, 'TEST')}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText(/Encrypted Withheld Amount \(TEST\)/)).toBeInTheDocument();
@@ -632,7 +642,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Group')).toBeInTheDocument();
@@ -657,7 +667,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Group Member')).toBeInTheDocument();
@@ -677,7 +687,7 @@ describe('TokenExtensionRow', () => {
                         <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
                     </AccountsProvider>
                 </ClusterProvider>
-            </ScrollAnchorProvider>
+            </ScrollAnchorProvider>,
         );
 
         expect(await screen.findByText('Unknown Extension')).toBeInTheDocument();

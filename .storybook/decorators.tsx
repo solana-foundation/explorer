@@ -1,8 +1,10 @@
 import { ClusterProvider } from '@providers/cluster';
 import type { Decorator, Parameters } from '@storybook/react';
 import React from 'react';
+import { fn } from 'storybook/test';
 
 import { MockAccountsProvider } from './__mocks__/MockAccountsProvider';
+import { MockTokenInfoBatchProvider } from './__mocks__/MockTokenInfoBatchProvider';
 
 /** Wraps stories with ClusterProvider. Usage: `decorators: [withCluster]` */
 export const withCluster: Decorator = Story => (
@@ -38,6 +40,13 @@ export const withCardTableField: Decorator = Story => (
     </ClusterProvider>
 );
 
+/** Wraps stories with MockTokenInfoBatchProvider. Usage: `decorators: [withTokenInfoBatch]` */
+export const withTokenInfoBatch: Decorator = Story => (
+    <MockTokenInfoBatchProvider>
+        <Story />
+    </MockTokenInfoBatchProvider>
+);
+
 type NextjsNavigationOptions = {
     pathname?: string;
     query?: Record<string, string>;
@@ -55,3 +64,13 @@ export const createNextjsParameters = (options?: NextjsNavigationOptions): Param
 });
 
 export const nextjsParameters: Parameters = createNextjsParameters();
+
+/** Mocks navigator.clipboard.writeText for stories that copy text. Usage: `decorators: [withClipboardMock]` */
+export const withClipboardMock: Decorator = Story => {
+    Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: { writeText: fn().mockResolvedValue(undefined) },
+    });
+
+    return <Story />;
+};

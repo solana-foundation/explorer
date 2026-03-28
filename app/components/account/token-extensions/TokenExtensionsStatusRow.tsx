@@ -27,7 +27,7 @@ export function TokenExtensionsStatusRow({ address, extensions }: { address: str
         (ext: { extensionName: TokenExtension['extension'] }) => {
             extension.navigateToExtension(ext.extensionName);
         },
-        [extension]
+        [extension],
     );
 
     return (

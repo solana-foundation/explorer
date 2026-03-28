@@ -2,6 +2,8 @@ import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { InstructionCard } from '../InstructionCard';
 import AddMappingDetailsCard from './AddMappingDetailsCard';
 import AddPriceDetailsCard from './AddPriceDetailsCard';
@@ -69,9 +71,9 @@ export function PythDetailsCard(props: {
                 return <SetMinPublishersDetailsCard info={PythInstruction.decodeSetMinPublishers(ix)} {...props} />;
         }
     } catch (error) {
-        console.error(error, {
-            signature: signature,
-            url: url,
+        Logger.error(error, {
+            signature,
+            url,
         });
     }
 

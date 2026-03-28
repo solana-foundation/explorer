@@ -188,12 +188,12 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
                 ...item,
                 displayCU: item.computeUnits || item.reservedValue || item.displayUnits || item.minValue,
             })),
-        [instructions]
+        [instructions],
     );
 
     const totalDisplayCU = React.useMemo(
         () => instructionsWithDisplay.reduce((sum, item) => sum + item.displayCU, 0),
-        [instructionsWithDisplay]
+        [instructionsWithDisplay],
     );
 
     React.useEffect(() => {
@@ -207,7 +207,7 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
 
     const chartOptions = React.useMemo<ChartOptions<'bar'>>(
         () => getCUProfileChartOptions(totalDisplayCU),
-        [totalDisplayCU]
+        [totalDisplayCU],
     );
 
     const chartData: ChartData<'bar'> = React.useMemo(
@@ -235,7 +235,7 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
             })),
             labels: [''],
         }),
-        [instructionsWithDisplay]
+        [instructionsWithDisplay],
     );
 
     if (instructions.length === 0) return null;

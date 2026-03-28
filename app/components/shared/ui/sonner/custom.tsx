@@ -41,7 +41,7 @@ export function CustomToast(props: CustomToastProps) {
             aria-describedby={descriptionId}
             className={cn(
                 'e-w-full e-rounded-lg e-border e-border-neutral-950 e-bg-neutral-800 e-text-white',
-                'md:e-max-w-80'
+                'md:e-max-w-80',
             )}
         >
             <div className="e-relative e-flex e-flex-1 e-items-start e-gap-2 e-px-3 e-py-2">
@@ -71,7 +71,7 @@ export function CustomToast(props: CustomToastProps) {
                         className={cn(
                             'e-h-full e-w-full e-rounded e-border-0 e-border-solid e-bg-transparent e-p-0',
                             'e-text-neutral-400 hover:e-text-neutral-500',
-                            'focus:e-outline-none focus:e-ring-2 focus:e-ring-neutral-400 focus:e-ring-offset-2'
+                            'focus:e-outline-none focus:e-ring-2 focus:e-ring-neutral-400 focus:e-ring-offset-2',
                         )}
                         onClick={() => sonnerToast.dismiss(id)}
                     >

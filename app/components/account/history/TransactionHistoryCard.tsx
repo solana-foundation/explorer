@@ -12,10 +12,10 @@ import React, { useCallback, useMemo } from 'react';
 import Moment from 'react-moment';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
+import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
 import { Copyable } from '../../common/Copyable';
-import { DownloadableDropdown } from '../../common/Downloadable';
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
@@ -82,7 +82,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                     </td>
                 </tr>
             );
-        }
+        },
     );
 
     const fetching = history.status === FetchStatus.Fetching;
@@ -115,7 +115,10 @@ export function TransactionHistoryCard({ address }: { address: string }) {
 
 function TransactionRawDataDownloadField({ signature }: { signature: string }) {
     const fetchRaw = useFetchRawTransaction();
-    const transactionData = useRawTransactionDetails(signature)?.data?.raw?.message.serialize() || null;
+    const rawDetails = useRawTransactionDetails(signature);
+    const serialized = rawDetails?.data?.raw?.message.serialize();
+    const transactionData = useMemo(() => serialized && new Uint8Array(serialized), [serialized]);
+    const loading = rawDetails?.status === FetchStatus.Fetching;
 
     const handleHover = useCallback(() => {
         if (!transactionData) {
@@ -126,7 +129,7 @@ function TransactionRawDataDownloadField({ signature }: { signature: string }) {
     return (
         <div className="d-flex align-items-center gap-1" onMouseEnter={handleHover}>
             <Copyable text={transactionData ? toBase64(transactionData) : null}>
-                <DownloadableDropdown data={transactionData} filename={signature} />
+                <DownloadDropdown data={transactionData} loading={loading} filename={signature} />
             </Copyable>
         </div>
     );

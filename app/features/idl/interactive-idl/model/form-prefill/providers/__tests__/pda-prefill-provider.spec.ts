@@ -154,7 +154,7 @@ function setup(idl: unknown, instructionName: string) {
             useInstructionForm({
                 instruction: mockInstruction,
                 onSubmit: vi.fn(),
-            })
+            }),
         ).result.current;
     };
 

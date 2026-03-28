@@ -2,7 +2,9 @@ import ScaledUiAmountMultiplierTooltip from '@components/account/token-extension
 import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { Account, NFTData, TokenProgramData, useFetchAccountInfo } from '@providers/accounts';
+import { useRefreshAccount } from '@entities/account';
+import { AccountDownloadDropdown } from '@features/account';
+import { Account, NFTData, TokenProgramData } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID, useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useCluster } from '@providers/cluster';
@@ -46,6 +48,7 @@ import { ExternalLink, RefreshCw } from 'react-feather';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { TokenExtensionsStatusRow } from './token-extensions/TokenExtensionsStatusRow';
@@ -54,6 +57,7 @@ import { UnknownAccountCard } from './UnknownAccountCard';
 const getEthAddress = (link?: string) => {
     let address = '';
     if (link) {
+        // eslint-disable-next-line no-restricted-syntax -- extract Ethereum address from URL
         const extractEth = link.match(/0x[a-fA-F0-9]{40,64}/);
 
         if (extractEth) {
@@ -108,7 +112,7 @@ export function TokenAccountSection({
         }
     } catch (err) {
         if (cluster !== Cluster.Custom) {
-            console.error(err, {
+            Logger.error(err, {
                 address: account.pubkey.toBase58(),
             });
         }
@@ -125,7 +129,7 @@ function FungibleTokenMintAccountCard({
     mintInfo: MintAccountInfo;
     tokenInfo?: FullLegacyTokenInfo;
 }) {
-    const fetchInfo = useFetchAccountInfo();
+    const fetchInfo = useRefreshAccount();
     const refresh = () => fetchInfo(account.pubkey, 'parsed');
 
     const bridgeContractAddress = getEthAddress(tokenInfo?.extensions?.bridgeContract);
@@ -137,18 +141,19 @@ function FungibleTokenMintAccountCard({
 
     return (
         <div className="card">
-            <div className="card-header">
+            <div className="card-header e-gap-2">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">
                     {tokenInfo
                         ? 'Overview'
                         : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58()
-                        ? 'Token-2022 Mint'
-                        : 'Token Mint'}
+                          ? 'Token-2022 Mint'
+                          : 'Token Mint'}
                 </h3>
                 <button className="btn btn-white btn-sm" onClick={refresh}>
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>
+                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
             </div>
             <TableCardBody>
                 <tr>
@@ -163,7 +168,7 @@ function FungibleTokenMintAccountCard({
                         <span>
                             {normalizeTokenAmount(
                                 Number(mintInfo.supply) * Number(scaledUiAmountMultiplier),
-                                mintInfo.decimals
+                                mintInfo.decimals,
                             ).toLocaleString('en-US', {
                                 maximumFractionDigits: 20,
                             })}
@@ -252,18 +257,19 @@ function NonFungibleTokenMintAccountCard({
     nftData: NFTData;
     mintInfo: MintAccountInfo;
 }) {
-    const fetchInfo = useFetchAccountInfo();
+    const fetchInfo = useRefreshAccount();
     const refresh = () => fetchInfo(account.pubkey, 'parsed');
 
     const collection = nftData.metadata.collection;
     return (
         <div className="card">
-            <div className="card-header">
+            <div className="card-header e-gap-2">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">Overview</h3>
                 <button className="btn btn-white btn-sm" onClick={refresh}>
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>
+                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
             </div>
             <TableCardBody>
                 <tr>
@@ -355,7 +361,7 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
 }
 
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
     const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(info.mint.toBase58(), info.tokenAmount.amount);
     const { cluster, url } = useCluster();
     const label = addressLabel(account.pubkey.toBase58(), cluster);
@@ -385,7 +391,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
 
     return (
         <div className="card">
-            <div className="card-header">
+            <div className="card-header e-gap-2">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">
                     Token{account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() && '-2022'} Account
                 </h3>
@@ -393,6 +399,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>
+                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
             </div>
             <TableCardBody>
                 <tr>
@@ -426,7 +433,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                         <ScaledUiAmountMultiplierTooltip
                             rawAmount={normalizeTokenAmount(
                                 Number(info.tokenAmount.amount),
-                                info.tokenAmount.decimals || 0
+                                info.tokenAmount.decimals || 0,
                             ).toString()}
                             scaledUiAmountMultiplier={scaledUiAmountMultiplier}
                         />
@@ -467,7 +474,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                                         {'\u25ce'}
                                         <span className="font-monospace">
                                             {new BigNumber(
-                                                info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0'
+                                                info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0',
                                             ).toFormat(9)}
                                         </span>
                                     </>
@@ -487,7 +494,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
 }
 
 function MultisigAccountCard({ account, info }: { account: Account; info: MultisigAccountInfo }) {
-    const refresh = useFetchAccountInfo();
+    const refresh = useRefreshAccount();
 
     return (
         <div className="card">
@@ -589,7 +596,7 @@ export function TokenExtensionRow(
     maybeEpoch: bigint | undefined,
     decimals: number,
     symbol: string | undefined,
-    headerStyle: 'header' | 'omit' = 'header'
+    headerStyle: 'header' | 'omit' = 'header',
 ) {
     const epoch = maybeEpoch || 0n; // fallback to 0 if not provided
     switch (tokenExtension.extension) {
@@ -648,7 +655,7 @@ export function TokenExtensionRow(
                                 'en-US',
                                 {
                                     maximumFractionDigits: 20,
-                                }
+                                },
                             )}
                         </td>
                     </tr>
@@ -670,7 +677,7 @@ export function TokenExtensionRow(
                                 'en-US',
                                 {
                                     maximumFractionDigits: 20,
-                                }
+                                },
                             )}
                         </td>
                     </tr>

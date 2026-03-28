@@ -38,6 +38,6 @@ describe('formatDisplayIdl', () => {
                 const { result } = renderHook(() => useFormatAnchorIdl(formattedIdl));
                 expect(toLengths(result.current)).toEqual(structure);
             }).not.toThrowError();
-        }
+        },
     );
 });

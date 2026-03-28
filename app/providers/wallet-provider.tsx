@@ -10,6 +10,7 @@ import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { ComponentProps, FC, PropsWithChildren, useCallback, useMemo } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
+import { Logger } from '@/app/shared/lib/logger';
 import { clusterUrl } from '@/app/utils/cluster';
 
 export const WalletProvider: FC<
@@ -24,12 +25,12 @@ export const WalletProvider: FC<
 
     const onError = useCallback(
         (error: WalletError) => {
-            console.error(error);
+            Logger.error(error);
             if (!skipToast) {
                 toast.custom({ description: error.message, title: 'Wallet Error', type: 'error' });
             }
         },
-        [toast, skipToast]
+        [toast, skipToast],
     );
 
     // use an empty array to allow detect wallets automatically

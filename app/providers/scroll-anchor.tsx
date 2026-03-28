@@ -3,6 +3,8 @@
 import { usePathname, useSearchParams } from 'next/navigation';
 import React, { createContext, ReactNode, RefCallback, useCallback, useContext, useEffect, useRef } from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 type URLFragment = string;
 
 type RegisterScrollAnchorFn = (key: string, element: HTMLElement) => void;
@@ -10,15 +12,12 @@ type RegisterScrollAnchorFn = (key: string, element: HTMLElement) => void;
 const ScrollAnchorContext = createContext<RegisterScrollAnchorFn>(
     typeof WeakRef !== 'undefined'
         ? (key: string) => {
-              console.warn(
-                  `Ignoring registration of scroll anchor for key \`${key}\`.` +
-                      'Did you forget to wrap your app in a `ScrollAnchorProvider`?'
-              );
+              Logger.warn('[providers:scroll-anchor] Ignoring registration, missing ScrollAnchorProvider', { key });
           }
         : // This entire implementation gets disabled if WeakRef is not supported
           () => {
               /* empty */
-          }
+          },
 );
 
 export const ScrollAnchorProvider =
@@ -36,6 +35,7 @@ export const ScrollAnchorProvider =
                       return;
                   }
                   const targetsByFragment = registeredScrollTargets.current;
+                  // eslint-disable-next-line no-restricted-syntax -- strip leading hash from URL fragment
                   const fragment = window.location.hash.replace(/^#/, '');
                   const targets = targetsByFragment[fragment];
                   if (!targets) {
@@ -59,7 +59,7 @@ export const ScrollAnchorProvider =
                       targets.unshift(new WeakRef(element));
                       maybeScroll();
                   },
-                  [maybeScroll]
+                  [maybeScroll],
               );
               useEffect(() => {
                   let distanceScrolled = 0;
@@ -101,6 +101,6 @@ export function useScrollAnchor(key: URLFragment): RefCallback<HTMLElement> {
             }
             registerScrollTarget(key, instance);
         },
-        [key, registerScrollTarget]
+        [key, registerScrollTarget],
     );
 }

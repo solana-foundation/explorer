@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-redeclare */
-
 import { ParsedInfo } from '@validators/index';
 import { PublicKeyFromString } from '@validators/pubkey';
 import { any, coerce, create, Infer, literal, nullable, number, string, tuple, type, union } from 'superstruct';
@@ -85,5 +83,5 @@ export const UpgradeableLoaderAccount = coerce(
                 throw new Error(`Unknown program account type: ${value.type}`);
             }
         }
-    }
+    },
 );

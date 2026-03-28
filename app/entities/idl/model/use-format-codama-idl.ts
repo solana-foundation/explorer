@@ -13,6 +13,8 @@ import {
 } from 'codama';
 import { useMemo } from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import type { FieldType, FormattedIdl, PdaData, StructField } from './formatters/formatted-idl';
 
 function parseEnumNodeVariants(type: EnumTypeNode): string[] {
@@ -45,7 +47,7 @@ function parseValueNodeValue(valueNode: ValueNode): string {
                 valueNode.entries.map(entry => ({
                     key: parseValueNodeValue(entry.key),
                     value: parseValueNodeValue(entry.value),
-                }))
+                })),
             );
         case 'noneValueNode':
             return 'none';
@@ -66,7 +68,7 @@ function parseValueNodeValue(valueNode: ValueNode): string {
                 valueNode.fields.map(field => ({
                     name: field.name,
                     value: parseValueNodeValue(field.value),
-                }))
+                })),
             );
         case 'tupleValueNode':
             return `tuple(${valueNode.items.map(item => parseValueNodeValue(item)).join(', ')})`;
@@ -93,7 +95,7 @@ function parseTypeNodeFieldType(type: TypeNode): string {
         case 'definedTypeLinkNode':
             return `${type.name}${type.program ? ` (${type.program.name})` : ''}`;
         case 'enumTypeNode':
-            console.warn('Handle each node separately');
+            Logger.warn('[idl] Handle each node separately', { kind: type.kind });
             return parseEnumNodeVariants(type).join(' | ');
         case 'fixedSizeTypeNode':
             return `array(${parseTypeNodeFieldType(type.type)},${type.size})`;
@@ -126,10 +128,10 @@ function parseTypeNodeFieldType(type: TypeNode): string {
         case 'stringTypeNode':
             return `string:${type.encoding}`;
         case 'structTypeNode':
-            console.warn('Handle each node separately');
+            Logger.warn('[idl] Handle each node separately', { kind: type.kind });
             return type.fields.map(field => parseTypeNodeFieldType(field.type)).join(', ');
         case 'tupleTypeNode':
-            console.warn('Handle each node separately');
+            Logger.warn('[idl] Handle each node separately', { kind: type.kind });
             return type.items.map(item => parseTypeNodeFieldType(item)).join(', ');
         case 'zeroableOptionTypeNode':
             return `zeroOption(${parseTypeNodeFieldType(type.item)})`;

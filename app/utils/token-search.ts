@@ -8,6 +8,8 @@
 
 import { Address } from '@solana/kit';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { Cluster } from './cluster';
 
 type TokenSearchApiResponseToken = {
@@ -51,23 +53,26 @@ export async function searchTokens(search: string, cluster: Cluster): Promise<Se
         const timeoutId = setTimeout(() => controller.abort(), 5000);
         const apiResponse = await fetch(
             `https://token-list-api.solana.cloud/v1/search?query=${encodeURIComponent(
-                search
+                search,
             )}&chainId=${chainId}&start=0&limit=20`,
-            { signal: controller.signal }
+            { signal: controller.signal },
         );
         clearTimeout(timeoutId);
 
         if (apiResponse.status >= 400) {
             try {
                 const errorJsonBody = await apiResponse.json();
-                console.error(new Error('Error calling token search API'), {
+                Logger.error(new Error('[utils:token-search] Error calling token search API'), {
                     chainId: chainId.toString(),
                     errorJsonBody,
                     search,
                 });
             } catch {
                 // no JSON body for error
-                console.error(new Error('Error calling token search API'), { chainId: chainId.toString(), search });
+                Logger.error(new Error('[utils:token-search] Error calling token search API'), {
+                    chainId: chainId.toString(),
+                    search,
+                });
             }
             return [];
         }
@@ -78,8 +83,11 @@ export async function searchTokens(search: string, cluster: Cluster): Promise<Se
             pathname: '/address/' + token.address,
             value: [token.name, token.symbol, token.address],
         }));
-    } catch (error) {
-        console.error(new Error('Error parsing token search API response'), { chainId: chainId.toString(), search });
+    } catch (_error) {
+        Logger.error(new Error('[utils:token-search] Error parsing token search API response'), {
+            chainId: chainId.toString(),
+            search,
+        });
         return [];
     }
 }

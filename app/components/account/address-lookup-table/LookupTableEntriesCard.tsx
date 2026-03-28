@@ -10,7 +10,7 @@ export function LookupTableEntriesCard(
           }
         | {
               lookupTableAccountData: Uint8Array;
-          }
+          },
 ) {
     const lookupTableState = React.useMemo(() => {
         if ('lookupTableAccountData' in params) {

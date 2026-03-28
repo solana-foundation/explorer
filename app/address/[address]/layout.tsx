@@ -19,6 +19,7 @@ import { VoteAccountSection } from '@components/account/VoteAccountSection';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Header } from '@components/Header';
+import { useRefreshAccount } from '@entities/account';
 import { useAnchorProgram } from '@entities/idl';
 import { SecurityNotification } from '@features/security-txt';
 import {
@@ -33,6 +34,7 @@ import {
 import FLAGGED_ACCOUNTS_WARNING from '@providers/accounts/flagged-accounts';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
+import { cn } from '@shared/utils';
 import { Address } from '@solana/kit';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
@@ -205,7 +207,7 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
 
     try {
         pubkey = new PublicKey(address);
-    } catch (err) {
+    } catch (_err) {
         /* empty */
     }
 
@@ -216,8 +218,11 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
         infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey;
     const { data: fullTokenInfo, isLoading: isFullTokenInfoLoading } = useSWRImmutable(
         shouldFetchTokenInfo ? getFullTokenInfoSwrKey(address, cluster, url, clusterInfo?.genesisHash) : null,
-        fetchFullTokenInfo
+        fetchFullTokenInfo,
     );
+
+    const isAccountLoading = !info || info.status === FetchStatus.Fetching;
+    const isTokenInfoLoading = isAccountLoading || isFullTokenInfoLoading;
 
     // Fetch account on load
     React.useEffect(() => {
@@ -232,7 +237,7 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
                 address={address}
                 account={info?.data}
                 tokenInfo={fullTokenInfo}
-                isTokenInfoLoading={isFullTokenInfoLoading}
+                isTokenInfoLoading={isTokenInfoLoading}
             />
             {!pubkey ? (
                 <ErrorCard text={`Address "${address}" is not valid`} />
@@ -241,7 +246,7 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
                     info={info}
                     pubkey={pubkey}
                     tokenInfo={fullTokenInfo}
-                    isTokenInfoLoading={isFullTokenInfoLoading}
+                    isTokenInfoLoading={isTokenInfoLoading}
                     notification={<SecurityNotification parsedData={infoParsed} address={address} />}
                 >
                     {children}
@@ -276,13 +281,13 @@ function DetailsSections({
     tokenInfo?: FullTokenInfo;
     isTokenInfoLoading: boolean;
 }) {
-    const fetchAccount = useFetchAccountInfo();
+    const refreshAccount = useRefreshAccount();
     const address = pubkey.toBase58();
 
     if (!info || info.status === FetchStatus.Fetching || isTokenInfoLoading) {
         return <LoadingCard />;
     } else if (info.status === FetchStatus.FetchFailed || info.data?.lamports === undefined) {
-        return <ErrorCard retry={() => fetchAccount(pubkey, 'parsed')} text="Fetch Failed" />;
+        return <ErrorCard retry={() => refreshAccount(pubkey, 'parsed')} text="Fetch Failed" />;
     }
 
     const account = info.data;
@@ -475,7 +480,7 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
                 slug: 'attributes',
                 title: 'Attributes',
             },
-            { compressed: true, path: 'compression', slug: 'compression', title: 'Compression' }
+            { compressed: true, path: 'compression', slug: 'compression', title: 'Compression' },
         );
     }
 
@@ -542,7 +547,7 @@ function Tab({ address, path, title }: { address: string; path: string; title: s
     const isActive = (selectedLayoutSegment === null && path === '') || selectedLayoutSegment === path;
     return (
         <li className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath} scroll={false}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={tabPath} scroll={false}>
                 {title}
             </Link>
         </li>
@@ -639,7 +644,7 @@ function ProgramIdlLink({ tab, address, account }: { tab: Tab; address: string; 
 
     return (
         <li key={tab.slug} className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={anchorProgramPath}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={anchorProgramPath}>
                 {tab.title}
             </Link>
         </li>
@@ -658,7 +663,7 @@ function AccountDataLink({ address, tab, programId }: { address: string; tab: Ta
 
     return (
         <li key={tab.slug} className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={accountDataPath}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={accountDataPath}>
                 {tab.title}
             </Link>
         </li>
@@ -677,7 +682,7 @@ function FeatureGateLink({ address, tab }: { address: string; tab: Tab }) {
 
     return (
         <li key={tab.slug} className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={accountDataPath}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={accountDataPath}>
                 {tab.title}
             </Link>
         </li>
@@ -699,7 +704,7 @@ function CompressedNftLink({ tab, address, pubkey }: { tab: Tab; address: string
 
     return (
         <li key={tab.slug} className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={tabPath}>
                 {tab.title}
             </Link>
         </li>
@@ -727,7 +732,7 @@ function ProgramMultisigLink({
 
     return (
         <li key={tab.slug} className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={tabPath}>
                 {tab.title}
             </Link>
         </li>
@@ -741,7 +746,7 @@ function TokenExtensionsLink({ address, tab }: { address: string; tab: Tab }) {
 
     return (
         <li key={tab.slug} className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={accountDataPath}>
+            <Link className={cn(isActive && 'active', 'nav-link')} href={accountDataPath}>
                 {tab.title}
             </Link>
         </li>

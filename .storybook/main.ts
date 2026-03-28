@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import type { StorybookConfig } from '@storybook/nextjs-vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
@@ -25,7 +26,7 @@ const config: StorybookConfig = {
                         global: true,
                         process: true,
                     },
-                    include: ['path', 'util'],
+                    include: ['path', 'util', 'buffer'],
                 }),
             ],
             resolve: {

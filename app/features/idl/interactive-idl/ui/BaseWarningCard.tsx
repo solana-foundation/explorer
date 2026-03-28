@@ -14,7 +14,7 @@ interface BaseWarningCardProps {
 export function BaseWarningCard({ className, message, description, children, asChild = false }: BaseWarningCardProps) {
     const baseClassName = cn(
         'e-flex e-items-center e-gap-3 e-rounded-lg e-border e-border-orange-200 e-bg-orange-50 e-p-4',
-        className
+        className,
     );
 
     if (asChild) {

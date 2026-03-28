@@ -17,6 +17,7 @@ import {
 } from '@/app/components/instruction/address-lookup-table/types';
 import { UnknownDetailsCard } from '@/app/components/instruction/UnknownDetailsCard';
 import { InstructionDetailsProps } from '@/app/components/transaction/InstructionsSection';
+import { Logger } from '@/app/shared/lib/logger';
 
 export function AddressLookupTableDetailsCard(props: InstructionDetailsProps) {
     const { ix } = props;
@@ -44,9 +45,9 @@ export function AddressLookupTableDetailsCard(props: InstructionDetailsProps) {
                 return <UnknownDetailsCard {...props} />;
         }
     } catch (error) {
-        console.error(error, {
+        Logger.error(error, {
             signature: props.tx.signatures[0],
-            url: url,
+            url,
         });
         return <UnknownDetailsCard {...props} />;
     }

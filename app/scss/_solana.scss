@@ -39,8 +39,14 @@ ul.log-messages {
     position: relative;
 
     .popover {
+        background-color: $popover-bg;
+        border: 1px solid $popover-border-color;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        word-wrap: normal;
+        max-width: none;
+
         &.bs-popover-top {
-            background-color: $dark;
             top: auto;
             bottom: 1.5rem;
         }
@@ -51,21 +57,26 @@ ul.log-messages {
         }
 
         &.bs-popover-bottom {
-            background-color: $dark;
             top: 1.5rem;
         }
 
         .popover-body {
-            color: white;
+            color: $popover-text-color;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
-        .arrow.right {
-            right: 1rem;
-        }
+        .arrow {
+            display: none;
 
-        .arrow::after {
-            border-top-color: $dark;
-            border-bottom-color: $dark;
+            &.right {
+                right: 1rem;
+            }
+
+            &::after {
+                border-top-color: $popover-bg;
+                border-bottom-color: $popover-bg;
+            }
         }
     }
 }
@@ -189,6 +200,29 @@ h4.slot-pill {
 
 .line-height-md {
     line-height: 1.5rem;
+}
+
+// Prevent navbar and content from breaking at very narrow viewports
+.main-content {
+    min-width: 292px;
+}
+
+// Restore padding on desktop that navbar-expand-lg zeroes out
+nav.navbar .navbar-container {
+
+    @include media-breakpoint-up(lg) {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+// Align visible Solana icon with search bar magnifying glass on mobile.
+// The logo SVG has ~8px internal whitespace before the green S mark,
+// while the search icon has ~1px. This negative margin compensates.
+.navbar-container > a:first-child {
+    @include media-breakpoint-down(xl) {
+        margin-left: -6px;
+    }
 }
 
 .search-bar__control {

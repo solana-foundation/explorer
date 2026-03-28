@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Headers as NodeFetchHeaders } from 'node-fetch';
 
-import Logger from '@/app/utils/logger';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { fetchResource, matchJsonContent, StatusError } from './feature';
 import { errors } from './feature/errors';
@@ -44,13 +44,13 @@ export async function GET(request: Request, { params: _params }: Params) {
 
         // check that uri has supported protocol despite of any other checks
         if (!isHTTPProtocol(parsedUrl)) {
-            Logger.error(new Error('Unsupported protocol'), parsedUrl.protocol);
+            Logger.error(new Error('[api:metadata-proxy] Unsupported protocol'), { protocol: parsedUrl.protocol });
             return respondWithError(400);
         }
 
         const isPrivate = await checkURLForPrivateIP(parsedUrl);
         if (isPrivate) {
-            Logger.error(new Error('Private IP detected'), parsedUrl.hostname);
+            Logger.error(new Error('[api:metadata-proxy] Private IP detected'), { hostname: parsedUrl.hostname });
             return respondWithError(403);
         }
     } catch (error) {

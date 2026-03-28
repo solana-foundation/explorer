@@ -78,7 +78,7 @@ describe('createWalletPrefillDependency', () => {
             useInstructionForm({
                 instruction: INSTRUCTION_WITH_SIGNER_AND_NON_SIGNER,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 
@@ -99,7 +99,7 @@ describe('createWalletPrefillDependency', () => {
             useInstructionForm({
                 instruction: INSTRUCTION_WITH_SIGNER,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 
@@ -118,7 +118,7 @@ describe('createWalletPrefillDependency', () => {
             useInstructionForm({
                 instruction: INSTRUCTION_WITH_NESTED_SIGNER,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 
@@ -148,7 +148,7 @@ describe('createWalletPrefillDependency', () => {
             useInstructionForm({
                 instruction: INSTRUCTION_WITH_SIGNER,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 
@@ -169,7 +169,7 @@ describe('createWalletPrefillDependency', () => {
             useInstructionForm({
                 instruction: INSTRUCTION_WITH_SIGNER,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 
@@ -190,7 +190,7 @@ describe('createWalletPrefillDependency', () => {
             useInstructionForm({
                 instruction: INSTRUCTION_WITH_TWO_SIGNERS,
                 onSubmit: vi.fn(),
-            })
+            }),
         );
         const { form, fieldNames } = result.current;
 

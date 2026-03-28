@@ -1,7 +1,9 @@
 'use client';
 
+import { useTokenInfo } from '@entities/token-info';
 import { Connection, programs } from '@metaplex/js';
 import { useCluster } from '@providers/cluster';
+import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { displayAddress, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
@@ -10,8 +12,8 @@ import React from 'react';
 import { useState } from 'react';
 import useAsyncEffect from 'use-async-effect';
 
-import { useTokenInfo } from '@/app/entities/token-info';
 import { EditIcon, NicknameEditor, useNickname } from '@/app/features/nicknames';
+import { useVisibility } from '@/app/shared/lib/visibility';
 
 import { Copyable } from './Copyable';
 
@@ -47,6 +49,7 @@ export function Address({
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
     const [showNicknameEditor, setShowNicknameEditor] = useState(false);
     const nickname = useNickname(address);
+    const { ref: containerRef, isVisible } = useVisibility(fetchTokenLabelInfo);
 
     const display = displayAddress(address, cluster, tokenLabelInfo);
     if (truncateUnknown && address === display) {
@@ -60,7 +63,8 @@ export function Address({
         addressLabel = metaplexData.data.data.name;
     }
 
-    const tokenInfo = useTokenInfo(fetchTokenLabelInfo, address, cluster, clusterInfo?.genesisHash);
+    const shouldFetchTokenInfo = fetchTokenLabelInfo && isVisible;
+    const tokenInfo = useTokenInfo(shouldFetchTokenInfo, address, cluster, clusterInfo?.genesisHash);
     if (tokenInfo) {
         addressLabel = displayAddress(address, cluster, tokenInfo);
     }
@@ -127,14 +131,15 @@ export function Address({
     );
 
     return (
-        <>
-            <div className={`d-none d-lg-flex align-items-center ${alignRight ? 'justify-content-end' : ''}`}>
+        <span ref={containerRef}>
+            <div className={cn('d-none d-lg-flex align-items-center', alignRight && 'justify-content-end')}>
                 {content}
             </div>
             <div className="d-flex d-lg-none align-items-center">{content}</div>
-        </>
+        </span>
     );
 }
+
 const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
     const [data, setData] = useState<programs.metadata.MetadataData>();
     const { url } = useCluster();
@@ -157,7 +162,7 @@ const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
                 }
             }
         },
-        [useMetadata, pubkey, url, data, setData]
+        [useMetadata, pubkey, url, data, setData],
     );
     return { data };
 };

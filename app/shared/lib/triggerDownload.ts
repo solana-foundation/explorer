@@ -44,6 +44,7 @@ const triggerDownloadBlob = (blob: Blob, filename: string): void => {
 
 const isValidBase64 = (str: string): boolean => {
     try {
+        // eslint-disable-next-line no-restricted-syntax -- validate base64 string format
         const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
         if (!base64Regex.test(str)) {
             return false;
@@ -89,8 +90,8 @@ export const triggerDownload = async (data: string, filename: string, options?: 
     if (estimatedDecodedSize > maxSize) {
         throw new Error(
             `File size (estimated ${formatBytes(estimatedDecodedSize)}) exceeds maximum allowed size (${formatBytes(
-                maxSize
-            )})`
+                maxSize,
+            )})`,
         );
     }
 
@@ -118,7 +119,7 @@ export const triggerDownloadText = async (text: string, filename: string, option
 
     if (text.length > maxSize) {
         throw new Error(
-            `File size (${formatBytes(text.length)}) exceeds maximum allowed size (${formatBytes(maxSize)})`
+            `File size (${formatBytes(text.length)}) exceeds maximum allowed size (${formatBytes(maxSize)})`,
         );
     }
 

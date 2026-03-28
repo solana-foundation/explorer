@@ -4,8 +4,6 @@
 // https://github.com/pnpm/pnpm/issues/4214
 // https://github.com/pnpm/pnpm/issues/5391
 
-const rootPkg = require('./package.json');
-
 console.log(`Checking for package peerDependency overrides`);
 
 const remapPeerDependencies = [
@@ -29,7 +27,7 @@ function overridesPeerDependencies(pkg) {
                         console.log(
                             `    - Overriding ${pkg.name}@${pkg.version} peerDependency ${dep.peerDependency}@${
                                 pkg.peerDependencies[dep.peerDependency]
-                            }`
+                            }`,
                         );
 
                         // First add a new dependency to the package and then remove the peer dependency.
@@ -40,7 +38,7 @@ function overridesPeerDependencies(pkg) {
                         console.log(
                             `      - Overrode ${pkg.name}@${pkg.version} peerDependency ${dep.peerDependency}@${
                                 pkg.dependencies[dep.peerDependency]
-                            }`
+                            }`,
                         );
                     } catch (err) {
                         console.error(err);

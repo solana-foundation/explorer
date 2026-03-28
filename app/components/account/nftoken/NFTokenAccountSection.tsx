@@ -1,6 +1,8 @@
 import { Address } from '@components/common/Address';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { Account, useFetchAccountInfo } from '@providers/accounts';
+import { useRefreshAccount } from '@entities/account';
+import { Account } from '@providers/accounts';
+import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { Suspense, useState } from 'react';
 import { RefreshCw } from 'react-feather';
@@ -27,7 +29,7 @@ export function NFTokenAccountSection({ account }: { account: Account }) {
 }
 
 const NFTCard = ({ nft }: { nft: NftokenTypes.NftAccount }) => {
-    const fetchInfo = useFetchAccountInfo();
+    const fetchInfo = useRefreshAccount();
     const refresh = () => fetchInfo(new PublicKey(nft.address), 'parsed');
 
     return (
@@ -98,7 +100,7 @@ export const NftokenImage = ({ url, size }: { url: string | undefined; size: num
                     }}
                 />
             )}
-            <div className={`rounded mx-auto ${isLoading ? 'd-none' : 'd-block'}`}>
+            <div className={cn('rounded mx-auto', isLoading ? 'd-none' : 'd-block')}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     alt="nft"
@@ -115,7 +117,7 @@ export const NftokenImage = ({ url, size }: { url: string | undefined; size: num
 };
 
 const CollectionCard = ({ collection }: { collection: NftokenTypes.CollectionAccount }) => {
-    const fetchInfo = useFetchAccountInfo();
+    const fetchInfo = useRefreshAccount();
     const refresh = () => fetchInfo(new PublicKey(collection.address), 'parsed');
 
     return (

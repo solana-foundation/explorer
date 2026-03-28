@@ -41,6 +41,7 @@ const ArrayArgumentInput = forwardRef<HTMLInputElement, ArrayArgumentInputProps>
         };
 
         const handleItemChange = (index: number, newValue: string) => {
+            // eslint-disable-next-line no-restricted-syntax -- remove commas from array item input
             const sanitizeArrayItem = (value: string) => value.replace(/,/g, '');
             const sanitizedValue = sanitizeArrayItem(newValue);
             const newValues = [...values];
@@ -155,7 +156,7 @@ const ArrayArgumentInput = forwardRef<HTMLInputElement, ArrayArgumentInputProps>
                 </div>
             </ArgumentInputLayout>
         );
-    }
+    },
 );
 ArrayArgumentInput.displayName = 'ArrayArgumentInput';
 
@@ -171,7 +172,7 @@ function useStableIds(arrayLength: number) {
     if (stableIdsRef.current.length < arrayLength) {
         const newIds = Array.from(
             { length: arrayLength - stableIdsRef.current.length },
-            () => `item-${idCounterRef.current++}`
+            () => `item-${idCounterRef.current++}`,
         );
         stableIdsRef.current = [...stableIdsRef.current, ...newIds];
     }
@@ -215,7 +216,7 @@ function useInputRefs() {
 function useAutoFocus(
     values: string[],
     stableIds: string[],
-    getInputRef: (itemId: string) => HTMLInputElement | undefined
+    getInputRef: (itemId: string) => HTMLInputElement | undefined,
 ) {
     const previousLengthRef = useRef(values.length);
     const removedIndexRef = useRef<number | null>(null);
@@ -254,7 +255,7 @@ function useAutoFocus(
 function useArrayValueState(
     value: string | number | readonly string[] | undefined,
     arg: ArgField,
-    maxArrayInputs = 100
+    maxArrayInputs = 100,
 ) {
     const parseStateValue = (value: string | number | readonly string[] | undefined): string[] => {
         if (!value || typeof value !== 'string') return [''];
@@ -301,7 +302,7 @@ const SingleArgumentInput = forwardRef<HTMLInputElement, SingleArgumentInputProp
                 />
             </ArgumentInputLayout>
         );
-    }
+    },
 );
 SingleArgumentInput.displayName = 'SingleArgumentInput';
 
