@@ -2,6 +2,7 @@ import { TableCardBodyProps } from '@components/common/TableCardBody';
 import { useRawAccountDataOnMount } from '@entities/account';
 import type { Account } from '@providers/accounts';
 
+import { AccountDownloadDropdown } from './AccountDownloadDropdown';
 import { BaseAccountCard } from './BaseAccountCard';
 import { BaseRawAccountRows } from './BaseRawAccountRows';
 
@@ -14,7 +15,11 @@ type AccountCardProps = TableCardBodyProps & {
 
 export function AccountCard({ account, children, ...rest }: AccountCardProps) {
     return (
-        <BaseAccountCard rawContent={<RawAccountRows account={account} />} {...rest}>
+        <BaseAccountCard
+            rawContent={<RawAccountRows account={account} />}
+            headerActions={<AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />}
+            {...rest}
+        >
             {children}
         </BaseAccountCard>
     );

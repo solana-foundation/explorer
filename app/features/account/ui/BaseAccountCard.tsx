@@ -7,6 +7,7 @@ import { Button } from '@/app/components/shared/ui/button';
 export type BaseAccountCardProps = TableCardBodyProps & {
     title: React.ReactNode;
     rawContent?: React.ReactNode;
+    headerActions?: React.ReactNode;
     refresh?: () => void;
     showRawButton?: boolean;
 };
@@ -14,6 +15,7 @@ export type BaseAccountCardProps = TableCardBodyProps & {
 export function BaseAccountCard({
     title,
     rawContent,
+    headerActions,
     refresh,
     showRawButton = true,
     children,
@@ -25,6 +27,12 @@ export function BaseAccountCard({
         <div className="card">
             <div className="card-header e-gap-2">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">{title}</h3>
+                {refresh && (
+                    <Button variant="outline" size="sm" aria-label="Refresh" onClick={refresh}>
+                        <RefreshCw size={12} />
+                        <span className="d-none d-md-inline">Refresh</span>
+                    </Button>
+                )}
                 {showRawButton && (
                     <Button
                         variant={showRaw ? 'default' : 'outline'}
@@ -37,12 +45,7 @@ export function BaseAccountCard({
                         <span className="d-none d-md-inline">Raw</span>
                     </Button>
                 )}
-                {refresh && (
-                    <Button variant="outline" size="sm" aria-label="Refresh" onClick={refresh}>
-                        <RefreshCw size={12} />
-                        <span className="d-none d-md-inline">Refresh</span>
-                    </Button>
-                )}
+                {headerActions}
             </div>
 
             <TableCardBody {...tableProps}>{showRaw ? rawContent : children}</TableCardBody>
