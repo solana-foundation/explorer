@@ -25,9 +25,8 @@ export function useRawAccountData(address: string) {
 export function useRawAccountDataOnMount(pubkey: PublicKey): { data: Uint8Array | undefined; isLoading: boolean } {
     const connection = useConnection();
 
-    const { data, isLoading } = useSWRImmutable(
-        rawAccountDataKey(connection.rpcEndpoint, pubkey.toBase58()),
-        () => fetchRawAccountData(connection, pubkey.toBase58()),
+    const { data, isLoading } = useSWRImmutable(rawAccountDataKey(connection.rpcEndpoint, pubkey.toBase58()), () =>
+        fetchRawAccountData(connection, pubkey.toBase58()),
     );
 
     return { data, isLoading };
