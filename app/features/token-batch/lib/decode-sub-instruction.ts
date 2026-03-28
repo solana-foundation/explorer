@@ -155,7 +155,11 @@ function decodeBurnChecked(data: Uint8Array, accounts: AccountEntry[]): RawCheck
     return { accounts, amount, decimals, type: 'burnChecked' };
 }
 
-function decodeAccountsOnly(data: Uint8Array, accounts: AccountEntry[], type: RawAccountsOnly['type']): RawAccountsOnly | undefined {
+function decodeAccountsOnly(
+    data: Uint8Array,
+    accounts: AccountEntry[],
+    type: RawAccountsOnly['type'],
+): RawAccountsOnly | undefined {
     if (data.length < 1) return undefined;
     return { accounts, type };
 }
