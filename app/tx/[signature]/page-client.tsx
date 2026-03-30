@@ -2,7 +2,7 @@
 
 import { ErrorCard } from '@components/common/ErrorCard';
 import { InfoTooltip } from '@components/common/InfoTooltip';
-import { LoadingCard } from '@/app/components/shared/LoadingCard';
+import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
 import { SolBalance } from '@components/common/SolBalance';
