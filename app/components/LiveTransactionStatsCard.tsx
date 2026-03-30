@@ -1,7 +1,6 @@
 'use client';
 
 import { TableCardBody } from '@components/common/TableCardBody';
-import { LiveTransactionStatsBodySkeleton } from '@components/HomepageSkeletons';
 import { StatsNotReady } from '@components/StatsNotReady';
 import { ClusterStatsStatus, PERF_UPDATE_SEC, usePerformanceInfo } from '@providers/stats/solanaClusterStats';
 import { PerformanceInfo } from '@providers/stats/solanaPerformanceInfo';
@@ -47,10 +46,7 @@ function TpsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeri
     const performanceInfo = usePerformanceInfo();
 
     if (performanceInfo.status !== ClusterStatsStatus.Ready) {
-        if (performanceInfo.status === ClusterStatsStatus.Error) {
-            return <StatsNotReady error={true} />;
-        }
-        return <LiveTransactionStatsBodySkeleton />;
+        return <StatsNotReady error={performanceInfo.status === ClusterStatsStatus.Error} />;
     }
 
     return <TpsBarChart performanceInfo={performanceInfo} series={series} setSeries={setSeries} />;

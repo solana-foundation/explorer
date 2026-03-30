@@ -9,7 +9,7 @@ import {
     StatsTableSkeleton,
     TableCardSkeleton,
     TableRowSkeleton,
-} from '../Skeletons';
+} from './Skeletons';
 
 const hasPulse = (canvasElement: HTMLElement) =>
     expect(canvasElement.querySelectorAll('.e-animate-pulse').length).toBeGreaterThan(0);
@@ -27,7 +27,7 @@ function TableWrapper({ children }: { children: React.ReactNode }) {
 const meta = {
     component: TableRowSkeleton,
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/Skeletons',
+    title: 'Components/Shared/UI/Skeletons',
 } satisfies Meta<typeof TableRowSkeleton>;
 
 export default meta;

@@ -1,4 +1,5 @@
-import { Skeleton } from '@components/shared/ui/skeleton';
+import { ReactElement } from 'react';
+import { Skeleton } from './ui/skeleton';
 
 type ColDef = {
     skeleton: string;
@@ -33,9 +34,9 @@ export function RichRowSkeleton() {
     );
 }
 
-export function SimpleCardSkeleton({ withTitle = false }: { withTitle?: boolean }) {
+export function SimpleCardSkeleton({ withTitle = false, title }: { withTitle?: boolean; title?: ReactElement }) {
     return (
-        <div className="card">
+        <div className="card e-w-full">
             {withTitle && (
                 <div className="card-header">
                     <div className="row e-items-center">
@@ -46,9 +47,9 @@ export function SimpleCardSkeleton({ withTitle = false }: { withTitle?: boolean 
                 </div>
             )}
             <div className="card-body">
-                <Skeleton className="e-mb-2 e-h-7 e-w-3/5" />
-                <Skeleton className="e-mb-2 e-h-12 e-w-full" />
-                <Skeleton className="e-h-6 e-w-2/5" />
+                {title || <Skeleton className="e-h-5 e-w-3/5" />}
+                <Skeleton className="e-mb-2.5 e-mt-2 e-h-7 e-w-full" />
+                <Skeleton className="e-h-3 e-w-2/5" />
             </div>
         </div>
     );
