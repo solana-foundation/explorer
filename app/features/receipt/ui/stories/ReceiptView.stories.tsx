@@ -50,11 +50,11 @@ export const DownloadOptions: Story = {
         await userEvent.click(downloadButton);
 
         // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
-        const csvButton = await within(document.body).findByRole('button', { name: /^csv$/i });
+        const csvButton = await within(document.body).findByRole('button', { name: /^get csv$/i });
         await expect(csvButton).toBeInTheDocument();
 
         // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
-        const pdfButton = await within(document.body).findByRole('button', { name: /^pdf$/i });
+        const pdfButton = await within(document.body).findByRole('button', { name: /^get pdf$/i });
         await expect(pdfButton).toBeInTheDocument();
     },
 };
