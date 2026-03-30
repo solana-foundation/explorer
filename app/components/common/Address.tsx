@@ -132,10 +132,10 @@ export function Address({
 
     return (
         <span ref={containerRef}>
-            <div className={cn('d-none d-lg-flex align-items-center', alignRight && 'justify-content-end')}>
+            <div className={cn('d-none d-md-flex align-items-center', alignRight && 'justify-content-end')}>
                 {content}
             </div>
-            <div className="d-flex d-lg-none align-items-center">{content}</div>
+            <div className="d-flex d-md-none align-items-center">{content}</div>
         </span>
     );
 }
