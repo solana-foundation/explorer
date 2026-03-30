@@ -17,7 +17,7 @@ export function PopoverButton({ icon, label, children, className, disabled, load
         <Popover>
             <PopoverTrigger asChild>
                 <Button variant="compact" size="compact" className={className} disabled={disabled || loading}>
-                    {loading ? <span className="e-spinner-grow e-spinner-grow-xs" aria-hidden="true" /> : icon}
+                    {loading ? <span className="e-spinner-grow e-spinner-grow-xs e-mx-0.5" aria-hidden="true" /> : icon}
                     {label}
                     <ChevronDown size={12} aria-hidden="true" />
                 </Button>

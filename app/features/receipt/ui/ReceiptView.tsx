@@ -3,7 +3,7 @@
 import { Button } from '@components/shared/ui/button';
 import { TransactionSignature } from '@solana/web3.js';
 import Link from 'next/link';
-import { Download, Share2 } from 'react-feather';
+import { Download, FileText, Share2, Table } from 'react-feather';
 
 import { useToast } from '@/app/components/shared/ui/sonner/use-toast';
 import { EReceiptDownloadFormat, receiptAnalytics } from '@/app/shared/lib/analytics';
@@ -103,12 +103,14 @@ export function ReceiptView({
                         className="e-max-h-[25px]"
                     >
                         <DownloadReceiptItem
+                            icon={<Table size={12} />}
                             format={EReceiptDownloadFormat.Csv}
                             label="CSV"
                             download={downloadCsv}
                             signature={signature}
                         />
                         <DownloadReceiptItem
+                            icon={<FileText size={12} />}
                             format={EReceiptDownloadFormat.Pdf}
                             label="PDF"
                             download={downloadPdf}

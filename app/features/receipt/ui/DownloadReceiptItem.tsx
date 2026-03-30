@@ -2,7 +2,6 @@
 
 import type { TransactionSignature } from '@solana/web3.js';
 import type { ReactNode } from 'react';
-import { Check, Loader, XCircle } from 'react-feather';
 
 import { EReceiptDownloadFormat, receiptAnalytics } from '@/app/shared/lib/analytics';
 
@@ -18,21 +17,14 @@ interface DownloadReceiptItemBaseProps {
 }
 
 export function DownloadReceiptItemBase({ icon, label, state, onTrigger }: DownloadReceiptItemBaseProps) {
+    const isDownloading = state === 'downloading';
+
     function getIcon() {
-        if (state === 'downloading') return <Loader size={11} className="e-animate-spin" />;
-        if (state === 'downloaded') return <Check size={11} />;
-        if (state === 'errored') return <XCircle size={11} />;
+        if (isDownloading) return <span className="e-spinner-grow e-spinner-grow-xs e-mx-0.5" aria-hidden="true" />;
         return icon;
     }
 
-    function getLabel() {
-        if (state === 'downloading') return 'Downloading...';
-        if (state === 'downloaded') return 'Downloaded!';
-        if (state === 'errored') return 'Failed';
-        return label;
-    }
-
-    return <PopoverMenuItem icon={getIcon()} label={getLabel()} onClick={onTrigger} />;
+    return <PopoverMenuItem disabled={isDownloading} icon={getIcon()} label={`Get ${label}`} onClick={onTrigger} />;
 }
 
 interface DownloadReceiptItemProps {
