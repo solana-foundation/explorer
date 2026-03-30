@@ -20,11 +20,19 @@ interface ReceiptViewProps {
     data: FormattedExtendedReceipt;
     downloadCsv: DownloadReceiptFn;
     downloadPdf: DownloadReceiptFn;
+    isPriceLoading?: boolean;
     signature: TransactionSignature;
     transactionPath: string;
 }
 
-export function ReceiptView({ data, downloadCsv, downloadPdf, signature, transactionPath }: ReceiptViewProps) {
+export function ReceiptView({
+    data,
+    downloadCsv,
+    downloadPdf,
+    isPriceLoading,
+    signature,
+    transactionPath,
+}: ReceiptViewProps) {
     const canNativeShare = useCanNativeShare();
     const toast = useToast();
 
@@ -88,7 +96,12 @@ export function ReceiptView({ data, downloadCsv, downloadPdf, signature, transac
                     )}
                 </div>
                 <div className="e-flex e-items-start e-gap-0.5">
-                    <PopoverButton icon={<Download size={12} />} label="Download">
+                    <PopoverButton
+                        icon={<Download size={12} />}
+                        label="Download"
+                        loading={isPriceLoading}
+                        className="e-max-h-[25px]"
+                    >
                         <DownloadReceiptItem
                             format={EReceiptDownloadFormat.Csv}
                             label="CSV"

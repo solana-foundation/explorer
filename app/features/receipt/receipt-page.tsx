@@ -27,7 +27,7 @@ import { generateReceiptCsv } from './lib/generate-receipt-csv';
 import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
 import { usePrimaryDomain } from './lib/use-primary-domain';
 import { extractReceiptData } from './model/create-receipt';
-import { useTokenPrice } from './model/use-price';
+import { PriceStatus, useTokenPrice } from './model/use-price';
 import type { FormattedReceipt } from './types';
 import { NoReceipt } from './ui/BaseReceipt';
 import { ReceiptView } from './ui/ReceiptView';
@@ -147,6 +147,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const logoURI = receipt.logoURI ? getProxiedUri(receipt.logoURI) : undefined;
 
     const priceResult = useTokenPrice(receiptMint ?? NATIVE_MINT.toBase58());
+    const isPriceLoading = priceResult?.status === PriceStatus.Loading;
     const amount = getReceiptAmount(receipt);
     const usdValue = priceResult?.price != null ? formatUsdValue(amount, priceResult.price) : undefined;
 
@@ -182,6 +183,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                 }}
                 downloadCsv={downloadCsv}
                 downloadPdf={downloadPdf}
+                isPriceLoading={isPriceLoading}
                 signature={signature}
                 transactionPath={transactionPath}
             />
