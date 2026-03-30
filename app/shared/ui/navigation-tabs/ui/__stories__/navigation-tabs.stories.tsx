@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, within } from 'storybook/test';
+import { expect, within } from 'storybook/test';
 
 import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
@@ -26,7 +26,6 @@ const ADDRESS_TABS: NavigationTab[] = [
 const meta: Meta<typeof BaseNavigationTabs> = {
     args: {
         buildHref: (path: string) => `#${path}`,
-        onSelectChange: fn(),
     },
     component: BaseNavigationTabs,
     title: 'Components/Shared/UI/NavigationTabs',
@@ -42,6 +41,7 @@ export const Default: Story = {
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
+        // In JSDOM all offsetWidths are 0, so visibleCount = allTabs.length (all fit)
         const tablist = canvas.getByRole('tablist', { hidden: true });
         const tabs = within(tablist).getAllByRole('tab', { hidden: true });
         expect(tabs).toHaveLength(4);
@@ -58,6 +58,19 @@ export const ManyTabs: Story = {
     },
 };
 
+// Resize the Storybook canvas narrower to see overflow tabs collapse into "More ▼"
+export const MobileView: Story = {
+    args: {
+        activeValue: '',
+        tabs: ADDRESS_TABS,
+    },
+    parameters: {
+        globals: {
+            viewport: { isRotated: false, value: 'mobile1' },
+        },
+    },
+};
+
 export const WithChildren: Story = {
     args: {
         activeValue: '',
@@ -65,17 +78,12 @@ export const WithChildren: Story = {
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
+        // In JSDOM all offsetWidths are 0, so all tabs (static + async) are visible
         const tablist = canvas.getByRole('tablist', { hidden: true });
         const tabs = within(tablist).getAllByRole('tab', { hidden: true });
         expect(tabs).toHaveLength(6);
         expect(tabs[4]).toHaveTextContent('Async Tab 1');
         expect(tabs[5]).toHaveTextContent('Async Tab 2');
-
-        // Async tabs should register into the select as well
-        const select = canvasElement.querySelector('select') as HTMLSelectElement;
-        expect(select.options).toHaveLength(6);
-        expect(select.options[4]).toHaveTextContent('Async Tab 1');
-        expect(select.options[5]).toHaveTextContent('Async Tab 2');
     },
     render: args => (
         <BaseNavigationTabs {...args}>
@@ -83,29 +91,6 @@ export const WithChildren: Story = {
             <NavigationTabLink path="extra-2" title="Async Tab 2" />
         </BaseNavigationTabs>
     ),
-};
-
-export const MobileSelect: Story = {
-    args: {
-        activeValue: 'rewards',
-        tabs: BLOCK_TABS,
-    },
-    parameters: {
-        globals: {
-            viewport: { isRotated: false, value: 'mobile1' },
-        },
-    },
-    play: async ({ canvasElement, args }) => {
-        const select = canvasElement.querySelector('select') as HTMLSelectElement;
-        expect(select).toBeTruthy();
-        expect(select.options).toHaveLength(4);
-        expect(select.value).toBe('rewards');
-
-        // Simulate user selecting a different option
-        select.value = 'programs';
-        select.dispatchEvent(new Event('change', { bubbles: true }));
-        expect(args.onSelectChange).toHaveBeenCalledWith('programs');
-    },
 };
 
 export const OverlappingAsyncTabs: Story = {
@@ -118,13 +103,8 @@ export const OverlappingAsyncTabs: Story = {
         const tablist = canvas.getByRole('tablist', { hidden: true });
         const tabs = within(tablist).getAllByRole('tab', { hidden: true });
 
-        // Desktop tablist: 4 static + 1 new (overlapping "rewards" is deduplicated)
+        // 4 static + 1 new ("rewards" overlaps and is deduplicated)
         expect(tabs).toHaveLength(5);
-
-        // Mobile select: should deduplicate "rewards", so 4 static + 1 new = 5
-        const select = canvasElement.querySelector('select') as HTMLSelectElement;
-        expect(select.options).toHaveLength(5);
-        expect(select.options[4]).toHaveTextContent('Extra Tab');
     },
     render: args => (
         <BaseNavigationTabs {...args}>

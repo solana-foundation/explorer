@@ -333,7 +333,7 @@ function MoreSection({
         <>
             <div className="container">
                 <div className="header">
-                    <div className="header-body pt-0">
+                    <div className="header-body e-py-0">
                         <NavigationTabs buildHref={buildHref} tabs={tabs}>
                             {asyncChildren}
                         </NavigationTabs>

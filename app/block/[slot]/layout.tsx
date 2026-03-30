@@ -252,7 +252,7 @@ function MoreSection({ children, slot }: { children: React.ReactNode; slot: numb
         <>
             <div className="container">
                 <div className="header">
-                    <div className="header-body pt-0">
+                    <div className="header-body e-py-0">
                         <NavigationTabs buildHref={buildHref} tabs={TABS} />
                     </div>
                 </div>

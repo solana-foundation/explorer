@@ -140,25 +140,3 @@
         mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50%/21px 100%;
     }
 }
-
-/* Override Dashkit header spacing around navigation tabs */
-.header-body:has(.navigation-tabs-select) {
-    padding-bottom: 0 !important;
-}
-@media (max-width: 767px) {
-    .header:has(.navigation-tabs-select) {
-        margin-bottom: 0.75rem !important;
-    }
-    .header-body:has(.navigation-tabs-select) {
-        padding-bottom: 0.75rem !important;
-    }
-}
-
-/* Negative margins bleed the select to the edges of the card body,
-   compensating for the Bootstrap card-body px-3 (12px) horizontal padding.
-   Visual styles are handled by BaseNativeSelect CVA variants. */
-.navigation-tabs-select {
-    margin-left: -12px;
-    margin-right: -12px;
-    width: calc(100% + 24px);
-}

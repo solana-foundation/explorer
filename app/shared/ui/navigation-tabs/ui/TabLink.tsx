@@ -6,11 +6,12 @@ import React from 'react';
 import { cn } from '@/app/components/shared/utils';
 import { useNavigationTabsContext } from '@/app/shared/ui/navigation-tabs/model/navigation-tabs-context';
 
-const tabLinkClassName = cn(
+export const tabLinkClassName = cn(
     'e-appearance-none e-border-solid e-shadow-none e-outline-none',
     'e-border-b e-border-transparent data-[state=active]:e-border-b-accent',
     'e-bg-transparent',
     'e-px-0 e-py-4',
+    'e-shrink-0 e-whitespace-nowrap',
     'e-text-sm e-font-normal e-text-outer-space-200 data-[state=active]:e-text-white',
     'e-no-underline',
 );
