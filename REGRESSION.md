@@ -573,7 +573,7 @@ _Note: Compressed NFT example address_
 
 **File:** `app/components/instruction/serum/types.ts`
 
-**Change:** `instruction.data.slice(1, 5).readUInt32LE(0)` → `readUint32LE(instruction.data, 1)` via `app/shared/lib/bytes.ts`
+**Change:** `instruction.data.slice(1, 5).readUInt32LE(0)` → `readUint32LE(instruction.data.slice(1, 5), 0)` via `app/shared/lib/bytes.ts`
 
 **Test:** Serum / OpenBook transaction pages that decode instruction titles
 
@@ -584,6 +584,77 @@ Serum Program ids: `srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX`, `4ckmDgGdxQoPD
 | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | http://localhost:3000/tx/inspector?cluster=mainnet                                                                                | https://explorer.solana.com/tx/inspector                                                                                |
 | http://localhost:3000/tx/35oVAqDXbd4cukgWL34KtBj1Ldp48idpMTtfWpD5j7bSneGse2bQSsZxSpyAyhvnyc9yFNM8dyyZxv4dM6njRoye?cluster=mainnet | https://explorer.solana.com/tx/35oVAqDXbd4cukgWL34KtBj1Ldp48idpMTtfWpD5j7bSneGse2bQSsZxSpyAyhvnyc9yFNM8dyyZxv4dM6njRoye |
+
+---
+
+## 36. Concurrent Merkle Tree Card
+
+**File:** `app/components/account/ConcurrentMerkleTreeCard.tsx`
+
+**Changes:**
+
+-   Prop type `data: Buffer` → `data: Uint8Array`
+-   `ConcurrentMerkleTreeAccount.fromBuffer(Buffer.from(data))` → `ConcurrentMerkleTreeAccount.fromBuffer(toBuffer(data))`
+
+**Reason:** `@solana/spl-account-compression` `ConcurrentMerkleTreeAccount.fromBuffer()` requires `Buffer`
+
+**Test:** Concurrent Merkle Tree account pages (related to compressed NFTs)
+
+| Local                                                                                     | Production                                                                      |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| http://localhost:3000/address/SMBH3wF6baUj6JWtzYvqcKuj2XCKWDqQxzspY12xPND?cluster=mainnet | https://explorer.solana.com/address/SMBH3wF6baUj6JWtzYvqcKuj2XCKWDqQxzspY12xPND |
+
+---
+
+## 37. SAS Attestation Data Card
+
+**File:** `app/components/account/sas/AttestationDataCard.tsx`
+
+**Change:** `Buffer.from(attestation.data).toString('base64')` → `toBase64(new Uint8Array(attestation.data))`
+
+**Test:** SAS attestation account pages with attestation data display
+
+| Local                                              | Production                               |
+| -------------------------------------------------- | ---------------------------------------- |
+| http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
+
+- Schema https://explorer.solana.com/address/9FQiiMtroSHP2Ewqfh3D94GPKnDjmeLT2ftqJ3E7QyWc
+- Credential https://explorer.solana.com/address/2chgBfvkwhnHQVVAyXKDK6CBjbCRMQ8aLWrysL5UQyyF
+- Attestation https://explorer.solana.com/address/EFsjVQHpTn7W5ZpjUh7dLZujHpnwUiDUNz7JbtnQqieb
+
+_Note: Find an account with SAS attestation data_
+
+---
+
+## 38. Inspector Page Base64 and Buffer.from Removal
+
+**File:** `app/components/inspector/InspectorPage.tsx`
+
+**Changes:**
+
+-   `Buffer.from(instruction.data)` → `instruction.data` (data is already `Uint8Array`, wrapper was unnecessary)
+-   `btoa(String.fromCharCode.apply(null, Array.from(inspectorData.rawMessage)))` → `toBase64(inspectorData.rawMessage)`
+
+**Test:** Transaction inspector — load Squads multisig transactions and verify raw message encoding
+
+| Local                                              | Production                               |
+| -------------------------------------------------- | ---------------------------------------- |
+| http://localhost:3000/tx/inspector?cluster=mainnet | https://explorer.solana.com/tx/inspector |
+
+---
+
+## 39. Compute Units Schedule
+
+**File:** `app/utils/compute-units-schedule.ts`
+
+**Change:** `Buffer.from(instruction.data)` → `instruction.data` (data is already `Uint8Array`, wrapper was unnecessary)
+
+**Test:** Any transaction page that displays compute unit information
+
+| Local                                                                                                                             | Production                                                                                                              |
+| --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| http://localhost:3000/tx/inspector?cluster=mainnet                                                                                | https://explorer.solana.com/tx/inspector                                                                                |
+| http://localhost:3000/tx/3mirX6YW4dPwHqpnKwERk6hNoHB2vTFaxuqpAtFNVQz2wixMoKGMMUdUeqPDMf3Lo8TQAQFTLd4E2xKCbQwcc4z?cluster=mainnet | https://explorer.solana.com/tx/3mirX6YW4dPwHqpnKwERk6hNoHB2vTFaxuqpAtFNVQz2wixMoKGMMUdUeqPDMf3Lo8TQAQFTLd4E2xKCbQwcc4z |
 
 ---
 
@@ -625,7 +696,17 @@ Serum Program ids: `srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX`, `4ckmDgGdxQoPD
 
 -   [ ] **Anchor Account Decode**: Verify Anchor account decoding still works via `toBuffer(...)`
 -   [ ] **Compressed NFT Tree**: Verify compressed NFT canopy depth still loads correctly via `toBuffer(...)`
+-   [ ] **Concurrent Merkle Tree Card**: Verify concurrent merkle tree data renders correctly via `toBuffer(...)`
 -   [ ] **Program Logs / Inspector**: Verify `TransactionInstruction` construction still works with `toBuffer(...)`
+
+### Buffer.from Removals
+
+-   [ ] **Inspector Page**: Load a Squads multisig transaction in inspector, verify instruction data and raw message encoding work
+-   [ ] **Compute Units**: Open any transaction page with compute budget instructions, verify CU schedule displays correctly
+
+### Additional Base64 Conversions
+
+-   [ ] **SAS Attestation**: Find an account with SAS attestation data, verify base64 data displays correctly
 
 ---
 

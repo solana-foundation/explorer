@@ -568,7 +568,7 @@ const SERUM_CODE_LOOKUP: { [key: number]: string } = {
 };
 
 export function parseSerumInstructionCode(instruction: TransactionInstruction) {
-    return readUint32LE(instruction.data, 1);
+    return readUint32LE(instruction.data.slice(1, 5), 0);
 }
 
 export function parseSerumInstructionTitle(instruction: TransactionInstruction): string {

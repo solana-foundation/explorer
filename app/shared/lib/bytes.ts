@@ -150,7 +150,7 @@ export function readUint8(bytes: Uint8Array, offset: number): number {
  * Read a 16-bit unsigned integer in little-endian format
  * Replaces: buffer.readUInt16LE(offset)
  */
-export function readUint16LE(bytes: Uint8Array, offset: number): number {
+export function readUint16LE(bytes: ByteArray, offset: number): number {
     const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
     return view.getUint16(offset, true);
 }
@@ -159,7 +159,7 @@ export function readUint16LE(bytes: Uint8Array, offset: number): number {
  * Read a 32-bit unsigned integer in little-endian format
  * Replaces: buffer.readUInt32LE(offset)
  */
-export function readUint32LE(bytes: Uint8Array, offset: number): number {
+export function readUint32LE(bytes: ByteArray, offset: number): number {
     const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
     return view.getUint32(offset, true);
 }

@@ -19,6 +19,7 @@ import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
+import { toBase64 } from '@/app/shared/lib/bytes';
 
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';
@@ -224,7 +225,7 @@ function SquadsProposalInspectorCard({ account, onClear }: { account: string; on
             })),
             compiledInstructions: message.instructions.map(instruction => ({
                 accountKeyIndexes: Array.from(instruction.accountIndexes),
-                data: Uint8Array.from(instruction.data),
+                data: instruction.data,
                 programIdIndex: instruction.programIdIndex,
             })),
             header: {
@@ -297,7 +298,7 @@ export function TransactionInspectorPage({
                 }
             }
 
-            const base64 = btoa(String.fromCharCode.apply(null, Array.from(inspectorData.rawMessage)));
+            const base64 = toBase64(inspectorData.rawMessage);
             const newParam = encodeURIComponent(base64);
             if (currentSearchParams.get('message') !== newParam) {
                 nextQueryParams ||= new URLSearchParams(currentSearchParams?.toString());

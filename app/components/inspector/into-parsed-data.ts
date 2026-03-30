@@ -194,10 +194,6 @@ function intoProgramName(programId: PublicKey): string | undefined {
     /* add other variants here */
 }
 
-function isDataEqual(data1: Uint8Array, data2: Uint8Array): boolean {
-    return equals(data1, data2);
-}
-
 function intoParsedData(instruction: TransactionInstruction, parsed?: any): any {
     const { programId, data } = instruction;
     const UNKNOWN_PROGRAM_TYPE = ''; // empty string represents that the program is unknown
@@ -208,7 +204,7 @@ function intoParsedData(instruction: TransactionInstruction, parsed?: any): any 
         let instructionData = data;
 
         // workaround for "create" instructions
-        if (isDataEqual(data, alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
+        if (equals(data, alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
             instructionData = toBuffer(discriminatorToBytes(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR));
             instruction.data = instructionData; // overwrite original data with the modified one
         }

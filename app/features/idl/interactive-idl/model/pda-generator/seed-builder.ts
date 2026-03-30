@@ -2,7 +2,7 @@ import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
 import { camelCase } from 'change-case';
 
-import { bnToBytes, fromUtf8, toHex } from '@/app/shared/lib/bytes';
+import { bnToBytes, bytes, fromUtf8, toHex } from '@/app/shared/lib/bytes';
 
 import { parseArrayInput } from '../anchor/array-parser';
 import type { IdlSeed, IdlSeedAccount, IdlSeedArg, IdlSeedConst, PdaArgument, PdaInstruction } from './types';
@@ -58,7 +58,7 @@ function processConstSeed(seed: IdlSeedConst): ProcessedSeed {
     if (!seed.value?.length) {
         return { buffer: null, info: { name: 'const', value: null } };
     }
-    const buffer = new Uint8Array(seed.value);
+    const buffer = bytes(seed.value);
     const hex = toHex(buffer);
     return { buffer, info: { name: `0x${hex}`, value: `0x${hex}` } };
 }
@@ -130,8 +130,8 @@ function argToSeedBuffer(value: string, type: PdaArgument['type']): Uint8Array |
         }
     }
     if (type === 'bool') {
-        if (value === 'true') return new Uint8Array([1]);
-        if (value === 'false') return new Uint8Array([0]);
+        if (value === 'true') return bytes([1]);
+        if (value === 'false') return bytes([0]);
         return null;
     }
 
@@ -147,13 +147,13 @@ function argToSeedBuffer(value: string, type: PdaArgument['type']): Uint8Array |
         const length = typeof sizeDef === 'number' ? sizeDef : null;
         if (length === null) return null;
         const trimmed = value.trim();
-        const bytes =
+        const bytesData =
             typeof elementType === 'string' && elementType === 'u8'
                 ? (parseU8ArrayFromHex(trimmed, length) ?? parseIntegerArray(value, 'u8', length))
                 : typeof elementType === 'string'
                   ? parseIntegerArray(value, elementType, length)
                   : null;
-        return bytes ? new Uint8Array(bytes) : null;
+        return bytesData ? bytes(bytesData) : null;
     }
 
     return null;
