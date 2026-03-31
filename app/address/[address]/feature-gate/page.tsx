@@ -18,7 +18,7 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
     const title = `Feature Gate | ${await getReadableTitleFromAddress(props)} | Solana`;
     return {
         description: `Feature information for address ${props.params.address} on Solana`,
-        openGraph: getFeatureGateOpenGraph(props.params.address, title),
+        openGraph: getFeatureGateOpenGraph(props.params.address),
         title,
     };
 }

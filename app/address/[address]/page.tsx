@@ -18,7 +18,7 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
         // Feature gate OG images are intentionally shown on the main address page too,
         // so shared links to feature gate addresses always display the rich preview.
         // e.g. /address/5xXZc66h4UdB6Yq7FzdBxBiRAFMMScMLwHxk2QZDaNZL?cluster=testnet
-        openGraph: getFeatureGateOpenGraph(props.params.address, title),
+        openGraph: getFeatureGateOpenGraph(props.params.address),
         title,
     };
 }
