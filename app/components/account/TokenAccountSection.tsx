@@ -281,7 +281,7 @@ function NonFungibleTokenMintAccountCard({
                     <td className="text-md-end">{maxSupply === 0 ? 1 : maxSupply}</td>
                 </tr>
             )}
-            {nftData?.editionInfo.masterEdition?.supply && (
+            {nftData?.editionInfo.masterEdition != null && (
                 <tr>
                     <td>Current Supply</td>
                     <td className="text-md-end">

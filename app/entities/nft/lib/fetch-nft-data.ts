@@ -1,7 +1,6 @@
 import { fetchMetadata, findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
 import { fromWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
 import { PublicKey } from '@solana/web3.js';
-import { pubkeyToString } from '@utils/index';
 
 import getEditionInfo from './get-edition-info';
 import { getMetadataJson, type GetMetadataJsonDeps } from './get-metadata-json';
@@ -22,8 +21,7 @@ export async function fetchNftData(
         const metadata = await fetchMetadata(umi, metadataPda);
         if (metadata) {
             const editionInfo = await getEditionInfo(metadata, rpcEndpoint);
-            const id = pubkeyToString(accountKey);
-            const json = await getMetadataJson(id, metadata, deps);
+            const json = await getMetadataJson(metadata, deps);
             return { editionInfo, json, metadata };
         }
     } catch {
