@@ -3,7 +3,7 @@ import { expect, within } from 'storybook/test';
 
 import { Logo } from '../SolanaLogo';
 
-const meta: Meta<typeof Logo> = {
+const meta = {
     argTypes: {
         variant: {
             control: 'radio',
@@ -11,11 +11,10 @@ const meta: Meta<typeof Logo> = {
         },
     },
     component: Logo,
-    parameters: {
-        layout: 'centered',
-    },
-    title: 'Shared/UI/SolanaLogo',
-};
+    parameters: { layout: 'padded' },
+    tags: ['autodocs', 'test'],
+    title: 'Shared/SolanaLogo',
+} satisfies Meta<typeof Logo>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

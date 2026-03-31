@@ -12,9 +12,9 @@ const PATH_COMPONENT = 'proposals';
 export async function fetchFeatureGateInformation(featureInfo?: FeatureInfoType): Promise<string[]> {
     const empty: string[] = ['No data'];
 
-    const fileNames = featureInfo?.simd_link ?? null;
+    const fileNames = featureInfo?.simd_link;
 
-    if (fileNames === null) return empty;
+    if (!fileNames) return empty;
 
     const results = await Promise.all(
         fileNames.map(async fileName => {
@@ -22,11 +22,14 @@ export async function fetchFeatureGateInformation(featureInfo?: FeatureInfoType)
             try {
                 const resp = await fetch(link, { method: 'GET' });
 
-                if (!resp.ok) return 'No data';
+                if (!resp.ok) {
+                    Logger.warn('[feature-gate] SIMD fetch failed', { link, status: resp.status });
+                    return 'No data';
+                }
 
                 return resp.text();
-            } catch (_e) {
-                Logger.debug('[feature-gate] Cannot fetch link', { link });
+            } catch (e) {
+                Logger.warn('[feature-gate] Cannot fetch link', { cause: e, link });
                 return 'No data';
             }
         }),
