@@ -388,4 +388,3 @@ export function bytes(input: string | ArrayLike<number> | ArrayBufferLike, encod
     // Handle array-like (number[])
     return new Uint8Array(input as ArrayLike<number>);
 }
-
