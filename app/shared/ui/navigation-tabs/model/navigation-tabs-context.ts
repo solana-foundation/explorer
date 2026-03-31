@@ -17,7 +17,7 @@ export const NavigationTabsContext = React.createContext<NavigationTabsContextVa
 
 export function useNavigationTabsContext() {
     const ctx = React.useContext(NavigationTabsContext);
-    if (!ctx) throw new Error('NavigationTabLink must be used within NavigationTabs');
+    if (!ctx) throw new Error('Tab components must be used within NavigationTabs');
     return ctx;
 }
 

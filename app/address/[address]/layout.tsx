@@ -51,6 +51,7 @@ import { hasTokenMetadata } from '@/app/features/metadata';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { type NavigationTab, NavigationTabLink, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
+import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
 import { isAttestationAccount } from '@/app/utils/attestation-service';
 import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import {
@@ -331,15 +332,13 @@ function MoreSection({
 
     return (
         <>
-            <div className="container">
-                <div className="header">
-                    <div className="header-body e-py-0">
-                        <NavigationTabs buildHref={buildHref} tabs={tabs}>
-                            {asyncChildren}
-                        </NavigationTabs>
-                    </div>
+            <StickyHeader>
+                <div className="container">
+                    <NavigationTabs buildHref={buildHref} tabs={tabs}>
+                        {asyncChildren}
+                    </NavigationTabs>
                 </div>
-            </div>
+            </StickyHeader>
             {children}
         </>
     );

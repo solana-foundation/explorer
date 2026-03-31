@@ -17,6 +17,7 @@ import React, { PropsWithChildren } from 'react';
 import { ExternalLink } from 'react-feather';
 
 import { type NavigationTab, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
+import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
 import { estimateRequestedComputeUnits } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot, getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
 import { pickClusterParams } from '@/app/utils/url';
@@ -250,13 +251,11 @@ function MoreSection({ children, slot }: { children: React.ReactNode; slot: numb
 
     return (
         <>
-            <div className="container">
-                <div className="header">
-                    <div className="header-body e-py-0">
-                        <NavigationTabs buildHref={buildHref} tabs={TABS} />
-                    </div>
+            <StickyHeader>
+                <div className="container">
+                    <NavigationTabs buildHref={buildHref} tabs={TABS} />
                 </div>
-            </div>
+            </StickyHeader>
             {children}
         </>
     );
