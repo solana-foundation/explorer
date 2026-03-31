@@ -7,15 +7,25 @@ import { DownloadDropdown } from '../DownloadDropdown';
 const meta: Meta<typeof DownloadDropdown> = {
     component: DownloadDropdown,
     parameters: {
-        layout: 'centered',
+        layout: 'padded',
     },
-    title: 'Shared/UI/DownloadDropdown',
+    tags: ['autodocs'],
+    title: 'Shared/DownloadDropdown',
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 const SAMPLE_DATA = new Uint8Array([72, 101, 108, 108, 111]);
+
+// Centered default for autodocs preview
+export const Default: Story = {
+    args: {
+        data: SAMPLE_DATA,
+        filename: 'test-transaction',
+    },
+    parameters: { layout: 'centered' },
+};
 
 export const WithData: Story = {
     args: {

@@ -1,11 +1,10 @@
 import { Address } from '@components/common/Address';
-import { TableCardBody } from '@components/common/TableCardBody';
 import { useRefreshAccount } from '@entities/account';
+import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { Suspense, useState } from 'react';
-import { RefreshCw } from 'react-feather';
 
 import { getProxiedUri } from '@/app/features/metadata/utils';
 
@@ -17,72 +16,58 @@ import { NftokenTypes } from './nftoken-types';
 export function NFTokenAccountSection({ account }: { account: Account }) {
     const nft = parseNFTokenNFTAccount(account);
     if (nft) {
-        return <NFTCard nft={nft} />;
+        return <NFTCard account={account} nft={nft} />;
     }
 
     const collection = parseNFTokenCollectionAccount(account);
     if (collection) {
-        return <CollectionCard collection={collection} />;
+        return <CollectionCard account={account} collection={collection} />;
     }
 
     return <UnknownAccountCard account={account} />;
 }
 
-const NFTCard = ({ nft }: { nft: NftokenTypes.NftAccount }) => {
+const NFTCard = ({ account, nft }: { account: Account; nft: NftokenTypes.NftAccount }) => {
     const fetchInfo = useRefreshAccount();
     const refresh = () => fetchInfo(new PublicKey(nft.address), 'parsed');
 
     return (
-        <div className="card">
-            <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Overview</h3>
-                <button className="btn btn-white btn-sm" onClick={refresh}>
-                    <RefreshCw className="align-text-top me-2" size={13} />
-                    Refresh
-                </button>
-            </div>
-
-            <TableCardBody>
-                <tr>
-                    <td>Address</td>
-                    <td className="text-lg-end">
-                        <Address pubkey={new PublicKey(nft.address)} alignRight raw />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Authority</td>
-                    <td className="text-lg-end">
-                        <Address pubkey={new PublicKey(nft.authority)} alignRight link />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Holder</td>
-                    <td className="text-lg-end">
-                        <Address pubkey={new PublicKey(nft.holder)} alignRight link />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Delegate</td>
-                    <td className="text-lg-end">
-                        {nft.delegate ? (
-                            <Address pubkey={new PublicKey(nft.delegate)} alignRight link />
-                        ) : (
-                            'Not Delegated'
-                        )}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Collection</td>
-                    <td className="text-lg-end">
-                        {nft.collection ? (
-                            <Address pubkey={new PublicKey(nft.collection)} alignRight link />
-                        ) : (
-                            'No Collection'
-                        )}
-                    </td>
-                </tr>
-            </TableCardBody>
-        </div>
+        <AccountCard title="Overview" account={account} refresh={refresh}>
+            <tr>
+                <td>Address</td>
+                <td className="text-lg-end">
+                    <Address pubkey={new PublicKey(nft.address)} alignRight raw />
+                </td>
+            </tr>
+            <tr>
+                <td>Authority</td>
+                <td className="text-lg-end">
+                    <Address pubkey={new PublicKey(nft.authority)} alignRight link />
+                </td>
+            </tr>
+            <tr>
+                <td>Holder</td>
+                <td className="text-lg-end">
+                    <Address pubkey={new PublicKey(nft.holder)} alignRight link />
+                </td>
+            </tr>
+            <tr>
+                <td>Delegate</td>
+                <td className="text-lg-end">
+                    {nft.delegate ? <Address pubkey={new PublicKey(nft.delegate)} alignRight link /> : 'Not Delegated'}
+                </td>
+            </tr>
+            <tr>
+                <td>Collection</td>
+                <td className="text-lg-end">
+                    {nft.collection ? (
+                        <Address pubkey={new PublicKey(nft.collection)} alignRight link />
+                    ) : (
+                        'No Collection'
+                    )}
+                </td>
+            </tr>
+        </AccountCard>
     );
 };
 
@@ -116,43 +101,33 @@ export const NftokenImage = ({ url, size }: { url: string | undefined; size: num
     );
 };
 
-const CollectionCard = ({ collection }: { collection: NftokenTypes.CollectionAccount }) => {
+const CollectionCard = ({ account, collection }: { account: Account; collection: NftokenTypes.CollectionAccount }) => {
     const fetchInfo = useRefreshAccount();
     const refresh = () => fetchInfo(new PublicKey(collection.address), 'parsed');
 
     return (
-        <div className="card">
-            <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Overview</h3>
-                <button className="btn btn-white btn-sm" onClick={refresh}>
-                    <RefreshCw className="align-text-top me-2" size={13} />
-                    Refresh
-                </button>
-            </div>
-
-            <TableCardBody>
-                <tr>
-                    <td>Address</td>
-                    <td className="text-lg-end">
-                        <Address pubkey={new PublicKey(collection.address)} alignRight raw />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Authority</td>
-                    <td className="text-lg-end">
-                        <Address pubkey={new PublicKey(collection.authority)} alignRight link />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Number of NFTs</td>
-                    <td className="text-lg-end">
-                        <Suspense fallback={<div>Loading...</div>}>
-                            <NumNfts collection={collection.address} />
-                        </Suspense>
-                    </td>
-                </tr>
-            </TableCardBody>
-        </div>
+        <AccountCard title="Overview" account={account} refresh={refresh}>
+            <tr>
+                <td>Address</td>
+                <td className="text-lg-end">
+                    <Address pubkey={new PublicKey(collection.address)} alignRight raw />
+                </td>
+            </tr>
+            <tr>
+                <td>Authority</td>
+                <td className="text-lg-end">
+                    <Address pubkey={new PublicKey(collection.authority)} alignRight link />
+                </td>
+            </tr>
+            <tr>
+                <td>Number of NFTs</td>
+                <td className="text-lg-end">
+                    <Suspense fallback={<div>Loading...</div>}>
+                        <NumNfts collection={collection.address} />
+                    </Suspense>
+                </td>
+            </tr>
+        </AccountCard>
     );
 };
 

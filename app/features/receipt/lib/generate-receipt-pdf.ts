@@ -1,6 +1,8 @@
 import type { AcroFormTextField, jsPDF } from 'jspdf';
 import type { toDataURL as ToDataURL } from 'qrcode';
 
+import { getReceiptSymbol } from '@/app/entities/token-receipt';
+
 import type { FormattedReceipt } from '../types';
 import {
     applyLineStyle,
@@ -193,7 +195,8 @@ export async function generateReceiptPdf(
     y = drawSectionTitle(doc, 'Payment Details', y);
     y += 2;
 
-    const paymentMethod = receipt.kind === 'token' && receipt.symbol ? `Solana (${receipt.symbol})` : 'Solana (SOL)';
+    const symbol = getReceiptSymbol(receipt);
+    const paymentMethod = symbol ? `Solana (${symbol})` : 'Solana (SOL)';
     const col2X = PAGE.marginX + PAGE.contentWidth / 2;
 
     // Row 1: Payment Method (left) + Payment Date (right) — stacked 2-column

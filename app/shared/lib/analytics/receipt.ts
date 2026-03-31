@@ -1,5 +1,10 @@
 import { type GA4EventName, trackEvent } from './track-event';
 
+export enum EReceiptDownloadFormat {
+    Csv = 'csv',
+    Pdf = 'pdf',
+}
+
 export enum ReceiptEvent {
     ButtonClicked = 'rcpt_button_clicked',
     Download = 'rcpt_download',
@@ -22,8 +27,8 @@ export const receiptAnalytics = {
         trackEvent(ReceiptEvent.ButtonClicked, { signature });
     },
 
-    trackDownload(signature: string): void {
-        trackEvent(ReceiptEvent.Download, { signature });
+    trackDownload(signature: string, format: EReceiptDownloadFormat): void {
+        trackEvent(ReceiptEvent.Download, { format, signature });
     },
 
     trackNoReceipt(signature: string): void {

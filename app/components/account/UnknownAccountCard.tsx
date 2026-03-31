@@ -2,8 +2,7 @@
 
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
-import { TableCardBody } from '@components/common/TableCardBody';
-import { AccountDownloadDropdown } from '@features/account';
+import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { address as createAddress, createSolanaRpc } from '@solana/kit';
@@ -18,56 +17,49 @@ export function UnknownAccountCard({ account }: { account: Account }) {
 
     const label = addressLabel(account.pubkey.toBase58(), cluster);
     return (
-        <div className="card">
-            <div className="card-header align-items-center e-gap-2">
-                <h3 className="card-header-title">Overview</h3>
-                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
-            </div>
-
-            <TableCardBody>
+        <AccountCard title="Overview" account={account}>
+            <tr>
+                <td>Address</td>
+                <td className="text-lg-end">
+                    <Address pubkey={account.pubkey} alignRight raw />
+                </td>
+            </tr>
+            {label && (
                 <tr>
-                    <td>Address</td>
-                    <td className="text-lg-end">
-                        <Address pubkey={account.pubkey} alignRight raw />
-                    </td>
+                    <td>Address Label</td>
+                    <td className="text-lg-end">{label}</td>
                 </tr>
-                {label && (
-                    <tr>
-                        <td>Address Label</td>
-                        <td className="text-lg-end">{label}</td>
-                    </tr>
-                )}
-                <tr>
-                    <td>Balance (SOL)</td>
-                    <td className="text-lg-end">
-                        {account.lamports === 0 ? (
-                            <AccountNofFound account={account} />
-                        ) : (
-                            <SolBalance lamports={account.lamports} />
-                        )}
-                    </td>
-                </tr>
+            )}
+            <tr>
+                <td>Balance (SOL)</td>
+                <td className="text-lg-end">
+                    {account.lamports === 0 ? (
+                        <AccountNofFound account={account} />
+                    ) : (
+                        <SolBalance lamports={account.lamports} />
+                    )}
+                </td>
+            </tr>
 
-                {account.space !== undefined && (
-                    <tr>
-                        <td>Allocated Data Size</td>
-                        <td className="text-lg-end">{account.space} byte(s)</td>
-                    </tr>
-                )}
-
+            {account.space !== undefined && (
                 <tr>
-                    <td>Assigned Program Id</td>
-                    <td className="text-lg-end">
-                        <Address pubkey={account.owner} alignRight link />
-                    </td>
+                    <td>Allocated Data Size</td>
+                    <td className="text-lg-end">{account.space} byte(s)</td>
                 </tr>
+            )}
 
-                <tr>
-                    <td>Executable</td>
-                    <td className="text-lg-end">{account.executable ? 'Yes' : 'No'}</td>
-                </tr>
-            </TableCardBody>
-        </div>
+            <tr>
+                <td>Assigned Program Id</td>
+                <td className="text-lg-end">
+                    <Address pubkey={account.owner} alignRight link />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Executable</td>
+                <td className="text-lg-end">{account.executable ? 'Yes' : 'No'}</td>
+            </tr>
+        </AccountCard>
     );
 }
 
