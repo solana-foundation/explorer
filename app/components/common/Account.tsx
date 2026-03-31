@@ -1,7 +1,10 @@
 import { SolBalance } from '@components/common/SolBalance';
 import { Account } from '@providers/accounts';
+import { snakeCase } from 'change-case';
 import React from 'react';
 import { RefreshCw } from 'react-feather';
+
+import { refreshAnalytics } from '@/app/shared/lib/analytics';
 
 import { Address } from './Address';
 
@@ -18,7 +21,13 @@ export function AccountHeader({ title, refresh }: AccountHeaderProps) {
     return (
         <div className="card-header align-items-center">
             <h3 className="card-header-title">{title}</h3>
-            <button className="btn btn-white btn-sm" onClick={() => refresh()}>
+            <button
+                className="btn btn-white btn-sm"
+                onClick={() => {
+                    refreshAnalytics.trackButtonClicked(snakeCase(title) + '_section');
+                    refresh();
+                }}
+            >
                 <RefreshCw className="align-text-top me-2" size={13} />
                 Refresh
             </button>

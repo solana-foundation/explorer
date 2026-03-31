@@ -30,6 +30,7 @@ import React, { useCallback } from 'react';
 import { ChevronDown, MinusSquare, PlusSquare, RefreshCw } from 'react-feather';
 
 import { INITIAL_TOKENS_TO_FETCH, INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
+import { refreshAnalytics } from '@/app/shared/lib/analytics';
 import { Logger } from '@/app/shared/lib/logger';
 
 const TRUNCATE_TOKEN_LENGTH = 10;
@@ -228,7 +229,14 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     show={showDropdown}
                     tokens={tokens}
                 ></FilterDropdown>
-                <button className="btn btn-white btn-sm" disabled={fetching} onClick={() => fetchHistories(true)}>
+                <button
+                    className="btn btn-white btn-sm"
+                    disabled={fetching}
+                    onClick={() => {
+                        refreshAnalytics.trackButtonClicked('token_history_card');
+                        fetchHistories(true);
+                    }}
+                >
                     {fetching ? (
                         <>
                             <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>

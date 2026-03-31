@@ -43,3 +43,17 @@ button_clicked → receipt_viewed / no_receipt → view_tx_clicked
 | `view_tx_clicked` | `signature` |
 
 All events are prefixed with `rcpt_`.
+
+## Refresh Button Tracking
+
+Tracks usage of the Refresh button across the Explorer.
+
+### Events
+
+| Event | Parameters |
+|-------|------------|
+| `button_clicked` | `section` |
+
+All events are prefixed with `rfsh_`.
+
+The `section` parameter identifies the page surface where the button was clicked. Values are derived from component names or titles (e.g. `transaction_card`, `token_mint_card`, `vote_account_section`, `token_history_card`).

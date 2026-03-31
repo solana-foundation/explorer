@@ -5,6 +5,8 @@ import Link from 'next/link';
 import React from 'react';
 import { RefreshCw } from 'react-feather';
 
+import { refreshAnalytics } from '@/app/shared/lib/analytics';
+
 import { useCollectionNfts } from './nftoken-hooks';
 import { NftokenTypes } from './nftoken-types';
 import { NftokenImage } from './NFTokenAccountSection';
@@ -18,7 +20,13 @@ export function NFTokenCollectionNFTGrid({ collection }: { collection: string })
             <div className="card-header align-items-center">
                 <h3 className="card-header-title">NFTs</h3>
 
-                <button className="btn btn-white btn-sm" onClick={() => mutate()}>
+                <button
+                    className="btn btn-white btn-sm"
+                    onClick={() => {
+                        refreshAnalytics.trackButtonClicked('nft_token_collection_grid');
+                        mutate();
+                    }}
+                >
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>

@@ -3,12 +3,14 @@ import { Epoch } from '@components/common/Epoch';
 import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useRefreshAccount } from '@entities/account';
-import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { StakeActivationData } from '@solana/web3.js';
 import { displayTimestampUtc } from '@utils/date';
 import { StakeAccountInfo, StakeAccountType, StakeMeta } from '@validators/accounts/stake';
 import React from 'react';
+import { RefreshCw } from 'react-feather';
+
+import { refreshAnalytics } from '@/app/shared/lib/analytics';
 
 const U64_MAX = BigInt('0xffffffffffffffff');
 
@@ -94,36 +96,52 @@ function OverviewCard({
 }) {
     const refresh = useRefreshAccount();
     return (
-        <AccountCard title="Stake Account" account={account} refresh={() => refresh(account.pubkey, 'parsed')}>
-            <tr>
-                <td>Address</td>
-                <td className="text-lg-end">
-                    <Address pubkey={account.pubkey} alignRight raw />
-                </td>
-            </tr>
-            <tr>
-                <td>Balance (SOL)</td>
-                <td className="text-lg-end text-uppercase">
-                    <SolBalance lamports={account.lamports} />
-                </td>
-            </tr>
-            <tr>
-                <td>Rent Reserve (SOL)</td>
-                <td className="text-lg-end">
-                    <SolBalance lamports={stakeAccount.meta.rentExemptReserve} />
-                </td>
-            </tr>
-            {hideDelegation && (
+        <div className="card">
+            <div className="card-header">
+                <h3 className="card-header-title mb-0 d-flex align-items-center">Stake Account</h3>
+                <button
+                    className="btn btn-white btn-sm"
+                    onClick={() => {
+                        refreshAnalytics.trackButtonClicked('stake_account_section');
+                        refresh(account.pubkey, 'parsed');
+                    }}
+                >
+                    <RefreshCw className="align-text-top me-2" size={13} />
+                    Refresh
+                </button>
+            </div>
+
+            <TableCardBody>
                 <tr>
-                    <td>Status</td>
+                    <td>Address</td>
                     <td className="text-lg-end">
-                        {isFullyInactivated(stakeAccount, activation)
-                            ? 'Not delegated'
-                            : displayStatus(stakeAccountType, activation)}
+                        <Address pubkey={account.pubkey} alignRight raw />
                     </td>
                 </tr>
-            )}
-        </AccountCard>
+                <tr>
+                    <td>Balance (SOL)</td>
+                    <td className="text-lg-end text-uppercase">
+                        <SolBalance lamports={account.lamports} />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Rent Reserve (SOL)</td>
+                    <td className="text-lg-end">
+                        <SolBalance lamports={stakeAccount.meta.rentExemptReserve} />
+                    </td>
+                </tr>
+                {hideDelegation && (
+                    <tr>
+                        <td>Status</td>
+                        <td className="text-lg-end">
+                            {isFullyInactivated(stakeAccount, activation)
+                                ? 'Not delegated'
+                                : displayStatus(stakeAccountType, activation)}
+                        </td>
+                    </tr>
+                )}
+            </TableCardBody>
+        </div>
     );
 }
 
