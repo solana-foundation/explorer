@@ -2,10 +2,10 @@
 
 | Type | Route | Size | First Load JS |
 |------|-------|------|---------------|
-| Static | `/` | 15 kB | 1.1 MB |
+| Static | `/` | 15 kB | 1.03 MB |
 | Static | `/_not-found` | 326 B | 164 kB |
 | Dynamic | `/address/[address]` | 10 kB | 975 kB |
-| Dynamic | `/address/[address]/anchor-account` | 8 kB | 1.1 MB |
+| Dynamic | `/address/[address]/anchor-account` | 8 kB | 1.01 MB |
 | Dynamic | `/address/[address]/anchor-program` | 336 B | 892 kB |
 | Dynamic | `/address/[address]/attestation` | 7 kB | 982 kB |
 | Dynamic | `/address/[address]/attributes` | 3 kB | 936 kB |
@@ -16,18 +16,18 @@
 | Dynamic | `/address/[address]/entries` | 4 kB | 957 kB |
 | Dynamic | `/address/[address]/feature-gate` | 335 B | 892 kB |
 | Dynamic | `/address/[address]/idl` | 134 kB | 1.2 MB |
-| Dynamic | `/address/[address]/instructions` | 9 kB | 1.1 MB |
+| Dynamic | `/address/[address]/instructions` | 9 kB | 1.05 MB |
 | Dynamic | `/address/[address]/metadata` | 8 kB | 951 kB |
-| Dynamic | `/address/[address]/nftoken-collection-nfts` | 8 kB | 1.1 MB |
-| Dynamic | `/address/[address]/program-multisig` | 5 kB | 1.1 MB |
+| Dynamic | `/address/[address]/nftoken-collection-nfts` | 8 kB | 1.02 MB |
+| Dynamic | `/address/[address]/program-multisig` | 5 kB | 1.01 MB |
 | Dynamic | `/address/[address]/rewards` | 5 kB | 940 kB |
-| Dynamic | `/address/[address]/security` | 10 kB | 1.1 MB |
+| Dynamic | `/address/[address]/security` | 10 kB | 1.02 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 5 kB | 940 kB |
 | Dynamic | `/address/[address]/stake-history` | 5 kB | 940 kB |
-| Dynamic | `/address/[address]/token-extensions` | 12 kB | 1.1 MB |
-| Dynamic | `/address/[address]/tokens` | 29 kB | 1.2 MB |
-| Dynamic | `/address/[address]/transfers` | 12 kB | 1.1 MB |
-| Dynamic | `/address/[address]/verified-build` | 8 kB | 1.1 MB |
+| Dynamic | `/address/[address]/token-extensions` | 12 kB | 1.02 MB |
+| Dynamic | `/address/[address]/tokens` | 29 kB | 1.13 MB |
+| Dynamic | `/address/[address]/transfers` | 12 kB | 1.07 MB |
+| Dynamic | `/address/[address]/verified-build` | 8 kB | 1.01 MB |
 | Dynamic | `/address/[address]/vote-history` | 5 kB | 940 kB |
 | Dynamic | `/api/anchor` | 0 B | 0 B |
 | Dynamic | `/api/ans-domains/[address]` | 0 B | 0 B |
@@ -56,7 +56,7 @@
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 7 kB | 947 kB |
 | Static | `/tos` | 325 B | 164 kB |
-| Dynamic | `/tx/[signature]` | 59 kB | 1.5 MB |
-| Dynamic | `/tx/[signature]/inspect` | 626 B | 1.3 MB |
-| Static | `/tx/inspector` | 632 B | 1.3 MB |
+| Dynamic | `/tx/[signature]` | 59 kB | 1.46 MB |
+| Dynamic | `/tx/[signature]/inspect` | 626 B | 1.23 MB |
+| Static | `/tx/inspector` | 632 B | 1.23 MB |
 | Static | `/verified-programs` | 7 kB | 173 kB |
