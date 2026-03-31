@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
 
-import { BaseFeatureGateImage, IMAGE_SIZE, MAX_TITLE_LENGTH } from '../BaseFeatureGateImage';
+import { IMAGE_SIZE } from '../../constants';
+import { BaseFeatureGateImage, MAX_TITLE_LENGTH } from '../BaseFeatureGateImage';
 
 const meta: Meta<typeof BaseFeatureGateImage> = {
     argTypes: {

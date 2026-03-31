@@ -1,10 +1,5 @@
 import { Logo } from '@/app/shared/components/SolanaLogo';
 
-export const IMAGE_SIZE = {
-    height: 630,
-    width: 1200,
-};
-
 export const MAX_TITLE_LENGTH = 100;
 
 type BaseFeatureGateImageProps = {
