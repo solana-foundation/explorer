@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 
 import { FeatureInfoType } from '@/app/utils/feature-gate/types';
 
-import { fetchFeatureGateInformation, getLink } from '../index';
+import { fetchFeatureGateInformation, getLink } from '../api/fetchFeatureGateInformation';
 
 // Taken from ../../../utils/feature-gate/featureGates.json
 const FEATURE: FeatureInfoType = {

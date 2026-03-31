@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkGFM from 'remark-gfm';
 
-import { fetchFeatureGateInformation } from '@/app/features/feature-gate';
+import { fetchFeatureGateInformation, getFeatureGateOpenGraph } from '@/app/features/feature-gate/server';
 import { getFeatureInfo } from '@/app/utils/feature-gate/utils';
 
 type Props = Readonly<{
@@ -15,9 +15,11 @@ type Props = Readonly<{
 }>;
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
+    const title = `Feature Gate | ${await getReadableTitleFromAddress(props)} | Solana`;
     return {
         description: `Feature information for address ${props.params.address} on Solana`,
-        title: `Feature Gate | ${await getReadableTitleFromAddress(props)} | Solana`,
+        openGraph: getFeatureGateOpenGraph(props.params.address, title),
+        title,
     };
 }
 
