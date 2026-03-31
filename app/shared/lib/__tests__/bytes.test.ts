@@ -211,6 +211,19 @@ describe('bytes helpers', () => {
                     const decoded = fromBase64(base64);
                     expect(Array.from(decoded)).toEqual(allByteValues);
                 });
+
+                it('should handle large input without stack overflow', () => {
+                    const input = new Uint8Array(100_000);
+                    input.forEach((_, i) => {
+                        input[i] = i % 256;
+                    });
+                    const base64 = toBase64(input);
+                    const decoded = fromBase64(base64);
+                    expect(decoded.length).toBe(100_000);
+                    expect(decoded[0]).toBe(0);
+                    expect(decoded[255]).toBe(255);
+                    expect(decoded[256]).toBe(0);
+                });
             });
 
             describe('native Uint8Array.prototype.toBase64', () => {

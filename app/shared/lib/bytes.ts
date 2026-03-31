@@ -46,8 +46,11 @@ const toCharCode = (c: string): number => c.charCodeAt(0);
 /**
  * Convert bytes to a binary string.
  * Used for encoding to base64 via btoa().
+ *
+ * Avoids String.fromCharCode(...bytes) spread which overflows the call stack
+ * for inputs larger than ~65K bytes (V8 argument count limit).
  */
-const fromCharCode = (bytes: Uint8Array): string => String.fromCharCode(...bytes);
+const fromCharCode = (bytes: Uint8Array): string => Array.from(bytes, b => String.fromCharCode(b)).join('');
 
 /**
  * Decode base64 string to Uint8Array
