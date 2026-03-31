@@ -1,8 +1,8 @@
-import { AccountAddressRow, AccountBalanceRow } from '@components/common/Account';
+import { AccountAddressRow, AccountBalanceRow, AccountHeader } from '@components/common/Account';
 import { Address } from '@components/common/Address';
 import { Slot } from '@components/common/Slot';
+import { TableCardBody } from '@components/common/TableCardBody';
 import { useRefreshAccount } from '@entities/account';
-import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { displayTimestamp } from '@utils/date';
 import { VoteAccount } from '@validators/accounts/vote';
@@ -12,53 +12,57 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
     const refresh = useRefreshAccount();
     const rootSlot = voteAccount.info.rootSlot;
     return (
-        <AccountCard title="Vote Account" account={account} refresh={() => refresh(account.pubkey, 'parsed')}>
-            <AccountAddressRow account={account} />
-            <AccountBalanceRow account={account} />
+        <div className="card">
+            <AccountHeader title="Vote Account" analyticsSection="vote_account_section" refresh={() => refresh(account.pubkey, 'parsed')} />
 
-            <tr>
-                <td>
-                    Authorized Voter
-                    {voteAccount.info.authorizedVoters.length > 1 ? 's' : ''}
-                </td>
-                <td className="text-lg-end">
-                    {voteAccount.info.authorizedVoters.map(voter => {
-                        return (
-                            <Address
-                                pubkey={voter.authorizedVoter}
-                                key={voter.authorizedVoter.toString()}
-                                alignRight
-                                raw
-                                link
-                            />
-                        );
-                    })}
-                </td>
-            </tr>
+            <TableCardBody>
+                <AccountAddressRow account={account} />
+                <AccountBalanceRow account={account} />
 
-            <tr>
-                <td>Authorized Withdrawer</td>
-                <td className="text-lg-end">
-                    <Address pubkey={voteAccount.info.authorizedWithdrawer} alignRight raw link />
-                </td>
-            </tr>
+                <tr>
+                    <td>
+                        Authorized Voter
+                        {voteAccount.info.authorizedVoters.length > 1 ? 's' : ''}
+                    </td>
+                    <td className="text-lg-end">
+                        {voteAccount.info.authorizedVoters.map(voter => {
+                            return (
+                                <Address
+                                    pubkey={voter.authorizedVoter}
+                                    key={voter.authorizedVoter.toString()}
+                                    alignRight
+                                    raw
+                                    link
+                                />
+                            );
+                        })}
+                    </td>
+                </tr>
 
-            <tr>
-                <td>Last Timestamp</td>
-                <td className="text-lg-end font-monospace">
-                    {displayTimestamp(voteAccount.info.lastTimestamp.timestamp * 1000)}
-                </td>
-            </tr>
+                <tr>
+                    <td>Authorized Withdrawer</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={voteAccount.info.authorizedWithdrawer} alignRight raw link />
+                    </td>
+                </tr>
 
-            <tr>
-                <td>Commission</td>
-                <td className="text-lg-end">{voteAccount.info.commission + '%'}</td>
-            </tr>
+                <tr>
+                    <td>Last Timestamp</td>
+                    <td className="text-lg-end font-monospace">
+                        {displayTimestamp(voteAccount.info.lastTimestamp.timestamp * 1000)}
+                    </td>
+                </tr>
 
-            <tr>
-                <td>Root Slot</td>
-                <td className="text-lg-end">{rootSlot !== null ? <Slot slot={rootSlot} link /> : 'N/A'}</td>
-            </tr>
-        </AccountCard>
+                <tr>
+                    <td>Commission</td>
+                    <td className="text-lg-end">{voteAccount.info.commission + '%'}</td>
+                </tr>
+
+                <tr>
+                    <td>Root Slot</td>
+                    <td className="text-lg-end">{rootSlot !== null ? <Slot slot={rootSlot} link /> : 'N/A'}</td>
+                </tr>
+            </TableCardBody>
+        </div>
     );
 }

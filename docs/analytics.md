@@ -56,4 +56,4 @@ Tracks usage of the Refresh button across the Explorer.
 
 All events are prefixed with `rfsh_`.
 
-The `section` parameter identifies the page surface where the button was clicked. Values are derived from component names or titles (e.g. `transaction_card`, `token_mint_card`, `vote_account_section`, `token_history_card`).
+The `section` parameter identifies the page surface where the button was clicked. Each call site provides a hardcoded literal (e.g. `transaction_card`, `token_mint_card`, `vote_account_section`, `token_history_card`). Shared components (`AccountHeader`, `HistoryCardHeader`) accept an explicit `analyticsSection` prop so the tracked value is decoupled from display text.

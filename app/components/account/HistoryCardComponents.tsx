@@ -1,5 +1,4 @@
 import { ConfirmedSignatureInfo, TransactionError } from '@solana/web3.js';
-import { snakeCase } from 'change-case';
 import React from 'react';
 import { RefreshCw } from 'react-feather';
 
@@ -17,10 +16,12 @@ export type TransactionRow = {
 
 export function HistoryCardHeader({
     title,
+    analyticsSection,
     refresh,
     fetching,
 }: {
     title: string;
+    analyticsSection: string;
     refresh: () => void;
     fetching: boolean;
 }) {
@@ -31,7 +32,7 @@ export function HistoryCardHeader({
                 className="btn btn-white btn-sm"
                 disabled={fetching}
                 onClick={() => {
-                    refreshAnalytics.trackButtonClicked(snakeCase(title) + '_header');
+                    refreshAnalytics.trackButtonClicked(analyticsSection);
                     refresh();
                 }}
             >

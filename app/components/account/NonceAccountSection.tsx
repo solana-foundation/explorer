@@ -1,7 +1,7 @@
-import { AccountAddressRow, AccountBalanceRow } from '@components/common/Account';
+import { AccountAddressRow, AccountBalanceRow, AccountHeader } from '@components/common/Account';
 import { Address } from '@components/common/Address';
+import { TableCardBody } from '@components/common/TableCardBody';
 import { useRefreshAccount } from '@entities/account';
-import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { NonceAccount } from '@validators/accounts/nonce';
 import React from 'react';
@@ -9,30 +9,34 @@ import React from 'react';
 export function NonceAccountSection({ account, nonceAccount }: { account: Account; nonceAccount: NonceAccount }) {
     const refresh = useRefreshAccount();
     return (
-        <AccountCard title="Nonce Account" account={account} refresh={() => refresh(account.pubkey, 'parsed')}>
-            <AccountAddressRow account={account} />
-            <AccountBalanceRow account={account} />
+        <div className="card">
+            <AccountHeader title="Nonce Account" analyticsSection="nonce_account_section" refresh={() => refresh(account.pubkey, 'parsed')} />
 
-            <tr>
-                <td>Authority</td>
-                <td className="text-lg-end">
-                    <Address pubkey={nonceAccount.info.authority} alignRight raw link />
-                </td>
-            </tr>
+            <TableCardBody>
+                <AccountAddressRow account={account} />
+                <AccountBalanceRow account={account} />
 
-            <tr>
-                <td>Blockhash</td>
-                <td className="text-lg-end">
-                    <code>{nonceAccount.info.blockhash}</code>
-                </td>
-            </tr>
+                <tr>
+                    <td>Authority</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={nonceAccount.info.authority} alignRight raw link />
+                    </td>
+                </tr>
 
-            <tr>
-                <td>Fee</td>
-                <td className="text-lg-end">
-                    {nonceAccount.info.feeCalculator.lamportsPerSignature} lamports per signature
-                </td>
-            </tr>
-        </AccountCard>
+                <tr>
+                    <td>Blockhash</td>
+                    <td className="text-lg-end">
+                        <code>{nonceAccount.info.blockhash}</code>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Fee</td>
+                    <td className="text-lg-end">
+                        {nonceAccount.info.feeCalculator.lamportsPerSignature} lamports per signature
+                    </td>
+                </tr>
+            </TableCardBody>
+        </div>
     );
 }
