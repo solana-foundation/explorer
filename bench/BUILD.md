@@ -16,13 +16,13 @@
 | Dynamic | `/address/[address]/idl` | 129 kB | 1.2 MB |
 | Dynamic | `/address/[address]/instructions` | 1.59 kB | 1.05 MB |
 | Dynamic | `/address/[address]/metadata` | 7.55 kB | 951 kB |
-| Dynamic | `/address/[address]/nftoken-collection-nfts` | 9.68 kB | 1.02 MB |
+| Dynamic | `/address/[address]/nftoken-collection-nfts` | 10.1 kB | 1.02 MB |
 | Dynamic | `/address/[address]/program-multisig` | 4.81 kB | 1.01 MB |
 | Dynamic | `/address/[address]/rewards` | 4.32 kB | 940 kB |
 | Dynamic | `/address/[address]/security` | 9.94 kB | 1.02 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 4.21 kB | 940 kB |
-| Dynamic | `/address/[address]/stake-history` | 4.33 kB | 940 kB |
-| Dynamic | `/address/[address]/token-extensions` | 12.5 kB | 1.02 MB |
+| Dynamic | `/address/[address]/stake-history` | 4.34 kB | 940 kB |
+| Dynamic | `/address/[address]/token-extensions` | 12.9 kB | 1.02 MB |
 | Dynamic | `/address/[address]/tokens` | 28.3 kB | 1.13 MB |
 | Dynamic | `/address/[address]/transfers` | 3.58 kB | 1.07 MB |
 | Dynamic | `/address/[address]/verified-build` | 7.45 kB | 1.01 MB |
@@ -53,7 +53,7 @@
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 6.05 kB | 947 kB |
 | Static | `/tos` | 325 B | 164 kB |
-| Dynamic | `/tx/[signature]` | 51.3 kB | 1.44 MB |
-| Dynamic | `/tx/[signature]/inspect` | 630 B | 1.23 MB |
-| Static | `/tx/inspector` | 637 B | 1.23 MB |
+| Dynamic | `/tx/[signature]` | 54.3 kB | 1.44 MB |
+| Dynamic | `/tx/[signature]/inspect` | 631 B | 1.23 MB |
+| Static | `/tx/inspector` | 636 B | 1.23 MB |
 | Static | `/verified-programs` | 6.34 kB | 173 kB |
