@@ -11,10 +11,7 @@ export type GetMetadataJsonDeps = {
 // eslint-disable-next-line no-restricted-syntax -- match image data URI mime types
 const IMAGE_MIME_TYPE_REGEX = /data:image\/(svg\+xml|png|jpeg|gif)/;
 
-export async function getMetadataJson(
-    metadata: Metadata,
-    deps?: GetMetadataJsonDeps,
-): Promise<NftJson | undefined> {
+export async function getMetadataJson(metadata: Metadata, deps?: GetMetadataJsonDeps): Promise<NftJson | undefined> {
     return new Promise(resolve => {
         const uri = metadata.uri;
         if (!uri) return resolve(undefined);
