@@ -1,9 +1,26 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
+import { MINIMAL_VIEWPORTS } from 'storybook/viewport';
 
 import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
 import { NavigationTabLink } from '@/app/shared/ui/navigation-tabs/ui/NavigationTabLink';
+
+function withViewport(key: keyof typeof MINIMAL_VIEWPORTS): Pick<StoryObj, 'decorators' | 'globals'> {
+    const viewport = MINIMAL_VIEWPORTS[key];
+    return {
+        decorators: [
+            Story => (
+                <div style={{ width: viewport.styles.width }}>
+                    <Story />
+                </div>
+            ),
+        ],
+        globals: {
+            viewport: { value: key },
+        },
+    };
+}
 
 const BLOCK_TABS: NavigationTab[] = [
     { path: '', title: 'Transactions' },
@@ -28,7 +45,9 @@ const meta: Meta<typeof BaseNavigationTabs> = {
         buildHref: (path: string) => `#${path}`,
     },
     component: BaseNavigationTabs,
+    tags: ['autodocs'],
     title: 'Components/Shared/UI/NavigationTabs',
+    globals: { viewport: { value: 'responsive' } },
 };
 
 export default meta;
@@ -58,16 +77,22 @@ export const ManyTabs: Story = {
     },
 };
 
-// Resize the Storybook canvas narrower to see overflow tabs collapse into "More ▼"
 export const MobileView: Story = {
+    ...withViewport('mobile1'),
     args: {
         activeValue: '',
         tabs: ADDRESS_TABS,
     },
-    parameters: {
-        globals: {
-            viewport: { isRotated: false, value: 'mobile1' },
-        },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+
+        const tablist = canvas.getByRole('tablist', { hidden: true });
+        const visibleTabs = within(tablist).getAllByRole('tab', { hidden: true });
+        expect(visibleTabs.length).toBeGreaterThan(0);
+        expect(visibleTabs.length).toBeLessThan(ADDRESS_TABS.length);
+
+        const moreButton = await canvas.findByText('More', { exact: false });
+        expect(moreButton).toBeInTheDocument();
     },
 };
 
