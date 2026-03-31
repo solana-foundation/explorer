@@ -1,7 +1,7 @@
-import { AccountAddressRow, AccountBalanceRow, AccountHeader } from '@components/common/Account';
+import { AccountAddressRow, AccountBalanceRow } from '@components/common/Account';
 import { Address } from '@components/common/Address';
-import { TableCardBody } from '@components/common/TableCardBody';
 import { useRefreshAccount } from '@entities/account';
+import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { ConfigAccount, StakeConfigInfoAccount, ValidatorInfoAccount } from '@validators/accounts/config';
@@ -32,86 +32,80 @@ function StakeConfigCard({ account, configAccount }: { account: Account; configA
     }).format(configAccount.info.slashPenalty / MAX_SLASH_PENALTY);
 
     return (
-        <div className="card">
-            <AccountHeader
-                title="Stake Config"
-                analyticsSection="stake_config_section"
-                refresh={() => refresh(account.pubkey, 'parsed')}
-            />
+        <AccountCard
+            title="Stake Config"
+            account={account}
+            analyticsSection="stake_config_section"
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        >
+            <AccountAddressRow account={account} />
+            <AccountBalanceRow account={account} />
 
-            <TableCardBody>
-                <AccountAddressRow account={account} />
-                <AccountBalanceRow account={account} />
+            <tr>
+                <td>Warmup / Cooldown Rate</td>
+                <td className="text-lg-end">{warmupCooldownFormatted}</td>
+            </tr>
 
-                <tr>
-                    <td>Warmup / Cooldown Rate</td>
-                    <td className="text-lg-end">{warmupCooldownFormatted}</td>
-                </tr>
-
-                <tr>
-                    <td>Slash Penalty</td>
-                    <td className="text-lg-end">{slashPenaltyFormatted}</td>
-                </tr>
-            </TableCardBody>
-        </div>
+            <tr>
+                <td>Slash Penalty</td>
+                <td className="text-lg-end">{slashPenaltyFormatted}</td>
+            </tr>
+        </AccountCard>
     );
 }
 
 function ValidatorInfoCard({ account, configAccount }: { account: Account; configAccount: ValidatorInfoAccount }) {
     const refresh = useRefreshAccount();
     return (
-        <div className="card">
-            <AccountHeader
-                title="Validator Info"
-                analyticsSection="validator_info_section"
-                refresh={() => refresh(account.pubkey, 'parsed')}
-            />
+        <AccountCard
+            title="Validator Info"
+            account={account}
+            analyticsSection="validator_info_section"
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        >
+            <AccountAddressRow account={account} />
+            <AccountBalanceRow account={account} />
 
-            <TableCardBody>
-                <AccountAddressRow account={account} />
-                <AccountBalanceRow account={account} />
+            {configAccount.info.configData.name && (
+                <tr>
+                    <td>Name</td>
+                    <td className="text-lg-end">{configAccount.info.configData.name}</td>
+                </tr>
+            )}
 
-                {configAccount.info.configData.name && (
-                    <tr>
-                        <td>Name</td>
-                        <td className="text-lg-end">{configAccount.info.configData.name}</td>
-                    </tr>
-                )}
+            {configAccount.info.configData.keybaseUsername && (
+                <tr>
+                    <td>Keybase Username</td>
+                    <td className="text-lg-end">{configAccount.info.configData.keybaseUsername}</td>
+                </tr>
+            )}
 
-                {configAccount.info.configData.keybaseUsername && (
-                    <tr>
-                        <td>Keybase Username</td>
-                        <td className="text-lg-end">{configAccount.info.configData.keybaseUsername}</td>
-                    </tr>
-                )}
+            {configAccount.info.configData.website && (
+                <tr>
+                    <td>Website</td>
+                    <td className="text-lg-end">
+                        <a href={configAccount.info.configData.website} target="_blank" rel="noopener noreferrer">
+                            {configAccount.info.configData.website}
+                        </a>
+                    </td>
+                </tr>
+            )}
 
-                {configAccount.info.configData.website && (
-                    <tr>
-                        <td>Website</td>
-                        <td className="text-lg-end">
-                            <a href={configAccount.info.configData.website} target="_blank" rel="noopener noreferrer">
-                                {configAccount.info.configData.website}
-                            </a>
-                        </td>
-                    </tr>
-                )}
+            {configAccount.info.configData.details && (
+                <tr>
+                    <td>Details</td>
+                    <td className="text-lg-end">{configAccount.info.configData.details}</td>
+                </tr>
+            )}
 
-                {configAccount.info.configData.details && (
-                    <tr>
-                        <td>Details</td>
-                        <td className="text-lg-end">{configAccount.info.configData.details}</td>
-                    </tr>
-                )}
-
-                {configAccount.info.keys && configAccount.info.keys.length > 1 && (
-                    <tr>
-                        <td>Signer</td>
-                        <td className="text-lg-end">
-                            <Address pubkey={new PublicKey(configAccount.info.keys[1].pubkey)} link alignRight />
-                        </td>
-                    </tr>
-                )}
-            </TableCardBody>
-        </div>
+            {configAccount.info.keys && configAccount.info.keys.length > 1 && (
+                <tr>
+                    <td>Signer</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={new PublicKey(configAccount.info.keys[1].pubkey)} link alignRight />
+                    </td>
+                </tr>
+            )}
+        </AccountCard>
     );
 }
