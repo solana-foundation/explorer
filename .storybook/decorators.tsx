@@ -1,4 +1,5 @@
 import { ClusterProvider } from '@providers/cluster';
+import { TransactionsProvider } from '@providers/transactions';
 import type { Decorator, Parameters } from '@storybook/react';
 import React from 'react';
 import { fn } from 'storybook/test';
@@ -37,6 +38,17 @@ export const withCardTableField: Decorator = Story => (
                 </div>
             </div>
         </MockAccountsProvider>
+    </ClusterProvider>
+);
+
+/** Wraps stories with ClusterProvider, TransactionsProvider, and MockAccountsProvider. Usage: `decorators: [withTransactions]` */
+export const withTransactions: Decorator = Story => (
+    <ClusterProvider>
+        <TransactionsProvider>
+            <MockAccountsProvider>
+                <Story />
+            </MockAccountsProvider>
+        </TransactionsProvider>
     </ClusterProvider>
 );
 

@@ -29,6 +29,7 @@ type Props = {
     overrideText?: string;
     tokenLabelInfo?: TokenLabelInfo;
     fetchTokenLabelInfo?: boolean;
+    'aria-label'?: string;
 };
 
 export function Address({
@@ -43,6 +44,7 @@ export function Address({
     overrideText,
     tokenLabelInfo,
     fetchTokenLabelInfo,
+    'aria-label': ariaLabel,
 }: Props) {
     const address = pubkey.toBase58();
     const { cluster, clusterInfo } = useCluster();
@@ -95,7 +97,7 @@ export function Address({
     };
 
     const content = (
-        <div className="d-flex align-items-center gap-2">
+        <div className="d-flex align-items-center gap-2" aria-label={ariaLabel}>
             <Copyable text={address}>
                 <span
                     data-address={address}

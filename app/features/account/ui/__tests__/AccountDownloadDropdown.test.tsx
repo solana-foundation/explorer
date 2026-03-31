@@ -1,5 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AccountDownloadDropdown } from '../AccountDownloadDropdown';
@@ -48,7 +48,7 @@ describe('AccountDownloadDropdown', () => {
 
     it('should fetch raw data when dropdown opens', () => {
         render(<AccountDownloadDropdown pubkey={PUBKEY} />);
-        screen.getByText('Download').click();
+        fireEvent.click(screen.getByText('Download'));
         expect(mockMutate).toHaveBeenCalled();
     });
 
