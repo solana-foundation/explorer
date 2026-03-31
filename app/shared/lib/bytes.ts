@@ -7,6 +7,36 @@ import type BN from 'bn.js';
  */
 export type ByteArray = Buffer | Uint8Array;
 
+export function concatBytes(...arrays: Uint8Array[]): Uint8Array {
+    const totalLen = arrays.reduce((sum, a) => sum + a.length, 0);
+    const result = new Uint8Array(totalLen);
+    let offset = 0;
+    for (const a of arrays) {
+        result.set(a, offset);
+        offset += a.length;
+    }
+    return result;
+}
+
+export function writeU64LE(value: bigint): Uint8Array {
+    const buf = new Uint8Array(8);
+    const view = new DataView(buf.buffer);
+    view.setBigUint64(0, value, true);
+    return buf;
+}
+
+export function readU64LE(data: Uint8Array, offset: number): bigint {
+    if (offset + 8 > data.length)
+        throw new RangeError(`readU64LE: offset ${offset} out of bounds (length ${data.length})`);
+    const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+    return view.getBigUint64(offset, true);
+}
+
+export function readU8(data: Uint8Array, offset: number): number {
+    if (offset >= data.length) throw new RangeError(`readU8: offset ${offset} out of bounds (length ${data.length})`);
+    return data[offset];
+}
+
 /**
  * Convert a character to its byte value (0-255).
  * Used for decoding binary strings from atob().
@@ -87,6 +117,15 @@ const toHexFallback = (bytes: ByteArray): string => {
     });
     return hex;
 };
+
+/**
+ * Convert Uint8Array to Buffer.
+ * Use only when an external API (e.g. @solana/web3.js TransactionInstruction) requires Buffer.
+ */
+export function toBuffer(bytes: ByteArray): Buffer {
+    if (Buffer.isBuffer(bytes)) return bytes;
+    return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+}
 
 /**
  * Encode Uint8Array to hex string
@@ -350,13 +389,3 @@ export function bytes(input: string | ArrayLike<number> | ArrayBufferLike, encod
     return new Uint8Array(input as ArrayLike<number>);
 }
 
-/**
- * Fallback for external libraries that require Buffer
- */
-export function toBuffer(bytes: ByteArray): Buffer {
-    if (bytes instanceof Buffer) {
-        return bytes;
-    }
-    // Otherwise, create a Buffer from the Uint8Array
-    return Buffer.from(bytes);
-}
