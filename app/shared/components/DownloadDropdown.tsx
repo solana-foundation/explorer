@@ -15,7 +15,7 @@ const DEFAULT_ENCODINGS: EncodingFormat[] = ['hex', 'base58', 'base64'];
 const DefaultTrigger = (
     <Button variant="outline" size="sm" aria-label="Download">
         <Download size={12} />
-        <span className="e-hidden sm:e-inline">Download</span>
+        <span className="e-hidden md:e-inline">Download</span>
     </Button>
 );
 

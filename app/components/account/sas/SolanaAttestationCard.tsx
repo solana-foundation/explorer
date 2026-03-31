@@ -1,11 +1,11 @@
 import { useRefreshAccount } from '@entities/account';
+import { AccountCard } from '@features/account';
 import { SystemProgram } from '@solana/web3.js';
 import React from 'react';
 import { Attestation as SasAttestation, Credential as SasCredential, Schema as SasSchema } from 'sas-lib';
 
-import { AccountAddressRow, AccountHeader } from '@/app/components/common/Account';
+import { AccountAddressRow } from '@/app/components/common/Account';
 import { Address } from '@/app/components/common/Address';
-import { TableCardBody } from '@/app/components/common/TableCardBody';
 import { Account } from '@/app/providers/accounts';
 import { decodeAccount } from '@/app/utils/attestation-service';
 import { decodeString, mapToPublicKey } from '@/app/utils/kit-wrapper';
@@ -132,12 +132,9 @@ export function SolanaAttestationServiceCard({ account }: { account: Account }) 
     }
 
     return (
-        <div className="card">
-            <AccountHeader title={title} refresh={() => refresh(account.pubkey, 'parsed')} />
-            <TableCardBody>
-                <AccountAddressRow account={account} />
-                {content}
-            </TableCardBody>
-        </div>
+        <AccountCard title={title} account={account} refresh={() => refresh(account.pubkey, 'parsed')}>
+            <AccountAddressRow account={account} />
+            {content}
+        </AccountCard>
     );
 }
