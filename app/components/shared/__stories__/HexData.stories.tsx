@@ -21,10 +21,8 @@ const truncateShortData = new Uint8Array([0xfe, 0xab, 0xcd]);
 const truncateLongData = new Uint8Array(Array.from({ length: 67 }, (_, i) => i));
 const atThresholdData = new Uint8Array(Array.from({ length: 16 }, (_, i) => i + 0xa0));
 
-// Centered default for autodocs preview
 export const Default: Story = {
     args: { align: 'start', raw: multiRowData },
-    parameters: { layout: 'centered' },
 };
 
 // ── Empty ────────────────────────────────────────────────────────────

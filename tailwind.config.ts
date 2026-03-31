@@ -19,6 +19,7 @@ const config: Config = {
             boxShadow: {
                 // border for active states from Dashkit
                 active: '0 0 0 0.15rem #33a382',
+                'active-sm': '0 0 0 1px #33a382',
             },
             colors: {
                 // TODO: replace with e-text-neutral-400

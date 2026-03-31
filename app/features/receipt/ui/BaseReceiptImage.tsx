@@ -1,6 +1,7 @@
+import { Logo } from '@/app/shared/components/SolanaLogo';
+
 import type { FormattedReceipt } from '../types';
 import { BottomLine } from './BottomLine';
-import { Logo } from './Logo';
 
 export const IMAGE_SIZE = {
     height: 630,

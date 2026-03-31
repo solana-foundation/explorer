@@ -104,6 +104,10 @@
         opacity: 0;
         animation: 0.75s linear infinite spinner-grow;
     }
+    .e-spinner-grow-xs {
+        width: 0.5rem;
+        height: 0.5rem;
+    }
     .e-spinner-grow-sm {
         width: 1rem;
         height: 1rem;

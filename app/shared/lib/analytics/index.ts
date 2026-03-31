@@ -1,2 +1,2 @@
 export { idlAnalytics } from './interactive-idl';
-export { receiptAnalytics } from './receipt';
+export { EReceiptDownloadFormat, receiptAnalytics } from './receipt';

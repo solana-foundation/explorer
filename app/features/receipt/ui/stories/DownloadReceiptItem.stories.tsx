@@ -31,16 +31,18 @@ export const Default: Story = {
     beforeEach({ args }) {
         (args.download as ReturnType<typeof fn>).mockResolvedValue(undefined);
     },
-    play: async ({ canvasElement }) => {
+    play: async ({ canvasElement, args }) => {
         const canvas = within(canvasElement);
 
         // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
-        const button = canvas.getByRole('button', { name: /download png/i });
+        const button = canvas.getByRole('button', { name: /^get download png$/i });
         await expect(button).toBeInTheDocument();
 
         await userEvent.click(button);
 
+        await expect(args.download).toHaveBeenCalledOnce();
+
         // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
-        await expect(canvas.getByRole('button', { name: /downloaded/i })).toBeInTheDocument();
+        await expect(canvas.getByRole('button', { name: /^get download png$/i })).toBeInTheDocument();
     },
 };
