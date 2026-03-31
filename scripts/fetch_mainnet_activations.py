@@ -6,7 +6,7 @@ from solders.pubkey import Pubkey
 import json
 
 FEATURE_GATES_PATH = 'app/utils/feature-gate/featureGates.json'
-MAINNET_RPC_URL = 'https://api.mainnet-beta.solana.com'
+MAINNET_RPC_URL = 'https://api.mainnet.solana.com'
 RATE_LIMIT_DELAY = 0.5
 MAX_RETRIES = 3
 
