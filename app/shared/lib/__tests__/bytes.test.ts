@@ -282,6 +282,12 @@ describe('bytes helpers', () => {
                 }
             });
 
+            it('should normalise odd-length hex by zero-padding', () => {
+                expect(Array.from(fromHex('abc'))).toEqual([0x0a, 0xbc]);
+                expect(Array.from(fromHex('f'))).toEqual([0x0f]);
+                expect(Array.from(fromHex('0x1'))).toEqual([0x01]);
+            });
+
             describe('fallback', () => {
                 // @ts-expect-error Intentionally accessing non-standard property for testing
                 const originalFromHex = Uint8Array['fromHex'];
