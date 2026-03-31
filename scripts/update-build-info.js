@@ -167,7 +167,7 @@ function formatTableLines(lines) {
  * Rounds a size string up to reduce noise from minor changes.
  * - B values: kept as-is
  * - kB values: rounded up to nearest integer
- * - MB values: rounded up to 1 decimal place
+ * - MB values: rounded up to 2 decimal places (~10 kB granularity)
  * @param {string} sizeStr - Size string like "14.7 kB" or "1.03 MB"
  * @returns {string} Rounded size string
  */
@@ -181,7 +181,7 @@ function roundSize(sizeStr) {
 
     if (unit === 'B') return sizeStr;
     if (unit === 'kB') return `${Math.ceil(value)} kB`;
-    if (unit === 'MB') return `${Math.ceil(value * 10) / 10} MB`;
+    if (unit === 'MB') return `${Math.ceil(Math.round(value * 1000) / 10) / 100} MB`;
 
     return sizeStr;
 }
