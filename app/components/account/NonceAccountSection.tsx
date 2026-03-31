@@ -10,7 +10,11 @@ export function NonceAccountSection({ account, nonceAccount }: { account: Accoun
     const refresh = useRefreshAccount();
     return (
         <div className="card">
-            <AccountHeader title="Nonce Account" analyticsSection="nonce_account_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title="Nonce Account"
+                analyticsSection="nonce_account_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
 
             <TableCardBody>
                 <AccountAddressRow account={account} />

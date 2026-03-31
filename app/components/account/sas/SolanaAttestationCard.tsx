@@ -133,7 +133,11 @@ export function SolanaAttestationServiceCard({ account }: { account: Account }) 
 
     return (
         <div className="card">
-            <AccountHeader title={title} analyticsSection="solana_attestation_service_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title={title}
+                analyticsSection="solana_attestation_service_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
             <TableCardBody>
                 <AccountAddressRow account={account} />
                 {content}

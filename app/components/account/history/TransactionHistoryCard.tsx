@@ -88,7 +88,12 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     const fetching = history.status === FetchStatus.Fetching;
     return (
         <div className="card">
-            <HistoryCardHeader fetching={fetching} refresh={() => refresh()} title="Transaction History" analyticsSection="transaction_history_header" />
+            <HistoryCardHeader
+                fetching={fetching}
+                refresh={() => refresh()}
+                title="Transaction History"
+                analyticsSection="transaction_history_header"
+            />
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>

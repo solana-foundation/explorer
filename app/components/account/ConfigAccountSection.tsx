@@ -33,7 +33,11 @@ function StakeConfigCard({ account, configAccount }: { account: Account; configA
 
     return (
         <div className="card">
-            <AccountHeader title="Stake Config" analyticsSection="stake_config_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title="Stake Config"
+                analyticsSection="stake_config_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
 
             <TableCardBody>
                 <AccountAddressRow account={account} />
@@ -57,7 +61,11 @@ function ValidatorInfoCard({ account, configAccount }: { account: Account; confi
     const refresh = useRefreshAccount();
     return (
         <div className="card">
-            <AccountHeader title="Validator Info" analyticsSection="validator_info_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title="Validator Info"
+                analyticsSection="validator_info_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
 
             <TableCardBody>
                 <AccountAddressRow account={account} />

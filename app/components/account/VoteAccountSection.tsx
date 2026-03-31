@@ -13,7 +13,11 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
     const rootSlot = voteAccount.info.rootSlot;
     return (
         <div className="card">
-            <AccountHeader title="Vote Account" analyticsSection="vote_account_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title="Vote Account"
+                analyticsSection="vote_account_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
 
             <TableCardBody>
                 <AccountAddressRow account={account} />

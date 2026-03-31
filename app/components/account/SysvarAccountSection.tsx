@@ -51,7 +51,11 @@ function SysvarAccountRecentBlockhashesCard({
     const refresh = useRefreshAccount();
     return (
         <div className="card">
-            <AccountHeader title="Sysvar: Recent Blockhashes" analyticsSection="sysvar_recent_blockhashes_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title="Sysvar: Recent Blockhashes"
+                analyticsSection="sysvar_recent_blockhashes_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
 
             <TableCardBody>
                 <AccountAddressRow account={account} />
@@ -65,7 +69,11 @@ function SysvarAccountSlotHashes({ account }: { account: Account; sysvarAccount:
     const refresh = useRefreshAccount();
     return (
         <div className="card">
-            <AccountHeader title="Sysvar: Slot Hashes" analyticsSection="sysvar_slot_hashes_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title="Sysvar: Slot Hashes"
+                analyticsSection="sysvar_slot_hashes_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
 
             <TableCardBody>
                 <AccountAddressRow account={account} />
@@ -91,7 +99,11 @@ function SysvarAccountSlotHistory({
     );
     return (
         <div className="card">
-            <AccountHeader title="Sysvar: Slot History" analyticsSection="sysvar_slot_history_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title="Sysvar: Slot History"
+                analyticsSection="sysvar_slot_history_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
 
             <TableCardBody>
                 <AccountAddressRow account={account} />
@@ -118,7 +130,11 @@ function SysvarAccountStakeHistory({ account }: { account: Account; sysvarAccoun
     const refresh = useRefreshAccount();
     return (
         <div className="card">
-            <AccountHeader title="Sysvar: Stake History" analyticsSection="sysvar_stake_history_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title="Sysvar: Stake History"
+                analyticsSection="sysvar_stake_history_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
 
             <TableCardBody>
                 <AccountAddressRow account={account} />
@@ -132,7 +148,11 @@ function SysvarAccountFeesCard({ account, sysvarAccount }: { account: Account; s
     const refresh = useRefreshAccount();
     return (
         <div className="card">
-            <AccountHeader title="Sysvar: Fees" analyticsSection="sysvar_fees_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title="Sysvar: Fees"
+                analyticsSection="sysvar_fees_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
 
             <TableCardBody>
                 <AccountAddressRow account={account} />
@@ -157,7 +177,11 @@ function SysvarAccountEpochScheduleCard({
     const refresh = useRefreshAccount();
     return (
         <div className="card">
-            <AccountHeader title="Sysvar: Epoch Schedule" analyticsSection="sysvar_epoch_schedule_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title="Sysvar: Epoch Schedule"
+                analyticsSection="sysvar_epoch_schedule_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
 
             <TableCardBody>
                 <AccountAddressRow account={account} />
@@ -200,7 +224,11 @@ function SysvarAccountClockCard({ account, sysvarAccount }: { account: Account; 
     const refresh = useRefreshAccount();
     return (
         <div className="card">
-            <AccountHeader title="Sysvar: Clock" analyticsSection="sysvar_clock_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title="Sysvar: Clock"
+                analyticsSection="sysvar_clock_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
 
             <TableCardBody>
                 <AccountAddressRow account={account} />
@@ -242,7 +270,11 @@ function SysvarAccountRentCard({ account, sysvarAccount }: { account: Account; s
     const refresh = useRefreshAccount();
     return (
         <div className="card">
-            <AccountHeader title="Sysvar: Rent" analyticsSection="sysvar_rent_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title="Sysvar: Rent"
+                analyticsSection="sysvar_rent_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
 
             <TableCardBody>
                 <AccountAddressRow account={account} />
@@ -282,7 +314,11 @@ function SysvarAccountRewardsCard({
 
     return (
         <div className="card">
-            <AccountHeader title="Sysvar: Rewards" analyticsSection="sysvar_rewards_section" refresh={() => refresh(account.pubkey, 'parsed')} />
+            <AccountHeader
+                title="Sysvar: Rewards"
+                analyticsSection="sysvar_rewards_section"
+                refresh={() => refresh(account.pubkey, 'parsed')}
+            />
 
             <TableCardBody>
                 <AccountAddressRow account={account} />
