@@ -11,7 +11,7 @@
 | Dynamic | `/address/[address]/attributes` | 3 kB | 938 kB |
 | Dynamic | `/address/[address]/blockhashes` | 3 kB | 937 kB |
 | Dynamic | `/address/[address]/compression` | 6 kB | 973 kB |
-| Dynamic | `/address/[address]/concurrent-merkle-tree` | 5 kB | 972 kB |
+| Dynamic | `/address/[address]/concurrent-merkle-tree` | 5 kB | 971 kB |
 | Dynamic | `/address/[address]/domains` | 3 kB | 940 kB |
 | Dynamic | `/address/[address]/entries` | 4 kB | 958 kB |
 | Dynamic | `/address/[address]/feature-gate` | 336 B | 893 kB |
@@ -33,7 +33,7 @@
 | Dynamic | `/api/ans-domains/[address]` | 0 B | 0 B |
 | Dynamic | `/api/domain-info/[domain]` | 0 B | 0 B |
 | Dynamic | `/api/geo-location` | 0 B | 0 B |
-| Dynamic | `/api/metadata/proxy` | 0 B | 0 B |
+| Static | `/api/metadata/proxy` | 0 B | 0 B |
 | Dynamic | `/api/ping/[network]` | 0 B | 0 B |
 | Dynamic | `/api/program-metadata-idl` | 0 B | 0 B |
 | Dynamic | `/api/receipt/price/[mintAddress]` | 0 B | 0 B |
@@ -56,7 +56,7 @@
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 7 kB | 948 kB |
 | Static | `/tos` | 325 B | 164 kB |
-| Dynamic | `/tx/[signature]` | 58 kB | 1.47 MB |
-| Dynamic | `/tx/[signature]/inspect` | 628 B | 1.23 MB |
-| Static | `/tx/inspector` | 634 B | 1.23 MB |
+| Dynamic | `/tx/[signature]` | 54 kB | 1.47 MB |
+| Dynamic | `/tx/[signature]/inspect` | 629 B | 1.23 MB |
+| Static | `/tx/inspector` | 633 B | 1.23 MB |
 | Static | `/verified-programs` | 7 kB | 173 kB |
