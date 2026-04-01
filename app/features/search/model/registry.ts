@@ -8,11 +8,11 @@ import { domainSearchProvider } from './domain-search-provider';
 import { epochSearchProvider } from './epoch-search-provider';
 import { explorerUrlSearchProvider } from './explorer-url-search-provider';
 import { featureGateSearchProvider } from './feature-gate-search-provider';
+import { heliusSearchProvider } from './helius-search-provider';
 import { loaderSearchProvider } from './loader-search-provider';
 import { programSearchProvider } from './program-search-provider';
 import { specialSearchProvider } from './special-search-provider';
 import { sysvarSearchProvider } from './sysvar-search-provider';
-import { tokenSearchProvider } from './token-search-provider';
 import { transactionSearchProvider } from './transaction-search-provider';
 
 const allProviders: SearchProvider[] = [
@@ -27,7 +27,7 @@ const allProviders: SearchProvider[] = [
     accountSearchProvider,
     transactionSearchProvider,
     base64TxSearchProvider,
-    tokenSearchProvider,
+    heliusSearchProvider,
     domainSearchProvider,
 ];
 

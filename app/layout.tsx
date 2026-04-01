@@ -7,6 +7,7 @@ import { Footer } from '@components/Footer';
 import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';
 import { ClusterProvider } from '@providers/cluster';
+import { HeliusSearchProvider } from '@providers/helius-search';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { Toaster } from '@shared/ui/sonner/toaster';
 import { isEnvEnabled } from '@utils/env';
@@ -60,26 +61,28 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                 <ScrollAnchorProvider>
                     <ClusterProvider>
                         <VisibilityProvider>
-                            <TokenInfoBatchProvider>
-                                <ClusterModal />
-                                <div className="e-flex e-min-h-screen e-flex-col">
-                                    <div className="main-content pb-4 e-flex-1">
-                                        <Navbar>
-                                            <SearchBar />
-                                        </Navbar>
-                                        <MessageBanner />
-                                        <div className="container my-3 d-xl-none">
-                                            <SearchBar />
+                            <HeliusSearchProvider>
+                                <TokenInfoBatchProvider>
+                                    <ClusterModal />
+                                    <div className="e-flex e-min-h-screen e-flex-col">
+                                        <div className="main-content pb-4 e-flex-1">
+                                            <Navbar>
+                                                <SearchBar />
+                                            </Navbar>
+                                            <MessageBanner />
+                                            <div className="container my-3 d-xl-none">
+                                                <SearchBar />
+                                            </div>
+                                            <div className="container my-3 d-lg-none">
+                                                <ClusterStatusButton />
+                                            </div>
+                                            {children}
                                         </div>
-                                        <div className="container my-3 d-lg-none">
-                                            <ClusterStatusButton />
-                                        </div>
-                                        {children}
+                                        <Footer />
                                     </div>
-                                    <Footer />
-                                </div>
-                                <Toaster position="bottom-center" toastOptions={{ duration: 5_000 }} />
-                            </TokenInfoBatchProvider>
+                                    <Toaster position="bottom-center" toastOptions={{ duration: 5_000 }} />
+                                </TokenInfoBatchProvider>
+                            </HeliusSearchProvider>
                         </VisibilityProvider>
                     </ClusterProvider>
                 </ScrollAnchorProvider>
