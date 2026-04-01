@@ -3,7 +3,7 @@ import { clusterSlug } from '@utils/cluster';
 import { Logger } from '@/app/shared/lib/logger';
 import { fetchWithHeliusSearchAuth } from '@/app/utils/helius-search-auth';
 
-import type { SearchContext, SearchOptions, SearchProvider } from '../lib/types';
+import type { SearchContext, SearchItem, SearchOptions, SearchProvider } from '../lib/types';
 
 const SEARCH_CACHE_TTL_MS = 30_000;
 const SEARCH_CACHE_MAX_SIZE = 100;
@@ -105,12 +105,6 @@ type SystemAccountSearchResult = {
     name: string;
 };
 
-type SearchItem = {
-    label: string;
-    pathname: string;
-    value: string[];
-};
-
 const searchCache = new Map<string, { data: SearchOptions[]; expiresAt: number }>();
 
 const GROUP_ORDER = [
@@ -145,11 +139,17 @@ function pushOption(
     groupedOptions.set(groupLabel, existingOptions);
 }
 
-function buildOption(label: string, pathname: string, value: Array<string | undefined | null>): SearchItem {
+function buildOption(
+    label: string,
+    pathname: string,
+    value: Array<string | undefined | null>,
+    meta?: Pick<SearchItem, 'icon' | 'verified'>,
+): SearchItem {
     return {
         label,
         pathname,
         value: value.filter((part): part is string => Boolean(part)),
+        ...meta,
     };
 }
 
@@ -162,26 +162,27 @@ function mapUnifiedSearchResponse(response: UnifiedSearchResponse): SearchOption
             groupedOptions,
             seen,
             'Tokens',
-            buildOption(`${token.ticker} · ${token.name}`, '/address/' + token.tokenAddress, [
-                token.name,
-                token.ticker,
-                token.tokenAddress,
-                token.shortName ?? undefined,
-            ]),
+            buildOption(
+                `${token.ticker} - ${token.name}`,
+                '/address/' + token.tokenAddress,
+                [token.name, token.ticker, token.tokenAddress, token.shortName ?? undefined],
+                { icon: token.icon ?? undefined, verified: token.isVerified },
+            ),
         );
     }
 
     for (const validator of response.results.validators ?? []) {
-        const label = validator.name ? `${validator.name} · ${validator.identity}` : validator.identity;
+        const label = validator.name ? `${validator.name} - ${validator.identity}` : validator.identity;
         pushOption(
             groupedOptions,
             seen,
             'Validators',
-            buildOption(label, '/address/' + validator.identity, [
-                validator.name,
-                validator.identity,
-                validator.voteAccount,
-            ]),
+            buildOption(
+                label,
+                '/address/' + validator.identity,
+                [validator.name, validator.identity, validator.voteAccount],
+                { icon: validator.image ?? undefined },
+            ),
         );
     }
 
@@ -190,10 +191,14 @@ function mapUnifiedSearchResponse(response: UnifiedSearchResponse): SearchOption
             groupedOptions,
             seen,
             'Programs',
-            buildOption(program.name || program.address, '/address/' + program.address, [
-                program.name,
-                program.address,
-            ]),
+            buildOption(
+                program.name || program.address,
+                '/address/' + program.address,
+                [program.name, program.address],
+                {
+                    icon: program.icon ?? undefined,
+                },
+            ),
         );
     }
 

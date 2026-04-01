@@ -6,6 +6,8 @@ export type SearchItem = {
     pathname: string;
     /** When set, overrides the current cluster context during navigation. */
     cluster?: Cluster;
+    icon?: string;
+    verified?: boolean;
 };
 
 export interface SearchOptions {

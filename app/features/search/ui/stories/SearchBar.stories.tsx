@@ -183,33 +183,25 @@ export const MultipleGroups: Story = {
     },
 };
 
-export const CustomRenderItem: Story = {
+export const WithIconsAndBadges: Story = {
     args: {
         open: true,
-        renderItem: option => (
-            <span className="e-flex e-items-center e-gap-2">
-                <span className="e-flex e-h-5 e-w-5 e-items-center e-justify-center e-rounded-full e-bg-heavy-metal-600 e-text-[10px] e-text-heavy-metal-200">
-                    {option.label.charAt(0)}
-                </span>
-                <span>{option.label}</span>
-                <span className="e-ml-auto e-text-xs e-text-heavy-metal-400">
-                    {option.pathname.split('/').pop()?.slice(0, 4)}...
-                </span>
-            </span>
-        ),
         results: [
             {
                 label: 'Tokens',
                 options: [
                     {
-                        label: 'USD Coin',
+                        icon: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png',
+                        label: 'USDC - USD Coin',
                         pathname: '/address/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-                        value: ['usdc'],
+                        value: ['usdc', 'USD Coin', 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'],
+                        verified: true,
                     },
                     {
-                        label: 'Tether USD',
+                        label: 'USDT - Tether USD',
                         pathname: '/address/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
-                        value: ['usdt'],
+                        value: ['usdt', 'Tether USD', 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'],
+                        verified: false,
                     },
                 ],
             },
@@ -226,14 +218,14 @@ export const CustomRenderItem: Story = {
         ],
         value: 'usdc',
     },
-    name: 'Custom Item Render',
+    name: 'With Icons and Badges',
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        expect(canvas.getByText('Tokens')).toBeInTheDocument();
-        expect(canvas.getByText('Programs')).toBeInTheDocument();
-        expect(canvas.getByText('USD Coin')).toBeInTheDocument();
-        expect(canvas.getByText('Tether USD')).toBeInTheDocument();
+        expect(canvas.getByText('TOKENS')).toBeInTheDocument();
+        expect(canvas.getByText('PROGRAMS')).toBeInTheDocument();
+        expect(canvas.getByText('USDC - USD Coin')).toBeInTheDocument();
+        expect(canvas.getByText('USDT - Tether USD')).toBeInTheDocument();
         expect(canvas.getByText('Token Program')).toBeInTheDocument();
     },
 };
