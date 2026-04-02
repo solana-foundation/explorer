@@ -51,7 +51,7 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
     });
 
     afterEach(() => {
-        vi.runOnlyPendingTimers();
+        vi.clearAllTimers();
         vi.useRealTimers();
         vi.clearAllMocks();
     });
