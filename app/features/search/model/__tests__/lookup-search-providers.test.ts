@@ -38,6 +38,16 @@ describe.each(lookupProviders)('$name search provider', (provider, matchQuery, g
     });
 });
 
+describe.each(lookupProviders)('$name minimum query length', (provider) => {
+    it('should return empty for a single-character query', async () => {
+        expect(await provider.search('a', ctx)).toEqual([]);
+    });
+
+    it('should return empty for an empty query', async () => {
+        expect(await provider.search('', ctx)).toEqual([]);
+    });
+});
+
 describe('programSearchProvider (cluster filtering)', () => {
     it('should return results for both mainnet and devnet', async () => {
         const devnetCtx = createSearchContext({ cluster: Cluster.Devnet });

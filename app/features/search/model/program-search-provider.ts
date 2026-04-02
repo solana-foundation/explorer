@@ -19,6 +19,8 @@ export const programSearchProvider: SearchProvider = {
     name: 'program',
     priority: 70,
     search(query: string, ctx: SearchContext): SearchOptions[] {
+        if (query.length < 2) return [];
+
         const matchedPrograms = Object.entries(PROGRAM_INFO_BY_ID).filter(([address, { name, deployments }]) => {
             if (!deployments.includes(ctx.cluster)) return false;
             return name.toLowerCase().includes(query.toLowerCase()) || address.includes(query);
