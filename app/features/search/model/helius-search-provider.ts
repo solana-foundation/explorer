@@ -275,7 +275,7 @@ function mapUnifiedSearchResponse(response: UnifiedSearchResponse): SearchOption
     }
 
     for (const domain of response.results.domains ?? []) {
-        const domainLabel = `${domain.domain}.${domain.tld}`;
+        const domainLabel = `${domain.domain}`;
 
         if (domain.owner) {
             pushOption(

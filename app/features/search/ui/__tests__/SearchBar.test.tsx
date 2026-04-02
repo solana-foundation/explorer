@@ -89,7 +89,7 @@ describe('SearchBar', () => {
 
         typeAndSettle('xyznonexistent');
 
-        expect(screen.getByText('No Results')).toBeInTheDocument();
+        expect(screen.getByText('No results found')).toBeInTheDocument();
     });
 
     it('should show loading state', () => {
@@ -97,7 +97,7 @@ describe('SearchBar', () => {
 
         typeAndSettle('loading');
 
-        expect(screen.getByText('loading...')).toBeInTheDocument();
+        expect(screen.getByText('Searching...')).toBeInTheDocument();
     });
 
     describe('debounce pending state', () => {

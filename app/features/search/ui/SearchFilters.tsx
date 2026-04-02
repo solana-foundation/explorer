@@ -22,7 +22,7 @@ export function SearchFilters({ tabs, activeFilter, counts, onFilterChange }: Se
                     key={tab.id}
                     className={cn(
                         'e-flex e-shrink-0 e-cursor-pointer e-items-center e-gap-1 e-rounded-full e-px-2.5 e-py-0.5',
-                        'e-border e-border-solid e-rounded-md e-text-xs e-font-medium e-transition-colors',
+                        'e-rounded-md e-border e-border-solid e-text-xs e-font-medium e-transition-colors',
                         activeFilter === tab.id
                             ? 'e-border-accent-600 e-bg-accent-600 e-text-heavy-metal-950'
                             : 'e-border-heavy-metal-600 e-bg-transparent e-text-heavy-metal-200 hover:e-border-heavy-metal-400 hover:e-text-white',

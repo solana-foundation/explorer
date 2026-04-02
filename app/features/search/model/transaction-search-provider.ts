@@ -30,7 +30,7 @@ export const transactionSearchProvider: SearchProvider = {
 
         return [
             {
-                label: 'Transaction',
+                label: 'Transactions',
                 options: [
                     {
                         label: query,

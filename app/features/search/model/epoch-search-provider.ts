@@ -24,7 +24,7 @@ export const epochSearchProvider: SearchProvider = {
 
         return [
             {
-                label: 'Epoch',
+                label: 'Epochs',
                 options: [
                     {
                         label: `Epoch #${query}`,

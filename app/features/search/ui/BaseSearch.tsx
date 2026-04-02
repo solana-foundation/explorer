@@ -74,17 +74,16 @@ export function BaseSearch({
         ) as Record<FilterId, number>;
     }, [results]);
 
-    const visibleTabs = useMemo(
-        () => FILTER_TABS.filter(t => t.id === 'all' || counts[t.id] > 0),
-        [counts],
-    );
+    const visibleTabs = useMemo(() => FILTER_TABS.filter(t => t.id === 'all' || counts[t.id] > 0), [counts]);
 
-    // Filter results for active tab, always showing Feature Gates last
+    // Filter results for active tab, always showing Feature Gates last in "All" view
     const filteredResults = useMemo(() => {
         const tab = FILTER_TABS.find(t => t.id === activeFilter);
         const filtered = tab?.groups
             ? results.filter(g => (tab.groups as readonly string[]).includes(g.label))
             : results;
+
+        if (activeFilter !== 'all') return filtered;
 
         const fgIndex = filtered.findIndex(g => g.label === 'Feature Gates');
         if (fgIndex === -1 || fgIndex === filtered.length - 1) return filtered;

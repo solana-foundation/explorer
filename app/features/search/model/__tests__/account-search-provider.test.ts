@@ -17,7 +17,7 @@ describe('accountSearchProvider', () => {
         const results = accountSearchProvider.search(address, ctx);
         expect(results).toEqual([
             {
-                label: 'Account',
+                label: 'Accounts',
                 options: [{ label: address, pathname: '/address/' + address, value: [address] }],
             },
         ]);

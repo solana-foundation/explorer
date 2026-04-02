@@ -20,7 +20,7 @@ export const blockSearchProvider: SearchProvider = {
 
         return [
             {
-                label: 'Block',
+                label: 'Blocks',
                 options: [
                     {
                         label: `Slot #${query}`,

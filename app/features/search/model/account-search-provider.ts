@@ -32,7 +32,7 @@ export const accountSearchProvider: SearchProvider = {
 
         return [
             {
-                label: 'Account',
+                label: 'Accounts',
                 options: [
                     {
                         label: query,

@@ -43,7 +43,7 @@ export const domainSearchProvider: SearchProvider = {
 
             return [
                 {
-                    label: 'Domain Owner',
+                    label: 'Domain Owners',
                     options: [
                         {
                             label: domainInfo.owner,
@@ -53,7 +53,7 @@ export const domainSearchProvider: SearchProvider = {
                     ],
                 },
                 {
-                    label: 'Name Service Account',
+                    label: 'Name Service Accounts',
                     options: [
                         {
                             label: query,

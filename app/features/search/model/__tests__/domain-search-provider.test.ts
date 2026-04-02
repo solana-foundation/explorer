@@ -22,11 +22,11 @@ describe('domainSearchProvider', () => {
 
         expect(results).toEqual([
             {
-                label: 'Domain Owner',
+                label: 'Domain Owners',
                 options: [{ label: mockOwner, pathname: `/address/${mockOwner}`, value: ['toly.sol'] }],
             },
             {
-                label: 'Name Service Account',
+                label: 'Name Service Accounts',
                 options: [{ label: 'toly.sol', pathname: `/address/${mockAddress}`, value: ['toly.sol'] }],
             },
         ]);
