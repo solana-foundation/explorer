@@ -3,4 +3,4 @@ export { useUserSnsDomains } from './model/use-user-sns-domains';
 export type { DomainInfo } from './model/types';
 export { DomainsCard } from './ui/DomainsCard';
 export { Domain } from './lib/domain-struct';
-export { ResolvedDomainInfoSchema } from './api/resolve-domain';
+export { ResolvedDomainInfoSchema, resolveDomain } from './api/resolve-domain';

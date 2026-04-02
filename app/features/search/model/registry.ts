@@ -15,8 +15,6 @@ import { sysvarSearchProvider } from './sysvar-search-provider';
 import { tokenSearchProvider } from './token-search-provider';
 import { transactionSearchProvider } from './transaction-search-provider';
 
-// The base64TxSearchProvider rejects inputs that decode as valid bs58 to avoid
-// misinterpreting pubkeys/signatures as serialized transactions.
 const allProviders: SearchProvider[] = [
     explorerUrlSearchProvider,
     programSearchProvider,
