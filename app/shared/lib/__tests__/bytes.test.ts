@@ -148,6 +148,12 @@ describe('bytes helpers', () => {
                 });
             });
 
+            it('should decode unpadded base64 when the runtime allows it', () => {
+                // Node's atob accepts unpadded base64; callers that need strict
+                // padding validation should normalise before calling fromBase64.
+                expect(fromBase64('SGVsbG8')).toEqual(new Uint8Array([72, 101, 108, 108, 111]));
+            });
+
             it('should throw on invalid base64 string', () => {
                 expect(() => fromBase64('Hello World!')).toThrow();
                 expect(() => fromBase64('Invalid@#$')).toThrow();

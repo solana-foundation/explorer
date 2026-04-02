@@ -1,6 +1,6 @@
 import bs58 from 'bs58';
 
-import { toBase64 } from '@/app/shared/lib/bytes';
+import { fromBase64, toBase64 } from '@/app/shared/lib/bytes';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 
 import type { SearchOptions, SearchProvider } from '../lib/types';
@@ -36,23 +36,31 @@ export const base64TxSearchProvider: SearchProvider = {
             // Not valid bs58 — continue with base64 attempt
         }
 
-        const decoded = Buffer.from(query, 'base64');
+        // Normalise to padded base64 — some tools emit unpadded base64 which
+        // atob rejects in strict environments.
+        const padded = query.padEnd(Math.ceil(query.length / 4) * 4, '=');
 
-        // Buffer.from is lenient with invalid base64 — re-encoding and comparing
-        // ensures the input was actually valid base64.
-        if (decoded.toString('base64') !== query) {
+        let decoded: Uint8Array;
+        try {
+            decoded = fromBase64(padded);
+        } catch {
+            // atob throws on invalid base64
             return [];
         }
 
-        const buffer = new Uint8Array(decoded);
+        // Round-trip check: re-encoding must match the padded input to
+        // confirm it was genuinely valid base64, not just tolerated junk.
+        if (toBase64(decoded) !== padded) {
+            return [];
+        }
 
-        if (buffer.length < MIN_MESSAGE_LENGTH) {
+        if (decoded.length < MIN_MESSAGE_LENGTH) {
             return [];
         }
 
         let parsed;
         try {
-            parsed = parseTransactionBytes(buffer);
+            parsed = parseTransactionBytes(decoded);
         } catch {
             return [];
         }

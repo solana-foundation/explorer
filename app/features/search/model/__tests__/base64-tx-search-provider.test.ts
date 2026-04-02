@@ -54,6 +54,16 @@ describe('base64TxSearchProvider', () => {
         expect(params.has('signatures')).toBe(false);
     });
 
+    it('should accept unpadded base64 input', async () => {
+        const b64 = createBase64Transaction();
+        // Strip trailing '=' padding
+        const unpadded = b64.replace(/=+$/, '');
+        const results = await base64TxSearchProvider.search(unpadded, ctx);
+
+        expect(results).toHaveLength(1);
+        expect(results[0].options[0].pathname).toContain('/tx/inspector?');
+    });
+
     it('should return an inspector link for a bare message (no signatures)', async () => {
         const messageBytes = createMessageBytes();
         const b64 = Buffer.from(messageBytes).toString('base64');
@@ -85,6 +95,20 @@ describe('base64TxSearchProvider', () => {
 
         it('should return empty for invalid base64', async () => {
             expect(await base64TxSearchProvider.search('!!!not-valid!!!', ctx)).toEqual([]);
+        });
+
+        it('should return empty when atob throws on non-base64 characters', async () => {
+            // Unicode characters outside the base64 alphabet cause atob to throw
+            expect(await base64TxSearchProvider.search('ñoño+café==', ctx)).toEqual([]);
+        });
+
+        it('should return empty when base64 round-trip check fails', async () => {
+            // 70 zero-bytes encode to valid base64. Tweaking the last
+            // data character ('q' → 'x') changes trailing bits so the
+            // decoded bytes re-encode to a different string.
+            const valid = Buffer.alloc(70, 0xab).toString('base64');
+            const corrupted = valid.slice(0, -4) + 'qx==';
+            expect(await base64TxSearchProvider.search(corrupted, ctx)).toEqual([]);
         });
 
         it('should return empty for a string with whitespace', async () => {
