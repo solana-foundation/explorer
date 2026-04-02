@@ -57,6 +57,7 @@ describe('base64TxSearchProvider', () => {
     it('should accept unpadded base64 input', async () => {
         const b64 = createBase64Transaction();
         // Strip trailing '=' padding
+        // eslint-disable-next-line no-restricted-syntax -- stripping trailing '=' padding from base64; regex is the clearest way to match variable-length suffix
         const unpadded = b64.replace(/=+$/, '');
         const results = await base64TxSearchProvider.search(unpadded, ctx);
 

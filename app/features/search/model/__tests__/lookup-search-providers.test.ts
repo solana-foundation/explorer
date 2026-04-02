@@ -38,7 +38,7 @@ describe.each(lookupProviders)('$name search provider', (provider, matchQuery, g
     });
 });
 
-describe.each(lookupProviders)('$name minimum query length', (provider) => {
+describe.each(lookupProviders)('$name minimum query length', provider => {
     it('should return empty for a single-character query', async () => {
         expect(await provider.search('a', ctx)).toEqual([]);
     });
