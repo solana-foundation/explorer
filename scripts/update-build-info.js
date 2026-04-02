@@ -144,6 +144,8 @@ function isOtherDataHeaderLine(line) {
 function formatTableLines(lines) {
     const tableLines = [];
 
+    tableLines.push('> Sizes are rounded up. Run `pnpm build` to see exact values.');
+    tableLines.push('');
     tableLines.push('| Type | Route | Size | First Load JS |');
     tableLines.push('|------|-------|------|---------------|');
 
@@ -154,11 +156,34 @@ function formatTableLines(lines) {
         if (match) {
             const [, type, route, size, firstLoad] = match;
             const typeSymbol = type === '○' ? 'Static' : 'Dynamic';
-            tableLines.push(`| ${typeSymbol} | \`${route}\` | ${size} | ${firstLoad.trim()} |`);
+            tableLines.push(`| ${typeSymbol} | \`${route}\` | ${roundSize(size)} | ${roundSize(firstLoad.trim())} |`);
         }
     }
 
     return tableLines.join('\n');
+}
+
+/**
+ * Rounds a size string up to reduce noise from minor changes.
+ * - B values: kept as-is
+ * - kB values: rounded up to nearest integer
+ * - MB values: rounded up to 2 decimal places (~10 kB granularity)
+ * @param {string} sizeStr - Size string like "14.7 kB" or "1.03 MB"
+ * @returns {string} Rounded size string
+ */
+function roundSize(sizeStr) {
+    // eslint-disable-next-line no-restricted-syntax -- Parsing size strings requires regex
+    const match = sizeStr.match(/^([\d.]+)\s+(B|kB|MB)$/);
+    if (!match) return sizeStr;
+
+    const value = parseFloat(match[1]);
+    const unit = match[2];
+
+    if (unit === 'B') return sizeStr;
+    if (unit === 'kB') return `${Math.ceil(value)} kB`;
+    if (unit === 'MB') return `${Math.ceil(Math.round(value * 1000) / 10) / 100} MB`;
+
+    return sizeStr;
 }
 
 // ================================================================================================
