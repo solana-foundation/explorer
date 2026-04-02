@@ -23,6 +23,7 @@ import {
     useTransactionStatus,
 } from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
+import { RefreshButton } from '@shared/ui/refresh-button';
 import { ParsedTransaction, SystemInstruction, SystemProgram, TransactionSignature } from '@solana/web3.js';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { displayTimestamp } from '@utils/date';
@@ -35,13 +36,12 @@ import bs58 from 'bs58';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useMemo, useState } from 'react';
-import { RefreshCw, ZoomIn } from 'react-feather';
+import { ZoomIn } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
 import { AccountsCard } from '@/app/components/transaction/AccountsCard';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
-import { refreshAnalytics } from '@/app/shared/lib/analytics';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
@@ -277,18 +277,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                 {autoRefresh === AutoRefresh.Active ? (
                     <span className="spinner-grow spinner-grow-sm"></span>
                 ) : (
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        aria-label="Refresh"
-                        onClick={() => {
-                            refreshAnalytics.trackButtonClicked('transaction_card');
-                            fetchStatus(signature);
-                        }}
-                    >
-                        <RefreshCw size={12} />
-                        <span className="d-none d-md-inline">Refresh</span>
-                    </Button>
+                    <RefreshButton analyticsSection="transaction_card" onClick={() => fetchStatus(signature)} />
                 )}
                 <DownloadDropdown
                     filename={signature}

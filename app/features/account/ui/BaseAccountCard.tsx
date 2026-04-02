@@ -1,6 +1,7 @@
 import { TableCardBody, type TableCardBodyProps } from '@components/common/TableCardBody';
+import { RefreshButton } from '@shared/ui/refresh-button';
 import React from 'react';
-import { Code, RefreshCw } from 'react-feather';
+import { Code } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
 
@@ -9,6 +10,7 @@ export type BaseAccountCardProps = TableCardBodyProps & {
     rawContent?: React.ReactNode;
     headerActions?: React.ReactNode;
     refresh?: () => void;
+    analyticsSection?: string;
     showRawButton?: boolean;
 };
 
@@ -17,6 +19,7 @@ export function BaseAccountCard({
     rawContent,
     headerActions,
     refresh,
+    analyticsSection,
     showRawButton = true,
     children,
     ...tableProps
@@ -27,12 +30,7 @@ export function BaseAccountCard({
         <div className="card">
             <div className="card-header e-gap-2">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">{title}</h3>
-                {refresh && (
-                    <Button variant="outline" size="sm" aria-label="Refresh" onClick={refresh}>
-                        <RefreshCw size={12} />
-                        <span className="d-none d-md-inline">Refresh</span>
-                    </Button>
-                )}
+                {refresh && analyticsSection && <RefreshButton analyticsSection={analyticsSection} onClick={refresh} />}
                 {showRawButton && (
                     <Button
                         variant={showRaw ? 'default' : 'outline'}

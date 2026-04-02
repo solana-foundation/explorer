@@ -1,9 +1,7 @@
 import { SolBalance } from '@components/common/SolBalance';
 import { Account } from '@providers/accounts';
+import { RefreshButton } from '@shared/ui/refresh-button';
 import React from 'react';
-import { RefreshCw } from 'react-feather';
-
-import { refreshAnalytics } from '@/app/shared/lib/analytics';
 
 import { Address } from './Address';
 
@@ -21,16 +19,7 @@ export function AccountHeader({ title, analyticsSection, refresh }: AccountHeade
     return (
         <div className="card-header align-items-center">
             <h3 className="card-header-title">{title}</h3>
-            <button
-                className="btn btn-white btn-sm"
-                onClick={() => {
-                    refreshAnalytics.trackButtonClicked(analyticsSection);
-                    refresh();
-                }}
-            >
-                <RefreshCw className="align-text-top me-2" size={13} />
-                Refresh
-            </button>
+            <RefreshButton analyticsSection={analyticsSection} onClick={refresh} />
         </div>
     );
 }

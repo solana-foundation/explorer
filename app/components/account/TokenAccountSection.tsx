@@ -47,7 +47,6 @@ import { ExternalLink } from 'react-feather';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
-import { refreshAnalytics } from '@/app/shared/lib/analytics';
 import { Logger } from '@/app/shared/lib/logger';
 import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
@@ -130,10 +129,6 @@ function FungibleTokenMintAccountCard({
     tokenInfo?: FullLegacyTokenInfo;
 }) {
     const fetchInfo = useRefreshAccount();
-    const refresh = () => {
-        refreshAnalytics.trackButtonClicked('token_mint_card');
-        fetchInfo(account.pubkey, 'parsed');
-    };
 
     const bridgeContractAddress = getEthAddress(tokenInfo?.extensions?.bridgeContract);
     const assetContractAddress = getEthAddress(tokenInfo?.extensions?.assetContract);
@@ -152,7 +147,8 @@ function FungibleTokenMintAccountCard({
                       : 'Token Mint'
             }
             account={account}
-            refresh={refresh}
+            refresh={() => fetchInfo(account.pubkey, 'parsed')}
+            analyticsSection="token_mint_card"
         >
             <tr>
                 <td>Address</td>
@@ -255,14 +251,15 @@ function NonFungibleTokenMintAccountCard({
     mintInfo: MintAccountInfo;
 }) {
     const fetchInfo = useRefreshAccount();
-    const refresh = () => {
-        refreshAnalytics.trackButtonClicked('nft_mint_card');
-        fetchInfo(account.pubkey, 'parsed');
-    };
 
     const collection = nftData.metadata.collection;
     return (
-        <AccountCard title="Overview" account={account} refresh={refresh}>
+        <AccountCard
+            title="Overview"
+            account={account}
+            refresh={() => fetchInfo(account.pubkey, 'parsed')}
+            analyticsSection="nft_mint_card"
+        >
             <tr>
                 <td>Address</td>
                 <td className="text-md-end">
