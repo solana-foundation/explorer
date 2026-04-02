@@ -18,6 +18,8 @@ export const specialSearchProvider: SearchProvider = {
     name: 'special',
     priority: 40,
     search(query: string): SearchOptions[] {
+        if (query.length < 2) return [];
+
         const matchedSpecialIds = Object.entries(SPECIAL_IDS).filter(([address, name]) => {
             return name.toLowerCase().includes(query.toLowerCase()) || address.includes(query);
         });

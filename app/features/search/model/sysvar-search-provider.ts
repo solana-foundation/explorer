@@ -19,6 +19,8 @@ export const sysvarSearchProvider: SearchProvider = {
     name: 'sysvar',
     priority: 50,
     search(query: string): SearchOptions[] {
+        if (query.length < 2) return [];
+
         const matchedSysvars = Object.entries(SYSVAR_IDS).filter(([address, name]) => {
             return name.toLowerCase().includes(query.toLowerCase()) || address.includes(query);
         });

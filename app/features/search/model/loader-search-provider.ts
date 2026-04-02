@@ -21,6 +21,8 @@ export const loaderSearchProvider: SearchProvider = {
     name: 'loader',
     priority: 60,
     search(query: string): SearchOptions[] {
+        if (query.length < 2) return [];
+
         const matchedLoaders = Object.entries(LOADER_IDS).filter(([address, name]) => {
             return (
                 SEARCHABLE_LOADERS.includes(name) &&

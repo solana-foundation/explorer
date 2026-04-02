@@ -19,6 +19,8 @@ export const featureGateSearchProvider: SearchProvider = {
     name: 'feature-gate',
     priority: 30,
     search(query: string): SearchOptions[] {
+        if (query.length < 2) return [];
+
         const features = (FEATURES as FeatureInfoType[]).filter(
             feature => feature.key && feature.title.toUpperCase().includes(query.toUpperCase()),
         );
