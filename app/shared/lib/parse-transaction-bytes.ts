@@ -21,15 +21,16 @@ export const MIN_MESSAGE_LENGTH =
  */
 export function parseTransactionBytes(bytes: Uint8Array): {
     messageBytes: Uint8Array;
-    signatures?: string[];
+    signatures?: (string | undefined)[];
 } {
     try {
         const tx = VersionedTransaction.deserialize(bytes);
         const messageBytes = new Uint8Array(tx.message.serialize());
-        const signatures = tx.signatures.filter(sig => sig.some(b => b !== 0)).map(sig => bs58.encode(sig));
+        const signatures = tx.signatures.map(sig => (sig.some(b => b !== 0) ? bs58.encode(sig) : undefined));
+        const hasSignatures = signatures.some(Boolean);
         return {
             messageBytes,
-            ...(signatures.length ? { signatures } : null),
+            ...(hasSignatures ? { signatures } : undefined),
         };
     } catch {
         // Deserialization as a transaction failed — treat the entire input as a bare message.

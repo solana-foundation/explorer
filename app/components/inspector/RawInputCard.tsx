@@ -14,14 +14,14 @@ export { MIN_MESSAGE_LENGTH };
 function getTransactionDataFromUserSuppliedBytes(bytes: Uint8Array): {
     message: VersionedMessage;
     rawMessage: Uint8Array;
-    signatures?: string[];
+    signatures?: (string | undefined)[];
 } {
     const { messageBytes, signatures } = parseTransactionBytes(bytes);
     const message = VersionedMessage.deserialize(messageBytes);
     return {
         message,
         rawMessage: messageBytes,
-        ...(signatures ? { signatures } : null),
+        ...(signatures ? { signatures } : undefined),
     };
 }
 

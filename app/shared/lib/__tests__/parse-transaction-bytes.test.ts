@@ -52,6 +52,29 @@ describe('parseTransactionBytes', () => {
         expect(VersionedMessage.deserialize(result.messageBytes).header.numRequiredSignatures).toBe(numRequired);
     });
 
+    it('should preserve unsigned slots as undefined in the signatures array', () => {
+        const messageBytes = createMultiSigMessageBytes();
+        const numRequired = VersionedMessage.deserialize(messageBytes).header.numRequiredSignatures;
+        expect(numRequired).toBe(2); // precondition
+
+        // Build a transaction where only the first signer has a real signature;
+        // the second slot is all zeros (unsigned).
+        const realSig = crypto.getRandomValues(new Uint8Array(64));
+        const zeroSig = new Uint8Array(64); // all zeros
+        const tx = new Uint8Array(1 + numRequired * 64 + messageBytes.length);
+        tx[0] = numRequired;
+        tx.set(realSig, 1);
+        tx.set(zeroSig, 1 + 64);
+        tx.set(messageBytes, 1 + numRequired * 64);
+
+        const result = parseTransactionBytes(tx);
+
+        // Array length must match numRequiredSignatures to keep positional alignment
+        expect(result.signatures).toHaveLength(numRequired);
+        expect(result.signatures?.[0]).toBeDefined();
+        expect(result.signatures?.[1]).toBeUndefined();
+    });
+
     it('should produce base58 signatures that roundtrip to the original bytes', () => {
         const messageBytes = createLegacyMessageBytes();
         const knownSigBytes = new Uint8Array(64).fill(42);
@@ -62,8 +85,9 @@ describe('parseTransactionBytes', () => {
 
         const result = parseTransactionBytes(tx);
 
-        if (!result.signatures) throw new Error('Expected signatures to be defined');
-        expect(new Uint8Array(bs58.decode(result.signatures[0]))).toEqual(knownSigBytes);
+        const firstSig = result.signatures?.[0];
+        if (!firstSig) throw new Error('Expected first signature to be defined');
+        expect(new Uint8Array(bs58.decode(firstSig))).toEqual(knownSigBytes);
     });
 
     it('should fall back when signature count mismatches message header', () => {
