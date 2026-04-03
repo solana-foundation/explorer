@@ -1,5 +1,4 @@
-import { type ResolvedDomainInfo, resolveDomain } from '@entities/domain/api/resolve-domain';
-import { Domain } from '@entities/domain/lib/domain-struct';
+import { Domain, resolveDomain } from '@entities/domain';
 import { NextResponse } from 'next/server';
 import { is } from 'superstruct';
 
@@ -10,8 +9,6 @@ type Params = {
         domain: string;
     };
 };
-
-export type FetchedDomainInfo = ResolvedDomainInfo;
 
 const CACHE_HEADERS = { 'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600' };
 

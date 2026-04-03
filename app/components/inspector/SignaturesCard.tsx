@@ -10,7 +10,7 @@ export function TransactionSignatures({
     message,
     rawMessage,
 }: {
-    signatures: (string | null)[];
+    signatures: (string | undefined)[];
     message: VersionedMessage;
     rawMessage: Uint8Array;
 }) {
@@ -81,7 +81,7 @@ function SignatureRow({
     verified,
     index,
 }: {
-    signature: string | null;
+    signature: string | undefined;
     signer: PublicKey;
     verified?: boolean;
     index: number;

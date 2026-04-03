@@ -22,7 +22,7 @@ import { VisibilityProvider } from '@/app/shared/lib/visibility';
 
 import { botIdProtectedRoutes } from '../middleware';
 
-const SearchBar = dynamic(() => import('@components/SearchBar'), {
+const SearchBar = dynamic(() => import('@features/search').then(mod => ({ default: mod.SearchBar })), {
     ssr: false,
 });
 

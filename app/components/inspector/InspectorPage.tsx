@@ -33,7 +33,7 @@ const { VaultTransaction } = generated;
 export type TransactionData = {
     rawMessage: Uint8Array;
     message: VersionedMessage;
-    signatures?: (string | null)[];
+    signatures?: (string | undefined)[];
     accountBalances?: {
         preBalances: number[];
         postBalances: number[];
@@ -63,7 +63,7 @@ function decodeParam(params: URLSearchParams, name: string): string | boolean {
 }
 
 // Decode a signatures param and throw an error on failure
-function decodeSignatures(signaturesParam: string): (string | null)[] {
+function decodeSignatures(signaturesParam: string): (string | undefined)[] {
     let signatures;
     try {
         signatures = JSON.parse(signaturesParam);
@@ -75,10 +75,10 @@ function decodeSignatures(signaturesParam: string): (string | null)[] {
         throw new Error('Signatures param is not a JSON array');
     }
 
-    const validSignatures: (string | null)[] = [];
+    const validSignatures: (string | undefined)[] = [];
     for (const signature of signatures) {
-        if (signature === null) {
-            validSignatures.push(signature);
+        if (signature === null || signature === undefined) {
+            validSignatures.push(undefined);
             continue;
         }
 
@@ -134,7 +134,7 @@ function decodeUrlParams(
         return ['', params, refreshUrl];
     }
 
-    let signatures: (string | null)[] | undefined = undefined;
+    let signatures: (string | undefined)[] | undefined = undefined;
     if (typeof signaturesParam === 'string') {
         try {
             signatures = decodeSignatures(signaturesParam);
