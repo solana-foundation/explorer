@@ -3,6 +3,8 @@ import { Headers as NodeFetchHeaders } from 'node-fetch';
 
 import { Logger } from '@/app/shared/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
 import { fetchResource, matchJsonContent, StatusError } from './feature';
 import { errors } from './feature/errors';
 import { checkURLForPrivateIP, isHTTPProtocol } from './feature/ip';
