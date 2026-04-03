@@ -8,6 +8,8 @@ import {
 import bs58 from 'bs58';
 import React from 'react';
 
+import { readUint8, readUint16LE, toBase64 } from '@/app/shared/lib/bytes';
+
 import { Address } from '../../common/Address';
 import { Copyable } from '../../common/Copyable';
 import { InstructionCard } from '../InstructionCard';
@@ -35,21 +37,21 @@ interface Ed25519SignatureOffsets {
 }
 
 // See https://docs.anza.xyz/runtime/programs/#ed25519-program
-function decodeEd25519Instruction(data: Buffer): Ed25519SignatureOffsets[] {
-    const count = data.readUInt8(0);
+function decodeEd25519Instruction(data: Uint8Array): Ed25519SignatureOffsets[] {
+    const count = readUint8(data, 0);
     const offsets: Ed25519SignatureOffsets[] = [];
 
     let cursor = 2; // Skip count and padding byte
 
     for (let i = 0; i < count; i++) {
         const offset: Ed25519SignatureOffsets = {
-            messageDataOffset: data.readUInt16LE(cursor + 8),
-            messageDataSize: data.readUInt16LE(cursor + 10),
-            messageInstructionIndex: data.readUInt16LE(cursor + 12),
-            publicKeyInstructionIndex: data.readUInt16LE(cursor + 6),
-            publicKeyOffset: data.readUInt16LE(cursor + 4),
-            signatureInstructionIndex: data.readUInt16LE(cursor + 2),
-            signatureOffset: data.readUInt16LE(cursor),
+            messageDataOffset: readUint16LE(data, cursor + 8),
+            messageDataSize: readUint16LE(data, cursor + 10),
+            messageInstructionIndex: readUint16LE(data, cursor + 12),
+            publicKeyInstructionIndex: readUint16LE(data, cursor + 6),
+            publicKeyOffset: readUint16LE(data, cursor + 4),
+            signatureInstructionIndex: readUint16LE(data, cursor + 2),
+            signatureOffset: readUint16LE(data, cursor),
         };
         offsets.push(offset);
         cursor += 14; // Number of bytes in one Ed25519SignatureOffsets struct
@@ -61,7 +63,7 @@ function decodeEd25519Instruction(data: Buffer): Ed25519SignatureOffsets[] {
 const extractData = (
     tx: ParsedTransaction,
     instructionIndex: number,
-    sourceData: Buffer,
+    sourceData: Uint8Array,
     dataOffset: number,
     dataLength: number,
 ): Uint8Array | null => {
@@ -138,10 +140,8 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                             <td>Signature</td>
                             <td className="text-lg-end">
                                 {signature ? (
-                                    <Copyable text={Buffer.from(signature).toString('base64')}>
-                                        <span className="font-monospace">
-                                            {Buffer.from(signature).toString('base64')}
-                                        </span>
+                                    <Copyable text={toBase64(signature)}>
+                                        <span className="font-monospace">{toBase64(signature)}</span>
                                     </Copyable>
                                 ) : (
                                     'Invalid reference'
@@ -192,10 +192,8 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                                 }}
                             >
                                 {message ? (
-                                    <Copyable text={Buffer.from(message).toString('base64')}>
-                                        <span className="font-monospace">
-                                            {Buffer.from(message).toString('base64')}
-                                        </span>
+                                    <Copyable text={toBase64(message)}>
+                                        <span className="font-monospace">{toBase64(message)}</span>
                                     </Copyable>
                                 ) : (
                                     'Invalid reference'

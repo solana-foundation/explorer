@@ -31,6 +31,7 @@ import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
 
+import { alloc } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { HistoryProvider } from './history';
@@ -109,7 +110,7 @@ export type ParsedData =
 
 export interface AccountData {
     parsed?: ParsedData;
-    raw?: Buffer;
+    raw?: Uint8Array;
 }
 
 export interface Account {
@@ -247,7 +248,7 @@ async function fetchMultipleAccounts({
                 let account: Account;
                 if (result === null) {
                     account = {
-                        data: { raw: Buffer.alloc(0) },
+                        data: { raw: alloc(0) },
                         executable: false,
                         lamports: 0,
                         owner: SystemProgram.programId,
@@ -272,7 +273,7 @@ async function fetchMultipleAccounts({
 
                     // If we cannot parse account layout as native spl account
                     // then keep raw data for other components to decode
-                    let rawData: Buffer | undefined;
+                    let rawData: Uint8Array | undefined;
                     if (!parsedData && !('parsed' in result.data) && dataMode !== 'skip') {
                         space = result.data.length;
                         rawData = result.data;

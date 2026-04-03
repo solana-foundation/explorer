@@ -3,13 +3,18 @@ import { getDomainKey as getANSDomainKey, NameRecordHeader } from '@onsol/tldpar
 import { Connection } from '@solana/web3.js';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
 import { deserializeUnchecked } from 'borsh';
+import { type Infer, nullable, string, type } from 'superstruct';
 
 import { SOL_TLD_AUTHORITY } from './constants';
 
-export type ResolvedDomainInfo = {
-    address: string;
-    owner: string;
-} | null;
+export const ResolvedDomainInfoSchema = nullable(
+    type({
+        address: string(),
+        owner: string(),
+    }),
+);
+
+export type ResolvedDomainInfo = Infer<typeof ResolvedDomainInfoSchema>;
 
 // A new Connection is cheap — it's just a config object holding the URL, no socket/TCP is opened
 // until an actual RPC call is made. Safe to create per-request in a short-lived API route handler.

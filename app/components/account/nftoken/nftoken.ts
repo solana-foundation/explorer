@@ -3,6 +3,8 @@ import axios from 'axios';
 import bs58 from 'bs58';
 import pLimit from 'p-limit';
 
+import { fromHex } from '@/app/shared/lib/bytes';
+
 import { NftokenTypes } from './nftoken-types';
 
 export const NFTOKEN_ADDRESS = 'nftokf9qcHSYkVSP3P2gUMmV6d4AwjMueXgUu43HyLL';
@@ -23,7 +25,7 @@ export namespace NftokenFetcher {
             filters: [
                 {
                     memcmp: {
-                        bytes: bs58.encode(Buffer.from(nftokenAccountDiscInHex, 'hex')),
+                        bytes: bs58.encode(fromHex(nftokenAccountDiscInHex)),
                         offset: 0,
                     },
                 },

@@ -7,6 +7,8 @@ import {
     type SimulatedTransactionAccountInfo,
 } from '@solana/web3.js';
 
+import { fromBase64 } from '@/app/shared/lib/bytes';
+
 export const MINT_ACCOUNT_BUFFER_LENGTH = 82;
 export const MIN_MINT_ACCOUNT_BUFFER_LENGTH = 82; // Token-2022 mints can be larger with extensions
 
@@ -53,10 +55,10 @@ export function getMintDecimals(
             accountOwnerPost &&
             accountDataPost &&
             isTokenProgramBase58(accountOwnerPost) &&
-            Buffer.from(accountDataPost, 'base64').length >= MINT_ACCOUNT_BUFFER_LENGTH
+            fromBase64(accountDataPost).length >= MINT_ACCOUNT_BUFFER_LENGTH
         ) {
-            const buffer = Buffer.from(accountDataPost, 'base64');
-            const accountParsedPost = MintLayout.decode(buffer.subarray(0, MIN_MINT_ACCOUNT_BUFFER_LENGTH));
+            const bytes = fromBase64(accountDataPost);
+            const accountParsedPost = MintLayout.decode(bytes.subarray(0, MIN_MINT_ACCOUNT_BUFFER_LENGTH));
             mintToDecimals[key.toBase58()] = accountParsedPost.decimals;
         }
     }

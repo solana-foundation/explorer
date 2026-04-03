@@ -11,6 +11,7 @@ import {
     useCompressedNft,
     useCompressedNftProof,
 } from '@/app/providers/compressed-nft';
+import { toBuffer } from '@/app/shared/lib/bytes';
 
 import { Address } from '../common/Address';
 import { TableCardBody } from '../common/TableCardBody';
@@ -45,7 +46,7 @@ function DasCompressionInfoCard({ proof, compressedNft }: { proof: CompressedNft
     });
     const canopyDepth =
         treeAccountInfo && treeAccountInfo.data && treeAccountInfo.data.data.raw
-            ? ConcurrentMerkleTreeAccount.fromBuffer(treeAccountInfo.data.data.raw).getCanopyDepth()
+            ? ConcurrentMerkleTreeAccount.fromBuffer(toBuffer(treeAccountInfo.data.data.raw)).getCanopyDepth()
             : 0;
     const proofSize = proof.proof.length - canopyDepth;
     return (

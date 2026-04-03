@@ -1270,7 +1270,7 @@
     "testnet_activation_epoch": 912,
     "devnet_activation_epoch": 1035,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 951,
     "description": ""
   },
   {
@@ -1367,7 +1367,7 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 937,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -1691,6 +1691,76 @@
       "v4.0.0"
     ],
     "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "EDGMC5kxFxGk4ixsNkGt8bW7QL5hDMXnbwaZvYMwNfzF",
+    "title": "SIMD-0459: Syscall Parameter Address Restrictions",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0459-syscall-parameter-address-restrictions.md"
+    ],
+    "simds": [
+      "0459"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "0.1"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "7VgiehxNxu53KdxgLspGQY8myE6f7UokaWa4jsGcaSz",
+    "title": "SIMD-0460: Virtual Address Space Adjustments",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0460-virtual-address-space-adjustments.md"
+    ],
+    "simds": [
+      "0460"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "0.1"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "CR3dVN2Yoo95Y96kLSTaziWDAQT2MNEpiWh5cqVq2pNE",
+    "title": "Account Data Direct Mapping",
+    "simd_link": [
+      ""
+    ],
+    "simds": [],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "0.1"
+    ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": null,

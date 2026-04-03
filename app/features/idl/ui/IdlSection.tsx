@@ -16,6 +16,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AlertCircle, Code, Download, ExternalLink, Search } from 'react-feather';
 
 import { WalletProvider } from '@/app/providers/wallet-provider';
+import { fromUtf8, toBase64 } from '@/app/shared/lib/bytes';
 import { triggerDownload } from '@/app/shared/lib/triggerDownload';
 
 import { type IdlVariant } from '../model/use-idl-last-transaction-date';
@@ -44,7 +45,7 @@ export function IdlSection({
     const downloadDropdownRef = useRef<HTMLButtonElement>(null);
 
     const idlBase64 = useMemo(() => {
-        return Buffer.from(JSON.stringify(idl, null, 2)).toString('base64');
+        return toBase64(fromUtf8(JSON.stringify(idl, null, 2)));
     }, [idl]);
     const castawayUrl = useMemo(() => {
         const params = new URLSearchParams({ idlSource, network, program: programId });

@@ -7,6 +7,8 @@ import {
     VersionedMessage,
 } from '@solana/web3.js';
 
+import { toBuffer } from '@/app/shared/lib/bytes';
+
 type LookupsForAccountKeyIndex = { lookupTableIndex: number; lookupTableKey: PublicKey };
 
 function findLookupAddressByIndex(
@@ -111,7 +113,7 @@ export function intoTransactionInstructionFromVersionedMessage(
     const accountMetas = fillAccountMetas(accountKeyIndexes, originalMessage, lookupAccounts);
 
     const transactionInstruction: TransactionInstruction = new TransactionInstruction({
-        data: Buffer.from(data),
+        data: toBuffer(data),
         keys: accountMetas,
         programId: programId,
     });

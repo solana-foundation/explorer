@@ -20,6 +20,7 @@ import { useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
+import { toBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 import { clusterUrl } from '@/app/utils/cluster';
 import { getTransactionInstructionError } from '@/app/utils/program-err';
@@ -524,7 +525,7 @@ function handleInvokeError(error: unknown | Error, message = 'Failed to invoke i
 function serializeTransactionMessage(transaction: Transaction | undefined): string | null {
     if (!transaction) return null;
     try {
-        return Buffer.from(transaction.serializeMessage()).toString('base64');
+        return toBase64(transaction.serializeMessage());
     } catch (error) {
         Logger.warn('[idl] Failed to serialize transaction message', { error });
         return null;

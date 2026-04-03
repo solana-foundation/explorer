@@ -4,10 +4,10 @@ import { IdlField, IdlTypeDefTyStruct } from '@coral-xyz/anchor/dist/cjs/idl';
 import { cn } from '@shared/utils';
 import { decodeEventFromLog, mapIxArgsToRows } from '@utils/anchor';
 import { camelToTitleCase } from '@utils/index';
-import { Buffer } from 'buffer';
 import React, { useState } from 'react';
 import { Code } from 'react-feather';
 
+import { fromBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
 export function ProgramEventsCard({
@@ -96,7 +96,7 @@ function EventCard({
                                         Event Data <span className="text-muted">(Hex)</span>
                                     </td>
                                     <td className="text-lg-end">
-                                        <HexData raw={Buffer.from(rawEventData, 'base64')} />
+                                        <HexData raw={fromBase64(rawEventData)} />
                                     </td>
                                 </tr>
                             </>
