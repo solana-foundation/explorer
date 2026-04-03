@@ -5,65 +5,24 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 
 import type { InspectorData } from './InspectorPage';
 
-function getMessageDataFromBytes(bytes: Uint8Array): {
-    message: VersionedMessage;
-    rawMessage: Uint8Array;
-} {
-    const message = VersionedMessage.deserialize(bytes);
-    return {
-        message,
-        rawMessage: bytes,
-    };
-}
+export { MIN_MESSAGE_LENGTH };
 
 function getTransactionDataFromUserSuppliedBytes(bytes: Uint8Array): {
     message: VersionedMessage;
     rawMessage: Uint8Array;
-    signatures?: string[];
+    signatures?: (string | undefined)[];
 } {
-    /**
-     * Step 1: Try to parse the bytes as a *transaction* first (ie. with signatures at the front)
-     */
-    let offset = 0;
-    const numSignatures = bytes[offset++];
-    // If this were a transaction, would its message expect exactly `numSignatures`?
-    let requiredSignaturesByteOffset = 1 + numSignatures * 64;
-    if (VersionedMessage.deserializeMessageVersion(bytes.slice(requiredSignaturesByteOffset)) !== 'legacy') {
-        requiredSignaturesByteOffset++;
-    }
-    const numRequiredSignaturesAccordingToMessage = bytes[requiredSignaturesByteOffset];
-    if (numRequiredSignaturesAccordingToMessage !== numSignatures) {
-        // We looked ahead into the message and could not match the number of signatures indicated
-        // by the first byte of the transaction with the expected number of signatures in the
-        // message. This is likely not a transaction at all, so try to parse it as a message now.
-        return getMessageDataFromBytes(bytes);
-    }
-    const signatures = [];
-    for (let ii = 0; ii < numSignatures; ii++) {
-        const signatureBytes = bytes.subarray(offset, offset + 64);
-        if (signatureBytes.length !== 64) {
-            // We hit the end of the byte array before consuming `numSignatures` signatures. This
-            // can't have been a transaction, so try to parse it as a message now.
-            return getMessageDataFromBytes(bytes);
-        }
-        signatures.push(base58.encode(signatureBytes));
-        offset += 64;
-    }
-    try {
-        const transactionData = getMessageDataFromBytes(bytes.slice(offset));
-        return {
-            ...transactionData,
-            ...(signatures.length ? { signatures } : null),
-        };
-    } catch {
-        /**
-         * Step 2: That didn't work, so presume that the bytes are a message, as asked for in the UI
-         */
-        return getMessageDataFromBytes(bytes);
-    }
+    const { messageBytes, signatures } = parseTransactionBytes(bytes);
+    const message = VersionedMessage.deserialize(messageBytes);
+    return {
+        message,
+        rawMessage: messageBytes,
+        ...(signatures ? { signatures } : undefined),
+    };
 }
 
 function parseAccountAddresses(input: string): string[] {
@@ -76,13 +35,6 @@ function parseAccountAddresses(input: string): string[] {
             .filter(addr => addr.length > 0)
     );
 }
-
-export const MIN_MESSAGE_LENGTH =
-    3 + // header
-    1 + // accounts length
-    32 + // accounts, must have at least one address for fees
-    32 + // recent blockhash
-    1; // instructions length
 
 type TabData = {
     id: string;
