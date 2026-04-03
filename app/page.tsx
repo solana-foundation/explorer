@@ -23,8 +23,8 @@ import { percentage } from '@utils/math';
 import React from 'react';
 
 import { DeveloperResources } from './components/DeveloperResources';
-import { UpcomingFeatures } from './utils/feature-gate/UpcomingFeatures';
 import { SimpleCardSkeleton } from './components/shared/Skeletons';
+import { UpcomingFeatures } from './utils/feature-gate/UpcomingFeatures';
 
 export default function Page() {
     return (
