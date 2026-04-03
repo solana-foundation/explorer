@@ -57,6 +57,6 @@
 | Static | `/supply` | 7 kB | 948 kB |
 | Static | `/tos` | 325 B | 164 kB |
 | Dynamic | `/tx/[signature]` | 58 kB | 1.47 MB |
-| Dynamic | `/tx/[signature]/inspect` | 629 B | 1.23 MB |
-| Static | `/tx/inspector` | 633 B | 1.23 MB |
+| Dynamic | `/tx/[signature]/inspect` | 628 B | 1.23 MB |
+| Static | `/tx/inspector` | 634 B | 1.23 MB |
 | Static | `/verified-programs` | 7 kB | 173 kB |
