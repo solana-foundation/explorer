@@ -6,7 +6,7 @@
 | Static | `/_not-found` | 326 B | 164 kB |
 | Dynamic | `/address/[address]` | 11 kB | 976 kB |
 | Dynamic | `/address/[address]/anchor-account` | 8 kB | 1.01 MB |
-| Dynamic | `/address/[address]/anchor-program` | 336 B | 892 kB |
+| Dynamic | `/address/[address]/anchor-program` | 335 B | 892 kB |
 | Dynamic | `/address/[address]/attestation` | 7 kB | 982 kB |
 | Dynamic | `/address/[address]/attributes` | 3 kB | 936 kB |
 | Dynamic | `/address/[address]/blockhashes` | 3 kB | 936 kB |
@@ -14,9 +14,9 @@
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 5 kB | 970 kB |
 | Dynamic | `/address/[address]/domains` | 3 kB | 939 kB |
 | Dynamic | `/address/[address]/entries` | 4 kB | 957 kB |
-| Dynamic | `/address/[address]/feature-gate` | 335 B | 892 kB |
+| Dynamic | `/address/[address]/feature-gate` | 334 B | 892 kB |
 | Dynamic | `/address/[address]/idl` | 134 kB | 1.2 MB |
-| Dynamic | `/address/[address]/instructions` | 10 kB | 1.05 MB |
+| Dynamic | `/address/[address]/instructions` | 3 kB | 1.05 MB |
 | Dynamic | `/address/[address]/metadata` | 8 kB | 951 kB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 8 kB | 1.02 MB |
 | Dynamic | `/address/[address]/program-multisig` | 5 kB | 1.01 MB |
@@ -26,7 +26,7 @@
 | Dynamic | `/address/[address]/stake-history` | 5 kB | 940 kB |
 | Dynamic | `/address/[address]/token-extensions` | 12 kB | 1.02 MB |
 | Dynamic | `/address/[address]/tokens` | 30 kB | 1.14 MB |
-| Dynamic | `/address/[address]/transfers` | 13 kB | 1.07 MB |
+| Dynamic | `/address/[address]/transfers` | 5 kB | 1.07 MB |
 | Dynamic | `/address/[address]/verified-build` | 8 kB | 1.01 MB |
 | Dynamic | `/address/[address]/vote-history` | 5 kB | 940 kB |
 | Dynamic | `/api/anchor` | 0 B | 0 B |
@@ -57,6 +57,6 @@
 | Static | `/supply` | 7 kB | 947 kB |
 | Static | `/tos` | 325 B | 164 kB |
 | Dynamic | `/tx/[signature]` | 59 kB | 1.46 MB |
-| Dynamic | `/tx/[signature]/inspect` | 626 B | 1.23 MB |
-| Static | `/tx/inspector` | 632 B | 1.23 MB |
+| Dynamic | `/tx/[signature]/inspect` | 630 B | 1.23 MB |
+| Static | `/tx/inspector` | 634 B | 1.23 MB |
 | Static | `/verified-programs` | 7 kB | 173 kB |
