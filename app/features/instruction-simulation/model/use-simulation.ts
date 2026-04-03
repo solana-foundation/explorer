@@ -20,6 +20,7 @@ import { InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import { BN } from 'bn.js';
 import React from 'react';
 
+import { fromBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { getMintDecimals, isTokenProgramBase58 } from '../lib/tokenAccountParsing';
@@ -140,9 +141,9 @@ export function useSimulation(
                     if (
                         accountOwnerPost &&
                         isTokenProgramBase58(accountOwnerPost) &&
-                        Buffer.from(accountDataPost!, 'base64').length >= 165
+                        fromBase64(accountDataPost!).length >= 165
                     ) {
-                        const accountParsedPost = AccountLayout.decode(Buffer.from(accountDataPost!, 'base64'));
+                        const accountParsedPost = AccountLayout.decode(fromBase64(accountDataPost!));
                         const mint = new PublicKey(accountParsedPost.mint);
                         const owner = new PublicKey(accountParsedPost.owner);
                         const postRawAmount = Number(accountParsedPost.amount.readBigUInt64LE(0));

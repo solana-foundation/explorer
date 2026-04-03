@@ -18,6 +18,8 @@ import { extractEventsFromLogs } from '@utils/program-logs';
 import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 
+import { toBase64 } from '@/app/shared/lib/bytes';
+
 import { InstructionCard } from './InstructionCard';
 import { ProgramEventsCard } from './ProgramEventsCard';
 
@@ -74,14 +76,15 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
         let ixDef: IdlInstruction | undefined;
         if (anchorProgram) {
             let coder: BorshInstructionCoder | BorshEventCoder;
+            const encodedInstructionData = toBase64(ix.data.slice(8));
             if (instructionIsSelfCPI(ix.data)) {
                 // Try custom discriminator decoder first (handles variable-length discriminators)
-                decodedIxData = decodeEventWithCustomDiscriminator(ix.data.slice(8).toString('base64'), anchorProgram);
+                decodedIxData = decodeEventWithCustomDiscriminator(encodedInstructionData, anchorProgram);
 
                 // Fallback to standard Anchor event decoder
                 if (!decodedIxData) {
                     coder = new BorshEventCoder(anchorProgram.idl);
-                    decodedIxData = coder.decode(ix.data.slice(8).toString('base64'));
+                    decodedIxData = coder.decode(encodedInstructionData);
                 }
                 const ixEventDef = anchorProgram.idl.events?.find(
                     ixDef => ixDef.name === decodedIxData?.name,

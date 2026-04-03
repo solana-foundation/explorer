@@ -14,6 +14,7 @@ import { ActionMeta, components, ControlProps, InputActionMeta, SelectInstance }
 import AsyncSelect from 'react-select/async';
 import { is } from 'superstruct';
 
+import { isValidBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 import FEATURES from '@/app/utils/feature-gate/featureGates.json';
 
@@ -471,15 +472,6 @@ function decodeTransactionFromBase64(base64String: string): {
         };
     } catch (_err) {
         return null;
-    }
-}
-
-function isValidBase64(str: string): boolean {
-    try {
-        Buffer.from(str, 'base64');
-        return true;
-    } catch (_err) {
-        return false;
     }
 }
 

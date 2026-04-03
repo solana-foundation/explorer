@@ -2,6 +2,8 @@ import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
 import { describe, expect, it, vi } from 'vitest';
 
+import { fromUtf8 } from '@/app/shared/lib/bytes';
+
 import { AnchorInterpreter } from './anchor-interpreter';
 import { AnchorUnifiedProgram } from './anchor-program';
 
@@ -282,7 +284,7 @@ describe('AnchorInterpreter', () => {
             await interpreter.createInstruction(mockProgram, 'bytesInstruction', accounts, args);
 
             expect(mockBuildInstruction).toHaveBeenCalledWith('bytesInstruction', {}, [
-                Buffer.from(testData),
+                fromUtf8(testData),
                 'test message',
             ]);
         });
@@ -367,12 +369,12 @@ describe('AnchorInterpreter', () => {
             } as unknown as AnchorUnifiedProgram;
 
             const accounts = {};
-            const customData = Buffer.from('encoded transaction data');
+            const customData = 'encoded transaction data';
             const args = [customData];
 
             await interpreter.createInstruction(mockProgram, 'definedTypeInstruction', accounts, args);
 
-            expect(mockBuildInstruction).toHaveBeenCalledWith('definedTypeInstruction', {}, [customData]);
+            expect(mockBuildInstruction).toHaveBeenCalledWith('definedTypeInstruction', {}, [fromUtf8(customData)]);
         });
 
         it('should handle nested vector types', async () => {

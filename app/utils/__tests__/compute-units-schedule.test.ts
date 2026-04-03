@@ -1,5 +1,7 @@
 import { ComputeBudgetProgram, PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 
+import { alloc, writeUint32LE } from '@/app/shared/lib/bytes';
+
 import { Cluster } from '../cluster';
 import { estimateRequestedComputeUnits, getReservedComputeUnits } from '../compute-units-schedule';
 
@@ -202,9 +204,9 @@ describe('estimateRequestedComputeUnits', () => {
     describe('with explicit compute budget', () => {
         it('returns compute units from SetComputeUnitLimit instruction', () => {
             const computeUnits = 300_000;
-            const data = Buffer.alloc(5);
+            const data = alloc(5);
             data[0] = 2; // SetComputeUnitLimit instruction type
-            data.writeUInt32LE(computeUnits, 1);
+            writeUint32LE(data, computeUnits, 1);
 
             const tx = createMockTransaction([
                 {
@@ -218,10 +220,10 @@ describe('estimateRequestedComputeUnits', () => {
 
         it('returns compute units from deprecated RequestUnits instruction', () => {
             const computeUnits = 150_000;
-            const data = Buffer.alloc(9); // RequestUnits needs 9 bytes
+            const data = alloc(9); // RequestUnits needs 9 bytes
             data[0] = 0; // RequestUnits instruction type
-            data.writeUInt32LE(computeUnits, 1);
-            data.writeUInt32LE(0, 5); // additionalFee
+            writeUint32LE(data, computeUnits, 1);
+            writeUint32LE(data, 0, 5); // additionalFee
 
             const tx = createMockTransaction([
                 {
@@ -234,13 +236,13 @@ describe('estimateRequestedComputeUnits', () => {
         });
 
         it('prioritizes first compute budget instruction found', () => {
-            const data1 = Buffer.alloc(5);
+            const data1 = alloc(5);
             data1[0] = 2;
-            data1.writeUInt32LE(100_000, 1);
+            writeUint32LE(data1, 100_000, 1);
 
-            const data2 = Buffer.alloc(5);
+            const data2 = alloc(5);
             data2[0] = 2;
-            data2.writeUInt32LE(200_000, 1);
+            writeUint32LE(data2, 200_000, 1);
 
             const tx = createMockTransaction([
                 {
@@ -362,9 +364,9 @@ describe('estimateRequestedComputeUnits', () => {
         });
 
         it('handles compute budget with other instructions', () => {
-            const data = Buffer.alloc(5);
+            const data = alloc(5);
             data[0] = 2; // SetComputeUnitLimit
-            data.writeUInt32LE(500_000, 1);
+            writeUint32LE(data, 500_000, 1);
 
             const tx = createMockTransaction([
                 {
