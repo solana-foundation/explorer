@@ -91,7 +91,8 @@ export async function GET(request: Request, { params: _params }: Params) {
         'Cache-Control': resourceHeaders.get('cache-control') ?? 'no-cache',
         // Prevent proxied content (e.g. SVG with embedded scripts) from executing
         // anything if the proxy URL is opened directly as a top-level document.
-        'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data:",
+        'Content-Security-Policy':
+            "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'none'",
         'Content-Type': resourceHeaders.get('content-type') ?? 'application/json; charset=utf-8',
         Etag: resourceHeaders.get('etag') ?? 'no-etag',
         'X-Content-Type-Options': 'nosniff',
