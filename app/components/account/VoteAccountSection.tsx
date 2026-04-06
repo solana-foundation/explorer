@@ -12,7 +12,12 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
     const refresh = useRefreshAccount();
     const rootSlot = voteAccount.info.rootSlot;
     return (
-        <AccountCard title="Vote Account" account={account} refresh={() => refresh(account.pubkey, 'parsed')}>
+        <AccountCard
+            title="Vote Account"
+            account={account}
+            analyticsSection="vote_account_section"
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        >
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 

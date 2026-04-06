@@ -9,7 +9,12 @@ import React from 'react';
 export function NonceAccountSection({ account, nonceAccount }: { account: Account; nonceAccount: NonceAccount }) {
     const refresh = useRefreshAccount();
     return (
-        <AccountCard title="Nonce Account" account={account} refresh={() => refresh(account.pubkey, 'parsed')}>
+        <AccountCard
+            title="Nonce Account"
+            account={account}
+            analyticsSection="nonce_account_section"
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        >
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 

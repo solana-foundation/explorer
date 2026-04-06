@@ -11,6 +11,7 @@ type AccountCardProps = TableCardBodyProps & {
     account: Account;
     refresh?: () => void;
     showRawButton?: boolean;
+    analyticsSection?: string;
 };
 
 export function AccountCard({ account, children, ...rest }: AccountCardProps) {

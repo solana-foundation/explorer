@@ -129,7 +129,6 @@ function FungibleTokenMintAccountCard({
     tokenInfo?: FullLegacyTokenInfo;
 }) {
     const fetchInfo = useRefreshAccount();
-    const refresh = () => fetchInfo(account.pubkey, 'parsed');
 
     const bridgeContractAddress = getEthAddress(tokenInfo?.extensions?.bridgeContract);
     const assetContractAddress = getEthAddress(tokenInfo?.extensions?.assetContract);
@@ -148,7 +147,8 @@ function FungibleTokenMintAccountCard({
                       : 'Token Mint'
             }
             account={account}
-            refresh={refresh}
+            refresh={() => fetchInfo(account.pubkey, 'parsed')}
+            analyticsSection="token_mint_card"
         >
             <tr>
                 <td>Address</td>
@@ -251,11 +251,15 @@ function NonFungibleTokenMintAccountCard({
     mintInfo: MintAccountInfo;
 }) {
     const fetchInfo = useRefreshAccount();
-    const refresh = () => fetchInfo(account.pubkey, 'parsed');
 
     const collection = nftData.metadata.collection;
     return (
-        <AccountCard title="Overview" account={account} refresh={refresh}>
+        <AccountCard
+            title="Overview"
+            account={account}
+            refresh={() => fetchInfo(account.pubkey, 'parsed')}
+            analyticsSection="nft_mint_card"
+        >
             <tr>
                 <td>Address</td>
                 <td className="text-md-end">
@@ -376,6 +380,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
         <AccountCard
             title={<>Token{account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() && '-2022'} Account</>}
             account={account}
+            analyticsSection="token_account_card"
             refresh={() => refresh(account.pubkey, 'parsed')}
         >
             <tr>
@@ -469,7 +474,12 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
     const refresh = useRefreshAccount();
 
     return (
-        <AccountCard title="Multisig Account" account={account} refresh={() => refresh(account.pubkey, 'parsed')}>
+        <AccountCard
+            title="Multisig Account"
+            account={account}
+            analyticsSection="multisig_account_card"
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        >
             <tr>
                 <td>Address</td>
                 <td className="text-md-end">

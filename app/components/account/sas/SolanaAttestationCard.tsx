@@ -132,7 +132,12 @@ export function SolanaAttestationServiceCard({ account }: { account: Account }) 
     }
 
     return (
-        <AccountCard title={title} account={account} refresh={() => refresh(account.pubkey, 'parsed')}>
+        <AccountCard
+            title={title}
+            account={account}
+            analyticsSection="solana_attestation_service_section"
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        >
             <AccountAddressRow account={account} />
             {content}
         </AccountCard>
