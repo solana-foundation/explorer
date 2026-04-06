@@ -46,7 +46,14 @@ describe('Rugcheck API Route', () => {
         mockFetchResponse(400, { error: 'not found' });
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(404);
-        expect(await response.json()).toEqual({ error: 'Failed to fetch rugcheck data' });
+        expect(await response.json()).toEqual({ error: 'No rugcheck data available' });
+    });
+
+    it('should return 422 when rugcheck responds with 400 (unable to generate report)', async () => {
+        mockFetchResponse(400, { error: 'unable to generate report' });
+        const response = await callRoute(VALID_MINT);
+        expect(response.status).toBe(422);
+        expect(await response.json()).toEqual({ error: 'No rugcheck data available' });
     });
 
     it('should return 400 and report to sentry when rugcheck responds with 400 and unexpected body', async () => {
@@ -60,7 +67,7 @@ describe('Rugcheck API Route', () => {
         mockFetchResponse(404);
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(404);
-        expect(await response.json()).toEqual({ error: 'Failed to fetch rugcheck data' });
+        expect(await response.json()).toEqual({ error: 'No rugcheck data available' });
     });
 
     it('should return 429 and log to sentry when rate limited', async () => {
