@@ -85,7 +85,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
 // instead of using proper status codes. See https://api.rugcheck.xyz/swagger/index.html
 type NoDataStatusCode = 404 | 422;
 
-const RUGCHECK_NO_DATA_ERRORS: Record<string, NoDataStatusCode> = {
+const RUGCHECK_NO_DATA_ERRORS: Partial<Record<string, NoDataStatusCode>> = {
     'not found': 404,
     'unable to generate report': 422,
 };
