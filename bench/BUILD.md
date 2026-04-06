@@ -6,7 +6,7 @@
 | Static | `/_not-found` | 326 B | 164 kB |
 | Dynamic | `/address/[address]` | 14 kB | 975 kB |
 | Dynamic | `/address/[address]/anchor-account` | 8 kB | 1.01 MB |
-| Dynamic | `/address/[address]/anchor-program` | 336 B | 893 kB |
+| Dynamic | `/address/[address]/anchor-program` | 337 B | 893 kB |
 | Dynamic | `/address/[address]/attestation` | 7 kB | 983 kB |
 | Dynamic | `/address/[address]/attributes` | 3 kB | 938 kB |
 | Dynamic | `/address/[address]/blockhashes` | 3 kB | 937 kB |
@@ -46,7 +46,7 @@
 | Dynamic | `/api/verified-programs/list/[page]` | 0 B | 0 B |
 | Dynamic | `/api/verified-programs/metadata/[programId]` | 0 B | 0 B |
 | Dynamic | `/block/[slot]` | 10 kB | 960 kB |
-| Dynamic | `/block/[slot]/accounts` | 4 kB | 940 kB |
+| Dynamic | `/block/[slot]/accounts` | 4 kB | 941 kB |
 | Dynamic | `/block/[slot]/programs` | 5 kB | 941 kB |
 | Dynamic | `/block/[slot]/rewards` | 5 kB | 946 kB |
 | Dynamic | `/epoch/[epoch]` | 5 kB | 267 kB |
@@ -57,6 +57,6 @@
 | Static | `/supply` | 7 kB | 948 kB |
 | Static | `/tos` | 325 B | 164 kB |
 | Dynamic | `/tx/[signature]` | 58 kB | 1.47 MB |
-| Dynamic | `/tx/[signature]/inspect` | 628 B | 1.23 MB |
-| Static | `/tx/inspector` | 634 B | 1.23 MB |
+| Dynamic | `/tx/[signature]/inspect` | 630 B | 1.23 MB |
+| Static | `/tx/inspector` | 632 B | 1.23 MB |
 | Static | `/verified-programs` | 7 kB | 173 kB |

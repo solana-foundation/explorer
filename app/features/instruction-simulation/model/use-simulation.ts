@@ -20,7 +20,7 @@ import { InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import { BN } from 'bn.js';
 import React from 'react';
 
-import { fromBase64 } from '@/app/shared/lib/bytes';
+import { fromBase64, toBuffer } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { getMintDecimals, isTokenProgramBase58 } from '../lib/tokenAccountParsing';
@@ -143,7 +143,8 @@ export function useSimulation(
                         isTokenProgramBase58(accountOwnerPost) &&
                         fromBase64(accountDataPost!).length >= 165
                     ) {
-                        const accountParsedPost = AccountLayout.decode(fromBase64(accountDataPost!));
+                        // AccountLayout.decode uses @solana/buffer-layout which requires Buffer
+                        const accountParsedPost = AccountLayout.decode(toBuffer(fromBase64(accountDataPost!)));
                         const mint = new PublicKey(accountParsedPost.mint);
                         const owner = new PublicKey(accountParsedPost.owner);
                         const postRawAmount = Number(accountParsedPost.amount.readBigUInt64LE(0));
