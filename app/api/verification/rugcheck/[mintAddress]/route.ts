@@ -51,7 +51,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
             }
 
             if (response.status === 429) {
-                Logger.warn('[api:rugcheck] Rate limit exceeded');
+                Logger.warn('[api:rugcheck] Rate limit exceeded', { sentry: true });
             } else {
                 Logger.panic(new Error(`Rugcheck API error: ${response.status}`));
             }

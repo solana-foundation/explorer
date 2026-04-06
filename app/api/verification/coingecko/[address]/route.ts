@@ -39,7 +39,7 @@ export async function GET(_request: Request, { params: { address } }: Params) {
 
         if (!response.ok) {
             if (response.status === 429) {
-                Logger.warn('[api:coingecko] Rate limit exceeded');
+                Logger.warn('[api:coingecko] Rate limit exceeded', { sentry: true });
             } else if (response.status !== 404) {
                 Logger.panic(new Error(`Coingecko contract API error: ${response.status}`));
             }
@@ -52,7 +52,7 @@ export async function GET(_request: Request, { params: { address } }: Params) {
         const data = await response.json();
 
         if (!is(data, CoinGeckoInfoSchema)) {
-            Logger.warn('[api:coingecko] Invalid response schema', { address });
+            Logger.warn('[api:coingecko] Invalid response schema', { address, sentry: true });
             return NextResponse.json(
                 { error: 'Invalid response from coingecko API' },
                 { headers: NO_STORE_HEADERS, status: 502 },
