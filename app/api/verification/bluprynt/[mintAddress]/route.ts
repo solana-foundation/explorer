@@ -69,6 +69,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
     }
 }
 
+// https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/timeout_static#exceptions
 function isTimeoutError(error: unknown): boolean {
     return error instanceof DOMException && error.name === 'TimeoutError';
 }
