@@ -1,13 +1,11 @@
 import { Address } from '@components/common/Address';
 import { useAddressLookupTable } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
-import { cn } from '@shared/utils';
+import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
 export function AddressTableLookupsCard({ message }: { message: VersionedMessage }) {
-    const [expanded, setExpanded] = React.useState(true);
-
     const lookupRows = React.useMemo(() => {
         let key = 0;
         return message.addressTableLookups.flatMap(lookup => {
@@ -32,42 +30,31 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
     if (message.version === 'legacy') return null;
 
     return (
-        <div className="card">
-            <div className="card-header">
-                <h3 className="card-header-title">Address Table Lookup(s)</h3>
-                <button
-                    className={cn('btn btn-sm d-flex', expanded ? 'btn-black active' : 'btn-white')}
-                    onClick={() => setExpanded(e => !e)}
-                >
-                    {expanded ? 'Collapse' : 'Expand'}
-                </button>
-            </div>
-            {expanded && (
-                <div className="table-responsive mb-0">
-                    <table className="table table-sm table-nowrap card-table">
-                        <thead>
+        <CollapsibleCard title="Address Table Lookup(s)">
+            <div className="table-responsive mb-0">
+                <table className="table table-sm table-nowrap card-table">
+                    <thead>
+                        <tr>
+                            <th className="text-muted">Address Lookup Table Address</th>
+                            <th className="text-muted">Table Index</th>
+                            <th className="text-muted">Resolved Address</th>
+                            <th className="text-muted">Details</th>
+                        </tr>
+                    </thead>
+                    {lookupRows.length > 0 ? (
+                        <tbody className="list">{lookupRows}</tbody>
+                    ) : (
+                        <tbody className="card-footer">
                             <tr>
-                                <th className="text-muted">Address Lookup Table Address</th>
-                                <th className="text-muted">Table Index</th>
-                                <th className="text-muted">Resolved Address</th>
-                                <th className="text-muted">Details</th>
+                                <td colSpan={4}>
+                                    <span className="text-muted text-center">No entries found</span>
+                                </td>
                             </tr>
-                        </thead>
-                        {lookupRows.length > 0 ? (
-                            <tbody className="list">{lookupRows}</tbody>
-                        ) : (
-                            <tbody className="card-footer">
-                                <tr>
-                                    <td colSpan={4}>
-                                        <span className="text-muted text-center">No entries found</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        )}
-                    </table>
-                </div>
-            )}
-        </div>
+                        </tbody>
+                    )}
+                </table>
+            </div>
+        </CollapsibleCard>
     );
 }
 
