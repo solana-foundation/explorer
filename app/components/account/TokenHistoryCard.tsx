@@ -18,6 +18,7 @@ import { isTokenProgramId, TokenInfoWithPubkey, useAccountOwnedTokens } from '@p
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Details, useFetchTransactionDetails, useTransactionDetailsCache } from '@providers/transactions/parsed';
+import { RefreshButton } from '@shared/ui/refresh-button';
 import { cn } from '@shared/utils';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -27,7 +28,7 @@ import { displayAddress, intoTransactionInstruction } from '@utils/tx';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import React, { useCallback } from 'react';
-import { ChevronDown, MinusSquare, PlusSquare, RefreshCw } from 'react-feather';
+import { ChevronDown, MinusSquare, PlusSquare } from 'react-feather';
 
 import { INITIAL_TOKENS_TO_FETCH, INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import { Logger } from '@/app/shared/lib/logger';
@@ -228,19 +229,11 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     show={showDropdown}
                     tokens={tokens}
                 ></FilterDropdown>
-                <button className="btn btn-white btn-sm" disabled={fetching} onClick={() => fetchHistories(true)}>
-                    {fetching ? (
-                        <>
-                            <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
-                            Loading
-                        </>
-                    ) : (
-                        <>
-                            <RefreshCw className="align-text-top me-2" size={13} />
-                            Refresh
-                        </>
-                    )}
-                </button>
+                <RefreshButton
+                    analyticsSection="token_history_card"
+                    onClick={() => fetchHistories(true)}
+                    fetching={fetching}
+                />
             </div>
 
             <div className="table-responsive mb-0">

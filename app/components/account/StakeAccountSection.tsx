@@ -94,7 +94,12 @@ function OverviewCard({
 }) {
     const refresh = useRefreshAccount();
     return (
-        <AccountCard title="Stake Account" account={account} refresh={() => refresh(account.pubkey, 'parsed')}>
+        <AccountCard
+            title="Stake Account"
+            account={account}
+            analyticsSection="stake_account_section"
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        >
             <tr>
                 <td>Address</td>
                 <td className="text-lg-end">

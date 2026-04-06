@@ -36,6 +36,7 @@ export function AddressLookupTableAccountSection(
         <AccountCard
             title="Address Lookup Table Account"
             account={account}
+            analyticsSection="address_lookup_table_section"
             refresh={() => refresh(account.pubkey, 'parsed')}
         >
             <tr>
