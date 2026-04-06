@@ -15,6 +15,14 @@ const MAX_SIZE = process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE
     : 1_000_000; // 1 000 000 bytes
 const TIMEOUT = process.env.NEXT_PUBLIC_METADATA_TIMEOUT ? Number(process.env.NEXT_PUBLIC_METADATA_TIMEOUT) : 10_000; // 10s
 
+// Prevent proxied content (e.g. SVG with embedded scripts) from executing
+// anything if the proxy URL is opened directly as a top-level document.
+const SECURITY_HEADERS = {
+    'Content-Security-Policy':
+        "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'none'",
+    'X-Content-Type-Options': 'nosniff',
+};
+
 /**
  *  Respond with error in a JSON format
  */
@@ -88,14 +96,10 @@ export async function GET(request: Request, { params: _params }: Params) {
     // preserve original cache-control headers
     // const contentLength = resourceHeaders.get('content-length');
     const responseHeaders: Record<string, string> = {
+        ...SECURITY_HEADERS,
         'Cache-Control': resourceHeaders.get('cache-control') ?? 'no-cache',
-        // Prevent proxied content (e.g. SVG with embedded scripts) from executing
-        // anything if the proxy URL is opened directly as a top-level document.
-        'Content-Security-Policy':
-            "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'none'",
         'Content-Type': resourceHeaders.get('content-type') ?? 'application/json; charset=utf-8',
         Etag: resourceHeaders.get('etag') ?? 'no-etag',
-        'X-Content-Type-Options': 'nosniff',
     };
 
     // Skipping Content-Length to avoid browser CORS issues:
