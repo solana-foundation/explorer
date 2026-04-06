@@ -33,7 +33,7 @@
 | Dynamic | `/api/ans-domains/[address]` | 0 B | 0 B |
 | Dynamic | `/api/domain-info/[domain]` | 0 B | 0 B |
 | Dynamic | `/api/geo-location` | 0 B | 0 B |
-| Static | `/api/metadata/proxy` | 0 B | 0 B |
+| Dynamic | `/api/metadata/proxy` | 0 B | 0 B |
 | Dynamic | `/api/ping/[network]` | 0 B | 0 B |
 | Dynamic | `/api/program-metadata-idl` | 0 B | 0 B |
 | Dynamic | `/api/receipt/price/[mintAddress]` | 0 B | 0 B |
