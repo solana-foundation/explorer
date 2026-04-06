@@ -38,11 +38,9 @@ export async function GET(_request: Request, { params: { address } }: Params) {
         });
 
         if (!response.ok) {
-            if (response.status === 404) {
-                Logger.debug('[api:coingecko] Coin not found by contract address', { address });
-            } else if (response.status === 429) {
-                Logger.warn('[api:coingecko] Rate limit exceeded', { sentry: true });
-            } else {
+            if (response.status === 429) {
+                Logger.warn('[api:coingecko] Rate limit exceeded');
+            } else if (response.status !== 404) {
                 Logger.panic(new Error(`Coingecko contract API error: ${response.status}`));
             }
             return NextResponse.json(
@@ -54,7 +52,7 @@ export async function GET(_request: Request, { params: { address } }: Params) {
         const data = await response.json();
 
         if (!is(data, CoinGeckoInfoSchema)) {
-            Logger.warn('[api:coingecko] Invalid response schema', { address, sentry: true });
+            Logger.warn('[api:coingecko] Invalid response schema', { address });
             return NextResponse.json(
                 { error: 'Invalid response from coingecko API' },
                 { headers: NO_STORE_HEADERS, status: 502 },

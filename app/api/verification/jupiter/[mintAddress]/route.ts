@@ -42,11 +42,9 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
         });
 
         if (!response.ok) {
-            if (response.status === 404) {
-                Logger.debug('[api:jupiter] Token not found', { mintAddress });
-            } else if (response.status === 429) {
+            if (response.status === 429) {
                 Logger.warn('[api:jupiter] Rate limit exceeded', { sentry: true });
-            } else {
+            } else if (response.status !== 404) {
                 Logger.panic(new Error(`Jupiter API error: ${response.status}`));
             }
             return NextResponse.json(
