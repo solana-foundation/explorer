@@ -1,7 +1,7 @@
 import { AccountHeader } from '@components/account/AccountHeader';
 import { TokenMarketData } from '@components/common/TokenMarketData';
 import { isTokenProgramData } from '@providers/accounts';
-import { ComponentProps, useMemo } from 'react';
+import { type ComponentProps, useMemo } from 'react';
 
 import {
     TokenVerificationBadge,
