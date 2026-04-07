@@ -51,9 +51,7 @@ export function makeNftData(
         json: json ?? { image: 'https://example.com/image.png', name },
         metadata: makeMetadata({
             collection: collection ? some({ ...collection, key: publicKey(collection.key) }) : none(),
-            creators: creators
-                ? some(creators.map(c => ({ ...c, address: publicKey(c.address) })))
-                : none(),
+            creators: creators ? some(creators.map(c => ({ ...c, address: publicKey(c.address) }))) : none(),
             name,
             symbol,
             tokenStandard: some(0),
