@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
-import fetch from 'node-fetch';
-import { is, literal, number, type } from 'superstruct';
+import fetch, { type Response } from 'node-fetch';
+import { is, number, type } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -42,13 +42,16 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
         });
 
         if (!response.ok) {
-            if (response.status === 404 || (await isNotFoundResponse(response))) {
-                Logger.debug('[api:rugcheck] Token not found', { mintAddress });
+            const noDataStatus = await getNoDataStatus(response);
+            if (noDataStatus) {
+                Logger.debug('[api:rugcheck] No data available', { mintAddress, status: noDataStatus });
                 return NextResponse.json(
-                    { error: 'Failed to fetch rugcheck data' },
-                    { headers: NO_STORE_HEADERS, status: 404 },
+                    { error: 'No rugcheck data available' },
+                    { headers: NO_STORE_HEADERS, status: noDataStatus },
                 );
-            } else if (response.status === 429) {
+            }
+
+            if (response.status === 429) {
                 Logger.warn('[api:rugcheck] Rate limit exceeded', { sentry: true });
             } else {
                 Logger.panic(new Error(`Rugcheck API error: ${response.status}`));
@@ -78,17 +81,28 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
     }
 }
 
-const RugCheckNotFoundSchema = type({
-    error: literal('not found'),
-});
+// Rugcheck returns 400 with various error messages for tokens it can't process
+// instead of using proper status codes. See https://api.rugcheck.xyz/swagger/index.html
+type NoDataStatusCode = 404 | 422;
 
-// Rugcheck returns 400 {"error":"not found"} for unrecognized tokens instead of 404
-async function isNotFoundResponse(response: import('node-fetch').Response): Promise<boolean> {
-    if (response.status !== 400) return false;
+const RUGCHECK_NO_DATA_ERRORS: Partial<Record<string, NoDataStatusCode>> = {
+    'not found': 404,
+    'unable to generate report': 422,
+};
+
+async function getNoDataStatus(response: Response): Promise<NoDataStatusCode | undefined> {
+    if (response.status === 404) return 404;
+    if (response.status !== 400) return undefined;
+    const error = await getErrorMessage(response);
+    if (error) return RUGCHECK_NO_DATA_ERRORS[error];
+    return undefined;
+}
+
+async function getErrorMessage(response: Response): Promise<string | undefined> {
     try {
-        const body = await response.json();
-        return is(body, RugCheckNotFoundSchema);
+        const { error } = (await response.json()) as { error?: string };
+        return error;
     } catch {
-        return false;
+        return undefined;
     }
 }
