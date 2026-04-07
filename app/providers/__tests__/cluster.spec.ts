@@ -1,10 +1,11 @@
 import { Cluster, DEFAULT_CLUSTER } from '@utils/cluster';
+import { ReadonlyURLSearchParams } from 'next/navigation';
 import { describe, expect, it } from 'vitest';
 
 import { parseQuery } from '../cluster';
 
-function makeSearchParams(params: Record<string, string> = {}): URLSearchParams {
-    return new URLSearchParams(params);
+function makeSearchParams(params: Record<string, string> = {}): ReadonlyURLSearchParams {
+    return new URLSearchParams(params) as ReadonlyURLSearchParams;
 }
 
 describe('parseQuery', () => {

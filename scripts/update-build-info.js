@@ -144,7 +144,7 @@ function isOtherDataHeaderLine(line) {
 function formatTableLines(lines) {
     const tableLines = [];
 
-    tableLines.push('> Sizes are rounded up. Run `pnpm build` to see exact values.');
+    tableLines.push('> Sizes are approximate and rounded to reduce build-output noise. Run `pnpm build` to see exact values.');
     tableLines.push('');
     tableLines.push('| Type | Route | Size | First Load JS |');
     tableLines.push('|------|-------|------|---------------|');
@@ -164,9 +164,10 @@ function formatTableLines(lines) {
 }
 
 /**
- * Rounds a size string up to reduce noise from minor changes.
- * - B values: kept as-is
- * - kB values: rounded up to nearest integer
+ * Rounds a size string to reduce noise from minor changes while keeping
+ * enough resolution to understand dependency cost from the generated table.
+ * - B values: rounded to nearest 10 B
+ * - kB values: rounded up to nearest 10 kB
  * - MB values: rounded up to 2 decimal places (~10 kB granularity)
  * @param {string} sizeStr - Size string like "14.7 kB" or "1.03 MB"
  * @returns {string} Rounded size string
@@ -175,15 +176,31 @@ function roundSize(sizeStr) {
     // eslint-disable-next-line no-restricted-syntax -- Parsing size strings requires regex
     const match = sizeStr.match(/^([\d.]+)\s+(B|kB|MB)$/);
     if (!match) return sizeStr;
+    const [, valueStr, unit] = match;
 
-    const value = parseFloat(match[1]);
-    const unit = match[2];
-
-    if (unit === 'B') return sizeStr;
-    if (unit === 'kB') return `${Math.ceil(value)} kB`;
-    if (unit === 'MB') return `${Math.ceil(Math.round(value * 1000) / 10) / 100} MB`;
-
+    if (unit === 'B') return `${Math.round(Number(valueStr) / 10) * 10} B`;
+    if (unit === 'kB') {
+        const ceiledValue = Math.ceil(parseDecimalToScaledInt(valueStr, 1) / 100) * 10;
+        return `${ceiledValue} kB`;
+    }
+    if (unit === 'MB') {
+        const ceiledValue = Math.ceil(parseDecimalToScaledInt(valueStr, 3) / 10);
+        return `${(ceiledValue / 100).toFixed(2)} MB`;
+    }
     return sizeStr;
+}
+
+/**
+ * Parses a decimal string into an integer with a fixed scale, avoiding
+ * floating-point rounding artifacts during size normalization.
+ * @param {string} valueStr - Decimal string like "14.7" or "1.03"
+ * @param {number} scale - Number of decimal places to preserve
+ * @returns {number} Integer scaled by 10^scale
+ */
+function parseDecimalToScaledInt(valueStr, scale) {
+    const [wholePart, fractionalPart = ''] = valueStr.split('.');
+    const normalizedFraction = fractionalPart.padEnd(scale, '0').slice(0, scale);
+    return Number(wholePart) * 10 ** scale + Number(normalizedFraction || '0');
 }
 
 // ================================================================================================

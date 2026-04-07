@@ -318,6 +318,16 @@ export function isValidBase64(str: string): boolean {
 }
 
 /**
+ * Type guard replacement for `instanceof Buffer`.
+ * TS 5.7 made Buffer generic (`Buffer<ArrayBufferLike>`), which breaks
+ * negative narrowing with `instanceof`. This type guard narrows correctly
+ * in both branches.
+ */
+export function isBuffer(value: unknown): value is Buffer {
+    return Buffer.isBuffer(value);
+}
+
+/**
  * Check if value is a ByteArray (Buffer or Uint8Array)
  */
 export function isByteArray(value: unknown): value is ByteArray {
