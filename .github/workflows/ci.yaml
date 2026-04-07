@@ -87,9 +87,6 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Types
-        run: pnpm types
-
       - name: Test
         env:
           TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}

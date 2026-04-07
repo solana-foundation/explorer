@@ -1,5 +1,5 @@
 import type { Metadata } from '@metaplex-foundation/mpl-token-metadata';
-import { none, some } from '@metaplex-foundation/umi';
+import { none, publicKey, some } from '@metaplex-foundation/umi';
 import { PublicKey } from '@solana/web3.js';
 
 import type { EditionInfo, NFTData, NftJson } from '../types';
@@ -50,8 +50,10 @@ export function makeNftData(
         editionInfo,
         json: json ?? { image: 'https://example.com/image.png', name },
         metadata: makeMetadata({
-            collection: collection ? some(collection) : none(),
-            creators: creators ? some(creators) : none(),
+            collection: collection ? some({ ...collection, key: publicKey(collection.key) }) : none(),
+            creators: creators
+                ? some(creators.map(c => ({ ...c, address: publicKey(c.address) })))
+                : none(),
             name,
             symbol,
             tokenStandard: some(0),

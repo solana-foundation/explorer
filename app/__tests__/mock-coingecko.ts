@@ -1,3 +1,4 @@
+import { publicKey, some } from '@metaplex-foundation/umi';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { FullTokenInfo } from '@utils/token-info';
@@ -42,21 +43,20 @@ export const account = (): Account => {
                     editionInfo: {},
                     metadata: {
                         data: {
-                            // @ts-expect-error This is real data that is received
                             creators: undefined,
                             name: 'USD Coin',
                             sellerFeeBasisPoints: 0,
                             symbol: 'USDC',
                             uri: '',
                         },
-                        editionNonce: 252,
+                        editionNonce: some(252),
                         // @ts-expect-error This is real data that is received
                         isMutable: 1,
                         key: 4,
-                        mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+                        mint: publicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
                         // @ts-expect-error This is real data that is received
                         primarySaleHappened: 0,
-                        updateAuthority: '2wmVCSfPxGPjrnMMn7rchp4uaeoTqN39mXFC2zhPdri9',
+                        updateAuthority: publicKey('2wmVCSfPxGPjrnMMn7rchp4uaeoTqN39mXFC2zhPdri9'),
                     },
                 },
                 parsed: {
