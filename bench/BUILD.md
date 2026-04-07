@@ -6,10 +6,10 @@
 | Static | `/_not-found` | 326 B | 164 kB |
 | Dynamic | `/address/[address]` | 16 kB | 1.03 MB |
 | Dynamic | `/address/[address]/anchor-account` | 7 kB | 1.08 MB |
-| Dynamic | `/address/[address]/anchor-program` | 337 B | 949 kB |
+| Dynamic | `/address/[address]/anchor-program` | 336 B | 949 kB |
 | Dynamic | `/address/[address]/attestation` | 6 kB | 1.04 MB |
 | Dynamic | `/address/[address]/attributes` | 3 kB | 999 kB |
-| Dynamic | `/address/[address]/blockhashes` | 2 kB | 999 kB |
+| Dynamic | `/address/[address]/blockhashes` | 2 kB | 998 kB |
 | Dynamic | `/address/[address]/compression` | 6 kB | 1.03 MB |
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 4 kB | 1.03 MB |
 | Dynamic | `/address/[address]/domains` | 3 kB | 1.02 MB |
@@ -57,6 +57,6 @@
 | Static | `/supply` | 5 kB | 1.03 MB |
 | Static | `/tos` | 325 B | 164 kB |
 | Dynamic | `/tx/[signature]` | 58 kB | 1.53 MB |
-| Dynamic | `/tx/[signature]/inspect` | 627 B | 1.29 MB |
+| Dynamic | `/tx/[signature]/inspect` | 626 B | 1.29 MB |
 | Static | `/tx/inspector` | 632 B | 1.29 MB |
 | Static | `/verified-programs` | 7 kB | 173 kB |
