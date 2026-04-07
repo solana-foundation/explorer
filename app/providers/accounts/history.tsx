@@ -60,7 +60,17 @@ function combineFetched(
 }
 
 function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | undefined) {
-    if (update?.history === undefined) return history;
+    if (update?.history === undefined) {
+        // Support transactionMap-only updates from background lazy fetches
+        if (update?.transactionMap && history) {
+            const transactionMap = new Map([
+                ...Array.from(history.transactionMap || new Map()),
+                ...Array.from(update.transactionMap),
+            ]);
+            return { ...history, transactionMap };
+        }
+        return history;
+    }
 
     let transactionMap = history?.transactionMap || new Map();
     if (update.transactionMap) {
@@ -206,6 +216,42 @@ function getUnfetchedSignatures(before: Cache.CacheEntry<AccountHistory>) {
     const existingMap = before.data.transactionMap;
     const allSignatures = before.data.fetched.map(signatureInfo => signatureInfo.signature);
     return allSignatures.filter(signature => !existingMap.has(signature));
+}
+
+export function useFetchTransactionsForHistory() {
+    const { cluster, url } = useCluster();
+    const dispatch = React.useContext(DispatchContext);
+    const inFlight = React.useContext(InFlightContext);
+    if (!dispatch || !inFlight) {
+        throw new Error(`useFetchTransactionsForHistory must be used within a HistoryProvider`);
+    }
+
+    return React.useCallback(
+        (pubkey: PublicKey, history: AccountHistory) => {
+            const existingMap = history.transactionMap || new Map();
+            const unfetched = history.fetched.map(info => info.signature).filter(sig => !existingMap.has(sig));
+            if (unfetched.length === 0) return;
+
+            const key = `${pubkey.toBase58()}:transactions`;
+            fetchOnce(key, inFlight, async () => {
+                try {
+                    const transactionMap = await fetchParsedTransactions(url, unfetched);
+                    dispatch({
+                        data: { transactionMap },
+                        key: pubkey.toBase58(),
+                        status: FetchStatus.Fetched,
+                        type: ActionType.Update,
+                        url,
+                    });
+                } catch (error) {
+                    if (cluster !== Cluster.Custom) {
+                        Logger.error(error, { url });
+                    }
+                }
+            }).catch(e => Logger.error(e));
+        },
+        [cluster, url, dispatch, inFlight],
+    );
 }
 
 export function useFetchAccountHistory(limit = 25) {
