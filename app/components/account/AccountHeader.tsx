@@ -2,6 +2,7 @@ import { CompressedNftAccountHeader } from '@components/account/CompressedNftCar
 import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
 import { isNFTokenAccount } from '@components/account/nftoken/isNFTokenAccount';
 import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
+import { isMetaplexNFT } from '@entities/nft';
 import {
     Account,
     isTokenProgramData,
@@ -9,7 +10,6 @@ import {
     TokenProgramData,
     useMintAccountInfo,
 } from '@providers/accounts';
-import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useMetadataJsonLink } from '@providers/compressed-nft';
 import { MintAccountInfo } from '@validators/accounts/token';
 import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension';
@@ -128,13 +128,13 @@ function TokenMintHeader({
         );
     }
     // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
-    else if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
+    else if (!parsedData?.nftData?.metadata.uri && tokenInfo) {
         return defaultCard;
     } else if (parsedData?.nftData) {
         const token = {
             logoURI: parsedData?.nftData?.json?.image,
-            name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
-            symbol: parsedData?.nftData?.metadata.data.symbol,
+            name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.name,
+            symbol: parsedData?.nftData?.metadata.symbol,
         };
         return <TokenMintHeaderCard token={token} />;
     } else if (tokenInfo) {

@@ -1,8 +1,8 @@
 import { InfoTooltip } from '@components/common/InfoTooltip';
 import { ArtContent } from '@components/common/NFTArt';
-import { programs } from '@metaplex/js';
+import type { EditionInfo } from '@entities/nft';
+import { isSome } from '@metaplex-foundation/umi';
 import { NFTData, useFetchAccountInfo, useMintAccountInfo } from '@providers/accounts';
-import { EditionInfo } from '@providers/accounts/utils/getEditionInfo';
 import { PublicKey } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
@@ -11,14 +11,15 @@ import { AlertOctagon, Check, ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
 export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; address: string }) {
-    const collection = nftData.metadata.collection;
+    const collectionOpt = nftData.metadata.collection;
+    const collection = collectionOpt && isSome(collectionOpt) ? collectionOpt.value : null;
     const collectionAddress = collection?.key;
-    const collectionMintInfo = useMintAccountInfo(collectionAddress);
+    const collectionMintInfo = useMintAccountInfo(collectionAddress?.toString());
     const fetchAccountInfo = useFetchAccountInfo();
 
     React.useEffect(() => {
         if (collectionAddress && !collectionMintInfo) {
-            fetchAccountInfo(new PublicKey(collectionAddress), 'parsed');
+            fetchAccountInfo(new PublicKey(collectionAddress.toString()), 'parsed');
         }
     }, [fetchAccountInfo, collectionAddress]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -53,13 +54,13 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
                 {<h6 className="header-pretitle ms-1">Metaplex NFT</h6>}
                 <div className="d-flex align-items-center">
                     <h2 className="header-title ms-1 align-items-center no-overflow-with-ellipsis">
-                        {metadata.data.name !== '' ? metadata.data.name : 'No NFT name was found'}
+                        {metadata.name !== '' ? metadata.name : 'No NFT name was found'}
                     </h2>
                     {getEditionPill(nftData.editionInfo)}
                     {isVerifiedCollection ? getVerifiedCollectionPill() : null}
                 </div>
                 <h4 className="header-pretitle ms-1 mt-1 no-overflow-with-ellipsis">
-                    {metadata.data.symbol !== '' ? metadata.data.symbol : 'No Symbol was found'}
+                    {metadata.symbol !== '' ? metadata.symbol : 'No Symbol was found'}
                 </h4>
                 <div className="mb-2 mt-2">{getSaleTypePill(metadata.primarySaleHappened)}</div>
                 <div className="mb-3 mt-2">{getIsMutablePill(metadata.isMutable)}</div>
@@ -74,15 +75,16 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
                     >
                         Creators <ChevronDown size={15} className="align-text-top" />
                     </button>
-                    <div className="dropdown-menu mt-2">{getCreatorDropdownItems(metadata.data.creators)}</div>
+                    <div className="dropdown-menu mt-2">
+                        {getCreatorDropdownItems(isSome(metadata.creators) ? metadata.creators.value : null)}
+                    </div>
                 </div>
             </div>
         </div>
     );
 }
 
-type Creator = programs.metadata.Creator;
-export function getCreatorDropdownItems(creators: Creator[] | null) {
+export function getCreatorDropdownItems(creators: Array<{ address: string; verified: boolean; share: number }> | null) {
     const CreatorHeader = () => {
         const creatorTooltip = 'Verified creators signed the metadata associated with this NFT when it was created.';
 
@@ -106,7 +108,7 @@ export function getCreatorDropdownItems(creators: Creator[] | null) {
         return isVerified ? <Check className="ms-3" size={15} /> : <AlertOctagon className="me-3" size={15} />;
     };
 
-    const CreatorEntry = (creator: Creator) => {
+    const CreatorEntry = (creator: { address: string; verified: boolean; share: number }) => {
         const creatorPath = useClusterPath({ pathname: `/address/${creator.address}` });
         return (
             <div className={'d-flex align-items-center font-monospace creator-dropdown-entry ms-3 me-3'}>
@@ -145,7 +147,7 @@ function getEditionPill(editionInfo: EditionInfo) {
         <div className={'d-inline-flex ms-2'}>
             <span className="badge badge-pill bg-dark">{`${
                 edition && masterEdition
-                    ? `Edition ${edition.edition.toNumber()} / ${masterEdition.supply.toNumber()}`
+                    ? `Edition ${Number(edition.edition)} / ${Number(masterEdition.supply)}`
                     : masterEdition
                       ? 'Master Edition'
                       : 'No Master Edition Information'

@@ -2,10 +2,11 @@ import ScaledUiAmountMultiplierTooltip from '@components/account/token-extension
 import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
 import { useRefreshAccount } from '@entities/account';
+import { isMetaplexNFT } from '@entities/nft';
 import { AccountCard } from '@features/account';
+import { isSome } from '@metaplex-foundation/umi';
 import { Account, NFTData, TokenProgramData } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID, useScaledUiAmountForMint } from '@providers/accounts/tokens';
-import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -252,7 +253,13 @@ function NonFungibleTokenMintAccountCard({
 }) {
     const fetchInfo = useRefreshAccount();
 
-    const collection = nftData.metadata.collection;
+    const collectionOpt = nftData.metadata.collection;
+    const collection = collectionOpt && isSome(collectionOpt) ? collectionOpt.value : null;
+    const maxSupplyOpt =
+        nftData.editionInfo.masterEdition && 'maxSupply' in nftData.editionInfo.masterEdition
+            ? nftData.editionInfo.masterEdition.maxSupply
+            : undefined;
+    const maxSupply = maxSupplyOpt && isSome(maxSupplyOpt) ? Number(maxSupplyOpt.value) : null;
     return (
         <AccountCard
             title="Overview"
@@ -272,31 +279,27 @@ function NonFungibleTokenMintAccountCard({
                     <Address pubkey={account.owner} alignRight link />
                 </td>
             </tr>
-            {nftData.editionInfo.masterEdition?.maxSupply && (
+            {maxSupply != null && (
                 <tr>
                     <td>Max Total Supply</td>
-                    <td className="text-md-end">
-                        {nftData.editionInfo.masterEdition.maxSupply.toNumber() === 0
-                            ? 1
-                            : nftData.editionInfo.masterEdition.maxSupply.toNumber()}
-                    </td>
+                    <td className="text-md-end">{maxSupply === 0 ? 1 : maxSupply}</td>
                 </tr>
             )}
-            {nftData?.editionInfo.masterEdition?.supply && (
+            {nftData?.editionInfo.masterEdition != null && (
                 <tr>
                     <td>Current Supply</td>
                     <td className="text-md-end">
-                        {nftData.editionInfo.masterEdition.supply.toNumber() === 0
+                        {Number(nftData.editionInfo.masterEdition.supply) === 0
                             ? 1
-                            : nftData.editionInfo.masterEdition.supply.toNumber()}
+                            : Number(nftData.editionInfo.masterEdition.supply)}
                     </td>
                 </tr>
             )}
-            {!!collection?.verified && (
+            {collection?.verified && (
                 <tr>
                     <td>Verified Collection Address</td>
                     <td className="text-md-end">
-                        <Address pubkey={new PublicKey(collection.key)} alignRight link />
+                        <Address pubkey={new PublicKey(collection.key.toString())} alignRight link />
                     </td>
                 </tr>
             )}
@@ -319,7 +322,7 @@ function NonFungibleTokenMintAccountCard({
             <tr>
                 <td>Update Authority</td>
                 <td className="text-md-end">
-                    <Address pubkey={new PublicKey(nftData.metadata.updateAuthority)} alignRight link />
+                    <Address pubkey={new PublicKey(nftData.metadata.updateAuthority.toString())} alignRight link />
                 </td>
             </tr>
             {nftData?.json && nftData.json.external_url && (
@@ -333,10 +336,10 @@ function NonFungibleTokenMintAccountCard({
                     </td>
                 </tr>
             )}
-            {nftData?.metadata.data && (
+            {nftData?.metadata && (
                 <tr>
                     <td>Seller Fee</td>
-                    <td className="text-md-end">{`${nftData?.metadata.data.sellerFeeBasisPoints / 100}%`}</td>
+                    <td className="text-md-end">{`${nftData.metadata.sellerFeeBasisPoints / 100}%`}</td>
                 </tr>
             )}
         </AccountCard>
