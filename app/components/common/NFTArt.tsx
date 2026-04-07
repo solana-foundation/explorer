@@ -1,5 +1,5 @@
+import type { NftJson } from '@entities/nft';
 import lowContrastSolanalogo from '@img/logos-solana/low-contrast-solana-logo.svg';
-import { MetadataJson } from '@metaplex/js';
 import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 
@@ -50,7 +50,7 @@ export const ArtContent = ({
 }: {
     pubkey?: PublicKey | string;
     uri?: string;
-    data: MetadataJson | undefined;
+    data: NftJson | undefined;
 }) => {
     if (pubkey && data) {
         uri = data.image;

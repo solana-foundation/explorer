@@ -1,17 +1,16 @@
 'use client';
 
-import { FullLegacyTokenInfo, FullTokenInfo } from '@/app/utils/token-info';
-
+import { type VerificationTarget } from '../lib/types';
 import { useTokenVerification } from '../model/use-verification-sources';
 import { BaseTokenVerificationBadge } from './BaseTokenVerificationBadge';
 
 export type TokenVerificationBadgeProps = {
-    tokenInfo?: FullTokenInfo | FullLegacyTokenInfo;
+    target: VerificationTarget;
     isTokenInfoLoading?: boolean;
 };
 
-export function TokenVerificationBadge({ tokenInfo, isTokenInfoLoading }: TokenVerificationBadgeProps) {
-    const verificationResult = useTokenVerification(tokenInfo);
+export function TokenVerificationBadge({ target, isTokenInfoLoading }: TokenVerificationBadgeProps) {
+    const verificationResult = useTokenVerification(target);
 
     return <BaseTokenVerificationBadge verificationResult={verificationResult} isLoading={isTokenInfoLoading} />;
 }

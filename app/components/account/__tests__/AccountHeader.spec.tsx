@@ -44,8 +44,9 @@ vi.mock('@providers/compressed-nft', () => ({
     useMetadataJsonLink: vi.fn(() => undefined),
 }));
 
-vi.mock('@providers/accounts/utils/isMetaplexNFT', () => ({
-    default: vi.fn(() => false),
+vi.mock('@entities/nft', async () => ({
+    ...(await vi.importActual('@entities/nft')),
+    isMetaplexNFT: vi.fn(() => false),
 }));
 
 vi.mock('@components/account/nftoken/isNFTokenAccount', () => ({
