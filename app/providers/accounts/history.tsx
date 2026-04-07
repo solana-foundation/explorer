@@ -19,16 +19,19 @@ import React from 'react';
 import { Logger } from '@/app/shared/lib/logger';
 
 type TransactionMap = Map<string, ParsedTransactionWithMeta>;
+type FailedTransactionSignatures = Set<string>;
 
 type AccountHistory = {
     fetched: ConfirmedSignatureInfo[];
     transactionMap?: TransactionMap;
+    failedTransactionSignatures?: FailedTransactionSignatures;
     foundOldest: boolean;
 };
 
 type HistoryUpdate = {
     history?: AccountHistory;
     transactionMap?: TransactionMap;
+    failedTransactionSignatures?: FailedTransactionSignatures;
     before?: TransactionSignature;
 };
 
@@ -59,25 +62,47 @@ function combineFetched(
     return fetched;
 }
 
+function mergeTransactionMap(current: TransactionMap | undefined, update: TransactionMap | undefined) {
+    if (!update) {
+        return current ?? new Map<string, ParsedTransactionWithMeta>();
+    }
+
+    return new Map([...Array.from(current ?? new Map<string, ParsedTransactionWithMeta>()), ...Array.from(update)]);
+}
+
+function mergeFailedTransactionSignatures(
+    current: FailedTransactionSignatures | undefined,
+    update: FailedTransactionSignatures | undefined,
+) {
+    if (!update) {
+        return current ?? new Set<string>();
+    }
+
+    return new Set([...Array.from(current ?? new Set<string>()), ...Array.from(update)]);
+}
+
 function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | undefined) {
     if (update?.history === undefined) {
         // Support transactionMap-only updates from background lazy fetches
-        if (update?.transactionMap && history) {
-            const transactionMap = new Map([
-                ...Array.from(history.transactionMap || new Map()),
-                ...Array.from(update.transactionMap),
-            ]);
-            return { ...history, transactionMap };
+        if ((update?.transactionMap || update?.failedTransactionSignatures) && history) {
+            const transactionMap = mergeTransactionMap(history.transactionMap, update.transactionMap);
+            const failedTransactionSignatures = mergeFailedTransactionSignatures(
+                history.failedTransactionSignatures,
+                update.failedTransactionSignatures,
+            );
+            return { ...history, failedTransactionSignatures, transactionMap };
         }
         return history;
     }
 
-    let transactionMap = history?.transactionMap || new Map();
-    if (update.transactionMap) {
-        transactionMap = new Map([...Array.from(transactionMap), ...Array.from(update.transactionMap)]);
-    }
+    const transactionMap = mergeTransactionMap(history?.transactionMap, update.transactionMap);
+    const failedTransactionSignatures = mergeFailedTransactionSignatures(
+        update.before === undefined ? undefined : history?.failedTransactionSignatures,
+        update.failedTransactionSignatures,
+    );
 
     return {
+        failedTransactionSignatures,
         fetched: combineFetched(update.history.fetched, history?.fetched, update?.before),
         foundOldest: update?.history?.foundOldest || history?.foundOldest || false,
         transactionMap,
@@ -108,22 +133,37 @@ export function HistoryProvider({ children }: HistoryProviderProps) {
     );
 }
 
-async function fetchParsedTransactions(url: string, transactionSignatures: string[]) {
+async function fetchParsedTransactions(url: string, cluster: Cluster, transactionSignatures: string[]) {
     const connection = new Connection(url);
-    const results = await fetchAll(transactionSignatures, signature =>
-        withBackoff(() =>
-            connection.getParsedTransaction(signature, {
-                maxSupportedTransactionVersion: 0,
-            }),
-        ),
-    );
-    const transactionMap = new Map<string, ParsedTransactionWithMeta>();
-    results.forEach((tx, i) => {
-        if (tx !== null) {
-            transactionMap.set(transactionSignatures[i], tx);
+    const results = await fetchAll(transactionSignatures, async signature => {
+        try {
+            const transaction = await withBackoff(() =>
+                connection.getParsedTransaction(signature, {
+                    maxSupportedTransactionVersion: 0,
+                }),
+            );
+
+            return { signature, transaction };
+        } catch (error) {
+            if (cluster !== Cluster.Custom) {
+                Logger.error(error, { signature, url });
+            }
+            return { signature, transaction: null };
         }
     });
-    return transactionMap;
+
+    const transactionMap = new Map<string, ParsedTransactionWithMeta>();
+    const failedTransactionSignatures = new Set<string>();
+
+    results.forEach(({ signature, transaction }) => {
+        if (transaction !== null) {
+            transactionMap.set(signature, transaction);
+        } else {
+            failedTransactionSignatures.add(signature);
+        }
+    });
+
+    return { failedTransactionSignatures, transactionMap };
 }
 
 async function fetchAccountHistory(
@@ -162,11 +202,12 @@ async function fetchAccountHistory(
         status = FetchStatus.FetchFailed;
     }
 
+    let failedTransactionSignatures;
     let transactionMap;
     if (fetchTransactions && history?.fetched) {
         try {
             const signatures = history.fetched.map(signature => signature.signature).concat(additionalSignatures || []);
-            transactionMap = await fetchParsedTransactions(url, signatures);
+            ({ failedTransactionSignatures, transactionMap } = await fetchParsedTransactions(url, cluster, signatures));
         } catch (error) {
             if (cluster !== Cluster.Custom) {
                 Logger.error(error, { url });
@@ -178,6 +219,7 @@ async function fetchAccountHistory(
     dispatch({
         data: {
             before: options?.before,
+            failedTransactionSignatures,
             history,
             transactionMap,
         },
@@ -209,37 +251,53 @@ export function useAccountHistory(address: string): Cache.CacheEntry<AccountHist
 }
 
 function getUnfetchedSignatures(before: Cache.CacheEntry<AccountHistory>) {
-    if (!before.data?.transactionMap) {
+    if (!before.data) {
         return [];
     }
 
-    const existingMap = before.data.transactionMap;
+    const existingMap = before.data.transactionMap || new Map<string, ParsedTransactionWithMeta>();
+    const failedTransactionSignatures = before.data.failedTransactionSignatures || new Set<string>();
     const allSignatures = before.data.fetched.map(signatureInfo => signatureInfo.signature);
-    return allSignatures.filter(signature => !existingMap.has(signature));
+    return allSignatures.filter(
+        signature => !existingMap.has(signature) && !failedTransactionSignatures.has(signature),
+    );
 }
 
 export function useFetchTransactionsForHistory() {
     const { cluster, url } = useCluster();
+    const state = React.useContext(StateContext);
     const dispatch = React.useContext(DispatchContext);
     const inFlight = React.useContext(InFlightContext);
-    if (!dispatch || !inFlight) {
+    const latestEntriesRef = React.useRef(state?.entries);
+    latestEntriesRef.current = state?.entries;
+
+    if (!state || !dispatch || !inFlight) {
         throw new Error(`useFetchTransactionsForHistory must be used within a HistoryProvider`);
     }
 
     return React.useCallback(
         (pubkey: PublicKey, history: AccountHistory) => {
             const existingMap = history.transactionMap || new Map();
-            const unfetched = history.fetched.map(info => info.signature).filter(sig => !existingMap.has(sig));
+            const failedTransactionSignatures = history.failedTransactionSignatures || new Set<string>();
+            const unfetched = history.fetched
+                .map(info => info.signature)
+                .filter(sig => !existingMap.has(sig) && !failedTransactionSignatures.has(sig));
             if (unfetched.length === 0) return;
 
             const key = `${pubkey.toBase58()}:transactions`;
             fetchOnce(key, inFlight, async () => {
                 try {
-                    const transactionMap = await fetchParsedTransactions(url, unfetched);
+                    const { failedTransactionSignatures, transactionMap } = await fetchParsedTransactions(
+                        url,
+                        cluster,
+                        unfetched,
+                    );
+                    const currentStatus =
+                        latestEntriesRef.current?.[pubkey.toBase58()]?.status ?? FetchStatus.Fetched;
                     dispatch({
-                        data: { transactionMap },
+                        data: { failedTransactionSignatures, transactionMap },
                         key: pubkey.toBase58(),
-                        status: FetchStatus.Fetched,
+                        status: currentStatus,
                         type: ActionType.Update,
                         url,
                     });
