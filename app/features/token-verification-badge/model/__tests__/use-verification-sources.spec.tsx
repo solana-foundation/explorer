@@ -40,13 +40,13 @@ vi.mock('../use-rugcheck', async importOriginal => {
     };
 });
 
-const baseMint: VerificationTarget = {
+const baseTarget: VerificationTarget = {
     address: 'token-address',
     coingeckoId: 'token-id',
     solflareVerified: true,
 };
 
-const legacyMint: VerificationTarget = {
+const legacyTarget: VerificationTarget = {
     address: 'token-address',
     coingeckoId: 'token-id',
 };
@@ -67,7 +67,7 @@ describe('useTokenVerification', () => {
                 verified: true,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const bluprynt = result.current.sources.find(s => s.name === EVerificationSource.Bluprynt);
 
             expect(bluprynt?.verified).toBe(true);
@@ -80,7 +80,7 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const bluprynt = result.current.sources.find(s => s.name === EVerificationSource.Bluprynt);
 
             expect(bluprynt?.verified).toBe(false);
@@ -93,7 +93,7 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const bluprynt = result.current.sources.find(s => s.name === EVerificationSource.Bluprynt);
 
             expect(bluprynt?.verified).toBe(false);
@@ -107,7 +107,7 @@ describe('useTokenVerification', () => {
                 status: CoingeckoStatus.Success,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const coingecko = result.current.sources.find(s => s.name === EVerificationSource.CoinGecko);
 
             expect(coingecko?.verified).toBe(true);
@@ -118,9 +118,9 @@ describe('useTokenVerification', () => {
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.Success,
             });
-            const mintWithoutCoingecko: VerificationTarget = { address: 'token-address', solflareVerified: true };
+            const targetWithoutCoingecko: VerificationTarget = { address: 'token-address', solflareVerified: true };
 
-            const { result } = renderHook(() => useTokenVerification(mintWithoutCoingecko));
+            const { result } = renderHook(() => useTokenVerification(targetWithoutCoingecko));
             const coingecko = result.current.sources.find(s => s.name === EVerificationSource.CoinGecko);
 
             expect(coingecko?.verified).toBe(false);
@@ -132,7 +132,7 @@ describe('useTokenVerification', () => {
                 status: CoingeckoStatus.RateLimited,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const coingecko = result.current.sources.find(s => s.name === EVerificationSource.CoinGecko);
 
             expect(coingecko?.isRateLimited).toBe(true);
@@ -148,7 +148,7 @@ describe('useTokenVerification', () => {
                 verified: true,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const jupiter = result.current.sources.find(s => s.name === EVerificationSource.Jupiter);
 
             expect(jupiter?.verified).toBe(true);
@@ -161,7 +161,7 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const jupiter = result.current.sources.find(s => s.name === EVerificationSource.Jupiter);
 
             expect(jupiter?.verified).toBe(false);
@@ -174,7 +174,7 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const jupiter = result.current.sources.find(s => s.name === EVerificationSource.Jupiter);
 
             expect(jupiter?.isRateLimited).toBe(true);
@@ -184,7 +184,7 @@ describe('useTokenVerification', () => {
 
     describe('Solflare verification', () => {
         it('should mark as verified when tokenInfo has verified property set to true', () => {
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const solflare = result.current.sources.find(s => s.name === EVerificationSource.Solflare);
 
             expect(solflare?.verified).toBe(true);
@@ -192,9 +192,9 @@ describe('useTokenVerification', () => {
         });
 
         it('should mark as not verified when solflareVerified is false', () => {
-            const unverifiedMint: VerificationTarget = { ...baseMint, solflareVerified: false };
+            const unverifiedTarget: VerificationTarget = { ...baseTarget, solflareVerified: false };
 
-            const { result } = renderHook(() => useTokenVerification(unverifiedMint));
+            const { result } = renderHook(() => useTokenVerification(unverifiedTarget));
             const solflare = result.current.sources.find(s => s.name === EVerificationSource.Solflare);
 
             expect(solflare?.verified).toBe(false);
@@ -202,7 +202,7 @@ describe('useTokenVerification', () => {
         });
 
         it('should mark isVerificationFound as false when solflareVerified is undefined', () => {
-            const { result } = renderHook(() => useTokenVerification(legacyMint));
+            const { result } = renderHook(() => useTokenVerification(legacyTarget));
             const solflare = result.current.sources.find(s => s.name === EVerificationSource.Solflare);
 
             expect(solflare?.verified).toBe(false);
@@ -218,7 +218,7 @@ describe('useTokenVerification', () => {
                 verified: true,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const rugcheck = result.current.sources.find(s => s.name === EVerificationSource.RugCheck);
 
             expect(rugcheck?.verified).toBe(true);
@@ -234,7 +234,7 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const rugcheck = result.current.sources.find(s => s.name === EVerificationSource.RugCheck);
 
             expect(rugcheck?.verified).toBe(false);
@@ -250,7 +250,7 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const rugcheck = result.current.sources.find(s => s.name === EVerificationSource.RugCheck);
 
             expect(rugcheck?.verified).toBe(false);
@@ -266,7 +266,7 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const rugcheck = result.current.sources.find(s => s.name === EVerificationSource.RugCheck);
 
             expect(rugcheck?.isRateLimited).toBe(true);
@@ -281,7 +281,7 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const rugcheck = result.current.sources.find(s => s.name === EVerificationSource.RugCheck);
 
             expect(rugcheck?.verified).toBe(false);
@@ -309,7 +309,7 @@ describe('useTokenVerification', () => {
                 verified: true,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
 
             expect(result.current.verificationFoundSources).toHaveLength(5);
             expect(result.current.verificationFoundSources.map(s => s.name)).toEqual([
@@ -339,7 +339,7 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
 
             expect(result.current.verificationFoundSources).toHaveLength(1);
             expect(result.current.verificationFoundSources[0].name).toBe(EVerificationSource.Solflare);
@@ -365,8 +365,8 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const unverifiedMint: VerificationTarget = { ...baseMint, solflareVerified: false };
-            const { result } = renderHook(() => useTokenVerification(unverifiedMint));
+            const unverifiedTarget: VerificationTarget = { ...baseTarget, solflareVerified: false };
+            const { result } = renderHook(() => useTokenVerification(unverifiedTarget));
 
             expect(result.current.sourcesToApply).toHaveLength(4);
             expect(result.current.sourcesToApply.map(s => s.name)).toEqual([
@@ -395,8 +395,8 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const unverifiedMint: VerificationTarget = { ...baseMint, solflareVerified: false };
-            const { result } = renderHook(() => useTokenVerification(unverifiedMint));
+            const unverifiedTarget: VerificationTarget = { ...baseTarget, solflareVerified: false };
+            const { result } = renderHook(() => useTokenVerification(unverifiedTarget));
 
             expect(result.current.sourcesToApply).toHaveLength(1);
             expect(result.current.sourcesToApply[0].name).toBe(EVerificationSource.Bluprynt);
@@ -420,8 +420,8 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const unverifiedMint: VerificationTarget = { ...baseMint, solflareVerified: false };
-            const { result } = renderHook(() => useTokenVerification(unverifiedMint));
+            const unverifiedTarget: VerificationTarget = { ...baseTarget, solflareVerified: false };
+            const { result } = renderHook(() => useTokenVerification(unverifiedTarget));
 
             expect(result.current.sourcesToApply.map(s => s.name)).not.toContain(EVerificationSource.Bluprynt);
         });
@@ -444,7 +444,7 @@ describe('useTokenVerification', () => {
                 verified: true,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
 
             expect(result.current.sourcesToApply).toHaveLength(0);
         });
@@ -476,7 +476,7 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const { result } = renderHook(() => useTokenVerification(baseMint));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
 
             expect(result.current.verificationFoundSources.map(s => s.name)).toEqual([
                 EVerificationSource.Bluprynt,
