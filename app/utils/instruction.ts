@@ -7,12 +7,15 @@ import {
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
 import { isTokenProgramId } from '@providers/accounts/tokens';
 import {
+    ComputeBudgetProgram,
     ConfirmedSignatureInfo,
     ParsedInstruction,
     ParsedTransactionWithMeta,
     PartiallyDecodedInstruction,
 } from '@solana/web3.js';
-import { isTokenProgram } from '@utils/programs';
+import { ComputeBudgetInstruction, identifyComputeBudgetInstruction } from '@solana-program/compute-budget';
+import { camelToTitleCase } from '@utils/index';
+import { getProgramName, isTokenProgram } from '@utils/programs';
 import { intoTransactionInstruction } from '@utils/tx';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
@@ -114,6 +117,32 @@ export function getTokenInstructionName(
     }
 
     return name;
+}
+
+export function getTransactionInstructionNames(transactionWithMeta: ParsedTransactionWithMeta): string[] {
+    return transactionWithMeta.transaction.message.instructions.map(ix => {
+        const programName = getProgramName(ix.programId);
+        if ('parsed' in ix) {
+            if (typeof ix.parsed === 'object' && ix.parsed !== null && 'type' in ix.parsed) {
+                return `${programName}: ${camelToTitleCase(String(ix.parsed.type))}`;
+            }
+            // ix.parsed is a string (e.g. memo text) — instruction name is the program name
+            return `${programName}: Memo`;
+        }
+        if (ix.programId.equals(ComputeBudgetProgram.programId)) {
+            try {
+                const txInstruction = intoTransactionInstruction(transactionWithMeta.transaction, ix);
+                if (txInstruction) {
+                    const type = identifyComputeBudgetInstruction(new Uint8Array(txInstruction.data));
+                    const name = ComputeBudgetInstruction[type];
+                    return `${programName}: ${camelToTitleCase(name.charAt(0).toLowerCase() + name.slice(1))}`;
+                }
+            } catch {
+                // fall through
+            }
+        }
+        return `${programName}: Unknown Instruction`;
+    });
 }
 
 export function getTokenInstructionType(

@@ -4,10 +4,11 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
-import { useAccountHistory, useFetchAccountHistory } from '@providers/accounts/history';
+import { useAccountHistory, useFetchAccountHistory, useFetchTransactionsForHistory } from '@providers/accounts/history';
 import { FetchStatus } from '@providers/cache';
-import { PublicKey } from '@solana/web3.js';
+import { ParsedTransactionWithMeta, PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc } from '@utils/date';
+import { getTransactionInstructionNames } from '@utils/instruction';
 import React, { useCallback, useMemo } from 'react';
 import Moment from 'react-moment';
 
@@ -22,8 +23,15 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
     const history = useAccountHistory(address);
     const fetchAccountHistory = useFetchAccountHistory();
+    const fetchTransactionsForHistory = useFetchTransactionsForHistory();
     const refresh = () => fetchAccountHistory(pubkey, false, true);
     const loadMore = () => fetchAccountHistory(pubkey, false);
+
+    React.useEffect(() => {
+        if (history?.data) {
+            fetchTransactionsForHistory(pubkey, history.data);
+        }
+    }, [history?.data, fetchTransactionsForHistory, pubkey]);
 
     const transactionRows = React.useMemo(() => {
         if (history?.data?.fetched) {
@@ -31,6 +39,11 @@ export function TransactionHistoryCard({ address }: { address: string }) {
         }
         return [];
     }, [history]);
+
+    const detailedHistoryMap = React.useMemo(
+        () => history?.data?.transactionMap || new Map<string, ParsedTransactionWithMeta>(),
+        [history?.data?.transactionMap],
+    );
 
     React.useEffect(() => {
         if (!history) {
@@ -53,10 +66,22 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     const hasTimestamps = transactionRows.some(element => element.blockTime);
     const detailsList: React.ReactNode[] = transactionRows.map(
         ({ slot, signature, blockTime, statusClass, statusText }) => {
+            const transactionWithMeta = detailedHistoryMap.get(signature);
+            const instructionNames = transactionWithMeta ? getTransactionInstructionNames(transactionWithMeta) : null;
+
             return (
                 <tr key={signature}>
                     <td>
                         <Signature signature={signature} link truncateChars={40} />
+                        {instructionNames && instructionNames.length > 0 && (
+                            <div className="d-flex flex-wrap gap-1 mt-1">
+                                {instructionNames.map((name, i) => (
+                                    <span key={i} className="badge bg-secondary-soft">
+                                        {name}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                     </td>
 
                     <td className="w-1">
