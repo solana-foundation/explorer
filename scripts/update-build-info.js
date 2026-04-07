@@ -167,7 +167,7 @@ function formatTableLines(lines) {
  * Rounds a size string to reduce noise from minor changes while keeping
  * enough resolution to understand dependency cost from the generated table.
  * - B values: rounded to nearest 10 B
- * - kB values: rounded up to nearest 10 kB
+ * - kB values: rounded up to nearest 10 kB, carrying to MB at 1000 kB
  * - MB values: rounded up to 2 decimal places (~10 kB granularity)
  * @param {string} sizeStr - Size string like "14.7 kB" or "1.03 MB"
  * @returns {string} Rounded size string
@@ -181,6 +181,7 @@ function roundSize(sizeStr) {
     if (unit === 'B') return `${Math.round(Number(valueStr) / 10) * 10} B`;
     if (unit === 'kB') {
         const ceiledValue = Math.ceil(parseDecimalToScaledInt(valueStr, 1) / 100) * 10;
+        if (ceiledValue >= 1000) return `${(ceiledValue / 1000).toFixed(2)} MB`;
         return `${ceiledValue} kB`;
     }
     if (unit === 'MB') {
