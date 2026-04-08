@@ -27,6 +27,7 @@ function EntityIcon({ icon, label }: { icon?: string; label: string }) {
                 className="e-h-9 e-w-9 e-shrink-0 e-rounded-lg e-object-cover"
                 height={36}
                 src={icon}
+                unoptimized
                 width={36}
                 onError={() => setError(true)}
             />
