@@ -75,11 +75,21 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
 
     const { logs, solBalanceChanges, epoch, unitsConsumed, error } = simulation.result;
     const succeeded = !error;
+    const hasLogs = !!logs?.length;
+    const hasErrorWithoutLogs = !hasLogs && !!error;
 
     return (
         <>
             <SimulationCardShell action={<SimulateButton label="Retry" onClick={simulation.simulate} />}>
-                {logs && <ProgramLogsCardBody message={message} logs={logs} cluster={cluster} url={url} />}
+                {hasLogs && <ProgramLogsCardBody message={message} logs={logs} cluster={cluster} url={url} />}
+                {hasErrorWithoutLogs && (
+                    <div className="card-body">
+                        <div>
+                            Simulation Failure:
+                            <span className="e-ml-2 e-text-yellow-500">{error}</span>
+                        </div>
+                    </div>
+                )}
             </SimulationCardShell>
             {logs && (
                 <SimulatorCUProfilingCard
