@@ -3,7 +3,7 @@ import fetch, { Headers } from 'node-fetch';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { NO_STORE_HEADERS, parseResponseBody,PROXY_TIMEOUT_MS } from '../config';
+import { NO_STORE_HEADERS, parseResponseBody, PROXY_TIMEOUT_MS } from '../config';
 import { getHeliusSearchApiBaseUrl } from '../helius-search-config';
 
 export async function POST(request: Request) {
