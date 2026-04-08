@@ -82,6 +82,21 @@ describe('CoinGecko API Route', () => {
         expect(Logger.panic).toHaveBeenCalled();
     });
 
+    it('should accept null market_cap_rank for unranked tokens', async () => {
+        mockFetchResponse(200, {
+            last_updated: '2025-01-01T00:00:00Z',
+            market_cap_rank: null,
+            market_data: {
+                current_price: { usd: 0.01 },
+                market_cap: { usd: 10_000 },
+                total_volume: { usd: 500 },
+            },
+        });
+        const response = await callRoute(VALID_ADDRESS);
+        expect(response.status).toBe(200);
+        expect(await response.json()).toEqual(expect.objectContaining({ market_cap_rank: null }));
+    });
+
     it('should return 502 and log to sentry when response schema is invalid', async () => {
         mockFetchResponse(200, { unexpected: 'shape' });
         const response = await callRoute(VALID_ADDRESS);

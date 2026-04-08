@@ -20,7 +20,7 @@ export interface CoinInfo {
     volume_24: number;
     market_cap: number;
     price_change_percentage_24h: number | undefined;
-    market_cap_rank: number;
+    market_cap_rank: number | undefined;
     last_updated: Date;
 }
 
@@ -70,7 +70,7 @@ async function fetchCoinGeckoVerification([, address]: CoinGeckoSwrKey): Promise
             coinInfo: {
                 last_updated: new Date(data.last_updated),
                 market_cap: data.market_data.market_cap.usd,
-                market_cap_rank: data.market_cap_rank,
+                market_cap_rank: data.market_cap_rank ?? undefined,
                 price: data.market_data.current_price.usd,
                 price_change_percentage_24h: data.market_data.price_change_percentage_24h_in_currency?.usd,
                 volume_24: data.market_data.total_volume.usd,
