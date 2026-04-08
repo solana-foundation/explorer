@@ -4,7 +4,7 @@ import fetch, { Headers } from 'node-fetch';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, clusterFromSlug, clusterSlug } from '@/app/utils/cluster';
 
-import { NO_STORE_HEADERS, PROXY_TIMEOUT_MS, parseResponseBody } from './config';
+import { NO_STORE_HEADERS, parseResponseBody,PROXY_TIMEOUT_MS } from './config';
 import { getHeliusSearchApiBaseUrl } from './helius-search-config';
 
 export const dynamic = 'force-dynamic';

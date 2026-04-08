@@ -108,7 +108,7 @@ describe('SearchBar', () => {
             fireEvent.change(input, { target: { value: 'token' } });
 
             // Debounce hasn't fired yet → search !== debouncedSearch → loading shown
-            expect(screen.getByText('loading...')).toBeInTheDocument();
+            expect(screen.getByText('Searching...')).toBeInTheDocument();
         });
 
         it('should stop showing loading indicator after debounce settles', () => {
@@ -121,7 +121,7 @@ describe('SearchBar', () => {
             act(() => vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS));
 
             // Debounce settled, fetch not loading → no loading indicator
-            expect(screen.queryByText('loading...')).not.toBeInTheDocument();
+            expect(screen.queryByText('Searching...')).not.toBeInTheDocument();
         });
 
         it('should not show loading indicator for whitespace-only input during debounce', () => {
@@ -131,7 +131,7 @@ describe('SearchBar', () => {
             fireEvent.change(input, { target: { value: '   ' } });
 
             // Whitespace-only search should not trigger pending state
-            expect(screen.queryByText('loading...')).not.toBeInTheDocument();
+            expect(screen.queryByText('Searching...')).not.toBeInTheDocument();
         });
     });
 });

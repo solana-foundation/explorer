@@ -7,8 +7,8 @@ import {
     getHeliusSearchTurnstileSiteKey,
     getSearchVerificationState,
     registerSearchChallengeCallback,
-    subscribeToSearchStateChanges,
     type SearchVerificationState,
+    subscribeToSearchStateChanges,
 } from '@/app/utils/helius-search-auth';
 
 declare global {

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import React from 'react';
 import { expect, userEvent, within } from 'storybook/test';
 import { fn } from 'storybook/test';
 
@@ -33,9 +32,7 @@ export const Default: Story = {
         const input = canvas.getByRole('combobox');
         expect(input).toBeInTheDocument();
 
-        const placeholder = canvas.getByPlaceholderText(
-            'Search for blocks, accounts, transactions, programs, and tokens',
-        );
+        const placeholder = canvas.getByPlaceholderText('Search for tokens, validators, programs, and accounts');
         expect(placeholder).toBeInTheDocument();
     },
 };
@@ -75,7 +72,7 @@ export const WithResults: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        expect(canvas.getByText('Tokens')).toBeInTheDocument();
+        expect(canvas.getByText('Tokens', { selector: 'span' })).toBeInTheDocument();
         expect(canvas.getByText('Token A')).toBeInTheDocument();
         expect(canvas.getByText('Token B')).toBeInTheDocument();
     },
@@ -90,8 +87,8 @@ export const Loading: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        expect(canvas.getByText('loading...')).toBeInTheDocument();
-        expect(canvas.queryByText('No Results')).not.toBeInTheDocument();
+        expect(canvas.getByText('Searching...')).toBeInTheDocument();
+        expect(canvas.queryByText('No results found')).not.toBeInTheDocument();
     },
 };
 
@@ -105,8 +102,8 @@ export const NoResults: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        expect(canvas.getByText('No Results')).toBeInTheDocument();
-        expect(canvas.queryByText('loading...')).not.toBeInTheDocument();
+        expect(canvas.getByText('No results found')).toBeInTheDocument();
+        expect(canvas.queryByText('Searching...')).not.toBeInTheDocument();
     },
 };
 
@@ -174,9 +171,9 @@ export const MultipleGroups: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        expect(canvas.getByText('Accounts')).toBeInTheDocument();
-        expect(canvas.getByText('Programs')).toBeInTheDocument();
-        expect(canvas.getByText('Tokens')).toBeInTheDocument();
+        expect(canvas.getByText('Accounts', { selector: 'span' })).toBeInTheDocument();
+        expect(canvas.getByText('Programs', { selector: 'span' })).toBeInTheDocument();
+        expect(canvas.getByText('Tokens', { selector: 'span' })).toBeInTheDocument();
         expect(canvas.getByText('Solana Foundation')).toBeInTheDocument();
         expect(canvas.getByText('Solana Token Program')).toBeInTheDocument();
         expect(canvas.getByText('Wrapped SOL')).toBeInTheDocument();
@@ -222,8 +219,8 @@ export const WithIconsAndBadges: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        expect(canvas.getByText('TOKENS')).toBeInTheDocument();
-        expect(canvas.getByText('PROGRAMS')).toBeInTheDocument();
+        expect(canvas.getByText('Tokens', { selector: 'span' })).toBeInTheDocument();
+        expect(canvas.getByText('Programs', { selector: 'span' })).toBeInTheDocument();
         expect(canvas.getByText('USDC - USD Coin')).toBeInTheDocument();
         expect(canvas.getByText('USDT - Tether USD')).toBeInTheDocument();
         expect(canvas.getByText('Token Program')).toBeInTheDocument();

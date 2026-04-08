@@ -1,14 +1,14 @@
 import { Logger } from '@/app/shared/lib/logger';
 
 import type { SearchProvider, SearchProviderRegistry } from '../lib/types';
+import { base64TxSearchProvider } from './base64-tx-search-provider';
+import { domainSearchProvider } from './domain-search-provider';
+import { explorerUrlSearchProvider } from './explorer-url-search-provider';
 import { featureGateSearchProvider } from './feature-gate-search-provider';
 import { heliusSearchProvider } from './helius-search-provider';
 import { loaderSearchProvider } from './loader-search-provider';
-import { explorerUrlSearchProvider } from './explorer-url-search-provider';
 import { specialSearchProvider } from './special-search-provider';
 import { sysvarSearchProvider } from './sysvar-search-provider';
-import { base64TxSearchProvider } from './base64-tx-search-provider';
-import { domainSearchProvider } from './domain-search-provider';
 import { transactionSearchProvider } from './transaction-search-provider';
 
 const allProviders: SearchProvider[] = [
