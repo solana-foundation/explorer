@@ -1,14 +1,12 @@
+import { CUProfilingCard, formatInstructionLogs } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
-import { ParsedTransactionWithMeta } from '@solana/web3.js';
-import { Cluster } from '@utils/cluster';
-import { formatInstructionLogs } from '@utils/cu-profiling';
+import type { ParsedTransactionWithMeta } from '@solana/web3.js';
+import type { Cluster } from '@utils/cluster';
 import { getEpochForSlot } from '@utils/epoch-schedule';
 import type { SignatureProps } from '@utils/index';
-import { InstructionLogs, parseProgramLogs } from '@utils/program-logs';
+import { type InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
-
-import { CUProfilingCard } from './CUProfilingCard';
 
 export function CUProfilingSection({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);

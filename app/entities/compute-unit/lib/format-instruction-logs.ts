@@ -1,15 +1,9 @@
-import { Cluster } from './cluster';
+import type { Cluster } from '@utils/cluster';
+import type { InstructionLogs } from '@utils/program-logs';
+
 import { getReservedComputeUnits } from './compute-units-schedule';
 import { getDefaultComputeUnits } from './default-compute-units';
-import { InstructionLogs } from './program-logs';
-
-export type InstructionCUData = {
-    programId: string;
-    computeUnits: number;
-    displayUnits?: number;
-    reservedValue?: number;
-    minValue: number;
-};
+import type { InstructionCUData } from './types';
 
 const MIN_VALUE = 150;
 

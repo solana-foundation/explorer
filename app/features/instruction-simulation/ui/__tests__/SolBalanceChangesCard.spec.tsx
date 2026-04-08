@@ -49,7 +49,14 @@ describe('SolBalanceChangesCard', () => {
     });
 
     it('should render table headers', () => {
-        const balanceChanges: SolBalanceChange[] = [];
+        const balanceChanges: SolBalanceChange[] = [
+            createMockBalanceChange(
+                'GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS',
+                '1000000000',
+                '2000000000',
+                '3000000000',
+            ),
+        ];
 
         render(<SolBalanceChangesCard balanceChanges={balanceChanges} />);
 
