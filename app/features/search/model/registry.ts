@@ -1,33 +1,25 @@
 import { Logger } from '@/app/shared/lib/logger';
 
 import type { SearchProvider, SearchProviderRegistry } from '../lib/types';
-import { accountSearchProvider } from './account-search-provider';
-import { base64TxSearchProvider } from './base64-tx-search-provider';
-import { blockSearchProvider } from './block-search-provider';
-import { domainSearchProvider } from './domain-search-provider';
-import { epochSearchProvider } from './epoch-search-provider';
-import { explorerUrlSearchProvider } from './explorer-url-search-provider';
 import { featureGateSearchProvider } from './feature-gate-search-provider';
 import { heliusSearchProvider } from './helius-search-provider';
 import { loaderSearchProvider } from './loader-search-provider';
-import { programSearchProvider } from './program-search-provider';
+import { explorerUrlSearchProvider } from './explorer-url-search-provider';
 import { specialSearchProvider } from './special-search-provider';
 import { sysvarSearchProvider } from './sysvar-search-provider';
+import { base64TxSearchProvider } from './base64-tx-search-provider';
+import { domainSearchProvider } from './domain-search-provider';
 import { transactionSearchProvider } from './transaction-search-provider';
 
 const allProviders: SearchProvider[] = [
+    ...(process.env.NEXT_PUBLIC_DISABLE_TOKEN_SEARCH ? [] : [heliusSearchProvider]),
+    featureGateSearchProvider,
     explorerUrlSearchProvider,
-    programSearchProvider,
     loaderSearchProvider,
     sysvarSearchProvider,
     specialSearchProvider,
-    featureGateSearchProvider,
-    blockSearchProvider,
-    epochSearchProvider,
-    accountSearchProvider,
     transactionSearchProvider,
     base64TxSearchProvider,
-    heliusSearchProvider,
     domainSearchProvider,
 ];
 
