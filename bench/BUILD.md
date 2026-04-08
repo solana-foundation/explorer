@@ -45,7 +45,7 @@
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | 0 B | 0 B |
 | Dynamic | `/api/verified-programs/list/[page]` | 0 B | 0 B |
 | Dynamic | `/api/verified-programs/metadata/[programId]` | 0 B | 0 B |
-| Dynamic | `/block/[slot]` | 10 kB | 1.05 MB |
+| Dynamic | `/block/[slot]` | 10 kB | 1.11 MB |
 | Dynamic | `/block/[slot]/accounts` | 10 kB | 1.03 MB |
 | Dynamic | `/block/[slot]/programs` | 10 kB | 1.03 MB |
 | Dynamic | `/block/[slot]/rewards` | 10 kB | 1.04 MB |
