@@ -93,7 +93,12 @@ function getSimulate(state: SimulationState): () => void {
 }
 
 function createMockMessage(): VersionedMessage {
-    return { addressTableLookups: [], staticAccountKeys: [] } as unknown as VersionedMessage;
+    // Minimal stub — serialize() returns an empty buffer, enough for fingerprinting.
+    return {
+        addressTableLookups: [],
+        serialize: () => new Uint8Array(0),
+        staticAccountKeys: [],
+    } as unknown as VersionedMessage;
 }
 
 function createSuccessResult(overrides?: Partial<SimulationResult>): SimulationResult {

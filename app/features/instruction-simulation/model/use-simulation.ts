@@ -82,10 +82,5 @@ export function useSimulation(message: VersionedMessage, accountBalances?: Accou
  * Hashes the raw key bytes to keep the key compact regardless of account count.
  */
 function messageToFingerprint(message: VersionedMessage): string {
-    const keys = message.staticAccountKeys;
-    const bytes = new Uint8Array(keys.length * 32);
-    for (let i = 0; i < keys.length; i++) {
-        bytes.set(keys[i].toBytes(), i * 32);
-    }
-    return toHex(sha256(bytes));
+    return toHex(sha256(Uint8Array.from(message.serialize())));
 }
