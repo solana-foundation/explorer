@@ -302,7 +302,7 @@ describe('simulateTransaction', () => {
         function createTokenMessage(): VersionedMessage {
             return createMockMessage({
                 getAccountKeys: () => ({
-                    staticAccountKeys: [TOKEN_ACCOUNT_KEY, MINT_KEY],
+                    keySegments: () => [[TOKEN_ACCOUNT_KEY, MINT_KEY]],
                 }),
             });
         }
@@ -368,11 +368,13 @@ function createMockConnection(overrides?: Partial<Connection>): Connection {
     } as unknown as Connection;
 }
 
-function createMockMessage(overrides?: Partial<VersionedMessage>): VersionedMessage {
+// Partial<VersionedMessage> is too strict for test mocks — getAccountKeys
+// returns a minimal stub, not a full MessageAccountKeys.
+function createMockMessage(overrides?: Partial<Record<string, unknown>>): VersionedMessage {
     return {
         addressTableLookups: [],
         getAccountKeys: () => ({
-            staticAccountKeys: [ACCOUNT_KEY_1, ACCOUNT_KEY_2],
+            keySegments: () => [[ACCOUNT_KEY_1, ACCOUNT_KEY_2]],
         }),
         ...overrides,
     } as unknown as VersionedMessage;

@@ -65,9 +65,7 @@ type RawSimulation = {
  */
 async function runSimulation(connection: Connection, message: VersionedMessage): Promise<RawSimulation> {
     const lookupTables = await resolveAddressLookupTables(connection, message);
-    const accountKeys = message.getAccountKeys({
-        addressLookupTableAccounts: lookupTables,
-    }).staticAccountKeys;
+    const accountKeys = message.getAccountKeys({ addressLookupTableAccounts: lookupTables }).keySegments().flat();
 
     const [parsedAccountsPre, epochInfo] = await Promise.all([
         connection.getMultipleParsedAccounts(accountKeys),
