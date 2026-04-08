@@ -1,10 +1,11 @@
-import { is, number, optional, string, type } from 'superstruct';
+import { is } from 'superstruct';
 import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
 import { Cluster } from '@/app/utils/cluster';
 import useTabVisibility from '@/app/utils/use-tab-visibility';
 
+import { CoinGeckoInfoSchema } from '../lib/coingecko-schema';
 import { TOKEN_VERIFICATION_SWR_CONFIG } from './token-verification-cache';
 
 export enum CoingeckoStatus {
@@ -23,27 +24,6 @@ export interface CoinInfo {
     last_updated: Date;
 }
 
-const CoinInfoResultSchema = type({
-    last_updated: string(),
-    market_cap_rank: number(),
-    market_data: type({
-        current_price: type({
-            usd: number(),
-        }),
-        market_cap: type({
-            usd: number(),
-        }),
-        price_change_percentage_24h_in_currency: optional(
-            type({
-                usd: optional(number()),
-            }),
-        ),
-        total_volume: type({
-            usd: number(),
-        }),
-    }),
-});
-
 export type CoinGeckoResult = {
     coinInfo?: CoinInfo;
     status: CoingeckoStatus;
@@ -51,15 +31,7 @@ export type CoinGeckoResult = {
 
 type CoinGeckoSwrKey = ['coingecko', string];
 
-function getCoinGeckoSwrKey(
-    cluster: Cluster,
-    coinId: string | undefined,
-    isTabVisible: boolean,
-): CoinGeckoSwrKey | null {
-    if (coinId === 'solana') {
-        return null;
-    }
-
+function getCoinGeckoSwrKey(cluster: Cluster, address: string, isTabVisible: boolean): CoinGeckoSwrKey | null {
     if (!isTabVisible) {
         return null;
     }
@@ -68,16 +40,12 @@ function getCoinGeckoSwrKey(
         return null;
     }
 
-    if (!coinId) {
-        return null;
-    }
-
-    return ['coingecko', coinId];
+    return ['coingecko', address];
 }
 
-async function fetchCoinGeckoVerification([, coinId]: CoinGeckoSwrKey): Promise<CoinGeckoResult> {
+async function fetchCoinGeckoVerification([, address]: CoinGeckoSwrKey): Promise<CoinGeckoResult> {
     try {
-        const response = await fetch(`/api/verification/coingecko/${coinId}`);
+        const response = await fetch(`/api/verification/coingecko/${address}`);
 
         if (!response.ok) {
             if (response.status === 429) {
@@ -92,7 +60,7 @@ async function fetchCoinGeckoVerification([, coinId]: CoinGeckoSwrKey): Promise<
 
         const data = await response.json();
 
-        if (!is(data, CoinInfoResultSchema)) {
+        if (!is(data, CoinGeckoInfoSchema)) {
             return {
                 status: CoingeckoStatus.FetchFailed,
             };
@@ -116,10 +84,10 @@ async function fetchCoinGeckoVerification([, coinId]: CoinGeckoSwrKey): Promise<
     }
 }
 
-export function useCoinGeckoVerification(coinId?: string): CoinGeckoResult | undefined {
+export function useCoinGeckoVerification(address: string): CoinGeckoResult | undefined {
     const { cluster } = useCluster();
     const { visible: isTabVisible } = useTabVisibility();
-    const swrKey = getCoinGeckoSwrKey(cluster, coinId, isTabVisible);
+    const swrKey = getCoinGeckoSwrKey(cluster, address, isTabVisible);
     const { data, isLoading } = useSWR(swrKey, fetchCoinGeckoVerification, TOKEN_VERIFICATION_SWR_CONFIG);
 
     if (isLoading && !data) {

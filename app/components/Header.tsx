@@ -12,7 +12,7 @@ import {
 type HeaderProps = ComponentProps<typeof AccountHeader>;
 
 export function Header({ address, account, tokenInfo, isTokenInfoLoading }: HeaderProps) {
-    const coinInfo = useCoinGeckoVerification(tokenInfo?.extensions?.coingeckoId);
+    const coinInfo = useCoinGeckoVerification(address);
 
     const parsedData = account?.data.parsed;
     const isTokenMint = parsedData && isTokenProgramData(parsedData) && parsedData?.parsed.type === 'mint';
@@ -20,7 +20,6 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
     const verificationTarget: VerificationTarget = useMemo(
         () => ({
             address,
-            coingeckoId: tokenInfo?.extensions?.coingeckoId,
             solflareVerified: tokenInfo && 'verified' in tokenInfo ? tokenInfo.verified : undefined,
         }),
         [address, tokenInfo],
@@ -38,7 +37,7 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
                 {isTokenMint && (
                     <div className="e-flex e-w-full e-flex-col e-gap-1 sm:e-items-start sm:e-gap-2 md:e-w-auto md:e-flex-row">
                         <TokenVerificationBadge target={verificationTarget} isTokenInfoLoading={isTokenInfoLoading} />
-                        <TokenMarketData tokenInfo={tokenInfo} coinInfo={coinInfo} />
+                        <TokenMarketData coinInfo={coinInfo} />
                     </div>
                 )}
             </div>

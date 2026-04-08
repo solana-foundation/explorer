@@ -8,7 +8,6 @@ import { ERiskLevel } from '../model/use-rugcheck';
  */
 export type VerificationTarget = {
     address: string;
-    coingeckoId?: string;
     solflareVerified?: boolean;
 };
 
