@@ -42,13 +42,11 @@ vi.mock('../use-rugcheck', async importOriginal => {
 
 const baseTarget: VerificationTarget = {
     address: 'token-address',
-    coingeckoId: 'token-id',
     solflareVerified: true,
 };
 
 const legacyTarget: VerificationTarget = {
     address: 'token-address',
-    coingeckoId: 'token-id',
 };
 
 describe('useTokenVerification', () => {
@@ -102,7 +100,7 @@ describe('useTokenVerification', () => {
     });
 
     describe('CoinGecko verification', () => {
-        it('should mark as verified when coingeckoId exists and status is Success', () => {
+        it('should mark as verified when status is Success', () => {
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.Success,
             });
@@ -114,13 +112,12 @@ describe('useTokenVerification', () => {
             expect(coingecko?.isVerificationFound).toBe(true);
         });
 
-        it('should mark as not verified when coingeckoId is missing', () => {
+        it('should mark as not verified when status is FetchFailed', () => {
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
-                status: CoingeckoStatus.Success,
+                status: CoingeckoStatus.FetchFailed,
             });
-            const targetWithoutCoingecko: VerificationTarget = { address: 'token-address', solflareVerified: true };
 
-            const { result } = renderHook(() => useTokenVerification(targetWithoutCoingecko));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
             const coingecko = result.current.sources.find(s => s.name === EVerificationSource.CoinGecko);
 
             expect(coingecko?.verified).toBe(false);

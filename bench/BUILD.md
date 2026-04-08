@@ -40,7 +40,7 @@
 | Dynamic | `/api/sns-domains/[address]` | 0 B | 0 B |
 | Dynamic | `/api/token-info` | 0 B | 0 B |
 | Dynamic | `/api/verification/bluprynt/[mintAddress]` | 0 B | 0 B |
-| Dynamic | `/api/verification/coingecko/[coinId]` | 0 B | 0 B |
+| Dynamic | `/api/verification/coingecko/[address]` | 0 B | 0 B |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | 0 B | 0 B |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | 0 B | 0 B |
 | Dynamic | `/api/verified-programs/list/[page]` | 0 B | 0 B |

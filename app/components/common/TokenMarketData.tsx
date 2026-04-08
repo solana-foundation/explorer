@@ -2,18 +2,11 @@ import { LoadingCard } from '@components/shared/LoadingCard';
 import { useRef } from 'react';
 
 import { cn } from '@/app/components/shared/utils';
-import { CoinGeckoResult, CoingeckoStatus, CoinInfo } from '@/app/features/token-verification-badge';
-import { FullLegacyTokenInfo, FullTokenInfo } from '@/app/utils/token-info';
+import { type CoinGeckoResult, CoingeckoStatus, type CoinInfo } from '@/app/features/token-verification-badge';
 
 import { MarketData } from './token-market-data/MarketData';
 
-export function TokenMarketData({
-    coinInfo,
-    tokenInfo,
-}: {
-    coinInfo?: CoinGeckoResult;
-    tokenInfo?: FullTokenInfo | FullLegacyTokenInfo;
-}) {
+export function TokenMarketData({ coinInfo }: { coinInfo?: CoinGeckoResult }) {
     const tokenPriceInfo = useRef<CoinInfo | undefined>(undefined);
     const tokenPriceDecimals = useRef<number>(2);
 
@@ -24,8 +17,7 @@ export function TokenMarketData({
         }
     }
 
-    const isLoadingFromCoingecko =
-        Boolean(tokenInfo?.extensions?.coingeckoId) && coinInfo?.status === CoingeckoStatus.Loading;
+    const isLoadingFromCoingecko = coinInfo?.status === CoingeckoStatus.Loading;
 
     return (
         <>
