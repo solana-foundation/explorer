@@ -6,15 +6,15 @@
 | Static | `/_not-found` | 326 B | 164 kB |
 | Dynamic | `/address/[address]` | 16 kB | 1.03 MB |
 | Dynamic | `/address/[address]/anchor-account` | 7 kB | 1.08 MB |
-| Dynamic | `/address/[address]/anchor-program` | 336 B | 949 kB |
+| Dynamic | `/address/[address]/anchor-program` | 337 B | 949 kB |
 | Dynamic | `/address/[address]/attestation` | 6 kB | 1.04 MB |
 | Dynamic | `/address/[address]/attributes` | 3 kB | 999 kB |
-| Dynamic | `/address/[address]/blockhashes` | 2 kB | 998 kB |
+| Dynamic | `/address/[address]/blockhashes` | 2 kB | 999 kB |
 | Dynamic | `/address/[address]/compression` | 6 kB | 1.03 MB |
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 4 kB | 1.03 MB |
 | Dynamic | `/address/[address]/domains` | 3 kB | 1.02 MB |
 | Dynamic | `/address/[address]/entries` | 4 kB | 1.02 MB |
-| Dynamic | `/address/[address]/feature-gate` | 336 B | 949 kB |
+| Dynamic | `/address/[address]/feature-gate` | 335 B | 949 kB |
 | Dynamic | `/address/[address]/idl` | 123 kB | 1.26 MB |
 | Dynamic | `/address/[address]/instructions` | 4 kB | 1.12 MB |
 | Dynamic | `/address/[address]/metadata` | 8 kB | 1.01 MB |
@@ -37,6 +37,8 @@
 | Dynamic | `/api/ping/[network]` | 0 B | 0 B |
 | Dynamic | `/api/program-metadata-idl` | 0 B | 0 B |
 | Dynamic | `/api/receipt/price/[mintAddress]` | 0 B | 0 B |
+| Dynamic | `/api/search` | 0 B | 0 B |
+| Dynamic | `/api/search/auth` | 0 B | 0 B |
 | Dynamic | `/api/sns-domains/[address]` | 0 B | 0 B |
 | Dynamic | `/api/token-info` | 0 B | 0 B |
 | Dynamic | `/api/verification/bluprynt/[mintAddress]` | 0 B | 0 B |
@@ -48,7 +50,7 @@
 | Dynamic | `/block/[slot]` | 8 kB | 1.04 MB |
 | Dynamic | `/block/[slot]/accounts` | 3 kB | 1.02 MB |
 | Dynamic | `/block/[slot]/programs` | 4 kB | 1.02 MB |
-| Dynamic | `/block/[slot]/rewards` | 3 kB | 1.02 MB |
+| Dynamic | `/block/[slot]/rewards` | 3 kB | 1.03 MB |
 | Dynamic | `/epoch/[epoch]` | 5 kB | 267 kB |
 | Static | `/feature-gates` | 3 kB | 1.03 MB |
 | Dynamic | `/og/feature-gate/[address]` | 0 B | 0 B |
@@ -57,6 +59,6 @@
 | Static | `/supply` | 5 kB | 1.03 MB |
 | Static | `/tos` | 325 B | 164 kB |
 | Dynamic | `/tx/[signature]` | 58 kB | 1.53 MB |
-| Dynamic | `/tx/[signature]/inspect` | 626 B | 1.29 MB |
+| Dynamic | `/tx/[signature]/inspect` | 627 B | 1.29 MB |
 | Static | `/tx/inspector` | 632 B | 1.29 MB |
 | Static | `/verified-programs` | 7 kB | 173 kB |
