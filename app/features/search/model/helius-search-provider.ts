@@ -1,7 +1,6 @@
 import { clusterSlug } from '@utils/cluster';
 
 import { Logger } from '@/app/shared/lib/logger';
-import { fetchWithHeliusSearchAuth } from '@/app/utils/helius-search-auth';
 
 import type { SearchContext, SearchItem, SearchOptions, SearchProvider } from '../lib/types';
 
@@ -341,7 +340,7 @@ export const heliusSearchProvider: SearchProvider = {
                 q: trimmed,
             });
 
-            const response = await fetchWithHeliusSearchAuth(`/api/search?${url.toString()}`, {
+            const response = await fetch(`/api/search?${url.toString()}`, {
                 headers: { Accept: 'application/json' },
                 signal: controller.signal,
             });

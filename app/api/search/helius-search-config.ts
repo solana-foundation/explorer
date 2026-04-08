@@ -17,9 +17,12 @@ function deriveSearchApiBaseUrlFromRpcUrl(rpcUrl: string) {
     }
 }
 
+export function getHeliusApiKey() {
+    return process.env.HELIUS_API_KEY ?? '';
+}
+
 export function getHeliusSearchApiBaseUrl() {
-    const explicitBaseUrl =
-        process.env.HELIUS_SEARCH_API_BASE_URL ?? process.env.NEXT_PUBLIC_HELIUS_SEARCH_API_BASE_URL;
+    const explicitBaseUrl = process.env.NEXT_PUBLIC_HELIUS_SEARCH_API_BASE_URL;
     if (explicitBaseUrl) {
         return normalizeBaseUrl(explicitBaseUrl);
     }

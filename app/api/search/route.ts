@@ -5,7 +5,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, clusterFromSlug, clusterSlug } from '@/app/utils/cluster';
 
 import { NO_STORE_HEADERS, parseResponseBody, PROXY_TIMEOUT_MS } from './config';
-import { getHeliusSearchApiBaseUrl } from './helius-search-config';
+import { getHeliusApiKey, getHeliusSearchApiBaseUrl } from './helius-search-config';
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -56,9 +56,9 @@ export async function GET(request: Request) {
     upstreamUrl.searchParams.set('cluster', clusterSlug(cluster));
 
     const upstreamHeaders = new Headers({ Accept: 'application/json' });
-    const authorizationHeader = request.headers.get('Authorization');
-    if (authorizationHeader) {
-        upstreamHeaders.set('Authorization', authorizationHeader);
+    const apiKey = getHeliusApiKey();
+    if (apiKey) {
+        upstreamUrl.searchParams.set('api-key', apiKey);
     }
 
     const controller = new AbortController();

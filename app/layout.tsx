@@ -7,7 +7,6 @@ import { Footer } from '@components/Footer';
 import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';
 import { ClusterProvider } from '@providers/cluster';
-import { HeliusSearchProvider } from '@providers/helius-search';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { Toaster } from '@shared/ui/sonner/toaster';
 import { isEnvEnabled } from '@utils/env';
@@ -61,7 +60,6 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                 <ScrollAnchorProvider>
                     <ClusterProvider>
                         <VisibilityProvider>
-                            <HeliusSearchProvider>
                                 <TokenInfoBatchProvider>
                                     <ClusterModal />
                                     <div className="e-flex e-min-h-screen e-flex-col">
@@ -82,7 +80,6 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                                     </div>
                                     <Toaster position="bottom-center" toastOptions={{ duration: 5_000 }} />
                                 </TokenInfoBatchProvider>
-                            </HeliusSearchProvider>
                         </VisibilityProvider>
                     </ClusterProvider>
                 </ScrollAnchorProvider>
