@@ -13,16 +13,16 @@ export type TokenVerificationResult = {
 
 export function useTokenVerification({
     address,
-    coingeckoId,
+    isTokenMint,
     solflareVerified,
 }: VerificationTarget): TokenVerificationResult {
     const blupryntInfo = useBlupryntVerification(address);
-    const coinInfo = useCoinGeckoVerification(coingeckoId);
+    const coinInfo = useCoinGeckoVerification(address, isTokenMint);
     const jupiterInfo = useJupiterVerification(address);
     const rugCheckInfo = useRugCheckVerification(address);
 
     const blupryntVerified = blupryntInfo?.status === BlupryntStatus.Success && blupryntInfo.verified;
-    const coingeckoVerified = !!coingeckoId && coinInfo?.status === CoingeckoStatus.Success;
+    const coingeckoVerified = coinInfo?.status === CoingeckoStatus.Success;
     const jupiterVerified = jupiterInfo?.status === JupiterStatus.Success && jupiterInfo.verified;
     const rugCheckVerified = rugCheckInfo?.status === RugCheckStatus.Success && rugCheckInfo.verified;
 
@@ -42,9 +42,9 @@ export function useTokenVerification({
             applyUrl:
                 'https://support.coingecko.com/hc/en-us/articles/23725417857817-Verification-Guide-for-Listing-Update-Requests-on-CoinGecko',
             isRateLimited: coinInfo?.status === CoingeckoStatus.RateLimited,
-            isVerificationFound: Boolean(coingeckoId && coinInfo?.status === CoingeckoStatus.Success),
+            isVerificationFound: coinInfo?.status === CoingeckoStatus.Success,
             name: EVerificationSource.CoinGecko,
-            url: `https://www.coingecko.com/en/coins/${coingeckoId}`,
+            url: `https://www.coingecko.com/en/coins/solana/contract/${address}`,
             verified: coingeckoVerified,
         },
         {

@@ -1,3 +1,6 @@
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
+
 import { Cluster } from './cluster';
 
 export enum PROGRAM_NAMES {
@@ -507,8 +510,8 @@ export const SYSVAR_IDS: { [key: string]: string } = {
 };
 
 export const TOKEN_IDS: { [key: string]: string } = {
-    TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'Token Program',
-    TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: 'Token-2022 Program',
+    [TOKEN_2022_PROGRAM_ADDRESS]: 'Token-2022 Program',
+    [TOKEN_PROGRAM_ADDRESS]: 'Token Program',
 } as const;
 
 export type TokenProgram = 'spl-token' | 'spl-token-2022';

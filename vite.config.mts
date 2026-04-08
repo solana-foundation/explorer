@@ -62,6 +62,9 @@ export default defineConfig({
                 test: {
                     name: 'specs',
                     setupFiles: ['./test-setup.specs.ts'],
+                    typecheck: {
+                        enabled: true,
+                    },
                 },
             },
             {
