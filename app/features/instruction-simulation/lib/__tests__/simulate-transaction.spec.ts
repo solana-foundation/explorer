@@ -111,7 +111,7 @@ describe('simulateTransaction', () => {
         await expect(simulate(connection)).rejects.toThrow('RPC did not return account data after simulation');
     });
 
-    it('should return TransactionError when simulation returns error string with empty logs', async () => {
+    it('should return raw error string when simulation returns error with empty logs', async () => {
         const connection = createMockConnection({
             simulateTransaction: vi.fn().mockResolvedValue(
                 createSimulationResponse({
@@ -123,7 +123,7 @@ describe('simulateTransaction', () => {
 
         const result = await simulate(connection);
 
-        expect(result).toMatchObject({ error: 'TransactionError', logs: undefined });
+        expect(result).toMatchObject({ error: 'AccountNotFound', logs: undefined });
     });
 
     it('should return TransactionError when simulation has logs and an error', async () => {
