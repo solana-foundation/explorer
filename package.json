@@ -188,6 +188,7 @@
     "pnpm": {
         "onlyBuiltDependencies": [
             "@sentry/cli",
+            "bigint-buffer",
             "esbuild"
         ],
         "overrides": {
@@ -236,7 +237,6 @@
             "@solana-developers/helpers@2.8.1": "patches/@solana-developers__helpers@2.8.1.patch"
         },
         "ignoredBuiltDependencies": [
-            "bigint-buffer",
             "bufferutil",
             "keccak",
             "msw",
