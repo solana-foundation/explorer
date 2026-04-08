@@ -1,8 +1,15 @@
 import type { Address, ReadonlyUint8Array } from '@solana/kit';
 import { identifyTokenAccount, TOKEN_PROGRAM_ADDRESS, TokenAccount } from '@solana-program/token';
+import { NATIVE_MINT } from '@solana/spl-token';
 import { identifyToken2022Account, TOKEN_2022_PROGRAM_ADDRESS, Token2022Account } from '@solana-program/token-2022';
 
 export { Token2022Account, TokenAccount };
+
+export const NATIVE_MINT_ADDRESS = NATIVE_MINT.toBase58();
+
+export function isNativeMint(mint: Address | string): boolean {
+    return mint === NATIVE_MINT_ADDRESS;
+}
 
 export function isTokenMintByOwner(owner: Address, data?: ReadonlyUint8Array): boolean {
     if (owner !== TOKEN_PROGRAM_ADDRESS && owner !== TOKEN_2022_PROGRAM_ADDRESS) {

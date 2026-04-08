@@ -9,7 +9,7 @@ import {
     type VerificationTarget,
 } from '@/app/features/token-verification-badge';
 import { toAddress } from '@/app/shared/model/address';
-import { isTokenMintByOwner } from '@/app/shared/model/token-program';
+import { isNativeMint, isTokenMintByOwner } from '@/app/shared/model/token-program';
 
 type HeaderProps = ComponentProps<typeof AccountHeader>;
 
@@ -17,6 +17,7 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
     const parsedData = account?.data.parsed;
     // isTokenProgramData + parsed.type check gonna be replaced with isTokenMintByOwner(owner, data) at some point
     const isTokenMint =
+        !isNativeMint(address) &&
         parsedData &&
         isTokenProgramData(parsedData) &&
         parsedData?.parsed.type === 'mint' &&
