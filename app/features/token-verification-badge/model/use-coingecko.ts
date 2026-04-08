@@ -31,7 +31,16 @@ export type CoinGeckoResult = {
 
 type CoinGeckoSwrKey = ['coingecko', string];
 
-function getCoinGeckoSwrKey(cluster: Cluster, address: string, isTabVisible: boolean): CoinGeckoSwrKey | null {
+function getCoinGeckoSwrKey(
+    cluster: Cluster,
+    address: string,
+    isTabVisible: boolean,
+    enabled: boolean,
+): CoinGeckoSwrKey | null {
+    if (!enabled) {
+        return null;
+    }
+
     if (!isTabVisible) {
         return null;
     }
@@ -80,10 +89,10 @@ export async function fetchCoinGeckoVerification([, address]: CoinGeckoSwrKey): 
     };
 }
 
-export function useCoinGeckoVerification(address: string): CoinGeckoResult | undefined {
+export function useCoinGeckoVerification(address: string, enabled = true): CoinGeckoResult | undefined {
     const { cluster } = useCluster();
     const { visible: isTabVisible } = useTabVisibility();
-    const swrKey = getCoinGeckoSwrKey(cluster, address, isTabVisible);
+    const swrKey = getCoinGeckoSwrKey(cluster, address, isTabVisible, enabled);
     const { data, error, isLoading } = useSWR(swrKey, fetchCoinGeckoVerification, TOKEN_VERIFICATION_SWR_CONFIG);
 
     if (isLoading && !data) {

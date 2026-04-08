@@ -11,9 +11,13 @@ export type TokenVerificationResult = {
     verificationFoundSources: VerificationSource[];
 };
 
-export function useTokenVerification({ address, solflareVerified }: VerificationTarget): TokenVerificationResult {
+export function useTokenVerification({
+    address,
+    isTokenMint,
+    solflareVerified,
+}: VerificationTarget): TokenVerificationResult {
     const blupryntInfo = useBlupryntVerification(address);
-    const coinInfo = useCoinGeckoVerification(address);
+    const coinInfo = useCoinGeckoVerification(address, isTokenMint);
     const jupiterInfo = useJupiterVerification(address);
     const rugCheckInfo = useRugCheckVerification(address);
 

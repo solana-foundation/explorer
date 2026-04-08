@@ -8,21 +8,29 @@ import {
     useCoinGeckoVerification,
     type VerificationTarget,
 } from '@/app/features/token-verification-badge';
+import { toAddress } from '@/app/shared/model/address';
+import { isTokenMintByOwner } from '@/app/shared/model/token-program';
 
 type HeaderProps = ComponentProps<typeof AccountHeader>;
 
 export function Header({ address, account, tokenInfo, isTokenInfoLoading }: HeaderProps) {
-    const coinInfo = useCoinGeckoVerification(address);
-
     const parsedData = account?.data.parsed;
-    const isTokenMint = parsedData && isTokenProgramData(parsedData) && parsedData?.parsed.type === 'mint';
+    // isTokenProgramData + parsed.type check gonna be replaced with isTokenMintByOwner(owner, data) at some point
+    const isTokenMint =
+        parsedData &&
+        isTokenProgramData(parsedData) &&
+        parsedData?.parsed.type === 'mint' &&
+        isTokenMintByOwner(toAddress(account.owner), account.data.raw);
+
+    const coinInfo = useCoinGeckoVerification(address, !!isTokenMint);
 
     const verificationTarget: VerificationTarget = useMemo(
         () => ({
             address,
+            isTokenMint: !!isTokenMint,
             solflareVerified: tokenInfo && 'verified' in tokenInfo ? tokenInfo.verified : undefined,
         }),
-        [address, tokenInfo],
+        [address, isTokenMint, tokenInfo],
     );
 
     return (

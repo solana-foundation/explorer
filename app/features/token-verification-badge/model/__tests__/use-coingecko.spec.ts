@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
 import { SWRConfig } from 'swr';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 
 import { Cluster } from '@/app/utils/cluster';
 
@@ -24,7 +24,7 @@ const VALID_RESPONSE = {
     },
 };
 
-let fetchSpy: ReturnType<typeof vi.spyOn<typeof globalThis, 'fetch'>>;
+let fetchSpy: MockInstance;
 
 function mockResponse(status: number, body: unknown = {}) {
     fetchSpy.mockResolvedValueOnce({
@@ -159,12 +159,13 @@ describe('useCoinGeckoVerification', () => {
     });
 
     it.each([
-        ['non-mainnet cluster', { cluster: Cluster.Devnet, visible: true }],
-        ['tab not visible', { cluster: Cluster.MainnetBeta, visible: false }],
-    ])('should not fetch when %s', (_label, { cluster, visible }) => {
+        ['not enabled', { cluster: Cluster.MainnetBeta, enabled: false, visible: true }],
+        ['non-mainnet cluster', { cluster: Cluster.Devnet, enabled: true, visible: true }],
+        ['tab not visible', { cluster: Cluster.MainnetBeta, enabled: true, visible: false }],
+    ])('should not fetch when %s', (_label, { cluster, enabled, visible }) => {
         vi.mocked(useCluster).mockReturnValue({ cluster } as ReturnType<typeof useCluster>);
         vi.mocked(useTabVisibility).mockReturnValue({ visible });
-        renderHook(() => useCoinGeckoVerification('address'), { wrapper });
+        renderHook(() => useCoinGeckoVerification('address', enabled), { wrapper });
         expect(fetchSpy).not.toHaveBeenCalled();
     });
 });
