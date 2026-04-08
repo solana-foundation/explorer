@@ -31,7 +31,11 @@ export type ParsedSubInstruction = ParsedBatchSubInstruction<AccountMeta>;
 // Uses a structural type instead of TransactionInstruction so callers don't
 // need to construct a full web3.js object in tests — only programId and the
 // first byte of data are inspected.
-export function isTokenBatchInstruction(ix: { programId: PublicKey; data: { length: number; 0?: number } }): boolean {
+export function isTokenBatchInstruction(ix: {
+    programId: PublicKey;
+    data: { length: number; 0?: number };
+    keys?: unknown[];
+}): boolean {
     const isTokenProgram = ix.programId.equals(TOKEN_PROGRAM_ID) || ix.programId.equals(TOKEN_2022_PROGRAM_ID);
     if (!isTokenProgram) return false;
 

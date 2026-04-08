@@ -56,6 +56,7 @@ export default defineConfig({
         conditions: ['browser', 'default'],
     },
     test: {
+        exclude: ['**/node_modules/**', '.claude/**'],
         projects: [
             {
                 extends: true,

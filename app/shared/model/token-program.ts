@@ -1,6 +1,6 @@
 import type { Address, ReadonlyUint8Array } from '@solana/kit';
-import { identifyTokenAccount, TOKEN_PROGRAM_ADDRESS, TokenAccount } from '@solana-program/token';
 import { NATIVE_MINT } from '@solana/spl-token';
+import { identifyTokenAccount, TOKEN_PROGRAM_ADDRESS, TokenAccount } from '@solana-program/token';
 import { identifyToken2022Account, TOKEN_2022_PROGRAM_ADDRESS, Token2022Account } from '@solana-program/token-2022';
 
 export { Token2022Account, TokenAccount };
