@@ -1,5 +1,4 @@
 import { Connection, PublicKey } from '@solana/web3.js';
-import axios from 'axios';
 import bs58 from 'bs58';
 import pLimit from 'p-limit';
 
@@ -116,9 +115,13 @@ export namespace NftokenFetcher {
         const promises = urls.map(url =>
             limit(async () => {
                 try {
-                    const { data } = await axios.get(url, {
-                        timeout: 5_000,
+                    const response = await fetch(url, {
+                        signal: AbortSignal.timeout(5_000),
                     });
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch NFT metadata: ${response.status}`);
+                    }
+                    const data = await response.json();
                     metadataMap.set(url, {
                         animation_url: data.animation_url ?? null,
                         description: data.description ?? null,
