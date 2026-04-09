@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { getSafeExternalUrl, isSafeExternalUrl } from '../safe-external-url';
 
 describe('safe external URLs', () => {
-    it('accepts trimmed http and https URLs', () => {
-        expect(getSafeExternalUrl(' https://solana.com ')).toBe('https://solana.com');
+    it('accepts trimmed http and https URLs and returns normalized hrefs', () => {
+        expect(getSafeExternalUrl(' HTTPS://Example.COM/Path ')).toBe('https://example.com/Path');
         expect(getSafeExternalUrl('http://localhost:3000/test')).toBe('http://localhost:3000/test');
     });
 

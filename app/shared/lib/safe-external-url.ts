@@ -10,7 +10,7 @@ export function getSafeExternalUrl(value: unknown): string | null {
 
     try {
         const url = new URL(trimmedValue);
-        return ['http:', 'https:'].includes(url.protocol) ? trimmedValue : null;
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
     } catch {
         return null;
     }
