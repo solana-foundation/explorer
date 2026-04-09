@@ -261,7 +261,7 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
             )}
             {showAccountAddress && token.pubkey && (
                 <td>
-                    <Address pubkey={new PublicKey(token.pubkey)} link tokenLabelInfo={token} />
+                    <Address pubkey={new PublicKey(token.pubkey)} link />
                 </td>
             )}
             <td>
