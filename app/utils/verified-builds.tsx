@@ -232,8 +232,9 @@ function useEnrichedOsecInfo({
                     if (pdaAccountInfo) {
                         return pdaAccountInfo;
                     }
-                } catch (error) {
-                    Logger.error(error);
+                } catch (error: unknown) {
+                    // Expected: most signer candidates won't have a matching PDA
+                    Logger.debug(error);
                 }
             }
             return null;
