@@ -9,6 +9,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { useCluster } from '../providers/cluster';
 import { ProgramDataAccountInfo } from '../validators/accounts/upgradeable-program';
 import { Cluster } from './cluster';
+import { useMemo } from 'react';
 
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
@@ -54,7 +55,7 @@ function parsePublicKey(value: string | undefined): PublicKey | null {
 const TRUSTED_SIGNERS: Record<string, string> = {
     '5vJwnLeyjV8uNJSp1zn7VLW8GwiQbcsQbGaVSwRmkE4r': 'Foundation',
     '9VWiUUhgNoRwTH5NVehYJEDwcotwYX3VgW4MChiHPAqU': 'OtterSecurity',
-    'CyJj5ejJAUveDXnLduJbkvwjxcmWJNqCuB9DR7AExrHn': 'Explorer',
+    CyJj5ejJAUveDXnLduJbkvwjxcmWJNqCuB9DR7AExrHn: 'Explorer',
     '11111111111111111111111111111111': 'Explorer',
 };
 
@@ -204,7 +205,11 @@ function useEnrichedOsecInfo({
         () =>
             Array.from(
                 new Map(
-                    [programAuthority, parsePublicKey(osecInfo?.signer), ...Object.keys(TRUSTED_SIGNERS).map(parsePublicKey)]
+                    [
+                        programAuthority,
+                        parsePublicKey(osecInfo?.signer),
+                        ...Object.keys(TRUSTED_SIGNERS).map(parsePublicKey),
+                    ]
                         .filter((key): key is PublicKey => key !== null)
                         .map(key => [key.toBase58(), key]),
                 ).values(),
@@ -238,7 +243,9 @@ function useEnrichedOsecInfo({
                     }
                 } catch (error: unknown) {
                     // Expected: most signer candidates won't have a matching PDA
-                    Logger.debug(error);
+                    Logger.debug('[utils:verified-builds] No matching PDA for signer candidate', {
+                        error,
+                    });
                 }
             }
             return null;
