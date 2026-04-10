@@ -23,7 +23,6 @@ export const Primary: Story = {
             coinInfo: mockCoingecko.coinInfo(),
             status: CoingeckoStatus.Success,
         },
-        tokenInfo: mockCoingecko.tokenInfo(),
     },
     async play({ canvasElement }) {
         expect.assertions(1);
@@ -39,7 +38,6 @@ export const Loading: Story = {
             coinInfo: undefined,
             status: CoingeckoStatus.Loading,
         },
-        tokenInfo: mockCoingecko.tokenInfo(),
     },
     async play({ canvasElement }) {
         expect.assertions(1);

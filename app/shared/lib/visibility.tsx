@@ -52,8 +52,8 @@ export function VisibilityProvider({ children }: { children: ReactNode }) {
     return <VisibilityContext.Provider value={observe}>{children}</VisibilityContext.Provider>;
 }
 
-export function useVisibility(enabled: boolean | undefined) {
-    const ref = useRef<HTMLElement>(null);
+export function useVisibility<T extends HTMLElement = HTMLElement>(enabled: boolean | undefined) {
+    const ref = useRef<T>(null);
     const [isVisible, setIsVisible] = useState(false);
     const observe = useContext(VisibilityContext);
 

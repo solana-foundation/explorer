@@ -1,6 +1,4 @@
-import { FullLegacyTokenInfo, FullTokenInfo } from '@/app/utils/token-info';
-
-import { EVerificationSource, VerificationSource } from '../lib/types';
+import { EVerificationSource, VerificationSource, type VerificationTarget } from '../lib/types';
 import { BlupryntStatus, useBlupryntVerification } from './use-bluprynt';
 import { CoingeckoStatus, useCoinGeckoVerification } from './use-coingecko';
 import { JupiterStatus, useJupiterVerification } from './use-jupiter';
@@ -13,15 +11,18 @@ export type TokenVerificationResult = {
     verificationFoundSources: VerificationSource[];
 };
 
-export function useTokenVerification(tokenInfo?: FullTokenInfo | FullLegacyTokenInfo): TokenVerificationResult {
-    const blupryntInfo = useBlupryntVerification(tokenInfo?.address);
-    const coinInfo = useCoinGeckoVerification(tokenInfo?.extensions?.coingeckoId);
-    const jupiterInfo = useJupiterVerification(tokenInfo?.address);
-    const rugCheckInfo = useRugCheckVerification(tokenInfo?.address);
+export function useTokenVerification({
+    address,
+    isTokenMint,
+    solflareVerified,
+}: VerificationTarget): TokenVerificationResult {
+    const blupryntInfo = useBlupryntVerification(address);
+    const coinInfo = useCoinGeckoVerification(address, isTokenMint);
+    const jupiterInfo = useJupiterVerification(address);
+    const rugCheckInfo = useRugCheckVerification(address);
 
     const blupryntVerified = blupryntInfo?.status === BlupryntStatus.Success && blupryntInfo.verified;
-    const coingeckoVerified = !!tokenInfo?.extensions?.coingeckoId && coinInfo?.status === CoingeckoStatus.Success;
-    const solflareVerified = tokenInfo && 'verified' in tokenInfo ? tokenInfo.verified : false;
+    const coingeckoVerified = coinInfo?.status === CoingeckoStatus.Success;
     const jupiterVerified = jupiterInfo?.status === JupiterStatus.Success && jupiterInfo.verified;
     const rugCheckVerified = rugCheckInfo?.status === RugCheckStatus.Success && rugCheckInfo.verified;
 
@@ -34,18 +35,16 @@ export function useTokenVerification(tokenInfo?: FullTokenInfo | FullLegacyToken
             isRateLimited: blupryntInfo?.status === BlupryntStatus.RateLimited,
             isVerificationFound: blupryntInfo?.status === BlupryntStatus.Success,
             name: EVerificationSource.Bluprynt,
-            url: `https://verified.bluprynt.com/verified-assets/${tokenInfo?.address}/solana`,
+            url: `https://verified.bluprynt.com/verified-assets/${address}/solana`,
             verified: blupryntVerified,
         },
         {
             applyUrl:
                 'https://support.coingecko.com/hc/en-us/articles/23725417857817-Verification-Guide-for-Listing-Update-Requests-on-CoinGecko',
             isRateLimited: coinInfo?.status === CoingeckoStatus.RateLimited,
-            isVerificationFound: Boolean(
-                tokenInfo?.extensions?.coingeckoId && coinInfo?.status === CoingeckoStatus.Success,
-            ),
+            isVerificationFound: coinInfo?.status === CoingeckoStatus.Success,
             name: EVerificationSource.CoinGecko,
-            url: `https://www.coingecko.com/en/coins/${tokenInfo?.extensions?.coingeckoId}`,
+            url: `https://www.coingecko.com/en/coins/solana/contract/${address}`,
             verified: coingeckoVerified,
         },
         {
@@ -53,15 +52,15 @@ export function useTokenVerification(tokenInfo?: FullTokenInfo | FullLegacyToken
             isRateLimited: jupiterInfo?.status === JupiterStatus.RateLimited,
             isVerificationFound: jupiterInfo?.status === JupiterStatus.Success,
             name: EVerificationSource.Jupiter,
-            url: `https://jup.ag/tokens/${tokenInfo?.address}`,
+            url: `https://jup.ag/tokens/${address}`,
             verified: jupiterVerified,
         },
         {
             applyUrl: 'https://help.solflare.com/en/articles/9260147-i-cannot-find-a-token-in-solflare',
-            isVerificationFound: tokenInfo && 'verified' in tokenInfo,
+            isVerificationFound: solflareVerified !== undefined,
             name: EVerificationSource.Solflare,
-            url: `https://www.solflare.com/prices/${tokenInfo?.address}`,
-            verified: solflareVerified,
+            url: `https://www.solflare.com/prices/${address}`,
+            verified: solflareVerified ?? false,
         },
         {
             applyUrl: 'https://rugcheck.xyz/verify/token',
@@ -70,7 +69,7 @@ export function useTokenVerification(tokenInfo?: FullTokenInfo | FullLegacyToken
             level: rugCheckLevel,
             name: EVerificationSource.RugCheck,
             score: rugCheckScore,
-            url: `https://rugcheck.xyz/tokens/${tokenInfo?.address}`,
+            url: `https://rugcheck.xyz/tokens/${address}`,
             verified: rugCheckVerified,
         },
     ];

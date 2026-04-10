@@ -32,7 +32,12 @@ function StakeConfigCard({ account, configAccount }: { account: Account; configA
     }).format(configAccount.info.slashPenalty / MAX_SLASH_PENALTY);
 
     return (
-        <AccountCard title="Stake Config" account={account} refresh={() => refresh(account.pubkey, 'parsed')}>
+        <AccountCard
+            title="Stake Config"
+            account={account}
+            analyticsSection="stake_config_section"
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        >
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
@@ -52,7 +57,12 @@ function StakeConfigCard({ account, configAccount }: { account: Account; configA
 function ValidatorInfoCard({ account, configAccount }: { account: Account; configAccount: ValidatorInfoAccount }) {
     const refresh = useRefreshAccount();
     return (
-        <AccountCard title="Validator Info" account={account} refresh={() => refresh(account.pubkey, 'parsed')}>
+        <AccountCard
+            title="Validator Info"
+            account={account}
+            analyticsSection="validator_info_section"
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        >
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 

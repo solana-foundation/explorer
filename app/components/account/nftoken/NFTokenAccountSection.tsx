@@ -29,10 +29,14 @@ export function NFTokenAccountSection({ account }: { account: Account }) {
 
 const NFTCard = ({ account, nft }: { account: Account; nft: NftokenTypes.NftAccount }) => {
     const fetchInfo = useRefreshAccount();
-    const refresh = () => fetchInfo(new PublicKey(nft.address), 'parsed');
 
     return (
-        <AccountCard title="Overview" account={account} refresh={refresh}>
+        <AccountCard
+            title="Overview"
+            account={account}
+            refresh={() => fetchInfo(new PublicKey(nft.address), 'parsed')}
+            analyticsSection="nft_token_card"
+        >
             <tr>
                 <td>Address</td>
                 <td className="text-lg-end">
@@ -103,10 +107,14 @@ export const NftokenImage = ({ url, size }: { url: string | undefined; size: num
 
 const CollectionCard = ({ account, collection }: { account: Account; collection: NftokenTypes.CollectionAccount }) => {
     const fetchInfo = useRefreshAccount();
-    const refresh = () => fetchInfo(new PublicKey(collection.address), 'parsed');
 
     return (
-        <AccountCard title="Overview" account={account} refresh={refresh}>
+        <AccountCard
+            title="Overview"
+            account={account}
+            refresh={() => fetchInfo(new PublicKey(collection.address), 'parsed')}
+            analyticsSection="nft_token_collection_card"
+        >
             <tr>
                 <td>Address</td>
                 <td className="text-lg-end">

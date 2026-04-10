@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import type { FormattedIdl } from '@/app/entities/idl/formatters/formatted-idl';
+import type { FormattedIdl } from '@/app/entities/idl/model/formatters/formatted-idl';
 
 import { contains, useSearchIdl } from '../search';
 

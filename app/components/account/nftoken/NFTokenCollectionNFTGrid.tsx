@@ -1,9 +1,9 @@
 'use client';
 
+import { RefreshButton } from '@shared/ui/refresh-button';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
-import { RefreshCw } from 'react-feather';
 
 import { useCollectionNfts } from './nftoken-hooks';
 import { NftokenTypes } from './nftoken-types';
@@ -18,10 +18,7 @@ export function NFTokenCollectionNFTGrid({ collection }: { collection: string })
             <div className="card-header align-items-center">
                 <h3 className="card-header-title">NFTs</h3>
 
-                <button className="btn btn-white btn-sm" onClick={() => mutate()}>
-                    <RefreshCw className="align-text-top me-2" size={13} />
-                    Refresh
-                </button>
+                <RefreshButton analyticsSection="nft_token_collection_grid" onClick={mutate} />
             </div>
 
             <div className="py-4">

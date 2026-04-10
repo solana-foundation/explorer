@@ -237,7 +237,12 @@ export function TokenTransfersCard({ address }: { address: string }) {
     const fetching = history.status === FetchStatus.Fetching;
     return (
         <div className="card">
-            <HistoryCardHeader fetching={fetching} refresh={() => refresh()} title="Token Transfers" />
+            <HistoryCardHeader
+                fetching={fetching}
+                refresh={() => refresh()}
+                title="Token Transfers"
+                analyticsSection="token_transfers_header"
+            />
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>

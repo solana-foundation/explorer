@@ -26,7 +26,7 @@ const config: StorybookConfig = {
                         global: true,
                         process: true,
                     },
-                    include: ['path', 'util', 'buffer'],
+                    include: ['path', 'stream', 'util', 'buffer'],
                 }),
             ],
             resolve: {

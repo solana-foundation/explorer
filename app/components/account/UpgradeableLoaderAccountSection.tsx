@@ -4,8 +4,9 @@ import { DownloadableIcon } from '@components/common/Downloadable';
 import { InfoTooltip } from '@components/common/InfoTooltip';
 import { Slot } from '@components/common/Slot';
 import { SolBalance } from '@components/common/SolBalance';
+import { TableCardBody } from '@components/common/TableCardBody';
 import { useRefreshAccount } from '@entities/account';
-import { AccountCard } from '@features/account';
+import { AccountDownloadDropdown } from '@features/account';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
@@ -18,11 +19,12 @@ import {
 } from '@validators/accounts/upgradeable-program';
 import Link from 'next/link';
 import React from 'react';
-import { ExternalLink } from 'react-feather';
+import { ExternalLink, RefreshCw } from 'react-feather';
 
 import { ProgramSecurityTXTBadge } from '@/app/features/security-txt/ui/SecurityTXTBadge';
 import { ProgramSecurityTXTLabel } from '@/app/features/security-txt/ui/SecurityTXTLabel';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
+import { refreshAnalytics } from '@/app/shared/lib/analytics';
 import { Cluster } from '@/app/utils/cluster';
 import { useClusterPath } from '@/app/utils/url';
 
@@ -75,83 +77,98 @@ export function UpgradeableProgramSection({
     const label = addressLabel(account.pubkey.toBase58(), cluster);
 
     return (
-        <AccountCard
-            title={<>{programData === undefined && 'Closed '}Program Account</>}
-            account={account}
-            refresh={() => refresh(account.pubkey, 'parsed')}
-        >
-            <tr>
-                <td>Address</td>
-                <td className="text-lg-end">
-                    <Address pubkey={account.pubkey} alignRight raw />
-                </td>
-            </tr>
-            {label && (
+        <div className="card">
+            <div className="card-header e-gap-2">
+                <h3 className="card-header-title mb-0 d-flex align-items-center">
+                    {programData === undefined && 'Closed '}Program Account
+                </h3>
+                <button
+                    className="btn btn-white btn-sm"
+                    onClick={() => {
+                        refreshAnalytics.trackButtonClicked('program_section');
+                        refresh(account.pubkey, 'parsed');
+                    }}
+                >
+                    <RefreshCw className="align-text-top me-2" size={13} />
+                    Refresh
+                </button>
+                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
+            </div>
+
+            <TableCardBody>
                 <tr>
-                    <td>Address Label</td>
-                    <td className="text-lg-end">{label}</td>
+                    <td>Address</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={account.pubkey} alignRight raw />
+                    </td>
                 </tr>
-            )}
-            <tr>
-                <td>Balance (SOL)</td>
-                <td className="text-lg-end text-uppercase">
-                    <SolBalance lamports={account.lamports} />
-                </td>
-            </tr>
-            <tr>
-                <td>Executable</td>
-                <td className="text-lg-end">{programData !== undefined ? 'Yes' : 'No'}</td>
-            </tr>
-            <tr>
-                <td>Executable Data{programData === undefined && ' (Closed)'}</td>
-                <td className="text-lg-end">
-                    <Address pubkey={programAccount.programData} alignRight link />
-                </td>
-            </tr>
-            {programData !== undefined && (
-                <>
+                {label && (
                     <tr>
-                        <td>Upgradeable</td>
-                        <td className="text-lg-end">{programData.authority !== null ? 'Yes' : 'No'}</td>
+                        <td>Address Label</td>
+                        <td className="text-lg-end">{label}</td>
                     </tr>
-                    <tr>
-                        <td>
-                            <VerifiedLabel />
-                        </td>
-                        <td className="text-lg-end">
-                            <VerifiedProgramBadge programData={programData} pubkey={account.pubkey} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <ProgramSecurityTXTLabel programPubkey={account.pubkey} />
-                        </td>
-                        <td className="text-lg-end">
-                            <ProgramSecurityTXTBadge programData={programData} programPubkey={account.pubkey} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Last Deployed Slot</td>
-                        <td className="text-lg-end">
-                            <Slot slot={programData.slot} link />
-                        </td>
-                    </tr>
-                    {programData.authority !== null && (
-                        <>
-                            <tr>
-                                <td>Upgrade Authority</td>
-                                <td className="text-lg-end">
-                                    {cluster == Cluster.MainnetBeta && squadMapInfo?.isSquad ? (
-                                        <MultisigBadge pubkey={account.pubkey} />
-                                    ) : null}
-                                    <Address pubkey={programData.authority} alignRight link />
-                                </td>
-                            </tr>
-                        </>
-                    )}
-                </>
-            )}
-        </AccountCard>
+                )}
+                <tr>
+                    <td>Balance (SOL)</td>
+                    <td className="text-lg-end text-uppercase">
+                        <SolBalance lamports={account.lamports} />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Executable</td>
+                    <td className="text-lg-end">{programData !== undefined ? 'Yes' : 'No'}</td>
+                </tr>
+                <tr>
+                    <td>Executable Data{programData === undefined && ' (Closed)'}</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={programAccount.programData} alignRight link />
+                    </td>
+                </tr>
+                {programData !== undefined && (
+                    <>
+                        <tr>
+                            <td>Upgradeable</td>
+                            <td className="text-lg-end">{programData.authority !== null ? 'Yes' : 'No'}</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <VerifiedLabel />
+                            </td>
+                            <td className="text-lg-end">
+                                <VerifiedProgramBadge programData={programData} pubkey={account.pubkey} />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <ProgramSecurityTXTLabel programPubkey={account.pubkey} />
+                            </td>
+                            <td className="text-lg-end">
+                                <ProgramSecurityTXTBadge programData={programData} programPubkey={account.pubkey} />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Last Deployed Slot</td>
+                            <td className="text-lg-end">
+                                <Slot slot={programData.slot} link />
+                            </td>
+                        </tr>
+                        {programData.authority !== null && (
+                            <>
+                                <tr>
+                                    <td>Upgrade Authority</td>
+                                    <td className="text-lg-end">
+                                        {cluster == Cluster.MainnetBeta && squadMapInfo?.isSquad ? (
+                                            <MultisigBadge pubkey={account.pubkey} />
+                                        ) : null}
+                                        <Address pubkey={programData.authority} alignRight link />
+                                    </td>
+                                </tr>
+                            </>
+                        )}
+                    </>
+                )}
+            </TableCardBody>
+        </div>
     );
 }
 
@@ -190,52 +207,64 @@ export function UpgradeableProgramDataSection({
 }) {
     const refresh = useRefreshAccount();
     return (
-        <AccountCard
-            title="Program Executable Data Account"
-            account={account}
-            refresh={() => refresh(account.pubkey, 'parsed')}
-        >
-            <tr>
-                <td>Address</td>
-                <td className="text-lg-end">
-                    <Address pubkey={account.pubkey} alignRight raw />
-                </td>
-            </tr>
-            <tr>
-                <td>Balance (SOL)</td>
-                <td className="text-lg-end text-uppercase">
-                    <SolBalance lamports={account.lamports} />
-                </td>
-            </tr>
-            {account.space !== undefined && (
+        <div className="card">
+            <div className="card-header">
+                <h3 className="card-header-title mb-0 d-flex align-items-center">Program Executable Data Account</h3>
+                <button
+                    className="btn btn-white btn-sm"
+                    onClick={() => {
+                        refreshAnalytics.trackButtonClicked('program_data_section');
+                        refresh(account.pubkey, 'parsed');
+                    }}
+                >
+                    <RefreshCw className="align-text-top me-2" size={13} />
+                    Refresh
+                </button>
+            </div>
+
+            <TableCardBody>
                 <tr>
-                    <td>Data Size (Bytes)</td>
+                    <td>Address</td>
                     <td className="text-lg-end">
-                        <DownloadableIcon data={programData.data[0]} filename={`${account.pubkey.toString()}.bin`}>
-                            <span className="me-2">{account.space}</span>
-                        </DownloadableIcon>
+                        <Address pubkey={account.pubkey} alignRight raw />
                     </td>
                 </tr>
-            )}
-            <tr>
-                <td>Upgradeable</td>
-                <td className="text-lg-end">{programData.authority !== null ? 'Yes' : 'No'}</td>
-            </tr>
-            <tr>
-                <td>Last Deployed Slot</td>
-                <td className="text-lg-end">
-                    <Slot slot={programData.slot} link />
-                </td>
-            </tr>
-            {programData.authority !== null && (
                 <tr>
-                    <td>Upgrade Authority</td>
-                    <td className="text-lg-end">
-                        <Address pubkey={programData.authority} alignRight link />
+                    <td>Balance (SOL)</td>
+                    <td className="text-lg-end text-uppercase">
+                        <SolBalance lamports={account.lamports} />
                     </td>
                 </tr>
-            )}
-        </AccountCard>
+                {account.space !== undefined && (
+                    <tr>
+                        <td>Data Size (Bytes)</td>
+                        <td className="text-lg-end">
+                            <DownloadableIcon data={programData.data[0]} filename={`${account.pubkey.toString()}.bin`}>
+                                <span className="me-2">{account.space}</span>
+                            </DownloadableIcon>
+                        </td>
+                    </tr>
+                )}
+                <tr>
+                    <td>Upgradeable</td>
+                    <td className="text-lg-end">{programData.authority !== null ? 'Yes' : 'No'}</td>
+                </tr>
+                <tr>
+                    <td>Last Deployed Slot</td>
+                    <td className="text-lg-end">
+                        <Slot slot={programData.slot} link />
+                    </td>
+                </tr>
+                {programData.authority !== null && (
+                    <tr>
+                        <td>Upgrade Authority</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={programData.authority} alignRight link />
+                        </td>
+                    </tr>
+                )}
+            </TableCardBody>
+        </div>
     );
 }
 
@@ -248,43 +277,55 @@ export function UpgradeableProgramBufferSection({
 }) {
     const refresh = useRefreshAccount();
     return (
-        <AccountCard
-            title="Program Deploy Buffer Account"
-            account={account}
-            refresh={() => refresh(account.pubkey, 'parsed')}
-        >
-            <tr>
-                <td>Address</td>
-                <td className="text-lg-end">
-                    <Address pubkey={account.pubkey} alignRight raw />
-                </td>
-            </tr>
-            <tr>
-                <td>Balance (SOL)</td>
-                <td className="text-lg-end text-uppercase">
-                    <SolBalance lamports={account.lamports} />
-                </td>
-            </tr>
-            {account.space !== undefined && (
+        <div className="card">
+            <div className="card-header">
+                <h3 className="card-header-title mb-0 d-flex align-items-center">Program Deploy Buffer Account</h3>
+                <button
+                    className="btn btn-white btn-sm"
+                    onClick={() => {
+                        refreshAnalytics.trackButtonClicked('program_buffer_section');
+                        refresh(account.pubkey, 'parsed');
+                    }}
+                >
+                    <RefreshCw className="align-text-top me-2" size={13} />
+                    Refresh
+                </button>
+            </div>
+
+            <TableCardBody>
                 <tr>
-                    <td>Data Size (Bytes)</td>
-                    <td className="text-lg-end">{account.space}</td>
-                </tr>
-            )}
-            {programBuffer.authority !== null && (
-                <tr>
-                    <td>Deploy Authority</td>
+                    <td>Address</td>
                     <td className="text-lg-end">
-                        <Address pubkey={programBuffer.authority} alignRight link />
+                        <Address pubkey={account.pubkey} alignRight raw />
                     </td>
                 </tr>
-            )}
-            <tr>
-                <td>Owner</td>
-                <td className="text-lg-end">
-                    <Address pubkey={account.owner} alignRight link />
-                </td>
-            </tr>
-        </AccountCard>
+                <tr>
+                    <td>Balance (SOL)</td>
+                    <td className="text-lg-end text-uppercase">
+                        <SolBalance lamports={account.lamports} />
+                    </td>
+                </tr>
+                {account.space !== undefined && (
+                    <tr>
+                        <td>Data Size (Bytes)</td>
+                        <td className="text-lg-end">{account.space}</td>
+                    </tr>
+                )}
+                {programBuffer.authority !== null && (
+                    <tr>
+                        <td>Deploy Authority</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={programBuffer.authority} alignRight link />
+                        </td>
+                    </tr>
+                )}
+                <tr>
+                    <td>Owner</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={account.owner} alignRight link />
+                    </td>
+                </tr>
+            </TableCardBody>
+        </div>
     );
 }
