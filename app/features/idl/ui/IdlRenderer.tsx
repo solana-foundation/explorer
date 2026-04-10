@@ -3,7 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import { useSetAtom } from 'jotai';
 import { memo, useEffect } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import ReactJson from 'react-json-view';
+import ReactJson from '@microlink/react-json-view';
 
 import { AnchorFormattedIdl } from '../formatted-idl/ui/AnchorFormattedIdl';
 import { CodamaFormattedIdl } from '../formatted-idl/ui/CodamaFormattedIdl';
