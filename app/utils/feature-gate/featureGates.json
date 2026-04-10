@@ -1296,7 +1296,7 @@
     "testnet_activation_epoch": 916,
     "devnet_activation_epoch": 1037,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 954,
     "description": ""
   },
   {
@@ -1412,7 +1412,7 @@
     "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": 936,
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1053,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1433,7 +1433,7 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 939,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -1455,7 +1455,7 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 940,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -1607,7 +1607,7 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 938,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -1760,6 +1760,56 @@
     ],
     "min_fd_versions": [
       "0.1"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "VAT9huvhPjRN9cyrPytq9rwvEJ3J4ADtjdncgZRyANJ",
+    "title": "SIMD-0357: Alpenglow VAT implementation",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0357-alpenglow_validator_admission_ticket.md"
+    ],
+    "simds": [
+      "0357"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0-beta.6"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "5cC3foj77CWun58pC51ebHFUWavHWKarWyR5UUik7dnC",
+    "title": "SIMD-0178/0189/0377: Enables deployment and execution of SBPFv3 programs",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0178-static-syscalls.md",
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0189-sbpf-stricter-elf-headers.md",
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0377-ebpf-isa-compatibility.md"
+    ],
+    "simds": [
+      "0178",
+      " 0189",
+      " 0377"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.0.0"
+    ],
+    "min_fd_versions": [
+      "v1.0"
     ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
