@@ -60,7 +60,7 @@ export function BaseFeatureGateImage({ title, simds }: BaseFeatureGateImageProps
             {/* SIMD + title bottom-left */}
             <div
                 style={{
-                    bottom: '64px',
+                    bottom: '100px',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '24px',
