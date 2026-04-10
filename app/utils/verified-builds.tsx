@@ -200,12 +200,16 @@ function useEnrichedOsecInfo({
     const connection = new Connection(clusterUrl);
 
     const { program: accountAnchorProgram } = useAnchorProgram(VERIFY_PROGRAM_ID, connection.rpcEndpoint);
-    const signerAuthorities = Array.from(
-        new Map(
-            [programAuthority, parsePublicKey(osecInfo?.signer), ...Object.keys(TRUSTED_SIGNERS).map(parsePublicKey)]
-                .filter((key): key is PublicKey => key !== null)
-                .map(key => [key.toBase58(), key]),
-        ).values(),
+    const signerAuthorities = useMemo(
+        () =>
+            Array.from(
+                new Map(
+                    [programAuthority, parsePublicKey(osecInfo?.signer), ...Object.keys(TRUSTED_SIGNERS).map(parsePublicKey)]
+                        .filter((key): key is PublicKey => key !== null)
+                        .map(key => [key.toBase58(), key]),
+                ).values(),
+            ),
+        [programAuthority, osecInfo?.signer],
     );
 
     // Fetch the PDA derived from the program upgrade authority
