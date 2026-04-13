@@ -34,17 +34,11 @@ function OverflowBadge({ names }: { names: string[] }) {
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <span className="badge bg-secondary-soft e-cursor-pointer">
-                    +{names.length} more
-                </span>
+                <span className="badge bg-secondary-soft e-cursor-pointer">+{names.length} more</span>
             </TooltipTrigger>
-            <TooltipContent
-                side="bottom"
-                sideOffset={4}
-                className="e-flex e-flex-col e-gap-1 e-p-2 e-text-inherit"
-            >
+            <TooltipContent side="bottom" sideOffset={4} className="e-flex e-flex-col e-gap-1 e-p-2 e-text-inherit">
                 {names.map((name, i) => (
-                    <span key={`${name}-${i}`} className="badge bg-secondary-soft e-cursor-default e-w-fit">
+                    <span key={`${name}-${i}`} className="badge bg-secondary-soft e-w-fit e-cursor-default">
                         {name}
                     </span>
                 ))}
