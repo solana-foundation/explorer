@@ -67,7 +67,7 @@ function mergeTransactionMap(current: TransactionMap | undefined, update: Transa
         return current ?? new Map<string, ParsedTransactionWithMeta>();
     }
 
-    return new Map([...Array.from(current ?? new Map<string, ParsedTransactionWithMeta>()), ...Array.from(update)]);
+    return new Map([...(current ?? []), ...update]);
 }
 
 function mergeFailedTransactionSignatures(
@@ -78,7 +78,7 @@ function mergeFailedTransactionSignatures(
         return current ?? new Set<string>();
     }
 
-    return new Set([...Array.from(current ?? new Set<string>()), ...Array.from(update)]);
+    return new Set([...(current ?? []), ...update]);
 }
 
 function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | undefined) {
@@ -250,17 +250,17 @@ export function useAccountHistory(address: string): Cache.CacheEntry<AccountHist
     return context.entries[address];
 }
 
+function getUnfetchedSignaturesFromHistory(history: AccountHistory): string[] {
+    const existingMap = history.transactionMap ?? new Map<string, ParsedTransactionWithMeta>();
+    const failedSigs = history.failedTransactionSignatures ?? new Set<string>();
+    return history.fetched.map(info => info.signature).filter(sig => !existingMap.has(sig) && !failedSigs.has(sig));
+}
+
 function getUnfetchedSignatures(before: Cache.CacheEntry<AccountHistory>) {
     if (!before.data) {
         return [];
     }
-
-    const existingMap = before.data.transactionMap || new Map<string, ParsedTransactionWithMeta>();
-    const failedTransactionSignatures = before.data.failedTransactionSignatures || new Set<string>();
-    const allSignatures = before.data.fetched.map(signatureInfo => signatureInfo.signature);
-    return allSignatures.filter(
-        signature => !existingMap.has(signature) && !failedTransactionSignatures.has(signature),
-    );
+    return getUnfetchedSignaturesFromHistory(before.data);
 }
 
 export function useFetchTransactionsForHistory() {
@@ -268,20 +268,13 @@ export function useFetchTransactionsForHistory() {
     const state = React.useContext(StateContext);
     const dispatch = React.useContext(DispatchContext);
     const inFlight = React.useContext(InFlightContext);
-    const latestEntriesRef = React.useRef(state?.entries);
-    latestEntriesRef.current = state?.entries;
-
     if (!state || !dispatch || !inFlight) {
         throw new Error(`useFetchTransactionsForHistory must be used within a HistoryProvider`);
     }
 
     return React.useCallback(
         (pubkey: PublicKey, history: AccountHistory) => {
-            const existingMap = history.transactionMap || new Map();
-            const failedTransactionSignatures = history.failedTransactionSignatures || new Set<string>();
-            const unfetched = history.fetched
-                .map(info => info.signature)
-                .filter(sig => !existingMap.has(sig) && !failedTransactionSignatures.has(sig));
+            const unfetched = getUnfetchedSignaturesFromHistory(history);
             if (unfetched.length === 0) return;
 
             const key = `${pubkey.toBase58()}:transactions`;
@@ -292,12 +285,10 @@ export function useFetchTransactionsForHistory() {
                         cluster,
                         unfetched,
                     );
-                    const currentStatus =
-                        latestEntriesRef.current?.[pubkey.toBase58()]?.status ?? FetchStatus.Fetched;
                     dispatch({
                         data: { failedTransactionSignatures, transactionMap },
                         key: pubkey.toBase58(),
-                        status: currentStatus,
+                        status: FetchStatus.Fetched,
                         type: ActionType.Update,
                         url,
                     });

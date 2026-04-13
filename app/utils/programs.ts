@@ -530,5 +530,6 @@ export function isTokenProgram(program: string): program is TokenProgram {
 }
 
 export function getProgramName(programId: PublicKey): string {
-    return PROGRAM_INFO_BY_ID[programId.toBase58()]?.name ?? 'Unknown';
+    const address = programId.toBase58();
+    return PROGRAM_INFO_BY_ID[address]?.name ?? LOADER_IDS[address] ?? 'Unknown';
 }
