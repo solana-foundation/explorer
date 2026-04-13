@@ -1,3 +1,4 @@
+import { getMintSize, getTokenSize } from '@solana-program/token';
 import { describe, expect, it } from 'vitest';
 
 import { toBase64 } from '@/app/shared/lib/bytes';
@@ -9,14 +10,20 @@ import {
     POST_SYSTEM_ACCOUNT,
     postAccount,
     SOME_KEY,
-    SYSTEM_PROGRAM,
-    TOKEN_2022_PROGRAM,
-    TOKEN_PROGRAM,
+    SYSTEM_PROGRAM_ADDRESS,
+    TOKEN_2022_PROGRAM_ADDRESS,
+    TOKEN_PROGRAM_ADDRESS,
     USDC_MINT,
     WSOL_MINT,
 } from '../../mocks/token-accounts';
 import { getMintDecimals } from '../get-mint-decimals';
-import { ACCOUNT_TYPE_MINT, ACCOUNT_TYPE_TOKEN, DECIMALS_OFFSET, MINT_SIZE, TOKEN_ACCOUNT_SIZE } from '../token-layout';
+import { ACCOUNT_TYPE_MINT, ACCOUNT_TYPE_TOKEN } from '../token-layout';
+
+const MINT_SIZE = getMintSize();
+const TOKEN_ACCOUNT_SIZE = getTokenSize();
+
+/** mintAuthorityOption(4) + mintAuthority(32) + supply(8) = 44 */
+const DECIMALS_OFFSET = 44;
 
 describe('getMintDecimals', () => {
     it('should extract decimals from a pre-simulation parsed token account', () => {
@@ -32,7 +39,7 @@ describe('getMintDecimals', () => {
     });
 
     it('should extract decimals from a post-simulation mint buffer', () => {
-        const result = getMintDecimals([WSOL_MINT], [undefined], [postAccount(mintBase64(8), TOKEN_PROGRAM)]);
+        const result = getMintDecimals([WSOL_MINT], [undefined], [postAccount(mintBase64(8), TOKEN_PROGRAM_ADDRESS)]);
 
         expect(result[WSOL_MINT.toBase58()]).toBe(8);
     });
@@ -41,7 +48,7 @@ describe('getMintDecimals', () => {
         const result = getMintDecimals(
             [SOME_KEY, WSOL_MINT, USDC_MINT],
             [PARSED_USDC_TOKEN_ACCOUNT, PARSED_WSOL_MINT_ACCOUNT, undefined],
-            [POST_SYSTEM_ACCOUNT, POST_SYSTEM_ACCOUNT, postAccount(mintBase64(6), TOKEN_PROGRAM)],
+            [POST_SYSTEM_ACCOUNT, POST_SYSTEM_ACCOUNT, postAccount(mintBase64(6), TOKEN_PROGRAM_ADDRESS)],
         );
 
         expect(result[USDC_MINT.toBase58()]).toBe(6);
@@ -55,20 +62,24 @@ describe('getMintDecimals', () => {
     });
 
     it('should handle Token-2022 program owner for post-simulation mint buffers', () => {
-        const result = getMintDecimals([USDC_MINT], [undefined], [postAccount(mintBase64(5), TOKEN_2022_PROGRAM)]);
+        const result = getMintDecimals(
+            [USDC_MINT],
+            [undefined],
+            [postAccount(mintBase64(5), TOKEN_2022_PROGRAM_ADDRESS)],
+        );
 
         expect(result[USDC_MINT.toBase58()]).toBe(5);
     });
 
     it('should skip post-simulation accounts owned by non-token programs', () => {
-        const result = getMintDecimals([USDC_MINT], [undefined], [postAccount(mintBase64(6), SYSTEM_PROGRAM)]);
+        const result = getMintDecimals([USDC_MINT], [undefined], [postAccount(mintBase64(6), SYSTEM_PROGRAM_ADDRESS)]);
 
         expect(result).toEqual({});
     });
 
     it('should skip post-simulation accounts with data shorter than 82 bytes', () => {
         const shortData = toBase64(new Uint8Array(50));
-        const result = getMintDecimals([USDC_MINT], [undefined], [postAccount(shortData, TOKEN_PROGRAM)]);
+        const result = getMintDecimals([USDC_MINT], [undefined], [postAccount(shortData, TOKEN_PROGRAM_ADDRESS)]);
 
         expect(result).toEqual({});
     });
@@ -89,7 +100,11 @@ describe('getMintDecimals', () => {
         bytes[DECIMALS_OFFSET + 1] = 1;
         bytes[TOKEN_ACCOUNT_SIZE] = ACCOUNT_TYPE_MINT;
 
-        const result = getMintDecimals([USDC_MINT], [undefined], [postAccount(toBase64(bytes), TOKEN_2022_PROGRAM)]);
+        const result = getMintDecimals(
+            [USDC_MINT],
+            [undefined],
+            [postAccount(toBase64(bytes), TOKEN_2022_PROGRAM_ADDRESS)],
+        );
 
         expect(result[USDC_MINT.toBase58()]).toBe(7);
     });
@@ -99,7 +114,7 @@ describe('getMintDecimals', () => {
         bytes[DECIMALS_OFFSET] = 1;
         bytes[DECIMALS_OFFSET + 1] = 1;
 
-        const result = getMintDecimals([USDC_MINT], [undefined], [postAccount(toBase64(bytes), TOKEN_PROGRAM)]);
+        const result = getMintDecimals([USDC_MINT], [undefined], [postAccount(toBase64(bytes), TOKEN_PROGRAM_ADDRESS)]);
 
         expect(result).toEqual({});
     });
@@ -110,7 +125,11 @@ describe('getMintDecimals', () => {
         bytes[DECIMALS_OFFSET + 1] = 1;
         bytes[TOKEN_ACCOUNT_SIZE] = ACCOUNT_TYPE_TOKEN;
 
-        const result = getMintDecimals([USDC_MINT], [undefined], [postAccount(toBase64(bytes), TOKEN_2022_PROGRAM)]);
+        const result = getMintDecimals(
+            [USDC_MINT],
+            [undefined],
+            [postAccount(toBase64(bytes), TOKEN_2022_PROGRAM_ADDRESS)],
+        );
 
         expect(result).toEqual({});
     });
@@ -119,7 +138,7 @@ describe('getMintDecimals', () => {
         const result = getMintDecimals(
             [SOME_KEY, SOME_KEY],
             [PARSED_USDC_TOKEN_ACCOUNT, undefined],
-            [POST_SYSTEM_ACCOUNT, postAccount(mintBase64(9), TOKEN_PROGRAM)],
+            [POST_SYSTEM_ACCOUNT, postAccount(mintBase64(9), TOKEN_PROGRAM_ADDRESS)],
         );
 
         // Post-simulation mint overwrites pre-simulation token account

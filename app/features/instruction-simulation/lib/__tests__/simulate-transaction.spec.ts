@@ -1,4 +1,6 @@
-import { type Connection, PublicKey, type VersionedMessage } from '@solana/web3.js';
+import { type Connection, Keypair, PublicKey, type VersionedMessage } from '@solana/web3.js';
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { Cluster } from '@utils/cluster';
 import type { InstructionLogs } from '@utils/program-logs';
 import BN from 'bn.js';
@@ -22,11 +24,11 @@ vi.mock('@utils/program-logs', () => ({
 
 import { simulateTransaction } from '../simulate-transaction';
 
-const ACCOUNT_KEY_1 = new PublicKey('GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS');
-const ACCOUNT_KEY_2 = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
-const TOKEN_PROGRAM_ID = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
-const MOCK_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-const MOCK_OWNER = new PublicKey('5ZiE3vAkrdXBgyFL7KqG3RoEGBws8CjY8AsGq1MuR5My');
+const ACCOUNT_KEY_1 = Keypair.generate().publicKey;
+// Intentionally the Token program — this key doubles as an account key and a program owner
+const ACCOUNT_KEY_2 = new PublicKey(TOKEN_PROGRAM_ADDRESS);
+const MOCK_MINT = Keypair.generate().publicKey;
+const MOCK_OWNER = Keypair.generate().publicKey;
 
 describe('simulateTransaction', () => {
     beforeEach(() => {
@@ -39,7 +41,7 @@ describe('simulateTransaction', () => {
             {
                 computeUnits: 150,
                 failed: false,
-                invokedProgram: '11111111111111111111111111111111',
+                invokedProgram: SYSTEM_PROGRAM_ADDRESS,
                 logs: [{ prefix: 'Program', style: 'success', text: 'success' }],
                 truncated: false,
             },
@@ -90,8 +92,8 @@ describe('simulateTransaction', () => {
         const connection = createMockConnection({
             getMultipleParsedAccounts: vi.fn().mockResolvedValue({
                 value: [
-                    { data: {}, lamports: 2_000_000_000, owner: new PublicKey('11111111111111111111111111111111') },
-                    { data: {}, lamports: 500_000_000, owner: new PublicKey('11111111111111111111111111111111') },
+                    { data: {}, lamports: 2_000_000_000, owner: new PublicKey(SYSTEM_PROGRAM_ADDRESS) },
+                    { data: {}, lamports: 500_000_000, owner: new PublicKey(SYSTEM_PROGRAM_ADDRESS) },
                 ],
             }),
         });
@@ -131,7 +133,7 @@ describe('simulateTransaction', () => {
             {
                 computeUnits: 100,
                 failed: true,
-                invokedProgram: '11111111111111111111111111111111',
+                invokedProgram: SYSTEM_PROGRAM_ADDRESS,
                 logs: [{ prefix: 'Program', style: 'warning', text: 'failed' }],
                 truncated: false,
             },
@@ -142,7 +144,7 @@ describe('simulateTransaction', () => {
             simulateTransaction: vi.fn().mockResolvedValue(
                 createSimulationResponse({
                     err: { InstructionError: [0, 'Custom'] },
-                    logs: ['Program 11111111111111111111111111111111 invoke [1]', 'Program failed'],
+                    logs: [`Program ${SYSTEM_PROGRAM_ADDRESS} invoke [1]`, 'Program failed'],
                 }),
             ),
         });
@@ -173,8 +175,8 @@ describe('simulateTransaction', () => {
     });
 
     it('should resolve address lookup tables before simulation', async () => {
-        const lookupTableKey = new PublicKey('9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin');
-        const lookupAddress = new PublicKey('GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS');
+        const lookupTableKey = Keypair.generate().publicKey;
+        const lookupAddress = Keypair.generate().publicKey;
         const message = createMockMessage({
             addressTableLookups: [{ accountKey: lookupTableKey, readonlyIndexes: [], writableIndexes: [0] }],
         });
@@ -226,7 +228,7 @@ describe('simulateTransaction', () => {
     });
 
     describe('token balance parsing', () => {
-        const TOKEN_ACCOUNT_KEY = new PublicKey('3kzAHRgraoYwJY7CSS2HoNvfRXBM4rBUFh4x9mHBMbYW');
+        const TOKEN_ACCOUNT_KEY = Keypair.generate().publicKey;
         const MINT_KEY = MOCK_MINT;
         const OWNER_KEY = MOCK_OWNER;
 
@@ -255,7 +257,7 @@ describe('simulateTransaction', () => {
                                 program: 'spl-token',
                             },
                             lamports: 2_039_280,
-                            owner: new PublicKey(TOKEN_PROGRAM_ID),
+                            owner: new PublicKey(TOKEN_PROGRAM_ADDRESS),
                         },
                         {
                             data: {
@@ -266,7 +268,7 @@ describe('simulateTransaction', () => {
                                 program: 'spl-token',
                             },
                             lamports: 1_000_000,
-                            owner: new PublicKey(TOKEN_PROGRAM_ID),
+                            owner: new PublicKey(TOKEN_PROGRAM_ADDRESS),
                         },
                     ],
                 }),
@@ -277,21 +279,21 @@ describe('simulateTransaction', () => {
                                 data: [postTokenAccountBase64, 'base64'],
                                 executable: false,
                                 lamports: 2_039_280,
-                                owner: TOKEN_PROGRAM_ID,
+                                owner: TOKEN_PROGRAM_ADDRESS,
                                 rentEpoch: 0,
                             },
                             {
                                 data: [mintBase64, 'base64'],
                                 executable: false,
                                 lamports: 1_000_000,
-                                owner: TOKEN_PROGRAM_ID,
+                                owner: TOKEN_PROGRAM_ADDRESS,
                                 rentEpoch: 0,
                             },
                         ],
                         err: null,
                         logs: [
-                            'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [1]',
-                            'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success',
+                            `Program ${TOKEN_PROGRAM_ADDRESS} invoke [1]`,
+                            `Program ${TOKEN_PROGRAM_ADDRESS} success`,
                         ],
                         unitsConsumed: 200,
                     },
@@ -359,8 +361,8 @@ function createMockConnection(overrides?: Partial<Connection>): Connection {
         getMultipleAccountsInfo: vi.fn().mockResolvedValue([]),
         getMultipleParsedAccounts: vi.fn().mockResolvedValue({
             value: [
-                { data: {}, lamports: 1_000_000_000, owner: new PublicKey('11111111111111111111111111111111') },
-                { data: {}, lamports: 1_000_000_000, owner: new PublicKey('11111111111111111111111111111111') },
+                { data: {}, lamports: 1_000_000_000, owner: new PublicKey(SYSTEM_PROGRAM_ADDRESS) },
+                { data: {}, lamports: 1_000_000_000, owner: new PublicKey(SYSTEM_PROGRAM_ADDRESS) },
             ],
         }),
         simulateTransaction: vi.fn().mockResolvedValue(createSimulationResponse()),
@@ -388,22 +390,19 @@ function createSimulationResponse(overrides?: Record<string, unknown>) {
                     data: ['', 'base64'],
                     executable: false,
                     lamports: 2_000_000_000,
-                    owner: '11111111111111111111111111111111',
+                    owner: SYSTEM_PROGRAM_ADDRESS,
                     rentEpoch: 0,
                 },
                 {
                     data: ['', 'base64'],
                     executable: false,
                     lamports: 500_000_000,
-                    owner: '11111111111111111111111111111111',
+                    owner: SYSTEM_PROGRAM_ADDRESS,
                     rentEpoch: 0,
                 },
             ],
             err: null,
-            logs: [
-                'Program 11111111111111111111111111111111 invoke [1]',
-                'Program 11111111111111111111111111111111 success',
-            ],
+            logs: [`Program ${SYSTEM_PROGRAM_ADDRESS} invoke [1]`, `Program ${SYSTEM_PROGRAM_ADDRESS} success`],
             unitsConsumed: 150,
             ...overrides,
         },

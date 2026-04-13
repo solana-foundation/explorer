@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SimulationResult } from '../../lib/simulate-transaction';
 import type { SimulationState } from '../use-simulation';
 
-const MOCK_URL = 'https://api.devnet.solana.com';
+const MOCK_URL = 'https://devnet.rpc.address';
 
 vi.mock('@providers/cluster', () => ({
     useCluster: () => ({ cluster: 'devnet', url: MOCK_URL }),

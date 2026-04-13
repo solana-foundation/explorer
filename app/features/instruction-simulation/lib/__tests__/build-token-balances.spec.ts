@@ -1,4 +1,4 @@
-import { PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { alloc, toBase64, writeU64LE } from '@/app/shared/lib/bytes';
@@ -8,12 +8,12 @@ import {
     POST_SYSTEM_ACCOUNT,
     postAccount,
     SOME_KEY,
-    TOKEN_PROGRAM,
+    TOKEN_PROGRAM_ADDRESS,
     USDC_MINT,
 } from '../../mocks/token-accounts';
 import { buildTokenBalances } from '../build-token-balances';
 
-const UNKNOWN_MINT = new PublicKey('DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263');
+const UNKNOWN_MINT = Keypair.generate().publicKey;
 
 describe('buildTokenBalances', () => {
     it('should skip post-simulation token account when mint decimals are unknown', () => {
@@ -22,7 +22,7 @@ describe('buildTokenBalances', () => {
         const result = buildTokenBalances(
             [SOME_KEY],
             [undefined],
-            [postAccount(tokenAccountBase64, TOKEN_PROGRAM)],
+            [postAccount(tokenAccountBase64, TOKEN_PROGRAM_ADDRESS)],
             {}, // empty decimals map — mint is unknown
         );
 
@@ -32,9 +32,14 @@ describe('buildTokenBalances', () => {
     it('should include post-simulation token account when mint decimals are known', () => {
         const tokenAccountBase64 = encodeTokenAccountBase64(USDC_MINT, SOME_KEY, 1_000_000n);
 
-        const result = buildTokenBalances([SOME_KEY], [undefined], [postAccount(tokenAccountBase64, TOKEN_PROGRAM)], {
-            [USDC_MINT.toBase58()]: 6,
-        });
+        const result = buildTokenBalances(
+            [SOME_KEY],
+            [undefined],
+            [postAccount(tokenAccountBase64, TOKEN_PROGRAM_ADDRESS)],
+            {
+                [USDC_MINT.toBase58()]: 6,
+            },
+        );
 
         expect(result.postTokenBalances).toHaveLength(1);
         expect(result.postTokenBalances[0]).toMatchObject({

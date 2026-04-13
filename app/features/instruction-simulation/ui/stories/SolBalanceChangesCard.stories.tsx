@@ -1,4 +1,6 @@
-import { PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import type { Meta, StoryObj } from '@storybook/react';
 import BN from 'bn.js';
 import { expect, within } from 'storybook/test';
@@ -7,9 +9,7 @@ import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '..
 import type { SolBalanceChange } from '../../lib/types';
 import { SolBalanceChangesCard } from '../SolBalanceChangesCard';
 
-const ALICE = 'GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS';
-const TOKEN_PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
-const SYSTEM_PROGRAM = '11111111111111111111111111111111';
+const ALICE = Keypair.generate().publicKey.toBase58();
 
 const meta = {
     component: SolBalanceChangesCard,
@@ -64,8 +64,8 @@ export const MultipleChanges: Story = {
     args: {
         balanceChanges: [
             change(ALICE, '-2000000000', '5000000000', '3000000000'),
-            change(TOKEN_PROGRAM, '1500000000', '1000000000', '2500000000'),
-            change(SYSTEM_PROGRAM, '500000000', '0', '500000000'),
+            change(TOKEN_PROGRAM_ADDRESS, '1500000000', '1000000000', '2500000000'),
+            change(SYSTEM_PROGRAM_ADDRESS, '500000000', '0', '500000000'),
         ],
     },
     play: async ({ canvasElement }) => {

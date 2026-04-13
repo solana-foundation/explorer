@@ -9,11 +9,15 @@ import {
     type SimulatedTransactionAccountInfo,
     type TokenBalance,
 } from '@solana/web3.js';
+import { getTokenSize } from '@solana-program/token';
 
 import { fromBase64, readU64LE, toBuffer } from '@/app/shared/lib/bytes';
+import { isTokenProgram } from '@/app/shared/model/token-program';
 
-import { ACCOUNT_TYPE_TOKEN, TOKEN_ACCOUNT_SIZE } from './token-layout';
-import { isTokenProgramBase58, toParsedData } from './token-program';
+import { ACCOUNT_TYPE_TOKEN } from './token-layout';
+
+const TOKEN_ACCOUNT_SIZE = getTokenSize();
+import { toParsedData } from './token-program';
 import type { MintDecimalsMap } from './types';
 
 export type TokenBalanceData = {
@@ -79,7 +83,7 @@ function extractPostTokenBalance(
 
     const dataBase64 = accountInfo.data[0];
     const ownerProgram = accountInfo.owner;
-    if (!dataBase64 || !isTokenProgramBase58(ownerProgram)) return undefined;
+    if (!dataBase64 || !isTokenProgram(ownerProgram)) return undefined;
 
     const bytes = fromBase64(dataBase64);
     if (bytes.length < TOKEN_ACCOUNT_SIZE) return undefined;

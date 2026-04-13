@@ -1,13 +1,14 @@
 import type { AccountInfo, ParsedAccountData, SimulatedTransactionAccountInfo } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import BN from 'bn.js';
 import { describe, expect, it } from 'vitest';
 
 import { computeSolBalanceChanges } from '../compute-sol-balance-changes';
 
-const KEY_A = new PublicKey('5ZiE3vAkrdXBgyFL7KqG3RoEGBws8CjY8AsGq1MuR5My');
-const KEY_B = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-const KEY_C = new PublicKey('So11111111111111111111111111111111111111112');
+const KEY_A = Keypair.generate().publicKey;
+const KEY_B = Keypair.generate().publicKey;
+const KEY_C = Keypair.generate().publicKey;
 
 describe('computeSolBalanceChanges', () => {
     it('should compute a positive delta when an account gains lamports', () => {
@@ -117,7 +118,7 @@ function preAccount(lamports: number): AccountInfo<ParsedAccountData | Buffer> {
         data: { parsed: { info: {}, type: 'account' }, program: 'system', space: 0 },
         executable: false,
         lamports,
-        owner: new PublicKey('11111111111111111111111111111111'),
+        owner: new PublicKey(SYSTEM_PROGRAM_ADDRESS),
         rentEpoch: 0,
     };
 }
@@ -127,7 +128,7 @@ function postAccount(lamports: number): SimulatedTransactionAccountInfo {
         data: ['', 'base64'],
         executable: false,
         lamports,
-        owner: '11111111111111111111111111111111',
+        owner: SYSTEM_PROGRAM_ADDRESS,
         rentEpoch: 0,
     };
 }

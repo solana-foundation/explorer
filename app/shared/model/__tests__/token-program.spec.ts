@@ -1,9 +1,9 @@
 import type { Address, ReadonlyUint8Array } from '@solana/kit';
 import { TOKEN_PROGRAM_ADDRESS, TokenAccount } from '@solana-program/token';
-import { Token2022Account } from '@solana-program/token-2022';
+import { TOKEN_2022_PROGRAM_ADDRESS, Token2022Account } from '@solana-program/token-2022';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
-import { identifyTokenAccountType, isTokenMintByOwner } from '../token-program';
+import { identifyTokenAccountType, isTokenMintByOwner, isTokenProgram } from '../token-program';
 
 describe('token-program types', () => {
     it('isTokenMintByOwner should accept Address and return boolean', () => {
@@ -22,6 +22,28 @@ describe('token-program types', () => {
         expect(TokenAccount.Mint).toBe(Token2022Account.Mint);
         expect(TokenAccount.Token).toBe(Token2022Account.Token);
         expect(TokenAccount.Multisig).toBe(Token2022Account.Multisig);
+    });
+});
+
+describe('isTokenProgram', () => {
+    it('should return true for the Token program address', () => {
+        expect(isTokenProgram(TOKEN_PROGRAM_ADDRESS)).toBe(true);
+    });
+
+    it('should return true for the Token-2022 program address', () => {
+        expect(isTokenProgram(TOKEN_2022_PROGRAM_ADDRESS)).toBe(true);
+    });
+
+    it('should return true for a plain string matching the Token program', () => {
+        expect(isTokenProgram('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')).toBe(true);
+    });
+
+    it('should return true for a plain string matching the Token-2022 program', () => {
+        expect(isTokenProgram('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb')).toBe(true);
+    });
+
+    it('should return false for an unrelated program', () => {
+        expect(isTokenProgram('11111111111111111111111111111111')).toBe(false);
     });
 });
 

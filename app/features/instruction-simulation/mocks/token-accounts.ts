@@ -1,15 +1,18 @@
+import { NATIVE_MINT } from '@solana/spl-token';
 import type { AccountInfo, ParsedAccountData, SimulatedTransactionAccountInfo } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
+import { getMintSize, getTokenSize, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
-import { MINT_SIZE, TOKEN_ACCOUNT_SIZE } from '../lib/token-layout';
+import { USDC_MINT } from '@/app/shared/model/known-mints';
 
-export const TOKEN_PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
-export const TOKEN_2022_PROGRAM = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
-export const SYSTEM_PROGRAM = '11111111111111111111111111111111';
+const MINT_SIZE = getMintSize();
+const TOKEN_ACCOUNT_SIZE = getTokenSize();
 
-export const USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-export const WSOL_MINT = new PublicKey('So11111111111111111111111111111111111111112');
-export const SOME_KEY = new PublicKey('5ZiE3vAkrdXBgyFL7KqG3RoEGBws8CjY8AsGq1MuR5My');
+export { SYSTEM_PROGRAM_ADDRESS, TOKEN_2022_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS, USDC_MINT };
+export const WSOL_MINT = NATIVE_MINT;
+export const SOME_KEY = Keypair.generate().publicKey;
 
 /** Parsed USDC token account (decimals 6, owned by TOKEN_PROGRAM) as returned by getMultipleParsedAccounts */
 export const PARSED_USDC_TOKEN_ACCOUNT: AccountInfo<ParsedAccountData> = {
@@ -27,14 +30,14 @@ export const PARSED_USDC_TOKEN_ACCOUNT: AccountInfo<ParsedAccountData> = {
     },
     executable: false,
     lamports: 2_039_280,
-    owner: new PublicKey(TOKEN_PROGRAM),
+    owner: new PublicKey(TOKEN_PROGRAM_ADDRESS),
     rentEpoch: 0,
 };
 
 /** Same token account shape but owned by Token-2022 */
 export const PARSED_USDC_TOKEN_ACCOUNT_2022: AccountInfo<ParsedAccountData> = {
     ...PARSED_USDC_TOKEN_ACCOUNT,
-    owner: new PublicKey(TOKEN_2022_PROGRAM),
+    owner: new PublicKey(TOKEN_2022_PROGRAM_ADDRESS),
 };
 
 /** Parsed WSOL mint account (decimals 9) as returned by getMultipleParsedAccounts */
@@ -49,7 +52,7 @@ export const PARSED_WSOL_MINT_ACCOUNT: AccountInfo<ParsedAccountData> = {
     },
     executable: false,
     lamports: 1_000_000,
-    owner: new PublicKey(TOKEN_PROGRAM),
+    owner: new PublicKey(TOKEN_PROGRAM_ADDRESS),
     rentEpoch: 0,
 };
 
@@ -58,7 +61,7 @@ export const POST_SYSTEM_ACCOUNT: SimulatedTransactionAccountInfo = {
     data: ['', 'base64'],
     executable: false,
     lamports: 1_000_000,
-    owner: SYSTEM_PROGRAM,
+    owner: SYSTEM_PROGRAM_ADDRESS,
     rentEpoch: 0,
 };
 
