@@ -15,12 +15,13 @@ export const CollapsibleCard = React.forwardRef<HTMLDivElement, CollapsibleCardP
         const [expanded, setExpanded] = React.useState(defaultExpanded);
 
         return (
-            <div ref={ref} className={className ?? 'card'}>
+            <div ref={ref} className={cn('card', className)}>
                 <div className={cn('card-header', collapsible && !expanded && 'border-0')}>
                     <h3 className="card-header-title d-flex align-items-center">{title}</h3>
                     {headerButtons}
                     {collapsible && (
                         <button
+                            aria-expanded={expanded}
                             className={cn('btn btn-sm d-flex', expanded ? 'btn-black active' : 'btn-white')}
                             onClick={() => setExpanded(current => !current)}
                         >
