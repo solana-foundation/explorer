@@ -6,7 +6,7 @@ import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
 import { useAccountHistory, useFetchAccountHistory, useFetchTransactionsForHistory } from '@providers/accounts/history';
 import { FetchStatus } from '@providers/cache';
-import { ParsedTransactionWithMeta, PublicKey } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc } from '@utils/date';
 import { getTransactionInstructionNames } from '@utils/instruction';
 import React, { useCallback, useMemo } from 'react';
@@ -18,6 +18,7 @@ import { toBase64 } from '@/app/shared/lib/bytes';
 
 import { Copyable } from '../../common/Copyable';
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
+import { InstructionBadges } from './InstructionBadges';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
@@ -40,10 +41,15 @@ export function TransactionHistoryCard({ address }: { address: string }) {
         return [];
     }, [history]);
 
-    const detailedHistoryMap = React.useMemo(
-        () => history?.data?.transactionMap || new Map<string, ParsedTransactionWithMeta>(),
-        [history?.data?.transactionMap],
-    );
+    const instructionNamesMap = React.useMemo(() => {
+        const map = new Map<string, string[]>();
+        if (history?.data?.transactionMap) {
+            for (const [sig, tx] of history.data.transactionMap) {
+                map.set(sig, getTransactionInstructionNames(tx));
+            }
+        }
+        return map;
+    }, [history?.data?.transactionMap]);
 
     React.useEffect(() => {
         if (!history) {
@@ -66,21 +72,14 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     const hasTimestamps = transactionRows.some(element => element.blockTime);
     const detailsList: React.ReactNode[] = transactionRows.map(
         ({ slot, signature, blockTime, statusClass, statusText }) => {
-            const transactionWithMeta = detailedHistoryMap.get(signature);
-            const instructionNames = transactionWithMeta ? getTransactionInstructionNames(transactionWithMeta) : null;
+            const instructionNames = instructionNamesMap.get(signature) ?? null;
 
             return (
                 <tr key={signature}>
                     <td>
                         <Signature signature={signature} link truncateChars={40} />
                         {instructionNames && instructionNames.length > 0 && (
-                            <div className="d-flex flex-wrap gap-1 mt-1">
-                                {instructionNames.map((name, i) => (
-                                    <span key={i} className="badge bg-secondary-soft">
-                                        {name}
-                                    </span>
-                                ))}
-                            </div>
+                            <InstructionBadges names={instructionNames} />
                         )}
                     </td>
 

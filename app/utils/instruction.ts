@@ -141,7 +141,7 @@ export function getTransactionInstructionNames(transactionWithMeta: ParsedTransa
                 // fall through
             }
         }
-        return `${programName}: Unknown Instruction`;
+        return `${programName} Program: Unknown Instruction`;
     });
 }
 
