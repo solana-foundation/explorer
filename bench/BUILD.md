@@ -4,7 +4,7 @@
 |------|-------|------|---------------|
 | Static | `/` | 20 kB | 1.12 MB |
 | Static | `/_not-found` | 330 B | 170 kB |
-| Dynamic | `/address/[address]` | 20 kB | 1.03 MB |
+| Dynamic | `/address/[address]` | 30 kB | 1.17 MB |
 | Dynamic | `/address/[address]/anchor-account` | 10 kB | 1.09 MB |
 | Dynamic | `/address/[address]/anchor-program` | 340 B | 950 kB |
 | Dynamic | `/address/[address]/attestation` | 10 kB | 1.06 MB |
@@ -16,17 +16,17 @@
 | Dynamic | `/address/[address]/entries` | 10 kB | 1.03 MB |
 | Dynamic | `/address/[address]/feature-gate` | 340 B | 950 kB |
 | Dynamic | `/address/[address]/idl` | 130 kB | 1.27 MB |
-| Dynamic | `/address/[address]/instructions` | 10 kB | 1.13 MB |
+| Dynamic | `/address/[address]/instructions` | 10 kB | 1.14 MB |
 | Dynamic | `/address/[address]/metadata` | 10 kB | 1.03 MB |
-| Dynamic | `/address/[address]/nftoken-collection-nfts` | 10 kB | 1.10 MB |
+| Dynamic | `/address/[address]/nftoken-collection-nfts` | 10 kB | 1.08 MB |
 | Dynamic | `/address/[address]/program-multisig` | 10 kB | 1.08 MB |
 | Dynamic | `/address/[address]/rewards` | 10 kB | 1.02 MB |
 | Dynamic | `/address/[address]/security` | 10 kB | 1.08 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 10 kB | 1.01 MB |
 | Dynamic | `/address/[address]/stake-history` | 10 kB | 1.02 MB |
 | Dynamic | `/address/[address]/token-extensions` | 10 kB | 1.10 MB |
-| Dynamic | `/address/[address]/tokens` | 30 kB | 1.21 MB |
-| Dynamic | `/address/[address]/transfers` | 10 kB | 1.15 MB |
+| Dynamic | `/address/[address]/tokens` | 30 kB | 1.22 MB |
+| Dynamic | `/address/[address]/transfers` | 20 kB | 1.15 MB |
 | Dynamic | `/address/[address]/verified-build` | 10 kB | 1.08 MB |
 | Dynamic | `/address/[address]/vote-history` | 10 kB | 1.01 MB |
 | Dynamic | `/api/anchor` | 0 B | 0 B |
