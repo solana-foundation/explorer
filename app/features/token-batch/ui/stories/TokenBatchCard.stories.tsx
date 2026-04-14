@@ -83,7 +83,7 @@ export const DecodedTransferAmount: Story = {
     },
 };
 
-// Unknown discriminator renders raw hex data
+// Unknown discriminator — SDK cannot parse it, shows as parse error
 export const UnknownDiscriminator: Story = {
     args: {
         index: 2,
@@ -92,8 +92,7 @@ export const UnknownDiscriminator: Story = {
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByText('Unknown')).toBeInTheDocument();
-        await expect(canvas.getByText('fe ab cd')).toBeInTheDocument();
+        await expect(canvas.getByTestId('batch-error')).toBeInTheDocument();
     },
 };
 
