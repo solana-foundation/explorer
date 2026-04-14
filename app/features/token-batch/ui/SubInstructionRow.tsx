@@ -9,9 +9,17 @@ import { formatParsedInstruction } from '../lib/format-sub-instruction';
 import type { DecodedField, DecodedParams, LabeledAccount } from '../lib/types';
 import { useSubInstructionMintInfo } from '../model/use-sub-instruction-mint-info';
 
-export function SubInstructionRow({ parsed, index }: { parsed: ParsedTokenInstruction<string>; index: number }) {
+export function SubInstructionRow({
+    parsed,
+    extraSigners,
+    index,
+}: {
+    parsed: ParsedTokenInstruction<string>;
+    extraSigners: LabeledAccount[];
+    index: number;
+}) {
     const mintInfo = useSubInstructionMintInfo(parsed);
-    const decoded = formatParsedInstruction(parsed, mintInfo);
+    const decoded = formatParsedInstruction(parsed, mintInfo, extraSigners);
     const typeName = TokenInstruction[parsed.instructionType] ?? 'Unknown';
 
     return (

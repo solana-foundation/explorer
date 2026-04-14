@@ -1,8 +1,7 @@
 import { InstructionCard } from '@components/instruction/InstructionCard';
 import type { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import type { ParsedTokenInstruction } from '@solana-program/token';
 
-import { parseBatchInstruction } from '../lib/batch-parser';
+import { parseBatchInstruction, type ParsedSubInstruction } from '../lib/batch-parser';
 import { BatchMintRegistryProvider } from '../model/batch-mint-registry';
 import { SubInstructionRow } from './SubInstructionRow';
 
@@ -20,14 +19,13 @@ export function TokenBatchCard({
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
-    const { instructions, error }: { instructions: ParsedTokenInstruction<string>[]; error: string | undefined } =
-        (() => {
-            try {
-                return { error: undefined, instructions: parseBatchInstruction(ix).instructions };
-            } catch (e) {
-                return { error: e instanceof Error ? e.message : String(e), instructions: [] };
-            }
-        })();
+    const { instructions, error }: { instructions: ParsedSubInstruction[]; error: string | undefined } = (() => {
+        try {
+            return { error: undefined, instructions: parseBatchInstruction(ix).instructions };
+        } catch (e) {
+            return { error: e instanceof Error ? e.message : String(e), instructions: [] };
+        }
+    })();
 
     const title = `Token Program: Batch (${instructions.length} instruction${instructions.length !== 1 ? 's' : ''})`;
 
@@ -43,8 +41,13 @@ export function TokenBatchCard({
                         )}
                         {instructions.length > 0 && (
                             <BatchMintRegistryProvider>
-                                {instructions.map((parsed, i) => (
-                                    <SubInstructionRow key={i} parsed={parsed} index={i} />
+                                {instructions.map((sub, i) => (
+                                    <SubInstructionRow
+                                        key={i}
+                                        parsed={sub.parsed}
+                                        extraSigners={sub.extraSigners}
+                                        index={i}
+                                    />
                                 ))}
                             </BatchMintRegistryProvider>
                         )}

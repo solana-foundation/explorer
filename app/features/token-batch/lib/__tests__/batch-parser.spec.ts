@@ -54,7 +54,8 @@ describe('parseBatchInstruction', () => {
         const result = parseBatchInstruction(ix);
 
         expect(result.instructions).toHaveLength(1);
-        expect(result.instructions[0].instructionType).toBe(TokenInstruction.Transfer);
+        expect(result.instructions[0].parsed.instructionType).toBe(TokenInstruction.Transfer);
+        expect(result.instructions[0].extraSigners).toEqual([]);
     });
 
     it('should parse multiple sub-instructions', () => {
@@ -69,7 +70,7 @@ describe('parseBatchInstruction', () => {
 
         const result = parseBatchInstruction(ix);
         expect(result.instructions).toHaveLength(3);
-        expect(result.instructions.every(i => i.instructionType === TokenInstruction.Transfer)).toBe(true);
+        expect(result.instructions.every(i => i.parsed.instructionType === TokenInstruction.Transfer)).toBe(true);
     });
 
     it('should parse mixed instruction types', () => {
@@ -83,8 +84,30 @@ describe('parseBatchInstruction', () => {
 
         const result = parseBatchInstruction(ix);
         expect(result.instructions).toHaveLength(2);
-        expect(result.instructions[0].instructionType).toBe(TokenInstruction.Transfer);
-        expect(result.instructions[1].instructionType).toBe(TokenInstruction.TransferChecked);
+        expect(result.instructions[0].parsed.instructionType).toBe(TokenInstruction.Transfer);
+        expect(result.instructions[1].parsed.instructionType).toBe(TokenInstruction.TransferChecked);
+    });
+
+    it('should extract multisig co-signer accounts as extraSigners', () => {
+        // Transfer has 3 named accounts; 2 extra accounts are multisig signers
+        const ix = makeBatchIxWithKeys(
+            [{ data: makeTransferData(100n), numAccounts: 5 }],
+            [
+                makeAccount(true, false), // Source (writable)
+                makeAccount(true, false), // Destination (writable)
+                makeAccount(false, false), // Authority (multisig address, not signer)
+                makeAccount(false, true), // Co-signer 1
+                makeAccount(false, true), // Co-signer 2
+            ],
+        );
+
+        const result = parseBatchInstruction(ix);
+        expect(result.instructions).toHaveLength(1);
+        expect(result.instructions[0].extraSigners).toHaveLength(2);
+        expect(result.instructions[0].extraSigners[0].label).toBe('Signer 1');
+        expect(result.instructions[0].extraSigners[0].isSigner).toBe(true);
+        expect(result.instructions[0].extraSigners[1].label).toBe('Signer 2');
+        expect(result.instructions[0].extraSigners[1].isSigner).toBe(true);
     });
 
     it('should throw on non-batch data', () => {
@@ -116,7 +139,7 @@ describe('formatParsedInstruction', () => {
             [makeAccount(), makeAccount(), makeAccount(false, true)],
         );
         const { instructions } = parseBatchInstruction(ix);
-        const decoded = formatParsedInstruction(instructions[0]);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
 
         expect(decoded).toBeDefined();
         expect(decoded?.fields).toEqual([{ label: 'Amount', value: '42000' }]);
@@ -129,7 +152,7 @@ describe('formatParsedInstruction', () => {
             [makeAccount(), makeAccount(), makeAccount(false, true)],
         );
         const { instructions } = parseBatchInstruction(ix);
-        const decoded = formatParsedInstruction(instructions[0]);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
 
         expect(decoded).toBeDefined();
         expect(decoded?.fields).toEqual([{ label: 'Amount', value: '500' }]);
@@ -142,7 +165,7 @@ describe('formatParsedInstruction', () => {
             [makeAccount(), makeAccount(), makeAccount(), makeAccount(false, true)],
         );
         const { instructions } = parseBatchInstruction(ix);
-        const decoded = formatParsedInstruction(instructions[0]);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
 
         expect(decoded).toBeDefined();
         expect(decoded?.fields).toEqual([
@@ -158,7 +181,7 @@ describe('formatParsedInstruction', () => {
             [makeAccount(), makeAccount(), makeAccount(), makeAccount(false, true)],
         );
         const { instructions } = parseBatchInstruction(ix);
-        const decoded = formatParsedInstruction(instructions[0]);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
 
         expect(decoded).toBeDefined();
         expect(decoded?.fields).toEqual([
@@ -174,7 +197,7 @@ describe('formatParsedInstruction', () => {
             [makeAccount(), makeAccount(), makeAccount(false, true)],
         );
         const { instructions } = parseBatchInstruction(ix);
-        const decoded = formatParsedInstruction(instructions[0]);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
 
         expect(decoded).toBeDefined();
         expect(decoded?.fields).toEqual([
@@ -190,7 +213,7 @@ describe('formatParsedInstruction', () => {
             [makeAccount(), makeAccount(), makeAccount(false, true)],
         );
         const { instructions } = parseBatchInstruction(ix);
-        const decoded = formatParsedInstruction(instructions[0]);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
 
         expect(decoded).toBeDefined();
         expect(decoded?.fields).toEqual([
@@ -207,7 +230,7 @@ describe('formatParsedInstruction', () => {
             [makeAccount(), makeAccount(), makeAccount(false, true)],
         );
         const { instructions } = parseBatchInstruction(ix);
-        const decoded = formatParsedInstruction(instructions[0]);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
 
         expect(decoded).toBeDefined();
         expect(decoded?.fields).toEqual([]);
@@ -220,7 +243,7 @@ describe('formatParsedInstruction', () => {
             [makeAccount(), makeAccount(false, true)],
         );
         const { instructions } = parseBatchInstruction(ix);
-        const decoded = formatParsedInstruction(instructions[0]);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
 
         expect(decoded).toBeDefined();
         expect(decoded?.fields).toEqual([
@@ -237,7 +260,7 @@ describe('formatParsedInstruction', () => {
             [makeAccount(), makeAccount(false, true)],
         );
         const { instructions } = parseBatchInstruction(ix);
-        const decoded = formatParsedInstruction(instructions[0]);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
 
         expect(decoded).toBeDefined();
         expect(decoded?.fields).toEqual([
@@ -253,11 +276,37 @@ describe('formatParsedInstruction', () => {
         );
         const { instructions } = parseBatchInstruction(ix);
         const mint = Keypair.generate().publicKey.toBase58();
-        const decoded = formatParsedInstruction(instructions[0], { decimals: 6, mint });
+        const decoded = formatParsedInstruction(instructions[0].parsed, { decimals: 6, mint });
 
         expect(decoded).toBeDefined();
         expect(decoded?.fields).toEqual([{ label: 'Amount', value: '1.5' }]);
         expect(decoded?.accounts[1].label).toBe('Mint*');
         expect(decoded?.accounts[1].pubkey.toBase58()).toBe(mint);
+    });
+
+    it('should append extra signers from multisig instructions', () => {
+        const ix = makeBatchIxWithKeys(
+            [{ data: makeTransferData(100n), numAccounts: 5 }],
+            [
+                makeAccount(true, false), // Source
+                makeAccount(true, false), // Destination
+                makeAccount(false, false), // Multisig authority
+                makeAccount(false, true), // Co-signer 1
+                makeAccount(false, true), // Co-signer 2
+            ],
+        );
+        const { instructions } = parseBatchInstruction(ix);
+        const decoded = formatParsedInstruction(instructions[0].parsed, undefined, instructions[0].extraSigners);
+
+        expect(decoded).toBeDefined();
+        expect(decoded?.accounts.map(a => a.label)).toEqual([
+            'Source',
+            'Destination',
+            'Owner/Delegate',
+            'Signer 1',
+            'Signer 2',
+        ]);
+        expect(decoded?.accounts[3].isSigner).toBe(true);
+        expect(decoded?.accounts[4].isSigner).toBe(true);
     });
 });

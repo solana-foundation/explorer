@@ -172,6 +172,32 @@ export const SetAuthorityRevoke: Story = {
     },
 };
 
+// Multisig Transfer — authority is a multisig address followed by 2 co-signers
+export const MultisigCoSigners: Story = {
+    args: {
+        index: 9,
+        ix: makeBatchIxWithKeys(
+            [{ data: concatBytes(new Uint8Array([3]), writeU64LE(7500n)), numAccounts: 5 }],
+            [
+                makeAccount(true, false), // Source (writable)
+                makeAccount(true, false), // Destination (writable)
+                makeAccount(false, false), // Multisig authority (not a signer itself)
+                makeAccount(false, true), // Co-signer 1
+                makeAccount(false, true), // Co-signer 2
+            ],
+        ),
+        result: { err: null },
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByText('Transfer')).toBeInTheDocument();
+        await expect(canvas.getByText('Amount:')).toBeInTheDocument();
+        await expect(canvas.getByText('7500')).toBeInTheDocument();
+        await expect(canvas.getByText('Signer 1:')).toBeInTheDocument();
+        await expect(canvas.getByText('Signer 2:')).toBeInTheDocument();
+    },
+};
+
 // Writable and signer badges rendered on accounts
 export const WritableAndSignerBadges: Story = {
     args: {

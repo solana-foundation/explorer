@@ -21,6 +21,7 @@ const MINT_INJECT_TYPES = new Set<TokenInstruction>([
 export function formatParsedInstruction(
     parsed: ParsedTokenInstruction<string>,
     mintInfo?: MintInfo,
+    extraSigners?: LabeledAccount[],
 ): DecodedParams | undefined {
     try {
         const result = formatByType(parsed, mintInfo?.decimals);
@@ -35,6 +36,10 @@ export function formatParsedInstruction(
                 label: 'Mint*',
                 pubkey: new PublicKey(mintInfo.mint),
             });
+        }
+
+        if (extraSigners?.length) {
+            accounts.push(...extraSigners);
         }
 
         return { accounts, fields };
