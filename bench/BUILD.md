@@ -45,7 +45,7 @@
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | 0 B | 0 B |
 | Dynamic | `/api/verified-programs/list/[page]` | 0 B | 0 B |
 | Dynamic | `/api/verified-programs/metadata/[programId]` | 0 B | 0 B |
-| Dynamic | `/block/[slot]` | 10 kB | 1.11 MB |
+| Dynamic | `/block/[slot]` | 10 kB | 1.04 MB |
 | Dynamic | `/block/[slot]/accounts` | 10 kB | 1.03 MB |
 | Dynamic | `/block/[slot]/programs` | 10 kB | 1.03 MB |
 | Dynamic | `/block/[slot]/rewards` | 10 kB | 1.04 MB |
@@ -57,6 +57,6 @@
 | Static | `/supply` | 10 kB | 1.04 MB |
 | Static | `/tos` | 330 B | 170 kB |
 | Dynamic | `/tx/[signature]` | 60 kB | 1.53 MB |
-| Dynamic | `/tx/[signature]/inspect` | 620 B | 1.30 MB |
-| Static | `/tx/inspector` | 630 B | 1.30 MB |
+| Dynamic | `/tx/[signature]/inspect` | 620 B | 1.29 MB |
+| Static | `/tx/inspector` | 630 B | 1.29 MB |
 | Static | `/verified-programs` | 10 kB | 180 kB |
