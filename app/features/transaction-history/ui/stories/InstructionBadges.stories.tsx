@@ -1,41 +1,59 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { InstructionBadges } from '../InstructionBadges';
+import { InstructionList } from '../InstructionList';
 
 const meta = {
-    component: InstructionBadges,
-    title: 'Features/TransactionHistory/InstructionBadges',
-} satisfies Meta<typeof InstructionBadges>;
+    component: InstructionList,
+    title: 'Features/TransactionHistory/InstructionList',
+} satisfies Meta<typeof InstructionList>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const SingleInstruction: Story = {
     args: {
-        names: ['System: Transfer'],
+        instructions: [{ name: 'Transfer', program: 'System' }],
     },
 };
 
 export const FewInstructions: Story = {
     args: {
-        names: ['System: Transfer', 'Token: Transfer Checked'],
+        instructions: [
+            { name: 'Transfer', program: 'System' },
+            { name: 'Transfer Checked', program: 'Token' },
+        ],
     },
 };
 
 export const ExactlyThree: Story = {
     args: {
-        names: ['Compute Budget: Set Compute Unit Limit', 'Compute Budget: Set Compute Unit Price', 'System: Transfer'],
+        instructions: [
+            { name: 'Set Compute Unit Limit', program: 'Compute Budget' },
+            { name: 'Set Compute Unit Price', program: 'Compute Budget' },
+            { name: 'Transfer', program: 'System' },
+        ],
     },
 };
 
 export const ManyInstructions: Story = {
     args: {
-        names: [
-            'Compute Budget: Set Compute Unit Limit',
-            'Compute Budget: Set Compute Unit Price',
-            'System: Transfer',
-            'Token: Transfer Checked',
-            'Associated Token Account: Create',
+        instructions: [
+            { name: 'Set Compute Unit Limit', program: 'Compute Budget' },
+            { name: 'Set Compute Unit Price', program: 'Compute Budget' },
+            { name: 'Transfer', program: 'System' },
+            { name: 'Transfer Checked', program: 'Token' },
+            { name: 'Create', program: 'Associated Token Account' },
+        ],
+    },
+};
+
+export const WithUnknown: Story = {
+    args: {
+        instructions: [
+            { name: 'Advance Nonce', program: 'System Program' },
+            { name: 'Set Compute Unit Price', program: 'Compute Budget Program' },
+            { name: 'Unknown Instruction', program: 'Some Program' },
+            { name: 'Unknown Instruction', program: 'Other Program' },
         ],
     },
 };

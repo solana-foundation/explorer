@@ -25,23 +25,25 @@ function makeTransaction(instructions: unknown[]): ParsedTransactionWithMeta {
 describe('getTransactionInstructionNames', () => {
     it('returns instruction name for parsed instruction with type', () => {
         const tx = makeTransaction([{ parsed: { type: 'transfer' }, programId: PublicKey.default }]);
-        expect(getTransactionInstructionNames(tx)).toEqual(['TestProgram: Transfer']);
+        expect(getTransactionInstructionNames(tx)).toEqual([{ name: 'Transfer', program: 'TestProgram' }]);
     });
 
     it('converts camelCase type to title case', () => {
         const tx = makeTransaction([{ parsed: { type: 'transferChecked' }, programId: PublicKey.default }]);
-        expect(getTransactionInstructionNames(tx)).toEqual(['TestProgram: Transfer Checked']);
+        expect(getTransactionInstructionNames(tx)).toEqual([{ name: 'Transfer Checked', program: 'TestProgram' }]);
     });
 
     it('returns Memo label for parsed instruction with string value', () => {
         const tx = makeTransaction([{ parsed: 'some memo text', programId: PublicKey.default }]);
-        expect(getTransactionInstructionNames(tx)).toEqual(['TestProgram: Memo']);
+        expect(getTransactionInstructionNames(tx)).toEqual([{ name: 'Memo', program: 'TestProgram' }]);
     });
 
     it('returns Unknown Instruction for unrecognized partially decoded instruction', () => {
         // System program (default pubkey) is not ComputeBudget, so falls through to Unknown Instruction
         const tx = makeTransaction([{ accounts: [], data: 'data', programId: PublicKey.default }]);
-        expect(getTransactionInstructionNames(tx)).toEqual(['TestProgram Program: Unknown Instruction']);
+        expect(getTransactionInstructionNames(tx)).toEqual([
+            { name: 'Unknown Instruction', program: 'TestProgram Program' },
+        ]);
     });
 
     it('handles multiple instructions', () => {
@@ -49,7 +51,10 @@ describe('getTransactionInstructionNames', () => {
             { parsed: { type: 'transfer' }, programId: PublicKey.default },
             { parsed: 'memo text', programId: PublicKey.default },
         ]);
-        expect(getTransactionInstructionNames(tx)).toEqual(['TestProgram: Transfer', 'TestProgram: Memo']);
+        expect(getTransactionInstructionNames(tx)).toEqual([
+            { name: 'Transfer', program: 'TestProgram' },
+            { name: 'Memo', program: 'TestProgram' },
+        ]);
     });
 
     it('returns empty array for transaction with no instructions', () => {
