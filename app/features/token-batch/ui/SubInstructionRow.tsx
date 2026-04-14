@@ -34,7 +34,7 @@ export function SubInstructionRow({
                 </Badge>
             </div>
 
-            {decoded ? <DecodedContent decoded={decoded} /> : <RawContent typeName={typeName} />}
+            {decoded && <DecodedContent decoded={decoded} />}
         </div>
     );
 }
@@ -48,17 +48,6 @@ function DecodedContent({ decoded }: { decoded: DecodedParams }) {
             {decoded.accounts.map((account, i) => (
                 <AccountRow key={i} account={account} />
             ))}
-        </div>
-    );
-}
-
-function RawContent({ typeName }: { typeName: string }) {
-    return (
-        <div className="e-ml-6 e-space-y-1">
-            <div className="e-flex e-items-center e-gap-2 e-text-sm">
-                <span className="e-min-w-[120px] e-text-neutral-500">Type:</span>
-                <span className="e-font-mono e-text-xs">{typeName}</span>
-            </div>
         </div>
     );
 }

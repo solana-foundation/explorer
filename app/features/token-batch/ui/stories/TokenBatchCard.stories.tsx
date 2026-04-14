@@ -198,6 +198,22 @@ export const MultisigCoSigners: Story = {
     },
 };
 
+// SyncNative (disc 17) — not in formatByType, exercises the generic fallback
+// that extracts accounts from the parsed instruction.
+export const UnhandledInstructionType: Story = {
+    args: {
+        index: 10,
+        ix: makeBatchIxWithKeys([{ data: new Uint8Array([17]), numAccounts: 1 }], [makeAccount(true, false)]),
+        result: { err: null },
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByText('SyncNative')).toBeInTheDocument();
+        // Generic fallback should render the account address
+        await expect(canvas.getByText('Account:')).toBeInTheDocument();
+    },
+};
+
 // Writable and signer badges rendered on accounts
 export const WritableAndSignerBadges: Story = {
     args: {

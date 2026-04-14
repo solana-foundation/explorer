@@ -5,6 +5,7 @@ import { formatTokenAmount } from '@entities/token-amount';
 import { type AccountMeta, isSignerRole, isSome, isWritableRole } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
 import { AuthorityType, type ParsedTokenInstruction, TokenInstruction } from '@solana-program/token';
+import { capitalCase } from 'change-case';
 
 import type { DecodedField, DecodedParams, LabeledAccount, MintInfo } from './types';
 
@@ -269,8 +270,37 @@ function formatByType(
             };
 
         default:
-            return undefined;
+            return genericFallback(parsed);
     }
+}
+
+// For instruction types without dedicated formatting, extract accounts
+// generically so users can still see the addresses involved.
+function genericFallback(parsed: ParsedTokenInstruction<string>): {
+    fields: DecodedField[];
+    accounts: LabeledAccount[];
+} {
+    const accounts: LabeledAccount[] = [];
+
+    if ('accounts' in parsed && parsed.accounts && typeof parsed.accounts === 'object') {
+        for (const [key, meta] of Object.entries(parsed.accounts)) {
+            // Some parsed variants have optional accounts (e.g. SyncNative.rent)
+            // that are undefined when not present on-chain.
+            if (!meta) continue;
+
+            // Object.entries erases the value type to unknown; every
+            // ParsedTokenInstruction variant stores AccountMeta here.
+            const typedMeta = meta as AccountMeta<string>;
+            accounts.push({
+                isSigner: isSignerRole(typedMeta.role),
+                isWritable: isWritableRole(typedMeta.role),
+                label: capitalCase(key),
+                pubkey: new PublicKey(typedMeta.address),
+            });
+        }
+    }
+
+    return { accounts, fields: [] };
 }
 
 function labelMetas(entries: { label: string; meta: AccountMeta<string> }[]): LabeledAccount[] {
