@@ -10,7 +10,7 @@ import { useAccountHistory, useFetchAccountHistory, useFetchTransactionsForHisto
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc } from '@utils/date';
-import { getTransactionInstructionNames } from '@utils/instruction';
+import { getTransactionInstructionNames, type TransactionInstructionInfo } from '@utils/instruction';
 import React, { useCallback, useMemo } from 'react';
 import Moment from 'react-moment';
 
@@ -18,7 +18,7 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
-import { InstructionBadges } from './InstructionBadges';
+import { InstructionList } from './InstructionList';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
@@ -42,7 +42,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     }, [history]);
 
     const instructionNamesMap = React.useMemo(() => {
-        const map = new Map<string, string[]>();
+        const map = new Map<string, TransactionInstructionInfo[]>();
         if (history?.data?.transactionMap) {
             for (const [sig, tx] of history.data.transactionMap) {
                 map.set(sig, getTransactionInstructionNames(tx));
@@ -79,7 +79,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                     <td>
                         <Signature signature={signature} link truncateChars={40} />
                         {instructionNames && instructionNames.length > 0 && (
-                            <InstructionBadges names={instructionNames} />
+                            <InstructionList instructions={instructionNames} />
                         )}
                     </td>
 

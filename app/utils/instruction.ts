@@ -27,6 +27,11 @@ export type InstructionType = {
     innerInstructions: (ParsedInstruction | PartiallyDecodedInstruction)[];
 };
 
+export type TransactionInstructionInfo = {
+    name: string;
+    program: string;
+};
+
 export interface InstructionItem {
     instruction: ParsedInstruction | PartiallyDecodedInstruction;
     inner: (ParsedInstruction | PartiallyDecodedInstruction)[];
@@ -119,15 +124,17 @@ export function getTokenInstructionName(
     return name;
 }
 
-export function getTransactionInstructionNames(transactionWithMeta: ParsedTransactionWithMeta): string[] {
+export function getTransactionInstructionNames(
+    transactionWithMeta: ParsedTransactionWithMeta,
+): TransactionInstructionInfo[] {
     return transactionWithMeta.transaction.message.instructions.map(ix => {
-        const programName = getProgramName(ix.programId);
+        const program = getProgramName(ix.programId);
         if ('parsed' in ix) {
             if (typeof ix.parsed === 'object' && ix.parsed !== null && 'type' in ix.parsed) {
-                return `${programName}: ${camelToTitleCase(String(ix.parsed.type))}`;
+                return { name: camelToTitleCase(String(ix.parsed.type)), program };
             }
             // ix.parsed is a string (e.g. memo text) — instruction name is the program name
-            return `${programName}: Memo`;
+            return { name: 'Memo', program };
         }
         if (ix.programId.equals(ComputeBudgetProgram.programId)) {
             try {
@@ -135,13 +142,13 @@ export function getTransactionInstructionNames(transactionWithMeta: ParsedTransa
                 if (txInstruction) {
                     const type = identifyComputeBudgetInstruction(new Uint8Array(txInstruction.data));
                     const name = ComputeBudgetInstruction[type];
-                    return `${programName}: ${camelToTitleCase(name.charAt(0).toLowerCase() + name.slice(1))}`;
+                    return { name: camelToTitleCase(name.charAt(0).toLowerCase() + name.slice(1)), program };
                 }
             } catch {
                 // fall through
             }
         }
-        return `${programName} Program: Unknown Instruction`;
+        return { name: 'Unknown Instruction', program: `${program} Program` };
     });
 }
 
