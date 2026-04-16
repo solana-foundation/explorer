@@ -27,7 +27,7 @@ import { getMintDecimals, isTokenProgramBase58 } from '../lib/tokenAccountParsin
 import type { SolBalanceChange } from '../lib/types';
 import { useEpochInfo } from './use-epoch-info';
 
-function parseSimulationError(err: any, logs?: string[]): string {
+function parseSimulationError(err: object | string | null, logs?: string[]): string {
     if (!err) return '';
 
     if (logs?.some(l => l.includes('InsufficientFundsForFee'))) {
