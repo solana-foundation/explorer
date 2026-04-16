@@ -30,10 +30,6 @@ import { useEpochInfo } from './use-epoch-info';
 function parseSimulationError(err: object | string | null, logs?: string[]): string {
     if (!err) return '';
 
-    if (logs?.some(l => l.includes('InsufficientFundsForFee'))) {
-        return 'Insufficient funds for transaction fee';
-    }
-
     if (typeof err === 'string') {
         if (err.includes('InsufficientFundsForFee')) {
             return 'Insufficient funds for transaction fee';
@@ -46,6 +42,10 @@ function parseSimulationError(err: object | string | null, logs?: string[]): str
             return 'Insufficient funds for transaction fee';
         }
         return JSON.stringify(err);
+    }
+
+    if (logs?.some(l => l.includes('InsufficientFundsForFee'))) {
+        return 'Insufficient funds for transaction fee';
     }
 
     return 'Transaction failed';
@@ -255,8 +255,7 @@ export function useSimulation(
                 if (resp.value.unitsConsumed !== undefined) {
                     setUnitsConsumed(resp.value.unitsConsumed);
                 }
-                // Parse the error to provide a human-readable message.
-                if (resp.value.err) {
+                // If the response has an error, the logs will say what it it, so no need to parse here.
                 if (resp.value.err) {
                     setError(parseSimulationError(resp.value.err, resp.value.logs ?? undefined));
                 }
