@@ -173,6 +173,11 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://explorer.solana.com/address/Feature111111111111111111111111111111111111</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://explorer.solana.com/address/FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
