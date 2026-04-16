@@ -190,6 +190,33 @@ describe('createWalletPrefillDependency', () => {
         expect(form.getValues('accounts.testInstruction.signer')).toBe(PREFILLED_ADDRESS);
     });
 
+    it('should overwrite a signer field that still contains the previous wallet address', () => {
+        const { result } = renderHook(() =>
+            useInstructionForm({
+                instruction: INSTRUCTION_WITH_SIGNER,
+                onSubmit: vi.fn(),
+            }),
+        );
+        const { form, fieldNames } = result.current;
+
+        const walletAAddress = Keypair.generate().publicKey.toBase58();
+        const walletB = Keypair.generate().publicKey;
+
+        form.setValue('accounts.testInstruction.signer', walletAAddress);
+        const ref = makeRef(walletAAddress);
+
+        const dependency = createWalletPrefillDependency(
+            INSTRUCTION_WITH_SIGNER,
+            {
+                account: fieldNames.account,
+            },
+            ref,
+        );
+        dependency.onValueChange(walletB, form);
+
+        expect(form.getValues('accounts.testInstruction.signer')).toBe(walletB.toBase58());
+    });
+
     it('should fill only empty signer fields when some are already filled', () => {
         const { result } = renderHook(() =>
             useInstructionForm({
