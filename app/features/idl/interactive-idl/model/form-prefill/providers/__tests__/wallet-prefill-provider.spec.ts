@@ -65,12 +65,7 @@ const INSTRUCTION_WITH_TWO_SIGNERS: InstructionData = {
     name: 'testInstruction',
 };
 
-const EMPTY_INSTRUCTION: InstructionData = {
-    accounts: [],
-    args: [],
-    docs: [],
-    name: 'testInstruction',
-};
+const makeRef = (val?: string): { current: string | undefined } => ({ current: val });
 
 describe('createWalletPrefillDependency', () => {
     it('should fill signer accounts with wallet address', () => {
@@ -83,9 +78,13 @@ describe('createWalletPrefillDependency', () => {
         const { form, fieldNames } = result.current;
 
         const walletPublicKey = PublicKey.default;
-        const dependency = createWalletPrefillDependency(INSTRUCTION_WITH_SIGNER_AND_NON_SIGNER, walletPublicKey, {
-            account: fieldNames.account,
-        });
+        const dependency = createWalletPrefillDependency(
+            INSTRUCTION_WITH_SIGNER_AND_NON_SIGNER,
+            {
+                account: fieldNames.account,
+            },
+            makeRef(),
+        );
 
         const walletAddress = walletPublicKey.toBase58();
         dependency.onValueChange(walletPublicKey, form);
@@ -103,9 +102,13 @@ describe('createWalletPrefillDependency', () => {
         );
         const { form, fieldNames } = result.current;
 
-        const dependency = createWalletPrefillDependency(INSTRUCTION_WITH_SIGNER, null, {
-            account: fieldNames.account,
-        });
+        const dependency = createWalletPrefillDependency(
+            INSTRUCTION_WITH_SIGNER,
+            {
+                account: fieldNames.account,
+            },
+            makeRef(),
+        );
 
         const setValueSpy = vi.spyOn(form, 'setValue');
         dependency.onValueChange(null, form);
@@ -123,24 +126,18 @@ describe('createWalletPrefillDependency', () => {
         const { form, fieldNames } = result.current;
 
         const walletPublicKey = PublicKey.default;
-        const dependency = createWalletPrefillDependency(INSTRUCTION_WITH_NESTED_SIGNER, walletPublicKey, {
-            account: fieldNames.account,
-        });
+        const dependency = createWalletPrefillDependency(
+            INSTRUCTION_WITH_NESTED_SIGNER,
+            {
+                account: fieldNames.account,
+            },
+            makeRef(),
+        );
 
         const walletAddress = walletPublicKey.toBase58();
         dependency.onValueChange(walletPublicKey, form);
 
         expect(form.getValues('accounts.testInstruction.group.nestedSigner')).toBe(walletAddress);
-    });
-
-    it('should return correct dependency id and getValue', () => {
-        const walletPublicKey = PublicKey.default;
-        const dependency = createWalletPrefillDependency(EMPTY_INSTRUCTION, walletPublicKey, {
-            account: () => 'accounts.testInstruction.test' as any,
-        });
-
-        expect(dependency.id).toBe('wallet');
-        expect(dependency.getValue()).toBe(walletPublicKey);
     });
 
     it('should ignore non-PublicKey values in onValueChange', () => {
@@ -152,9 +149,13 @@ describe('createWalletPrefillDependency', () => {
         );
         const { form, fieldNames } = result.current;
 
-        const dependency = createWalletPrefillDependency(INSTRUCTION_WITH_SIGNER, null, {
-            account: fieldNames.account,
-        });
+        const dependency = createWalletPrefillDependency(
+            INSTRUCTION_WITH_SIGNER,
+            {
+                account: fieldNames.account,
+            },
+            makeRef(),
+        );
 
         const setValueSpy = vi.spyOn(form, 'setValue');
         dependency.onValueChange('not-a-public-key', form);
@@ -176,9 +177,13 @@ describe('createWalletPrefillDependency', () => {
         form.setValue('accounts.testInstruction.signer', PREFILLED_ADDRESS);
 
         const walletPublicKey = PublicKey.default;
-        const dependency = createWalletPrefillDependency(INSTRUCTION_WITH_SIGNER, walletPublicKey, {
-            account: fieldNames.account,
-        });
+        const dependency = createWalletPrefillDependency(
+            INSTRUCTION_WITH_SIGNER,
+            {
+                account: fieldNames.account,
+            },
+            makeRef(),
+        );
 
         dependency.onValueChange(walletPublicKey, form);
 
@@ -198,9 +203,13 @@ describe('createWalletPrefillDependency', () => {
 
         const walletPublicKey = PublicKey.default;
         const walletAddress = walletPublicKey.toBase58();
-        const dependency = createWalletPrefillDependency(INSTRUCTION_WITH_TWO_SIGNERS, walletPublicKey, {
-            account: fieldNames.account,
-        });
+        const dependency = createWalletPrefillDependency(
+            INSTRUCTION_WITH_TWO_SIGNERS,
+            {
+                account: fieldNames.account,
+            },
+            makeRef(),
+        );
 
         dependency.onValueChange(walletPublicKey, form);
 
