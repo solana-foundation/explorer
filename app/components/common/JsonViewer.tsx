@@ -3,8 +3,8 @@
 import dynamic from 'next/dynamic';
 import { ComponentProps } from 'react';
 
-// Dynamically import react-json-view with SSR disabled
-const ReactJsonView = dynamic(() => import('react-json-view'), {
+// Dynamically import @microlink/react-json-view with SSR disabled
+const ReactJsonView = dynamic(() => import('@microlink/react-json-view'), {
     loading: () => <div className="text-muted">Loading JSON viewer...</div>,
     ssr: false,
 });
