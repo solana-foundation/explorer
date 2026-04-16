@@ -255,7 +255,8 @@ export function useSimulation(
                 if (resp.value.unitsConsumed !== undefined) {
                     setUnitsConsumed(resp.value.unitsConsumed);
                 }
-                // If the response has an error, the logs will say what it it, so no need to parse here.
+                // Parse the error to provide a human-readable message.
+                if (resp.value.err) {
                 if (resp.value.err) {
                     setError(parseSimulationError(resp.value.err, resp.value.logs ?? undefined));
                 }
