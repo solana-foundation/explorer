@@ -18,7 +18,7 @@
 | Dynamic | `/address/[address]/idl` | 130 kB | 1.27 MB |
 | Dynamic | `/address/[address]/instructions` | 10 kB | 1.13 MB |
 | Dynamic | `/address/[address]/metadata` | 10 kB | 1.03 MB |
-| Dynamic | `/address/[address]/nftoken-collection-nfts` | 10 kB | 1.10 MB |
+| Dynamic | `/address/[address]/nftoken-collection-nfts` | 10 kB | 1.08 MB |
 | Dynamic | `/address/[address]/program-multisig` | 10 kB | 1.08 MB |
 | Dynamic | `/address/[address]/rewards` | 10 kB | 1.02 MB |
 | Dynamic | `/address/[address]/security` | 10 kB | 1.08 MB |
