@@ -27,6 +27,30 @@ import { getMintDecimals, isTokenProgramBase58 } from '../lib/tokenAccountParsin
 import type { SolBalanceChange } from '../lib/types';
 import { useEpochInfo } from './use-epoch-info';
 
+function parseSimulationError(err: any, logs?: string[]): string {
+    if (!err) return '';
+
+    if (logs?.some(l => l.includes('InsufficientFundsForFee'))) {
+        return 'Insufficient funds for transaction fee';
+    }
+
+    if (typeof err === 'string') {
+        if (err.includes('InsufficientFundsForFee')) {
+            return 'Insufficient funds for transaction fee';
+        }
+        return err;
+    }
+
+    if (typeof err === 'object') {
+        if ('InsufficientFundsForFee' in err) {
+            return 'Insufficient funds for transaction fee';
+        }
+        return JSON.stringify(err);
+    }
+
+    return 'Transaction failed';
+}
+
 export function useSimulation(
     message: VersionedMessage,
     accountBalances?: {
@@ -223,7 +247,6 @@ export function useSimulation(
 
                 if (resp.value.logs.length === 0 && typeof resp.value.err === 'string') {
                     setLogs(null);
-                    setError(resp.value.err);
                 } else {
                     // Prettify logs
                     setLogs(parseProgramLogs(resp.value.logs, resp.value.err, cluster));
@@ -234,7 +257,7 @@ export function useSimulation(
                 }
                 // If the response has an error, the logs will say what it it, so no need to parse here.
                 if (resp.value.err) {
-                    setError('TransactionError');
+                    setError(parseSimulationError(resp.value.err, resp.value.logs ?? undefined));
                 }
             } catch (err) {
                 Logger.error(err);
