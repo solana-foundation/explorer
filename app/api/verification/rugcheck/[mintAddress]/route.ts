@@ -44,7 +44,6 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
         if (!response.ok) {
             const noDataStatus = await getNoDataStatus(response);
             if (noDataStatus) {
-                Logger.debug('[api:rugcheck] No data available', { mintAddress, status: noDataStatus });
                 return NextResponse.json(
                     { error: 'No rugcheck data available' },
                     { headers: NO_STORE_HEADERS, status: noDataStatus },

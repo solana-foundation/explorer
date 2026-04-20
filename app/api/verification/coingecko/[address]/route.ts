@@ -38,10 +38,10 @@ export async function GET(_request: Request, { params: { address } }: Params) {
         });
 
         if (!response.ok) {
-            if (response.status === 404) {
-                Logger.debug('[api:coingecko] Coin not found by contract address', { address });
-            } else if (response.status === 429) {
+            if (response.status === 429) {
                 Logger.warn('[api:coingecko] Rate limit exceeded', { sentry: true });
+            } else if (response.status === 404) {
+                Logger.warn('[api:coingecko] No data found', { address });
             } else {
                 Logger.panic(new Error(`Coingecko contract API error: ${response.status}`));
             }

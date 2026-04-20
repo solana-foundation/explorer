@@ -61,7 +61,7 @@ describe('CoinGecko API Route', () => {
         const response = await callRoute(VALID_ADDRESS);
         expect(response.status).toBe(404);
         expect(await response.json()).toEqual({ error: 'Failed to fetch coingecko data' });
-        expect(Logger.debug).toHaveBeenCalledWith('[api:coingecko] Coin not found by contract address', {
+        expect(Logger.warn).toHaveBeenCalledWith('[api:coingecko] No data found', {
             address: VALID_ADDRESS,
         });
     });
