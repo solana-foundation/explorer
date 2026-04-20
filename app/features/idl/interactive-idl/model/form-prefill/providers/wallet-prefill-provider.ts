@@ -1,10 +1,10 @@
 import type { InstructionData } from '@entities/idl';
 import { PublicKey } from '@solana/web3.js';
-import type { MutableRefObject } from 'react';
-import type { FieldPath, UseFormReturn } from 'react-hook-form';
+import type { UseFormReturn } from 'react-hook-form';
 
 import type { FormValue, InstructionFormData, InstructionFormFieldNames } from '../../use-instruction-form';
 import { isPrefilledAccount, WALLET_ACCOUNT_PATTERNS } from '../const';
+import type { ExternalDependency } from '../types';
 import { traverseInstructionAccounts } from './traverse-accounts';
 
 /**
@@ -13,10 +13,10 @@ import { traverseInstructionAccounts } from './traverse-accounts';
  */
 export function createWalletPrefillDependency(
     instruction: InstructionData,
+    publicKey: PublicKey | null,
     fieldNames: Pick<InstructionFormFieldNames, 'account'>,
-    lastPrefillAddressRef: MutableRefObject<string | undefined>,
-): { onValueChange: (value: unknown, form: UseFormReturn<InstructionFormData>) => void } {
-    const signerPaths: FieldPath<InstructionFormData>[] = [];
+): ExternalDependency<PublicKey> {
+    const signerPaths: ReturnType<InstructionFormFieldNames['account']>[] = [];
 
     traverseInstructionAccounts(instruction, (account, parentGroup) => {
         // Skip accounts that have known addresses (e.g., system program, token program)
@@ -43,26 +43,20 @@ export function createWalletPrefillDependency(
     });
 
     return {
+        getValue: () => publicKey,
+        id: 'wallet',
         onValueChange: (value: unknown, form: UseFormReturn<InstructionFormData>) => {
             if (!value || !(value instanceof PublicKey)) return;
 
             const walletAddress = value.toBase58();
-            const lastPrefillAddress = lastPrefillAddressRef.current;
 
             for (const path of signerPaths) {
-                const currentValue = String(form.getValues(path) ?? '').trim();
-                const isEmpty = currentValue === '';
-                const hasPreviousWallet = lastPrefillAddress !== undefined && currentValue === lastPrefillAddress;
-
-                if (isEmpty || hasPreviousWallet) {
-                    form.setValue(path, walletAddress as unknown as FormValue, {
-                        shouldDirty: false,
-                        shouldValidate: false,
-                    });
-                }
+                if (form.getFieldState(path).isDirty) continue;
+                form.setValue(path, walletAddress as unknown as FormValue, {
+                    shouldDirty: false,
+                    shouldValidate: false,
+                });
             }
-
-            lastPrefillAddressRef.current = walletAddress;
         },
     };
 }

@@ -8,7 +8,6 @@ import { Button } from '@shared/ui/button';
 import { Card } from '@shared/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useEffect, useRef } from 'react';
 import { Loader, Send } from 'react-feather';
 import { Control, Controller, FieldPath } from 'react-hook-form';
 
@@ -51,18 +50,12 @@ export function InteractInstruction({
     const pdas = usePdas({ form, idl, instruction });
     const getAutocompleteItems = createGetAutocompleteItems({ pdas, publicKey });
 
-    const lastPrefillAddressRef = useRef<string | undefined>(undefined);
-    useEffect(() => {
-        createWalletPrefillDependency(instruction, fieldNames, lastPrefillAddressRef).onValueChange(publicKey, form);
-        // instruction and fieldNames are stable for the lifetime of this component instance
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [publicKey, form]);
-
+    const walletPrefillDependency = createWalletPrefillDependency(instruction, publicKey, fieldNames);
     const knownAccountsPrefillDependency = createKnownAccountsPrefillDependency(instruction, fieldNames);
     const pdaPrefillDependency = createPdaPrefillDependency(idl, instruction, fieldNames);
     useFormPrefill({
         config: {
-            externalDependencies: [knownAccountsPrefillDependency, pdaPrefillDependency],
+            externalDependencies: [walletPrefillDependency, knownAccountsPrefillDependency, pdaPrefillDependency],
         },
         form,
     });
