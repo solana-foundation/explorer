@@ -60,23 +60,25 @@ describe('Bluprynt API Route', () => {
         expect(await response.json()).toEqual({ verified: false });
     });
 
-    it('should return 504 when RPC request times out', async () => {
+    it('should return 504 with short negative cache when RPC request times out', async () => {
         const timeoutError = new DOMException('Signal timed out.', 'TimeoutError');
         mockGetProgramAccounts.mockRejectedValueOnce(timeoutError);
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(504);
         expect(await response.json()).toEqual({ error: 'Verification request timed out' });
+        expect(response.headers.get('Cache-Control')).toBe('public, max-age=30, s-maxage=30');
         expect(Logger.warn).toHaveBeenCalledWith('[api:bluprynt] RPC request timed out', {
             mintAddress: VALID_MINT,
             sentry: true,
         });
     });
 
-    it('should return 500 when RPC throws a non-timeout error', async () => {
+    it('should return 500 with short negative cache when RPC throws a non-timeout error', async () => {
         mockGetProgramAccounts.mockRejectedValueOnce(new Error('Connection refused'));
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(500);
         expect(await response.json()).toEqual({ error: 'Failed to verify bluprynt data' });
+        expect(response.headers.get('Cache-Control')).toBe('public, max-age=30, s-maxage=30');
         expect(Logger.panic).toHaveBeenCalled();
     });
 });

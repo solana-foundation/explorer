@@ -5,9 +5,9 @@ import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sa
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
+import { CACHE_HEADERS, ERROR_CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
 
-const RPC_TIMEOUT_MS = 5_000;
+const RPC_TIMEOUT_MS = 15_000;
 
 type Params = {
     params: {
@@ -57,14 +57,14 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
             Logger.warn('[api:bluprynt] RPC request timed out', { mintAddress, sentry: true });
             return NextResponse.json(
                 { error: 'Verification request timed out' },
-                { headers: NO_STORE_HEADERS, status: 504 },
+                { headers: ERROR_CACHE_HEADERS, status: 504 },
             );
         }
 
         Logger.panic(error instanceof Error ? error : new Error('Failed to verify bluprynt data'));
         return NextResponse.json(
             { error: 'Failed to verify bluprynt data' },
-            { headers: NO_STORE_HEADERS, status: 500 },
+            { headers: ERROR_CACHE_HEADERS, status: 500 },
         );
     }
 }
