@@ -9,7 +9,14 @@ import { useFetchAccountInfo } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import usePrevious from '@react-hook/previous';
-import { Connection, MessageV0, PACKET_DATA_SIZE, PublicKey, VersionedMessage } from '@solana/web3.js';
+import {
+    type CompiledInnerInstruction,
+    Connection,
+    MessageV0,
+    PACKET_DATA_SIZE,
+    PublicKey,
+    VersionedMessage,
+} from '@solana/web3.js';
 import { generated, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
 import { useClusterPath } from '@utils/url';
 import bs58 from 'bs58';
@@ -38,6 +45,7 @@ export type TransactionData = {
         preBalances: number[];
         postBalances: number[];
     };
+    compiledInnerInstructions?: CompiledInnerInstruction[];
 };
 
 export type SquadsProposalAccountData = {
@@ -397,6 +405,7 @@ function PermalinkView({
     const { message, signatures, meta } = transaction;
     const tx = {
         accountBalances: meta,
+        compiledInnerInstructions: meta?.innerInstructions,
         message,
         rawMessage: message.serialize(),
         signatures,
@@ -413,7 +422,7 @@ function LoadedView({
     onClear: () => void;
     showTokenBalanceChanges: boolean;
 }) {
-    const { message, rawMessage, signatures, accountBalances } = transaction;
+    const { message, rawMessage, signatures, accountBalances, compiledInnerInstructions } = transaction;
 
     const fetchAccountInfo = useFetchAccountInfo();
     React.useEffect(() => {
@@ -433,7 +442,7 @@ function LoadedView({
             {signatures && <TransactionSignatures message={message} signatures={signatures} rawMessage={rawMessage} />}
             <AccountsCard message={message} />
             <AddressTableLookupsCard message={message} />
-            <InstructionsSection message={message} />
+            <InstructionsSection message={message} compiledInnerInstructions={compiledInnerInstructions} />
         </>
     );
 }

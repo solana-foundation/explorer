@@ -13,12 +13,15 @@ export function UnknownDetailsCard({
     index,
     ix,
     programName,
+    innerCards,
 }: {
     index: number;
     ix: TransactionInstruction;
     programName: string;
+    innerCards?: React.ReactNode[];
 }) {
-    const [expanded, setExpanded] = React.useState(false);
+    const hasInnerCards = innerCards && innerCards.length > 0;
+    const [expanded, setExpanded] = React.useState(hasInnerCards ?? false);
 
     const scrollAnchorRef = useScrollAnchor(getInstructionCardScrollAnchorId([index + 1]));
 
@@ -41,6 +44,18 @@ export function UnknownDetailsCard({
                 <TableCardBody>
                     <ProgramField programId={ix.programId} showExtendedInfo />
                     <BaseRawDetails ix={ix} />
+                    {hasInnerCards && (
+                        <>
+                            <tr className="table-sep">
+                                <td colSpan={3}>Inner Instructions</td>
+                            </tr>
+                            <tr>
+                                <td colSpan={3}>
+                                    <div className="inner-cards !e-m-0">{innerCards}</div>
+                                </td>
+                            </tr>
+                        </>
+                    )}
                 </TableCardBody>
             )}
         </div>
