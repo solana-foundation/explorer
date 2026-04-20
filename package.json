@@ -161,7 +161,7 @@
         "eslint-plugin-sort-keys-fix": "1.1.2",
         "eslint-plugin-storybook": "9.1.10",
         "eslint-plugin-testing-library": "7.16.0",
-        "fast-xml-parser": "5.3.6",
+        "fast-xml-parser": "5.5.7",
         "globals": "16.2.0",
         "jest-environment-jsdom": "29.5.0",
         "jsdom": "26.0.0",
