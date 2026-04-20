@@ -11,8 +11,12 @@ export function isNativeMint(mint: Address | string): boolean {
     return mint === NATIVE_MINT_ADDRESS;
 }
 
+export function isTokenProgram(owner: Address | string): boolean {
+    return owner === TOKEN_PROGRAM_ADDRESS || owner === TOKEN_2022_PROGRAM_ADDRESS;
+}
+
 export function isTokenMintByOwner(owner: Address, data?: ReadonlyUint8Array): boolean {
-    if (owner !== TOKEN_PROGRAM_ADDRESS && owner !== TOKEN_2022_PROGRAM_ADDRESS) {
+    if (!isTokenProgram(owner)) {
         return false;
     }
     if (data) {

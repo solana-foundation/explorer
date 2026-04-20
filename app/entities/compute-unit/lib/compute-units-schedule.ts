@@ -1,14 +1,18 @@
 import { address } from '@solana/kit';
-import { ComputeBudgetProgram, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
+import {
+    ComputeBudgetProgram,
+    type ParsedInstruction,
+    type PartiallyDecodedInstruction,
+    type PublicKey,
+} from '@solana/web3.js';
 import {
     ComputeBudgetInstruction,
     identifyComputeBudgetInstruction,
     parseRequestUnitsInstruction,
     parseSetComputeUnitLimitInstruction,
 } from '@solana-program/compute-budget';
+import { Cluster } from '@utils/cluster';
 import bs58 from 'bs58';
-
-import { Cluster } from '@/app/utils/cluster';
 
 /**
  * Built-in programs that have minimal reserved compute units (3k)

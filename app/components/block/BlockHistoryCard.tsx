@@ -2,6 +2,7 @@ import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Signature } from '@components/common/Signature';
 import { SolBalance } from '@components/common/SolBalance';
+import { estimateRequestedComputeUnits } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
 import { cn } from '@shared/utils';
 import {
@@ -19,8 +20,6 @@ import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from
 import React, { createRef, useMemo } from 'react';
 import { ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
-
-import { estimateRequestedComputeUnits } from '@/app/utils/compute-units-schedule';
 
 const PAGE_SIZE = 25;
 

@@ -11,6 +11,7 @@ import { SignatureContext } from '@components/instruction/SignatureContext';
 import { InstructionsSection } from '@components/transaction/InstructionsSection';
 import { ProgramLogSection } from '@components/transaction/ProgramLogSection';
 import { TokenBalancesCard } from '@components/transaction/TokenBalancesCard';
+import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
 import { CUProfilingSection } from '@features/cu-profiling';
 import { Receipt, ViewReceiptButton } from '@features/receipt';
 import { isReceiptEnabled } from '@features/receipt';
@@ -42,7 +43,6 @@ import { Button } from '@/app/components/shared/ui/button';
 import { AccountsCard } from '@/app/components/transaction/AccountsCard';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
-import { estimateRequestedComputeUnitsForParsedTransaction } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
 export const AUTO_REFRESH_INTERVAL = 2000;

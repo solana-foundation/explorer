@@ -1,9 +1,8 @@
-import { CUProfilingCard } from '@features/cu-profiling';
+import { CUProfilingCard, formatInstructionLogs } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
 import type { VersionedMessage } from '@solana/web3.js';
-import { formatInstructionLogs } from '@utils/cu-profiling';
 import type { InstructionLogs } from '@utils/program-logs';
-import React from 'react';
+import { useMemo } from 'react';
 
 type SimulatorCUProfilingCardProps = {
     message: VersionedMessage;
@@ -20,7 +19,7 @@ export function SimulatorCUProfilingCard({
     cluster,
     epoch,
 }: SimulatorCUProfilingCardProps) {
-    const instructionsForCU = React.useMemo(() => {
+    const instructionsForCU = useMemo(() => {
         const instructions = message.compiledInstructions.map(ix => ({
             programId: message.staticAccountKeys[ix.programIdIndex],
         }));

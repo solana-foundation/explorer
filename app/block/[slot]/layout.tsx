@@ -7,6 +7,7 @@ import { ExternalLinkWarning } from '@components/common/ExternalLinkWarning';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
+import { estimateRequestedComputeUnits } from '@entities/compute-unit';
 import { BlockProvider, FetchStatus, useBlock, useFetchBlock } from '@providers/block';
 import { useCluster } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
@@ -18,7 +19,6 @@ import { ExternalLink } from 'react-feather';
 
 import { type NavigationTab, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
 import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
-import { estimateRequestedComputeUnits } from '@/app/utils/compute-units-schedule';
 import { getEpochForSlot, getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
 import { pickClusterParams } from '@/app/utils/url';
 

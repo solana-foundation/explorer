@@ -1,6 +1,7 @@
-import { Cluster } from '../cluster';
-import { formatInstructionLogs } from '../cu-profiling';
-import { InstructionLogs } from '../program-logs';
+import { Cluster } from '@utils/cluster';
+import type { InstructionLogs } from '@utils/program-logs';
+
+import { formatInstructionLogs } from '../format-instruction-logs';
 
 const DEFAULT_RESERVED_CU = 200_000;
 

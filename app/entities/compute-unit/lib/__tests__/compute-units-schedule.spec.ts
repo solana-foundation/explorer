@@ -1,8 +1,8 @@
-import { ComputeBudgetProgram, PublicKey, VersionedBlockResponse } from '@solana/web3.js';
+import { ComputeBudgetProgram, PublicKey, type VersionedBlockResponse } from '@solana/web3.js';
+import { Cluster } from '@utils/cluster';
 
 import { alloc, writeUint32LE } from '@/app/shared/lib/bytes';
 
-import { Cluster } from '../cluster';
 import { estimateRequestedComputeUnits, getReservedComputeUnits } from '../compute-units-schedule';
 
 describe('getReservedComputeUnits', () => {

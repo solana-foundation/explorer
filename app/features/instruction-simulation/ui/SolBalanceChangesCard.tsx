@@ -1,9 +1,8 @@
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { SolBalance } from '@components/common/SolBalance';
-import React from 'react';
 
-import { SolBalanceChange } from '../lib/types';
+import type { SolBalanceChange } from '../lib/types';
 
 export function SolBalanceChangesCard({ balanceChanges }: { balanceChanges: SolBalanceChange[] }) {
     return (

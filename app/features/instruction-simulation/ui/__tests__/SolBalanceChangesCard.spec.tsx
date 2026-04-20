@@ -1,4 +1,6 @@
-import { PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { render, screen } from '@testing-library/react';
 import BN from 'bn.js';
 import React from 'react';
@@ -6,6 +8,8 @@ import { vi } from 'vitest';
 
 import type { SolBalanceChange } from '../../lib/types';
 import { SolBalanceChangesCard } from '../SolBalanceChangesCard';
+
+const ARBITRARY_KEY = Keypair.generate().publicKey.toBase58();
 
 vi.mock('@components/common/Address', () => ({
     Address: ({ pubkey }: { pubkey: PublicKey }) => <div data-testid="address">{pubkey.toBase58()}</div>,
@@ -49,7 +53,9 @@ describe('SolBalanceChangesCard', () => {
     });
 
     it('should render table headers', () => {
-        const balanceChanges: SolBalanceChange[] = [];
+        const balanceChanges: SolBalanceChange[] = [
+            createMockBalanceChange(ARBITRARY_KEY, '1000000000', '2000000000', '3000000000'),
+        ];
 
         render(<SolBalanceChangesCard balanceChanges={balanceChanges} />);
 
@@ -60,7 +66,7 @@ describe('SolBalanceChangesCard', () => {
     });
 
     it('should render single balance change', () => {
-        const mockPubkey = 'GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS';
+        const mockPubkey = ARBITRARY_KEY;
         const balanceChanges: SolBalanceChange[] = [
             createMockBalanceChange(mockPubkey, '1000000000', '2000000000', '3000000000'),
         ];
@@ -74,19 +80,9 @@ describe('SolBalanceChangesCard', () => {
 
     it('should render multiple balance changes with correct numbering', () => {
         const balanceChanges: SolBalanceChange[] = [
-            createMockBalanceChange(
-                'GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS',
-                '1000000000',
-                '2000000000',
-                '3000000000',
-            ),
-            createMockBalanceChange(
-                'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-                '2000000000',
-                '3000000000',
-                '5000000000',
-            ),
-            createMockBalanceChange('11111111111111111111111111111111', '-500000000', '1000000000', '500000000'),
+            createMockBalanceChange(ARBITRARY_KEY, '1000000000', '2000000000', '3000000000'),
+            createMockBalanceChange(TOKEN_PROGRAM_ADDRESS, '2000000000', '3000000000', '5000000000'),
+            createMockBalanceChange(SYSTEM_PROGRAM_ADDRESS, '-500000000', '1000000000', '500000000'),
         ];
 
         render(<SolBalanceChangesCard balanceChanges={balanceChanges} />);
@@ -97,19 +93,14 @@ describe('SolBalanceChangesCard', () => {
 
         const addresses = screen.getAllByTestId('address');
         expect(addresses).toHaveLength(3);
-        expect(addresses[0]).toHaveTextContent('GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS');
-        expect(addresses[1]).toHaveTextContent('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
-        expect(addresses[2]).toHaveTextContent('11111111111111111111111111111111');
+        expect(addresses[0]).toHaveTextContent(ARBITRARY_KEY);
+        expect(addresses[1]).toHaveTextContent(TOKEN_PROGRAM_ADDRESS);
+        expect(addresses[2]).toHaveTextContent(SYSTEM_PROGRAM_ADDRESS);
     });
 
     it('should render with negative delta', () => {
         const balanceChanges: SolBalanceChange[] = [
-            createMockBalanceChange(
-                'GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS',
-                '-1000000000',
-                '2000000000',
-                '1000000000',
-            ),
+            createMockBalanceChange(ARBITRARY_KEY, '-1000000000', '2000000000', '1000000000'),
         ];
 
         render(<SolBalanceChangesCard balanceChanges={balanceChanges} />);

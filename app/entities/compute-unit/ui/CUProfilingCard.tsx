@@ -1,7 +1,8 @@
-import { InstructionCUData } from '@utils/cu-profiling';
-import { BarElement, CategoryScale, Chart, ChartData, ChartOptions, LinearScale, Tooltip } from 'chart.js';
+import { BarElement, CategoryScale, Chart, type ChartData, type ChartOptions, LinearScale, Tooltip } from 'chart.js';
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
+
+import type { InstructionCUData } from '../lib/types';
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
