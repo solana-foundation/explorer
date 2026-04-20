@@ -8,6 +8,7 @@ export enum PROGRAM_NAMES {
     ADDRESS_LOOKUP_TABLE = 'Address Lookup Table Program',
     COMPUTE_BUDGET = 'Compute Budget Program',
     CONFIG = 'Config Program',
+    FEATURE_GATE = 'Feature Gate Program',
     STAKE = 'Stake Program',
     SYSTEM = 'System Program',
     VOTE = 'Vote Program',
@@ -280,6 +281,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     Feat1YXHhH6t1juaWF74WLcfv4XoNocjXA6sPWHNgAse: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.FEATURE_PROPOSAL,
+    },
+    Feature111111111111111111111111111111111111: {
+        deployments: ALL_CLUSTERS,
+        name: PROGRAM_NAMES.FEATURE_GATE,
     },
     FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH: {
         deployments: [Cluster.MainnetBeta],
