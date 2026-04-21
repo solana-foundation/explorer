@@ -25,7 +25,7 @@
 | Dynamic | `/address/[address]/slot-hashes` | 10 kB | 1.01 MB |
 | Dynamic | `/address/[address]/stake-history` | 10 kB | 1.02 MB |
 | Dynamic | `/address/[address]/token-extensions` | 10 kB | 1.10 MB |
-| Dynamic | `/address/[address]/tokens` | 30 kB | 1.21 MB |
+| Dynamic | `/address/[address]/tokens` | 30 kB | 1.22 MB |
 | Dynamic | `/address/[address]/transfers` | 10 kB | 1.15 MB |
 | Dynamic | `/address/[address]/verified-build` | 10 kB | 1.08 MB |
 | Dynamic | `/address/[address]/vote-history` | 10 kB | 1.01 MB |
@@ -56,7 +56,7 @@
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 10 kB | 1.04 MB |
 | Static | `/tos` | 330 B | 170 kB |
-| Dynamic | `/tx/[signature]` | 60 kB | 1.53 MB |
+| Dynamic | `/tx/[signature]` | 60 kB | 1.54 MB |
 | Dynamic | `/tx/[signature]/inspect` | 620 B | 1.30 MB |
 | Static | `/tx/inspector` | 630 B | 1.30 MB |
 | Static | `/verified-programs` | 10 kB | 180 kB |
