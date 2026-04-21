@@ -61,6 +61,10 @@ import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
 import { alloc, bytes, equals, toBuffer } from '@/app/shared/lib/bytes';
 
+import {
+    parseMetaplexTokenMetadataInstruction,
+    TOKEN_METADATA_PROGRAM_ADDRESS,
+} from './instruction-parsers/metaplex-token-metadata.parser';
 import { parseTokenProgramInstruction } from './instruction-parsers/spl-token.parser';
 import { parseSystemProgramInstruction } from './instruction-parsers/system-program.parser';
 import { parseToken2022Instruction } from './instruction-parsers/token-2022-program.parser';
@@ -190,6 +194,9 @@ function intoProgramName(programId: PublicKey): string | undefined {
     }
     if (programId.toBase58() === TOKEN_2022_PROGRAM_ADDRESS) {
         return 'spl-token-2022';
+    }
+    if (programId.toBase58() === TOKEN_METADATA_PROGRAM_ADDRESS) {
+        return 'mpl-token-metadata';
     }
     /* add other variants here */
 }
@@ -359,6 +366,18 @@ function intoParsedData(instruction: TransactionInstruction, parsed?: any): any 
         };
     } else if (programId.toBase58() === TOKEN_2022_PROGRAM_ADDRESS) {
         const result = parseToken2022Instruction(instruction);
+        if (result) {
+            return {
+                info: parsed ?? result.info,
+                type: result.type,
+            };
+        }
+        return {
+            info: parsed ?? info,
+            type: UNKNOWN_PROGRAM_TYPE,
+        };
+    } else if (programId.toBase58() === TOKEN_METADATA_PROGRAM_ADDRESS) {
+        const result = parseMetaplexTokenMetadataInstruction(instruction);
         if (result) {
             return {
                 info: parsed ?? result.info,

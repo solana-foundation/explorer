@@ -25,9 +25,11 @@ import { InspectorInstructionCard as InspectorInstructionCardComponent } from '.
 import { LoadingCard } from '../common/LoadingCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
+import { MetaplexTokenMetadataDetailsCard } from '../instruction/metaplex-token-metadata/MetaplexTokenMetadataDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
+import { TOKEN_METADATA_PROGRAM_ADDRESS } from './instruction-parsers/metaplex-token-metadata.parser';
 import { intoParsedInstruction, intoParsedTransaction } from './into-parsed-data';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
 
@@ -236,6 +238,21 @@ function InspectorInstructionCard({
             }
             // Fall through to unknown if parsing failed
             break;
+        }
+        case TOKEN_METADATA_PROGRAM_ADDRESS: {
+            return (
+                <ErrorBoundary
+                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                >
+                    <MetaplexTokenMetadataDetailsCard
+                        key={index}
+                        ix={ix}
+                        index={index}
+                        result={result}
+                        InstructionCardComponent={BaseInstructionCard}
+                    />
+                </ErrorBoundary>
+            );
         }
         default: {
             // unknown program; allow to render the next card
