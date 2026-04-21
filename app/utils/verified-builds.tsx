@@ -1,6 +1,7 @@
 import { useAnchorProgram } from '@entities/idl';
 import { sha256 } from '@noble/hashes/sha256';
 import { Connection, PublicKey } from '@solana/web3.js';
+import { useMemo } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
 import { fromBase64, fromUtf8, toHex } from '@/app/shared/lib/bytes';
@@ -9,7 +10,6 @@ import { Logger } from '@/app/shared/lib/logger';
 import { useCluster } from '../providers/cluster';
 import { ProgramDataAccountInfo } from '../validators/accounts/upgradeable-program';
 import { Cluster } from './cluster';
-import { useMemo } from 'react';
 
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
@@ -53,10 +53,10 @@ function parsePublicKey(value: string | undefined): PublicKey | null {
 }
 
 const TRUSTED_SIGNERS: Record<string, string> = {
+    '11111111111111111111111111111111': 'Explorer',
     '5vJwnLeyjV8uNJSp1zn7VLW8GwiQbcsQbGaVSwRmkE4r': 'Foundation',
     '9VWiUUhgNoRwTH5NVehYJEDwcotwYX3VgW4MChiHPAqU': 'OtterSecurity',
     CyJj5ejJAUveDXnLduJbkvwjxcmWJNqCuB9DR7AExrHn: 'Explorer',
-    '11111111111111111111111111111111': 'Explorer',
 };
 
 export function useVerifiedProgramRegistry({
