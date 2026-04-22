@@ -14,12 +14,14 @@ import {
     PartiallyDecodedInstruction,
 } from '@solana/web3.js';
 import { ComputeBudgetInstruction, identifyComputeBudgetInstruction } from '@solana-program/compute-budget';
+import { capitalCase } from 'change-case';
 import { camelToTitleCase } from '@utils/index';
-import { getProgramName, isTokenProgram } from '@utils/programs';
+import { isTokenProgram } from '@utils/programs';
 import { intoTransactionInstruction } from '@utils/tx';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
 
+import { getProgramName } from '@/app/entities/transaction-data';
 import { Logger } from '@/app/shared/lib/logger';
 
 export type InstructionType = {
@@ -133,8 +135,10 @@ export function getTransactionInstructionNames(
             if (typeof ix.parsed === 'object' && ix.parsed !== null && 'type' in ix.parsed) {
                 return { name: camelToTitleCase(String(ix.parsed.type)), program };
             }
-            // ix.parsed is a string (e.g. memo text) — instruction name is the program name
-            return { name: 'Memo', program };
+            if (typeof ix.parsed === 'string') {
+                // ix.parsed is a string (e.g. memo text) — instruction name is the program name
+                return { name: 'Memo', program };
+            }
         }
         if (ix.programId.equals(ComputeBudgetProgram.programId)) {
             try {
@@ -142,13 +146,13 @@ export function getTransactionInstructionNames(
                 if (txInstruction) {
                     const type = identifyComputeBudgetInstruction(new Uint8Array(txInstruction.data));
                     const name = ComputeBudgetInstruction[type];
-                    return { name: camelToTitleCase(name.charAt(0).toLowerCase() + name.slice(1)), program };
+                    return { name: capitalCase(name), program };
                 }
             } catch {
                 // fall through
             }
         }
-        return { name: 'Unknown Instruction', program: `${program} Program` };
+        return { name: 'Unknown Instruction', program: program === 'Unknown' ? 'Unknown Program' : program };
     });
 }
 

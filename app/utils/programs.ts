@@ -1,4 +1,3 @@
-import { PublicKey } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
@@ -527,9 +526,4 @@ export function isTokenProgram(program: string): program is TokenProgram {
     } catch (_e) {
         return false;
     }
-}
-
-export function getProgramName(programId: PublicKey): string {
-    const address = programId.toBase58();
-    return PROGRAM_INFO_BY_ID[address]?.name ?? LOADER_IDS[address] ?? 'Unknown';
 }

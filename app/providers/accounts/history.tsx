@@ -16,6 +16,7 @@ import { fetchOnce } from '@utils/fetch-once';
 import { withBackoff } from '@utils/with-backoff';
 import React from 'react';
 
+import { mergeTransactionMap } from '@/app/entities/transaction-data';
 import { Logger } from '@/app/shared/lib/logger';
 
 type TransactionMap = Map<string, ParsedTransactionWithMeta>;
@@ -60,14 +61,6 @@ function combineFetched(
     }
 
     return fetched;
-}
-
-function mergeTransactionMap(current: TransactionMap | undefined, update: TransactionMap | undefined) {
-    if (!update) {
-        return current ?? new Map<string, ParsedTransactionWithMeta>();
-    }
-
-    return new Map([...(current ?? []), ...update]);
 }
 
 function mergeFailedTransactionSignatures(
