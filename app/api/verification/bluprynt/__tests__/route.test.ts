@@ -3,8 +3,14 @@ import { vi } from 'vitest';
 import { Logger } from '@/app/shared/lib/logger';
 
 const VALID_MINT = 'B61SyRxF2b8JwSLZHgEUF6rtn6NUikkrK1EMEgP6nhXW';
+const MOCK_ATTESTATION_ADDRESS = 'Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS';
 
-const mockGetProgramAccounts = vi.fn();
+const mockGetAccountInfo = vi.fn();
+const mockDeriveAttestationPda = vi.fn().mockResolvedValue([MOCK_ATTESTATION_ADDRESS]);
+
+vi.mock('sas-lib', () => ({
+    deriveAttestationPda: mockDeriveAttestationPda,
+}));
 
 vi.mock('@utils/cluster', () => ({
     Cluster: { MainnetBeta: 'mainnet-beta' },
@@ -16,7 +22,7 @@ vi.mock('@solana/web3.js', async () => {
     return {
         ...actual,
         Connection: vi.fn().mockImplementation(() => ({
-            getProgramAccounts: mockGetProgramAccounts,
+            getAccountInfo: mockGetAccountInfo,
         })),
     };
 });
@@ -26,6 +32,7 @@ const { GET } = await import('../[mintAddress]/route');
 describe('Bluprynt API Route', () => {
     beforeEach(() => {
         vi.stubEnv('BLUPRYNT_CREDENTIAL_AUTHORITY', 'test-credential');
+        vi.stubEnv('BLUPRYNT_SCHEMA_ADDRESS', 'test-schema');
     });
 
     afterEach(() => {
@@ -46,23 +53,40 @@ describe('Bluprynt API Route', () => {
         expect(await response.json()).toEqual({ error: 'Bluprynt API is misconfigured' });
     });
 
-    it('should return verified true when attestation accounts exist', async () => {
-        mockGetProgramAccounts.mockResolvedValueOnce([{ pubkey: 'some-account' }]);
+    it('should return 500 when schema address is missing', async () => {
+        vi.stubEnv('BLUPRYNT_SCHEMA_ADDRESS', '');
+        const response = await callRoute(VALID_MINT);
+        expect(response.status).toBe(500);
+        expect(await response.json()).toEqual({ error: 'Bluprynt API is misconfigured' });
+    });
+
+    it('should return verified true when attestation account exists', async () => {
+        mockGetAccountInfo.mockResolvedValueOnce({ data: Buffer.alloc(0), lamports: 1 });
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({ verified: true });
     });
 
-    it('should return verified false when no attestation accounts exist', async () => {
-        mockGetProgramAccounts.mockResolvedValueOnce([]);
+    it('should return verified false when attestation account does not exist', async () => {
+        mockGetAccountInfo.mockResolvedValueOnce(null);
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({ verified: false });
     });
 
+    it('should derive the attestation PDA from credential, schema, and mint address', async () => {
+        mockGetAccountInfo.mockResolvedValueOnce(null);
+        await callRoute(VALID_MINT);
+        expect(mockDeriveAttestationPda).toHaveBeenCalledWith({
+            credential: 'test-credential',
+            nonce: VALID_MINT,
+            schema: 'test-schema',
+        });
+    });
+
     it('should return 504 with short negative cache when RPC request times out', async () => {
         const timeoutError = new DOMException('Signal timed out.', 'TimeoutError');
-        mockGetProgramAccounts.mockRejectedValueOnce(timeoutError);
+        mockGetAccountInfo.mockRejectedValueOnce(timeoutError);
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(504);
         expect(await response.json()).toEqual({ error: 'Verification request timed out' });
@@ -74,7 +98,7 @@ describe('Bluprynt API Route', () => {
     });
 
     it('should return 500 with short negative cache when RPC throws a non-timeout error', async () => {
-        mockGetProgramAccounts.mockRejectedValueOnce(new Error('Connection refused'));
+        mockGetAccountInfo.mockRejectedValueOnce(new Error('Connection refused'));
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(500);
         expect(await response.json()).toEqual({ error: 'Failed to verify bluprynt data' });
