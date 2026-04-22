@@ -3,6 +3,8 @@ import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.j
 import { getCreateAccountWithSeedInstructionDataEncoder } from '@solana-program/system';
 import { describe, expect, test } from 'vitest';
 
+import { assert } from '@/app/shared/lib/assert';
+
 import { parseSystemProgramInstruction } from '../system-program.parser';
 
 /** Helper to encode CreateAccountWithSeed instruction data using @solana-program/system */
@@ -54,15 +56,15 @@ describe('parseSystemProgramInstruction', () => {
 
             const result = parseSystemProgramInstruction(instruction);
 
-            expect(result).not.toBeNull();
-            expect(result!.type).toBe('createAccountWithSeed');
-            expect(result!.info.source.equals(payer)).toBe(true);
-            expect(result!.info.newAccount.equals(newAccount)).toBe(true);
-            expect(result!.info.base.equals(baseAccount)).toBe(true);
-            expect(result!.info.seed).toBe(seed);
-            expect(result!.info.lamports).toBe(lamports);
-            expect(result!.info.space).toBe(space);
-            expect(result!.info.owner.equals(tokenProgram)).toBe(true);
+            assert(result, 'expected parser to return an instruction for a valid CreateAccountWithSeed payload');
+            expect(result.type).toBe('createAccountWithSeed');
+            expect(result.info.source.equals(payer)).toBe(true);
+            expect(result.info.newAccount.equals(newAccount)).toBe(true);
+            expect(result.info.base.equals(baseAccount)).toBe(true);
+            expect(result.info.seed).toBe(seed);
+            expect(result.info.lamports).toBe(lamports);
+            expect(result.info.space).toBe(space);
+            expect(result.info.owner.equals(tokenProgram)).toBe(true);
         });
 
         test('parses 2-account variant (payer === baseAccount)', () => {
@@ -88,16 +90,19 @@ describe('parseSystemProgramInstruction', () => {
 
             const result = parseSystemProgramInstruction(instruction);
 
-            expect(result).not.toBeNull();
-            expect(result!.type).toBe('createAccountWithSeed');
-            expect(result!.info.source.equals(payer)).toBe(true);
-            expect(result!.info.newAccount.equals(newAccount)).toBe(true);
+            assert(
+                result,
+                'expected parser to return an instruction for a valid 2-account CreateAccountWithSeed payload',
+            );
+            expect(result.type).toBe('createAccountWithSeed');
+            expect(result.info.source.equals(payer)).toBe(true);
+            expect(result.info.newAccount.equals(newAccount)).toBe(true);
             // Base should be extracted from instruction data, not accounts
-            expect(result!.info.base.equals(payer)).toBe(true);
-            expect(result!.info.seed).toBe(seed);
-            expect(result!.info.lamports).toBe(lamports);
-            expect(result!.info.space).toBe(space);
-            expect(result!.info.owner.equals(tokenProgram)).toBe(true);
+            expect(result.info.base.equals(payer)).toBe(true);
+            expect(result.info.seed).toBe(seed);
+            expect(result.info.lamports).toBe(lamports);
+            expect(result.info.space).toBe(space);
+            expect(result.info.owner.equals(tokenProgram)).toBe(true);
         });
 
         test('handles different seed lengths correctly', () => {
@@ -120,8 +125,8 @@ describe('parseSystemProgramInstruction', () => {
 
             const result = parseSystemProgramInstruction(instruction);
 
-            expect(result).not.toBeNull();
-            expect(result!.info.seed).toBe(longSeed);
+            assert(result, 'expected parser to return an instruction when seed is long');
+            expect(result.info.seed).toBe(longSeed);
         });
 
         test('returns null for non-System Program instructions', () => {

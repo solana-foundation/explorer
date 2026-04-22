@@ -48,7 +48,7 @@ export default tseslint.config(
             semi: ['error', 'always'],
             '@typescript-eslint/no-explicit-any': 'off',
             'object-curly-spacing': ['error', 'always'],
-            '@typescript-eslint/no-non-null-assertion': 'off',
+            '@typescript-eslint/no-non-null-assertion': 'error',
             '@typescript-eslint/no-unused-vars': [
                 'error',
                 {

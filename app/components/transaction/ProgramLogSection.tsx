@@ -40,9 +40,9 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                         <Code className="me-2" size={13} /> Raw
                     </button>
                 </div>
-                {prettyLogs !== null ? (
+                {prettyLogs !== null && logMessages !== null ? (
                     showRaw ? (
-                        <RawProgramLogs raw={logMessages!} />
+                        <RawProgramLogs raw={logMessages} />
                     ) : (
                         <ProgramLogsCardBody message={message} logs={prettyLogs} cluster={cluster} url={url} />
                     )

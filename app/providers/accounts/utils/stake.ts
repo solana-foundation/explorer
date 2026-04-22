@@ -2,6 +2,7 @@
 // Temporary fix, copied from: https://github.com/solana-developers/solana-rpc-get-stake-activation/blob/main/web3js-1.0/src/rpc.ts
 import { AccountInfo, Connection, ParsedAccountData, PublicKey, RpcResponseAndContext } from '@solana/web3.js';
 
+import { assert } from '@/app/shared/lib/assert';
 import { isBuffer } from '@/app/shared/lib/bytes';
 
 interface StakeActivation {
@@ -238,7 +239,8 @@ export async function getStakeActivation(connection: Connection, stakeAddress: P
     } else {
         status = 'inactive';
     }
-    const inactive = BigInt(stakeAccountParsed.value!.lamports) - effective - stakeAccount.meta.rentExemptReserve;
+    assert(stakeAccountParsed.value, 'stake account value is checked above');
+    const inactive = BigInt(stakeAccountParsed.value.lamports) - effective - stakeAccount.meta.rentExemptReserve;
 
     return {
         active: effective,

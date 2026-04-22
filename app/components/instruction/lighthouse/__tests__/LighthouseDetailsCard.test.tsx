@@ -2,7 +2,17 @@ import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 
+import { assert } from '@/app/shared/lib/assert';
+
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
+
+function nextSibling(el: Element | null): Element {
+    assert(el, 'expected current element to be non-null');
+    // eslint-disable-next-line testing-library/no-node-access -- tests walk the DOM by sibling index
+    const sibling = el.nextElementSibling;
+    assert(sibling, 'expected nextElementSibling to exist');
+    return sibling;
+}
 
 vi.mock('react-feather', () => ({
     CornerDownRight: () => <div data-testid="corner-down-right" />,
@@ -548,48 +558,40 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs1a).toHaveTextContent('#0');
             expect(ixArgs1a).toHaveTextContent('Lamports');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            const ixArgs1aChild0 = ixArgs1a!.nextElementSibling;
+            const ixArgs1aChild0 = nextSibling(ixArgs1a);
             expect(ixArgs1aChild0).toHaveTextContent('value');
             expect(ixArgs1aChild0).toHaveTextContent('bignum');
             expect(ixArgs1aChild0).toHaveTextContent('40305008');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            const ixArgs1aChild1 = ixArgs1aChild0!.nextElementSibling;
+            const ixArgs1aChild1 = nextSibling(ixArgs1aChild0);
             expect(ixArgs1aChild1).toHaveTextContent('operator');
             expect(ixArgs1aChild1).toHaveTextContent('string');
             expect(ixArgs1aChild1).toHaveTextContent('>=');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            const ixArgs1b = ixArgs1aChild1!.nextElementSibling;
+            const ixArgs1b = nextSibling(ixArgs1aChild1);
             expect(ixArgs1b).toHaveTextContent('#1');
             expect(ixArgs1b).toHaveTextContent('Lamports');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            const ixArgs1bChild0 = ixArgs1b!.nextElementSibling;
+            const ixArgs1bChild0 = nextSibling(ixArgs1b);
             expect(ixArgs1bChild0).toHaveTextContent('value');
             expect(ixArgs1bChild0).toHaveTextContent('bignum');
             expect(ixArgs1bChild0).toHaveTextContent('67175012');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            const ixArgs1bChild1 = ixArgs1bChild0!.nextElementSibling;
+            const ixArgs1bChild1 = nextSibling(ixArgs1bChild0);
             expect(ixArgs1bChild1).toHaveTextContent('operator');
             expect(ixArgs1bChild1).toHaveTextContent('string');
             expect(ixArgs1bChild1).toHaveTextContent('<=');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            const ixArgs1c = ixArgs1bChild1!.nextElementSibling;
+            const ixArgs1c = nextSibling(ixArgs1bChild1);
             expect(ixArgs1c).toHaveTextContent('#2');
             expect(ixArgs1c).toHaveTextContent('KnownOwner');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            const ixArgs1cChild0 = ixArgs1c!.nextElementSibling;
+            const ixArgs1cChild0 = nextSibling(ixArgs1c);
             expect(ixArgs1cChild0).toHaveTextContent('value');
             expect(ixArgs1cChild0).toHaveTextContent('number');
             expect(ixArgs1cChild0).toHaveTextContent('0');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            const ixArgs1cChild1 = ixArgs1cChild0!.nextElementSibling;
+            const ixArgs1cChild1 = nextSibling(ixArgs1cChild0);
             expect(ixArgs1cChild1).toHaveTextContent('operator');
             expect(ixArgs1cChild1).toHaveTextContent('string');
             expect(ixArgs1cChild1).toHaveTextContent('=');
@@ -640,80 +642,68 @@ describe('LighthouseDetailsCard', () => {
             expect(next).toHaveTextContent('#0');
             expect(next).toHaveTextContent('MetaAssertion');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+            next = nextSibling(next);
             expect(next).toHaveTextContent('fields');
             expect(next).toHaveTextContent('Array[1]');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+            next = nextSibling(next);
             expect(next).toHaveTextContent('#0');
             expect(next).toHaveTextContent('AuthorizedWithdrawer');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+            next = nextSibling(next);
             expect(next).toHaveTextContent('value');
             expect(next).toHaveTextContent('pubkey');
             expect(next).toHaveTextContent('FZLY576gVwyD6rEosP72pRUC9TAe7LhgvoSepk3F63PY');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+            next = nextSibling(next);
             expect(next).toHaveTextContent('operator');
             expect(next).toHaveTextContent('string');
             expect(next).toHaveTextContent('=');
 
             // 2nd assertion
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+
+            next = nextSibling(next);
             expect(next).toHaveTextContent('#1');
             expect(next).toHaveTextContent('MetaAssertion');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+            next = nextSibling(next);
             expect(next).toHaveTextContent('fields');
             expect(next).toHaveTextContent('Array[1]');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+            next = nextSibling(next);
             expect(next).toHaveTextContent('#0');
             expect(next).toHaveTextContent('AuthorizedStaker');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+            next = nextSibling(next);
             expect(next).toHaveTextContent('value');
             expect(next).toHaveTextContent('pubkey');
             expect(next).toHaveTextContent('FZLY576gVwyD6rEosP72pRUC9TAe7LhgvoSepk3F63PY');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+            next = nextSibling(next);
             expect(next).toHaveTextContent('operator');
             expect(next).toHaveTextContent('string');
             expect(next).toHaveTextContent('=');
 
             // 3rd assertion
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+
+            next = nextSibling(next);
             expect(next).toHaveTextContent('#2');
             expect(next).toHaveTextContent('StakeAssertion');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+            next = nextSibling(next);
             expect(next).toHaveTextContent('fields');
             expect(next).toHaveTextContent('Array[1]');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+            next = nextSibling(next);
             expect(next).toHaveTextContent('#0');
             expect(next).toHaveTextContent('DelegationStake');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+            next = nextSibling(next);
             expect(next).toHaveTextContent('value');
             expect(next).toHaveTextContent('bignum');
             expect(next).toHaveTextContent('2200000');
 
-            // eslint-disable-next-line testing-library/no-node-access
-            next = next!.nextElementSibling;
+            next = nextSibling(next);
             expect(next).toHaveTextContent('operator');
             expect(next).toHaveTextContent('string');
             expect(next).toHaveTextContent('>=');

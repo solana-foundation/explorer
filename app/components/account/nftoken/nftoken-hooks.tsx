@@ -1,6 +1,8 @@
 import { useCluster } from '@providers/cluster';
 import useSWR, { SWRResponse } from 'swr';
 
+import { assert } from '@/app/shared/lib/assert';
+
 import { NftokenFetcher } from './nftoken';
 import { NftokenTypes } from './nftoken-types';
 
@@ -28,8 +30,8 @@ export const useCollectionNfts = ({
     const { data, error, mutate } = useSWR(swrKey, getCollectionNftsFetcher, {
         suspense: true,
     });
-    // Not nullable since we use suspense
-    return { data: data!, error, mutate };
+    assert(data, 'SWR suspense guarantees data is non-null');
+    return { data, error, mutate };
 };
 
 const getMetadataFetcher = async (metadataUrl: string) => {
@@ -47,6 +49,6 @@ export const useNftokenMetadata = (
     const { data, error, mutate } = useSWR(swrKey, getMetadataFetcher, {
         suspense: true,
     });
-    // Not nullable since we use suspense
-    return { data: data!, error, mutate };
+    assert(data !== undefined, 'SWR suspense guarantees data is defined');
+    return { data, error, mutate };
 };
