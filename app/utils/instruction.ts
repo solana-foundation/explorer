@@ -14,11 +14,11 @@ import {
     PartiallyDecodedInstruction,
 } from '@solana/web3.js';
 import { ComputeBudgetInstruction, identifyComputeBudgetInstruction } from '@solana-program/compute-budget';
-import { capitalCase } from 'change-case';
 import { camelToTitleCase } from '@utils/index';
 import { isTokenProgram } from '@utils/programs';
 import { intoTransactionInstruction } from '@utils/tx';
 import { ParsedInfo } from '@validators/index';
+import { capitalCase } from 'change-case';
 import { create } from 'superstruct';
 
 import { getProgramName } from '@/app/entities/transaction-data';
