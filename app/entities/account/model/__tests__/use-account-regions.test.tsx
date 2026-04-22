@@ -1,9 +1,9 @@
+import type { Account } from '@providers/accounts';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { useAccountRegions } from '../use-account-regions';
-import type { Account } from '@providers/accounts';
 
 const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 const TOKEN_2022_PROGRAM_ID = new PublicKey('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb');
@@ -14,14 +14,14 @@ function makeAccount(opts: {
     parsed?: Account['data']['parsed'];
 }): Account {
     return {
-        pubkey: PublicKey.default,
-        lamports: 1,
-        executable: false,
-        owner: opts.owner ?? SystemProgram.programId,
         data: {
-            raw: opts.rawData,
             parsed: opts.parsed,
+            raw: opts.rawData,
         },
+        executable: false,
+        lamports: 1,
+        owner: opts.owner ?? SystemProgram.programId,
+        pubkey: PublicKey.default,
     };
 }
 
@@ -33,35 +33,35 @@ describe('useAccountRegions', () => {
     it('returns no-raw when rawData is undefined', () => {
         const account = makeAccount({ owner: TOKEN_PROGRAM_ID });
         const { result } = renderHook(() => useAccountRegions(account, undefined));
-        expect(result.current).toEqual({ status: 'fallback', reason: 'no-raw' });
+        expect(result.current).toEqual({ reason: 'no-raw', status: 'fallback' });
     });
 
     it('returns oversize for rawData > 4096 bytes', () => {
         const account = makeAccount({ owner: TOKEN_PROGRAM_ID });
         const { result } = renderHook(() => useAccountRegions(account, zeroBytes(5000)));
-        expect(result.current).toEqual({ status: 'fallback', reason: 'oversize' });
+        expect(result.current).toEqual({ reason: 'oversize', status: 'fallback' });
     });
 
     it('returns unknown-owner for non-token programs', () => {
         const account = makeAccount({ owner: SystemProgram.programId });
         const { result } = renderHook(() => useAccountRegions(account, zeroBytes(82)));
-        expect(result.current).toEqual({ status: 'fallback', reason: 'unknown-owner' });
+        expect(result.current).toEqual({ reason: 'unknown-owner', status: 'fallback' });
     });
 
     it('returns multisig fallback for token multisig accounts', () => {
         const account = makeAccount({
             owner: TOKEN_PROGRAM_ID,
-            rawData: zeroBytes(355),
             parsed: {
-                program: 'spl-token',
                 parsed: {
-                    type: 'multisig',
                     info: {},
-                } as Account['data']['parsed']['parsed'],
+                    type: 'multisig',
+                } as NonNullable<Account['data']['parsed']>['parsed'],
+                program: 'spl-token',
             } as Account['data']['parsed'],
+            rawData: zeroBytes(355),
         });
         const { result } = renderHook(() => useAccountRegions(account, zeroBytes(355)));
-        expect(result.current).toEqual({ status: 'fallback', reason: 'multisig' });
+        expect(result.current).toEqual({ reason: 'multisig', status: 'fallback' });
     });
 
     it('annotates a legacy SPL Mint (82 bytes, no parsed) via raw-byte fallback', () => {
@@ -83,7 +83,7 @@ describe('useAccountRegions', () => {
     it('rejects legacy SPL Token with unexpected length (e.g. 100 bytes)', () => {
         const account = makeAccount({ owner: TOKEN_PROGRAM_ID });
         const { result } = renderHook(() => useAccountRegions(account, zeroBytes(100)));
-        expect(result.current).toEqual({ status: 'fallback', reason: 'unexpected-length' });
+        expect(result.current).toEqual({ reason: 'unexpected-length', status: 'fallback' });
     });
 
     it('annotates a Token-2022 Mint with TLV tail (88 bytes)', () => {
@@ -106,14 +106,14 @@ describe('useAccountRegions', () => {
         const bytes = zeroBytes(200);
         const account = makeAccount({
             owner: TOKEN_2022_PROGRAM_ID,
-            rawData: bytes,
             parsed: {
-                program: 'spl-token-2022',
                 parsed: {
-                    type: 'account',
                     info: {},
+                    type: 'account',
                 },
+                program: 'spl-token-2022',
             } as Account['data']['parsed'],
+            rawData: bytes,
         });
         const { result } = renderHook(() => useAccountRegions(account, bytes));
         if (result.current.status !== 'regions') throw new Error('expected regions');
@@ -144,12 +144,12 @@ describe('useAccountRegions', () => {
     it('does not recompute when parsed object has different identity but same contents', () => {
         const rawData = zeroBytes(82);
         const parsedA = {
+            parsed: { info: { decimals: 6 }, type: 'mint' },
             program: 'spl-token',
-            parsed: { type: 'mint', info: { decimals: 6 } },
         } as unknown as Account['data']['parsed'];
         const parsedB = {
+            parsed: { info: { decimals: 6 }, type: 'mint' },
             program: 'spl-token',
-            parsed: { type: 'mint', info: { decimals: 6 } },
         } as unknown as Account['data']['parsed'];
 
         const { result, rerender } = renderHook(

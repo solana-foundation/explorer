@@ -47,7 +47,7 @@ describe('walkTokenExtensions', () => {
     });
 
     it('walks a single known zero-length extension (ImmutableOwner) — header only', () => {
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 7, data: new Uint8Array(0) }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data: new Uint8Array(0), type: 7 }]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         // accountType (1) + header (4) = 2 regions, no data region for zero-length
         expect(regions).toHaveLength(2);
@@ -59,8 +59,8 @@ describe('walkTokenExtensions', () => {
         // Uses type 2 (TransferFeeAmount) + type 11 (CpiGuard): both are known names but
         // do not have sub-region decoders yet, so they emit as header+opaque-data pairs.
         const bytes = appendTlvTail(baseMint(), 1, [
-            { type: 2, data: new Uint8Array(8).fill(0xAA) },
-            { type: 11, data: new Uint8Array(1).fill(0x01) },
+            { data: new Uint8Array(8).fill(0xAA), type: 2 },
+            { data: new Uint8Array(1).fill(0x01), type: 11 },
         ]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         // accountType + (header+data) + (header+data) = 5 regions
@@ -84,8 +84,8 @@ describe('walkTokenExtensions', () => {
         // Use an undecoded known type (#2, TransferFeeAmount) as the second entry
         // so the assertion can reliably compare region count without dispatcher interference.
         const bytes = appendTlvTail(baseMint(), 1, [
-            { type: 0xFE, data: new Uint8Array(8).fill(0xFF) }, // unknown
-            { type: 2, data: new Uint8Array(8).fill(0xAA) }, // TransferFeeAmount (no decoder)
+            { data: new Uint8Array(8).fill(0xFF), type: 0xFE }, // unknown
+            { data: new Uint8Array(8).fill(0xAA), type: 2 }, // TransferFeeAmount (no decoder)
         ]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         expect(regions).toHaveLength(5);
@@ -129,7 +129,7 @@ describe('walkTokenExtensions', () => {
 
     it('buildSplMintRegions integrates the walker when raw.length > 82', () => {
         const bytes = appendTlvTail(baseMint(), 1, [
-            { type: 9, data: new Uint8Array(0) }, // NonTransferable
+            { data: new Uint8Array(0), type: 9 }, // NonTransferable
         ]);
         const regions = buildSplMintRegions(bytes, undefined);
         // 7 mint layout regions + accountType + 1 ext header (zero-length data)

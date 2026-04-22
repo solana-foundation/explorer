@@ -8,13 +8,13 @@ import { DecodedValue, LayoutField, Region } from './types';
 export const SPL_MINT_SIZE = 82;
 
 export const SPL_MINT_LAYOUT = [
-    { id: 'mint.mintAuthorityOption', name: 'Mint Authority (COption tag)', start: 0, length: 4, kind: 'option' },
-    { id: 'mint.mintAuthority', name: 'Mint Authority', start: 4, length: 32, kind: 'authority' },
-    { id: 'mint.supply', name: 'Supply', start: 36, length: 8, kind: 'amount' },
-    { id: 'mint.decimals', name: 'Decimals', start: 44, length: 1, kind: 'scalar' },
-    { id: 'mint.isInitialized', name: 'Is Initialized', start: 45, length: 1, kind: 'scalar' },
-    { id: 'mint.freezeAuthorityOption', name: 'Freeze Authority (COption tag)', start: 46, length: 4, kind: 'option' },
-    { id: 'mint.freezeAuthority', name: 'Freeze Authority', start: 50, length: 32, kind: 'authority' },
+    { id: 'mint.mintAuthorityOption', kind: 'option', length: 4, name: 'Mint Authority (COption tag)', start: 0 },
+    { id: 'mint.mintAuthority', kind: 'authority', length: 32, name: 'Mint Authority', start: 4 },
+    { id: 'mint.supply', kind: 'amount', length: 8, name: 'Supply', start: 36 },
+    { id: 'mint.decimals', kind: 'scalar', length: 1, name: 'Decimals', start: 44 },
+    { id: 'mint.isInitialized', kind: 'scalar', length: 1, name: 'Is Initialized', start: 45 },
+    { id: 'mint.freezeAuthorityOption', kind: 'option', length: 4, name: 'Freeze Authority (COption tag)', start: 46 },
+    { id: 'mint.freezeAuthority', kind: 'authority', length: 32, name: 'Freeze Authority', start: 50 },
 ] as const satisfies readonly LayoutField[];
 
 export interface ParsedMintInfo {
@@ -47,13 +47,13 @@ function decodeMintField(fieldId: string, raw: Uint8Array, parsed: ParsedMintInf
             return decodeCOptionPubkey(raw, 0, 4, parsed?.mintAuthority);
         case 'mint.supply': {
             const rawAmount = parsed?.supply !== undefined ? BigInt(parsed.supply) : readU64LE(raw, 36);
-            return { kind: 'amount', raw: rawAmount, decimals: parsed?.decimals };
+            return { decimals: parsed?.decimals, kind: 'amount', raw: rawAmount };
         }
         case 'mint.decimals':
             return { kind: 'scalar', value: parsed?.decimals ?? raw[44] };
         case 'mint.isInitialized': {
             const initialized = parsed?.isInitialized ?? raw[45] === 1;
-            return { kind: 'scalar', value: initialized ? 'Yes' : 'No', label: initialized ? 'Initialized' : 'Uninitialized' };
+            return { kind: 'scalar', label: initialized ? 'Initialized' : 'Uninitialized', value: initialized ? 'Yes' : 'No' };
         }
         case 'mint.freezeAuthorityOption':
             return { kind: 'option', present: readUint32LE(raw, 46) === 1 };
@@ -71,25 +71,25 @@ function decodeCOptionPubkey(
     parsedPubkey: { toBase58(): string } | null | undefined,
 ): DecodedValue {
     const present = readUint32LE(raw, tagOffset) === 1;
-    if (!present) return { kind: 'pubkey', base58: '', isNone: true };
-    if (parsedPubkey) return { kind: 'pubkey', base58: parsedPubkey.toBase58() };
-    return { kind: 'pubkey', base58: bs58.encode(raw.slice(pubkeyOffset, pubkeyOffset + 32)) };
+    if (!present) return { base58: '', isNone: true, kind: 'pubkey' };
+    if (parsedPubkey) return { base58: parsedPubkey.toBase58(), kind: 'pubkey' };
+    return { base58: bs58.encode(raw.slice(pubkeyOffset, pubkeyOffset + 32)), kind: 'pubkey' };
 }
 
 export const SPL_TOKEN_ACCOUNT_SIZE = 165;
 
 export const SPL_TOKEN_ACCOUNT_LAYOUT = [
-    { id: 'token.mint', name: 'Mint', start: 0, length: 32, kind: 'pubkey' },
-    { id: 'token.owner', name: 'Owner', start: 32, length: 32, kind: 'authority' },
-    { id: 'token.amount', name: 'Amount', start: 64, length: 8, kind: 'amount' },
-    { id: 'token.delegateOption', name: 'Delegate (COption tag)', start: 72, length: 4, kind: 'option' },
-    { id: 'token.delegate', name: 'Delegate', start: 76, length: 32, kind: 'pubkey' },
-    { id: 'token.state', name: 'State', start: 108, length: 1, kind: 'scalar' },
-    { id: 'token.isNativeOption', name: 'Is Native (COption tag)', start: 109, length: 4, kind: 'option' },
-    { id: 'token.nativeAmount', name: 'Rent-Exempt Reserve', start: 113, length: 8, kind: 'amount' },
-    { id: 'token.delegatedAmount', name: 'Delegated Amount', start: 121, length: 8, kind: 'amount' },
-    { id: 'token.closeAuthorityOption', name: 'Close Authority (COption tag)', start: 129, length: 4, kind: 'option' },
-    { id: 'token.closeAuthority', name: 'Close Authority', start: 133, length: 32, kind: 'pubkey' },
+    { id: 'token.mint', kind: 'pubkey', length: 32, name: 'Mint', start: 0 },
+    { id: 'token.owner', kind: 'authority', length: 32, name: 'Owner', start: 32 },
+    { id: 'token.amount', kind: 'amount', length: 8, name: 'Amount', start: 64 },
+    { id: 'token.delegateOption', kind: 'option', length: 4, name: 'Delegate (COption tag)', start: 72 },
+    { id: 'token.delegate', kind: 'pubkey', length: 32, name: 'Delegate', start: 76 },
+    { id: 'token.state', kind: 'scalar', length: 1, name: 'State', start: 108 },
+    { id: 'token.isNativeOption', kind: 'option', length: 4, name: 'Is Native (COption tag)', start: 109 },
+    { id: 'token.nativeAmount', kind: 'amount', length: 8, name: 'Rent-Exempt Reserve', start: 113 },
+    { id: 'token.delegatedAmount', kind: 'amount', length: 8, name: 'Delegated Amount', start: 121 },
+    { id: 'token.closeAuthorityOption', kind: 'option', length: 4, name: 'Close Authority (COption tag)', start: 129 },
+    { id: 'token.closeAuthority', kind: 'pubkey', length: 32, name: 'Close Authority', start: 133 },
 ] as const satisfies readonly LayoutField[];
 
 export type TokenAccountState = 'uninitialized' | 'initialized' | 'frozen';
@@ -139,16 +139,16 @@ function decodeTokenAccountField(
     switch (fieldId) {
         case 'token.mint':
             return parsed?.mint
-                ? { kind: 'pubkey', base58: parsed.mint.toBase58() }
-                : { kind: 'pubkey', base58: bs58.encode(raw.slice(0, 32)) };
+                ? { base58: parsed.mint.toBase58(), kind: 'pubkey' }
+                : { base58: bs58.encode(raw.slice(0, 32)), kind: 'pubkey' };
         case 'token.owner':
             return parsed?.owner
-                ? { kind: 'pubkey', base58: parsed.owner.toBase58() }
-                : { kind: 'pubkey', base58: bs58.encode(raw.slice(32, 64)) };
+                ? { base58: parsed.owner.toBase58(), kind: 'pubkey' }
+                : { base58: bs58.encode(raw.slice(32, 64)), kind: 'pubkey' };
         case 'token.amount': {
             const amountStr = parsed?.tokenAmount?.amount;
             const rawAmount = amountStr !== undefined ? BigInt(amountStr) : readU64LE(raw, 64);
-            return { kind: 'amount', raw: rawAmount, decimals: parsed?.tokenAmount?.decimals };
+            return { decimals: parsed?.tokenAmount?.decimals, kind: 'amount', raw: rawAmount };
         }
         case 'token.delegateOption':
             return { kind: 'option', present: readUint32LE(raw, 72) === 1 };
@@ -157,7 +157,7 @@ function decodeTokenAccountField(
         case 'token.state': {
             const stateByte = raw[108];
             const label = parsed?.state ?? STATE_LABELS[stateByte] ?? 'uninitialized';
-            return { kind: 'scalar', value: stateByte, label };
+            return { kind: 'scalar', label, value: stateByte };
         }
         case 'token.isNativeOption':
             return { kind: 'option', present: readUint32LE(raw, 109) === 1 };
@@ -169,13 +169,13 @@ function decodeTokenAccountField(
             const rawAmount = parsed?.rentExemptReserve
                 ? BigInt(parsed.rentExemptReserve.amount)
                 : readU64LE(raw, 113);
-            return { kind: 'amount', raw: rawAmount, decimals: parsed?.rentExemptReserve?.decimals };
+            return { decimals: parsed?.rentExemptReserve?.decimals, kind: 'amount', raw: rawAmount };
         }
         case 'token.delegatedAmount': {
             const rawAmount = parsed?.delegatedAmount
                 ? BigInt(parsed.delegatedAmount.amount)
                 : readU64LE(raw, 121);
-            return { kind: 'amount', raw: rawAmount, decimals: parsed?.delegatedAmount?.decimals };
+            return { decimals: parsed?.delegatedAmount?.decimals, kind: 'amount', raw: rawAmount };
         }
         case 'token.closeAuthorityOption':
             return { kind: 'option', present: readUint32LE(raw, 129) === 1 };
@@ -194,6 +194,7 @@ const ACCOUNT_TYPE_LABELS: Record<number, string> = {
     2: 'Account',
 };
 
+/* eslint-disable sort-keys-fix/sort-keys-fix -- numeric-keyed map for Token-2022 extension discriminators; natural-order reads better than lexicographic */
 export const EXTENSION_NAMES: Record<number, string> = {
     0: 'Uninitialized',
     1: 'TransferFeeConfig',
@@ -223,6 +224,7 @@ export const EXTENSION_NAMES: Record<number, string> = {
     25: 'PausableConfig',
     26: 'PausableAccount',
 };
+/* eslint-enable sort-keys-fix/sort-keys-fix */
 
 /**
  * Walks the Token-2022 TLV tail starting at `baseSize` (82 for mints, 165 for token accounts).
@@ -245,16 +247,16 @@ export function* walkTokenExtensions(raw: Uint8Array, baseSize: number): Generat
 
     const accountTypeByte = raw[baseSize];
     yield {
-        id: `ext.accountType@${baseSize}`,
-        name: 'Token-2022 Account Type',
-        start: baseSize,
-        length: 1,
-        kind: 'scalar',
         decodedValue: {
             kind: 'scalar',
-            value: accountTypeByte,
             label: ACCOUNT_TYPE_LABELS[accountTypeByte] ?? `Unknown (${accountTypeByte})`,
+            value: accountTypeByte,
         },
+        id: `ext.accountType@${baseSize}`,
+        kind: 'scalar',
+        length: 1,
+        name: 'Token-2022 Account Type',
+        start: baseSize,
     };
 
     let pos = baseSize + 1;
@@ -263,12 +265,12 @@ export function* walkTokenExtensions(raw: Uint8Array, baseSize: number): Generat
     while (pos < raw.length) {
         if (pos + 4 > raw.length) {
             yield {
+                decodedValue: { kind: 'unparsed', reason: 'truncated' },
                 id: `ext.${extIndex}.truncated@${pos}`,
+                kind: 'neutral',
+                length: raw.length - pos,
                 name: 'Truncated Extension Header',
                 start: pos,
-                length: raw.length - pos,
-                kind: 'neutral',
-                decodedValue: { kind: 'unparsed', reason: 'truncated' },
             };
             return;
         }
@@ -278,12 +280,12 @@ export function* walkTokenExtensions(raw: Uint8Array, baseSize: number): Generat
         const extName = EXTENSION_NAMES[extType] ?? `Unknown (#${extType})`;
 
         yield {
+            decodedValue: { kind: 'scalar', label: `${extName}, length ${extLen}`, value: extType },
             id: `ext.${extIndex}.header@${pos}`,
+            kind: 'option',
+            length: 4,
             name: `${extName} — Header`,
             start: pos,
-            length: 4,
-            kind: 'option',
-            decodedValue: { kind: 'scalar', value: extType, label: `${extName}, length ${extLen}` },
         };
         pos += 4;
 
@@ -294,12 +296,12 @@ export function* walkTokenExtensions(raw: Uint8Array, baseSize: number): Generat
 
         if (pos + extLen > raw.length) {
             yield {
+                decodedValue: { kind: 'unparsed', reason: 'truncated' },
                 id: `ext.${extIndex}.truncated@${pos}`,
+                kind: 'neutral',
+                length: raw.length - pos,
                 name: `${extName} — Truncated Data`,
                 start: pos,
-                length: raw.length - pos,
-                kind: 'neutral',
-                decodedValue: { kind: 'unparsed', reason: 'truncated' },
             };
             return;
         }
@@ -310,14 +312,14 @@ export function* walkTokenExtensions(raw: Uint8Array, baseSize: number): Generat
         } else {
             const isKnown = extType in EXTENSION_NAMES;
             yield {
-                id: `ext.${extIndex}.data@${pos}`,
-                name: `${extName} — Data`,
-                start: pos,
-                length: extLen,
-                kind: 'neutral',
                 decodedValue: isKnown
                     ? { kind: 'text', value: `${extLen} byte(s)` }
                     : { kind: 'unparsed', reason: 'unknown-ext' },
+                id: `ext.${extIndex}.data@${pos}`,
+                kind: 'neutral',
+                length: extLen,
+                name: `${extName} — Data`,
+                start: pos,
             };
         }
         pos += extLen;
@@ -339,51 +341,51 @@ type ExtensionDecoder = (
 function decodeOptionalNonZeroPubkey(raw: Uint8Array, start: number): DecodedValue {
     const slice = raw.slice(start, start + 32);
     const isNone = slice.every(b => b === 0);
-    if (isNone) return { kind: 'pubkey', base58: '', isNone: true };
-    return { kind: 'pubkey', base58: bs58.encode(slice) };
+    if (isNone) return { base58: '', isNone: true, kind: 'pubkey' };
+    return { base58: bs58.encode(slice), kind: 'pubkey' };
 }
 
 function* decodeMintCloseAuthority(raw: Uint8Array, start: number, length: number, extIndex: number): Generator<Region> {
     if (length < 32) return;
     yield {
+        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
         id: `ext.${extIndex}.closeAuthority@${start}`,
+        kind: 'authority',
+        length: 32,
         name: 'MintCloseAuthority — Close Authority',
         start,
-        length: 32,
-        kind: 'authority',
-        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
     };
 }
 
 function* decodePermanentDelegate(raw: Uint8Array, start: number, length: number, extIndex: number): Generator<Region> {
     if (length < 32) return;
     yield {
+        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
         id: `ext.${extIndex}.permanentDelegate@${start}`,
+        kind: 'authority',
+        length: 32,
         name: 'PermanentDelegate — Delegate',
         start,
-        length: 32,
-        kind: 'authority',
-        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
     };
 }
 
 function* decodeMetadataPointer(raw: Uint8Array, start: number, length: number, extIndex: number): Generator<Region> {
     if (length < 64) return;
     yield {
+        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
         id: `ext.${extIndex}.metadataPointer.authority@${start}`,
+        kind: 'authority',
+        length: 32,
         name: 'MetadataPointer — Authority',
         start,
-        length: 32,
-        kind: 'authority',
-        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
     };
     yield {
+        decodedValue: decodeOptionalNonZeroPubkey(raw, start + 32),
         id: `ext.${extIndex}.metadataPointer.address@${start + 32}`,
+        kind: 'pubkey',
+        length: 32,
         name: 'MetadataPointer — Metadata Address',
         start: start + 32,
-        length: 32,
-        kind: 'pubkey',
-        decodedValue: decodeOptionalNonZeroPubkey(raw, start + 32),
     };
 }
 
@@ -396,44 +398,44 @@ function* decodeInterestBearingConfig(
     if (length < 52) return;
     const view = new DataView(raw.buffer, raw.byteOffset, raw.byteLength);
     yield {
+        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
         id: `ext.${extIndex}.ibc.rateAuthority@${start}`,
+        kind: 'authority',
+        length: 32,
         name: 'InterestBearing — Rate Authority',
         start,
-        length: 32,
-        kind: 'authority',
-        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
     };
     yield {
+        decodedValue: { kind: 'text', value: view.getBigInt64(start + 32, true).toString() },
         id: `ext.${extIndex}.ibc.initTs@${start + 32}`,
+        kind: 'scalar',
+        length: 8,
         name: 'InterestBearing — Initialization Timestamp',
         start: start + 32,
-        length: 8,
-        kind: 'scalar',
-        decodedValue: { kind: 'text', value: view.getBigInt64(start + 32, true).toString() },
     };
     yield {
+        decodedValue: { kind: 'text', value: `${view.getInt16(start + 40, true)} bps` },
         id: `ext.${extIndex}.ibc.preRate@${start + 40}`,
+        kind: 'scalar',
+        length: 2,
         name: 'InterestBearing — Pre-update Average Rate',
         start: start + 40,
-        length: 2,
-        kind: 'scalar',
-        decodedValue: { kind: 'text', value: `${view.getInt16(start + 40, true)} bps` },
     };
     yield {
+        decodedValue: { kind: 'text', value: view.getBigInt64(start + 42, true).toString() },
         id: `ext.${extIndex}.ibc.lastTs@${start + 42}`,
+        kind: 'scalar',
+        length: 8,
         name: 'InterestBearing — Last Update Timestamp',
         start: start + 42,
-        length: 8,
-        kind: 'scalar',
-        decodedValue: { kind: 'text', value: view.getBigInt64(start + 42, true).toString() },
     };
     yield {
+        decodedValue: { kind: 'text', value: `${view.getInt16(start + 50, true)} bps` },
         id: `ext.${extIndex}.ibc.currentRate@${start + 50}`,
+        kind: 'scalar',
+        length: 2,
         name: 'InterestBearing — Current Rate',
         start: start + 50,
-        length: 2,
-        kind: 'scalar',
-        decodedValue: { kind: 'text', value: `${view.getInt16(start + 50, true)} bps` },
     };
 }
 
@@ -458,20 +460,20 @@ function* decodeTokenMetadata(
     const end = start + length;
     if (length < 64 + 4) return; // minimum: 64 pubkeys + 4-byte length prefix for name
     yield {
+        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
         id: `ext.${extIndex}.tm.updateAuthority@${start}`,
+        kind: 'authority',
+        length: 32,
         name: 'TokenMetadata — Update Authority',
         start,
-        length: 32,
-        kind: 'authority',
-        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
     };
     yield {
+        decodedValue: { base58: bs58.encode(raw.slice(start + 32, start + 64)), kind: 'pubkey' },
         id: `ext.${extIndex}.tm.mint@${start + 32}`,
+        kind: 'pubkey',
+        length: 32,
         name: 'TokenMetadata — Mint',
         start: start + 32,
-        length: 32,
-        kind: 'pubkey',
-        decodedValue: { kind: 'pubkey', base58: bs58.encode(raw.slice(start + 32, start + 64)) },
     };
 
     let pos = start + 64;
@@ -480,12 +482,12 @@ function* decodeTokenMetadata(
         const strLen = readUint32LE(raw, pos);
         if (pos + 4 + strLen > end) {
             yield {
+                decodedValue: { kind: 'unparsed', reason: 'truncated' },
                 id: `ext.${extIndex}.tm.${fieldName.toLowerCase()}.truncated@${pos}`,
+                kind: 'neutral',
+                length: end - pos,
                 name: `TokenMetadata — ${fieldName} (truncated)`,
                 start: pos,
-                length: end - pos,
-                kind: 'neutral',
-                decodedValue: { kind: 'unparsed', reason: 'truncated' },
             };
             return;
         }
@@ -493,32 +495,32 @@ function* decodeTokenMetadata(
         const rawText = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
         const safeText = sanitizeDisplayString(rawText);
         yield {
+            decodedValue: { kind: 'text', value: safeText },
             id: `ext.${extIndex}.tm.${fieldName.toLowerCase()}@${pos}`,
+            kind: 'neutral',
+            length: 4 + strLen,
             name: `TokenMetadata — ${fieldName}`,
             start: pos,
-            length: 4 + strLen,
-            kind: 'neutral',
-            decodedValue: { kind: 'text', value: safeText },
         };
         pos += 4 + strLen;
     }
     // Any trailing bytes (additional_metadata length + entries) rendered as one opaque region.
     if (pos < end) {
         yield {
+            decodedValue: { kind: 'text', value: `${end - pos} byte(s)` },
             id: `ext.${extIndex}.tm.additional@${pos}`,
+            kind: 'neutral',
+            length: end - pos,
             name: 'TokenMetadata — Additional Metadata',
             start: pos,
-            length: end - pos,
-            kind: 'neutral',
-            decodedValue: { kind: 'text', value: `${end - pos} byte(s)` },
         };
     }
 }
 
 const EXTENSION_DECODERS: Partial<Record<number, ExtensionDecoder>> = {
-    3: decodeMintCloseAuthority,
     10: decodeInterestBearingConfig,
     12: decodePermanentDelegate,
     18: decodeMetadataPointer,
     19: decodeTokenMetadata,
+    3: decodeMintCloseAuthority,
 };

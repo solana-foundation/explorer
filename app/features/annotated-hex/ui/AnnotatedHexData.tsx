@@ -37,7 +37,7 @@ export function AnnotatedHexData({ raw, regions }: Props) {
     const rows = useMemo(() => {
         const result: { offset: number; bytes: Uint8Array }[] = [];
         for (let i = 0; i < raw.length; i += ROW_SIZE) {
-            result.push({ offset: i, bytes: raw.slice(i, Math.min(i + ROW_SIZE, raw.length)) });
+            result.push({ bytes: raw.slice(i, Math.min(i + ROW_SIZE, raw.length)), offset: i });
         }
         return result;
     }, [raw]);
@@ -156,9 +156,13 @@ function RenderDecodedValue({ value }: { value: DecodedValue }) {
     switch (value.kind) {
         case 'pubkey':
             return value.isNone ? (
-                <span className="e-italic e-text-neutral-400">None</span>
+                <span data-testid="decoded-pubkey-none" className="e-italic e-text-neutral-400">
+                    None
+                </span>
             ) : (
-                <code className="e-font-mono">{value.base58}</code>
+                <code data-testid="decoded-pubkey" className="e-font-mono">
+                    {value.base58}
+                </code>
             );
         case 'amount': {
             const raw = value.raw.toString();

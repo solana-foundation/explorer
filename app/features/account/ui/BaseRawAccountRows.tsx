@@ -1,7 +1,7 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
+import { AccountAnnotatedHex } from '@features/annotated-hex';
 import type { Account } from '@providers/accounts';
-import { HexData } from '@shared/HexData';
 
 export type BaseRawAccountRowsProps = {
     account: Account;
@@ -47,7 +47,7 @@ export function BaseRawAccountRows({ account, rawData, isLoading }: BaseRawAccou
                         <span className="spinner-grow spinner-grow-sm me-2" />
                     ) : rawData ? (
                         rawData.length > 0 ? (
-                            <HexData raw={rawData} />
+                            <AccountAnnotatedHex account={account} rawData={rawData} />
                         ) : (
                             <span>No data</span>
                         )

@@ -91,11 +91,11 @@ describe('buildSplTokenAccountRegions', () => {
 
     it('prefers parsed.tokenAmount over raw bytes when available', () => {
         const parsed: ParsedTokenAccountInfo = {
+            isNative: false,
             mint: { toBase58: () => 'MintPubkey' },
             owner: { toBase58: () => 'OwnerPubkey' },
-            tokenAmount: { amount: '1000000', decimals: 6 },
-            isNative: false,
             state: 'initialized',
+            tokenAmount: { amount: '1000000', decimals: 6 },
         };
         const regions = buildSplTokenAccountRegions(buildSplTokenAccountBytes({ amount: 999n }), parsed);
         const amountRegion = regions.find(r => r.id === 'token.amount')!;
@@ -143,11 +143,12 @@ describe('buildSplTokenAccountRegions', () => {
     });
 
     it('throws on truncated data (< 165 bytes)', () => {
+        // eslint-disable-next-line no-restricted-syntax -- asserting specific error message with a unicode char
         expect(() => buildSplTokenAccountRegions(new Uint8Array(100), undefined)).toThrow(/≥ 165 bytes/);
     });
 
     it('read-only invariant: rawData bytes unchanged after build', () => {
-        const bytes = buildSplTokenAccountBytes({ mint: fakePubkey(1), owner: fakePubkey(2), amount: 42n });
+        const bytes = buildSplTokenAccountBytes({ amount: 42n, mint: fakePubkey(1), owner: fakePubkey(2) });
         const snapshot = new Uint8Array(bytes);
         buildSplTokenAccountRegions(bytes, undefined);
         expect(bytes).toEqual(snapshot);
@@ -155,7 +156,7 @@ describe('buildSplTokenAccountRegions', () => {
 
     it('every region has a valid FieldKind matching the layout', () => {
         const regions = buildSplTokenAccountRegions(buildSplTokenAccountBytes(), undefined);
-        const expected = new Map(SPL_TOKEN_ACCOUNT_LAYOUT.map(f => [f.id, f.kind]));
+        const expected = new Map<string, string>(SPL_TOKEN_ACCOUNT_LAYOUT.map(f => [f.id, f.kind]));
         for (const r of regions) {
             expect(r.kind).toBe(expected.get(r.id));
         }

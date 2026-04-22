@@ -78,11 +78,11 @@ describe('buildSplMintRegions', () => {
     it('prefers parsed.supply over raw bytes when available', () => {
         const bytes = buildSplMintBytes({ supply: 999n });
         const regions = buildSplMintRegions(bytes, {
+            decimals: 6,
+            freezeAuthority: null,
+            isInitialized: true,
             mintAuthority: null,
             supply: '1000000',
-            decimals: 6,
-            isInitialized: true,
-            freezeAuthority: null,
         });
         const supplyRegion = regions.find(r => r.id === 'mint.supply')!;
         if (supplyRegion.decodedValue.kind !== 'amount') throw new Error('unreachable');
@@ -130,6 +130,7 @@ describe('buildSplMintRegions', () => {
     });
 
     it('throws on truncated data (< 82 bytes)', () => {
+        // eslint-disable-next-line no-restricted-syntax -- asserting specific error message with a unicode char
         expect(() => buildSplMintRegions(new Uint8Array(50), undefined)).toThrow(/≥ 82 bytes/);
     });
 
@@ -147,7 +148,7 @@ describe('buildSplMintRegions', () => {
     it('every region has a valid FieldKind matching the layout', () => {
         const bytes = buildSplMintBytes();
         const regions: Region[] = buildSplMintRegions(bytes, undefined);
-        const expected = new Map(SPL_MINT_LAYOUT.map(f => [f.id, f.kind]));
+        const expected = new Map<string, string>(SPL_MINT_LAYOUT.map(f => [f.id, f.kind]));
         for (const r of regions) {
             expect(r.kind).toBe(expected.get(r.id));
         }

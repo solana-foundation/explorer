@@ -1,3 +1,4 @@
+import { Account, isTokenProgramData } from '@providers/accounts';
 import { useMemo } from 'react';
 
 import {
@@ -9,7 +10,6 @@ import {
     SPL_TOKEN_ACCOUNT_SIZE,
 } from '@/app/features/annotated-hex/model/spl-token';
 import { Region } from '@/app/features/annotated-hex/model/types';
-import { Account, isTokenProgramData } from '@providers/accounts';
 
 /**
  * Upper bound on `rawData.length` we are willing to annotate.
@@ -48,75 +48,75 @@ export function useAccountRegions(
         if (!parsedData || !isTokenProgramData(parsedData)) return null;
         // Structural signature: stable across SWR revalidations when values are unchanged.
         // `info` is `any()` per Explorer's validator, but its shape is deterministic in practice.
-        return JSON.stringify({ type: parsedData.parsed.type, info: parsedData.parsed.info });
+        return JSON.stringify({ info: parsedData.parsed.info, type: parsedData.parsed.type });
     }, [account?.data.parsed]);
 
     return useMemo<RegionsState>(() => {
-        if (!rawData) return { status: 'fallback', reason: 'no-raw' };
-        if (rawData.length > MAX_ANNOTATABLE_SIZE) return { status: 'fallback', reason: 'oversize' };
-        if (!ownerBase58) return { status: 'fallback', reason: 'unknown-owner' };
+        if (!rawData) return { reason: 'no-raw', status: 'fallback' };
+        if (rawData.length > MAX_ANNOTATABLE_SIZE) return { reason: 'oversize', status: 'fallback' };
+        if (!ownerBase58) return { reason: 'unknown-owner', status: 'fallback' };
 
         const parsedData = account?.data.parsed;
         const tokenParsed = parsedData && isTokenProgramData(parsedData) ? parsedData.parsed : undefined;
 
         if (tokenParsed?.type === 'multisig') {
-            return { status: 'fallback', reason: 'multisig' };
+            return { reason: 'multisig', status: 'fallback' };
         }
 
         const isTokenOwner =
             ownerBase58 === TOKEN_PROGRAM_ID_BASE58 || ownerBase58 === TOKEN_2022_PROGRAM_ID_BASE58;
         if (!isTokenOwner) {
-            return { status: 'fallback', reason: 'unknown-owner' };
+            return { reason: 'unknown-owner', status: 'fallback' };
         }
 
         // Legacy SPL Token — strict size match, no TLV tail possible.
         if (ownerBase58 === TOKEN_PROGRAM_ID_BASE58) {
             if (rawData.length === SPL_MINT_SIZE) {
                 return {
-                    status: 'regions',
                     regions: buildSplMintRegions(rawData, tokenParsed?.info as ParsedMintInfo | undefined),
+                    status: 'regions',
                 };
             }
             if (rawData.length === SPL_TOKEN_ACCOUNT_SIZE) {
                 return {
-                    status: 'regions',
                     regions: buildSplTokenAccountRegions(
                         rawData,
                         tokenParsed?.info as ParsedTokenAccountInfo | undefined,
                     ),
+                    status: 'regions',
                 };
             }
-            return { status: 'fallback', reason: 'unexpected-length' };
+            return { reason: 'unexpected-length', status: 'fallback' };
         }
 
         // Token-2022 — base size plus optional TLV tail. Disambiguate via parsed.type
         // when available; otherwise use size to choose.
         if (tokenParsed?.type === 'mint') {
-            if (rawData.length < SPL_MINT_SIZE) return { status: 'fallback', reason: 'unexpected-length' };
+            if (rawData.length < SPL_MINT_SIZE) return { reason: 'unexpected-length', status: 'fallback' };
             return {
-                status: 'regions',
                 regions: buildSplMintRegions(rawData, tokenParsed.info as ParsedMintInfo | undefined),
+                status: 'regions',
             };
         }
         if (tokenParsed?.type === 'account') {
-            if (rawData.length < SPL_TOKEN_ACCOUNT_SIZE) return { status: 'fallback', reason: 'unexpected-length' };
+            if (rawData.length < SPL_TOKEN_ACCOUNT_SIZE) return { reason: 'unexpected-length', status: 'fallback' };
             return {
-                status: 'regions',
                 regions: buildSplTokenAccountRegions(
                     rawData,
                     tokenParsed.info as ParsedTokenAccountInfo | undefined,
                 ),
+                status: 'regions',
             };
         }
 
         // No parsed.type (jsonParsed didn't land or isn't supported). Disambiguate by size.
         if (rawData.length < SPL_TOKEN_ACCOUNT_SIZE && rawData.length >= SPL_MINT_SIZE) {
-            return { status: 'regions', regions: buildSplMintRegions(rawData, undefined) };
+            return { regions: buildSplMintRegions(rawData, undefined), status: 'regions' };
         }
         if (rawData.length >= SPL_TOKEN_ACCOUNT_SIZE) {
-            return { status: 'regions', regions: buildSplTokenAccountRegions(rawData, undefined) };
+            return { regions: buildSplTokenAccountRegions(rawData, undefined), status: 'regions' };
         }
-        return { status: 'fallback', reason: 'unexpected-length' };
+        return { reason: 'unexpected-length', status: 'fallback' };
         // parsedSignature is included in deps so same-byte/different-parsed transitions still recompute.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [rawData, ownerBase58, parsedSignature, account?.data.parsed]);

@@ -51,7 +51,7 @@ function concat(...parts: Uint8Array[]): Uint8Array {
 describe('MintCloseAuthority decoder (type 3)', () => {
     it('emits a single 32-byte close-authority region after the header', () => {
         const auth = fakePubkey(0x11);
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 3, data: auth }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data: auth, type: 3 }]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         // accountType + header + closeAuthority = 3
         expect(regions).toHaveLength(3);
@@ -63,7 +63,7 @@ describe('MintCloseAuthority decoder (type 3)', () => {
     });
 
     it('renders all-zero bytes as isNone (OptionalNonZeroPubkey)', () => {
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 3, data: new Uint8Array(32) }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data: new Uint8Array(32), type: 3 }]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         if (regions[2].decodedValue.kind !== 'pubkey') throw new Error('unreachable');
         expect(regions[2].decodedValue.isNone).toBe(true);
@@ -73,7 +73,7 @@ describe('MintCloseAuthority decoder (type 3)', () => {
 describe('PermanentDelegate decoder (type 12)', () => {
     it('emits a 32-byte delegate region', () => {
         const delegate = fakePubkey(0x22);
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 12, data: delegate }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data: delegate, type: 12 }]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         expect(regions).toHaveLength(3);
         expect(regions[2].name).toBe('PermanentDelegate — Delegate');
@@ -86,7 +86,7 @@ describe('MetadataPointer decoder (type 18)', () => {
     it('emits authority + metadata-address sub-regions', () => {
         const auth = fakePubkey(0x33);
         const mdAddr = fakePubkey(0x44);
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 18, data: concat(auth, mdAddr) }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data: concat(auth, mdAddr), type: 18 }]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         // accountType + header + authority + mdAddress = 4
         expect(regions).toHaveLength(4);
@@ -99,7 +99,7 @@ describe('MetadataPointer decoder (type 18)', () => {
     });
 
     it('sub-regions are contiguous with the header', () => {
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 18, data: new Uint8Array(64) }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data: new Uint8Array(64), type: 18 }]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         const header = regions[1];
         const auth = regions[2];
@@ -120,7 +120,7 @@ describe('InterestBearingConfig decoder (type 10)', () => {
         view.setBigInt64(42, 1_750_000_000n, true);
         view.setInt16(50, 300, true); // 300 bps
 
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 10, data }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data, type: 10 }]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         // accountType + header + 5 sub-regions = 7
         expect(regions).toHaveLength(7);
@@ -162,13 +162,13 @@ describe('TokenMetadata decoder (type 19)', () => {
 
     it('emits updateAuthority, mint, name, symbol, uri sub-regions', () => {
         const data = buildTokenMetadataData({
-            updateAuthority: fakePubkey(0xaa),
             mint: fakePubkey(0xbb),
             name: 'My Token',
             symbol: 'MYT',
+            updateAuthority: fakePubkey(0xaa),
             uri: 'https://example.com/metadata.json',
         });
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 19, data }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data, type: 19 }]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         const names = regions.map(r => r.name);
         expect(names).toContain('TokenMetadata — Update Authority');
@@ -184,7 +184,7 @@ describe('TokenMetadata decoder (type 19)', () => {
 
     it('security: javascript: URI rendered as plain text, never as a link', () => {
         const data = buildTokenMetadataData({ name: 'X', symbol: 'X', uri: 'javascript:alert(1)' });
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 19, data }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data, type: 19 }]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         const uriRegion = regions.find(r => r.name === 'TokenMetadata — URI')!;
         if (uriRegion.decodedValue.kind !== 'text') throw new Error('unreachable');
@@ -197,7 +197,7 @@ describe('TokenMetadata decoder (type 19)', () => {
         const RLO = String.fromCodePoint(0x202e);
         const REPLACEMENT = String.fromCodePoint(0xfffd);
         const data = buildTokenMetadataData({ name: `${RLO}spoofed`, symbol: 'X', uri: '' });
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 19, data }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data, type: 19 }]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         const nameRegion = regions.find(r => r.name === 'TokenMetadata — Name')!;
         if (nameRegion.decodedValue.kind !== 'text') throw new Error('unreachable');
@@ -210,7 +210,7 @@ describe('TokenMetadata decoder (type 19)', () => {
         const BEL = String.fromCodePoint(0x07);
         const REPLACEMENT = String.fromCodePoint(0xfffd);
         const data = buildTokenMetadataData({ name: `A${NUL}B${BEL}C`, symbol: 'X', uri: '' });
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 19, data }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data, type: 19 }]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         const nameRegion = regions.find(r => r.name === 'TokenMetadata — Name')!;
         if (nameRegion.decodedValue.kind !== 'text') throw new Error('unreachable');
@@ -220,7 +220,7 @@ describe('TokenMetadata decoder (type 19)', () => {
     it('security: overly long strings are truncated to MAX_DISPLAY_STRING', () => {
         const huge = 'x'.repeat(10_000);
         const data = buildTokenMetadataData({ name: 'X', symbol: 'X', uri: huge });
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 19, data }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data, type: 19 }]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         const uriRegion = regions.find(r => r.name === 'TokenMetadata — URI')!;
         if (uriRegion.decodedValue.kind !== 'text') throw new Error('unreachable');
@@ -241,7 +241,7 @@ describe('TokenMetadata decoder (type 19)', () => {
         new DataView(uriLenPrefix.buffer).setUint32(0, 100, true);
         const data = concat(partial, uriLenPrefix); // declares 100 bytes, provides 0
 
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 19, data }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data, type: 19 }]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         const truncated = regions.find(r => r.name.includes('truncated'));
         expect(truncated).toBeDefined();
@@ -255,7 +255,7 @@ describe('TokenMetadata decoder (type 19)', () => {
 
     it('read-only invariant: bytes unchanged after TokenMetadata decoding', () => {
         const data = buildTokenMetadataData({ name: 'Test', symbol: 'TST', uri: 'https://x.io' });
-        const bytes = appendTlvTail(baseMint(), 1, [{ type: 19, data }]);
+        const bytes = appendTlvTail(baseMint(), 1, [{ data, type: 19 }]);
         const snapshot = new Uint8Array(bytes);
         Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         expect(bytes).toEqual(snapshot);

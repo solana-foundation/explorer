@@ -103,25 +103,24 @@ describe('AnnotatedHexData', () => {
         const mintAuthRegion = regions.find(r => r.id === 'mint.mintAuthority')!;
         render(<TooltipBody region={mintAuthRegion} offset={4} byte={7} />);
 
-        const tooltip = screen.getByTestId('annotated-tooltip-mint.mintAuthority');
-        expect(tooltip).toHaveTextContent('Mint Authority');
-        const pubkeyCode = tooltip.querySelector('code');
-        const text = pubkeyCode?.textContent ?? '';
+        expect(screen.getByTestId('annotated-tooltip-mint.mintAuthority')).toHaveTextContent('Mint Authority');
+        const pubkeyCode = screen.getByTestId('decoded-pubkey');
+        const text = pubkeyCode.textContent ?? '';
         // Solana pubkeys base58-encode to 32-44 chars (leading zero bytes shorten the result)
         expect(text.length).toBeGreaterThanOrEqual(32);
         expect(text.length).toBeLessThanOrEqual(44);
-        // Must match the Bitcoin-alphabet base58 character set
+        // eslint-disable-next-line no-restricted-syntax -- base58 alphabet character set validation
         expect(text).toMatch(/^[1-9A-HJ-NP-Za-km-z]+$/);
     });
 
     it('TooltipBody renders amount DecodedValue as raw + ui-scaled', () => {
         const bytes = buildBytes();
         const regions = buildSplMintRegions(bytes, {
+            decimals: 6,
+            freezeAuthority: null,
+            isInitialized: true,
             mintAuthority: null,
             supply: '1234567890',
-            decimals: 6,
-            isInitialized: true,
-            freezeAuthority: null,
         });
         const supplyRegion = regions.find(r => r.id === 'mint.supply')!;
         render(<TooltipBody region={supplyRegion} offset={36} byte={0x00} />);
@@ -140,10 +139,9 @@ describe('AnnotatedHexData', () => {
         const authRegion = regions.find(r => r.id === 'mint.mintAuthority')!;
         render(<TooltipBody region={authRegion} offset={4} byte={0} />);
 
-        const tooltip = screen.getByTestId('annotated-tooltip-mint.mintAuthority');
-        expect(tooltip).toHaveTextContent('None');
-        // No <code> element — None is rendered as italic span
-        expect(tooltip.querySelector('code')).toBeNull();
+        expect(screen.getByTestId('annotated-tooltip-mint.mintAuthority')).toHaveTextContent('None');
+        expect(screen.getByTestId('decoded-pubkey-none')).toBeInTheDocument();
+        expect(screen.queryByTestId('decoded-pubkey')).not.toBeInTheDocument();
     });
 
     it('TooltipBody includes byte range + offset + byte value in small print', () => {
@@ -153,9 +151,11 @@ describe('AnnotatedHexData', () => {
         render(<TooltipBody region={supplyRegion} offset={36} byte={0x40} />);
 
         const tooltip = screen.getByTestId('annotated-tooltip-mint.supply');
+        /* eslint-disable no-restricted-syntax -- asserting specific format text in small-print metadata */
         expect(tooltip).toHaveTextContent(/bytes \[36\.\.44\]/);
         expect(tooltip).toHaveTextContent(/offset 0x0024/);
         expect(tooltip).toHaveTextContent(/byte 0x40/);
+        /* eslint-enable no-restricted-syntax */
     });
 
     it('cells without a region render as neutral (no tooltip, no region id)', () => {
@@ -185,8 +185,8 @@ describe('AnnotatedHexData', () => {
         // the renderer uses plain text nodes — never an <a href>.
         const bytes = buildBytes();
         const regions = buildSplMintRegions(bytes, undefined);
-        const { container } = render(<AnnotatedHexData raw={bytes} regions={regions} />);
-        expect(container.querySelectorAll('a')).toHaveLength(0);
+        render(<AnnotatedHexData raw={bytes} regions={regions} />);
+        expect(screen.queryAllByRole('link')).toHaveLength(0);
     });
 
     it('does not crash when raw.length is smaller than the largest region end (defensive)', () => {
