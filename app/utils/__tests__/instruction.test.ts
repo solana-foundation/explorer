@@ -1,4 +1,3 @@
-import bs58 from 'bs58';
 import {
     ComputeBudgetProgram,
     ParsedInstruction,
@@ -7,6 +6,7 @@ import {
     PublicKey,
     SystemProgram,
 } from '@solana/web3.js';
+import bs58 from 'bs58';
 
 import { getTransactionInstructionNames } from '../instruction';
 
