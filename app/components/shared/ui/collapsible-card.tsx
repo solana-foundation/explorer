@@ -1,5 +1,6 @@
 import { cn } from '@shared/utils';
 import React from 'react';
+import { ChevronDown } from 'react-feather';
 
 type CollapsibleCardProps = {
     title: React.ReactNode;
@@ -22,14 +23,32 @@ export const CollapsibleCard = React.forwardRef<HTMLDivElement, CollapsibleCardP
                     {collapsible && (
                         <button
                             aria-expanded={expanded}
-                            className={cn('btn btn-sm d-flex', expanded ? 'btn-black active' : 'btn-white')}
+                            aria-label={expanded ? 'Collapse' : 'Expand'}
+                            className="btn btn-sm btn-white d-flex align-items-center justify-content-center e-py-[5.3px] e-transition-colors"
                             onClick={() => setExpanded(current => !current)}
                         >
-                            {expanded ? 'Collapse' : 'Expand'}
+                            <ChevronDown
+                                size={16}
+                                className={cn(
+                                    'e-transition-transform e-duration-200 e-ease-in-out',
+                                    expanded && 'e-rotate-180',
+                                )}
+                            />
                         </button>
                     )}
                 </div>
-                {(!collapsible || expanded) && children}
+                {collapsible ? (
+                    <div
+                        className={cn(
+                            'e-grid e-transition-[grid-template-rows] e-duration-200 e-ease-in-out',
+                            expanded ? 'e-grid-rows-[1fr]' : 'e-grid-rows-[0fr]',
+                        )}
+                    >
+                        <div className="e-overflow-hidden">{children}</div>
+                    </div>
+                ) : (
+                    children
+                )}
             </div>
         );
     },
