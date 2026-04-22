@@ -46,13 +46,13 @@ function decodeMintField(fieldId: string, raw: Uint8Array, parsed: ParsedMintInf
         case 'mint.mintAuthority':
             return decodeCOptionPubkey(raw, 0, 4, parsed?.mintAuthority);
         case 'mint.supply': {
-            const rawAmount = parsed ? BigInt(parsed.supply) : readU64LE(raw, 36);
+            const rawAmount = parsed?.supply !== undefined ? BigInt(parsed.supply) : readU64LE(raw, 36);
             return { kind: 'amount', raw: rawAmount, decimals: parsed?.decimals };
         }
         case 'mint.decimals':
             return { kind: 'scalar', value: parsed?.decimals ?? raw[44] };
         case 'mint.isInitialized': {
-            const initialized = parsed ? parsed.isInitialized : raw[45] === 1;
+            const initialized = parsed?.isInitialized ?? raw[45] === 1;
             return { kind: 'scalar', value: initialized ? 'Yes' : 'No', label: initialized ? 'Initialized' : 'Uninitialized' };
         }
         case 'mint.freezeAuthorityOption':
@@ -138,16 +138,17 @@ function decodeTokenAccountField(
 ): DecodedValue {
     switch (fieldId) {
         case 'token.mint':
-            return parsed
+            return parsed?.mint
                 ? { kind: 'pubkey', base58: parsed.mint.toBase58() }
                 : { kind: 'pubkey', base58: bs58.encode(raw.slice(0, 32)) };
         case 'token.owner':
-            return parsed
+            return parsed?.owner
                 ? { kind: 'pubkey', base58: parsed.owner.toBase58() }
                 : { kind: 'pubkey', base58: bs58.encode(raw.slice(32, 64)) };
         case 'token.amount': {
-            const rawAmount = parsed ? BigInt(parsed.tokenAmount.amount) : readU64LE(raw, 64);
-            return { kind: 'amount', raw: rawAmount, decimals: parsed?.tokenAmount.decimals };
+            const amountStr = parsed?.tokenAmount?.amount;
+            const rawAmount = amountStr !== undefined ? BigInt(amountStr) : readU64LE(raw, 64);
+            return { kind: 'amount', raw: rawAmount, decimals: parsed?.tokenAmount?.decimals };
         }
         case 'token.delegateOption':
             return { kind: 'option', present: readUint32LE(raw, 72) === 1 };

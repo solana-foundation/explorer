@@ -1,3 +1,5 @@
+export { useAccountRegions } from './model/use-account-regions';
+export type { RegionsState } from './model/use-account-regions';
 export { selectMintDecimals, selectTokenAccountMint } from './model/selectors';
 export { useAccountQuery } from './model/use-account-query';
 export { useAccountsInfo } from './model/use-accounts-info';
