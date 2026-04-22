@@ -2,6 +2,7 @@ import bs58 from 'bs58';
 
 import { readU64LE, readUint16LE, readUint32LE } from '@/app/shared/lib/bytes';
 
+import { sanitizeDisplayString } from './sanitize';
 import { DecodedValue, LayoutField, Region } from './types';
 
 export const SPL_MINT_SIZE = 82;
@@ -302,18 +303,221 @@ export function* walkTokenExtensions(raw: Uint8Array, baseSize: number): Generat
             return;
         }
 
-        const isKnown = extType in EXTENSION_NAMES;
-        yield {
-            id: `ext.${extIndex}.data@${pos}`,
-            name: `${extName} — Data`,
-            start: pos,
-            length: extLen,
-            kind: 'neutral',
-            decodedValue: isKnown
-                ? { kind: 'text', value: `${extLen} byte(s)` }
-                : { kind: 'unparsed', reason: 'unknown-ext' },
-        };
+        const decoder = EXTENSION_DECODERS[extType];
+        if (decoder) {
+            yield* decoder(raw, pos, extLen, extIndex, extName);
+        } else {
+            const isKnown = extType in EXTENSION_NAMES;
+            yield {
+                id: `ext.${extIndex}.data@${pos}`,
+                name: `${extName} — Data`,
+                start: pos,
+                length: extLen,
+                kind: 'neutral',
+                decodedValue: isKnown
+                    ? { kind: 'text', value: `${extLen} byte(s)` }
+                    : { kind: 'unparsed', reason: 'unknown-ext' },
+            };
+        }
         pos += extLen;
         extIndex++;
     }
 }
+
+// ---- Per-extension sub-region decoders -------------------------------------
+
+type ExtensionDecoder = (
+    raw: Uint8Array,
+    start: number,
+    length: number,
+    extIndex: number,
+    extName: string,
+) => Generator<Region>;
+
+/** Token-2022 uses OptionalNonZeroPubkey: 32 bytes, all-zero = None. */
+function decodeOptionalNonZeroPubkey(raw: Uint8Array, start: number): DecodedValue {
+    const slice = raw.slice(start, start + 32);
+    const isNone = slice.every(b => b === 0);
+    if (isNone) return { kind: 'pubkey', base58: '', isNone: true };
+    return { kind: 'pubkey', base58: bs58.encode(slice) };
+}
+
+function* decodeMintCloseAuthority(raw: Uint8Array, start: number, length: number, extIndex: number): Generator<Region> {
+    if (length < 32) return;
+    yield {
+        id: `ext.${extIndex}.closeAuthority@${start}`,
+        name: 'MintCloseAuthority — Close Authority',
+        start,
+        length: 32,
+        kind: 'authority',
+        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
+    };
+}
+
+function* decodePermanentDelegate(raw: Uint8Array, start: number, length: number, extIndex: number): Generator<Region> {
+    if (length < 32) return;
+    yield {
+        id: `ext.${extIndex}.permanentDelegate@${start}`,
+        name: 'PermanentDelegate — Delegate',
+        start,
+        length: 32,
+        kind: 'authority',
+        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
+    };
+}
+
+function* decodeMetadataPointer(raw: Uint8Array, start: number, length: number, extIndex: number): Generator<Region> {
+    if (length < 64) return;
+    yield {
+        id: `ext.${extIndex}.metadataPointer.authority@${start}`,
+        name: 'MetadataPointer — Authority',
+        start,
+        length: 32,
+        kind: 'authority',
+        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
+    };
+    yield {
+        id: `ext.${extIndex}.metadataPointer.address@${start + 32}`,
+        name: 'MetadataPointer — Metadata Address',
+        start: start + 32,
+        length: 32,
+        kind: 'pubkey',
+        decodedValue: decodeOptionalNonZeroPubkey(raw, start + 32),
+    };
+}
+
+function* decodeInterestBearingConfig(
+    raw: Uint8Array,
+    start: number,
+    length: number,
+    extIndex: number,
+): Generator<Region> {
+    if (length < 52) return;
+    const view = new DataView(raw.buffer, raw.byteOffset, raw.byteLength);
+    yield {
+        id: `ext.${extIndex}.ibc.rateAuthority@${start}`,
+        name: 'InterestBearing — Rate Authority',
+        start,
+        length: 32,
+        kind: 'authority',
+        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
+    };
+    yield {
+        id: `ext.${extIndex}.ibc.initTs@${start + 32}`,
+        name: 'InterestBearing — Initialization Timestamp',
+        start: start + 32,
+        length: 8,
+        kind: 'scalar',
+        decodedValue: { kind: 'text', value: view.getBigInt64(start + 32, true).toString() },
+    };
+    yield {
+        id: `ext.${extIndex}.ibc.preRate@${start + 40}`,
+        name: 'InterestBearing — Pre-update Average Rate',
+        start: start + 40,
+        length: 2,
+        kind: 'scalar',
+        decodedValue: { kind: 'text', value: `${view.getInt16(start + 40, true)} bps` },
+    };
+    yield {
+        id: `ext.${extIndex}.ibc.lastTs@${start + 42}`,
+        name: 'InterestBearing — Last Update Timestamp',
+        start: start + 42,
+        length: 8,
+        kind: 'scalar',
+        decodedValue: { kind: 'text', value: view.getBigInt64(start + 42, true).toString() },
+    };
+    yield {
+        id: `ext.${extIndex}.ibc.currentRate@${start + 50}`,
+        name: 'InterestBearing — Current Rate',
+        start: start + 50,
+        length: 2,
+        kind: 'scalar',
+        decodedValue: { kind: 'text', value: `${view.getInt16(start + 50, true)} bps` },
+    };
+}
+
+/**
+ * TokenMetadata layout (TLV-internal):
+ *   0..32   update_authority (OptionalNonZeroPubkey)
+ *   32..64  mint             (Pubkey)
+ *   64..    borsh String:    name    (u32 LE length + UTF-8 bytes)
+ *   ...     borsh String:    symbol
+ *   ...     borsh String:    uri
+ *   ...     u32 additional_metadata length + (string key, string value) * N
+ *
+ * Strings are sanitized via sanitizeDisplayString: C0/C1 stripped, bidi overrides
+ * neutralized, truncated to MAX_DISPLAY_STRING. URI is NEVER rendered as a link.
+ */
+function* decodeTokenMetadata(
+    raw: Uint8Array,
+    start: number,
+    length: number,
+    extIndex: number,
+): Generator<Region> {
+    const end = start + length;
+    if (length < 64 + 4) return; // minimum: 64 pubkeys + 4-byte length prefix for name
+    yield {
+        id: `ext.${extIndex}.tm.updateAuthority@${start}`,
+        name: 'TokenMetadata — Update Authority',
+        start,
+        length: 32,
+        kind: 'authority',
+        decodedValue: decodeOptionalNonZeroPubkey(raw, start),
+    };
+    yield {
+        id: `ext.${extIndex}.tm.mint@${start + 32}`,
+        name: 'TokenMetadata — Mint',
+        start: start + 32,
+        length: 32,
+        kind: 'pubkey',
+        decodedValue: { kind: 'pubkey', base58: bs58.encode(raw.slice(start + 32, start + 64)) },
+    };
+
+    let pos = start + 64;
+    for (const fieldName of ['Name', 'Symbol', 'URI'] as const) {
+        if (pos + 4 > end) return;
+        const strLen = readUint32LE(raw, pos);
+        if (pos + 4 + strLen > end) {
+            yield {
+                id: `ext.${extIndex}.tm.${fieldName.toLowerCase()}.truncated@${pos}`,
+                name: `TokenMetadata — ${fieldName} (truncated)`,
+                start: pos,
+                length: end - pos,
+                kind: 'neutral',
+                decodedValue: { kind: 'unparsed', reason: 'truncated' },
+            };
+            return;
+        }
+        const bytes = raw.slice(pos + 4, pos + 4 + strLen);
+        const rawText = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+        const safeText = sanitizeDisplayString(rawText);
+        yield {
+            id: `ext.${extIndex}.tm.${fieldName.toLowerCase()}@${pos}`,
+            name: `TokenMetadata — ${fieldName}`,
+            start: pos,
+            length: 4 + strLen,
+            kind: 'neutral',
+            decodedValue: { kind: 'text', value: safeText },
+        };
+        pos += 4 + strLen;
+    }
+    // Any trailing bytes (additional_metadata length + entries) rendered as one opaque region.
+    if (pos < end) {
+        yield {
+            id: `ext.${extIndex}.tm.additional@${pos}`,
+            name: 'TokenMetadata — Additional Metadata',
+            start: pos,
+            length: end - pos,
+            kind: 'neutral',
+            decodedValue: { kind: 'text', value: `${end - pos} byte(s)` },
+        };
+    }
+}
+
+const EXTENSION_DECODERS: Partial<Record<number, ExtensionDecoder>> = {
+    3: decodeMintCloseAuthority,
+    10: decodeInterestBearingConfig,
+    12: decodePermanentDelegate,
+    18: decodeMetadataPointer,
+    19: decodeTokenMetadata,
+};

@@ -55,20 +55,22 @@ describe('walkTokenExtensions', () => {
         expect(regions[1].length).toBe(4);
     });
 
-    it('walks multiple extensions preserving order and byte offsets', () => {
+    it('walks multiple extensions preserving order and byte offsets (undecoded types)', () => {
+        // Uses type 2 (TransferFeeAmount) + type 11 (CpiGuard): both are known names but
+        // do not have sub-region decoders yet, so they emit as header+opaque-data pairs.
         const bytes = appendTlvTail(baseMint(), 1, [
-            { type: 3, data: new Uint8Array(32).fill(0xAA) }, // MintCloseAuthority
-            { type: 18, data: new Uint8Array(64).fill(0xBB) }, // MetadataPointer
+            { type: 2, data: new Uint8Array(8).fill(0xAA) },
+            { type: 11, data: new Uint8Array(1).fill(0x01) },
         ]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         // accountType + (header+data) + (header+data) = 5 regions
         expect(regions).toHaveLength(5);
         expect(regions.map(r => r.name)).toEqual([
             'Token-2022 Account Type',
-            'MintCloseAuthority — Header',
-            'MintCloseAuthority — Data',
-            'MetadataPointer — Header',
-            'MetadataPointer — Data',
+            'TransferFeeAmount — Header',
+            'TransferFeeAmount — Data',
+            'CpiGuard — Header',
+            'CpiGuard — Data',
         ]);
 
         // Each region is contiguous with the previous
@@ -79,9 +81,11 @@ describe('walkTokenExtensions', () => {
     });
 
     it('unknown extension type does not abort the loop; subsequent known extension still emits', () => {
+        // Use an undecoded known type (#2, TransferFeeAmount) as the second entry
+        // so the assertion can reliably compare region count without dispatcher interference.
         const bytes = appendTlvTail(baseMint(), 1, [
             { type: 0xFE, data: new Uint8Array(8).fill(0xFF) }, // unknown
-            { type: 3, data: new Uint8Array(32).fill(0xAA) }, // MintCloseAuthority
+            { type: 2, data: new Uint8Array(8).fill(0xAA) }, // TransferFeeAmount (no decoder)
         ]);
         const regions = Array.from(walkTokenExtensions(bytes, SPL_MINT_SIZE));
         expect(regions).toHaveLength(5);
@@ -89,7 +93,7 @@ describe('walkTokenExtensions', () => {
         if (regions[2].decodedValue.kind !== 'unparsed') throw new Error('unreachable');
         expect(regions[2].decodedValue.reason).toBe('unknown-ext');
         // Known extension after unknown is still emitted
-        expect(regions[3].name).toContain('MintCloseAuthority');
+        expect(regions[3].name).toContain('TransferFeeAmount');
     });
 
     it('TLV fuzz: extLen=0xFFFF with insufficient remaining bytes emits truncated region and halts', () => {
