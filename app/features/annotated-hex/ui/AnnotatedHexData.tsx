@@ -3,7 +3,7 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@components/shared/ui/tooltip';
 import { useMemo } from 'react';
 
-import { cn } from '@/app/components/shared/utils';
+import { cn } from '@shared/utils';
 
 import { DecodedValue, Region } from '../model/types';
 import { LayoutLegend } from './LayoutLegend';
@@ -16,28 +16,19 @@ type Props = {
     regions: Region[];
 };
 
-/**
- * Presentational primitive: given raw bytes + a region map, renders a hex
- * dump where each byte is colored by the field it belongs to and a Radix
- * Tooltip reveals the field name + decoded value on hover/focus.
- *
- * Uses WAI-ARIA's Grid Pattern (role=grid / row / gridcell) with a simple
- * per-region tab stop (the first cell of each region is tabIndex=0, all
- * others are -1). Tab moves user from one region to the next; Tab exits
- * the grid. Full arrow-key navigation within a region is left for a
- * follow-up — the MVP prioritizes legibility + tooltip access.
- *
- * Layout matches the original HexData block: right-aligned content within
- * the table cell, no separate offset column (the tooltip carries per-byte
- * offset metadata).
- *
- * This component is account-agnostic — see AccountAnnotatedHex for the
- * adapter that pulls regions from the account hook.
- */
 export function AnnotatedHexData({ raw, regions }: Props) {
-    const offsetMap = useMemo(() => buildOffsetMap(raw.length, regions), [raw.length, regions]);
-    const regionIndexById = useMemo(() => buildRegionIndexById(regions), [regions]);
-    const regionStartOffsets = useMemo(() => new Set(regions.map(r => r.start)), [regions]);
+    const { offsetMap, regionIndexById } = useMemo(() => {
+        const offsets = new Array<Region | undefined>(raw.length);
+        const indexById = new Map<string, number>();
+        regions.forEach((r, idx) => {
+            if (!indexById.has(r.id)) indexById.set(r.id, idx);
+            for (let i = 0; i < r.length; i++) {
+                const offset = r.start + i;
+                if (offset < raw.length) offsets[offset] = r;
+            }
+        });
+        return { offsetMap: offsets, regionIndexById: indexById };
+    }, [raw.length, regions]);
 
     const rows = useMemo(() => {
         const result: { offset: number; bytes: Uint8Array }[] = [];
@@ -59,27 +50,13 @@ export function AnnotatedHexData({ raw, regions }: Props) {
                     data-testid="annotated-hex-grid"
                 >
                     {rows.map(row => (
-                        <div
+                        <Row
                             key={row.offset}
-                            role="row"
-                            className="e-flex e-justify-end e-gap-px e-py-px"
-                        >
-                            {Array.from(row.bytes).map((byte, colIdx) => {
-                                const offset = row.offset + colIdx;
-                                const region = offsetMap[offset];
-                                const rotationIndex = region ? regionIndexById.get(region.id) ?? 0 : 0;
-                                return (
-                                    <AnnotatedHexCell
-                                        key={offset}
-                                        byte={byte}
-                                        offset={offset}
-                                        region={region}
-                                        rotationIndex={rotationIndex}
-                                        isRegionStart={region !== undefined && regionStartOffsets.has(offset)}
-                                    />
-                                );
-                            })}
-                        </div>
+                            rowOffset={row.offset}
+                            rowBytes={row.bytes}
+                            offsetMap={offsetMap}
+                            regionIndexById={regionIndexById}
+                        />
                     ))}
                 </div>
                 <LayoutLegend regions={regions} />
@@ -88,55 +65,118 @@ export function AnnotatedHexData({ raw, regions }: Props) {
     );
 }
 
-type CellProps = {
-    byte: number;
-    offset: number;
+type Segment = {
+    startOffset: number;
+    bytes: Uint8Array;
     region: Region | undefined;
-    rotationIndex: number;
-    isRegionStart: boolean;
 };
 
-function AnnotatedHexCell({ byte, offset, region, rotationIndex, isRegionStart }: CellProps) {
-    const hex = byte.toString(16).padStart(2, '0');
-
-    if (!region) {
-        return (
-            <span
-                role="gridcell"
-                data-testid={`annotated-cell-${offset}`}
-                className="e-px-1 e-py-0.5 e-text-neutral-500"
-            >
-                {hex}
-            </span>
-        );
+function Row({
+    rowOffset,
+    rowBytes,
+    offsetMap,
+    regionIndexById,
+}: {
+    rowOffset: number;
+    rowBytes: Uint8Array;
+    offsetMap: readonly (Region | undefined)[];
+    regionIndexById: ReadonlyMap<string, number>;
+}) {
+    const segments: Segment[] = [];
+    for (let i = 0; i < rowBytes.length; i++) {
+        const offset = rowOffset + i;
+        const region = offsetMap[offset];
+        const last = segments[segments.length - 1];
+        if (last && last.region === region) {
+            last.bytes = concat(last.bytes, rowBytes[i]);
+        } else {
+            segments.push({ bytes: Uint8Array.of(rowBytes[i]), region, startOffset: offset });
+        }
     }
 
+    return (
+        <div role="row" className="e-flex e-justify-end e-gap-px e-py-px">
+            {segments.map(segment =>
+                segment.region ? (
+                    <RegionSegment
+                        key={segment.startOffset}
+                        segment={segment}
+                        region={segment.region}
+                        rotationIndex={regionIndexById.get(segment.region.id) ?? 0}
+                    />
+                ) : (
+                    <UnannotatedSegment key={segment.startOffset} segment={segment} />
+                ),
+            )}
+        </div>
+    );
+}
+
+function RegionSegment({
+    segment,
+    region,
+    rotationIndex,
+}: {
+    segment: Segment;
+    region: Region;
+    rotationIndex: number;
+}) {
+    const isRegionStart = segment.startOffset === region.start;
     return (
         <Tooltip>
             <TooltipTrigger asChild>
                 <span
-                    role="gridcell"
-                    tabIndex={isRegionStart ? 0 : -1}
-                    data-testid={`annotated-cell-${offset}`}
+                    data-testid={`annotated-segment-${segment.startOffset}`}
                     data-region-id={region.id}
-                    aria-label={`${region.name}, byte ${offset}`}
+                    tabIndex={isRegionStart ? 0 : -1}
+                    aria-label={region.name}
                     className={cn(
-                        'e-rounded-[2px] e-px-1 e-py-0.5 e-cursor-help e-outline-none',
+                        'e-inline-flex e-gap-px e-rounded-[2px] e-cursor-help e-outline-none',
                         'focus-visible:e-ring-2 focus-visible:e-ring-white/40',
                         cellClasses(region.kind, rotationIndex),
                     )}
                 >
-                    {hex}
+                    {Array.from(segment.bytes).map((byte, i) => (
+                        <Cell
+                            key={segment.startOffset + i}
+                            offset={segment.startOffset + i}
+                            byte={byte}
+                            regionId={region.id}
+                        />
+                    ))}
                 </span>
             </TooltipTrigger>
             <TooltipContent side="top" className="e-max-w-sm e-break-words">
-                <TooltipBody region={region} offset={offset} byte={byte} />
+                <TooltipBody region={region} />
             </TooltipContent>
         </Tooltip>
     );
 }
 
-export function TooltipBody({ region, offset, byte }: { region: Region; offset: number; byte: number }) {
+function UnannotatedSegment({ segment }: { segment: Segment }) {
+    return (
+        <span className="e-inline-flex e-gap-px e-text-neutral-500">
+            {Array.from(segment.bytes).map((byte, i) => (
+                <Cell key={segment.startOffset + i} offset={segment.startOffset + i} byte={byte} />
+            ))}
+        </span>
+    );
+}
+
+function Cell({ offset, byte, regionId }: { offset: number; byte: number; regionId?: string }) {
+    return (
+        <span
+            role="gridcell"
+            data-testid={`annotated-cell-${offset}`}
+            data-region-id={regionId}
+            className="e-px-1 e-py-0.5"
+        >
+            {byte.toString(16).padStart(2, '0')}
+        </span>
+    );
+}
+
+export function TooltipBody({ region }: { region: Region }) {
     return (
         <div
             data-testid={`annotated-tooltip-${region.id}`}
@@ -147,8 +187,8 @@ export function TooltipBody({ region, offset, byte }: { region: Region; offset: 
                 <RenderDecodedValue value={region.decodedValue} />
             </div>
             <div className="e-mt-1 e-text-[10px] e-text-neutral-400 dark:e-text-neutral-600">
-                bytes [{region.start}..{region.start + region.length}] · offset 0x
-                {offset.toString(16).padStart(4, '0')} · byte 0x{byte.toString(16).padStart(2, '0')}
+                bytes [{region.start}..{region.start + region.length}] · {region.length} byte
+                {region.length === 1 ? '' : 's'}
             </div>
         </div>
     );
@@ -169,7 +209,6 @@ function RenderDecodedValue({ value }: { value: DecodedValue }) {
         case 'amount': {
             const raw = value.raw.toString();
             if (value.decimals != null) {
-                // Show both raw and ui-scaled — never silently apply decimals
                 const div = 10n ** BigInt(value.decimals);
                 const whole = value.raw / div;
                 const frac = (value.raw % div).toString().padStart(value.decimals, '0');
@@ -194,42 +233,15 @@ function RenderDecodedValue({ value }: { value: DecodedValue }) {
         case 'option':
             return <span>{value.present ? 'Some' : 'None'}</span>;
         case 'text':
-            // React auto-escapes text children; value has already been sanitized by sanitizeDisplayString
-            // in the decoder path, so bidi overrides / control chars / overlong strings are already neutralized.
             return <span className="e-break-words">{value.value}</span>;
         case 'unparsed':
             return <span className="e-italic e-text-neutral-400">(unparsed: {value.reason})</span>;
     }
 }
 
-/**
- * Build a dense offset→Region lookup for O(1) per-cell color resolution.
- *
- * Uses a flat array (not a Map) because offsets are contiguous 0..length and
- * array indexing beats Map.get() by ~2x at these sizes — matters when
- * rendering a 300-cell Token-2022 account at 60fps during hover.
- */
-function buildOffsetMap(size: number, regions: Region[]): (Region | undefined)[] {
-    const map = new Array<Region | undefined>(size);
-    for (const r of regions) {
-        for (let i = 0; i < r.length; i++) {
-            const offset = r.start + i;
-            if (offset < size) map[offset] = r;
-        }
-    }
-    return map;
-}
-
-/**
- * Map each region id to its index in the regions array. Used by the palette
- * rotation so every distinct region gets a distinct color (or as close to it
- * as the rotation size allows). Duplicate region ids share a color — this
- * matches the legend's dedupe behavior.
- */
-function buildRegionIndexById(regions: Region[]): Map<string, number> {
-    const map = new Map<string, number>();
-    regions.forEach((r, idx) => {
-        if (!map.has(r.id)) map.set(r.id, idx);
-    });
-    return map;
+function concat(prev: Uint8Array, byte: number): Uint8Array {
+    const out = new Uint8Array(prev.length + 1);
+    out.set(prev, 0);
+    out[prev.length] = byte;
+    return out;
 }
