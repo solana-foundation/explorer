@@ -6,7 +6,7 @@ import {
 import { none, some } from '@metaplex-foundation/umi';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
-import { nextjsParameters, withTransactions } from '@storybook-config/decorators';
+import { nextjsParameters, withTokenInfoBatch, withTransactions } from '@storybook-config/decorators';
 import { expect, within } from 'storybook/test';
 
 import { TOKEN_METADATA_PROGRAM_ADDRESS } from '../../metaplex-token-metadata.parser';
@@ -33,7 +33,7 @@ const createMasterEditionV3Serializer = getCreateMasterEditionV3InstructionDataS
 
 const meta = {
     component: MetaplexTokenMetadataDetailsCard,
-    decorators: [withTransactions],
+    decorators: [withTransactions, withTokenInfoBatch],
     parameters: {
         ...nextjsParameters,
         layout: 'padded',
