@@ -1,6 +1,6 @@
 import bs58 from 'bs58';
 
-import { readU64LE, readUint32LE } from '@/app/shared/lib/bytes';
+import { readU64LE, readUint16LE, readUint32LE } from '@/app/shared/lib/bytes';
 
 import { DecodedValue, LayoutField, Region } from './types';
 
@@ -28,10 +28,14 @@ export function buildSplMintRegions(raw: Uint8Array, parsed: ParsedMintInfo | un
     if (raw.length < SPL_MINT_SIZE) {
         throw new RangeError(`SPL mint data must be ≥ ${SPL_MINT_SIZE} bytes, got ${raw.length}`);
     }
-    return SPL_MINT_LAYOUT.map(field => ({
+    const regions: Region[] = SPL_MINT_LAYOUT.map(field => ({
         ...field,
         decodedValue: decodeMintField(field.id, raw, parsed),
     }));
+    if (raw.length > SPL_MINT_SIZE) {
+        regions.push(...walkTokenExtensions(raw, SPL_MINT_SIZE));
+    }
+    return regions;
 }
 
 function decodeMintField(fieldId: string, raw: Uint8Array, parsed: ParsedMintInfo | undefined): DecodedValue {
@@ -116,10 +120,14 @@ export function buildSplTokenAccountRegions(
             `SPL token account data must be ≥ ${SPL_TOKEN_ACCOUNT_SIZE} bytes, got ${raw.length}`,
         );
     }
-    return SPL_TOKEN_ACCOUNT_LAYOUT.map(field => ({
+    const regions: Region[] = SPL_TOKEN_ACCOUNT_LAYOUT.map(field => ({
         ...field,
         decodedValue: decodeTokenAccountField(field.id, raw, parsed),
     }));
+    if (raw.length > SPL_TOKEN_ACCOUNT_SIZE) {
+        regions.push(...walkTokenExtensions(raw, SPL_TOKEN_ACCOUNT_SIZE));
+    }
+    return regions;
 }
 
 function decodeTokenAccountField(
@@ -173,5 +181,139 @@ function decodeTokenAccountField(
             return decodeCOptionPubkey(raw, 129, 133, parsed?.closeAuthority);
         default:
             return { kind: 'unparsed', reason: 'no-jsonparsed' };
+    }
+}
+
+// ---- Token-2022 TLV walker -------------------------------------------------
+
+const ACCOUNT_TYPE_LABELS: Record<number, string> = {
+    0: 'Uninitialized',
+    1: 'Mint',
+    2: 'Account',
+};
+
+export const EXTENSION_NAMES: Record<number, string> = {
+    0: 'Uninitialized',
+    1: 'TransferFeeConfig',
+    2: 'TransferFeeAmount',
+    3: 'MintCloseAuthority',
+    4: 'ConfidentialTransferMint',
+    5: 'ConfidentialTransferAccount',
+    6: 'DefaultAccountState',
+    7: 'ImmutableOwner',
+    8: 'MemoTransfer',
+    9: 'NonTransferable',
+    10: 'InterestBearingConfig',
+    11: 'CpiGuard',
+    12: 'PermanentDelegate',
+    13: 'NonTransferableAccount',
+    14: 'TransferHook',
+    15: 'TransferHookAccount',
+    16: 'ConfidentialTransferFeeConfig',
+    17: 'ConfidentialTransferFeeAmount',
+    18: 'MetadataPointer',
+    19: 'TokenMetadata',
+    20: 'GroupPointer',
+    21: 'GroupMemberPointer',
+    22: 'TokenGroup',
+    23: 'TokenGroupMember',
+    24: 'ScaledUiAmountConfig',
+    25: 'PausableConfig',
+    26: 'PausableAccount',
+};
+
+/**
+ * Walks the Token-2022 TLV tail starting at `baseSize` (82 for mints, 165 for token accounts).
+ *
+ * Emits:
+ * - one scalar region for the 1-byte account-type discriminator
+ * - per extension: a 4-byte `option`-kind header region labeled with the extension name,
+ *   followed by a `neutral`-kind opaque data region sized to the TLV length.
+ *
+ * Guards:
+ * - If only the account-type byte remains (no TLV), emits it and stops.
+ * - If a header would overrun `raw.length`, terminates without emitting.
+ * - If a TLV data block claims more bytes than remain, emits a single `truncated` region
+ *   sized to the remaining bytes and stops (no out-of-bounds slice, no throw).
+ * - Zero-length extensions (e.g. ImmutableOwner, NonTransferable) emit header only,
+ *   no data region.
+ */
+export function* walkTokenExtensions(raw: Uint8Array, baseSize: number): Generator<Region> {
+    if (raw.length <= baseSize) return;
+
+    const accountTypeByte = raw[baseSize];
+    yield {
+        id: `ext.accountType@${baseSize}`,
+        name: 'Token-2022 Account Type',
+        start: baseSize,
+        length: 1,
+        kind: 'scalar',
+        decodedValue: {
+            kind: 'scalar',
+            value: accountTypeByte,
+            label: ACCOUNT_TYPE_LABELS[accountTypeByte] ?? `Unknown (${accountTypeByte})`,
+        },
+    };
+
+    let pos = baseSize + 1;
+    let extIndex = 0;
+
+    while (pos < raw.length) {
+        if (pos + 4 > raw.length) {
+            yield {
+                id: `ext.${extIndex}.truncated@${pos}`,
+                name: 'Truncated Extension Header',
+                start: pos,
+                length: raw.length - pos,
+                kind: 'neutral',
+                decodedValue: { kind: 'unparsed', reason: 'truncated' },
+            };
+            return;
+        }
+
+        const extType = readUint16LE(raw, pos);
+        const extLen = readUint16LE(raw, pos + 2);
+        const extName = EXTENSION_NAMES[extType] ?? `Unknown (#${extType})`;
+
+        yield {
+            id: `ext.${extIndex}.header@${pos}`,
+            name: `${extName} — Header`,
+            start: pos,
+            length: 4,
+            kind: 'option',
+            decodedValue: { kind: 'scalar', value: extType, label: `${extName}, length ${extLen}` },
+        };
+        pos += 4;
+
+        if (extLen === 0) {
+            extIndex++;
+            continue;
+        }
+
+        if (pos + extLen > raw.length) {
+            yield {
+                id: `ext.${extIndex}.truncated@${pos}`,
+                name: `${extName} — Truncated Data`,
+                start: pos,
+                length: raw.length - pos,
+                kind: 'neutral',
+                decodedValue: { kind: 'unparsed', reason: 'truncated' },
+            };
+            return;
+        }
+
+        const isKnown = extType in EXTENSION_NAMES;
+        yield {
+            id: `ext.${extIndex}.data@${pos}`,
+            name: `${extName} — Data`,
+            start: pos,
+            length: extLen,
+            kind: 'neutral',
+            decodedValue: isKnown
+                ? { kind: 'text', value: `${extLen} byte(s)` }
+                : { kind: 'unparsed', reason: 'unknown-ext' },
+        };
+        pos += extLen;
+        extIndex++;
     }
 }
