@@ -1,9 +1,11 @@
 'use client';
 
+import type { IdlType } from '@coral-xyz/anchor/dist/cjs/idl';
 import {
     EnumTypeNode,
     InstructionAccountNode,
     InstructionNode,
+    isNode,
     PdaNode,
     PdaValueNode,
     RegisteredPdaSeedNode,
@@ -122,11 +124,14 @@ function parseTypeNodeFieldType(type: TypeNode): string {
         case 'setTypeNode':
             return `set(${parseTypeNodeFieldType(type.item)})`;
         case 'sizePrefixTypeNode':
+            if (type.type.kind === 'stringTypeNode' && type.type.encoding === 'utf8') {
+                return 'string';
+            }
             return `sizePrefix(${parseTypeNodeFieldType(type.type)})`;
         case 'solAmountTypeNode':
             return `solAmount(${parseTypeNodeFieldType(type.number)})`;
         case 'stringTypeNode':
-            return `string:${type.encoding}`;
+            return type.encoding === 'utf8' ? 'string' : `string:${type.encoding}`;
         case 'structTypeNode':
             Logger.warn('[idl] Handle each node separately', { kind: type.kind });
             return type.fields.map(field => parseTypeNodeFieldType(field.type)).join(', ');
@@ -177,20 +182,17 @@ function parseTypeNode(data: TypeNode): FieldType | null {
     }
 }
 
-function getUniqPdaNodesFromIxs(ixs: InstructionNode[]): PdaValueNode[] {
+export function getUniqPdaNodesFromIxs(ixs: InstructionNode[]): PdaValueNode[] {
     const uniqPdas = new Map<string, PdaValueNode>();
     ixs.forEach(ix => {
         ix.accounts.forEach(acc => {
             if (!isIxAccountNodePda(acc)) return;
             if (acc.defaultValue?.kind === 'conditionalValueNode') {
-                const conditionalTruePda = acc.defaultValue.ifTrue as PdaValueNode;
-                const conditionalFalsePda = acc.defaultValue.ifFalse as PdaValueNode;
-                if (!uniqPdas.get(conditionalTruePda.pda.name)) {
-                    uniqPdas.set(conditionalTruePda.pda.name, conditionalTruePda);
-                }
-                if (!uniqPdas.get(conditionalFalsePda.pda.name)) {
-                    uniqPdas.set(conditionalFalsePda.pda.name, conditionalFalsePda);
-                }
+                const { ifTrue, ifFalse } = acc.defaultValue;
+                const truePda = ifTrue && isNode(ifTrue, 'pdaValueNode') ? ifTrue : undefined;
+                const falsePda = ifFalse && isNode(ifFalse, 'pdaValueNode') ? ifFalse : undefined;
+                if (truePda && !uniqPdas.has(truePda.pda.name)) uniqPdas.set(truePda.pda.name, truePda);
+                if (falsePda && !uniqPdas.has(falsePda.pda.name)) uniqPdas.set(falsePda.pda.name, falsePda);
                 return;
             }
             if (uniqPdas.get(acc.name)) return;
@@ -261,12 +263,19 @@ export function useFormatCodamaIdl(idl?: RootNode): FormattedIdl | null {
                         writable: acc.isWritable,
                     };
                 }),
+                // Filter out auto-filled arguments (e.g. discriminators) that Codama marks as omitted
                 args:
-                    ix.arguments?.map(arg => ({
-                        docs: arg.docs || [],
-                        name: arg.name,
-                        type: parseTypeNodeFieldType(arg.type),
-                    })) || [],
+                    ix.arguments
+                        ?.filter(arg => arg.defaultValueStrategy !== 'omitted')
+                        .map(arg => {
+                            const rawType = typeNodeToIdlType(arg.type);
+                            return {
+                                docs: arg.docs || [],
+                                name: arg.name,
+                                type: parseTypeNodeFieldType(arg.type),
+                                ...(rawType !== undefined && { rawType }),
+                            };
+                        }) || [],
                 docs: ix.docs || [],
                 name: ix.name,
             })),
@@ -294,4 +303,68 @@ export function useFormatCodamaIdl(idl?: RootNode): FormattedIdl | null {
     }, [idl]);
 
     return formattedIdl;
+}
+
+/**
+ * Convert a Codama TypeNode to an Anchor-compatible IdlType.
+ * Used to populate rawType on ArgField so that vec/array detection
+ * and array-length extraction work the same as for Anchor IDLs.
+ */
+function typeNodeToIdlType(type: TypeNode): IdlType | undefined {
+    switch (type.kind) {
+        case 'numberTypeNode':
+            return type.format as IdlType;
+        case 'booleanTypeNode':
+            return 'bool';
+        case 'publicKeyTypeNode':
+            return 'pubkey';
+        case 'stringTypeNode':
+            return 'string';
+        case 'bytesTypeNode':
+            return 'bytes';
+        case 'arrayTypeNode': {
+            const item = typeNodeToIdlType(type.item);
+            if (!item) return undefined;
+            if (type.count.kind === 'fixedCountNode') {
+                return { array: [item, type.count.value] };
+            }
+            return { vec: item };
+        }
+        case 'setTypeNode': {
+            const item = typeNodeToIdlType(type.item);
+            if (!item) return undefined;
+            return { vec: item };
+        }
+        case 'optionTypeNode':
+        case 'remainderOptionTypeNode':
+        case 'zeroableOptionTypeNode': {
+            const item = typeNodeToIdlType(type.item);
+            if (!item) return undefined;
+            return { option: item };
+        }
+        case 'fixedSizeTypeNode': {
+            const inner = typeNodeToIdlType(type.type);
+            if (!inner) return undefined;
+            return { array: [inner, type.size] };
+        }
+        case 'definedTypeLinkNode':
+            return { defined: { name: type.name } };
+        // Wrapper types — delegate to inner
+        case 'sizePrefixTypeNode':
+            if (type.type.kind === 'stringTypeNode') return 'string';
+            return typeNodeToIdlType(type.type);
+        case 'hiddenPrefixTypeNode':
+        case 'hiddenSuffixTypeNode':
+            return typeNodeToIdlType(type.type);
+        case 'postOffsetTypeNode':
+        case 'preOffsetTypeNode':
+        case 'sentinelTypeNode':
+            return typeNodeToIdlType(type.type);
+        case 'solAmountTypeNode':
+        case 'amountTypeNode':
+        case 'dateTimeTypeNode':
+            return typeNodeToIdlType(type.number);
+        default:
+            return undefined;
+    }
 }

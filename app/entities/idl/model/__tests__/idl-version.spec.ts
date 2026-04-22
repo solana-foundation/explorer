@@ -48,9 +48,9 @@ describe('isInteractiveIdlSupported', () => {
         expect(isInteractiveIdlSupported(idl)).toBe(false);
     });
 
-    it('should return false for Codama IDL', () => {
+    it('should return true for Codama IDL', () => {
         const idl = createMockIdl('codama');
-        expect(isInteractiveIdlSupported(idl)).toBe(false);
+        expect(isInteractiveIdlSupported(idl)).toBe(true);
     });
 
     it('should return false for Anchor with spec < 0.1.0', () => {

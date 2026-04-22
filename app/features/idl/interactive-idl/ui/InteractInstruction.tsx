@@ -14,7 +14,7 @@ import { Control, Controller, FieldPath } from 'react-hook-form';
 import { createGetAutocompleteItems } from '../model/account-autocomplete/createGetAutocompleteItems';
 import type { AutocompleteItem } from '../model/account-autocomplete/types';
 import { createKnownAccountsPrefillDependency } from '../model/form-prefill/providers/known-accounts-prefill-provider';
-import { createPdaPrefillDependency } from '../model/form-prefill/providers/pda-prefill-provider';
+import { usePdaPrefill } from '../model/form-prefill/providers/use-pda-prefill';
 import { createWalletPrefillDependency } from '../model/form-prefill/providers/wallet-prefill-provider';
 import { useFormPrefill } from '../model/form-prefill/use-form-prefill';
 import {
@@ -52,13 +52,13 @@ export function InteractInstruction({
 
     const walletPrefillDependency = createWalletPrefillDependency(instruction, publicKey, fieldNames);
     const knownAccountsPrefillDependency = createKnownAccountsPrefillDependency(instruction, fieldNames);
-    const pdaPrefillDependency = createPdaPrefillDependency(idl, instruction, fieldNames);
     useFormPrefill({
         config: {
-            externalDependencies: [walletPrefillDependency, knownAccountsPrefillDependency, pdaPrefillDependency],
+            externalDependencies: [walletPrefillDependency, knownAccountsPrefillDependency],
         },
         form,
     });
+    usePdaPrefill({ fieldNames, form, instruction, pdas });
 
     const executeDisabled = !walletConnected || isExecuting;
 
