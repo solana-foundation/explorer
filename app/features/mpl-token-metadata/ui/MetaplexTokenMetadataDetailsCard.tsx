@@ -1,11 +1,13 @@
 import { Address } from '@components/common/Address';
-import { parseMetaplexTokenMetadataInstruction } from '@components/inspector/instruction-parsers/metaplex-token-metadata.parser';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import {
+    MetaplexInstructionType,
+    parseMetaplexTokenMetadataInstruction,
+} from '@features/mpl-token-metadata/metaplex-token-metadata.parser';
 import { PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
-import { InstructionCard } from '../InstructionCard';
-
-const IX_TITLES: Record<string, string> = {
+const IX_TITLES: Record<MetaplexInstructionType, string> = {
     burnEditionNft: 'Burn Edition NFT',
     burnNft: 'Burn NFT',
     burnV1: 'Burn',
@@ -96,7 +98,11 @@ function GenericAccountRows({ ix }: { ix: TransactionInstruction }) {
     );
 }
 
-function renderContent(type: string, info: Record<string, unknown>, ix: TransactionInstruction): React.ReactNode {
+function renderContent(
+    type: MetaplexInstructionType,
+    info: Record<string, unknown>,
+    ix: TransactionInstruction,
+): React.ReactNode {
     switch (type) {
         case 'createMetadataAccountV3':
             return (

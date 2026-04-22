@@ -15,12 +15,12 @@ import {
 
 const PROGRAM_ID = new PublicKey(TOKEN_METADATA_PROGRAM_ADDRESS);
 
-// Deterministic test public keys
-const KEY_A = new PublicKey('5beFUXg6tj7as2rVSvr39MsTQChSsyBNy13j8Em3ZMVV');
-const KEY_B = new PublicKey('HGZxAm97YjZN2Ea8kk4zNv87fGYnUmEDphTiN9pVVRf1');
-const KEY_C = new PublicKey('Base4feziQk7rNDM1GfCnU6BMAUQiY7MBtJ7qctugFJp');
-const KEY_D = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
-const KEY_E = new PublicKey('11111111111111111111111111111111');
+// Generated test public keys (byte-filled for readability)
+const KEY_A = new PublicKey(new Uint8Array(32).fill(1));
+const KEY_B = new PublicKey(new Uint8Array(32).fill(2));
+const KEY_C = new PublicKey(new Uint8Array(32).fill(3));
+const KEY_D = new PublicKey(new Uint8Array(32).fill(4));
+const KEY_E = PublicKey.default;
 
 // Hoisted serializers — construction allocates nested objects, so share across tests
 const createMetadataV3Serializer = getCreateMetadataAccountV3InstructionDataSerializer();
@@ -35,15 +35,20 @@ function makeIx(data: Uint8Array | Buffer, keys: PublicKey[] = []): TransactionI
     });
 }
 
+function assertParsed<T>(val: T | null | undefined): T {
+    expect(val).toBeDefined();
+    return val as T;
+}
+
 describe('identifyInstructionType', () => {
-    test('should return null for empty data', () => {
-        expect(identifyInstructionType(new Uint8Array())).toBeNull();
+    test('should return undefined for empty data', () => {
+        expect(identifyInstructionType(new Uint8Array())).toBeUndefined();
     });
 
-    test('should return null for unknown single-byte discriminator', () => {
-        expect(identifyInstructionType(new Uint8Array([0xff]))).toBeNull();
-        expect(identifyInstructionType(new Uint8Array([0]))).toBeNull();
-        expect(identifyInstructionType(new Uint8Array([99]))).toBeNull();
+    test('should return undefined for unknown single-byte discriminator', () => {
+        expect(identifyInstructionType(new Uint8Array([0xff]))).toBeUndefined();
+        expect(identifyInstructionType(new Uint8Array([0]))).toBeUndefined();
+        expect(identifyInstructionType(new Uint8Array([99]))).toBeUndefined();
     });
 
     test.each([
@@ -74,8 +79,8 @@ describe('identifyInstructionType', () => {
     });
 
     describe('delegate sub-discriminators (byte 0 = 44)', () => {
-        test('should return null when only one byte', () => {
-            expect(identifyInstructionType(new Uint8Array([44]))).toBeNull();
+        test('should return undefined when only one byte', () => {
+            expect(identifyInstructionType(new Uint8Array([44]))).toBeUndefined();
         });
 
         test.each([
@@ -91,14 +96,14 @@ describe('identifyInstructionType', () => {
             expect(identifyInstructionType(new Uint8Array([44, sub]))).toBe(expected);
         });
 
-        test('should return null for unknown delegate sub-discriminator', () => {
-            expect(identifyInstructionType(new Uint8Array([44, 99]))).toBeNull();
+        test('should return undefined for unknown delegate sub-discriminator', () => {
+            expect(identifyInstructionType(new Uint8Array([44, 99]))).toBeUndefined();
         });
     });
 
     describe('revoke sub-discriminators (byte 0 = 45)', () => {
-        test('should return null when only one byte', () => {
-            expect(identifyInstructionType(new Uint8Array([45]))).toBeNull();
+        test('should return undefined when only one byte', () => {
+            expect(identifyInstructionType(new Uint8Array([45]))).toBeUndefined();
         });
 
         test.each([
@@ -116,8 +121,8 @@ describe('identifyInstructionType', () => {
     });
 
     describe('print sub-discriminators (byte 0 = 55)', () => {
-        test('should return null when only one byte', () => {
-            expect(identifyInstructionType(new Uint8Array([55]))).toBeNull();
+        test('should return undefined when only one byte', () => {
+            expect(identifyInstructionType(new Uint8Array([55]))).toBeUndefined();
         });
 
         test.each([
@@ -127,34 +132,32 @@ describe('identifyInstructionType', () => {
             expect(identifyInstructionType(new Uint8Array([55, sub]))).toBe(expected);
         });
 
-        test('should return null for unknown print sub-discriminator', () => {
-            expect(identifyInstructionType(new Uint8Array([55, 99]))).toBeNull();
+        test('should return undefined for unknown print sub-discriminator', () => {
+            expect(identifyInstructionType(new Uint8Array([55, 99]))).toBeUndefined();
         });
     });
 });
 
 describe('parseMetaplexTokenMetadataInstruction', () => {
-    test('should return null for empty instruction data', () => {
-        expect(parseMetaplexTokenMetadataInstruction(makeIx(new Uint8Array()))).toBeNull();
+    test('should return undefined for empty instruction data', () => {
+        expect(parseMetaplexTokenMetadataInstruction(makeIx(new Uint8Array()))).toBeUndefined();
     });
 
-    test('should return null for unknown discriminator', () => {
-        expect(parseMetaplexTokenMetadataInstruction(makeIx(new Uint8Array([0xff])))).toBeNull();
+    test('should return undefined for unknown discriminator', () => {
+        expect(parseMetaplexTokenMetadataInstruction(makeIx(new Uint8Array([0xff])))).toBeUndefined();
     });
 
     test('should return type even when data decoding throws (corrupted payload)', () => {
         // signMetadata discriminator (7) but no valid payload
-        const result = parseMetaplexTokenMetadataInstruction(makeIx(new Uint8Array([7]), [KEY_A, KEY_B]));
-        expect(result).not.toBeNull();
-        expect(result!.type).toBe('signMetadata');
+        const result = assertParsed(parseMetaplexTokenMetadataInstruction(makeIx(new Uint8Array([7]), [KEY_A, KEY_B])));
+        expect(result.type).toBe('signMetadata');
         // info may be populated from keys or empty — either is acceptable
     });
 
     test('should return type only for delegate/revoke instructions that have no decoding', () => {
-        const result = parseMetaplexTokenMetadataInstruction(makeIx(new Uint8Array([44, 0])));
-        expect(result).not.toBeNull();
-        expect(result!.type).toBe('delegateCollectionV1');
-        expect(result!.info).toEqual({});
+        const result = assertParsed(parseMetaplexTokenMetadataInstruction(makeIx(new Uint8Array([44, 0]))));
+        expect(result.type).toBe('delegateCollectionV1');
+        expect(result.info).toEqual({});
     });
 
     describe('createMetadataAccountV3', () => {
@@ -180,20 +183,19 @@ describe('parseMetaplexTokenMetadataInstruction', () => {
             // keys: metadata[0], mint[1], mintAuthority[2], payer[3], updateAuthority[4]
             const keys = [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E];
             const ix = makeIx(buildData('My NFT', 'MNFT', 'https://example.com/nft', 500, true), keys);
-            const result = parseMetaplexTokenMetadataInstruction(ix);
+            const result = assertParsed(parseMetaplexTokenMetadataInstruction(ix));
 
-            expect(result).not.toBeNull();
-            expect(result!.type).toBe('createMetadataAccountV3');
-            expect(result!.info.name).toBe('My NFT');
-            expect(result!.info.symbol).toBe('MNFT');
-            expect(result!.info.uri).toBe('https://example.com/nft');
-            expect(result!.info.sellerFeeBasisPoints).toBe(500);
-            expect(result!.info.isMutable).toBe(true);
-            expect((result!.info.metadata as PublicKey).equals(KEY_A)).toBe(true);
-            expect((result!.info.mint as PublicKey).equals(KEY_B)).toBe(true);
-            expect((result!.info.mintAuthority as PublicKey).equals(KEY_C)).toBe(true);
-            expect((result!.info.payer as PublicKey).equals(KEY_D)).toBe(true);
-            expect((result!.info.updateAuthority as PublicKey).equals(KEY_E)).toBe(true);
+            expect(result.type).toBe('createMetadataAccountV3');
+            expect(result.info.name).toBe('My NFT');
+            expect(result.info.symbol).toBe('MNFT');
+            expect(result.info.uri).toBe('https://example.com/nft');
+            expect(result.info.sellerFeeBasisPoints).toBe(500);
+            expect(result.info.isMutable).toBe(true);
+            expect((result.info.metadata as PublicKey).equals(KEY_A)).toBe(true);
+            expect((result.info.mint as PublicKey).equals(KEY_B)).toBe(true);
+            expect((result.info.mintAuthority as PublicKey).equals(KEY_C)).toBe(true);
+            expect((result.info.payer as PublicKey).equals(KEY_D)).toBe(true);
+            expect((result.info.updateAuthority as PublicKey).equals(KEY_E)).toBe(true);
         });
     });
 
@@ -232,53 +234,47 @@ describe('parseMetaplexTokenMetadataInstruction', () => {
 
         test('should decode name from Some(data)', () => {
             const ix = makeIx(buildData({ name: 'Updated Name' }), [KEY_A, KEY_B]);
-            const result = parseMetaplexTokenMetadataInstruction(ix);
+            const result = assertParsed(parseMetaplexTokenMetadataInstruction(ix));
 
-            expect(result).not.toBeNull();
-            expect(result!.type).toBe('updateMetadataAccountV2');
-            expect(result!.info.name).toBe('Updated Name');
+            expect(result.type).toBe('updateMetadataAccountV2');
+            expect(result.info.name).toBe('Updated Name');
         });
 
         test('should return null name/symbol/uri when data is None', () => {
-            const result = parseMetaplexTokenMetadataInstruction(allNoneIx);
+            const result = assertParsed(parseMetaplexTokenMetadataInstruction(allNoneIx));
 
-            expect(result).not.toBeNull();
-            expect(result!.info.name).toBeNull();
-            expect(result!.info.symbol).toBeNull();
-            expect(result!.info.uri).toBeNull();
+            expect(result.info.name).toBeNull();
+            expect(result.info.symbol).toBeNull();
+            expect(result.info.uri).toBeNull();
         });
 
         test('should decode newUpdateAuthority as a PublicKey when Some', () => {
             const ix = makeIx(buildData({ newUpdateAuthority: KEY_C.toBase58() }), [KEY_A, KEY_B]);
-            const result = parseMetaplexTokenMetadataInstruction(ix);
+            const result = assertParsed(parseMetaplexTokenMetadataInstruction(ix));
 
-            expect(result).not.toBeNull();
-            expect(result!.info.newUpdateAuthority).toBeInstanceOf(PublicKey);
-            expect((result!.info.newUpdateAuthority as PublicKey).equals(KEY_C)).toBe(true);
+            expect(result.info.newUpdateAuthority).toBeInstanceOf(PublicKey);
+            expect((result.info.newUpdateAuthority as PublicKey).equals(KEY_C)).toBe(true);
         });
 
         test('should return null newUpdateAuthority when None', () => {
-            const result = parseMetaplexTokenMetadataInstruction(allNoneIx);
+            const result = assertParsed(parseMetaplexTokenMetadataInstruction(allNoneIx));
 
-            expect(result).not.toBeNull();
-            expect(result!.info.newUpdateAuthority).toBeNull();
+            expect(result.info.newUpdateAuthority).toBeNull();
         });
 
         test('should decode isMutable and primarySaleHappened', () => {
             const ix = makeIx(buildData({ isMutable: false, primarySaleHappened: true }), [KEY_A, KEY_B]);
-            const result = parseMetaplexTokenMetadataInstruction(ix);
+            const result = assertParsed(parseMetaplexTokenMetadataInstruction(ix));
 
-            expect(result).not.toBeNull();
-            expect(result!.info.isMutable).toBe(false);
-            expect(result!.info.primarySaleHappened).toBe(true);
+            expect(result.info.isMutable).toBe(false);
+            expect(result.info.primarySaleHappened).toBe(true);
         });
 
         test('should return null for isMutable/primarySaleHappened when None', () => {
-            const result = parseMetaplexTokenMetadataInstruction(allNoneIx);
+            const result = assertParsed(parseMetaplexTokenMetadataInstruction(allNoneIx));
 
-            expect(result).not.toBeNull();
-            expect(result!.info.isMutable).toBeNull();
-            expect(result!.info.primarySaleHappened).toBeNull();
+            expect(result.info.isMutable).toBeNull();
+            expect(result.info.primarySaleHappened).toBeNull();
         });
     });
 
@@ -294,27 +290,25 @@ describe('parseMetaplexTokenMetadataInstruction', () => {
         test('should decode maxSupply as a number when Some', () => {
             // keys: edition[0], mint[1], updateAuth[2], mintAuth[3], payer[4], metadata[5]
             const ix = makeIx(buildData(100n), [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E, KEY_A]);
-            const result = parseMetaplexTokenMetadataInstruction(ix);
+            const result = assertParsed(parseMetaplexTokenMetadataInstruction(ix));
 
-            expect(result).not.toBeNull();
-            expect(result!.type).toBe('createMasterEditionV3');
-            expect(result!.info.maxSupply).toBe(100);
+            expect(result.type).toBe('createMasterEditionV3');
+            expect(result.info.maxSupply).toBe(100);
         });
 
         test('should decode maxSupply as null and map account keys', () => {
             // keys: edition[0], mint[1], updateAuth[2], mintAuth[3], payer[4], metadata[5]
             const keys = [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E, KEY_A];
             const ix = makeIx(buildData(null), keys);
-            const result = parseMetaplexTokenMetadataInstruction(ix);
+            const result = assertParsed(parseMetaplexTokenMetadataInstruction(ix));
 
-            expect(result).not.toBeNull();
-            expect(result!.info.maxSupply).toBeNull();
-            expect((result!.info.edition as PublicKey).equals(KEY_A)).toBe(true);
-            expect((result!.info.mint as PublicKey).equals(KEY_B)).toBe(true);
-            expect((result!.info.updateAuthority as PublicKey).equals(KEY_C)).toBe(true);
-            expect((result!.info.mintAuthority as PublicKey).equals(KEY_D)).toBe(true);
-            expect((result!.info.payer as PublicKey).equals(KEY_E)).toBe(true);
-            expect((result!.info.metadata as PublicKey).equals(KEY_A)).toBe(true);
+            expect(result.info.maxSupply).toBeNull();
+            expect((result.info.edition as PublicKey).equals(KEY_A)).toBe(true);
+            expect((result.info.mint as PublicKey).equals(KEY_B)).toBe(true);
+            expect((result.info.updateAuthority as PublicKey).equals(KEY_C)).toBe(true);
+            expect((result.info.mintAuthority as PublicKey).equals(KEY_D)).toBe(true);
+            expect((result.info.payer as PublicKey).equals(KEY_E)).toBe(true);
+            expect((result.info.metadata as PublicKey).equals(KEY_A)).toBe(true);
         });
     });
 });

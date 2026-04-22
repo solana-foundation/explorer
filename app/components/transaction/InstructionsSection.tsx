@@ -23,6 +23,8 @@ import { VoteDetailsCard } from '@components/instruction/vote/VoteDetailsCard';
 import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { useAnchorProgram } from '@entities/idl';
+import { TOKEN_METADATA_PROGRAM_ADDRESS } from '@features/mpl-token-metadata/metaplex-token-metadata.parser';
+import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata/ui/MetaplexTokenMetadataDetailsCard';
 import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails, useTransactionStatus } from '@providers/transactions';
@@ -44,14 +46,12 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
 
-import { TOKEN_METADATA_PROGRAM_ADDRESS } from '../inspector/instruction-parsers/metaplex-token-metadata.parser';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { Ed25519DetailsCard } from '../instruction/ed25519/Ed25519DetailsCard';
 import { isEd25519Instruction } from '../instruction/ed25519/types';
 import { LighthouseDetailsCard } from '../instruction/lighthouse/LighthouseDetailsCard';
 import { isLighthouseInstruction } from '../instruction/lighthouse/types';
 import { isMangoInstruction } from '../instruction/mango/types';
-import { MetaplexTokenMetadataDetailsCard } from '../instruction/metaplex-token-metadata/MetaplexTokenMetadataDetailsCard';
 import { ProgramMetadataIdlInstructionDetailsCard } from '../instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard';
 import {
     isSolanaAttestationInstruction,

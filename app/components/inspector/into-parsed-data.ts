@@ -12,6 +12,10 @@ import {
     UpgradeNonceInfo,
     WithdrawNonceInfo,
 } from '@components/instruction/system/types';
+import {
+    parseMetaplexTokenMetadataInstruction,
+    TOKEN_METADATA_PROGRAM_ADDRESS,
+} from '@features/mpl-token-metadata/metaplex-token-metadata.parser';
 import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import {
     AccountMeta,
@@ -61,10 +65,6 @@ import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
 import { alloc, bytes, equals, toBuffer } from '@/app/shared/lib/bytes';
 
-import {
-    parseMetaplexTokenMetadataInstruction,
-    TOKEN_METADATA_PROGRAM_ADDRESS,
-} from './instruction-parsers/metaplex-token-metadata.parser';
 import { parseTokenProgramInstruction } from './instruction-parsers/spl-token.parser';
 import { parseSystemProgramInstruction } from './instruction-parsers/system-program.parser';
 import { parseToken2022Instruction } from './instruction-parsers/token-2022-program.parser';

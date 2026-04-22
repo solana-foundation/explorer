@@ -1,5 +1,7 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { useAnchorProgram } from '@entities/idl';
+import { TOKEN_METADATA_PROGRAM_ADDRESS } from '@features/mpl-token-metadata/metaplex-token-metadata.parser';
+import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata/ui/MetaplexTokenMetadataDetailsCard';
 import { useCluster } from '@providers/cluster';
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
@@ -25,11 +27,9 @@ import { InspectorInstructionCard as InspectorInstructionCardComponent } from '.
 import { LoadingCard } from '../common/LoadingCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
-import { MetaplexTokenMetadataDetailsCard } from '../instruction/metaplex-token-metadata/MetaplexTokenMetadataDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
-import { TOKEN_METADATA_PROGRAM_ADDRESS } from './instruction-parsers/metaplex-token-metadata.parser';
 import { intoParsedInstruction, intoParsedTransaction } from './into-parsed-data';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
 
