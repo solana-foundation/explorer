@@ -70,3 +70,108 @@ function decodeCOptionPubkey(
     if (parsedPubkey) return { kind: 'pubkey', base58: parsedPubkey.toBase58() };
     return { kind: 'pubkey', base58: bs58.encode(raw.slice(pubkeyOffset, pubkeyOffset + 32)) };
 }
+
+export const SPL_TOKEN_ACCOUNT_SIZE = 165;
+
+export const SPL_TOKEN_ACCOUNT_LAYOUT = [
+    { id: 'token.mint', name: 'Mint', start: 0, length: 32, kind: 'pubkey' },
+    { id: 'token.owner', name: 'Owner', start: 32, length: 32, kind: 'authority' },
+    { id: 'token.amount', name: 'Amount', start: 64, length: 8, kind: 'amount' },
+    { id: 'token.delegateOption', name: 'Delegate (COption tag)', start: 72, length: 4, kind: 'option' },
+    { id: 'token.delegate', name: 'Delegate', start: 76, length: 32, kind: 'pubkey' },
+    { id: 'token.state', name: 'State', start: 108, length: 1, kind: 'scalar' },
+    { id: 'token.isNativeOption', name: 'Is Native (COption tag)', start: 109, length: 4, kind: 'option' },
+    { id: 'token.nativeAmount', name: 'Rent-Exempt Reserve', start: 113, length: 8, kind: 'amount' },
+    { id: 'token.delegatedAmount', name: 'Delegated Amount', start: 121, length: 8, kind: 'amount' },
+    { id: 'token.closeAuthorityOption', name: 'Close Authority (COption tag)', start: 129, length: 4, kind: 'option' },
+    { id: 'token.closeAuthority', name: 'Close Authority', start: 133, length: 32, kind: 'pubkey' },
+] as const satisfies readonly LayoutField[];
+
+export type TokenAccountState = 'uninitialized' | 'initialized' | 'frozen';
+
+export interface ParsedTokenAccountInfo {
+    mint: { toBase58(): string };
+    owner: { toBase58(): string };
+    tokenAmount: { amount: string; decimals: number };
+    delegate?: { toBase58(): string };
+    delegatedAmount?: { amount: string; decimals: number };
+    isNative: boolean;
+    rentExemptReserve?: { amount: string; decimals: number };
+    state: TokenAccountState;
+    closeAuthority?: { toBase58(): string };
+}
+
+const STATE_LABELS: Record<number, TokenAccountState> = {
+    0: 'uninitialized',
+    1: 'initialized',
+    2: 'frozen',
+};
+
+export function buildSplTokenAccountRegions(
+    raw: Uint8Array,
+    parsed: ParsedTokenAccountInfo | undefined,
+): Region[] {
+    if (raw.length < SPL_TOKEN_ACCOUNT_SIZE) {
+        throw new RangeError(
+            `SPL token account data must be ≥ ${SPL_TOKEN_ACCOUNT_SIZE} bytes, got ${raw.length}`,
+        );
+    }
+    return SPL_TOKEN_ACCOUNT_LAYOUT.map(field => ({
+        ...field,
+        decodedValue: decodeTokenAccountField(field.id, raw, parsed),
+    }));
+}
+
+function decodeTokenAccountField(
+    fieldId: string,
+    raw: Uint8Array,
+    parsed: ParsedTokenAccountInfo | undefined,
+): DecodedValue {
+    switch (fieldId) {
+        case 'token.mint':
+            return parsed
+                ? { kind: 'pubkey', base58: parsed.mint.toBase58() }
+                : { kind: 'pubkey', base58: bs58.encode(raw.slice(0, 32)) };
+        case 'token.owner':
+            return parsed
+                ? { kind: 'pubkey', base58: parsed.owner.toBase58() }
+                : { kind: 'pubkey', base58: bs58.encode(raw.slice(32, 64)) };
+        case 'token.amount': {
+            const rawAmount = parsed ? BigInt(parsed.tokenAmount.amount) : readU64LE(raw, 64);
+            return { kind: 'amount', raw: rawAmount, decimals: parsed?.tokenAmount.decimals };
+        }
+        case 'token.delegateOption':
+            return { kind: 'option', present: readUint32LE(raw, 72) === 1 };
+        case 'token.delegate':
+            return decodeCOptionPubkey(raw, 72, 76, parsed?.delegate);
+        case 'token.state': {
+            const stateByte = raw[108];
+            const label = parsed?.state ?? STATE_LABELS[stateByte] ?? 'uninitialized';
+            return { kind: 'scalar', value: stateByte, label };
+        }
+        case 'token.isNativeOption':
+            return { kind: 'option', present: readUint32LE(raw, 109) === 1 };
+        case 'token.nativeAmount': {
+            const isNative = readUint32LE(raw, 109) === 1;
+            if (!isNative) {
+                return { kind: 'unparsed', reason: 'no-jsonparsed' };
+            }
+            const rawAmount = parsed?.rentExemptReserve
+                ? BigInt(parsed.rentExemptReserve.amount)
+                : readU64LE(raw, 113);
+            return { kind: 'amount', raw: rawAmount, decimals: parsed?.rentExemptReserve?.decimals };
+        }
+        case 'token.delegatedAmount': {
+            const rawAmount = parsed?.delegatedAmount
+                ? BigInt(parsed.delegatedAmount.amount)
+                : readU64LE(raw, 121);
+            return { kind: 'amount', raw: rawAmount, decimals: parsed?.delegatedAmount?.decimals };
+        }
+        case 'token.closeAuthorityOption':
+            return { kind: 'option', present: readUint32LE(raw, 129) === 1 };
+        case 'token.closeAuthority':
+            return decodeCOptionPubkey(raw, 129, 133, parsed?.closeAuthority);
+        default:
+            return { kind: 'unparsed', reason: 'no-jsonparsed' };
+    }
+}
