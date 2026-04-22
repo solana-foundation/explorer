@@ -10,13 +10,12 @@ type Props = {
 };
 
 /**
- * Dedupes regions by `id` (some extensions emit multiple regions per instance,
- * e.g. MetadataPointer has 2 sub-regions under one header). The legend shows
- * the field name + a color chip keyed to the field's kind.
+ * Dedupes regions by `id` (some extensions emit multiple regions per instance).
+ * Each unique region renders as a color chip with its field name; chip color
+ * matches the cell color via the shared rotation index.
  *
- * MVP scope: hover tooltips only; no click-to-isolate interaction (per plan
- * simplification — isolate was flagged as adding state + race conditions for
- * marginal value).
+ * Hover tooltips remain the primary interaction. MVP keeps this static — no
+ * click-to-isolate. (See brainstorm: simplification call.)
  */
 export function LayoutLegend({ regions }: Props) {
     const deduped = dedupeRegionsById(regions);
@@ -24,16 +23,16 @@ export function LayoutLegend({ regions }: Props) {
     return (
         <div
             data-testid="annotated-hex-legend"
-            className="e-mt-3 e-flex e-flex-wrap e-gap-2 e-text-xs"
+            className="e-mt-3 e-flex e-flex-wrap e-justify-end e-gap-2 e-text-xs"
             aria-label="Field legend"
         >
-            {deduped.map(region => (
+            {deduped.map(({ region, rotationIndex }) => (
                 <span
                     key={region.id}
                     data-testid={`annotated-hex-legend-${region.id}`}
                     className={cn(
                         'e-inline-flex e-items-center e-gap-1 e-rounded e-border e-px-2 e-py-0.5 e-font-medium',
-                        chipClasses(region.kind),
+                        chipClasses(region.kind, rotationIndex),
                     )}
                 >
                     {region.name}
@@ -43,13 +42,13 @@ export function LayoutLegend({ regions }: Props) {
     );
 }
 
-function dedupeRegionsById(regions: Region[]): Region[] {
-    const seen = new Set<string>();
-    const out: Region[] = [];
-    for (const r of regions) {
-        if (seen.has(r.id)) continue;
-        seen.add(r.id);
-        out.push(r);
-    }
+function dedupeRegionsById(regions: Region[]): { region: Region; rotationIndex: number }[] {
+    const seen = new Map<string, number>();
+    const out: { region: Region; rotationIndex: number }[] = [];
+    regions.forEach((r, idx) => {
+        if (seen.has(r.id)) return;
+        seen.set(r.id, idx);
+        out.push({ region: r, rotationIndex: idx });
+    });
     return out;
 }

@@ -27,11 +27,16 @@ type Props = {
  * the grid. Full arrow-key navigation within a region is left for a
  * follow-up — the MVP prioritizes legibility + tooltip access.
  *
+ * Layout matches the original HexData block: right-aligned content within
+ * the table cell, no separate offset column (the tooltip carries per-byte
+ * offset metadata).
+ *
  * This component is account-agnostic — see AccountAnnotatedHex for the
  * adapter that pulls regions from the account hook.
  */
 export function AnnotatedHexData({ raw, regions }: Props) {
     const offsetMap = useMemo(() => buildOffsetMap(raw.length, regions), [raw.length, regions]);
+    const regionIndexById = useMemo(() => buildRegionIndexById(regions), [regions]);
     const regionStartOffsets = useMemo(() => new Set(regions.map(r => r.start)), [regions]);
 
     const rows = useMemo(() => {
@@ -44,45 +49,41 @@ export function AnnotatedHexData({ raw, regions }: Props) {
 
     return (
         <TooltipProvider delayDuration={200} skipDelayDuration={400} disableHoverableContent>
-            <div
-                role="grid"
-                aria-label="Account hex dump"
-                aria-rowcount={rows.length}
-                aria-colcount={ROW_SIZE}
-                className="e-font-mono e-text-xs e-leading-tight"
-                data-testid="annotated-hex-grid"
-            >
-                {rows.map(row => (
-                    <div
-                        key={row.offset}
-                        role="row"
-                        className="e-flex e-items-center e-gap-1 e-py-px"
-                    >
-                        <span
-                            aria-hidden
-                            className="e-w-12 e-flex-shrink-0 e-text-right e-text-neutral-500"
+            <div className="e-flex e-flex-col e-items-end e-gap-3">
+                <div
+                    role="grid"
+                    aria-label="Account hex dump"
+                    aria-rowcount={rows.length}
+                    aria-colcount={ROW_SIZE}
+                    className="e-inline-block e-font-mono e-text-xs e-leading-tight"
+                    data-testid="annotated-hex-grid"
+                >
+                    {rows.map(row => (
+                        <div
+                            key={row.offset}
+                            role="row"
+                            className="e-flex e-justify-end e-gap-px e-py-px"
                         >
-                            {row.offset.toString(16).padStart(4, '0')}
-                        </span>
-                        <div className="e-flex e-gap-px">
                             {Array.from(row.bytes).map((byte, colIdx) => {
                                 const offset = row.offset + colIdx;
                                 const region = offsetMap[offset];
+                                const rotationIndex = region ? regionIndexById.get(region.id) ?? 0 : 0;
                                 return (
                                     <AnnotatedHexCell
                                         key={offset}
                                         byte={byte}
                                         offset={offset}
                                         region={region}
+                                        rotationIndex={rotationIndex}
                                         isRegionStart={region !== undefined && regionStartOffsets.has(offset)}
                                     />
                                 );
                             })}
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
+                <LayoutLegend regions={regions} />
             </div>
-            <LayoutLegend regions={regions} />
         </TooltipProvider>
     );
 }
@@ -91,10 +92,11 @@ type CellProps = {
     byte: number;
     offset: number;
     region: Region | undefined;
+    rotationIndex: number;
     isRegionStart: boolean;
 };
 
-function AnnotatedHexCell({ byte, offset, region, isRegionStart }: CellProps) {
+function AnnotatedHexCell({ byte, offset, region, rotationIndex, isRegionStart }: CellProps) {
     const hex = byte.toString(16).padStart(2, '0');
 
     if (!region) {
@@ -121,7 +123,7 @@ function AnnotatedHexCell({ byte, offset, region, isRegionStart }: CellProps) {
                     className={cn(
                         'e-rounded-[2px] e-px-1 e-py-0.5 e-cursor-help e-outline-none',
                         'focus-visible:e-ring-2 focus-visible:e-ring-white/40',
-                        cellClasses(region.kind),
+                        cellClasses(region.kind, rotationIndex),
                     )}
                 >
                     {hex}
@@ -215,5 +217,19 @@ function buildOffsetMap(size: number, regions: Region[]): (Region | undefined)[]
             if (offset < size) map[offset] = r;
         }
     }
+    return map;
+}
+
+/**
+ * Map each region id to its index in the regions array. Used by the palette
+ * rotation so every distinct region gets a distinct color (or as close to it
+ * as the rotation size allows). Duplicate region ids share a color — this
+ * matches the legend's dedupe behavior.
+ */
+function buildRegionIndexById(regions: Region[]): Map<string, number> {
+    const map = new Map<string, number>();
+    regions.forEach((r, idx) => {
+        if (!map.has(r.id)) map.set(r.id, idx);
+    });
     return map;
 }

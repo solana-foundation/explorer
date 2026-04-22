@@ -1,42 +1,69 @@
 import { FieldKind } from '../model/types';
 
 /**
- * Cell background + text color classes per FieldKind.
+ * Per-region color rotation: every region gets a distinct hue cycling through
+ * this list by its index. The legend is the source of truth for "which color
+ * is which field" — there is no semantic meaning to a particular hue.
  *
- * Uses Tailwind default-palette colors (prefixed per this repo's `e-` config).
- * Pattern mirrors existing Explorer usage in autocomplete.stories.tsx:
- *   e-bg-purple-500/20 e-text-purple-300
+ * Rotation (rather than kind-based coloring) avoids the "why are five fields
+ * all green" confusion that an authority/amount/pubkey-kind palette produces
+ * on a single account.
  *
- * Every pair meets WCAG 1.4.1 (≥ 3:1 contrast) against both dark and light
- * Explorer backgrounds because we use /20 opacity on the fill and a 300-shade
- * on the text, which keeps the hex glyphs readable in either theme.
- *
- * `satisfies` ensures the palette covers every FieldKind; adding a kind to
- * types.ts without updating this table becomes a compile error.
+ * Each tuple is (cell bg + text, chip bg + text + border) using Tailwind
+ * defaults with the repo's `e-` prefix. `/20` opacity on the fill + a 300-shade
+ * text keep the hex glyphs readable against both dark and light backgrounds.
  */
-export const KIND_CELL_CLASSES = {
-    amount: 'e-bg-purple-500/20 e-text-purple-300',
-    authority: 'e-bg-green-500/20 e-text-green-300',
-    neutral: 'e-bg-neutral-500/10 e-text-neutral-400',
-    option: 'e-bg-orange-500/20 e-text-orange-300',
-    pubkey: 'e-bg-blue-500/20 e-text-blue-300',
-    scalar: 'e-bg-yellow-500/20 e-text-yellow-300',
-} as const satisfies Record<FieldKind, string>;
+const ROTATION: readonly { cell: string; chip: string }[] = [
+    {
+        cell: 'e-bg-blue-500/20 e-text-blue-300',
+        chip: 'e-bg-blue-500/30 e-text-blue-200 e-border-blue-500/40',
+    },
+    {
+        cell: 'e-bg-green-500/20 e-text-green-300',
+        chip: 'e-bg-green-500/30 e-text-green-200 e-border-green-500/40',
+    },
+    {
+        cell: 'e-bg-purple-500/20 e-text-purple-300',
+        chip: 'e-bg-purple-500/30 e-text-purple-200 e-border-purple-500/40',
+    },
+    {
+        cell: 'e-bg-yellow-500/20 e-text-yellow-300',
+        chip: 'e-bg-yellow-500/30 e-text-yellow-200 e-border-yellow-500/40',
+    },
+    {
+        cell: 'e-bg-pink-500/20 e-text-pink-300',
+        chip: 'e-bg-pink-500/30 e-text-pink-200 e-border-pink-500/40',
+    },
+    {
+        cell: 'e-bg-cyan-500/20 e-text-cyan-300',
+        chip: 'e-bg-cyan-500/30 e-text-cyan-200 e-border-cyan-500/40',
+    },
+    {
+        cell: 'e-bg-orange-500/20 e-text-orange-300',
+        chip: 'e-bg-orange-500/30 e-text-orange-200 e-border-orange-500/40',
+    },
+    {
+        cell: 'e-bg-teal-500/20 e-text-teal-300',
+        chip: 'e-bg-teal-500/30 e-text-teal-200 e-border-teal-500/40',
+    },
+];
 
-/** Chip color classes used by LayoutLegend (slightly smaller opacity for a subtler feel). */
-export const KIND_CHIP_CLASSES = {
-    amount: 'e-bg-purple-500/30 e-text-purple-200 e-border-purple-500/40',
-    authority: 'e-bg-green-500/30 e-text-green-200 e-border-green-500/40',
-    neutral: 'e-bg-neutral-500/30 e-text-neutral-200 e-border-neutral-500/40',
-    option: 'e-bg-orange-500/30 e-text-orange-200 e-border-orange-500/40',
-    pubkey: 'e-bg-blue-500/30 e-text-blue-200 e-border-blue-500/40',
-    scalar: 'e-bg-yellow-500/30 e-text-yellow-200 e-border-yellow-500/40',
-} as const satisfies Record<FieldKind, string>;
+const NEUTRAL = {
+    cell: 'e-bg-neutral-500/10 e-text-neutral-400',
+    chip: 'e-bg-neutral-500/30 e-text-neutral-200 e-border-neutral-500/40',
+};
 
-export function cellClasses(kind: FieldKind): string {
-    return KIND_CELL_CLASSES[kind];
+/**
+ * `kind` is retained as an argument so the `neutral` kind (reserved / unparsed
+ * bytes) can be rendered in a muted style regardless of its rotation index.
+ * All other kinds rotate through ROTATION.
+ */
+export function cellClasses(kind: FieldKind, rotationIndex: number): string {
+    if (kind === 'neutral') return NEUTRAL.cell;
+    return ROTATION[rotationIndex % ROTATION.length].cell;
 }
 
-export function chipClasses(kind: FieldKind): string {
-    return KIND_CHIP_CLASSES[kind];
+export function chipClasses(kind: FieldKind, rotationIndex: number): string {
+    if (kind === 'neutral') return NEUTRAL.chip;
+    return ROTATION[rotationIndex % ROTATION.length].chip;
 }
