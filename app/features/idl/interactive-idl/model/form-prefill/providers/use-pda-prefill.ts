@@ -62,7 +62,7 @@ export function usePdaPrefill({
             const wasAutoFilled = lastGenerated !== undefined && currentValue === lastGenerated;
             const generatedChanged = lastGenerated !== undefined && lastGenerated !== generatedValue;
 
-            const shouldAutoFill = isEmpty || wasAutoFilled || neverTracked;
+            const shouldAutoFill = isEmpty || wasAutoFilled;
 
             if (shouldAutoFill && currentValue !== generatedValue) {
                 form.setValue(path, generatedValue as unknown as FormValue, {

@@ -170,6 +170,29 @@ describe('usePdaPrefill', () => {
         expect(form.getValues('accounts.initializePoll.poll')).toBe(manualEdit);
     });
 
+    it('should not overwrite a pre-populated value on initial mount', () => {
+        const { createForm, mockInstruction } = setup(votingIdl030, 'initialize_poll');
+        const { form, fieldNames } = createForm();
+
+        const preExisting = 'PreExistingAddressFromOtherProvider123';
+        act(() => {
+            form.setValue('accounts.initializePoll.poll', preExisting);
+        });
+
+        renderHook(() =>
+            usePdaPrefill({
+                fieldNames: { account: fieldNames.account },
+                form,
+                instruction: mockInstruction,
+                pdas: {
+                    poll: { generated: MOCK_PDA_ADDRESS_1, seeds: [{ name: 'pollId', value: '123' }] },
+                },
+            }),
+        );
+
+        expect(form.getValues('accounts.initializePoll.poll')).toBe(preExisting);
+    });
+
     it('should update auto-filled fields when generated value changes', () => {
         const { createForm, mockInstruction } = setup(votingIdl030, 'initialize_poll');
         const { form, fieldNames } = createForm();
