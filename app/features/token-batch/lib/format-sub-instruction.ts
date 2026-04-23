@@ -7,6 +7,8 @@ import { PublicKey } from '@solana/web3.js';
 import { AuthorityType, type ParsedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { capitalCase } from 'change-case';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import type { DecodedField, DecodedParams, LabeledAccount, MintInfo } from './types';
 
 // These instructions don't include the mint in their on-chain account list.
@@ -44,7 +46,11 @@ export function formatParsedInstruction(
         }
 
         return { accounts, fields };
-    } catch {
+    } catch (err) {
+        Logger.error(new Error('[token-batch:format-sub-instruction] formatParsedInstruction failed', { cause: err }), {
+            instructionType: parsed.instructionType,
+            parsed,
+        });
         return undefined;
     }
 }
