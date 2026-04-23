@@ -40,7 +40,7 @@ export function BaseRawAccountRows({ account, rawData, isLoading }: BaseRawAccou
                 <td>Executable</td>
                 <td className="text-lg-end">{account.executable ? 'Yes' : 'No'}</td>
             </tr>
-            <tr>
+            <tr className="align-top">
                 <td>Account Data (Hex)</td>
                 <td className="text-lg-end">
                     {isLoading ? (

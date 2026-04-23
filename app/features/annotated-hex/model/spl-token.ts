@@ -33,8 +33,29 @@ export function buildSplMintRegions(raw: Uint8Array, parsed: ParsedMintInfo | un
         ...field,
         decodedValue: decodeMintField(field.id, raw, parsed),
     }));
-    if (raw.length > SPL_MINT_SIZE) {
-        regions.push(...walkTokenExtensions(raw, SPL_MINT_SIZE));
+    // Token-2022 mints are padded to the TokenAccount size (165) so the AccountType
+    // discriminator sits at a shared offset for both base types. Bytes 82..165 are
+    // zero padding; the TLV walk begins at 165 (accountType) + 1.
+    if (raw.length >= SPL_TOKEN_ACCOUNT_SIZE) {
+        regions.push({
+            decodedValue: { kind: 'unparsed', reason: 'no-jsonparsed' },
+            id: `mint.padding@${SPL_MINT_SIZE}`,
+            kind: 'neutral',
+            length: SPL_TOKEN_ACCOUNT_SIZE - SPL_MINT_SIZE,
+            name: 'Padding',
+            start: SPL_MINT_SIZE,
+        });
+        regions.push(...walkTokenExtensions(raw, SPL_TOKEN_ACCOUNT_SIZE));
+    } else if (raw.length > SPL_MINT_SIZE) {
+        // Tail bytes that don't reach the Token-2022 discriminator offset. Rare.
+        regions.push({
+            decodedValue: { kind: 'unparsed', reason: 'no-jsonparsed' },
+            id: `mint.tail@${SPL_MINT_SIZE}`,
+            kind: 'neutral',
+            length: raw.length - SPL_MINT_SIZE,
+            name: 'Unknown tail',
+            start: SPL_MINT_SIZE,
+        });
     }
     return regions;
 }
@@ -265,6 +286,23 @@ export function* walkTokenExtensions(raw: Uint8Array, baseSize: number): Generat
 
         const extType = readUint16LE(raw, pos);
         const extLen = readUint16LE(raw, pos + 2);
+
+        // Type 0 (Uninitialized) is the end-of-TLV sentinel; anything after is padding.
+        if (extType === 0) {
+            const padLen = raw.length - pos;
+            if (padLen > 0) {
+                yield {
+                    decodedValue: { kind: 'text', value: `${padLen} byte(s)` },
+                    id: `ext.padding@${pos}`,
+                    kind: 'neutral',
+                    length: padLen,
+                    name: 'Padding',
+                    start: pos,
+                };
+            }
+            return;
+        }
+
         const extName = EXTENSION_NAMES[extType] ?? `Unknown (#${extType})`;
 
         yield {

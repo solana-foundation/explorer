@@ -86,20 +86,21 @@ describe('useAccountRegions', () => {
         expect(result.current).toEqual({ reason: 'unexpected-length', status: 'fallback' });
     });
 
-    it('annotates a Token-2022 Mint with TLV tail (88 bytes)', () => {
-        // 82 base + 1 accountType + 4 header + 1 zero-length ext content area
-        const bytes = zeroBytes(88);
-        bytes[82] = 1; // accountType = Mint
-        // Write a zero-length extension header (ImmutableOwner, type=7)
-        new DataView(bytes.buffer).setUint16(83, 7, true);
-        new DataView(bytes.buffer).setUint16(85, 0, true);
+    it('annotates a Token-2022 Mint with TLV tail', () => {
+        // Token-2022 Mint layout: 82 base + 83 zero-padding + accountType at 165 +
+        // header(4) at 166 + zero-length ImmutableOwner extension (type=7, len=0).
+        const bytes = zeroBytes(170);
+        bytes[165] = 1; // accountType = Mint
+        new DataView(bytes.buffer).setUint16(166, 7, true);
+        new DataView(bytes.buffer).setUint16(168, 0, true);
 
         const account = makeAccount({ owner: TOKEN_2022_PROGRAM_ID, rawData: bytes });
         const { result } = renderHook(() => useAccountRegions(account, bytes));
         expect(result.current.status).toBe('regions');
         if (result.current.status !== 'regions') throw new Error('unreachable');
-        // Expect base mint layout (7) + accountType (1) + header (1) = 9
-        expect(result.current.regions.length).toBeGreaterThanOrEqual(9);
+        // 7 mint + 1 padding + 1 accountType + 1 extension header = 10 minimum
+        expect(result.current.regions.length).toBeGreaterThanOrEqual(10);
+        expect(result.current.regions.find(r => r.name === 'Padding')).toBeDefined();
     });
 
     it('Token-2022: prefers parsed.type when available to disambiguate Mint vs Account', () => {

@@ -79,11 +79,16 @@ export function useAccountRegions(
                 status: 'regions',
             };
         }
-        if (rawData.length < SPL_TOKEN_ACCOUNT_SIZE && rawData.length >= SPL_MINT_SIZE) {
-            return { regions: buildSplMintRegions(rawData, undefined), status: 'regions' };
-        }
+        // No parsed.type. For Token-2022 with length >= 165, the accountType byte at
+        // offset 165 disambiguates: 1 = Mint, 2 = Account. Below 165 must be a plain mint.
         if (rawData.length >= SPL_TOKEN_ACCOUNT_SIZE) {
-            return { regions: buildSplTokenAccountRegions(rawData, undefined), status: 'regions' };
+            const accountTypeByte = rawData[SPL_TOKEN_ACCOUNT_SIZE];
+            return accountTypeByte === 1
+                ? { regions: buildSplMintRegions(rawData, undefined), status: 'regions' }
+                : { regions: buildSplTokenAccountRegions(rawData, undefined), status: 'regions' };
+        }
+        if (rawData.length >= SPL_MINT_SIZE) {
+            return { regions: buildSplMintRegions(rawData, undefined), status: 'regions' };
         }
         return { reason: 'unexpected-length', status: 'fallback' };
     }, [rawData, ownerBase58, parsedData]);

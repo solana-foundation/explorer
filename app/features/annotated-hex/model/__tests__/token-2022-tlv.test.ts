@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildSplMintRegions, SPL_MINT_SIZE, walkTokenExtensions } from '../spl-token';
+import { buildSplMintRegions, SPL_MINT_SIZE, SPL_TOKEN_ACCOUNT_SIZE, walkTokenExtensions } from '../spl-token';
 
 type TlvEntry = { type: number; data: Uint8Array };
 
@@ -122,14 +122,51 @@ describe('walkTokenExtensions', () => {
         expect(regions[1].length).toBe(2);
     });
 
-    it('buildSplMintRegions integrates the walker when raw.length > 82', () => {
-        const bytes = appendTlvTail(baseMint(), 1, [
-            { data: new Uint8Array(0), type: 9 }, // NonTransferable
-        ]);
+    it('stops at a type=0 sentinel and emits a single Padding region for the rest', () => {
+        // Real extension followed by zero-padding. Walker must emit the real ext,
+        // then one Padding region, not N bogus zero-length "Uninitialized" headers.
+        const base = baseMint();
+        const real = { data: new Uint8Array(32), type: 3 }; // MintCloseAuthority, 32 bytes
+        // Build: base + accountType + real TLV + 40 zero bytes (padding)
+        const bytes = new Uint8Array(base.length + 1 + 4 + real.data.length + 40);
+        bytes.set(base, 0);
+        bytes[base.length] = 1;
+        const view = new DataView(bytes.buffer);
+        view.setUint16(base.length + 1, real.type, true);
+        view.setUint16(base.length + 3, real.data.length, true);
+
+        const regions = Array.from(walkTokenExtensions(bytes, base.length));
+        const names = regions.map(r => r.name);
+        expect(names).toContain('MintCloseAuthority — Header');
+        expect(names).toContain('Padding');
+        // Exactly one Padding region, not one per 4 bytes of zeros.
+        expect(names.filter(n => n === 'Padding')).toHaveLength(1);
+    });
+
+    it('buildSplMintRegions for Token-2022 layout: padding 82..165 + TLV from 165', () => {
+        // Construct a Token-2022 mint: 82 base + 83 zero-padding + accountType(1) at 165
+        // + header(4) + 32 bytes for MintCloseAuthority.
+        const bytes = new Uint8Array(SPL_MINT_SIZE + 83 + 1 + 4 + 32);
+        bytes[165] = 1; // accountType = Mint
+        const view = new DataView(bytes.buffer);
+        view.setUint16(166, 3, true); // MintCloseAuthority
+        view.setUint16(168, 32, true);
+
         const regions = buildSplMintRegions(bytes, undefined);
-        // 7 mint layout regions + accountType + 1 ext header (zero-length data)
-        expect(regions).toHaveLength(9);
-        expect(regions.at(-1)?.name).toContain('NonTransferable');
+
+        // Expect: 7 mint regions + 1 padding region + 1 accountType + 1 ext header + 1 close-authority
+        expect(regions.find(r => r.name === 'Padding')?.start).toBe(SPL_MINT_SIZE);
+        expect(regions.find(r => r.name === 'Padding')?.length).toBe(SPL_TOKEN_ACCOUNT_SIZE - SPL_MINT_SIZE);
+        expect(regions.find(r => r.name === 'Token-2022 Account Type')?.start).toBe(SPL_TOKEN_ACCOUNT_SIZE);
+        expect(regions.find(r => r.name?.includes('MintCloseAuthority — Header'))).toBeDefined();
+        expect(regions.find(r => r.name === 'MintCloseAuthority — Close Authority')).toBeDefined();
+    });
+
+    it('buildSplMintRegions tolerates unusual tail (< 165 bytes) without crashing', () => {
+        // Tail bytes that don't reach the Token-2022 discriminator offset at 165.
+        const bytes = new Uint8Array(100);
+        const regions = buildSplMintRegions(bytes, undefined);
+        expect(regions.find(r => r.name === 'Unknown tail')).toBeDefined();
     });
 
 });
