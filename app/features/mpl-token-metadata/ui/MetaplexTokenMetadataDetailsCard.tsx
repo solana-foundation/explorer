@@ -1,9 +1,6 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import {
-    MetaplexInstructionType,
-    parseMetaplexTokenMetadataInstruction,
-} from '@features/mpl-token-metadata/metaplex-token-metadata.parser';
+import { MetaplexInstructionType, parseMetaplexTokenMetadataInstruction } from '@features/mpl-token-metadata';
 import { PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 

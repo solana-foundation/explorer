@@ -3,17 +3,14 @@ import {
     getCreateMetadataAccountV3InstructionDataSerializer,
     getUpdateMetadataAccountV2InstructionDataSerializer,
 } from '@metaplex-foundation/mpl-token-metadata';
+import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { none, publicKey as umiPublicKey, some } from '@metaplex-foundation/umi';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, test } from 'vitest';
 
-import {
-    identifyInstructionType,
-    parseMetaplexTokenMetadataInstruction,
-    TOKEN_METADATA_PROGRAM_ADDRESS,
-} from '../metaplex-token-metadata.parser';
+import { identifyInstructionType, parseMetaplexTokenMetadataInstruction } from '../lib/metaplex-token-metadata.parser';
 
-const PROGRAM_ID = new PublicKey(TOKEN_METADATA_PROGRAM_ADDRESS);
+const PROGRAM_ID = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
 
 // Generated test public keys (byte-filled for readability)
 const KEY_A = new PublicKey(new Uint8Array(32).fill(1));

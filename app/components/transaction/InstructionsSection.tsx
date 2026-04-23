@@ -23,9 +23,9 @@ import { VoteDetailsCard } from '@components/instruction/vote/VoteDetailsCard';
 import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { useAnchorProgram } from '@entities/idl';
-import { TOKEN_METADATA_PROGRAM_ADDRESS } from '@features/mpl-token-metadata/metaplex-token-metadata.parser';
-import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata/ui/MetaplexTokenMetadataDetailsCard';
+import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';
+import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails, useTransactionStatus } from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
@@ -277,7 +277,7 @@ function InstructionCard({
             </ErrorBoundary>
         );
     }
-    if (transactionIx.programId.toBase58() === TOKEN_METADATA_PROGRAM_ADDRESS) {
+    if (transactionIx.programId.toBase58() === MPL_TOKEN_METADATA_PROGRAM_ID) {
         return (
             <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
                 <MetaplexTokenMetadataDetailsCard {...props} />

@@ -1,17 +1,20 @@
 import {
+    type CreateMasterEditionV3InstructionData,
+    type CreateMetadataAccountV3InstructionData,
+    type CreateV1InstructionData,
     getCreateMasterEditionV3InstructionDataSerializer,
     getCreateMetadataAccountV3InstructionDataSerializer,
     getCreateV1InstructionDataSerializer,
     getMintNewEditionFromMasterEditionViaTokenInstructionDataSerializer,
     getUpdateMetadataAccountV2InstructionDataSerializer,
+    type MintNewEditionFromMasterEditionViaTokenInstructionData,
     TokenStandard,
+    type UpdateMetadataAccountV2InstructionData,
 } from '@metaplex-foundation/mpl-token-metadata';
 import { unwrapOption } from '@metaplex-foundation/umi';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 import { Logger } from '@/app/shared/lib/logger';
-
-export const TOKEN_METADATA_PROGRAM_ADDRESS = 'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s';
 
 export type MetaplexInstructionType =
     | 'burnEditionNft'
@@ -55,9 +58,9 @@ export type MetaplexInstructionType =
     | 'verifyCollection'
     | 'verifySizedCollectionItem';
 
-type SerializerFactory = () => { deserialize(data: Uint8Array | Buffer): [any, number] };
+type SerializerFactory = () => { deserialize(data: Uint8Array): [unknown, number] };
 
-type DataExtractor = (raw: any) => Record<string, unknown>;
+type DataExtractor = (raw: unknown) => Record<string, unknown>;
 
 type InstructionDef = {
     name: MetaplexInstructionType;
@@ -93,23 +96,26 @@ const INSTRUCTIONS: Record<number, Entry> = {
         // prettier-ignore
         accounts: ['', 'newEdition', 'masterEdition', 'newMint', '', 'newMintAuthority', '', 'tokenAccountOwner', '', 'newUpdateAuthority', 'originalMetadata'],
 
-        extractData: raw => ({
-            edition: Number(raw.mintNewEditionFromMasterEditionViaTokenArgs.edition),
-        }),
+        extractData: raw => {
+            const { mintNewEditionFromMasterEditionViaTokenArgs } =
+                raw as MintNewEditionFromMasterEditionViaTokenInstructionData;
+            return { edition: Number(mintNewEditionFromMasterEditionViaTokenArgs.edition) };
+        },
         getSerializer: getMintNewEditionFromMasterEditionViaTokenInstructionDataSerializer,
         name: 'mintNewEditionFromMasterEditionViaToken',
     },
     15: {
         accounts: ['metadata', 'updateAuthority'],
         extractData: raw => {
-            const dataV2 = unwrapOption(raw.data) as any;
-
-            const newUpdateAuthorityStr = unwrapOption(raw.newUpdateAuthority) as any;
+            const { data, isMutable, newUpdateAuthority, primarySaleHappened } =
+                raw as UpdateMetadataAccountV2InstructionData;
+            const dataV2 = unwrapOption(data);
+            const newUpdateAuthorityKey = unwrapOption(newUpdateAuthority);
             return {
-                isMutable: unwrapOption(raw.isMutable),
+                isMutable: unwrapOption(isMutable),
                 name: dataV2?.name ?? null,
-                newUpdateAuthority: newUpdateAuthorityStr ? new PublicKey(newUpdateAuthorityStr) : null,
-                primarySaleHappened: unwrapOption(raw.primarySaleHappened),
+                newUpdateAuthority: newUpdateAuthorityKey ? new PublicKey(newUpdateAuthorityKey) : null,
+                primarySaleHappened: unwrapOption(primarySaleHappened),
                 symbol: dataV2?.symbol ?? null,
                 uri: dataV2?.uri ?? null,
             };
@@ -120,7 +126,8 @@ const INSTRUCTIONS: Record<number, Entry> = {
     17: {
         accounts: ['edition', 'mint', 'updateAuthority', 'mintAuthority', 'payer', 'metadata'],
         extractData: raw => {
-            const maxSupplyRaw = unwrapOption(raw.maxSupply);
+            const { maxSupply } = raw as CreateMasterEditionV3InstructionData;
+            const maxSupplyRaw = unwrapOption(maxSupply);
             return { maxSupply: maxSupplyRaw !== null ? Number(maxSupplyRaw) : null };
         },
         getSerializer: getCreateMasterEditionV3InstructionDataSerializer,
@@ -201,13 +208,16 @@ const INSTRUCTIONS: Record<number, Entry> = {
     },
     33: {
         accounts: ['metadata', 'mint', 'mintAuthority', 'payer', 'updateAuthority'],
-        extractData: raw => ({
-            isMutable: raw.isMutable,
-            name: raw.data.name,
-            sellerFeeBasisPoints: raw.data.sellerFeeBasisPoints,
-            symbol: raw.data.symbol,
-            uri: raw.data.uri,
-        }),
+        extractData: raw => {
+            const { data, isMutable } = raw as CreateMetadataAccountV3InstructionData;
+            return {
+                isMutable,
+                name: data.name,
+                sellerFeeBasisPoints: data.sellerFeeBasisPoints,
+                symbol: data.symbol,
+                uri: data.uri,
+            };
+        },
         getSerializer: getCreateMetadataAccountV3InstructionDataSerializer,
         name: 'createMetadataAccountV3',
     },
@@ -236,17 +246,18 @@ const INSTRUCTIONS: Record<number, Entry> = {
     },
     42: {
         accounts: ['metadata', 'masterEdition', 'mint', 'authority', 'payer', 'updateAuthority'],
-        extractData: raw => ({
-            isMutable: raw.isMutable,
-            name: raw.name,
-            sellerFeeBasisPoints:
-                typeof raw.sellerFeeBasisPoints === 'object' && raw.sellerFeeBasisPoints !== null
-                    ? Number((raw.sellerFeeBasisPoints as { basisPoints: bigint }).basisPoints)
-                    : Number(raw.sellerFeeBasisPoints),
-            symbol: raw.symbol,
-            tokenStandard: tokenStandardToString(raw.tokenStandard),
-            uri: raw.uri,
-        }),
+        extractData: raw => {
+            const { isMutable, name, sellerFeeBasisPoints, symbol, tokenStandard, uri } =
+                raw as CreateV1InstructionData;
+            return {
+                isMutable,
+                name,
+                sellerFeeBasisPoints: Number(sellerFeeBasisPoints.basisPoints),
+                symbol,
+                tokenStandard: tokenStandardToString(tokenStandard),
+                uri,
+            };
+        },
         getSerializer: getCreateV1InstructionDataSerializer,
         name: 'createV1',
     },

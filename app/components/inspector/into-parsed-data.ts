@@ -12,10 +12,8 @@ import {
     UpgradeNonceInfo,
     WithdrawNonceInfo,
 } from '@components/instruction/system/types';
-import {
-    parseMetaplexTokenMetadataInstruction,
-    TOKEN_METADATA_PROGRAM_ADDRESS,
-} from '@features/mpl-token-metadata/metaplex-token-metadata.parser';
+import { parseMetaplexTokenMetadataInstruction } from '@features/mpl-token-metadata';
+import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import {
     AccountMeta,
@@ -195,7 +193,7 @@ function intoProgramName(programId: PublicKey): string | undefined {
     if (programId.toBase58() === TOKEN_2022_PROGRAM_ADDRESS) {
         return 'spl-token-2022';
     }
-    if (programId.toBase58() === TOKEN_METADATA_PROGRAM_ADDRESS) {
+    if (programId.toBase58() === MPL_TOKEN_METADATA_PROGRAM_ID) {
         return 'mpl-token-metadata';
     }
     /* add other variants here */
@@ -376,7 +374,7 @@ function intoParsedData(instruction: TransactionInstruction, parsed?: any): any 
             info: parsed ?? info,
             type: UNKNOWN_PROGRAM_TYPE,
         };
-    } else if (programId.toBase58() === TOKEN_METADATA_PROGRAM_ADDRESS) {
+    } else if (programId.toBase58() === MPL_TOKEN_METADATA_PROGRAM_ID) {
         const result = parseMetaplexTokenMetadataInstruction(instruction);
         if (result) {
             return {

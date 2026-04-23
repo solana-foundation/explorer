@@ -3,16 +3,16 @@ import {
     getCreateMetadataAccountV3InstructionDataSerializer,
     getUpdateMetadataAccountV2InstructionDataSerializer,
 } from '@metaplex-foundation/mpl-token-metadata';
+import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { none, some } from '@metaplex-foundation/umi';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withTokenInfoBatch, withTransactions } from '@storybook-config/decorators';
 import { expect, within } from 'storybook/test';
 
-import { TOKEN_METADATA_PROGRAM_ADDRESS } from '../../metaplex-token-metadata.parser';
 import { MetaplexTokenMetadataDetailsCard } from '../MetaplexTokenMetadataDetailsCard';
 
-const PROGRAM_ID = new PublicKey(TOKEN_METADATA_PROGRAM_ADDRESS);
+const PROGRAM_ID = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
 const KEY_A = new PublicKey(new Uint8Array(32).fill(1));
 const KEY_B = new PublicKey(new Uint8Array(32).fill(2));
 const KEY_C = new PublicKey(new Uint8Array(32).fill(3));
@@ -144,7 +144,7 @@ export const SignMetadata: Story = {
 export const UnknownInstruction: Story = {
     args: {
         index: 4,
-        ix: makeIx(new Uint8Array([0xff])),
+        ix: makeIx(new Uint8Array([0xff]), [KEY_A, KEY_B]),
         result: { err: null },
     },
     play: async ({ canvasElement }) => {
