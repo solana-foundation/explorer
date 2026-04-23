@@ -1,10 +1,9 @@
 'use client';
 
+import { useAccountRegions } from '@entities/account';
 import type { Account } from '@providers/accounts';
 import { HexData } from '@shared/HexData';
 import { ErrorBoundary } from 'react-error-boundary';
-
-import { useAccountRegions } from '@/app/entities/account';
 
 import { AnnotatedHexData } from './AnnotatedHexData';
 

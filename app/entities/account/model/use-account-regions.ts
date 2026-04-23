@@ -9,8 +9,8 @@ import {
     buildSplTokenAccountRegions,
     SPL_MINT_SIZE,
     SPL_TOKEN_ACCOUNT_SIZE,
-} from '@/app/features/annotated-hex/model/spl-token';
-import { Region } from '@/app/features/annotated-hex/model/types';
+} from '@features/annotated-hex/model/spl-token';
+import { Region } from '@features/annotated-hex/model/types';
 
 export const MAX_ANNOTATABLE_SIZE = 4096;
 
