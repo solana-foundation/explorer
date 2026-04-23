@@ -1,9 +1,3 @@
-import { Account, isTokenProgramData } from '@providers/accounts';
-import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
-import { MintAccountInfo, TokenAccountInfo } from '@validators/accounts/token';
-import { useMemo } from 'react';
-import { create, Struct } from 'superstruct';
-
 import {
     buildSplMintRegions,
     buildSplTokenAccountRegions,
@@ -11,6 +5,11 @@ import {
     SPL_TOKEN_ACCOUNT_SIZE,
 } from '@features/annotated-hex/model/spl-token';
 import { Region } from '@features/annotated-hex/model/types';
+import { Account, isTokenProgramData } from '@providers/accounts';
+import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
+import { MintAccountInfo, TokenAccountInfo } from '@validators/accounts/token';
+import { useMemo } from 'react';
+import { create, Struct } from 'superstruct';
 
 export const MAX_ANNOTATABLE_SIZE = 4096;
 

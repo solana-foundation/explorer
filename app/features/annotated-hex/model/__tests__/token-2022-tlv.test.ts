@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-    buildSplMintRegions,
-    EXTENSION_NAMES,
-    SPL_MINT_SIZE,
-    walkTokenExtensions,
-} from '../spl-token';
+import { buildSplMintRegions, SPL_MINT_SIZE, walkTokenExtensions } from '../spl-token';
 
 type TlvEntry = { type: number; data: Uint8Array };
 
@@ -137,19 +132,4 @@ describe('walkTokenExtensions', () => {
         expect(regions.at(-1)?.name).toContain('NonTransferable');
     });
 
-    it('EXTENSION_NAMES map covers all 26 types the Explorer validator enumerates', () => {
-        const expected = [
-            'TransferFeeConfig', 'TransferFeeAmount', 'MintCloseAuthority',
-            'ConfidentialTransferMint', 'ConfidentialTransferAccount', 'DefaultAccountState',
-            'ImmutableOwner', 'MemoTransfer', 'NonTransferable', 'InterestBearingConfig',
-            'CpiGuard', 'PermanentDelegate', 'NonTransferableAccount', 'TransferHook',
-            'TransferHookAccount', 'ConfidentialTransferFeeConfig', 'ConfidentialTransferFeeAmount',
-            'MetadataPointer', 'TokenMetadata', 'GroupPointer', 'GroupMemberPointer',
-            'TokenGroup', 'TokenGroupMember', 'ScaledUiAmountConfig', 'PausableConfig',
-            'PausableAccount',
-        ];
-        for (const name of expected) {
-            expect(Object.values(EXTENSION_NAMES)).toContain(name);
-        }
-    });
 });

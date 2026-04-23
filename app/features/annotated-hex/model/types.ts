@@ -1,5 +1,4 @@
-export const FIELD_KINDS = ['authority', 'amount', 'pubkey', 'scalar', 'option', 'neutral'] as const;
-export type FieldKind = (typeof FIELD_KINDS)[number];
+export type FieldKind = 'authority' | 'amount' | 'pubkey' | 'scalar' | 'option' | 'neutral';
 
 export type DecodedValue =
     | { kind: 'pubkey'; base58: string; isNone?: boolean }

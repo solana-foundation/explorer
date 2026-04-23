@@ -1,9 +1,8 @@
 'use client';
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@components/shared/ui/tooltip';
-import { useMemo } from 'react';
-
 import { cn } from '@shared/utils';
+import { useMemo } from 'react';
 
 import { DecodedValue, Region } from '../model/types';
 import { LayoutLegend } from './LayoutLegend';

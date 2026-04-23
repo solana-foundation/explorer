@@ -226,22 +226,10 @@ export const EXTENSION_NAMES: Record<number, string> = {
 };
 /* eslint-enable sort-keys-fix/sort-keys-fix */
 
-/**
- * Walks the Token-2022 TLV tail starting at `baseSize` (82 for mints, 165 for token accounts).
- *
- * Emits:
- * - one scalar region for the 1-byte account-type discriminator
- * - per extension: a 4-byte `option`-kind header region labeled with the extension name,
- *   followed by a `neutral`-kind opaque data region sized to the TLV length.
- *
- * Guards:
- * - If only the account-type byte remains (no TLV), emits it and stops.
- * - If a header would overrun `raw.length`, terminates without emitting.
- * - If a TLV data block claims more bytes than remain, emits a single `truncated` region
- *   sized to the remaining bytes and stops (no out-of-bounds slice, no throw).
- * - Zero-length extensions (e.g. ImmutableOwner, NonTransferable) emit header only,
- *   no data region.
- */
+// Walks the Token-2022 TLV tail (1-byte account-type discriminator + sequence of
+// {u16 type, u16 length, [length] data}). Known extensions are dispatched to
+// per-extension decoders; unknown or corrupt entries emit a single opaque or
+// 'truncated' region and the loop continues or terminates safely.
 export function* walkTokenExtensions(raw: Uint8Array, baseSize: number): Generator<Region> {
     if (raw.length <= baseSize) return;
 
@@ -337,7 +325,6 @@ type ExtensionDecoder = (
     extName: string,
 ) => Generator<Region>;
 
-/** Token-2022 uses OptionalNonZeroPubkey: 32 bytes, all-zero = None. */
 function decodeOptionalNonZeroPubkey(raw: Uint8Array, start: number): DecodedValue {
     const slice = raw.slice(start, start + 32);
     const isNone = slice.every(b => b === 0);
@@ -439,18 +426,8 @@ function* decodeInterestBearingConfig(
     };
 }
 
-/**
- * TokenMetadata layout (TLV-internal):
- *   0..32   update_authority (OptionalNonZeroPubkey)
- *   32..64  mint             (Pubkey)
- *   64..    borsh String:    name    (u32 LE length + UTF-8 bytes)
- *   ...     borsh String:    symbol
- *   ...     borsh String:    uri
- *   ...     u32 additional_metadata length + (string key, string value) * N
- *
- * Strings are sanitized via sanitizeDisplayString: C0/C1 stripped, bidi overrides
- * neutralized, truncated to MAX_DISPLAY_STRING. URI is NEVER rendered as a link.
- */
+// Layout: 32 update_authority (optional pubkey) + 32 mint + borsh String name/symbol/uri
+// + optional additional_metadata tail. Strings are sanitized; URI is text, never a link.
 function* decodeTokenMetadata(
     raw: Uint8Array,
     start: number,
@@ -517,10 +494,12 @@ function* decodeTokenMetadata(
     }
 }
 
+/* eslint-disable sort-keys-fix/sort-keys-fix -- numeric-keyed dispatch; natural order beats lexicographic */
 const EXTENSION_DECODERS: Partial<Record<number, ExtensionDecoder>> = {
+    3: decodeMintCloseAuthority,
     10: decodeInterestBearingConfig,
     12: decodePermanentDelegate,
     18: decodeMetadataPointer,
     19: decodeTokenMetadata,
-    3: decodeMintCloseAuthority,
 };
+/* eslint-enable sort-keys-fix/sort-keys-fix */

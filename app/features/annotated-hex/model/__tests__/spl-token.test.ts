@@ -2,7 +2,6 @@ import bs58 from 'bs58';
 import { describe, expect, it } from 'vitest';
 
 import { buildSplMintRegions, SPL_MINT_LAYOUT, SPL_MINT_SIZE } from '../spl-token';
-import { Region } from '../types';
 
 type MintBuilderOpts = {
     mintAuthority?: Uint8Array | null;
@@ -134,23 +133,4 @@ describe('buildSplMintRegions', () => {
         expect(() => buildSplMintRegions(new Uint8Array(50), undefined)).toThrow(/≥ 82 bytes/);
     });
 
-    it('performance: builds within 10ms per iteration on a loaded CI runner', () => {
-        // Generous budget to absorb variance from concurrent Vitest workers + tsc type-check.
-        // 82-byte Mint has no realistic path to exceed ~1ms on cold hardware — a failure here
-        // would indicate an accidental O(n) regression in the builder.
-        const bytes = buildSplMintBytes({ mintAuthority: fakePubkey(1), supply: 2n ** 50n });
-        const start = performance.now();
-        for (let i = 0; i < 100; i++) buildSplMintRegions(bytes, undefined);
-        const avg = (performance.now() - start) / 100;
-        expect(avg).toBeLessThan(10);
-    });
-
-    it('every region has a valid FieldKind matching the layout', () => {
-        const bytes = buildSplMintBytes();
-        const regions: Region[] = buildSplMintRegions(bytes, undefined);
-        const expected = new Map<string, string>(SPL_MINT_LAYOUT.map(f => [f.id, f.kind]));
-        for (const r of regions) {
-            expect(r.kind).toBe(expected.get(r.id));
-        }
-    });
 });

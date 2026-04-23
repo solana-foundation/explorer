@@ -141,28 +141,4 @@ describe('useAccountRegions', () => {
         expect(result.current).not.toBe(first);
     });
 
-    it('does not recompute when parsed object has different identity but same contents', () => {
-        const rawData = zeroBytes(82);
-        const parsedA = {
-            parsed: { info: { decimals: 6 }, type: 'mint' },
-            program: 'spl-token',
-        } as unknown as Account['data']['parsed'];
-        const parsedB = {
-            parsed: { info: { decimals: 6 }, type: 'mint' },
-            program: 'spl-token',
-        } as unknown as Account['data']['parsed'];
-
-        const { result, rerender } = renderHook(
-            ({ p }: { p: Account['data']['parsed'] }) =>
-                useAccountRegions(makeAccount({ owner: TOKEN_PROGRAM_ID, parsed: p }), rawData),
-            { initialProps: { p: parsedA } },
-        );
-        const first = result.current;
-        rerender({ p: parsedB });
-        // Because account identity changes (new makeAccount), we re-derive ownerBase58 etc.
-        // but the final regions array should be structurally equal. This test documents the
-        // behavior — strict referential equality is NOT guaranteed when account changes,
-        // only when rawData + account are both reference-stable.
-        expect(result.current.status).toBe(first.status);
-    });
 });

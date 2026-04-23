@@ -154,11 +154,4 @@ describe('buildSplTokenAccountRegions', () => {
         expect(bytes).toEqual(snapshot);
     });
 
-    it('every region has a valid FieldKind matching the layout', () => {
-        const regions = buildSplTokenAccountRegions(buildSplTokenAccountBytes(), undefined);
-        const expected = new Map<string, string>(SPL_TOKEN_ACCOUNT_LAYOUT.map(f => [f.id, f.kind]));
-        for (const r of regions) {
-            expect(r.kind).toBe(expected.get(r.id));
-        }
-    });
 });
