@@ -33,8 +33,7 @@ import type { PdaFormAccounts, PdaFormArgs, PdaGenerationResult, PdaProvider } f
  * Uses createProgramClient from @codama/dynamic-client for PDA derivation.
  */
 export function createCodamaPdaProvider(): PdaProvider {
-    let cachedClient: ProgramClient | undefined;
-    let cachedClientKey: string | undefined;
+    const clientCache = new WeakMap<RootNode, ProgramClient>();
 
     return {
         canHandle(idl: SupportedIdl): boolean {
@@ -43,14 +42,10 @@ export function createCodamaPdaProvider(): PdaProvider {
 
         async computePdas(idl, instructionName, formArgs, formAccounts) {
             const root = idl as RootNode;
-            const key = `${root.program.publicKey}:${root.version}`;
-            let client: ProgramClient;
-            if (cachedClient && cachedClientKey === key) {
-                client = cachedClient;
-            } else {
-                client = createProgramClient(root, { programId: root.program.publicKey });
-                cachedClient = client;
-                cachedClientKey = key;
+            let client = clientCache.get(root);
+            if (!client) {
+                client = createProgramClient<ProgramClient>(root, { programId: root.program.publicKey });
+                clientCache.set(root, client);
             }
 
             const ixNode = root.program.instructions.find(i => camelCase(i.name) === instructionName);

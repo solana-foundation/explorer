@@ -337,6 +337,44 @@ describe('createCodamaPdaProvider', () => {
             expect(createSpy).toHaveBeenCalledTimes(2);
         });
 
+        it('should key cache by object identity, not by publicKey+version string', async () => {
+            const { createProgramClient } = await import('@codama/dynamic-client');
+            const createSpy = vi.mocked(createProgramClient);
+            createSpy.mockClear();
+
+            const provider = createCodamaPdaProvider();
+
+            // Prepare two distinct objects.
+            // WeakMap keys by object identity, so each should get its own client.
+            const idlA = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
+            const idlB = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
+
+            await provider.computePdas(
+                idlA as unknown as SupportedIdl,
+                'initializeCandidate',
+                { candidateName: 'A', pollId: '1' },
+                {},
+            );
+            expect(createSpy).toHaveBeenCalledTimes(1);
+
+            await provider.computePdas(
+                idlB as unknown as SupportedIdl,
+                'initializeCandidate',
+                { candidateName: 'A', pollId: '1' },
+                {},
+            );
+            expect(createSpy).toHaveBeenCalledTimes(2);
+
+            // Reusing the same object hits the cache — no new client built.
+            await provider.computePdas(
+                idlA as unknown as SupportedIdl,
+                'vote',
+                { candidateName: 'A', pollId: '1' },
+                {},
+            );
+            expect(createSpy).toHaveBeenCalledTimes(2);
+        });
+
         it('should handle constant seed with bytesValueNode (base16)', async () => {
             const idlWithBytesSeed = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
             const constSeedIx = idlWithBytesSeed.program.instructions.find(i => i.name === 'instructionWithConstSeed');
