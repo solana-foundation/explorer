@@ -160,6 +160,17 @@ function findRecursivePdaAccounts(instruction: InstructionNode): Set<string> {
             const cycleNames = e.context.cycle.filter(n => n.kind === 'instructionAccountNode').map(n => n.name);
             return new Set(cycleNames);
         }
+        Logger.error(
+            new Error(
+                `[pda-generator:codama-provider] Unexpected error while detecting recursive PDA accounts in instruction ${instruction.name}`,
+                {
+                    cause: e,
+                },
+            ),
+            {
+                sentry: true,
+            },
+        );
         return new Set();
     }
 }
