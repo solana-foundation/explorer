@@ -2,15 +2,15 @@ import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { assert } from '@/app/shared/lib/assert';
+import { invariant } from '@/app/shared/lib/invariant';
 
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
 
 function nextSibling(el: Element | null): Element {
-    assert(el, 'expected current element to be non-null');
+    invariant(el, 'expected current element to be non-null');
     // eslint-disable-next-line testing-library/no-node-access -- tests walk the DOM by sibling index
     const sibling = el.nextElementSibling;
-    assert(sibling, 'expected nextElementSibling to exist');
+    invariant(sibling, 'expected nextElementSibling to exist');
     return sibling;
 }
 

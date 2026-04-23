@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
-import { assert } from '@/app/shared/lib/assert';
+import { invariant } from '@/app/shared/lib/invariant';
 
 import { fetchProgramsPage } from '../../api';
 import type { VerifiedProgramInfo } from '../../types';
@@ -255,7 +255,7 @@ describe('VerifiedProgramsCard', () => {
         });
 
         // Now resolve the promise
-        assert(resolveLoadMore, 'Promise executor should have assigned resolveLoadMore synchronously');
+        invariant(resolveLoadMore, 'Promise executor should have assigned resolveLoadMore synchronously');
         resolveLoadMore({
             currentPage: 2,
             programs: [mockPrograms[1], mockPrograms[2]],

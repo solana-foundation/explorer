@@ -4,7 +4,7 @@ import { renderHook } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 import { describe, expect, it } from 'vitest';
 
-import { assert } from '@/app/shared/lib/assert';
+import { invariant } from '@/app/shared/lib/invariant';
 
 import votingIdl029 from '../__mocks__/anchor/anchor-0.29.0-voting-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
 import votingIdl030 from '../__mocks__/anchor/anchor-0.30.0-voting-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
@@ -328,7 +328,7 @@ describe('usePdas', () => {
 function setup(idl: unknown, instructionName: string) {
     const mockIdl = idl as SupportedIdl;
     const mockInstruction = findInstruction(idl, instructionName);
-    assert(mockInstruction, `instruction ${instructionName} not found in IDL fixture`);
+    invariant(mockInstruction, `instruction ${instructionName} not found in IDL fixture`);
 
     const createMockForm = () => {
         return renderHook(() =>

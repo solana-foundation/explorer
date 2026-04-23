@@ -48,7 +48,7 @@ import { ExternalLink } from 'react-feather';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
-import { assert } from '@/app/shared/lib/assert';
+import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
 import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
@@ -92,7 +92,7 @@ export function TokenAccountSection({
 
                 const parsedData = account.data.parsed;
                 if (isMetaplexNFT(parsedData, mintInfo)) {
-                    assert(parsedData.nftData, 'isMetaplexNFT returned true but nftData is missing');
+                    invariant(parsedData.nftData, 'isMetaplexNFT returned true but nftData is missing');
                     return (
                         <NonFungibleTokenMintAccountCard
                             account={account}

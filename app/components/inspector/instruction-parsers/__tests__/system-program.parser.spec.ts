@@ -3,7 +3,7 @@ import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.j
 import { getCreateAccountWithSeedInstructionDataEncoder } from '@solana-program/system';
 import { describe, expect, test } from 'vitest';
 
-import { assert } from '@/app/shared/lib/assert';
+import { invariant } from '@/app/shared/lib/invariant';
 
 import { parseSystemProgramInstruction } from '../system-program.parser';
 
@@ -56,7 +56,7 @@ describe('parseSystemProgramInstruction', () => {
 
             const result = parseSystemProgramInstruction(instruction);
 
-            assert(result, 'expected parser to return an instruction for a valid CreateAccountWithSeed payload');
+            invariant(result, 'expected parser to return an instruction for a valid CreateAccountWithSeed payload');
             expect(result.type).toBe('createAccountWithSeed');
             expect(result.info.source.equals(payer)).toBe(true);
             expect(result.info.newAccount.equals(newAccount)).toBe(true);
@@ -90,7 +90,7 @@ describe('parseSystemProgramInstruction', () => {
 
             const result = parseSystemProgramInstruction(instruction);
 
-            assert(
+            invariant(
                 result,
                 'expected parser to return an instruction for a valid 2-account CreateAccountWithSeed payload',
             );
@@ -125,7 +125,7 @@ describe('parseSystemProgramInstruction', () => {
 
             const result = parseSystemProgramInstruction(instruction);
 
-            assert(result, 'expected parser to return an instruction when seed is long');
+            invariant(result, 'expected parser to return an instruction when seed is long');
             expect(result.info.seed).toBe(longSeed);
         });
 

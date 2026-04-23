@@ -21,7 +21,7 @@ import React, { createRef, useMemo } from 'react';
 import { ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
-import { assert } from '@/app/shared/lib/assert';
+import { invariant } from '@/app/shared/lib/invariant';
 
 const PAGE_SIZE = 25;
 
@@ -102,7 +102,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
             });
             indexMap.forEach((count, i) => {
                 const accountKey = accountKeys.get(i);
-                assert(accountKey, `account key index ${i} out of range`);
+                invariant(accountKey, `account key index ${i} out of range`);
                 const programId = accountKey.toBase58();
                 invocations.set(programId, count);
                 const programTransactionCount = invokedPrograms.get(programId) || 0;

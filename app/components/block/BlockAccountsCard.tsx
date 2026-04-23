@@ -4,7 +4,7 @@ import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
 
-import { assert } from '@/app/shared/lib/assert';
+import { invariant } from '@/app/shared/lib/invariant';
 
 type AccountStats = {
     reads: number;
@@ -28,7 +28,7 @@ export function BlockAccountsCard({ block, blockSlot }: { block: VersionedBlockR
             message.compiledInstructions.forEach(ix => {
                 ix.accountKeyIndexes.forEach(index => {
                     const accountKey = accountKeys.get(index);
-                    assert(accountKey, `account key index ${index} out of range`);
+                    invariant(accountKey, `account key index ${index} out of range`);
                     const address = accountKey.toBase58();
                     txSet.set(address, message.isAccountWritable(index));
                 });

@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 
-import { assert } from '@/app/shared/lib/assert';
 import { toBase64 } from '@/app/shared/lib/bytes';
+import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { Account } from '../../../providers/accounts';
@@ -20,7 +20,7 @@ export const parseNFTokenNFTAccount = (account: Account): NftokenTypes.NftAccoun
     }
 
     try {
-        assert(account.data.raw, 'isNFTokenAccount guarantees raw account data');
+        invariant(account.data.raw, 'isNFTokenAccount guarantees raw account data');
         const parsed = NftokenTypes.nftAccountLayout.decode(account.data.raw);
 
         if (!parsed) {
@@ -56,7 +56,7 @@ export const parseNFTokenCollectionAccount = (account: Account): NftokenTypes.Co
     }
 
     try {
-        assert(account.data.raw, 'isNFTokenAccount guarantees raw account data');
+        invariant(account.data.raw, 'isNFTokenAccount guarantees raw account data');
         const parsed = NftokenTypes.collectionAccountLayout.decode(account.data.raw);
 
         if (!parsed) {

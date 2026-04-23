@@ -18,8 +18,8 @@ import { extractEventsFromLogs } from '@utils/program-logs';
 import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 
-import { assert } from '@/app/shared/lib/assert';
 import { toBase64 } from '@/app/shared/lib/bytes';
+import { invariant } from '@/app/shared/lib/invariant';
 
 import { InstructionCard } from './InstructionCard';
 import { ProgramEventsCard } from './ProgramEventsCard';
@@ -246,7 +246,7 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                     let accountInfo: FlattenedIdlAccount | null = null;
                     if (accountMap.has(keyIndex) && ixAccounts) {
                         const mappedIndex = accountMap.get(keyIndex);
-                        assert(mappedIndex !== undefined, 'accountMap.has(keyIndex) guarantees the mapped index');
+                        invariant(mappedIndex !== undefined, 'accountMap.has(keyIndex) guarantees the mapped index');
                         accountInfo = ixAccounts[mappedIndex];
                     }
 

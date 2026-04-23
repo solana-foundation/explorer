@@ -3,7 +3,7 @@ import { TableCardBody } from '@components/common/TableCardBody';
 import { PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import React from 'react';
 
-import { assert } from '@/app/shared/lib/assert';
+import { invariant } from '@/app/shared/lib/invariant';
 
 export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) {
     const totalTransactions = block.transactions.length;
@@ -22,7 +22,7 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
         const trackProgram = (index: number) => {
             if (index >= accountKeys.length) return;
             const programId = accountKeys.get(index);
-            assert(programId, `account key index ${index} out of range`);
+            invariant(programId, `account key index ${index} out of range`);
             const programAddress = programId.toBase58();
             programUsed.add(programAddress);
             const frequency = ixFrequency.get(programAddress);

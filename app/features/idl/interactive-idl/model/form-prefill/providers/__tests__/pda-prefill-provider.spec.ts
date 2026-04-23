@@ -2,7 +2,7 @@ import type { SupportedIdl } from '@entities/idl';
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { assert } from '@/app/shared/lib/assert';
+import { invariant } from '@/app/shared/lib/invariant';
 
 import votingIdl030 from '../../../__mocks__/anchor/anchor-0.30.0-voting-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
 import votingIdl030Variations from '../../../__mocks__/anchor/anchor-0.30.0-voting-variations-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
@@ -150,7 +150,7 @@ describe('createPdaPrefillDependency', () => {
 function setup(idl: unknown, instructionName: string) {
     const mockIdl = idl as SupportedIdl;
     const mockInstruction = findInstruction(idl, instructionName);
-    assert(mockInstruction, `instruction ${instructionName} not found in IDL fixture`);
+    invariant(mockInstruction, `instruction ${instructionName} not found in IDL fixture`);
 
     const createForm = () => {
         return renderHook(() =>

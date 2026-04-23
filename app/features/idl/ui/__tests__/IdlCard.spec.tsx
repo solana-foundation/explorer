@@ -9,7 +9,7 @@ import { vi } from 'vitest';
 import { GENESIS_HASHES } from '@/app/entities/chain-id';
 import * as programMetadataIdlModule from '@/app/entities/program-metadata';
 import { ClusterProvider } from '@/app/providers/cluster';
-import { assert } from '@/app/shared/lib/assert';
+import { invariant } from '@/app/shared/lib/invariant';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
 
 import { IdlCard } from '../IdlCard';
@@ -141,7 +141,7 @@ describe('IdlCard', () => {
 
         expect(windowOpenSpy).toHaveBeenCalledTimes(1);
         const firstCall = windowOpenSpy.mock.calls[0];
-        assert(firstCall, 'expected window.open to have been called');
+        invariant(firstCall, 'expected window.open to have been called');
         const [openedUrl, target, features] = firstCall;
         const castawayUrl = new URL(openedUrl as string);
         expect(castawayUrl.origin).toBe('https://www.castaway.lol');
@@ -189,7 +189,7 @@ describe('IdlCard', () => {
 
         expect(windowOpenSpy).toHaveBeenCalledTimes(1);
         const firstCall = windowOpenSpy.mock.calls[0];
-        assert(firstCall, 'expected window.open to have been called');
+        invariant(firstCall, 'expected window.open to have been called');
         const [openedUrl, target, features] = firstCall;
         const castawayUrl = new URL(openedUrl as string);
         expect(castawayUrl.origin).toBe('https://www.castaway.lol');

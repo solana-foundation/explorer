@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
 
-import { assert } from '@/app/shared/lib/assert';
+import { invariant } from '@/app/shared/lib/invariant';
 
 // simplified versions of codama IDLs
 import minimalMock from '../../mocks/codama/simplified/minimalMock';
@@ -127,7 +127,7 @@ describe('useFormatCodamaIdl', () => {
 
         const types = result.current?.types;
         expect(types?.length).toEqual(3);
-        assert(types, 'expected formatted IDL to contain types');
+        invariant(types, 'expected formatted IDL to contain types');
 
         const type1 = types[0];
 

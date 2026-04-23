@@ -1,7 +1,7 @@
 import { Keypair, PublicKey, SystemProgram, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { assert } from '@/app/shared/lib/assert';
+import { invariant } from '@/app/shared/lib/invariant';
 
 import { base64TxSearchProvider } from '../base64-tx-search-provider';
 import { createSearchContext } from './provider-test-utils';
@@ -31,7 +31,7 @@ describe('base64TxSearchProvider', () => {
         const results = await base64TxSearchProvider.search(b64, ctx);
         const params = extractParams(results[0].options[0].pathname);
         const messageParam = params.get('message');
-        assert(messageParam, 'expected message param in inspector URL');
+        invariant(messageParam, 'expected message param in inspector URL');
         const decodedMessage = new Uint8Array(Buffer.from(messageParam, 'base64'));
 
         expect(decodedMessage).toEqual(messageBytes);
@@ -85,7 +85,7 @@ describe('base64TxSearchProvider', () => {
         const results = await base64TxSearchProvider.search(b64, ctx);
         const params = extractParams(results[0].options[0].pathname);
         const message = params.get('message');
-        assert(message, 'expected message param in inspector URL');
+        invariant(message, 'expected message param in inspector URL');
 
         // A double-encoded value would contain '%25' (the encoding of '%')
         expect(message).not.toContain('%25');
