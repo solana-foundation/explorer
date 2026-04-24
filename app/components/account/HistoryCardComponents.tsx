@@ -18,19 +18,26 @@ export function HistoryCardHeader({
     refresh,
     fetching,
     actions,
+    subHeader,
 }: {
     title: string;
     analyticsSection: string;
     refresh: () => void;
     fetching: boolean;
     actions?: React.ReactNode;
+    subHeader?: React.ReactNode;
 }) {
     return (
-        <div className="card-header align-items-center">
-            <h3 className="card-header-title">{title}</h3>
-            <div className="d-flex align-items-center gap-2">
-                {actions}
-                <RefreshButton analyticsSection={analyticsSection} onClick={refresh} fetching={fetching} />
+        <div className="card-header h-auto py-3" style={{ minHeight: '3.5rem' }}>
+            <div className="d-flex flex-column gap-2 w-100">
+                <div className="d-flex align-items-center gap-2">
+                    <h3 className="card-header-title mb-0 me-auto">{title}</h3>
+                    <div className="d-flex align-items-center gap-2">
+                        {actions}
+                        <RefreshButton analyticsSection={analyticsSection} onClick={refresh} fetching={fetching} />
+                    </div>
+                </div>
+                {subHeader && <div className="d-flex flex-wrap gap-2">{subHeader}</div>}
             </div>
         </div>
     );

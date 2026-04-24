@@ -80,7 +80,30 @@ function FilterChip({ label, value, onClear }: { label: string; value: number; o
     );
 }
 
-export function HistoryFilterBar({ afterSlot, beforeSlot }: SlotFilters) {
+export function HistoryFilterChips({ afterSlot, beforeSlot }: SlotFilters) {
+    const updateFilters = useUpdateSlotFilters();
+    if (afterSlot === undefined && beforeSlot === undefined) return null;
+    return (
+        <>
+            {afterSlot !== undefined && (
+                <FilterChip
+                    label="After slot"
+                    value={afterSlot}
+                    onClear={() => updateFilters({ afterSlot: undefined })}
+                />
+            )}
+            {beforeSlot !== undefined && (
+                <FilterChip
+                    label="Before slot"
+                    value={beforeSlot}
+                    onClear={() => updateFilters({ beforeSlot: undefined })}
+                />
+            )}
+        </>
+    );
+}
+
+export function HistoryFilterTrigger({ afterSlot, beforeSlot }: SlotFilters) {
     const updateFilters = useUpdateSlotFilters();
     const [open, setOpen] = React.useState(false);
     const [afterDraft, setAfterDraft] = React.useState<string>(afterSlot !== undefined ? String(afterSlot) : '');
@@ -117,77 +140,71 @@ export function HistoryFilterBar({ afterSlot, beforeSlot }: SlotFilters) {
     const triggerLabel = activeCount === 0 ? 'Filter' : 'Edit filter';
 
     return (
-        <div className="d-flex align-items-center gap-2 flex-wrap">
-            {afterSlot !== undefined && (
-                <FilterChip
-                    label="After slot"
-                    value={afterSlot}
-                    onClear={() => updateFilters({ afterSlot: undefined })}
-                />
-            )}
-            {beforeSlot !== undefined && (
-                <FilterChip
-                    label="Before slot"
-                    value={beforeSlot}
-                    onClear={() => updateFilters({ beforeSlot: undefined })}
-                />
-            )}
-            <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                    <Button size="sm" variant="outline">
-                        <Filter />
-                        {triggerLabel}
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="e-p-3 e-w-72">
-                    <form
-                        onSubmit={e => {
-                            e.preventDefault();
-                            apply();
-                        }}
-                        className="e-flex e-flex-col e-gap-3"
-                    >
-                        <div className="e-flex e-flex-col e-gap-1">
-                            <label className="e-text-xs e-text-neutral-300">After slot</label>
-                            <Input
-                                autoFocus
-                                variant="dark"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                placeholder="lower bound (optional)"
-                                value={afterDraft}
-                                aria-invalid={afterInvalid || rangeInvalid}
-                                onChange={e => setAfterDraft(e.target.value)}
-                            />
-                        </div>
-                        <div className="e-flex e-flex-col e-gap-1">
-                            <label className="e-text-xs e-text-neutral-300">Before slot</label>
-                            <Input
-                                variant="dark"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                placeholder="upper bound (optional)"
-                                value={beforeDraft}
-                                aria-invalid={beforeInvalid || rangeInvalid}
-                                onChange={e => setBeforeDraft(e.target.value)}
-                            />
-                        </div>
-                        {rangeInvalid && (
-                            <div className="e-text-xs e-text-red-400">After slot must be ≤ before slot.</div>
-                        )}
-                        <div className="e-flex e-justify-end e-gap-2 e-pt-1">
-                            {activeCount > 0 && (
-                                <Button type="button" size="sm" variant="ghost" onClick={clearAll}>
-                                    Clear all
-                                </Button>
-                            )}
-                            <Button type="submit" size="sm" variant="accent" disabled={hasError}>
-                                Apply
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button size="sm" variant="outline">
+                    <Filter />
+                    {triggerLabel}
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="e-p-3 e-w-72">
+                <form
+                    onSubmit={e => {
+                        e.preventDefault();
+                        apply();
+                    }}
+                    className="e-flex e-flex-col e-gap-3"
+                >
+                    <div className="e-flex e-flex-col e-gap-1">
+                        <label className="e-text-xs e-text-neutral-300">After slot</label>
+                        <Input
+                            autoFocus
+                            variant="dark"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            placeholder="lower bound (optional)"
+                            value={afterDraft}
+                            aria-invalid={afterInvalid || rangeInvalid}
+                            onChange={e => setAfterDraft(e.target.value)}
+                        />
+                    </div>
+                    <div className="e-flex e-flex-col e-gap-1">
+                        <label className="e-text-xs e-text-neutral-300">Before slot</label>
+                        <Input
+                            variant="dark"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            placeholder="upper bound (optional)"
+                            value={beforeDraft}
+                            aria-invalid={beforeInvalid || rangeInvalid}
+                            onChange={e => setBeforeDraft(e.target.value)}
+                        />
+                    </div>
+                    {rangeInvalid && (
+                        <div className="e-text-xs e-text-red-400">After slot must be ≤ before slot.</div>
+                    )}
+                    <div className="e-flex e-justify-end e-gap-2 e-pt-1">
+                        {activeCount > 0 && (
+                            <Button type="button" size="sm" variant="ghost" onClick={clearAll}>
+                                Clear all
                             </Button>
-                        </div>
-                    </form>
-                </PopoverContent>
-            </Popover>
+                        )}
+                        <Button type="submit" size="sm" variant="accent" disabled={hasError}>
+                            Apply
+                        </Button>
+                    </div>
+                </form>
+            </PopoverContent>
+        </Popover>
+    );
+}
+
+// Combined bar kept for tests / any consumer that wants chips + trigger inline.
+export function HistoryFilterBar(props: SlotFilters) {
+    return (
+        <div className="d-flex align-items-center gap-2 flex-wrap">
+            <HistoryFilterChips {...props} />
+            <HistoryFilterTrigger {...props} />
         </div>
     );
 }
