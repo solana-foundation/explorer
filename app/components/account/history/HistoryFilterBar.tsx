@@ -139,9 +139,9 @@ export function HistoryFilterTrigger({ afterSlot, beforeSlot }: SlotFilters) {
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="outline" aria-label={triggerLabel}>
                     <Filter />
-                    {triggerLabel}
+                    <span className="e-hidden md:e-inline">{triggerLabel}</span>
                 </Button>
             </PopoverTrigger>
             <PopoverContent align="end" className="e-p-3 e-w-72">
