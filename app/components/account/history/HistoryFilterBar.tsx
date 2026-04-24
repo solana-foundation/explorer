@@ -124,10 +124,7 @@ export function HistoryFilterTrigger({ afterSlot, beforeSlot }: SlotFilters) {
 
     const apply = () => {
         if (hasError) return;
-        updateFilters({
-            afterSlot: afterValue === 'invalid' ? undefined : afterValue,
-            beforeSlot: beforeValue === 'invalid' ? undefined : beforeValue,
-        });
+        updateFilters({ afterSlot: afterValue, beforeSlot: beforeValue });
         setOpen(false);
     };
 
@@ -137,7 +134,7 @@ export function HistoryFilterTrigger({ afterSlot, beforeSlot }: SlotFilters) {
     };
 
     const activeCount = (afterSlot !== undefined ? 1 : 0) + (beforeSlot !== undefined ? 1 : 0);
-    const triggerLabel = activeCount === 0 ? 'Filter' : 'Edit filter';
+    const triggerLabel = activeCount === 0 ? 'Filters' : 'Edit filters';
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
