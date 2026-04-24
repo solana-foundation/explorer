@@ -8,28 +8,44 @@ import React from 'react';
 import { Filter, X } from 'react-feather';
 
 export const AFTER_SLOT_PARAM = 'afterSlot';
+export const BEFORE_SLOT_PARAM = 'beforeSlot';
 
-export function useAfterSlotParam(): number | undefined {
-    const searchParams = useSearchParams();
-    const raw = searchParams?.get(AFTER_SLOT_PARAM);
+export type SlotFilters = {
+    afterSlot: number | undefined;
+    beforeSlot: number | undefined;
+};
+
+function parseSlotParam(raw: string | null | undefined): number | undefined {
     if (!raw) return undefined;
     const parsed = Number(raw);
     return Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : undefined;
 }
 
-function useUpdateAfterSlot() {
+export function useSlotFilters(): SlotFilters {
+    const searchParams = useSearchParams();
+    return {
+        afterSlot: parseSlotParam(searchParams?.get(AFTER_SLOT_PARAM)),
+        beforeSlot: parseSlotParam(searchParams?.get(BEFORE_SLOT_PARAM)),
+    };
+}
+
+function useUpdateSlotFilters() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
     return React.useCallback(
-        (next: number | undefined) => {
+        (next: Partial<SlotFilters>) => {
             const params = new URLSearchParams(searchParams?.toString() ?? '');
-            if (next === undefined) {
-                params.delete(AFTER_SLOT_PARAM);
-            } else {
-                params.set(AFTER_SLOT_PARAM, String(next));
-            }
+            const setParam = (key: string, value: number | undefined) => {
+                if (value === undefined) {
+                    params.delete(key);
+                } else {
+                    params.set(key, String(value));
+                }
+            };
+            if ('afterSlot' in next) setParam(AFTER_SLOT_PARAM, next.afterSlot);
+            if ('beforeSlot' in next) setParam(BEFORE_SLOT_PARAM, next.beforeSlot);
             const qs = params.toString();
             router.replace(`${pathname}${qs ? `?${qs}` : ''}`, { scroll: false });
         },
@@ -37,78 +53,135 @@ function useUpdateAfterSlot() {
     );
 }
 
-export function HistoryFilterBar({ afterSlot }: { afterSlot: number | undefined }) {
-    const updateAfterSlot = useUpdateAfterSlot();
+function slotDraftToValue(raw: string): number | undefined | 'invalid' {
+    const trimmed = raw.trim();
+    if (!trimmed) return undefined;
+    const parsed = Number(trimmed);
+    if (!Number.isFinite(parsed) || parsed < 0) return 'invalid';
+    return Math.floor(parsed);
+}
+
+function FilterChip({ label, value, onClear }: { label: string; value: number; onClear: () => void }) {
+    return (
+        <span className="badge bg-info-soft d-inline-flex align-items-center gap-1">
+            <span>
+                {label}: {value.toLocaleString()}
+            </span>
+            <button
+                type="button"
+                onClick={onClear}
+                aria-label={`Clear ${label.toLowerCase()} filter`}
+                className="btn btn-link btn-sm p-0 text-muted d-inline-flex align-items-center"
+                style={{ lineHeight: 0 }}
+            >
+                <X size={12} />
+            </button>
+        </span>
+    );
+}
+
+export function HistoryFilterBar({ afterSlot, beforeSlot }: SlotFilters) {
+    const updateFilters = useUpdateSlotFilters();
     const [open, setOpen] = React.useState(false);
-    const [draft, setDraft] = React.useState<string>(afterSlot !== undefined ? String(afterSlot) : '');
+    const [afterDraft, setAfterDraft] = React.useState<string>(afterSlot !== undefined ? String(afterSlot) : '');
+    const [beforeDraft, setBeforeDraft] = React.useState<string>(beforeSlot !== undefined ? String(beforeSlot) : '');
 
     React.useEffect(() => {
-        setDraft(afterSlot !== undefined ? String(afterSlot) : '');
-    }, [afterSlot]);
+        setAfterDraft(afterSlot !== undefined ? String(afterSlot) : '');
+        setBeforeDraft(beforeSlot !== undefined ? String(beforeSlot) : '');
+    }, [afterSlot, beforeSlot, open]);
+
+    const afterValue = slotDraftToValue(afterDraft);
+    const beforeValue = slotDraftToValue(beforeDraft);
+    const afterInvalid = afterValue === 'invalid';
+    const beforeInvalid = beforeValue === 'invalid';
+    const rangeInvalid =
+        typeof afterValue === 'number' && typeof beforeValue === 'number' && afterValue > beforeValue;
+    const hasError = afterInvalid || beforeInvalid || rangeInvalid;
 
     const apply = () => {
-        const trimmed = draft.trim();
-        if (!trimmed) {
-            updateAfterSlot(undefined);
-        } else {
-            const parsed = Number(trimmed);
-            if (Number.isFinite(parsed) && parsed >= 0) {
-                updateAfterSlot(Math.floor(parsed));
-            }
-        }
+        if (hasError) return;
+        updateFilters({
+            afterSlot: afterValue === 'invalid' ? undefined : afterValue,
+            beforeSlot: beforeValue === 'invalid' ? undefined : beforeValue,
+        });
         setOpen(false);
     };
 
-    const clear = () => updateAfterSlot(undefined);
+    const clearAll = () => {
+        updateFilters({ afterSlot: undefined, beforeSlot: undefined });
+        setOpen(false);
+    };
+
+    const activeCount = (afterSlot !== undefined ? 1 : 0) + (beforeSlot !== undefined ? 1 : 0);
+    const triggerLabel = activeCount === 0 ? 'Filter' : 'Edit filter';
 
     return (
-        <div className="d-flex align-items-center gap-2">
+        <div className="d-flex align-items-center gap-2 flex-wrap">
             {afterSlot !== undefined && (
-                <span className="badge bg-info-soft d-inline-flex align-items-center gap-1">
-                    <span>After slot: {afterSlot.toLocaleString()}</span>
-                    <button
-                        type="button"
-                        onClick={clear}
-                        aria-label="Clear after slot filter"
-                        className="btn btn-link btn-sm p-0 text-muted d-inline-flex align-items-center"
-                        style={{ lineHeight: 0 }}
-                    >
-                        <X size={12} />
-                    </button>
-                </span>
+                <FilterChip
+                    label="After slot"
+                    value={afterSlot}
+                    onClear={() => updateFilters({ afterSlot: undefined })}
+                />
+            )}
+            {beforeSlot !== undefined && (
+                <FilterChip
+                    label="Before slot"
+                    value={beforeSlot}
+                    onClear={() => updateFilters({ beforeSlot: undefined })}
+                />
             )}
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button size="sm" variant="outline">
                         <Filter />
-                        {afterSlot === undefined ? 'Filter' : 'Edit filter'}
+                        {triggerLabel}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="e-p-3 e-w-64">
+                <PopoverContent align="end" className="e-p-3 e-w-72">
                     <form
                         onSubmit={e => {
                             e.preventDefault();
                             apply();
                         }}
-                        className="e-flex e-flex-col e-gap-2"
+                        className="e-flex e-flex-col e-gap-3"
                     >
-                        <label className="e-text-xs e-text-neutral-300">After slot</label>
-                        <Input
-                            autoFocus
-                            variant="dark"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            placeholder="e.g. 310000000"
-                            value={draft}
-                            onChange={e => setDraft(e.target.value)}
-                        />
+                        <div className="e-flex e-flex-col e-gap-1">
+                            <label className="e-text-xs e-text-neutral-300">After slot</label>
+                            <Input
+                                autoFocus
+                                variant="dark"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                placeholder="lower bound (optional)"
+                                value={afterDraft}
+                                aria-invalid={afterInvalid || rangeInvalid}
+                                onChange={e => setAfterDraft(e.target.value)}
+                            />
+                        </div>
+                        <div className="e-flex e-flex-col e-gap-1">
+                            <label className="e-text-xs e-text-neutral-300">Before slot</label>
+                            <Input
+                                variant="dark"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                placeholder="upper bound (optional)"
+                                value={beforeDraft}
+                                aria-invalid={beforeInvalid || rangeInvalid}
+                                onChange={e => setBeforeDraft(e.target.value)}
+                            />
+                        </div>
+                        {rangeInvalid && (
+                            <div className="e-text-xs e-text-red-400">After slot must be ≤ before slot.</div>
+                        )}
                         <div className="e-flex e-justify-end e-gap-2 e-pt-1">
-                            {afterSlot !== undefined && (
-                                <Button type="button" size="sm" variant="ghost" onClick={clear}>
-                                    Clear
+                            {activeCount > 0 && (
+                                <Button type="button" size="sm" variant="ghost" onClick={clearAll}>
+                                    Clear all
                                 </Button>
                             )}
-                            <Button type="submit" size="sm" variant="accent">
+                            <Button type="submit" size="sm" variant="accent" disabled={hasError}>
                                 Apply
                             </Button>
                         </div>
