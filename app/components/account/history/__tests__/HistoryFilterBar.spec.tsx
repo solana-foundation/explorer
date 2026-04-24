@@ -49,9 +49,9 @@ describe('useSlotFilters', () => {
 });
 
 describe('HistoryFilterBar', () => {
-    it('shows a single Filter button when no filter is active', () => {
+    it('shows a single Filters button when no filter is active', () => {
         render(<HistoryFilterBar afterSlot={undefined} beforeSlot={undefined} />);
-        expect(screen.getByRole('button', { name: /^Filter$/ })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /^Filters$/ })).toBeInTheDocument();
         expect(screen.queryByText(/After slot:/)).not.toBeInTheDocument();
         expect(screen.queryByText(/Before slot:/)).not.toBeInTheDocument();
     });
@@ -61,7 +61,7 @@ describe('HistoryFilterBar', () => {
         expect(screen.getByText(/After slot:\s*100/)).toBeInTheDocument();
         // Use a regex since jsdom's toLocaleString thousand separator varies by ICU build.
         expect(screen.getByText(/Before slot:\s*2[,.\s  ]?000[,.\s  ]?000/)).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /Edit filter/ })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Edit filters/ })).toBeInTheDocument();
     });
 
     it('clears a single filter when its chip × is clicked', () => {
@@ -78,7 +78,7 @@ describe('HistoryFilterBar', () => {
     it('applies both bounds from the popover', () => {
         render(<HistoryFilterBar afterSlot={undefined} beforeSlot={undefined} />);
 
-        fireEvent.click(screen.getByRole('button', { name: /^Filter$/ }));
+        fireEvent.click(screen.getByRole('button', { name: /^Filters$/ }));
         fireEvent.change(screen.getByPlaceholderText(/lower bound/), { target: { value: '100' } });
         fireEvent.change(screen.getByPlaceholderText(/upper bound/), { target: { value: '500' } });
         fireEvent.click(screen.getByRole('button', { name: /^Apply$/ }));
@@ -102,7 +102,7 @@ describe('HistoryFilterBar', () => {
     it('disables Apply and shows an error when after > before', () => {
         render(<HistoryFilterBar afterSlot={undefined} beforeSlot={undefined} />);
 
-        fireEvent.click(screen.getByRole('button', { name: /^Filter$/ }));
+        fireEvent.click(screen.getByRole('button', { name: /^Filters$/ }));
         fireEvent.change(screen.getByPlaceholderText(/lower bound/), { target: { value: '500' } });
         fireEvent.change(screen.getByPlaceholderText(/upper bound/), { target: { value: '100' } });
 
@@ -118,7 +118,7 @@ describe('HistoryFilterBar', () => {
         setSearch('afterSlot=100&beforeSlot=500');
         render(<HistoryFilterBar afterSlot={100} beforeSlot={500} />);
 
-        fireEvent.click(screen.getByRole('button', { name: /Edit filter/ }));
+        fireEvent.click(screen.getByRole('button', { name: /Edit filters/ }));
         fireEvent.click(screen.getByRole('button', { name: /Clear all/ }));
 
         const [href] = replaceMock.mock.calls[0];
