@@ -17,7 +17,7 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
-import { HistoryFilterBar, useSlotFilters } from '@components/account/history/HistoryFilterBar';
+import { HistoryFilterChips, HistoryFilterTrigger, useSlotFilters } from '@components/account/history/HistoryFilterBar';
 
 import { useInstructionNames } from '../lib/use-instruction-names';
 import { InstructionList, InstructionListSkeleton } from './InstructionList';
@@ -93,7 +93,12 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                 refresh={() => refresh()}
                 title="Transaction History"
                 analyticsSection="transaction_history_header"
-                actions={<HistoryFilterBar afterSlot={afterSlot} beforeSlot={beforeSlot} />}
+                actions={<HistoryFilterTrigger afterSlot={afterSlot} beforeSlot={beforeSlot} />}
+                subHeader={
+                    afterSlot !== undefined || beforeSlot !== undefined ? (
+                        <HistoryFilterChips afterSlot={afterSlot} beforeSlot={beforeSlot} />
+                    ) : undefined
+                }
             />
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
