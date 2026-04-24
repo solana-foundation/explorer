@@ -167,6 +167,7 @@ async function fetchAccountHistory(
     options: {
         before?: TransactionSignature;
         limit: number;
+        afterSlot?: number;
     },
     fetchTransactions?: boolean,
     additionalSignatures?: string[],
@@ -182,7 +183,9 @@ async function fetchAccountHistory(
     let history;
     try {
         const connection = new Connection(url);
-        const fetched = await connection.getSignaturesForAddress(pubkey, options);
+        // Hydrant accepts `afterSlot` (and `beforeSlot`) on getSignaturesForAddress;
+        // web3.js 1.x spreads unknown options into the RPC call, so pass it through.
+        const fetched = await connection.getSignaturesForAddress(pubkey, options as Parameters<Connection['getSignaturesForAddress']>[1]);
         history = {
             fetched,
             foundOldest: fetched.length < options.limit,
@@ -221,6 +224,17 @@ async function fetchAccountHistory(
         type: ActionType.Update,
         url,
     });
+}
+
+export function useClearAccountHistories() {
+    const { url } = useCluster();
+    const dispatch = React.useContext(DispatchContext);
+    if (!dispatch) {
+        throw new Error(`useClearAccountHistories must be used within a HistoryProvider`);
+    }
+    return React.useCallback(() => {
+        dispatch({ type: ActionType.Clear, url });
+    }, [dispatch, url]);
 }
 
 export function useAccountHistories() {
@@ -296,7 +310,7 @@ export function useFetchTransactionsForHistory() {
     );
 }
 
-export function useFetchAccountHistory(limit = 25) {
+export function useFetchAccountHistory(limit = 25, afterSlot?: number) {
     const { cluster, url } = useCluster();
     const state = React.useContext(StateContext);
     const dispatch = React.useContext(DispatchContext);
@@ -323,17 +337,17 @@ export function useFetchAccountHistory(limit = 25) {
                         pubkey,
                         cluster,
                         url,
-                        { before: oldest, limit },
+                        { afterSlot, before: oldest, limit },
                         fetchTransactions,
                         additionalSignatures,
                     ),
                 ).catch(e => Logger.error(e));
             } else {
                 fetchOnce(pubkey.toBase58(), inFlight, () =>
-                    fetchAccountHistory(dispatch, pubkey, cluster, url, { limit }, fetchTransactions),
+                    fetchAccountHistory(dispatch, pubkey, cluster, url, { afterSlot, limit }, fetchTransactions),
                 ).catch(e => Logger.error(e));
             }
         },
-        [limit, state, dispatch, cluster, url, inFlight],
+        [limit, afterSlot, state, dispatch, cluster, url, inFlight],
     );
 }

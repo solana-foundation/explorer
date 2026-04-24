@@ -17,16 +17,21 @@ export function HistoryCardHeader({
     analyticsSection,
     refresh,
     fetching,
+    actions,
 }: {
     title: string;
     analyticsSection: string;
     refresh: () => void;
     fetching: boolean;
+    actions?: React.ReactNode;
 }) {
     return (
         <div className="card-header align-items-center">
             <h3 className="card-header-title">{title}</h3>
-            <RefreshButton analyticsSection={analyticsSection} onClick={refresh} fetching={fetching} />
+            <div className="d-flex align-items-center gap-2">
+                {actions}
+                <RefreshButton analyticsSection={analyticsSection} onClick={refresh} fetching={fetching} />
+            </div>
         </div>
     );
 }
