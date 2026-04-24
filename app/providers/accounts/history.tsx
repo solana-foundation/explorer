@@ -168,6 +168,7 @@ async function fetchAccountHistory(
         before?: TransactionSignature;
         limit: number;
         afterSlot?: number;
+        beforeSlot?: number;
     },
     fetchTransactions?: boolean,
     additionalSignatures?: string[],
@@ -310,7 +311,10 @@ export function useFetchTransactionsForHistory() {
     );
 }
 
-export function useFetchAccountHistory(limit = 25, afterSlot?: number) {
+export function useFetchAccountHistory(
+    limit = 25,
+    slotFilters: { afterSlot?: number; beforeSlot?: number } = {},
+) {
     const { cluster, url } = useCluster();
     const state = React.useContext(StateContext);
     const dispatch = React.useContext(DispatchContext);
@@ -318,6 +322,8 @@ export function useFetchAccountHistory(limit = 25, afterSlot?: number) {
     if (!state || !dispatch || !inFlight) {
         throw new Error(`useFetchAccountHistory must be used within a HistoryProvider`);
     }
+
+    const { afterSlot, beforeSlot } = slotFilters;
 
     return React.useCallback(
         (pubkey: PublicKey, fetchTransactions?: boolean, refresh?: boolean) => {
@@ -337,17 +343,24 @@ export function useFetchAccountHistory(limit = 25, afterSlot?: number) {
                         pubkey,
                         cluster,
                         url,
-                        { afterSlot, before: oldest, limit },
+                        { afterSlot, before: oldest, beforeSlot, limit },
                         fetchTransactions,
                         additionalSignatures,
                     ),
                 ).catch(e => Logger.error(e));
             } else {
                 fetchOnce(pubkey.toBase58(), inFlight, () =>
-                    fetchAccountHistory(dispatch, pubkey, cluster, url, { afterSlot, limit }, fetchTransactions),
+                    fetchAccountHistory(
+                        dispatch,
+                        pubkey,
+                        cluster,
+                        url,
+                        { afterSlot, beforeSlot, limit },
+                        fetchTransactions,
+                    ),
                 ).catch(e => Logger.error(e));
             }
         },
-        [limit, afterSlot, state, dispatch, cluster, url, inFlight],
+        [limit, afterSlot, beforeSlot, state, dispatch, cluster, url, inFlight],
     );
 }

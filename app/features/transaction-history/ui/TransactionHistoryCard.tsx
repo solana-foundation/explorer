@@ -17,16 +17,17 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
-import { HistoryFilterBar, useAfterSlotParam } from '@components/account/history/HistoryFilterBar';
+import { HistoryFilterBar, useSlotFilters } from '@components/account/history/HistoryFilterBar';
 
 import { useInstructionNames } from '../lib/use-instruction-names';
 import { InstructionList, InstructionListSkeleton } from './InstructionList';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
-    const afterSlot = useAfterSlotParam();
+    const slotFilters = useSlotFilters();
+    const { afterSlot, beforeSlot } = slotFilters;
     const history = useAccountHistory(address);
-    const fetchAccountHistory = useFetchAccountHistory(25, afterSlot);
+    const fetchAccountHistory = useFetchAccountHistory(25, slotFilters);
     const clearHistories = useClearAccountHistories();
     const refresh = useCallback(() => fetchAccountHistory(pubkey, false, true), [fetchAccountHistory, pubkey]);
     const loadMore = () => fetchAccountHistory(pubkey, false);
@@ -44,17 +45,18 @@ export function TransactionHistoryCard({ address }: { address: string }) {
         }
     }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Refetch from scratch when the afterSlot filter changes. The cache is keyed by
-    // address only, so we drop the cached entries before refetching to avoid mixing
-    // pre- and post-filter results in combineFetched.
-    const previousAfterSlot = React.useRef(afterSlot);
+    // Refetch from scratch when a slot filter changes. The cache is keyed by address
+    // only, so we drop the cached entries before refetching to avoid mixing pre- and
+    // post-filter results in combineFetched.
+    const previousFilters = React.useRef({ afterSlot, beforeSlot });
     React.useEffect(() => {
-        if (previousAfterSlot.current !== afterSlot) {
-            previousAfterSlot.current = afterSlot;
+        const prev = previousFilters.current;
+        if (prev.afterSlot !== afterSlot || prev.beforeSlot !== beforeSlot) {
+            previousFilters.current = { afterSlot, beforeSlot };
             clearHistories();
             refresh();
         }
-    }, [afterSlot, clearHistories, refresh]);
+    }, [afterSlot, beforeSlot, clearHistories, refresh]);
 
     if (!history) {
         return null;
@@ -91,7 +93,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                 refresh={() => refresh()}
                 title="Transaction History"
                 analyticsSection="transaction_history_header"
-                actions={<HistoryFilterBar afterSlot={afterSlot} />}
+                actions={<HistoryFilterBar afterSlot={afterSlot} beforeSlot={beforeSlot} />}
             />
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
