@@ -11,25 +11,25 @@ export const MANGO_PROGRAM_IDS = {
 
 /** Known spot market from mainnet.1 group */
 export const SPOT_MARKETS = {
-    'MNGO/USDC': {
-        marketIndex: 0,
-        publicKey: new PublicKey('3d4rzwpy9iGdCZvgxcu7B1YocYffVLsQXPXkBZKt2zLc'),
-    },
     'BTC/USDC': {
         marketIndex: 1,
         publicKey: new PublicKey('A8YFbxQYFVqKZaoYJLLUVcQiWP7G2MeEgW5wsAQgMvFw'),
+    },
+    'MNGO/USDC': {
+        marketIndex: 0,
+        publicKey: new PublicKey('3d4rzwpy9iGdCZvgxcu7B1YocYffVLsQXPXkBZKt2zLc'),
     },
 };
 
 /** Known perp market from mainnet.1 group */
 export const PERP_MARKETS = {
-    'MNGO-PERP': {
-        marketIndex: 0,
-        publicKey: new PublicKey('4nfmQP3KmUqEJ6qJLsS3offKgE96YUB4Rp7UQvm2Fbi9'),
-    },
     'BTC-PERP': {
         marketIndex: 1,
         publicKey: new PublicKey('DtEcjPLyD4YtTBB4q8xwFZ9q49W89xZCZtJyrGebi5t8'),
+    },
+    'MNGO-PERP': {
+        marketIndex: 0,
+        publicKey: new PublicKey('4nfmQP3KmUqEJ6qJLsS3offKgE96YUB4Rp7UQvm2Fbi9'),
     },
 };
 
@@ -38,96 +38,96 @@ export const PERP_MARKETS = {
  * built via encodeMangoInstruction() from @blockworks-foundation/mango-client.
  */
 export const ENCODED_INSTRUCTIONS = {
-    Deposit: encodeMangoInstruction({ Deposit: { quantity: new BN(1_000_000) } }),
-    Withdraw: encodeMangoInstruction({ Withdraw: { quantity: new BN(500_000), allowBorrow: new BN(1) } }),
-    AddToBasket: encodeMangoInstruction({ AddToBasket: { marketIndex: new BN(2) } }),
-    PlaceSpotOrder: encodeMangoInstruction({
-        PlaceSpotOrder: {
-            side: 'buy',
-            limitPrice: new BN(42_000),
-            maxBaseQuantity: new BN(100),
-            maxQuoteQuantity: new BN(4_200_000),
-            selfTradeBehavior: 'decrementTake',
-            orderType: 'limit',
-            clientId: new BN(12_345),
-            limit: 65_535,
+    AddPerpMarket: encodeMangoInstruction({
+        AddPerpMarket: {
+            baseLotSize: new BN(100),
+            exp: 0,
+            initLeverage: new BN(10),
+            liquidationFee: new BN(50),
+            maintLeverage: new BN(20),
+            makerFee: new BN(5),
+            maxDepthBps: new BN(200),
+            mngoPerPeriod: new BN(250),
+            quoteLotSize: new BN(10),
+            rate: new BN(30),
+            takerFee: new BN(10),
+            targetPeriodLength: new BN(3600),
         },
     }),
-    CancelSpotOrder: encodeMangoInstruction({ CancelSpotOrder: { side: 'sell', orderId: new BN(42) } }),
+    AddSpotMarket: encodeMangoInstruction({
+        AddSpotMarket: {
+            initLeverage: new BN(5),
+            liquidationFee: new BN(100),
+            maintLeverage: new BN(10),
+            maxRate: new BN(150),
+            optimalRate: new BN(80),
+            optimalUtil: new BN(70),
+        },
+    }),
+    AddToBasket: encodeMangoInstruction({ AddToBasket: { marketIndex: new BN(2) } }),
+    CancelPerpOrder: encodeMangoInstruction({ CancelPerpOrder: { invalidIdOk: false, orderId: new BN(42) } }),
+    CancelSpotOrder: encodeMangoInstruction({ CancelSpotOrder: { orderId: new BN(42), side: 'sell' } }),
+    ChangePerpMarketParams: encodeMangoInstruction({
+        ChangePerpMarketParams: {
+            exp: 0,
+            expOption: false,
+            initLeverage: new BN(10),
+            initLeverageOption: true,
+            liquidationFee: new BN(0),
+            liquidationFeeOption: false,
+            maintLeverage: new BN(20),
+            maintLeverageOption: true,
+            makerFee: new BN(5),
+            makerFeeOption: true,
+            maxDepthBps: new BN(0),
+            maxDepthBpsOption: false,
+            mngoPerPeriod: new BN(0),
+            mngoPerPeriodOption: false,
+            rate: new BN(0),
+            rateOption: false,
+            takerFee: new BN(10),
+            takerFeeOption: true,
+            targetPeriodLength: new BN(0),
+            targetPeriodLengthOption: false,
+        },
+    }),
+    Deposit: encodeMangoInstruction({ Deposit: { quantity: new BN(1_000_000) } }),
     PlacePerpOrder: encodeMangoInstruction({
         PlacePerpOrder: {
+            clientOrderId: new BN(99),
+            orderType: 'postOnly',
             price: new BN(50_000),
             quantity: new BN(10),
-            clientOrderId: new BN(99),
-            side: 'buy',
-            orderType: 'postOnly',
             reduceOnly: false,
+            side: 'buy',
         },
     }),
     PlacePerpOrder2: encodeMangoInstruction({
         PlacePerpOrder2: {
-            price: new BN(60_000),
-            maxBaseQuantity: new BN(5),
-            maxQuoteQuantity: new BN(0),
             clientOrderId: new BN(200),
             expiryTimestamp: new BN(1_700_000_000),
-            side: 'sell',
-            orderType: 'limit',
-            reduceOnly: true,
             limit: 0,
+            maxBaseQuantity: new BN(5),
+            maxQuoteQuantity: new BN(0),
+            orderType: 'limit',
+            price: new BN(60_000),
+            reduceOnly: true,
+            side: 'sell',
         },
     }),
-    CancelPerpOrder: encodeMangoInstruction({ CancelPerpOrder: { orderId: new BN(42), invalidIdOk: false } }),
-    AddSpotMarket: encodeMangoInstruction({
-        AddSpotMarket: {
-            maintLeverage: new BN(10),
-            initLeverage: new BN(5),
-            liquidationFee: new BN(100),
-            optimalUtil: new BN(70),
-            optimalRate: new BN(80),
-            maxRate: new BN(150),
+    PlaceSpotOrder: encodeMangoInstruction({
+        PlaceSpotOrder: {
+            clientId: new BN(12_345),
+            limit: 65_535,
+            limitPrice: new BN(42_000),
+            maxBaseQuantity: new BN(100),
+            maxQuoteQuantity: new BN(4_200_000),
+            orderType: 'limit',
+            selfTradeBehavior: 'decrementTake',
+            side: 'buy',
         },
     }),
-    AddPerpMarket: encodeMangoInstruction({
-        AddPerpMarket: {
-            maintLeverage: new BN(20),
-            initLeverage: new BN(10),
-            liquidationFee: new BN(50),
-            makerFee: new BN(5),
-            takerFee: new BN(10),
-            baseLotSize: new BN(100),
-            quoteLotSize: new BN(10),
-            rate: new BN(30),
-            maxDepthBps: new BN(200),
-            targetPeriodLength: new BN(3600),
-            mngoPerPeriod: new BN(250),
-            exp: 0,
-        },
-    }),
-    ChangePerpMarketParams: encodeMangoInstruction({
-        ChangePerpMarketParams: {
-            maintLeverageOption: true,
-            maintLeverage: new BN(20),
-            initLeverageOption: true,
-            initLeverage: new BN(10),
-            liquidationFeeOption: false,
-            liquidationFee: new BN(0),
-            makerFeeOption: true,
-            makerFee: new BN(5),
-            takerFeeOption: true,
-            takerFee: new BN(10),
-            rateOption: false,
-            rate: new BN(0),
-            maxDepthBpsOption: false,
-            maxDepthBps: new BN(0),
-            targetPeriodLengthOption: false,
-            targetPeriodLength: new BN(0),
-            mngoPerPeriodOption: false,
-            mngoPerPeriod: new BN(0),
-            expOption: false,
-            exp: 0,
-        },
-    }),
+    Withdraw: encodeMangoInstruction({ Withdraw: { allowBorrow: new BN(1), quantity: new BN(500_000) } }),
 };
 
 /** Create a TransactionInstruction from encoded data and a program ID */

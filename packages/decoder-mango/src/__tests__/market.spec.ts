@@ -1,8 +1,8 @@
 import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { getSpotMarketFromInstruction, getPerpMarketFromInstruction, spotMarketFromIndex } from '../market';
-import { MANGO_PROGRAM_IDS, SPOT_MARKETS, PERP_MARKETS, ENCODED_INSTRUCTIONS, makeInstruction } from './fixtures';
+import { getPerpMarketFromInstruction, getSpotMarketFromInstruction, spotMarketFromIndex } from '../market';
+import { ENCODED_INSTRUCTIONS, makeInstruction, MANGO_PROGRAM_IDS, PERP_MARKETS, SPOT_MARKETS } from './fixtures';
 
 describe('getSpotMarketFromInstruction', () => {
     it('should return spot market config for known market pubkey', () => {

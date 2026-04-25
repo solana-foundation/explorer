@@ -13,24 +13,18 @@ describe('mangoGroups', () => {
         expect(mangoGroups.some(g => g.name === 'mainnet.1')).toBe(true);
     });
 
-    it.each(['mainnet', 'devnet', 'testnet'] as const)(
-        'should contain a group with the %s program ID',
-        (network) => {
-            const id = MANGO_PROGRAM_IDS[network].toBase58();
-            expect(mangoGroups.some(g => g.mangoProgramId.toBase58() === id)).toBe(true);
-        }
-    );
+    it.each(['mainnet', 'devnet', 'testnet'] as const)('should contain a group with the %s program ID', network => {
+        const id = MANGO_PROGRAM_IDS[network].toBase58();
+        expect(mangoGroups.some(g => g.mangoProgramId.toBase58() === id)).toBe(true);
+    });
 });
 
 describe('findGroupConfig', () => {
-    it.each(['mainnet', 'devnet', 'testnet'] as const)(
-        'should return a group config for %s program ID',
-        (network) => {
-            const result = findGroupConfig(MANGO_PROGRAM_IDS[network]);
-            expect(result).toBeDefined();
-            expect(result!.mangoProgramId.equals(MANGO_PROGRAM_IDS[network])).toBe(true);
-        }
-    );
+    it.each(['mainnet', 'devnet', 'testnet'] as const)('should return a group config for %s program ID', network => {
+        const result = findGroupConfig(MANGO_PROGRAM_IDS[network]);
+        expect(result).toBeDefined();
+        expect(result!.mangoProgramId.equals(MANGO_PROGRAM_IDS[network])).toBe(true);
+    });
 
     it('should return undefined for an unknown program ID', () => {
         expect(findGroupConfig(PublicKey.default)).toBeUndefined();

@@ -1,6 +1,5 @@
+import { InstructionCard } from '@components/instruction/InstructionCard';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-
-import { InstructionCard } from '../InstructionCard';
 
 export function AddOracleDetailsCard(props: {
     ix: TransactionInstruction;

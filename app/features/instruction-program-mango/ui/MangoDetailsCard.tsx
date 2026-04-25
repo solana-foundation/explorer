@@ -1,22 +1,4 @@
-import { useCluster } from '@providers/cluster';
-import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-
-import { Logger } from '@/app/shared/lib/logger';
-
-import { InstructionCard } from './InstructionCard';
-import { AddOracleDetailsCard } from './mango/AddOracleDetailsCard';
-import { AddPerpMarketDetailsCard } from './mango/AddPerpMarketDetailsCard';
-import { AddSpotMarketDetailsCard } from './mango/AddSpotMarketDetailsCard';
-import { CancelPerpOrderDetailsCard } from './mango/CancelPerpOrderDetailsCard';
-import { CancelSpotOrderDetailsCard } from './mango/CancelSpotOrderDetailsCard';
-import { ChangePerpMarketParamsDetailsCard } from './mango/ChangePerpMarketParamsDetailsCard';
-import { ConsumeEventsDetailsCard } from './mango/ConsumeEventsDetailsCard';
-import { GenericMngoAccountDetailsCard } from './mango/GenericMngoAccountDetailsCard';
-import { GenericPerpMngoDetailsCard } from './mango/GenericPerpMngoDetailsCard';
-import { GenericSpotMngoDetailsCard } from './mango/GenericSpotMngoDetailsCard';
-import { PlacePerpOrder2DetailsCard } from './mango/PlacePerpOrder2DetailsCard';
-import { PlacePerpOrderDetailsCard } from './mango/PlacePerpOrderDetailsCard';
-import { PlaceSpotOrderDetailsCard } from './mango/PlaceSpotOrderDetailsCard';
+import { InstructionCard } from '@components/instruction/InstructionCard';
 import {
     decodeAddPerpMarket,
     decodeAddSpotMarket,
@@ -28,6 +10,24 @@ import {
     decodePlaceSpotOrder,
     parseMangoInstructionTitle,
 } from '@explorer/decoder-mango';
+import { useCluster } from '@providers/cluster';
+import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
+
+import { Logger } from '@/app/shared/lib/logger';
+
+import { AddOracleDetailsCard } from './AddOracleDetailsCard';
+import { AddPerpMarketDetailsCard } from './AddPerpMarketDetailsCard';
+import { AddSpotMarketDetailsCard } from './AddSpotMarketDetailsCard';
+import { CancelPerpOrderDetailsCard } from './CancelPerpOrderDetailsCard';
+import { CancelSpotOrderDetailsCard } from './CancelSpotOrderDetailsCard';
+import { ChangePerpMarketParamsDetailsCard } from './ChangePerpMarketParamsDetailsCard';
+import { ConsumeEventsDetailsCard } from './ConsumeEventsDetailsCard';
+import { GenericMngoAccountDetailsCard } from './GenericMngoAccountDetailsCard';
+import { GenericPerpMngoDetailsCard } from './GenericPerpMngoDetailsCard';
+import { GenericSpotMngoDetailsCard } from './GenericSpotMngoDetailsCard';
+import { PlacePerpOrder2DetailsCard } from './PlacePerpOrder2DetailsCard';
+import { PlacePerpOrderDetailsCard } from './PlacePerpOrderDetailsCard';
+import { PlaceSpotOrderDetailsCard } from './PlaceSpotOrderDetailsCard';
 
 export function MangoDetailsCard(props: {
     ix: TransactionInstruction;

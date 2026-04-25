@@ -1,10 +1,8 @@
 import { Address } from '@components/common/Address';
+import { InstructionCard } from '@components/instruction/InstructionCard';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 
 import { BaseTable } from '@/app/shared/ui/Table';
-
-import { InstructionCard } from '../InstructionCard';
-
 export function GenericMngoAccountDetailsCard(props: {
     ix: TransactionInstruction;
     index: number;

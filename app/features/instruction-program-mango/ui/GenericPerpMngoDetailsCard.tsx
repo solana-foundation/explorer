@@ -1,10 +1,9 @@
 import { Address } from '@components/common/Address';
-import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import { InstructionCard } from '@components/instruction/InstructionCard';
 
 import { BaseTable } from '@/app/shared/ui/Table';
-
-import { InstructionCard } from '../InstructionCard';
 import { getPerpMarketFromInstruction } from '@explorer/decoder-mango';
+import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 
 export function GenericPerpMngoDetailsCard(props: {
     ix: TransactionInstruction;

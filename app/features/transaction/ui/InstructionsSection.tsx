@@ -62,8 +62,8 @@ import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
 import { CollapsibleSection } from './CollapsibleSection';
 
 const MangoDetailsCard = dynamic(
-    () => import('@components/instruction/MangoDetails').then(mod => mod.MangoDetailsCard),
-    { ssr: false }
+    () => import('@features/instruction-program-mango').then(mod => mod.MangoDetailsCard),
+    { ssr: false },
 );
 
 export type InstructionDetailsProps = {

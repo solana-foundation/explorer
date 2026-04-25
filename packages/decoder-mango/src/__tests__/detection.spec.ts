@@ -2,7 +2,7 @@ import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.j
 import { describe, expect, it } from 'vitest';
 
 import { isMangoInstruction, parseMangoInstructionTitle } from '../detection';
-import { ENCODED_INSTRUCTIONS, MANGO_PROGRAM_IDS, makeInstruction } from './fixtures';
+import { ENCODED_INSTRUCTIONS, makeInstruction, MANGO_PROGRAM_IDS } from './fixtures';
 
 describe('isMangoInstruction', () => {
     it.each([

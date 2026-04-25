@@ -1,18 +1,17 @@
 import { Address } from '@components/common/Address';
-import { useCluster } from '@providers/cluster';
-import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import BN from 'bn.js';
-import { useEffect, useState } from 'react';
+import { InstructionCard } from '@components/instruction/InstructionCard';
 
 import { BaseTable } from '@/app/shared/ui/Table';
-
-import { InstructionCard } from '../InstructionCard';
 import {
     getPerpMarketFromInstruction,
     getPerpMarketFromPerpMarketConfig,
     OrderLotDetails,
     PlacePerpOrder2,
 } from '@explorer/decoder-mango';
+import { useCluster } from '@providers/cluster';
+import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import BN from 'bn.js';
+import { useEffect, useState } from 'react';
 
 export function PlacePerpOrder2DetailsCard(props: {
     ix: TransactionInstruction;

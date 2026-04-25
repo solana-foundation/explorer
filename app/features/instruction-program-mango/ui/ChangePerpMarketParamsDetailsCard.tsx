@@ -1,13 +1,15 @@
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import {
+    ChangePerpMarketParams,
+    getPerpMarketFromInstruction,
+    getPerpMarketFromPerpMarketConfig,
+} from '@explorer/decoder-mango';
 import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { formatDuration } from '@utils/date';
 import { useEffect, useState } from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
-
-import { InstructionCard } from '../InstructionCard';
-import { ChangePerpMarketParams, getPerpMarketFromInstruction, getPerpMarketFromPerpMarketConfig } from '@explorer/decoder-mango';
-
 export function ChangePerpMarketParamsDetailsCard(props: {
     ix: TransactionInstruction;
     index: number;

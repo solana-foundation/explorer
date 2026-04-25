@@ -1,10 +1,9 @@
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { AddPerpMarket } from '@explorer/decoder-mango';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { formatDuration } from '@utils/date';
 
 import { BaseTable } from '@/app/shared/ui/Table';
-
-import { InstructionCard } from '../InstructionCard';
-import { AddPerpMarket } from '@explorer/decoder-mango';
 
 export function AddPerpMarketDetailsCard(props: {
     ix: TransactionInstruction;

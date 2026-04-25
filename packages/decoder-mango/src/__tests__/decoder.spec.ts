@@ -13,7 +13,7 @@ import {
     decodePlaceSpotOrder,
     decodeWithdraw,
 } from '../decoder';
-import { ENCODED_INSTRUCTIONS, MANGO_PROGRAM_IDS, makeInstruction } from './fixtures';
+import { ENCODED_INSTRUCTIONS, makeInstruction, MANGO_PROGRAM_IDS } from './fixtures';
 
 const programId = MANGO_PROGRAM_IDS.mainnet;
 
