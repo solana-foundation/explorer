@@ -6,6 +6,7 @@ export {
     decodeCancelPerpOrder,
     decodeCancelSpotOrder,
     decodeChangePerpMarketParams,
+    decodeConsumeEvents,
     decodeDeposit,
     decodePlacePerpOrder,
     decodePlacePerpOrder2,
@@ -19,6 +20,7 @@ export type {
     CancelPerpOrder,
     CancelSpotOrder,
     ChangePerpMarketParams,
+    ConsumeEvents,
     Deposit,
     OrderLotDetails,
     PlacePerpOrder,
@@ -33,3 +35,5 @@ export {
     getSpotMarketFromSpotMarketConfig,
     spotMarketFromIndex,
 } from './market';
+export type { PerpMarket, PerpMarketConfig, SpotMarketConfig } from '@blockworks-foundation/mango-client';
+export type { Market } from '@project-serum/serum';

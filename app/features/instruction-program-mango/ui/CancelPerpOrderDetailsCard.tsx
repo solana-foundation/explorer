@@ -14,9 +14,7 @@ export function CancelPerpOrderDetailsCard(props: {
     childIndex?: number;
 }) {
     const { ix, index, result, info, innerCards, childIndex } = props;
-    const mangoAccount = ix.keys[1];
-    const perpMarketAccountMeta = ix.keys[3];
-    const mangoPerpMarketConfig = getPerpMarketFromInstruction(ix, perpMarketAccountMeta);
+    const mangoPerpMarketConfig = getPerpMarketFromInstruction(ix, info.perpMarket);
 
     return (
         <InstructionCard
@@ -30,7 +28,7 @@ export function CancelPerpOrderDetailsCard(props: {
             <BaseTable.Row>
                 <BaseTable.Cell>Mango account</BaseTable.Cell>
                 <BaseTable.Cell>
-                    <Address pubkey={mangoAccount.pubkey} alignRight link />
+                    <Address pubkey={info.mangoAccount.pubkey} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
@@ -44,7 +42,7 @@ export function CancelPerpOrderDetailsCard(props: {
             <BaseTable.Row>
                 <BaseTable.Cell>Perp market address</BaseTable.Cell>
                 <BaseTable.Cell>
-                    <Address pubkey={perpMarketAccountMeta.pubkey} alignRight link />
+                    <Address pubkey={info.perpMarket.pubkey} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 

@@ -2,16 +2,12 @@ import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
 
 import { BaseTable } from '@/app/shared/ui/Table';
-import {
-    getSpotMarketFromInstruction,
-    getSpotMarketFromSpotMarketConfig,
-    OrderLotDetails,
-    PlaceSpotOrder,
-} from '@explorer/decoder-mango';
-import { useCluster } from '@providers/cluster';
+import { getSpotMarketFromInstruction, OrderLotDetails, PlaceSpotOrder } from '@explorer/decoder-mango';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import BN from 'bn.js';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
+
+import { useMangoSpotMarket } from '../model/use-mango-market';
 
 export function PlaceSpotOrderDetailsCard(props: {
     ix: TransactionInstruction;
@@ -22,34 +18,16 @@ export function PlaceSpotOrderDetailsCard(props: {
     childIndex?: number;
 }) {
     const { ix, index, result, info, innerCards, childIndex } = props;
-    const mangoAccount = ix.keys[1];
-    const spotMarketAccountMeta = ix.keys[5];
-    const mangoSpotMarketConfig = getSpotMarketFromInstruction(ix, spotMarketAccountMeta);
+    const mangoSpotMarketConfig = getSpotMarketFromInstruction(ix, info.spotMarket);
+    const spotMarket = useMangoSpotMarket(ix.programId, mangoSpotMarketConfig);
 
-    const cluster = useCluster();
-    const [orderLotDetails, setOrderLotDetails] = useState<OrderLotDetails | null>(null);
-    useEffect(() => {
-        async function getOrderLotDetails() {
-            if (mangoSpotMarketConfig === undefined) {
-                return;
-            }
-            const mangoSpotMarket = await getSpotMarketFromSpotMarketConfig(
-                ix.programId,
-                cluster.url,
-                mangoSpotMarketConfig,
-            );
-            if (mangoSpotMarket === undefined) {
-                return;
-            }
-            const maxBaseQuantity = mangoSpotMarket.baseSizeLotsToNumber(new BN(info.maxBaseQuantity.toString()));
-            const limitPrice = mangoSpotMarket.priceLotsToNumber(new BN(info.limitPrice.toString()));
-            setOrderLotDetails({
-                price: limitPrice,
-                size: maxBaseQuantity,
-            } as OrderLotDetails);
-        }
-        getOrderLotDetails();
-    }, [cluster.url, info.maxBaseQuantity, info.limitPrice, ix.programId, mangoSpotMarketConfig]);
+    const orderLotDetails = useMemo<OrderLotDetails | null>(() => {
+        if (!spotMarket) return null;
+        return {
+            price: spotMarket.priceLotsToNumber(new BN(info.limitPrice.toString())),
+            size: spotMarket.baseSizeLotsToNumber(new BN(info.maxBaseQuantity.toString())),
+        };
+    }, [spotMarket, info.limitPrice, info.maxBaseQuantity]);
 
     return (
         <InstructionCard
@@ -64,7 +42,7 @@ export function PlaceSpotOrderDetailsCard(props: {
                 <BaseTable.Cell>Mango account</BaseTable.Cell>
                 <BaseTable.Cell>
                     {' '}
-                    <Address pubkey={mangoAccount.pubkey} alignRight link />
+                    <Address pubkey={info.mangoAccount.pubkey} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
@@ -78,7 +56,7 @@ export function PlaceSpotOrderDetailsCard(props: {
             <BaseTable.Row>
                 <BaseTable.Cell>Spot market address</BaseTable.Cell>
                 <BaseTable.Cell>
-                    <Address pubkey={spotMarketAccountMeta.pubkey} alignRight link />
+                    <Address pubkey={info.spotMarket.pubkey} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 

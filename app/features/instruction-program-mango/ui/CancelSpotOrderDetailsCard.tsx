@@ -14,9 +14,7 @@ export function CancelSpotOrderDetailsCard(props: {
     childIndex?: number;
 }) {
     const { ix, index, result, info, innerCards, childIndex } = props;
-    const mangoAccount = ix.keys[2];
-    const spotMarketAccountMeta = ix.keys[4];
-    const mangoSpotMarketConfig = getSpotMarketFromInstruction(ix, spotMarketAccountMeta);
+    const mangoSpotMarketConfig = getSpotMarketFromInstruction(ix, info.spotMarket);
 
     return (
         <InstructionCard
@@ -30,7 +28,7 @@ export function CancelSpotOrderDetailsCard(props: {
             <BaseTable.Row>
                 <BaseTable.Cell>Mango account</BaseTable.Cell>
                 <BaseTable.Cell>
-                    <Address pubkey={mangoAccount.pubkey} alignRight link />
+                    <Address pubkey={info.mangoAccount.pubkey} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
@@ -44,7 +42,7 @@ export function CancelSpotOrderDetailsCard(props: {
             <BaseTable.Row>
                 <BaseTable.Cell>Spot market address</BaseTable.Cell>
                 <BaseTable.Cell>
-                    <Address pubkey={spotMarketAccountMeta.pubkey} alignRight link />
+                    <Address pubkey={info.spotMarket.pubkey} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 

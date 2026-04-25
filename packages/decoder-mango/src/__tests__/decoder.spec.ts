@@ -7,13 +7,14 @@ import {
     decodeCancelPerpOrder,
     decodeCancelSpotOrder,
     decodeChangePerpMarketParams,
+    decodeConsumeEvents,
     decodeDeposit,
     decodePlacePerpOrder,
     decodePlacePerpOrder2,
     decodePlaceSpotOrder,
     decodeWithdraw,
 } from '../decoder';
-import { ENCODED_INSTRUCTIONS, makeInstruction, MANGO_PROGRAM_IDS } from './fixtures';
+import { ENCODED_INSTRUCTIONS, makeInstruction, MANGO_PROGRAM_IDS, TEST_KEYS } from './fixtures';
 
 const programId = MANGO_PROGRAM_IDS.mainnet;
 
@@ -44,7 +45,7 @@ describe('decodeAddToBasket', () => {
 
 describe('decodePlaceSpotOrder', () => {
     it('should decode all fields', () => {
-        const ix = makeInstruction(ENCODED_INSTRUCTIONS.PlaceSpotOrder, programId);
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS.PlaceSpotOrder, programId, TEST_KEYS);
         const result = decodePlaceSpotOrder(ix);
         expect(result.side).toBe('buy');
         expect(result.limitPrice).toBe(42000);
@@ -54,21 +55,25 @@ describe('decodePlaceSpotOrder', () => {
         expect(result.orderType).toBe('limit');
         expect(result.clientId).toBe('12345');
         expect(result.limit).toBe('65535');
+        expect(result.mangoAccount.pubkey).toEqual(TEST_KEYS[1]);
+        expect(result.spotMarket.pubkey).toEqual(TEST_KEYS[5]);
     });
 });
 
 describe('decodeCancelSpotOrder', () => {
-    it('should decode orderId and side', () => {
-        const ix = makeInstruction(ENCODED_INSTRUCTIONS.CancelSpotOrder, programId);
+    it('should decode orderId, side, and account refs', () => {
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS.CancelSpotOrder, programId, TEST_KEYS);
         const result = decodeCancelSpotOrder(ix);
         expect(result.side).toBe('sell');
         expect(result.orderId).toBe('42');
+        expect(result.mangoAccount.pubkey).toEqual(TEST_KEYS[2]);
+        expect(result.spotMarket.pubkey).toEqual(TEST_KEYS[4]);
     });
 });
 
 describe('decodePlacePerpOrder', () => {
     it('should decode all fields', () => {
-        const ix = makeInstruction(ENCODED_INSTRUCTIONS.PlacePerpOrder, programId);
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS.PlacePerpOrder, programId, TEST_KEYS);
         const result = decodePlacePerpOrder(ix);
         expect(result.price).toBe(50000);
         expect(result.quantity).toBe(10);
@@ -77,12 +82,14 @@ describe('decodePlacePerpOrder', () => {
         expect(result.orderType).toBe('postOnly');
         // reduceOnly is a boolean in the layout, .toString() produces "false"
         expect(result.reduceOnly).toBe('false');
+        expect(result.mangoAccount.pubkey).toEqual(TEST_KEYS[1]);
+        expect(result.perpMarket.pubkey).toEqual(TEST_KEYS[4]);
     });
 });
 
 describe('decodePlacePerpOrder2', () => {
     it('should decode all fields', () => {
-        const ix = makeInstruction(ENCODED_INSTRUCTIONS.PlacePerpOrder2, programId);
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS.PlacePerpOrder2, programId, TEST_KEYS);
         const result = decodePlacePerpOrder2(ix);
         expect(result.price).toBe(60000);
         expect(result.maxBaseQuantity).toBe(5);
@@ -92,16 +99,20 @@ describe('decodePlacePerpOrder2', () => {
         // reduceOnly is a boolean in the layout, encoded as true
         expect(result.reduceOnly).toBe('true');
         expect(result.expiryTimestamp).toBe(1_700_000_000);
+        expect(result.mangoAccount.pubkey).toEqual(TEST_KEYS[1]);
+        expect(result.perpMarket.pubkey).toEqual(TEST_KEYS[4]);
     });
 });
 
 describe('decodeCancelPerpOrder', () => {
-    it('should decode orderId and invalidIdOk', () => {
-        const ix = makeInstruction(ENCODED_INSTRUCTIONS.CancelPerpOrder, programId);
+    it('should decode orderId, invalidIdOk, and account refs', () => {
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS.CancelPerpOrder, programId, TEST_KEYS);
         const result = decodeCancelPerpOrder(ix);
         expect(result.orderId).toBe('42');
         // invalidIdOk is a boolean in the layout, .toString() produces "false"
         expect(result.invalidIdOk).toBe('false');
+        expect(result.mangoAccount.pubkey).toEqual(TEST_KEYS[1]);
+        expect(result.perpMarket.pubkey).toEqual(TEST_KEYS[3]);
     });
 });
 
@@ -118,8 +129,8 @@ describe.each([
 });
 
 describe('decodeChangePerpMarketParams', () => {
-    it('should decode option flags and values', () => {
-        const ix = makeInstruction(ENCODED_INSTRUCTIONS.ChangePerpMarketParams, programId);
+    it('should decode option flags, values, and perpMarket ref', () => {
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS.ChangePerpMarketParams, programId, TEST_KEYS);
         const result = decodeChangePerpMarketParams(ix);
         expect(result.maintLeverageOption).toBe(true);
         expect(result.initLeverageOption).toBe(true);
@@ -130,5 +141,14 @@ describe('decodeChangePerpMarketParams', () => {
         expect(result.maxDepthBpsOption).toBe(false);
         expect(result.targetPeriodLengthOption).toBe(false);
         expect(result.mngoPerPeriodOption).toBe(false);
+        expect(result.perpMarket.pubkey).toEqual(TEST_KEYS[1]);
+    });
+});
+
+describe('decodeConsumeEvents', () => {
+    it('should extract perpMarket account ref', () => {
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS.Deposit, programId, TEST_KEYS);
+        const result = decodeConsumeEvents(ix);
+        expect(result.perpMarket.pubkey).toEqual(TEST_KEYS[2]);
     });
 });

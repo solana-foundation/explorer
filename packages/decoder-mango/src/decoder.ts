@@ -1,5 +1,5 @@
 import { MangoInstructionLayout } from '@blockworks-foundation/mango-client';
-import { TransactionInstruction } from '@solana/web3.js';
+import { AccountMeta, TransactionInstruction } from '@solana/web3.js';
 
 export type Deposit = {
     quantity: number;
@@ -48,6 +48,8 @@ export type PlaceSpotOrder = {
     orderType: string;
     clientId: string;
     limit: string;
+    mangoAccount: AccountMeta;
+    spotMarket: AccountMeta;
 };
 
 export const decodePlaceSpotOrder = (ix: TransactionInstruction): PlaceSpotOrder => {
@@ -56,11 +58,13 @@ export const decodePlaceSpotOrder = (ix: TransactionInstruction): PlaceSpotOrder
         clientId: decoded.PlaceSpotOrder.clientId.toString(),
         limit: decoded.PlaceSpotOrder.limit.toString(),
         limitPrice: decoded.PlaceSpotOrder.limitPrice.toNumber(),
+        mangoAccount: ix.keys[1],
         maxBaseQuantity: decoded.PlaceSpotOrder.maxBaseQuantity.toNumber(),
         maxQuoteQuantity: decoded.PlaceSpotOrder.maxQuoteQuantity.toNumber(),
         orderType: decoded.PlaceSpotOrder.orderType.toString(),
         selfTradeBehavior: decoded.PlaceSpotOrder.selfTradeBehavior,
         side: decoded.PlaceSpotOrder.side.toString(),
+        spotMarket: ix.keys[5],
     };
 
     return placeSpotOrder;
@@ -69,13 +73,17 @@ export const decodePlaceSpotOrder = (ix: TransactionInstruction): PlaceSpotOrder
 export type CancelSpotOrder = {
     orderId: string;
     side: string;
+    mangoAccount: AccountMeta;
+    spotMarket: AccountMeta;
 };
 
 export const decodeCancelSpotOrder = (ix: TransactionInstruction): CancelSpotOrder => {
     const decoded = MangoInstructionLayout.decode(ix.data, 0);
     const cancelSpotOrder: CancelSpotOrder = {
+        mangoAccount: ix.keys[2],
         orderId: decoded.CancelSpotOrder.orderId.toString(),
         side: decoded.CancelSpotOrder.side.toString(),
+        spotMarket: ix.keys[4],
     };
     return cancelSpotOrder;
 };
@@ -87,13 +95,17 @@ export type PlacePerpOrder = {
     side: string;
     orderType: string;
     reduceOnly: string;
+    mangoAccount: AccountMeta;
+    perpMarket: AccountMeta;
 };
 
 export const decodePlacePerpOrder = (ix: TransactionInstruction): PlacePerpOrder => {
     const decoded = MangoInstructionLayout.decode(ix.data, 0);
     const placePerpOrder: PlacePerpOrder = {
         clientOrderId: decoded.PlacePerpOrder.clientOrderId.toString(),
+        mangoAccount: ix.keys[1],
         orderType: decoded.PlacePerpOrder.orderType.toString(),
+        perpMarket: ix.keys[4],
         price: decoded.PlacePerpOrder.price.toNumber(),
         quantity: decoded.PlacePerpOrder.quantity.toNumber(),
         reduceOnly: decoded.PlacePerpOrder.reduceOnly.toString(),
@@ -111,6 +123,8 @@ export type PlacePerpOrder2 = {
     orderType: string;
     reduceOnly: string;
     expiryTimestamp: number;
+    mangoAccount: AccountMeta;
+    perpMarket: AccountMeta;
 };
 
 export const decodePlacePerpOrder2 = (ix: TransactionInstruction): PlacePerpOrder2 => {
@@ -118,8 +132,10 @@ export const decodePlacePerpOrder2 = (ix: TransactionInstruction): PlacePerpOrde
     const placePerpOrder2: PlacePerpOrder2 = {
         clientOrderId: decoded.PlacePerpOrder2.clientOrderId.toString(),
         expiryTimestamp: decoded.PlacePerpOrder2.expiryTimestamp.toNumber(),
+        mangoAccount: ix.keys[1],
         maxBaseQuantity: decoded.PlacePerpOrder2.maxBaseQuantity.toNumber(),
         orderType: decoded.PlacePerpOrder2.orderType.toString(),
+        perpMarket: ix.keys[4],
         price: decoded.PlacePerpOrder2.price.toNumber(),
         reduceOnly: decoded.PlacePerpOrder2.reduceOnly.toString(),
         side: decoded.PlacePerpOrder2.side.toString(),
@@ -131,13 +147,17 @@ export const decodePlacePerpOrder2 = (ix: TransactionInstruction): PlacePerpOrde
 export type CancelPerpOrder = {
     orderId: string;
     invalidIdOk: string;
+    mangoAccount: AccountMeta;
+    perpMarket: AccountMeta;
 };
 
 export const decodeCancelPerpOrder = (ix: TransactionInstruction): CancelPerpOrder => {
     const decoded = MangoInstructionLayout.decode(ix.data, 0);
     const cancelPerpOrder: CancelPerpOrder = {
         invalidIdOk: decoded.CancelPerpOrder.invalidIdOk.toString(),
+        mangoAccount: ix.keys[1],
         orderId: decoded.CancelPerpOrder.orderId.toString(),
+        perpMarket: ix.keys[3],
     };
     return cancelPerpOrder;
 };
@@ -161,6 +181,7 @@ export type ChangePerpMarketParams = {
     targetPeriodLength: number;
     mngoPerPeriodOption: boolean;
     mngoPerPeriod: number;
+    perpMarket: AccountMeta;
 };
 
 export const decodeChangePerpMarketParams = (ix: TransactionInstruction): ChangePerpMarketParams => {
@@ -178,6 +199,7 @@ export const decodeChangePerpMarketParams = (ix: TransactionInstruction): Change
         maxDepthBpsOption: decoded.ChangePerpMarketParams.maxDepthBpsOption,
         mngoPerPeriod: decoded.ChangePerpMarketParams.mngoPerPeriod.toString(),
         mngoPerPeriodOption: decoded.ChangePerpMarketParams.mngoPerPeriodOption,
+        perpMarket: ix.keys[1],
         rate: decoded.ChangePerpMarketParams.rate.toString(),
         rateOption: decoded.ChangePerpMarketParams.rateOption,
         takerFee: decoded.ChangePerpMarketParams.takerFee.toString(),
@@ -250,3 +272,11 @@ export type OrderLotDetails = {
     price: number;
     size: number;
 };
+
+export type ConsumeEvents = {
+    perpMarket: AccountMeta;
+};
+
+export const decodeConsumeEvents = (ix: TransactionInstruction): ConsumeEvents => ({
+    perpMarket: ix.keys[2],
+});

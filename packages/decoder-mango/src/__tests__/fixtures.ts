@@ -1,5 +1,5 @@
 import { encodeMangoInstruction } from '@blockworks-foundation/mango-client';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import BN from 'bn.js';
 
 /** Known Mango v3 program IDs from Config.ids() */
@@ -138,3 +138,5 @@ export function makeInstruction(data: Buffer, programId: PublicKey, keys: Public
         programId,
     });
 }
+
+export const TEST_KEYS: PublicKey[] = Array.from({ length: 7 }, () => Keypair.generate().publicKey);

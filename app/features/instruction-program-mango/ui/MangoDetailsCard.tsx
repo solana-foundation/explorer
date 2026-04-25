@@ -5,6 +5,7 @@ import {
     decodeCancelPerpOrder,
     decodeCancelSpotOrder,
     decodeChangePerpMarketParams,
+    decodeConsumeEvents,
     decodePlacePerpOrder,
     decodePlacePerpOrder2,
     decodePlaceSpotOrder,
@@ -65,7 +66,7 @@ export function MangoDetailsCard(props: {
             case 'PlacePerpOrder2':
                 return <PlacePerpOrder2DetailsCard info={decodePlacePerpOrder2(ix)} {...props} />;
             case 'ConsumeEvents':
-                return <ConsumeEventsDetailsCard {...props} />;
+                return <ConsumeEventsDetailsCard info={decodeConsumeEvents(ix)} {...props} />;
             case 'CancelPerpOrder':
                 return <CancelPerpOrderDetailsCard info={decodeCancelPerpOrder(ix)} {...props} />;
             case 'SettleFunds':

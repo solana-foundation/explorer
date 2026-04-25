@@ -1,13 +1,9 @@
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import {
-    ChangePerpMarketParams,
-    getPerpMarketFromInstruction,
-    getPerpMarketFromPerpMarketConfig,
-} from '@explorer/decoder-mango';
-import { useCluster } from '@providers/cluster';
+import { ChangePerpMarketParams, getPerpMarketFromInstruction } from '@explorer/decoder-mango';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { formatDuration } from '@utils/date';
-import { useEffect, useState } from 'react';
+
+import { useMangoPerpMarket } from '../model/use-mango-market';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 export function ChangePerpMarketParamsDetailsCard(props: {
@@ -20,23 +16,9 @@ export function ChangePerpMarketParamsDetailsCard(props: {
 }) {
     const { ix, index, result, info, innerCards, childIndex } = props;
 
-    const perpMarketAccountMeta = ix.keys[1];
-    const mangoPerpMarketConfig = getPerpMarketFromInstruction(ix, perpMarketAccountMeta);
-
-    const cluster = useCluster();
-    const [targetPeriodLength, setTargetPeriodLength] = useState<number | null>(null);
-    useEffect(() => {
-        async function getTargetPeriodLength() {
-            if (mangoPerpMarketConfig === undefined) {
-                return;
-            }
-            const mangoPerpMarket = await getPerpMarketFromPerpMarketConfig(cluster.url, mangoPerpMarketConfig);
-
-            setTargetPeriodLength(mangoPerpMarket.liquidityMiningInfo.targetPeriodLength.toNumber());
-        }
-
-        getTargetPeriodLength();
-    }, [cluster.url, mangoPerpMarketConfig]);
+    const mangoPerpMarketConfig = getPerpMarketFromInstruction(ix, info.perpMarket);
+    const perpMarket = useMangoPerpMarket(mangoPerpMarketConfig);
+    const targetPeriodLength = perpMarket?.liquidityMiningInfo.targetPeriodLength.toNumber() ?? null;
 
     return (
         <InstructionCard
