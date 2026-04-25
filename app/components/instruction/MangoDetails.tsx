@@ -27,7 +27,7 @@ import {
     decodePlacePerpOrder2,
     decodePlaceSpotOrder,
     parseMangoInstructionTitle,
-} from './mango/types';
+} from '@explorer/decoder-mango';
 
 export function MangoDetailsCard(props: {
     ix: TransactionInstruction;

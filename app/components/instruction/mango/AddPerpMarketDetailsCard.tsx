@@ -4,7 +4,7 @@ import { formatDuration } from '@utils/date';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InstructionCard } from '../InstructionCard';
-import { AddPerpMarket } from './types';
+import { AddPerpMarket } from '@explorer/decoder-mango';
 
 export function AddPerpMarketDetailsCard(props: {
     ix: TransactionInstruction;

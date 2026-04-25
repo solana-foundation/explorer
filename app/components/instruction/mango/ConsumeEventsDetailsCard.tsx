@@ -4,7 +4,7 @@ import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InstructionCard } from '../InstructionCard';
-import { getPerpMarketFromInstruction } from './types';
+import { getPerpMarketFromInstruction } from '@explorer/decoder-mango';
 
 export function ConsumeEventsDetailsCard(props: {
     ix: TransactionInstruction;

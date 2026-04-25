@@ -4,7 +4,7 @@ import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InstructionCard } from '../InstructionCard';
-import { CancelSpotOrder, getSpotMarketFromInstruction } from './types';
+import { CancelSpotOrder, getSpotMarketFromInstruction } from '@explorer/decoder-mango';
 
 export function CancelSpotOrderDetailsCard(props: {
     ix: TransactionInstruction;

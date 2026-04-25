@@ -6,7 +6,7 @@ import { InstructionDetails } from '@components/common/InstructionDetails';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
-import { isMangoInstruction, parseMangoInstructionTitle } from '@components/instruction/mango/types';
+import { isMangoInstruction, parseMangoInstructionTitle } from '@explorer/decoder-mango';
 import { isSerumInstruction, parseSerumInstructionTitle } from '@components/instruction/serum/types';
 import {
     isTokenLendingInstruction,

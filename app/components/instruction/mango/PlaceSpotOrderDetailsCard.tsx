@@ -12,7 +12,7 @@ import {
     getSpotMarketFromSpotMarketConfig,
     OrderLotDetails,
     PlaceSpotOrder,
-} from './types';
+} from '@explorer/decoder-mango';
 
 export function PlaceSpotOrderDetailsCard(props: {
     ix: TransactionInstruction;

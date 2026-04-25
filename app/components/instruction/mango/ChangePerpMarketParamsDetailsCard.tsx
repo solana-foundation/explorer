@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InstructionCard } from '../InstructionCard';
-import { ChangePerpMarketParams, getPerpMarketFromInstruction, getPerpMarketFromPerpMarketConfig } from './types';
+import { ChangePerpMarketParams, getPerpMarketFromInstruction, getPerpMarketFromPerpMarketConfig } from '@explorer/decoder-mango';
 
 export function ChangePerpMarketParamsDetailsCard(props: {
     ix: TransactionInstruction;

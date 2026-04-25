@@ -8,8 +8,6 @@ import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upg
 import { ComputeBudgetDetailsCard } from '@components/instruction/ComputeBudgetDetailsCard';
 import { Ed25519DetailsCard } from '@components/instruction/ed25519/Ed25519DetailsCard';
 import { isEd25519Instruction } from '@components/instruction/ed25519/types';
-import { isMangoInstruction } from '@components/instruction/mango/types';
-import { MangoDetailsCard } from '@components/instruction/MangoDetails';
 import { MemoDetailsCard } from '@components/instruction/MemoDetailsCard';
 import { ProgramMetadataIdlInstructionDetailsCard } from '@components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard';
 import { PythDetailsCard } from '@components/instruction/pyth/PythDetailsCard';
@@ -33,6 +31,7 @@ import { ZkElGamalProofDetailsCard } from '@components/instruction/ZkElGamalProo
 import { useAnchorProgram } from '@entities/idl';
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
+import { isMangoInstruction } from '@explorer/decoder-mango';
 import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
@@ -54,12 +53,18 @@ import {
 import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT, SignatureProps } from '@utils/index';
 import { intoTransactionInstruction } from '@utils/tx';
+import dynamic from 'next/dynamic';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
 
 import { CollapsibleSection } from './CollapsibleSection';
+
+const MangoDetailsCard = dynamic(
+    () => import('@components/instruction/MangoDetails').then(mod => mod.MangoDetailsCard),
+    { ssr: false }
+);
 
 export type InstructionDetailsProps = {
     tx: ParsedTransaction;
