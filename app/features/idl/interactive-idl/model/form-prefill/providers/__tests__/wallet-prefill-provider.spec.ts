@@ -65,6 +65,13 @@ const INSTRUCTION_WITH_TWO_SIGNERS: InstructionData = {
     name: 'testInstruction',
 };
 
+const EMPTY_INSTRUCTION: InstructionData = {
+    accounts: [],
+    args: [],
+    docs: [],
+    name: 'testInstruction',
+};
+
 describe('createWalletPrefillDependency', () => {
     it('should fill signer accounts with wallet address', () => {
         const { result } = renderHook(() =>
@@ -124,6 +131,45 @@ describe('createWalletPrefillDependency', () => {
         dependency.onValueChange(walletPublicKey, form);
 
         expect(form.getValues('accounts.testInstruction.group.nestedSigner')).toBe(walletAddress);
+    });
+
+    it('should return correct dependency id and getValue', () => {
+        const walletPublicKey = PublicKey.default;
+        const dependency = createWalletPrefillDependency(EMPTY_INSTRUCTION, walletPublicKey, {
+            account: () => 'accounts.testInstruction.test' as any,
+        });
+
+        expect(dependency.id).toBe('wallet');
+        expect(dependency.getValue()).toBe(walletPublicKey);
+    });
+
+    it('should update signer fields when wallet changes', () => {
+        const { result } = renderHook(() =>
+            useInstructionForm({
+                instruction: INSTRUCTION_WITH_SIGNER,
+                onSubmit: vi.fn(),
+            }),
+        );
+        const { form, fieldNames } = result.current;
+
+        const walletA = Keypair.generate().publicKey;
+        const walletB = Keypair.generate().publicKey;
+
+        // Simulate wallet connecting: create dependency with walletA, trigger fill
+        const depA = createWalletPrefillDependency(INSTRUCTION_WITH_SIGNER, walletA, {
+            account: fieldNames.account,
+        });
+        expect(depA.getValue()).toBe(walletA);
+        depA.onValueChange(depA.getValue(), form);
+        expect(form.getValues('accounts.testInstruction.signer')).toBe(walletA.toBase58());
+
+        // Simulate wallet change: new dependency with walletB, field was not dirty so it updates
+        const depB = createWalletPrefillDependency(INSTRUCTION_WITH_SIGNER, walletB, {
+            account: fieldNames.account,
+        });
+        expect(depB.getValue()).toBe(walletB);
+        depB.onValueChange(depB.getValue(), form);
+        expect(form.getValues('accounts.testInstruction.signer')).toBe(walletB.toBase58());
     });
 
     it('should ignore non-PublicKey values in onValueChange', () => {
