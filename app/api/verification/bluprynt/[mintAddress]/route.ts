@@ -2,13 +2,46 @@ import type { Address } from '@solana/kit';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
 import { NextResponse } from 'next/server';
-import { deriveAttestationPda } from 'sas-lib';
+import { deriveAttestationPda, deriveSchemaPda } from 'sas-lib';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 import { CACHE_HEADERS, ERROR_CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
 
 const RPC_TIMEOUT_MS = 15_000;
+const MAX_SCHEMA_VERSIONS = 32;
+
+// Schema PDA derivation is deterministic and can be cached at module level.
+// Key: `${credentialAddress}:${schemaName}`
+const schemaVersionCache = new Map<string, string[]>();
+
+// Connection is reused across requests to preserve the underlying HTTP keep-alive pool.
+const connection = new Connection(serverClusterUrl(Cluster.MainnetBeta, ''), {
+    commitment: 'confirmed',
+    fetchMiddleware: (info, init, fetch) => {
+        fetch(info, { ...init, signal: AbortSignal.timeout(RPC_TIMEOUT_MS) });
+    },
+});
+
+async function getSchemaVersionPdas(credentialAddress: string, schemaName: string): Promise<string[]> {
+    const cacheKey = `${credentialAddress}:${schemaName}`;
+    const cached = schemaVersionCache.get(cacheKey);
+    if (cached) return cached;
+
+    const versions = await Promise.all(
+        Array.from({ length: MAX_SCHEMA_VERSIONS }, (_, version) =>
+            deriveSchemaPda({
+                credential: credentialAddress as Address,
+                name: schemaName,
+                version,
+            }),
+        ),
+    );
+
+    const pdas = versions.map(([addr]) => addr as string);
+    schemaVersionCache.set(cacheKey, pdas);
+    return pdas;
+}
 
 type Params = {
     params: {
@@ -24,9 +57,9 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
     }
 
     const credentialAddress = process.env.BLUPRYNT_CREDENTIAL_AUTHORITY;
-    const schemaAddress = process.env.BLUPRYNT_SCHEMA_ADDRESS;
+    const schemaName = process.env.BLUPRYNT_SCHEMA_NAME;
 
-    if (!credentialAddress || !schemaAddress) {
+    if (!credentialAddress || !schemaName) {
         return NextResponse.json(
             { error: 'Bluprynt API is misconfigured' },
             { headers: NO_STORE_HEADERS, status: 500 },
@@ -34,21 +67,22 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
     }
 
     try {
-        const connection = new Connection(serverClusterUrl(Cluster.MainnetBeta, ''), {
-            commitment: 'confirmed',
-            fetchMiddleware: (info, init, fetch) => {
-                fetch(info, { ...init, signal: AbortSignal.timeout(RPC_TIMEOUT_MS) });
-            },
-        });
+        const schemaPdas = await getSchemaVersionPdas(credentialAddress, schemaName);
 
-        const [attestationAddress] = await deriveAttestationPda({
-            credential: credentialAddress as Address,
-            nonce: mintAddress as Address,
-            schema: schemaAddress as Address,
-        });
+        const attestationPdas = await Promise.all(
+            schemaPdas.map(schema =>
+                deriveAttestationPda({
+                    credential: credentialAddress as Address,
+                    nonce: mintAddress as Address,
+                    schema: schema as Address,
+                }),
+            ),
+        );
 
-        const accountInfo = await connection.getAccountInfo(new PublicKey(attestationAddress));
-        const verified = accountInfo !== null;
+        const accountInfos = await connection.getMultipleAccountsInfo(
+            attestationPdas.map(([addr]) => new PublicKey(addr)),
+        );
+        const verified = accountInfos.some(info => info !== null);
 
         return NextResponse.json({ verified }, { headers: CACHE_HEADERS });
     } catch (error) {
