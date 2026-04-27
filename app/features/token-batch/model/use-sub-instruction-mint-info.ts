@@ -1,29 +1,25 @@
 'use client';
 
 import { selectMintDecimals, selectTokenAccountMint, useAccountQuery } from '@entities/account';
-import type { AccountMeta } from '@solana/web3.js';
+import { type ParsedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { useEffect } from 'react';
 
-import type { TokenInstructionName } from '../lib/const';
 import type { MintInfo } from '../lib/types';
 import { useBatchMintRegistry } from './batch-mint-registry';
 
 // Resolves mint decimals for a single batch sub-instruction using AccountsProvider.
 //
-// - Transfer/Approve: 2 hops (token account → discover mint → read decimals)
-// - MintTo: 1 hop (accounts[0] IS the mint)
-// - Burn: 1 hop (accounts[1] IS the mint)
+// - Transfer/Approve: 2 hops (token account -> discover mint -> read decimals)
+// - MintTo: 1 hop (accounts.mint IS the mint)
+// - Burn: 1 hop (accounts.mint IS the mint)
 // - Checked variants / others: no lookup needed
 //
 // When the on-chain lookup fails (e.g. closed token account), falls back to
 // the batch-level mint registry if all other sub-instructions resolved to
 // the same mint.
-export function useSubInstructionMintInfo(
-    typeName: TokenInstructionName | 'Unknown',
-    accounts: AccountMeta[],
-): MintInfo | undefined {
+export function useSubInstructionMintInfo(parsed: ParsedTokenInstruction<string>): MintInfo | undefined {
     const registry = useBatchMintRegistry();
-    const lookup = resolveLookupAddress(typeName, accounts);
+    const lookup = resolveLookupAddress(parsed);
 
     // Hop 1: For Transfer/Approve, fetch the token account to discover its mint.
     const tokenAccountQuery = useAccountQuery(lookup?.kind === 'tokenAccount' ? [lookup.address] : undefined, {
@@ -61,20 +57,19 @@ export function useSubInstructionMintInfo(
 
 type LookupAddress = { kind: 'mint'; address: string } | { kind: 'tokenAccount'; address: string };
 
-function resolveLookupAddress(
-    typeName: TokenInstructionName | 'Unknown',
-    accounts: AccountMeta[],
-): LookupAddress | undefined {
-    switch (typeName) {
-        case 'Transfer':
-        case 'Approve':
-        case 'CloseAccount':
-        case 'Revoke':
-            return accounts[0] ? { address: accounts[0].pubkey.toBase58(), kind: 'tokenAccount' } : undefined;
-        case 'MintTo':
-            return accounts[0] ? { address: accounts[0].pubkey.toBase58(), kind: 'mint' } : undefined;
-        case 'Burn':
-            return accounts[1] ? { address: accounts[1].pubkey.toBase58(), kind: 'mint' } : undefined;
+function resolveLookupAddress(parsed: ParsedTokenInstruction<string>): LookupAddress | undefined {
+    switch (parsed.instructionType) {
+        case TokenInstruction.Transfer:
+        case TokenInstruction.Approve:
+            return { address: parsed.accounts.source.address, kind: 'tokenAccount' };
+        case TokenInstruction.CloseAccount:
+            return { address: parsed.accounts.account.address, kind: 'tokenAccount' };
+        case TokenInstruction.Revoke:
+            return { address: parsed.accounts.source.address, kind: 'tokenAccount' };
+        case TokenInstruction.MintTo:
+            return { address: parsed.accounts.mint.address, kind: 'mint' };
+        case TokenInstruction.Burn:
+            return { address: parsed.accounts.mint.address, kind: 'mint' };
         default:
             return undefined;
     }

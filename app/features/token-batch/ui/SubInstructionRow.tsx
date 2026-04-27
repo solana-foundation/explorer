@@ -1,32 +1,40 @@
 'use client';
 
 import { Address } from '@components/common/Address';
-import { HexData } from '@shared/HexData';
 import { Badge } from '@shared/ui/badge';
 import { PublicKey } from '@solana/web3.js';
+import { type ParsedTokenInstruction, TokenInstruction } from '@solana-program/token';
 
-import type { ParsedSubInstruction } from '../lib/batch-parser';
-import { type DecodedParams, decodeSubInstructionParams, type LabeledAccount } from '../lib/decode-sub-instruction';
-import type { DecodedField } from '../lib/types';
+import { formatParsedInstruction } from '../lib/format-sub-instruction';
+import type { DecodedField, DecodedParams, LabeledAccount } from '../lib/types';
 import { useSubInstructionMintInfo } from '../model/use-sub-instruction-mint-info';
 
-export function SubInstructionRow({ subIx }: { subIx: ParsedSubInstruction }) {
-    const mintInfo = useSubInstructionMintInfo(subIx.typeName, subIx.accounts);
-    const decoded = decodeSubInstructionParams(subIx.typeName, subIx.data, subIx.accounts, mintInfo);
+export function SubInstructionRow({
+    parsed,
+    extraSigners,
+    index,
+}: {
+    parsed: ParsedTokenInstruction<string>;
+    extraSigners: LabeledAccount[];
+    index: number;
+}) {
+    const mintInfo = useSubInstructionMintInfo(parsed);
+    const decoded = formatParsedInstruction(parsed, mintInfo, extraSigners);
+    const typeName = TokenInstruction[parsed.instructionType] ?? 'Unknown';
 
     return (
         <div
             className="e-border-b e-border-neutral-200 e-py-3 dark:e-border-neutral-700"
-            data-testid={`sub-ix-${subIx.index}`}
+            data-testid={`sub-ix-${index}`}
         >
             <div className="e-mb-2 e-flex e-items-center e-gap-2">
-                <span className="badge bg-success-soft">#{subIx.index + 1}</span>
+                <span className="badge bg-success-soft">#{index + 1}</span>
                 <Badge variant="info" size="sm">
-                    {subIx.typeName}
+                    {typeName}
                 </Badge>
             </div>
 
-            {decoded ? <DecodedContent decoded={decoded} /> : <RawContent subIx={subIx} />}
+            {decoded && <DecodedContent decoded={decoded} />}
         </div>
     );
 }
@@ -38,21 +46,6 @@ function DecodedContent({ decoded }: { decoded: DecodedParams }) {
                 <FieldRow key={field.label} field={field} />
             ))}
             {decoded.accounts.map((account, i) => (
-                <AccountRow key={i} account={account} />
-            ))}
-        </div>
-    );
-}
-
-function RawContent({ subIx }: { subIx: ParsedSubInstruction }) {
-    const accounts = subIx.accounts.map((account, i) => ({ ...account, label: `Account ${i}` }));
-    return (
-        <div className="e-ml-6 e-space-y-1">
-            <div className="e-flex e-items-center e-gap-2 e-text-sm">
-                <span className="e-min-w-[120px] e-text-neutral-500">Data:</span>
-                <HexData raw={subIx.data} truncate inverted />
-            </div>
-            {accounts.map((account, i) => (
                 <AccountRow key={i} account={account} />
             ))}
         </div>
