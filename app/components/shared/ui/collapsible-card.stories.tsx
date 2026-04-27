@@ -12,15 +12,8 @@ const meta: Meta<typeof CollapsibleCard> = {
         },
     },
     component: CollapsibleCard,
-    decorators: [
-        Story => (
-            <div style={{ width: '600px' }}>
-                <Story />
-            </div>
-        ),
-    ],
     parameters: {
-        layout: 'centered',
+        layout: 'padded',
     },
     title: 'Components/Shared/UI/CollapsibleCard',
 };

@@ -1,19 +1,19 @@
 import { cn } from '@shared/utils';
-import React from 'react';
+import { forwardRef, ReactNode, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
 type CollapsibleCardProps = {
-    title: React.ReactNode;
-    children: React.ReactNode;
+    title: ReactNode;
+    children: ReactNode;
     defaultExpanded?: boolean;
     className?: string;
-    headerButtons?: React.ReactNode;
+    headerButtons?: ReactNode;
     collapsible?: boolean;
 };
 
-export const CollapsibleCard = React.forwardRef<HTMLDivElement, CollapsibleCardProps>(
+export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
     ({ title, children, defaultExpanded = true, className, headerButtons, collapsible = true }, ref) => {
-        const [expanded, setExpanded] = React.useState(defaultExpanded);
+        const [expanded, setExpanded] = useState(defaultExpanded);
 
         return (
             <div ref={ref} className={cn('card', className)}>
