@@ -479,9 +479,7 @@ describe('createCodamaPdaProvider', () => {
 
         it('should handle constant seed with publicKeyValueNode', async () => {
             const idlWithPubkeySeed = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
-            const constSeedIx = idlWithPubkeySeed.program.instructions.find(
-                i => i.name === 'instructionWithConstSeed',
-            );
+            const constSeedIx = idlWithPubkeySeed.program.instructions.find(i => i.name === 'instructionWithConstSeed');
             const pdaAccount = constSeedIx?.accounts.find(a => a.name === 'pdaAccount');
             const pdaNode = (pdaAccount as any).defaultValue.pda;
 
@@ -507,9 +505,7 @@ describe('createCodamaPdaProvider', () => {
 
         it('should handle constant seed with programIdValueNode', async () => {
             const idlWithProgIdSeed = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
-            const constSeedIx = idlWithProgIdSeed.program.instructions.find(
-                i => i.name === 'instructionWithConstSeed',
-            );
+            const constSeedIx = idlWithProgIdSeed.program.instructions.find(i => i.name === 'instructionWithConstSeed');
             const pdaAccount = constSeedIx?.accounts.find(a => a.name === 'pdaAccount');
             const pdaNode = (pdaAccount as any).defaultValue.pda;
 
