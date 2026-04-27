@@ -1,6 +1,6 @@
 import type { InstructionData } from '@entities/idl';
 import { PublicKey } from '@solana/web3.js';
-import type { FieldPath, UseFormReturn } from 'react-hook-form';
+import type { UseFormReturn } from 'react-hook-form';
 
 import type { FormValue, InstructionFormData, InstructionFormFieldNames } from '../../use-instruction-form';
 import { isPrefilledAccount, WALLET_ACCOUNT_PATTERNS } from '../const';
@@ -16,7 +16,7 @@ export function createWalletPrefillDependency(
     publicKey: PublicKey | null,
     fieldNames: Pick<InstructionFormFieldNames, 'account'>,
 ): ExternalDependency<PublicKey> {
-    const signerPaths: FieldPath<InstructionFormData>[] = [];
+    const signerPaths: ReturnType<InstructionFormFieldNames['account']>[] = [];
 
     traverseInstructionAccounts(instruction, (account, parentGroup) => {
         // Skip accounts that have known addresses (e.g., system program, token program)
@@ -51,13 +51,11 @@ export function createWalletPrefillDependency(
             const walletAddress = value.toBase58();
 
             for (const path of signerPaths) {
-                const currentValue = form.getValues(path);
-                if (!currentValue || String(currentValue).trim() === '') {
-                    form.setValue(path, walletAddress as unknown as FormValue, {
-                        shouldDirty: false,
-                        shouldValidate: false,
-                    });
-                }
+                if (form.getFieldState(path).isDirty) continue;
+                form.setValue(path, walletAddress as unknown as FormValue, {
+                    shouldDirty: false,
+                    shouldValidate: false,
+                });
             }
         },
     };
