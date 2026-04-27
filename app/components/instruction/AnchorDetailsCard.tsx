@@ -19,6 +19,7 @@ import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 
 import { toBase64 } from '@/app/shared/lib/bytes';
+import { invariant } from '@/app/shared/lib/invariant';
 
 import { InstructionCard } from './InstructionCard';
 import { ProgramEventsCard } from './ProgramEventsCard';
@@ -242,8 +243,12 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                     }
 
                     // Get the account info for this actual account
-                    const accountInfo =
-                        accountMap.has(keyIndex) && ixAccounts ? ixAccounts[accountMap.get(keyIndex)!] : null;
+                    let accountInfo: FlattenedIdlAccount | null = null;
+                    if (accountMap.has(keyIndex) && ixAccounts) {
+                        const mappedIndex = accountMap.get(keyIndex);
+                        invariant(mappedIndex !== undefined, 'accountMap.has(keyIndex) guarantees the mapped index');
+                        accountInfo = ixAccounts[mappedIndex];
+                    }
 
                     // Skip nested accounts if parent group is collapsed
                     if (

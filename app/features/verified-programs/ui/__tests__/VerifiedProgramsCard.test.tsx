@@ -2,6 +2,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
+import { invariant } from '@/app/shared/lib/invariant';
+
 import { fetchProgramsPage } from '../../api';
 import type { VerifiedProgramInfo } from '../../types';
 import { VerifiedProgramsCard } from '../VerifiedProgramsCard';
@@ -239,7 +241,7 @@ describe('VerifiedProgramsCard', () => {
         expect(screen.getByText('Load More')).toBeInTheDocument();
 
         // Use a promise we can control to ensure loading state is visible
-        let resolveLoadMore: (value: any) => void;
+        let resolveLoadMore: ((value: any) => void) | undefined;
         const loadMorePromise = new Promise(resolve => {
             resolveLoadMore = resolve;
         });
@@ -253,7 +255,8 @@ describe('VerifiedProgramsCard', () => {
         });
 
         // Now resolve the promise
-        resolveLoadMore!({
+        invariant(resolveLoadMore, 'Promise executor should have assigned resolveLoadMore synchronously');
+        resolveLoadMore({
             currentPage: 2,
             programs: [mockPrograms[1], mockPrograms[2]],
             totalCount: 3,

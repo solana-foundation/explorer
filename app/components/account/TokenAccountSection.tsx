@@ -5,7 +5,7 @@ import { useRefreshAccount } from '@entities/account';
 import { isMetaplexNFT } from '@entities/nft';
 import { AccountCard } from '@features/account';
 import { isSome } from '@metaplex-foundation/umi';
-import { Account, NFTData, TokenProgramData } from '@providers/accounts';
+import { Account, NFTData } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID, useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
@@ -48,6 +48,7 @@ import { ExternalLink } from 'react-feather';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
+import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
 import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
@@ -89,11 +90,13 @@ export function TokenAccountSection({
             case 'mint': {
                 const mintInfo = create(tokenAccount.info, MintAccountInfo);
 
-                if (isMetaplexNFT(account.data.parsed, mintInfo)) {
+                const parsedData = account.data.parsed;
+                if (isMetaplexNFT(parsedData, mintInfo)) {
+                    invariant(parsedData.nftData, 'isMetaplexNFT returned true but nftData is missing');
                     return (
                         <NonFungibleTokenMintAccountCard
                             account={account}
-                            nftData={(account.data.parsed as TokenProgramData).nftData!}
+                            nftData={parsedData.nftData}
                             mintInfo={mintInfo}
                         />
                     );
