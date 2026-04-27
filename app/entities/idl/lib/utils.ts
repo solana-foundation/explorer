@@ -1,8 +1,6 @@
 import { is, string } from 'superstruct';
 
-function invariant(cond: any, message?: string): asserts cond is NonNullable<unknown> {
-    if (cond === undefined) throw new Error(message ?? 'invariant violated');
-}
+import { invariant } from '@/app/shared/lib/invariant';
 
 const Address = string();
 

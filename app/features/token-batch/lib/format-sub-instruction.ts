@@ -1,119 +1,319 @@
-// Converts raw decoded wire data into labeled, human-readable output
+// Converts SDK-parsed token instructions into labeled, human-readable output
 // for display in the UI.
 
 import { formatTokenAmount } from '@entities/token-amount';
+import { type AccountMeta, isSignerRole, isSome, isWritableRole } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
-import { AuthorityType } from '@solana-program/token-2022';
+import { AuthorityType, type ParsedTokenInstruction, TokenInstruction } from '@solana-program/token';
+import { capitalCase } from 'change-case';
 
-import type { AccountEntry, DecodedField, DecodedParams, LabeledAccount, MintInfo, RawDecoded } from './types';
+import { Logger } from '@/app/shared/lib/logger';
 
-// Account layouts: each SPL Token instruction expects a fixed sequence of named
-// accounts, optionally followed by multisig signer accounts.
-// See: https://github.com/solana-program/token/blob/main/interface/src/instruction.rs
-const ACCOUNT_ROLES: Record<RawDecoded['type'], readonly string[]> = {
-    approve: ['Source', 'Delegate', 'Owner'],
-    approveChecked: ['Source', 'Mint', 'Delegate', 'Owner'],
-    burn: ['Account', 'Mint', 'Owner/Delegate'],
-    burnChecked: ['Account', 'Mint', 'Owner/Delegate'],
-    closeAccount: ['Account', 'Destination', 'Owner'],
-    freezeAccount: ['Account', 'Mint', 'Freeze Authority'],
-    initializeAccount3: ['Account', 'Mint'],
-    initializeMint2: ['Mint'],
-    mintTo: ['Mint', 'Destination', 'Mint Authority'],
-    mintToChecked: ['Mint', 'Destination', 'Mint Authority'],
-    revoke: ['Source', 'Owner'],
-    setAuthority: ['Account', 'Current Authority'],
-    thawAccount: ['Account', 'Mint', 'Freeze Authority'],
-    transfer: ['Source', 'Destination', 'Owner/Delegate'],
-    transferChecked: ['Source', 'Mint', 'Destination', 'Owner/Delegate'],
-};
+import type { DecodedField, DecodedParams, LabeledAccount, MintInfo } from './types';
 
 // These instructions don't include the mint in their on-chain account list.
 // When the mint address has been resolved via RPC, we inject a synthetic
 // "Mint" account after the first account (index 0).
-const MINT_INJECT_TYPES = new Set<RawDecoded['type']>(['transfer', 'approve', 'closeAccount', 'revoke']);
+const MINT_INJECT_TYPES = new Set<TokenInstruction>([
+    TokenInstruction.Transfer,
+    TokenInstruction.Approve,
+    TokenInstruction.CloseAccount,
+    TokenInstruction.Revoke,
+]);
 
-export function formatDecoded(raw: RawDecoded, mintInfo?: MintInfo): DecodedParams {
-    const accounts = labelAccounts(raw.accounts, ACCOUNT_ROLES[raw.type]);
+export function formatParsedInstruction(
+    parsed: ParsedTokenInstruction<string>,
+    mintInfo?: MintInfo,
+    extraSigners?: LabeledAccount[],
+): DecodedParams | undefined {
+    try {
+        const result = formatByType(parsed, mintInfo?.decimals);
+        if (!result) return undefined;
 
-    if (mintInfo?.mint && MINT_INJECT_TYPES.has(raw.type)) {
-        accounts.splice(1, 0, {
-            isSigner: false,
-            isWritable: false,
-            label: 'Mint*',
-            pubkey: new PublicKey(mintInfo.mint),
+        const { fields, accounts } = result;
+
+        if (mintInfo?.mint && MINT_INJECT_TYPES.has(parsed.instructionType)) {
+            accounts.splice(1, 0, {
+                isSigner: false,
+                isWritable: false,
+                label: 'Mint*',
+                pubkey: new PublicKey(mintInfo.mint),
+            });
+        }
+
+        if (extraSigners?.length) {
+            accounts.push(...extraSigners);
+        }
+
+        return { accounts, fields };
+    } catch (err) {
+        Logger.error(new Error('[token-batch:format-sub-instruction] formatParsedInstruction failed', { cause: err }), {
+            instructionType: parsed.instructionType,
+            parsed,
         });
-    }
-
-    return {
-        accounts,
-        fields: formatFields(raw, mintInfo?.decimals),
-    };
-}
-
-function formatFields(raw: RawDecoded, externalDecimals?: number): DecodedField[] {
-    switch (raw.type) {
-        case 'transfer':
-        case 'approve':
-        case 'mintTo':
-        case 'burn':
-            return [
-                {
-                    label: 'Amount',
-                    value:
-                        externalDecimals === undefined
-                            ? raw.amount.toString()
-                            : formatTokenAmount({ amount: raw.amount, decimals: externalDecimals }),
-                },
-            ];
-
-        case 'transferChecked':
-        case 'approveChecked':
-        case 'mintToChecked':
-        case 'burnChecked':
-            return [
-                { label: 'Decimals', value: raw.decimals.toString() },
-                { label: 'Amount', value: formatTokenAmount({ amount: raw.amount, decimals: raw.decimals }) },
-            ];
-
-        case 'closeAccount':
-        case 'freezeAccount':
-        case 'thawAccount':
-        case 'revoke':
-            return [];
-
-        case 'initializeMint2':
-            return [
-                { label: 'Decimals', value: raw.decimals.toString() },
-                { isAddress: true, label: 'Mint Authority', value: raw.mintAuthority },
-                ...(raw.freezeAuthority
-                    ? [{ isAddress: true, label: 'Freeze Authority', value: raw.freezeAuthority }]
-                    : [{ label: 'Freeze Authority', value: '(none)' }]),
-            ];
-
-        case 'initializeAccount3':
-            return [{ isAddress: true, label: 'Owner', value: raw.owner }];
-
-        case 'setAuthority':
-            return [
-                {
-                    label: 'Authority Type',
-                    value: AuthorityType[raw.authorityType] ?? `Unknown (${raw.authorityType})`,
-                },
-                ...(raw.newAuthority
-                    ? [{ isAddress: true, label: 'New Authority', value: raw.newAuthority }]
-                    : [{ label: 'New Authority', value: '(none)' }]),
-            ];
+        return undefined;
     }
 }
 
-// SPL Token instructions support multisig owners/delegates. The `layout` defines the
-// named positional accounts; any remaining accounts are additional signers required to
-// meet the multisig threshold.
-// See: https://github.com/solana-program/token/blob/main/program/src/processor.rs#L988
-function labelAccounts(accounts: AccountEntry[], roles: readonly string[]): LabeledAccount[] {
-    return accounts.map((account, i) => ({
-        ...account,
-        label: i < roles.length ? roles[i] : `Signer ${i - roles.length + 1}`,
+function formatByType(
+    parsed: ParsedTokenInstruction<string>,
+    externalDecimals?: number,
+): { fields: DecodedField[]; accounts: LabeledAccount[] } | undefined {
+    switch (parsed.instructionType) {
+        case TokenInstruction.Transfer:
+            return {
+                accounts: labelMetas([
+                    { label: 'Source', meta: parsed.accounts.source },
+                    { label: 'Destination', meta: parsed.accounts.destination },
+                    { label: 'Owner/Delegate', meta: parsed.accounts.authority },
+                ]),
+                fields: [
+                    {
+                        label: 'Amount',
+                        value:
+                            externalDecimals === undefined
+                                ? parsed.data.amount.toString()
+                                : formatTokenAmount({ amount: parsed.data.amount, decimals: externalDecimals }),
+                    },
+                ],
+            };
+
+        case TokenInstruction.Approve:
+            return {
+                accounts: labelMetas([
+                    { label: 'Source', meta: parsed.accounts.source },
+                    { label: 'Delegate', meta: parsed.accounts.delegate },
+                    { label: 'Owner', meta: parsed.accounts.owner },
+                ]),
+                fields: [
+                    {
+                        label: 'Amount',
+                        value:
+                            externalDecimals === undefined
+                                ? parsed.data.amount.toString()
+                                : formatTokenAmount({ amount: parsed.data.amount, decimals: externalDecimals }),
+                    },
+                ],
+            };
+
+        case TokenInstruction.MintTo:
+            return {
+                accounts: labelMetas([
+                    { label: 'Mint', meta: parsed.accounts.mint },
+                    { label: 'Destination', meta: parsed.accounts.token },
+                    { label: 'Mint Authority', meta: parsed.accounts.mintAuthority },
+                ]),
+                fields: [
+                    {
+                        label: 'Amount',
+                        value:
+                            externalDecimals === undefined
+                                ? parsed.data.amount.toString()
+                                : formatTokenAmount({ amount: parsed.data.amount, decimals: externalDecimals }),
+                    },
+                ],
+            };
+
+        case TokenInstruction.Burn:
+            return {
+                accounts: labelMetas([
+                    { label: 'Account', meta: parsed.accounts.account },
+                    { label: 'Mint', meta: parsed.accounts.mint },
+                    { label: 'Owner/Delegate', meta: parsed.accounts.authority },
+                ]),
+                fields: [
+                    {
+                        label: 'Amount',
+                        value:
+                            externalDecimals === undefined
+                                ? parsed.data.amount.toString()
+                                : formatTokenAmount({ amount: parsed.data.amount, decimals: externalDecimals }),
+                    },
+                ],
+            };
+
+        case TokenInstruction.TransferChecked:
+            return {
+                accounts: labelMetas([
+                    { label: 'Source', meta: parsed.accounts.source },
+                    { label: 'Mint', meta: parsed.accounts.mint },
+                    { label: 'Destination', meta: parsed.accounts.destination },
+                    { label: 'Owner/Delegate', meta: parsed.accounts.authority },
+                ]),
+                fields: [
+                    { label: 'Decimals', value: parsed.data.decimals.toString() },
+                    {
+                        label: 'Amount',
+                        value: formatTokenAmount({ amount: parsed.data.amount, decimals: parsed.data.decimals }),
+                    },
+                ],
+            };
+
+        case TokenInstruction.ApproveChecked:
+            return {
+                accounts: labelMetas([
+                    { label: 'Source', meta: parsed.accounts.source },
+                    { label: 'Mint', meta: parsed.accounts.mint },
+                    { label: 'Delegate', meta: parsed.accounts.delegate },
+                    { label: 'Owner', meta: parsed.accounts.owner },
+                ]),
+                fields: [
+                    { label: 'Decimals', value: parsed.data.decimals.toString() },
+                    {
+                        label: 'Amount',
+                        value: formatTokenAmount({ amount: parsed.data.amount, decimals: parsed.data.decimals }),
+                    },
+                ],
+            };
+
+        case TokenInstruction.MintToChecked:
+            return {
+                accounts: labelMetas([
+                    { label: 'Mint', meta: parsed.accounts.mint },
+                    { label: 'Destination', meta: parsed.accounts.token },
+                    { label: 'Mint Authority', meta: parsed.accounts.mintAuthority },
+                ]),
+                fields: [
+                    { label: 'Decimals', value: parsed.data.decimals.toString() },
+                    {
+                        label: 'Amount',
+                        value: formatTokenAmount({ amount: parsed.data.amount, decimals: parsed.data.decimals }),
+                    },
+                ],
+            };
+
+        case TokenInstruction.BurnChecked:
+            return {
+                accounts: labelMetas([
+                    { label: 'Account', meta: parsed.accounts.account },
+                    { label: 'Mint', meta: parsed.accounts.mint },
+                    { label: 'Owner/Delegate', meta: parsed.accounts.authority },
+                ]),
+                fields: [
+                    { label: 'Decimals', value: parsed.data.decimals.toString() },
+                    {
+                        label: 'Amount',
+                        value: formatTokenAmount({ amount: parsed.data.amount, decimals: parsed.data.decimals }),
+                    },
+                ],
+            };
+
+        case TokenInstruction.CloseAccount:
+            return {
+                accounts: labelMetas([
+                    { label: 'Account', meta: parsed.accounts.account },
+                    { label: 'Destination', meta: parsed.accounts.destination },
+                    { label: 'Owner', meta: parsed.accounts.owner },
+                ]),
+                fields: [],
+            };
+
+        case TokenInstruction.FreezeAccount:
+            return {
+                accounts: labelMetas([
+                    { label: 'Account', meta: parsed.accounts.account },
+                    { label: 'Mint', meta: parsed.accounts.mint },
+                    { label: 'Freeze Authority', meta: parsed.accounts.owner },
+                ]),
+                fields: [],
+            };
+
+        case TokenInstruction.ThawAccount:
+            return {
+                accounts: labelMetas([
+                    { label: 'Account', meta: parsed.accounts.account },
+                    { label: 'Mint', meta: parsed.accounts.mint },
+                    { label: 'Freeze Authority', meta: parsed.accounts.owner },
+                ]),
+                fields: [],
+            };
+
+        case TokenInstruction.Revoke:
+            return {
+                accounts: labelMetas([
+                    { label: 'Source', meta: parsed.accounts.source },
+                    { label: 'Owner', meta: parsed.accounts.owner },
+                ]),
+                fields: [],
+            };
+
+        case TokenInstruction.SetAuthority:
+            return {
+                accounts: labelMetas([
+                    { label: 'Account', meta: parsed.accounts.owned },
+                    { label: 'Current Authority', meta: parsed.accounts.owner },
+                ]),
+                fields: [
+                    {
+                        label: 'Authority Type',
+                        value: AuthorityType[parsed.data.authorityType] ?? `Unknown (${parsed.data.authorityType})`,
+                    },
+                    ...(isSome(parsed.data.newAuthority)
+                        ? [{ isAddress: true, label: 'New Authority', value: parsed.data.newAuthority.value }]
+                        : [{ label: 'New Authority', value: '(none)' }]),
+                ],
+            };
+
+        case TokenInstruction.InitializeMint2:
+            return {
+                accounts: labelMetas([{ label: 'Mint', meta: parsed.accounts.mint }]),
+                fields: [
+                    { label: 'Decimals', value: parsed.data.decimals.toString() },
+                    { isAddress: true, label: 'Mint Authority', value: parsed.data.mintAuthority },
+                    ...(isSome(parsed.data.freezeAuthority)
+                        ? [{ isAddress: true, label: 'Freeze Authority', value: parsed.data.freezeAuthority.value }]
+                        : [{ label: 'Freeze Authority', value: '(none)' }]),
+                ],
+            };
+
+        case TokenInstruction.InitializeAccount3:
+            return {
+                accounts: labelMetas([
+                    { label: 'Account', meta: parsed.accounts.account },
+                    { label: 'Mint', meta: parsed.accounts.mint },
+                ]),
+                fields: [{ isAddress: true, label: 'Owner', value: parsed.data.owner }],
+            };
+
+        default:
+            return genericFallback(parsed);
+    }
+}
+
+// For instruction types without dedicated formatting, extract accounts
+// generically so users can still see the addresses involved.
+function genericFallback(parsed: ParsedTokenInstruction<string>): {
+    fields: DecodedField[];
+    accounts: LabeledAccount[];
+} {
+    const accounts: LabeledAccount[] = [];
+
+    if ('accounts' in parsed && parsed.accounts && typeof parsed.accounts === 'object') {
+        for (const [key, meta] of Object.entries(parsed.accounts)) {
+            // Some parsed variants have optional accounts (e.g. SyncNative.rent)
+            // that are undefined when not present on-chain.
+            if (!meta) continue;
+
+            // Object.entries erases the value type to unknown; every
+            // ParsedTokenInstruction variant stores AccountMeta here.
+            const typedMeta = meta as AccountMeta<string>;
+            accounts.push({
+                isSigner: isSignerRole(typedMeta.role),
+                isWritable: isWritableRole(typedMeta.role),
+                label: capitalCase(key),
+                pubkey: new PublicKey(typedMeta.address),
+            });
+        }
+    }
+
+    return { accounts, fields: [] };
+}
+
+function labelMetas(entries: { label: string; meta: AccountMeta<string> }[]): LabeledAccount[] {
+    return entries.map(({ label, meta }) => ({
+        isSigner: isSignerRole(meta.role),
+        isWritable: isWritableRole(meta.role),
+        label,
+        pubkey: new PublicKey(meta.address),
     }));
 }

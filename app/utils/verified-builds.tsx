@@ -1,6 +1,7 @@
 import { useAnchorProgram } from '@entities/idl';
 import { sha256 } from '@noble/hashes/sha256';
 import { Connection, PublicKey } from '@solana/web3.js';
+import { useMemo } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
 import { fromBase64, fromUtf8, toHex } from '@/app/shared/lib/bytes';
@@ -41,6 +42,15 @@ export type OsecInfo = {
     last_verified_at: string;
     is_frozen: boolean;
 };
+
+function parsePublicKey(value: string | undefined): PublicKey | null {
+    if (!value) return null;
+    try {
+        return new PublicKey(value);
+    } catch {
+        return null;
+    }
+}
 
 const TRUSTED_SIGNERS: Record<string, string> = {
     '11111111111111111111111111111111': 'Explorer',
@@ -172,7 +182,7 @@ export function useVerifiedProgram({
     // Get the first verified entry
     const verifiedData = orderedVerifiedEntries?.find(entry => entry.is_verified);
 
-    return useEnrichedOsecInfo({ options, osecInfo: verifiedData, programId });
+    return useEnrichedOsecInfo({ options, osecInfo: verifiedData, programAuthority, programId });
 }
 
 // Internal method to enrich the osec info with the verify command (requires fetching the on-chain PDA)
@@ -180,15 +190,32 @@ function useEnrichedOsecInfo({
     programId,
     osecInfo,
     options,
+    programAuthority,
 }: {
     programId: PublicKey;
     osecInfo: OsecInfo | undefined;
     options?: { suspense: boolean };
+    programAuthority: PublicKey | null;
 }) {
     const { url: clusterUrl, cluster: cluster } = useCluster();
     const connection = new Connection(clusterUrl);
 
     const { program: accountAnchorProgram } = useAnchorProgram(VERIFY_PROGRAM_ID, connection.rpcEndpoint);
+    const signerAuthorities = useMemo(
+        () =>
+            Array.from(
+                new Map(
+                    [
+                        programAuthority,
+                        parsePublicKey(osecInfo?.signer),
+                        ...Object.keys(TRUSTED_SIGNERS).map(parsePublicKey),
+                    ]
+                        .filter((key): key is PublicKey => key !== null)
+                        .map(key => [key.toBase58(), key]),
+                ).values(),
+            ),
+        [programAuthority, osecInfo?.signer],
+    );
 
     // Fetch the PDA derived from the program upgrade authority
     const {
@@ -196,27 +223,32 @@ function useEnrichedOsecInfo({
         error: pdaError,
         isLoading: isPdaLoading,
     } = useSWRImmutable(
-        accountAnchorProgram ? `pda-${programId.toBase58()}-${osecInfo?.signer}` : null,
+        accountAnchorProgram && osecInfo && signerAuthorities.length > 0
+            ? `pda-${programId.toBase58()}-${signerAuthorities.map(x => x.toBase58()).join(',')}`
+            : null,
         async () => {
             if (!osecInfo || !accountAnchorProgram) {
                 return null;
             }
 
-            try {
+            for (const pdaSeedAuthority of signerAuthorities) {
                 const [pda] = PublicKey.findProgramAddressSync(
-                    [fromUtf8('otter_verify'), new PublicKey(osecInfo.signer).toBytes(), programId.toBytes()],
+                    [fromUtf8('otter_verify'), pdaSeedAuthority.toBytes(), programId.toBytes()],
                     new PublicKey(VERIFY_PROGRAM_ID),
                 );
-
-                const pdaAccountInfo = await (accountAnchorProgram.account as any).buildParams.fetch(pda);
-                if (!pdaAccountInfo) {
-                    return null;
+                try {
+                    const pdaAccountInfo = await (accountAnchorProgram.account as any).buildParams.fetch(pda);
+                    if (pdaAccountInfo) {
+                        return pdaAccountInfo;
+                    }
+                } catch (error: unknown) {
+                    // Expected: most signer candidates won't have a matching PDA
+                    Logger.debug('[utils:verified-builds] No matching PDA for signer candidate', {
+                        error,
+                    });
                 }
-                return pdaAccountInfo;
-            } catch (error) {
-                Logger.error(error);
-                return null;
             }
+            return null;
         },
         { suspense: options?.suspense },
     );

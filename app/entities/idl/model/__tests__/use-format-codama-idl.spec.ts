@@ -1,5 +1,7 @@
 import { renderHook } from '@testing-library/react';
 
+import { invariant } from '@/app/shared/lib/invariant';
+
 // simplified versions of codama IDLs
 import minimalMock from '../../mocks/codama/simplified/minimalMock';
 import programMock1 from '../../mocks/codama/simplified/programMock1';
@@ -125,8 +127,9 @@ describe('useFormatCodamaIdl', () => {
 
         const types = result.current?.types;
         expect(types?.length).toEqual(3);
+        invariant(types, 'expected formatted IDL to contain types');
 
-        const type1 = types![0];
+        const type1 = types[0];
 
         expect(type1.name).toEqual('whirlpoolRewardInfo');
         expect(type1.fieldType?.kind).toEqual('struct');
@@ -152,7 +155,7 @@ describe('useFormatCodamaIdl', () => {
         expect(type1Field5?.name).toEqual('growthGlobalX64');
         expect(type1Field5?.type).toEqual('u128');
 
-        const type2 = types![1];
+        const type2 = types[1];
 
         expect(type2.name).toEqual('remainingAccountsInfo');
         expect(type2.fieldType?.kind).toEqual('struct');
@@ -166,7 +169,7 @@ describe('useFormatCodamaIdl', () => {
         expect(type2Field2?.name).toEqual('optionalAccounts');
         expect(type2Field2?.type).toEqual('option(array(bool, 3))');
 
-        const type3 = types![2];
+        const type3 = types[2];
 
         expect(type3.name).toEqual('accountsType');
         expect(type3.fieldType?.kind).toEqual('enum');

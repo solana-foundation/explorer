@@ -3,6 +3,7 @@
 import { AccountInfo, Connection, ParsedAccountData, PublicKey, RpcResponseAndContext } from '@solana/web3.js';
 
 import { isBuffer } from '@/app/shared/lib/bytes';
+import { invariant } from '@/app/shared/lib/invariant';
 
 interface StakeActivation {
     status: string;
@@ -238,7 +239,8 @@ export async function getStakeActivation(connection: Connection, stakeAddress: P
     } else {
         status = 'inactive';
     }
-    const inactive = BigInt(stakeAccountParsed.value!.lamports) - effective - stakeAccount.meta.rentExemptReserve;
+    invariant(stakeAccountParsed.value, 'stake account value is checked above');
+    const inactive = BigInt(stakeAccountParsed.value.lamports) - effective - stakeAccount.meta.rentExemptReserve;
 
     return {
         active: effective,

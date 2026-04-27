@@ -1,7 +1,8 @@
 import type { AnchorIdl } from '@entities/idl';
 import { formatDisplayIdl, getFormattedIdl, useFormatAnchorIdl } from '@entities/idl';
 
-import { invariant } from '../lib/invariant';
+import { invariant } from '@/app/shared/lib/invariant';
+
 import { useSearchIdl } from '../model/search';
 import { BaseFormattedIdl } from './BaseFormattedIdl';
 import type { StandardFormattedIdlProps } from './types';

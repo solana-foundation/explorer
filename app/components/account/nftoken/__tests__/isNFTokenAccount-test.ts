@@ -2,6 +2,8 @@ import { parseNFTokenNFTAccount } from '@components/account/nftoken/isNFTokenAcc
 import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
 import { PublicKey } from '@solana/web3.js';
 
+import { invariant } from '@/app/shared/lib/invariant';
+
 describe('parseNFTokenAccounts', () => {
     it('parses an NFT', () => {
         const buffer = new Uint8Array([
@@ -24,6 +26,7 @@ describe('parseNFTokenAccounts', () => {
             pubkey: new PublicKey('FagABcRBhZH27JDtu6A1Jo9woXyoznP28QujLkxkN9Hj'),
             space: buffer.length,
         });
-        expect(nftAccount!.metadata_url).toBe('https://cdn.glow.app/n/88/78ef17c1-2b5a-468e-ae8f-7403856e9f00.json');
+        invariant(nftAccount, 'expected parseNFTokenNFTAccount to return an NFT account');
+        expect(nftAccount.metadata_url).toBe('https://cdn.glow.app/n/88/78ef17c1-2b5a-468e-ae8f-7403856e9f00.json');
     });
 });
