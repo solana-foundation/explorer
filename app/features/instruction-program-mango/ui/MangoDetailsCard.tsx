@@ -23,9 +23,9 @@ import { CancelPerpOrderDetailsCard } from './CancelPerpOrderDetailsCard';
 import { CancelSpotOrderDetailsCard } from './CancelSpotOrderDetailsCard';
 import { ChangePerpMarketParamsDetailsCard } from './ChangePerpMarketParamsDetailsCard';
 import { ConsumeEventsDetailsCard } from './ConsumeEventsDetailsCard';
-import { GenericMngoAccountDetailsCard } from './GenericMngoAccountDetailsCard';
-import { GenericPerpMngoDetailsCard } from './GenericPerpMngoDetailsCard';
-import { GenericSpotMngoDetailsCard } from './GenericSpotMngoDetailsCard';
+import { GenericMangoAccountDetailsCard } from './GenericMangoAccountDetailsCard';
+import { GenericPerpMangoDetailsCard } from './GenericPerpMangoDetailsCard';
+import { GenericSpotMangoDetailsCard } from './GenericSpotMangoDetailsCard';
 import { PlacePerpOrder2DetailsCard } from './PlacePerpOrder2DetailsCard';
 import { PlacePerpOrderDetailsCard } from './PlacePerpOrderDetailsCard';
 import { PlaceSpotOrderDetailsCard } from './PlaceSpotOrderDetailsCard';
@@ -48,13 +48,13 @@ export function MangoDetailsCard(props: {
 
         switch (title) {
             case 'InitMangoAccount':
-                return <GenericMngoAccountDetailsCard mangoAccountKeyLocation={1} title={title} {...props} />;
+                return <GenericMangoAccountDetailsCard mangoAccountKeyLocation={1} title={title} {...props} />;
             case 'Deposit':
-                return <GenericMngoAccountDetailsCard mangoAccountKeyLocation={1} title={title} {...props} />;
+                return <GenericMangoAccountDetailsCard mangoAccountKeyLocation={1} title={title} {...props} />;
             case 'Withdraw':
-                return <GenericMngoAccountDetailsCard mangoAccountKeyLocation={1} title={title} {...props} />;
+                return <GenericMangoAccountDetailsCard mangoAccountKeyLocation={1} title={title} {...props} />;
             case 'InitSpotOpenOrders':
-                return <GenericMngoAccountDetailsCard mangoAccountKeyLocation={1} title={title} {...props} />;
+                return <GenericMangoAccountDetailsCard mangoAccountKeyLocation={1} title={title} {...props} />;
             case 'PlaceSpotOrder':
                 return <PlaceSpotOrderDetailsCard info={decodePlaceSpotOrder(ix)} {...props} />;
             case 'CancelSpotOrder':
@@ -71,7 +71,7 @@ export function MangoDetailsCard(props: {
                 return <CancelPerpOrderDetailsCard info={decodeCancelPerpOrder(ix)} {...props} />;
             case 'SettleFunds':
                 return (
-                    <GenericSpotMngoDetailsCard
+                    <GenericSpotMangoDetailsCard
                         accountKeyLocation={2}
                         spotMarketkeyLocation={5}
                         title={title}
@@ -80,7 +80,7 @@ export function MangoDetailsCard(props: {
                 );
             case 'RedeemMngo':
                 return (
-                    <GenericPerpMngoDetailsCard
+                    <GenericPerpMangoDetailsCard
                         mangoAccountKeyLocation={3}
                         perpMarketKeyLocation={4}
                         title={title}

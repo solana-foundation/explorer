@@ -2,23 +2,23 @@ import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
 
 import { BaseTable } from '@/app/shared/ui/Table';
-import { getSpotMarketFromInstruction } from '@explorer/decoder-mango';
+import { getPerpMarketFromInstruction } from '@explorer/decoder-mango';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 
-export function GenericSpotMngoDetailsCard(props: {
+export function GenericPerpMangoDetailsCard(props: {
     ix: TransactionInstruction;
     index: number;
     result: SignatureResult;
-    accountKeyLocation: number;
-    spotMarketkeyLocation: number;
+    mangoAccountKeyLocation: number;
+    perpMarketKeyLocation: number;
     title: string;
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
-    const { ix, index, result, accountKeyLocation, spotMarketkeyLocation, title, innerCards, childIndex } = props;
-    const mangoAccount = ix.keys[accountKeyLocation];
-    const spotMarketAccountMeta = ix.keys[spotMarketkeyLocation];
-    const mangoSpotMarketConfig = getSpotMarketFromInstruction(ix, spotMarketAccountMeta);
+    const { ix, index, result, mangoAccountKeyLocation, perpMarketKeyLocation, title, innerCards, childIndex } = props;
+    const mangoAccount = ix.keys[mangoAccountKeyLocation];
+    const perpMarketAccountMeta = ix.keys[perpMarketKeyLocation];
+    const mangoPerpMarketConfig = getPerpMarketFromInstruction(ix, perpMarketAccountMeta);
 
     return (
         <InstructionCard
@@ -36,17 +36,17 @@ export function GenericSpotMngoDetailsCard(props: {
                 </BaseTable.Cell>
             </BaseTable.Row>
 
-            {mangoSpotMarketConfig !== undefined && (
+            {mangoPerpMarketConfig !== undefined && (
                 <BaseTable.Row>
-                    <BaseTable.Cell>Spot market</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">{mangoSpotMarketConfig.name}</BaseTable.Cell>
+                    <BaseTable.Cell>Perp market</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{mangoPerpMarketConfig.name}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
 
             <BaseTable.Row>
-                <BaseTable.Cell>Spot market address</BaseTable.Cell>
+                <BaseTable.Cell>Perp market address</BaseTable.Cell>
                 <BaseTable.Cell>
-                    <Address pubkey={spotMarketAccountMeta.pubkey} alignRight link />
+                    <Address pubkey={perpMarketAccountMeta.pubkey} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>

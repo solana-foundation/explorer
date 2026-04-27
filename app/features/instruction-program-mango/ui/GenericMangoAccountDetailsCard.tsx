@@ -3,7 +3,8 @@ import { InstructionCard } from '@components/instruction/InstructionCard';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 
 import { BaseTable } from '@/app/shared/ui/Table';
-export function GenericMngoAccountDetailsCard(props: {
+
+export function GenericMangoAccountDetailsCard(props: {
     ix: TransactionInstruction;
     index: number;
     result: SignatureResult;
