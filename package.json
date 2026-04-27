@@ -8,7 +8,7 @@
         "build:info": "node scripts/update-build-info.js",
         "build-sb": "storybook build",
         "coverage": "vitest --coverage",
-        "dev": "next dev",
+        "dev": "pnpm run build:packages && next dev",
         "eslint:lint": "eslint",
         "format": "pnpm pretty:format '**/*.{ts,tsx,mts,mjs,cjs}' '*.json'",
         "format:ci": "pnpm format",
