@@ -18,7 +18,9 @@ export function useSearchNavigation(): (option: SearchItem) => void {
             const effectiveCluster = option.cluster ?? cluster;
 
             if (pathname.includes('?')) {
-                const [path, currentSearchParamsString] = pathname.split('?');
+                const qIndex = pathname.indexOf('?');
+                const path = pathname.slice(0, qIndex);
+                const currentSearchParamsString = pathname.slice(qIndex + 1);
                 const nextPath = pickClusterParams(
                     path,
                     new URLSearchParams(currentSearchParamsString),

@@ -4,6 +4,7 @@ import { is } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
+import { SearchGroup } from '../lib/filter-tabs';
 import type { SearchContext, SearchOptions, SearchProvider } from '../lib/types';
 
 const SEARCH_TIMEOUT_MS = 5_000;
@@ -43,21 +44,24 @@ export const domainSearchProvider: SearchProvider = {
 
             return [
                 {
-                    label: 'Domain Owner',
+                    label: SearchGroup.DomainOwners,
                     options: [
                         {
                             label: domainInfo.owner,
                             pathname: `/address/${domainInfo.owner}`,
+                            type: 'address',
                             value: [query],
                         },
                     ],
                 },
                 {
-                    label: 'Name Service Account',
+                    label: SearchGroup.NameServiceAccounts,
                     options: [
                         {
                             label: query,
                             pathname: `/address/${domainInfo.address}`,
+                            sublabel: domainInfo.address,
+                            type: 'address',
                             value: [query],
                         },
                     ],

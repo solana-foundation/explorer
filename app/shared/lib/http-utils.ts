@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const NO_STORE_HEADERS = { 'Cache-Control': 'no-store, max-age=0' };
+
 /**
  * True if If-None-Match implies the client has a valid copy (return 304).
  * Uses weak comparison per RFC 7232 Section 3.2 (opaque-tags match character-by-character).

@@ -1,6 +1,7 @@
 import { PUBLIC_KEY_LENGTH } from '@solana/web3.js';
 import bs58 from 'bs58';
 
+import { SearchGroup } from '../lib/filter-tabs';
 import type { SearchOptions, SearchProvider } from '../lib/types';
 
 /**
@@ -32,11 +33,12 @@ export const accountSearchProvider: SearchProvider = {
 
         return [
             {
-                label: 'Account',
+                label: SearchGroup.Accounts,
                 options: [
                     {
                         label: query,
                         pathname: `/address/${query}`,
+                        type: 'address',
                         value: [query],
                     },
                 ],

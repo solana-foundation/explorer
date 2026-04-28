@@ -1,3 +1,4 @@
+import { SearchGroup } from '../lib/filter-tabs';
 import { parseNaturalNumber } from '../lib/parse-natural-number';
 import type { SearchContext, SearchOptions, SearchProvider } from '../lib/types';
 
@@ -24,11 +25,12 @@ export const epochSearchProvider: SearchProvider = {
 
         return [
             {
-                label: 'Epoch',
+                label: SearchGroup.Epochs,
                 options: [
                     {
                         label: `Epoch #${query}`,
                         pathname: `/epoch/${query}`,
+                        type: 'epoch',
                         value: [query],
                     },
                 ],

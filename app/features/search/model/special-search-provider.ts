@@ -1,5 +1,6 @@
 import { SPECIAL_IDS } from '@/app/utils/programs';
 
+import { SearchGroup } from '../lib/filter-tabs';
 import type { SearchOptions, SearchProvider } from '../lib/types';
 
 /**
@@ -28,10 +29,12 @@ export const specialSearchProvider: SearchProvider = {
 
         return [
             {
-                label: 'Accounts',
+                label: SearchGroup.Accounts,
                 options: matchedSpecialIds.map(([id, name]) => ({
                     label: name,
                     pathname: `/address/${id}`,
+                    sublabel: id,
+                    type: 'address',
                     value: [name, id],
                 })),
             },

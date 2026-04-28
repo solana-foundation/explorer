@@ -44,6 +44,24 @@ button_clicked → receipt_viewed / no_receipt → view_tx_clicked
 
 All events are prefixed with `rcpt_`.
 
+## Search Tracking
+
+Tracks Helius-powered search usage.
+
+### Events
+
+| Event                  | Parameters                       |
+| ---------------------- | -------------------------------- |
+| `srch_performed`       | `query_length`, `results_count`  |
+| `srch_result_selected` | `result_type`, `result_verified` |
+
+All events are prefixed with `srch_`.
+
+- `query_length`: length of the trimmed search query (no raw query to avoid logging addresses/keys)
+- `results_count`: total number of results across all groups returned
+- `result_type`: entity type derived from the result pathname (e.g. `address`, `tx`, `block`, `epoch`, `validator`)
+- `result_verified`: whether the selected result has a verified badge
+
 ## Refresh Button Tracking
 
 Tracks usage of the Refresh button across the Explorer.

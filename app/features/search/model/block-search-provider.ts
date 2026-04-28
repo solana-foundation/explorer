@@ -1,3 +1,4 @@
+import { SearchGroup } from '../lib/filter-tabs';
 import { parseNaturalNumber } from '../lib/parse-natural-number';
 import type { SearchOptions, SearchProvider } from '../lib/types';
 
@@ -20,11 +21,12 @@ export const blockSearchProvider: SearchProvider = {
 
         return [
             {
-                label: 'Block',
+                label: SearchGroup.Blocks,
                 options: [
                     {
                         label: `Slot #${query}`,
                         pathname: `/block/${query}`,
+                        type: 'block',
                         value: [query],
                     },
                 ],

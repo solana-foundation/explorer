@@ -13,8 +13,8 @@ describe('epochSearchProvider', () => {
         const results = epochSearchProvider.search('100', ctx);
         expect(results).toEqual([
             {
-                label: 'Epoch',
-                options: [{ label: 'Epoch #100', pathname: '/epoch/100', value: ['100'] }],
+                label: 'Epochs',
+                options: [{ label: 'Epoch #100', pathname: '/epoch/100', type: 'epoch', value: ['100'] }],
             },
         ]);
     });

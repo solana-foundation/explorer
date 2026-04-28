@@ -1,5 +1,6 @@
 import { PROGRAM_INFO_BY_ID } from '@/app/utils/programs';
 
+import { SearchGroup } from '../lib/filter-tabs';
 import type { SearchContext, SearchOptions, SearchProvider } from '../lib/types';
 
 /**
@@ -30,10 +31,12 @@ export const programSearchProvider: SearchProvider = {
 
         return [
             {
-                label: 'Programs',
+                label: SearchGroup.Programs,
                 options: matchedPrograms.map(([address, { name }]) => ({
                     label: name,
                     pathname: `/address/${address}`,
+                    sublabel: address,
+                    type: 'address',
                     value: [name, address],
                 })),
             },

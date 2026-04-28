@@ -5,7 +5,7 @@ import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sa
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { CACHE_HEADERS, ERROR_CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
+import { CACHE_HEADERS, ERROR_CACHE_HEADERS } from '../../config';
 
 const RPC_TIMEOUT_MS = 15_000;
 
@@ -27,7 +27,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
     if (!credential) {
         return NextResponse.json(
             { error: 'Bluprynt API is misconfigured' },
-            { headers: NO_STORE_HEADERS, status: 500 },
+            { headers: ERROR_CACHE_HEADERS, status: 500 },
         );
     }
 

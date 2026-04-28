@@ -16,6 +16,7 @@ import { tokenSearchProvider } from './token-search-provider';
 import { transactionSearchProvider } from './transaction-search-provider';
 
 const allProviders: SearchProvider[] = [
+    ...(process.env.NEXT_PUBLIC_DISABLE_TOKEN_SEARCH ? [] : [tokenSearchProvider]),
     explorerUrlSearchProvider,
     programSearchProvider,
     loaderSearchProvider,
@@ -27,7 +28,6 @@ const allProviders: SearchProvider[] = [
     accountSearchProvider,
     transactionSearchProvider,
     base64TxSearchProvider,
-    tokenSearchProvider,
     domainSearchProvider,
 ];
 

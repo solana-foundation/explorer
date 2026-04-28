@@ -3,9 +3,10 @@ import { NextResponse } from 'next/server';
 import fetch, { type Response } from 'node-fetch';
 import { is, number, type } from 'superstruct';
 
+import { NO_STORE_HEADERS } from '@/app/shared/lib/http-utils';
 import { Logger } from '@/app/shared/lib/logger';
 
-import { CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
+import { CACHE_HEADERS } from '../../config';
 
 const RugCheckResponseSchema = type({
     score_normalised: number(),

@@ -1,6 +1,7 @@
 import FEATURES from '@/app/utils/feature-gate/featureGates.json';
 import type { FeatureInfoType } from '@/app/utils/feature-gate/types';
 
+import { SearchGroup } from '../lib/filter-tabs';
 import type { SearchOptions, SearchProvider } from '../lib/types';
 
 /**
@@ -29,10 +30,12 @@ export const featureGateSearchProvider: SearchProvider = {
 
         return [
             {
-                label: 'Feature Gates',
+                label: SearchGroup.FeatureGates,
                 options: features.map(feature => ({
                     label: feature.title,
                     pathname: `/address/${feature.key}`,
+                    sublabel: feature.key,
+                    type: 'address',
                     value: [feature.key],
                 })),
             },
