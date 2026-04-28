@@ -28,6 +28,7 @@ export const explorerUrlSearchProvider: SearchProvider = {
                         cluster: result.cluster,
                         label: `${result.source} — ${result.entity}`,
                         pathname: result.pathname,
+                        type: result.type,
                         value: [query],
                     },
                 ],

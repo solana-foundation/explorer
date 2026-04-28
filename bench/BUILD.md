@@ -37,6 +37,7 @@
 | Dynamic | `/api/ping/[network]` | 370 B | 190 kB |
 | Dynamic | `/api/program-metadata-idl` | 370 B | 190 kB |
 | Dynamic | `/api/receipt/price/[mintAddress]` | 370 B | 190 kB |
+| Dynamic | `/api/search` | 370 B | 190 kB |
 | Dynamic | `/api/sns-domains/[address]` | 370 B | 190 kB |
 | Dynamic | `/api/token-info` | 390 B | 1.07 MB |
 | Dynamic | `/api/verification/bluprynt/[mintAddress]` | 370 B | 190 kB |

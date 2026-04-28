@@ -1,5 +1,6 @@
 import { LOADER_IDS, type LoaderName } from '@/app/utils/programs';
 
+import { SearchGroup } from '../lib/filter-tabs';
 import type { SearchOptions, SearchProvider } from '../lib/types';
 
 const SEARCHABLE_LOADERS: LoaderName[] = ['BPF Loader', 'BPF Loader 2', 'BPF Upgradeable Loader'];
@@ -34,10 +35,12 @@ export const loaderSearchProvider: SearchProvider = {
 
         return [
             {
-                label: 'Program Loaders',
+                label: SearchGroup.ProgramLoaders,
                 options: matchedLoaders.map(([id, name]) => ({
                     label: name,
                     pathname: `/address/${id}`,
+                    sublabel: id,
+                    type: 'address',
                     value: [name, id],
                 })),
             },
