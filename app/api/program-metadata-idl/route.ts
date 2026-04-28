@@ -57,7 +57,9 @@ export async function GET(request: Request) {
         }
 
         // RPC failure means the request fundamentally failed — escalate to Sentry.
-        Logger.panic(new Error('[api:program-metadata-idl] Request failed', { cause: error }));
+        Logger.panic(new Error('[api:program-metadata-idl] Request failed', { cause: error }), {
+            sentryExtras: { cluster: clusterProp, programAddress, seed },
+        });
         return NextResponse.json({ error: errors[500] }, { status: 502 });
     }
 }

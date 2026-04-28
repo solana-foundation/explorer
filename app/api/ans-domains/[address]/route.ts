@@ -24,7 +24,9 @@ export async function GET(_request: Request, { params: { address } }: Params) {
         return NextResponse.json({ domains }, { headers: CACHE_HEADERS });
     } catch (error) {
         // RPC failure means the request fundamentally failed — escalate to Sentry.
-        Logger.panic(new Error('[api:ans-domains] Failed to fetch ANS domains', { cause: error }), { address });
+        Logger.panic(new Error('[api:ans-domains] Failed to fetch ANS domains', { cause: error }), {
+            sentryExtras: { address },
+        });
         return NextResponse.json({ domains: [] }, { headers: { 'Cache-Control': 'no-store' }, status: 500 });
     }
 }

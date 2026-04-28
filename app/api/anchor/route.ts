@@ -55,7 +55,9 @@ export async function GET(request: Request) {
         }
 
         // RPC failure means the request fundamentally failed — escalate to Sentry.
-        Logger.panic(new Error('[api:anchor] Failed to fetch IDL', { cause: error }));
+        Logger.panic(new Error('[api:anchor] Failed to fetch IDL', { cause: error }), {
+            sentryExtras: { cluster: clusterProp, programAddress },
+        });
         return NextResponse.json({ error: 'Failed to fetch IDL' }, { status: 502 });
     }
 }
