@@ -12,8 +12,8 @@ import { triggerDownloadText } from '@/app/shared/lib/triggerDownload';
 
 const DEFAULT_ENCODINGS: EncodingFormat[] = ['hex', 'base58', 'base64'];
 
-const DefaultTrigger = (
-    <Button variant="outline" size="sm" aria-label="Download">
+const DefaultTrigger = ({ disabled }: {disabled: boolean}) => (
+    <Button variant="outline" size="sm" aria-label="Download" disabled={disabled}>
         <Download size={12} />
         <span className="e-hidden md:e-inline">Download</span>
     </Button>
@@ -22,6 +22,7 @@ const DefaultTrigger = (
 export function DownloadDropdown({
     data,
     loading = false,
+    disabled = false,
     error,
     filename,
     encodings = DEFAULT_ENCODINGS,
@@ -30,30 +31,40 @@ export function DownloadDropdown({
 }: {
     data: ByteArray | undefined;
     loading?: boolean;
+    disabled?: boolean;
     error?: Error;
     filename: string;
     encodings?: EncodingFormat[];
     onOpenChange?: (open: boolean) => void;
     children?: React.ReactNode;
 }) {
+    const hasMoreThanOneEncoding = encodings.length > 1;
+
     return (
         <DropdownMenu onOpenChange={onOpenChange}>
-            <DropdownMenuTrigger asChild>{children ?? DefaultTrigger}</DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                {error ? (
-                    <DropdownMenuItem disabled>Failed to load data</DropdownMenuItem>
-                ) : (
-                    encodings.map(encoding => (
-                        <DropdownMenuItem
-                            key={encoding}
-                            disabled={loading || !data}
-                            onClick={() => data && handleDownload(data, encoding, filename)}
-                        >
-                            {loading ? `Loading ${encoding}…` : `Download ${encoding}`}
-                        </DropdownMenuItem>
-                    ))
-                )}
-            </DropdownMenuContent>
+            <DropdownMenuTrigger
+                asChild
+                onClick={hasMoreThanOneEncoding ? undefined : () => handleDownload(data!, encodings[0], filename)}
+            >
+                {children ?? DefaultTrigger({ disabled: loading || disabled })}
+            </DropdownMenuTrigger>
+            {hasMoreThanOneEncoding && (
+                <DropdownMenuContent align="end">
+                    {error ? (
+                        <DropdownMenuItem disabled>Failed to load data</DropdownMenuItem>
+                    ) : (
+                        encodings.map(encoding => (
+                            <DropdownMenuItem
+                                key={encoding}
+                                disabled={loading || !data}
+                                onClick={() => data && handleDownload(data, encoding, filename)}
+                            >
+                                {loading ? `Loading ${encoding}…` : `Download ${encoding}`}
+                            </DropdownMenuItem>
+                        ))
+                    )}
+                </DropdownMenuContent>
+            )}
         </DropdownMenu>
     );
 }

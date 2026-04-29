@@ -36,7 +36,7 @@ export function truncateHexPairs(pairs: string[]): { pairs: string[]; truncated:
 // Group pairs into alternating-color spans of SPAN_SIZE.
 // The ellipsis marker (\u2026) gets its own span.
 // When inverted, the first span is secondary-old and the second is primary (greenish first, white second).
-export function formatHexSpans(pairs: string[], options: { inverted?: boolean } = {}): HexSpan[] {
+export function formatHexSpans(pairs: string[], options: { inverted?: boolean } = {}, spanSize: number): HexSpan[] {
     const first: HexSpan['variant'] = options.inverted ? 'secondary-old' : 'primary';
     const second: HexSpan['variant'] = options.inverted ? 'primary' : 'secondary-old';
     const spans: HexSpan[] = [];
@@ -49,19 +49,18 @@ export function formatHexSpans(pairs: string[], options: { inverted?: boolean } 
             continue;
         }
 
-        const variant = pairIndex % (2 * SPAN_SIZE) === 0 ? first : second;
-        const chunk = pairs.slice(i, i + SPAN_SIZE).filter(p => p !== '\u2026');
+        const variant = pairIndex % (2 * spanSize) === 0 ? first : second;
+        const chunk = pairs.slice(i, i + spanSize).filter(p => p !== '\u2026');
         spans.push({ text: chunk.join(' '), variant });
-        pairIndex += SPAN_SIZE;
+        pairIndex += spanSize;
         i += chunk.length;
     }
 
     return spans;
 }
 
-// Group spans into rows of ROW_SIZE / SPAN_SIZE for the full hex dump view.
-export function groupHexRows(spans: HexSpan[]): HexRow[] {
-    const spansPerRow = ROW_SIZE / SPAN_SIZE;
+export function groupHexRows(spans: HexSpan[], rowSize: number, spanSize: number): HexRow[] {
+    const spansPerRow = rowSize / spanSize;
     const rows: HexRow[] = [];
     for (let i = 0; i < spans.length; i += spansPerRow) {
         rows.push(spans.slice(i, i + spansPerRow));
@@ -75,7 +74,10 @@ export function HexData({
     copyableRaw,
     truncate = false,
     inverted = false,
+    isCopyable = true,
     align = 'end',
+    spanSize = SPAN_SIZE,
+    rowSize = ROW_SIZE,
 }: {
     raw: ByteArray;
     copyableRaw?: ByteArray;
@@ -84,6 +86,9 @@ export function HexData({
     inverted?: boolean;
     // 'end' is the legacy default (right-aligned in table cells).
     align?: 'start' | 'end';
+    isCopyable?: boolean;
+    spanSize?: number;
+    rowSize?: number;
 }) {
     if (!raw || raw.length === 0) {
         // Same <pre> wrapper as the populated path so the row height matches.
@@ -98,16 +103,26 @@ export function HexData({
     const copyText = copyableRaw ? toHex(copyableRaw) : hexString;
 
     if (truncate) {
-        return <TruncatedContent hexString={hexString} copyText={copyText} raw={raw} inverted={inverted} />;
+        return (
+            <TruncatedContent
+                hexString={hexString}
+                copyText={copyText}
+                raw={raw}
+                inverted={inverted}
+                spanSize={spanSize}
+            />
+        );
     }
 
     return (
         <FullContent
             hexString={hexString}
-            copyText={copyText}
+            copyText={isCopyable ? copyText : null}
             className={className}
             inverted={inverted}
             align={align}
+            spanSize={spanSize}
+            rowSize={rowSize}
         />
     );
 }
@@ -141,14 +156,16 @@ function TruncatedContent({
     copyText,
     raw,
     inverted,
+    spanSize,
 }: {
     hexString: string;
-    copyText: string;
+    copyText: string | null;
     raw: ByteArray;
     inverted: boolean;
+    spanSize: number;
 }) {
     const { pairs: truncatedPairs, truncated } = truncateHexPairs(splitHexPairs(hexString));
-    const spans = formatHexSpans(truncatedPairs, { inverted });
+    const spans = formatHexSpans(truncatedPairs, { inverted }, spanSize);
 
     return (
         <span className="e-inline-flex e-items-center e-gap-2 e-text-sm">
@@ -177,15 +194,19 @@ function FullContent({
     className,
     inverted,
     align,
+    spanSize,
+    rowSize,
 }: {
     hexString: string;
-    copyText: string;
+    copyText: string | null;
     className?: string;
     inverted: boolean;
     align: 'start' | 'end';
+    spanSize: number;
+    rowSize: number;
 }) {
-    const spans = formatHexSpans(splitHexPairs(hexString), { inverted });
-    const rows = groupHexRows(spans);
+    const spans = formatHexSpans(splitHexPairs(hexString), { inverted }, spanSize);
+    const rows = groupHexRows(spans, rowSize, spanSize);
 
     const divs = rows.map((row, rowIdx) => (
         <div key={rowIdx}>
@@ -201,12 +222,16 @@ function FullContent({
         <>
             <div className={cn('e-hidden lg:e-flex', fullContentVariants({ align }), className)}>
                 <Copyable text={copyText}>
-                    <pre className="e-mb-0 e-inline-block e-text-left">{divs}</pre>
+                    <pre className="e-mb-0 e-inline-block e-bg-heavy-metal-900 e-p-1.5 e-text-left e-text-xs">
+                        {divs}
+                    </pre>
                 </Copyable>
             </div>
             <div className={cn('e-flex lg:e-hidden', fullContentVariants({ align }), className)}>
                 <Copyable text={copyText}>
-                    <pre className="e-mb-0 e-inline-block e-text-left">{divs}</pre>
+                    <pre className="e-mb-0 e-inline-block e-bg-heavy-metal-900 e-p-1.5 e-text-left e-text-xs">
+                        {divs}
+                    </pre>
                 </Copyable>
             </div>
         </>

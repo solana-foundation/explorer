@@ -50,11 +50,13 @@ export function Copyable({ text, children }: { text: string | null; children?: R
 
     return (
         <>
-            <span className="font-size-tiny me-2" style={{ fontSize: '12px' }}>
-                <span className={textColor}>
-                    <CopyIcon />
+            {Boolean(text) && (
+                <span className="font-size-tiny me-2" style={{ fontSize: '12px' }}>
+                    <span className={textColor}>
+                        <CopyIcon />
+                    </span>
                 </span>
-            </span>
+            )}
             {children}
         </>
     );

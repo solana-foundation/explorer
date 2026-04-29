@@ -1,7 +1,7 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
 import type { Account } from '@providers/accounts';
-import { HexData } from '@shared/HexData';
+import { RawDataField } from '@shared/RawDataField';
 
 export type BaseRawAccountRowsProps = {
     account: Account;
@@ -41,19 +41,11 @@ export function BaseRawAccountRows({ account, rawData, isLoading }: BaseRawAccou
                 <td className="text-lg-end">{account.executable ? 'Yes' : 'No'}</td>
             </tr>
             <tr>
-                <td>Account Data (Hex)</td>
-                <td className="text-lg-end">
-                    {isLoading ? (
-                        <span className="spinner-grow spinner-grow-sm me-2" />
-                    ) : rawData ? (
-                        rawData.length > 0 ? (
-                            <HexData raw={rawData} />
-                        ) : (
-                            <span>No data</span>
-                        )
-                    ) : (
-                        <span>Account data unavailable</span>
-                    )}
+                <td>Raw Data</td>
+                <td>
+                    <div className="e-flex e-justify-start md:e-justify-end">
+                        <RawDataField data={rawData} filename={account.pubkey.toBase58()} loading={isLoading} />
+                    </div>
                 </td>
             </tr>
         </>
