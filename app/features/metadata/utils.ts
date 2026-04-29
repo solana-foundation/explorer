@@ -1,8 +1,9 @@
+import Logger from '@utils/logger';
+import { CID } from 'multiformats/cid';
+
+const IPFS_GATEWAY = 'https://ipfs.io/ipfs';
+
 export const getProxiedUri = (uri: string): string | '' => {
-    const isProxyEnabled = process.env.NEXT_PUBLIC_METADATA_ENABLED === 'true';
-
-    if (!isProxyEnabled) return uri;
-
     // handle empty addresses as that is likely the case for metadata
     if (uri === '') return '';
 
@@ -13,7 +14,38 @@ export const getProxiedUri = (uri: string): string | '' => {
         throw new Error(`Could not construct URL for "${uri}"`);
     }
 
+    const isProxyEnabled = process.env.NEXT_PUBLIC_METADATA_ENABLED === 'true';
+
+    if (url.protocol === 'ipfs:') {
+        const gatewayUri = resolveIpfsUri(url);
+        if (gatewayUri === '') return '';
+        return isProxyEnabled ? proxyUri(gatewayUri) : gatewayUri;
+    }
+
+    if (!isProxyEnabled) return uri;
+
     if (!['http:', 'https:'].includes(url.protocol)) return uri;
 
-    return `/api/metadata/proxy?uri=${encodeURIComponent(uri)}`;
+    return proxyUri(uri);
+};
+
+const resolveIpfsUri = (url: URL): string => {
+    // eslint-disable-next-line no-restricted-syntax -- Strips redundant "ipfs/" prefix from the path for a clean gateway URL.
+    const path = (url.host + url.pathname).replace(/^ipfs\//, '');
+    if (!verifyCID(path)) {
+        Logger.warn(`[metadata] Cannot fetch a malformed CID: ${path}`);
+        return '';
+    }
+    return `${IPFS_GATEWAY}/${path}${url.search}`;
+};
+
+const proxyUri = (uri: string): string => `/api/metadata/proxy?uri=${encodeURIComponent(uri)}`;
+
+const verifyCID = (cid: string): boolean => {
+    try {
+        CID.parse(cid);
+        return true;
+    } catch {
+        return false;
+    }
 };
