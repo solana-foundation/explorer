@@ -25,7 +25,10 @@ export async function GET(_request: Request, { params: { domain } }: Params) {
 
         return NextResponse.json(domainInfo, { headers: CACHE_HEADERS });
     } catch (error) {
-        Logger.error(error, { domain });
+        // RPC failure means the request fundamentally failed — escalate to Sentry.
+        Logger.panic(new Error('[api:domain-info] Failed to resolve domain', { cause: error }), {
+            sentryExtras: { domain },
+        });
         return NextResponse.json(null, { headers: NO_CACHE_HEADERS, status: 500 });
     }
 }
