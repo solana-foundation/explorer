@@ -6,7 +6,8 @@ import { deriveAttestationPda, deriveSchemaPda } from 'sas-lib';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { CACHE_HEADERS, ERROR_CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
+import { CACHE_HEADERS, ERROR_CACHE_HEADERS } from '../../config';
+import { BLUPRYNT_CONFIG } from '../config';
 
 const RPC_TIMEOUT_MS = 15_000;
 const MAX_SCHEMA_VERSIONS = 32;
@@ -44,21 +45,11 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
         return NextResponse.json({ error: 'Invalid mint address' }, { status: 400 });
     }
 
-    const credentialAddress = process.env.BLUPRYNT_CREDENTIAL_AUTHORITY;
-    const schemaName = process.env.BLUPRYNT_SCHEMA_NAME;
-
-    if (!credentialAddress || !schemaName) {
-        return NextResponse.json(
-            { error: 'Bluprynt API is misconfigured' },
-            { headers: NO_STORE_HEADERS, status: 500 },
-        );
-    }
-
     try {
-        const credentialAddr = address(credentialAddress);
+        const credentialAddr = address(BLUPRYNT_CONFIG.credentialAuthority);
         const mintAddr = address(mintAddress);
 
-        const schemaPdas = await getSchemaVersionPdas(credentialAddr, schemaName);
+        const schemaPdas = await getSchemaVersionPdas(credentialAddr, BLUPRYNT_CONFIG.schemaName);
 
         const attestationPdas = await Promise.all(
             schemaPdas.map(schema =>

@@ -32,16 +32,17 @@ vi.mock('@solana/web3.js', async () => {
     };
 });
 
+vi.mock('../config', () => ({
+    BLUPRYNT_CONFIG: {
+        credentialAuthority: 'FygHgyQWuSHP9ob7Bt64gGrzRsuuxUbnAiKKeZDtCKeQ',
+        schemaName: 'Test Schema',
+    },
+}));
+
 const { GET } = await import('../[mintAddress]/route');
 
 describe('Bluprynt API Route', () => {
-    beforeEach(() => {
-        vi.stubEnv('BLUPRYNT_CREDENTIAL_AUTHORITY', 'test-credential');
-        vi.stubEnv('BLUPRYNT_SCHEMA_NAME', 'Test Schema');
-    });
-
     afterEach(() => {
-        vi.unstubAllEnvs();
         vi.clearAllMocks();
     });
 
@@ -49,20 +50,6 @@ describe('Bluprynt API Route', () => {
         const response = await callRoute('not-a-valid-key');
         expect(response.status).toBe(400);
         expect(await response.json()).toEqual({ error: 'Invalid mint address' });
-    });
-
-    it('should return 500 when credential authority is missing', async () => {
-        vi.stubEnv('BLUPRYNT_CREDENTIAL_AUTHORITY', '');
-        const response = await callRoute(VALID_MINT);
-        expect(response.status).toBe(500);
-        expect(await response.json()).toEqual({ error: 'Bluprynt API is misconfigured' });
-    });
-
-    it('should return 500 when schema name is missing', async () => {
-        vi.stubEnv('BLUPRYNT_SCHEMA_NAME', '');
-        const response = await callRoute(VALID_MINT);
-        expect(response.status).toBe(500);
-        expect(await response.json()).toEqual({ error: 'Bluprynt API is misconfigured' });
     });
 
     it('should return verified true when any attestation account exists', async () => {
