@@ -16,19 +16,25 @@ import { fetchOnce } from '@utils/fetch-once';
 import { withBackoff } from '@utils/with-backoff';
 import React from 'react';
 
+import { mergeTransactionMap } from '@/app/entities/transaction-data';
 import { Logger } from '@/app/shared/lib/logger';
 
 type TransactionMap = Map<string, ParsedTransactionWithMeta>;
+type FailedTransactionSignatures = Set<string>;
+type InstructionCountMap = Map<string, number>;
 
 type AccountHistory = {
     fetched: ConfirmedSignatureInfo[];
+    instructionCountMap?: InstructionCountMap;
     transactionMap?: TransactionMap;
+    failedTransactionSignatures?: FailedTransactionSignatures;
     foundOldest: boolean;
 };
 
 type HistoryUpdate = {
     history?: AccountHistory;
     transactionMap?: TransactionMap;
+    failedTransactionSignatures?: FailedTransactionSignatures;
     before?: TransactionSignature;
 };
 
@@ -59,17 +65,42 @@ function combineFetched(
     return fetched;
 }
 
-function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | undefined) {
-    if (update?.history === undefined) return history;
-
-    let transactionMap = history?.transactionMap || new Map();
-    if (update.transactionMap) {
-        transactionMap = new Map([...Array.from(transactionMap), ...Array.from(update.transactionMap)]);
+function mergeFailedTransactionSignatures(
+    current: FailedTransactionSignatures | undefined,
+    update: FailedTransactionSignatures | undefined,
+) {
+    if (!update) {
+        return current ?? new Set<string>();
     }
 
+    return new Set([...(current ?? []), ...update]);
+}
+
+function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | undefined) {
+    if (update?.history === undefined) {
+        // Support transactionMap-only updates from background lazy fetches
+        if ((update?.transactionMap || update?.failedTransactionSignatures) && history) {
+            const transactionMap = mergeTransactionMap(history.transactionMap, update.transactionMap);
+            const failedTransactionSignatures = mergeFailedTransactionSignatures(
+                history.failedTransactionSignatures,
+                update.failedTransactionSignatures,
+            );
+            return { ...history, failedTransactionSignatures, transactionMap };
+        }
+        return history;
+    }
+
+    const transactionMap = mergeTransactionMap(history?.transactionMap, update.transactionMap);
+    const failedTransactionSignatures = mergeFailedTransactionSignatures(
+        update.before === undefined ? undefined : history?.failedTransactionSignatures,
+        update.failedTransactionSignatures,
+    );
+
     return {
+        failedTransactionSignatures,
         fetched: combineFetched(update.history.fetched, history?.fetched, update?.before),
         foundOldest: update?.history?.foundOldest || history?.foundOldest || false,
+        instructionCountMap: mergeInstructionCountMap(history?.instructionCountMap, update.history.instructionCountMap),
         transactionMap,
     };
 }
@@ -98,22 +129,70 @@ export function HistoryProvider({ children }: HistoryProviderProps) {
     );
 }
 
-async function fetchParsedTransactions(url: string, transactionSignatures: string[]) {
+async function fetchParsedTransactions(url: string, cluster: Cluster, transactionSignatures: string[]) {
     const connection = new Connection(url);
-    const results = await fetchAll(transactionSignatures, signature =>
-        withBackoff(() =>
-            connection.getParsedTransaction(signature, {
-                maxSupportedTransactionVersion: 0,
-            }),
-        ),
-    );
-    const transactionMap = new Map<string, ParsedTransactionWithMeta>();
-    results.forEach((tx, i) => {
-        if (tx !== null) {
-            transactionMap.set(transactionSignatures[i], tx);
+    const results = await fetchAll(transactionSignatures, async signature => {
+        try {
+            const transaction = await withBackoff(() =>
+                connection.getParsedTransaction(signature, {
+                    maxSupportedTransactionVersion: 0,
+                }),
+            );
+
+            return { signature, transaction };
+        } catch (error) {
+            if (cluster !== Cluster.Custom) {
+                Logger.error(error, { signature, url });
+            }
+            return { signature, transaction: null };
         }
     });
-    return transactionMap;
+
+    const transactionMap = new Map<string, ParsedTransactionWithMeta>();
+    const failedTransactionSignatures = new Set<string>();
+
+    results.forEach(({ signature, transaction }) => {
+        if (transaction !== null) {
+            transactionMap.set(signature, transaction);
+        } else {
+            failedTransactionSignatures.add(signature);
+        }
+    });
+
+    return { failedTransactionSignatures, transactionMap };
+}
+
+async function fetchTransactionInstructionCounts(
+    url: string,
+    cluster: Cluster,
+    signatures: string[],
+): Promise<InstructionCountMap> {
+    if (signatures.length === 0) return new Map();
+    const connection = new Connection(url);
+    try {
+        const results = await connection.getTransactions(signatures, { maxSupportedTransactionVersion: 0 });
+        const countMap: InstructionCountMap = new Map();
+        signatures.forEach((sig, i) => {
+            const tx = results[i];
+            countMap.set(sig, tx?.transaction.message.compiledInstructions.length ?? 0);
+        });
+        return countMap;
+    } catch (error) {
+        if (cluster !== Cluster.Custom) {
+            Logger.error(error, { url });
+        }
+        return new Map();
+    }
+}
+
+function mergeInstructionCountMap(
+    current: InstructionCountMap | undefined,
+    incoming: InstructionCountMap | undefined,
+): InstructionCountMap | undefined {
+    if (!incoming && !current) return undefined;
+    if (!incoming) return current;
+    if (!current) return incoming;
+    return new Map([...current, ...incoming]);
 }
 
 async function fetchAccountHistory(
@@ -152,11 +231,21 @@ async function fetchAccountHistory(
         status = FetchStatus.FetchFailed;
     }
 
+    let instructionCountMap: InstructionCountMap | undefined;
+    if (history?.fetched) {
+        instructionCountMap = await fetchTransactionInstructionCounts(
+            url,
+            cluster,
+            history.fetched.map(s => s.signature),
+        );
+    }
+
+    let failedTransactionSignatures;
     let transactionMap;
     if (fetchTransactions && history?.fetched) {
         try {
             const signatures = history.fetched.map(signature => signature.signature).concat(additionalSignatures || []);
-            transactionMap = await fetchParsedTransactions(url, signatures);
+            ({ failedTransactionSignatures, transactionMap } = await fetchParsedTransactions(url, cluster, signatures));
         } catch (error) {
             if (cluster !== Cluster.Custom) {
                 Logger.error(error, { url });
@@ -168,7 +257,8 @@ async function fetchAccountHistory(
     dispatch({
         data: {
             before: options?.before,
-            history,
+            failedTransactionSignatures,
+            history: history ? { ...history, instructionCountMap } : undefined,
             transactionMap,
         },
         key: pubkey.toBase58(),
@@ -198,14 +288,57 @@ export function useAccountHistory(address: string): Cache.CacheEntry<AccountHist
     return context.entries[address];
 }
 
+function getUnfetchedSignaturesFromHistory(history: AccountHistory): string[] {
+    const existingMap = history.transactionMap ?? new Map<string, ParsedTransactionWithMeta>();
+    const failedSigs = history.failedTransactionSignatures ?? new Set<string>();
+    return history.fetched.map(info => info.signature).filter(sig => !existingMap.has(sig) && !failedSigs.has(sig));
+}
+
 function getUnfetchedSignatures(before: Cache.CacheEntry<AccountHistory>) {
-    if (!before.data?.transactionMap) {
+    if (!before.data) {
         return [];
     }
+    return getUnfetchedSignaturesFromHistory(before.data);
+}
 
-    const existingMap = before.data.transactionMap;
-    const allSignatures = before.data.fetched.map(signatureInfo => signatureInfo.signature);
-    return allSignatures.filter(signature => !existingMap.has(signature));
+export function useFetchTransactionsForHistory() {
+    const { cluster, url } = useCluster();
+    const state = React.useContext(StateContext);
+    const dispatch = React.useContext(DispatchContext);
+    const inFlight = React.useContext(InFlightContext);
+    if (!state || !dispatch || !inFlight) {
+        throw new Error(`useFetchTransactionsForHistory must be used within a HistoryProvider`);
+    }
+
+    return React.useCallback(
+        (pubkey: PublicKey, history: AccountHistory) => {
+            const unfetched = getUnfetchedSignaturesFromHistory(history);
+            if (unfetched.length === 0) return;
+
+            const key = `${pubkey.toBase58()}:transactions`;
+            fetchOnce(key, inFlight, async () => {
+                try {
+                    const { failedTransactionSignatures, transactionMap } = await fetchParsedTransactions(
+                        url,
+                        cluster,
+                        unfetched,
+                    );
+                    dispatch({
+                        data: { failedTransactionSignatures, transactionMap },
+                        key: pubkey.toBase58(),
+                        status: FetchStatus.Fetched,
+                        type: ActionType.Update,
+                        url,
+                    });
+                } catch (error) {
+                    if (cluster !== Cluster.Custom) {
+                        Logger.error(error, { url });
+                    }
+                }
+            }).catch(e => Logger.error(e));
+        },
+        [cluster, url, dispatch, inFlight],
+    );
 }
 
 export function useFetchAccountHistory(limit = 25) {
