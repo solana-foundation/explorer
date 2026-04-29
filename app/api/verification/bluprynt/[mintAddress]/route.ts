@@ -1,4 +1,4 @@
-import type { Address } from '@solana/kit';
+import { type Address, address } from '@solana/kit';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
 import { NextResponse } from 'next/server';
@@ -11,11 +11,6 @@ import { CACHE_HEADERS, ERROR_CACHE_HEADERS, NO_STORE_HEADERS } from '../../conf
 const RPC_TIMEOUT_MS = 15_000;
 const MAX_SCHEMA_VERSIONS = 32;
 
-// Schema PDA derivation is deterministic and can be cached at module level.
-// Key: `${credentialAddress}:${schemaName}`
-const schemaVersionCache = new Map<string, string[]>();
-
-// Connection is reused across requests to preserve the underlying HTTP keep-alive pool.
 const connection = new Connection(serverClusterUrl(Cluster.MainnetBeta, ''), {
     commitment: 'confirmed',
     fetchMiddleware: (info, init, fetch) => {
@@ -23,24 +18,17 @@ const connection = new Connection(serverClusterUrl(Cluster.MainnetBeta, ''), {
     },
 });
 
-async function getSchemaVersionPdas(credentialAddress: string, schemaName: string): Promise<string[]> {
-    const cacheKey = `${credentialAddress}:${schemaName}`;
-    const cached = schemaVersionCache.get(cacheKey);
-    if (cached) return cached;
-
+async function getSchemaVersionPdas(credentialAddress: Address, schemaName: string): Promise<Address[]> {
     const versions = await Promise.all(
         Array.from({ length: MAX_SCHEMA_VERSIONS }, (_, version) =>
             deriveSchemaPda({
-                credential: credentialAddress as Address,
+                credential: credentialAddress,
                 name: schemaName,
                 version,
             }),
         ),
     );
-
-    const pdas = versions.map(([addr]) => addr as string);
-    schemaVersionCache.set(cacheKey, pdas);
-    return pdas;
+    return versions.map(([addr]) => addr);
 }
 
 type Params = {
@@ -67,14 +55,17 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
     }
 
     try {
-        const schemaPdas = await getSchemaVersionPdas(credentialAddress, schemaName);
+        const credentialAddr = address(credentialAddress);
+        const mintAddr = address(mintAddress);
+
+        const schemaPdas = await getSchemaVersionPdas(credentialAddr, schemaName);
 
         const attestationPdas = await Promise.all(
             schemaPdas.map(schema =>
                 deriveAttestationPda({
-                    credential: credentialAddress as Address,
-                    nonce: mintAddress as Address,
-                    schema: schema as Address,
+                    credential: credentialAddr,
+                    nonce: mintAddr,
+                    schema,
                 }),
             ),
         );

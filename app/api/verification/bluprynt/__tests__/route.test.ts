@@ -9,8 +9,8 @@ const MOCK_SCHEMA_PDA = 'Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS';
 const MOCK_ATTESTATION_PDA = '7UX2i7SucgLMQcfZ75s3VXmZZY4YRUyJN9X1RgfMoDUi';
 
 const mockGetMultipleAccountsInfo = vi.fn();
-const mockDeriveSchemaPda = vi.fn().mockResolvedValue([MOCK_SCHEMA_PDA]);
-const mockDeriveAttestationPda = vi.fn().mockResolvedValue([MOCK_ATTESTATION_PDA]);
+const mockDeriveSchemaPda = vi.fn().mockResolvedValue([MOCK_SCHEMA_PDA, 255]);
+const mockDeriveAttestationPda = vi.fn().mockResolvedValue([MOCK_ATTESTATION_PDA, 255]);
 
 vi.mock('sas-lib', () => ({
     deriveAttestationPda: mockDeriveAttestationPda,
