@@ -33,6 +33,13 @@ export function getIdlVersion(idl: SupportedIdl): IdlVersion {
 }
 
 /**
+ * Returns the IDL standard name: 'Codama' or 'Anchor'.
+ */
+export function getIdlStandard(idl: SupportedIdl): 'Codama' | 'Anchor' {
+    return getSerdeIdlSpecType(idl) === 'codama' ? 'Codama' : 'Anchor';
+}
+
+/**
  * Returns the IDL spec from metadata.spec for Anchor IDLs.
  * Returns null for legacy or codama IDLs.
  */

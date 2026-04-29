@@ -33,7 +33,7 @@ describe('useFormPrefill', () => {
         expect(result.current).toBeUndefined();
     });
 
-    it('should trigger onValueChange when dependency value changes', async () => {
+    it('should trigger onValueChange when dependency value changes', () => {
         const { form } = setup();
         const onValueChange = vi.fn();
         const dependency: ExternalDependency<string> = {
@@ -64,7 +64,7 @@ describe('useFormPrefill', () => {
         expect(onValueChange).toHaveBeenCalledTimes(2);
     });
 
-    it('should not trigger onValueChange when dependency value has not changed', async () => {
+    it('should not trigger onValueChange when dependency value has not changed', () => {
         const { form } = setup();
         const onValueChange = vi.fn();
         const dependency: ExternalDependency<string> = {
@@ -94,7 +94,7 @@ describe('useFormPrefill', () => {
         expect(onValueChange).toHaveBeenCalledTimes(1);
     });
 
-    it('should trigger onValueChange for dependencies with watchesFormValues when form values change', async () => {
+    it('should trigger onValueChange for dependencies with watchesFormValues when form values change', () => {
         const { form } = setup();
         const onValueChange = vi.fn();
         const dependency: ExternalDependency<string> = {
@@ -124,7 +124,7 @@ describe('useFormPrefill', () => {
         expect(onValueChange.mock.calls.length).toBeGreaterThan(initialCallCount);
     });
 
-    it('should handle multiple dependencies independently', async () => {
+    it('should handle multiple dependencies independently', () => {
         const { form } = setup();
         const onValueChange1 = vi.fn();
         const onValueChange2 = vi.fn();
@@ -166,7 +166,7 @@ describe('useFormPrefill', () => {
         expect(onValueChange2).toHaveBeenCalledTimes(1);
     });
 
-    it('should pass current value and form to onValueChange', async () => {
+    it('should pass current value and form to onValueChange', () => {
         const { form } = setup();
         const onValueChange = vi.fn();
         const dependency: ExternalDependency<string> = {

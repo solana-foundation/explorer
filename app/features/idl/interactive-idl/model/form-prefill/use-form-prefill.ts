@@ -6,7 +6,6 @@ import type { UseFormPrefillOptions } from './types';
 /**
  * Hook that manages form prefill logic:
  * - Watches external dependencies and auto-fills fields when they change
- * - Watches form values for dependencies that need to react to form changes (e.g., PDAs)
  */
 export function useFormPrefill({ form, config }: UseFormPrefillOptions): void {
     const externalDependencyRefs = useRef<Map<string, unknown>>(new Map());

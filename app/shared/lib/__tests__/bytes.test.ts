@@ -307,6 +307,11 @@ describe('bytes helpers', () => {
                 expect(Array.from(fromHex('0x1'))).toEqual([0x01]);
             });
 
+            it('should throw on invalid hex characters', () => {
+                expect(() => fromHex('zzzz')).toThrow();
+                expect(() => fromHex('0xgg')).toThrow();
+            });
+
             describe('fallback', () => {
                 // @ts-expect-error Intentionally accessing non-standard property for testing
                 const originalFromHex = Uint8Array['fromHex'];
@@ -331,6 +336,11 @@ describe('bytes helpers', () => {
                 it('should handle binary data with all byte values', () => {
                     const decoded = fromHex(allByteValuesHex);
                     expect(Array.from(decoded)).toEqual(allByteValues);
+                });
+
+                it('should throw with position info on invalid hex', () => {
+                    expect(() => fromHex('zzzz')).toThrow('Invalid hex character at position 0: "zz"');
+                    expect(() => fromHex('deadzz')).toThrow('Invalid hex character at position 4: "zz"');
                 });
             });
 

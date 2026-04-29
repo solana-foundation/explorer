@@ -12,6 +12,7 @@ import { Logger } from '@/app/shared/lib/logger';
 
 export enum IdlVariant {
     Anchor = 'anchor',
+    Codama = 'codama',
     ProgramMetadata = 'program-metadata',
 }
 

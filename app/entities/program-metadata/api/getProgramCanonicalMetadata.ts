@@ -30,6 +30,11 @@ export async function getProgramMetadataIdl(programAddress: string, url: string)
     return getProgramCanonicalMetadata(programAddress, IDL_SEED, url);
 }
 
+export const CODAMA_IDL_SEED = 'codama:idl';
+export async function getProgramMetadataCodamaIdl(programAddress: string, url: string) {
+    return getProgramCanonicalMetadata(programAddress, CODAMA_IDL_SEED, url);
+}
+
 export const SECURITY_TXT_SEED = 'security';
 export async function getProgramMetadataSecurityTxt(programAddress: string, url: string) {
     return getProgramCanonicalMetadata(programAddress, SECURITY_TXT_SEED, url);
