@@ -50,6 +50,7 @@ import useSWR from 'swr';
 
 import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
+import { getSafeExternalUrl } from '@/app/shared/lib/safe-external-url';
 import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { TokenExtensionsStatusRow } from './token-extensions/TokenExtensionsStatusRow';
@@ -134,6 +135,9 @@ function FungibleTokenMintAccountCard({
 }) {
     const fetchInfo = useRefreshAccount();
 
+    const websiteUrl = getSafeExternalUrl(tokenInfo?.extensions?.website);
+    const bridgeContractUrl = getSafeExternalUrl(tokenInfo?.extensions?.bridgeContract);
+    const assetContractUrl = getSafeExternalUrl(tokenInfo?.extensions?.assetContract);
     const bridgeContractAddress = getEthAddress(tokenInfo?.extensions?.bridgeContract);
     const assetContractAddress = getEthAddress(tokenInfo?.extensions?.assetContract);
 
@@ -181,10 +185,14 @@ function FungibleTokenMintAccountCard({
                 <tr>
                     <td>Website</td>
                     <td className="text-md-end">
-                        <a rel="noopener noreferrer" target="_blank" href={tokenInfo.extensions.website}>
-                            {tokenInfo.extensions.website}
-                            <ExternalLink className="align-text-top ms-2" size={13} />
-                        </a>
+                        {websiteUrl ? (
+                            <a rel="noopener noreferrer" target="_blank" href={websiteUrl}>
+                                {tokenInfo.extensions.website}
+                                <ExternalLink className="align-text-top ms-2" size={13} />
+                            </a>
+                        ) : (
+                            tokenInfo.extensions.website
+                        )}
                     </td>
                 </tr>
             )}
@@ -219,9 +227,13 @@ function FungibleTokenMintAccountCard({
                     <td>Bridge Contract</td>
                     <td className="text-md-end">
                         <Copyable text={bridgeContractAddress}>
-                            <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
-                                {bridgeContractAddress}
-                            </a>
+                            {bridgeContractUrl ? (
+                                <a href={bridgeContractUrl} target="_blank" rel="noreferrer">
+                                    {bridgeContractAddress}
+                                </a>
+                            ) : (
+                                <span>{bridgeContractAddress}</span>
+                            )}
                         </Copyable>
                     </td>
                 </tr>
@@ -231,9 +243,13 @@ function FungibleTokenMintAccountCard({
                     <td>Bridged Asset Contract</td>
                     <td className="text-md-end">
                         <Copyable text={assetContractAddress}>
-                            <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
-                                {assetContractAddress}
-                            </a>
+                            {assetContractUrl ? (
+                                <a href={assetContractUrl} target="_blank" rel="noreferrer">
+                                    {assetContractAddress}
+                                </a>
+                            ) : (
+                                <span>{assetContractAddress}</span>
+                            )}
                         </Copyable>
                     </td>
                 </tr>
@@ -255,6 +271,7 @@ function NonFungibleTokenMintAccountCard({
     mintInfo: MintAccountInfo;
 }) {
     const fetchInfo = useRefreshAccount();
+    const externalUrl = getSafeExternalUrl(nftData?.json?.external_url);
 
     const collectionOpt = nftData.metadata.collection;
     const collection = collectionOpt && isSome(collectionOpt) ? collectionOpt.value : null;
@@ -332,10 +349,14 @@ function NonFungibleTokenMintAccountCard({
                 <tr>
                     <td>Website</td>
                     <td className="text-md-end">
-                        <a rel="noopener noreferrer" target="_blank" href={nftData.json.external_url}>
-                            {nftData.json.external_url}
-                            <ExternalLink className="align-text-top ms-2" size={13} />
-                        </a>
+                        {externalUrl ? (
+                            <a rel="noopener noreferrer" target="_blank" href={externalUrl}>
+                                {nftData.json.external_url}
+                                <ExternalLink className="align-text-top ms-2" size={13} />
+                            </a>
+                        ) : (
+                            nftData.json.external_url
+                        )}
                     </td>
                 </tr>
             )}
@@ -956,6 +977,7 @@ export function TokenExtensionRow(
         }
         case 'tokenMetadata': {
             const extension = create(tokenExtension.state, TokenMetadata);
+            const uri = getSafeExternalUrl(extension.uri);
             return (
                 <>
                     {headerStyle === 'header' ? <HHeader name="Metadata" /> : null}
@@ -984,8 +1006,8 @@ export function TokenExtensionRow(
                     <tr>
                         <td>URI</td>
                         <td className="text-md-end">
-                            {extension.uri.startsWith('http') ? (
-                                <a rel="noopener noreferrer" target="_blank" href={extension.uri}>
+                            {uri ? (
+                                <a rel="noopener noreferrer" target="_blank" href={uri}>
                                     {extension.uri}
                                     <ExternalLink className="align-text-top ms-2" size={13} />
                                 </a>

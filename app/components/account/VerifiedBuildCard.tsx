@@ -6,6 +6,7 @@ import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 import { ExternalLink } from 'react-feather';
 
+import { getSafeExternalUrl } from '@/app/shared/lib/safe-external-url';
 import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
 
 import { Address } from '../common/Address';
@@ -190,11 +191,12 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 </td>
             );
         case DisplayType.URL:
-            if (isValidLink(value as string)) {
+            const safeUrl = getSafeExternalUrl(value);
+            if (safeUrl) {
                 return (
                     <td className="text-lg-end">
                         <span className="font-monospace">
-                            <a rel="noopener noreferrer" target="_blank" href={value as string}>
+                            <a rel="noopener noreferrer" target="_blank" href={safeUrl}>
                                 {value}
                                 <ExternalLink className="align-text-top ms-2" size={13} />
                             </a>
@@ -223,13 +225,4 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
             break;
     }
     return <></>;
-}
-
-function isValidLink(value: string) {
-    try {
-        const url = new URL(value);
-        return ['http:', 'https:'].includes(url.protocol);
-    } catch (_err) {
-        return false;
-    }
 }

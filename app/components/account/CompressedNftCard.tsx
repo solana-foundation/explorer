@@ -8,6 +8,7 @@ import useAsyncEffect from 'use-async-effect';
 import { getProxiedUri } from '@/app/features/metadata';
 import { useCluster } from '@/app/providers/cluster';
 import { CompressedNft, useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
+import { getSafeExternalUrl } from '@/app/shared/lib/safe-external-url';
 
 import { Address } from '../common/Address';
 import { InfoTooltip } from '../common/InfoTooltip';
@@ -20,6 +21,7 @@ export function CompressedNftCard({ account }: { account: Account }) {
     const { url } = useCluster();
     const compressedNft = useCompressedNft({ address: account.pubkey.toString(), url });
     if (!compressedNft) return <UnknownAccountCard account={account} />;
+    const externalUrl = getSafeExternalUrl(compressedNft.content.links.external_url);
 
     const collectionGroup = compressedNft.grouping.find(group => group.group_key === 'collection');
     const updateAuthority = compressedNft.authorities.find(authority => authority.scopes.includes('full'))?.address;
@@ -57,10 +59,14 @@ export function CompressedNftCard({ account }: { account: Account }) {
             <tr>
                 <td>Website</td>
                 <td className="text-lg-end">
-                    <a rel="noopener noreferrer" target="_blank" href={compressedNft.content.links.external_url}>
-                        {compressedNft.content.links.external_url}
-                        <ExternalLink className="align-text-top ms-2" size={13} />
-                    </a>
+                    {externalUrl ? (
+                        <a rel="noopener noreferrer" target="_blank" href={externalUrl}>
+                            {compressedNft.content.links.external_url}
+                            <ExternalLink className="align-text-top ms-2" size={13} />
+                        </a>
+                    ) : (
+                        compressedNft.content.links.external_url || '-'
+                    )}
                 </td>
             </tr>
             <tr>

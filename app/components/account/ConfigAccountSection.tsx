@@ -7,6 +7,8 @@ import { PublicKey } from '@solana/web3.js';
 import { ConfigAccount, StakeConfigInfoAccount, ValidatorInfoAccount } from '@validators/accounts/config';
 import React from 'react';
 
+import { getSafeExternalUrl } from '@/app/shared/lib/safe-external-url';
+
 const MAX_SLASH_PENALTY = Math.pow(2, 8);
 
 export function ConfigAccountSection({ account, configAccount }: { account: Account; configAccount: ConfigAccount }) {
@@ -56,6 +58,7 @@ function StakeConfigCard({ account, configAccount }: { account: Account; configA
 
 function ValidatorInfoCard({ account, configAccount }: { account: Account; configAccount: ValidatorInfoAccount }) {
     const refresh = useRefreshAccount();
+    const websiteUrl = getSafeExternalUrl(configAccount.info.configData.website);
     return (
         <AccountCard
             title="Validator Info"
@@ -84,9 +87,13 @@ function ValidatorInfoCard({ account, configAccount }: { account: Account; confi
                 <tr>
                     <td>Website</td>
                     <td className="text-lg-end">
-                        <a href={configAccount.info.configData.website} target="_blank" rel="noopener noreferrer">
-                            {configAccount.info.configData.website}
-                        </a>
+                        {websiteUrl ? (
+                            <a href={websiteUrl} target="_blank" rel="noopener noreferrer">
+                                {configAccount.info.configData.website}
+                            </a>
+                        ) : (
+                            configAccount.info.configData.website
+                        )}
                     </td>
                 </tr>
             )}
