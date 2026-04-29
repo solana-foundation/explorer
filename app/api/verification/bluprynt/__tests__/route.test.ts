@@ -4,7 +4,18 @@ import { Logger } from '@/app/shared/lib/logger';
 
 const VALID_MINT = 'B61SyRxF2b8JwSLZHgEUF6rtn6NUikkrK1EMEgP6nhXW';
 
-const mockGetProgramAccounts = vi.fn();
+// Stable mock PDAs for schema versions and attestations
+const MOCK_SCHEMA_PDA = 'Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS';
+const MOCK_ATTESTATION_PDA = '7UX2i7SucgLMQcfZ75s3VXmZZY4YRUyJN9X1RgfMoDUi';
+
+const mockGetMultipleAccountsInfo = vi.fn();
+const mockDeriveSchemaPda = vi.fn().mockResolvedValue([MOCK_SCHEMA_PDA]);
+const mockDeriveAttestationPda = vi.fn().mockResolvedValue([MOCK_ATTESTATION_PDA]);
+
+vi.mock('sas-lib', () => ({
+    deriveAttestationPda: mockDeriveAttestationPda,
+    deriveSchemaPda: mockDeriveSchemaPda,
+}));
 
 vi.mock('@utils/cluster', () => ({
     Cluster: { MainnetBeta: 'mainnet-beta' },
@@ -16,7 +27,7 @@ vi.mock('@solana/web3.js', async () => {
     return {
         ...actual,
         Connection: vi.fn().mockImplementation(() => ({
-            getProgramAccounts: mockGetProgramAccounts,
+            getMultipleAccountsInfo: mockGetMultipleAccountsInfo,
         })),
     };
 });
@@ -26,6 +37,7 @@ const { GET } = await import('../[mintAddress]/route');
 describe('Bluprynt API Route', () => {
     beforeEach(() => {
         vi.stubEnv('BLUPRYNT_CREDENTIAL_AUTHORITY', 'test-credential');
+        vi.stubEnv('BLUPRYNT_SCHEMA_NAME', 'Test Schema');
     });
 
     afterEach(() => {
@@ -46,23 +58,39 @@ describe('Bluprynt API Route', () => {
         expect(await response.json()).toEqual({ error: 'Bluprynt API is misconfigured' });
     });
 
-    it('should return verified true when attestation accounts exist', async () => {
-        mockGetProgramAccounts.mockResolvedValueOnce([{ pubkey: 'some-account' }]);
+    it('should return 500 when schema name is missing', async () => {
+        vi.stubEnv('BLUPRYNT_SCHEMA_NAME', '');
+        const response = await callRoute(VALID_MINT);
+        expect(response.status).toBe(500);
+        expect(await response.json()).toEqual({ error: 'Bluprynt API is misconfigured' });
+    });
+
+    it('should return verified true when any attestation account exists', async () => {
+        const nulls = new Array(31).fill(null);
+        mockGetMultipleAccountsInfo.mockResolvedValueOnce([...nulls, { data: Buffer.alloc(0), lamports: 1 }]);
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({ verified: true });
     });
 
     it('should return verified false when no attestation accounts exist', async () => {
-        mockGetProgramAccounts.mockResolvedValueOnce([]);
+        mockGetMultipleAccountsInfo.mockResolvedValueOnce(new Array(32).fill(null));
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({ verified: false });
     });
 
+    it('should batch-check all schema versions in a single RPC call', async () => {
+        mockGetMultipleAccountsInfo.mockResolvedValueOnce(new Array(32).fill(null));
+        await callRoute(VALID_MINT);
+        expect(mockGetMultipleAccountsInfo).toHaveBeenCalledTimes(1);
+        const [[accounts]] = mockGetMultipleAccountsInfo.mock.calls;
+        expect(accounts).toHaveLength(32);
+    });
+
     it('should return 504 with short negative cache when RPC request times out', async () => {
         const timeoutError = new DOMException('Signal timed out.', 'TimeoutError');
-        mockGetProgramAccounts.mockRejectedValueOnce(timeoutError);
+        mockGetMultipleAccountsInfo.mockRejectedValueOnce(timeoutError);
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(504);
         expect(await response.json()).toEqual({ error: 'Verification request timed out' });
@@ -74,7 +102,7 @@ describe('Bluprynt API Route', () => {
     });
 
     it('should return 500 with short negative cache when RPC throws a non-timeout error', async () => {
-        mockGetProgramAccounts.mockRejectedValueOnce(new Error('Connection refused'));
+        mockGetMultipleAccountsInfo.mockRejectedValueOnce(new Error('Connection refused'));
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(500);
         expect(await response.json()).toEqual({ error: 'Failed to verify bluprynt data' });
