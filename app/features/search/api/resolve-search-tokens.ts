@@ -1,5 +1,6 @@
 import { getAssetBatch } from '@/app/entities/digital-asset/server';
 
+import { getJupiterApiKey } from '../config';
 import { discoverWithJupiter } from './discover-with-jupiter';
 import { discoverWithUtl } from './discover-with-utl';
 import type { DiscoveredToken } from './types';
@@ -31,12 +32,10 @@ export async function resolveSearchTokens(query: string, _cluster: string): Prom
 
     let discovered: DiscoveredToken[];
     try {
-        const jupiterResults = await discoverWithJupiter(query, discoveryController.signal);
-        discovered =
-            jupiterResults !== undefined
-                ? jupiterResults.slice(0, SEARCH_TOKENS_LIMIT)
-                : // Jupiter unavailable — fall back to UTL (degraded: no address search, curated list only)
-                  await discoverWithUtl(query, discoveryController.signal, SEARCH_TOKENS_LIMIT);
+        discovered = getJupiterApiKey()
+            ? (await discoverWithJupiter(query, discoveryController.signal)).slice(0, SEARCH_TOKENS_LIMIT)
+            : // Jupiter unavailable — fall back to UTL (degraded: no address search, curated list only)
+              await discoverWithUtl(query, discoveryController.signal, SEARCH_TOKENS_LIMIT);
     } finally {
         clearTimeout(discoveryTimeout);
     }

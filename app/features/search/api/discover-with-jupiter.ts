@@ -18,11 +18,11 @@ const JupiterTokenSchema = type({
 
 const JupiterSearchResponseSchema = array(JupiterTokenSchema);
 
-export async function discoverWithJupiter(query: string, signal: AbortSignal): Promise<DiscoveredToken[] | undefined> {
+export async function discoverWithJupiter(query: string, signal: AbortSignal): Promise<DiscoveredToken[]> {
     const jupiterApiKey = getJupiterApiKey();
     if (!jupiterApiKey) {
         Logger.warn('[api:search] JUPITER_API_KEY is not configured — skipping Jupiter discovery');
-        return undefined;
+        return [];
     }
 
     try {
@@ -41,11 +41,11 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
             } else {
                 Logger.warn(`[api:search] Jupiter returned ${response.status}`, { sentry: true });
             }
-            return undefined;
+            return [];
         }
 
         const data = await response.json();
-        if (!is(data, JupiterSearchResponseSchema)) return undefined;
+        if (!is(data, JupiterSearchResponseSchema)) return [];
 
         return data.map(item => ({
             address: item.id,
@@ -61,6 +61,6 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
                 sentry: true,
             });
         }
-        return undefined;
+        return [];
     }
 }
