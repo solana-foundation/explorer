@@ -1,5 +1,7 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { useAnchorProgram } from '@entities/idl';
+import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
+import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
@@ -236,6 +238,21 @@ function InspectorInstructionCard({
             }
             // Fall through to unknown if parsing failed
             break;
+        }
+        case MPL_TOKEN_METADATA_PROGRAM_ID: {
+            return (
+                <ErrorBoundary
+                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                >
+                    <MetaplexTokenMetadataDetailsCard
+                        key={index}
+                        ix={ix}
+                        index={index}
+                        result={result}
+                        InstructionCardComponent={BaseInstructionCard}
+                    />
+                </ErrorBoundary>
+            );
         }
         default: {
             // unknown program; allow to render the next card
