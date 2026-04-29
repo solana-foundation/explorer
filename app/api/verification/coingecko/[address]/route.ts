@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import fetch from 'node-fetch';
-import { is } from 'superstruct';
+import { is, number, type } from 'superstruct';
 
 import { CoinGeckoInfoSchema } from '@/app/features/token-verification-badge/server';
 import { Logger } from '@/app/shared/lib/logger';
@@ -16,6 +16,14 @@ const COINGECKO_QUERY = [
     'sparkline=false',
     'tickers=false',
 ].join('&');
+
+// Some tokens are listed on CoinGecko but have no trade data yet — upstream
+// returns 200 with empty currency maps and last_updated: null. This pre-check
+// catches that case so we can return 404 (a cacheable miss) instead of letting
+// it fall through as a spurious schema failure.
+const HasUsdMarketDataSchema = type({
+    market_data: type({ current_price: type({ usd: number() }) }),
+});
 
 type Params = {
     params: {
@@ -52,6 +60,11 @@ export async function GET(_request: Request, { params: { address } }: Params) {
         }
 
         const data = await response.json();
+
+        if (!is(data, HasUsdMarketDataSchema)) {
+            Logger.warn('[api:coingecko] No market data', { address });
+            return NextResponse.json({ error: 'No market data' }, { headers: NO_STORE_HEADERS, status: 404 });
+        }
 
         if (!is(data, CoinGeckoInfoSchema)) {
             Logger.warn('[api:coingecko] Invalid response schema', { address, sentry: true });
