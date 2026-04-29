@@ -1,3 +1,4 @@
+import { Skeleton } from '@/app/components/shared/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
 import { TransactionInstructionInfo } from '@/app/utils/instruction';
 
@@ -23,6 +24,22 @@ function InstructionLine({ instruction }: { instruction: TransactionInstructionI
             <span className="e-text-muted">{instruction.program}: </span>
             <span className="e-text-white">{instruction.name}</span>
         </span>
+    );
+}
+
+const SKELETON_WIDTHS = ['e-w-44', 'e-w-36', 'e-w-40'] as const;
+
+export function InstructionListSkeleton({ count }: { count?: number }) {
+    const visibleCount = Math.min(count ?? 0, INLINE_LIMIT);
+    return (
+        <div className="e-mt-1 e-flex e-flex-col e-gap-1">
+            {Array.from({ length: visibleCount }, (_, i) => (
+                <Skeleton key={i} className={`e-h-3.5 ${SKELETON_WIDTHS[i % SKELETON_WIDTHS.length]}`} />
+            ))}
+            {count && count > INLINE_LIMIT && (
+                <span className="e-cursor-default e-text-xs e-text-muted">+{count - INLINE_LIMIT} more</span>
+            )}
+        </div>
     );
 }
 

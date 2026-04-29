@@ -18,7 +18,7 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
-import { InstructionList } from './InstructionList';
+import { InstructionList, InstructionListSkeleton } from './InstructionList';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
@@ -51,6 +51,8 @@ export function TransactionHistoryCard({ address }: { address: string }) {
         return map;
     }, [history?.data?.transactionMap]);
 
+    const instructionCountMap = history?.data?.instructionCountMap;
+
     React.useEffect(() => {
         if (!history) {
             refresh();
@@ -73,14 +75,17 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     const detailsList: React.ReactNode[] = transactionRows.map(
         ({ slot, signature, blockTime, statusClass, statusText }) => {
             const instructionNames = instructionNamesMap.get(signature) ?? null;
+            const instructionCount = instructionCountMap?.get(signature);
 
             return (
                 <tr key={signature}>
                     <td>
                         <Signature signature={signature} link truncateChars={40} />
-                        {instructionNames && instructionNames.length > 0 && (
+                        {instructionNames !== null && instructionNames.length > 0 ? (
                             <InstructionList instructions={instructionNames} />
-                        )}
+                        ) : instructionNames === null && instructionCount !== undefined && instructionCount > 0 ? (
+                            <InstructionListSkeleton count={instructionCount} />
+                        ) : null}
                     </td>
 
                     <td className="w-1">

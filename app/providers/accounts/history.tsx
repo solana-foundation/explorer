@@ -21,9 +21,11 @@ import { Logger } from '@/app/shared/lib/logger';
 
 type TransactionMap = Map<string, ParsedTransactionWithMeta>;
 type FailedTransactionSignatures = Set<string>;
+type InstructionCountMap = Map<string, number>;
 
 type AccountHistory = {
     fetched: ConfirmedSignatureInfo[];
+    instructionCountMap?: InstructionCountMap;
     transactionMap?: TransactionMap;
     failedTransactionSignatures?: FailedTransactionSignatures;
     foundOldest: boolean;
@@ -98,6 +100,7 @@ function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | 
         failedTransactionSignatures,
         fetched: combineFetched(update.history.fetched, history?.fetched, update?.before),
         foundOldest: update?.history?.foundOldest || history?.foundOldest || false,
+        instructionCountMap: mergeInstructionCountMap(history?.instructionCountMap, update.history.instructionCountMap),
         transactionMap,
     };
 }
@@ -159,6 +162,39 @@ async function fetchParsedTransactions(url: string, cluster: Cluster, transactio
     return { failedTransactionSignatures, transactionMap };
 }
 
+async function fetchTransactionInstructionCounts(
+    url: string,
+    cluster: Cluster,
+    signatures: string[],
+): Promise<InstructionCountMap> {
+    if (signatures.length === 0) return new Map();
+    const connection = new Connection(url);
+    try {
+        const results = await connection.getTransactions(signatures, { maxSupportedTransactionVersion: 0 });
+        const countMap: InstructionCountMap = new Map();
+        signatures.forEach((sig, i) => {
+            const tx = results[i];
+            countMap.set(sig, tx?.transaction.message.compiledInstructions.length ?? 0);
+        });
+        return countMap;
+    } catch (error) {
+        if (cluster !== Cluster.Custom) {
+            Logger.error(error, { url });
+        }
+        return new Map();
+    }
+}
+
+function mergeInstructionCountMap(
+    current: InstructionCountMap | undefined,
+    incoming: InstructionCountMap | undefined,
+): InstructionCountMap | undefined {
+    if (!incoming && !current) return undefined;
+    if (!incoming) return current;
+    if (!current) return incoming;
+    return new Map([...current, ...incoming]);
+}
+
 async function fetchAccountHistory(
     dispatch: Dispatch,
     pubkey: PublicKey,
@@ -195,6 +231,15 @@ async function fetchAccountHistory(
         status = FetchStatus.FetchFailed;
     }
 
+    let instructionCountMap: InstructionCountMap | undefined;
+    if (history?.fetched) {
+        instructionCountMap = await fetchTransactionInstructionCounts(
+            url,
+            cluster,
+            history.fetched.map(s => s.signature),
+        );
+    }
+
     let failedTransactionSignatures;
     let transactionMap;
     if (fetchTransactions && history?.fetched) {
@@ -213,7 +258,7 @@ async function fetchAccountHistory(
         data: {
             before: options?.before,
             failedTransactionSignatures,
-            history,
+            history: history ? { ...history, instructionCountMap } : undefined,
             transactionMap,
         },
         key: pubkey.toBase58(),
