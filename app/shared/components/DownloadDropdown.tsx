@@ -46,7 +46,7 @@ export function DownloadDropdown({
             <DropdownMenuTrigger
                 asChild
                 onClick={
-                    hasMoreThanOneEncoding || !data ? undefined : () => handleDownload(data, encodings[0], filename)
+                    hasMoreThanOneEncoding ? undefined : () => data && handleDownload(data, encodings[0], filename)
                 }
             >
                 {children ?? <DefaultTrigger disabled={(!hasMoreThanOneEncoding && loading) || disabled} />}

@@ -3,7 +3,7 @@
 import { HexData } from '@shared/HexData';
 import { Button } from '@shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ChevronDown, Copy } from 'react-feather';
 
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
@@ -12,7 +12,7 @@ import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
 import { cn } from './utils';
 
-// Must match HexData's ROW_SIZE (4 spans × 6 bytes each).
+// Must match HexData's default spanSize (4 bytes). 6 spans × 4 bytes = 24 bytes per row.
 const HEX_ROW_BYTES = 24;
 const VISIBLE_ROWS = 3;
 
@@ -29,8 +29,8 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
     const [expanded, setExpanded] = useState(false);
     const [copyState, copy] = useCopyToClipboard();
 
-    const hexString = data && data.length > 0 ? toHex(data) : '';
-    const base64String = data && data.length > 0 ? toBase64(new Uint8Array(data)) : '';
+    const hexString = useMemo(() => (data && data.length > 0 ? toHex(data) : ''), [data]);
+    const base64String = useMemo(() => (data && data.length > 0 ? toBase64(new Uint8Array(data)) : ''), [data]);
 
     const hasMoreHex = data !== undefined && data.length > VISIBLE_ROWS * HEX_ROW_BYTES;
     const visibleData = !expanded && hasMoreHex ? data.subarray(0, VISIBLE_ROWS * HEX_ROW_BYTES) : data;
@@ -41,7 +41,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
     const hasMore = (tab === 'hex' && hasMoreHex) || (tab === 'base64' && hasMoreBase64);
 
     const handleTabChange = (value: string) => {
-        setTab(value as 'hex' | 'base64');
+        if (value === 'hex' || value === 'base64') setTab(value);
         setExpanded(false);
     };
 
