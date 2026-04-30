@@ -17,7 +17,6 @@ const mockLargeData = (() => {
 
 const meta: Meta<typeof RawDataField> = {
     component: RawDataField,
-    parameters: { layout: 'padded' },
     tags: ['test'],
     title: 'Components/Shared/UI/RawDataField',
 };
