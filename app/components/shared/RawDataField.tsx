@@ -9,6 +9,7 @@ import { ChevronDown, Copy } from 'react-feather';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { type ByteArray, toBase64, toHex } from '@/app/shared/lib/bytes';
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
+
 import { cn } from './utils';
 
 // Must match HexData's ROW_SIZE (4 spans × 6 bytes each).
@@ -50,7 +51,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
             onValueChange={handleTabChange}
             className="e-max-w-[540px] e-overflow-hidden e-rounded-lg e-border e-border-solid e-border-outer-space-800 e-bg-heavy-metal-900"
         >
-            <div className="e-flex e-flex-wrap e-gap-8 e-justify-between e-border-b e-border-outer-space-800 e-px-3 [border-bottom-style:solid]">
+            <div className="e-flex e-flex-wrap e-justify-between e-gap-8 e-border-b e-border-outer-space-800 e-px-3 [border-bottom-style:solid]">
                 <TabsList>
                     <TabsTrigger className="!e-py-2 e-text-xs" value="hex">
                         Hex
@@ -59,7 +60,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                         Base64
                     </TabsTrigger>
                 </TabsList>
-                <div className="e-flex e-gap-2 e-items-center">
+                <div className="e-flex e-items-center e-gap-2">
                     {data !== undefined && !loading && (
                         <span className="e-whitespace-nowrap e-text-xs e-text-outer-space-300">
                             {data.length} bytes
@@ -75,11 +76,17 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                         <Copy size={12} />
                         <span className="e-hidden md:e-inline">{copyState === 'copied' ? 'Copied!' : 'Copy'}</span>
                     </Button>
-                    <DownloadDropdown filename={filename} data={data} loading={loading} disabled={!data || !data.length} encodings={[tab]} />
+                    <DownloadDropdown
+                        filename={filename}
+                        data={data}
+                        loading={loading}
+                        disabled={!data || !data.length}
+                        encodings={[tab]}
+                    />
                 </div>
             </div>
 
-            <TabsContent value="hex" className={cn("e-text-start", loading ? "e-p-3" : "e-p-1.5")}>
+            <TabsContent value="hex" className={cn('e-text-start', loading ? 'e-p-3' : 'e-p-1.5')}>
                 {loading ? (
                     <span className="spinner-grow spinner-grow-sm" />
                 ) : (
@@ -93,7 +100,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                 )}
             </TabsContent>
 
-            <TabsContent value="base64" className={cn("e-text-start e-p-3", !loading && data?.length && "e-py-2")}>
+            <TabsContent value="base64" className={cn('e-p-3 e-text-start', !loading && data?.length && 'e-py-2')}>
                 {loading ? (
                     <span className="spinner-grow spinner-grow-sm" />
                 ) : !data || data.length === 0 ? (

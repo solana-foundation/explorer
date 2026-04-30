@@ -1,27 +1,22 @@
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { ErrorCard } from '@components/common/ErrorCard';
-import { HexData } from '@components/common/HexData';
 import { SolBalance } from '@components/common/SolBalance';
-import { type AccountInfo, useAccountsInfo } from '@entities/account';
+import { useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
+import { RawDataField } from '@shared/RawDataField';
 import { Button } from '@shared/ui/button';
 import { CollapsibleCard } from '@shared/ui/collapsible-card';
-import { cn } from '@shared/utils';
-import { PublicKey } from '@solana/web3.js';
+import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
-import React, { useMemo, useState } from 'react';
-import { Code, Download } from 'react-feather';
-
-import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
-import { ByteArray } from '@/app/shared/lib/bytes';
+import React, { useMemo } from 'react';
+import { Code } from 'react-feather';
 
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { url } = useCluster();
-    const [showRaw, setShowRaw] = useState(false);
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const message = transactionWithMeta?.transaction.message;
@@ -69,14 +64,17 @@ export function AccountsCard({ signature }: SignatureProps) {
                         <span className="text-muted">Loading...</span>
                     ) : accountInfo ? (
                         accountInfo.size > 0 ? (
-                            <div className="e-flex e-items-center">
-                                <DownloadDropdown data={accountInfo.data} encodings={['hex', 'base64']} filename={key}>
-                                    <Button variant="ghost" size="icon">
-                                        <Download size={12} />
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="ghost">
+                                        <Code size={12} />
+                                        <span>{accountInfo.size.toLocaleString('en-US')}</span>
                                     </Button>
-                                </DownloadDropdown>
-                                <span>{accountInfo.size.toLocaleString('en-US')}</span>
-                            </div>
+                                </PopoverTrigger>
+                                <PopoverContent className="e-w-auto !e-rounded-lg e-border-none e-p-0" align="end">
+                                    <RawDataField data={accountInfo.data} filename={key} />
+                                </PopoverContent>
+                            </Popover>
                         ) : (
                             <span className="e-ml-7">{accountInfo.size.toLocaleString('en-US')}</span>
                         )
@@ -100,162 +98,44 @@ export function AccountsCard({ signature }: SignatureProps) {
     });
 
     return (
-        <CollapsibleCard
-            title={`Account Input(s) (${message.accountKeys.length})`}
-            headerButtons={
-                <button
-                    className={cn(
-                        'btn btn-sm d-flex align-items-center me-2',
-                        showRaw ? 'btn-black active' : 'btn-white',
-                    )}
-                    onClick={() => setShowRaw(r => !r)}
-                >
-                    <Code className="me-2" size={13} /> Raw
-                </button>
-            }
-        >
-            {showRaw ? (
-                <div className="card-body">
-                    <RawAccountsView accountKeys={message.accountKeys} accounts={accounts} loading={loading} />
-                </div>
-            ) : (
-                <div className="table-responsive mb-0">
-                    <table className="table table-sm table-nowrap card-table">
-                        <thead>
+        <CollapsibleCard title={`Account Input(s) (${message.accountKeys.length})`}>
+            <div className="table-responsive mb-0">
+                <table className="table table-sm table-nowrap card-table">
+                    <thead>
+                        <tr>
+                            <th className="text-muted">#</th>
+                            <th className="text-muted">Address</th>
+                            <th className="text-muted">Change (SOL)</th>
+                            <th className="text-muted">Post Balance (SOL)</th>
+                            <th className="text-muted">Size (bytes)</th>
+                            <th className="text-muted">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody className="list">{accountRows}</tbody>
+                    {totalAccountSize > 0 && (
+                        <tfoot>
                             <tr>
-                                <th className="text-muted">#</th>
-                                <th className="text-muted">Address</th>
-                                <th className="text-muted">Change (SOL)</th>
-                                <th className="text-muted">Post Balance (SOL)</th>
-                                <th className="text-muted">Size (bytes)</th>
-                                <th className="text-muted">Details</th>
+                                <td colSpan={3} className="align-bottom">
+                                    <p className="text-muted e-m-0 e-text-right e-text-[0.625rem]">
+                                        reflects current account state
+                                    </p>
+                                </td>
+                                <td className="align-bottom">
+                                    <p className="text-muted e-m-0 e-text-[0.625rem] e-uppercase">
+                                        Total Account Size:
+                                    </p>
+                                </td>
+                                <td>
+                                    <span className="text-white e-ml-7">
+                                        {totalAccountSize.toLocaleString('en-US')}
+                                    </span>
+                                </td>
+                                <td />
                             </tr>
-                        </thead>
-                        <tbody className="list">{accountRows}</tbody>
-                        {totalAccountSize > 0 && (
-                            <tfoot>
-                                <tr>
-                                    <td colSpan={3} className="align-bottom">
-                                        <p className="text-muted e-m-0 e-text-right e-text-[0.625rem]">
-                                            reflects current account state
-                                        </p>
-                                    </td>
-                                    <td className="align-bottom">
-                                        <p className="text-muted e-m-0 e-text-[0.625rem] e-uppercase">
-                                            Total Account Size:
-                                        </p>
-                                    </td>
-                                    <td>
-                                        <span className="text-white e-ml-7">
-                                            {totalAccountSize.toLocaleString('en-US')}
-                                        </span>
-                                    </td>
-                                    <td />
-                                </tr>
-                            </tfoot>
-                        )}
-                    </table>
-                </div>
-            )}
-        </CollapsibleCard>
-    );
-}
-
-function RawAccountsView({
-    accountKeys,
-    accounts,
-    loading,
-}: {
-    accountKeys: { pubkey: PublicKey }[];
-    accounts: Map<string, AccountInfo>;
-    loading: boolean;
-}) {
-    if (loading) {
-        return <div className="text-center py-4">Loading account data...</div>;
-    }
-
-    return (
-        <div className="table-responsive mb-0">
-            <table className="table table-sm table-nowrap card-table">
-                <tbody className="list">
-                    {accountKeys.map((account, index) => {
-                        const key = account.pubkey.toBase58();
-                        const info = accounts.get(key);
-
-                        return (
-                            <DataRow
-                                key={key}
-                                index={index}
-                                account={account}
-                                data={info?.data}
-                                accountSize={info?.size.toLocaleString('en-US')}
-                            />
-                        );
-                    })}
-                </tbody>
-            </table>
-        </div>
-    );
-}
-
-const MAX_DISPLAY_BYTES = 1024;
-
-function DataRow({
-    index,
-    account,
-    data,
-    accountSize,
-}: {
-    index: number;
-    account: { pubkey: PublicKey };
-    data: ByteArray | undefined;
-    accountSize: string | undefined;
-}) {
-    const [isDataVisible, setIsDataVisible] = useState(false);
-
-    const isTruncated = data && data.length > MAX_DISPLAY_BYTES;
-    const displayData = data && isTruncated ? data.slice(0, MAX_DISPLAY_BYTES) : data;
-
-    return (
-        <tr>
-            <td>
-                <div className="e-flex e-flex-col e-gap-3">
-                    <div className="e-flex e-items-center e-justify-between">
-                        <div className="e-flex e-items-start">
-                            <span className="badge bg-info-soft e-me-2">#{index + 1}</span>
-                            <div className="e-flex e-flex-col">
-                                <Address pubkey={account.pubkey} link fetchTokenLabelInfo />
-                                <span className="text-muted">{accountSize ? `${accountSize} bytes` : '-'}</span>
-                            </div>
-                        </div>
-
-                        <button
-                            className={cn('btn btn-sm d-flex', isDataVisible ? 'btn-black active' : 'btn-white')}
-                            onClick={() => setIsDataVisible(!isDataVisible)}
-                        >
-                            {isDataVisible ? 'Hide Data' : 'Show Data'}
-                        </button>
-                    </div>
-
-                    {isDataVisible && (
-                        <div className="md:e-items-end xl:e-text-end">
-                            {displayData && displayData.length > 0 ? (
-                                <>
-                                    <HexData raw={displayData} copyableRaw={data} className="!e-items-baseline" />
-                                    {isTruncated && (
-                                        <span className="text-muted e-ml-5 e-mt-1 e-text-xs xl:e-ml-0">
-                                            Showing first {MAX_DISPLAY_BYTES.toLocaleString()} of{' '}
-                                            {data.length.toLocaleString()} bytes
-                                        </span>
-                                    )}
-                                </>
-                            ) : (
-                                <span className="text-muted">No data</span>
-                            )}
-                        </div>
+                        </tfoot>
                     )}
-                </div>
-            </td>
-        </tr>
+                </table>
+            </div>
+        </CollapsibleCard>
     );
 }

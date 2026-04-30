@@ -36,7 +36,7 @@ export function truncateHexPairs(pairs: string[]): { pairs: string[]; truncated:
 // Group pairs into alternating-color spans of SPAN_SIZE.
 // The ellipsis marker (\u2026) gets its own span.
 // When inverted, the first span is secondary-old and the second is primary (greenish first, white second).
-export function formatHexSpans(pairs: string[], options: { inverted?: boolean } = {}, spanSize: number): HexSpan[] {
+export function formatHexSpans(pairs: string[], options: { inverted?: boolean } = {}, spanSize = SPAN_SIZE): HexSpan[] {
     const first: HexSpan['variant'] = options.inverted ? 'secondary-old' : 'primary';
     const second: HexSpan['variant'] = options.inverted ? 'primary' : 'secondary-old';
     const spans: HexSpan[] = [];
@@ -59,7 +59,7 @@ export function formatHexSpans(pairs: string[], options: { inverted?: boolean } 
     return spans;
 }
 
-export function groupHexRows(spans: HexSpan[], rowSize: number, spanSize: number): HexRow[] {
+export function groupHexRows(spans: HexSpan[], rowSize = ROW_SIZE, spanSize = SPAN_SIZE): HexRow[] {
     const spansPerRow = rowSize / spanSize;
     const rows: HexRow[] = [];
     for (let i = 0; i < spans.length; i += spansPerRow) {

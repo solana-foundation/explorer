@@ -12,12 +12,13 @@ import { triggerDownloadText } from '@/app/shared/lib/triggerDownload';
 
 const DEFAULT_ENCODINGS: EncodingFormat[] = ['hex', 'base58', 'base64'];
 
-const DefaultTrigger = ({ disabled }: {disabled: boolean}) => (
-    <Button variant="outline" size="sm" aria-label="Download" disabled={disabled}>
+const DefaultTrigger = React.forwardRef<HTMLButtonElement, { disabled: boolean }>(({ disabled, ...props }, ref) => (
+    <Button ref={ref} variant="outline" size="sm" aria-label="Download" disabled={disabled} {...props}>
         <Download size={12} />
         <span className="e-hidden md:e-inline">Download</span>
     </Button>
-);
+));
+DefaultTrigger.displayName = 'DefaultTrigger';
 
 export function DownloadDropdown({
     data,
@@ -44,9 +45,11 @@ export function DownloadDropdown({
         <DropdownMenu onOpenChange={onOpenChange}>
             <DropdownMenuTrigger
                 asChild
-                onClick={hasMoreThanOneEncoding ? undefined : () => handleDownload(data!, encodings[0], filename)}
+                onClick={
+                    hasMoreThanOneEncoding || !data ? undefined : () => handleDownload(data, encodings[0], filename)
+                }
             >
-                {children ?? DefaultTrigger({ disabled: loading || disabled })}
+                {children ?? <DefaultTrigger disabled={loading || disabled} />}
             </DropdownMenuTrigger>
             {hasMoreThanOneEncoding && (
                 <DropdownMenuContent align="end">
