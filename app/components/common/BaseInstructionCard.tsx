@@ -1,5 +1,6 @@
 import { Address } from '@components/common/Address';
 import { useScrollAnchor } from '@providers/scroll-anchor';
+import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { cn } from '@shared/utils';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
@@ -46,7 +47,6 @@ export function BaseInstructionCard({
 }: InstructionProps) {
     const [resultClass] = ixResult(result, index);
     const [showRaw, setShowRaw] = React.useState(defaultRaw || false);
-    const [expanded, setExpanded] = React.useState(true);
     const rawClickHandler = () => {
         if (!defaultRaw && !showRaw && !raw) {
             // trigger handler to simulate behaviour for the InstructionCard for the transcation which contains logic in it to fetch raw transaction data
@@ -59,93 +59,87 @@ export function BaseInstructionCard({
         getInstructionCardScrollAnchorId(childIndex != null ? [index + 1, childIndex + 1] : [index + 1]),
     );
     return (
-        <div className="card" ref={scrollAnchorRef}>
-            <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">
+        <CollapsibleCard
+            ref={scrollAnchorRef}
+            collapsible={collapsible}
+            title={
+                <>
                     <span className={`badge bg-${resultClass}-soft me-2`}>
                         #{index + 1}
                         {childIndex !== undefined ? `.${childIndex + 1}` : ''}
                     </span>
                     {title}
-                </h3>
-
+                </>
+            }
+            headerButtons={
                 <div className="d-flex align-items-center gap-2">
                     {headerButtons}
-                    {collapsible && (
-                        <button
-                            className="btn btn-sm d-flex align-items-center btn-white"
-                            onClick={() => setExpanded(v => !v)}
-                        >
-                            {expanded ? 'Collapse' : 'Expand'}
-                        </button>
-                    )}
                     <button
-                        disabled={defaultRaw || !expanded}
+                        disabled={defaultRaw}
                         className={cn(
                             'btn btn-sm d-flex align-items-center',
                             showRaw ? 'btn-black active' : 'btn-white',
-                            (defaultRaw || !expanded) && '!e-pointer-events-auto e-cursor-not-allowed',
+                            defaultRaw && '!e-pointer-events-auto e-cursor-not-allowed',
                         )}
                         onClick={rawClickHandler}
                     >
                         <Code className="me-2" size={13} /> Raw
                     </button>
                 </div>
+            }
+        >
+            <div className="table-responsive mb-0">
+                <table className="table table-sm table-nowrap card-table">
+                    <tbody className="list">
+                        {showRaw ? (
+                            <>
+                                <tr>
+                                    <td>Program</td>
+                                    <td className="text-lg-end">
+                                        <Address pubkey={ix.programId} alignRight link />
+                                    </td>
+                                </tr>
+                                {'parsed' in ix ? (
+                                    <BaseRawParsedDetails ix={ix}>
+                                        {raw ? <BaseRawDetails ix={raw} /> : null}
+                                    </BaseRawParsedDetails>
+                                ) : (
+                                    <BaseRawDetails ix={ix} />
+                                )}
+                            </>
+                        ) : (
+                            children
+                        )}
+                        {innerCards && innerCards.length > 0 && (
+                            <>
+                                <tr className="table-sep">
+                                    <td colSpan={3}>Inner Instructions</td>
+                                </tr>
+                                <tr>
+                                    <td colSpan={3}>
+                                        {/* !e-m-0 overrides the 1.5rem margin from inner-cards
+                                        so the card aligns with the "Inner Instructions" label above */}
+                                        <div className="inner-cards !e-m-0">{innerCards}</div>
+                                    </td>
+                                </tr>
+                            </>
+                        )}
+                        {eventCards && eventCards.length > 0 && (
+                            <>
+                                <tr className="table-sep">
+                                    <td colSpan={3}>Events</td>
+                                </tr>
+                                <tr>
+                                    <td colSpan={3}>
+                                        <div className="inner-cards">{eventCards}</div>
+                                    </td>
+                                </tr>
+                            </>
+                        )}
+                    </tbody>
+                </table>
             </div>
-            {expanded && (
-                <div className="table-responsive mb-0">
-                    <table className="table table-sm table-nowrap card-table">
-                        <tbody className="list">
-                            {showRaw ? (
-                                <>
-                                    <tr>
-                                        <td>Program</td>
-                                        <td className="text-lg-end">
-                                            <Address pubkey={ix.programId} alignRight link />
-                                        </td>
-                                    </tr>
-                                    {'parsed' in ix ? (
-                                        <BaseRawParsedDetails ix={ix}>
-                                            {raw ? <BaseRawDetails ix={raw} /> : null}
-                                        </BaseRawParsedDetails>
-                                    ) : (
-                                        <BaseRawDetails ix={ix} />
-                                    )}
-                                </>
-                            ) : (
-                                children
-                            )}
-                            {innerCards && innerCards.length > 0 && (
-                                <>
-                                    <tr className="table-sep">
-                                        <td colSpan={3}>Inner Instructions</td>
-                                    </tr>
-                                    <tr>
-                                        <td colSpan={3}>
-                                            {/* !e-m-0 overrides the 1.5rem margin from inner-cards
-                                            so the card aligns with the "Inner Instructions" label above */}
-                                            <div className="inner-cards !e-m-0">{innerCards}</div>
-                                        </td>
-                                    </tr>
-                                </>
-                            )}
-                            {eventCards && eventCards.length > 0 && (
-                                <>
-                                    <tr className="table-sep">
-                                        <td colSpan={3}>Events</td>
-                                    </tr>
-                                    <tr>
-                                        <td colSpan={3}>
-                                            <div className="inner-cards">{eventCards}</div>
-                                        </td>
-                                    </tr>
-                                </>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-        </div>
+        </CollapsibleCard>
     );
 }
 

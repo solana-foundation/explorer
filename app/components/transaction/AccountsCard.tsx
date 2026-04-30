@@ -7,6 +7,7 @@ import { type AccountInfo, useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import { Button } from '@shared/ui/button';
+import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
@@ -21,7 +22,6 @@ export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { url } = useCluster();
     const [showRaw, setShowRaw] = useState(false);
-    const [expanded, setExpanded] = useState(true);
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const message = transactionWithMeta?.transaction.message;
@@ -100,71 +100,64 @@ export function AccountsCard({ signature }: SignatureProps) {
     });
 
     return (
-        <div className="card">
-            <div className={cn('card-header', !expanded && 'border-0')}>
-                <h3 className="card-header-title">{`Account Input(s) (${message.accountKeys.length})`}</h3>
+        <CollapsibleCard
+            title={`Account Input(s) (${message.accountKeys.length})`}
+            headerButtons={
                 <button
                     className={cn(
-                        'btn btn-sm d-flex align-items-center',
+                        'btn btn-sm d-flex align-items-center me-2',
                         showRaw ? 'btn-black active' : 'btn-white',
-                        'me-2',
                     )}
                     onClick={() => setShowRaw(r => !r)}
                 >
                     <Code className="me-2" size={13} /> Raw
                 </button>
-                <button
-                    className={cn('btn btn-sm d-flex', expanded ? 'btn-black active' : 'btn-white')}
-                    onClick={() => setExpanded(e => !e)}
-                >
-                    {expanded ? 'Collapse' : 'Expand'}
-                </button>
-            </div>
-            {expanded &&
-                (showRaw ? (
-                    <div className="card-body">
-                        <RawAccountsView accountKeys={message.accountKeys} accounts={accounts} loading={loading} />
-                    </div>
-                ) : (
-                    <div className="table-responsive mb-0">
-                        <table className="table table-sm table-nowrap card-table">
-                            <thead>
+            }
+        >
+            {showRaw ? (
+                <div className="card-body">
+                    <RawAccountsView accountKeys={message.accountKeys} accounts={accounts} loading={loading} />
+                </div>
+            ) : (
+                <div className="table-responsive mb-0">
+                    <table className="table table-sm table-nowrap card-table">
+                        <thead>
+                            <tr>
+                                <th className="text-muted">#</th>
+                                <th className="text-muted">Address</th>
+                                <th className="text-muted">Change (SOL)</th>
+                                <th className="text-muted">Post Balance (SOL)</th>
+                                <th className="text-muted">Size (bytes)</th>
+                                <th className="text-muted">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody className="list">{accountRows}</tbody>
+                        {totalAccountSize > 0 && (
+                            <tfoot>
                                 <tr>
-                                    <th className="text-muted">#</th>
-                                    <th className="text-muted">Address</th>
-                                    <th className="text-muted">Change (SOL)</th>
-                                    <th className="text-muted">Post Balance (SOL)</th>
-                                    <th className="text-muted">Size (bytes)</th>
-                                    <th className="text-muted">Details</th>
+                                    <td colSpan={3} className="align-bottom">
+                                        <p className="text-muted e-m-0 e-text-right e-text-[0.625rem]">
+                                            reflects current account state
+                                        </p>
+                                    </td>
+                                    <td className="align-bottom">
+                                        <p className="text-muted e-m-0 e-text-[0.625rem] e-uppercase">
+                                            Total Account Size:
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <span className="text-white e-ml-7">
+                                            {totalAccountSize.toLocaleString('en-US')}
+                                        </span>
+                                    </td>
+                                    <td />
                                 </tr>
-                            </thead>
-                            <tbody className="list">{accountRows}</tbody>
-                            {totalAccountSize > 0 && (
-                                <tfoot>
-                                    <tr>
-                                        <td colSpan={3} className="align-bottom">
-                                            <p className="text-muted e-m-0 e-text-right e-text-[0.625rem]">
-                                                reflects current account state
-                                            </p>
-                                        </td>
-                                        <td className="align-bottom">
-                                            <p className="text-muted e-m-0 e-text-[0.625rem] e-uppercase">
-                                                Total Account Size:
-                                            </p>
-                                        </td>
-                                        <td>
-                                            <span className="text-white e-ml-7">
-                                                {totalAccountSize.toLocaleString('en-US')}
-                                            </span>
-                                        </td>
-                                        <td />
-                                    </tr>
-                                </tfoot>
-                            )}
-                        </table>
-                    </div>
-                ))}
-        </div>
+                            </tfoot>
+                        )}
+                    </table>
+                </div>
+            )}
+        </CollapsibleCard>
     );
 }
 

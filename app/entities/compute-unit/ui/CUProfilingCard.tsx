@@ -1,3 +1,4 @@
+import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { BarElement, CategoryScale, Chart, type ChartData, type ChartOptions, LinearScale, Tooltip } from 'chart.js';
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
@@ -242,10 +243,7 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
     if (instructions.length === 0) return null;
 
     return (
-        <div className="e-card">
-            <div className="card-header">
-                <h3 className="card-header-title">CU profiling</h3>
-            </div>
+        <CollapsibleCard title="CU profiling" className="e-card">
             <div className="e-card-body">
                 {Boolean(unitsConsumed) && <div className="mb-3">Total: {unitsConsumed?.toLocaleString()} CU</div>}
 
@@ -279,6 +277,6 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
                     })}
                 </div>
             </div>
-        </div>
+        </CollapsibleCard>
     );
 }

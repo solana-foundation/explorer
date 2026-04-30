@@ -1,5 +1,6 @@
 import { ProgramField } from '@entities/instruction-card';
 import { useScrollAnchor } from '@providers/scroll-anchor';
+import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { cn } from '@shared/utils';
 import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
@@ -54,24 +55,31 @@ export function InspectorInstructionCard({
     );
 
     return (
-        <div className="card" ref={scrollAnchorRef}>
-            <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">
+        <CollapsibleCard
+            ref={scrollAnchorRef}
+            title={
+                <>
                     <span className={`badge bg-${resultClass}-soft me-2`}>
                         #{index + 1}
                         {childIndex !== undefined ? `.${childIndex + 1}` : ''}
                     </span>
                     {title}
-                </h3>
-
+                </>
+            }
+            headerButtons={
                 <button
                     disabled={defaultRaw}
-                    className={cn('btn btn-sm d-flex align-items-center', showRaw ? 'btn-black active' : 'btn-white')}
+                    className={cn(
+                        'btn btn-sm d-flex align-items-center',
+                        showRaw ? 'btn-black active' : 'btn-white',
+                        defaultRaw && '!e-pointer-events-auto e-cursor-not-allowed',
+                    )}
                     onClick={rawClickHandler}
                 >
                     <Code className="me-2" size={13} /> Raw
                 </button>
-            </div>
+            }
+        >
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <tbody className="list">
@@ -102,7 +110,7 @@ export function InspectorInstructionCard({
                     </tbody>
                 </table>
             </div>
-        </div>
+        </CollapsibleCard>
     );
 }
 
