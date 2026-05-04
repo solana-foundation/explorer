@@ -39,15 +39,17 @@ function reconcile(rewards: Rewards | undefined, update: RewardsUpdate | undefin
         return rewards;
     }
 
-    const combined = (rewards?.rewards || []).concat(update.rewards).filter(value => value !== null);
-
-    const foundOldest = update.foundOldest;
+    const combined = [...(rewards?.rewards ?? []), ...update.rewards];
+    const byEpoch = new Map<number, InflationReward>();
+    combined.forEach(r => {
+        if (r) byEpoch.set(r.epoch, r);
+    });
 
     return {
-        foundOldest,
+        foundOldest: update.foundOldest,
         highestFetchedEpoch: rewards?.highestFetchedEpoch || update.highestFetchedEpoch,
         lowestFetchedEpoch: update.lowestFetchedEpoch,
-        rewards: combined,
+        rewards: Array.from(byEpoch.values()),
     };
 }
 
