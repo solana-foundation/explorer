@@ -83,7 +83,7 @@ export const DecodedTransferAmount: Story = {
     },
 };
 
-// Unknown discriminator renders raw hex data
+// Unknown discriminator — SDK cannot parse it, shows as parse error
 export const UnknownDiscriminator: Story = {
     args: {
         index: 2,
@@ -92,8 +92,7 @@ export const UnknownDiscriminator: Story = {
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByText('Unknown')).toBeInTheDocument();
-        await expect(canvas.getByText('fe ab cd')).toBeInTheDocument();
+        await expect(canvas.getByTestId('batch-error')).toBeInTheDocument();
     },
 };
 
@@ -170,6 +169,48 @@ export const SetAuthorityRevoke: Story = {
         if (!authorityTypeRow) throw new Error('Expected Authority Type row');
         await expect(within(authorityTypeRow).getByText('CloseAccount')).toBeInTheDocument();
         await expect(canvas.getByText('(none)')).toBeInTheDocument();
+    },
+};
+
+// Multisig Transfer — authority is a multisig address followed by 2 co-signers
+export const MultisigCoSigners: Story = {
+    args: {
+        index: 9,
+        ix: makeBatchIxWithKeys(
+            [{ data: concatBytes(new Uint8Array([3]), writeU64LE(7500n)), numAccounts: 5 }],
+            [
+                makeAccount(true, false), // Source (writable)
+                makeAccount(true, false), // Destination (writable)
+                makeAccount(false, false), // Multisig authority (not a signer itself)
+                makeAccount(false, true), // Co-signer 1
+                makeAccount(false, true), // Co-signer 2
+            ],
+        ),
+        result: { err: null },
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByText('Transfer')).toBeInTheDocument();
+        await expect(canvas.getByText('Amount:')).toBeInTheDocument();
+        await expect(canvas.getByText('7500')).toBeInTheDocument();
+        await expect(canvas.getByText('Signer 1:')).toBeInTheDocument();
+        await expect(canvas.getByText('Signer 2:')).toBeInTheDocument();
+    },
+};
+
+// SyncNative (disc 17) — not in formatByType, exercises the generic fallback
+// that extracts accounts from the parsed instruction.
+export const UnhandledInstructionType: Story = {
+    args: {
+        index: 10,
+        ix: makeBatchIxWithKeys([{ data: new Uint8Array([17]), numAccounts: 1 }], [makeAccount(true, false)]),
+        result: { err: null },
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByText('SyncNative')).toBeInTheDocument();
+        // Generic fallback should render the account address
+        await expect(canvas.getByText('Account:')).toBeInTheDocument();
     },
 };
 

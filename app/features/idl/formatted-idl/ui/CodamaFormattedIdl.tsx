@@ -1,7 +1,8 @@
 import type { CodamaIdl } from '@entities/idl';
 import { useFormatCodamaIdl } from '@entities/idl';
 
-import { invariant } from '../lib/invariant';
+import { invariant } from '@/app/shared/lib/invariant';
+
 import { useSearchIdl } from '../model/search';
 import { BaseFormattedIdl } from './BaseFormattedIdl';
 import type { StandardFormattedIdlProps } from './types';

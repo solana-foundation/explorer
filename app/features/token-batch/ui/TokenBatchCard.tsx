@@ -19,15 +19,15 @@ export function TokenBatchCard({
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
-    const { subInstructions, error }: { subInstructions: ParsedSubInstruction[]; error: string | undefined } = (() => {
+    const { instructions, error }: { instructions: ParsedSubInstruction[]; error: string | undefined } = (() => {
         try {
-            return { error: undefined, subInstructions: parseBatchInstruction(new Uint8Array(ix.data), ix.keys) };
+            return { error: undefined, instructions: parseBatchInstruction(ix).instructions };
         } catch (e) {
-            return { error: e instanceof Error ? e.message : String(e), subInstructions: [] };
+            return { error: e instanceof Error ? e.message : String(e), instructions: [] };
         }
     })();
 
-    const title = `Token Program: Batch (${subInstructions.length} instruction${subInstructions.length !== 1 ? 's' : ''})`;
+    const title = `Token Program: Batch (${instructions.length} instruction${instructions.length !== 1 ? 's' : ''})`;
 
     return (
         <InstructionCard title={title} collapsible {...{ childIndex, index, innerCards, ix, result }}>
@@ -39,14 +39,19 @@ export function TokenBatchCard({
                                 Parse error: {error}
                             </div>
                         )}
-                        {subInstructions.length > 0 && (
+                        {instructions.length > 0 && (
                             <BatchMintRegistryProvider>
-                                {subInstructions.map(subIx => (
-                                    <SubInstructionRow key={subIx.index} subIx={subIx} />
+                                {instructions.map((sub, i) => (
+                                    <SubInstructionRow
+                                        key={i}
+                                        parsed={sub.parsed}
+                                        extraSigners={sub.extraSigners}
+                                        index={i}
+                                    />
                                 ))}
                             </BatchMintRegistryProvider>
                         )}
-                        {subInstructions.length === 0 && !error && (
+                        {instructions.length === 0 && !error && (
                             <div className="e-text-sm e-text-neutral-500" data-testid="batch-empty">
                                 No sub-instructions found
                             </div>

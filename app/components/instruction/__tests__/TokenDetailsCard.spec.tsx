@@ -6,7 +6,11 @@ import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, vi } from 'vitest';
 
-vi.mock('next/navigation');
+vi.mock('next/navigation', () => ({
+    usePathname: vi.fn(),
+    useRouter: vi.fn(() => ({ push: vi.fn() })),
+    useSearchParams: vi.fn(() => ({ get: vi.fn(), has: vi.fn(), toString: () => '' })),
+}));
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';

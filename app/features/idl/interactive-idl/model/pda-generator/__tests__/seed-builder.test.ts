@@ -1,6 +1,8 @@
 import { PublicKey } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
+import { invariant } from '@/app/shared/lib/invariant';
+
 import { buildSeedsWithInfo } from '../seed-builder';
 import type { IdlSeed, PdaArgument, PdaInstruction } from '../types';
 
@@ -62,8 +64,8 @@ describe('seed-builder', () => {
 
                     const result = buildSeedsWithInfo(seeds, {}, {}, EMPTY_INSTRUCTION);
 
-                    expect(result.buffers).not.toBeNull();
-                    expect(Array.from(result.buffers![0])).toEqual(value);
+                    invariant(result.buffers, 'expected buffers for valid const seed');
+                    expect(Array.from(result.buffers[0])).toEqual(value);
                     expect(result.info[0].name).toBe(expectedHex);
                     expect(result.info[0].value).toBe(expectedHex);
                 },
@@ -93,8 +95,8 @@ describe('seed-builder', () => {
 
                     const result = buildSeedsWithInfo(seeds, { value: input }, {}, instruction);
 
-                    expect(result.buffers).not.toBeNull();
-                    expect(Array.from(result.buffers![0])).toEqual(expected);
+                    invariant(result.buffers, 'expected buffers for valid integer arg seed');
+                    expect(Array.from(result.buffers[0])).toEqual(expected);
                 },
             );
 
@@ -110,8 +112,8 @@ describe('seed-builder', () => {
 
                     const result = buildSeedsWithInfo(seeds, { value: input }, {}, instruction);
 
-                    expect(result.buffers).not.toBeNull();
-                    expect(result.buffers![0].length).toBe(expectedLength);
+                    invariant(result.buffers, 'expected buffers for valid signed integer arg seed');
+                    expect(result.buffers[0].length).toBe(expectedLength);
                 },
             );
 
@@ -125,8 +127,8 @@ describe('seed-builder', () => {
 
                 const result = buildSeedsWithInfo(seeds, { values: '[1,256,1000]' }, {}, instruction);
 
-                expect(result.buffers).not.toBeNull();
-                expect(Array.from(result.buffers![0])).toEqual([1, 0, 0, 1, 232, 3]);
+                invariant(result.buffers, 'expected buffers for valid integer array seed');
+                expect(Array.from(result.buffers[0])).toEqual([1, 0, 0, 1, 232, 3]);
             });
         });
 
@@ -141,8 +143,8 @@ describe('seed-builder', () => {
 
                 const result = buildSeedsWithInfo(seeds, { data: input }, {}, instruction);
 
-                expect(result.buffers).not.toBeNull();
-                expect(Array.from(result.buffers![0])).toEqual(UTF8_TEST_CASES[input]);
+                invariant(result.buffers, 'expected buffers for valid string/bytes arg seed');
+                expect(Array.from(result.buffers[0])).toEqual(UTF8_TEST_CASES[input]);
             });
         });
 
@@ -152,8 +154,8 @@ describe('seed-builder', () => {
 
                 const result = buildSeedsWithInfo(seeds, {}, { owner: DEFAULT_PUBKEY }, EMPTY_INSTRUCTION);
 
-                expect(result.buffers).not.toBeNull();
-                expect(result.buffers![0].length).toBe(32);
+                invariant(result.buffers, 'expected buffers for valid account seed');
+                expect(result.buffers[0].length).toBe(32);
                 expect(result.info[0].name).toBe('owner');
                 expect(result.info[0].value).toBe(DEFAULT_PUBKEY);
             });
@@ -194,11 +196,11 @@ describe('seed-builder', () => {
 
                 const result = buildSeedsWithInfo(seeds, { index: '5' }, { user: DEFAULT_PUBKEY }, instruction);
 
-                expect(result.buffers).not.toBeNull();
-                expect(result.buffers!.length).toBe(3);
-                expect(Array.from(result.buffers![0])).toEqual([0x01, 0x02]);
-                expect(Array.from(result.buffers![1])).toEqual([5]);
-                expect(result.buffers![2].length).toBe(32);
+                invariant(result.buffers, 'expected buffers for valid mixed seeds');
+                expect(result.buffers.length).toBe(3);
+                expect(Array.from(result.buffers[0])).toEqual([0x01, 0x02]);
+                expect(Array.from(result.buffers[1])).toEqual([5]);
+                expect(result.buffers[2].length).toBe(32);
             });
 
             it('should return null buffers if any seed fails', () => {
@@ -248,8 +250,8 @@ describe('seed-builder', () => {
             it('should handle empty seeds array', () => {
                 const result = buildSeedsWithInfo([], {}, {}, EMPTY_INSTRUCTION);
 
-                expect(result.buffers).not.toBeNull();
-                expect(result.buffers!.length).toBe(0);
+                invariant(result.buffers, 'expected empty buffers array for empty seeds input');
+                expect(result.buffers.length).toBe(0);
                 expect(result.info.length).toBe(0);
             });
 

@@ -490,7 +490,8 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 val => val.name.toLocaleLowerCase() === enumVariantName.toLocaleLowerCase(),
             );
 
-            return variant && variant.fields ? (
+            const variantFields = variant?.fields;
+            return variant && variantFields ? (
                 <ExpandableRow
                     fieldName={itemKey}
                     fieldType={typeDisplayName({ enum: enumVariantName })}
@@ -499,7 +500,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 >
                     <Fragment key={keySuffix ? `${key}-${keySuffix}` : key}>
                         {Object.entries(value[enumVariantName]).map(([innerKey, innerValue]: [string, any], index) => {
-                            const innerFieldType = variant.fields![index];
+                            const innerFieldType = variantFields[index];
                             if (!innerFieldType) {
                                 throw Error(
                                     `Could not type definition for ${innerKey} field in user-defined struct ${fieldType.name}`,

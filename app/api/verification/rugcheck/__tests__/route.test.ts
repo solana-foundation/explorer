@@ -56,6 +56,14 @@ describe('Rugcheck API Route', () => {
         expect(await response.json()).toEqual({ error: 'No rugcheck data available' });
     });
 
+    it('should return 404 when rugcheck responds with 400 (invalid token mint)', async () => {
+        mockFetchResponse(400, { error: 'invalid token mint' });
+        const response = await callRoute(VALID_MINT);
+        expect(response.status).toBe(404);
+        expect(await response.json()).toEqual({ error: 'No rugcheck data available' });
+        expect(Logger.panic).not.toHaveBeenCalled();
+    });
+
     it('should return 400 and report to sentry when rugcheck responds with 400 and unexpected body', async () => {
         mockFetchResponse(400, { error: 'bad request' });
         const response = await callRoute(VALID_MINT);

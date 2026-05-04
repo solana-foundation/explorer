@@ -72,13 +72,19 @@ describe('GET /api/ans-domains/[address]', () => {
             expect(data.domains).toEqual([]);
         });
 
-        it('should log the error on fetch failure', async () => {
+        it('should escalate on fetch failure', async () => {
             const error = new Error('Connection failed');
             vi.mocked(fetchAnsDomains).mockRejectedValueOnce(error);
 
             await GET(mockRequest, { params: { address: VALID_ADDRESS } });
 
-            expect(Logger.error).toHaveBeenCalledWith(error, { address: VALID_ADDRESS });
+            expect(Logger.panic).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    cause: error,
+                    message: '[api:ans-domains] Failed to fetch ANS domains',
+                }),
+                { sentryExtras: { address: VALID_ADDRESS } },
+            );
         });
 
         it('should not cache error responses', async () => {

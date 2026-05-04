@@ -4,11 +4,13 @@ import { PublicKey, SystemProgram } from '@solana/web3.js';
 import React from 'react';
 
 import { FetchStatus } from '@/app/providers/cache';
+import { invariant } from '@/app/shared/lib/invariant';
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
 import { LOADER_IDS } from '@/app/utils/programs';
 
 // BPF Loader 2 program ID - using key from LOADER_IDS
-const BPF_LOADER_2_KEY = Object.keys(LOADER_IDS).find(key => LOADER_IDS[key] === 'BPF Loader 2')!;
+const BPF_LOADER_2_KEY = Object.keys(LOADER_IDS).find(key => LOADER_IDS[key] === 'BPF Loader 2');
+invariant(BPF_LOADER_2_KEY, 'BPF Loader 2 program ID not found in LOADER_IDS');
 const BPF_LOADER_2 = new PublicKey(BPF_LOADER_2_KEY);
 
 // Mock account data for programs

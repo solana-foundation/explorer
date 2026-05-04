@@ -57,15 +57,16 @@ export function pickClusterParams(
 
     if (additionalParams) {
         nextSearchParams ||= new URLSearchParams();
+        const params = nextSearchParams;
         const additionalParamsObj = new URLSearchParams(additionalParams.toString());
         additionalParamsObj.forEach((value, key) => {
             // Skip mainnet-beta cluster as it's the default
             if (key === 'cluster' && value === MAINNET_MONIKER) {
                 // Remove it if it was added from current params
-                nextSearchParams!.delete('cluster');
+                params.delete('cluster');
                 return;
             }
-            nextSearchParams!.set(key, value); // Override current with additional
+            params.set(key, value); // Override current with additional
         });
     }
     const queryString = nextSearchParams?.toString();

@@ -85,6 +85,7 @@ export async function GET(_request: Request, { params: { mintAddress } }: Params
 type NoDataStatusCode = 404 | 422;
 
 const RUGCHECK_NO_DATA_ERRORS: Partial<Record<string, NoDataStatusCode>> = {
+    'invalid token mint': 404,
     'not found': 404,
     'unable to generate report': 422,
 };

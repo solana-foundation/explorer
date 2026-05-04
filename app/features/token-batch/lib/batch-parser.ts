@@ -1,32 +1,24 @@
-// Manual parser for SPL Token batched instructions (discriminator 0xff).
-//
-// Why not use @solana/spl-token or @solana-program/token?
-// Neither package exposes batch instruction decoding. The batch wire format
-// (a sequence of packed sub-instructions inside a single instruction's data)
-// is a runtime feature of the Token / Token-2022 programs but has no
-// corresponding JS decoder in any published SDK version. See also the comment
-// in decode-sub-instruction.ts for per-sub-instruction decoding rationale.
-//
-// Wire format reference:
-//   https://github.com/solana-program/token/blob/065786e/pinocchio/interface/src/instruction.rs#L552
+// Parses SPL Token batched instructions (discriminator 0xff) using the SDK's
+// parseBatchInstruction helper from @solana-program/token.
 
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
-import type { AccountMeta, PublicKey } from '@solana/web3.js';
+import { type AccountMeta, isSignerRole, isWritableRole } from '@solana/kit';
+import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
+import { parseBatchInstruction as sdkParseBatch, type ParsedTokenInstruction } from '@solana-program/token';
 
-import { readU8 } from '@/app/shared/lib/bytes';
-import { Logger } from '@/app/shared/lib/logger';
+import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
-import { BATCH_DISCRIMINATOR, type TokenInstructionName, typeNameByDiscriminator } from './const';
+import { BATCH_DISCRIMINATOR } from './const';
+import type { LabeledAccount } from './types';
 
-export type ParsedBatchSubInstruction<T> = {
-    index: number;
-    accounts: T[];
-    data: Uint8Array;
-    discriminator: number | undefined;
-    typeName: TokenInstructionName | 'Unknown';
+export type ParsedSubInstruction = {
+    parsed: ParsedTokenInstruction<string>;
+    extraSigners: LabeledAccount[];
 };
 
-export type ParsedSubInstruction = ParsedBatchSubInstruction<AccountMeta>;
+export type ParsedBatchResult = {
+    instructions: ParsedSubInstruction[];
+};
 
 // Uses a structural type instead of TransactionInstruction so callers don't
 // need to construct a full web3.js object in tests — only programId and the
@@ -42,62 +34,47 @@ export function isTokenBatchInstruction(ix: {
     return hasBatchDiscriminator(ix.data);
 }
 
-export function parseBatchInstruction<T>(data: Uint8Array, accounts: T[]): ParsedBatchSubInstruction<T>[] {
-    if (!hasBatchDiscriminator(data)) {
+export function parseBatchInstruction(ix: TransactionInstruction): ParsedBatchResult {
+    if (!hasBatchDiscriminator(ix.data)) {
         throw new Error('Not a batch instruction');
     }
 
-    const subInstructions: ParsedBatchSubInstruction<T>[] = [];
-    let offset = 1; // skip batch discriminator
-    let accountOffset = 0;
-    let subIndex = 0;
+    const kitIx = toKitInstruction(ix);
+    const parsed = sdkParseBatch(kitIx);
 
-    while (offset < data.length) {
-        if (offset + 2 > data.length) {
-            throw new Error(`Truncated data: expected num_accounts and data_len at offset ${offset}`);
-        }
-        // Wire format packs both fields as single u8 values (see header comment link)
-        const numAccounts = readU8(data, offset);
-        const dataLen = readU8(data, offset + 1);
-        offset += 2;
+    // The SDK maps only named accounts per instruction type. For multisig
+    // instructions the on-chain account list includes extra co-signer accounts
+    // beyond the named ones. We recover them from the raw account slices using
+    // the numberOfAccounts field that the batch format provides.
+    const allAccounts = kitIx.accounts ?? [];
+    const accountOffsets = parsed.data.data.reduce<number[]>(
+        (offsets, _, i) => [...offsets, offsets[i] + parsed.data.data[i].numberOfAccounts],
+        [0],
+    );
 
-        // Read sub-instruction data
-        if (offset + dataLen > data.length) {
-            throw new Error(
-                `Truncated data: expected ${dataLen} bytes at offset ${offset}, but only ${data.length - offset} remain`,
-            );
-        }
-        const subData = data.slice(offset, offset + dataLen);
-        offset += dataLen;
+    const instructions = parsed.instructions.map((sub, i) => {
+        const namedCount = 'accounts' in sub && sub.accounts ? Object.keys(sub.accounts).length : 0;
+        const extraSigners = extractExtraSigners(
+            allAccounts.slice(accountOffsets[i] + namedCount, accountOffsets[i + 1]),
+        );
+        return { extraSigners, parsed: sub };
+    });
 
-        // Slice accounts
-        if (accountOffset + numAccounts > accounts.length) {
-            throw new Error(`Insufficient accounts: need ${accountOffset + numAccounts}, have ${accounts.length}`);
-        }
-        const subAccounts = accounts.slice(accountOffset, accountOffset + numAccounts);
-        accountOffset += numAccounts;
-
-        const discriminator = subData.length > 0 ? subData[0] : undefined;
-        const typeName = (discriminator !== undefined && typeNameByDiscriminator[discriminator]) || 'Unknown';
-
-        if (typeName === 'Unknown') {
-            Logger.warn('[token-batch] Unknown sub-instruction discriminator', { discriminator, index: subIndex });
-        }
-
-        subInstructions.push({
-            accounts: subAccounts,
-            data: subData,
-            discriminator,
-            index: subIndex,
-            typeName,
-        });
-
-        subIndex++;
-    }
-
-    return subInstructions;
+    return { instructions };
 }
 
 function hasBatchDiscriminator(data: { length: number; 0?: number }): boolean {
     return data.length >= 1 && data[0] === BATCH_DISCRIMINATOR;
+}
+
+// Multisig SPL Token instructions place the multisig authority in the last
+// named account slot, followed by N co-signer accounts. We label them
+// "Signer 1", "Signer 2", etc. to match the old behaviour.
+function extractExtraSigners(signerMetas: readonly AccountMeta<string>[]): LabeledAccount[] {
+    return signerMetas.map((meta, i) => ({
+        isSigner: isSignerRole(meta.role),
+        isWritable: isWritableRole(meta.role),
+        label: `Signer ${i + 1}`,
+        pubkey: new PublicKey(meta.address),
+    }));
 }

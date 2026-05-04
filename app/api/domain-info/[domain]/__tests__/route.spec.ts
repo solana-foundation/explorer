@@ -73,13 +73,19 @@ describe('GET /api/domain-info/[domain]', () => {
         expect(response.headers.get('Cache-Control')).toBe('no-store');
     });
 
-    it('should log the error on unexpected failure', async () => {
+    it('should escalate on unexpected failure', async () => {
         const error = new Error('Unexpected failure');
         vi.mocked(resolveDomain).mockRejectedValueOnce(error);
 
         await GET(mockRequest, { params: { domain: 'test.sol' } });
 
-        expect(Logger.error).toHaveBeenCalledWith(error, { domain: 'test.sol' });
+        expect(Logger.panic).toHaveBeenCalledWith(
+            expect.objectContaining({
+                cause: error,
+                message: '[api:domain-info] Failed to resolve domain',
+            }),
+            { sentryExtras: { domain: 'test.sol' } },
+        );
     });
 
     describe('invalid domain input', () => {
