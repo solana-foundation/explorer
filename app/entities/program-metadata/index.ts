@@ -1,3 +1,4 @@
+export { useProgramMetadataCodamaIdl } from './model/useProgramMetadataCodamaIdl';
 export { useProgramMetadataIdl } from './model/useProgramMetadataIdl';
 export { useProgramMetadataSecurityTxt } from './model/useProgramMetadataSecurityTxt';
 

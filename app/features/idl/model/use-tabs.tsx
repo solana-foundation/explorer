@@ -1,12 +1,6 @@
 'use client';
 
-import {
-    FormattedIdl,
-    getIdlSpec,
-    isIdlProgramIdMismatch,
-    isInteractiveIdlSupported,
-    type SupportedIdl,
-} from '@entities/idl';
+import { FormattedIdl, isIdlProgramIdMismatch, isInteractiveIdlSupported, type SupportedIdl } from '@entities/idl';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { cn } from '@shared/utils';
 import { isEnvEnabled } from '@utils/env';
@@ -112,22 +106,16 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, pro
             },
         ];
 
-        // Only show interactive tab for Anchor IDLs (getIdlSpec returns null for legacy and codama)
-        if (originalIdl && getIdlSpec(originalIdl) !== null && IS_INTERACTIVE_IDL_ENABLED) {
-            const isVersionUnsupported = !isInteractiveIdlSupported(originalIdl);
+        // Show interactive tab for modern Anchor IDLs and Codama IDLs
+        if (originalIdl && isInteractiveIdlSupported(originalIdl) && IS_INTERACTIVE_IDL_ENABLED) {
             const isProgramIdMismatch = programId ? isIdlProgramIdMismatch(originalIdl, programId) : false;
-            const isInteractDisabled = isVersionUnsupported || isProgramIdMismatch;
-
-            const warningMessage = isProgramIdMismatch
-                ? 'IDL program address does not match the current program'
-                : 'Current version of IDL is not supported';
 
             tabItems.push({
                 disabled: !idl.instructions?.length,
                 id: 'interact',
                 render: () =>
-                    isInteractDisabled ? (
-                        <BaseWarningCard message={warningMessage} />
+                    isProgramIdMismatch ? (
+                        <BaseWarningCard message="IDL program address does not match the current program" />
                     ) : (
                         <InteractWithIdl
                             data={idl.instructions}
@@ -139,12 +127,7 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, pro
                             onWalletConnected={idlAnalytics.trackWalletConnected}
                         />
                     ),
-                title: (
-                    <InteractWithIdlTabName
-                        isInteractDisabled={isInteractDisabled}
-                        isProgramIdMismatch={isProgramIdMismatch}
-                    />
-                ),
+                title: <InteractWithIdlTabName isProgramIdMismatch={isProgramIdMismatch} />,
             } as InteractTab);
         }
 
@@ -181,32 +164,24 @@ function NoSearchResultsPlaceholder({ tabName }: { tabName: string }) {
     );
 }
 
-function InteractWithIdlTabName({
-    isInteractDisabled,
-    isProgramIdMismatch = false,
-}: {
-    isInteractDisabled: boolean;
-    isProgramIdMismatch?: boolean;
-}) {
+function InteractWithIdlTabName({ isProgramIdMismatch = false }: { isProgramIdMismatch?: boolean }) {
     const tab = (
         <div className="e-flex e-items-center e-gap-1">
-            {isInteractDisabled ? <XCircle size={14} /> : <PlayCircle size={14} />}
+            {isProgramIdMismatch ? <XCircle size={14} /> : <PlayCircle size={14} />}
             Interact
         </div>
     );
 
     const tooltipMessage = isProgramIdMismatch
         ? 'IDL program address does not match the current program'
-        : isInteractDisabled
-          ? 'Currently we support only modern Anchor IDL >= 0.30.1'
-          : "Launch Anchor's instructions";
+        : 'Launch program instructions';
 
     return (
         <Tooltip>
             <TooltipTrigger asChild>
                 <div
                     className={cn('e-w-fit', {
-                        'e-cursor-not-allowed e-opacity-50': isInteractDisabled,
+                        'e-cursor-not-allowed e-opacity-50': isProgramIdMismatch,
                     })}
                 >
                     {tab}

@@ -97,8 +97,45 @@ describe('CoinGecko API Route', () => {
         expect(await response.json()).toEqual(expect.objectContaining({ market_cap_rank: null }));
     });
 
+    it('should return 404 when upstream lists the token but has no USD market data', async () => {
+        mockFetchResponse(200, {
+            id: 'glow-staked-sol',
+            last_updated: null,
+            market_cap_rank: null,
+            market_data: {
+                current_price: {},
+                market_cap: {},
+                total_volume: {},
+            },
+        });
+        const response = await callRoute(VALID_ADDRESS);
+        expect(response.status).toBe(404);
+        expect(await response.json()).toEqual({ error: 'No market data' });
+        expect(Logger.warn).toHaveBeenCalledWith('[api:coingecko] No market data', { address: VALID_ADDRESS });
+    });
+
+    it('should return 404 when USD is missing from the currency map', async () => {
+        mockFetchResponse(200, {
+            last_updated: '2025-01-01T00:00:00Z',
+            market_cap_rank: 5,
+            market_data: {
+                current_price: { eur: 0.92 },
+                market_cap: { eur: 900_000 },
+                total_volume: { eur: 400_000 },
+            },
+        });
+        const response = await callRoute(VALID_ADDRESS);
+        expect(response.status).toBe(404);
+    });
+
     it('should return 502 and log to sentry when response schema is invalid', async () => {
-        mockFetchResponse(200, { unexpected: 'shape' });
+        // Has USD price (passes the "no market data" pre-check) but is missing
+        // other required fields — exercises the strict-schema failure path.
+        mockFetchResponse(200, {
+            market_data: {
+                current_price: { usd: 1.23 },
+            },
+        });
         const response = await callRoute(VALID_ADDRESS);
         expect(response.status).toBe(502);
         expect(await response.json()).toEqual({ error: 'Invalid response from coingecko API' });

@@ -1,16 +1,18 @@
 import type { PublicKey, Transaction, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
 
 /**
- * Base interface for all IDL types
+ * Base interface for all IDL types.
  *
- * It targets legacy idls as well as 0.30+ versions
+ * Anchor IDLs have a top-level `instructions` array, while Codama IDLs
+ * (RootNode) nest instructions under `program.instructions`. All fields
+ * are optional so both shapes satisfy this interface.
  */
 export interface BaseIdl {
     accounts?: any[];
     constants?: any[];
     errors?: any[];
     events?: any[];
-    instructions: any[];
+    instructions?: any[];
     types?: any[];
     version?: string;
 }

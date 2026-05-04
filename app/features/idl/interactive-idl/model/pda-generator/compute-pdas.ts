@@ -1,32 +1,28 @@
 import type { InstructionData, SupportedIdl } from '@entities/idl';
-import { PublicKey } from '@solana/web3.js';
-import { camelCase } from 'change-case';
 import type { DeepPartial } from 'react-hook-form';
 
 import type { InstructionFormData } from '../use-instruction-form';
 import { createAnchorPdaProvider } from './anchor-provider';
-import { resolveProgramId } from './program-resolver';
+import { createCodamaPdaProvider } from './codama-provider';
 import { createPdaProviderRegistry } from './registry';
-import { buildSeedsWithInfo } from './seed-builder';
+import type { PdaGenerationResult } from './types';
 
 const defaultRegistry = createPdaProviderRegistry();
 defaultRegistry.register(createAnchorPdaProvider());
-
-export interface PdaGenerationResult {
-    generated: string | null;
-    seeds: { value: string | null; name: string }[];
-}
+defaultRegistry.register(createCodamaPdaProvider());
 
 /**
  * Computes PDA addresses for accounts that have PDA seeds defined.
  * Returns a map of account names (camelCase) to their computed PDA data.
+ *
+ * Delegates to the matching provider's `computePdas` method.
  */
-export function computePdas(
+export async function computePdas(
     idl: SupportedIdl | undefined,
     instruction: InstructionData,
     formValues: DeepPartial<InstructionFormData>,
-): Record<string, PdaGenerationResult> {
-    if (!idl) {
+): Promise<Record<string, PdaGenerationResult>> {
+    if (!idl || !instruction) {
         return {};
     }
 
@@ -35,62 +31,13 @@ export function computePdas(
         return {};
     }
 
-    const programId = provider.getProgramId(idl);
-    if (!programId) {
-        return {};
-    }
-
-    const idlInstruction = provider.findInstruction(idl, instruction.name);
-    if (!idlInstruction) {
-        return {};
-    }
-
     const args = formValues.arguments?.[instruction.name] || {};
     const accounts = formValues.accounts?.[instruction.name] || {};
-    const pdaAddresses: Record<string, PdaGenerationResult> = {};
 
-    for (const account of idlInstruction.accounts) {
-        if (!account.pda) {
-            continue;
-        }
-
-        // Skip if pda is just a boolean (0.29 IDL) without seeds definition
-        if (typeof account.pda === 'boolean' || !account.pda.seeds) {
-            continue;
-        }
-
-        const camelName = camelCase(account.name);
-
-        try {
-            const { buffers: seedBuffers, info: seedInfo } = buildSeedsWithInfo(
-                account.pda.seeds,
-                args,
-                accounts,
-                idlInstruction,
-            );
-
-            const derivationProgramId = resolveProgramId(programId, account.pda.program, { accounts, args });
-
-            if (seedBuffers && derivationProgramId) {
-                const [pda] = PublicKey.findProgramAddressSync(seedBuffers, derivationProgramId);
-                pdaAddresses[camelName] = {
-                    generated: pda.toBase58(),
-                    seeds: seedInfo,
-                };
-            } else {
-                pdaAddresses[camelName] = {
-                    generated: null,
-                    seeds: seedInfo,
-                };
-            }
-        } catch {
-            const { info: seedInfo } = buildSeedsWithInfo(account.pda.seeds, args, accounts, idlInstruction);
-            pdaAddresses[camelName] = {
-                generated: null,
-                seeds: seedInfo,
-            };
-        }
-    }
-
-    return pdaAddresses;
+    return provider.computePdas(
+        idl,
+        instruction.name,
+        args as Record<string, string | undefined>,
+        accounts as Record<string, string | Record<string, string | undefined> | undefined>,
+    );
 }

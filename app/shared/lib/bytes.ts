@@ -83,9 +83,14 @@ export function toBase64(bytes: Uint8Array): string {
  */
 const fromHexFallback = (hex: string): Uint8Array => {
     const bytes = new Uint8Array(hex.length / 2);
-    bytes.forEach((_, i) => {
-        bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-    });
+    for (let i = 0; i < hex.length; i += 2) {
+        const pair = hex.slice(i, i + 2);
+        const byte = parseInt(pair, 16);
+        if (isNaN(byte)) {
+            throw new Error(`Invalid hex character at position ${i}: "${pair}"`);
+        }
+        bytes[i / 2] = byte;
+    }
     return bytes;
 };
 

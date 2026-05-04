@@ -1,6 +1,6 @@
 'use client';
 
-import type { InstructionData } from '@entities/idl';
+import { getIdlSpecType, type InstructionData } from '@entities/idl';
 import { useParsedLogs } from '@entities/program-logs';
 import { useWallet } from '@solana/wallet-adapter-react';
 import {
@@ -27,6 +27,7 @@ import { getTransactionInstructionError } from '@/app/utils/program-err';
 
 import { programAtom } from '../model/state-atoms';
 import { AnchorInterpreter } from './anchor/anchor-interpreter';
+import { CodamaInterpreter } from './codama/codama-interpreter';
 import { IdlExecutor, populateAccounts, populateArguments } from './idl-executor';
 import type { UnifiedWallet } from './unified-program';
 import { BaseIdl } from './unified-program';
@@ -36,7 +37,7 @@ interface UseInstructionOptions {
     cluster?: string;
     idl?: BaseIdl;
     enabled?: boolean;
-    interpreterName?: typeof AnchorInterpreter.NAME;
+    interpreterName?: typeof AnchorInterpreter.NAME | typeof CodamaInterpreter.NAME;
     commitment?: Finality;
     /** Commitment level for transaction simulation. Defaults to 'processed'. */
     simulationCommitment?: Commitment;
@@ -78,13 +79,14 @@ export function useInstruction({
     cluster,
     idl,
     enabled = true,
-    interpreterName = AnchorInterpreter.NAME,
+    interpreterName: interpreterNameOverride,
     commitment = 'confirmed',
     simulationCommitment = 'processed',
     onSuccess,
     onError,
     onPreInvocationError,
 }: UseInstructionOptions): UseInstructionReturn {
+    const interpreterName = interpreterNameOverride ?? detectInterpreterName(idl);
     const { connected, publicKey, ...wallet } = useWallet();
     const { cluster: currentCluster, customUrl } = useCluster();
 
@@ -530,4 +532,15 @@ function serializeTransactionMessage(transaction: Transaction | undefined): stri
         Logger.warn('[idl] Failed to serialize transaction message', { error });
         return null;
     }
+}
+
+/**
+ * Auto-detect the interpreter name based on the IDL type.
+ * Falls back to Anchor interpreter for unknown/missing IDLs.
+ */
+function detectInterpreterName(idl?: BaseIdl): typeof AnchorInterpreter.NAME | typeof CodamaInterpreter.NAME {
+    if (idl && getIdlSpecType(idl) === 'codama') {
+        return CodamaInterpreter.NAME;
+    }
+    return AnchorInterpreter.NAME;
 }

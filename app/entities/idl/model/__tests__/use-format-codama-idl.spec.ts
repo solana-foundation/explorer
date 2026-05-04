@@ -1,4 +1,12 @@
 import { renderHook } from '@testing-library/react';
+import {
+    accountValueNode,
+    conditionalValueNode,
+    instructionAccountNode,
+    instructionNode,
+    pdaLinkNode,
+    pdaValueNode,
+} from 'codama';
 
 import { invariant } from '@/app/shared/lib/invariant';
 
@@ -9,7 +17,7 @@ import programMock2 from '../../mocks/codama/simplified/programMock2';
 import programMock3 from '../../mocks/codama/simplified/programMock3';
 import programMock4 from '../../mocks/codama/simplified/programMock4';
 import type { EnumFieldType, FieldType, StructFieldType, TypeFieldType } from '../formatters/formatted-idl';
-import { useFormatCodamaIdl } from '../use-format-codama-idl';
+import { getUniqPdaNodesFromIxs, useFormatCodamaIdl } from '../use-format-codama-idl';
 
 describe('useFormatCodamaIdl', () => {
     it('should return null when idl is undefined', () => {
@@ -58,7 +66,7 @@ describe('useFormatCodamaIdl', () => {
         expect(args).toHaveLength(1);
         expect(args?.[0]).toMatchObject({
             name: 'seed',
-            type: 'string:utf8',
+            type: 'string',
         });
     });
 
@@ -454,5 +462,49 @@ describe('useFormatCodamaIdl', () => {
         const programIdSeed = multiSeedPda?.seeds[2] as FieldType;
         expect((programIdSeed as any).name).toBe('programId');
         expect(programIdSeed.docs).toEqual([]);
+    });
+});
+
+describe('getUniqPdaNodesFromIxs — conditional branches', () => {
+    const makeIxWithConditional = (
+        ifTrue: Parameters<typeof conditionalValueNode>[0]['ifTrue'],
+        ifFalse: Parameters<typeof conditionalValueNode>[0]['ifFalse'],
+    ) =>
+        instructionNode({
+            accounts: [
+                instructionAccountNode({
+                    defaultValue: conditionalValueNode({
+                        condition: accountValueNode('authority'),
+                        ifFalse,
+                        ifTrue,
+                    }),
+                    isSigner: false,
+                    isWritable: true,
+                    name: 'target',
+                }),
+            ],
+            name: 'ix',
+        });
+
+    it('does not throw when only ifTrue is a PdaValueNode', () => {
+        const ix = makeIxWithConditional(pdaValueNode(pdaLinkNode('poll')), accountValueNode('authority'));
+        expect(() => getUniqPdaNodesFromIxs([ix])).not.toThrow();
+        const result = getUniqPdaNodesFromIxs([ix]);
+        expect(result).toHaveLength(1);
+        expect(result[0].pda.name).toBe('poll');
+    });
+
+    it('does not throw when only ifFalse is a PdaValueNode', () => {
+        const ix = makeIxWithConditional(accountValueNode('authority'), pdaValueNode(pdaLinkNode('otherPda')));
+        expect(() => getUniqPdaNodesFromIxs([ix])).not.toThrow();
+        const result = getUniqPdaNodesFromIxs([ix]);
+        expect(result).toHaveLength(1);
+        expect(result[0].pda.name).toBe('otherPda');
+    });
+
+    it('collects both PdaValueNode branches when both are PDAs', () => {
+        const ix = makeIxWithConditional(pdaValueNode(pdaLinkNode('pdaA')), pdaValueNode(pdaLinkNode('pdaB')));
+        const result = getUniqPdaNodesFromIxs([ix]);
+        expect(result.map(r => r.pda.name).sort()).toEqual(['pdaA', 'pdaB']);
     });
 });
