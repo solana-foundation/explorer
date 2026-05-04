@@ -10,6 +10,7 @@ import { CACHE_HEADERS, ERROR_CACHE_HEADERS } from '../../config';
 import { BLUPRYNT_CONFIG } from '../config';
 
 const RPC_TIMEOUT_MS = 15_000;
+// SAS protocol supports up to 256 schema versions. We decided to use 32 for now.
 const MAX_SCHEMA_VERSIONS = 32;
 
 const connection = new Connection(serverClusterUrl(Cluster.MainnetBeta, ''), {
