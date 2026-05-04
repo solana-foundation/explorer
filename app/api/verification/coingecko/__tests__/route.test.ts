@@ -148,5 +148,5 @@ function mockFetchResponse(status: number, body: Record<string, unknown> = {}) {
 
 function callRoute(address: string) {
     const request = new Request(`http://localhost:3000/api/verification/coingecko/${address}`);
-    return GET(request, { params: { address } });
+    return GET(request, { params: Promise.resolve({ address }) });
 }

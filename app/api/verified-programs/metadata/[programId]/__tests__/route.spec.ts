@@ -28,7 +28,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
 
     describe('validation', () => {
         it('rejects program IDs that are too short', async () => {
-            const params = { params: { programId: 'short' } };
+            const params = { params: Promise.resolve({ programId: 'short' }) };
             const response = await GET(mockRequest, params);
 
             expect(response.status).toBe(400);
@@ -37,7 +37,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
         });
 
         it('rejects program IDs that are too long', async () => {
-            const params = { params: { programId: 'a'.repeat(45) } };
+            const params = { params: Promise.resolve({ programId: 'a'.repeat(45) }) };
             const response = await GET(mockRequest, params);
 
             expect(response.status).toBe(400);
@@ -46,7 +46,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
         });
 
         it('rejects empty program IDs', async () => {
-            const params = { params: { programId: '' } };
+            const params = { params: Promise.resolve({ programId: '' }) };
             const response = await GET(mockRequest, params);
 
             expect(response.status).toBe(400);
@@ -56,7 +56,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
 
         it('accepts program IDs with length 32', async () => {
             const validProgramId = 'a'.repeat(32);
-            const params = { params: { programId: validProgramId } };
+            const params = { params: Promise.resolve({ programId: validProgramId }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockMetadata,
@@ -68,7 +68,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
         });
 
         it('accepts program IDs with length 44', async () => {
-            const params = { params: { programId: mockProgramId } };
+            const params = { params: Promise.resolve({ programId: mockProgramId }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockMetadata,
@@ -82,7 +82,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
 
     describe('successful requests', () => {
         it('fetches metadata from osec.io', async () => {
-            const params = { params: { programId: mockProgramId } };
+            const params = { params: Promise.resolve({ programId: mockProgramId }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockMetadata,
@@ -95,7 +95,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
         });
 
         it('returns metadata with cache headers', async () => {
-            const params = { params: { programId: mockProgramId } };
+            const params = { params: Promise.resolve({ programId: mockProgramId }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockMetadata,
@@ -112,7 +112,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
         });
 
         it('returns multiple metadata entries', async () => {
-            const params = { params: { programId: mockProgramId } };
+            const params = { params: Promise.resolve({ programId: mockProgramId }) };
             const multipleMetadata = [mockMetadata[0], { ...mockMetadata[0], verified_at: '2024-10-01' }];
 
             vi.mocked(fetch).mockResolvedValueOnce({
@@ -130,7 +130,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
 
     describe('error handling', () => {
         it('returns empty array with cache headers on 404', async () => {
-            const params = { params: { programId: mockProgramId } };
+            const params = { params: Promise.resolve({ programId: mockProgramId }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 ok: false,
@@ -147,7 +147,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
         });
 
         it('logs debug message on 404', async () => {
-            const params = { params: { programId: mockProgramId } };
+            const params = { params: Promise.resolve({ programId: mockProgramId }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 ok: false,
@@ -163,7 +163,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
         });
 
         it('returns error on 500 from osec.io', async () => {
-            const params = { params: { programId: mockProgramId } };
+            const params = { params: Promise.resolve({ programId: mockProgramId }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 ok: false,
@@ -178,7 +178,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
         });
 
         it('logs debug message on non-404 errors', async () => {
-            const params = { params: { programId: mockProgramId } };
+            const params = { params: Promise.resolve({ programId: mockProgramId }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 ok: false,
@@ -194,7 +194,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
         });
 
         it('handles network errors', async () => {
-            const params = { params: { programId: mockProgramId } };
+            const params = { params: Promise.resolve({ programId: mockProgramId }) };
             const networkError = new Error('Network error');
 
             vi.mocked(fetch).mockRejectedValueOnce(networkError);
@@ -207,7 +207,7 @@ describe('GET /api/verified-programs/metadata/[programId]', () => {
         });
 
         it('logs errors to Logger', async () => {
-            const params = { params: { programId: mockProgramId } };
+            const params = { params: Promise.resolve({ programId: mockProgramId }) };
             const networkError = new Error('Network error');
 
             vi.mocked(fetch).mockRejectedValueOnce(networkError);

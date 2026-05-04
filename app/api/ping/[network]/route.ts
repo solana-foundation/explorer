@@ -4,10 +4,13 @@ import fetch from 'node-fetch';
 import { Logger } from '@/app/shared/lib/logger';
 
 type Params = {
-    params: {
-        network: 'mainnet';
-    };
+    params: Promise<{
+        network: string;
+    }>;
 };
+
+const SUPPORTED_NETWORK = 'mainnet';
+const VALIDATORS_APP_LABEL = 'mainnet';
 
 export type ValidatorsAppPingStats = {
     interval: number;
@@ -25,15 +28,27 @@ const CACHE_HEADERS = { 'Cache-Control': 'public, max-age=60, s-maxage=60, stale
 
 const PING_INTERVALS: number[] = [1, 3, 12];
 
-export async function GET(_request: Request, { params: { network } }: Params) {
+export async function GET(_request: Request, props: Params) {
+    const { network } = await props.params;
+
+    if (network !== SUPPORTED_NETWORK) {
+        return NextResponse.json(
+            { error: `Network "${network}" is not supported` },
+            { headers: { 'Cache-Control': 'no-store, max-age=0' }, status: 404 },
+        );
+    }
+
     try {
         const responses = await Promise.all(
             PING_INTERVALS.map(interval =>
-                fetch(`https://www.validators.app/api/v1/ping-thing-stats/${network}.json?interval=${interval}`, {
-                    headers: {
-                        Token: process.env.PING_API_KEY || '',
+                fetch(
+                    `https://www.validators.app/api/v1/ping-thing-stats/${VALIDATORS_APP_LABEL}.json?interval=${interval}`,
+                    {
+                        headers: {
+                            Token: process.env.PING_API_KEY || '',
+                        },
                     },
-                }),
+                ),
             ),
         );
         const data: { [interval: number]: ValidatorsAppPingStats[] } = {};
@@ -44,8 +59,13 @@ export async function GET(_request: Request, { params: { network } }: Params) {
                     throw new Error(`Upstream API error: ${response.status} ${response.statusText}`);
                 }
 
+                const payload = await response.json();
+                if (!Array.isArray(payload)) {
+                    throw new Error('Upstream API returned non-array payload');
+                }
+
                 const interval = PING_INTERVALS[index];
-                data[interval] = (await response.json()) as ValidatorsAppPingStats[];
+                data[interval] = payload as ValidatorsAppPingStats[];
             }),
         );
 

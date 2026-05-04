@@ -1,9 +1,9 @@
 import StakeHistoryPageClient from './page-client';
 
 type Props = Readonly<{
-    params: {
+    params: Promise<{
         address: string;
-    };
+    }>;
 }>;
 
 export const metadata = {
@@ -11,6 +11,7 @@ export const metadata = {
     title: `Stake History | Solana`,
 };
 
-export default function StakeHistoryPage(props: Props) {
-    return <StakeHistoryPageClient {...props} />;
+export default async function StakeHistoryPage(props: Props) {
+    const params = await props.params;
+    return <StakeHistoryPageClient params={params} />;
 }

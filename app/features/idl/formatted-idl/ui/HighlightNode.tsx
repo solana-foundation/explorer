@@ -37,7 +37,7 @@ function extractTextFromChildren(children: React.ReactNode): string {
     if (Array.isArray(children)) {
         return children.map(extractTextFromChildren).join('');
     }
-    if (isValidElement(children)) {
+    if (isValidElement<{ children?: React.ReactNode }>(children)) {
         return extractTextFromChildren(children.props.children);
     }
     return '';

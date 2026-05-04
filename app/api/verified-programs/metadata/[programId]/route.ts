@@ -7,12 +7,14 @@ const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const PROGRAM_METADATA_CACHE_SECONDS = 3600;
 
 type Params = {
-    params: {
+    params: Promise<{
         programId: string;
-    };
+    }>;
 };
 
-export async function GET(_request: Request, { params: { programId } }: Params) {
+export async function GET(_request: Request, props: Params) {
+    const { programId } = await props.params;
+
     try {
         if (!programId || programId.length < 32 || programId.length > 44) {
             return NextResponse.json({ error: 'Invalid program ID' }, { status: 400 });

@@ -4,18 +4,20 @@ import { Metadata } from 'next/types';
 import ConcurrentMerkleTreePageClient from './page-client';
 
 type Props = Readonly<{
-    params: {
+    params: Promise<{
         address: string;
-    };
+    }>;
 }>;
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
+    const { address } = await props.params;
     return {
-        description: `Contents of the SPL Concurrent Merkle Tree at address ${props.params.address} on Solana`,
+        description: `Contents of the SPL Concurrent Merkle Tree at address ${address} on Solana`,
         title: `Concurrent Merkle Tree | ${await getReadableTitleFromAddress(props)} | Solana`,
     };
 }
 
-export default function ConcurrentMerkleTreePage(props: Props) {
-    return <ConcurrentMerkleTreePageClient {...props} />;
+export default async function ConcurrentMerkleTreePage(props: Props) {
+    const params = await props.params;
+    return <ConcurrentMerkleTreePageClient params={params} />;
 }

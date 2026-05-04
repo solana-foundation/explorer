@@ -19,7 +19,7 @@ describe('GET /api/sns-domains/[address]', () => {
 
     describe('validation', () => {
         it('should reject an invalid wallet address', async () => {
-            const response = await GET(mockRequest, { params: { address: 'not-a-pubkey' } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ address: 'not-a-pubkey' }) });
 
             expect(response.status).toBe(400);
             const data = await response.json();
@@ -36,7 +36,7 @@ describe('GET /api/sns-domains/[address]', () => {
         it('should return domains from fetchSnsDomains', async () => {
             vi.mocked(fetchSnsDomains).mockResolvedValueOnce(mockDomains);
 
-            const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ address: VALID_ADDRESS }) });
 
             expect(response.status).toBe(200);
             const data = await response.json();
@@ -46,7 +46,7 @@ describe('GET /api/sns-domains/[address]', () => {
         it('should call fetchSnsDomains with the address', async () => {
             vi.mocked(fetchSnsDomains).mockResolvedValueOnce([]);
 
-            await GET(mockRequest, { params: { address: VALID_ADDRESS } });
+            await GET(mockRequest, { params: Promise.resolve({ address: VALID_ADDRESS }) });
 
             expect(fetchSnsDomains).toHaveBeenCalledWith(VALID_ADDRESS);
         });
@@ -54,7 +54,7 @@ describe('GET /api/sns-domains/[address]', () => {
         it('should return cache headers with 43200s max-age', async () => {
             vi.mocked(fetchSnsDomains).mockResolvedValueOnce([]);
 
-            const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ address: VALID_ADDRESS }) });
 
             expect(response.headers.get('Cache-Control')).toBe('public, s-maxage=43200, stale-while-revalidate=3600');
         });
@@ -64,7 +64,7 @@ describe('GET /api/sns-domains/[address]', () => {
         it('should return 404 when no domains found', async () => {
             vi.mocked(fetchSnsDomains).mockResolvedValueOnce(undefined);
 
-            const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ address: VALID_ADDRESS }) });
 
             expect(response.status).toBe(404);
             const data = await response.json();
@@ -79,7 +79,7 @@ describe('GET /api/sns-domains/[address]', () => {
             const error = new Error('Bonfida API down');
             vi.mocked(fetchSnsDomains).mockRejectedValueOnce(error);
 
-            await GET(mockRequest, { params: { address: VALID_ADDRESS } });
+            await GET(mockRequest, { params: Promise.resolve({ address: VALID_ADDRESS }) });
 
             expect(Logger.error).toHaveBeenCalledWith(error, { address: VALID_ADDRESS });
         });
@@ -87,7 +87,7 @@ describe('GET /api/sns-domains/[address]', () => {
         it('does not cache error responses', async () => {
             vi.mocked(fetchSnsDomains).mockRejectedValueOnce(new Error('fail'));
 
-            const response = await GET(mockRequest, { params: { address: VALID_ADDRESS } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ address: VALID_ADDRESS }) });
 
             expect(response.status).toBe(500);
             const data = await response.json();

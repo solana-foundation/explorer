@@ -6,18 +6,20 @@ import { withTraceData } from '@/app/shared/lib/sentry';
 import IdlPageClient from './page-client';
 
 type Props = Readonly<{
-    params: {
+    params: Promise<{
         address: string;
-    };
+    }>;
 }>;
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
+    const { address } = await props.params;
     return withTraceData({
-        description: `The Interface Definition Language (IDL) file for the program at address ${props.params.address} on Solana`,
+        description: `The Interface Definition Language (IDL) file for the program at address ${address} on Solana`,
         title: `Program IDL | ${await getReadableTitleFromAddress(props)} | Solana`,
     });
 }
 
-export default function ProgramIDLPage({ params }: Props) {
+export default async function ProgramIDLPage(props: Props) {
+    const params = await props.params;
     return <IdlPageClient address={params.address} />;
 }

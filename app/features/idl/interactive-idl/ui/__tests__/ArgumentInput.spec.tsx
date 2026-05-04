@@ -62,7 +62,7 @@ describe('ArgumentInput', () => {
 
         it('should forward ref to input element', () => {
             const arg = createArgField();
-            const ref = { current: null } as React.RefObject<HTMLInputElement>;
+            const ref = { current: null } as React.RefObject<HTMLInputElement | null>;
 
             render(<ArgumentInput ref={ref} arg={arg} value="" onChange={vi.fn()} />);
 
@@ -408,7 +408,7 @@ describe('ArgumentInput', () => {
 
         it('should forward ref to first input element', () => {
             const arg = createArgField({ type: 'vec(u8)' });
-            const ref = { current: null } as React.RefObject<HTMLInputElement>;
+            const ref = { current: null } as React.RefObject<HTMLInputElement | null>;
 
             render(<ArgumentInput ref={ref} arg={arg} value="a, b" />);
 

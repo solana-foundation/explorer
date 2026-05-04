@@ -1,9 +1,9 @@
 import RecentBlockhashesPageClient from './page-client';
 
 type Props = Readonly<{
-    params: {
+    params: Promise<{
         address: string;
-    };
+    }>;
 }>;
 
 export const metadata = {
@@ -11,6 +11,7 @@ export const metadata = {
     title: `Recent Blockhashes | Solana`,
 };
 
-export default function RecentBlockhashesPage(props: Props) {
-    return <RecentBlockhashesPageClient {...props} />;
+export default async function RecentBlockhashesPage(props: Props) {
+    const params = await props.params;
+    return <RecentBlockhashesPageClient params={params} />;
 }

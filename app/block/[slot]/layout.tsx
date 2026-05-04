@@ -14,7 +14,7 @@ import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { IBRL_EXPLORER_URL } from '@utils/env';
 import { notFound, useSearchParams } from 'next/navigation';
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren, use } from 'react';
 import { ExternalLink } from 'react-feather';
 
 import { type NavigationTab, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
@@ -22,9 +22,11 @@ import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
 import { getEpochForSlot, getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
 import { pickClusterParams } from '@/app/utils/url';
 
-type Props = PropsWithChildren<{ params: { slot: string } }>;
+type SlotParams = { slot: string };
+type Props = PropsWithChildren<{ params: Promise<SlotParams> }>;
+type InnerProps = PropsWithChildren<{ params: SlotParams }>;
 
-function BlockLayoutInner({ children, params: { slot } }: Props) {
+function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
     const slotNumber = Number(slot);
     if (isNaN(slotNumber) || slotNumber >= Number.MAX_SAFE_INTEGER || slotNumber % 1 !== 0) {
         notFound();
@@ -227,7 +229,11 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
     );
 }
 
-export default function BlockLayout({ children, params }: Props) {
+export default function BlockLayout(props: Props) {
+    const params = use(props.params);
+
+    const { children } = props;
+
     return (
         <BlockProvider>
             <BlockLayoutInner params={params}>{children}</BlockLayoutInner>

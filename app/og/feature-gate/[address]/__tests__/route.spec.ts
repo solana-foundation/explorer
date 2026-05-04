@@ -43,7 +43,7 @@ describe('GET /og/feature-gate/[address]', () => {
         vi.stubEnv('FEATURE_GATE_OG_ENABLED', 'false');
         const { GET } = await import('../route');
 
-        const response = await GET(makeRequest(validAddress), { params: { address: validAddress } });
+        const response = await GET(makeRequest(validAddress), { params: Promise.resolve({ address: validAddress }) });
 
         expect(response.status).toBe(404);
         expect(await response.text()).toBe('Not Found');
@@ -69,7 +69,7 @@ describe('GET /og/feature-gate/[address]', () => {
             title: 'MoveStake and MoveLamports',
         });
 
-        const response = await GET(makeRequest(validAddress), { params: { address: validAddress } });
+        const response = await GET(makeRequest(validAddress), { params: Promise.resolve({ address: validAddress }) });
 
         expect(response.status).toBe(200);
         expect(response.headers.get('Content-Type')).toBe('image/png');
@@ -81,7 +81,9 @@ describe('GET /og/feature-gate/[address]', () => {
         const { GET } = await import('../route');
         const { getFeatureInfo } = await import('@/app/utils/feature-gate/utils');
 
-        const response = await GET(makeRequest('not-valid!!!'), { params: { address: 'not-valid!!!' } });
+        const response = await GET(makeRequest('not-valid!!!'), {
+            params: Promise.resolve({ address: 'not-valid!!!' }),
+        });
 
         expect(response.status).toBe(400);
         expect(await response.text()).toBe('Invalid address');
@@ -93,7 +95,9 @@ describe('GET /og/feature-gate/[address]', () => {
         const { getFeatureInfo } = await import('@/app/utils/feature-gate/utils');
         vi.mocked(getFeatureInfo).mockReturnValue(undefined);
 
-        const response = await GET(makeRequest(unknownAddress), { params: { address: unknownAddress } });
+        const response = await GET(makeRequest(unknownAddress), {
+            params: Promise.resolve({ address: unknownAddress }),
+        });
 
         expect(response.status).toBe(404);
         expect(await response.text()).toBe('Feature not found');
@@ -123,7 +127,7 @@ describe('GET /og/feature-gate/[address]', () => {
             throw new Error('Render failed');
         });
 
-        const response = await GET(makeRequest(validAddress), { params: { address: validAddress } });
+        const response = await GET(makeRequest(validAddress), { params: Promise.resolve({ address: validAddress }) });
 
         expect(response.status).toBe(500);
         expect(await response.text()).toBe('Failed to process request');

@@ -3,18 +3,21 @@ import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/ge
 import { Metadata } from 'next/types';
 
 type Props = Readonly<{
-    params: {
+    params: Promise<{
         address: string;
-    };
+    }>;
 }>;
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
+    const { address } = await props.params;
     return {
-        description: `Rewards due to the address ${props.params.address} by epoch on Solana`,
+        description: `Rewards due to the address ${address} by epoch on Solana`,
         title: `Address Rewards | ${await getReadableTitleFromAddress(props)} | Solana`,
     };
 }
 
-export default function BlockRewardsPage({ params: { address } }: Props) {
+export default async function BlockRewardsPage(props: Props) {
+    const { address } = await props.params;
+
     return <RewardsCard address={address} />;
 }

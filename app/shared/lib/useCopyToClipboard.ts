@@ -6,7 +6,7 @@ export type CopyState = 'copy' | 'copied' | 'errored';
 
 export function useCopyToClipboard(resetMs = 2000): readonly [CopyState, (text: string) => void] {
     const [state, setState] = useState<CopyState>('copy');
-    const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+    const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
     useEffect(() => {
         return () => {

@@ -32,7 +32,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
 
     describe('validation', () => {
         it('rejects non-numeric page numbers', async () => {
-            const params = { params: { page: 'abc' } };
+            const params = { params: Promise.resolve({ page: 'abc' }) };
             const response = await GET(mockRequest, params);
 
             expect(response.status).toBe(400);
@@ -41,7 +41,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
         });
 
         it('rejects page number zero', async () => {
-            const params = { params: { page: '0' } };
+            const params = { params: Promise.resolve({ page: '0' }) };
             const response = await GET(mockRequest, params);
 
             expect(response.status).toBe(400);
@@ -50,7 +50,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
         });
 
         it('rejects negative page numbers', async () => {
-            const params = { params: { page: '-1' } };
+            const params = { params: Promise.resolve({ page: '-1' }) };
             const response = await GET(mockRequest, params);
 
             expect(response.status).toBe(400);
@@ -59,7 +59,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
         });
 
         it('rejects decimal page numbers', async () => {
-            const params = { params: { page: '1.5' } };
+            const params = { params: Promise.resolve({ page: '1.5' }) };
             const response = await GET(mockRequest, params);
 
             expect(response.status).toBe(400);
@@ -68,7 +68,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
         });
 
         it('accepts page number 1', async () => {
-            const params = { params: { page: '1' } };
+            const params = { params: Promise.resolve({ page: '1' }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockProgramList,
@@ -80,7 +80,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
         });
 
         it('accepts large page numbers', async () => {
-            const params = { params: { page: '999' } };
+            const params = { params: Promise.resolve({ page: '999' }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockProgramList,
@@ -94,7 +94,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
 
     describe('successful requests', () => {
         it('fetches program list from osec.io', async () => {
-            const params = { params: { page: '2' } };
+            const params = { params: Promise.resolve({ page: '2' }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockProgramList,
@@ -107,7 +107,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
         });
 
         it('returns program list with cache headers', async () => {
-            const params = { params: { page: '1' } };
+            const params = { params: Promise.resolve({ page: '1' }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockProgramList,
@@ -124,7 +124,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
         });
 
         it('returns correct pagination metadata', async () => {
-            const params = { params: { page: '1' } };
+            const params = { params: Promise.resolve({ page: '1' }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockProgramList,
@@ -141,7 +141,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
         });
 
         it('returns program IDs array', async () => {
-            const params = { params: { page: '1' } };
+            const params = { params: Promise.resolve({ page: '1' }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockProgramList,
@@ -161,7 +161,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
 
     describe('error handling', () => {
         it('returns error on 404 from osec.io', async () => {
-            const params = { params: { page: '999' } };
+            const params = { params: Promise.resolve({ page: '999' }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 ok: false,
@@ -176,7 +176,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
         });
 
         it('returns error on 500 from osec.io', async () => {
-            const params = { params: { page: '1' } };
+            const params = { params: Promise.resolve({ page: '1' }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 ok: false,
@@ -191,7 +191,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
         });
 
         it('logs error message on failed fetch', async () => {
-            const params = { params: { page: '1' } };
+            const params = { params: Promise.resolve({ page: '1' }) };
 
             vi.mocked(fetch).mockResolvedValueOnce({
                 ok: false,
@@ -207,7 +207,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
         });
 
         it('handles network errors', async () => {
-            const params = { params: { page: '1' } };
+            const params = { params: Promise.resolve({ page: '1' }) };
             const networkError = new Error('Network error');
 
             vi.mocked(fetch).mockRejectedValueOnce(networkError);
@@ -220,7 +220,7 @@ describe('GET /api/verified-programs/list/[page]', () => {
         });
 
         it('logs network errors to Logger', async () => {
-            const params = { params: { page: '1' } };
+            const params = { params: Promise.resolve({ page: '1' }) };
             const networkError = new Error('Network error');
 
             vi.mocked(fetch).mockRejectedValueOnce(networkError);

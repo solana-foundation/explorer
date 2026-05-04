@@ -39,7 +39,7 @@ describe('GET /og/receipt/[signature]', () => {
         const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
         const request = new NextRequest(url.toString());
 
-        const response = await GET(request, { params: { signature: validSignature } });
+        const response = await GET(request, { params: Promise.resolve({ signature: validSignature }) });
 
         expect(response.status).toBe(200);
         expect(response.headers.get('Content-Type')).toBe('image/png');
@@ -51,7 +51,7 @@ describe('GET /og/receipt/[signature]', () => {
         const { createReceipt } = await import('@features/receipt/server');
         const request = new NextRequest('http://localhost:3000/og/receipt/not-base58!!!');
 
-        const response = await GET(request, { params: { signature: 'not-base58!!!' } });
+        const response = await GET(request, { params: Promise.resolve({ signature: 'not-base58!!!' }) });
 
         expect(response.status).toBe(400);
         expect(await response.text()).toBe('Invalid transaction signature');
@@ -66,7 +66,7 @@ describe('GET /og/receipt/[signature]', () => {
         const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
         const request = new NextRequest(url.toString());
 
-        const response = await GET(request, { params: { signature: validSignature } });
+        const response = await GET(request, { params: Promise.resolve({ signature: validSignature }) });
 
         expect(response.status).toBe(404);
         const text = await response.text();
@@ -80,7 +80,7 @@ describe('GET /og/receipt/[signature]', () => {
 
         const request = new NextRequest(`http://localhost:3000/og/receipt/${validSignature}`);
 
-        const response = await GET(request, { params: { signature: validSignature } });
+        const response = await GET(request, { params: Promise.resolve({ signature: validSignature }) });
 
         expect(response.status).toBe(502);
         const text = await response.text();
@@ -94,7 +94,7 @@ describe('GET /og/receipt/[signature]', () => {
 
         const request = new NextRequest(`http://localhost:3000/og/receipt/${validSignature}`);
 
-        const response = await GET(request, { params: { signature: validSignature } });
+        const response = await GET(request, { params: Promise.resolve({ signature: validSignature }) });
 
         expect(response.status).toBe(500);
         const text = await response.text();

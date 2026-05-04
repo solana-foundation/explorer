@@ -118,5 +118,5 @@ function mockFetchResponse(status: number, body: Record<string, unknown> = {}) {
 
 function callRoute(mintAddress: string) {
     const request = new Request(`http://localhost:3000/api/verification/rugcheck/${mintAddress}`);
-    return GET(request, { params: { mintAddress } });
+    return GET(request, { params: Promise.resolve({ mintAddress }) });
 }

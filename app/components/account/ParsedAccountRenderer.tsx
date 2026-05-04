@@ -5,8 +5,7 @@ import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
-import { RedirectType } from 'next/dist/client/components/redirect';
-import { redirect } from 'next/navigation';
+import { redirect, RedirectType } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { useClusterPath } from '@/app/utils/url';

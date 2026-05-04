@@ -1,8 +1,7 @@
 import { RichListProvider } from '@providers/richList';
 import { SupplyProvider } from '@providers/supply';
-import { PropsWithChildren } from 'react';
 
-export default function SupplyLayout({ children }: PropsWithChildren<Record<string, never>>) {
+export default function SupplyLayout({ children }: { children: React.ReactNode }) {
     return (
         <SupplyProvider>
             <RichListProvider>{children}</RichListProvider>

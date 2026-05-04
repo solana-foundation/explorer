@@ -18,12 +18,14 @@ const COINGECKO_QUERY = [
 ].join('&');
 
 type Params = {
-    params: {
+    params: Promise<{
         address: string;
-    };
+    }>;
 };
 
-export async function GET(_request: Request, { params: { address } }: Params) {
+export async function GET(_request: Request, props: Params) {
+    const { address } = await props.params;
+
     try {
         new PublicKey(address);
     } catch {

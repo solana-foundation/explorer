@@ -6,7 +6,7 @@ const DEFAULT_CLOSE_DELAY = 100;
 
 export function useHoverPopover(closeDelay = DEFAULT_CLOSE_DELAY) {
     const [isOpen, setIsOpen] = useState(false);
-    const timeoutRef = useRef<NodeJS.Timeout>();
+    const timeoutRef = useRef<NodeJS.Timeout>(undefined);
 
     const open = useCallback(() => {
         clearTimeout(timeoutRef.current);

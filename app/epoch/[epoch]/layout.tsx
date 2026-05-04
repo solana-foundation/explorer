@@ -1,6 +1,5 @@
 import { EpochProvider } from '@providers/epoch';
-import { PropsWithChildren } from 'react';
 
-export default function EpochLayout({ children }: PropsWithChildren<Record<string, never>>) {
+export default function EpochLayout({ children }: { children: React.ReactNode; params: Promise<{ epoch: string }> }) {
     return <EpochProvider>{children}</EpochProvider>;
 }

@@ -9,7 +9,7 @@ export type DownloadState = 'idle' | 'downloading' | 'downloaded' | 'errored';
 export function useDownloadReceipt(download: DownloadReceiptFn, resetMs = 2000): readonly [DownloadState, () => void] {
     const [state, setState] = useState<DownloadState>('idle');
     const stateRef = useRef<DownloadState>('idle');
-    const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+    const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
     const mountedRef = useRef(true);
 
     useEffect(() => {

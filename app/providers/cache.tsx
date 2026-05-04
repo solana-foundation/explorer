@@ -38,7 +38,6 @@ export type Clear = {
 
 export type Action<T> = Update<T> | Clear;
 export type Dispatch<T> = (action: Action<T>) => void;
-type Reducer<T, U> = (state: State<T>, action: Action<U>) => State<T>;
 type Reconciler<T, U> = (entry: T | undefined, update: U | undefined) => T | undefined;
 
 function defaultReconciler<T>(entry: T | undefined, update: T | undefined) {
@@ -61,7 +60,7 @@ function defaultReducer<T>(state: State<T>, action: Action<T>) {
 }
 
 export function useReducer<T>(url: string) {
-    return React.useReducer<Reducer<T, T>>(defaultReducer, { entries: {}, url });
+    return React.useReducer(defaultReducer<T>, { entries: {}, url } satisfies State<T>);
 }
 
 export function useCustomReducer<T, U>(url: string, reconciler: Reconciler<T, U>) {
@@ -70,7 +69,7 @@ export function useCustomReducer<T, U>(url: string, reconciler: Reconciler<T, U>
             return reducer(state, action, reconciler);
         };
     }, [reconciler]);
-    return React.useReducer<Reducer<T, U>>(customReducer, { entries: {}, url });
+    return React.useReducer(customReducer, { entries: {}, url } satisfies State<T>);
 }
 
 export function reducer<T, U>(state: State<T>, action: Action<U>, reconciler: Reconciler<T, U>): State<T> {

@@ -11,14 +11,17 @@ import React from 'react';
 import TransactionDetailsPageClient from './page-client';
 
 type Props = Readonly<{
-    params: SignatureProps;
-    searchParams: Record<string, string | string[] | undefined>;
+    params: Promise<SignatureProps>;
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
 }>;
 
 // Custom clusters use user-specific RPCs that the receipt API cannot access
 const SHAREABLE_CLUSTERS = CLUSTERS.filter(c => c !== Cluster.Custom);
 
-export async function generateMetadata({ params: { signature }, searchParams }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+    const searchParams = await props.searchParams;
+    const { signature } = await props.params;
+
     const isReceiptView = searchParams.view === 'receipt' && isReceiptEnabled;
 
     if (isReceiptView) {
@@ -73,6 +76,7 @@ export async function generateMetadata({ params: { signature }, searchParams }: 
     };
 }
 
-export default function TransactionDetailsPage(props: Props) {
-    return <TransactionDetailsPageClient {...props} />;
+export default async function TransactionDetailsPage(props: Props) {
+    const params = await props.params;
+    return <TransactionDetailsPageClient params={params} />;
 }

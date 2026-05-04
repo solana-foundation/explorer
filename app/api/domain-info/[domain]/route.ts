@@ -5,16 +5,18 @@ import { is } from 'superstruct';
 import { Logger } from '@/app/shared/lib/logger';
 
 type Params = {
-    params: {
+    params: Promise<{
         domain: string;
-    };
+    }>;
 };
 
 const CACHE_HEADERS = { 'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600' };
 
 const NO_CACHE_HEADERS = { 'Cache-Control': 'no-store' };
 
-export async function GET(_request: Request, { params: { domain } }: Params) {
+export async function GET(_request: Request, props: Params) {
+    const { domain } = await props.params;
+
     if (!is(domain, Domain)) {
         Logger.warn(`Invalid domain input rejected: ${domain}`);
         return NextResponse.json(null, { headers: NO_CACHE_HEADERS, status: 400 });

@@ -33,7 +33,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
     describe('validation', () => {
         it('returns 400 for an invalid mint address', async () => {
             const { GET } = await import('../route');
-            const response = await GET(mockRequest, { params: { mintAddress: 'not-a-valid-pubkey' } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: 'not-a-valid-pubkey' }) });
 
             expect(response.status).toBe(400);
             const data = await response.json();
@@ -48,7 +48,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
             vi.resetModules();
             const { GET } = await import('../route');
 
-            const response = await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
             expect(response.status).toBe(500);
             const data = await response.json();
@@ -67,7 +67,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
                 ? T
                 : never);
 
-            const response = await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
             expect(response.status).toBe(429);
             expect(Logger.warn).toHaveBeenCalledWith('Jupiter price API rate limit exceeded', { sentry: true });
@@ -83,7 +83,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
                 ? T
                 : never);
 
-            const response = await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
             expect(response.status).toBe(502);
             expect(Logger.error).toHaveBeenCalledWith(new Error('Jupiter price API error: 503'), { sentry: true });
@@ -100,7 +100,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
                 ok: true,
             } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
 
-            const response = await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
             expect(response.status).toBe(200);
             const data = await response.json();
@@ -116,7 +116,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
                 ok: true,
             } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
 
-            await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
+            await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
             const expectedErr = new Error(`Jupiter price API returned unexpected schema for ${VALID_MINT}`);
             expect(Logger.error).toHaveBeenCalledWith(expectedErr, { sentry: true });
@@ -130,7 +130,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
                 ok: true,
             } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
 
-            const response = await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
             expect(response.status).toBe(200);
             const data = await response.json();
@@ -150,7 +150,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
                 ok: true,
             } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
 
-            const response = await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
             expect(response.status).toBe(200);
             const data = await response.json();
@@ -169,7 +169,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
                 ok: true,
             } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
 
-            const response = await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
             expect(response.status).toBe(200);
             const data = await response.json();
@@ -185,7 +185,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
                 ok: true,
             } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
 
-            await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
+            await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
             expect(fetch).toHaveBeenCalledWith(`${JUPITER_PRICE_ENDPOINT}?ids=${VALID_MINT}`, expect.any(Object));
         });
@@ -198,7 +198,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
             const error = new Error('Network failure');
             vi.mocked(fetch).mockRejectedValueOnce(error);
 
-            const response = await GET(mockRequest, { params: { mintAddress: VALID_MINT } });
+            const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
             expect(response.status).toBe(500);
             const data = await response.json();

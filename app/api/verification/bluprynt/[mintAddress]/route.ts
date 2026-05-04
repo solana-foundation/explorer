@@ -10,12 +10,14 @@ import { CACHE_HEADERS, ERROR_CACHE_HEADERS, NO_STORE_HEADERS } from '../../conf
 const RPC_TIMEOUT_MS = 15_000;
 
 type Params = {
-    params: {
+    params: Promise<{
         mintAddress: string;
-    };
+    }>;
 };
 
-export async function GET(_request: Request, { params: { mintAddress } }: Params) {
+export async function GET(_request: Request, props: Params) {
+    const { mintAddress } = await props.params;
+
     try {
         new PublicKey(mintAddress);
     } catch {

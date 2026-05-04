@@ -1,9 +1,9 @@
 import SlotHashesPageClient from './page-client';
 
 type Props = Readonly<{
-    params: {
+    params: Promise<{
         address: string;
-    };
+    }>;
 }>;
 
 export const metadata = {
@@ -11,6 +11,7 @@ export const metadata = {
     title: `Slot Hashes | Solana`,
 };
 
-export default function SlotHashesPage(props: Props) {
-    return <SlotHashesPageClient {...props} />;
+export default async function SlotHashesPage(props: Props) {
+    const params = await props.params;
+    return <SlotHashesPageClient params={params} />;
 }

@@ -14,11 +14,11 @@ const CACHE_HEADERS = {
 };
 
 type Props = Readonly<{
-    params: { address: string };
+    params: Promise<{ address: string }>;
 }>;
 
-export async function GET(_request: NextRequest, { params }: Props) {
-    const { address } = params;
+export async function GET(_request: NextRequest, props: Props) {
+    const { address } = await props.params;
 
     if (!isFeatureGateOgEnabled()) return new NextResponse('Not Found', { status: 404 });
     if (!address || !isAddress(address)) return new NextResponse('Invalid address', { status: 400 });

@@ -41,7 +41,7 @@ import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useSearchParams } from 'next/navigation';
-import React, { PropsWithChildren, Suspense } from 'react';
+import React, { PropsWithChildren, Suspense, use } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
 import useSWRImmutable from 'swr/immutable';
@@ -128,9 +128,11 @@ export type AddressTabPath =
 
 type AddressTab = NavigationTab<AddressTabPath>;
 
-type Props = PropsWithChildren<{ params: { address: string } }>;
+type AddressParams = { address: string };
+type Props = PropsWithChildren<{ params: Promise<AddressParams> }>;
+type InnerProps = PropsWithChildren<{ params: AddressParams }>;
 
-function AddressLayoutInner({ children, params: { address } }: Props) {
+function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     const fetchAccount = useFetchAccountInfo();
     const { status, cluster, url, clusterInfo } = useCluster();
     const info = useAccountInfo(address);
@@ -188,7 +190,11 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
     );
 }
 
-export default function AddressLayout({ children, params }: Props) {
+export default function AddressLayout(props: Props) {
+    const params = use(props.params);
+
+    const { children } = props;
+
     return (
         <AccountsProvider>
             <AddressLayoutInner params={params}>{children}</AddressLayoutInner>

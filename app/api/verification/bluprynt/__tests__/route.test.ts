@@ -85,5 +85,5 @@ describe('Bluprynt API Route', () => {
 
 function callRoute(mintAddress: string) {
     const request = new Request(`http://localhost:3000/api/verification/bluprynt/${mintAddress}`);
-    return GET(request, { params: { mintAddress } });
+    return GET(request, { params: Promise.resolve({ mintAddress }) });
 }

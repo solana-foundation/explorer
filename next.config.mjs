@@ -16,10 +16,6 @@ const SUPPLY_ALIASES = ['accounts', 'accounts/top'];
 const nextConfig = {
     // Use separate build directory for dev server to avoid conflicts with production builds
     distDir: process.env.NODE_ENV === 'production' ? '.next' : '.next-dev',
-    experimental: {
-        // FIXME: https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout
-        missingSuspenseWithCSRBailout: false,
-    },
     images: {
         remotePatterns: [
             {

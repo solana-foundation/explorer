@@ -20,11 +20,11 @@ const DEFAULT_CACHE_HEADERS = {
 };
 
 type Props = Readonly<{
-    params: { signature: string };
+    params: Promise<{ signature: string }>;
 }>;
 
-export async function GET(request: NextRequest, { params }: Props) {
-    const { signature: compositeSignature } = params;
+export async function GET(request: NextRequest, props: Props) {
+    const { signature: compositeSignature } = await props.params;
     const { signature, cluster } = parseCompositeSignature(compositeSignature);
 
     if (!isReceiptEnabled) return new NextResponse('Not Found', { status: 404 });

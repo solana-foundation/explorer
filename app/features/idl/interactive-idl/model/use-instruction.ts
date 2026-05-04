@@ -112,7 +112,7 @@ export function useInstruction({
     }, [cluster, currentCluster, customUrl]);
 
     /// Allow to create Executor instance and update cluster-dependent connection
-    const executorRef = useRef<IdlExecutor>();
+    const executorRef = useRef<IdlExecutor>(undefined);
     const executor = useMemo(() => {
         if (!executorRef.current) {
             executorRef.current = new IdlExecutor({ connection });
