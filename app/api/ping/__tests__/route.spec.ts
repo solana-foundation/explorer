@@ -36,8 +36,8 @@ describe('Ping API Route', () => {
         it('should return ping stats keyed by interval with public cache headers', async () => {
             const statsByInterval: Record<number, ValidatorsAppPingStats[]> = {
                 1: [makeStats({ interval: 1, median: 1.1 })],
-                3: [makeStats({ interval: 3, median: 3.3 })],
                 12: [makeStats({ interval: 12, median: 12.12 })],
+                3: [makeStats({ interval: 3, median: 3.3 })],
             };
             mockFetchPerInterval(interval => ({
                 json: async () => statsByInterval[interval],
