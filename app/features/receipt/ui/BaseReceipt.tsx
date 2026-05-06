@@ -27,8 +27,10 @@ export function BaseReceipt({
         total,
         memo,
         confirmationStatus,
+        logoURI,
         senderHref,
         receiverHref,
+        tokenHref,
         transfers,
     },
 }: BaseReceiptProps) {
@@ -47,7 +49,7 @@ export function BaseReceipt({
             <div className="e-bg-outer-space-900">
                 <Header date={date} />
                 <TransactionSection network={network} confirmationStatus={confirmationStatus} />
-                <TransfersTable transfers={transferRows} fee={fee} />
+                <TransfersTable transfers={transferRows} fee={fee} logoURI={logoURI} tokenHref={tokenHref} />
                 {memo && (
                     <div className="e-flex e-flex-col e-gap-1 e-px-6 e-pb-6 e-text-xs">
                         <span className="e-text-gray-400">Memo</span>
@@ -95,7 +97,17 @@ function TransactionSection({
     );
 }
 
-function TransfersTable({ transfers, fee }: { transfers: TransferRow[]; fee: FormattedExtendedReceipt['fee'] }) {
+function TransfersTable({
+    transfers,
+    fee,
+    logoURI,
+    tokenHref,
+}: {
+    transfers: TransferRow[];
+    fee: FormattedExtendedReceipt['fee'];
+    logoURI?: string;
+    tokenHref?: string;
+}) {
     return (
         <div className="e-px-6 e-pb-4 e-text-xs e-text-gray-400">
             <div className={cn('e-items-center e-py-1', DASHED_BORDER_CLASSNAMES, GRID_CLASSNAMES)}>
@@ -105,7 +117,7 @@ function TransfersTable({ transfers, fee }: { transfers: TransferRow[]; fee: For
                 <span>Amount</span>
             </div>
             {transfers.map((row, i) => (
-                <TransferRowItem key={i} index={i + 1} row={row} />
+                <TransferRowItem key={i} index={i + 1} row={row} logoURI={logoURI} tokenHref={tokenHref} />
             ))}
             <div className={cn('e-items-center e-py-1', DASHED_BORDER_CLASSNAMES, GRID_CLASSNAMES)}>
                 <span>–</span>
@@ -124,7 +136,17 @@ function TransfersTable({ transfers, fee }: { transfers: TransferRow[]; fee: For
     );
 }
 
-function TransferRowItem({ index, row }: { index: number; row: TransferRow }) {
+function TransferRowItem({
+    index,
+    row,
+    logoURI,
+    tokenHref,
+}: {
+    index: number;
+    row: TransferRow;
+    logoURI?: string;
+    tokenHref?: string;
+}) {
     const { sender, receiver, amount, senderHref, receiverHref } = row;
     const senderDisplay = sender.domain ?? sender.truncated;
     const receiverDisplay = receiver.domain ?? receiver.truncated;
@@ -136,7 +158,34 @@ function TransferRowItem({ index, row }: { index: number; row: TransferRow }) {
             <AddressCell address={receiver.address} display={receiverDisplay} href={receiverHref} />
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <span className="e-whitespace-nowrap e-text-left e-font-mono e-text-white">
+                    <span className="e-flex e-items-center e-gap-1 e-whitespace-nowrap e-text-left e-font-mono e-text-white">
+                        {logoURI &&
+                            (tokenHref ? (
+                                <a
+                                    href={tokenHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="e-flex-shrink-0"
+                                >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={logoURI}
+                                        alt="Token logo"
+                                        height="16"
+                                        width="16"
+                                        className="e-flex-shrink-0"
+                                    />
+                                </a>
+                            ) : (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                    src={logoURI}
+                                    alt="Token logo"
+                                    height="16"
+                                    width="16"
+                                    className="e-flex-shrink-0"
+                                />
+                            ))}
                         {amount.formatted} <span className="e-text-gray-400">{amount.unit}</span>
                     </span>
                 </TooltipTrigger>

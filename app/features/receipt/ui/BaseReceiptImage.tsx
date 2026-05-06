@@ -30,7 +30,7 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
 
     const transferList = transfers ?? [{ amount: total, receiver, sender }];
     const visibleTransfers = transferList.slice(0, MAX_VISIBLE_TRANSFERS);
-    const hiddenCount = transferList.length - MAX_VISIBLE_TRANSFERS;
+    const hiddenCount = Math.max(0, transferList.length - MAX_VISIBLE_TRANSFERS);
 
     return (
         <div

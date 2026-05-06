@@ -23,14 +23,12 @@ export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta)
         return undefined;
     }
 
-    const transfers =
-        instructions.length > 1
-            ? instructions.map(instr => ({
-                  receiver: instr.parsed.info.destination ?? '',
-                  sender: instr.parsed.info.source ?? '',
-                  total: instr.parsed.info.lamports ?? 0,
-              }))
-            : undefined;
+    let transfers: Array<{ receiver: string; sender: string; total: number }> | undefined;
+    if (instructions.length > 1) {
+        const validatedTransfers = buildTransfers(transaction, instructions);
+        if (!validatedTransfers) return undefined;
+        transfers = validatedTransfers;
+    }
 
     const total = transfers ? transfers.reduce((sum, t) => sum + t.total, 0) : validated.total;
 
@@ -54,6 +52,23 @@ function isSolTransfer(instruction: ParsedInstruction | PartiallyDecodedInstruct
     if (!isParsedInstruction(instruction)) return false;
     const [err] = validate(instruction, SystemTransferInstructionRefinedSchema, { coerce: true });
     return err === undefined;
+}
+
+function buildTransfers(
+    transaction: ParsedTransactionWithMeta,
+    instructions: SolTransferInstruction[],
+): Array<{ receiver: string; sender: string; total: number }> | undefined {
+    const result: Array<{ receiver: string; sender: string; total: number }> = [];
+    for (const instr of instructions) {
+        const payload = extractSolTransferPayload(transaction, instr);
+        const [err, v] = validate(payload, SolTransferPayload, { coerce: true });
+        if (err) {
+            Logger.error(err);
+            return undefined;
+        }
+        result.push({ receiver: v.receiver, sender: v.sender, total: v.total });
+    }
+    return result;
 }
 
 function extractSolTransferPayload(transaction: ParsedTransactionWithMeta, instruction: SolTransferInstruction) {
