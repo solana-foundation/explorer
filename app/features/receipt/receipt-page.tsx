@@ -3,7 +3,7 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SignatureContext } from '@components/instruction/SignatureContext';
-import { useExplorerLink } from '@entities/cluster';
+import { buildExplorerLink, useExplorerLink } from '@entities/cluster';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { useFetchTransactionStatus, useTransactionDetails, useTransactionStatus } from '@providers/transactions';
@@ -138,6 +138,9 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
         receiptAnalytics.trackViewed(signature, receiptType);
     }, [signature, receiptType]);
 
+    const { cluster, customUrl } = useCluster();
+    const makeAddressHref = (address: string) => buildExplorerLink(cluster, customUrl, `/address/${address}`);
+
     const senderDomain = usePrimaryDomain(receipt.sender.address);
     const receiverDomain = usePrimaryDomain(receipt.receiver.address);
     const senderLink = useExplorerLink(`/address/${receipt.sender.address}`);
@@ -180,6 +183,13 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                     sender: { ...receipt.sender, domain: senderDomain },
                     senderHref: senderLink.link,
                     tokenHref: tokenLink.link,
+                    transfers: receipt.transfers?.map(t => ({
+                        amount: t.amount,
+                        receiver: t.receiver,
+                        receiverHref: makeAddressHref(t.receiver.address),
+                        sender: t.sender,
+                        senderHref: makeAddressHref(t.sender.address),
+                    })),
                 }}
                 downloadCsv={downloadCsv}
                 downloadPdf={downloadPdf}

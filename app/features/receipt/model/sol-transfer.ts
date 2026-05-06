@@ -11,10 +11,11 @@ import { isParsedInstruction, type ReceiptSol, type SolTransferParsed } from './
 type SolTransferInstruction = ParsedInstruction & { parsed: SolTransferParsed };
 
 export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta): ReceiptSol | undefined {
-    const instruction = getSingleSolTransferInstruction(transaction);
-    if (!instruction) return undefined;
+    const instructions = getSolTransferInstructions(transaction);
+    if (instructions.length === 0) return undefined;
 
-    const raw = extractSolTransferPayload(transaction, instruction);
+    const primary = instructions[0];
+    const raw = extractSolTransferPayload(transaction, primary);
 
     const [err, validated] = validate(raw, SolTransferPayload, { coerce: true });
     if (err) {
@@ -22,19 +23,28 @@ export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta)
         return undefined;
     }
 
+    const transfers =
+        instructions.length > 1
+            ? instructions.map(instr => ({
+                  receiver: instr.parsed.info.destination ?? '',
+                  sender: instr.parsed.info.source ?? '',
+                  total: instr.parsed.info.lamports ?? 0,
+              }))
+            : undefined;
+
     return {
         ...validated,
         memo: raw.memo,
+        transfers,
         type: 'sol',
     };
 }
 
-// We support only single sol transfer instruction per transaction by design.
-function getSingleSolTransferInstruction(transaction: ParsedTransactionWithMeta): SolTransferInstruction | undefined {
-    const instructions = transaction.transaction.message.instructions
-        .filter((instruction): instruction is SolTransferInstruction => isSolTransfer(instruction))
-        .filter(instruction => !isJitoTransfer(instruction));
-    return instructions.length === 1 ? instructions[0] : undefined;
+function getSolTransferInstructions(transaction: ParsedTransactionWithMeta): SolTransferInstruction[] {
+    return transaction.transaction.message.instructions.filter(
+        (instruction): instruction is SolTransferInstruction =>
+            isSolTransfer(instruction) && !isJitoTransfer(instruction),
+    );
 }
 
 function isSolTransfer(instruction: ParsedInstruction | PartiallyDecodedInstruction): boolean {

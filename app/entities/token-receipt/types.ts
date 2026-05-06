@@ -25,6 +25,11 @@ export type FormattedBaseReceipt = {
     };
     memo?: string | undefined;
     logoURI?: string | undefined;
+    transfers?: Array<{
+        amount: { formatted: string; raw: number; unit: string };
+        receiver: { address: string; truncated: string };
+        sender: { address: string; truncated: string };
+    }>;
 };
 
 export type FormattedReceiptToken = FormattedBaseReceipt & {

@@ -3,12 +3,11 @@
 import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
-import { cn } from '@components/shared/utils';
 import { displayTimestamp } from '@utils/date';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-import type { FormattedExtendedReceipt } from '../types';
+import type { FormattedExtendedReceipt, TransferRow } from '../types';
 
 interface BaseReceiptProps {
     data: FormattedExtendedReceipt;
@@ -24,26 +23,33 @@ export function BaseReceipt({
         total,
         memo,
         confirmationStatus,
-        logoURI,
         senderHref,
         receiverHref,
-        tokenHref,
+        transfers,
     },
 }: BaseReceiptProps) {
+    const transferRows: TransferRow[] = transfers ?? [
+        {
+            amount: total,
+            receiver,
+            receiverHref,
+            sender,
+            senderHref,
+        },
+    ];
+
     return (
         <div className="e-w-full e-max-w-lg">
             <div className="e-bg-outer-space-900">
                 <Header date={date} />
-                <Content
-                    sender={sender}
-                    receiver={receiver}
-                    network={network}
-                    confirmationStatus={confirmationStatus}
-                    senderHref={senderHref}
-                    receiverHref={receiverHref}
-                />
-                <div className="e-my-5 e-border-t e-border-white/10 [border-top-style:dashed]" />
-                <Footer fee={fee} total={total} memo={memo} logoURI={logoURI} tokenHref={tokenHref} />
+                <TransactionSection network={network} confirmationStatus={confirmationStatus} />
+                <TransfersTable transfers={transferRows} fee={fee} />
+                {memo && (
+                    <div className="e-flex e-flex-col e-gap-1 e-px-6 e-pb-6 e-text-xs">
+                        <span className="e-text-gray-400">Memo</span>
+                        <span className="e-text-white">{memo}</span>
+                    </div>
+                )}
             </div>
             <Zigzag />
         </div>
@@ -66,160 +72,98 @@ export function Header({ date }: { date?: FormattedExtendedReceipt['date'] }) {
     );
 }
 
-function Content({
-    sender,
-    receiver,
+function TransactionSection({
     network,
     confirmationStatus,
-    senderHref,
-    receiverHref,
-}: Pick<FormattedExtendedReceipt, 'sender' | 'receiver' | 'network' | 'confirmationStatus'> & {
-    senderHref?: string;
-    receiverHref?: string;
-}) {
+}: Pick<FormattedExtendedReceipt, 'network' | 'confirmationStatus'>) {
     return (
-        <div className="e-grid e-grid-cols-2 e-gap-6 e-p-6 e-pt-8 e-text-sm e-text-gray-400">
-            <ListItem
-                label="Sender"
-                tooltipText={sender.address}
-                value={sender.domain ?? sender.truncated}
-                href={senderHref}
-            />
-            <ListItem
-                label="Receiver"
-                tooltipText={receiver.address}
-                value={receiver.domain ?? receiver.truncated}
-                href={receiverHref}
-            />
-            <span>Status</span>
-            <div className="e-text-right">
+        <div className="e-flex e-flex-col e-gap-1 e-px-6 e-py-4">
+            <span className="e-text-xs e-text-gray-400">Transaction</span>
+            <div className="e-flex e-items-center e-gap-2">
+                <span className="e-text-sm e-text-white">{network}</span>
                 <Badge size="sm" variant="success">
                     {confirmationStatus
                         ? confirmationStatus.charAt(0).toUpperCase() + confirmationStatus.slice(1).toLowerCase()
                         : 'Unknown'}
                 </Badge>
             </div>
-            <ListItem label="Network" className="e-text-white" value={network} />
         </div>
     );
 }
 
-function ListItem({
-    label,
-    value,
-    className,
-    tooltipText,
-    href,
-}: {
-    label: string;
-    value?: string;
-    className?: string;
-    tooltipText?: string;
-    href?: string;
-}) {
-    if (!value) return null;
-
-    const content = (
-        <span className={cn('e-truncate e-text-right e-font-mono e-text-green-400', className)}>{value}</span>
-    );
-
+function TransfersTable({ transfers, fee }: { transfers: TransferRow[]; fee: FormattedExtendedReceipt['fee'] }) {
     return (
-        <>
-            <span>{label}</span>
-            <Tooltip>
-                <div className="e-text-right">
-                    <TooltipTrigger asChild>
-                        {href ? (
-                            <a
-                                href={href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={cn('e-truncate e-font-mono e-text-green-400 hover:e-underline', className)}
-                            >
-                                {value}
-                            </a>
-                        ) : (
-                            content
-                        )}
-                    </TooltipTrigger>
-                </div>
-                {tooltipText && (
-                    <TooltipContent side="top">
-                        <span className="e-text-green-400">{tooltipText}</span>
-                    </TooltipContent>
-                )}
-            </Tooltip>
-        </>
-    );
-}
-
-function Footer({
-    fee,
-    total,
-    memo,
-    logoURI,
-    tokenHref,
-}: Pick<FormattedExtendedReceipt, 'fee' | 'total' | 'memo' | 'logoURI' | 'tokenHref'>) {
-    return (
-        <div className="e-p-6 e-pt-0 e-text-xs e-text-gray-400">
-            <div className="e-grid e-grid-cols-2 e-items-center">
-                <span className="e-text-white">Total</span>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <div className="e-ml-auto e-flex e-w-fit e-items-center e-gap-2">
-                            {logoURI &&
-                                (tokenHref ? (
-                                    <a
-                                        href={tokenHref}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="e-flex-shrink-0"
-                                    >
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img
-                                            src={logoURI}
-                                            alt="Token logo"
-                                            height="20"
-                                            width="20"
-                                            className="e-flex-shrink-0"
-                                        />
-                                    </a>
-                                ) : (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img
-                                        src={logoURI}
-                                        alt="Token logo"
-                                        height="20"
-                                        width="20"
-                                        className="e-flex-shrink-0"
-                                    />
-                                ))}
-                            <span className="e-whitespace-nowrap e-text-2xl e-text-white">
-                                {total.formatted} {total.unit}
-                            </span>
-                        </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">
-                        {total.unit === 'SOL' ? `${total.raw} lamports` : `${total.raw} ${total.unit}`}
-                    </TooltipContent>
-                </Tooltip>
+        <div className="e-px-6 e-pb-4 e-text-xs e-text-gray-400">
+            <div className="e-grid e-grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] e-gap-x-3 e-pb-2">
+                <span>#</span>
+                <span>Sender</span>
+                <span>Receiver</span>
+                <span className="e-text-right">Amount</span>
+            </div>
+            {transfers.map((row, i) => (
+                <TransferRowItem key={i} index={i + 1} row={row} />
+            ))}
+            <div className="e-my-3 e-border-t e-border-white/10 [border-top-style:dashed]" />
+            <div className="e-grid e-grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] e-items-center e-gap-x-3 e-py-1">
+                <span>–</span>
                 <span>Fee</span>
-
+                <span />
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <span className="e-ml-auto e-block e-w-fit">{fee.formatted} SOL</span>
+                        <span className="e-text-right">{fee.formatted} SOL</span>
                     </TooltipTrigger>
                     <TooltipContent side="top">{fee.raw} lamports</TooltipContent>
                 </Tooltip>
             </div>
-
-            {memo && (
-                <div className="e-mt-3 e-flex e-flex-col e-gap-1">
-                    <span>Memo</span>
-                    <span className="e-text-xs e-text-white">{memo}</span>
-                </div>
-            )}
         </div>
+    );
+}
+
+function TransferRowItem({ index, row }: { index: number; row: TransferRow }) {
+    const { sender, receiver, amount, senderHref, receiverHref } = row;
+    const senderDisplay = sender.domain ?? sender.truncated;
+    const receiverDisplay = receiver.domain ?? receiver.truncated;
+
+    return (
+        <div className="e-grid e-grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] e-items-center e-gap-x-3 e-py-1 e-text-xs">
+            <span className="e-text-gray-400">{index}</span>
+            <AddressCell address={sender.address} display={senderDisplay} href={senderHref} />
+            <AddressCell address={receiver.address} display={receiverDisplay} href={receiverHref} />
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <span className="e-whitespace-nowrap e-text-right e-font-mono e-text-white">
+                        {amount.formatted} <span className="e-text-gray-400">{amount.unit}</span>
+                    </span>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                    {amount.unit === 'SOL' ? `${amount.raw} lamports` : `${amount.raw} ${amount.unit}`}
+                </TooltipContent>
+            </Tooltip>
+        </div>
+    );
+}
+
+function AddressCell({ address, display, href }: { address: string; display: string; href?: string }) {
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                {href ? (
+                    <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="e-truncate e-font-mono e-text-green-400 hover:e-underline"
+                    >
+                        {display}
+                    </a>
+                ) : (
+                    <span className="e-truncate e-font-mono e-text-green-400">{display}</span>
+                )}
+            </TooltipTrigger>
+            <TooltipContent side="top">
+                <span className="e-text-green-400">{address}</span>
+            </TooltipContent>
+        </Tooltip>
     );
 }
 
@@ -257,9 +201,7 @@ export function NoReceipt({
                 <div className="e-min-h-96 e-bg-outer-space-900">
                     <Header date={date} />
                     <div className="e-p-6 e-text-sm e-text-gray-400">
-                        <p className="e-m-0">
-                            Receipts can only be generated for transactions that only contain a single transfer.
-                        </p>
+                        <p className="e-m-0">Receipts can only be generated for SOL or token transfer transactions.</p>
                         <p className="e-m-0 e-mt-4">Forwarding to transaction view in {countdown}...</p>
                     </div>
                 </div>
