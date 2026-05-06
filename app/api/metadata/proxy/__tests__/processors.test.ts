@@ -1,13 +1,13 @@
-import { Headers, Response as NodeFetchResponse } from 'node-fetch';
 import { describe, expect, it } from 'vitest';
 
 import { processTextAsJson } from '../feature/processors';
 
-function createMockResponse(text: string, headers: Headers = new Headers()): NodeFetchResponse {
+function createMockResponse(text: string, headers: Headers = new Headers()): Response {
+    // Cast: tests only stub the surface of Response that processTextAsJson touches.
     return {
         headers,
         text: async () => text,
-    } as unknown as NodeFetchResponse;
+    } as unknown as Response;
 }
 
 describe('processTextAsJson', () => {

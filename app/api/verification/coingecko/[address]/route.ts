@@ -1,6 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
-import fetch from 'node-fetch';
 import { is, number, type } from 'superstruct';
 
 import { CoinGeckoInfoSchema } from '@/app/features/token-verification-badge/server';

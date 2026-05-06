@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -13,12 +12,16 @@ vi.mock('@/app/shared/lib/logger', () => ({
     },
 }));
 
-vi.mock('node-fetch', () => ({
-    default: vi.fn(),
-}));
+const fetchMock = vi.fn();
+vi.stubGlobal('fetch', fetchMock);
 
 const VALID_MINT = 'So11111111111111111111111111111111111111112';
 const mockRequest = new Request(`http://localhost:3000/api/receipt/price/${VALID_MINT}`);
+
+// Cast: tests only stub the surface of Response that the route touches.
+function mockResponseOnce(value: Partial<Response>) {
+    fetchMock.mockResolvedValueOnce(value as Response);
+}
 
 describe('GET /api/receipt/price/[mintAddress]', () => {
     beforeEach(() => {
@@ -61,11 +64,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
         it('returns 429 and calls Logger.warn on rate limit', async () => {
             vi.resetModules();
             const { GET } = await import('../route');
-            vi.mocked(fetch).mockResolvedValueOnce({ ok: false, status: 429 } as ReturnType<
-                typeof fetch
-            > extends Promise<infer T>
-                ? T
-                : never);
+            mockResponseOnce({ ok: false, status: 429 });
 
             const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
@@ -77,11 +76,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
         it('returns 502 and calls Logger.error on non-rate-limit HTTP error', async () => {
             vi.resetModules();
             const { GET } = await import('../route');
-            vi.mocked(fetch).mockResolvedValueOnce({ ok: false, status: 503 } as ReturnType<
-                typeof fetch
-            > extends Promise<infer T>
-                ? T
-                : never);
+            mockResponseOnce({ ok: false, status: 503 });
 
             const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
@@ -95,10 +90,10 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
         it('returns { price: null } with no-store headers when response schema is unexpected', async () => {
             vi.resetModules();
             const { GET } = await import('../route');
-            vi.mocked(fetch).mockResolvedValueOnce({
+            mockResponseOnce({
                 json: async () => ({ [VALID_MINT]: { usdPrice: -1 } }),
                 ok: true,
-            } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
+            });
 
             const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
@@ -111,10 +106,10 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
         it('logs and captures the error on schema mismatch', async () => {
             vi.resetModules();
             const { GET } = await import('../route');
-            vi.mocked(fetch).mockResolvedValueOnce({
+            mockResponseOnce({
                 json: async () => ({ [VALID_MINT]: { usdPrice: 0 } }),
                 ok: true,
-            } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
+            });
 
             await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
@@ -125,10 +120,10 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
         it('should log an error when mint address is missing from response', async () => {
             vi.resetModules();
             const { GET } = await import('../route');
-            vi.mocked(fetch).mockResolvedValueOnce({
+            mockResponseOnce({
                 json: async () => ({}),
                 ok: true,
-            } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
+            });
 
             const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
@@ -145,10 +140,10 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
         it('should not log an error when token has no usdPrice field', async () => {
             vi.resetModules();
             const { GET } = await import('../route');
-            vi.mocked(fetch).mockResolvedValueOnce({
+            mockResponseOnce({
                 json: async () => ({ [VALID_MINT]: { blockId: 408752772, decimals: 8, liquidity: 856.71 } }),
                 ok: true,
-            } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
+            });
 
             const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
@@ -164,10 +159,10 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
         it('returns the price with cache headers', async () => {
             vi.resetModules();
             const { GET } = await import('../route');
-            vi.mocked(fetch).mockResolvedValueOnce({
+            mockResponseOnce({
                 json: async () => ({ [VALID_MINT]: { usdPrice: 180.5 } }),
                 ok: true,
-            } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
+            });
 
             const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
@@ -180,14 +175,14 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
         it('calls the Jupiter price endpoint with the correct URL', async () => {
             vi.resetModules();
             const { GET } = await import('../route');
-            vi.mocked(fetch).mockResolvedValueOnce({
+            mockResponseOnce({
                 json: async () => ({ [VALID_MINT]: { usdPrice: 180.5 } }),
                 ok: true,
-            } as ReturnType<typeof fetch> extends Promise<infer T> ? T : never);
+            });
 
             await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
-            expect(fetch).toHaveBeenCalledWith(`${JUPITER_PRICE_ENDPOINT}?ids=${VALID_MINT}`, expect.any(Object));
+            expect(fetchMock).toHaveBeenCalledWith(`${JUPITER_PRICE_ENDPOINT}?ids=${VALID_MINT}`, expect.any(Object));
         });
     });
 
@@ -196,7 +191,7 @@ describe('GET /api/receipt/price/[mintAddress]', () => {
             vi.resetModules();
             const { GET } = await import('../route');
             const error = new Error('Network failure');
-            vi.mocked(fetch).mockRejectedValueOnce(error);
+            fetchMock.mockRejectedValueOnce(error);
 
             const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 

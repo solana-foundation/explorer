@@ -1,5 +1,3 @@
-import { Response as NodeFetchResponse } from 'node-fetch';
-
 import { Logger } from '@/app/shared/lib/logger';
 
 import { errors, matchMaxSizeError } from './errors';
@@ -7,7 +5,7 @@ import { errors, matchMaxSizeError } from './errors';
 /**
  * process binary data and catch any specific errors
  */
-export async function processBinary(data: NodeFetchResponse) {
+export async function processBinary(data: Response) {
     const headers = data.headers;
 
     try {
@@ -28,7 +26,7 @@ export async function processBinary(data: NodeFetchResponse) {
 /**
  * process text data as json and handle specific errors
  */
-export async function processJson(data: NodeFetchResponse) {
+export async function processJson(data: Response) {
     const headers = data.headers;
 
     try {
@@ -51,7 +49,7 @@ export async function processJson(data: NodeFetchResponse) {
 /**
  * Process text response as JSON, handling newlines and whitespace issues
  */
-export async function processTextAsJson(data: NodeFetchResponse) {
+export async function processTextAsJson(data: Response) {
     const headers = data.headers;
 
     try {

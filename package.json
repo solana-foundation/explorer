@@ -98,7 +98,6 @@
         "micromatch": "4.0.8",
         "moment": "2.29.4",
         "next": "15.5.14",
-        "node-fetch": "3.3.2",
         "p-limit": "3.1.0",
         "pako": "2.1.0",
         "qrcode": "1.5.4",

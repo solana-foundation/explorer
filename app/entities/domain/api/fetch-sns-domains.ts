@@ -1,5 +1,4 @@
 import { getHashedName, getNameAccountKey } from '@bonfida/spl-name-service';
-import fetch from 'node-fetch';
 import { array, is, record, string, unknown } from 'superstruct';
 
 import type { DomainInfo } from '../model/types';
