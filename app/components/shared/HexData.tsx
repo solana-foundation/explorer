@@ -117,12 +117,13 @@ export function HexData({
     return (
         <FullContent
             hexString={hexString}
-            copyText={isCopyable ? copyText : null}
+            copyText={copyText}
             className={className}
             inverted={inverted}
             align={align}
             spanSize={spanSize}
             rowSize={rowSize}
+            isCopyable={isCopyable}
         />
     );
 }
@@ -196,6 +197,7 @@ function FullContent({
     align,
     spanSize,
     rowSize,
+    isCopyable,
 }: {
     hexString: string;
     copyText: string | null;
@@ -204,6 +206,7 @@ function FullContent({
     align: 'start' | 'end';
     spanSize: number;
     rowSize: number;
+    isCopyable: boolean;
 }) {
     const spans = formatHexSpans(splitHexPairs(hexString), { inverted }, spanSize);
     const rows = groupHexRows(spans, rowSize, spanSize);
@@ -221,18 +224,30 @@ function FullContent({
     return (
         <>
             <div className={cn('e-hidden lg:e-flex', fullContentVariants({ align }), className)}>
-                <Copyable text={copyText}>
+                {isCopyable ? (
+                    <Copyable text={copyText}>
+                        <pre className="e-mb-0 e-inline-block e-bg-heavy-metal-900 e-p-1.5 e-text-left e-text-xs">
+                            {divs}
+                        </pre>
+                    </Copyable>
+                ) : (
                     <pre className="e-mb-0 e-inline-block e-bg-heavy-metal-900 e-p-1.5 e-text-left e-text-xs">
                         {divs}
                     </pre>
-                </Copyable>
+                )}
             </div>
             <div className={cn('e-flex lg:e-hidden', fullContentVariants({ align }), className)}>
-                <Copyable text={copyText}>
+                {isCopyable ? (
+                    <Copyable text={copyText}>
+                        <pre className="e-mb-0 e-inline-block e-bg-heavy-metal-900 e-p-1.5 e-text-left e-text-xs">
+                            {divs}
+                        </pre>
+                    </Copyable>
+                ) : (
                     <pre className="e-mb-0 e-inline-block e-bg-heavy-metal-900 e-p-1.5 e-text-left e-text-xs">
                         {divs}
                     </pre>
-                </Copyable>
+                )}
             </div>
         </>
     );

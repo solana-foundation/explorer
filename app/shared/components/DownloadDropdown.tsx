@@ -39,35 +39,34 @@ export function DownloadDropdown({
     onOpenChange?: (open: boolean) => void;
     children?: React.ReactNode;
 }) {
-    const hasMoreThanOneEncoding = encodings.length > 1;
+    if (encodings.length <= 1) {
+        const trigger = children ?? <DefaultTrigger disabled={loading || disabled} />;
+        if (React.isValidElement(trigger)) {
+            return React.cloneElement(trigger as React.ReactElement<React.ButtonHTMLAttributes<HTMLButtonElement>>, {
+                onClick: () => data && handleDownload(data, encodings[0], filename),
+            });
+        }
+        return trigger;
+    }
 
     return (
         <DropdownMenu onOpenChange={onOpenChange}>
-            <DropdownMenuTrigger
-                asChild
-                onClick={
-                    hasMoreThanOneEncoding ? undefined : () => data && handleDownload(data, encodings[0], filename)
-                }
-            >
-                {children ?? <DefaultTrigger disabled={(!hasMoreThanOneEncoding && loading) || disabled} />}
-            </DropdownMenuTrigger>
-            {hasMoreThanOneEncoding && (
-                <DropdownMenuContent align="end">
-                    {error ? (
-                        <DropdownMenuItem disabled>Failed to load data</DropdownMenuItem>
-                    ) : (
-                        encodings.map(encoding => (
-                            <DropdownMenuItem
-                                key={encoding}
-                                disabled={loading || !data}
-                                onClick={() => data && handleDownload(data, encoding, filename)}
-                            >
-                                {loading ? `Loading ${encoding}…` : `Download ${encoding}`}
-                            </DropdownMenuItem>
-                        ))
-                    )}
-                </DropdownMenuContent>
-            )}
+            <DropdownMenuTrigger asChild>{children ?? <DefaultTrigger disabled={disabled} />}</DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                {error ? (
+                    <DropdownMenuItem disabled>Failed to load data</DropdownMenuItem>
+                ) : (
+                    encodings.map(encoding => (
+                        <DropdownMenuItem
+                            key={encoding}
+                            disabled={loading || !data}
+                            onClick={() => data && handleDownload(data, encoding, filename)}
+                        >
+                            {loading ? `Loading ${encoding}…` : `Download ${encoding}`}
+                        </DropdownMenuItem>
+                    ))
+                )}
+            </DropdownMenuContent>
         </DropdownMenu>
     );
 }

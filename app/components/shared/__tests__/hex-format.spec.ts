@@ -65,6 +65,15 @@ describe('formatHexSpans', () => {
         expect(ellipsis?.variant).toBe('secondary-old');
     });
 
+    it('should group into spans of custom spanSize', () => {
+        const pairs = ['01', '02', '03', '04', '05', '06'];
+        const spans = formatHexSpans(pairs, {}, 2);
+        expect(spans).toHaveLength(3);
+        expect(spans[0]).toEqual({ text: '01 02', variant: 'primary' });
+        expect(spans[1]).toEqual({ text: '03 04', variant: 'secondary-old' });
+        expect(spans[2]).toEqual({ text: '05 06', variant: 'primary' });
+    });
+
     it('should compose with truncateHexPairs: formatHexSpans(truncateHexPairs(pairs))', () => {
         const pairs = Array.from({ length: 20 }, (_, i) => i.toString(16).padStart(2, '0'));
         const { pairs: truncated } = truncateHexPairs(pairs);

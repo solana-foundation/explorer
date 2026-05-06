@@ -3,7 +3,7 @@
 import { HexData } from '@shared/HexData';
 import { Button } from '@shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, Copy } from 'react-feather';
 
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
@@ -29,6 +29,12 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
     const [expanded, setExpanded] = useState(false);
     const [copyState, copy] = useCopyToClipboard();
 
+    useEffect(() => {
+        setExpanded(false);
+    }, [data]);
+
+    const hasData = data !== undefined && data.length > 0;
+
     const hexString = useMemo(() => (data && data.length > 0 ? toHex(data) : ''), [data]);
     const base64String = useMemo(() => (data && data.length > 0 ? toBase64(new Uint8Array(data)) : ''), [data]);
 
@@ -41,8 +47,10 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
     const hasMore = (tab === 'hex' && hasMoreHex) || (tab === 'base64' && hasMoreBase64);
 
     const handleTabChange = (value: string) => {
-        if (value === 'hex' || value === 'base64') setTab(value);
-        setExpanded(false);
+        if (value === 'hex' || value === 'base64') {
+            if (value !== tab) setExpanded(false);
+            setTab(value);
+        }
     };
 
     return (
@@ -70,7 +78,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                         variant="outline"
                         size="sm"
                         aria-label="Copy"
-                        disabled={!data || !data.length || loading}
+                        disabled={!hasData || loading}
                         onClick={() => copy(tab === 'base64' ? base64String : hexString)}
                     >
                         <Copy size={12} />
@@ -80,7 +88,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                         filename={filename}
                         data={data}
                         loading={loading}
-                        disabled={!data || !data.length}
+                        disabled={!hasData}
                         encodings={[tab]}
                     />
                 </div>
@@ -103,7 +111,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
             <TabsContent value="base64" className={cn('e-p-3 e-text-start', !loading && data?.length && 'e-py-2')}>
                 {loading ? (
                     <span className="spinner-grow spinner-grow-sm" />
-                ) : !data || data.length === 0 ? (
+                ) : !hasData ? (
                     <span className="e-text-sm e-text-outer-space-200">No data</span>
                 ) : (
                     <span className="e-text-wrap e-break-all e-font-mono e-text-xs e-text-white">
@@ -113,7 +121,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                 )}
             </TabsContent>
 
-            {hasMore && !loading && data && data.length > 0 && (
+            {hasMore && !loading && hasData && (
                 <div className="e-mt-1 e-flex e-justify-center e-border-t e-border-outer-space-800 [border-top-style:solid]">
                     <Button
                         variant="ghost"
