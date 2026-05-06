@@ -18,13 +18,19 @@ type BaseReceiptImageProps = {
     };
 };
 
+const MAX_VISIBLE_TRANSFERS = 2;
+
 export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
     const size = options?.size || IMAGE_SIZE;
 
     if (!data) return <NoReceipt size={size} />;
 
-    const { sender, receiver, date, memo, fee, total } = data;
-    const truncatedMemo = memo ? (memo.length > 90 ? memo.substring(0, 90) + '...' : memo) : undefined;
+    const { date, fee, memo, receiver, sender, total, transfers } = data;
+    const truncatedMemo = memo ? (memo.length > 90 ? `${memo.substring(0, 90)}...` : memo) : undefined;
+
+    const transferList = transfers ?? [{ amount: total, receiver, sender }];
+    const visibleTransfers = transferList.slice(0, MAX_VISIBLE_TRANSFERS);
+    const hiddenCount = transferList.length - MAX_VISIBLE_TRANSFERS;
 
     return (
         <div
@@ -32,220 +38,155 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                 backgroundImage: `radial-gradient(ellipse at 50% 50%, ${colors.emerald700} 0%, #EBEBEB 90%)`,
                 display: 'flex',
                 height: '100%',
-                justifyContent: 'center',
-                padding: '0 75px 40px',
+                padding: '0 76px 12px',
                 width: '100%',
             }}
         >
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
-                    padding: '0',
-                    position: 'relative',
-                    width: '100%',
-                }}
-            >
+            <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                {/* Card */}
                 <div
                     style={{
-                        background: colors.white,
-                        borderBottom: 'none',
+                        backgroundColor: colors.neutral100,
                         display: 'flex',
                         flexDirection: 'column',
                         flexGrow: 1,
+                        gap: '24px',
+                        overflow: 'hidden',
+                        padding: '24px 54px 28px',
                     }}
                 >
-                    <Header />
+                    {/* Header: logo + "Receipt" on left, date on right */}
                     <div
                         style={{
+                            alignItems: 'center',
                             display: 'flex',
-                            flexDirection: 'column',
-                            flexGrow: 1,
+                            justifyContent: 'space-between',
+                            width: '100%',
                         }}
                     >
-                        <ListItem label="Sender" value={sender.truncated} />
-                        <ListItem label="Date" value={date.utc} valueColor={colors.emerald900} />
-                        <ListItem
-                            label="1. Sent"
-                            style={{ flexGrow: 1 }}
-                            value={
-                                <div
-                                    style={{
-                                        alignItems: 'center',
-                                        display: 'flex',
-                                        flexGrow: 1,
-                                        fontSize: '36px',
-                                        gap: '8px',
-                                        lineHeight: '1em',
-                                    }}
-                                >
-                                    <span style={{ color: colors.heavyMetal800, fontWeight: 600, lineHeight: '1em' }}>
-                                        {total.formatted} {total.unit}
-                                    </span>
-                                    <span style={{ color: colors.neutral500, lineHeight: '1em' }}>to</span>
-                                    <span
-                                        style={{
-                                            color: colors.emerald700,
-                                        }}
-                                    >
-                                        {receiver.truncated}
-                                    </span>
-                                </div>
-                            }
-                        />
-                        {truncatedMemo && (
-                            <ListItem
-                                label="Memo"
-                                value={
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            flexGrow: 1,
-                                            fontSize: '34px',
-                                            gap: '8px',
-                                            lineHeight: '1em',
-                                            textAlign: 'right',
-                                        }}
-                                    >
-                                        <span
-                                            style={{
-                                                color: colors.heavyMetal800,
-                                                marginLeft: 'auto',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                whiteSpace: 'nowrap',
-                                                width: '714px',
-                                            }}
-                                        >
-                                            {truncatedMemo}
-                                        </span>
-                                    </div>
-                                }
-                                valueColor={colors.emerald900}
-                            />
-                        )}
+                        <div style={{ alignItems: 'center', display: 'flex', gap: '17px' }}>
+                            <Logo style={{ color: colors.heavyMetal800, height: '26px', width: '229px' }} />
+                            <span style={{ ...headerTextStyle, color: colors.neutral800 }}>Receipt</span>
+                        </div>
+                        <span style={{ ...headerTextStyle, color: colors.neutral500 }}>{date.utc}</span>
                     </div>
 
-                    <Footer fee={fee.formatted} total={total.formatted} />
+                    {/* Transfer table */}
+                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                        {/* Column headers */}
+                        <div
+                            style={{
+                                borderBottom: `2px dashed ${colors.heavyMetal200}`,
+                                display: 'flex',
+                                gap: '12px',
+                                padding: '8px 0',
+                                width: '100%',
+                            }}
+                        >
+                            <span style={columnLabelStyle}>Sender</span>
+                            <span style={columnLabelStyle}>Receiver</span>
+                            <div style={{ display: 'flex', flex: 1, justifyContent: 'flex-end' }}>
+                                <span style={{ ...columnLabelStyle, width: undefined }}>Amount</span>
+                            </div>
+                        </div>
+
+                        {/* Transfer rows */}
+                        {visibleTransfers.map((transfer, i) => (
+                            <div key={i} style={{ ...tableDataRowStyle, gap: '12px' }}>
+                                <span style={addressStyle}>{transfer.sender.truncated}</span>
+                                <span style={addressStyle}>{transfer.receiver.truncated}</span>
+                                <div style={amountCellStyle}>
+                                    <AmountDisplay amount={transfer.amount.formatted} unit={transfer.amount.unit} />
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* "N more" row */}
+                        {hiddenCount > 0 && (
+                            <div style={tableDataRowStyle}>
+                                <div style={amountCellStyle}>
+                                    <span
+                                        style={{
+                                            color: colors.neutral500,
+                                            fontSize: '44px',
+                                            letterSpacing: '-0.88px',
+                                            lineHeight: '50px',
+                                        }}
+                                    >
+                                        {hiddenCount} more
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Fee row */}
+                        <div style={{ ...tableDataRowStyle, gap: '12px' }}>
+                            <span style={{ ...columnLabelStyle }}>Fee</span>
+                            <div style={{ width: '260px' }} />
+                            <div style={amountCellStyle}>
+                                <AmountDisplay amount={fee.formatted} unit="SOL" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Memo */}
+                    {truncatedMemo && (
+                        <div style={{ alignItems: 'center', display: 'flex', gap: '125px', width: '100%' }}>
+                            <span
+                                style={{
+                                    color: colors.neutral500,
+                                    flexShrink: 0,
+                                    fontSize: '36px',
+                                    letterSpacing: '-0.72px',
+                                }}
+                            >
+                                Memo
+                            </span>
+                            <div style={{ flex: 1, overflow: 'hidden' }}>
+                                <span
+                                    style={{
+                                        color: colors.neutral950,
+                                        display: 'block',
+                                        fontSize: '34px',
+                                        letterSpacing: '-0.68px',
+                                        overflow: 'hidden',
+                                        textAlign: 'right',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {truncatedMemo}
+                                </span>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
-                <BottomLine style={{ color: colors.white }} />
+                {/* Receipt saw edge */}
+                <BottomLine style={{ color: colors.neutral100 }} />
             </div>
         </div>
     );
 }
 
-function Header() {
+function AmountDisplay({ amount, unit }: { amount: string; unit: string }) {
+    const { bright, dim } = splitAmount(amount);
     return (
-        <div
-            style={{
-                alignItems: 'center',
-                borderBottom: `2px solid ${colors.neutral200}`,
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '20px 54px',
-            }}
-        >
-            <div
-                style={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    gap: '12px',
-                }}
-            >
-                <Logo style={{ color: colors.heavyMetal800, height: '26px', width: '229px' }} />
-
-                <span
-                    style={{
-                        color: colors.heavyMetal800,
-                        fontSize: '35px',
-                        fontWeight: 500,
-                    }}
-                >
-                    Receipt
-                </span>
-            </div>
-        </div>
-    );
-}
-
-function Footer({ fee, total }: { fee?: string; total?: string }) {
-    if (!total) return null;
-    return (
-        <div
-            style={{
-                borderTop: '2px dashed rgba(255, 255, 255, 0.15)',
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '29px 54px 16px',
-            }}
-        >
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: colors.neutral500, fontSize: '36px', lineHeight: '1em' }}>Fee</span>
-                <span style={{ color: colors.emerald900, fontSize: '34px', lineHeight: '1em' }}>{fee} SOL</span>
-            </div>
-        </div>
-    );
-}
-
-function ListItem({
-    label,
-    value,
-    valueColor = colors.emerald700,
-    style,
-}: {
-    label: string;
-    value: React.ReactNode | string | undefined;
-    valueColor?: string;
-    style?: React.CSSProperties;
-}) {
-    if (!value) return null;
-    return (
-        <div
-            style={{
-                alignItems: 'flex-start',
-                borderBottom: `2px dashed ${colors.neutral200}`,
-                display: 'flex',
-                gap: '16px',
-                justifyContent: 'space-between',
-                padding: '22px 54px',
-
-                ...style,
-            }}
-        >
-            <Description text={label} />
-            {typeof value === 'string' ? (
-                <span
-                    style={{
-                        color: valueColor,
-                        display: 'flex',
-                        flex: 1,
-                        fontSize: '34px',
-                        justifyContent: 'flex-end',
-                    }}
-                >
-                    {value}
-                </span>
-            ) : (
-                value
-            )}
-        </div>
-    );
-}
-
-function Description({ text }: { text: string }) {
-    return (
-        <span
-            style={{
-                color: colors.neutral500,
-                fontSize: '36px',
-                lineHeight: '1em',
-            }}
-        >
-            {text}
+        <span style={{ alignItems: 'center', display: 'flex', gap: '8px' }}>
+            <span style={{ display: 'flex' }}>
+                {dim && <span style={{ ...amountTextStyle, color: colors.neutral500 }}>{dim}</span>}
+                <span style={{ ...amountTextStyle, color: colors.neutral950 }}>{bright}</span>
+            </span>
+            <span style={{ ...amountTextStyle, color: colors.neutral500 }}>{unit}</span>
         </span>
     );
+}
+
+function splitAmount(formatted: string): { bright: string; dim: string } {
+    // Split "0.000123" into dim="0.00" + bright="123". Non-zero integer parts are unsplit.
+    const match = formatted.match(/^(0\.0*)([1-9].*)/);
+    if (!match) return { bright: formatted, dim: '' };
+    return { bright: match[2], dim: match[1] };
 }
 
 function NoReceipt({ size }: { size: { width: number; height: number } }) {
@@ -294,13 +235,55 @@ function NoReceipt({ size }: { size: { width: number; height: number } }) {
 }
 
 const colors = {
-    destructive: '#f765fb',
     emerald700: '#0ea476',
-    emerald900: '#053D2C',
+    heavyMetal200: '#9faea7',
     heavyMetal800: '#29302c',
-    neutral200: '#e5e5e5',
+    neutral100: '#f5f5f5',
     neutral500: '#737373',
+    neutral800: '#262626',
+    neutral950: '#0a0a0a',
     outerSpace900: '#1d2322',
-    outerSpace950: '#101413',
     white: '#fff',
 };
+
+const headerTextStyle = {
+    fontSize: '36px',
+    letterSpacing: '-0.72px',
+    lineHeight: '37.7px',
+} as const;
+
+const columnLabelStyle = {
+    color: colors.neutral500,
+    fontSize: '36px',
+    letterSpacing: '-0.72px',
+    lineHeight: '40px',
+    width: '260px',
+} as const;
+
+const addressStyle = {
+    color: colors.emerald700,
+    fontSize: '36px',
+    letterSpacing: '-0.72px',
+    lineHeight: '40px',
+    width: '260px',
+} as const;
+
+const tableDataRowStyle = {
+    borderBottom: `2px dashed ${colors.heavyMetal200}`,
+    display: 'flex',
+    height: '66px',
+    padding: '8px 0',
+    width: '100%',
+} as const;
+
+const amountCellStyle = {
+    alignItems: 'flex-start',
+    display: 'flex',
+    flex: 1,
+    justifyContent: 'flex-end',
+} as const;
+
+const amountTextStyle = {
+    fontSize: '44px',
+    lineHeight: '50px',
+} as const;
