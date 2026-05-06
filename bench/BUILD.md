@@ -13,7 +13,7 @@
 | Dynamic | `/address/[address]/compression` | 10 kB | 1.17 MB |
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 10 kB | 1.17 MB |
 | Dynamic | `/address/[address]/domains` | 10 kB | 1.15 MB |
-| Dynamic | `/address/[address]/entries` | 10 kB | 1.15 MB |
+| Dynamic | `/address/[address]/entries` | 10 kB | 1.16 MB |
 | Dynamic | `/address/[address]/feature-gate` | 380 B | 1.07 MB |
 | Dynamic | `/address/[address]/idl` | 160 kB | 1.43 MB |
 | Dynamic | `/address/[address]/instructions` | 10 kB | 1.25 MB |
