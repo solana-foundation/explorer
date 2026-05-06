@@ -47,7 +47,7 @@ function reconcile(rewards: Rewards | undefined, update: RewardsUpdate | undefin
 
     return {
         foundOldest: update.foundOldest,
-        highestFetchedEpoch: rewards?.highestFetchedEpoch || update.highestFetchedEpoch,
+        highestFetchedEpoch: rewards?.highestFetchedEpoch ?? update.highestFetchedEpoch,
         lowestFetchedEpoch: update.lowestFetchedEpoch,
         rewards: Array.from(byEpoch.values()),
     };
