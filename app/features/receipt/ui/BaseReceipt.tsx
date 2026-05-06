@@ -8,10 +8,14 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import type { FormattedExtendedReceipt, TransferRow } from '../types';
+import { cn } from '@components/shared/utils';
 
 interface BaseReceiptProps {
     data: FormattedExtendedReceipt;
 }
+
+const GRID_CLASSNAMES = 'e-grid e-grid-cols-[10px_1fr_1fr_minmax(auto,120px)] e-gap-x-3';
+const DASHED_BORDER_CLASSNAMES = 'e-border-b e-border-white/10 [border-bottom-style:dashed]';
 
 export function BaseReceipt({
     data: {
@@ -58,12 +62,12 @@ export function BaseReceipt({
 
 export function Header({ date }: { date?: FormattedExtendedReceipt['date'] }) {
     return (
-        <div className="e-flex e-items-center e-justify-between e-gap-x-4 e-border-b e-border-white/10 e-p-6 e-pt-8 [border-bottom-style:solid]">
+        <div className="e-flex e-items-center e-justify-between e-gap-x-4 e-border-b e-border-white/10 e-p-6 [border-bottom-style:solid]">
             <h3 className="e-m-0 e-flex-shrink-0 e-font-medium e-text-white">Solana Receipt</h3>
             {date && (
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <span className="e-text-right e-font-mono e-text-sm e-text-gray-400">{date.utc}</span>
+                        <span className="e-text-right e-font-mono e-text-xs e-text-gray-400">{date.utc}</span>
                     </TooltipTrigger>
                     <TooltipContent side="top">{displayTimestamp(date.timestamp, true)}</TooltipContent>
                 </Tooltip>
@@ -77,11 +81,11 @@ function TransactionSection({
     confirmationStatus,
 }: Pick<FormattedExtendedReceipt, 'network' | 'confirmationStatus'>) {
     return (
-        <div className="e-flex e-flex-col e-gap-1 e-px-6 e-py-4">
+        <div className="e-flex e-flex-col e-px-6 e-py-3">
             <span className="e-text-xs e-text-gray-400">Transaction</span>
             <div className="e-flex e-items-center e-gap-2">
-                <span className="e-text-sm e-text-white">{network}</span>
-                <Badge size="sm" variant="success">
+                <span className="e-text-xs e-text-white">{network}</span>
+                <Badge size="xs" variant="success">
                     {confirmationStatus
                         ? confirmationStatus.charAt(0).toUpperCase() + confirmationStatus.slice(1).toLowerCase()
                         : 'Unknown'}
@@ -94,23 +98,24 @@ function TransactionSection({
 function TransfersTable({ transfers, fee }: { transfers: TransferRow[]; fee: FormattedExtendedReceipt['fee'] }) {
     return (
         <div className="e-px-6 e-pb-4 e-text-xs e-text-gray-400">
-            <div className="e-grid e-grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] e-gap-x-3 e-pb-2">
+            <div className={cn('e-items-center e-py-1', DASHED_BORDER_CLASSNAMES, GRID_CLASSNAMES)}>
                 <span>#</span>
                 <span>Sender</span>
                 <span>Receiver</span>
-                <span className="e-text-right">Amount</span>
+                <span>Amount</span>
             </div>
             {transfers.map((row, i) => (
                 <TransferRowItem key={i} index={i + 1} row={row} />
             ))}
-            <div className="e-my-3 e-border-t e-border-white/10 [border-top-style:dashed]" />
-            <div className="e-grid e-grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] e-items-center e-gap-x-3 e-py-1">
+            <div className={cn('e-items-center e-py-1', DASHED_BORDER_CLASSNAMES, GRID_CLASSNAMES)}>
                 <span>–</span>
                 <span>Fee</span>
                 <span />
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <span className="e-text-right">{fee.formatted} SOL</span>
+                        <span className="e-whitespace-nowrap e-text-left e-font-mono e-text-white">
+                            {fee.formatted} <span className="e-text-gray-400">SOL</span>
+                        </span>
                     </TooltipTrigger>
                     <TooltipContent side="top">{fee.raw} lamports</TooltipContent>
                 </Tooltip>
@@ -125,13 +130,13 @@ function TransferRowItem({ index, row }: { index: number; row: TransferRow }) {
     const receiverDisplay = receiver.domain ?? receiver.truncated;
 
     return (
-        <div className="e-grid e-grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] e-items-center e-gap-x-3 e-py-1 e-text-xs">
+        <div className={cn('e-items-center e-py-1', DASHED_BORDER_CLASSNAMES, GRID_CLASSNAMES)}>
             <span className="e-text-gray-400">{index}</span>
             <AddressCell address={sender.address} display={senderDisplay} href={senderHref} />
             <AddressCell address={receiver.address} display={receiverDisplay} href={receiverHref} />
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <span className="e-whitespace-nowrap e-text-right e-font-mono e-text-white">
+                    <span className="e-whitespace-nowrap e-text-left e-font-mono e-text-white">
                         {amount.formatted} <span className="e-text-gray-400">{amount.unit}</span>
                     </span>
                 </TooltipTrigger>
