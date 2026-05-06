@@ -66,7 +66,7 @@ describe('createReceipt', () => {
             expect(result?.date.utc).toBeDefined();
         });
 
-        it('should return null for multiple SOL transfers', async () => {
+        it('should create a formatted SOL receipt for multiple transfers', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
                 cluster: Cluster.MainnetBeta,
                 transaction: mockMultipleTransfersTransaction,
@@ -74,7 +74,36 @@ describe('createReceipt', () => {
 
             const result = await createReceipt(mockSignature);
 
-            expect(result).toBeUndefined();
+            expect(result).toMatchObject({
+                kind: 'sol',
+                total: { formatted: '0.14', raw: 140000000, unit: 'SOL' },
+                transfers: [
+                    {
+                        amount: { formatted: '0.08', raw: 80000000, unit: 'SOL' },
+                        receiver: {
+                            address: 'G2GjouKPJnGi3aGVsHnBu475EGvseiL1QnVHBMkN6wid',
+                            truncated: 'G2Gjo..N6wid',
+                        },
+                        sender: { address: 'Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5', truncated: 'Hd3f3..R3bD5' },
+                    },
+                    {
+                        amount: { formatted: '0.05', raw: 50000000, unit: 'SOL' },
+                        receiver: {
+                            address: '65MUMxiopKUaZbazs6pRUr9y774mj4Z1TdDgUh3L2Fhk',
+                            truncated: '65MUM..L2Fhk',
+                        },
+                        sender: { address: 'Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5', truncated: 'Hd3f3..R3bD5' },
+                    },
+                    {
+                        amount: { formatted: '0.01', raw: 10000000, unit: 'SOL' },
+                        receiver: {
+                            address: 'G2GjouKPJnGi3aGVsHnBu475EGvseiL1QnVHBMkN6wid',
+                            truncated: 'G2Gjo..N6wid',
+                        },
+                        sender: { address: 'Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5', truncated: 'Hd3f3..R3bD5' },
+                    },
+                ],
+            });
         });
 
         it('should return null for zero SOL transfer', async () => {

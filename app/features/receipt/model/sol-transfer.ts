@@ -32,9 +32,12 @@ export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta)
               }))
             : undefined;
 
+    const total = transfers ? transfers.reduce((sum, t) => sum + t.total, 0) : validated.total;
+
     return {
         ...validated,
         memo: raw.memo,
+        total,
         transfers,
         type: 'sol',
     };

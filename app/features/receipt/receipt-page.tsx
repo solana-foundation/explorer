@@ -139,7 +139,10 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     }, [signature, receiptType]);
 
     const { cluster, customUrl } = useCluster();
-    const makeAddressHref = (address: string) => buildExplorerLink(cluster, customUrl, `/address/${address}`);
+    const makeAddressHref = useCallback(
+        (address: string) => buildExplorerLink(cluster, customUrl, `/address/${address}`),
+        [cluster, customUrl],
+    );
 
     const senderDomain = usePrimaryDomain(receipt.sender.address);
     const receiverDomain = usePrimaryDomain(receipt.receiver.address);
