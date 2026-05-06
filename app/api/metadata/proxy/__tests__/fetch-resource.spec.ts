@@ -67,6 +67,27 @@ describe('fetchResource', () => {
         }).rejects.toThrowError('Max Content Size Exceeded');
     });
 
+    it('should throw exception when streamed body exceeds limit without Content-Length', async () => {
+        // Chunked response with no Content-Length — only the streaming counter in
+        // readBodyWithLimit can catch the overflow.
+        const stream = new ReadableStream<Uint8Array>({
+            start(controller) {
+                controller.enqueue(new Uint8Array(60));
+                controller.enqueue(new Uint8Array(60));
+                controller.close();
+            },
+        });
+        fetchMock.mockResolvedValueOnce(
+            new Response(stream, {
+                headers: { 'Content-Type': 'application/json' },
+            }),
+        );
+
+        await expect(() => {
+            return fetchResource(uri, headers, 100, 100);
+        }).rejects.toThrowError('Max Content Size Exceeded');
+    });
+
     it('should handle AbortSignal', async () => {
         class TimeoutError extends Error {
             constructor() {
