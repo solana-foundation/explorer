@@ -3,12 +3,12 @@
 import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
+import { cn } from '@components/shared/utils';
 import { displayTimestamp } from '@utils/date';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import type { FormattedExtendedReceipt, TransferRow } from '../types';
-import { cn } from '@components/shared/utils';
 
 interface BaseReceiptProps {
     data: FormattedExtendedReceipt;

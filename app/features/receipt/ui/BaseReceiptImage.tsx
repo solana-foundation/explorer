@@ -184,6 +184,7 @@ function AmountDisplay({ amount, unit }: { amount: string; unit: string }) {
 
 function splitAmount(formatted: string): { bright: string; dim: string } {
     // Split "0.000123" into dim="0.00" + bright="123". Non-zero integer parts are unsplit.
+    // eslint-disable-next-line no-restricted-syntax -- way to separate the leading zero fraction from the first significant digit
     const match = formatted.match(/^(0\.0*)([1-9].*)/);
     if (!match) return { bright: formatted, dim: '' };
     return { bright: match[2], dim: match[1] };
