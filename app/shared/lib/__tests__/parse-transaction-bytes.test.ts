@@ -1,4 +1,10 @@
 import {
+    bytesEqual,
+    getCompiledTransactionMessageDecoder,
+    getCompiledTransactionMessageEncoder,
+    getTransactionDecoder,
+} from '@solana/kit';
+import {
     Keypair,
     PublicKey,
     SystemProgram,
@@ -121,10 +127,15 @@ describe('parseTransactionBytes', () => {
         // half of the input — losing the real account keys, blockhash, and instruction.
         const bytes = buildAmbiguousBareMessage();
 
-        // Precondition: web3.js's deserializer DOES accept these bytes (this is the trap).
-        const tx = VersionedTransaction.deserialize(bytes);
-        // But re-serialization is shorter than the input — proof the parse was lossy.
-        expect(tx.serialize().length).toBeLessThan(bytes.length);
+        // Precondition: @solana/kit's transaction decoder DOES accept these bytes — the
+        // same decoder used by parseTransactionBytes — so the round-trip branch is what
+        // the test actually exercises (not the decode-throws fallback).
+        const tx = getTransactionDecoder().decode(bytes);
+        // And re-encoding the message is lossy: the parse silently dropped trailing bytes.
+        const reEncoded = getCompiledTransactionMessageEncoder().encode(
+            getCompiledTransactionMessageDecoder().decode(tx.messageBytes),
+        );
+        expect(bytesEqual(reEncoded, tx.messageBytes)).toBe(false);
 
         // parseTransactionBytes detects the mismatch and treats the input as a bare message.
         const result = parseTransactionBytes(bytes);
