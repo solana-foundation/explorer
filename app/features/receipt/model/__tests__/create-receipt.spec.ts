@@ -1,10 +1,11 @@
+import { truncateAddress } from '@entities/address';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster } from '@/app/utils/cluster';
 
 import { getTokenInfo } from '../../api/get-token-info';
 import { getTx } from '../../api/get-tx';
-import { MULTISIG_AUTHORITY, RECEIVER } from '../../mocks/addresses';
+import { MULTISIG_AUTHORITY, RECEIVER, RECEIVER_2, SENDER } from '../../mocks/addresses';
 import { mockCustomFeePayerTransaction } from '../../mocks/custom-fee-payer';
 import { mockJitoOnlyTransferTransaction } from '../../mocks/jito-only-transfer';
 import { mockMultipleTransfersTransaction } from '../../mocks/multiple-transfers';
@@ -50,10 +51,10 @@ describe('createReceipt', () => {
                 },
                 network: 'Mainnet Beta',
                 receiver: {
-                    truncated: '65MUM..L2Fhk',
+                    truncated: truncateAddress(RECEIVER.publicKey.toBase58(), 5),
                 },
                 sender: {
-                    truncated: 'Hd3f3..R3bD5',
+                    truncated: truncateAddress(SENDER.publicKey.toBase58(), 5),
                 },
                 total: {
                     formatted: '0.3',
@@ -80,27 +81,18 @@ describe('createReceipt', () => {
                 transfers: [
                     {
                         amount: { formatted: '0.08', raw: 80000000, unit: 'SOL' },
-                        receiver: {
-                            address: 'G2GjouKPJnGi3aGVsHnBu475EGvseiL1QnVHBMkN6wid',
-                            truncated: 'G2Gjo..N6wid',
-                        },
-                        sender: { address: 'Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5', truncated: 'Hd3f3..R3bD5' },
+                        receiver: { address: RECEIVER.publicKey.toBase58() },
+                        sender: { address: SENDER.publicKey.toBase58() },
                     },
                     {
                         amount: { formatted: '0.05', raw: 50000000, unit: 'SOL' },
-                        receiver: {
-                            address: '65MUMxiopKUaZbazs6pRUr9y774mj4Z1TdDgUh3L2Fhk',
-                            truncated: '65MUM..L2Fhk',
-                        },
-                        sender: { address: 'Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5', truncated: 'Hd3f3..R3bD5' },
+                        receiver: { address: RECEIVER_2.publicKey.toBase58() },
+                        sender: { address: SENDER.publicKey.toBase58() },
                     },
                     {
                         amount: { formatted: '0.01', raw: 10000000, unit: 'SOL' },
-                        receiver: {
-                            address: 'G2GjouKPJnGi3aGVsHnBu475EGvseiL1QnVHBMkN6wid',
-                            truncated: 'G2Gjo..N6wid',
-                        },
-                        sender: { address: 'Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5', truncated: 'Hd3f3..R3bD5' },
+                        receiver: { address: RECEIVER.publicKey.toBase58() },
+                        sender: { address: SENDER.publicKey.toBase58() },
                     },
                 ],
             });

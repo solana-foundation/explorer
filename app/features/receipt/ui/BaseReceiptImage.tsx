@@ -86,7 +86,16 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                             <span style={columnLabelStyle}>Sender</span>
                             <span style={columnLabelStyle}>Receiver</span>
                             <div style={{ display: 'flex', flex: 1, justifyContent: 'flex-end' }}>
-                                <span style={{ ...columnLabelStyle, width: undefined }}>Amount</span>
+                                <span
+                                    style={{
+                                        color: columnLabelStyle.color,
+                                        fontSize: columnLabelStyle.fontSize,
+                                        letterSpacing: columnLabelStyle.letterSpacing,
+                                        lineHeight: columnLabelStyle.lineHeight,
+                                    }}
+                                >
+                                    Amount
+                                </span>
                             </div>
                         </div>
 
@@ -113,7 +122,7 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                                             lineHeight: '50px',
                                         }}
                                     >
-                                        {hiddenCount} more
+                                        and {hiddenCount} more
                                     </span>
                                 </div>
                             </div>

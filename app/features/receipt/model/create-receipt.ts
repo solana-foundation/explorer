@@ -39,7 +39,7 @@ export function formatReceiptData(receipt: Receipt, cluster: Cluster): Formatted
     const unit = isSolReceipt(receipt) ? 'SOL' : receipt.symbol || 'TOKEN';
 
     const transfers =
-        isSolReceipt(receipt) && receipt.transfers
+        isSolReceipt(receipt) && receipt.transfers?.length
             ? receipt.transfers.map(t => ({
                   amount: {
                       formatted: lamportsToSolString(t.total, 9),

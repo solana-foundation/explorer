@@ -209,12 +209,12 @@ function AddressCell({ address, display, href }: { address: string; display: str
                         className="e-truncate e-font-mono e-text-green-400 hover:e-underline"
                     >
                         <span className="e-hidden sm:e-inline">{display}</span>
-                        <span className="sm:e-hidden e-truncate">{address}</span>                        
+                        <span className="e-truncate sm:e-hidden">{address}</span>
                     </a>
                 ) : (
                     <span className="e-font-mono e-text-green-400">
                         <span className="e-hidden sm:e-inline">{display}</span>
-                        <span className="sm:e-hidden e-truncate">{address}</span>
+                        <span className="e-truncate sm:e-hidden">{address}</span>
                     </span>
                 )}
             </TooltipTrigger>

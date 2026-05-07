@@ -1,11 +1,10 @@
 import { type ParsedTransactionWithMeta, PublicKey } from '@solana/web3.js';
 
+import { RECEIVER, SENDER } from './addresses';
+
 /**
  * Mock transaction data for testing a single SOL transfer.
- * - Transfer 0.3 SOL (300,000,000 lamports) from Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5
- * - To: 65MUMxiopKUaZbazs6pRUr9y774mj4Z1TdDgUh3L2Fhk
- *
- * Sender: Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5
+ * - Transfer 0.3 SOL (300,000,000 lamports) from SENDER to RECEIVER
  */
 export const mockSingleTransferTransaction = {
     blockTime: 1769070902,
@@ -29,13 +28,13 @@ export const mockSingleTransferTransaction = {
         message: {
             accountKeys: [
                 {
-                    pubkey: new PublicKey('Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5'),
+                    pubkey: SENDER.publicKey,
                     signer: true,
                     source: 'transaction',
                     writable: true,
                 },
                 {
-                    pubkey: new PublicKey('65MUMxiopKUaZbazs6pRUr9y774mj4Z1TdDgUh3L2Fhk'),
+                    pubkey: RECEIVER.publicKey,
                     signer: false,
                     source: 'transaction',
                     writable: true,
@@ -51,9 +50,9 @@ export const mockSingleTransferTransaction = {
                 {
                     parsed: {
                         info: {
-                            destination: '65MUMxiopKUaZbazs6pRUr9y774mj4Z1TdDgUh3L2Fhk',
+                            destination: RECEIVER.publicKey.toBase58(),
                             lamports: 300000000,
-                            source: 'Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5',
+                            source: SENDER.publicKey.toBase58(),
                         },
                         type: 'transfer',
                     },

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { FormattedReceipt } from '../../types';
-import { buildReceiptCsvRow, generateReceiptCsv } from '../generate-receipt-csv';
+import { buildReceiptCsvRows, generateReceiptCsv } from '../generate-receipt-csv';
 
 const RECEIPT: FormattedReceipt = {
     date: { timestamp: 1700000000, utc: '2023-11-14 22:13:20 UTC' },
@@ -16,9 +16,9 @@ const RECEIPT: FormattedReceipt = {
 
 const SIGNATURE = '5UfDuX7hXbGjGHqPXRGaHdSecretSignature1234567890abcdef';
 
-describe('buildReceiptCsvRow', () => {
+describe('buildReceiptCsvRows', () => {
     it('should include all expected fields in correct column order', () => {
-        const row = buildReceiptCsvRow(RECEIPT, SIGNATURE);
+        const [row] = buildReceiptCsvRows(RECEIPT, SIGNATURE);
 
         expect(row[0]).toBe('2023-11-14 22:13:20 UTC');
         expect(row[1]).toBe(SIGNATURE);
@@ -35,12 +35,12 @@ describe('buildReceiptCsvRow', () => {
     });
 
     it('should include USD value when provided', () => {
-        const row = buildReceiptCsvRow(RECEIPT, SIGNATURE, '$150.00');
+        const [row] = buildReceiptCsvRows(RECEIPT, SIGNATURE, '$150.00');
         expect(row[8]).toBe('$150.00');
     });
 
     it('should leave mint field empty for SOL receipts', () => {
-        const row = buildReceiptCsvRow(RECEIPT, SIGNATURE);
+        const [row] = buildReceiptCsvRows(RECEIPT, SIGNATURE);
         expect(row[7]).toBe('');
     });
 
@@ -52,20 +52,20 @@ describe('buildReceiptCsvRow', () => {
             symbol: 'USDC',
             total: { formatted: '143.25', raw: 143.25, unit: 'USDC' },
         };
-        const row = buildReceiptCsvRow(tokenReceipt, SIGNATURE);
+        const [row] = buildReceiptCsvRows(tokenReceipt, SIGNATURE);
         expect(row[6]).toBe('USDC');
         expect(row[7]).toBe('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
     });
 
     it('should leave memo field empty when absent', () => {
         const receiptNoMemo: FormattedReceipt = { ...RECEIPT, memo: undefined };
-        const row = buildReceiptCsvRow(receiptNoMemo, SIGNATURE);
+        const [row] = buildReceiptCsvRows(receiptNoMemo, SIGNATURE);
         expect(row[10]).toBe('');
     });
 
     it('should sanitize memo with formula-injection prefix', () => {
         const receipt: FormattedReceipt = { ...RECEIPT, memo: '=SUM(A1)' };
-        const row = buildReceiptCsvRow(receipt, SIGNATURE);
+        const [row] = buildReceiptCsvRows(receipt, SIGNATURE);
         expect(row[10]).toBe("'=SUM(A1)");
     });
 
@@ -77,8 +77,37 @@ describe('buildReceiptCsvRow', () => {
             symbol: '=EVIL',
             total: { formatted: '100', raw: 100, unit: '=EVIL' },
         };
-        const row = buildReceiptCsvRow(receipt, SIGNATURE);
+        const [row] = buildReceiptCsvRows(receipt, SIGNATURE);
         expect(row[6]).toBe("'=EVIL");
+    });
+
+    it('should emit one row per transfer for multi-transfer receipts', () => {
+        const multiReceipt: FormattedReceipt = {
+            ...RECEIPT,
+            transfers: [
+                {
+                    amount: { formatted: '0.6', raw: 600000000, unit: 'SOL' },
+                    receiver: { address: 'ReceiverAddr3333333333333333333333333333333', truncated: 'Recv...3333' },
+                    sender: { address: 'SenderAddr111111111111111111111111111111111', truncated: 'Send...1111' },
+                },
+                {
+                    amount: { formatted: '0.4', raw: 400000000, unit: 'SOL' },
+                    receiver: { address: 'ReceiverAddr4444444444444444444444444444444', truncated: 'Recv...4444' },
+                    sender: { address: 'SenderAddr111111111111111111111111111111111', truncated: 'Send...1111' },
+                },
+            ],
+        };
+        const rows = buildReceiptCsvRows(multiReceipt, SIGNATURE, '$90.00');
+        expect(rows).toHaveLength(2);
+        expect(rows[0][3]).toBe('SenderAddr111111111111111111111111111111111');
+        expect(rows[0][4]).toBe('ReceiverAddr3333333333333333333333333333333');
+        expect(rows[0][5]).toBe('0.6');
+        expect(rows[0][8]).toBe('$54.00'); // 0.6/1.0 * $90
+        expect(rows[0][9]).toBe('0.000005');
+        expect(rows[1][4]).toBe('ReceiverAddr4444444444444444444444444444444');
+        expect(rows[1][5]).toBe('0.4');
+        expect(rows[1][8]).toBe('$36.00'); // 0.4/1.0 * $90
+        expect(rows[1][9]).toBe('');
     });
 });
 

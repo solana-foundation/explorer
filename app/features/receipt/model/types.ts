@@ -13,11 +13,11 @@ export type BaseReceipt = {
     fee: number;
     total: number;
     memo?: string | undefined;
-    transfers?: Transfer[];
 };
 
 export type ReceiptSol = BaseReceipt & {
     type: 'sol';
+    transfers?: Transfer[];
 };
 
 export type ReceiptToken = BaseReceipt & {

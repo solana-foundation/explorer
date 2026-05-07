@@ -6,7 +6,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { isJitoTransfer } from './jito';
 import { extractMemoFromTransaction } from './memo';
 import { SolTransferPayload, SystemTransferInstructionRefinedSchema } from './schemas';
-import { isParsedInstruction, type ReceiptSol, type SolTransferParsed } from './types';
+import { isParsedInstruction, type ReceiptSol, type SolTransferParsed, type Transfer } from './types';
 
 type SolTransferInstruction = ParsedInstruction & { parsed: SolTransferParsed };
 
@@ -19,11 +19,11 @@ export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta)
 
     const [err, validated] = validate(raw, SolTransferPayload, { coerce: true });
     if (err) {
-        Logger.error(err);
+        Logger.error(err, { instructionIndex: 0 });
         return undefined;
     }
 
-    let transfers: Array<{ receiver: string; sender: string; total: number }> | undefined;
+    let transfers: Transfer[] | undefined;
     if (instructions.length > 1) {
         const validatedTransfers = buildTransfers(transaction, instructions);
         if (!validatedTransfers) return undefined;
@@ -57,13 +57,13 @@ function isSolTransfer(instruction: ParsedInstruction | PartiallyDecodedInstruct
 function buildTransfers(
     transaction: ParsedTransactionWithMeta,
     instructions: SolTransferInstruction[],
-): Array<{ receiver: string; sender: string; total: number }> | undefined {
-    const result: Array<{ receiver: string; sender: string; total: number }> = [];
-    for (const instr of instructions) {
+): Transfer[] | undefined {
+    const result: Transfer[] = [];
+    for (const [i, instr] of instructions.entries()) {
         const payload = extractSolTransferPayload(transaction, instr);
         const [err, v] = validate(payload, SolTransferPayload, { coerce: true });
         if (err) {
-            Logger.error(err);
+            Logger.error(err, { instructionIndex: i });
             return undefined;
         }
         result.push({ receiver: v.receiver, sender: v.sender, total: v.total });
