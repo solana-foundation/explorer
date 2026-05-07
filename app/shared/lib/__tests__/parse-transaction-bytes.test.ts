@@ -114,6 +114,34 @@ describe('parseTransactionBytes', () => {
         expect(result.messageBytes).toBe(garbage);
     });
 
+    it('should fall back when bytes deserialize as a transaction but do not round-trip', () => {
+        // Hand-crafted bare legacy message (136 bytes) that VersionedTransaction.deserialize
+        // happily accepts by misreading the first 65 bytes as "1 signature". Without the
+        // round-trip check, we'd return a 69-byte fake message recovered from the second
+        // half of the input — losing the real account keys, blockhash, and instruction.
+        const bytes = buildAmbiguousBareMessage();
+
+        // Precondition: web3.js's deserializer DOES accept these bytes (this is the trap).
+        const tx = VersionedTransaction.deserialize(bytes);
+        // But re-serialization is shorter than the input — proof the parse was lossy.
+        expect(tx.serialize().length).toBeLessThan(bytes.length);
+
+        // parseTransactionBytes detects the mismatch and treats the input as a bare message.
+        const result = parseTransactionBytes(bytes);
+        expect(result.signatures).toBeUndefined();
+        expect(result.messageBytes).toBe(bytes);
+    });
+
+    it('should not fall back for a real transaction that round-trips cleanly', () => {
+        const txBytes = buildTransactionBytes(createLegacyMessageBytes(), 1);
+
+        const result = parseTransactionBytes(txBytes);
+
+        expect(result.signatures).toHaveLength(1);
+        // Sanity: the round-trip check let a genuine transaction through.
+        expect(VersionedMessage.deserialize(result.messageBytes).header.numRequiredSignatures).toBe(1);
+    });
+
     it('should return a slice (not a view) of message bytes for transactions', () => {
         const txBytes = buildTransactionBytes(createLegacyMessageBytes(), 1);
         const result = parseTransactionBytes(txBytes);
@@ -233,6 +261,38 @@ function createMultiSigMessageBytes(): Uint8Array {
         .compileToLegacyMessage()
         .serialize();
     return new Uint8Array(buf);
+}
+
+/**
+ * Bare legacy message whose bytes from offset 65 also parse as a (different)
+ * valid VersionedMessage with numRequiredSignatures=1. This is the same shape
+ * that `Keypair.generate()`-driven tests occasionally produce by accident:
+ * `VersionedTransaction.deserialize` succeeds and silently returns a fake
+ * message recovered from the back half of the input.
+ */
+function buildAmbiguousBareMessage(): Uint8Array {
+    const bytes = new Uint8Array(136);
+
+    // --- Bare-message view (the truth) ---
+    bytes[0] = 1; // header.numRequiredSignatures
+    bytes[1] = 0; // header.numReadonlySignedAccounts
+    bytes[2] = 1; // header.numReadonlyUnsignedAccounts
+    bytes[3] = 3; // 3 account keys
+    // pubkey1: 4..36, pubkey2: 36..68, pubkey3: 68..100, blockhash: 100..132
+    bytes[132] = 1; // 1 instruction
+    // empty instruction at 133..136: programIdIndex=0, accountLen=0, dataLen=0
+
+    // --- Tx misinterpretation: byte[0]=1 → "1 signature" → bytes[65..] is "message" ---
+    // Make the would-be message header valid with numRequiredSignatures=1 so
+    // VersionedTransaction.deserialize's internal sig-count check passes.
+    bytes[65] = 1; // fake numRequiredSignatures (also pubkey2[29])
+    bytes[66] = 0; // fake numReadonlySignedAccounts
+    bytes[67] = 1; // fake numReadonlyUnsignedAccounts
+    bytes[68] = 1; // fake account keys length (also pubkey3[0])
+    // The fake message consumes 69 bytes (header + 1 pubkey + blockhash + numInst=0).
+    // bytes[133]=0 already serves as the fake numInstructions.
+
+    return bytes;
 }
 
 function buildTransactionBytes(messageBytes: Uint8Array, signatureCount: number): Uint8Array {
