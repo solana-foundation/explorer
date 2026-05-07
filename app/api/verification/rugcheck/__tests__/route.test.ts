@@ -97,6 +97,20 @@ describe('Rugcheck API Route', () => {
         expect(response.status).toBe(500);
         expect(await response.json()).toEqual({ error: 'Failed to fetch rugcheck data' });
     });
+
+    it('should return 504 with short negative cache when upstream request times out', async () => {
+        const timeoutError = new DOMException('Signal timed out.', 'TimeoutError');
+        fetchMock.mockRejectedValueOnce(timeoutError);
+        const response = await callRoute(VALID_MINT);
+        expect(response.status).toBe(504);
+        expect(await response.json()).toEqual({ error: 'Upstream request timed out' });
+        expect(response.headers.get('Cache-Control')).toBe('public, max-age=30, s-maxage=30');
+        expect(Logger.warn).toHaveBeenCalledWith('[api:rugcheck] Upstream request timed out', {
+            mintAddress: VALID_MINT,
+            sentry: true,
+        });
+        expect(Logger.panic).not.toHaveBeenCalled();
+    });
 });
 
 function mockFetchResponse(status: number, body: Record<string, unknown> = {}) {

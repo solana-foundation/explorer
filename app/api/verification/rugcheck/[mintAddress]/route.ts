@@ -4,7 +4,8 @@ import { is, number, type } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
+import { CACHE_HEADERS, ERROR_CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
+import { fetchUpstream, isTimeoutError } from '../../upstream';
 
 const RugCheckResponseSchema = type({
     score_normalised: number(),
@@ -35,7 +36,7 @@ export async function GET(_request: Request, props: Params) {
     }
 
     try {
-        const response = await fetch(`https://premium.rugcheck.xyz/v1/tokens/${mintAddress}/report`, {
+        const response = await fetchUpstream(`https://premium.rugcheck.xyz/v1/tokens/${mintAddress}/report`, {
             headers: {
                 'Content-Type': 'application/json',
                 'x-api-key': apiKey,
@@ -73,6 +74,13 @@ export async function GET(_request: Request, props: Params) {
 
         return NextResponse.json({ score: data.score_normalised }, { headers: CACHE_HEADERS });
     } catch (error) {
+        if (isTimeoutError(error)) {
+            Logger.warn('[api:rugcheck] Upstream request timed out', { mintAddress, sentry: true });
+            return NextResponse.json(
+                { error: 'Upstream request timed out' },
+                { headers: ERROR_CACHE_HEADERS, status: 504 },
+            );
+        }
         Logger.panic(error instanceof Error ? error : new Error('Failed to fetch rugcheck data'));
         return NextResponse.json(
             { error: 'Failed to fetch rugcheck data' },

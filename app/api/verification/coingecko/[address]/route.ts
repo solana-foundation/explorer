@@ -5,7 +5,8 @@ import { is, number, type } from 'superstruct';
 import { CoinGeckoInfoSchema } from '@/app/features/token-verification-badge/server';
 import { Logger } from '@/app/shared/lib/logger';
 
-import { CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
+import { CACHE_HEADERS, ERROR_CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
+import { fetchUpstream, isTimeoutError } from '../../upstream';
 
 const COINGECKO_QUERY = [
     'community_data=false',
@@ -42,7 +43,7 @@ export async function GET(_request: Request, props: Params) {
     const { baseUrl, headers } = getCoingeckoConfig();
 
     try {
-        const response = await fetch(`${baseUrl}/coins/solana/contract/${address}?${COINGECKO_QUERY}`, {
+        const response = await fetchUpstream(`${baseUrl}/coins/solana/contract/${address}?${COINGECKO_QUERY}`, {
             headers,
         });
 
@@ -91,6 +92,13 @@ export async function GET(_request: Request, props: Params) {
             { headers: CACHE_HEADERS },
         );
     } catch (error) {
+        if (isTimeoutError(error)) {
+            Logger.warn('[api:coingecko] Upstream request timed out', { address, sentry: true });
+            return NextResponse.json(
+                { error: 'Upstream request timed out' },
+                { headers: ERROR_CACHE_HEADERS, status: 504 },
+            );
+        }
         Logger.panic(error instanceof Error ? error : new Error('Failed to fetch coingecko data'));
         return NextResponse.json(
             { error: 'Failed to fetch coingecko data' },
