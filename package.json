@@ -167,7 +167,7 @@
         "jest-environment-jsdom": "29.5.0",
         "jsdom": "26.0.0",
         "playwright": "1.57.0",
-        "postcss": "8.5.3",
+        "postcss": "8.5.10",
         "postcss-import": "16.1.0",
         "postcss@3.4.17": "link:tailwindcss/postcss@3.4.17",
         "prettier": "3.5.3",
