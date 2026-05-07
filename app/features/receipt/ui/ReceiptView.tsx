@@ -35,6 +35,7 @@ export function ReceiptView({
 }: ReceiptViewProps) {
     const canNativeShare = useCanNativeShare();
     const toast = useToast();
+    const isMultiTransfer = data.transfers && data.transfers.length > 1;
 
     function handleViewTxClick() {
         receiptAnalytics.trackViewTxClicked(signature);
@@ -115,6 +116,7 @@ export function ReceiptView({
                             label="PDF"
                             download={downloadPdf}
                             signature={signature}
+                            disabled={isMultiTransfer}
                         />
                     </PopoverButton>
                 </div>
