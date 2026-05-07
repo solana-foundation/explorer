@@ -119,7 +119,7 @@ function TransfersTable({
             {transfers.map((row, i) => (
                 <TransferRowItem key={i} index={i + 1} row={row} logoURI={logoURI} tokenHref={tokenHref} />
             ))}
-            <div className={cn('e-items-center e-py-1', DASHED_BORDER_CLASSNAMES, GRID_CLASSNAMES)}>
+            <div className={cn('e-items-center e-py-4', GRID_CLASSNAMES)}>
                 <span>–</span>
                 <span>Fee</span>
                 <span />
@@ -208,10 +208,14 @@ function AddressCell({ address, display, href }: { address: string; display: str
                         rel="noopener noreferrer"
                         className="e-truncate e-font-mono e-text-green-400 hover:e-underline"
                     >
-                        {display}
+                        <span className="e-hidden sm:e-inline">{display}</span>
+                        <span className="sm:e-hidden e-truncate">{address}</span>                        
                     </a>
                 ) : (
-                    <span className="e-truncate e-font-mono e-text-green-400">{display}</span>
+                    <span className="e-font-mono e-text-green-400">
+                        <span className="e-hidden sm:e-inline">{display}</span>
+                        <span className="sm:e-hidden e-truncate">{address}</span>
+                    </span>
                 )}
             </TooltipTrigger>
             <TooltipContent side="top">
