@@ -30,7 +30,7 @@ const createInstructionWithKeys = (): TransactionInstruction => {
             {
                 isSigner: true,
                 isWritable: true,
-                pubkey: new PublicKey('11111111111111111111111111111111'),
+                pubkey: PublicKey.default,
             },
             {
                 isSigner: false,
@@ -43,16 +43,17 @@ const createInstructionWithKeys = (): TransactionInstruction => {
                 pubkey: new PublicKey('SysvarRent111111111111111111111111111111111'),
             },
         ],
-        programId: new PublicKey('11111111111111111111111111111111'),
+        programId: PublicKey.default,
     });
 };
 
-// Create an instruction with no keys (simulates loading state)
+// Instruction with no accounts and no data (legal in Solana — e.g. a no-op-style call).
+// Inspector hits this shape via URL params with hand-crafted messages.
 const createInstructionWithNoKeys = (): TransactionInstruction => {
     return new TransactionInstruction({
         data: Buffer.from([]),
         keys: [],
-        programId: new PublicKey('11111111111111111111111111111111'),
+        programId: PublicKey.default,
     });
 };
 
@@ -81,20 +82,30 @@ export const LoadingState: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        // Should show loading message
+        // Loader (spinner + label) renders only when ix has not arrived yet
         await expect(canvas.getByText('Loading instruction data...')).toBeInTheDocument();
+        await expect(canvasElement.querySelector('.spinner-grow')).toBeInTheDocument();
+
+        // No account/data rows leak through while loading
+        await expect(canvas.queryByText('Account #1')).not.toBeInTheDocument();
+        await expect(canvas.queryByText('Instruction Data')).not.toBeInTheDocument();
     },
 };
 
-export const LoadingStateWithEmptyKeys: Story = {
+export const EmptyAccountsList: Story = {
     args: {
         ix: createInstructionWithNoKeys(),
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        // Should show loading message when keys array is empty
-        await expect(canvas.getByText('Loading instruction data...')).toBeInTheDocument();
+        // Empty keys is a valid instruction shape, not a loading state
+        await expect(canvas.queryByText('Loading instruction data...')).not.toBeInTheDocument();
+        await expect(canvas.queryByText('Account #1')).not.toBeInTheDocument();
+
+        // Data row always renders; empty data falls through to HexData's "No data"
+        await expect(canvas.getByText('Instruction Data')).toBeInTheDocument();
+        await expect(canvas.getByText('No data')).toBeInTheDocument();
     },
 };
 
