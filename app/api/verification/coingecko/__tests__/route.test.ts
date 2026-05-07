@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -7,15 +6,8 @@ import { GET } from '../[address]/route';
 
 const VALID_ADDRESS = 'B61SyRxF2b8JwSLZHgEUF6rtn6NUikkrK1EMEgP6nhXW';
 
-vi.mock('node-fetch', async () => {
-    const actual = await vi.importActual('node-fetch');
-    return {
-        ...actual,
-        default: vi.fn(),
-    };
-});
-
-const fetchMock = vi.mocked(fetch);
+const fetchMock = vi.fn();
+vi.stubGlobal('fetch', fetchMock);
 
 describe('CoinGecko API Route', () => {
     afterEach(() => {
@@ -176,11 +168,12 @@ describe('CoinGecko API Route', () => {
 
 function mockFetchResponse(status: number, body: Record<string, unknown> = {}) {
     const ok = status >= 200 && status < 300;
+    // Cast: tests only stub the surface of Response that the route touches.
     fetchMock.mockResolvedValueOnce({
         json: async () => body,
         ok,
         status,
-    } as Awaited<ReturnType<typeof fetch>>);
+    } as Response);
 }
 
 function callRoute(address: string) {

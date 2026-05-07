@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import fetch from 'node-fetch';
 
 import { Logger } from '@/app/shared/lib/logger';
 

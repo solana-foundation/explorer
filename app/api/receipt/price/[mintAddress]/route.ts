@@ -1,6 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
-import fetch from 'node-fetch';
 import { is, number, optional, refine, type } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';

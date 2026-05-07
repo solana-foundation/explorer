@@ -4,10 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const USER_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 
 const mockFetchFn = vi.fn();
-
-vi.mock('node-fetch', () => ({
-    default: mockFetchFn,
-}));
+vi.stubGlobal('fetch', mockFetchFn);
 
 vi.mock('@bonfida/spl-name-service', () => ({
     getHashedName: vi.fn().mockImplementation(() => Promise.resolve(Buffer.alloc(32))),

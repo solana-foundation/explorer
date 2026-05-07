@@ -1,5 +1,4 @@
 import _dns from 'dns';
-import fetch, { Headers } from 'node-fetch';
 import { vi } from 'vitest';
 
 import { GET } from '../route';
@@ -10,13 +9,8 @@ function setEnvironment(key: string, value: string) {
     Object.assign(process.env, { ...process.env, [key]: value });
 }
 
-vi.mock('node-fetch', async () => {
-    const actual = await vi.importActual('node-fetch');
-    return {
-        ...actual,
-        default: vi.fn(),
-    };
-});
+const fetchMock = vi.fn();
+vi.stubGlobal('fetch', fetchMock);
 
 vi.mock('dns', async () => {
     const originalDns = await vi.importActual('dns');
@@ -34,9 +28,8 @@ vi.mock('dns', async () => {
     };
 });
 
-async function mockFileResponseOnce(data: any, headers: Headers) {
-    // @ts-expect-error unavailable mock method for fetch
-    fetch.mockResolvedValueOnce({ headers, json: async () => data });
+function mockFileResponseOnce(data: unknown, headers: Record<string, string>) {
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(data), { headers }));
 }
 
 const ORIGIN = 'http://explorer.solana.com';
@@ -95,14 +88,14 @@ describe('Metadata Proxy Route', () => {
     });
 
     it('should handle valid response successfully', async () => {
-        await mockFileResponseOnce(
+        mockFileResponseOnce(
             { attributes: [], name: 'NFT' },
-            new Headers({
+            {
                 'Cache-Control': 'no-cache',
                 'Content-Length': '140',
                 'Content-Type': 'application/json',
                 Etag: 'random-etag',
-            }),
+            },
         );
         // @ts-expect-error lookup does not have mocked fn
         dns.lookup.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
@@ -121,68 +114,27 @@ describe('Metadata Proxy Route :: resource fetching', () => {
     });
 
     it('should handle response without Content-Length header', async () => {
-        const sourceHeaders = new Headers({
+        const sourceHeaders = {
             'Cache-Control': 'max-age=3600',
             'Content-Type': 'application/json',
             ETag: 'test-etag',
-        });
+        };
 
         // @ts-expect-error lookup does not have mocked fn
         dns.lookup.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
 
-        // Mock fetch to return a response without Content-Length
-        // @ts-expect-error fetch does not have mocked fn
-        fetch.mockResolvedValueOnce({
-            arrayBuffer: async () => new ArrayBuffer(8),
-            headers: sourceHeaders,
-            json: async () => testData,
-        });
+        fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(testData), { headers: sourceHeaders }));
 
         const request = new Request(`http://localhost:3000/api/metadata/proxy?uri=${encodeURIComponent(testUri)}`);
         const response = await GET(request, { params: EMPTY_PARAMS });
 
-        // Verify response
         expect(response.status).toBe(200);
         expect(response.headers.get('content-type')).toBe('application/json');
         expect(response.headers.get('cache-control')).toBe('max-age=3600');
         expect(response.headers.get('etag')).toBe('test-etag');
 
-        // Next.js should calculate and set Content-Length automatically in theory
+        // Content-Length should not be forwarded by the proxy.
         const contentLength = response.headers.get('content-length');
         expect(contentLength).toBeNull();
     });
-
-    // Skipped because proxy no longer forwards Content-Length to avoid CORS issues
-    // it('should preserve original Content-Length header when present', async () => {
-    //     const originalContentLength = '89'; // Length of testData JSON, but different from real one
-    //     const sourceHeaders = new Headers({
-    //         'Cache-Control': 'max-age=3600',
-    //         'Content-Length': originalContentLength,
-    //         'Content-Type': 'application/json',
-    //         ETag: 'test-etag',
-    //     });
-
-    //     // @ts-expect-error lookup does not have mocked fn
-    //     dns.lookup.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
-
-    //     // Mock fetch to return a response with Content-Length
-    //     // @ts-expect-error fetch does not have mocked fn
-    //     fetch.mockResolvedValueOnce({
-    //         arrayBuffer: async () => new ArrayBuffer(8),
-    //         headers: sourceHeaders,
-    //         json: async () => testData,
-    //     });
-
-    //     const request = new Request(`http://localhost:3000/api/metadata/proxy?uri=${encodeURIComponent(testUri)}`);
-    //     const response = await GET(request, { params: {} });
-
-    //     // Verify response
-    //     expect(response.status).toBe(200);
-    //     expect(response.headers.get('content-type')).toBe('application/json');
-    //     expect(response.headers.get('cache-control')).toBe('max-age=3600');
-    //     expect(response.headers.get('etag')).toBe('test-etag');
-
-    //     // Content-Length should match original
-    //     expect(response.headers.get('content-length')).toBe(originalContentLength);
-    // });
 });

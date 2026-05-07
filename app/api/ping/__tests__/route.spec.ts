@@ -1,13 +1,11 @@
-import fetch, { Response } from 'node-fetch';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 import { GET, ValidatorsAppPingStats } from '../[network]/route';
 
-vi.mock('node-fetch', () => ({
-    default: vi.fn(),
-}));
+const fetchMock = vi.fn();
+vi.stubGlobal('fetch', fetchMock);
 
 vi.mock('@/app/shared/lib/logger', () => ({
     Logger: { error: vi.fn(), panic: vi.fn(), warn: vi.fn() },
@@ -28,7 +26,7 @@ describe('Ping API Route', () => {
             expect(response.status).toBe(404);
             expect(await response.json()).toEqual({ error: `Network "${network}" is not supported` });
             expect(response.headers.get('Cache-Control')).toBe('no-store, max-age=0');
-            expect(fetch).not.toHaveBeenCalled();
+            expect(fetchMock).not.toHaveBeenCalled();
         },
     );
 
@@ -58,9 +56,9 @@ describe('Ping API Route', () => {
 
             await callRoute('mainnet');
 
-            expect(fetch).toHaveBeenCalledTimes(PING_INTERVALS.length);
+            expect(fetchMock).toHaveBeenCalledTimes(PING_INTERVALS.length);
             for (const interval of PING_INTERVALS) {
-                expect(fetch).toHaveBeenCalledWith(
+                expect(fetchMock).toHaveBeenCalledWith(
                     `https://www.validators.app/api/v1/ping-thing-stats/mainnet.json?interval=${interval}`,
                     { headers: { Token: expect.any(String) } },
                 );
@@ -100,10 +98,10 @@ function callRoute(network: string) {
 }
 
 function mockFetchPerInterval(makeResponse: (interval: number) => Partial<Response>) {
-    vi.mocked(fetch).mockImplementation(async input => {
+    fetchMock.mockImplementation(async (input: string | URL | Request) => {
         const url = typeof input === 'string' ? input : input.toString();
         const interval = Number(new URL(url).searchParams.get('interval'));
-        // Cast: tests only stub the surface of node-fetch's Response that the route touches.
+        // Cast: tests only stub the surface of Response that the route touches.
         return makeResponse(interval) as Response;
     });
 }
