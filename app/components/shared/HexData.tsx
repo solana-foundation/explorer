@@ -86,7 +86,12 @@ export function HexData({
     align?: 'start' | 'end';
 }) {
     if (!raw || raw.length === 0) {
-        return <span>No data</span>;
+        // Same <pre> wrapper as the populated path so the row height matches.
+        return (
+            <span className={cn('e-inline-flex', fullContentVariants({ align }), className)}>
+                <pre className="e-mb-0 e-inline-block e-text-left">No data</pre>
+            </span>
+        );
     }
 
     const hexString = toHex(raw);

@@ -9,10 +9,10 @@
 | Dynamic | `/address/[address]/anchor-program` | 390 B | 1.07 MB |
 | Dynamic | `/address/[address]/attestation` | 10 kB | 1.18 MB |
 | Dynamic | `/address/[address]/attributes` | 10 kB | 1.14 MB |
-| Dynamic | `/address/[address]/blockhashes` | 10 kB | 1.13 MB |
+| Dynamic | `/address/[address]/blockhashes` | 10 kB | 1.14 MB |
 | Dynamic | `/address/[address]/compression` | 10 kB | 1.17 MB |
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 10 kB | 1.17 MB |
-| Dynamic | `/address/[address]/domains` | 10 kB | 1.15 MB |
+| Dynamic | `/address/[address]/domains` | 10 kB | 1.16 MB |
 | Dynamic | `/address/[address]/entries` | 10 kB | 1.16 MB |
 | Dynamic | `/address/[address]/feature-gate` | 380 B | 1.07 MB |
 | Dynamic | `/address/[address]/idl` | 160 kB | 1.43 MB |
@@ -31,7 +31,7 @@
 | Dynamic | `/address/[address]/vote-history` | 10 kB | 1.14 MB |
 | Dynamic | `/api/anchor` | 370 B | 190 kB |
 | Dynamic | `/api/ans-domains/[address]` | 370 B | 190 kB |
-| Dynamic | `/api/domain-info/[domain]` | 10 kB | 1.15 MB |
+| Dynamic | `/api/domain-info/[domain]` | 10 kB | 1.16 MB |
 | Dynamic | `/api/geo-location` | 370 B | 190 kB |
 | Dynamic | `/api/metadata/proxy` | 370 B | 190 kB |
 | Dynamic | `/api/ping/[network]` | 370 B | 190 kB |
@@ -46,7 +46,7 @@
 | Dynamic | `/api/verified-programs/list/[page]` | 370 B | 190 kB |
 | Dynamic | `/api/verified-programs/metadata/[programId]` | 370 B | 190 kB |
 | Dynamic | `/block/[slot]` | 10 kB | 1.23 MB |
-| Dynamic | `/block/[slot]/accounts` | 10 kB | 1.15 MB |
+| Dynamic | `/block/[slot]/accounts` | 10 kB | 1.16 MB |
 | Dynamic | `/block/[slot]/programs` | 10 kB | 1.16 MB |
 | Dynamic | `/block/[slot]/rewards` | 10 kB | 1.16 MB |
 | Dynamic | `/epoch/[epoch]` | 10 kB | 290 kB |
@@ -57,6 +57,6 @@
 | Static | `/supply` | 10 kB | 1.16 MB |
 | Static | `/tos` | 370 B | 190 kB |
 | Dynamic | `/tx/[signature]` | 70 kB | 1.67 MB |
-| Dynamic | `/tx/[signature]/inspect` | 610 B | 1.43 MB |
-| Static | `/tx/inspector` | 600 B | 1.43 MB |
+| Dynamic | `/tx/[signature]/inspect` | 620 B | 1.44 MB |
+| Static | `/tx/inspector` | 600 B | 1.44 MB |
 | Static | `/verified-programs` | 10 kB | 200 kB |
