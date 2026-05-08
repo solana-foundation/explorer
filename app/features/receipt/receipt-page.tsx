@@ -111,15 +111,22 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
             />
         );
     if (isDetailsLoading || isReceiptLoading) return <LoadingCard message="Loading receipt" />;
-    if (!receipt)
+    if (!receipt) {
+        const hasInnerInstructions = Boolean(tx?.meta?.innerInstructions?.length);
         return (
             <NoReceipt
                 transactionPath={transactionPath}
                 timestamp={tx?.blockTime}
                 onViewTxClick={handleViewTxClick}
                 onRedirect={handleRedirect}
+                message={
+                    hasInnerInstructions
+                        ? 'Receipts are only available for simple transfers. This transaction contains inner program instructions.'
+                        : undefined
+                }
             />
         );
+    }
 
     return <ReceiptContent receipt={receipt} signature={signature} status={status} transactionPath={transactionPath} />;
 }

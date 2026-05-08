@@ -232,11 +232,13 @@ export function NoReceipt({
     timestamp,
     onViewTxClick,
     onRedirect,
+    message,
 }: {
     transactionPath: string;
     timestamp?: number | null;
     onViewTxClick?: () => void;
     onRedirect?: () => void;
+    message?: string;
 }) {
     const date = timestamp ? { timestamp: timestamp * 1000, utc: new Date(timestamp * 1000).toISOString() } : undefined;
     const [countdown, setCountdown] = useState(REDIRECT_COUNTDOWN);
@@ -259,7 +261,9 @@ export function NoReceipt({
                 <div className="e-min-h-96 e-bg-outer-space-900">
                     <Header date={date} />
                     <div className="e-p-6 e-text-sm e-text-gray-400">
-                        <p className="e-m-0">Receipts can only be generated for SOL or token transfer transactions.</p>
+                        <p className="e-m-0">
+                            {message ?? 'Receipts can only be generated for SOL or token transfer transactions.'}
+                        </p>
                         <p className="e-m-0 e-mt-4">Forwarding to transaction view in {countdown}...</p>
                     </div>
                 </div>

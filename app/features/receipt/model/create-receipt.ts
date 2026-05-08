@@ -23,6 +23,8 @@ export async function extractReceiptData(
     tx: ParsedTransactionWithMeta,
     cluster: Cluster,
 ): Promise<FormattedReceipt | undefined> {
+    if (tx.meta?.innerInstructions?.length) return undefined;
+
     let receipt: Receipt | undefined = await createTokenTransferReceipt(tx, (mint: string | undefined) =>
         getParsedTokenInfo(mint, cluster),
     );
