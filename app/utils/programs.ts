@@ -103,6 +103,9 @@ export enum PROGRAM_NAMES {
     ZK_COMPRESSED_TOKEN_PROGRAM = 'ZK Compressed Token Program',
     ZK_ACCOUNT_COMPRESSION_PROGRAM = 'ZK Account Compression Program',
 
+    // ZK ElGamal Proof
+    ZK_ELGAMAL_PROOF = 'ZK ElGamal Proof Program',
+
     // Lighthouse
     LIGHTHOUSE_PROGRAM = 'Lighthouse Program',
 }
@@ -425,6 +428,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     WvmTNLpGMVbwJVYztYL4Hnsy82cJhQorxjnnXcRm3b6: {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.SERUM_POOL,
+    },
+    ZkE1Gama1Proof11111111111111111111111111111: {
+        deployments: ALL_CLUSTERS,
+        name: PROGRAM_NAMES.ZK_ELGAMAL_PROOF,
     },
     auctxRXPeJoc4817jDhf4HbjnhEcr1cCXenosMhK5R8: {
         deployments: LIVE_CLUSTERS,

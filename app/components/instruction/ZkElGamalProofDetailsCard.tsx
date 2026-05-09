@@ -1,0 +1,102 @@
+import { Address } from '@components/common/Address';
+import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import React from 'react';
+
+import { InstructionCard } from './InstructionCard';
+
+export const ZK_ELGAMAL_PROOF_PROGRAM_ID = 'ZkE1Gama1Proof11111111111111111111111111111';
+
+const INSTRUCTION_NAMES: Record<number, string> = {
+    0: 'Close Context State',
+    1: 'Verify Zero Ciphertext',
+    2: 'Verify Ciphertext-Ciphertext Equality',
+    3: 'Verify Ciphertext-Commitment Equality',
+    4: 'Verify Pubkey Validity',
+    5: 'Verify Percentage With Cap',
+    6: 'Verify Batched Range Proof (U64)',
+    7: 'Verify Batched Range Proof (U128)',
+    8: 'Verify Batched Range Proof (U256)',
+    9: 'Verify Grouped Ciphertext (2 handles)',
+    10: 'Verify Batched Grouped Ciphertext (2 handles)',
+    11: 'Verify Grouped Ciphertext (3 handles)',
+    12: 'Verify Batched Grouped Ciphertext (3 handles)',
+};
+
+export function isZkElGamalProofInstruction(ix: TransactionInstruction): boolean {
+    return ix.programId.toBase58() === ZK_ELGAMAL_PROOF_PROGRAM_ID;
+}
+
+export function ZkElGamalProofDetailsCard({
+    ix,
+    index,
+    result,
+    innerCards,
+    childIndex,
+    InstructionCardComponent = InstructionCard,
+}: {
+    ix: TransactionInstruction;
+    index: number;
+    result: SignatureResult;
+    innerCards?: JSX.Element[];
+    childIndex?: number;
+    InstructionCardComponent?: React.FC<Parameters<typeof InstructionCard>[0]>;
+}) {
+    const data = ix.data;
+    const discriminator = data.length > 0 ? data[0] : -1;
+    const instructionName = INSTRUCTION_NAMES[discriminator] ?? 'Unknown Instruction';
+    const isClose = discriminator === 0;
+    const proofBytes = data.length > 1 ? data.length - 1 : 0;
+    const accountCount = ix.keys.length;
+
+    return (
+        <InstructionCardComponent
+            ix={ix}
+            index={index}
+            result={result}
+            title={`ZK ElGamal Proof Program: ${instructionName}`}
+            innerCards={innerCards}
+            childIndex={childIndex}
+        >
+            <tr>
+                <td>Program</td>
+                <td className="text-lg-end">
+                    <Address pubkey={ix.programId} alignRight link />
+                </td>
+            </tr>
+            {ix.keys.map((meta, i) => (
+                <tr key={i}>
+                    <td>{labelFor(i, isClose, accountCount)}</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={meta.pubkey} alignRight link />
+                    </td>
+                </tr>
+            ))}
+            {!isClose && proofBytes > 0 && (
+                <tr>
+                    <td>Proof size</td>
+                    <td className="text-lg-end font-monospace">{proofBytes} bytes</td>
+                </tr>
+            )}
+        </InstructionCardComponent>
+    );
+}
+
+// Account layouts:
+//   CloseContextState: [context_state, destination, authority]
+//   Verify with proof in instruction data: []
+//   Verify with record account: [record_account]
+//   Verify with context state account: [context_state, context_state_authority]
+function labelFor(idx: number, isClose: boolean, total: number): string {
+    if (isClose) {
+        if (idx === 0) return 'Context State Account';
+        if (idx === 1) return 'Destination';
+        if (idx === 2) return 'Authority';
+        return `Account #${idx + 1}`;
+    }
+    if (total === 1 && idx === 0) return 'Record Account';
+    if (total === 2) {
+        if (idx === 0) return 'Context State Account';
+        if (idx === 1) return 'Context State Authority';
+    }
+    return `Account #${idx + 1}`;
+}

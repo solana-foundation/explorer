@@ -19,6 +19,10 @@ import { isTokenSwapInstruction } from '@components/instruction/token-swap/types
 import { TokenLendingDetailsCard } from '@components/instruction/TokenLendingDetailsCard';
 import { TokenSwapDetailsCard } from '@components/instruction/TokenSwapDetailsCard';
 import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
+import {
+    isZkElGamalProofInstruction,
+    ZkElGamalProofDetailsCard,
+} from '@components/instruction/ZkElGamalProofDetailsCard';
 import { VoteDetailsCard } from '@components/instruction/vote/VoteDetailsCard';
 import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
@@ -259,6 +263,9 @@ function InstructionCard({
     }
     if (ComputeBudgetProgram.programId.equals(transactionIx.programId)) {
         return <ComputeBudgetDetailsCard key={key} {...props} />;
+    }
+    if (isZkElGamalProofInstruction(transactionIx)) {
+        return <ZkElGamalProofDetailsCard key={key} {...props} />;
     }
     if (isLighthouseInstruction(transactionIx)) {
         return <LighthouseDetailsCard key={key} {...props} />;
