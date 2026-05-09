@@ -19,13 +19,13 @@ import { isTokenSwapInstruction } from '@components/instruction/token-swap/types
 import { TokenLendingDetailsCard } from '@components/instruction/TokenLendingDetailsCard';
 import { TokenSwapDetailsCard } from '@components/instruction/TokenSwapDetailsCard';
 import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
+import { VoteDetailsCard } from '@components/instruction/vote/VoteDetailsCard';
+import { isWormholeInstruction } from '@components/instruction/wormhole/types';
+import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import {
     isZkElGamalProofInstruction,
     ZkElGamalProofDetailsCard,
 } from '@components/instruction/ZkElGamalProofDetailsCard';
-import { VoteDetailsCard } from '@components/instruction/vote/VoteDetailsCard';
-import { isWormholeInstruction } from '@components/instruction/wormhole/types';
-import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { useAnchorProgram } from '@entities/idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';

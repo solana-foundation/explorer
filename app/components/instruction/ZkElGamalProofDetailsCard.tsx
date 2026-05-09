@@ -5,21 +5,22 @@ import React from 'react';
 
 import { InstructionCard } from './InstructionCard';
 
-const INSTRUCTION_NAMES: Record<number, string> = {
-    0: 'Close Context State',
-    1: 'Verify Zero Ciphertext',
-    2: 'Verify Ciphertext-Ciphertext Equality',
-    3: 'Verify Ciphertext-Commitment Equality',
-    4: 'Verify Pubkey Validity',
-    5: 'Verify Percentage With Cap',
-    6: 'Verify Batched Range Proof (U64)',
-    7: 'Verify Batched Range Proof (U128)',
-    8: 'Verify Batched Range Proof (U256)',
-    9: 'Verify Grouped Ciphertext (2 handles)',
-    10: 'Verify Batched Grouped Ciphertext (2 handles)',
-    11: 'Verify Grouped Ciphertext (3 handles)',
-    12: 'Verify Batched Grouped Ciphertext (3 handles)',
-};
+// Indexed by the 1-byte discriminator (0..=12).
+const INSTRUCTION_NAMES: readonly string[] = [
+    'Close Context State',
+    'Verify Zero Ciphertext',
+    'Verify Ciphertext-Ciphertext Equality',
+    'Verify Ciphertext-Commitment Equality',
+    'Verify Pubkey Validity',
+    'Verify Percentage With Cap',
+    'Verify Batched Range Proof (U64)',
+    'Verify Batched Range Proof (U128)',
+    'Verify Batched Range Proof (U256)',
+    'Verify Grouped Ciphertext (2 handles)',
+    'Verify Batched Grouped Ciphertext (2 handles)',
+    'Verify Grouped Ciphertext (3 handles)',
+    'Verify Batched Grouped Ciphertext (3 handles)',
+];
 
 export function isZkElGamalProofInstruction(ix: TransactionInstruction): boolean {
     return ix.programId.toBase58() === ZK_ELGAMAL_PROOF_PROGRAM_ID;
