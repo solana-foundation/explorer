@@ -1,10 +1,9 @@
 import { Address } from '@components/common/Address';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import { ZK_ELGAMAL_PROOF_PROGRAM_ID } from '@utils/programs';
 import React from 'react';
 
 import { InstructionCard } from './InstructionCard';
-
-export const ZK_ELGAMAL_PROOF_PROGRAM_ID = 'ZkE1Gama1Proof11111111111111111111111111111';
 
 const INSTRUCTION_NAMES: Record<number, string> = {
     0: 'Close Context State',
@@ -41,6 +40,9 @@ export function ZkElGamalProofDetailsCard({
     childIndex?: number;
     InstructionCardComponent?: React.FC<Parameters<typeof InstructionCard>[0]>;
 }) {
+    // Instruction data layout: [discriminator (1 byte), ...raw_proof_bytes].
+    // For verify variants using a record/context-state account, raw_proof_bytes is
+    // empty and the proof lives off-instruction; the row below stays hidden.
     const data = ix.data;
     const discriminator = data.length > 0 ? data[0] : -1;
     const instructionName = INSTRUCTION_NAMES[discriminator] ?? 'Unknown Instruction';

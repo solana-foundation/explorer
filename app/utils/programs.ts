@@ -129,6 +129,8 @@ export type ProgramInfo = {
     deployments: Cluster[];
 };
 
+export const ZK_ELGAMAL_PROOF_PROGRAM_ID = 'ZkE1Gama1Proof11111111111111111111111111111';
+
 export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     '11111111111111111111111111111111': {
         deployments: ALL_CLUSTERS,
@@ -429,7 +431,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.SERUM_POOL,
     },
-    ZkE1Gama1Proof11111111111111111111111111111: {
+    [ZK_ELGAMAL_PROOF_PROGRAM_ID]: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.ZK_ELGAMAL_PROOF,
     },
