@@ -363,6 +363,152 @@ const InitializeTokenGroupMember = type({
     memberMintAuthority: PublicKeyFromString,
 });
 
+// Confidential Transfer extension instructions (Token-2022).
+// JSON shapes mirror agave/transaction-status/src/parse_token/extension/confidential_transfer.rs.
+
+const InitializeConfidentialTransferMint = type({
+    auditorElGamalPubkey: nullable(string()),
+    authority: optional(PublicKeyFromString),
+    autoApproveNewAccounts: boolean(),
+    mint: PublicKeyFromString,
+});
+
+const UpdateConfidentialTransferMint = type({
+    auditorElGamalPubkey: nullable(string()),
+    autoApproveNewAccounts: boolean(),
+    confidentialTransferMintAuthority: PublicKeyFromString,
+    mint: PublicKeyFromString,
+});
+
+const ConfigureConfidentialTransferAccount = type({
+    account: PublicKeyFromString,
+    decryptableZeroBalance: string(),
+    instructionsSysvar: optional(PublicKeyFromString),
+    maximumPendingBalanceCreditCounter: union([string(), number()]),
+    mint: PublicKeyFromString,
+    multisigOwner: optional(PublicKeyFromString),
+    owner: optional(PublicKeyFromString),
+    proofContextStateAccount: optional(PublicKeyFromString),
+    proofInstructionOffset: number(),
+    recordAccount: optional(PublicKeyFromString),
+    signers: optional(array(PublicKeyFromString)),
+});
+
+const ApproveConfidentialTransferAccount = type({
+    account: PublicKeyFromString,
+    confidentialTransferAuditorAuthority: PublicKeyFromString,
+    mint: PublicKeyFromString,
+});
+
+const EmptyConfidentialTransferAccount = type({
+    account: PublicKeyFromString,
+    instructionsSysvar: optional(PublicKeyFromString),
+    multisigOwner: optional(PublicKeyFromString),
+    owner: optional(PublicKeyFromString),
+    proofContextStateAccount: optional(PublicKeyFromString),
+    proofInstructionOffset: number(),
+    recordAccount: optional(PublicKeyFromString),
+    signers: optional(array(PublicKeyFromString)),
+});
+
+const DepositConfidentialTransfer = type({
+    amount: union([string(), number()]),
+    decimals: number(),
+    destination: PublicKeyFromString,
+    mint: PublicKeyFromString,
+    multisigOwner: optional(PublicKeyFromString),
+    owner: optional(PublicKeyFromString),
+    signers: optional(array(PublicKeyFromString)),
+    source: PublicKeyFromString,
+});
+
+const WithdrawConfidentialTransfer = type({
+    amount: union([string(), number()]),
+    decimals: number(),
+    destination: PublicKeyFromString,
+    equalityProofContextStateAccount: optional(PublicKeyFromString),
+    equalityProofInstructionOffset: number(),
+    equalityProofRecordAccount: optional(PublicKeyFromString),
+    instructionsSysvar: optional(PublicKeyFromString),
+    mint: PublicKeyFromString,
+    multisigOwner: optional(PublicKeyFromString),
+    newDecryptableAvailableBalance: string(),
+    owner: optional(PublicKeyFromString),
+    rangeProofContextStateAccount: optional(PublicKeyFromString),
+    rangeProofInstructionOffset: number(),
+    rangeProofRecordAccount: optional(PublicKeyFromString),
+    signers: optional(array(PublicKeyFromString)),
+    source: PublicKeyFromString,
+});
+
+const ConfidentialTransfer = type({
+    ciphertextValidityProofContextStateAccount: optional(PublicKeyFromString),
+    ciphertextValidityProofInstructionOffset: number(),
+    ciphertextValidityProofRecordAccount: optional(PublicKeyFromString),
+    destination: PublicKeyFromString,
+    equalityProofContextStateAccount: optional(PublicKeyFromString),
+    equalityProofInstructionOffset: number(),
+    equalityProofRecordAccount: optional(PublicKeyFromString),
+    instructionsSysvar: optional(PublicKeyFromString),
+    mint: PublicKeyFromString,
+    multisigOwner: optional(PublicKeyFromString),
+    newSourceDecryptableAvailableBalance: string(),
+    owner: optional(PublicKeyFromString),
+    rangeProofContextStateAccount: optional(PublicKeyFromString),
+    rangeProofInstructionOffset: number(),
+    rangeProofRecordAccount: optional(PublicKeyFromString),
+    signers: optional(array(PublicKeyFromString)),
+    source: PublicKeyFromString,
+});
+
+const ConfidentialTransferWithFee = type({
+    destination: PublicKeyFromString,
+    equalityProofContextStateAccount: optional(PublicKeyFromString),
+    equalityProofInstructionOffset: number(),
+    equalityProofRecordAccount: optional(PublicKeyFromString),
+    feeCiphertextValidityProofContextStateAccount: optional(PublicKeyFromString),
+    feeCiphertextValidityProofInstructionOffset: number(),
+    feeCiphertextValidityProofRecordAccount: optional(PublicKeyFromString),
+    feeSigmaProofContextStateAccount: optional(PublicKeyFromString),
+    feeSigmaProofInstructionOffset: number(),
+    feeSigmaProofRecordAccount: optional(PublicKeyFromString),
+    instructionsSysvar: optional(PublicKeyFromString),
+    mint: PublicKeyFromString,
+    multisigOwner: optional(PublicKeyFromString),
+    newSourceDecryptableAvailableBalance: string(),
+    owner: optional(PublicKeyFromString),
+    rangeProofContextStateAccount: optional(PublicKeyFromString),
+    rangeProofInstructionOffset: number(),
+    rangeProofRecordAccount: optional(PublicKeyFromString),
+    signers: optional(array(PublicKeyFromString)),
+    source: PublicKeyFromString,
+    transferAmountCiphertextValidityProofContextStateAccount: optional(PublicKeyFromString),
+    transferAmountCiphertextValidityProofInstructionOffset: number(),
+    transferAmountCiphertextValidityProofRecordAccount: optional(PublicKeyFromString),
+});
+
+const ApplyPendingConfidentialTransferBalance = type({
+    account: PublicKeyFromString,
+    expectedPendingBalanceCreditCounter: union([string(), number()]),
+    multisigOwner: optional(PublicKeyFromString),
+    newDecryptableAvailableBalance: string(),
+    owner: optional(PublicKeyFromString),
+    signers: optional(array(PublicKeyFromString)),
+});
+
+const ConfidentialTransferCreditsToggle = type({
+    account: PublicKeyFromString,
+    multisigOwner: optional(PublicKeyFromString),
+    owner: optional(PublicKeyFromString),
+    signers: optional(array(PublicKeyFromString)),
+});
+
+const ConfigureConfidentialAccountWithRegistry = type({
+    account: PublicKeyFromString,
+    mint: PublicKeyFromString,
+    registry: PublicKeyFromString,
+});
+
 export type TokenInstructionType = Infer<typeof TokenInstructionType>;
 export const TokenInstructionType = enums([
     'initializeMint',
@@ -417,25 +563,53 @@ export const TokenInstructionType = enums([
     'updateTokenGroupMaxSize',
     'updateTokenGroupUpdateAuthority',
     'createNativeMint',
+    'initializeConfidentialTransferMint',
+    'updateConfidentialTransferMint',
+    'configureConfidentialTransferAccount',
+    'approveConfidentialTransferAccount',
+    'emptyConfidentialTransferAccount',
+    'depositConfidentialTransfer',
+    'withdrawConfidentialTransfer',
+    'confidentialTransfer',
+    'confidentialTransferWithFee',
+    'applyPendingConfidentialTransferBalance',
+    'enableConfidentialTransferConfidentialCredits',
+    'disableConfidentialTransferConfidentialCredits',
+    'enableConfidentialTransferNonConfidentialCredits',
+    'disableConfidentialTransferNonConfidentialCredits',
+    'configureConfidentialAccountWithRegistry',
 ]);
 
 export const IX_STRUCTS = {
     amountToUiAmount: AmountToUiAmount,
+    applyPendingConfidentialTransferBalance: ApplyPendingConfidentialTransferBalance,
     approve: Approve,
     approve2: ApproveChecked,
     approveChecked: ApproveChecked,
+    approveConfidentialTransferAccount: ApproveConfidentialTransferAccount,
     burn: Burn,
     burn2: BurnChecked,
     burnChecked: BurnChecked,
     closeAccount: CloseAccount,
+    confidentialTransfer: ConfidentialTransfer,
+    confidentialTransferWithFee: ConfidentialTransferWithFee,
+    configureConfidentialAccountWithRegistry: ConfigureConfidentialAccountWithRegistry,
+    configureConfidentialTransferAccount: ConfigureConfidentialTransferAccount,
     createNativeMint: CreateNativeMint,
     defaultAccountStateExtension: DefaultAccountStateExtension,
+    depositConfidentialTransfer: DepositConfidentialTransfer,
+    disableConfidentialTransferConfidentialCredits: ConfidentialTransferCreditsToggle,
+    disableConfidentialTransferNonConfidentialCredits: ConfidentialTransferCreditsToggle,
     emitTokenMetadata: EmitTokenMetadata,
+    emptyConfidentialTransferAccount: EmptyConfidentialTransferAccount,
+    enableConfidentialTransferConfidentialCredits: ConfidentialTransferCreditsToggle,
+    enableConfidentialTransferNonConfidentialCredits: ConfidentialTransferCreditsToggle,
     freezeAccount: FreezeAccount,
     getAccountDataSize: GetAccountDataSize,
     initializeAccount: InitializeAccount,
     initializeAccount2: InitializeAccount2,
     initializeAccount3: InitializeAccount3,
+    initializeConfidentialTransferMint: InitializeConfidentialTransferMint,
     initializeGroupMemberPointer: InitializeGroupMemberPointer,
     initializeGroupPointer: InitializeGroupPointer,
     initializeImmutableOwner: InitializeImmutableOwner,
@@ -464,6 +638,7 @@ export const IX_STRUCTS = {
     transferChecked: TransferChecked,
     transferFeeExtension: TransferFeeExtension,
     uiAmountToAmount: UiAmountToAmount,
+    updateConfidentialTransferMint: UpdateConfidentialTransferMint,
     updateGroupMemberPointer: UpdateGroupMemberPointer,
     updateGroupPointer: UpdateGroupPointer,
     updateMetadataPointer: UpdateMetadataPointer,
@@ -472,25 +647,39 @@ export const IX_STRUCTS = {
     updateTokenMetadataAuthority: UpdateTokenMetadataAuthority,
     updateTokenMetadataField: UpdateTokenMetadataField,
     updateTokenMetadataUpdateAuthority: UpdateTokenMetadataUpdateAuthority,
+    withdrawConfidentialTransfer: WithdrawConfidentialTransfer,
 };
 
 export const IX_TITLES = {
     amountToUiAmount: 'Amount To UiAmount',
+    applyPendingConfidentialTransferBalance: 'Apply Pending Confidential Transfer Balance',
     approve: 'Approve',
     approve2: 'Approve (Checked)',
     approveChecked: 'Approve (Checked)',
+    approveConfidentialTransferAccount: 'Approve Confidential Transfer Account',
     burn: 'Burn',
     burn2: 'Burn (Checked)',
     burnChecked: 'Burn (Checked)',
     closeAccount: 'Close Account',
+    confidentialTransfer: 'Confidential Transfer',
+    confidentialTransferWithFee: 'Confidential Transfer With Fee',
+    configureConfidentialAccountWithRegistry: 'Configure Confidential Account With Registry',
+    configureConfidentialTransferAccount: 'Configure Confidential Transfer Account',
     createNativeMint: 'Create Native Mint',
     defaultAccountStateExtension: 'Default Account State Extension',
+    depositConfidentialTransfer: 'Deposit Confidential Transfer',
+    disableConfidentialTransferConfidentialCredits: 'Disable Confidential Credits',
+    disableConfidentialTransferNonConfidentialCredits: 'Disable Non-Confidential Credits',
     emitTokenMetadata: 'Emit Token Metadata',
+    emptyConfidentialTransferAccount: 'Empty Confidential Transfer Account',
+    enableConfidentialTransferConfidentialCredits: 'Enable Confidential Credits',
+    enableConfidentialTransferNonConfidentialCredits: 'Enable Non-Confidential Credits',
     freezeAccount: 'Freeze Account',
     getAccountDataSize: 'Get Account Data Size',
     initializeAccount: 'Initialize Account',
     initializeAccount2: 'Initialize Account (2)',
     initializeAccount3: 'Initialize Account (3)',
+    initializeConfidentialTransferMint: 'Initialize Confidential Transfer Mint',
     initializeGroupMemberPointer: 'Initialize Group Member Pointer',
     initializeGroupPointer: 'Initialize Group Pointer',
     initializeImmutableOwner: 'Initialize Immutable Owner',
@@ -519,6 +708,7 @@ export const IX_TITLES = {
     transferChecked: 'Transfer (Checked)',
     transferFeeExtension: 'Transfer Fee Extension',
     uiAmountToAmount: 'UiAmount To Amount',
+    updateConfidentialTransferMint: 'Update Confidential Transfer Mint',
     updateGroupMemberPointer: 'Update Group Member Pointer',
     updateGroupPointer: 'Update Group Pointer',
     updateMetadataPointer: 'Update Metadata Pointer',
@@ -527,4 +717,5 @@ export const IX_TITLES = {
     updateTokenMetadataAuthority: 'Update Token Metadata Authority',
     updateTokenMetadataField: 'Update Token Metadata Field',
     updateTokenMetadataUpdateAuthority: 'Update Token Metadata Update Authority',
+    withdrawConfidentialTransfer: 'Withdraw Confidential Transfer',
 };

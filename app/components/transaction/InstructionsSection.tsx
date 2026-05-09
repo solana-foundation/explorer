@@ -22,6 +22,10 @@ import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
 import { VoteDetailsCard } from '@components/instruction/vote/VoteDetailsCard';
 import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
+import {
+    isZkElGamalProofInstruction,
+    ZkElGamalProofDetailsCard,
+} from '@components/instruction/ZkElGamalProofDetailsCard';
 import { useAnchorProgram } from '@entities/idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';
@@ -259,6 +263,9 @@ function InstructionCard({
     }
     if (ComputeBudgetProgram.programId.equals(transactionIx.programId)) {
         return <ComputeBudgetDetailsCard key={key} {...props} />;
+    }
+    if (isZkElGamalProofInstruction(transactionIx)) {
+        return <ZkElGamalProofDetailsCard key={key} {...props} />;
     }
     if (isLighthouseInstruction(transactionIx)) {
         return <LighthouseDetailsCard key={key} {...props} />;
