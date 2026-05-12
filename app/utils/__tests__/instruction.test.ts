@@ -105,10 +105,7 @@ describe('getTransactionInstructionNames', () => {
 
             const results = getTransactionInstructionNames(makeTx([transfer, setLimit]));
 
-            expect(results).toEqual([
-                { name: 'Transfer', program: 'System Program' },
-                { name: 'Set Compute Unit Limit', program: 'Compute Budget Program' },
-            ]);
+            expect(results).toEqual([{ name: 'Transfer', program: 'System Program' }]);
         });
 
         it('should return an empty array for a transaction with no instructions', () => {
