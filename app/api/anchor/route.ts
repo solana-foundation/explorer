@@ -83,7 +83,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Invalid program address' }, { status: 400 });
     }
 
-    if (NON_ANCHOR_PROGRAMS.has(programAddress)) {
+    if (NON_ANCHOR_PROGRAMS.has(programId)) {
         return NextResponse.json({ idl: null }, { headers: CACHE_HEADERS, status: 200 });
     }
 
