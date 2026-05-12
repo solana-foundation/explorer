@@ -1,4 +1,5 @@
 import { getAssetBatch } from '@/app/entities/digital-asset/server';
+import { type Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
 import { getJupiterApiKey } from '../config';
 import { discoverWithJupiter } from './discover-with-jupiter';
@@ -23,9 +24,7 @@ type NormalizedToken = {
     tokenAddress: string;
 };
 
-// _cluster is always 'mainnet-beta'; non-mainnet is short-circuited before this call.
-// It is included only so the signature is correct for a future multi-cluster extension.
-export async function resolveSearchTokens(query: string, _cluster: string): Promise<NormalizedToken[]> {
+export async function resolveSearchTokens(query: string, cluster: Cluster, customUrl = ''): Promise<NormalizedToken[]> {
     // --- Discovery (3s budget) ---
     const discoveryController = new AbortController();
     const discoveryTimeout = setTimeout(() => discoveryController.abort(), DISCOVERY_TIMEOUT_MS);
@@ -46,10 +45,13 @@ export async function resolveSearchTokens(query: string, _cluster: string): Prom
     const enrichmentController = new AbortController();
     const enrichmentTimeout = setTimeout(() => enrichmentController.abort(), ENRICHMENT_TIMEOUT_MS);
 
+    const rpcUrl = serverClusterUrl(cluster, customUrl);
+
     let assets = null;
     try {
         assets = await getAssetBatch(
             discovered.map(t => t.address),
+            rpcUrl,
             enrichmentController.signal,
         );
     } finally {

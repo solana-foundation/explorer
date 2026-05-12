@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     }
 
     const queryType = detectQueryType(trimmed);
-    const tokens = await resolveSearchTokens(trimmed, clusterParam);
+    const tokens = await resolveSearchTokens(trimmed, cluster);
 
     return NextResponse.json(
         { meta: { total: tokens.length }, query: trimmed, queryType, results: { tokens }, success: true },

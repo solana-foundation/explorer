@@ -1,13 +1,10 @@
 /**
- * Optional Triton RPC enrichment for token icon metadata.
+ * DAS API enrichment for token icon metadata.
  *
  * Token discovery (Jupiter/UTL) does not always return icon URLs, so this
- * module fetches them from Triton's DAS API as a best-effort fallback.
- * If TRITON_RPC_URL is not configured, enrichment is silently skipped and
- * tokens are returned without icons.
+ * module fetches them from the cluster's DAS API as a best-effort fallback.
  */
 
-import fetch from 'node-fetch';
 import { array, boolean, is, optional, string, type } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -38,12 +35,11 @@ const GetAssetBatchResponseSchema = type({
 
 /**
  * Fetch metadata for multiple assets in one call.
- * Returns null if DAS is not configured or the request fails.
+ * Returns null if url is empty or the request fails.
  */
-export async function getAssetBatch(ids: string[], signal?: AbortSignal): Promise<DigitalAsset[] | null> {
-    const url = process.env.TRITON_RPC_URL;
+export async function getAssetBatch(ids: string[], url: string, signal?: AbortSignal): Promise<DigitalAsset[] | null> {
     if (!url) {
-        Logger.warn('[digital-asset:triton] TRITON_RPC_URL is not configured — skipping enrichment');
+        Logger.warn('[digital-asset] No RPC URL provided — skipping DAS enrichment');
         return null;
     }
 
