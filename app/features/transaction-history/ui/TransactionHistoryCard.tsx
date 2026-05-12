@@ -18,7 +18,7 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
-import { InstructionList } from './InstructionList';
+import { InstructionList, InstructionListSkeleton } from './InstructionList';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
@@ -78,9 +78,11 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                 <tr key={signature}>
                     <td>
                         <Signature signature={signature} link truncateChars={40} />
-                        {instructionNames && instructionNames.length > 0 && (
+                        {instructionNames !== null && instructionNames.length > 0 ? (
                             <InstructionList instructions={instructionNames} />
-                        )}
+                        ) : instructionNames === null ? (
+                            <InstructionListSkeleton />
+                        ) : null}
                     </td>
 
                     <td className="w-1">

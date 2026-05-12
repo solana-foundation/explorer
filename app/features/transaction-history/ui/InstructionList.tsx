@@ -1,3 +1,4 @@
+import { Skeleton } from '@/app/components/shared/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
 import { TransactionInstructionInfo } from '@/app/utils/instruction';
 
@@ -23,6 +24,15 @@ function InstructionLine({ instruction }: { instruction: TransactionInstructionI
             <span className="e-text-muted">{instruction.program}: </span>
             <span className="e-text-white">{instruction.name}</span>
         </span>
+    );
+}
+
+export function InstructionListSkeleton() {
+    return (
+        <div className="e-mt-1 e-flex e-flex-col e-gap-1">
+            <Skeleton className="e-h-3.5 e-w-44" />
+            <Skeleton className="e-h-3.5 e-w-36" />
+        </div>
     );
 }
 
