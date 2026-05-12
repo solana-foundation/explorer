@@ -8,7 +8,7 @@ import {
     useCoinGeckoVerification,
     type VerificationTarget,
 } from '@/app/features/token-verification-badge';
-import { toAddress } from '@/app/shared/model/address';
+import { toAddress } from '@/app/shared/lib/web3js-compat';
 import { isNativeMint, isTokenMintByOwner } from '@/app/shared/model/token-program';
 
 type HeaderProps = ComponentProps<typeof AccountHeader>;
