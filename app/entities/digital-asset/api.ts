@@ -59,19 +59,22 @@ export async function getAssetBatch(ids: string[], url: string, signal?: AbortSi
         });
 
         if (!response.ok) {
-            Logger.warn(`[digital-asset:triton] getAssets returned ${response.status}`, { sentry: true });
+            Logger.warn(`[das] getAssets returned ${response.status}`, { sentry: true });
             return null;
         }
 
         const data = await response.json();
+
+        Logger.info('[das] getAssets response', { data });
+
         if (!is(data, GetAssetBatchResponseSchema)) {
-            Logger.warn('[digital-asset:triton] getAssets invalid response', { sentry: true });
+            Logger.warn('[das] getAssets invalid response', { sentry: true });
             return null;
         }
 
         return data.result as DigitalAsset[];
     } catch (error) {
-        Logger.error(error instanceof Error ? error : new Error('[digital-asset:triton] getAssets failed'), {
+        Logger.error(error instanceof Error ? error : new Error('[das] getAssets failed'), {
             sentry: true,
         });
         return null;
