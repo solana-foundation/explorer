@@ -13,9 +13,11 @@ type IdlSwrKey = readonly ['idl-anchor', string, Cluster, string];
 export function useIdlFromAnchorProgramSeed(programAddress: string, url: string, cluster?: Cluster): Idl | null {
     const resolvedCluster = cluster ?? Cluster.MainnetBeta;
     const swrKey: IdlSwrKey = ['idl-anchor', programAddress, resolvedCluster, url];
-    // Suspense: callers wrap this in <Suspense> to show loading cards (e.g. IdlCard,
-    // InstructionsSection, ProgramMultisigCard) while the IDL request is in flight.
-    const { data } = useSWRImmutable(swrKey, fetchIdlForProgram, { suspense: true });
+    // No suspense: callers render `idl=null` during the in-flight fetch and re-render
+    // with the resolved value (cards already handle `null` by hiding the Anchor tab).
+    // Using SWR's suspense throws into call sites that lack a Suspense boundary
+    // (notably the transaction inspector), breaking the render tree there.
+    const { data } = useSWRImmutable(swrKey, fetchIdlForProgram);
     return data ?? null;
 }
 
