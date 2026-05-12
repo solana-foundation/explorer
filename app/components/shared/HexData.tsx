@@ -68,6 +68,15 @@ export function groupHexRows(spans: HexSpan[], rowSize = ROW_SIZE, spanSize = SP
     return rows;
 }
 
+const fullContentVariants = cva('e-items-center', {
+    variants: {
+        align: {
+            end: 'e-justify-end',
+            start: 'e-justify-start',
+        },
+    },
+});
+
 export function HexData({
     raw,
     className,
@@ -179,15 +188,6 @@ function TruncatedContent({
         </span>
     );
 }
-
-const fullContentVariants = cva('e-items-center', {
-    variants: {
-        align: {
-            end: 'e-justify-end',
-            start: 'e-justify-start',
-        },
-    },
-});
 
 function FullContent({
     hexString,
