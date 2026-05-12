@@ -165,6 +165,7 @@ describe('GET /api/anchor', () => {
 
         expect(res.status).toBe(200);
         expect(await res.json()).toEqual({ idl: null });
+        expect(Logger.warn).toHaveBeenCalled();
         expect(Logger.panic).not.toHaveBeenCalled();
     });
 
