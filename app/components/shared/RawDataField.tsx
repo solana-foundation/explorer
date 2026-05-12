@@ -18,6 +18,10 @@ const VISIBLE_ROWS = 3;
 
 const BASE64_VISIBLE_CHARS = 192;
 
+// Inline string conversion (hex/base64) is skipped above this threshold.
+// Copy is disabled, use the download button for large payloads.
+const MAX_INLINE_BYTES = 100_000;
+
 export type RawDataFieldProps = {
     data: ByteArray | undefined;
     loading?: boolean;
@@ -34,9 +38,13 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
     }, [data]);
 
     const hasData = data !== undefined && data.length > 0;
+    const tooLarge = data !== undefined && data.length > MAX_INLINE_BYTES;
 
-    const hexString = useMemo(() => (data && data.length > 0 ? toHex(data) : ''), [data]);
-    const base64String = useMemo(() => (data && data.length > 0 ? toBase64(new Uint8Array(data)) : ''), [data]);
+    const hexString = useMemo(() => (data && data.length > 0 && !tooLarge ? toHex(data) : ''), [data, tooLarge]);
+    const base64String = useMemo(
+        () => (data && data.length > 0 && !tooLarge ? toBase64(new Uint8Array(data)) : ''),
+        [data, tooLarge],
+    );
 
     const hasMoreHex = data !== undefined && data.length > VISIBLE_ROWS * HEX_ROW_BYTES;
     const visibleData = !expanded && hasMoreHex ? data.subarray(0, VISIBLE_ROWS * HEX_ROW_BYTES) : data;
@@ -78,7 +86,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                         variant="outline"
                         size="sm"
                         aria-label="Copy"
-                        disabled={!hasData || loading}
+                        disabled={!hasData || loading || tooLarge}
                         onClick={() => copy(tab === 'base64' ? base64String : hexString)}
                     >
                         <Copy size={12} />
@@ -113,6 +121,8 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                     <span className="spinner-grow spinner-grow-sm" />
                 ) : !hasData ? (
                     <span className="e-text-sm e-text-outer-space-200">No data</span>
+                ) : tooLarge ? (
+                    <span className="e-text-sm e-text-outer-space-200">Too large to display — use download.</span>
                 ) : (
                     <span className="e-text-wrap e-break-all e-font-mono e-text-xs e-text-white">
                         {visibleBase64}
