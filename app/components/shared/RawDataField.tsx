@@ -20,7 +20,7 @@ const BASE64_VISIBLE_CHARS = 192;
 
 // Inline string conversion (hex/base64) is skipped above this threshold.
 // Copy is disabled, use the download button for large payloads.
-const MAX_INLINE_BYTES = 100_000;
+const MAX_INLINE_BYTES = 1024;
 
 export type RawDataFieldProps = {
     data: ByteArray | undefined;
