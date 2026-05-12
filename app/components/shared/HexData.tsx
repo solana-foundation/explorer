@@ -100,11 +100,10 @@ export function HexData({
     rowSize?: number;
 }) {
     if (!raw || raw.length === 0) {
-        // Same <pre> wrapper as the populated path so the row height matches.
         return (
-            <span className={cn('e-inline-flex', fullContentVariants({ align }), className)}>
-                <pre className="e-mb-0 e-inline-block e-text-left">No data</pre>
-            </span>
+            <div className={cn('e-p-1.5', fullContentVariants({ align }), className)}>
+                <span className="e-text-sm e-text-outer-space-200">No data</span>
+            </div>
         );
     }
 
