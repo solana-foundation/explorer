@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { array, is, nullable, number, optional, string, type } from 'superstruct';
 
 import { UTL_API_BASE_URL } from '@/app/entities/token-info/server';

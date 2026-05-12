@@ -1,20 +1,14 @@
-import fetch from 'node-fetch';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getAssetBatch } from '@/app/entities/digital-asset/api';
 
 import { GET } from '../route';
 
-vi.mock('node-fetch', async () => {
-    const actual = await vi.importActual('node-fetch');
-    return { ...actual, default: vi.fn() };
-});
-
 vi.mock('@/app/entities/digital-asset/api', () => ({
     getAssetBatch: vi.fn(),
 }));
 
-const fetchMock = vi.mocked(fetch);
+const fetchMock = vi.fn();
 const getAssetBatchMock = vi.mocked(getAssetBatch);
 
 const VALID_ADDRESS = 'So11111111111111111111111111111111111111112';
@@ -37,7 +31,7 @@ function mockFetch(status: number, body: unknown) {
         json: async () => body,
         ok,
         status,
-    } as Awaited<ReturnType<typeof fetch>>);
+    } as Response);
 }
 
 let testSeq = 0;
@@ -48,11 +42,13 @@ function makeRequest(q: string, cluster = 'mainnet-beta') {
 const originalEnv = { ...process.env };
 
 beforeEach(() => {
+    vi.stubGlobal('fetch', fetchMock);
     process.env = { ...originalEnv, JUPITER_API_KEY: 'test-key' };
     getAssetBatchMock.mockResolvedValue(null);
 });
 
 afterEach(() => {
+    vi.unstubAllGlobals();
     process.env = originalEnv;
     vi.resetAllMocks();
 });

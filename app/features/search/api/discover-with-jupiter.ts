@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { array, boolean, is, nullable, number, optional, string, type } from 'superstruct';
 
 import { matchAbortError } from '@/app/shared/lib/errors';
