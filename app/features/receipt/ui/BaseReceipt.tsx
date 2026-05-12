@@ -15,7 +15,6 @@ interface BaseReceiptProps {
 }
 
 const GRID_CLASSNAMES = 'e-grid e-grid-cols-[10px_1fr_1fr_minmax(auto,120px)] e-gap-x-3';
-const DASHED_BORDER_CLASSNAMES = 'e-border-b e-border-white/10 [border-bottom-style:dashed]';
 
 export function BaseReceipt({
     data: {
@@ -51,7 +50,7 @@ export function BaseReceipt({
                 <TransactionSection network={network} confirmationStatus={confirmationStatus} />
                 <TransfersTable transfers={transferRows} fee={fee} logoURI={logoURI} tokenHref={tokenHref} />
                 {memo && (
-                    <div className="e-flex e-flex-col e-gap-1 e-px-6 e-pb-6 e-text-xs">
+                    <div className="e-flex e-flex-col e-gap-1 e-px-6 e-pb-6 e-pt-4 e-text-xs">
                         <span className="e-text-gray-400">Memo</span>
                         <span className="e-text-white">{memo}</span>
                     </div>
@@ -109,28 +108,38 @@ function TransfersTable({
     tokenHref?: string;
 }) {
     return (
-        <div className="e-px-6 e-pb-4 e-text-xs e-text-gray-400">
-            <div className={cn('e-items-center e-py-1', DASHED_BORDER_CLASSNAMES, GRID_CLASSNAMES)}>
-                <span>#</span>
-                <span>Sender</span>
-                <span>Receiver</span>
-                <span>Amount</span>
+        <div>
+            <div className="e-px-6 e-pb-4 e-text-xs e-text-gray-400">
+                <div className={cn('e-items-center e-py-1', GRID_CLASSNAMES)}>
+                    <span>#</span>
+                    <span>Sender</span>
+                    <span>Receiver</span>
+                    <span>Amount</span>
+                </div>
+                {transfers.map((row, i) => (
+                    <TransferRowItem key={i} index={i + 1} row={row} logoURI={logoURI} tokenHref={tokenHref} />
+                ))}
             </div>
-            {transfers.map((row, i) => (
-                <TransferRowItem key={i} index={i + 1} row={row} logoURI={logoURI} tokenHref={tokenHref} />
-            ))}
-            <div className={cn('e-items-center e-py-4', GRID_CLASSNAMES)}>
-                <span>–</span>
-                <span>Fee</span>
-                <span />
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <span className="e-whitespace-nowrap e-text-left e-font-mono e-text-white">
-                            {fee.formatted} <span className="e-text-gray-400">SOL</span>
-                        </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">{fee.raw} lamports</TooltipContent>
-                </Tooltip>
+            <div
+                className={cn(
+                    'e-border-white/10 e-px-6 e-text-xs',
+                    'e-border-b [border-bottom-style:dashed]',
+                    'e-border-t [border-top-style:dashed]',
+                )}
+            >
+                <div className={cn('e-items-center e-py-4', GRID_CLASSNAMES)}>
+                    <span className="e-text-gray-400">Fee</span>
+                    <span />
+                    <span />
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span className="e-whitespace-nowrap e-text-left e-font-mono e-text-gray-400">
+                                {fee.formatted} <span className="e-text-gray-400">SOL</span>
+                            </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">{fee.raw} lamports</TooltipContent>
+                    </Tooltip>
+                </div>
             </div>
         </div>
     );
@@ -152,7 +161,7 @@ function TransferRowItem({
     const receiverDisplay = receiver.domain ?? receiver.truncated;
 
     return (
-        <div className={cn('e-items-center e-py-1', DASHED_BORDER_CLASSNAMES, GRID_CLASSNAMES)}>
+        <div className={cn('e-items-center e-py-1', GRID_CLASSNAMES)}>
             <span className="e-text-gray-400">{index}</span>
             <AddressCell address={sender.address} display={senderDisplay} href={senderHref} />
             <AddressCell address={receiver.address} display={receiverDisplay} href={receiverHref} />
