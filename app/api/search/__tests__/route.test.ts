@@ -63,12 +63,13 @@ describe('GET /api/search', () => {
             expect(res.headers.get('Cache-Control')).toContain('s-maxage=30');
         });
 
-        it('should return empty with no-store headers for non-mainnet cluster', async () => {
+        it('should return results with cache headers for non-mainnet cluster', async () => {
+            mockFetch(200, []);
             const res = await GET(new Request(`http://localhost/api/search?q=sol-${++testSeq}&cluster=devnet`));
             expect(res.status).toBe(200);
             const data = await res.json();
             expect(data).toMatchObject({ results: { tokens: [] }, success: true });
-            expect(res.headers.get('Cache-Control')).toContain('no-store');
+            expect(res.headers.get('Cache-Control')).toContain('s-maxage=30');
         });
 
         it('should return empty with cache headers when query exceeds max length', async () => {
