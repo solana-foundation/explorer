@@ -1,6 +1,14 @@
 import type { Idl } from '@coral-xyz/anchor';
 import { encodeIdlAccount as encodeIdlAccountBorsh } from '@coral-xyz/anchor/dist/cjs/idl';
-import { getBase64Decoder, SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, SolanaError } from '@solana/kit';
+import {
+    getBase64Decoder,
+    SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR,
+    SOLANA_ERROR__JSON_RPC__METHOD_NOT_FOUND,
+    SOLANA_ERROR__RPC__API_PLAN_MISSING_FOR_RPC_METHOD,
+    SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR,
+    SOLANA_ERROR__RPC__TRANSPORT_HTTP_HEADER_FORBIDDEN,
+    SolanaError,
+} from '@solana/kit';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -169,7 +177,7 @@ describe('GET /api/anchor', () => {
         expect(Logger.panic).not.toHaveBeenCalled();
     });
 
-    it('should return 502 without escalating when RPC throws a SolanaError', async () => {
+    it('should return 502 without escalating on a transient JSON-RPC error (Internal error)', async () => {
         const rpcError = new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, {
             __serverMessage: 'Internal error',
         });
@@ -184,6 +192,100 @@ describe('GET /api/anchor', () => {
         expect(await res.json()).toEqual({ error: 'Upstream RPC error' });
         expect(Logger.warn).toHaveBeenCalled();
         expect(Logger.panic).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        ['HTTP 500 upstream sick', 500],
+        ['HTTP 502 bad gateway', 502],
+        ['HTTP 503 service unavailable', 503],
+        ['HTTP 429 rate-limited backpressure', 429],
+    ])('should treat %s as transient and warn without escalating', async (_label, statusCode) => {
+        const rpcError = new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
+            headers: new Headers(),
+            message: 'upstream',
+            statusCode,
+        });
+        mocks.sendGetAccountInfo.mockRejectedValueOnce(rpcError);
+
+        const { GET } = await importRoute();
+        const res = await GET(
+            createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: ANCHOR_PROGRAM_ADDRESS }),
+        );
+
+        expect(res.status).toBe(502);
+        expect(await res.json()).toEqual({ error: 'Upstream RPC error' });
+        expect(Logger.warn).toHaveBeenCalled();
+        expect(Logger.panic).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        ['HTTP 401 wrong RPC token', 401],
+        ['HTTP 403 forbidden', 403],
+        ['HTTP 404 wrong endpoint', 404],
+    ])('should escalate %s as misconfiguration', async (_label, statusCode) => {
+        const rpcError = new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
+            headers: new Headers(),
+            message: 'unauthorized',
+            statusCode,
+        });
+        mocks.sendGetAccountInfo.mockRejectedValueOnce(rpcError);
+
+        const { GET } = await importRoute();
+        const res = await GET(
+            createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: ANCHOR_PROGRAM_ADDRESS }),
+        );
+
+        expect(res.status).toBe(502);
+        expect(await res.json()).toEqual({ error: 'Failed to fetch IDL' });
+        expect(Logger.panic).toHaveBeenCalled();
+        expect(Logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('should escalate when the RPC reports a missing API plan', async () => {
+        const rpcError = new SolanaError(SOLANA_ERROR__RPC__API_PLAN_MISSING_FOR_RPC_METHOD, {
+            rpcMethod: 'getAccountInfo',
+            rpcParams: [],
+        });
+        mocks.sendGetAccountInfo.mockRejectedValueOnce(rpcError);
+
+        const { GET } = await importRoute();
+        const res = await GET(
+            createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: ANCHOR_PROGRAM_ADDRESS }),
+        );
+
+        expect(res.status).toBe(502);
+        expect(await res.json()).toEqual({ error: 'Failed to fetch IDL' });
+        expect(Logger.panic).toHaveBeenCalled();
+    });
+
+    it('should escalate when a proxy strips required RPC headers', async () => {
+        const rpcError = new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_HEADER_FORBIDDEN, {
+            headers: ['Solana-Client'],
+        });
+        mocks.sendGetAccountInfo.mockRejectedValueOnce(rpcError);
+
+        const { GET } = await importRoute();
+        const res = await GET(
+            createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: ANCHOR_PROGRAM_ADDRESS }),
+        );
+
+        expect(res.status).toBe(502);
+        expect(Logger.panic).toHaveBeenCalled();
+    });
+
+    it('should escalate when the RPC reports an unknown method', async () => {
+        const rpcError = new SolanaError(SOLANA_ERROR__JSON_RPC__METHOD_NOT_FOUND, {
+            __serverMessage: 'Method not found',
+        });
+        mocks.sendGetAccountInfo.mockRejectedValueOnce(rpcError);
+
+        const { GET } = await importRoute();
+        const res = await GET(
+            createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: ANCHOR_PROGRAM_ADDRESS }),
+        );
+
+        expect(res.status).toBe(502);
+        expect(Logger.panic).toHaveBeenCalled();
     });
 
     it('should return 502 and escalate to Sentry on truly unexpected errors', async () => {
