@@ -34,6 +34,9 @@ export async function fetchTokenResults(query: string, ctx: SearchContext): Prom
             cluster: clusterSlug(ctx.cluster),
             q: trimmed,
         });
+        if (ctx.genesisHash) {
+            params.set('genesisHash', ctx.genesisHash);
+        }
 
         const response = await fetch(`/api/search?${params}`, {
             headers: { Accept: 'application/json' },

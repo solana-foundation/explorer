@@ -10,12 +10,15 @@ export function useSearch(query: string) {
     const { cluster, clusterInfo } = useCluster();
     const trimmed = query.trim();
 
+    const genesisHash = clusterInfo?.genesisHash;
+
     return useSWR(
-        trimmed.length > 0 ? ['search', trimmed, cluster] : null,
+        trimmed.length > 0 ? ['search', trimmed, cluster, genesisHash] : null,
         () =>
             search(searchProviders, trimmed, {
                 cluster,
                 currentEpoch: clusterInfo?.epochInfo.epoch,
+                genesisHash,
             }),
         {
             keepPreviousData: false,

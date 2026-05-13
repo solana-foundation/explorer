@@ -20,6 +20,7 @@ export interface SearchOptions {
 export type SearchContext = {
     cluster: Cluster;
     currentEpoch: bigint | undefined;
+    genesisHash?: string;
 };
 
 export interface SearchProvider {
