@@ -11,6 +11,22 @@ import {
     isSolanaError,
     type ReadonlyUint8Array,
     type Rpc,
+    SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR,
+    SOLANA_ERROR__JSON_RPC__PARSE_ERROR,
+    SOLANA_ERROR__JSON_RPC__SCAN_ERROR,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_BLOCK_CLEANED_UP,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_BLOCK_NOT_AVAILABLE,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_BLOCK_STATUS_NOT_AVAILABLE_YET,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_KEY_EXCLUDED_FROM_SECONDARY_INDEX,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_LONG_TERM_STORAGE_SLOT_SKIPPED,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_MIN_CONTEXT_SLOT_NOT_REACHED,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NO_SNAPSHOT,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NODE_UNHEALTHY,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SLOT_SKIPPED,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_TRANSACTION_HISTORY_NOT_AVAILABLE,
+    SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR,
+    type SolanaError,
+    type SolanaErrorCode,
     type SolanaRpcApi,
 } from '@solana/kit';
 import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '@solana-program/compute-budget';
@@ -61,6 +77,28 @@ const NON_ANCHOR_PROGRAMS = new Set<string>([
     'ZkTokenProof1111111111111111111111111111111',
 ]);
 
+// SolanaError codes that represent ephemeral upstream-state issues for a `getAccountInfo`
+// call: the node is briefly unhealthy, the slot was skipped, the snapshot/block isn't
+// available yet, the JSON-RPC server returned a generic "Internal error", etc. They are
+// not actionable at the app layer and recur naturally — warn and let the client retry.
+// Everything outside this set (auth, plan, malformed responses, programmer-bug-class
+// codes) falls through to `Logger.panic` so misconfiguration surfaces in Sentry.
+const TRANSIENT_RPC_ERROR_CODES = new Set<SolanaErrorCode>([
+    SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR,
+    SOLANA_ERROR__JSON_RPC__PARSE_ERROR,
+    SOLANA_ERROR__JSON_RPC__SCAN_ERROR,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_BLOCK_CLEANED_UP,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_BLOCK_NOT_AVAILABLE,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_BLOCK_STATUS_NOT_AVAILABLE_YET,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_KEY_EXCLUDED_FROM_SECONDARY_INDEX,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_LONG_TERM_STORAGE_SLOT_SKIPPED,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_MIN_CONTEXT_SLOT_NOT_REACHED,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NO_SNAPSHOT,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NODE_UNHEALTHY,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SLOT_SKIPPED,
+    SOLANA_ERROR__JSON_RPC__SERVER_ERROR_TRANSACTION_HISTORY_NOT_AVAILABLE,
+]);
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const clusterProp = searchParams.get('cluster');
@@ -91,9 +129,9 @@ export async function GET(request: Request) {
     try {
         accountData = await fetchIdlAccountData(createSolanaRpc(url), programId);
     } catch (error) {
-        if (isSolanaError(error)) {
-            // Transient upstream RPC failure. Not actionable at the app layer; don't escalate.
-            // Return 502 (uncached) so the client may retry.
+        if (isSolanaError(error) && classifySolanaError(error) === 'transient') {
+            // Ephemeral upstream issue (node unhealthy, slot skipped, JSON-RPC "Internal error",
+            // 5xx/429, ...). Not actionable at the app layer; return 502 (uncached) for retry.
             Logger.warn('[api:anchor] RPC error fetching IDL account', {
                 cluster: clusterProp,
                 programAddress,
@@ -102,7 +140,8 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Upstream RPC error' }, { status: 502 });
         }
 
-        // Truly unexpected — escalate.
+        // Misconfiguration (wrong RPC token, missing API plan, method not supported, ...) or
+        // any other unexpected throwable. Escalate so Sentry pages us.
         Logger.panic(new Error('[api:anchor] Failed to fetch IDL account', { cause: error }), {
             sentryExtras: { cluster: clusterProp, programAddress },
         });
@@ -126,6 +165,18 @@ export async function GET(request: Request) {
         });
         return NextResponse.json({ idl: null }, { headers: CACHE_HEADERS, status: 200 });
     }
+}
+
+function classifySolanaError(error: SolanaError): 'transient' | 'misconfig' {
+    if (TRANSIENT_RPC_ERROR_CODES.has(error.context.__code)) return 'transient';
+    if (isSolanaError(error, SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR)) {
+        // 5xx = upstream is sick, retryable. 429 = backpressure, also retryable. Everything
+        // else in the 4xx range (401/403 wrong token, 404 wrong URL, 410, ...) is persistent
+        // misconfig and should page.
+        const { statusCode } = error.context;
+        return statusCode >= 500 || statusCode === 429 ? 'transient' : 'misconfig';
+    }
+    return 'misconfig';
 }
 
 async function fetchIdlAccountData(
