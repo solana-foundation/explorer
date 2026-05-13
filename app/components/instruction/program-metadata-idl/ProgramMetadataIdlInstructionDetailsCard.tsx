@@ -43,7 +43,11 @@ export function ProgramMetadataIdlInstructionDetailsCard({
 
     let parsedCard = tryParse(idl as RootNode);
     if (!parsedCard) {
-        parsedCard = tryParse(rootNodeFromAnchor(idl) as unknown as RootNode);
+        try {
+            parsedCard = tryParse(rootNodeFromAnchor(idl) as unknown as RootNode);
+        } catch {
+            // ignore and fallback
+        }
     }
     return parsedCard ?? <UnknownDetailsCard {...props} />;
 }
