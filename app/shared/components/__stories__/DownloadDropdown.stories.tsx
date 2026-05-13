@@ -58,9 +58,27 @@ export const CustomEncodings: Story = {
     },
 };
 
+export const SingleEncoding: Story = {
+    args: {
+        data: SAMPLE_DATA,
+        encodings: ['hex'],
+        filename: 'test-transaction',
+    },
+};
+
+export const SingleEncodingLoading: Story = {
+    args: {
+        data: undefined,
+        encodings: ['hex'],
+        filename: 'test-transaction',
+        loading: true,
+    },
+};
+
 export const OnOpenChange: Story = {
     args: {
         data: SAMPLE_DATA,
+        encodings: ['hex', 'base58', 'base64'],
         filename: 'test-transaction',
         onOpenChange: fn(),
     },
@@ -75,6 +93,7 @@ export const OnOpenChange: Story = {
 export const OpenWithData: Story = {
     args: {
         data: SAMPLE_DATA,
+        encodings: ['hex', 'base58', 'base64'],
         filename: 'test-transaction',
     },
     play: async ({ canvasElement }) => {
@@ -88,6 +107,7 @@ export const OpenWithData: Story = {
 export const OpenLoading: Story = {
     args: {
         data: undefined,
+        encodings: ['hex', 'base58', 'base64'],
         filename: 'test-transaction',
         loading: true,
     },
@@ -102,6 +122,7 @@ export const OpenLoading: Story = {
 export const OpenError: Story = {
     args: {
         data: undefined,
+        encodings: ['hex', 'base58', 'base64'],
         error: new window.Error('RPC timeout'),
         filename: 'test-transaction',
     },
