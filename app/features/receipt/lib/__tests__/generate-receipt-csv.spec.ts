@@ -98,16 +98,17 @@ describe('buildReceiptCsvRows', () => {
             ],
         };
         const rows = buildReceiptCsvRows(multiReceipt, SIGNATURE, '$90.00');
-        expect(rows).toHaveLength(2);
+        expect(rows).toHaveLength(3);
         expect(rows[0][3]).toBe('SenderAddr111111111111111111111111111111111');
         expect(rows[0][4]).toBe('ReceiverAddr3333333333333333333333333333333');
         expect(rows[0][5]).toBe('0.6');
         expect(rows[0][8]).toBe('$54.00'); // 0.6/1.0 * $90
-        expect(rows[0][9]).toBe('0.000005');
+        expect(rows[0][9]).toBe('');
         expect(rows[1][4]).toBe('ReceiverAddr4444444444444444444444444444444');
         expect(rows[1][5]).toBe('0.4');
         expect(rows[1][8]).toBe('$36.00'); // 0.4/1.0 * $90
         expect(rows[1][9]).toBe('');
+        expect(rows[2][9]).toBe('0.000005');
     });
 });
 
