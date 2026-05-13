@@ -44,7 +44,7 @@ export function buildReceiptCsvRows(receipt: FormattedReceipt, signature: string
 
     if (receipt.transfers && receipt.transfers.length > 1) {
         const totalUsd = usdValue ? parseUsdNumber(usdValue) : null;
-        return receipt.transfers.map((t, i) => [
+        const transferRows = receipt.transfers.map((t, i) => [
             receipt.date.utc,
             signature,
             receipt.network,
@@ -54,9 +54,23 @@ export function buildReceiptCsvRows(receipt: FormattedReceipt, signature: string
             unit,
             mint ?? '',
             totalUsd !== null ? prorateUsd(t.amount.raw, receipt.total.raw, totalUsd) : '',
-            i === 0 ? receipt.fee.formatted : '',
+            '',
             i === 0 && receipt.memo ? sanitizeCsvField(receipt.memo) : '',
         ]);
+        const feeRow = [
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            receipt.fee.formatted,
+            '',
+        ];
+        return [...transferRows, feeRow];
     }
 
     return [
