@@ -1348,7 +1348,7 @@
     "testnet_activation_epoch": 931,
     "devnet_activation_epoch": 1045,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 972,
     "description": ""
   },
   {
