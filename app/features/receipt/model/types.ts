@@ -1,5 +1,11 @@
 import type { ParsedInstruction, PartiallyDecodedInstruction } from '@solana/web3.js';
 
+export type Transfer = {
+    receiver: string;
+    sender: string;
+    total: number;
+};
+
 export type BaseReceipt = {
     sender: string;
     receiver: string;
@@ -11,6 +17,7 @@ export type BaseReceipt = {
 
 export type ReceiptSol = BaseReceipt & {
     type: 'sol';
+    transfers?: Transfer[];
 };
 
 export type ReceiptToken = BaseReceipt & {

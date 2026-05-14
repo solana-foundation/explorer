@@ -1,10 +1,11 @@
+import { truncateAddress } from '@entities/address';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster } from '@/app/utils/cluster';
 
 import { getTokenInfo } from '../../api/get-token-info';
 import { getTx } from '../../api/get-tx';
-import { MULTISIG_AUTHORITY, RECEIVER } from '../../mocks/addresses';
+import { MULTISIG_AUTHORITY, RECEIVER, RECEIVER_2, SENDER } from '../../mocks/addresses';
 import { mockCustomFeePayerTransaction } from '../../mocks/custom-fee-payer';
 import { mockJitoOnlyTransferTransaction } from '../../mocks/jito-only-transfer';
 import { mockMultipleTransfersTransaction } from '../../mocks/multiple-transfers';
@@ -50,10 +51,10 @@ describe('createReceipt', () => {
                 },
                 network: 'Mainnet Beta',
                 receiver: {
-                    truncated: '65MUM..L2Fhk',
+                    truncated: truncateAddress(RECEIVER.publicKey.toBase58(), 5),
                 },
                 sender: {
-                    truncated: 'Hd3f3..R3bD5',
+                    truncated: truncateAddress(SENDER.publicKey.toBase58(), 5),
                 },
                 total: {
                     formatted: '0.3',
@@ -66,7 +67,7 @@ describe('createReceipt', () => {
             expect(result?.date.utc).toBeDefined();
         });
 
-        it('should return null for multiple SOL transfers', async () => {
+        it('should create a formatted SOL receipt for multiple transfers', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
                 cluster: Cluster.MainnetBeta,
                 transaction: mockMultipleTransfersTransaction,
@@ -74,7 +75,27 @@ describe('createReceipt', () => {
 
             const result = await createReceipt(mockSignature);
 
-            expect(result).toBeUndefined();
+            expect(result).toMatchObject({
+                kind: 'sol',
+                total: { formatted: '0.14', raw: 140000000, unit: 'SOL' },
+                transfers: [
+                    {
+                        amount: { formatted: '0.08', raw: 80000000, unit: 'SOL' },
+                        receiver: { address: RECEIVER.publicKey.toBase58() },
+                        sender: { address: SENDER.publicKey.toBase58() },
+                    },
+                    {
+                        amount: { formatted: '0.05', raw: 50000000, unit: 'SOL' },
+                        receiver: { address: RECEIVER_2.publicKey.toBase58() },
+                        sender: { address: SENDER.publicKey.toBase58() },
+                    },
+                    {
+                        amount: { formatted: '0.01', raw: 10000000, unit: 'SOL' },
+                        receiver: { address: RECEIVER.publicKey.toBase58() },
+                        sender: { address: SENDER.publicKey.toBase58() },
+                    },
+                ],
+            });
         });
 
         it('should return null for zero SOL transfer', async () => {

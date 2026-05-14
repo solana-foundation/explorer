@@ -10,6 +10,7 @@ const CLUSTER = Cluster.MainnetBeta;
 
 const senderKeypair = Keypair.generate();
 const receiverKeypair = Keypair.generate();
+const extraKeypairs = Array.from({ length: 9 }, () => Keypair.generate());
 
 const raw = {
     date: 1737100062,
@@ -89,6 +90,32 @@ export const receiptTokenTransferSimple: FormattedReceipt = formatReceiptData(
         symbol: 'USDC',
         total: 1250.75,
         type: 'token',
+    },
+    CLUSTER,
+);
+
+export const receiptMultiTransfer3: FormattedReceipt = formatReceiptData(
+    {
+        ...baseSolReceipt,
+        total: 350000000,
+        transfers: [
+            { receiver: extraKeypairs[0].publicKey.toBase58(), sender: raw.sender, total: 100000000 },
+            { receiver: extraKeypairs[1].publicKey.toBase58(), sender: raw.sender, total: 50000000 },
+            { receiver: extraKeypairs[2].publicKey.toBase58(), sender: raw.sender, total: 200000000 },
+        ],
+    },
+    CLUSTER,
+);
+
+export const receiptMultiTransfer9: FormattedReceipt = formatReceiptData(
+    {
+        ...baseSolReceipt,
+        total: 1125000000,
+        transfers: Array.from({ length: 9 }, (_, i) => ({
+            receiver: extraKeypairs[i].publicKey.toBase58(),
+            sender: raw.sender,
+            total: (i + 1) * 25000000,
+        })),
     },
     CLUSTER,
 );

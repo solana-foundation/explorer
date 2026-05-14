@@ -3,39 +3,25 @@ import { EXPLORER_BASE_URL as baseUrl } from '@utils/env';
 import { useCluster } from '@/app/providers/cluster';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
 
-export function useExplorerLink(path: string) {
-    const { cluster, customUrl } = useCluster();
-
-    // Build the full URL with path
+export function buildExplorerLink(cluster: Cluster, customUrl: string | undefined, path: string): string {
     let url: string;
     if (!baseUrl.endsWith('/') && !path.startsWith('/')) {
-        if (path === '') {
-            url = baseUrl;
-        } else {
-            url = `${baseUrl}/${path}`;
-        }
+        url = path === '' ? baseUrl : `${baseUrl}/${path}`;
     } else {
         url = `${baseUrl}${path}`;
     }
 
     // Add cluster query parameter for non-mainnet clusters
     const params = new URLSearchParams();
-
     switch (cluster) {
         case Cluster.Testnet:
-            params.append('cluster', clusterSlug(cluster));
-            break;
         case Cluster.Devnet:
-            params.append('cluster', clusterSlug(cluster));
-            break;
         case Cluster.Simd296:
             params.append('cluster', clusterSlug(cluster));
             break;
         case Cluster.Custom:
             params.append('cluster', clusterSlug(cluster));
-            if (customUrl) {
-                params.append('customUrl', customUrl);
-            }
+            if (customUrl) params.append('customUrl', customUrl);
             break;
         case Cluster.MainnetBeta:
         default:
@@ -47,13 +33,16 @@ export function useExplorerLink(path: string) {
     const queryString = params.toString();
     if (queryString) {
         if (url.indexOf('?') === -1) {
-            url += `?${queryString}`;
-        } else {
-            // change order for additional params as having ?message at the url and placing it first, breaks input at the Inspector
-            const [path, qs] = url.split('?');
-            url = `${path}?${queryString}&${qs}`;
+            return `${url}?${queryString}`;
         }
+        // change order for additional params as having ?message at the url and placing it first, breaks input at the Inspector
+        const [urlPath, qs] = url.split('?');
+        return `${urlPath}?${queryString}&${qs}`;
     }
+    return url;
+}
 
-    return { link: url };
+export function useExplorerLink(path: string) {
+    const { cluster, customUrl } = useCluster();
+    return { link: buildExplorerLink(cluster, customUrl, path) };
 }

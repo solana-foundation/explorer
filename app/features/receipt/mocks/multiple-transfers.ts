@@ -1,12 +1,14 @@
 import { type ParsedTransactionWithMeta, PublicKey } from '@solana/web3.js';
 
+import { RECEIVER, RECEIVER_2, SENDER } from './addresses';
+
 /**
  * Mock transaction data for testing multiple transfers.
- * - Transfer 0.08 SOL to G2GjouKPJnGi3aGVsHnBu475EGvseiL1QnVHBMkN6wid
- * - Transfer 0.05 SOL to 65MUMxiopKUaZbazs6pRUr9y774mj4Z1TdDgUh3L2Fhk
- * - Transfer 0.01 SOL to G2GjouKPJnGi3aGVsHnBu475EGvseiL1QnVHBMkN6wid
+ * - Transfer 0.08 SOL to RECEIVER
+ * - Transfer 0.05 SOL to RECEIVER_2
+ * - Transfer 0.01 SOL to RECEIVER
  *
- * Sender: Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5
+ * Sender: SENDER
  */
 export const mockMultipleTransfersTransaction = {
     blockTime: 1768831450,
@@ -33,19 +35,19 @@ export const mockMultipleTransfersTransaction = {
         message: {
             accountKeys: [
                 {
-                    pubkey: new PublicKey('Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5'),
+                    pubkey: SENDER.publicKey,
                     signer: true,
                     source: 'transaction',
                     writable: true,
                 },
                 {
-                    pubkey: new PublicKey('G2GjouKPJnGi3aGVsHnBu475EGvseiL1QnVHBMkN6wid'),
+                    pubkey: RECEIVER.publicKey,
                     signer: false,
                     source: 'transaction',
                     writable: true,
                 },
                 {
-                    pubkey: new PublicKey('65MUMxiopKUaZbazs6pRUr9y774mj4Z1TdDgUh3L2Fhk'),
+                    pubkey: RECEIVER_2.publicKey,
                     signer: false,
                     source: 'transaction',
                     writable: true,
@@ -61,9 +63,9 @@ export const mockMultipleTransfersTransaction = {
                 {
                     parsed: {
                         info: {
-                            destination: 'G2GjouKPJnGi3aGVsHnBu475EGvseiL1QnVHBMkN6wid',
+                            destination: RECEIVER.publicKey.toBase58(),
                             lamports: 80000000,
-                            source: 'Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5',
+                            source: SENDER.publicKey.toBase58(),
                         },
                         type: 'transfer',
                     },
@@ -73,9 +75,9 @@ export const mockMultipleTransfersTransaction = {
                 {
                     parsed: {
                         info: {
-                            destination: '65MUMxiopKUaZbazs6pRUr9y774mj4Z1TdDgUh3L2Fhk',
+                            destination: RECEIVER_2.publicKey.toBase58(),
                             lamports: 50000000,
-                            source: 'Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5',
+                            source: SENDER.publicKey.toBase58(),
                         },
                         type: 'transfer',
                     },
@@ -85,9 +87,9 @@ export const mockMultipleTransfersTransaction = {
                 {
                     parsed: {
                         info: {
-                            destination: 'G2GjouKPJnGi3aGVsHnBu475EGvseiL1QnVHBMkN6wid',
+                            destination: RECEIVER.publicKey.toBase58(),
                             lamports: 10000000,
-                            source: 'Hd3f3TdvcEqEEkCE5pV8qZxtw4CRZ82SU8ggYVR3bD5',
+                            source: SENDER.publicKey.toBase58(),
                         },
                         type: 'transfer',
                     },

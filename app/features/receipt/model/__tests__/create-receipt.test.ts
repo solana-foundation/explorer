@@ -1,13 +1,13 @@
+import { truncateAddress } from '@entities/address';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster } from '@/app/utils/cluster';
 
 import { getTokenInfo } from '../../api/get-token-info';
 import { getTx } from '../../api/get-tx';
-import { MULTISIG_AUTHORITY, RECEIVER } from '../../mocks/addresses';
+import { MULTISIG_AUTHORITY, RECEIVER, SENDER } from '../../mocks/addresses';
 import { mockCustomFeePayerTransaction } from '../../mocks/custom-fee-payer';
 import { mockJitoOnlyTransferTransaction } from '../../mocks/jito-only-transfer';
-import { mockMultipleTransfersTransaction } from '../../mocks/multiple-transfers';
 import { mockNoTransferTransaction } from '../../mocks/no-transfers';
 import { mockSingleTransferTransaction } from '../../mocks/single-transfer';
 import { mockToken2022TransferTransaction } from '../../mocks/token-2022-transfer';
@@ -50,10 +50,10 @@ describe('createReceipt', () => {
                 },
                 network: 'Mainnet Beta',
                 receiver: {
-                    truncated: '65MUM..L2Fhk',
+                    truncated: truncateAddress(RECEIVER.publicKey.toBase58(), 5),
                 },
                 sender: {
-                    truncated: 'Hd3f3..R3bD5',
+                    truncated: truncateAddress(SENDER.publicKey.toBase58(), 5),
                 },
                 total: {
                     formatted: '0.3',
@@ -64,17 +64,6 @@ describe('createReceipt', () => {
             expect(result?.date).toBeDefined();
             expect(result?.date.timestamp).toBeDefined();
             expect(result?.date.utc).toBeDefined();
-        });
-
-        it('should return null for multiple SOL transfers', async () => {
-            vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
-                transaction: mockMultipleTransfersTransaction,
-            });
-
-            const result = await createReceipt(mockSignature);
-
-            expect(result).toBeUndefined();
         });
 
         it('should return null for zero SOL transfer', async () => {
