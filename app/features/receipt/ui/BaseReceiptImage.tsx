@@ -74,7 +74,14 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                         </div>
 
                         {/* Transfer table */}
-                        <div style={{ display: 'flex', flexDirection: 'column', padding: `0 ${SPACING.cardPaddingX}`, width: '100%' }}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                padding: `0 ${SPACING.cardPaddingX}`,
+                                width: '100%',
+                            }}
+                        >
                             {/* Column headers */}
                             <div
                                 style={{
