@@ -51,9 +51,9 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                             display: 'flex',
                             flexDirection: 'column',
                             flexGrow: 1,
-                            gap: '24px',
+                            gap: SPACING.cardGap,
                             overflow: 'hidden',
-                            padding: '24px 54px 28px',
+                            padding: SPACING.cardPadding,
                         }}
                     >
                         {/* Header: logo + "Receipt" on left, date on right */}
@@ -79,8 +79,8 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                                 style={{
                                     borderBottom: `2px dashed ${colors.heavyMetal200}`,
                                     display: 'flex',
-                                    gap: '12px',
-                                    padding: '8px 0',
+                                    gap: SPACING.rowGap,
+                                    padding: SPACING.rowPadding,
                                     width: '100%',
                                 }}
                             >
@@ -95,7 +95,7 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                             {visibleTransfers.map((transfer, i) => (
                                 <div
                                     key={`${transfer.sender.address}-${i}`}
-                                    style={{ ...tableDataRowStyle, gap: '12px' }}
+                                    style={{ ...tableDataRowStyle, gap: SPACING.rowGap }}
                                 >
                                     <span style={addressStyle}>{transfer.sender.truncated}</span>
                                     <span style={addressStyle}>{transfer.receiver.truncated}</span>
@@ -109,14 +109,7 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                             {hiddenCount > 0 && (
                                 <div style={tableDataRowStyle}>
                                     <div style={amountCellStyle}>
-                                        <span
-                                            style={{
-                                                color: colors.neutral500,
-                                                fontSize: '44px',
-                                                letterSpacing: '-0.88px',
-                                                lineHeight: '50px',
-                                            }}
-                                        >
+                                        <span style={{ color: colors.neutral500, ...TYPO.body }}>
                                             and {hiddenCount} more
                                         </span>
                                     </div>
@@ -124,9 +117,9 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                             )}
 
                             {/* Fee row */}
-                            <div style={{ ...tableDataRowStyle, gap: '12px' }}>
+                            <div style={{ ...tableDataRowStyle, gap: SPACING.rowGap }}>
                                 <span style={{ ...columnLabelStyle }}>Fee</span>
-                                <div style={{ width: '260px' }} />
+                                <div style={{ width: SPACING.columnWidth }} />
                                 <div style={amountCellStyle}>
                                     <AmountDisplay amount={fee.formatted} unit="SOL" />
                                 </div>
@@ -140,8 +133,8 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                                     style={{
                                         color: colors.neutral500,
                                         flexShrink: 0,
-                                        fontSize: '36px',
-                                        letterSpacing: '-0.72px',
+                                        fontSize: TYPO.body.fontSize,
+                                        letterSpacing: TYPO.body.letterSpacing,
                                     }}
                                 >
                                     Memo
@@ -151,8 +144,7 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                                         style={{
                                             color: colors.neutral950,
                                             display: 'block',
-                                            fontSize: '34px',
-                                            letterSpacing: '-0.68px',
+                                            ...TYPO.memo,
                                             overflow: 'hidden',
                                             textAlign: 'right',
                                             textOverflow: 'ellipsis',
@@ -445,44 +437,52 @@ const colors = {
     white: '#fff',
 };
 
-const headerTextStyle = {
-    fontSize: '36px',
-    letterSpacing: '-0.72px',
-    lineHeight: '37.7px',
+const SPACING = {
+    cardGap: '30px',
+    cardPadding: '24px 54px 28px',
+    columnWidth: '260px',
+    rowGap: '12px',
+    rowHeight: '66px',
+    rowPadding: '14px 0 4px',
 } as const;
+
+const TYPO = {
+    body: { fontSize: '36px', letterSpacing: '-0.72px', lineHeight: '40px' },
+    header: { fontSize: '36px', letterSpacing: '-0.72px', lineHeight: '37.7px' },
+    memo: { fontSize: '34px', letterSpacing: '-0.68px' },
+} as const;
+
+const headerTextStyle = TYPO.header;
 
 const columnLabelStyle = {
     color: colors.neutral500,
-    fontSize: '36px',
-    letterSpacing: '-0.72px',
-    lineHeight: '40px',
-    width: '260px',
+    ...TYPO.body,
+    width: SPACING.columnWidth,
 } as const;
 
 const addressStyle = {
     color: colors.emerald700,
-    fontSize: '36px',
-    letterSpacing: '-0.72px',
-    lineHeight: '40px',
-    width: '260px',
+    ...TYPO.body,
+    width: SPACING.columnWidth,
 } as const;
 
 const tableDataRowStyle = {
+    alignItems: 'center',
     borderBottom: `2px dashed ${colors.heavyMetal200}`,
     display: 'flex',
-    height: '66px',
-    padding: '8px 0',
+    height: SPACING.rowHeight,
+    padding: SPACING.rowPadding,
     width: '100%',
 } as const;
 
 const amountCellStyle = {
-    alignItems: 'flex-start',
+    alignItems: 'center',
     display: 'flex',
     flex: 1,
     justifyContent: 'flex-end',
 } as const;
 
 const amountTextStyle = {
-    fontSize: '44px',
-    lineHeight: '50px',
+    fontSize: TYPO.body.fontSize,
+    lineHeight: TYPO.body.lineHeight,
 } as const;
