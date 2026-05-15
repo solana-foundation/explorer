@@ -1,9 +1,11 @@
 'use client';
 
 import { fetchNftData } from '@entities/nft';
+import { getStakeActivation, StakeAccount } from '@features/stake';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
+import { address, createSolanaRpc } from '@solana/kit';
 import {
     AddressLookupTableAccount,
     AddressLookupTableProgram,
@@ -18,7 +20,6 @@ import { assertIsTokenProgram, TokenProgram } from '@utils/programs';
 import { ParsedAddressLookupTableAccount } from '@validators/accounts/address-lookup-table';
 import { ConfigAccount } from '@validators/accounts/config';
 import { NonceAccount } from '@validators/accounts/nonce';
-import { StakeAccount } from '@validators/accounts/stake';
 import { SysvarAccount } from '@validators/accounts/sysvar';
 import { MintAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import {
@@ -37,7 +38,6 @@ import { Logger } from '@/app/shared/lib/logger';
 import { HistoryProvider } from './history';
 import { RewardsProvider } from './rewards';
 import { TokensProvider } from './tokens';
-import { getStakeActivation } from './utils/stake';
 export { useAccountHistory } from './history';
 
 export type StakeProgramData = {
@@ -349,14 +349,15 @@ async function handleParsedAccountData(
             const parsed = create(info, StakeAccount);
             const isDelegated = parsed.type === 'delegated';
 
-            // TODO(ngundotra): replace with web3.js fix when live
-            const activation = isDelegated ? await getStakeActivation(connection, accountKey) : undefined;
+            const activation = isDelegated
+                ? await getStakeActivation(createSolanaRpc(url), address(accountKey.toBase58()))
+                : undefined;
             return {
                 activation: activation
                     ? {
                           active: Number(activation.active),
                           inactive: Number(activation.inactive),
-                          state: activation.status as any,
+                          state: activation.status,
                       }
                     : undefined,
                 parsed,

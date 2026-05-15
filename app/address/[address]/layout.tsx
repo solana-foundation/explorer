@@ -10,7 +10,6 @@ import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/acc
 import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
 import { NFTokenAccountSection } from '@components/account/nftoken/NFTokenAccountSection';
 import { NonceAccountSection } from '@components/account/NonceAccountSection';
-import { StakeAccountSection } from '@components/account/StakeAccountSection';
 import { SysvarAccountSection } from '@components/account/SysvarAccountSection';
 import { TokenAccountSection } from '@components/account/TokenAccountSection';
 import { UnknownAccountCard } from '@components/account/UnknownAccountCard';
@@ -22,6 +21,7 @@ import { Header } from '@components/Header';
 import { useRefreshAccount } from '@entities/account';
 import { useAnchorProgram } from '@entities/idl';
 import { SecurityNotification } from '@features/security-txt';
+import { StakeAccountSection } from '@features/stake';
 import {
     Account,
     AccountsProvider,

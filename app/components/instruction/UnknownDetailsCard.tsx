@@ -16,7 +16,7 @@ export function UnknownDetailsCard({
     ix: TransactionInstruction | ParsedInstruction;
     index: number;
     result: SignatureResult;
-    innerCards?: JSX.Element[];
+    innerCards?: React.ReactNode[];
     childIndex?: number;
     InstructionCardComponent?: React.FC<Parameters<typeof InstructionCard>[0]>;
 }) {

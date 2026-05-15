@@ -11,7 +11,6 @@ import { PythDetailsCard } from '@components/instruction/pyth/PythDetailsCard';
 import { isPythInstruction } from '@components/instruction/pyth/types';
 import { isSerumInstruction } from '@components/instruction/serum/types';
 import { SerumDetailsCard } from '@components/instruction/SerumDetailsCard';
-import { StakeDetailsCard } from '@components/instruction/stake/StakeDetailsCard';
 import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
 import { isTokenLendingInstruction } from '@components/instruction/token-lending/types';
@@ -28,6 +27,7 @@ import {
 } from '@components/instruction/ZkElGamalProofDetailsCard';
 import { useAnchorProgram } from '@entities/idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
+import { StakeDetailsCard } from '@features/stake';
 import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';

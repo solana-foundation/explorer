@@ -1,7 +1,7 @@
 'use client';
 
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
-import { StakeHistoryCard } from '@components/account/StakeHistoryCard';
+import { StakeHistoryCard } from '@features/stake';
 import React from 'react';
 
 type Props = Readonly<{
