@@ -1,10 +1,10 @@
-#!/usr/bin/env pnpx tsx
+#!/usr/bin/env -S pnpm exec tsx
 
 /**
  * Script to generate sitemap index with multiple sitemaps
  *
  * Usage:
- *   pnpx tsx scripts/update-sitemap.ts
+ *   pnpm exec tsx scripts/update-sitemap.ts
  *
  * Prerequisites:
  *   Run `pnpm build:info` first to generate bench/BUILD.md
