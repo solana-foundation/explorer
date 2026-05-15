@@ -37,13 +37,7 @@ function swrWrapper({ children }: { children: React.ReactNode }) {
 function renderUseProgramCanonicalMetadata() {
     return renderHook(
         () =>
-            useProgramCanonicalMetadata(
-                PROGRAM_ADDRESS,
-                IDL_SEED,
-                CUSTOM_RPC_URL,
-                Cluster.Custom,
-                /* enabled */ true,
-            ),
+            useProgramCanonicalMetadata(PROGRAM_ADDRESS, IDL_SEED, CUSTOM_RPC_URL, Cluster.Custom, /* enabled */ true),
         { wrapper: swrWrapper },
     );
 }
