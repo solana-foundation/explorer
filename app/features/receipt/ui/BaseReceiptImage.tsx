@@ -50,8 +50,8 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                             backgroundColor: colors.neutral100,
                             display: 'flex',
                             flexDirection: 'column',
-                            flexGrow: 1,
                             gap: SPACING.cardGap,
+                            minHeight: SPACING.cardMinHeight,
                             overflow: 'hidden',
                             padding: SPACING.cardPadding,
                         }}
@@ -439,6 +439,7 @@ const colors = {
 
 const SPACING = {
     cardGap: '30px',
+    cardMinHeight: '500px',
     cardPadding: '24px 54px 28px',
     columnWidth: '260px',
     rowGap: '12px',
