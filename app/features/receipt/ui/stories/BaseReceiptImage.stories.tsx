@@ -6,6 +6,8 @@ import {
     defaultReceipt,
     receiptLargeAmountWithMemo,
     receiptMultiTokenTransfer,
+    receiptMultiTokenTransferWithLongMemo,
+    receiptMultiTokenTransferWithMemo,
     receiptMultiTransfer3,
     receiptMultiTransfer9,
     receiptTokenTransferSimple,
@@ -81,6 +83,18 @@ export const MultiTransfer9: Story = {
 export const MultiTokenTransfer: Story = {
     args: {
         data: receiptMultiTokenTransfer,
+    },
+};
+
+export const MultiTokenTransferWithMemo: Story = {
+    args: {
+        data: receiptMultiTokenTransferWithMemo,
+    },
+};
+
+export const MultiTokenTransferWithLongMemo: Story = {
+    args: {
+        data: receiptMultiTokenTransferWithLongMemo,
     },
 };
 

@@ -26,7 +26,7 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
     if (!data) return <NoReceipt size={size} />;
 
     const { date, fee, memo, receiver, sender, total, transfers } = data;
-    const truncatedMemo = memo ? (memo.length > 90 ? `${memo.substring(0, 90)}...` : memo) : undefined;
+    const truncatedMemo = memo ? (memo.length > 180 ? `${memo.substring(0, 180)}...` : memo) : undefined;
     const isMulti = transfers && transfers.length > 1;
 
     if (isMulti) {
@@ -47,7 +47,7 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                     {/* Card */}
                     <div
                         style={{
-                            backgroundColor: colors.neutral100,
+                            backgroundColor: colors.white,
                             display: 'flex',
                             flexDirection: 'column',
                             gap: SPACING.cardGap,
@@ -60,20 +60,21 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                         <div
                             style={{
                                 alignItems: 'center',
+                                borderBottom: `2px solid ${colors.neutral200}`,
                                 display: 'flex',
                                 justifyContent: 'space-between',
-                                width: '100%',
+                                padding: `20px ${SPACING.cardPaddingX}`,
                             }}
                         >
-                            <div style={{ alignItems: 'center', display: 'flex', gap: '17px' }}>
+                            <div style={{ alignItems: 'center', display: 'flex', gap: '12px' }}>
                                 <Logo style={{ color: colors.heavyMetal800, height: '26px', width: '229px' }} />
-                                <span style={{ ...headerTextStyle, color: colors.neutral800 }}>Receipt</span>
+                                <span style={{ ...headerTextStyle, color: colors.heavyMetal800 }}>Receipt</span>
                             </div>
-                            <span style={{ ...headerTextStyle, color: colors.neutral500 }}>{date.utc}</span>
+                            <span style={{ ...TYPO.date, color: colors.neutral500 }}>{date.utc}</span>
                         </div>
 
                         {/* Transfer table */}
-                        <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', padding: `0 ${SPACING.cardPaddingX}`, width: '100%' }}>
                             {/* Column headers */}
                             <div
                                 style={{
@@ -127,39 +128,50 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                         </div>
 
                         {/* Memo */}
-                        {truncatedMemo && (
-                            <div style={{ alignItems: 'center', display: 'flex', gap: '125px', width: '100%' }}>
+                        <div
+                            style={{
+                                alignItems: 'baseline',
+                                display: 'flex',
+                                gap: '24px',
+                                padding: `0 ${SPACING.cardPaddingX}`,
+                                width: '100%',
+                            }}
+                        >
+                            <span
+                                style={{
+                                    color: colors.neutral500,
+                                    flexShrink: 0,
+                                    ...TYPO.memo,
+                                }}
+                            >
+                                Memo
+                            </span>
+                            <div
+                                style={{
+                                    alignItems: 'flex-end',
+                                    display: 'flex',
+                                    flex: 1,
+                                    flexDirection: 'column',
+                                    maxHeight: '108px',
+                                    overflow: 'hidden',
+                                }}
+                            >
                                 <span
                                     style={{
                                         color: colors.neutral500,
-                                        flexShrink: 0,
-                                        fontSize: TYPO.body.fontSize,
-                                        letterSpacing: TYPO.body.letterSpacing,
+                                        ...TYPO.memo,
+                                        maxWidth: '100%',
+                                        textAlign: 'right',
                                     }}
                                 >
-                                    Memo
+                                    {truncatedMemo ?? '—'}
                                 </span>
-                                <div style={{ flex: 1, overflow: 'hidden' }}>
-                                    <span
-                                        style={{
-                                            color: colors.neutral950,
-                                            display: 'block',
-                                            ...TYPO.memo,
-                                            overflow: 'hidden',
-                                            textAlign: 'right',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                        }}
-                                    >
-                                        {truncatedMemo}
-                                    </span>
-                                </div>
                             </div>
-                        )}
+                        </div>
                     </div>
 
                     {/* Receipt saw edge */}
-                    <BottomLine style={{ color: colors.neutral100 }} />
+                    <BottomLine style={{ color: colors.white }} />
                 </div>
             </div>
         );
@@ -438,9 +450,10 @@ const colors = {
 };
 
 const SPACING = {
-    cardGap: '30px',
+    cardGap: '14px',
     cardMinHeight: '500px',
-    cardPadding: '24px 54px 28px',
+    cardPadding: '0 0 28px',
+    cardPaddingX: '54px',
     columnWidth: '260px',
     rowGap: '12px',
     rowHeight: '66px',
@@ -449,8 +462,9 @@ const SPACING = {
 
 const TYPO = {
     body: { fontSize: '36px', letterSpacing: '-0.72px', lineHeight: '40px' },
-    header: { fontSize: '36px', letterSpacing: '-0.72px', lineHeight: '37.7px' },
-    memo: { fontSize: '34px', letterSpacing: '-0.68px' },
+    date: { fontSize: '28px', letterSpacing: '-0.56px', lineHeight: '32px' },
+    header: { fontSize: '35px', fontWeight: 500 },
+    memo: { fontSize: '30px', letterSpacing: '-0.6px', lineHeight: '36px' },
 } as const;
 
 const headerTextStyle = TYPO.header;
