@@ -8,13 +8,19 @@ import { getTx } from '../../api/get-tx';
 import { MULTISIG_AUTHORITY, RECEIVER, RECEIVER_2, SENDER } from '../../mocks/addresses';
 import { mockCustomFeePayerTransaction } from '../../mocks/custom-fee-payer';
 import { mockJitoOnlyTransferTransaction } from '../../mocks/jito-only-transfer';
+import { mockMixedMintTransfersTransaction } from '../../mocks/mixed-mint-transfers';
 import { mockMultipleTransfersTransaction } from '../../mocks/multiple-transfers';
 import { mockNoTransferTransaction } from '../../mocks/no-transfers';
 import { mockSingleTransferTransaction } from '../../mocks/single-transfer';
 import { mockToken2022TransferTransaction } from '../../mocks/token-2022-transfer';
 import { mockToken2022Transfer2Transaction } from '../../mocks/token-2022-transfer2';
 import { mockUsdcTransferTransaction } from '../../mocks/usdc-checked-transfer';
+import { mockUsdcFpPrecisionTransfersTransaction } from '../../mocks/usdc-fp-precision-transfers';
 import { mockUsdcJitoTransferTransaction } from '../../mocks/usdc-jito-transfer';
+import {
+    mockUsdcMultipleTransfersAddresses,
+    mockUsdcMultipleTransfersTransaction,
+} from '../../mocks/usdc-multiple-transfers';
 import { mockUsdcMultisigTransferTransaction } from '../../mocks/usdc-multisig-transfer';
 import { mockUsdcRegularTransferTransaction } from '../../mocks/usdc-regular-transfer';
 import { mockZeroTransferTransaction } from '../../mocks/zero-transfer';
@@ -386,6 +392,38 @@ describe('createReceipt', () => {
             expect(receipt.sender.address).toBe(MULTISIG_AUTHORITY.publicKey.toBase58());
             expect(receipt.receiver.address).toBe(RECEIVER.publicKey.toBase58());
         });
+
+        it('should create a multi-transfer token receipt summing totals and exposing per-instruction transfers', async () => {
+            vi.mocked(getTx).mockResolvedValueOnce({
+                cluster: Cluster.MainnetBeta,
+                transaction: mockUsdcMultipleTransfersTransaction,
+            });
+            vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
+
+            const receipt = unwrap(await createReceipt(mockSignature));
+
+            const { authority, mint, receiver1, receiver2 } = mockUsdcMultipleTransfersAddresses;
+
+            expect(receipt.total).toMatchObject({
+                formatted: '1.000841',
+                raw: 1.000841,
+                unit: 'USDC',
+            });
+            expect(receipt.sender.address).toBe(authority);
+            expect(receipt.receiver.address).toBe(receiver1);
+            expect(receipt.transfers).toHaveLength(2);
+            expect(receipt.transfers?.[0]).toMatchObject({
+                amount: { formatted: '1', raw: 1, unit: 'USDC' },
+                receiver: { address: receiver1 },
+                sender: { address: authority },
+            });
+            expect(receipt.transfers?.[1]).toMatchObject({
+                amount: { formatted: '0.000841', raw: 0.000841, unit: 'USDC' },
+                receiver: { address: receiver2 },
+                sender: { address: authority },
+            });
+            expect(getTokenInfo).toHaveBeenCalledWith(mint, Cluster.MainnetBeta);
+        });
     });
 
     describe('no transfer receipts', () => {
@@ -398,6 +436,45 @@ describe('createReceipt', () => {
             const result = await createReceipt(mockSignature);
 
             expect(result).toEqual({ kind: 'unavailable', reason: 'no-transfers' });
+        });
+    });
+
+    describe('mixed-mint token transfers', () => {
+        it('should report mixed-mint when token transfers use different mints', async () => {
+            vi.mocked(getTx).mockResolvedValueOnce({
+                cluster: Cluster.MainnetBeta,
+                transaction: mockMixedMintTransfersTransaction,
+            });
+
+            const result = await createReceipt(mockSignature);
+
+            expect(result).toEqual({ kind: 'unavailable', reason: 'mixed-mint' });
+        });
+
+        it('should sum same-mint token transfers exactly (no float drift)', async () => {
+            vi.mocked(getTx).mockResolvedValueOnce({
+                cluster: Cluster.MainnetBeta,
+                transaction: mockUsdcFpPrecisionTransfersTransaction,
+            });
+            vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
+
+            const receipt = unwrap(await createReceipt(mockSignature));
+
+            // 0.1 + 0.2 via naive float addition would yield 0.30000000000000004.
+            expect(receipt.total.raw).toBe(0.3);
+            expect(receipt.total.formatted).toBe('0.3');
+        });
+
+        it('should produce an ok receipt for same-mint multi-token transactions', async () => {
+            vi.mocked(getTx).mockResolvedValueOnce({
+                cluster: Cluster.MainnetBeta,
+                transaction: mockUsdcMultipleTransfersTransaction,
+            });
+            vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
+
+            const result = await createReceipt(mockSignature);
+
+            expect(result.kind).toBe('ok');
         });
     });
 });

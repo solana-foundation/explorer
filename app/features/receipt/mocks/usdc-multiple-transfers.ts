@@ -1,4 +1,5 @@
-import { type ParsedTransactionWithMeta, PublicKey } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
+import { ComputeBudgetProgram, type ParsedTransactionWithMeta, PublicKey } from '@solana/web3.js';
 
 const FEE_PAYER = new PublicKey('BcdwLA62UPEAvRn7AWauMUXKtYMXxdLzTPaSQg5tNaFc');
 const AUTHORITY = new PublicKey('C4E3ZZ4ymQ5wY6o7JkKMeg6Yjj6CQjnaWr6ANvF9mGYY');
@@ -8,8 +9,8 @@ const DESTINATION_TOKEN_ACCOUNT_1 = new PublicKey('DC1VbwstSDC7LVi4dmWjr5abd5BHu
 const RECEIVER_1 = new PublicKey('96WoyH3JmANSMsQLGC3MKyiGiXCymZyM9SLaWjcRrKuD');
 const USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
 
-const COMPUTE_BUDGET = new PublicKey('ComputeBudget111111111111111111111111111111');
-const TOKEN_PROGRAM = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+const COMPUTE_BUDGET = ComputeBudgetProgram.programId;
+const TOKEN_PROGRAM = TOKEN_PROGRAM_ID;
 
 /**
  * Mock transaction data captured from mainnet signature

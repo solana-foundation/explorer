@@ -12,7 +12,7 @@ import type { FormattedReceipt } from '../types';
 import { type QueryCluster } from './cluster';
 import { createSolTransferReceipt } from './sol-transfer';
 import { createTokenTransferReceipt } from './token-transfer';
-import { isSolReceipt, isTokenReceipt, type Receipt } from './types';
+import { hasTransfers, isSolReceipt, isTokenReceipt, type Receipt } from './types';
 
 export type ReceiptUnavailabilityReason = 'inner-instructions' | 'mixed-mint' | 'no-transfers';
 
@@ -52,7 +52,7 @@ export function formatReceiptData(receipt: Receipt, cluster: Cluster): Formatted
     const timestamp = receipt.date * 1000;
     const unit = isSolReceipt(receipt) ? 'SOL' : receipt.symbol || 'TOKEN';
 
-    const transfers = receipt.transfers?.length
+    const transfers = hasTransfers(receipt)
         ? receipt.transfers.map(t => ({
               amount: {
                   formatted: isSolReceipt(receipt) ? lamportsToSolString(t.total, 9) : String(t.total),

@@ -120,7 +120,7 @@ function getTokenTransferInstructions(transaction: ParsedTransactionWithMeta): T
 }
 
 type BuildTokenTransfersResult =
-    | { kind: 'ok'; transfers: Transfer[]; total: number }
+    | { kind: 'ok'; transfers: Transfer[] | undefined; total: number }
     | { kind: 'rejected'; reason: 'mixed-mint' }
     | { kind: 'not-applicable' };
 
@@ -162,7 +162,14 @@ function buildTokenTransfers(
         transfers.push({ receiver: v.receiver, sender: v.sender, total: v.total });
     }
 
-    return { kind: 'ok', total: Number(totalRaw) / Math.pow(10, decimals), transfers };
+    // Number() before division is intentional: BigInt division truncates (floor), which
+    // would discard the fractional part. Converting first keeps the fractional digits intact.
+    // Transaction token amounts are well within Number.MAX_SAFE_INTEGER for any realistic token.
+    return {
+        kind: 'ok',
+        total: Number(totalRaw) / Math.pow(10, decimals),
+        transfers: transfers.length >= 2 ? transfers : undefined,
+    };
 }
 
 function extractAmountInfo(

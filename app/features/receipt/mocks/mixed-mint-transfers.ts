@@ -1,4 +1,5 @@
-import { Keypair, type ParsedTransactionWithMeta, PublicKey } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
+import { Keypair, type ParsedTransactionWithMeta } from '@solana/web3.js';
 
 const FEE_PAYER = Keypair.generate().publicKey;
 const AUTHORITY = Keypair.generate().publicKey;
@@ -10,7 +11,7 @@ const RECEIVER_USDC = Keypair.generate().publicKey;
 const RECEIVER_BONK = Keypair.generate().publicKey;
 const USDC_MINT = Keypair.generate().publicKey;
 const BONK_MINT = Keypair.generate().publicKey;
-const TOKEN_PROGRAM = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+const TOKEN_PROGRAM = TOKEN_PROGRAM_ID;
 
 /**
  * Mock transaction containing two token transfers of distinct mints.

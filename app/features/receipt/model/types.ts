@@ -38,6 +38,10 @@ export function isTokenReceipt(receipt: Receipt): receipt is ReceiptToken {
     return receipt.type === 'token';
 }
 
+export function hasTransfers(receipt: Receipt): receipt is Receipt & { transfers: Transfer[] } {
+    return Boolean(receipt.transfers?.length);
+}
+
 export type SolTransferParsed = {
     type: 'transfer';
     info: {
