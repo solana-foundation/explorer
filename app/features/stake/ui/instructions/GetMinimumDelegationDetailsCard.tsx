@@ -4,13 +4,7 @@ import React from 'react';
 import { StakeProgramRow } from './DetailRow';
 import type { StakeCardBaseProps } from './types';
 
-export function GetMinimumDelegationDetailsCard({
-    ix,
-    index,
-    result,
-    innerCards,
-    childIndex,
-}: StakeCardBaseProps) {
+export function GetMinimumDelegationDetailsCard({ ix, index, result, innerCards, childIndex }: StakeCardBaseProps) {
     return (
         <InstructionCard
             ix={ix}

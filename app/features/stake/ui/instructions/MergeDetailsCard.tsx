@@ -5,14 +5,7 @@ import type { MergeInfo } from '../../lib/instruction-types';
 import { DetailRow, StakeProgramRow } from './DetailRow';
 import type { StakeCardProps } from './types';
 
-export function MergeDetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    innerCards,
-    childIndex,
-}: StakeCardProps<MergeInfo>) {
+export function MergeDetailsCard({ ix, index, result, info, innerCards, childIndex }: StakeCardProps<MergeInfo>) {
     return (
         <InstructionCard
             ix={ix}
@@ -27,9 +20,7 @@ export function MergeDetailsCard({
             <DetailRow label="Stake Destination" pubkey={info.destination} />
             <DetailRow label="Authority Address" pubkey={info.stakeAuthority} />
             {info.clockSysvar && <DetailRow label="Clock Sysvar" pubkey={info.clockSysvar} />}
-            {info.stakeHistorySysvar && (
-                <DetailRow label="Stake History Sysvar" pubkey={info.stakeHistorySysvar} />
-            )}
+            {info.stakeHistorySysvar && <DetailRow label="Stake History Sysvar" pubkey={info.stakeHistorySysvar} />}
         </InstructionCard>
     );
 }

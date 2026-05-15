@@ -5,14 +5,7 @@ import type { DelegateInfo } from '../../lib/instruction-types';
 import { DetailRow, StakeProgramRow } from './DetailRow';
 import type { StakeCardProps } from './types';
 
-export function DelegateDetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    innerCards,
-    childIndex,
-}: StakeCardProps<DelegateInfo>) {
+export function DelegateDetailsCard({ ix, index, result, info, innerCards, childIndex }: StakeCardProps<DelegateInfo>) {
     return (
         <InstructionCard
             ix={ix}

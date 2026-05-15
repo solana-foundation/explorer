@@ -6,14 +6,7 @@ import type { WithdrawInfo } from '../../lib/instruction-types';
 import { DetailRow, StakeProgramRow } from './DetailRow';
 import type { StakeCardProps } from './types';
 
-export function WithdrawDetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    innerCards,
-    childIndex,
-}: StakeCardProps<WithdrawInfo>) {
+export function WithdrawDetailsCard({ ix, index, result, info, innerCards, childIndex }: StakeCardProps<WithdrawInfo>) {
     return (
         <InstructionCard
             ix={ix}

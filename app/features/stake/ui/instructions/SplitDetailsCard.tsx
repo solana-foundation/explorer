@@ -6,14 +6,7 @@ import type { SplitInfo } from '../../lib/instruction-types';
 import { DetailRow, StakeProgramRow } from './DetailRow';
 import type { StakeCardProps } from './types';
 
-export function SplitDetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    innerCards,
-    childIndex,
-}: StakeCardProps<SplitInfo>) {
+export function SplitDetailsCard({ ix, index, result, info, innerCards, childIndex }: StakeCardProps<SplitInfo>) {
     return (
         <InstructionCard
             ix={ix}

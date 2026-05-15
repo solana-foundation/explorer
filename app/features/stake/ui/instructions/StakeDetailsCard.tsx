@@ -101,11 +101,7 @@ export function StakeDetailsCard(props: DetailsProps) {
             case 'authorizeWithSeed': {
                 const info = create(parsed.info, AuthorizeWithSeedInfo);
                 return (
-                    <AuthorizeWithSeedDetailsCard
-                        info={info}
-                        title="Stake Program: Authorize With Seed"
-                        {...props}
-                    />
+                    <AuthorizeWithSeedDetailsCard info={info} title="Stake Program: Authorize With Seed" {...props} />
                 );
             }
             case 'authorizeCheckedWithSeed': {
