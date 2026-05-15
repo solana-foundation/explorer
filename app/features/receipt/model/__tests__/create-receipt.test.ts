@@ -14,6 +14,7 @@ import { mockSingleTransferTransaction } from '../../mocks/single-transfer';
 import { mockToken2022TransferTransaction } from '../../mocks/token-2022-transfer';
 import { mockToken2022Transfer2Transaction } from '../../mocks/token-2022-transfer2';
 import { mockUsdcTransferTransaction } from '../../mocks/usdc-checked-transfer';
+import { mockUsdcFpPrecisionTransfersTransaction } from '../../mocks/usdc-fp-precision-transfers';
 import { mockUsdcJitoTransferTransaction } from '../../mocks/usdc-jito-transfer';
 import {
     mockUsdcMultipleTransfersAddresses,
@@ -416,6 +417,20 @@ describe('createReceipt', () => {
             const result = await createReceipt(mockSignature);
 
             expect(result).toEqual({ kind: 'unavailable', reason: 'mixed-mint' });
+        });
+
+        it('should sum same-mint token transfers exactly (no float drift)', async () => {
+            vi.mocked(getTx).mockResolvedValueOnce({
+                cluster: Cluster.MainnetBeta,
+                transaction: mockUsdcFpPrecisionTransfersTransaction,
+            });
+            vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
+
+            const receipt = unwrap(await createReceipt(mockSignature));
+
+            // 0.1 + 0.2 via naive float addition would yield 0.30000000000000004.
+            expect(receipt.total.raw).toBe(0.3);
+            expect(receipt.total.formatted).toBe('0.3');
         });
 
         it('should produce an ok receipt for same-mint multi-token transactions', async () => {

@@ -82,13 +82,21 @@ export async function createTokenTransferReceipt(
     }
 
     let transfers: Transfer[] | undefined;
+    let total = validated.total;
+
     if (instructions.length > 1) {
-        const built = buildTokenTransfers(transaction, instructions, validated.mint);
+        const primaryAmount = extractAmountInfo(primary.parsed, transaction);
+        if (!primaryAmount) return { kind: 'not-applicable' };
+
+        const built = buildTokenTransfers(transaction, instructions, {
+            amount: primaryAmount,
+            transfer: { receiver: validated.receiver, sender: validated.sender, total: validated.total },
+            validated,
+        });
         if (built.kind !== 'ok') return built;
         transfers = built.transfers;
+        total = built.total;
     }
-
-    const total = transfers ? transfers.reduce((sum, t) => sum + t.total, 0) : validated.total;
 
     const tokenInfo = await getTokenInfo(validated.mint);
     return {
@@ -112,17 +120,32 @@ function getTokenTransferInstructions(transaction: ParsedTransactionWithMeta): T
 }
 
 type BuildTokenTransfersResult =
-    | { kind: 'ok'; transfers: Transfer[] }
+    | { kind: 'ok'; transfers: Transfer[]; total: number }
     | { kind: 'rejected'; reason: 'mixed-mint' }
     | { kind: 'not-applicable' };
 
+type AmountInfo = { rawAmount: string; decimals: number };
+
+type PrimaryToken = {
+    amount: AmountInfo;
+    transfer: Transfer;
+    validated: { mint: string };
+};
+
+// Sums token amounts via BigInt over base units to avoid float drift (e.g. 0.1 + 0.2),
+// then divides by 10^decimals once. Caller guarantees all instructions share a mint
+// (and therefore the same decimals).
 function buildTokenTransfers(
     transaction: ParsedTransactionWithMeta,
     instructions: TokenTransferInstruction[],
-    expectedMint: string,
+    primary: PrimaryToken,
 ): BuildTokenTransfersResult {
-    const result: Transfer[] = [];
-    for (const [i, instr] of instructions.entries()) {
+    const transfers: Transfer[] = [primary.transfer];
+    let totalRaw = BigInt(primary.amount.rawAmount);
+    const decimals = primary.amount.decimals;
+
+    for (let i = 1; i < instructions.length; i++) {
+        const instr = instructions[i];
         const payload = extractTokenTransferPayload(transaction, instr);
         const [err, v] = validate(payload, TokenTransferPayload, { coerce: true });
         if (err) {
@@ -130,10 +153,31 @@ function buildTokenTransfers(
             return { kind: 'not-applicable' };
         }
         // Mixed-mint receipts are out of scope: a single total only makes sense for one mint.
-        if (v.mint !== expectedMint) return { kind: 'rejected', reason: 'mixed-mint' };
-        result.push({ receiver: v.receiver, sender: v.sender, total: v.total });
+        if (v.mint !== primary.validated.mint) return { kind: 'rejected', reason: 'mixed-mint' };
+
+        const amount = extractAmountInfo(instr.parsed, transaction);
+        if (!amount) return { kind: 'not-applicable' };
+
+        totalRaw += BigInt(amount.rawAmount);
+        transfers.push({ receiver: v.receiver, sender: v.sender, total: v.total });
     }
-    return { kind: 'ok', transfers: result };
+
+    return { kind: 'ok', total: Number(totalRaw) / Math.pow(10, decimals), transfers };
+}
+
+function extractAmountInfo(
+    parsed: TokenTransferParsed,
+    transaction: ParsedTransactionWithMeta,
+): AmountInfo | undefined {
+    if (parsed.type === 'transferChecked' || parsed.type === 'transfer2') {
+        const tokenAmount = parsed.info.tokenAmount;
+        if (!tokenAmount?.amount || tokenAmount.decimals === undefined) return undefined;
+        return { decimals: tokenAmount.decimals, rawAmount: tokenAmount.amount };
+    }
+    if (!parsed.info.amount) return undefined;
+    const decimals = getTokenDecimals(transaction, (parsed.info.destination || parsed.info.source)?.toString());
+    if (decimals === undefined) return undefined;
+    return { decimals, rawAmount: parsed.info.amount };
 }
 
 function isTokenTransfer(instruction: ParsedInstruction | PartiallyDecodedInstruction): boolean {
