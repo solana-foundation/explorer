@@ -9,7 +9,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import type { TokenInfo } from '../api/get-token-info';
 import { extractMemoFromTransaction } from './memo';
 import { TokenTransferPayload } from './schemas';
-import { isParsedInstruction, type ReceiptToken } from './types';
+import { isParsedInstruction, type ReceiptToken, type Transfer } from './types';
 
 type TokenTransferParsed =
     | {
@@ -60,39 +60,80 @@ function isMultisigTransfer(info: Record<string, unknown>): info is MultisigTran
     return 'multisigAuthority' in info && typeof info.multisigAuthority === 'string';
 }
 
+export type TokenReceiptOutcome =
+    | { kind: 'ok'; receipt: ReceiptToken }
+    | { kind: 'rejected'; reason: 'mixed-mint' }
+    | { kind: 'not-applicable' };
+
 export async function createTokenTransferReceipt(
     transaction: ParsedTransactionWithMeta,
     getTokenInfo: (mint: string | undefined) => Promise<TokenInfo | undefined>,
-): Promise<ReceiptToken | undefined> {
-    const instruction = getSingleTokenTransferInstruction(transaction);
-    if (!instruction) return undefined;
+): Promise<TokenReceiptOutcome> {
+    const instructions = getTokenTransferInstructions(transaction);
+    if (instructions.length === 0) return { kind: 'not-applicable' };
 
-    const raw = extractTokenTransferPayload(transaction, instruction);
+    const primary = instructions[0];
+    const raw = extractTokenTransferPayload(transaction, primary);
 
     const [err, validated] = validate(raw, TokenTransferPayload, { coerce: true });
     if (err) {
-        Logger.error(err);
-        return undefined;
+        Logger.error(err, { instructionIndex: 0 });
+        return { kind: 'not-applicable' };
     }
+
+    let transfers: Transfer[] | undefined;
+    if (instructions.length > 1) {
+        const built = buildTokenTransfers(transaction, instructions, validated.mint);
+        if (built.kind !== 'ok') return built;
+        transfers = built.transfers;
+    }
+
+    const total = transfers ? transfers.reduce((sum, t) => sum + t.total, 0) : validated.total;
 
     const tokenInfo = await getTokenInfo(validated.mint);
     return {
-        ...validated,
-        logoURI: tokenInfo?.logoURI,
-        memo: raw.memo,
-        symbol: tokenInfo?.symbol,
-        type: 'token',
+        kind: 'ok',
+        receipt: {
+            ...validated,
+            logoURI: tokenInfo?.logoURI,
+            memo: raw.memo,
+            symbol: tokenInfo?.symbol,
+            total,
+            transfers,
+            type: 'token',
+        },
     };
 }
 
-// We support only single token transfer instruction per transaction by design.
-function getSingleTokenTransferInstruction(
-    transaction: ParsedTransactionWithMeta,
-): TokenTransferInstruction | undefined {
-    const instructions = transaction.transaction.message.instructions.filter(
-        (instruction): instruction is TokenTransferInstruction => isTokenTransfer(instruction),
+function getTokenTransferInstructions(transaction: ParsedTransactionWithMeta): TokenTransferInstruction[] {
+    return transaction.transaction.message.instructions.filter((instruction): instruction is TokenTransferInstruction =>
+        isTokenTransfer(instruction),
     );
-    return instructions.length === 1 ? instructions[0] : undefined;
+}
+
+type BuildTokenTransfersResult =
+    | { kind: 'ok'; transfers: Transfer[] }
+    | { kind: 'rejected'; reason: 'mixed-mint' }
+    | { kind: 'not-applicable' };
+
+function buildTokenTransfers(
+    transaction: ParsedTransactionWithMeta,
+    instructions: TokenTransferInstruction[],
+    expectedMint: string,
+): BuildTokenTransfersResult {
+    const result: Transfer[] = [];
+    for (const [i, instr] of instructions.entries()) {
+        const payload = extractTokenTransferPayload(transaction, instr);
+        const [err, v] = validate(payload, TokenTransferPayload, { coerce: true });
+        if (err) {
+            Logger.error(err, { instructionIndex: i });
+            return { kind: 'not-applicable' };
+        }
+        // Mixed-mint receipts are out of scope: a single total only makes sense for one mint.
+        if (v.mint !== expectedMint) return { kind: 'rejected', reason: 'mixed-mint' };
+        result.push({ receiver: v.receiver, sender: v.sender, total: v.total });
+    }
+    return { kind: 'ok', transfers: result };
 }
 
 function isTokenTransfer(instruction: ParsedInstruction | PartiallyDecodedInstruction): boolean {

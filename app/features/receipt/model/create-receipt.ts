@@ -14,44 +14,55 @@ import { createSolTransferReceipt } from './sol-transfer';
 import { createTokenTransferReceipt } from './token-transfer';
 import { isSolReceipt, isTokenReceipt, type Receipt } from './types';
 
-export async function createReceipt(signature: string, cluster?: QueryCluster): Promise<FormattedReceipt | undefined> {
+export type ReceiptUnavailabilityReason = 'inner-instructions' | 'mixed-mint' | 'no-transfers';
+
+export type ReceiptResult =
+    | { kind: 'ok'; receipt: FormattedReceipt }
+    | { kind: 'unavailable'; reason: ReceiptUnavailabilityReason };
+
+export async function createReceipt(signature: string, cluster?: QueryCluster): Promise<ReceiptResult> {
     const data = await getTx(signature, undefined, cluster);
     return extractReceiptData(data.transaction, data.cluster);
 }
 
-export async function extractReceiptData(
-    tx: ParsedTransactionWithMeta,
-    cluster: Cluster,
-): Promise<FormattedReceipt | undefined> {
-    if (tx.meta?.innerInstructions?.length) return undefined;
+export async function extractReceiptData(tx: ParsedTransactionWithMeta, cluster: Cluster): Promise<ReceiptResult> {
+    if (tx.meta?.innerInstructions?.length) {
+        return { kind: 'unavailable', reason: 'inner-instructions' };
+    }
 
-    let receipt: Receipt | undefined = await createTokenTransferReceipt(tx, (mint: string | undefined) =>
+    const tokenOutcome = await createTokenTransferReceipt(tx, (mint: string | undefined) =>
         getParsedTokenInfo(mint, cluster),
     );
-    if (!receipt) {
-        receipt = createSolTransferReceipt(tx);
+    if (tokenOutcome.kind === 'ok') {
+        return { kind: 'ok', receipt: formatReceiptData(tokenOutcome.receipt, cluster) };
     }
-    if (!receipt) return undefined;
+    if (tokenOutcome.kind === 'rejected') {
+        return { kind: 'unavailable', reason: tokenOutcome.reason };
+    }
 
-    return formatReceiptData(receipt, cluster);
+    const solReceipt = createSolTransferReceipt(tx);
+    if (solReceipt) {
+        return { kind: 'ok', receipt: formatReceiptData(solReceipt, cluster) };
+    }
+
+    return { kind: 'unavailable', reason: 'no-transfers' };
 }
 
 export function formatReceiptData(receipt: Receipt, cluster: Cluster): FormattedReceipt {
     const timestamp = receipt.date * 1000;
     const unit = isSolReceipt(receipt) ? 'SOL' : receipt.symbol || 'TOKEN';
 
-    const transfers =
-        isSolReceipt(receipt) && receipt.transfers?.length
-            ? receipt.transfers.map(t => ({
-                  amount: {
-                      formatted: lamportsToSolString(t.total, 9),
-                      raw: t.total,
-                      unit: 'SOL' as const,
-                  },
-                  receiver: { address: t.receiver, truncated: truncateAddress(t.receiver, 5) },
-                  sender: { address: t.sender, truncated: truncateAddress(t.sender, 5) },
-              }))
-            : undefined;
+    const transfers = receipt.transfers?.length
+        ? receipt.transfers.map(t => ({
+              amount: {
+                  formatted: isSolReceipt(receipt) ? lamportsToSolString(t.total, 9) : String(t.total),
+                  raw: t.total,
+                  unit,
+              },
+              receiver: { address: t.receiver, truncated: truncateAddress(t.receiver, 5) },
+              sender: { address: t.sender, truncated: truncateAddress(t.sender, 5) },
+          }))
+        : undefined;
 
     const base = {
         date: {

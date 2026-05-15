@@ -18,10 +18,16 @@ import { mockUsdcJitoTransferTransaction } from '../../mocks/usdc-jito-transfer'
 import { mockUsdcMultisigTransferTransaction } from '../../mocks/usdc-multisig-transfer';
 import { mockUsdcRegularTransferTransaction } from '../../mocks/usdc-regular-transfer';
 import { mockZeroTransferTransaction } from '../../mocks/zero-transfer';
-import { createReceipt } from '../create-receipt';
+import { createReceipt, type ReceiptResult } from '../create-receipt';
 
 vi.mock('../../api/get-tx');
 vi.mock('../../api/get-token-info');
+
+function unwrap(result: ReceiptResult) {
+    expect(result.kind).toBe('ok');
+    if (result.kind !== 'ok') throw new Error(`expected ok, got unavailable: ${result.reason}`);
+    return result.receipt;
+}
 
 describe('createReceipt', () => {
     const mockSignature = '5yKzCuw1e9d58HcnzSL31cczfXUux2H4Ga5TAR2RcQLE5W8BiTAC9x9MvhLtc4h99sC9XxLEAjhrXyfKezdMkZFV';
@@ -42,9 +48,9 @@ describe('createReceipt', () => {
                 transaction: mockSingleTransferTransaction,
             });
 
-            const result = await createReceipt(mockSignature);
+            const receipt = unwrap(await createReceipt(mockSignature));
 
-            expect(result).toMatchObject({
+            expect(receipt).toMatchObject({
                 fee: {
                     formatted: '0.000005',
                     raw: 5000,
@@ -62,9 +68,9 @@ describe('createReceipt', () => {
                     unit: 'SOL',
                 },
             });
-            expect(result?.date).toBeDefined();
-            expect(result?.date.timestamp).toBeDefined();
-            expect(result?.date.utc).toBeDefined();
+            expect(receipt.date).toBeDefined();
+            expect(receipt.date.timestamp).toBeDefined();
+            expect(receipt.date.utc).toBeDefined();
         });
 
         it('should create a formatted SOL receipt for multiple transfers', async () => {
@@ -73,9 +79,9 @@ describe('createReceipt', () => {
                 transaction: mockMultipleTransfersTransaction,
             });
 
-            const result = await createReceipt(mockSignature);
+            const receipt = unwrap(await createReceipt(mockSignature));
 
-            expect(result).toMatchObject({
+            expect(receipt).toMatchObject({
                 kind: 'sol',
                 total: { formatted: '0.14', raw: 140000000, unit: 'SOL' },
                 transfers: [
@@ -98,7 +104,7 @@ describe('createReceipt', () => {
             });
         });
 
-        it('should return null for zero SOL transfer', async () => {
+        it('should report no-transfers for zero SOL transfer', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
                 cluster: Cluster.MainnetBeta,
                 transaction: mockZeroTransferTransaction,
@@ -106,7 +112,7 @@ describe('createReceipt', () => {
 
             const result = await createReceipt(mockSignature);
 
-            expect(result).toBeUndefined();
+            expect(result).toEqual({ kind: 'unavailable', reason: 'no-transfers' });
         });
 
         it('should handle custom fee payer transaction', async () => {
@@ -115,9 +121,9 @@ describe('createReceipt', () => {
                 transaction: mockCustomFeePayerTransaction,
             });
 
-            const result = await createReceipt(mockSignature);
+            const receipt = unwrap(await createReceipt(mockSignature));
 
-            expect(result).toMatchObject({
+            expect(receipt).toMatchObject({
                 fee: {
                     formatted: '0.00001',
                     raw: 10000,
@@ -142,9 +148,9 @@ describe('createReceipt', () => {
                 transaction: mockSingleTransferTransaction,
             });
 
-            const result = await createReceipt(mockSignature);
+            const receipt = unwrap(await createReceipt(mockSignature));
 
-            expect(result).toMatchObject({
+            expect(receipt).toMatchObject({
                 network: 'Devnet',
             });
         });
@@ -155,9 +161,9 @@ describe('createReceipt', () => {
                 transaction: mockUsdcJitoTransferTransaction,
             });
 
-            const result = await createReceipt(mockSignature);
+            const receipt = unwrap(await createReceipt(mockSignature));
 
-            expect(result).toMatchObject({
+            expect(receipt).toMatchObject({
                 fee: {
                     formatted: '0.000005',
                     raw: 5000,
@@ -177,7 +183,7 @@ describe('createReceipt', () => {
             });
         });
 
-        it('should return undefined for Jito-only SOL transfer', async () => {
+        it('should report no-transfers for Jito-only SOL transfer', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
                 cluster: Cluster.MainnetBeta,
                 transaction: mockJitoOnlyTransferTransaction,
@@ -185,7 +191,7 @@ describe('createReceipt', () => {
 
             const result = await createReceipt(mockSignature);
 
-            expect(result).toBeUndefined();
+            expect(result).toEqual({ kind: 'unavailable', reason: 'no-transfers' });
         });
     });
 
@@ -202,9 +208,9 @@ describe('createReceipt', () => {
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
 
-            const result = await createReceipt(mockSignature);
+            const receipt = unwrap(await createReceipt(mockSignature));
 
-            expect(result).toMatchObject({
+            expect(receipt).toMatchObject({
                 fee: {
                     formatted: '0.000005',
                     raw: 5000,
@@ -239,9 +245,9 @@ describe('createReceipt', () => {
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
 
-            const result = await createReceipt(mockSignature);
+            const receipt = unwrap(await createReceipt(mockSignature));
 
-            expect(result).toMatchObject({
+            expect(receipt).toMatchObject({
                 fee: {
                     formatted: '0.000005',
                     raw: 5000,
@@ -267,9 +273,9 @@ describe('createReceipt', () => {
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce(undefined);
 
-            const result = await createReceipt(mockSignature);
+            const receipt = unwrap(await createReceipt(mockSignature));
 
-            expect(result).toMatchObject({
+            expect(receipt).toMatchObject({
                 total: {
                     unit: 'TOKEN',
                 },
@@ -283,9 +289,9 @@ describe('createReceipt', () => {
             });
             vi.mocked(getTokenInfo).mockRejectedValueOnce(new Error('Token info not found'));
 
-            const result = await createReceipt(mockSignature);
+            const receipt = unwrap(await createReceipt(mockSignature));
 
-            expect(result).toMatchObject({
+            expect(receipt).toMatchObject({
                 total: {
                     unit: 'TOKEN',
                 },
@@ -304,9 +310,9 @@ describe('createReceipt', () => {
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
 
-            const result = await createReceipt(mockSignature);
+            const receipt = unwrap(await createReceipt(mockSignature));
 
-            expect(result).toMatchObject({
+            expect(receipt).toMatchObject({
                 fee: {
                     formatted: '0.000005',
                     raw: 5000,
@@ -342,9 +348,9 @@ describe('createReceipt', () => {
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
 
-            const result = await createReceipt(mockSignature);
+            const receipt = unwrap(await createReceipt(mockSignature));
 
-            expect(result).toMatchObject({
+            expect(receipt).toMatchObject({
                 fee: {
                     formatted: '0.000005',
                     raw: 5000,
@@ -375,16 +381,15 @@ describe('createReceipt', () => {
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
 
-            const result = await createReceipt(mockSignature);
+            const receipt = unwrap(await createReceipt(mockSignature));
 
-            expect(result).toBeDefined();
-            expect(result?.sender.address).toBe(MULTISIG_AUTHORITY.publicKey.toBase58());
-            expect(result?.receiver.address).toBe(RECEIVER.publicKey.toBase58());
+            expect(receipt.sender.address).toBe(MULTISIG_AUTHORITY.publicKey.toBase58());
+            expect(receipt.receiver.address).toBe(RECEIVER.publicKey.toBase58());
         });
     });
 
     describe('no transfer receipts', () => {
-        it('should return null for transaction with no transfers', async () => {
+        it('should report no-transfers for transaction with no transfers', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
                 cluster: Cluster.MainnetBeta,
                 transaction: mockNoTransferTransaction,
@@ -392,7 +397,7 @@ describe('createReceipt', () => {
 
             const result = await createReceipt(mockSignature);
 
-            expect(result).toBeUndefined();
+            expect(result).toEqual({ kind: 'unavailable', reason: 'no-transfers' });
         });
     });
 });
