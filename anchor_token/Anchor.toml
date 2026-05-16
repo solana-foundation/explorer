@@ -1,0 +1,9 @@
+[programs.localnet]
+anchor_token = "Anchor111111111111111111111111111111111111111"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"

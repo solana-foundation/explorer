@@ -1,0 +1,13 @@
+[package]
+name = "anchor_token"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "anchor_token"
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+anchor-lang = "0.28.0"
+anchor-spl = "0.28.0"
+mpl-token-metadata = "1.10.0"
