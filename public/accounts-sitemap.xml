@@ -353,6 +353,11 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://explorer.solana.com/address/ZkE1Gama1Proof11111111111111111111111111111</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://explorer.solana.com/address/auctxRXPeJoc4817jDhf4HbjnhEcr1cCXenosMhK5R8</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>

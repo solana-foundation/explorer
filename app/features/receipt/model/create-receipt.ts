@@ -23,6 +23,8 @@ export async function extractReceiptData(
     tx: ParsedTransactionWithMeta,
     cluster: Cluster,
 ): Promise<FormattedReceipt | undefined> {
+    if (tx.meta?.innerInstructions?.length) return undefined;
+
     let receipt: Receipt | undefined = await createTokenTransferReceipt(tx, (mint: string | undefined) =>
         getParsedTokenInfo(mint, cluster),
     );
@@ -37,6 +39,19 @@ export async function extractReceiptData(
 export function formatReceiptData(receipt: Receipt, cluster: Cluster): FormattedReceipt {
     const timestamp = receipt.date * 1000;
     const unit = isSolReceipt(receipt) ? 'SOL' : receipt.symbol || 'TOKEN';
+
+    const transfers =
+        isSolReceipt(receipt) && receipt.transfers?.length
+            ? receipt.transfers.map(t => ({
+                  amount: {
+                      formatted: lamportsToSolString(t.total, 9),
+                      raw: t.total,
+                      unit: 'SOL' as const,
+                  },
+                  receiver: { address: t.receiver, truncated: truncateAddress(t.receiver, 5) },
+                  sender: { address: t.sender, truncated: truncateAddress(t.sender, 5) },
+              }))
+            : undefined;
 
     const base = {
         date: {
@@ -63,6 +78,7 @@ export function formatReceiptData(receipt: Receipt, cluster: Cluster): Formatted
             raw: receipt.total,
             unit,
         },
+        transfers,
     };
     if (isTokenReceipt(receipt)) {
         return { ...base, kind: 'token' as const, mint: receipt.mint, symbol: receipt.symbol };

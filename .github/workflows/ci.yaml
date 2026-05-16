@@ -127,7 +127,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate sitemap
-        run: pnpx tsx scripts/update-sitemap.ts
+        run: pnpm exec tsx scripts/update-sitemap.ts
 
       - name: Check for sitemap drift
         run: git diff --exit-code public/sitemap.xml public/default-sitemap.xml public/accounts-sitemap.xml

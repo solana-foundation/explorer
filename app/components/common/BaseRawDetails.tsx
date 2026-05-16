@@ -21,7 +21,7 @@ function RawDetailsLoader() {
  *  VersionedMessage is optional as it will be present at inspector page only.
  */
 export function BaseRawDetails({ ix }: { ix?: TransactionInstruction }) {
-    if (!ix || ix.keys.length === 0) {
+    if (!ix) {
         return <RawDetailsLoader />;
     }
     return <BaseTransactionInstructionRawDetails ix={ix} />;

@@ -18,13 +18,160 @@ type BaseReceiptImageProps = {
     };
 };
 
+const MAX_VISIBLE_TRANSFERS = 2;
+
 export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
     const size = options?.size || IMAGE_SIZE;
 
     if (!data) return <NoReceipt size={size} />;
 
-    const { sender, receiver, date, memo, fee, total } = data;
-    const truncatedMemo = memo ? (memo.length > 90 ? memo.substring(0, 90) + '...' : memo) : undefined;
+    const { date, fee, memo, receiver, sender, total, transfers } = data;
+    const truncatedMemo = memo ? (memo.length > 90 ? `${memo.substring(0, 90)}...` : memo) : undefined;
+    const isMulti = transfers && transfers.length > 1;
+
+    if (isMulti) {
+        const visibleTransfers = transfers.slice(0, MAX_VISIBLE_TRANSFERS);
+        const hiddenCount = Math.max(0, transfers.length - MAX_VISIBLE_TRANSFERS);
+
+        return (
+            <div
+                style={{
+                    backgroundImage: `radial-gradient(ellipse at 50% 50%, ${colors.emerald700} 0%, #EBEBEB 90%)`,
+                    display: 'flex',
+                    height: '100%',
+                    padding: '0 76px 12px',
+                    width: '100%',
+                }}
+            >
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    {/* Card */}
+                    <div
+                        style={{
+                            backgroundColor: colors.neutral100,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            flexGrow: 1,
+                            gap: '24px',
+                            overflow: 'hidden',
+                            padding: '24px 54px 28px',
+                        }}
+                    >
+                        {/* Header: logo + "Receipt" on left, date on right */}
+                        <div
+                            style={{
+                                alignItems: 'center',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                width: '100%',
+                            }}
+                        >
+                            <div style={{ alignItems: 'center', display: 'flex', gap: '17px' }}>
+                                <Logo style={{ color: colors.heavyMetal800, height: '26px', width: '229px' }} />
+                                <span style={{ ...headerTextStyle, color: colors.neutral800 }}>Receipt</span>
+                            </div>
+                            <span style={{ ...headerTextStyle, color: colors.neutral500 }}>{date.utc}</span>
+                        </div>
+
+                        {/* Transfer table */}
+                        <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                            {/* Column headers */}
+                            <div
+                                style={{
+                                    borderBottom: `2px dashed ${colors.heavyMetal200}`,
+                                    display: 'flex',
+                                    gap: '12px',
+                                    padding: '8px 0',
+                                    width: '100%',
+                                }}
+                            >
+                                <span style={columnLabelStyle}>Sender</span>
+                                <span style={columnLabelStyle}>Receiver</span>
+                                <div style={{ display: 'flex', flex: 1, justifyContent: 'flex-end' }}>
+                                    <span style={{ ...columnLabelStyle, width: 'auto' }}>Amount</span>
+                                </div>
+                            </div>
+
+                            {/* Transfer rows */}
+                            {visibleTransfers.map((transfer, i) => (
+                                <div
+                                    key={`${transfer.sender.address}-${i}`}
+                                    style={{ ...tableDataRowStyle, gap: '12px' }}
+                                >
+                                    <span style={addressStyle}>{transfer.sender.truncated}</span>
+                                    <span style={addressStyle}>{transfer.receiver.truncated}</span>
+                                    <div style={amountCellStyle}>
+                                        <AmountDisplay amount={transfer.amount.formatted} unit={transfer.amount.unit} />
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* "N more" row */}
+                            {hiddenCount > 0 && (
+                                <div style={tableDataRowStyle}>
+                                    <div style={amountCellStyle}>
+                                        <span
+                                            style={{
+                                                color: colors.neutral500,
+                                                fontSize: '44px',
+                                                letterSpacing: '-0.88px',
+                                                lineHeight: '50px',
+                                            }}
+                                        >
+                                            and {hiddenCount} more
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Fee row */}
+                            <div style={{ ...tableDataRowStyle, gap: '12px' }}>
+                                <span style={{ ...columnLabelStyle }}>Fee</span>
+                                <div style={{ width: '260px' }} />
+                                <div style={amountCellStyle}>
+                                    <AmountDisplay amount={fee.formatted} unit="SOL" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Memo */}
+                        {truncatedMemo && (
+                            <div style={{ alignItems: 'center', display: 'flex', gap: '125px', width: '100%' }}>
+                                <span
+                                    style={{
+                                        color: colors.neutral500,
+                                        flexShrink: 0,
+                                        fontSize: '36px',
+                                        letterSpacing: '-0.72px',
+                                    }}
+                                >
+                                    Memo
+                                </span>
+                                <div style={{ flex: 1, overflow: 'hidden' }}>
+                                    <span
+                                        style={{
+                                            color: colors.neutral950,
+                                            display: 'block',
+                                            fontSize: '34px',
+                                            letterSpacing: '-0.68px',
+                                            overflow: 'hidden',
+                                            textAlign: 'right',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        {truncatedMemo}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Receipt saw edge */}
+                    <BottomLine style={{ color: colors.neutral100 }} />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div
@@ -84,13 +231,7 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                                         {total.formatted} {total.unit}
                                     </span>
                                     <span style={{ color: colors.neutral500, lineHeight: '1em' }}>to</span>
-                                    <span
-                                        style={{
-                                            color: colors.emerald700,
-                                        }}
-                                    >
-                                        {receiver.truncated}
-                                    </span>
+                                    <span style={{ color: colors.emerald700 }}>{receiver.truncated}</span>
                                 </div>
                             }
                         />
@@ -127,7 +268,7 @@ export function BaseReceiptImage({ data, options }: BaseReceiptImageProps) {
                         )}
                     </div>
 
-                    <Footer fee={fee.formatted} total={total.formatted} />
+                    <Footer fee={fee.formatted} />
                 </div>
 
                 <BottomLine style={{ color: colors.white }} />
@@ -147,31 +288,15 @@ function Header() {
                 padding: '20px 54px',
             }}
         >
-            <div
-                style={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    gap: '12px',
-                }}
-            >
+            <div style={{ alignItems: 'center', display: 'flex', gap: '12px' }}>
                 <Logo style={{ color: colors.heavyMetal800, height: '26px', width: '229px' }} />
-
-                <span
-                    style={{
-                        color: colors.heavyMetal800,
-                        fontSize: '35px',
-                        fontWeight: 500,
-                    }}
-                >
-                    Receipt
-                </span>
+                <span style={{ color: colors.heavyMetal800, fontSize: '35px', fontWeight: 500 }}>Receipt</span>
             </div>
         </div>
     );
 }
 
-function Footer({ fee, total }: { fee?: string; total?: string }) {
-    if (!total) return null;
+function Footer({ fee }: { fee: string }) {
     return (
         <div
             style={{
@@ -235,17 +360,30 @@ function ListItem({
 }
 
 function Description({ text }: { text: string }) {
+    return <span style={{ color: colors.neutral500, fontSize: '36px', lineHeight: '1em' }}>{text}</span>;
+}
+
+function AmountDisplay({ amount, unit }: { amount: string; unit: string }) {
+    const { bright, dim } = splitAmount(amount);
     return (
-        <span
-            style={{
-                color: colors.neutral500,
-                fontSize: '36px',
-                lineHeight: '1em',
-            }}
-        >
-            {text}
+        <span style={{ alignItems: 'center', display: 'flex', gap: '8px' }}>
+            <span style={{ display: 'flex' }}>
+                {dim && <span style={{ ...amountTextStyle, color: colors.neutral500 }}>{dim}</span>}
+                <span style={{ ...amountTextStyle, color: colors.neutral950 }}>{bright}</span>
+            </span>
+            <span style={{ ...amountTextStyle, color: colors.neutral500 }}>{unit}</span>
         </span>
     );
+}
+
+// Split "0.000123" into dim="0.00" + bright="123". Non-zero integer parts are unsplit.
+// eslint-disable-next-line no-restricted-syntax -- way to separate the leading zero fraction from the first significant digit
+const AMOUNT_SPLIT_RE = /^(0\.0*)([1-9].*)/;
+
+function splitAmount(formatted: string): { bright: string; dim: string } {
+    const match = formatted.match(AMOUNT_SPLIT_RE);
+    if (!match) return { bright: formatted, dim: '' };
+    return { bright: match[2], dim: match[1] };
 }
 
 function NoReceipt({ size }: { size: { width: number; height: number } }) {
@@ -294,13 +432,57 @@ function NoReceipt({ size }: { size: { width: number; height: number } }) {
 }
 
 const colors = {
-    destructive: '#f765fb',
     emerald700: '#0ea476',
     emerald900: '#053D2C',
+    heavyMetal200: '#9faea7',
     heavyMetal800: '#29302c',
+    neutral100: '#f5f5f5',
     neutral200: '#e5e5e5',
     neutral500: '#737373',
+    neutral800: '#262626',
+    neutral950: '#0a0a0a',
     outerSpace900: '#1d2322',
-    outerSpace950: '#101413',
     white: '#fff',
 };
+
+const headerTextStyle = {
+    fontSize: '36px',
+    letterSpacing: '-0.72px',
+    lineHeight: '37.7px',
+} as const;
+
+const columnLabelStyle = {
+    color: colors.neutral500,
+    fontSize: '36px',
+    letterSpacing: '-0.72px',
+    lineHeight: '40px',
+    width: '260px',
+} as const;
+
+const addressStyle = {
+    color: colors.emerald700,
+    fontSize: '36px',
+    letterSpacing: '-0.72px',
+    lineHeight: '40px',
+    width: '260px',
+} as const;
+
+const tableDataRowStyle = {
+    borderBottom: `2px dashed ${colors.heavyMetal200}`,
+    display: 'flex',
+    height: '66px',
+    padding: '8px 0',
+    width: '100%',
+} as const;
+
+const amountCellStyle = {
+    alignItems: 'flex-start',
+    display: 'flex',
+    flex: 1,
+    justifyContent: 'flex-end',
+} as const;
+
+const amountTextStyle = {
+    fontSize: '44px',
+    lineHeight: '50px',
+} as const;

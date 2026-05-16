@@ -4,7 +4,8 @@ import { array, boolean, is, optional, string, type } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
+import { CACHE_HEADERS, ERROR_CACHE_HEADERS, NO_STORE_HEADERS } from '../../config';
+import { fetchUpstream, isTimeoutError } from '../../upstream';
 
 const JupiterTokenSchema = type({
     id: string(),
@@ -35,7 +36,7 @@ export async function GET(_request: Request, props: Params) {
     }
 
     try {
-        const response = await fetch(`https://api.jup.ag/tokens/v2/search?query=${mintAddress}`, {
+        const response = await fetchUpstream(`https://api.jup.ag/tokens/v2/search?query=${mintAddress}`, {
             headers: {
                 'Content-Type': 'application/json',
                 'x-api-key': JUPITER_API_KEY,
@@ -63,6 +64,13 @@ export async function GET(_request: Request, props: Params) {
         const token = data.find(t => t.id === mintAddress);
         return NextResponse.json({ verified: token?.isVerified === true }, { headers: CACHE_HEADERS });
     } catch (error) {
+        if (isTimeoutError(error)) {
+            Logger.warn('[api:jupiter] Upstream request timed out', { mintAddress, sentry: true });
+            return NextResponse.json(
+                { error: 'Upstream request timed out' },
+                { headers: ERROR_CACHE_HEADERS, status: 504 },
+            );
+        }
         Logger.panic(error instanceof Error ? error : new Error('Failed to fetch jupiter data'));
         return NextResponse.json({ error: 'Failed to fetch jupiter data' }, { headers: NO_STORE_HEADERS, status: 500 });
     }

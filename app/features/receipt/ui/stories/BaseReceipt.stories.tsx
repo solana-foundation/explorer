@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
 
+import type { TransferRow } from '../../types';
 import { BaseReceipt, NoReceipt as NoReceiptComponent } from '../BaseReceipt';
 import {
     defaultReceipt,
@@ -62,6 +63,31 @@ export const WithDomainNames: Story = {
 export const TokenTransfer: Story = {
     args: {
         data: forBaseReceipt(receiptTokenTransfer, { tokenHref: 'https://example.com/token' }),
+    },
+};
+
+const multiTransferRows: TransferRow[] = Array.from({ length: 7 }, (_, i) => ({
+    amount: { formatted: '0.00203928', raw: 203928, unit: 'SOL' },
+    receiver: {
+        address: '3mMgoF7M6k2xYkNmS4mQv6m4RqB9QeW1jH5AaEpPxYr',
+        truncated: '3mMg...oF7M',
+    },
+    receiverHref: `https://example.com/receiver-${i}`,
+    sender: {
+        address: 'J8HaB2kNmS4mQv6m4RqB9QeW1jH5AaEpPxYrEpPx',
+        truncated: 'J8Ha...EpPx',
+    },
+    senderHref: `https://example.com/sender-${i}`,
+}));
+
+export const MultiTransfer: Story = {
+    args: {
+        data: forBaseReceipt(receiptWithMemo, { transfers: multiTransferRows }),
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        expect(canvas.getByText('Solana Receipt')).toBeInTheDocument();
+        expect(canvas.getAllByText('J8Ha...EpPx')).toHaveLength(7);
     },
 };
 

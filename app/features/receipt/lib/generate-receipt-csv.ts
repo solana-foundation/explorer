@@ -26,21 +26,67 @@ function sanitizeCsvField(value: string): string {
     return /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
 }
 
-export function buildReceiptCsvRow(receipt: FormattedReceipt, signature: string, usdValue?: string): string[] {
+function parseUsdNumber(usdValue: string): number | null {
+    // eslint-disable-next-line no-restricted-syntax -- regex is the clearest way to strip currency formatting chars
+    const n = parseFloat(usdValue.replace(/[$,]/g, ''));
+    return isNaN(n) ? null : n;
+}
+
+function prorateUsd(transferRaw: number, totalRaw: number, totalUsd: number): string {
+    if (totalRaw === 0) return '';
+    const value = (transferRaw / totalRaw) * totalUsd;
+    return `$${value.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`;
+}
+
+export function buildReceiptCsvRows(receipt: FormattedReceipt, signature: string, usdValue?: string): string[][] {
     const mint = getReceiptMint(receipt);
+    const unit = sanitizeCsvField(receipt.total.unit);
+
+    if (receipt.transfers && receipt.transfers.length > 1) {
+        const totalUsd = usdValue ? parseUsdNumber(usdValue) : null;
+        const transferRows = receipt.transfers.map(t => [
+            receipt.date.utc,
+            signature,
+            receipt.network,
+            t.sender.address,
+            t.receiver.address,
+            t.amount.formatted,
+            unit,
+            mint ?? '',
+            totalUsd !== null ? prorateUsd(t.amount.raw, receipt.total.raw, totalUsd) : '',
+            '',
+            '',
+        ]);
+        const feeRow = [
+            receipt.date.utc,
+            signature,
+            receipt.network,
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            receipt.fee.formatted,
+            receipt.memo ? sanitizeCsvField(receipt.memo) : '',
+        ];
+        return [...transferRows, feeRow];
+    }
 
     return [
-        receipt.date.utc,
-        signature,
-        receipt.network,
-        receipt.sender.address,
-        receipt.receiver.address,
-        receipt.total.formatted,
-        sanitizeCsvField(receipt.total.unit), // token symbol comes from on-chain metadata
-        mint ?? '',
-        usdValue ?? '',
-        receipt.fee.formatted,
-        receipt.memo ? sanitizeCsvField(receipt.memo) : '',
+        [
+            receipt.date.utc,
+            signature,
+            receipt.network,
+            receipt.sender.address,
+            receipt.receiver.address,
+            receipt.total.formatted,
+            unit,
+            mint ?? '',
+            usdValue ?? '',
+            receipt.fee.formatted,
+            receipt.memo ? sanitizeCsvField(receipt.memo) : '',
+        ],
     ];
 }
 
@@ -49,8 +95,8 @@ export async function generateReceiptCsv(
     signature: string,
     usdValue?: string,
 ): Promise<void> {
-    const row = buildReceiptCsvRow(receipt, signature, usdValue);
-    const csv = await writeToString([row], { headers: [...CSV_HEADERS] });
+    const rows = buildReceiptCsvRows(receipt, signature, usdValue);
+    const csv = await writeToString(rows, { headers: [...CSV_HEADERS] });
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);

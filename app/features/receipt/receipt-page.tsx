@@ -3,7 +3,7 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SignatureContext } from '@components/instruction/SignatureContext';
-import { useExplorerLink } from '@entities/cluster';
+import { buildExplorerLink, useExplorerLink } from '@entities/cluster';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { useFetchTransactionStatus, useTransactionDetails, useTransactionStatus } from '@providers/transactions';
@@ -111,15 +111,22 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
             />
         );
     if (isDetailsLoading || isReceiptLoading) return <LoadingCard message="Loading receipt" />;
-    if (!receipt)
+    if (!receipt) {
+        const hasInnerInstructions = Boolean(tx?.meta?.innerInstructions?.length);
         return (
             <NoReceipt
                 transactionPath={transactionPath}
                 timestamp={tx?.blockTime}
                 onViewTxClick={handleViewTxClick}
                 onRedirect={handleRedirect}
+                message={
+                    hasInnerInstructions
+                        ? 'Receipts are only available for simple transfers. This transaction contains inner program instructions.'
+                        : undefined
+                }
             />
         );
+    }
 
     return <ReceiptContent receipt={receipt} signature={signature} status={status} transactionPath={transactionPath} />;
 }
@@ -137,6 +144,12 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     useEffect(() => {
         receiptAnalytics.trackViewed(signature, receiptType);
     }, [signature, receiptType]);
+
+    const { cluster, customUrl } = useCluster();
+    const makeAddressHref = useCallback(
+        (address: string) => buildExplorerLink(cluster, customUrl, `/address/${address}`),
+        [cluster, customUrl],
+    );
 
     const senderDomain = usePrimaryDomain(receipt.sender.address);
     const receiverDomain = usePrimaryDomain(receipt.receiver.address);
@@ -180,6 +193,13 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                     sender: { ...receipt.sender, domain: senderDomain },
                     senderHref: senderLink.link,
                     tokenHref: tokenLink.link,
+                    transfers: receipt.transfers?.map(t => ({
+                        amount: t.amount,
+                        receiver: t.receiver,
+                        receiverHref: makeAddressHref(t.receiver.address),
+                        sender: t.sender,
+                        senderHref: makeAddressHref(t.sender.address),
+                    })),
                 }}
                 downloadCsv={downloadCsv}
                 downloadPdf={downloadPdf}

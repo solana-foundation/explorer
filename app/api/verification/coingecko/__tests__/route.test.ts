@@ -145,6 +145,20 @@ describe('CoinGecko API Route', () => {
         expect(Logger.panic).toHaveBeenCalled();
     });
 
+    it('should return 504 with short negative cache when upstream request times out', async () => {
+        const timeoutError = new DOMException('Signal timed out.', 'TimeoutError');
+        fetchMock.mockRejectedValueOnce(timeoutError);
+        const response = await callRoute(VALID_ADDRESS);
+        expect(response.status).toBe(504);
+        expect(await response.json()).toEqual({ error: 'Upstream request timed out' });
+        expect(response.headers.get('Cache-Control')).toBe('public, max-age=30, s-maxage=30');
+        expect(Logger.warn).toHaveBeenCalledWith('[api:coingecko] Upstream request timed out', {
+            address: VALID_ADDRESS,
+            sentry: true,
+        });
+        expect(Logger.panic).not.toHaveBeenCalled();
+    });
+
     it('should use public API when COINGECKO_API_KEY is not set', async () => {
         delete process.env.COINGECKO_API_KEY;
         mockFetchResponse(200, { market_data: {} });

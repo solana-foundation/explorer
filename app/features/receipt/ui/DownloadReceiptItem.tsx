@@ -10,13 +10,14 @@ import type { DownloadReceiptFn } from '../types';
 import { PopoverMenuItem } from './PopoverMenuItem';
 
 interface DownloadReceiptItemBaseProps {
+    disabled?: boolean;
     icon?: ReactNode;
     label: string;
     state: DownloadState;
     onTrigger: () => void;
 }
 
-export function DownloadReceiptItemBase({ icon, label, state, onTrigger }: DownloadReceiptItemBaseProps) {
+export function DownloadReceiptItemBase({ disabled, icon, label, state, onTrigger }: DownloadReceiptItemBaseProps) {
     const isDownloading = state === 'downloading';
 
     function getIcon() {
@@ -24,10 +25,18 @@ export function DownloadReceiptItemBase({ icon, label, state, onTrigger }: Downl
         return icon;
     }
 
-    return <PopoverMenuItem disabled={isDownloading} icon={getIcon()} label={`Get ${label}`} onClick={onTrigger} />;
+    return (
+        <PopoverMenuItem
+            disabled={disabled || isDownloading}
+            icon={getIcon()}
+            label={`Get ${label}`}
+            onClick={onTrigger}
+        />
+    );
 }
 
 interface DownloadReceiptItemProps {
+    disabled?: boolean;
     icon?: ReactNode;
     label: string;
     download: DownloadReceiptFn;
@@ -35,7 +44,7 @@ interface DownloadReceiptItemProps {
     signature: TransactionSignature;
 }
 
-export function DownloadReceiptItem({ icon, label, download, format, signature }: DownloadReceiptItemProps) {
+export function DownloadReceiptItem({ disabled, icon, label, download, format, signature }: DownloadReceiptItemProps) {
     const [state, trigger] = useDownloadReceipt(download);
 
     function handleTrigger() {
@@ -43,5 +52,13 @@ export function DownloadReceiptItem({ icon, label, download, format, signature }
         trigger();
     }
 
-    return <DownloadReceiptItemBase icon={icon} label={label} state={state} onTrigger={handleTrigger} />;
+    return (
+        <DownloadReceiptItemBase
+            disabled={disabled}
+            icon={icon}
+            label={label}
+            state={state}
+            onTrigger={handleTrigger}
+        />
+    );
 }

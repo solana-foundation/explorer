@@ -2,6 +2,7 @@ import { Keypair } from '@solana/web3.js';
 
 export const SENDER = Keypair.generate();
 export const RECEIVER = Keypair.generate();
+export const RECEIVER_2 = Keypair.generate();
 export const MINT = Keypair.generate();
 export const SOURCE_TOKEN_ACCOUNT = Keypair.generate();
 export const DESTINATION_TOKEN_ACCOUNT = Keypair.generate();
