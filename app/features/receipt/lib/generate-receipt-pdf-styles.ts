@@ -53,9 +53,9 @@ export const TEXT_STYLES = {
     sectionTitle: { color: COLORS.textHeading, font: HELVETICA, size: 10, weight: BOLD },
     subtitle: { color: COLORS.textSubtle, font: HELVETICA, size: 9, weight: NORMAL },
     title: { color: COLORS.textHeading, font: HELVETICA, size: 16, weight: BOLD },
-    valueStrong: { color: COLORS.textStrong, font: HELVETICA, size: 8, weight: BOLD },
     value: { color: COLORS.textBody, font: HELVETICA, size: 8, weight: NORMAL },
     valueMono: { color: COLORS.textBody, font: COURIER, size: 8, weight: NORMAL },
+    valueStrong: { color: COLORS.textStrong, font: HELVETICA, size: 8, weight: BOLD },
     valueUsd: { color: COLORS.textMuted, font: HELVETICA, size: 7, weight: NORMAL },
     warning: { color: COLORS.warningText, font: HELVETICA, size: 9, weight: NORMAL },
 } as const satisfies Record<string, TextStyle>;
