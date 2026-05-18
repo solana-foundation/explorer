@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import type { SysvarStakeHistoryAccount } from '@validators/accounts/sysvar';
 import { expect, within } from 'storybook/test';
 
-import { nextjsParameters, withClusterAndAccounts } from '../../../../../.storybook/decorators';
+import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
 import { StakeHistoryCard } from '../StakeHistoryCard';
 
 function sysvar(entries: SysvarStakeHistoryAccount['info']): SysvarStakeHistoryAccount {
@@ -11,7 +11,7 @@ function sysvar(entries: SysvarStakeHistoryAccount['info']): SysvarStakeHistoryA
 
 const meta = {
     component: StakeHistoryCard,
-    decorators: [withClusterAndAccounts],
+    decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Stake/StakeHistoryCard',
