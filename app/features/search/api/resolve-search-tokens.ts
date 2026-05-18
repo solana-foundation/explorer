@@ -1,7 +1,6 @@
 import { getAssetBatch } from '@/app/entities/digital-asset/server';
 import { type Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
-import { getJupiterApiKey } from '../config';
 import { discoverWithJupiter, fetchJupiterImages } from './discover-with-jupiter';
 import { discoverWithUtl } from './discover-with-utl';
 import type { DiscoveredToken } from './types';
@@ -32,10 +31,14 @@ export async function resolveSearchTokens(query: string, cluster: Cluster, custo
 
     let discovered: DiscoveredToken[];
     try {
-        discovered = getJupiterApiKey()
-            ? (await discoverWithJupiter(query, discoveryController.signal)).slice(0, SEARCH_TOKENS_LIMIT)
-            : // Jupiter unavailable — fall back to UTL (degraded: no address search, curated list only)
-              await discoverWithUtl(query, discoveryController.signal, SEARCH_TOKENS_LIMIT);
+        const jupiterResult = await discoverWithJupiter(query, discoveryController.signal);
+        if (jupiterResult.ok) {
+            discovered = jupiterResult.tokens.slice(0, SEARCH_TOKENS_LIMIT);
+        } else {
+            // Jupiter unavailable or failed — fall back to UTL (degraded: curated list only, no address search)
+            const utlResult = await discoverWithUtl(query, discoveryController.signal, SEARCH_TOKENS_LIMIT);
+            discovered = utlResult.tokens;
+        }
     } finally {
         clearTimeout(discoveryTimeout);
     }
@@ -52,7 +55,7 @@ export async function resolveSearchTokens(query: string, cluster: Cluster, custo
     const rpcUrl = serverClusterUrl(cluster, customUrl);
     const addresses = discovered.map(t => t.address);
 
-    let assets = null;
+    let assets: Awaited<ReturnType<typeof getAssetBatch>> = undefined;
     let jupiterIconMap = new Map<string, string>();
     try {
         [assets, jupiterIconMap] = await Promise.all([

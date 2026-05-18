@@ -4,7 +4,7 @@ import { matchAbortError } from '@/app/shared/lib/errors';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { getJupiterApiKey } from '../config';
-import type { DiscoveredToken } from './types';
+import type { DiscoveredToken, DiscoveryResult } from './types';
 
 const JupiterTokenSchema = type({
     decimals: optional(number()),
@@ -18,11 +18,11 @@ const JupiterTokenSchema = type({
 
 const JupiterSearchResponseSchema = array(JupiterTokenSchema);
 
-export async function discoverWithJupiter(query: string, signal: AbortSignal): Promise<DiscoveredToken[]> {
+export async function discoverWithJupiter(query: string, signal: AbortSignal): Promise<DiscoveryResult> {
     const jupiterApiKey = getJupiterApiKey();
     if (!jupiterApiKey) {
         Logger.warn('[api:search] JUPITER_API_KEY is not configured — skipping Jupiter discovery');
-        return [];
+        return { ok: false, tokens: [] };
     }
 
     try {
@@ -41,27 +41,36 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
             } else {
                 Logger.warn(`[api:search] Jupiter returned ${response.status}`, { sentry: true });
             }
-            return [];
+            return { ok: false, tokens: [] };
         }
 
         const data = await response.json();
-        if (!is(data, JupiterSearchResponseSchema)) return [];
-
-        return data.map(item => ({
-            address: item.id,
-            decimals: item.decimals,
-            isVerified: item.isVerified === true,
-            logoUri: item.icon ?? item.logoURI ?? undefined,
-            name: item.name,
-            symbol: item.symbol,
-        }));
-    } catch (error) {
-        if (!matchAbortError(error)) {
-            Logger.error(error instanceof Error ? error : new Error('[api:search] Jupiter discovery failed'), {
-                sentry: true,
-            });
+        if (!is(data, JupiterSearchResponseSchema)) {
+            Logger.warn('[api:search] Jupiter schema mismatch', { sentry: true });
+            return { ok: false, tokens: [] };
         }
-        return [];
+
+        return {
+            ok: true,
+            tokens: data.map(item => ({
+                address: item.id,
+                decimals: item.decimals,
+                isVerified: item.isVerified === true,
+                logoUri: item.icon ?? item.logoURI ?? undefined,
+                name: item.name,
+                symbol: item.symbol,
+            })),
+        };
+    } catch (error) {
+        if (matchAbortError(error)) {
+            // Fall through to UTL so any remaining discovery budget is used; the shared signal
+            // may already be aborted, in which case UTL aborts quickly too (cheap CDN call).
+            return { ok: false, tokens: [] };
+        }
+        Logger.error(error instanceof Error ? error : new Error('[api:search] Jupiter discovery failed'), {
+            sentry: true,
+        });
+        return { ok: false, tokens: [] };
     }
 }
 

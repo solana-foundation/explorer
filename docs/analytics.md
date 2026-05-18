@@ -46,7 +46,7 @@ All events are prefixed with `rcpt_`.
 
 ## Search Tracking
 
-Tracks Helius-powered search usage.
+Tracks search usage.
 
 ### Events
 

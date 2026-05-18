@@ -59,7 +59,11 @@ export async function GET(_request: Request, props: Params) {
         const data = await response.json();
 
         if (!is(data, JupiterResponseSchema)) {
-            return NextResponse.json({ verified: false }, { headers: CACHE_HEADERS });
+            Logger.error(new Error('[api:jupiter] schema mismatch'), { mintAddress, sentry: true });
+            return NextResponse.json(
+                { error: 'Upstream schema mismatch' },
+                { headers: ERROR_CACHE_HEADERS, status: 502 },
+            );
         }
 
         const token = data.find(t => t.id === mintAddress);
