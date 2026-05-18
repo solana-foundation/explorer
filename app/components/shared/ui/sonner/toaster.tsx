@@ -18,9 +18,9 @@ export const Toaster = ({ toastOptions, ...props }: Props) => {
             }}
             style={
                 {
-                    '--normal-bg': 'var(--popover)',
+                    '--normal-bg': 'oklch(0.205 0 0)',
                     '--normal-border': 'var(--border)',
-                    '--normal-text': 'var(--popover-foreground)',
+                    '--normal-text': 'oklch(0.985 0 0)',
                 } as React.CSSProperties
             }
             {...props}
