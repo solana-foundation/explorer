@@ -6,14 +6,14 @@
 | Static | `/_not-found` | 370 B | 190 kB |
 | Dynamic | `/address/[address]` | 20 kB | 1.16 MB |
 | Dynamic | `/address/[address]/anchor-account` | 10 kB | 1.22 MB |
-| Dynamic | `/address/[address]/anchor-program` | 390 B | 1.07 MB |
+| Dynamic | `/address/[address]/anchor-program` | 380 B | 1.07 MB |
 | Dynamic | `/address/[address]/attestation` | 10 kB | 1.18 MB |
 | Dynamic | `/address/[address]/attributes` | 10 kB | 1.14 MB |
 | Dynamic | `/address/[address]/blockhashes` | 10 kB | 1.13 MB |
 | Dynamic | `/address/[address]/compression` | 10 kB | 1.17 MB |
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 10 kB | 1.17 MB |
 | Dynamic | `/address/[address]/domains` | 10 kB | 1.15 MB |
-| Dynamic | `/address/[address]/entries` | 10 kB | 1.15 MB |
+| Dynamic | `/address/[address]/entries` | 10 kB | 1.16 MB |
 | Dynamic | `/address/[address]/feature-gate` | 380 B | 1.07 MB |
 | Dynamic | `/address/[address]/idl` | 160 kB | 1.47 MB |
 | Dynamic | `/address/[address]/instructions` | 10 kB | 1.25 MB |
@@ -38,7 +38,7 @@
 | Dynamic | `/api/program-metadata-idl` | 370 B | 190 kB |
 | Dynamic | `/api/receipt/price/[mintAddress]` | 370 B | 190 kB |
 | Dynamic | `/api/sns-domains/[address]` | 370 B | 190 kB |
-| Dynamic | `/api/token-info` | 390 B | 1.07 MB |
+| Dynamic | `/api/token-info` | 380 B | 1.07 MB |
 | Dynamic | `/api/verification/bluprynt/[mintAddress]` | 370 B | 190 kB |
 | Dynamic | `/api/verification/coingecko/[address]` | 370 B | 190 kB |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | 370 B | 190 kB |

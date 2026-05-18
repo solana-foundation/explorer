@@ -28,7 +28,7 @@ const baseSolReceipt: Receipt = {
 };
 
 export const longMemoText =
-    'This is a very long description that demonstrates how the receipt component handles extended text content. It includes multiple sentences and various details about the transaction, such as the purpose of the payment, the services rendered, and any additional context that might be relevant to understanding the nature of this particular blockchain transaction on the Solana network.';
+    'This is a longer description that demonstrates how the receipt component handles extended text content, including a couple of sentences about the purpose of the payment and any additional context relevant to the transaction.';
 
 export const defaultReceipt: FormattedReceipt = formatReceiptData(baseSolReceipt, CLUSTER);
 
@@ -119,6 +119,71 @@ export const receiptMultiTransfer9: FormattedReceipt = formatReceiptData(
     },
     CLUSTER,
 );
+
+export const receiptMultiTokenTransfer: FormattedReceipt = formatReceiptData(
+    {
+        date: raw.date,
+        fee: 10001,
+        logoURI: USDC_LOGO,
+        mint: USDC_MINT,
+        receiver: raw.receiver,
+        sender: raw.sender,
+        symbol: 'USDC',
+        total: 1.000841,
+        transfers: [
+            { receiver: extraKeypairs[0].publicKey.toBase58(), sender: raw.sender, total: 1 },
+            { receiver: extraKeypairs[1].publicKey.toBase58(), sender: raw.sender, total: 0.000841 },
+        ],
+        type: 'token',
+    },
+    CLUSTER,
+);
+
+export const receiptMultiTokenTransferWithMemo: FormattedReceipt = formatReceiptData(
+    {
+        date: raw.date,
+        fee: 10001,
+        logoURI: USDC_LOGO,
+        memo: 'Payroll batch — Q2',
+        mint: USDC_MINT,
+        receiver: raw.receiver,
+        sender: raw.sender,
+        symbol: 'USDC',
+        total: 1.000841,
+        transfers: [
+            { receiver: extraKeypairs[0].publicKey.toBase58(), sender: raw.sender, total: 1 },
+            { receiver: extraKeypairs[1].publicKey.toBase58(), sender: raw.sender, total: 0.000841 },
+        ],
+        type: 'token',
+    },
+    CLUSTER,
+);
+
+export const receiptMultiTokenTransferWithLongMemo: FormattedReceipt = formatReceiptData(
+    {
+        date: raw.date,
+        fee: 10001,
+        logoURI: USDC_LOGO,
+        memo: longMemoText,
+        mint: USDC_MINT,
+        receiver: raw.receiver,
+        sender: raw.sender,
+        symbol: 'USDC',
+        total: 1.000841,
+        transfers: [
+            { receiver: extraKeypairs[0].publicKey.toBase58(), sender: raw.sender, total: 1 },
+            { receiver: extraKeypairs[1].publicKey.toBase58(), sender: raw.sender, total: 0.000841 },
+        ],
+        type: 'token',
+    },
+    CLUSTER,
+);
+
+export const mixedMintNoReceiptMessage =
+    'Receipts are only available when all token transfers in a transaction use the same mint. This transaction transfers multiple different tokens.';
+
+export const innerInstructionsNoReceiptMessage =
+    'Receipts are only available for simple transfers. This transaction contains inner program instructions.';
 
 export function forBaseReceipt(
     data: FormattedReceipt,

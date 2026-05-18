@@ -26,7 +26,7 @@ import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app
 import { generateReceiptCsv } from './lib/generate-receipt-csv';
 import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
 import { usePrimaryDomain } from './lib/use-primary-domain';
-import { extractReceiptData } from './model/create-receipt';
+import { extractReceiptData, type ReceiptUnavailabilityReason } from './model/create-receipt';
 import { PriceStatus, useTokenPrice } from './model/use-price';
 import type { FormattedReceipt } from './types';
 import { NoReceipt } from './ui/BaseReceipt';
@@ -45,7 +45,7 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
     const transactionPath = useClusterPath({ pathname: `/tx/${signature}` });
 
     const tx = details?.data?.transactionWithMeta;
-    const { data: receipt, isLoading: isReceiptLoading } = useSWR(
+    const { data: receiptResult, isLoading: isReceiptLoading } = useSWR(
         tx ? ['receipt', signature, cluster] : null,
         () => {
             if (!tx) return undefined;
@@ -53,6 +53,7 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
         },
         { revalidateOnFocus: false },
     );
+    const receipt = receiptResult?.kind === 'ok' ? receiptResult.receipt : undefined;
 
     useEffect(() => {
         if (!status && clusterStatus === ClusterStatus.Connected) {
@@ -112,23 +113,31 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
         );
     if (isDetailsLoading || isReceiptLoading) return <LoadingCard message="Loading receipt" />;
     if (!receipt) {
-        const hasInnerInstructions = Boolean(tx?.meta?.innerInstructions?.length);
+        const reason = receiptResult?.kind === 'unavailable' ? receiptResult.reason : undefined;
         return (
             <NoReceipt
                 transactionPath={transactionPath}
                 timestamp={tx?.blockTime}
                 onViewTxClick={handleViewTxClick}
                 onRedirect={handleRedirect}
-                message={
-                    hasInnerInstructions
-                        ? 'Receipts are only available for simple transfers. This transaction contains inner program instructions.'
-                        : undefined
-                }
+                message={messageForReason(reason)}
             />
         );
     }
 
     return <ReceiptContent receipt={receipt} signature={signature} status={status} transactionPath={transactionPath} />;
+}
+
+function messageForReason(reason: ReceiptUnavailabilityReason | undefined): string | undefined {
+    switch (reason) {
+        case 'inner-instructions':
+            return 'Receipts are only available for simple transfers. This transaction contains inner program instructions.';
+        case 'mixed-mint':
+            return 'Receipts are only available when all token transfers in a transaction use the same mint. This transaction transfers multiple different tokens.';
+        case 'no-transfers':
+        case undefined:
+            return undefined;
+    }
 }
 
 interface ReceiptContentProps {

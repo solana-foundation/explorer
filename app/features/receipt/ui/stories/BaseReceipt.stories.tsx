@@ -6,7 +6,10 @@ import { BaseReceipt, NoReceipt as NoReceiptComponent } from '../BaseReceipt';
 import {
     defaultReceipt,
     forBaseReceipt,
+    innerInstructionsNoReceiptMessage,
+    mixedMintNoReceiptMessage,
     receiptLargeAmount,
+    receiptMultiTokenTransfer,
     receiptTokenTransfer,
     receiptWithDomains,
     receiptWithMemo,
@@ -91,6 +94,35 @@ export const MultiTransfer: Story = {
     },
 };
 
+export const MultiTokenTransfer: Story = {
+    args: {
+        data: forBaseReceipt(receiptMultiTokenTransfer, { tokenHref: 'https://example.com/token' }),
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        expect(canvas.getByText('Solana Receipt')).toBeInTheDocument();
+        expect(canvas.getAllByText('USDC')).toHaveLength(2);
+    },
+};
+
 export const NoReceipt: Story = {
     render: () => <NoReceiptComponent transactionPath="https://example.com/tx/ExampleTransactionSignature" />,
+};
+
+export const NoReceiptMixedMint: Story = {
+    render: () => (
+        <NoReceiptComponent
+            transactionPath="https://example.com/tx/ExampleTransactionSignature"
+            message={mixedMintNoReceiptMessage}
+        />
+    ),
+};
+
+export const NoReceiptInnerInstructions: Story = {
+    render: () => (
+        <NoReceiptComponent
+            transactionPath="https://example.com/tx/ExampleTransactionSignature"
+            message={innerInstructionsNoReceiptMessage}
+        />
+    ),
 };

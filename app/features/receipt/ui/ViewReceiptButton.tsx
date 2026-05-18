@@ -21,7 +21,7 @@ interface ViewReceiptButtonProps {
 export function ViewReceiptButton({ signature, receiptPath, transactionWithMeta }: ViewReceiptButtonProps) {
     const { cluster } = useCluster();
 
-    const { data: receipt } = useSWR(
+    const { data: receiptResult } = useSWR(
         isReceiptEnabled && transactionWithMeta ? ['receipt', signature, cluster] : null,
         () => {
             if (!transactionWithMeta) return undefined;
@@ -30,7 +30,7 @@ export function ViewReceiptButton({ signature, receiptPath, transactionWithMeta 
         { revalidateOnFocus: false },
     );
 
-    if (!isReceiptEnabled || !receipt) {
+    if (!isReceiptEnabled || receiptResult?.kind !== 'ok') {
         return null;
     }
 
