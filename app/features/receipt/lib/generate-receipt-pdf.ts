@@ -1,26 +1,30 @@
 import type { AcroFormTextField, jsPDF } from 'jspdf';
 import type { toDataURL as ToDataURL } from 'qrcode';
 
-import { getReceiptSymbol } from '@/app/entities/token-receipt';
-
 import type { FormattedReceipt } from '../types';
 import {
     applyLineStyle,
     applyTextStyle,
+    BORDER_RADIUS,
     COLORS,
-    formatText,
+    GRID,
     LINE_STYLES,
     PAGE,
     TEXT_STYLES,
     type TextStyle,
 } from './generate-receipt-pdf-styles';
 import { LOGO_SVG } from './logo-svg';
+import { parseUsdNumber, prorateUsd } from './parse-usd';
+import { splitAtFirstNonZeroDigit } from './split-at-first-non-zero-digit';
+import { WARNING_SVG } from './warning-svg';
 
 export type PdfDeps = {
     JsPDF: typeof import('jspdf').jsPDF;
     onError?: (error: unknown) => void;
     qrToDataURL: typeof ToDataURL;
 };
+
+const MAX_VISIBLE_TRANSFERS = 12;
 
 async function svgToDataUrl(svg: string, width: number, height: number): Promise<string> {
     const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
@@ -47,41 +51,38 @@ async function svgToDataUrl(svg: string, width: number, height: number): Promise
     }
 }
 
-function drawDivider(doc: jsPDF, y: number): number {
-    applyLineStyle(doc, LINE_STYLES.divider);
-    doc.line(PAGE.marginX, y, PAGE.marginX + PAGE.contentWidth, y);
-    return y + 6;
+const SECTION_GAP = 6;
+const SECTION_TITLE_HEIGHT = 6;
+const POST_TITLE_PADDING = 2;
+const POST_SECTION_PADDING = 2;
+const LABEL_TO_FIELD_GAP = 1;
+const POST_FIELD_GAP = 4;
+const DEFAULT_FIELD_HEIGHT = 6;
+const POST_TOTAL_ROW_PADDING = 6;
+const PAGE_TOP_Y = 20;
+const PAGE_BOTTOM_PADDING = 20;
+
+function addSectionGap(y: number): number {
+    return y + SECTION_GAP;
+}
+
+function labeledFieldHeight(fieldHeight: number): number {
+    return LABEL_TO_FIELD_GAP + POST_FIELD_GAP + fieldHeight;
+}
+
+function ensurePageSpace(doc: jsPDF, y: number, needed: number): number {
+    if (y + needed > PAGE.height - PAGE_BOTTOM_PADDING) {
+        doc.addPage();
+        return PAGE_TOP_Y;
+    }
+    return y;
 }
 
 function drawSectionTitle(doc: jsPDF, title: string, y: number): number {
     applyTextStyle(doc, TEXT_STYLES.sectionTitle);
     doc.text(title, PAGE.marginX, y);
-    return y + 6;
+    return y + SECTION_TITLE_HEIGHT;
 }
-
-function drawStackedRow(
-    doc: jsPDF,
-    label: string,
-    value: string,
-    y: number,
-    style: TextStyle = TEXT_STYLES.value,
-): number {
-    applyTextStyle(doc, TEXT_STYLES.label);
-    doc.text(formatText(label, TEXT_STYLES.label), PAGE.marginX, y);
-    y += 4;
-
-    applyTextStyle(doc, style);
-    const textWidth = doc.getTextWidth(value);
-    if (textWidth > PAGE.contentWidth) {
-        doc.setFontSize(style.size * (PAGE.contentWidth / textWidth));
-    }
-    doc.text(value, PAGE.marginX, y);
-    doc.setFontSize(style.size); // reset after potential overflow scaling
-
-    return y + 8;
-}
-
-const CELL_RADIUS = 1.5;
 
 function addEditableField(
     doc: jsPDF,
@@ -98,7 +99,7 @@ function addEditableField(
 ): void {
     doc.setFillColor(COLORS.fieldBg);
     applyLineStyle(doc, LINE_STYLES.border);
-    doc.roundedRect(x, y, width, height, CELL_RADIUS, CELL_RADIUS, 'FD');
+    doc.roundedRect(x, y, width, height, BORDER_RADIUS, BORDER_RADIUS, 'FD');
 
     const TextField = doc.AcroForm.TextField as unknown as new () => AcroFormTextField;
     const field = new TextField();
@@ -106,7 +107,7 @@ function addEditableField(
     field.multiline = multiline;
     // Inset the widget annotation inside the rounded rect so the viewer's
     // rectangular field highlight doesn't overflow the rounded corners
-    const inset = CELL_RADIUS / 3;
+    const inset = BORDER_RADIUS / 3;
     field.x = x + inset;
     field.y = y + inset;
     field.width = width - inset * 2;
@@ -128,15 +129,15 @@ function drawLabeledField(
     y: number,
     defaultValue = '',
     multiline = false,
-    height = 6,
+    height = DEFAULT_FIELD_HEIGHT,
 ): number {
     applyTextStyle(doc, TEXT_STYLES.label);
-    doc.text(formatText(label, TEXT_STYLES.label), PAGE.marginX, y);
+    doc.text(label, PAGE.marginX, y);
 
-    y += 1;
+    y += LABEL_TO_FIELD_GAP;
 
     addEditableField(doc, fieldName, PAGE.marginX, y, PAGE.contentWidth, height, defaultValue, multiline);
-    return y + 4 + height;
+    return y + POST_FIELD_GAP + height;
 }
 
 const FOOTER_LABEL_X = PAGE.marginX + 90;
@@ -147,7 +148,7 @@ const FOOTER_CELL_HEIGHT = 6;
 
 function drawTotalRow(doc: jsPDF, label: string, fieldName: string, value: string, y: number): number {
     applyTextStyle(doc, TEXT_STYLES.totalLabel);
-    doc.text(label, FOOTER_LABEL_X, y + FOOTER_CELL_HEIGHT / 2 + 1);
+    doc.text(label, FOOTER_LABEL_X, y + FOOTER_CELL_HEIGHT / 2, { baseline: 'middle' });
     addEditableField(
         doc,
         fieldName,
@@ -161,7 +162,203 @@ function drawTotalRow(doc: jsPDF, label: string, fieldName: string, value: strin
         true,
         FOOTER_FONT_SIZE,
     );
-    return y + FOOTER_CELL_HEIGHT + 6;
+    return y + FOOTER_CELL_HEIGHT + POST_TOTAL_ROW_PADDING;
+}
+
+// ----- Transaction details (2-column grid) -----
+const COL1_X = PAGE.marginX;
+const COL2_X = PAGE.marginX + GRID.col.outerWidth;
+
+function drawDetailCell(
+    doc: jsPDF,
+    label: string,
+    valueLines: string[],
+    x: number,
+    y: number,
+    valueStyle: TextStyle,
+): number {
+    applyTextStyle(doc, TEXT_STYLES.label);
+    doc.text(label, x, y);
+
+    applyTextStyle(doc, valueStyle);
+    const lineHeight = valueStyle.size * 0.45;
+    let cursor = y + 4;
+    for (const line of valueLines) {
+        doc.text(line, x, cursor);
+        cursor += lineHeight;
+    }
+    return cursor;
+}
+
+// ----- Transfers table -----
+const TABLE_AMOUNT_WIDTH = 42;
+const TABLE_ADDRESS_WIDTH = (PAGE.contentWidth - TABLE_AMOUNT_WIDTH - GRID.col.gap * 2) / 2;
+const TABLE_SENDER_X = PAGE.marginX;
+const TABLE_RECEIVER_X = TABLE_SENDER_X + TABLE_ADDRESS_WIDTH + GRID.col.gap;
+const TABLE_SENDER_WIDTH = TABLE_ADDRESS_WIDTH;
+const TABLE_RECEIVER_W = TABLE_ADDRESS_WIDTH;
+const TABLE_AMOUNT_RIGHT_X = PAGE.marginX + PAGE.contentWidth;
+const AMOUNT_LINE_HEIGHT = TEXT_STYLES.value.size * 0.45;
+
+function drawTransfersHeader(doc: jsPDF, y: number): number {
+    applyTextStyle(doc, TEXT_STYLES.label);
+    doc.text('Sender', TABLE_SENDER_X, y);
+    doc.text('Receiver', TABLE_RECEIVER_X, y);
+    doc.text('Amount', TABLE_AMOUNT_RIGHT_X, y, { align: 'right' });
+    y += 2;
+    applyLineStyle(doc, LINE_STYLES.border);
+    doc.line(PAGE.marginX, y, PAGE.marginX + PAGE.contentWidth, y);
+    return y + 4;
+}
+
+function drawTransferRow(
+    doc: jsPDF,
+    transfer: {
+        amount: { formatted: string; unit: string };
+        sender: { address: string };
+        receiver: { address: string };
+    },
+    y: number,
+    proratedUsd: string | undefined,
+): number {
+    drawAddressCell(doc, transfer.sender.address, TABLE_SENDER_X, y, TABLE_SENDER_WIDTH);
+    drawAddressCell(doc, transfer.receiver.address, TABLE_RECEIVER_X, y, TABLE_RECEIVER_W);
+    const amountBottom = drawAmountCell(
+        doc,
+        transfer.amount.formatted,
+        transfer.amount.unit,
+        proratedUsd,
+        TABLE_AMOUNT_RIGHT_X,
+        y,
+    );
+
+    const lineY = Math.max(y, amountBottom) + 2;
+    applyLineStyle(doc, LINE_STYLES.border);
+    doc.line(PAGE.marginX, lineY, PAGE.marginX + PAGE.contentWidth, lineY);
+
+    return lineY + 4;
+}
+
+function drawAddressCell(doc: jsPDF, address: string, x: number, y: number, maxWidth: number): void {
+    applyTextStyle(doc, TEXT_STYLES.valueMono);
+    const size = fitFontSize(doc, address, maxWidth, TEXT_STYLES.valueMono.size);
+    doc.setFontSize(size);
+    doc.text(address, x, y);
+    doc.setFontSize(TEXT_STYLES.valueMono.size);
+}
+
+/**
+ * Returns a font size (pt) at which `text` renders within `maxWidth` on a single line.
+ *
+ * Measures the text at `baseSize` using the doc's currently-active font family
+ * Then scales the size down proportionally if the text would overflow.
+ * If `text` already fits at `baseSize`, returns `baseSize` unchanged — no upscaling.
+ *
+ * Use this to shrink-to-fit content into a fixed cell/bar width.
+ */
+function fitFontSize(doc: jsPDF, text: string, maxWidth: number, baseSize: number): number {
+    doc.setFontSize(baseSize);
+    const w = doc.getTextWidth(text);
+    return w > maxWidth ? baseSize * (maxWidth / w) : baseSize;
+}
+
+function drawAmountLine1(doc: jsPDF, formatted: string, unit: string, rightX: number, y: number): void {
+    const { leadingZeros, significantDigits } = splitAtFirstNonZeroDigit(formatted);
+    const suffix = ` ${unit}`;
+
+    applyTextStyle(doc, TEXT_STYLES.value);
+    const scaledSize = fitFontSize(doc, `${formatted}${suffix}`, TABLE_AMOUNT_WIDTH, TEXT_STYLES.value.size);
+
+    let x = rightX;
+
+    applyTextStyle(doc, TEXT_STYLES.amountDim);
+    doc.setFontSize(scaledSize);
+    x -= doc.getTextWidth(suffix);
+    doc.text(suffix, x, y);
+
+    applyTextStyle(doc, TEXT_STYLES.totalLabel);
+    doc.setFontSize(scaledSize);
+    x -= doc.getTextWidth(significantDigits);
+    doc.text(significantDigits, x, y);
+
+    if (leadingZeros) {
+        applyTextStyle(doc, TEXT_STYLES.amountDim);
+        doc.setFontSize(scaledSize);
+        x -= doc.getTextWidth(leadingZeros);
+        doc.text(leadingZeros, x, y);
+    }
+}
+
+function drawAmountCell(
+    doc: jsPDF,
+    formatted: string,
+    unit: string,
+    proratedUsd: string | undefined,
+    rightX: number,
+    y: number,
+): number {
+    drawAmountLine1(doc, formatted, unit, rightX, y);
+
+    if (!proratedUsd) {
+        return y;
+    }
+
+    const line2Y = y + AMOUNT_LINE_HEIGHT;
+    applyTextStyle(doc, TEXT_STYLES.valueUsd);
+    const fittedUsdSize = fitFontSize(doc, proratedUsd, TABLE_AMOUNT_WIDTH, TEXT_STYLES.valueUsd.size);
+    doc.setFontSize(fittedUsdSize);
+    const wUsd = doc.getTextWidth(proratedUsd);
+    doc.text(proratedUsd, rightX - wUsd, line2Y);
+
+    return line2Y;
+}
+
+const WARNING_BAR_HEIGHT = 8;
+const WARNING_BAR_RADIUS = BORDER_RADIUS;
+const WARNING_ICON_SIZE = 5;
+const WARNING_INNER_PADDING = 2;
+const WARNING_ICON_TO_TEXT_OFFSET = 1.05;
+const WARNING_TEXT_RIGHT_PADDING = 4;
+
+async function drawWarningBar(deps: PdfDeps, doc: jsPDF, totalCount: number, y: number): Promise<number> {
+    const text =
+        `Only the ${MAX_VISIBLE_TRANSFERS} largest transfers are shown here. To view the full list of ` +
+        `${totalCount} transfers, export the CSV. You can also use the QR code at the end of the receipt to access the full details.`;
+
+    doc.setFillColor(COLORS.warningBg);
+    doc.roundedRect(
+        PAGE.marginX,
+        y,
+        PAGE.contentWidth,
+        WARNING_BAR_HEIGHT,
+        WARNING_BAR_RADIUS,
+        WARNING_BAR_RADIUS,
+        'F',
+    );
+
+    try {
+        const iconUrl = await svgToDataUrl(WARNING_SVG, 20, 20);
+        doc.addImage(
+            iconUrl,
+            'PNG',
+            PAGE.marginX + WARNING_INNER_PADDING,
+            y + (WARNING_BAR_HEIGHT - WARNING_ICON_SIZE) / 2,
+            WARNING_ICON_SIZE,
+            WARNING_ICON_SIZE,
+        );
+    } catch (error) {
+        deps.onError?.(error);
+    }
+
+    const textX = PAGE.marginX + WARNING_INNER_PADDING + WARNING_ICON_SIZE + WARNING_ICON_TO_TEXT_OFFSET;
+    const textMaxWidth = PAGE.marginX + PAGE.contentWidth - WARNING_INNER_PADDING - WARNING_TEXT_RIGHT_PADDING - textX;
+    applyTextStyle(doc, TEXT_STYLES.warning);
+    const fittedSize = fitFontSize(doc, text, textMaxWidth, TEXT_STYLES.warning.size);
+    doc.setFontSize(fittedSize);
+    doc.text(text, textX, y + WARNING_BAR_HEIGHT / 2, { baseline: 'middle' });
+    doc.setFontSize(TEXT_STYLES.warning.size);
+
+    return y + WARNING_BAR_HEIGHT + 6;
 }
 
 export async function loadPdfDeps(): Promise<PdfDeps> {
@@ -181,7 +378,7 @@ export async function generateReceiptPdf(
 
     let y = 20;
 
-    // Title
+    // ----- TITLE -----
     applyTextStyle(doc, TEXT_STYLES.title);
     doc.text('Solana Payment Receipt', PAGE.marginX, y);
     y += 4;
@@ -190,96 +387,121 @@ export async function generateReceiptPdf(
     doc.text('On-chain Transaction Record', PAGE.marginX, y);
     y += 4;
 
-    // ----- PAYMENT DETAILS -----
-    y = drawDivider(doc, y);
-    y = drawSectionTitle(doc, 'Payment Details', y);
+    // ----- TRANSACTION DETAILS -----
+    y = addSectionGap(y);
+    y = drawSectionTitle(doc, 'Transaction details', y);
     y += 2;
 
-    const symbol = getReceiptSymbol(receipt);
-    const paymentMethod = symbol ? `Solana (${symbol})` : 'Solana (SOL)';
-    const col2X = PAGE.marginX + PAGE.contentWidth / 2;
+    // Row 1: Payment date | Network fee
+    const dateBottom = drawDetailCell(doc, 'Payment date', [receipt.date.utc], COL1_X, y, TEXT_STYLES.valueMono);
+    const feeBottom = drawDetailCell(
+        doc,
+        'Network fee',
+        [`${receipt.fee.formatted} SOL`],
+        COL2_X,
+        y,
+        TEXT_STYLES.valueMono,
+    );
+    y = Math.max(dateBottom, feeBottom) + 4;
 
-    // Row 1: Payment Method (left) + Payment Date (right) — stacked 2-column
-    applyTextStyle(doc, TEXT_STYLES.label);
-    doc.text(formatText('Payment Method', TEXT_STYLES.label), PAGE.marginX, y);
-    doc.text(formatText('Payment Date', TEXT_STYLES.label), col2X, y);
-    y += 4;
-    applyTextStyle(doc, TEXT_STYLES.totalLabel);
-    doc.text(paymentMethod, PAGE.marginX, y);
-    applyTextStyle(doc, TEXT_STYLES.value);
-    doc.text(receipt.date.utc, col2X, y);
-    y += 8;
-
-    // Row 2: Original Amount (left) + Amount USD (right, if available)
-    if (usdValue) {
-        applyTextStyle(doc, TEXT_STYLES.label);
-        doc.text(formatText('Original Amount', TEXT_STYLES.label), PAGE.marginX, y);
-        doc.text(formatText('Amount (USD)', TEXT_STYLES.label), col2X, y);
-        y += 4;
-        applyTextStyle(doc, TEXT_STYLES.totalLabel);
-        doc.text(`${receipt.total.formatted} ${receipt.total.unit}`, PAGE.marginX, y);
-        doc.text(usdValue, col2X, y);
-        y += 4;
-        applyTextStyle(doc, TEXT_STYLES.caption);
-        doc.text('Estimated current value at time of download provided by Jupiter API', col2X, y);
-        y += 8;
-    } else {
-        y = drawStackedRow(
-            doc,
-            'Original Amount',
-            `${receipt.total.formatted} ${receipt.total.unit}`,
-            y,
-            TEXT_STYLES.totalLabel,
-        );
-    }
-
-    y = drawStackedRow(doc, 'Network Fee', `${receipt.fee.formatted} SOL`, y);
-    y = drawStackedRow(doc, 'Sender Wallet Address', receipt.sender.address, y, TEXT_STYLES.valueMono);
-    y = drawStackedRow(doc, 'Receiver Wallet Address', receipt.receiver.address, y, TEXT_STYLES.valueMono);
-
-    // Transaction Signature — clickable if transactionUrl provided
+    // Row 2: Signature | Memo (signature spans full width when memo is absent)
+    const signatureWidth = receipt.memo ? GRID.col.innerWidth : PAGE.contentWidth;
+    applyTextStyle(doc, TEXT_STYLES.valueMono);
+    const signatureLines = doc.splitTextToSize(signature, signatureWidth) as string[];
     const sigStartY = y;
-    y = drawStackedRow(doc, 'Transaction Signature', signature, y, TEXT_STYLES.valueMono);
+    const sigBottom = drawDetailCell(doc, 'Signature', signatureLines, COL1_X, y, TEXT_STYLES.valueMono);
     if (transactionUrl) {
-        doc.link(PAGE.marginX, sigStartY + 3, PAGE.contentWidth, 5, { url: transactionUrl });
+        const linkH = sigBottom - (sigStartY + 4) + 1;
+        doc.link(COL1_X, sigStartY + 1, signatureWidth, linkH, { url: transactionUrl });
     }
 
+    let memoBottom = y;
     if (receipt.memo) {
-        y = drawStackedRow(doc, 'Transaction Memo', receipt.memo, y);
+        applyTextStyle(doc, TEXT_STYLES.value);
+        const memoLines = doc.splitTextToSize(receipt.memo, GRID.col.innerWidth) as string[];
+        memoBottom = drawDetailCell(doc, 'Memo', memoLines, COL2_X, y, TEXT_STYLES.value);
     }
 
-    y -= 2;
-    // ----- END PAYMENT DETAILS -----
+    y = Math.max(sigBottom, memoBottom) + 4;
+
+    // ----- TRANSFERS -----
+    y = addSectionGap(y);
+    y = drawSectionTitle(doc, 'Transfers', y);
+    y += 2;
+
+    const transfers =
+        receipt.transfers && receipt.transfers.length > 0
+            ? [...receipt.transfers].sort((a, b) => b.amount.raw - a.amount.raw)
+            : [
+                  {
+                      amount: { formatted: receipt.total.formatted, raw: receipt.total.raw, unit: receipt.total.unit },
+                      receiver: receipt.receiver,
+                      sender: receipt.sender,
+                  },
+              ];
+    const visibleTransfers = transfers.slice(0, MAX_VISIBLE_TRANSFERS);
+    const hiddenCount = transfers.length - visibleTransfers.length;
+
+    const totalUsdNum = usdValue ? parseUsdNumber(usdValue) : null;
+
+    y = drawTransfersHeader(doc, y);
+
+    for (const t of visibleTransfers) {
+        const proratedUsd =
+            totalUsdNum !== null && receipt.total.raw > 0
+                ? prorateUsd(t.amount.raw, receipt.total.raw, totalUsdNum)
+                : undefined;
+        y = drawTransferRow(doc, t, y, proratedUsd);
+    }
+
+    if (hiddenCount > 0) {
+        y = await drawWarningBar(deps, doc, transfers.length, y - 1);
+    } else {
+        y += 2;
+    }
 
     // ----- SUPPLIER / SELLER -----
-    y = drawDivider(doc, y);
-    y = drawSectionTitle(doc, 'Supplier / Seller Information', y);
-    y += 2;
-
     const ADDRESS_HEIGHT = 12;
+    const DESCRIPTION_HEIGHT = 54;
+    const SUPPLIER_SECTION_HEIGHT =
+        SECTION_GAP +
+        SECTION_TITLE_HEIGHT +
+        POST_TITLE_PADDING +
+        labeledFieldHeight(DEFAULT_FIELD_HEIGHT) +
+        labeledFieldHeight(ADDRESS_HEIGHT) +
+        POST_SECTION_PADDING;
+    const ITEMS_SECTION_HEIGHT =
+        SECTION_GAP +
+        SECTION_TITLE_HEIGHT +
+        DESCRIPTION_HEIGHT +
+        POST_TITLE_PADDING +
+        FOOTER_CELL_HEIGHT +
+        POST_TOTAL_ROW_PADDING;
+    // Keep Supplier and Items together: if they won't both fit, break before Supplier
+    y = ensurePageSpace(doc, y, SUPPLIER_SECTION_HEIGHT + ITEMS_SECTION_HEIGHT);
+    y = addSectionGap(y);
+    y = drawSectionTitle(doc, 'Supplier / Seller Information', y);
+    y += POST_TITLE_PADDING;
+
     y = drawLabeledField(doc, 'Full Name', 'supplier_name', y);
     y = drawLabeledField(doc, 'Address', 'supplier_address', y, '', true, ADDRESS_HEIGHT);
-    y += 2;
+    y += POST_SECTION_PADDING;
     // ----- END SUPPLIER / SELLER -----
 
     // ----- ITEMS / SERVICES -----
-    y = drawDivider(doc, y);
+    y = addSectionGap(y);
     y = drawSectionTitle(doc, 'Items / Services', y);
 
-    const DESCRIPTION_HEIGHT = 54;
     addEditableField(doc, 'items_description', PAGE.marginX, y, PAGE.contentWidth, DESCRIPTION_HEIGHT, '', true);
-    y += DESCRIPTION_HEIGHT + 2;
+    y += DESCRIPTION_HEIGHT + POST_TITLE_PADDING;
 
     y = drawTotalRow(doc, 'TOTAL', 'total', `${receipt.total.formatted} ${receipt.total.unit}`, y);
     // ----- END ITEMS / SERVICES -----
 
-    // add a new page if the footer won't fit
+    // ----- FOOTER -----
     const FOOTER_HEIGHT = 55; // divider + disclaimer + logo/QR + caption
-    if (y > PAGE.height - FOOTER_HEIGHT) {
-        doc.addPage();
-        y = 20;
-    }
-    y = drawDivider(doc, y);
+    y = ensurePageSpace(doc, y, FOOTER_HEIGHT);
+    y = addSectionGap(y);
 
     applyTextStyle(doc, TEXT_STYLES.disclaimer);
     const disclaimer =
