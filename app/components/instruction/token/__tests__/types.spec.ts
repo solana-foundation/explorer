@@ -20,10 +20,7 @@ describe('token instruction types: withdrawExcessLamports', () => {
         const destination = randomAddress();
         const authority = randomAddress();
 
-        const parsed = create(
-            { authority, destination, source },
-            IX_STRUCTS.withdrawExcessLamports,
-        );
+        const parsed = create({ authority, destination, source }, IX_STRUCTS.withdrawExcessLamports);
 
         expect(parsed.authority).toBeInstanceOf(PublicKey);
         expect(parsed.authority?.toBase58()).toBe(authority);
@@ -39,10 +36,7 @@ describe('token instruction types: withdrawExcessLamports', () => {
         const multisigAuthority = randomAddress();
         const signers = [randomAddress(), randomAddress()];
 
-        const parsed = create(
-            { destination, multisigAuthority, signers, source },
-            IX_STRUCTS.withdrawExcessLamports,
-        );
+        const parsed = create({ destination, multisigAuthority, signers, source }, IX_STRUCTS.withdrawExcessLamports);
 
         expect(parsed.multisigAuthority?.toBase58()).toBe(multisigAuthority);
         expect(parsed.signers?.map(s => s.toBase58())).toEqual(signers);
