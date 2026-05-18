@@ -430,7 +430,7 @@ export async function generateReceiptPdf(
     y += 2;
 
     const transfers =
-        receipt.transfers && receipt.transfers.length > 0
+        receipt.transfers && receipt.transfers.length > 1
             ? [...receipt.transfers].sort((a, b) => b.amount.raw - a.amount.raw)
             : [
                   {
