@@ -91,4 +91,23 @@ describe('getStakeActivatingAndDeactivating', () => {
         const result = getStakeActivatingAndDeactivating(delegation, 12n, history);
         expect(result).toEqual({ activating: 0n, deactivating: 28_100n, effective: 28_100n });
     });
+
+    it('should treat the account as fully effective when cluster activating stake is zero', () => {
+        // entry.activating === 0n would make weight = Infinity and BigInt(round(Infinity * …))
+        // throw RangeError. The guard short-circuits to the delegation amount instead.
+        const delegation: Delegation = { activationEpoch: 0n, deactivationEpoch: NEVER_DEACTIVATED, stake: 1_000n };
+        const history: StakeHistoryEntry[] = [{ activating: 0n, deactivating: 0n, effective: 1_000_000n, epoch: 0n }];
+        const result = getStakeActivatingAndDeactivating(delegation, 1n, history);
+        expect(result).toEqual({ activating: 0n, deactivating: 0n, effective: 1_000n });
+    });
+
+    it('should reset effective stake to zero when cluster deactivating stake is zero', () => {
+        // entry.deactivating === 0n means the account should already be fully undelegated.
+        // Without an explicit zero-reset the prior `currentEffectiveStake` would leak through
+        // as both deactivating and effective in the return value.
+        const delegation: Delegation = { activationEpoch: 0n, deactivationEpoch: 10n, stake: 200_000n };
+        const history: StakeHistoryEntry[] = [{ activating: 0n, deactivating: 0n, effective: 1_000_000n, epoch: 10n }];
+        const result = getStakeActivatingAndDeactivating(delegation, 11n, history);
+        expect(result).toEqual({ activating: 0n, deactivating: 0n, effective: 0n });
+    });
 });

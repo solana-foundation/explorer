@@ -1,4 +1,4 @@
-// Pure replay of the Solana runtime's stake warmup/cooldown schedule. Kept as a line-for-line
+// Pure replay of the Solana runtime's stake warmup/cooldown schedule. Kept close to a line-for-line
 // translation of the upstream Rust so divergences with the protocol are easy to spot — do not
 // refactor the parallel structure of the two iterative loops.
 //
@@ -36,7 +36,10 @@ export function getStakeActivatingAndDeactivating(
     targetEpoch: bigint,
     stakeHistory: StakeHistoryEntry[],
 ): StakeActivatingAndDeactivating {
-    const { effective, activating } = getStakeAndActivating(delegation, targetEpoch, stakeHistory);
+    // Index the history once so the per-epoch lookups inside the warmup/cooldown loops are O(1)
+    // instead of O(n); a full sysvar carries 512 entries and a long warmup made it O(n²).
+    const stakeHistoryMap = buildStakeHistoryMap(stakeHistory);
+    const { effective, activating } = getStakeAndActivating(delegation, targetEpoch, stakeHistoryMap);
 
     // then de-activate some portion if necessary
     if (targetEpoch < delegation.deactivationEpoch) {
@@ -46,7 +49,7 @@ export function getStakeActivatingAndDeactivating(
         return { activating: 0n, deactivating: effective, effective };
     }
     let currentEpoch = delegation.deactivationEpoch;
-    let entry = getStakeHistoryEntry(currentEpoch, stakeHistory);
+    let entry = getStakeHistoryEntry(currentEpoch, stakeHistoryMap);
     if (entry !== null) {
         // target_epoch > self.activation_epoch
         // loop from my deactivation epoch until the target epoch
@@ -54,9 +57,11 @@ export function getStakeActivatingAndDeactivating(
         let currentEffectiveStake = effective;
         while (entry !== null) {
             currentEpoch++;
-            // if there is no deactivating stake at prev epoch, we should have been
-            // fully undelegated at this moment
+            // If no cluster-wide deactivating stake at this epoch the account is already
+            // fully undelegated. Reset explicitly (the upstream Rust returns `(0, 0, 0)` here)
+            // and also guard the divide-by-zero in the weight calculation below.
             if (entry.deactivating === 0n) {
+                currentEffectiveStake = 0n;
                 break;
             }
 
@@ -77,7 +82,7 @@ export function getStakeActivatingAndDeactivating(
             if (currentEpoch >= targetEpoch) {
                 break;
             }
-            entry = getStakeHistoryEntry(currentEpoch, stakeHistory);
+            entry = getStakeHistoryEntry(currentEpoch, stakeHistoryMap);
         }
 
         // deactivating stake should equal to all of currently remaining effective stake
@@ -94,7 +99,7 @@ export function getStakeActivatingAndDeactivating(
 function getStakeAndActivating(
     delegation: Delegation,
     targetEpoch: bigint,
-    stakeHistory: StakeHistoryEntry[],
+    stakeHistoryMap: Map<bigint, StakeHistoryEntry>,
 ): EffectiveAndActivating {
     if (delegation.activationEpoch === delegation.deactivationEpoch) {
         // activated but instantly deactivated; no stake at all regardless of target_epoch
@@ -108,7 +113,7 @@ function getStakeAndActivating(
     }
 
     let currentEpoch = delegation.activationEpoch;
-    let entry = getStakeHistoryEntry(currentEpoch, stakeHistory);
+    let entry = getStakeHistoryEntry(currentEpoch, stakeHistoryMap);
     if (entry !== null) {
         // target_epoch > self.activation_epoch
 
@@ -118,6 +123,13 @@ function getStakeAndActivating(
         while (entry !== null) {
             currentEpoch++;
             const remaining = delegation.stake - currentEffectiveStake;
+            // If no cluster-wide activating stake at this epoch the warmup cap doesn't apply
+            // — the account's remaining delegation is treated as fully effective. This also
+            // guards against `Number(remaining) / Number(0n) = Infinity` flowing into BigInt().
+            if (entry.activating === 0n) {
+                currentEffectiveStake = delegation.stake;
+                break;
+            }
             const weight = Number(remaining) / Number(entry.activating);
             const newlyEffectiveClusterStake = Number(entry.effective) * WARMUP_COOLDOWN_RATE;
             const newlyEffectiveStake = BigInt(Math.max(1, Math.round(weight * newlyEffectiveClusterStake)));
@@ -131,7 +143,7 @@ function getStakeAndActivating(
             if (currentEpoch >= targetEpoch || currentEpoch >= delegation.deactivationEpoch) {
                 break;
             }
-            entry = getStakeHistoryEntry(currentEpoch, stakeHistory);
+            entry = getStakeHistoryEntry(currentEpoch, stakeHistoryMap);
         }
         return {
             activating: delegation.stake - currentEffectiveStake,
@@ -143,11 +155,17 @@ function getStakeAndActivating(
     }
 }
 
-function getStakeHistoryEntry(epoch: bigint, stakeHistory: StakeHistoryEntry[]): StakeHistoryEntry | null {
+function buildStakeHistoryMap(stakeHistory: StakeHistoryEntry[]): Map<bigint, StakeHistoryEntry> {
+    const map = new Map<bigint, StakeHistoryEntry>();
     for (const entry of stakeHistory) {
-        if (entry.epoch === epoch) {
-            return entry;
-        }
+        map.set(entry.epoch, entry);
     }
-    return null;
+    return map;
+}
+
+function getStakeHistoryEntry(
+    epoch: bigint,
+    stakeHistoryMap: Map<bigint, StakeHistoryEntry>,
+): StakeHistoryEntry | null {
+    return stakeHistoryMap.get(epoch) ?? null;
 }
