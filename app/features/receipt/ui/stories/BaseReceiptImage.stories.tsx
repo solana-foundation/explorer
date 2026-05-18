@@ -5,6 +5,9 @@ import { BaseReceiptImage, IMAGE_SIZE } from '../BaseReceiptImage';
 import {
     defaultReceipt,
     receiptLargeAmountWithMemo,
+    receiptMultiTokenTransfer,
+    receiptMultiTokenTransferWithLongMemo,
+    receiptMultiTokenTransferWithMemo,
     receiptMultiTransfer3,
     receiptMultiTransfer9,
     receiptTokenTransferSimple,
@@ -74,6 +77,24 @@ export const MultiTransfer3: Story = {
 export const MultiTransfer9: Story = {
     args: {
         data: receiptMultiTransfer9,
+    },
+};
+
+export const MultiTokenTransfer: Story = {
+    args: {
+        data: receiptMultiTokenTransfer,
+    },
+};
+
+export const MultiTokenTransferWithMemo: Story = {
+    args: {
+        data: receiptMultiTokenTransferWithMemo,
+    },
+};
+
+export const MultiTokenTransferWithLongMemo: Story = {
+    args: {
+        data: receiptMultiTokenTransferWithLongMemo,
     },
 };
 

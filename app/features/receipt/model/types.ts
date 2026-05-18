@@ -25,6 +25,7 @@ export type ReceiptToken = BaseReceipt & {
     mint: string | undefined;
     symbol: string | undefined;
     logoURI: string | undefined;
+    transfers?: Transfer[];
 };
 
 export type Receipt = ReceiptSol | ReceiptToken;
@@ -35,6 +36,10 @@ export function isSolReceipt(receipt: Receipt): receipt is ReceiptSol {
 
 export function isTokenReceipt(receipt: Receipt): receipt is ReceiptToken {
     return receipt.type === 'token';
+}
+
+export function hasTransfers(receipt: Receipt): receipt is Receipt & { transfers: Transfer[] } {
+    return Boolean(receipt.transfers?.length);
 }
 
 export type SolTransferParsed = {

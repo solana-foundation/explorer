@@ -36,6 +36,7 @@ describe('GET /og/receipt/[signature]', () => {
     it('should generate image successfully with signature', async () => {
         const { GET } = await import('../route');
         const { createReceipt } = await import('@features/receipt/server');
+        vi.mocked(createReceipt).mockResolvedValue({ kind: 'unavailable', reason: 'no-transfers' });
         const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
         const request = new NextRequest(url.toString());
 

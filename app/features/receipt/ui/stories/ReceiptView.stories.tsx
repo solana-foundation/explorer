@@ -5,6 +5,7 @@ import { ReceiptView } from '../ReceiptView';
 import {
     defaultReceipt,
     forBaseReceipt,
+    receiptMultiTokenTransfer,
     receiptMultiTransfer3,
     receiptMultiTransfer9,
     receiptTokenTransfer,
@@ -88,5 +89,11 @@ export const MultiTransfer3: Story = {
 export const MultiTransfer9: Story = {
     args: {
         data: forBaseReceipt(receiptMultiTransfer9),
+    },
+};
+
+export const MultiTokenTransfer: Story = {
+    args: {
+        data: forBaseReceipt(receiptMultiTokenTransfer, { tokenHref: 'https://example.com/token' }),
     },
 };

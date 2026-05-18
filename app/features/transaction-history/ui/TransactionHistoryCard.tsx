@@ -1,5 +1,7 @@
 'use client';
 
+import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '@components/account/HistoryCardComponents';
+import { Copyable } from '@components/common/Copyable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
@@ -15,8 +17,8 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
-import { Copyable } from '../../common/Copyable';
-import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
+import { useInstructionNames } from '../lib/use-instruction-names';
+import { InstructionList, InstructionListSkeleton } from './InstructionList';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
@@ -52,37 +54,17 @@ export function TransactionHistoryCard({ address }: { address: string }) {
 
     const hasTimestamps = transactionRows.some(element => element.blockTime);
     const detailsList: React.ReactNode[] = transactionRows.map(
-        ({ slot, signature, blockTime, statusClass, statusText }) => {
-            return (
-                <tr key={signature}>
-                    <td>
-                        <Signature signature={signature} link truncateChars={40} />
-                    </td>
-
-                    <td className="w-1">
-                        <Slot slot={slot} link />
-                    </td>
-
-                    {hasTimestamps && (
-                        <>
-                            <td className="text-muted">
-                                {blockTime ? <Moment date={blockTime * 1000} fromNow /> : '---'}
-                            </td>
-                            <td className="text-muted">
-                                {blockTime ? displayTimestampUtc(blockTime * 1000, true) : '---'}
-                            </td>
-                        </>
-                    )}
-
-                    <td>
-                        <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
-                    </td>
-                    <td>
-                        <TransactionRawDataDownloadField signature={signature} />
-                    </td>
-                </tr>
-            );
-        },
+        ({ slot, signature, blockTime, statusClass, statusText }) => (
+            <TransactionRow
+                key={signature}
+                signature={signature}
+                slot={slot}
+                blockTime={blockTime}
+                statusClass={statusClass}
+                statusText={statusText}
+                hasTimestamps={hasTimestamps}
+            />
+        ),
     );
 
     const fetching = history.status === FetchStatus.Fetching;
@@ -115,6 +97,50 @@ export function TransactionHistoryCard({ address }: { address: string }) {
             </div>
             <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />
         </div>
+    );
+}
+
+type TransactionRowProps = {
+    signature: string;
+    slot: number;
+    blockTime: number | null | undefined;
+    statusClass: string;
+    statusText: string;
+    hasTimestamps: boolean;
+};
+
+function TransactionRow({ signature, slot, blockTime, statusClass, statusText, hasTimestamps }: TransactionRowProps) {
+    const instructionNames = useInstructionNames(signature);
+
+    return (
+        <tr>
+            <td>
+                <Signature signature={signature} link truncateChars={40} />
+                {instructionNames !== null && instructionNames.length > 0 ? (
+                    <InstructionList instructions={instructionNames} />
+                ) : instructionNames === null ? (
+                    <InstructionListSkeleton />
+                ) : null}
+            </td>
+
+            <td className="w-1">
+                <Slot slot={slot} link />
+            </td>
+
+            {hasTimestamps && (
+                <>
+                    <td className="text-muted">{blockTime ? <Moment date={blockTime * 1000} fromNow /> : '---'}</td>
+                    <td className="text-muted">{blockTime ? displayTimestampUtc(blockTime * 1000, true) : '---'}</td>
+                </>
+            )}
+
+            <td>
+                <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
+            </td>
+            <td>
+                <TransactionRawDataDownloadField signature={signature} />
+            </td>
+        </tr>
     );
 }
 

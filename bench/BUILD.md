@@ -4,7 +4,7 @@
 |------|-------|------|---------------|
 | Static | `/` | 20 kB | 1.24 MB |
 | Static | `/_not-found` | 380 B | 190 kB |
-| Dynamic | `/address/[address]` | 20 kB | 1.16 MB |
+| Dynamic | `/address/[address]` | 20 kB | 1.30 MB |
 | Dynamic | `/address/[address]/anchor-account` | 10 kB | 1.22 MB |
 | Dynamic | `/address/[address]/anchor-program` | 380 B | 1.07 MB |
 | Dynamic | `/address/[address]/attestation` | 10 kB | 1.18 MB |
@@ -15,17 +15,17 @@
 | Dynamic | `/address/[address]/domains` | 10 kB | 1.16 MB |
 | Dynamic | `/address/[address]/entries` | 10 kB | 1.16 MB |
 | Dynamic | `/address/[address]/feature-gate` | 380 B | 1.07 MB |
-| Dynamic | `/address/[address]/idl` | 170 kB | 1.43 MB |
-| Dynamic | `/address/[address]/instructions` | 10 kB | 1.25 MB |
+| Dynamic | `/address/[address]/idl` | 160 kB | 1.47 MB |
+| Dynamic | `/address/[address]/instructions` | 10 kB | 1.26 MB |
 | Dynamic | `/address/[address]/metadata` | 10 kB | 1.15 MB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 10 kB | 1.21 MB |
 | Dynamic | `/address/[address]/program-multisig` | 10 kB | 1.21 MB |
-| Dynamic | `/address/[address]/rewards` | 10 kB | 1.15 MB |
-| Dynamic | `/address/[address]/security` | 20 kB | 1.21 MB |
+| Dynamic | `/address/[address]/rewards` | 10 kB | 1.14 MB |
+| Dynamic | `/address/[address]/security` | 10 kB | 1.28 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 10 kB | 1.14 MB |
-| Dynamic | `/address/[address]/stake-history` | 10 kB | 1.15 MB |
-| Dynamic | `/address/[address]/token-extensions` | 10 kB | 1.22 MB |
-| Dynamic | `/address/[address]/tokens` | 30 kB | 1.35 MB |
+| Dynamic | `/address/[address]/stake-history` | 10 kB | 1.14 MB |
+| Dynamic | `/address/[address]/token-extensions` | 20 kB | 1.22 MB |
+| Dynamic | `/address/[address]/tokens` | 20 kB | 1.34 MB |
 | Dynamic | `/address/[address]/transfers` | 10 kB | 1.28 MB |
 | Dynamic | `/address/[address]/verified-build` | 10 kB | 1.21 MB |
 | Dynamic | `/address/[address]/vote-history` | 10 kB | 1.14 MB |
@@ -57,7 +57,7 @@
 | Static | `/opengraph-image.png` | 0 B | 0 B |
 | Static | `/supply` | 10 kB | 1.16 MB |
 | Static | `/tos` | 380 B | 190 kB |
-| Dynamic | `/tx/[signature]` | 70 kB | 1.67 MB |
-| Dynamic | `/tx/[signature]/inspect` | 620 B | 1.44 MB |
+| Dynamic | `/tx/[signature]` | 70 kB | 1.68 MB |
+| Dynamic | `/tx/[signature]/inspect` | 610 B | 1.44 MB |
 | Static | `/tx/inspector` | 600 B | 1.44 MB |
 | Static | `/verified-programs` | 10 kB | 200 kB |

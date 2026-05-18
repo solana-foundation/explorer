@@ -509,6 +509,14 @@ const ConfigureConfidentialAccountWithRegistry = type({
     registry: PublicKeyFromString,
 });
 
+const WithdrawExcessLamports = type({
+    authority: optional(PublicKeyFromString),
+    destination: PublicKeyFromString,
+    multisigAuthority: optional(PublicKeyFromString),
+    signers: optional(array(PublicKeyFromString)),
+    source: PublicKeyFromString,
+});
+
 export type TokenInstructionType = Infer<typeof TokenInstructionType>;
 export const TokenInstructionType = enums([
     'initializeMint',
@@ -578,6 +586,7 @@ export const TokenInstructionType = enums([
     'enableConfidentialTransferNonConfidentialCredits',
     'disableConfidentialTransferNonConfidentialCredits',
     'configureConfidentialAccountWithRegistry',
+    'withdrawExcessLamports',
 ]);
 
 export const IX_STRUCTS = {
@@ -648,6 +657,7 @@ export const IX_STRUCTS = {
     updateTokenMetadataField: UpdateTokenMetadataField,
     updateTokenMetadataUpdateAuthority: UpdateTokenMetadataUpdateAuthority,
     withdrawConfidentialTransfer: WithdrawConfidentialTransfer,
+    withdrawExcessLamports: WithdrawExcessLamports,
 };
 
 export const IX_TITLES = {
@@ -718,4 +728,5 @@ export const IX_TITLES = {
     updateTokenMetadataField: 'Update Token Metadata Field',
     updateTokenMetadataUpdateAuthority: 'Update Token Metadata Update Authority',
     withdrawConfidentialTransfer: 'Withdraw Confidential Transfer',
+    withdrawExcessLamports: 'Withdraw Excess Lamports',
 };

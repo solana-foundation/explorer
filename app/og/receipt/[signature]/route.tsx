@@ -34,7 +34,8 @@ export async function GET(request: NextRequest, props: Props) {
     const cacheHeaders = getCacheHeaders();
 
     try {
-        const receipt = await createReceipt(signature, cluster);
+        const result = await createReceipt(signature, cluster);
+        const receipt = result.kind === 'ok' ? result.receipt : undefined;
 
         const imageResponse = new ImageResponse(<BaseReceiptImage data={receipt} />, {
             ...OG_IMAGE_SIZE,
