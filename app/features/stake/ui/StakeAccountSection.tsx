@@ -1,4 +1,3 @@
-import { Address } from '@components/common/Address';
 import { Epoch } from '@components/common/Epoch';
 import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
@@ -8,8 +7,11 @@ import type { Account } from '@providers/accounts';
 import { displayTimestampUtc } from '@utils/date';
 import React from 'react';
 
+import { toKitAddress } from '@/app/shared/lib/web3js-compat';
+
 import type { StakeActivationStatus } from '../api/stake-activation';
 import type { StakeAccountInfo, StakeAccountType, StakeMeta } from '../lib/validators';
+import { KitAddress } from './KitAddress';
 
 type StakeActivationData = {
     state: StakeActivationStatus;
@@ -74,7 +76,7 @@ function OverviewCard({
             <tr>
                 <td>Address</td>
                 <td className="text-lg-end">
-                    <Address pubkey={account.pubkey} alignRight raw />
+                    <KitAddress address={toKitAddress(account.pubkey)} alignRight raw />
                 </td>
             </tr>
             <tr>
@@ -160,7 +162,7 @@ function DelegationCard({
                             <tr>
                                 <td>Delegated Vote Address</td>
                                 <td className="text-lg-end">
-                                    <Address pubkey={voterPubkey} alignRight link />
+                                    <KitAddress address={voterPubkey} alignRight link />
                                 </td>
                             </tr>
                         )}
@@ -195,14 +197,14 @@ function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
                 <tr>
                     <td>Stake Authority Address</td>
                     <td className="text-lg-end">
-                        <Address pubkey={meta.authorized.staker} alignRight link />
+                        <KitAddress address={meta.authorized.staker} alignRight link />
                     </td>
                 </tr>
 
                 <tr>
                     <td>Withdraw Authority Address</td>
                     <td className="text-lg-end">
-                        <Address pubkey={meta.authorized.withdrawer} alignRight link />
+                        <KitAddress address={meta.authorized.withdrawer} alignRight link />
                     </td>
                 </tr>
 
@@ -210,7 +212,7 @@ function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
                     <tr>
                         <td>Lockup Authority Address</td>
                         <td className="text-lg-end">
-                            <Address pubkey={meta.lockup.custodian} alignRight link />
+                            <KitAddress address={meta.lockup.custodian} alignRight link />
                         </td>
                     </tr>
                 )}

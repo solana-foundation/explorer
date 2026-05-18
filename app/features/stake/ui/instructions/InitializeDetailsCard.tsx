@@ -39,7 +39,7 @@ export function InitializeDetailsCard({
                     {displayTimestampUtc(info.lockup.unixTimestamp * 1000)}
                 </DetailRow>
             )}
-            {info.lockup.custodian.toBase58() !== SYSTEM_PROGRAM_ADDRESS && (
+            {info.lockup.custodian !== SYSTEM_PROGRAM_ADDRESS && (
                 <DetailRow label="Lockup Custodian Address" pubkey={info.lockup.custodian} />
             )}
         </InstructionCard>

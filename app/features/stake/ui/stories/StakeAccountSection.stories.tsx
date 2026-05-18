@@ -1,18 +1,24 @@
 import type { Account } from '@providers/accounts';
-import { PublicKey } from '@solana/web3.js';
+import { address } from '@solana/kit';
+import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
+
+import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
 import { nextjsParameters, withClusterAndAccounts } from '../../../../../.storybook/decorators';
 import type { StakeAccountInfo, StakeAccountType } from '../../lib/validators';
 import { StakeAccountSection } from '../StakeAccountSection';
 
-const STAKE_ACCOUNT_ADDRESS = new PublicKey('5ASxtmcPKDeD8NoE5QpskizPokqDdX1qHFiqZb1spLdo');
-const STAKE_PROGRAM = new PublicKey('Stake11111111111111111111111111111111111111');
-const STAKER = new PublicKey('2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8');
-const WITHDRAWER = new PublicKey('4TPTXRKCbL39nMkWAtRDMRB4gQkUfrfCMvwKS4AYoH7e');
-const CUSTODIAN = new PublicKey('11111111111111111111111111111111');
-const VOTER = new PublicKey('3MRBUAxwx7gWoGvAtzxLtzmhzwPDGAEqStKWb8cJnYQX');
+// CUSTODIAN sentinel = System Program — convention for "no custodian set" in stake accounts.
+const CUSTODIAN = SYSTEM_PROGRAM_ADDRESS;
+// Random valid pubkeys used as opaque placeholders in stories.
+const STAKE_ACCOUNT_ADDRESS = toLegacyPublicKey(address('5ASxtmcPKDeD8NoE5QpskizPokqDdX1qHFiqZb1spLdo'));
+const STAKE_PROGRAM = toLegacyPublicKey(STAKE_PROGRAM_ADDRESS);
+const STAKER = address('2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8');
+const WITHDRAWER = address('4TPTXRKCbL39nMkWAtRDMRB4gQkUfrfCMvwKS4AYoH7e');
+const VOTER = address('3MRBUAxwx7gWoGvAtzxLtzmhzwPDGAEqStKWb8cJnYQX');
 const NEVER_DEACTIVATED = 0xffffffffffffffffn;
 
 const RENT_RESERVE = 2_282_880n;

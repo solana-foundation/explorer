@@ -59,7 +59,9 @@ type StakeAccount = {
 type JsonAccountData = AccountInfoWithJsonData['data'];
 type ParsedAccountData = Exclude<JsonAccountData, readonly [string, string]>;
 
-const SYSVAR_STAKE_HISTORY_ADDRESS = address('SysvarStakeHistory1111111111111111111111111');
+// The kit ecosystem doesn't ship a constant for the stake-history sysvar (and @solana-program/stake
+// only exports STAKE_PROGRAM_ADDRESS), so the on-chain literal is the source of truth here.
+export const SYSVAR_STAKE_HISTORY_ADDRESS = address('SysvarStakeHistory1111111111111111111111111');
 
 export async function getStakeActivation(rpc: StakeActivationRpc, stakeAddress: Address): Promise<StakeActivation> {
     const [epochInfo, stakeAccountResponse, stakeHistoryResponse] = await Promise.all([

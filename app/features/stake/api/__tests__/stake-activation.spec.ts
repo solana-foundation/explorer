@@ -1,10 +1,13 @@
-import { type Address, address } from '@solana/kit';
+import { type AccountInfoWithJsonData, type Address, address } from '@solana/kit';
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { describe, expect, it } from 'vitest';
 
-import { getStakeActivation, type StakeActivationRpc } from '../stake-activation';
+import { getStakeActivation, type StakeActivationRpc, SYSVAR_STAKE_HISTORY_ADDRESS } from '../stake-activation';
 
-const STAKE_ACCOUNT_ADDRESS = address('11111111111111111111111111111111');
-const STAKE_HISTORY_ADDRESS = 'SysvarStakeHistory1111111111111111111111111';
+// Placeholder pubkey for fields the test doesn't care about (voter, staker, owner, etc.); the
+// System Program address is just a known-valid base58 string serving as a sentinel.
+const PLACEHOLDER_PUBKEY = SYSTEM_PROGRAM_ADDRESS;
+const STAKE_ACCOUNT_ADDRESS = address(PLACEHOLDER_PUBKEY);
 // Sentinel deactivation epoch used on chain for stake that has never been deactivated.
 const NEVER_DEACTIVATED = 18446744073709551615n;
 
@@ -142,7 +145,7 @@ function buildRpc({
     return {
         getAccountInfo: (addr: Address) => ({
             send: async () =>
-                addr === STAKE_HISTORY_ADDRESS
+                addr === SYSVAR_STAKE_HISTORY_ADDRESS
                     ? buildStakeHistoryResponse(stakeHistory)
                     : buildStakeAccountResponse(stakeAccount),
         }),
@@ -180,7 +183,7 @@ function buildStakeAccountResponse(fixture: StakeAccountFixture) {
                         activationEpoch: String(f.activationEpoch),
                         deactivationEpoch: String(f.deactivationEpoch),
                         stake: String(f.stake),
-                        voter: '11111111111111111111111111111111',
+                        voter: PLACEHOLDER_PUBKEY,
                         warmupCooldownRate: 0.09,
                     },
                 },
@@ -209,14 +212,14 @@ function buildStakeHistoryResponse(entries: HistoryEntry[] | null) {
     });
 }
 
-function buildJsonAccountResponse(lamports: bigint, data: unknown) {
+function buildJsonAccountResponse(lamports: bigint, data: AccountInfoWithJsonData['data']) {
     return {
         context: { slot: 0n },
         value: {
             data,
             executable: false,
             lamports,
-            owner: '11111111111111111111111111111111',
+            owner: PLACEHOLDER_PUBKEY,
             space: 200n,
         },
     };
@@ -225,11 +228,11 @@ function buildJsonAccountResponse(lamports: bigint, data: unknown) {
 function defaultMeta(rentExemptReserve: string) {
     return {
         authorized: {
-            staker: '11111111111111111111111111111111',
-            withdrawer: '11111111111111111111111111111111',
+            staker: PLACEHOLDER_PUBKEY,
+            withdrawer: PLACEHOLDER_PUBKEY,
         },
         lockup: {
-            custodian: '11111111111111111111111111111111',
+            custodian: PLACEHOLDER_PUBKEY,
             epoch: 0,
             unixTimestamp: 0,
         },
