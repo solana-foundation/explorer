@@ -25,7 +25,12 @@ export function ProgramName({ programId, cluster, url }: { programId: PublicKey;
                     />
                 }
             >
-                <ProgramMetadataProgramName programId={programId} url={url} cluster={cluster} />
+                <ProgramMetadataProgramName
+                    programId={programId}
+                    url={url}
+                    cluster={cluster}
+                    defaultName={defaultProgramName}
+                />
             </ErrorBoundary>
         </React.Suspense>
     );
