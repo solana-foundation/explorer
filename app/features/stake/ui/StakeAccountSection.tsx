@@ -107,7 +107,7 @@ function DelegationCard({
     activation?: StakeActivationData;
 }) {
     let voterPubkey, activationEpoch, deactivationEpoch;
-    const delegation = stakeAccount?.stake?.delegation;
+    const delegation = stakeAccount.stake?.delegation;
     if (delegation) {
         voterPubkey = delegation.voter;
         if (delegation.activationEpoch !== EPOCH_NEVER_SET) {
