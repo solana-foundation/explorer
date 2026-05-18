@@ -17,10 +17,6 @@ const JupiterTokenSchema = type({
 
 const JupiterSearchResponseSchema = array(JupiterTokenSchema);
 
-const JupiterTokenDetailSchema = type({
-    logoURI: optional(nullable(string())),
-});
-
 export async function discoverWithJupiter(query: string, signal: AbortSignal): Promise<DiscoveredToken[]> {
     const jupiterApiKey = getJupiterApiKey();
     if (!jupiterApiKey) {
@@ -69,20 +65,23 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
 }
 
 export async function fetchJupiterImages(addresses: string[], signal: AbortSignal): Promise<Map<string, string>> {
+    const jupiterApiKey = getJupiterApiKey();
     const results = new Map<string, string>();
 
     await Promise.allSettled(
         addresses.map(async address => {
             try {
-                const response = await fetch(`https://tokens.jup.ag/token/${encodeURIComponent(address)}`, {
-                    headers: { Accept: 'application/json' },
-                    signal,
-                });
+                const url = `https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(address)}`;
+                const headers: Record<string, string> = { Accept: 'application/json' };
+                if (jupiterApiKey) headers['x-api-key'] = jupiterApiKey;
+
+                const response = await fetch(url, { headers, signal });
                 if (!response.ok) return;
                 const data = await response.json();
-                if (!is(data, JupiterTokenDetailSchema)) return;
-                if (data.logoURI) {
-                    results.set(address, data.logoURI);
+                if (!is(data, JupiterSearchResponseSchema)) return;
+                const match = data.find(t => t.id === address);
+                if (match?.logoURI) {
+                    results.set(address, match.logoURI);
                 }
             } catch {
                 // silently ignore per-token failures (network errors, aborts)
