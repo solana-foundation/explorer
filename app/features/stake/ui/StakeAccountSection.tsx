@@ -17,6 +17,9 @@ type StakeActivationData = {
     inactive: number;
 };
 
+// Sentinel u64::MAX used on chain for activation/deactivation epochs that have never been set.
+const EPOCH_NEVER_SET = 0xffffffffffffffffn;
+
 export function StakeAccountSection({
     account,
     stakeAccount,
@@ -103,7 +106,6 @@ function DelegationCard({
     stakeAccount: StakeAccountInfo;
     activation?: StakeActivationData;
 }) {
-    const EPOCH_NEVER_SET = 0xffffffffffffffffn;
     let voterPubkey, activationEpoch, deactivationEpoch;
     const delegation = stakeAccount?.stake?.delegation;
     if (delegation) {
@@ -218,7 +220,6 @@ function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
 }
 
 function isFullyInactivated(stakeAccount: StakeAccountInfo, activation?: StakeActivationData): boolean {
-    const EPOCH_NEVER_SET = 0xffffffffffffffffn;
     const { stake } = stakeAccount;
 
     if (!stake || !activation) {
