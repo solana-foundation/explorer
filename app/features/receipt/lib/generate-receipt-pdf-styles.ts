@@ -32,39 +32,47 @@ export const GRID = {
 // Common border radius for inset rounded-rect elements (editable fields, warning bar)
 export const BORDER_RADIUS = 1.5;
 
-export const HELVETICA = 'helvetica' as const;
-export const COURIER = 'courier' as const;
+export const SANS = 'Rubik' as const;
+export const MONO = 'RobotoMono' as const;
 export const NORMAL = 'normal' as const;
 export const BOLD = 'bold' as const;
 
 export type TextStyle = {
-    font: typeof HELVETICA | typeof COURIER;
+    font: typeof SANS | typeof MONO;
     weight: typeof NORMAL | typeof BOLD;
     size: number;
     color: string;
+    uppercase?: boolean;
 };
 
 export const TEXT_STYLES = {
-    amountDim: { color: COLORS.textMuted, font: HELVETICA, size: 8, weight: BOLD },
-    caption: { color: COLORS.textSubtle, font: HELVETICA, size: 6, weight: NORMAL },
-    disclaimer: { color: COLORS.textSubtle, font: HELVETICA, size: 7, weight: NORMAL },
-    label: { color: COLORS.textMuted, font: HELVETICA, size: 8, weight: NORMAL },
-    logoFallback: { color: COLORS.textHeading, font: HELVETICA, size: 9, weight: BOLD },
-    sectionTitle: { color: COLORS.textHeading, font: HELVETICA, size: 10, weight: BOLD },
-    subtitle: { color: COLORS.textSubtle, font: HELVETICA, size: 9, weight: NORMAL },
-    title: { color: COLORS.textHeading, font: HELVETICA, size: 16, weight: BOLD },
-    value: { color: COLORS.textBody, font: HELVETICA, size: 8, weight: NORMAL },
-    valueMono: { color: COLORS.textBody, font: COURIER, size: 8, weight: NORMAL },
-    valueStrong: { color: COLORS.textStrong, font: HELVETICA, size: 8, weight: BOLD },
-    valueUsd: { color: COLORS.textMuted, font: HELVETICA, size: 7, weight: NORMAL },
-    warning: { color: COLORS.warningText, font: HELVETICA, size: 9, weight: NORMAL },
+    amountDim: { color: COLORS.textMuted, font: SANS, size: 8, weight: BOLD },
+    caption: { color: COLORS.textSubtle, font: SANS, size: 6, weight: NORMAL },
+    disclaimer: { color: COLORS.textSubtle, font: SANS, size: 7, weight: NORMAL },
+    label: { color: COLORS.textMuted, font: SANS, size: 8, weight: NORMAL },
+    logoFallback: { color: COLORS.textHeading, font: SANS, size: 9, weight: BOLD },
+    paymentLabel: { color: COLORS.textMuted, font: SANS, size: 8, uppercase: true, weight: BOLD },
+    sectionTitle: { color: COLORS.textHeading, font: SANS, size: 10, weight: BOLD },
+    subtitle: { color: COLORS.textSubtle, font: SANS, size: 9, weight: NORMAL },
+    title: { color: COLORS.textHeading, font: SANS, size: 16, weight: BOLD },
+    totalLabel: { color: COLORS.textHeading, font: SANS, size: 8, weight: BOLD },
+    value: { color: COLORS.textBody, font: SANS, size: 8, weight: NORMAL },
+    valueMono: { color: COLORS.textBody, font: MONO, size: 8, weight: NORMAL },
+    valueStrong: { color: COLORS.textStrong, font: SANS, size: 8, weight: BOLD },
+    valueUsd: { color: COLORS.textMuted, font: SANS, size: 7, weight: NORMAL },
+    warning: { color: COLORS.warningText, font: SANS, size: 9, weight: NORMAL },
 } as const satisfies Record<string, TextStyle>;
 
 export type LineStyle = { color: string; width: number };
 
 export const LINE_STYLES = {
     border: { color: COLORS.border, width: 0.2 },
+    divider: { color: COLORS.border, width: 0.3 },
 } as const satisfies Record<string, LineStyle>;
+
+export function formatText(text: string, style: TextStyle): string {
+    return style.uppercase ? text.toUpperCase() : text;
+}
 
 export function applyTextStyle(doc: jsPDF, style: TextStyle): void {
     doc.setFont(style.font, style.weight);
