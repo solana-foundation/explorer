@@ -27,7 +27,7 @@ import {
 } from '@components/instruction/ZkElGamalProofDetailsCard';
 import { useAnchorProgram } from '@entities/idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
-import { StakeDetailsCard } from '@features/stake';
+import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
 import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';
@@ -269,6 +269,9 @@ function InstructionCard({
     }
     if (isLighthouseInstruction(transactionIx)) {
         return <LighthouseDetailsCard key={key} {...props} />;
+    }
+    if (isStakeInstruction(transactionIx)) {
+        return <RawStakeDetailsCard key={key} {...props} />;
     }
     if (isTokenBatchInstruction(transactionIx)) {
         return (

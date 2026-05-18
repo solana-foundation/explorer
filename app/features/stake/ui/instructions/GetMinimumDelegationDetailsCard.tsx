@@ -1,10 +1,24 @@
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import React from 'react';
+import type { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import React, { type ReactNode } from 'react';
 
 import { StakeProgramRow } from './DetailRow';
-import type { StakeCardBaseProps } from './types';
 
-export function GetMinimumDelegationDetailsCard({ ix, index, result, innerCards, childIndex }: StakeCardBaseProps) {
+type GetMinimumDelegationDetailsCardProps = {
+    ix: ParsedInstruction | TransactionInstruction;
+    index: number;
+    result: SignatureResult;
+    innerCards?: ReactNode[];
+    childIndex?: number;
+};
+
+export function GetMinimumDelegationDetailsCard({
+    ix,
+    index,
+    result,
+    innerCards,
+    childIndex,
+}: GetMinimumDelegationDetailsCardProps) {
     return (
         <InstructionCard
             ix={ix}
