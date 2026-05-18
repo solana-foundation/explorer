@@ -9,6 +9,7 @@ vi.mock('@/app/entities/digital-asset/api', () => ({
 }));
 
 const fetchMock = vi.fn();
+vi.stubGlobal('fetch', fetchMock);
 const getAssetBatchMock = vi.mocked(getAssetBatch);
 
 const VALID_ADDRESS = 'So11111111111111111111111111111111111111112';

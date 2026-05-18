@@ -2,13 +2,14 @@ import { getAssetBatch } from '@/app/entities/digital-asset/server';
 import { type Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
 import { getJupiterApiKey } from '../config';
-import { discoverWithJupiter } from './discover-with-jupiter';
+import { discoverWithJupiter, fetchJupiterImages } from './discover-with-jupiter';
 import { discoverWithUtl } from './discover-with-utl';
 import type { DiscoveredToken } from './types';
 
 const SEARCH_CACHE_REVALIDATE_S = 30;
 const DISCOVERY_TIMEOUT_MS = 3_000;
 const ENRICHMENT_TIMEOUT_MS = 2_000;
+const IMAGE_FALLBACK_TIMEOUT_MS = 2_000;
 const SEARCH_TOKENS_LIMIT = 20;
 
 export const SEARCH_CACHE_HEADERS = {
@@ -41,28 +42,33 @@ export async function resolveSearchTokens(query: string, cluster: Cluster, custo
 
     if (discovered.length === 0) return [];
 
-    // --- Enrichment (2s budget) ---
+    // --- Enrichment + Jupiter image fallback in parallel (2s budget each) ---
     const enrichmentController = new AbortController();
     const enrichmentTimeout = setTimeout(() => enrichmentController.abort(), ENRICHMENT_TIMEOUT_MS);
 
+    const imageController = new AbortController();
+    const imageTimeout = setTimeout(() => imageController.abort(), IMAGE_FALLBACK_TIMEOUT_MS);
+
     const rpcUrl = serverClusterUrl(cluster, customUrl);
+    const addresses = discovered.map(t => t.address);
 
     let assets = null;
+    let jupiterIconMap = new Map<string, string>();
     try {
-        assets = await getAssetBatch(
-            discovered.map(t => t.address),
-            rpcUrl,
-            enrichmentController.signal,
-        );
+        [assets, jupiterIconMap] = await Promise.all([
+            getAssetBatch(addresses, rpcUrl, enrichmentController.signal),
+            fetchJupiterImages(addresses, imageController.signal),
+        ]);
     } finally {
         clearTimeout(enrichmentTimeout);
+        clearTimeout(imageTimeout);
     }
 
     const iconMap = new Map(assets?.map(a => [a.id, a.content.links?.image]) ?? []);
 
     return discovered.map(t => ({
         decimals: t.decimals,
-        icon: t.logoUri ?? iconMap.get(t.address),
+        icon: t.logoUri ?? iconMap.get(t.address) ?? jupiterIconMap.get(t.address),
         isVerified: t.isVerified,
         name: t.name,
         ticker: t.symbol,
