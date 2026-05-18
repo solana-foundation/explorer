@@ -67,9 +67,13 @@ export async function getAssetBatch(ids: string[], url: string, signal?: AbortSi
         });
 
         const abortPromise = signal
-            ? new Promise<never>((_, reject) =>
-                  signal.addEventListener('abort', () => reject(signal.reason), { once: true }),
-              )
+            ? new Promise<never>((_, reject) => {
+                  if (signal.aborted) {
+                      reject(signal.reason);
+                  } else {
+                      signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+                  }
+              })
             : null;
 
         const response = await (abortPromise ? Promise.race([fetchPromise, abortPromise]) : fetchPromise);

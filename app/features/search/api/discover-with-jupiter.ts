@@ -67,13 +67,12 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
 
 const JUPITER_IMAGES_CACHE_REVALIDATE_S = 30;
 
-// Search by symbol so Jupiter returns full token data including the icon field.
-// Searching by raw address strips the logo from the response.
+// Fetches logo URIs for tokens whose discovery response didn't include one.
+// Searches by symbol (not address) because Jupiter strips the logo field from address-based queries.
 export async function fetchJupiterImages(tokens: DiscoveredToken[], signal: AbortSignal): Promise<Map<string, string>> {
     const jupiterApiKey = getJupiterApiKey();
     if (!jupiterApiKey) return new Map();
 
-    // Only fetch logos for tokens that discovery didn't already provide.
     const missing = tokens.filter(t => !t.logoUri);
     if (missing.length === 0) return new Map();
 

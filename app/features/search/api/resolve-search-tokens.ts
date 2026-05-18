@@ -63,7 +63,7 @@ export async function resolveSearchTokens(query: string, cluster: Cluster, custo
         clearTimeout(enrichmentTimeout);
         clearTimeout(imageTimeout);
     }
-    
+
     const iconMap = new Map(assets?.map(a => [a.id, a.content.links?.image]) ?? []);
 
     return discovered.map(t => ({
