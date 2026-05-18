@@ -19,8 +19,8 @@ import { splitAtFirstNonZeroDigit } from './split-at-first-non-zero-digit';
 import { WARNING_SVG } from './warning-svg';
 
 export type PdfDeps = {
-    JsPDF: typeof import('jspdf').jsPDF;
-    onError?: (error: unknown) => void;
+    JsPDF: typeof jsPDF;
+    onError: (error: unknown) => void;
     qrToDataURL: typeof ToDataURL;
 };
 
@@ -347,7 +347,7 @@ async function drawWarningBar(deps: PdfDeps, doc: jsPDF, totalCount: number, y: 
             WARNING_ICON_SIZE,
         );
     } catch (error) {
-        deps.onError?.(error);
+        deps.onError(error);
     }
 
     const textX = PAGE.marginX + WARNING_INNER_PADDING + WARNING_ICON_SIZE + WARNING_ICON_TO_TEXT_OFFSET;
@@ -361,9 +361,9 @@ async function drawWarningBar(deps: PdfDeps, doc: jsPDF, totalCount: number, y: 
     return y + WARNING_BAR_HEIGHT + 6;
 }
 
-export async function loadPdfDeps(): Promise<PdfDeps> {
+export async function loadPdfDeps(onError: (error: unknown) => void): Promise<PdfDeps> {
     const [{ jsPDF: JsPDF }, { toDataURL: qrToDataURL }] = await Promise.all([import('jspdf'), import('qrcode')]);
-    return { JsPDF, qrToDataURL };
+    return { JsPDF, onError, qrToDataURL };
 }
 
 export async function generateReceiptPdf(
@@ -523,7 +523,7 @@ export async function generateReceiptPdf(
         const logoHeight = (28 / 229) * logoWidth;
         doc.addImage(logoDataUrl, 'PNG', PAGE.marginX, y, logoWidth, logoHeight);
     } catch (error) {
-        deps.onError?.(error);
+        deps.onError(error);
         // Fallback: render text if canvas is unavailable (e.g. in tests)
         applyTextStyle(doc, TEXT_STYLES.logoFallback);
         doc.text('Solana Explorer', PAGE.marginX, y + 4);
@@ -535,7 +535,7 @@ export async function generateReceiptPdf(
         applyTextStyle(doc, TEXT_STYLES.caption);
         doc.text('Verify on Solana Explorer', qrX + qrSize / 2, y + qrSize + 3, { align: 'center' });
     } catch (error) {
-        deps.onError?.(error);
+        deps.onError(error);
     }
 
     doc.save(`solana-receipt-${signature}.pdf`);
