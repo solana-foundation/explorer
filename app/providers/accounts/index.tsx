@@ -5,7 +5,7 @@ import { getStakeActivation, StakeAccount } from '@features/stake';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { address, createSolanaRpc } from '@solana/kit';
+import { createSolanaRpc } from '@solana/kit';
 import {
     AddressLookupTableAccount,
     AddressLookupTableProgram,
@@ -262,7 +262,13 @@ async function fetchMultipleAccounts({
                         const accountData: ParsedAccountData = result.data;
                         space = result.data.space;
                         try {
-                            parsedData = await handleParsedAccountData(connection, pubkey, accountData, url);
+                            parsedData = await handleParsedAccountData(
+                                connection,
+                                pubkey,
+                                accountData,
+                                url,
+                                result.lamports,
+                            );
                         } catch (error) {
                             Logger.error(error, {
                                 address: pubkey.toBase58(),
@@ -322,6 +328,7 @@ async function handleParsedAccountData(
     accountKey: PublicKey,
     accountData: ParsedAccountData,
     url: string,
+    lamports: number,
 ): Promise<ParsedData | undefined> {
     const info = create(accountData.parsed, ParsedInfo);
     switch (accountData.program) {
@@ -347,11 +354,16 @@ async function handleParsedAccountData(
 
         case 'stake': {
             const parsed = create(info, StakeAccount);
-            const isDelegated = parsed.type === 'delegated';
+            const stakeInfo = parsed.info;
 
-            const activation = isDelegated
-                ? await getStakeActivation(createSolanaRpc(url), address(accountKey.toBase58()))
-                : undefined;
+            const activation =
+                parsed.type === 'delegated' && stakeInfo.stake !== null
+                    ? await getStakeActivation(createSolanaRpc(url), {
+                          delegation: stakeInfo.stake.delegation,
+                          lamports: BigInt(lamports),
+                          rentExemptReserve: stakeInfo.meta.rentExemptReserve,
+                      })
+                    : undefined;
             return {
                 activation: activation
                     ? {

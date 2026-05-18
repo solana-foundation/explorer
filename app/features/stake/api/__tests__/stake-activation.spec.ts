@@ -1,40 +1,16 @@
-import { type AccountInfoWithJsonData, type Address, address } from '@solana/kit';
-import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
+import { type AccountInfoWithJsonData } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
-import { getStakeActivation, type StakeActivationRpc, SYSVAR_STAKE_HISTORY_ADDRESS } from '../stake-activation';
+import { type Delegation } from '../../lib/stake-activation-math';
+import { getStakeActivation, type StakeActivationInput, type StakeActivationRpc } from '../stake-activation';
 
-// Placeholder pubkey for fields the test doesn't care about (voter, staker, owner, etc.); the
-// System Program address is just a known-valid base58 string serving as a sentinel.
-const PLACEHOLDER_PUBKEY = SYSTEM_PROGRAM_ADDRESS;
-const STAKE_ACCOUNT_ADDRESS = address(PLACEHOLDER_PUBKEY);
 // Sentinel deactivation epoch used on chain for stake that has never been deactivated.
 const NEVER_DEACTIVATED = 18446744073709551615n;
 
 describe('getStakeActivation', () => {
-    describe('error handling', () => {
-        it('should throw when the stake account is not found', async () => {
-            const rpc = buildRpc({ epoch: 100n, stakeAccount: null, stakeHistory: [] });
-            await expect(getStakeActivation(rpc, STAKE_ACCOUNT_ADDRESS)).rejects.toThrow('Account not found');
-        });
-
-        it('should throw when the stake history sysvar is not found', async () => {
-            const rpc = buildRpc({
-                epoch: 100n,
-                stakeAccount: delegatedStakeFixture(),
-                stakeHistory: null,
-            });
-            await expect(getStakeActivation(rpc, STAKE_ACCOUNT_ADDRESS)).rejects.toThrow('StakeHistory not found');
-        });
-
-        it('should throw when the stake account is not delegated', async () => {
-            const rpc = buildRpc({
-                epoch: 100n,
-                stakeAccount: { kind: 'initialized' },
-                stakeHistory: [],
-            });
-            await expect(getStakeActivation(rpc, STAKE_ACCOUNT_ADDRESS)).rejects.toThrow('not delegated');
-        });
+    it('should throw when the stake history sysvar is not found', async () => {
+        const rpc = buildRpc({ epoch: 100n, stakeHistory: null });
+        await expect(getStakeActivation(rpc, defaultInput())).rejects.toThrow('StakeHistory not found');
     });
 
     // These pipeline tests cover each branch of deriveStatus. Per-branch math edges live in
@@ -48,14 +24,15 @@ describe('getStakeActivation', () => {
         //                = 90M
         const rpc = buildRpc({
             epoch: 11n,
-            stakeAccount: delegatedStakeFixture({
-                activationEpoch: 10n,
-                lamports: 100_002_282_880n,
-                stake: 100_000_000n,
-            }),
             stakeHistory: [{ activating: 100_000_000n, deactivating: 0n, effective: 1_000_000_000n, epoch: 10n }],
         });
-        const result = await getStakeActivation(rpc, STAKE_ACCOUNT_ADDRESS);
+        const result = await getStakeActivation(
+            rpc,
+            defaultInput({
+                delegation: { activationEpoch: 10n, deactivationEpoch: NEVER_DEACTIVATED, stake: 100_000_000n },
+                lamports: 100_002_282_880n,
+            }),
+        );
         expect(result.status).toBe('activating');
         expect(result.active).toBe(90_000_000n);
         // lamports (100_002_282_880) - active (90_000_000) - rentReserve (2_282_880)
@@ -65,12 +42,8 @@ describe('getStakeActivation', () => {
     it('should derive "active" status for a fully warmed delegation', async () => {
         // Empty history at a target epoch past activation → "dropped out of history" branch
         // returns the full delegated stake as effective.
-        const rpc = buildRpc({
-            epoch: 100n,
-            stakeAccount: delegatedStakeFixture(),
-            stakeHistory: [],
-        });
-        const result = await getStakeActivation(rpc, STAKE_ACCOUNT_ADDRESS);
+        const rpc = buildRpc({ epoch: 100n, stakeHistory: [] });
+        const result = await getStakeActivation(rpc, defaultInput());
         expect(result.status).toBe('active');
         expect(result.active).toBe(1_000_000n);
         expect(result.inactive).toBe(0n);
@@ -78,12 +51,11 @@ describe('getStakeActivation', () => {
 
     it('should derive "deactivating" status at the deactivation epoch', async () => {
         // At target == deactivationEpoch, all effective stake is reported as deactivating.
-        const rpc = buildRpc({
-            epoch: 50n,
-            stakeAccount: delegatedStakeFixture({ deactivationEpoch: 50n }),
-            stakeHistory: [],
-        });
-        const result = await getStakeActivation(rpc, STAKE_ACCOUNT_ADDRESS);
+        const rpc = buildRpc({ epoch: 50n, stakeHistory: [] });
+        const result = await getStakeActivation(
+            rpc,
+            defaultInput({ delegation: { activationEpoch: 0n, deactivationEpoch: 50n, stake: 1_000_000n } }),
+        );
         expect(result.status).toBe('deactivating');
         expect(result.active).toBe(1_000_000n);
         expect(result.inactive).toBe(0n);
@@ -91,28 +63,17 @@ describe('getStakeActivation', () => {
 
     it('should derive "inactive" status for a fully decayed delegation', async () => {
         // Target far past deactivation with no history entry → math returns all zeros.
-        const rpc = buildRpc({
-            epoch: 100n,
-            stakeAccount: delegatedStakeFixture({ deactivationEpoch: 10n }),
-            stakeHistory: [],
-        });
-        const result = await getStakeActivation(rpc, STAKE_ACCOUNT_ADDRESS);
+        const rpc = buildRpc({ epoch: 100n, stakeHistory: [] });
+        const result = await getStakeActivation(
+            rpc,
+            defaultInput({ delegation: { activationEpoch: 0n, deactivationEpoch: 10n, stake: 1_000_000n } }),
+        );
         expect(result.status).toBe('inactive');
         expect(result.active).toBe(0n);
         // lamports (3_282_880) - active (0) - rentReserve (2_282_880) = 1_000_000
         expect(result.inactive).toBe(1_000_000n);
     });
 });
-
-type DelegatedStakeFixtureInput = {
-    kind?: 'delegated';
-    lamports?: bigint;
-    rentExemptReserve?: bigint;
-    stake?: bigint;
-    activationEpoch?: bigint;
-    deactivationEpoch?: bigint;
-};
-type StakeAccountFixture = DelegatedStakeFixtureInput | { kind: 'initialized' } | null;
 
 type HistoryEntry = {
     epoch: bigint;
@@ -121,33 +82,24 @@ type HistoryEntry = {
     effective: bigint;
 };
 
-function delegatedStakeFixture(overrides: DelegatedStakeFixtureInput = {}): DelegatedStakeFixtureInput {
-    return {
+function defaultInput(overrides: Partial<StakeActivationInput> = {}): StakeActivationInput {
+    const defaultDelegation: Delegation = {
         activationEpoch: 0n,
         deactivationEpoch: NEVER_DEACTIVATED,
-        kind: 'delegated',
+        stake: 1_000_000n,
+    };
+    return {
+        delegation: defaultDelegation,
         lamports: 3_282_880n,
         rentExemptReserve: 2_282_880n,
-        stake: 1_000_000n,
         ...overrides,
     };
 }
 
-function buildRpc({
-    epoch,
-    stakeAccount,
-    stakeHistory,
-}: {
-    epoch: bigint;
-    stakeAccount: StakeAccountFixture;
-    stakeHistory: HistoryEntry[] | null;
-}): StakeActivationRpc {
+function buildRpc({ epoch, stakeHistory }: { epoch: bigint; stakeHistory: HistoryEntry[] | null }): StakeActivationRpc {
     return {
-        getAccountInfo: (addr: Address) => ({
-            send: async () =>
-                addr === SYSVAR_STAKE_HISTORY_ADDRESS
-                    ? buildStakeHistoryResponse(stakeHistory)
-                    : buildStakeAccountResponse(stakeAccount),
+        getAccountInfo: () => ({
+            send: async () => buildStakeHistoryResponse(stakeHistory),
         }),
         getEpochInfo: () => ({
             send: async () => ({ epoch }),
@@ -155,51 +107,11 @@ function buildRpc({
     };
 }
 
-function buildStakeAccountResponse(fixture: StakeAccountFixture) {
-    if (fixture === null) {
-        return { context: { slot: 0n }, value: null };
-    }
-    if (fixture.kind === 'initialized') {
-        return buildJsonAccountResponse(2_282_880n, {
-            parsed: {
-                info: {
-                    meta: defaultMeta('2282880'),
-                    stake: null,
-                },
-                type: 'initialized',
-            },
-            program: 'stake',
-            space: 200n,
-        });
-    }
-    const f = { ...delegatedStakeFixture(), ...fixture };
-    return buildJsonAccountResponse(f.lamports ?? 0n, {
-        parsed: {
-            info: {
-                meta: defaultMeta(String(f.rentExemptReserve)),
-                stake: {
-                    creditsObserved: 0,
-                    delegation: {
-                        activationEpoch: String(f.activationEpoch),
-                        deactivationEpoch: String(f.deactivationEpoch),
-                        stake: String(f.stake),
-                        voter: PLACEHOLDER_PUBKEY,
-                        warmupCooldownRate: 0.09,
-                    },
-                },
-            },
-            type: 'delegated',
-        },
-        program: 'stake',
-        space: 200n,
-    });
-}
-
 function buildStakeHistoryResponse(entries: HistoryEntry[] | null) {
     if (entries === null) {
         return { context: { slot: 0n }, value: null };
     }
-    return buildJsonAccountResponse(1n, {
+    return buildJsonAccountResponse({
         parsed: {
             info: entries.map(e => ({
                 epoch: e.epoch,
@@ -212,30 +124,9 @@ function buildStakeHistoryResponse(entries: HistoryEntry[] | null) {
     });
 }
 
-function buildJsonAccountResponse(lamports: bigint, data: AccountInfoWithJsonData['data']) {
+function buildJsonAccountResponse(data: AccountInfoWithJsonData['data']) {
     return {
         context: { slot: 0n },
-        value: {
-            data,
-            executable: false,
-            lamports,
-            owner: PLACEHOLDER_PUBKEY,
-            space: 200n,
-        },
-    };
-}
-
-function defaultMeta(rentExemptReserve: string) {
-    return {
-        authorized: {
-            staker: PLACEHOLDER_PUBKEY,
-            withdrawer: PLACEHOLDER_PUBKEY,
-        },
-        lockup: {
-            custodian: PLACEHOLDER_PUBKEY,
-            epoch: 0,
-            unixTimestamp: 0,
-        },
-        rentExemptReserve,
+        value: { data },
     };
 }

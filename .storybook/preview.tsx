@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 // Storybook serialises story args with JSON.stringify (for the controls panel and inter-frame
 // messaging), which throws on BigInt. Story fixtures here use BigInt for lamports / epoch values,
 // so teach BigInt how to encode itself as a string.
- 
+
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
 };

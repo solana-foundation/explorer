@@ -11,13 +11,7 @@
 //
 // @solana-program/stake can't replace this: it's a Codama-generated program client (instructions,
 // account codecs, types), and activation-state replay isn't on-chain logic, so it isn't generated.
-import {
-    type AccountInfoWithJsonData,
-    type Address,
-    address,
-    type JsonParsedStakeProgramAccount,
-    type JsonParsedSysvarAccount,
-} from '@solana/kit';
+import { type AccountInfoWithJsonData, type Address, address, type JsonParsedSysvarAccount } from '@solana/kit';
 
 import {
     type Delegation,
@@ -40,18 +34,12 @@ interface StakeActivation {
 type AccountInfoResponse = {
     value: {
         data: AccountInfoWithJsonData['data'];
-        lamports: bigint;
     } | null;
 };
 export interface StakeActivationRpc {
     getEpochInfo(): { send(): Promise<{ epoch: bigint }> };
     getAccountInfo(address: Address, config: { encoding: 'jsonParsed' }): { send(): Promise<AccountInfoResponse> };
 }
-
-type StakeAccount = {
-    delegation: Delegation;
-    rentExemptReserve: bigint;
-};
 
 // The kit-typed shape of `getAccountInfo(…, { encoding: 'jsonParsed' }).send()`'s `value.data`:
 // either the program-specific parsed JSON, or a `[base64, 'base64']` tuple when the RPC could
@@ -63,32 +51,40 @@ type ParsedAccountData = Exclude<JsonAccountData, readonly [string, string]>;
 // only exports STAKE_PROGRAM_ADDRESS), so the on-chain literal is the source of truth here.
 export const SYSVAR_STAKE_HISTORY_ADDRESS = address('SysvarStakeHistory1111111111111111111111111');
 
-export async function getStakeActivation(rpc: StakeActivationRpc, stakeAddress: Address): Promise<StakeActivation> {
-    const [epochInfo, stakeAccountResponse, stakeHistoryResponse] = await Promise.all([
+export type StakeActivationInput = {
+    delegation: Delegation;
+    rentExemptReserve: bigint;
+    lamports: bigint;
+};
+
+// Caller supplies the already-parsed delegation + rent + lamports (it just parsed them in
+// `handleParsedAccountData`), so we only need to fetch the cluster-wide stake-history sysvar
+// and the current epoch. Avoids a redundant stake-account round trip and the race window
+// between two `getAccountInfo` calls.
+export async function getStakeActivation(
+    rpc: StakeActivationRpc,
+    { delegation, rentExemptReserve, lamports }: StakeActivationInput,
+): Promise<StakeActivation> {
+    const [epochInfo, stakeHistoryResponse] = await Promise.all([
         rpc.getEpochInfo().send(),
-        rpc.getAccountInfo(stakeAddress, { encoding: 'jsonParsed' }).send(),
         rpc.getAccountInfo(SYSVAR_STAKE_HISTORY_ADDRESS, { encoding: 'jsonParsed' }).send(),
     ]);
 
-    if (stakeAccountResponse.value === null) {
-        throw new Error('Account not found');
-    }
     if (stakeHistoryResponse.value === null) {
         throw new Error('StakeHistory not found');
     }
 
-    const stakeAccount = parseStakeAccount(stakeAccountResponse.value.data);
     const stakeHistory = parseStakeHistory(stakeHistoryResponse.value.data);
 
     const { effective, activating, deactivating } = getStakeActivatingAndDeactivating(
-        stakeAccount.delegation,
+        delegation,
         epochInfo.epoch,
         stakeHistory,
     );
 
     return {
         active: effective,
-        inactive: stakeAccountResponse.value.lamports - effective - stakeAccount.rentExemptReserve,
+        inactive: lamports - effective - rentExemptReserve,
         status: deriveStatus({ activating, deactivating, effective }),
     };
 }
@@ -100,48 +96,20 @@ function deriveStatus({ effective, activating, deactivating }: StakeActivatingAn
     return 'inactive';
 }
 
-function parseStakeAccount(data: JsonAccountData): StakeAccount {
-    const { parsed } = requireParsedAccountData(data);
-    if (!isStakeProgramAccount(parsed)) {
-        throw new Error('Account is not a stake account');
-    }
-    if (parsed.type !== 'delegated' || parsed.info.stake === null) {
-        throw new Error('Stake account is not delegated');
-    }
-    const { delegation } = parsed.info.stake;
-    return {
-        delegation: {
-            activationEpoch: BigInt(delegation.activationEpoch),
-            deactivationEpoch: BigInt(delegation.deactivationEpoch),
-            stake: BigInt(delegation.stake),
-        },
-        rentExemptReserve: BigInt(parsed.info.meta.rentExemptReserve),
-    };
-}
-
 function parseStakeHistory(data: JsonAccountData): StakeHistoryEntry[] {
-    const { parsed } = requireParsedAccountData(data);
-    if (!isStakeHistorySysvar(parsed)) {
+    if (Array.isArray(data)) {
+        // `[base64, 'base64']` tuple — RPC couldn't parse the account
+        throw new Error('Stake history sysvar data is not parsed');
+    }
+    if (!isStakeHistorySysvar(data.parsed)) {
         throw new Error('Account is not the stake history sysvar');
     }
-    return parsed.info.map(entry => ({
+    return data.parsed.info.map(entry => ({
         activating: BigInt(entry.stakeHistory.activating),
         deactivating: BigInt(entry.stakeHistory.deactivating),
         effective: BigInt(entry.stakeHistory.effective),
         epoch: BigInt(entry.epoch),
     }));
-}
-
-function requireParsedAccountData(data: JsonAccountData): ParsedAccountData {
-    if (Array.isArray(data)) {
-        // `[base64, 'base64']` tuple — RPC couldn't parse the account
-        throw new Error('Account data is not parsed');
-    }
-    return data;
-}
-
-function isStakeProgramAccount(parsed: ParsedAccountData['parsed']): parsed is JsonParsedStakeProgramAccount {
-    return (parsed.type === 'delegated' || parsed.type === 'initialized') && parsed.info !== undefined;
 }
 
 function isStakeHistorySysvar(
