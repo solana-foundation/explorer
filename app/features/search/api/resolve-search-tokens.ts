@@ -57,13 +57,13 @@ export async function resolveSearchTokens(query: string, cluster: Cluster, custo
     try {
         [assets, jupiterIconMap] = await Promise.all([
             getAssetBatch(addresses, rpcUrl, enrichmentController.signal),
-            fetchJupiterImages(addresses, imageController.signal),
+            fetchJupiterImages(discovered, imageController.signal),
         ]);
     } finally {
         clearTimeout(enrichmentTimeout);
         clearTimeout(imageTimeout);
     }
-
+    
     const iconMap = new Map(assets?.map(a => [a.id, a.content.links?.image]) ?? []);
 
     return discovered.map(t => ({

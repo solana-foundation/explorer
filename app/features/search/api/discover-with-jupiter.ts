@@ -8,6 +8,7 @@ import type { DiscoveredToken } from './types';
 
 const JupiterTokenSchema = type({
     decimals: optional(number()),
+    icon: optional(nullable(string())),
     id: string(),
     isVerified: optional(boolean()),
     logoURI: optional(nullable(string())),
@@ -50,7 +51,7 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
             address: item.id,
             decimals: item.decimals,
             isVerified: item.isVerified === true,
-            logoUri: item.logoURI ?? undefined,
+            logoUri: item.icon ?? item.logoURI ?? undefined,
             name: item.name,
             symbol: item.symbol,
         }));
@@ -64,27 +65,59 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
     }
 }
 
-export async function fetchJupiterImages(addresses: string[], signal: AbortSignal): Promise<Map<string, string>> {
+const JUPITER_IMAGES_CACHE_REVALIDATE_S = 30;
+
+// Search by symbol so Jupiter returns full token data including the icon field.
+// Searching by raw address strips the logo from the response.
+export async function fetchJupiterImages(tokens: DiscoveredToken[], signal: AbortSignal): Promise<Map<string, string>> {
     const jupiterApiKey = getJupiterApiKey();
+    if (!jupiterApiKey) return new Map();
+
+    // Only fetch logos for tokens that discovery didn't already provide.
+    const missing = tokens.filter(t => !t.logoUri);
+    if (missing.length === 0) return new Map();
+
     const results = new Map<string, string>();
 
-    await Promise.allSettled(
-        addresses.map(async address => {
-            try {
-                const url = `https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(address)}`;
-                const headers: Record<string, string> = { Accept: 'application/json' };
-                if (jupiterApiKey) headers['x-api-key'] = jupiterApiKey;
+    const abortPromise = new Promise<never>((_, reject) => {
+        if (signal.aborted) {
+            reject(signal.reason);
+        } else {
+            signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+        }
+    });
 
-                const response = await fetch(url, { headers, signal });
-                if (!response.ok) return;
-                const data = await response.json();
-                if (!is(data, JupiterSearchResponseSchema)) return;
-                const match = data.find(t => t.id === address);
-                if (match?.logoURI) {
-                    results.set(address, match.logoURI);
+    await Promise.allSettled(
+        missing.map(async token => {
+            try {
+                const url = `https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(token.symbol)}`;
+                const fetchPromise = fetch(url, {
+                    headers: { Accept: 'application/json', 'x-api-key': jupiterApiKey },
+                    next: { revalidate: JUPITER_IMAGES_CACHE_REVALIDATE_S },
+                });
+                const response = await Promise.race([fetchPromise, abortPromise]);
+                if (!response.ok) {
+                    Logger.warn(`[jupiter-images] ${response.status} for ${token.address}`);
+                    return;
                 }
-            } catch {
-                // silently ignore per-token failures (network errors, aborts)
+                const data = await response.json();
+                if (!is(data, JupiterSearchResponseSchema)) {
+                    Logger.warn('[jupiter-images] schema mismatch');
+                    return;
+                }
+                const match = data.find(t => t.id === token.address);
+                const logo = match?.icon ?? match?.logoURI;
+                if (logo) {
+                    results.set(token.address, logo);
+                } else if (!match) {
+                    Logger.warn(`[jupiter-images] no match for ${token.symbol} in ${data.length} results`);
+                }
+            } catch (error) {
+                if (!matchAbortError(error)) {
+                    Logger.error(error instanceof Error ? error : new Error('[jupiter-images] fetch failed'), {
+                        sentry: true,
+                    });
+                }
             }
         }),
     );
