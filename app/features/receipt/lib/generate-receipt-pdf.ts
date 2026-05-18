@@ -147,7 +147,7 @@ const FOOTER_FONT_SIZE = 10;
 const FOOTER_CELL_HEIGHT = 6;
 
 function drawTotalRow(doc: jsPDF, label: string, fieldName: string, value: string, y: number): number {
-    applyTextStyle(doc, TEXT_STYLES.totalLabel);
+    applyTextStyle(doc, TEXT_STYLES.valueStrong);
     doc.text(label, FOOTER_LABEL_X, y + FOOTER_CELL_HEIGHT / 2, { baseline: 'middle' });
     addEditableField(
         doc,
@@ -266,7 +266,7 @@ function drawAmountLine1(doc: jsPDF, formatted: string, unit: string, rightX: nu
     const { leadingZeros, significantDigits } = splitAtFirstNonZeroDigit(formatted);
     const suffix = ` ${unit}`;
 
-    applyTextStyle(doc, TEXT_STYLES.value);
+    applyTextStyle(doc, TEXT_STYLES.valueStrong);
     const scaledSize = fitFontSize(doc, `${formatted}${suffix}`, TABLE_AMOUNT_WIDTH, TEXT_STYLES.value.size);
 
     let x = rightX;
@@ -276,7 +276,7 @@ function drawAmountLine1(doc: jsPDF, formatted: string, unit: string, rightX: nu
     x -= doc.getTextWidth(suffix);
     doc.text(suffix, x, y);
 
-    applyTextStyle(doc, TEXT_STYLES.totalLabel);
+    applyTextStyle(doc, TEXT_STYLES.valueStrong);
     doc.setFontSize(scaledSize);
     x -= doc.getTextWidth(significantDigits);
     doc.text(significantDigits, x, y);
