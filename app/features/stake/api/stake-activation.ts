@@ -15,11 +15,8 @@ import {
     type AccountInfoWithJsonData,
     type Address,
     address,
-    type GetAccountInfoApi,
-    type GetEpochInfoApi,
     type JsonParsedStakeProgramAccount,
     type JsonParsedSysvarAccount,
-    type Rpc,
 } from '@solana/kit';
 
 import {
@@ -37,7 +34,19 @@ interface StakeActivation {
     inactive: bigint;
 }
 
-type StakeActivationRpc = Rpc<GetAccountInfoApi & GetEpochInfoApi>;
+// Minimal RPC surface this function depends on. Declared structurally so the production
+// `Rpc<GetAccountInfoApi & GetEpochInfoApi>` satisfies it by width, and tests can build a typed
+// mock without a cast at the test boundary.
+type AccountInfoResponse = {
+    value: {
+        data: AccountInfoWithJsonData['data'];
+        lamports: bigint;
+    } | null;
+};
+export interface StakeActivationRpc {
+    getEpochInfo(): { send(): Promise<{ epoch: bigint }> };
+    getAccountInfo(address: Address, config: { encoding: 'jsonParsed' }): { send(): Promise<AccountInfoResponse> };
+}
 
 type StakeAccount = {
     delegation: Delegation;

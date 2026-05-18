@@ -1,7 +1,7 @@
 import { type Address, address } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
-import { getStakeActivation } from '../stake-activation';
+import { getStakeActivation, type StakeActivationRpc } from '../stake-activation';
 
 const STAKE_ACCOUNT_ADDRESS = address('11111111111111111111111111111111');
 const STAKE_HISTORY_ADDRESS = 'SysvarStakeHistory1111111111111111111111111';
@@ -34,14 +34,15 @@ describe('getStakeActivation', () => {
         });
     });
 
-    it('should assemble the response end-to-end through parse, math, and status derivation', async () => {
+    // These pipeline tests cover each branch of deriveStatus. Per-branch math edges live in
+    // lib/__tests__/stake-activation-math.spec.ts; these only verify status derivation +
+    // lamports/rent arithmetic + JSON parsing wire together for each status string.
+
+    it('should derive "activating" status one epoch after activation', async () => {
         // One epoch after activation, the cluster's 9% warmup cap applies.
         // newlyEffective = (remaining / activating) * (effective * 0.09)
         //                = (100M / 100M) * (1B * 0.09)
         //                = 90M
-        // The math itself is unit-tested in lib/__tests__/stake-activation-math.spec.ts; this
-        // test exists to verify the full pipeline — kit JSON shape parsing, lamports/rent
-        // arithmetic, and status derivation — all wire together.
         const rpc = buildRpc({
             epoch: 11n,
             stakeAccount: delegatedStakeFixture({
@@ -56,6 +57,47 @@ describe('getStakeActivation', () => {
         expect(result.active).toBe(90_000_000n);
         // lamports (100_002_282_880) - active (90_000_000) - rentReserve (2_282_880)
         expect(result.inactive).toBe(99_910_000_000n);
+    });
+
+    it('should derive "active" status for a fully warmed delegation', async () => {
+        // Empty history at a target epoch past activation → "dropped out of history" branch
+        // returns the full delegated stake as effective.
+        const rpc = buildRpc({
+            epoch: 100n,
+            stakeAccount: delegatedStakeFixture(),
+            stakeHistory: [],
+        });
+        const result = await getStakeActivation(rpc, STAKE_ACCOUNT_ADDRESS);
+        expect(result.status).toBe('active');
+        expect(result.active).toBe(1_000_000n);
+        expect(result.inactive).toBe(0n);
+    });
+
+    it('should derive "deactivating" status at the deactivation epoch', async () => {
+        // At target == deactivationEpoch, all effective stake is reported as deactivating.
+        const rpc = buildRpc({
+            epoch: 50n,
+            stakeAccount: delegatedStakeFixture({ deactivationEpoch: 50n }),
+            stakeHistory: [],
+        });
+        const result = await getStakeActivation(rpc, STAKE_ACCOUNT_ADDRESS);
+        expect(result.status).toBe('deactivating');
+        expect(result.active).toBe(1_000_000n);
+        expect(result.inactive).toBe(0n);
+    });
+
+    it('should derive "inactive" status for a fully decayed delegation', async () => {
+        // Target far past deactivation with no history entry → math returns all zeros.
+        const rpc = buildRpc({
+            epoch: 100n,
+            stakeAccount: delegatedStakeFixture({ deactivationEpoch: 10n }),
+            stakeHistory: [],
+        });
+        const result = await getStakeActivation(rpc, STAKE_ACCOUNT_ADDRESS);
+        expect(result.status).toBe('inactive');
+        expect(result.active).toBe(0n);
+        // lamports (3_282_880) - active (0) - rentReserve (2_282_880) = 1_000_000
+        expect(result.inactive).toBe(1_000_000n);
     });
 });
 
@@ -96,8 +138,8 @@ function buildRpc({
     epoch: bigint;
     stakeAccount: StakeAccountFixture;
     stakeHistory: HistoryEntry[] | null;
-}) {
-    const rpc = {
+}): StakeActivationRpc {
+    return {
         getAccountInfo: (addr: Address) => ({
             send: async () =>
                 addr === STAKE_HISTORY_ADDRESS
@@ -105,20 +147,9 @@ function buildRpc({
                     : buildStakeAccountResponse(stakeAccount),
         }),
         getEpochInfo: () => ({
-            send: async () => ({
-                absoluteSlot: 0n,
-                blockHeight: 0n,
-                epoch,
-                slotIndex: 0n,
-                slotsInEpoch: 432_000n,
-                transactionCount: null,
-            }),
+            send: async () => ({ epoch }),
         }),
     };
-    // The mock matches the structural surface getStakeActivation uses (.getEpochInfo,
-    // .getAccountInfo with `.send()`), but not the full Rpc<...> generic. Casting at the
-    // test/mock boundary keeps the production type strict.
-    return rpc as unknown as Parameters<typeof getStakeActivation>[0];
 }
 
 function buildStakeAccountResponse(fixture: StakeAccountFixture) {
@@ -127,8 +158,6 @@ function buildStakeAccountResponse(fixture: StakeAccountFixture) {
     }
     if (fixture.kind === 'initialized') {
         return buildJsonAccountResponse(2_282_880n, {
-            program: 'stake',
-            space: 200n,
             parsed: {
                 info: {
                     meta: defaultMeta('2282880'),
@@ -136,12 +165,12 @@ function buildStakeAccountResponse(fixture: StakeAccountFixture) {
                 },
                 type: 'initialized',
             },
+            program: 'stake',
+            space: 200n,
         });
     }
     const f = { ...delegatedStakeFixture(), ...fixture };
     return buildJsonAccountResponse(f.lamports ?? 0n, {
-        program: 'stake',
-        space: 200n,
         parsed: {
             info: {
                 meta: defaultMeta(String(f.rentExemptReserve)),
@@ -158,6 +187,8 @@ function buildStakeAccountResponse(fixture: StakeAccountFixture) {
             },
             type: 'delegated',
         },
+        program: 'stake',
+        space: 200n,
     });
 }
 
@@ -166,8 +197,6 @@ function buildStakeHistoryResponse(entries: HistoryEntry[] | null) {
         return { context: { slot: 0n }, value: null };
     }
     return buildJsonAccountResponse(1n, {
-        program: 'sysvar',
-        space: BigInt(entries.length * 32),
         parsed: {
             info: entries.map(e => ({
                 epoch: e.epoch,
@@ -175,6 +204,8 @@ function buildStakeHistoryResponse(entries: HistoryEntry[] | null) {
             })),
             type: 'stakeHistory',
         },
+        program: 'sysvar',
+        space: BigInt(entries.length * 32),
     });
 }
 
