@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { GENESIS_HASHES } from '@/app/entities/chain-id/lib/const';
 import { getAssetBatch } from '@/app/entities/digital-asset/api';
 
 import { GET } from '../route';
@@ -282,6 +283,57 @@ describe('GET /api/search', () => {
             const res = await GET(makeRequest('sol'));
             const data = await res.json();
             expect(data.results.tokens[0].icon).toBeUndefined();
+        });
+    });
+
+    describe('cluster routing', () => {
+        it('should return 400 for unknown cluster slug', async () => {
+            const res = await GET(new Request(`http://localhost/api/search?q=sol-${++testSeq}&cluster=bogus`));
+            expect(res.status).toBe(400);
+            expect(await res.json()).toMatchObject({ error: 'Invalid cluster', success: false });
+            expect(fetchMock).not.toHaveBeenCalled();
+        });
+
+        it('should return empty with no-store headers when Custom cluster has no genesisHash', async () => {
+            const res = await GET(new Request(`http://localhost/api/search?q=sol-${++testSeq}&cluster=custom`));
+            expect(res.status).toBe(200);
+            const data = await res.json();
+            expect(data).toMatchObject({ results: { tokens: [] }, success: true });
+            expect(res.headers.get('Cache-Control')).toContain('no-store');
+            expect(fetchMock).not.toHaveBeenCalled();
+        });
+
+        it('should return empty with no-store headers when Custom genesisHash is unknown', async () => {
+            const res = await GET(
+                new Request(`http://localhost/api/search?q=sol-${++testSeq}&cluster=custom&genesisHash=UnknownHash`),
+            );
+            expect(res.status).toBe(200);
+            const data = await res.json();
+            expect(data.results.tokens).toEqual([]);
+            expect(res.headers.get('Cache-Control')).toContain('no-store');
+            expect(fetchMock).not.toHaveBeenCalled();
+        });
+
+        it('should resolve Custom + mainnet genesisHash and run search', async () => {
+            mockFetch(200, [makeJupiterToken()]);
+            const res = await GET(
+                new Request(
+                    `http://localhost/api/search?q=sol-${++testSeq}&cluster=custom&genesisHash=${GENESIS_HASHES.MAINNET}`,
+                ),
+            );
+            expect(res.status).toBe(200);
+            const data = await res.json();
+            expect(data.results.tokens).toHaveLength(1);
+            expect(res.headers.get('Cache-Control')).toContain('s-maxage=30');
+        });
+
+        it('should short-circuit Simd296 with empty result and no-store headers', async () => {
+            const res = await GET(makeRequest('sol', 'simd296'));
+            expect(res.status).toBe(200);
+            const data = await res.json();
+            expect(data).toMatchObject({ results: { tokens: [] }, success: true });
+            expect(res.headers.get('Cache-Control')).toContain('no-store');
+            expect(fetchMock).not.toHaveBeenCalled();
         });
     });
 });

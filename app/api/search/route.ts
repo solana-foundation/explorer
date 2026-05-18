@@ -79,8 +79,7 @@ export async function GET(request: Request) {
         );
     }
 
-    // SIMD-296 is an experimental testnet cluster that does not expose
-    // a DAS API endpoint. Token search requires DAS and is unavailable on this cluster.
+    // SIMD-296 is an experimental cluster not covered by Jupiter/UTL token lists.
     if (cluster === Cluster.Simd296) {
         return NextResponse.json(
             {
