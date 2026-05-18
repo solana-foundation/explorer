@@ -1,52 +1,57 @@
 import { vi } from 'vitest';
 
 import type { FormattedReceipt } from '../../types';
+import { generateReceiptPdf, loadPdfDeps } from '../generate-receipt-pdf';
 
-const mockTextField = vi.fn(() => ({
-    defaultValue: '',
-    fieldName: '',
-    fontSize: 0,
-    height: 0,
-    value: '',
-    width: 0,
-    x: 0,
-    y: 0,
-}));
+const { mockJsPDF, mockDoc, mockSave, mockAddField, mockText, mockAddImage, mockTextField, mockToDataURL } =
+    vi.hoisted(() => {
+        const mockTextField = vi.fn(() => ({
+            defaultValue: '',
+            fieldName: '',
+            fontSize: 0,
+            height: 0,
+            value: '',
+            width: 0,
+            x: 0,
+            y: 0,
+        }));
+        const mockSave = vi.fn();
+        const mockAddField = vi.fn();
+        const mockText = vi.fn();
+        const mockAddImage = vi.fn();
+        const mockDoc = {
+            AcroForm: { TextField: mockTextField },
+            addField: mockAddField,
+            addImage: mockAddImage,
+            addPage: vi.fn(),
+            getTextWidth: vi.fn().mockReturnValue(0),
+            line: vi.fn(),
+            link: vi.fn(),
+            rect: vi.fn(),
+            roundedRect: vi.fn(),
+            save: mockSave,
+            setDrawColor: vi.fn(),
+            setFillColor: vi.fn(),
+            setFont: vi.fn(),
+            setFontSize: vi.fn(),
+            setLineWidth: vi.fn(),
+            setTextColor: vi.fn(),
+            splitTextToSize: vi.fn((text: string, _maxWidth: number) => [text]),
+            text: mockText,
+        };
+        return {
+            mockAddField,
+            mockAddImage,
+            mockDoc,
+            mockJsPDF: vi.fn(() => mockDoc),
+            mockSave,
+            mockText,
+            mockTextField,
+            mockToDataURL: vi.fn().mockResolvedValue('data:image/png;base64,qrcode'),
+        };
+    });
 
-const mockSave = vi.fn();
-const mockAddField = vi.fn();
-const mockText = vi.fn();
-const mockAddImage = vi.fn();
-const mockSplitTextToSize = vi.fn((text: string, _maxWidth: number) => [text]);
-
-const mockDoc = {
-    AcroForm: {
-        TextField: mockTextField,
-    },
-    addField: mockAddField,
-    addImage: mockAddImage,
-    addPage: vi.fn(),
-    getTextWidth: vi.fn().mockReturnValue(0),
-    line: vi.fn(),
-    link: vi.fn(),
-    rect: vi.fn(),
-    roundedRect: vi.fn(),
-    save: mockSave,
-    setDrawColor: vi.fn(),
-    setFillColor: vi.fn(),
-    setFont: vi.fn(),
-    setFontSize: vi.fn(),
-    setLineWidth: vi.fn(),
-    setTextColor: vi.fn(),
-    splitTextToSize: mockSplitTextToSize,
-    text: mockText,
-};
-
-vi.mock('jspdf', () => ({
-    jsPDF: vi.fn(() => mockDoc),
-}));
-
-const mockToDataURL = vi.fn().mockResolvedValue('data:image/png;base64,qrcode');
+vi.mock('jspdf', () => ({ jsPDF: mockJsPDF }));
 
 vi.mock('qrcode', () => ({
     default: { toDataURL: (...args: unknown[]) => mockToDataURL(...args) },
@@ -72,23 +77,20 @@ function collectText(): string {
 }
 
 describe('generateReceiptPdf', () => {
-    let generateReceiptPdf: typeof import('../generate-receipt-pdf').generateReceiptPdf;
-    let loadPdfDeps: typeof import('../generate-receipt-pdf').loadPdfDeps;
+    const mockOnError = vi.fn();
 
-    beforeEach(async () => {
+    beforeEach(() => {
         vi.clearAllMocks();
-        ({ generateReceiptPdf, loadPdfDeps } = await import('../generate-receipt-pdf'));
     });
 
     it('should create jsPDF instance with A4 format', async () => {
-        const { jsPDF } = await import('jspdf');
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
-        expect(jsPDF).toHaveBeenCalledWith({ format: 'a4', unit: 'mm' });
+        expect(mockJsPDF).toHaveBeenCalledWith({ format: 'a4', unit: 'mm' });
     });
 
     it('should render transaction details labels and values', async () => {
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         const allText = collectText();
@@ -104,7 +106,7 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should render transfers table with sender, receiver, and amount columns', async () => {
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         const allText = collectText();
@@ -118,7 +120,7 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should render single-transfer receipt as a single table row', async () => {
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         const textCalls = mockText.mock.calls.map(([text]) => (Array.isArray(text) ? text.join(' ') : text));
@@ -137,7 +139,7 @@ describe('generateReceiptPdf', () => {
         }));
         const multiReceipt: FormattedReceipt = { ...RECEIPT, total: { ...RECEIPT.total, raw: 300000000 }, transfers };
 
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, multiReceipt, SIGNATURE, RECEIPT_URL);
 
         const allText = collectText();
@@ -163,7 +165,7 @@ describe('generateReceiptPdf', () => {
         }));
         const multiReceipt: FormattedReceipt = { ...RECEIPT, total: { ...RECEIPT.total, raw: 1500000000 }, transfers };
 
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, multiReceipt, SIGNATURE, RECEIPT_URL);
 
         const allText = collectText();
@@ -196,7 +198,7 @@ describe('generateReceiptPdf', () => {
         const totalRaw = transfers.reduce((sum, t) => sum + t.amount.raw, 0);
         const multiReceipt: FormattedReceipt = { ...RECEIPT, total: { ...RECEIPT.total, raw: totalRaw }, transfers };
 
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, multiReceipt, SIGNATURE, RECEIPT_URL);
 
         const allText = collectText();
@@ -212,7 +214,7 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should create AcroForm text fields for editable sections', async () => {
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         const fieldNames = mockTextField.mock.results.map(r => r.value.fieldName).filter(Boolean);
@@ -223,7 +225,7 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should render Total as a pre-filled editable field', async () => {
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         const fieldNames = mockTextField.mock.results.map(r => r.value.fieldName).filter(Boolean);
@@ -234,7 +236,7 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should call doc.save with full signature filename', async () => {
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
@@ -242,7 +244,7 @@ describe('generateReceiptPdf', () => {
 
     it('should omit memo cell when memo is absent', async () => {
         const receiptWithoutMemo: FormattedReceipt = { ...RECEIPT, memo: undefined };
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
 
         await generateReceiptPdf(deps, receiptWithoutMemo, SIGNATURE, RECEIPT_URL);
 
@@ -254,7 +256,7 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should add editable fields via addField for each AcroForm field', async () => {
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         expect(mockAddField).toHaveBeenCalled();
@@ -262,7 +264,7 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should render memo cell with label and value when present', async () => {
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         const allText = collectText();
@@ -272,7 +274,7 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should embed QR code image in the PDF', async () => {
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         expect(mockToDataURL).toHaveBeenCalledWith(RECEIPT_URL, { margin: 0, width: 200 });
@@ -286,7 +288,7 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should render prorated USD per row when usdValue is provided', async () => {
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL, undefined, '$200.00');
 
         const allText = collectText();
@@ -296,7 +298,7 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should not render any USD value when usdValue is not provided', async () => {
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(mockOnError);
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         const allText = collectText();
@@ -305,11 +307,104 @@ describe('generateReceiptPdf', () => {
     });
 
     it('should handle QR code generation failure gracefully', async () => {
-        mockToDataURL.mockRejectedValueOnce(new Error('QR generation failed'));
-        const deps = await loadPdfDeps();
+        const qrError = new Error('QR generation failed');
+        mockToDataURL.mockRejectedValueOnce(qrError);
+        const deps = await loadPdfDeps(mockOnError);
 
         await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
 
         expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
+        expect(mockOnError).toHaveBeenCalledWith(qrError);
+    });
+
+    describe('error paths', () => {
+        // svgToDataUrl always opens a Blob URL — making createObjectURL throw
+        // is the most surgical way to force the SVG→PNG conversion to fail.
+        function breakSvgConversion(): { error: Error; restore: () => void } {
+            const error = new Error('Forced SVG conversion failure');
+            const target = URL as { createObjectURL?: (b: Blob) => string };
+            const original = target.createObjectURL;
+            target.createObjectURL = () => {
+                throw error;
+            };
+            return {
+                error,
+                restore: () => {
+                    if (original) target.createObjectURL = original;
+                    else delete target.createObjectURL;
+                },
+            };
+        }
+
+        it('should call onError and render the Solana Explorer text fallback when the logo SVG fails', async () => {
+            const { error, restore } = breakSvgConversion();
+            try {
+                const deps = await loadPdfDeps(mockOnError);
+                await generateReceiptPdf(deps, RECEIPT, SIGNATURE, RECEIPT_URL);
+
+                expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
+                expect(mockOnError).toHaveBeenCalledWith(error);
+                expect(collectText()).toContain('Solana Explorer');
+            } finally {
+                restore();
+            }
+        });
+
+        it('should call onError when the warning-icon SVG fails on a multi-transfer receipt', async () => {
+            const transfers = Array.from({ length: 15 }, (_, i) => ({
+                amount: { formatted: '0.1', raw: 100000000, unit: 'SOL' },
+                receiver: { address: `Recv${i}`.padEnd(43, 'x'), truncated: `R${i}` },
+                sender: { address: `Send${i}`.padEnd(43, 'x'), truncated: `S${i}` },
+            }));
+            const multiReceipt: FormattedReceipt = {
+                ...RECEIPT,
+                total: { ...RECEIPT.total, raw: 1500000000 },
+                transfers,
+            };
+
+            const { error, restore } = breakSvgConversion();
+            try {
+                const deps = await loadPdfDeps(mockOnError);
+                await generateReceiptPdf(deps, multiReceipt, SIGNATURE, RECEIPT_URL);
+
+                expect(mockSave).toHaveBeenCalled();
+                // Warning-icon path + logo path both fail → onError invoked at least twice
+                expect(mockOnError.mock.calls.length).toBeGreaterThanOrEqual(2);
+                expect(mockOnError).toHaveBeenCalledWith(error);
+                // Warning bar text still renders even when its icon failed
+                expect(collectText()).toContain('Only the 12 largest transfers are shown here');
+            } finally {
+                restore();
+            }
+        });
+
+        it('should save the PDF even when logo, warning icon, and QR code all fail', async () => {
+            const transfers = Array.from({ length: 15 }, (_, i) => ({
+                amount: { formatted: '0.1', raw: 100000000, unit: 'SOL' },
+                receiver: { address: `Recv${i}`.padEnd(43, 'x'), truncated: `R${i}` },
+                sender: { address: `Send${i}`.padEnd(43, 'x'), truncated: `S${i}` },
+            }));
+            const multiReceipt: FormattedReceipt = {
+                ...RECEIPT,
+                total: { ...RECEIPT.total, raw: 1500000000 },
+                transfers,
+            };
+            const qrError = new Error('QR generation failed');
+            mockToDataURL.mockRejectedValue(qrError);
+
+            const { error: svgError, restore } = breakSvgConversion();
+            try {
+                const deps = await loadPdfDeps(mockOnError);
+                await generateReceiptPdf(deps, multiReceipt, SIGNATURE, RECEIPT_URL);
+
+                expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
+                const reported = mockOnError.mock.calls.map(([e]) => e);
+                expect(reported).toContain(svgError);
+                expect(reported).toContain(qrError);
+            } finally {
+                restore();
+                mockToDataURL.mockResolvedValue('data:image/png;base64,qrcode');
+            }
+        });
     });
 });

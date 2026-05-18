@@ -178,16 +178,9 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     }, [receipt, signature, usdValue]);
 
     const downloadPdf = useCallback(async () => {
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(error => Logger.error(error, { sentry: true }));
         const transactionUrl = window.location.origin + transactionPath;
-        await generateReceiptPdf(
-            { ...deps, onError: Logger.error },
-            receipt,
-            signature,
-            window.location.href,
-            transactionUrl,
-            usdValue,
-        );
+        await generateReceiptPdf(deps, receipt, signature, window.location.href, transactionUrl, usdValue);
     }, [receipt, signature, transactionPath, usdValue]);
 
     return (
