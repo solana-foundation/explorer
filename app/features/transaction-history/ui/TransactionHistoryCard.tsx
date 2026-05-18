@@ -6,11 +6,10 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
-import { useAccountHistory, useFetchAccountHistory, useFetchTransactionsForHistory } from '@providers/accounts/history';
+import { useAccountHistory, useFetchAccountHistory } from '@providers/accounts/history';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc } from '@utils/date';
-import { getTransactionInstructionNames, type TransactionInstructionInfo } from '@utils/instruction';
 import React, { useCallback, useMemo } from 'react';
 import Moment from 'react-moment';
 
@@ -18,21 +17,15 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
+import { useInstructionNames } from '../lib/use-instruction-names';
 import { InstructionList, InstructionListSkeleton } from './InstructionList';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
     const history = useAccountHistory(address);
     const fetchAccountHistory = useFetchAccountHistory();
-    const fetchTransactionsForHistory = useFetchTransactionsForHistory();
     const refresh = () => fetchAccountHistory(pubkey, false, true);
     const loadMore = () => fetchAccountHistory(pubkey, false);
-
-    React.useEffect(() => {
-        if (history?.data) {
-            fetchTransactionsForHistory(pubkey, history.data);
-        }
-    }, [history?.data, fetchTransactionsForHistory, pubkey]);
 
     const transactionRows = React.useMemo(() => {
         if (history?.data?.fetched) {
@@ -40,16 +33,6 @@ export function TransactionHistoryCard({ address }: { address: string }) {
         }
         return [];
     }, [history]);
-
-    const instructionNamesMap = React.useMemo(() => {
-        const map = new Map<string, TransactionInstructionInfo[]>();
-        if (history?.data?.transactionMap) {
-            for (const [sig, tx] of history.data.transactionMap) {
-                map.set(sig, getTransactionInstructionNames(tx));
-            }
-        }
-        return map;
-    }, [history?.data?.transactionMap]);
 
     React.useEffect(() => {
         if (!history) {
@@ -71,44 +54,17 @@ export function TransactionHistoryCard({ address }: { address: string }) {
 
     const hasTimestamps = transactionRows.some(element => element.blockTime);
     const detailsList: React.ReactNode[] = transactionRows.map(
-        ({ slot, signature, blockTime, statusClass, statusText }) => {
-            const instructionNames = instructionNamesMap.get(signature) ?? null;
-
-            return (
-                <tr key={signature}>
-                    <td>
-                        <Signature signature={signature} link truncateChars={40} />
-                        {instructionNames !== null && instructionNames.length > 0 ? (
-                            <InstructionList instructions={instructionNames} />
-                        ) : instructionNames === null ? (
-                            <InstructionListSkeleton />
-                        ) : null}
-                    </td>
-
-                    <td className="w-1">
-                        <Slot slot={slot} link />
-                    </td>
-
-                    {hasTimestamps && (
-                        <>
-                            <td className="text-muted">
-                                {blockTime ? <Moment date={blockTime * 1000} fromNow /> : '---'}
-                            </td>
-                            <td className="text-muted">
-                                {blockTime ? displayTimestampUtc(blockTime * 1000, true) : '---'}
-                            </td>
-                        </>
-                    )}
-
-                    <td>
-                        <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
-                    </td>
-                    <td>
-                        <TransactionRawDataDownloadField signature={signature} />
-                    </td>
-                </tr>
-            );
-        },
+        ({ slot, signature, blockTime, statusClass, statusText }) => (
+            <TransactionRow
+                key={signature}
+                signature={signature}
+                slot={slot}
+                blockTime={blockTime}
+                statusClass={statusClass}
+                statusText={statusText}
+                hasTimestamps={hasTimestamps}
+            />
+        ),
     );
 
     const fetching = history.status === FetchStatus.Fetching;
@@ -141,6 +97,50 @@ export function TransactionHistoryCard({ address }: { address: string }) {
             </div>
             <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />
         </div>
+    );
+}
+
+type TransactionRowProps = {
+    signature: string;
+    slot: number;
+    blockTime: number | null | undefined;
+    statusClass: string;
+    statusText: string;
+    hasTimestamps: boolean;
+};
+
+function TransactionRow({ signature, slot, blockTime, statusClass, statusText, hasTimestamps }: TransactionRowProps) {
+    const instructionNames = useInstructionNames(signature);
+
+    return (
+        <tr>
+            <td>
+                <Signature signature={signature} link truncateChars={40} />
+                {instructionNames !== null && instructionNames.length > 0 ? (
+                    <InstructionList instructions={instructionNames} />
+                ) : instructionNames === null ? (
+                    <InstructionListSkeleton />
+                ) : null}
+            </td>
+
+            <td className="w-1">
+                <Slot slot={slot} link />
+            </td>
+
+            {hasTimestamps && (
+                <>
+                    <td className="text-muted">{blockTime ? <Moment date={blockTime * 1000} fromNow /> : '---'}</td>
+                    <td className="text-muted">{blockTime ? displayTimestampUtc(blockTime * 1000, true) : '---'}</td>
+                </>
+            )}
+
+            <td>
+                <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
+            </td>
+            <td>
+                <TransactionRawDataDownloadField signature={signature} />
+            </td>
+        </tr>
     );
 }
 
