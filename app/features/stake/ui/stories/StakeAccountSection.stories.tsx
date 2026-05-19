@@ -136,8 +136,8 @@ export const Deactivating: Story = {
 
 export const FullyInactivated: Story = {
     // Fully decayed delegation: deactivation epoch is set and `inactive === delegated.stake`.
-    // The section detects this via `isFullyInactivated` and shows "Not delegated" in the
-    // overview while hiding the Stake Delegation card entirely.
+    // The section detects this via `isFullyInactivated` and shows "Deactivated" in the overview
+    // (distinct from never-delegated states) while hiding the Stake Delegation card entirely.
     args: {
         account,
         activation: { active: 0, inactive: Number(DELEGATED_STAKE), state: 'inactive' },
@@ -146,13 +146,13 @@ export const FullyInactivated: Story = {
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        expect(canvas.getByText('Not delegated')).toBeInTheDocument();
+        expect(canvas.getByText('Deactivated')).toBeInTheDocument();
         expect(canvas.queryByText('Stake Delegation')).not.toBeInTheDocument();
     },
 };
 
-export const NotDelegated: Story = {
-    // `stake` is null on the account, so there's no delegation to display.
+export const Initialized: Story = {
+    // Stake authorities are set but the account has never been delegated (`stake` is null).
     args: {
         account,
         stakeAccount: initializedStakeInfo(),
@@ -160,7 +160,7 @@ export const NotDelegated: Story = {
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        expect(canvas.getByText('Not delegated')).toBeInTheDocument();
+        expect(canvas.getByText('Initialized')).toBeInTheDocument();
         expect(canvas.queryByText('Stake Delegation')).not.toBeInTheDocument();
     },
 };

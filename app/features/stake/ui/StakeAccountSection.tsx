@@ -33,15 +33,34 @@ export function StakeAccountSection({
     stakeAccountType: StakeAccountType;
     activation?: StakeActivationData;
 }) {
-    const hideDelegation = stakeAccountType !== 'delegated' || isFullyInactivated(stakeAccount, activation);
+    const overviewStatus = deriveOverviewStatus(stakeAccountType, stakeAccount, activation);
     return (
         <>
             <LockupCard stakeAccount={stakeAccount} />
-            <OverviewCard account={account} stakeAccount={stakeAccount} hideDelegation={hideDelegation} />
-            {!hideDelegation && <DelegationCard stakeAccount={stakeAccount} activation={activation} />}
+            <OverviewCard account={account} stakeAccount={stakeAccount} status={overviewStatus} />
+            {overviewStatus === undefined && <DelegationCard stakeAccount={stakeAccount} activation={activation} />}
             <AuthoritiesCard meta={stakeAccount.meta} />
         </>
     );
+}
+
+// Returns the Status label to render in the overview card, or undefined when the account is
+// actively delegated — in which case the dedicated Stake Delegation card carries the status.
+function deriveOverviewStatus(
+    stakeAccountType: StakeAccountType,
+    stakeAccount: StakeAccountInfo,
+    activation?: StakeActivationData,
+): string | undefined {
+    switch (stakeAccountType) {
+        case 'delegated':
+            return isFullyInactivated(stakeAccount, activation) ? 'Deactivated' : undefined;
+        case 'initialized':
+            return 'Initialized';
+        case 'uninitialized':
+            return 'Uninitialized';
+        case 'rewardsPool':
+            return 'RewardsPool';
+    }
 }
 
 function LockupCard({ stakeAccount }: { stakeAccount: StakeAccountInfo }) {
@@ -59,11 +78,11 @@ function LockupCard({ stakeAccount }: { stakeAccount: StakeAccountInfo }) {
 function OverviewCard({
     account,
     stakeAccount,
-    hideDelegation,
+    status,
 }: {
     account: Account;
     stakeAccount: StakeAccountInfo;
-    hideDelegation: boolean;
+    status?: string;
 }) {
     const refresh = useRefreshAccount();
     return (
@@ -91,10 +110,10 @@ function OverviewCard({
                     <SolBalance lamports={stakeAccount.meta.rentExemptReserve} />
                 </td>
             </tr>
-            {hideDelegation && (
+            {status !== undefined && (
                 <tr>
                     <td>Status</td>
-                    <td className="text-lg-end">Not delegated</td>
+                    <td className="text-lg-end">{status}</td>
                 </tr>
             )}
         </AccountCard>
