@@ -4,7 +4,7 @@ import { TableCardBody } from '@components/common/TableCardBody';
 import { useRefreshAccount } from '@entities/account';
 import { AccountCard } from '@features/account';
 import type { Account } from '@providers/accounts';
-import { displayTimestampUtc } from '@utils/date';
+import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import React from 'react';
 
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
@@ -45,13 +45,13 @@ export function StakeAccountSection({
 }
 
 function LockupCard({ stakeAccount }: { stakeAccount: StakeAccountInfo }) {
-    const unixTimestamp = 1000 * stakeAccount.meta.lockup.unixTimestamp;
-    if (Date.now() >= unixTimestamp) {
+    const lockupExpiryMs = unixTimestampToMs(stakeAccount.meta.lockup.unixTimestamp);
+    if (Date.now() >= lockupExpiryMs) {
         return null;
     }
     return (
         <div className="alert alert-warning text-center">
-            <strong>Account is locked!</strong> Lockup expires on {displayTimestampUtc(unixTimestamp)}
+            <strong>Account is locked!</strong> Lockup expires on {displayTimestampUtc(lockupExpiryMs)}
         </div>
     );
 }

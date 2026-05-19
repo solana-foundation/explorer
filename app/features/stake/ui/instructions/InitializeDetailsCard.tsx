@@ -1,7 +1,7 @@
 import { Epoch } from '@components/common/Epoch';
 import { InstructionCard } from '@components/instruction/InstructionCard';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
-import { displayTimestampUtc } from '@utils/date';
+import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import React from 'react';
 
 import type { InitializeInfo } from '../../lib/instruction-types';
@@ -36,7 +36,7 @@ export function InitializeDetailsCard({
             )}
             {info.lockup.unixTimestamp > 0 && (
                 <DetailRow label="Lockup Expiry Timestamp" monospace>
-                    {displayTimestampUtc(info.lockup.unixTimestamp * 1000)}
+                    {displayTimestampUtc(unixTimestampToMs(info.lockup.unixTimestamp))}
                 </DetailRow>
             )}
             {info.lockup.custodian !== SYSTEM_PROGRAM_ADDRESS && (

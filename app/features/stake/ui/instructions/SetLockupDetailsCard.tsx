@@ -1,6 +1,6 @@
 import { Epoch } from '@components/common/Epoch';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import { displayTimestampUtc } from '@utils/date';
+import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import React from 'react';
 
 import type { SetLockupCheckedInfo, SetLockupInfo } from '../../lib/instruction-types';
@@ -35,7 +35,7 @@ export function SetLockupDetailsCard({
             )}
             {info.lockup.unixTimestamp !== undefined && (
                 <DetailRow label="New Lockup Expiry Timestamp" monospace>
-                    {displayTimestampUtc(info.lockup.unixTimestamp * 1000)}
+                    {displayTimestampUtc(unixTimestampToMs(info.lockup.unixTimestamp))}
                 </DetailRow>
             )}
             {info.lockup.custodian && <DetailRow label="New Lockup Custodian" pubkey={info.lockup.custodian} />}
