@@ -44,17 +44,34 @@ describe('computeFilterArgs', () => {
     });
 
     describe('visibleTabs', () => {
-        it('should always include the "all" tab', () => {
-            expect(computeFilterArgs([]).visibleTabs.map(t => t.id)).toContain('all');
-        });
-
-        it('should include tabs that have results', () => {
-            expect(computeFilterArgs([tokens]).visibleTabs.map(t => t.id)).toContain('tokens');
+        it.each([
+            {
+                expectedActive: 'all',
+                expectedVisible: ['all'],
+                groups: [],
+                scenario: 'should include "all" when no tab has results',
+            },
+            {
+                expectedActive: 'tokens',
+                expectedVisible: ['tokens'],
+                groups: [tokens],
+                scenario: 'should hide "all" and rewrite activeFilter when only one non-"all" tab has results',
+            },
+            {
+                expectedActive: 'all',
+                expectedVisible: ['all', 'tokens', 'programs'],
+                groups: [tokens, programs],
+                scenario: 'should keep "all" and activeFilter when two or more non-"all" tabs have results',
+            },
+        ])('$scenario', ({ groups, expectedVisible, expectedActive }) => {
+            const { activeFilter, visibleTabs } = computeFilterArgs(groups, 'all');
+            expect(visibleTabs.map(t => t.id)).toEqual(expectedVisible);
+            expect(activeFilter).toBe(expectedActive);
         });
 
         it('should exclude tabs with no results', () => {
-            const ids = computeFilterArgs([tokens]).visibleTabs.map(t => t.id);
-            expect(ids).not.toContain('programs');
+            const ids = computeFilterArgs([tokens, programs]).visibleTabs.map(t => t.id);
+            expect(ids).not.toContain('feature-gates');
             expect(ids).not.toContain('other');
         });
     });

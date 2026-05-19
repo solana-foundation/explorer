@@ -170,7 +170,8 @@ export function BaseSearch({
                         onOpenAutoFocus={e => e.preventDefault()}
                     >
                         <div>
-                            {hasResults && visibleTabs.length > 1 && (
+                            {/* Allow a single pill: hide-all rule can leave visibleTabs at length 1. */}
+                            {hasResults && visibleTabs.length >= 1 && (
                                 <SearchFilters
                                     activeFilter={activeFilter}
                                     counts={counts}

@@ -64,13 +64,17 @@ export function computeFilterArgs(results: SearchOptions[], activeFilter: Filter
         ]),
     ) as Record<FilterId, number>;
 
-    const visibleTabs = FILTER_TABS.filter(t => t.id === 'all' || counts[t.id] > 0);
+    const nonAllWithCounts = FILTER_TABS.filter(t => t.id !== 'all' && counts[t.id] > 0);
+    // Hide "All" when its count would duplicate the only non-"all" tab.
+    const hideAll = nonAllWithCounts.length === 1;
+    const visibleTabs = hideAll ? nonAllWithCounts : FILTER_TABS.filter(t => t.id === 'all' || counts[t.id] > 0);
+    const effectiveActive: FilterId = hideAll && activeFilter === 'all' ? nonAllWithCounts[0].id : activeFilter;
 
-    const activeGroups = FILTER_TABS.find(t => t.id === activeFilter)?.groups;
+    const activeGroups = FILTER_TABS.find(t => t.id === effectiveActive)?.groups;
     const filtered = activeGroups ? results.filter(g => activeGroups.includes(g.label as SearchGroup)) : results;
 
-    if (activeFilter !== 'all') {
-        return { activeFilter, counts, filteredResults: filtered, visibleTabs };
+    if (effectiveActive !== 'all') {
+        return { activeFilter: effectiveActive, counts, filteredResults: filtered, visibleTabs };
     }
 
     const reordered = [...filtered];
@@ -83,5 +87,5 @@ export function computeFilterArgs(results: SearchOptions[], activeFilter: Filter
     const fgIndex = reordered.findIndex(g => g.label === SearchGroup.FeatureGates);
     if (fgIndex !== -1 && fgIndex < reordered.length - 1) reordered.push(reordered.splice(fgIndex, 1)[0]);
 
-    return { activeFilter, counts, filteredResults: reordered, visibleTabs };
+    return { activeFilter: effectiveActive, counts, filteredResults: reordered, visibleTabs };
 }
