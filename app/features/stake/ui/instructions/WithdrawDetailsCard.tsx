@@ -23,6 +23,7 @@ export function WithdrawDetailsCard({ ix, index, result, info, innerCards, child
             <DetailRow label="Withdraw Amount (SOL)">
                 <SolBalance lamports={info.lamports} />
             </DetailRow>
+            {info.custodian && <DetailRow label="Lockup Custodian" pubkey={info.custodian} />}
         </InstructionCard>
     );
 }

@@ -27,6 +27,7 @@ export function AuthorizeDetailsCard({
             <DetailRow label="Old Authority Address" pubkey={info.authority} />
             <DetailRow label="New Authority Address" pubkey={info.newAuthority} />
             <DetailRow label="Authority Type">{info.authorityType}</DetailRow>
+            {info.custodian && <DetailRow label="Lockup Custodian" pubkey={info.custodian} />}
         </InstructionCard>
     );
 }

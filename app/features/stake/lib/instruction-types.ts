@@ -27,6 +27,7 @@ export type AuthorizeInfo = Infer<typeof AuthorizeInfo>;
 export const AuthorizeInfo = type({
     authority: AddressFromString,
     authorityType: enums(['Staker', 'Withdrawer']),
+    custodian: optional(AddressFromString),
     newAuthority: AddressFromString,
     stakeAccount: AddressFromString,
 });
@@ -41,6 +42,7 @@ export const SplitInfo = type({
 
 export type WithdrawInfo = Infer<typeof WithdrawInfo>;
 export const WithdrawInfo = type({
+    custodian: optional(AddressFromString),
     destination: AddressFromString,
     lamports: number(),
     stakeAccount: AddressFromString,
