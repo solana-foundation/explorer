@@ -20,7 +20,8 @@ const UtlSearchResponseSchema = type({
 
 export async function discoverWithUtl(query: string, signal: AbortSignal, limit: number): Promise<DiscoveryResult> {
     try {
-        const url = `${UTL_API_BASE_URL}/v1/search?query=${encodeURIComponent(query)}&chainId=101&limit=${limit}`;
+        // UTL's /v1/search requires `start` (pagination offset); omitting it returns 400.
+        const url = `${UTL_API_BASE_URL}/v1/search?query=${encodeURIComponent(query)}&chainId=101&start=0&limit=${limit}`;
         const response = await fetch(url, {
             headers: { Accept: 'application/json' },
             signal,
