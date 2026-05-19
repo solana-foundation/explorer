@@ -68,10 +68,19 @@ export function BaseSearch({
                 onOpenChange(false);
                 return;
             }
+            if (open && e.key === 'Tab' && visibleTabs.length > 1) {
+                e.preventDefault();
+                const currentIndex = visibleTabs.findIndex(t => t.id === activeFilter);
+                const nextIndex = e.shiftKey
+                    ? (currentIndex - 1 + visibleTabs.length) % visibleTabs.length
+                    : (currentIndex + 1) % visibleTabs.length;
+                onFilterChange(visibleTabs[nextIndex].id);
+                return;
+            }
             if (open) return;
             if (e.key === 'ArrowUp' || e.key === 'ArrowDown') onOpenChange(true);
         },
-        [open, onOpenChange],
+        [open, visibleTabs, activeFilter, onFilterChange, onOpenChange],
     );
 
     useHotkeys(
