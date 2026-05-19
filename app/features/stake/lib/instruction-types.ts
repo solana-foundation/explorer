@@ -25,7 +25,7 @@ export const DelegateInfo = type({
 export type AuthorizeInfo = Infer<typeof AuthorizeInfo>;
 export const AuthorizeInfo = type({
     authority: AddressFromString,
-    authorityType: string(),
+    authorityType: enums(['Staker', 'Withdrawer']),
     newAuthority: AddressFromString,
     stakeAccount: AddressFromString,
 });
@@ -87,7 +87,7 @@ export const AuthorizeWithSeedInfo = type({
     authorityBase: AddressFromString,
     authorityOwner: AddressFromString,
     authoritySeed: string(),
-    authorityType: string(),
+    authorityType: enums(['Staker', 'Withdrawer']),
     clockSysvar: optional(AddressFromString),
     custodian: optional(AddressFromString),
     newAuthorized: AddressFromString,
@@ -105,7 +105,7 @@ export const InitializeCheckedInfo = type({
 export type AuthorizeCheckedInfo = Infer<typeof AuthorizeCheckedInfo>;
 export const AuthorizeCheckedInfo = type({
     authority: AddressFromString,
-    authorityType: string(),
+    authorityType: enums(['Staker', 'Withdrawer']),
     clockSysvar: AddressFromString,
     custodian: optional(AddressFromString),
     newAuthority: AddressFromString,
@@ -117,7 +117,7 @@ export const AuthorizeCheckedWithSeedInfo = type({
     authorityBase: AddressFromString,
     authorityOwner: AddressFromString,
     authoritySeed: string(),
-    authorityType: string(),
+    authorityType: enums(['Staker', 'Withdrawer']),
     clockSysvar: AddressFromString,
     custodian: optional(AddressFromString),
     newAuthorized: AddressFromString,
