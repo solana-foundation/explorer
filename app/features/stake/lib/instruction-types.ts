@@ -12,6 +12,7 @@ export const InitializeInfo = type({
         epoch: number(),
         unixTimestamp: number(),
     }),
+    rentSysvar: AddressFromString,
     stakeAccount: AddressFromString,
 });
 

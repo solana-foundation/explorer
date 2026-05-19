@@ -42,6 +42,7 @@ export function InitializeDetailsCard({
             {info.lockup.custodian !== SYSTEM_PROGRAM_ADDRESS && (
                 <DetailRow label="Lockup Custodian Address" pubkey={info.lockup.custodian} />
             )}
+            <DetailRow label="Rent Sysvar" pubkey={info.rentSysvar} />
         </InstructionCard>
     );
 }
