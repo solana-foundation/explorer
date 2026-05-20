@@ -194,8 +194,7 @@ async def fetch_activation_epoch(connection: AsyncClient, epoch_schedule, key: s
             # If activated, next 8 bytes contain activation slot as u64
             activation_slot = int.from_bytes(account.value.data[1:9], 'little')
 
-            # Technically, feature gates only become active in the following epoch
-            return get_epoch_for_slot(epoch_schedule, activation_slot) + 1
+            return get_epoch_for_slot(epoch_schedule, activation_slot)
         else:
             return backup_epoch
     else:
