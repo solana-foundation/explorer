@@ -1,6 +1,7 @@
 import type { jsPDF } from 'jspdf';
 
 import type { FormattedReceipt } from '../types';
+import type { ReceiptPdfOpts } from './generate-receipt-pdf';
 import {
     applyLineStyle,
     applyTextStyle,
@@ -10,99 +11,67 @@ import {
     LINE_STYLES,
     PAGE,
     TEXT_STYLES,
-    type TextStyle,
 } from './generate-receipt-pdf-styles';
-import { parseUsdNumber, prorateUsd } from './parse-usd';
 import {
     addSectionGap,
-    drawJupiterAttribution,
+    DETAIL_LABEL_TO_VALUE_GAP,
+    DETAIL_ROW_GAP,
+    drawDetailCell,
     drawPageFooter,
     drawSectionTitle,
     drawSupplierAndItems,
     fitFontSize,
     initReceiptDoc,
     type PdfDeps,
-    POST_TITLE_PADDING,
     svgToDataUrl,
+    truncateMemo,
 } from './pdf-shared';
 import { splitAtFirstNonZeroDigit } from './split-at-first-non-zero-digit';
 import { WARNING_SVG } from './warning-svg';
 
-const MAX_VISIBLE_TRANSFERS = 12;
+const MAX_VISIBLE_TRANSFERS = 18;
+const MAX_VISIBLE_TRANSFERS_WITH_WARNING = 16;
 
 const COL1_X = PAGE.marginX;
 const COL2_X = PAGE.marginX + GRID.col.outerWidth;
 
-// Vertical line-height ratio relative to the font size — empirical multiplier
-// that gives a comfortable inline spacing for value lines within a cell.
-const LINE_HEIGHT_RATIO = 0.45;
-
-// Detail cell layout: gap from label baseline to first value baseline.
-const DETAIL_LABEL_TO_VALUE_GAP = 4;
-const DETAIL_ROW_GAP = 4; // gap below a detail row (signature, payment date / network fee)
-
-// Transfers table widths.
-const TABLE_AMOUNT_WIDTH = 42;
-const TABLE_ADDRESS_WIDTH = (PAGE.contentWidth - TABLE_AMOUNT_WIDTH - GRID.col.gap * 2) / 2;
+// Transfers table widths — design: 393px / 393px / 220px across a 1030px row,
+// mapped onto the 170mm A4 content band (≈ 6.06 px/mm).
+const TABLE_ADDRESS_WIDTH = 64.9;
+const TABLE_AMOUNT_WIDTH = 36.3;
+const TABLE_COL_GAP = (PAGE.contentWidth - TABLE_ADDRESS_WIDTH * 2 - TABLE_AMOUNT_WIDTH) / 2;
 const TABLE_SENDER_X = PAGE.marginX;
-const TABLE_RECEIVER_X = TABLE_SENDER_X + TABLE_ADDRESS_WIDTH + GRID.col.gap;
-const TABLE_SENDER_WIDTH = TABLE_ADDRESS_WIDTH;
-const TABLE_RECEIVER_WIDTH = TABLE_ADDRESS_WIDTH;
+const TABLE_RECEIVER_X = TABLE_SENDER_X + TABLE_ADDRESS_WIDTH + TABLE_COL_GAP;
 const TABLE_AMOUNT_RIGHT_X = PAGE.marginX + PAGE.contentWidth;
-const AMOUNT_LINE_HEIGHT = TEXT_STYLES.value.size * LINE_HEIGHT_RATIO;
 
 // Transfers table header: gap before the divider line and gap after it.
 const TRANSFERS_HEADER_PRE_LINE_GAP = 2;
-const TRANSFERS_HEADER_POST_LINE_GAP = 4;
+const TRANSFERS_HEADER_POST_LINE_GAP = 2.8;
 
 // Transfer row: gap before the divider line and gap after it.
-const TRANSFER_ROW_PRE_LINE_GAP = 1;
-const TRANSFER_ROW_POST_LINE_GAP = 3;
+const TRANSFER_ROW_PRE_LINE_GAP = 1.75;
+const TRANSFER_ROW_POST_LINE_GAP = 2.75;
+const TRANSFER_ROW_HEIGHT = TRANSFER_ROW_PRE_LINE_GAP + TRANSFER_ROW_POST_LINE_GAP;
 
-// Truncation warning bar geometry.
-const WARNING_BAR_HEIGHT = 8;
+// Truncation warning bar geometry. The bar's vertical footprint is sized to
+// exactly two transfer-row heights so that "16 rows + warning" matches the
+// height of "18 rows" — the supplier section below starts at the same y in
+// both cases.
+const WARNING_BAR_HEIGHT = TRANSFER_ROW_HEIGHT * 1.5;
 const WARNING_BAR_RADIUS = BORDER_RADIUS;
-const WARNING_ICON_SIZE = 5;
-const WARNING_INNER_PADDING = 2;
+const WARNING_ICON_SIZE = 4;
+const WARNING_INNER_PADDING = 1.5;
 const WARNING_ICON_TO_TEXT_OFFSET = 1.05;
-const WARNING_TEXT_RIGHT_PADDING = 4;
+// const WARNING_TEXT_RIGHT_PADDING = 4;
 const WARNING_ICON_NATIVE_SIZE = 20; // px (the WARNING_SVG is 20x20)
-const WARNING_AFTER_BAR_GAP = 6;
-
-// Jupiter attribution line: gap below the caption.
-const JUPITER_AFTER_GAP = 4;
 
 // Signature link annotation: insets so the clickable rectangle hugs the
 // signature text. The `+1`/`-1` tighten the box to the actual text bounds.
 const SIG_LINK_TOP_INSET = 1;
 const SIG_LINK_HEIGHT_PADDING = 1;
 
-// Gap below the transfers table when no truncation warning was drawn.
-const POST_TABLE_NO_WARNING_GAP = 2;
-
-// Pulls the warning bar slightly tight against the table.
-const WARNING_BAR_PRE_PULL = 1;
-
-function drawDetailCell(
-    doc: jsPDF,
-    label: string,
-    valueLines: string[],
-    x: number,
-    y: number,
-    valueStyle: TextStyle,
-): number {
-    applyTextStyle(doc, TEXT_STYLES.label);
-    doc.text(label, x, y);
-
-    applyTextStyle(doc, valueStyle);
-    const lineHeight = valueStyle.size * LINE_HEIGHT_RATIO;
-    let cursor = y + DETAIL_LABEL_TO_VALUE_GAP;
-    for (const line of valueLines) {
-        doc.text(line, x, cursor);
-        cursor += lineHeight;
-    }
-    return cursor;
-}
+// Trailing gap appended after the transfers table (with or without warning).
+const POST_TABLE_GAP = 2;
 
 function drawTransfersHeader(doc: jsPDF, y: number): number {
     applyTextStyle(doc, TEXT_STYLES.label);
@@ -115,63 +84,30 @@ function drawTransfersHeader(doc: jsPDF, y: number): number {
     return y + TRANSFERS_HEADER_POST_LINE_GAP;
 }
 
-function drawAddressCell(doc: jsPDF, address: string, x: number, y: number, maxWidth: number): void {
-    applyTextStyle(doc, TEXT_STYLES.valueMono);
-    const size = fitFontSize(doc, address, maxWidth, TEXT_STYLES.valueMono.size);
-    doc.setFontSize(size);
+function drawAddressCell(doc: jsPDF, address: string, x: number, y: number): void {
+    applyTextStyle(doc, TEXT_STYLES.tableAddress);
     doc.text(address, x, y);
-    doc.setFontSize(TEXT_STYLES.valueMono.size);
 }
 
-function drawAmountLine1(doc: jsPDF, formatted: string, unit: string, rightX: number, y: number): void {
+function drawAmountCell(doc: jsPDF, formatted: string, unit: string, rightX: number, y: number): void {
     const { leadingZeros, significantDigits } = splitAtFirstNonZeroDigit(formatted);
     const suffix = ` ${unit}`;
 
-    applyTextStyle(doc, TEXT_STYLES.valueStrong);
-    const scaledSize = fitFontSize(doc, `${formatted}${suffix}`, TABLE_AMOUNT_WIDTH, TEXT_STYLES.value.size);
-
     let x = rightX;
 
-    applyTextStyle(doc, TEXT_STYLES.amountDim);
-    doc.setFontSize(scaledSize);
+    applyTextStyle(doc, TEXT_STYLES.tableAmountDim);
     x -= doc.getTextWidth(suffix);
     doc.text(suffix, x, y);
 
-    applyTextStyle(doc, TEXT_STYLES.valueStrong);
-    doc.setFontSize(scaledSize);
+    applyTextStyle(doc, TEXT_STYLES.tableAmountStrong);
     x -= doc.getTextWidth(significantDigits);
     doc.text(significantDigits, x, y);
 
     if (leadingZeros) {
-        applyTextStyle(doc, TEXT_STYLES.amountDim);
-        doc.setFontSize(scaledSize);
+        applyTextStyle(doc, TEXT_STYLES.tableAmountDim);
         x -= doc.getTextWidth(leadingZeros);
         doc.text(leadingZeros, x, y);
     }
-}
-
-function drawAmountCell(
-    doc: jsPDF,
-    formatted: string,
-    unit: string,
-    proratedUsd: string | undefined,
-    rightX: number,
-    y: number,
-): number {
-    drawAmountLine1(doc, formatted, unit, rightX, y);
-
-    if (!proratedUsd) {
-        return y;
-    }
-
-    const line2Y = y + AMOUNT_LINE_HEIGHT;
-    applyTextStyle(doc, TEXT_STYLES.valueUsd);
-    const fittedUsdSize = fitFontSize(doc, proratedUsd, TABLE_AMOUNT_WIDTH, TEXT_STYLES.valueUsd.size);
-    doc.setFontSize(fittedUsdSize);
-    const wUsd = doc.getTextWidth(proratedUsd);
-    doc.text(proratedUsd, rightX - wUsd, line2Y);
-
-    return line2Y;
 }
 
 function drawTransferRow(
@@ -182,20 +118,12 @@ function drawTransferRow(
         receiver: { address: string };
     },
     y: number,
-    proratedUsd: string | undefined,
 ): number {
-    drawAddressCell(doc, transfer.sender.address, TABLE_SENDER_X, y, TABLE_SENDER_WIDTH);
-    drawAddressCell(doc, transfer.receiver.address, TABLE_RECEIVER_X, y, TABLE_RECEIVER_WIDTH);
-    const amountBottom = drawAmountCell(
-        doc,
-        transfer.amount.formatted,
-        transfer.amount.unit,
-        proratedUsd,
-        TABLE_AMOUNT_RIGHT_X,
-        y,
-    );
+    drawAddressCell(doc, transfer.sender.address, TABLE_SENDER_X, y);
+    drawAddressCell(doc, transfer.receiver.address, TABLE_RECEIVER_X, y);
+    drawAmountCell(doc, transfer.amount.formatted, transfer.amount.unit, TABLE_AMOUNT_RIGHT_X, y);
 
-    const lineY = Math.max(y, amountBottom) + TRANSFER_ROW_PRE_LINE_GAP;
+    const lineY = y + TRANSFER_ROW_PRE_LINE_GAP;
     applyLineStyle(doc, LINE_STYLES.border);
     doc.line(PAGE.marginX, lineY, PAGE.marginX + PAGE.contentWidth, lineY);
 
@@ -204,7 +132,7 @@ function drawTransferRow(
 
 async function drawWarningBar(deps: PdfDeps, doc: jsPDF, totalCount: number, y: number): Promise<number> {
     const text =
-        `Only the ${MAX_VISIBLE_TRANSFERS} largest transfers are shown here. To view the full list of ` +
+        `Only the ${MAX_VISIBLE_TRANSFERS_WITH_WARNING} largest transfers are shown here. To view the full list of ` +
         `${totalCount} transfers, export the CSV. You can also use the QR code at the end of the receipt to access the full details.`;
 
     doc.setFillColor(COLORS.warningBg);
@@ -233,29 +161,27 @@ async function drawWarningBar(deps: PdfDeps, doc: jsPDF, totalCount: number, y: 
     }
 
     const textX = PAGE.marginX + WARNING_INNER_PADDING + WARNING_ICON_SIZE + WARNING_ICON_TO_TEXT_OFFSET;
-    const textMaxWidth = PAGE.marginX + PAGE.contentWidth - WARNING_INNER_PADDING - WARNING_TEXT_RIGHT_PADDING - textX;
+    const textMaxWidth = PAGE.marginX + PAGE.contentWidth - WARNING_INNER_PADDING - WARNING_ICON_TO_TEXT_OFFSET - textX;
     applyTextStyle(doc, TEXT_STYLES.warning);
     const fittedSize = fitFontSize(doc, text, textMaxWidth, TEXT_STYLES.warning.size);
     doc.setFontSize(fittedSize);
     doc.text(text, textX, y + WARNING_BAR_HEIGHT / 2, { baseline: 'middle' });
     doc.setFontSize(TEXT_STYLES.warning.size);
 
-    return y + WARNING_BAR_HEIGHT + WARNING_AFTER_BAR_GAP;
+    return y + WARNING_BAR_HEIGHT;
 }
 
 export async function generateMultiTransferPdf(
     deps: PdfDeps,
     receipt: FormattedReceipt,
-    signature: string,
-    receiptUrl: string,
-    transactionUrl?: string,
-    usdValue?: string,
+    opts: ReceiptPdfOpts,
 ): Promise<void> {
-    let { doc, y } = initReceiptDoc(deps);
+    const { signature, receiptUrl, transactionUrl } = opts;
+    const { doc, y: initialY } = initReceiptDoc(deps, opts.clusterLabel);
+    let y = initialY;
 
     y = addSectionGap(y);
     y = drawSectionTitle(doc, 'Transaction details', y);
-    y += POST_TITLE_PADDING;
 
     const dateBottom = drawDetailCell(doc, 'Payment date', [receipt.date.utc], COL1_X, y, TEXT_STYLES.valueMono);
     const feeBottom = drawDetailCell(
@@ -268,7 +194,7 @@ export async function generateMultiTransferPdf(
     );
     y = Math.max(dateBottom, feeBottom) + DETAIL_ROW_GAP;
 
-    const signatureWidth = receipt.memo ? GRID.col.innerWidth : PAGE.contentWidth;
+    const signatureWidth = GRID.col.innerWidth;
     applyTextStyle(doc, TEXT_STYLES.valueMono);
     const signatureLines = doc.splitTextToSize(signature, signatureWidth) as string[];
     const sigStartY = y;
@@ -278,18 +204,17 @@ export async function generateMultiTransferPdf(
         doc.link(COL1_X, sigStartY + SIG_LINK_TOP_INSET, signatureWidth, linkH, { url: transactionUrl });
     }
 
-    let memoBottom = y;
-    if (receipt.memo) {
-        applyTextStyle(doc, TEXT_STYLES.value);
-        const memoLines = doc.splitTextToSize(receipt.memo, GRID.col.innerWidth) as string[];
-        memoBottom = drawDetailCell(doc, 'Memo', memoLines, COL2_X, y, TEXT_STYLES.value);
-    }
+    applyTextStyle(doc, TEXT_STYLES.valueMono);
+    const memoLines = doc.splitTextToSize(truncateMemo(receipt.memo), GRID.col.innerWidth) as string[];
+    drawDetailCell(doc, 'Memo', memoLines, COL2_X, y, TEXT_STYLES.valueMono);
 
-    y = Math.max(sigBottom, memoBottom) + DETAIL_ROW_GAP;
+    // Anchor the next section on the signature column only — signature line
+    // count is deterministic, so the Transfers title sits at a fixed y
+    // regardless of how tall the memo wraps.
+    y = sigBottom + DETAIL_ROW_GAP;
 
     y = addSectionGap(y);
     y = drawSectionTitle(doc, 'Transfers', y);
-    y += POST_TITLE_PADDING;
 
     const transfers =
         receipt.transfers && receipt.transfers.length > 1
@@ -301,32 +226,22 @@ export async function generateMultiTransferPdf(
                       sender: receipt.sender,
                   },
               ];
-    const visibleTransfers = transfers.slice(0, MAX_VISIBLE_TRANSFERS);
-    const hiddenCount = transfers.length - visibleTransfers.length;
-
-    const totalUsdNum = usdValue ? parseUsdNumber(usdValue) : null;
+    const isOverflow = transfers.length > MAX_VISIBLE_TRANSFERS;
+    const visibleCount = isOverflow ? MAX_VISIBLE_TRANSFERS_WITH_WARNING : MAX_VISIBLE_TRANSFERS;
+    const visibleTransfers = transfers.slice(0, visibleCount);
 
     y = drawTransfersHeader(doc, y);
 
     for (const t of visibleTransfers) {
-        const proratedUsd =
-            totalUsdNum !== null && receipt.total.raw > 0
-                ? prorateUsd(t.amount.raw, receipt.total.raw, totalUsdNum)
-                : undefined;
-        y = drawTransferRow(doc, t, y, proratedUsd);
+        y = drawTransferRow(doc, t, y);
     }
 
-    if (hiddenCount > 0) {
-        y = await drawWarningBar(deps, doc, transfers.length, y - WARNING_BAR_PRE_PULL);
-    } else {
-        y += POST_TABLE_NO_WARNING_GAP;
+    if (isOverflow) {
+        y = await drawWarningBar(deps, doc, transfers.length, y - 1);
     }
+    y += POST_TABLE_GAP;
 
-    if (usdValue && totalUsdNum !== null && receipt.total.raw > 0) {
-        y = drawJupiterAttribution(doc, PAGE.marginX, y, JUPITER_AFTER_GAP);
-    }
-
-    y = drawSupplierAndItems(doc, receipt, y);
+    y = drawSupplierAndItems(doc, y, false);
     await drawPageFooter(deps, doc, receiptUrl, y);
 
     doc.save(`solana-receipt-${signature}.pdf`);

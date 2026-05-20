@@ -63,11 +63,11 @@ export function lamportsToSolString(lamports: number | bigint, maximumFractionDi
 
 export function formatUsdValue(amount: number, price: number): string {
     const value = amount * price;
-    if (isNaN(value) || value < 0) return '$0.00';
-    return `$${value.toLocaleString('en-US', {
+    if (isNaN(value) || value < 0) return '~0.00 USD';
+    return `~${value.toLocaleString('en-US', {
         maximumFractionDigits: 2,
         minimumFractionDigits: 2,
-    })}`;
+    })} USD`;
 }
 
 export function numberWithSeparator(s: string) {
