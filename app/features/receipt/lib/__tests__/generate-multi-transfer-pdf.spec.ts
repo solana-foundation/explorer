@@ -253,17 +253,16 @@ describe('generateMultiTransferPdf', () => {
 
     it('should not render any prorated USD per row even when usdValue is provided', async () => {
         const deps = await loadPdfDeps(mockOnError);
-        await generateMultiTransferPdf(deps, RECEIPT, { ...PDF_OPTS, usdValue: '$200.00' });
+        await generateMultiTransferPdf(deps, RECEIPT, { ...PDF_OPTS, usdValue: '~200.00 USD' });
 
         const allText = collectText();
 
-        expect(allText).not.toContain('$200.00');
-        expect(allText).not.toContain('$');
+        expect(allText).not.toContain('~200.00 USD');
     });
 
     it('should not render the Jupiter API attribution on the multi-transfer receipt', async () => {
         const deps = await loadPdfDeps(mockOnError);
-        await generateMultiTransferPdf(deps, RECEIPT, { ...PDF_OPTS, usdValue: '$200.00' });
+        await generateMultiTransferPdf(deps, RECEIPT, { ...PDF_OPTS, usdValue: '~200.00 USD' });
 
         const allText = collectText();
         expect(allText).not.toContain('Jupiter API');
