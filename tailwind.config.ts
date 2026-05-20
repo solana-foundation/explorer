@@ -12,32 +12,37 @@ const breakpoints = new Map([
 
 // dashkit migration tokens — sourced from app/scss/dashkit/_variables.scss after _solana-variables.scss overrides.
 // Phase 2 replaces Bootstrap classes with `e-*-dk-*` utilities; Phase 3 deletes these once dashkit is gone.
+//
+// IMPORTANT: explorer renders dark-only today. Entries tagged `// light` below are unused at runtime —
+// they're kept here so the migration mirrors the SCSS variable names 1:1 and stays easy to audit.
+// When a real light theme lands, rename these to their light-theme equivalents (e.g. `gray-100` →
+// `light-gray-100` or move under a `light` namespace) and drop this note.
 const dkSpacer = '1.5rem';
 const dkColors = {
     white: '#ffffff',
     black: '#232323',
     'black-dark': '#141816',
-    'gray-100': '#f9fdfc',
-    'gray-200': '#f1f8f6',
-    'gray-300': '#e5ebe9',
-    'gray-400': '#c6e6de',
-    'gray-500': '#abd5c6',
-    'gray-600': '#86b8b6',
-    'gray-700': '#698582',
-    'gray-800': '#387462',
-    'gray-900': '#1b4e3f',
+    'gray-100': '#f9fdfc', // light — unused at runtime; rename when light theme lands
+    'gray-200': '#f1f8f6', // light — unused at runtime
+    'gray-300': '#e5ebe9', // light — unused at runtime
+    'gray-400': '#c6e6de', // light — unused at runtime
+    'gray-500': '#abd5c6', // light — unused at runtime
+    'gray-600': '#86b8b6', // shared light+dark (solana keeps this value in dark)
+    'gray-700': '#698582', // light — unused at runtime
+    'gray-800': '#387462', // light — unused at runtime
+    'gray-900': '#1b4e3f', // light — unused at runtime
     'gray-600-dark': '#343a37',
     'gray-700-dark': '#282d2b',
     'gray-800-dark': '#1e2423',
-    primary: '#42ba96',
-    'primary-dark': '#33a382',
+    primary: '#42ba96', // light — unused at runtime; dark uses `primary-on-dark`
+    'primary-dark': '#33a382', // active/link color (both themes)
     'primary-on-dark': '#1dd79b',
-    success: '#19be56',
+    success: '#19be56', // light — unused at runtime; dark uses `success-on-dark`
     'success-on-dark': '#26e97e',
-    info: '#43b5c5',
-    warning: '#d83aeb',
+    info: '#43b5c5', // shared light+dark
+    warning: '#d83aeb', // light — unused at runtime; dark uses `warning-on-dark`
     'warning-on-dark': '#fa62fc',
-    danger: '#b45be1',
+    danger: '#b45be1', // shared light+dark
     'rainbow-1': '#fa62fc',
     'rainbow-2': '#be84e8',
     'rainbow-3': '#79abd2',
@@ -46,7 +51,26 @@ const dkColors = {
     'popover-bg': '#1A1A1A',
     'popover-border': 'rgba(255,255,255,0.1)',
     'card-outline-dark': '#111',
+    'input-placeholder-dark': '#ccc',
 };
+
+// Phase-2 refactor map — Bootstrap class → Tailwind utilities. Append to this table when you
+// convert a new class family; delete entries as they go to zero usage.
+//
+//   .btn-white / .btn-light (dark theme, in app/scss/dashkit/dark/_overrides-dark.scss)
+//     background-color : idle → e-bg-dk-gray-800-dark      active/hover → e-bg-dk-black-dark
+//     border-color     : idle → e-border-dk-gray-600-dark  active/hover → e-border-dk-gray-700-dark
+//     color            : e-text-dk-white
+//
+//   .btn-black.active  → e-shadow-active   (= 0 0 0 0.15rem #33a382, already declared above)
+//
+//   .card              → e-bg-dk-gray-800-dark e-border-dk-gray-700-dark e-rounded-dk-lg e-shadow-dk-card
+//   .card-header       → e-px-dk-4 e-py-4  (cap padding; consider adding dk-cap-py later)
+//   .card-body         → e-px-dk-4 e-py-dk-4
+//
+//   .text-muted        → e-text-dk-gray-600              (light theme)  /  e-text-dk-gray-700 (dark)
+//   .text-rainbow-N    → e-text-dk-rainbow-{1..5}
+//   .bg-rainbow-N      → e-bg-dk-rainbow-{1..5}
 
 const config: Config = {
     content: ['./app/**/*.{ts,tsx}'],
