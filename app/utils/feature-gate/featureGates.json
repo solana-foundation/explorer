@@ -59,10 +59,10 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 716,
+    "testnet_activation_epoch": 744,
     "devnet_activation_epoch": 805,
     "comms_required": null,
-    "mainnet_activation_epoch": 742,
+    "mainnet_activation_epoch": 741,
     "description": "Passes on 100% of priority fee to validators"
   },
   {
@@ -98,7 +98,7 @@
     "testnet_activation_epoch": 715,
     "devnet_activation_epoch": 802,
     "comms_required": null,
-    "mainnet_activation_epoch": 735,
+    "mainnet_activation_epoch": 734,
     "description": "Removes legacy floating number arithmetic operation in fee calculation, making it integer-based"
   },
   {
@@ -120,7 +120,7 @@
     "testnet_activation_epoch": 746,
     "devnet_activation_epoch": 806,
     "comms_required": null,
-    "mainnet_activation_epoch": 746,
+    "mainnet_activation_epoch": 745,
     "description": "Unified syscall interface for all sysvars, without needing to include sysvar address in transactions"
   },
   {
@@ -142,7 +142,7 @@
     "testnet_activation_epoch": 746,
     "devnet_activation_epoch": 813,
     "comms_required": null,
-    "mainnet_activation_epoch": 750,
+    "mainnet_activation_epoch": 749,
     "description": "Enable new voting instruction"
   },
   {
@@ -164,7 +164,7 @@
     "testnet_activation_epoch": 746,
     "devnet_activation_epoch": 816,
     "comms_required": null,
-    "mainnet_activation_epoch": 753,
+    "mainnet_activation_epoch": 752,
     "description": "Turn feature gate syscall into a BPF program, enabling revocation of pending features."
   },
   {
@@ -186,7 +186,7 @@
     "testnet_activation_epoch": 746,
     "devnet_activation_epoch": 817,
     "comms_required": null,
-    "mainnet_activation_epoch": 754,
+    "mainnet_activation_epoch": 753,
     "description": "Migrate the config program to a BPF program"
   },
   {
@@ -208,7 +208,7 @@
     "testnet_activation_epoch": 745,
     "devnet_activation_epoch": 820,
     "comms_required": null,
-    "mainnet_activation_epoch": 744,
+    "mainnet_activation_epoch": 743,
     "description": "Allow core developers to exclude system programs from write-locking transactions"
   },
   {
@@ -230,7 +230,7 @@
     "testnet_activation_epoch": 746,
     "devnet_activation_epoch": 824,
     "comms_required": null,
-    "mainnet_activation_epoch": 756,
+    "mainnet_activation_epoch": 755,
     "description": "Improve performance of validator performance at epoch boundary by skipping rent collection"
   },
   {
@@ -252,7 +252,7 @@
     "testnet_activation_epoch": 746,
     "devnet_activation_epoch": 825,
     "comms_required": null,
-    "mainnet_activation_epoch": 757,
+    "mainnet_activation_epoch": 756,
     "description": "Disables rent collection for accounts, to be activated when all rent-paying accounts are gone"
   },
   {
@@ -274,7 +274,7 @@
     "testnet_activation_epoch": 756,
     "devnet_activation_epoch": 849,
     "comms_required": null,
-    "mainnet_activation_epoch": 763,
+    "mainnet_activation_epoch": 762,
     "description": "Migrate the Address Lookup Table to a BPF program"
   },
   {
@@ -296,7 +296,7 @@
     "testnet_activation_epoch": 760,
     "devnet_activation_epoch": 853,
     "comms_required": null,
-    "mainnet_activation_epoch": 767,
+    "mainnet_activation_epoch": 766,
     "description": "Add a new syscall to get the epoch stake"
   },
   {
@@ -336,7 +336,7 @@
     "testnet_activation_epoch": 763,
     "devnet_activation_epoch": 856,
     "comms_required": null,
-    "mainnet_activation_epoch": 770,
+    "mainnet_activation_epoch": 769,
     "description": "Only vote for blocks with sufficiently sized fec sets"
   },
   {
@@ -354,7 +354,7 @@
     "testnet_activation_epoch": 759,
     "devnet_activation_epoch": 852,
     "comms_required": null,
-    "mainnet_activation_epoch": 764,
+    "mainnet_activation_epoch": 763,
     "description": "Blocks exceeding cost tracker limits should fail during replay with proper error"
   },
   {
@@ -376,7 +376,7 @@
     "testnet_activation_epoch": 810,
     "devnet_activation_epoch": 911,
     "comms_required": null,
-    "mainnet_activation_epoch": 819,
+    "mainnet_activation_epoch": 818,
     "description": "Improve validator performance by using Accounts Lattice Hash for snapshots instead of the Merkle-based account hash"
   },
   {
@@ -398,7 +398,7 @@
     "testnet_activation_epoch": 750,
     "devnet_activation_epoch": 842,
     "comms_required": null,
-    "mainnet_activation_epoch": 759,
+    "mainnet_activation_epoch": 758,
     "description": "Allocate 3,000 compute units for builtins, instead of normal 200,000 compute units"
   },
   {
@@ -420,7 +420,7 @@
     "testnet_activation_epoch": 752,
     "devnet_activation_epoch": 843,
     "comms_required": null,
-    "mainnet_activation_epoch": 760,
+    "mainnet_activation_epoch": 759,
     "description": "Charge allocated compute units for sBPF failures instead of consumed compute units"
   },
   {
@@ -442,7 +442,7 @@
     "testnet_activation_epoch": 755,
     "devnet_activation_epoch": 847,
     "comms_required": null,
-    "mainnet_activation_epoch": 761,
+    "mainnet_activation_epoch": 760,
     "description": "Charge transactions with precompile signature verification failures normal inclusion fees"
   },
   {
@@ -508,7 +508,7 @@
     "testnet_activation_epoch": 748,
     "devnet_activation_epoch": 839,
     "comms_required": null,
-    "mainnet_activation_epoch": 758,
+    "mainnet_activation_epoch": 757,
     "description": "Relax account loading rules to simplify the protocol and give block-producers more flexibility"
   },
   {
@@ -530,7 +530,7 @@
     "testnet_activation_epoch": 764,
     "devnet_activation_epoch": 857,
     "comms_required": null,
-    "mainnet_activation_epoch": 771,
+    "mainnet_activation_epoch": 770,
     "description": "Raises max block limit to 50M CUs to give additional capacity to the network"
   },
   {
@@ -552,7 +552,7 @@
     "testnet_activation_epoch": 794,
     "devnet_activation_epoch": 895,
     "comms_required": null,
-    "mainnet_activation_epoch": 808,
+    "mainnet_activation_epoch": 807,
     "description": "Remove hashing of modified account state in favor of the Accounts Lattice Hash"
   },
   {
@@ -576,7 +576,7 @@
     "testnet_activation_epoch": 789,
     "devnet_activation_epoch": 893,
     "comms_required": null,
-    "mainnet_activation_epoch": 805,
+    "mainnet_activation_epoch": 804,
     "description": "Faster hashing of all account state at then end of every block instead of every epoch"
   },
   {
@@ -622,7 +622,7 @@
     "testnet_activation_epoch": 785,
     "devnet_activation_epoch": 892,
     "comms_required": null,
-    "mainnet_activation_epoch": 802,
+    "mainnet_activation_epoch": 801,
     "description": "Sets rent_epoch to a constant to prevent divergence and enable future field repurposing"
   },
   {
@@ -644,7 +644,7 @@
     "testnet_activation_epoch": 798,
     "devnet_activation_epoch": 903,
     "comms_required": null,
-    "mainnet_activation_epoch": 812,
+    "mainnet_activation_epoch": 811,
     "description": "Removes redundant is_executable checks to simplify execution and enable cleaner loader upgrades"
   },
   {
@@ -666,7 +666,7 @@
     "testnet_activation_epoch": 795,
     "devnet_activation_epoch": 896,
     "comms_required": null,
-    "mainnet_activation_epoch": 809,
+    "mainnet_activation_epoch": 808,
     "description": "Removes partitioned rent updates to reduce unnecessary account lookups and speed up block processing"
   },
   {
@@ -740,7 +740,7 @@
     "testnet_activation_epoch": 671,
     "devnet_activation_epoch": 730,
     "comms_required": null,
-    "mainnet_activation_epoch": 655,
+    "mainnet_activation_epoch": 656,
     "description": null
   },
   {
@@ -785,7 +785,7 @@
       ""
     ],
     "planned_testnet_order": 350,
-    "testnet_activation_epoch": 674,
+    "testnet_activation_epoch": 705,
     "devnet_activation_epoch": 734,
     "comms_required": null,
     "mainnet_activation_epoch": 710,
@@ -809,7 +809,7 @@
       ""
     ],
     "planned_testnet_order": 400,
-    "testnet_activation_epoch": 675,
+    "testnet_activation_epoch": 705,
     "devnet_activation_epoch": 735,
     "comms_required": null,
     "mainnet_activation_epoch": 703,
@@ -833,7 +833,7 @@
       ""
     ],
     "planned_testnet_order": 600,
-    "testnet_activation_epoch": 676,
+    "testnet_activation_epoch": 705,
     "devnet_activation_epoch": 737,
     "comms_required": null,
     "mainnet_activation_epoch": 704,
@@ -931,10 +931,10 @@
       ""
     ],
     "planned_testnet_order": 5200,
-    "testnet_activation_epoch": 814,
-    "devnet_activation_epoch": 918,
+    "testnet_activation_epoch": 813,
+    "devnet_activation_epoch": 917,
     "comms_required": null,
-    "mainnet_activation_epoch": 824,
+    "mainnet_activation_epoch": 823,
     "description": "Migrates Stake program to Core BPF, reducing client complexity and unifying validator runtime behavior"
   },
   {
@@ -976,9 +976,9 @@
     "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": 811,
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 914,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 821,
     "description": ""
   },
   {
@@ -997,10 +997,10 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 830,
-    "devnet_activation_epoch": 934,
+    "testnet_activation_epoch": 829,
+    "devnet_activation_epoch": 933,
     "comms_required": null,
-    "mainnet_activation_epoch": 842,
+    "mainnet_activation_epoch": 841,
     "description": ""
   },
   {
@@ -1019,10 +1019,10 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 817,
-    "devnet_activation_epoch": 921,
+    "testnet_activation_epoch": 816,
+    "devnet_activation_epoch": 920,
     "comms_required": null,
-    "mainnet_activation_epoch": 837,
+    "mainnet_activation_epoch": 836,
     "description": "Corrects alt-bn128 multiplication input length to 96 bytes, preventing errors and simplifying debugging"
   },
   {
@@ -1047,10 +1047,10 @@
       "v2.2.0"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 815,
-    "devnet_activation_epoch": 919,
+    "testnet_activation_epoch": 814,
+    "devnet_activation_epoch": 918,
     "comms_required": null,
-    "mainnet_activation_epoch": 826,
+    "mainnet_activation_epoch": 825,
     "description": "Improves SBPF encoding and arithmetic, simplifying verification and enabling faster big-integer operations"
   },
   {
@@ -1071,10 +1071,10 @@
     ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 813,
-    "devnet_activation_epoch": 916,
+    "testnet_activation_epoch": 812,
+    "devnet_activation_epoch": 915,
     "comms_required": null,
-    "mainnet_activation_epoch": 823,
+    "mainnet_activation_epoch": 822,
     "description": "Raises block limits to 60M CUs, expanding network capacity for more transactions"
   },
   {
@@ -1137,10 +1137,10 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
-    "devnet_activation_epoch": null,
+    "testnet_activation_epoch": 865,
+    "devnet_activation_epoch": 949,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 878,
     "description": ""
   },
   {
@@ -1163,10 +1163,10 @@
       "v3.1.0"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 907,
-    "devnet_activation_epoch": 1016,
+    "testnet_activation_epoch": 906,
+    "devnet_activation_epoch": 1015,
     "comms_required": null,
-    "mainnet_activation_epoch": 943,
+    "mainnet_activation_epoch": 942,
     "description": ""
   },
   {
@@ -1189,10 +1189,10 @@
       "v3.1.0"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 908,
-    "devnet_activation_epoch": 1024,
+    "testnet_activation_epoch": 907,
+    "devnet_activation_epoch": 1023,
     "comms_required": null,
-    "mainnet_activation_epoch": 944,
+    "mainnet_activation_epoch": 943,
     "description": ""
   },
   {
@@ -1215,10 +1215,10 @@
       "v3.1.0"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 910,
-    "devnet_activation_epoch": 1030,
+    "testnet_activation_epoch": 909,
+    "devnet_activation_epoch": 1029,
     "comms_required": null,
-    "mainnet_activation_epoch": 947,
+    "mainnet_activation_epoch": 946,
     "description": ""
   },
   {
@@ -1241,10 +1241,10 @@
       "v3.1.0"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 911,
-    "devnet_activation_epoch": 1034,
+    "testnet_activation_epoch": 910,
+    "devnet_activation_epoch": 1033,
     "comms_required": null,
-    "mainnet_activation_epoch": 950,
+    "mainnet_activation_epoch": 949,
     "description": ""
   },
   {
@@ -1267,10 +1267,10 @@
       "v3.1.0"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 912,
-    "devnet_activation_epoch": 1035,
+    "testnet_activation_epoch": 911,
+    "devnet_activation_epoch": 1034,
     "comms_required": null,
-    "mainnet_activation_epoch": 951,
+    "mainnet_activation_epoch": 950,
     "description": ""
   },
   {
@@ -1293,10 +1293,10 @@
       "v3.1.7"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 916,
-    "devnet_activation_epoch": 1037,
+    "testnet_activation_epoch": 915,
+    "devnet_activation_epoch": 1036,
     "comms_required": null,
-    "mainnet_activation_epoch": 954,
+    "mainnet_activation_epoch": 953,
     "description": ""
   },
   {
@@ -1319,10 +1319,10 @@
       "v3.1.8"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 929,
-    "devnet_activation_epoch": 1044,
+    "testnet_activation_epoch": 928,
+    "devnet_activation_epoch": 1043,
     "comms_required": null,
-    "mainnet_activation_epoch": 957,
+    "mainnet_activation_epoch": 956,
     "description": ""
   },
   {
@@ -1345,10 +1345,10 @@
       "v3.1.8"
     ],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 931,
-    "devnet_activation_epoch": 1045,
+    "testnet_activation_epoch": 930,
+    "devnet_activation_epoch": 1044,
     "comms_required": null,
-    "mainnet_activation_epoch": 972,
+    "mainnet_activation_epoch": 971,
     "description": ""
   },
   {
@@ -1367,8 +1367,8 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 955,
-    "devnet_activation_epoch": 1055,
+    "testnet_activation_epoch": 954,
+    "devnet_activation_epoch": 1054,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1411,8 +1411,8 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 955,
-    "devnet_activation_epoch": 1053,
+    "testnet_activation_epoch": 954,
+    "devnet_activation_epoch": 1052,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1433,8 +1433,8 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 955,
-    "devnet_activation_epoch": 1057,
+    "testnet_activation_epoch": 954,
+    "devnet_activation_epoch": 1056,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1455,8 +1455,8 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 955,
-    "devnet_activation_epoch": 1059,
+    "testnet_activation_epoch": 954,
+    "devnet_activation_epoch": 1058,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1477,8 +1477,8 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 955,
-    "devnet_activation_epoch": 1067,
+    "testnet_activation_epoch": 954,
+    "devnet_activation_epoch": 1066,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1543,8 +1543,8 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 955,
-    "devnet_activation_epoch": 1060,
+    "testnet_activation_epoch": 954,
+    "devnet_activation_epoch": 1059,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1607,8 +1607,8 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 955,
-    "devnet_activation_epoch": 1056,
+    "testnet_activation_epoch": 954,
+    "devnet_activation_epoch": 1055,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1671,8 +1671,8 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 955,
-    "devnet_activation_epoch": 1068,
+    "testnet_activation_epoch": 954,
+    "devnet_activation_epoch": 1067,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1693,8 +1693,8 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 956,
-    "devnet_activation_epoch": 1066,
+    "testnet_activation_epoch": 955,
+    "devnet_activation_epoch": 1065,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1717,8 +1717,8 @@
     ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 957,
-    "devnet_activation_epoch": 1071,
+    "testnet_activation_epoch": 956,
+    "devnet_activation_epoch": 1070,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1741,8 +1741,8 @@
     ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 958,
-    "devnet_activation_epoch": null,
+    "testnet_activation_epoch": 957,
+    "devnet_activation_epoch": 1073,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1763,7 +1763,7 @@
     ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 959,
+    "testnet_activation_epoch": 958,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -1813,8 +1813,8 @@
     ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 955,
-    "devnet_activation_epoch": 1070,
+    "testnet_activation_epoch": 954,
+    "devnet_activation_epoch": 1069,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""

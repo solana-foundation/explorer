@@ -75,8 +75,7 @@ async def main():
                         # If activated, next 8 bytes contain activation slot as u64
                         activation_slot = int.from_bytes(account.value.data[1:9], 'little')
 
-                        # Technically, feature gates only become active in the following epoch
-                        activation_epoch = get_epoch_for_slot(epoch_schedule, activation_slot) + 1
+                        activation_epoch = get_epoch_for_slot(epoch_schedule, activation_slot)
 
                         print(feature['key'], 'activated at', activation_epoch)
                         feature['mainnet_activation_epoch'] = activation_epoch
