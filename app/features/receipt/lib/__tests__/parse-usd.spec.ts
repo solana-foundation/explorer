@@ -2,6 +2,8 @@ import { parseUsdNumber, prorateUsd } from '../parse-usd';
 
 describe('parseUsdNumber', () => {
     it.each<[string, number]>([
+        ['~200.00 USD', 200],
+        ['~1,234.56 USD', 1234.56],
         ['$200.00', 200],
         ['$1,234.56', 1234.56],
         ['42.5', 42.5],
@@ -19,11 +21,11 @@ describe('parseUsdNumber', () => {
 
 describe('prorateUsd', () => {
     it.each<[number, number, number, string]>([
-        [1_000_000_000, 1_000_000_000, 200, '$200.00'],
-        [250_000_000, 1_000_000_000, 200, '$50.00'],
-        [1, 3, 1, '$0.33'],
-        [1, 1, 1234567.89, '$1,234,567.89'],
-        [5, 10, 20, '$10.00'],
+        [1_000_000_000, 1_000_000_000, 200, '~200.00 USD'],
+        [250_000_000, 1_000_000_000, 200, '~50.00 USD'],
+        [1, 3, 1, '~0.33 USD'],
+        [1, 1, 1234567.89, '~1,234,567.89 USD'],
+        [5, 10, 20, '~10.00 USD'],
     ])('should prorate transfer=%i of total=%i at USD=%i to %s', (transferRaw, totalRaw, totalUsd, expected) => {
         expect(prorateUsd(transferRaw, totalRaw, totalUsd)).toBe(expected);
     });
