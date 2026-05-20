@@ -79,4 +79,18 @@ describe('useSearchNavigation', () => {
         expect(url.searchParams.get('foo')).toBe('bar');
         expect(url.searchParams.get('cluster')).toBe('devnet');
     });
+
+    it('should preserve query values that contain "?" by splitting at the first occurrence only', () => {
+        // A query value containing a literal '?' — split('?') would truncate at the second '?',
+        // losing the rest of the value. indexOf + slice correctly takes everything after the first '?'.
+        const { result } = renderHook(() => useSearchNavigation());
+
+        result.current({ label: 'Inspector', pathname: '/tx/inspector?message=abc?extra', value: ['abc'] });
+
+        const pushed = pushMock.mock.calls[0][0] as string;
+        const url = new URL(pushed, 'http://localhost');
+        expect(url.pathname).toBe('/tx/inspector');
+        expect(url.searchParams.get('message')).toBe('abc?extra');
+        expect(url.searchParams.get('cluster')).toBe('devnet');
+    });
 });
