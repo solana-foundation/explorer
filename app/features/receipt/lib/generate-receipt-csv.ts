@@ -3,6 +3,7 @@ import { writeToString } from '@fast-csv/format';
 import { getReceiptMint } from '@/app/entities/token-receipt';
 
 import type { FormattedReceipt } from '../types';
+import { parseUsdNumber, prorateUsd } from './parse-usd';
 
 const CSV_HEADERS = [
     'Date (UTC)',
@@ -24,18 +25,6 @@ const CSV_HEADERS = [
 function sanitizeCsvField(value: string): string {
     // eslint-disable-next-line no-restricted-syntax -- regex is the clearest way to express CSV formula injection chars
     return /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
-}
-
-function parseUsdNumber(usdValue: string): number | null {
-    // eslint-disable-next-line no-restricted-syntax -- regex is the clearest way to strip currency formatting chars
-    const n = parseFloat(usdValue.replace(/[$,]/g, ''));
-    return isNaN(n) ? null : n;
-}
-
-function prorateUsd(transferRaw: number, totalRaw: number, totalUsd: number): string {
-    if (totalRaw === 0) return '';
-    const value = (transferRaw / totalRaw) * totalUsd;
-    return `$${value.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`;
 }
 
 export function buildReceiptCsvRows(receipt: FormattedReceipt, signature: string, usdValue?: string): string[][] {

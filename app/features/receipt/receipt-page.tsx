@@ -10,7 +10,7 @@ import { useFetchTransactionStatus, useTransactionDetails, useTransactionStatus 
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import { NATIVE_MINT } from '@solana/spl-token';
 import { TransactionSignature } from '@solana/web3.js';
-import { ClusterStatus } from '@utils/cluster';
+import { clusterName, ClusterStatus } from '@utils/cluster';
 import { formatUsdValue } from '@utils/index';
 import { useClusterPath } from '@utils/url';
 import { useRouter } from 'next/navigation';
@@ -178,17 +178,16 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     }, [receipt, signature, usdValue]);
 
     const downloadPdf = useCallback(async () => {
-        const deps = await loadPdfDeps();
+        const deps = await loadPdfDeps(error => Logger.error(error, { sentry: true }));
         const transactionUrl = window.location.origin + transactionPath;
-        await generateReceiptPdf(
-            { ...deps, onError: Logger.error },
-            receipt,
+        await generateReceiptPdf(deps, receipt, {
+            clusterLabel: clusterName(cluster),
+            receiptUrl: window.location.href,
             signature,
-            window.location.href,
             transactionUrl,
             usdValue,
-        );
-    }, [receipt, signature, transactionPath, usdValue]);
+        });
+    }, [receipt, signature, transactionPath, usdValue, cluster]);
 
     return (
         <SignatureContext.Provider value={signature}>
