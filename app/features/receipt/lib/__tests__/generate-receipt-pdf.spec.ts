@@ -6,8 +6,7 @@ import {
     collectTextFromMock as collectText,
     mockJsPDF,
     mockToDataURL,
-    RECEIPT_URL,
-    SIGNATURE,
+    PDF_OPTS,
     SOL_RECEIPT,
 } from './__fixtures__/pdf-mocks';
 
@@ -37,35 +36,52 @@ describe('generateReceiptPdf (dispatcher)', () => {
 
     it('should route a single-transfer receipt to the single-transfer renderer', async () => {
         const deps = await loadPdfDeps(mockOnError);
-        await generateReceiptPdf(deps, SOL_RECEIPT, SIGNATURE, RECEIPT_URL);
+        await generateReceiptPdf(deps, SOL_RECEIPT, PDF_OPTS);
 
         const allText = collectText();
-        // Single layout uses "Payment Details" + uppercase "PAYMENT METHOD" labels
-        expect(allText).toContain('Payment Details');
-        expect(allText).toContain('PAYMENT METHOD');
+        // Both layouts use "Transaction details"; single is identified by the
+        // absence of the "Transfers" section title.
+        expect(allText).toContain('Transaction details');
+        expect(allText).toContain('Amount');
         expect(allText).not.toContain('Transfers');
     });
 
     it('should route a multi-transfer receipt to the multi-transfer renderer', async () => {
         const deps = await loadPdfDeps(mockOnError);
-        await generateReceiptPdf(deps, buildMultiSolReceipt(3), SIGNATURE, RECEIPT_URL);
+        await generateReceiptPdf(deps, buildMultiSolReceipt(3), PDF_OPTS);
 
         const allText = collectText();
-        // Multi layout uses "Transaction details" + "Transfers" + table headers
         expect(allText).toContain('Transaction details');
         expect(allText).toContain('Transfers');
         expect(allText).toContain('Sender');
         expect(allText).toContain('Receiver');
         expect(allText).toContain('Amount');
-        expect(allText).not.toContain('Payment Details');
     });
 
     it('should route a receipt with exactly one transfer entry to the single renderer', async () => {
         const deps = await loadPdfDeps(mockOnError);
-        await generateReceiptPdf(deps, buildMultiSolReceipt(1), SIGNATURE, RECEIPT_URL);
+        await generateReceiptPdf(deps, buildMultiSolReceipt(1), PDF_OPTS);
 
         const allText = collectText();
-        expect(allText).toContain('Payment Details');
+        expect(allText).toContain('Transaction details');
         expect(allText).not.toContain('Transfers');
+    });
+
+    it('should append the cluster label to the subtitle when provided', async () => {
+        const deps = await loadPdfDeps(mockOnError);
+        await generateReceiptPdf(deps, SOL_RECEIPT, { ...PDF_OPTS, clusterLabel: 'Custom-Cluster' });
+
+        expect(collectText()).toContain('On-chain Transaction Record — Custom-Cluster');
+    });
+
+    it('should always render Memo and Amount USD labels even when values are missing', async () => {
+        const deps = await loadPdfDeps(mockOnError);
+        await generateReceiptPdf(deps, { ...SOL_RECEIPT, memo: undefined }, PDF_OPTS);
+
+        const allText = collectText();
+        expect(allText).toContain('Memo');
+        expect(allText).toContain('Amount USD - equivalent by Jupiter API');
+        // No usdValue → no Jupiter "report date" caption should appear
+        expect(allText).not.toContain('Equivalent on report date');
     });
 });

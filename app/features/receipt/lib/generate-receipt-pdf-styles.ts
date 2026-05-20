@@ -46,20 +46,22 @@ export type TextStyle = {
 };
 
 export const TEXT_STYLES = {
-    amountDim: { color: COLORS.textMuted, font: SANS, size: 8, weight: BOLD },
+    amountDim: { color: COLORS.textMuted, font: MONO, size: 8, weight: NORMAL },
     caption: { color: COLORS.textSubtle, font: SANS, size: 6, weight: NORMAL },
     disclaimer: { color: COLORS.textSubtle, font: SANS, size: 7, weight: NORMAL },
     label: { color: COLORS.textMuted, font: SANS, size: 8, weight: NORMAL },
     logoFallback: { color: COLORS.textHeading, font: SANS, size: 9, weight: BOLD },
-    paymentLabel: { color: COLORS.textMuted, font: SANS, size: 8, uppercase: true, weight: BOLD },
+    paymentLabel: { color: COLORS.textMuted, font: SANS, size: 8, weight: BOLD },
     sectionTitle: { color: COLORS.textHeading, font: SANS, size: 10, weight: BOLD },
     subtitle: { color: COLORS.textSubtle, font: SANS, size: 9, weight: NORMAL },
+    tableAddress: { color: COLORS.textBody, font: MONO, size: 6.5, weight: NORMAL },
+    tableAmountDim: { color: COLORS.textMuted, font: MONO, size: 6.5, weight: NORMAL },
+    tableAmountStrong: { color: COLORS.textStrong, font: MONO, size: 6.5, weight: NORMAL },
     title: { color: COLORS.textHeading, font: SANS, size: 16, weight: BOLD },
     totalLabel: { color: COLORS.textHeading, font: SANS, size: 8, weight: BOLD },
-    value: { color: COLORS.textBody, font: SANS, size: 8, weight: NORMAL },
     valueMono: { color: COLORS.textBody, font: MONO, size: 8, weight: NORMAL },
-    valueStrong: { color: COLORS.textStrong, font: SANS, size: 8, weight: BOLD },
-    valueUsd: { color: COLORS.textMuted, font: SANS, size: 7, weight: NORMAL },
+    valueStrong: { color: COLORS.textStrong, font: MONO, size: 8, weight: NORMAL },
+    valueUsd: { color: COLORS.textMuted, font: MONO, size: 7, weight: NORMAL },
     warning: { color: COLORS.warningText, font: SANS, size: 9, weight: NORMAL },
 } as const satisfies Record<string, TextStyle>;
 
