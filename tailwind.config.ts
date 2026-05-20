@@ -10,6 +10,44 @@ const breakpoints = new Map([
     ['xxl', 1400],
 ]);
 
+// dashkit migration tokens — sourced from app/scss/dashkit/_variables.scss after _solana-variables.scss overrides.
+// Phase 2 replaces Bootstrap classes with `e-*-dk-*` utilities; Phase 3 deletes these once dashkit is gone.
+const dkSpacer = '1.5rem';
+const dkColors = {
+    white: '#ffffff',
+    black: '#232323',
+    'black-dark': '#141816',
+    'gray-100': '#f9fdfc',
+    'gray-200': '#f1f8f6',
+    'gray-300': '#e5ebe9',
+    'gray-400': '#c6e6de',
+    'gray-500': '#abd5c6',
+    'gray-600': '#86b8b6',
+    'gray-700': '#698582',
+    'gray-800': '#387462',
+    'gray-900': '#1b4e3f',
+    'gray-600-dark': '#343a37',
+    'gray-700-dark': '#282d2b',
+    'gray-800-dark': '#1e2423',
+    primary: '#42ba96',
+    'primary-dark': '#33a382',
+    'primary-on-dark': '#1dd79b',
+    success: '#19be56',
+    'success-on-dark': '#26e97e',
+    info: '#43b5c5',
+    warning: '#d83aeb',
+    'warning-on-dark': '#fa62fc',
+    danger: '#b45be1',
+    'rainbow-1': '#fa62fc',
+    'rainbow-2': '#be84e8',
+    'rainbow-3': '#79abd2',
+    'rainbow-4': '#38d0bd',
+    'rainbow-5': '#1dd79b',
+    'popover-bg': '#1A1A1A',
+    'popover-border': 'rgba(255,255,255,0.1)',
+    'card-outline-dark': '#111',
+};
+
 const config: Config = {
     content: ['./app/**/*.{ts,tsx}'],
     plugins: [],
@@ -20,8 +58,40 @@ const config: Config = {
                 // border for active states from Dashkit
                 active: '0 0 0 0.15rem #33a382',
                 'active-sm': '0 0 0 1px #33a382',
+                'dk-card': '0 0.75rem 1.5rem rgba(20, 24, 22, 0.5)',
+                'dk-lift': '0 1rem 2.5rem rgba(35, 35, 35, 0.1), 0 0.5rem 1rem -0.75rem rgba(35, 35, 35, 0.1)',
+            },
+            borderRadius: {
+                'dk-xs': '0.1875rem',
+                'dk-sm': '0.25rem',
+                dk: '0.375rem',
+                'dk-lg': '0.5rem',
+                'dk-pill': '200px',
+            },
+            fontSize: {
+                'dk-xs': '0.625rem',
+                'dk-sm': '0.8125rem',
+                'dk-base': '0.9375rem',
+                'dk-lg': '1.0625rem',
+                'dk-h1': '1.625rem',
+                'dk-h2': '1.25rem',
+                'dk-h3': '1.0625rem',
+                'dk-h4': '0.9375rem',
+                'dk-h5': '0.8125rem',
+                'dk-h6': '0.625rem',
+            },
+            spacing: {
+                'dk-1': '0.1875rem',
+                'dk-2': '0.375rem',
+                'dk-3': '0.75rem',
+                'dk-4': dkSpacer,
+                'dk-5': '2.25rem',
+                'dk-6': '4.5rem',
+                'dk-7': '6.75rem',
+                'dk-8': '13.5rem',
             },
             colors: {
+                dk: dkColors,
                 // TODO: replace with e-text-neutral-400
                 muted: 'oklch(0.6406 0.0038 174.41)', // #8a8d8c
                 'heavy-metal': {
