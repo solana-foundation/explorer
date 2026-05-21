@@ -59,6 +59,22 @@ describe('getStakeActivation', () => {
         expect(result.inactive).toBe(0n);
     });
 
+    it('should clamp inactive to zero when lamports < effective + rentExemptReserve', async () => {
+        // Replaying warmup/cooldown locally can drift by a few lamports from the chain's
+        // real `effective`, which would otherwise surface as a negative inactive balance.
+        // Force the case with synthetic inputs and verify we return 0 instead of negative.
+        const rpc = buildRpc({ epoch: 100n, stakeHistory: [] });
+        const result = await getStakeActivation(
+            rpc,
+            defaultInput({
+                lamports: 2_500_000n, // effective (1M) + rentReserve (2_282_880) = 3_282_880 > lamports
+                rentExemptReserve: 2_282_880n,
+            }),
+        );
+        expect(result.active).toBe(1_000_000n);
+        expect(result.inactive).toBe(0n);
+    });
+
     it('should derive "inactive" status for a fully decayed delegation', async () => {
         // Target far past deactivation with no history entry → math returns all zeros.
         const rpc = buildRpc({ epoch: 100n, stakeHistory: [] });

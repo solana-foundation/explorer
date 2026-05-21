@@ -82,9 +82,15 @@ export async function getStakeActivation(
         stakeHistory,
     );
 
+    // Clamp to zero: the local warmup/cooldown replay can in principle drift by a few
+    // lamports against the chain's true `effective` (rounding inside per-epoch deltas),
+    // and `lamports` is read independently of the delegation — both can produce a
+    // negative remainder. Showing a negative inactive SOL balance is worse UX than 0.
+    const inactiveRaw = lamports - effective - rentExemptReserve;
+
     return {
         active: effective,
-        inactive: lamports - effective - rentExemptReserve,
+        inactive: inactiveRaw < 0n ? 0n : inactiveRaw,
         status: deriveStatus({ activating, deactivating, effective }),
     };
 }
