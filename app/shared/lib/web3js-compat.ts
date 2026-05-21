@@ -5,13 +5,22 @@
 import {
     type AccountMeta,
     AccountRole,
+    type Address,
     address,
     type Instruction,
     type InstructionWithAccounts,
     type InstructionWithData,
     type ReadonlyUint8Array,
 } from '@solana/kit';
-import type { TransactionInstruction } from '@solana/web3.js';
+import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
+
+export function toAddress(publicKey: PublicKey): Address {
+    return address(publicKey.toBase58());
+}
+
+export function toPublicKey(addr: Address): PublicKey {
+    return new PublicKey(addr);
+}
 
 type KitInstruction = Instruction<string> &
     InstructionWithAccounts<AccountMeta[]> &
