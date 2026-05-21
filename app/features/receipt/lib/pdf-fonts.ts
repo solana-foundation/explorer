@@ -23,7 +23,12 @@ export function loadPdfFonts(): Promise<PdfFonts> {
                 ),
             );
             return Object.fromEntries(entries) as PdfFonts;
-        })();
+        })().catch(error => {
+            // Drop the rejected promise so a transient font-fetch failure (e.g. CDN blip)
+            // doesn't permanently break downloads for the session — the next call retries.
+            cached = undefined;
+            throw error;
+        });
     }
     return cached;
 }

@@ -108,6 +108,7 @@ export function ReceiptView({
                             label="CSV"
                             download={downloadCsv}
                             signature={signature}
+                            onError={() => toast.custom({ title: 'Failed to download receipt CSV', type: 'error' })}
                         />
                         <DownloadReceiptItem
                             icon={<FileText size={12} />}
@@ -115,6 +116,7 @@ export function ReceiptView({
                             label="PDF"
                             download={downloadPdf}
                             signature={signature}
+                            onError={() => toast.custom({ title: 'Failed to download receipt PDF', type: 'error' })}
                         />
                     </PopoverButton>
                 </div>

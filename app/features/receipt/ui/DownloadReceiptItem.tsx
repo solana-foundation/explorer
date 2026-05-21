@@ -42,10 +42,19 @@ interface DownloadReceiptItemProps {
     download: DownloadReceiptFn;
     format: EReceiptDownloadFormat;
     signature: TransactionSignature;
+    onError?: (error: unknown) => void;
 }
 
-export function DownloadReceiptItem({ disabled, icon, label, download, format, signature }: DownloadReceiptItemProps) {
-    const [state, trigger] = useDownloadReceipt(download);
+export function DownloadReceiptItem({
+    disabled,
+    icon,
+    label,
+    download,
+    format,
+    signature,
+    onError,
+}: DownloadReceiptItemProps) {
+    const [state, trigger] = useDownloadReceipt(download, undefined, onError);
 
     function handleTrigger() {
         receiptAnalytics.trackDownload(signature, format);
