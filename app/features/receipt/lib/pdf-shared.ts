@@ -6,6 +6,7 @@ import {
     applyTextStyle,
     BORDER_RADIUS,
     COLORS,
+    GRID,
     LINE_STYLES,
     PAGE,
     TEXT_STYLES,
@@ -53,15 +54,25 @@ export function truncateMemo(memo: string | undefined | null): string {
     return memo.length > MEMO_MAX_CHARS ? `${memo.slice(0, MEMO_MAX_CHARS)}...` : memo;
 }
 
+// Top margin: y at which content starts on every page.
 export const PAGE_TOP_Y = 15;
+// Reserved blank strip at the bottom of the page; ensurePageSpace triggers a new page once a draw would cross it.
 export const PAGE_BOTTOM_PADDING = 14;
+// Vertical space inserted before a new section title.
 export const SECTION_GAP = 4;
+// Vertical advance after drawing a section title (heading row height).
 export const SECTION_TITLE_HEIGHT = 6;
+// Small trailing padding added after a section's last field, before the next SECTION_GAP.
 export const POST_SECTION_PADDING = 1;
+// Gap between a field's label baseline and the top of the field rectangle below it.
 export const LABEL_TO_FIELD_GAP = 1.5;
+// Gap appended after a field rectangle before the next labeled element.
 export const POST_FIELD_GAP = 3;
+// Default height of an editable single-line AcroForm field.
 export const DEFAULT_FIELD_HEIGHT = 6;
+// Trailing padding under the Total row in the supplier/items section.
 export const POST_TOTAL_ROW_PADDING = 4;
+// Height of the Total row cell (and matching label baseline-center anchor).
 export const FOOTER_CELL_HEIGHT = 6;
 
 // Two-column detail grid (used by both single and multi layouts).
@@ -69,6 +80,13 @@ export const DETAIL_LABEL_TO_VALUE_GAP = 4;
 export const DETAIL_ROW_GAP = 4;
 // Empirical inline line-height multiplier (font size × ratio = line height in mm).
 export const LINE_HEIGHT_RATIO = 0.45;
+// Coordinates for the two-column details section at the top of the receipt.
+export const DETAILS_COL1_X = PAGE.marginX;
+export const DETAILS_COL2_X = PAGE.marginX + GRID.col.outerWidth;
+// Signature link annotation: insets so the clickable rectangle hugs the
+// signature text rather than the surrounding label/gap.
+export const SIG_LINK_TOP_INSET = 1;
+export const SIG_LINK_HEIGHT_PADDING = 1;
 
 // Jupiter "report date" caption: icon size + inline gap from icon to text.
 const JUPITER_ICON_SIZE = 2.2;
@@ -325,6 +343,29 @@ export function drawDetailCell(
         cursor += lineHeight;
     }
     return cursor;
+}
+
+// Draws the Signature cell in the left detail column. When `transactionUrl` is
+// provided, overlays an invisible clickable link annotation hugging the
+// signature value lines (not the label or trailing gap).
+export function drawSignatureCell(doc: jsPDF, signature: string, y: number, transactionUrl?: string): number {
+    applyTextStyle(doc, TEXT_STYLES.valueMono);
+    const lines = doc.splitTextToSize(signature, GRID.col.innerWidth) as string[];
+    const startY = y;
+    const bottom = drawDetailCell(doc, 'Signature', lines, DETAILS_COL1_X, y, TEXT_STYLES.valueMono);
+    if (transactionUrl) {
+        const linkH = bottom - (startY + DETAIL_LABEL_TO_VALUE_GAP) + SIG_LINK_HEIGHT_PADDING;
+        doc.link(DETAILS_COL1_X, startY + SIG_LINK_TOP_INSET, GRID.col.innerWidth, linkH, { url: transactionUrl });
+    }
+    return bottom;
+}
+
+// Draws the Memo cell in the right detail column. Memo is truncated to
+// MEMO_MAX_CHARS and rendered as "-" when missing.
+export function drawMemoCell(doc: jsPDF, memo: string | undefined | null, y: number): number {
+    applyTextStyle(doc, TEXT_STYLES.valueMono);
+    const lines = doc.splitTextToSize(truncateMemo(memo), GRID.col.innerWidth) as string[];
+    return drawDetailCell(doc, 'Memo', lines, DETAILS_COL2_X, y, TEXT_STYLES.valueMono);
 }
 
 // Inline "ⓘ Equivalent on report date (… UTC), not transaction date" — drawn

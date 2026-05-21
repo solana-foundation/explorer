@@ -6,34 +6,35 @@ import {
     applyTextStyle,
     BORDER_RADIUS,
     COLORS,
-    GRID,
     LINE_STYLES,
     PAGE,
     TEXT_STYLES,
 } from './generate-receipt-pdf-styles';
 import {
     addSectionGap,
-    DETAIL_LABEL_TO_VALUE_GAP,
     DETAIL_ROW_GAP,
+    DETAILS_COL1_X,
+    DETAILS_COL2_X,
     drawDetailCell,
+    drawMemoCell,
     drawPageFooter,
     drawSectionTitle,
+    drawSignatureCell,
     drawSupplierAndItems,
     fitFontSize,
     initReceiptDoc,
     type PdfDeps,
     type ReceiptPdfOpts,
     svgToDataUrl,
-    truncateMemo,
 } from './pdf-shared';
 import { splitAtFirstNonZeroDigit } from './split-at-first-non-zero-digit';
 import { WARNING_SVG } from './warning-svg';
 
+// Max displayed rows in the transfers table.
 const MAX_VISIBLE_TRANSFERS = 18;
+// Max displayed rows in the transfers table with warning.
+// For more than 18 transfers, we show 16 rows + warning, which fits the same vertical space as 18 rows without warning.
 const MAX_VISIBLE_TRANSFERS_WITH_WARNING = 16;
-
-const COL1_X = PAGE.marginX;
-const COL2_X = PAGE.marginX + GRID.col.outerWidth;
 
 // Transfers table widths — design: 393px / 393px / 220px across a 1030px row,
 // mapped onto the 170mm A4 content band (≈ 6.06 px/mm).
@@ -64,13 +65,87 @@ const WARNING_INNER_PADDING = 1.5;
 const WARNING_ICON_TO_TEXT_OFFSET = 1.05;
 const WARNING_ICON_NATIVE_SIZE = 20; // px (the WARNING_SVG is 20x20)
 
-// Signature link annotation: insets so the clickable rectangle hugs the
-// signature text rather than the surrounding label/gap.
-const SIG_LINK_TOP_INSET = 1;
-const SIG_LINK_HEIGHT_PADDING = 1;
-
 // Trailing gap appended after the transfers table (with or without warning).
 const POST_TABLE_GAP = 2;
+
+export async function generateMultiTransferPdf(
+    deps: PdfDeps,
+    receipt: FormattedReceipt,
+    opts: ReceiptPdfOpts,
+): Promise<void> {
+    const { signature, receiptUrl, transactionUrl } = opts;
+    const { doc, y: initialY } = initReceiptDoc(deps, opts.clusterLabel);
+    let y = initialY;
+
+    y = addSectionGap(y);
+    // - Title
+    y = drawSectionTitle(doc, 'Transaction details', y);
+
+    // - Details secttion with two columns grid
+    // Row 1: Payment date | Network fee
+    const dateBottom = drawDetailCell(
+        doc,
+        'Payment date',
+        [receipt.date.utc],
+        DETAILS_COL1_X,
+        y,
+        TEXT_STYLES.valueMono,
+    );
+    const feeBottom = drawDetailCell(
+        doc,
+        'Network fee',
+        [`${receipt.fee.formatted} SOL`],
+        DETAILS_COL2_X,
+        y,
+        TEXT_STYLES.valueMono,
+    );
+    y = Math.max(dateBottom, feeBottom) + DETAIL_ROW_GAP;
+
+    // Row 2: Signature | Memo
+    const sigBottom = drawSignatureCell(doc, signature, y, transactionUrl);
+    drawMemoCell(doc, receipt.memo, y);
+
+    // Anchor the next section on the signature column only — signature line
+    // count is deterministic, so the Transfers title sits at a fixed y
+    // regardless of how tall the memo wraps.
+    y = sigBottom + DETAIL_ROW_GAP;
+
+    y = addSectionGap(y);
+
+    // - Transfers section with table
+    y = drawSectionTitle(doc, 'Transfers', y);
+
+    const transfers =
+        receipt.transfers && receipt.transfers.length > 1
+            ? [...receipt.transfers].sort((a, b) => b.amount.raw - a.amount.raw)
+            : [
+                  {
+                      amount: { formatted: receipt.total.formatted, raw: receipt.total.raw, unit: receipt.total.unit },
+                      receiver: receipt.receiver,
+                      sender: receipt.sender,
+                  },
+              ];
+    const isOverflow = transfers.length > MAX_VISIBLE_TRANSFERS;
+    const visibleCount = isOverflow ? MAX_VISIBLE_TRANSFERS_WITH_WARNING : MAX_VISIBLE_TRANSFERS;
+    const visibleTransfers = transfers.slice(0, visibleCount);
+
+    y = drawTransfersHeader(doc, y);
+
+    for (const t of visibleTransfers) {
+        y = drawTransferRow(doc, t, y);
+    }
+
+    if (isOverflow) {
+        y = await drawWarningBar(deps, doc, transfers.length, y - 1);
+    }
+    y += POST_TABLE_GAP;
+
+    // - Supplier section and footer
+    y = drawSupplierAndItems(doc, y, false);
+    await drawPageFooter(deps, doc, receiptUrl, y);
+
+    doc.save(`solana-receipt-${signature}.pdf`);
+}
 
 function drawTransfersHeader(doc: jsPDF, y: number): number {
     applyTextStyle(doc, TEXT_STYLES.label);
@@ -168,80 +243,4 @@ async function drawWarningBar(deps: PdfDeps, doc: jsPDF, totalCount: number, y: 
     doc.setFontSize(TEXT_STYLES.warning.size);
 
     return y + WARNING_BAR_HEIGHT;
-}
-
-export async function generateMultiTransferPdf(
-    deps: PdfDeps,
-    receipt: FormattedReceipt,
-    opts: ReceiptPdfOpts,
-): Promise<void> {
-    const { signature, receiptUrl, transactionUrl } = opts;
-    const { doc, y: initialY } = initReceiptDoc(deps, opts.clusterLabel);
-    let y = initialY;
-
-    y = addSectionGap(y);
-    y = drawSectionTitle(doc, 'Transaction details', y);
-
-    const dateBottom = drawDetailCell(doc, 'Payment date', [receipt.date.utc], COL1_X, y, TEXT_STYLES.valueMono);
-    const feeBottom = drawDetailCell(
-        doc,
-        'Network fee',
-        [`${receipt.fee.formatted} SOL`],
-        COL2_X,
-        y,
-        TEXT_STYLES.valueMono,
-    );
-    y = Math.max(dateBottom, feeBottom) + DETAIL_ROW_GAP;
-
-    const signatureWidth = GRID.col.innerWidth;
-    applyTextStyle(doc, TEXT_STYLES.valueMono);
-    const signatureLines = doc.splitTextToSize(signature, signatureWidth) as string[];
-    const sigStartY = y;
-    const sigBottom = drawDetailCell(doc, 'Signature', signatureLines, COL1_X, y, TEXT_STYLES.valueMono);
-    if (transactionUrl) {
-        const linkH = sigBottom - (sigStartY + DETAIL_LABEL_TO_VALUE_GAP) + SIG_LINK_HEIGHT_PADDING;
-        doc.link(COL1_X, sigStartY + SIG_LINK_TOP_INSET, signatureWidth, linkH, { url: transactionUrl });
-    }
-
-    applyTextStyle(doc, TEXT_STYLES.valueMono);
-    const memoLines = doc.splitTextToSize(truncateMemo(receipt.memo), GRID.col.innerWidth) as string[];
-    drawDetailCell(doc, 'Memo', memoLines, COL2_X, y, TEXT_STYLES.valueMono);
-
-    // Anchor the next section on the signature column only — signature line
-    // count is deterministic, so the Transfers title sits at a fixed y
-    // regardless of how tall the memo wraps.
-    y = sigBottom + DETAIL_ROW_GAP;
-
-    y = addSectionGap(y);
-    y = drawSectionTitle(doc, 'Transfers', y);
-
-    const transfers =
-        receipt.transfers && receipt.transfers.length > 1
-            ? [...receipt.transfers].sort((a, b) => b.amount.raw - a.amount.raw)
-            : [
-                  {
-                      amount: { formatted: receipt.total.formatted, raw: receipt.total.raw, unit: receipt.total.unit },
-                      receiver: receipt.receiver,
-                      sender: receipt.sender,
-                  },
-              ];
-    const isOverflow = transfers.length > MAX_VISIBLE_TRANSFERS;
-    const visibleCount = isOverflow ? MAX_VISIBLE_TRANSFERS_WITH_WARNING : MAX_VISIBLE_TRANSFERS;
-    const visibleTransfers = transfers.slice(0, visibleCount);
-
-    y = drawTransfersHeader(doc, y);
-
-    for (const t of visibleTransfers) {
-        y = drawTransferRow(doc, t, y);
-    }
-
-    if (isOverflow) {
-        y = await drawWarningBar(deps, doc, transfers.length, y - 1);
-    }
-    y += POST_TABLE_GAP;
-
-    y = drawSupplierAndItems(doc, y, false);
-    await drawPageFooter(deps, doc, receiptUrl, y);
-
-    doc.save(`solana-receipt-${signature}.pdf`);
 }
