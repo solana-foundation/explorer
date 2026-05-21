@@ -89,11 +89,17 @@ export async function generateReceiptCsv(
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `solana-receipt-${signature}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    try {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `solana-receipt-${signature}.csv`;
+        document.body.appendChild(link);
+        try {
+            link.click();
+        } finally {
+            document.body.removeChild(link);
+        }
+    } finally {
+        URL.revokeObjectURL(url);
+    }
 }

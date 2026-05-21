@@ -162,4 +162,14 @@ describe('generateReceiptCsv', () => {
         const blobArg = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls[0][0] as Blob;
         expect(blobArg.size).toBeGreaterThan(0);
     });
+
+    it('should revoke the object URL even when link.click throws', async () => {
+        mockClick.mockImplementation(() => {
+            throw new Error('click failed');
+        });
+
+        await expect(generateReceiptCsv(RECEIPT, SIGNATURE)).rejects.toThrow('click failed');
+        expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test-url');
+        expect(document.body.removeChild).toHaveBeenCalled();
+    });
 });

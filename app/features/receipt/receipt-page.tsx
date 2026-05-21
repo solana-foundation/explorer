@@ -174,19 +174,35 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const usdValue = priceResult?.price != null ? formatUsdValue(amount, priceResult.price) : undefined;
 
     const downloadCsv = useCallback(async () => {
-        await generateReceiptCsv(receipt, signature, usdValue);
+        try {
+            await generateReceiptCsv(receipt, signature, usdValue);
+        } catch (error) {
+            Logger.error(new Error('CSV generation failed', { cause: error }), {
+                sentry: true,
+                sentryExtras: { format: 'csv' },
+            });
+            throw error;
+        }
     }, [receipt, signature, usdValue]);
 
     const downloadPdf = useCallback(async () => {
-        const deps = await loadPdfDeps(error => Logger.error(error, { sentry: true }));
-        const transactionUrl = window.location.origin + transactionPath;
-        await generateReceiptPdf(deps, receipt, {
-            clusterLabel: clusterName(cluster),
-            receiptUrl: window.location.href,
-            signature,
-            transactionUrl,
-            usdValue,
-        });
+        try {
+            const deps = await loadPdfDeps(error => Logger.error(error, { sentry: true }));
+            const transactionUrl = window.location.origin + transactionPath;
+            await generateReceiptPdf(deps, receipt, {
+                clusterLabel: clusterName(cluster),
+                receiptUrl: window.location.href,
+                signature,
+                transactionUrl,
+                usdValue,
+            });
+        } catch (error) {
+            Logger.error(new Error('PDF generation failed', { cause: error }), {
+                sentry: true,
+                sentryExtras: { format: 'pdf' },
+            });
+            throw error;
+        }
     }, [receipt, signature, transactionPath, usdValue, cluster]);
 
     return (

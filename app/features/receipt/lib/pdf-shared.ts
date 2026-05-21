@@ -22,6 +22,15 @@ export type PdfDeps = {
     qrToDataURL: typeof ToDataURL;
 };
 
+export type ReceiptPdfOpts = {
+    signature: string;
+    receiptUrl: string;
+    clusterLabel: string;
+    transactionUrl?: string;
+    reportDate?: Date;
+    usdValue?: string;
+};
+
 export type TitleBlockSizes = {
     afterSubtitleGap: number; // mm below subtitle baseline
     afterTitleGap: number; // mm between title baseline and subtitle baseline

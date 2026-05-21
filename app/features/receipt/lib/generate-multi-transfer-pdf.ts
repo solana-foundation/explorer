@@ -1,7 +1,6 @@
 import type { jsPDF } from 'jspdf';
 
 import type { FormattedReceipt } from '../types';
-import type { ReceiptPdfOpts } from './generate-receipt-pdf';
 import {
     applyLineStyle,
     applyTextStyle,
@@ -23,6 +22,7 @@ import {
     fitFontSize,
     initReceiptDoc,
     type PdfDeps,
+    type ReceiptPdfOpts,
     svgToDataUrl,
     truncateMemo,
 } from './pdf-shared';
@@ -62,7 +62,6 @@ const WARNING_BAR_RADIUS = BORDER_RADIUS;
 const WARNING_ICON_SIZE = 4;
 const WARNING_INNER_PADDING = 1.5;
 const WARNING_ICON_TO_TEXT_OFFSET = 1.05;
-// const WARNING_TEXT_RIGHT_PADDING = 4;
 const WARNING_ICON_NATIVE_SIZE = 20; // px (the WARNING_SVG is 20x20)
 
 // Signature link annotation: insets so the clickable rectangle hugs the

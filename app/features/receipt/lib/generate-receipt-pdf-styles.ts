@@ -42,16 +42,13 @@ export type TextStyle = {
     weight: typeof NORMAL | typeof BOLD;
     size: number;
     color: string;
-    uppercase?: boolean;
 };
 
 export const TEXT_STYLES = {
-    amountDim: { color: COLORS.textMuted, font: MONO, size: 8, weight: NORMAL },
     caption: { color: COLORS.textSubtle, font: SANS, size: 6, weight: NORMAL },
     disclaimer: { color: COLORS.textSubtle, font: SANS, size: 7, weight: NORMAL },
     label: { color: COLORS.textMuted, font: SANS, size: 8, weight: NORMAL },
     logoFallback: { color: COLORS.textHeading, font: SANS, size: 9, weight: BOLD },
-    paymentLabel: { color: COLORS.textMuted, font: SANS, size: 8, weight: BOLD },
     sectionTitle: { color: COLORS.textHeading, font: SANS, size: 10, weight: BOLD },
     subtitle: { color: COLORS.textSubtle, font: SANS, size: 9, weight: NORMAL },
     tableAddress: { color: COLORS.textBody, font: MONO, size: 6.5, weight: NORMAL },
@@ -60,8 +57,6 @@ export const TEXT_STYLES = {
     title: { color: COLORS.textHeading, font: SANS, size: 16, weight: BOLD },
     totalLabel: { color: COLORS.textHeading, font: SANS, size: 8, weight: BOLD },
     valueMono: { color: COLORS.textBody, font: MONO, size: 8, weight: NORMAL },
-    valueStrong: { color: COLORS.textStrong, font: MONO, size: 8, weight: NORMAL },
-    valueUsd: { color: COLORS.textMuted, font: MONO, size: 7, weight: NORMAL },
     warning: { color: COLORS.warningText, font: SANS, size: 9, weight: NORMAL },
 } as const satisfies Record<string, TextStyle>;
 
@@ -71,10 +66,6 @@ export const LINE_STYLES = {
     border: { color: COLORS.border, width: 0.2 },
     divider: { color: COLORS.border, width: 0.3 },
 } as const satisfies Record<string, LineStyle>;
-
-export function formatText(text: string, style: TextStyle): string {
-    return style.uppercase ? text.toUpperCase() : text;
-}
 
 export function applyTextStyle(doc: jsPDF, style: TextStyle): void {
     doc.setFont(style.font, style.weight);

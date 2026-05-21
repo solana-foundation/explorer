@@ -16,10 +16,6 @@ export function formatUsdValue(amount: number, price: number): string {
  * Parses a formatted USD string into a number, stripping the `~` approximation
  * marker, `$`, comma thousands-separators, and the trailing ` USD` suffix
  * (e.g. `"~1,234.56 USD"` → `1234.56`, `"$50.00"` → `50`).
- *
- * Returns `null` when the input cannot be parsed as a finite number — e.g. an
- * empty string or a non-numeric value like `"n/a"`. Callers should treat `null`
- * as "no USD value available" and skip USD-dependent rendering.
  */
 export function parseUsdNumber(usdValue: string): number | null {
     // eslint-disable-next-line no-restricted-syntax -- regex is the clearest way to strip currency formatting chars

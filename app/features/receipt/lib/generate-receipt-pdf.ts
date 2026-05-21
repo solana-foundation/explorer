@@ -1,19 +1,10 @@
 import type { FormattedReceipt } from '../types';
 import { generateMultiTransferPdf } from './generate-multi-transfer-pdf';
 import { generateSingleTransferPdf } from './generate-single-transfer-pdf';
-import { loadPdfDeps as loadPdfDepsImpl, type PdfDeps } from './pdf-shared';
+import { loadPdfDeps as loadPdfDepsImpl, type PdfDeps, type ReceiptPdfOpts } from './pdf-shared';
 
-export type { PdfDeps };
+export type { PdfDeps, ReceiptPdfOpts };
 export const loadPdfDeps = loadPdfDepsImpl;
-
-export type ReceiptPdfOpts = {
-    signature: string;
-    receiptUrl: string;
-    clusterLabel: string;
-    transactionUrl?: string;
-    reportDate?: Date;
-    usdValue?: string;
-};
 
 export async function generateReceiptPdf(
     deps: PdfDeps,

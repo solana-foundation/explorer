@@ -1,5 +1,4 @@
 import type { FormattedReceipt } from '../types';
-import type { ReceiptPdfOpts } from './generate-receipt-pdf';
 import { applyTextStyle, GRID, PAGE, TEXT_STYLES } from './generate-receipt-pdf-styles';
 import {
     addSectionGap,
@@ -13,6 +12,7 @@ import {
     initReceiptDoc,
     LINE_HEIGHT_RATIO,
     type PdfDeps,
+    type ReceiptPdfOpts,
     truncateMemo,
 } from './pdf-shared';
 
