@@ -36,4 +36,16 @@ describe('prorateUsd', () => {
     ])('should return empty string when totalRaw is zero (transfer=%i, usd=%i)', (transferRaw, totalRaw, totalUsd) => {
         expect(prorateUsd(transferRaw, totalRaw, totalUsd)).toBe('');
     });
+
+    it.each<[number, number, number]>([
+        [1, 2, NaN],
+        [NaN, 2, 100],
+        [-1, 2, 100],
+        [1, 2, -100],
+    ])(
+        'should clamp NaN/negative results to ~0.00 USD (transfer=%s, total=%s, usd=%s)',
+        (transferRaw, totalRaw, totalUsd) => {
+            expect(prorateUsd(transferRaw, totalRaw, totalUsd)).toBe('~0.00 USD');
+        },
+    );
 });

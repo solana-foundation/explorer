@@ -65,7 +65,7 @@ const WARNING_ICON_TO_TEXT_OFFSET = 1.05;
 const WARNING_ICON_NATIVE_SIZE = 20; // px (the WARNING_SVG is 20x20)
 
 // Signature link annotation: insets so the clickable rectangle hugs the
-// signature text. The `+1`/`-1` tighten the box to the actual text bounds.
+// signature text rather than the surrounding label/gap.
 const SIG_LINK_TOP_INSET = 1;
 const SIG_LINK_HEIGHT_PADDING = 1;
 

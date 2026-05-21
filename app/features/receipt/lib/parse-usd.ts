@@ -24,18 +24,22 @@ export function parseUsdNumber(usdValue: string): number | null {
 }
 
 /**
- * Returns this transfer's share of the receipt's total USD value, formatted to
- * match `formatUsdValue` (`"~X.XX USD"`, 2 decimal places, thousands-separators).
+ * Returns this transfer's share of the receipt's total USD value, formatted as
+ * `"~X.XX USD"` (2 decimal places, thousands-separators) — matching
+ * `formatUsdValue`'s output shape, including its `~0.00 USD` clamp for
+ * NaN/negative results.
  *
  * The share is proportional: `(transferRaw / totalRaw) * totalUsd`. Use this
  * when a single aggregate USD figure (e.g. from Jupiter) must be split across
  * multiple transfers within the same receipt.
  *
- * Returns an empty string when `totalRaw` is `0` to avoid division-by-zero —
- * callers should treat `""` as "no proration available" and render nothing.
+ * Returns an empty string when `totalRaw` is `0` (the division would yield
+ * `Infinity`/`NaN`) — callers should treat `""` as "no proration available"
+ * and render nothing.
  */
 export function prorateUsd(transferRaw: number, totalRaw: number, totalUsd: number): string {
     if (totalRaw === 0) return '';
     const value = (transferRaw / totalRaw) * totalUsd;
+    if (isNaN(value) || value < 0) return '~0.00 USD';
     return `~${value.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 })} USD`;
 }
