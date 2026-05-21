@@ -1,16 +1,24 @@
-import { Address } from '@components/common/Address';
 import { Epoch } from '@components/common/Epoch';
 import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useRefreshAccount } from '@entities/account';
 import { AccountCard } from '@features/account';
-import { Account } from '@providers/accounts';
-import { StakeActivationData } from '@solana/web3.js';
-import { displayTimestampUtc } from '@utils/date';
-import { StakeAccountInfo, StakeAccountType, StakeMeta } from '@validators/accounts/stake';
+import type { Account } from '@providers/accounts';
+import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import React from 'react';
 
-const U64_MAX = BigInt('0xffffffffffffffff');
+import { toKitAddress } from '@/app/shared/lib/web3js-compat';
+
+import type { StakeActivationStatus } from '../api/stake-activation';
+import { EPOCH_NEVER_SET } from '../lib/constants';
+import type { StakeAccountInfo, StakeAccountType, StakeMeta } from '../lib/validators';
+import { KitAddress } from './KitAddress';
+
+type StakeActivationData = {
+    state: StakeActivationStatus;
+    active: number;
+    inactive: number;
+};
 
 export function StakeAccountSection({
     account,
@@ -23,74 +31,56 @@ export function StakeAccountSection({
     stakeAccountType: StakeAccountType;
     activation?: StakeActivationData;
 }) {
-    const hideDelegation = stakeAccountType !== 'delegated' || isFullyInactivated(stakeAccount, activation);
+    const overviewStatus = deriveOverviewStatus(stakeAccountType, stakeAccount, activation);
     return (
         <>
             <LockupCard stakeAccount={stakeAccount} />
-            <OverviewCard
-                account={account}
-                stakeAccount={stakeAccount}
-                stakeAccountType={stakeAccountType}
-                activation={activation}
-                hideDelegation={hideDelegation}
-            />
-            {!hideDelegation && (
-                <DelegationCard
-                    stakeAccount={stakeAccount}
-                    activation={activation}
-                    stakeAccountType={stakeAccountType}
-                />
-            )}
+            <OverviewCard account={account} stakeAccount={stakeAccount} status={overviewStatus} />
+            {overviewStatus === undefined && <DelegationCard stakeAccount={stakeAccount} activation={activation} />}
             <AuthoritiesCard meta={stakeAccount.meta} />
         </>
     );
 }
 
-function LockupCard({ stakeAccount }: { stakeAccount: StakeAccountInfo }) {
-    const unixTimestamp = 1000 * (stakeAccount.meta?.lockup.unixTimestamp || 0);
-    if (Date.now() < unixTimestamp) {
-        const prettyTimestamp = displayTimestampUtc(unixTimestamp);
-        return (
-            <div className="alert alert-warning text-center">
-                <strong>Account is locked!</strong> Lockup expires on {prettyTimestamp}
-            </div>
-        );
-    } else {
-        return null;
+// Returns the Status label to render in the overview card, or undefined when the account is
+// actively delegated — in which case the dedicated Stake Delegation card carries the status.
+function deriveOverviewStatus(
+    stakeAccountType: StakeAccountType,
+    stakeAccount: StakeAccountInfo,
+    activation?: StakeActivationData,
+): string | undefined {
+    switch (stakeAccountType) {
+        case 'delegated':
+            return isFullyInactivated(stakeAccount, activation) ? 'Deactivated' : undefined;
+        case 'initialized':
+            return 'Initialized';
+        case 'uninitialized':
+            return 'Uninitialized';
+        case 'rewardsPool':
+            return 'RewardsPool';
     }
 }
 
-const TYPE_NAMES = {
-    delegated: 'Delegated',
-    initialized: 'Initialized',
-    rewardsPool: 'RewardsPool',
-    uninitialized: 'Uninitialized',
-};
-
-function displayStatus(stakeAccountType: StakeAccountType, activation?: StakeActivationData) {
-    let status = TYPE_NAMES[stakeAccountType];
-    let activationState = '';
-    if (stakeAccountType !== 'delegated') {
-        status = 'Not delegated';
-    } else {
-        activationState = activation ? `(${activation.state})` : '';
+function LockupCard({ stakeAccount }: { stakeAccount: StakeAccountInfo }) {
+    const lockupExpiryMs = unixTimestampToMs(stakeAccount.meta.lockup.unixTimestamp);
+    if (Date.now() >= lockupExpiryMs) {
+        return null;
     }
-
-    return [status, activationState].join(' ');
+    return (
+        <div className="alert alert-warning text-center">
+            <strong>Account is locked!</strong> Lockup expires on {displayTimestampUtc(lockupExpiryMs)}
+        </div>
+    );
 }
 
 function OverviewCard({
     account,
     stakeAccount,
-    stakeAccountType,
-    activation,
-    hideDelegation,
+    status,
 }: {
     account: Account;
     stakeAccount: StakeAccountInfo;
-    stakeAccountType: StakeAccountType;
-    activation?: StakeActivationData;
-    hideDelegation: boolean;
+    status?: string;
 }) {
     const refresh = useRefreshAccount();
     return (
@@ -103,7 +93,7 @@ function OverviewCard({
             <tr>
                 <td>Address</td>
                 <td className="text-lg-end">
-                    <Address pubkey={account.pubkey} alignRight raw />
+                    <KitAddress address={toKitAddress(account.pubkey)} alignRight raw />
                 </td>
             </tr>
             <tr>
@@ -118,14 +108,10 @@ function OverviewCard({
                     <SolBalance lamports={stakeAccount.meta.rentExemptReserve} />
                 </td>
             </tr>
-            {hideDelegation && (
+            {status !== undefined && (
                 <tr>
                     <td>Status</td>
-                    <td className="text-lg-end">
-                        {isFullyInactivated(stakeAccount, activation)
-                            ? 'Not delegated'
-                            : displayStatus(stakeAccountType, activation)}
-                    </td>
+                    <td className="text-lg-end">{status}</td>
                 </tr>
             )}
         </AccountCard>
@@ -134,21 +120,19 @@ function OverviewCard({
 
 function DelegationCard({
     stakeAccount,
-    stakeAccountType,
     activation,
 }: {
     stakeAccount: StakeAccountInfo;
-    stakeAccountType: StakeAccountType;
     activation?: StakeActivationData;
 }) {
     let voterPubkey, activationEpoch, deactivationEpoch;
-    const delegation = stakeAccount?.stake?.delegation;
+    const delegation = stakeAccount.stake?.delegation;
     if (delegation) {
         voterPubkey = delegation.voter;
-        if (delegation.activationEpoch !== U64_MAX) {
+        if (delegation.activationEpoch !== EPOCH_NEVER_SET) {
             activationEpoch = delegation.activationEpoch;
         }
-        if (delegation.deactivationEpoch !== U64_MAX) {
+        if (delegation.deactivationEpoch !== EPOCH_NEVER_SET) {
             deactivationEpoch = delegation.deactivationEpoch;
         }
     }
@@ -161,7 +145,7 @@ function DelegationCard({
             <TableCardBody>
                 <tr>
                     <td>Status</td>
-                    <td className="text-lg-end">{displayStatus(stakeAccountType, activation)}</td>
+                    <td className="text-lg-end">{activation ? `Delegated (${activation.state})` : 'Delegated'}</td>
                 </tr>
 
                 {stake && (
@@ -195,7 +179,7 @@ function DelegationCard({
                             <tr>
                                 <td>Delegated Vote Address</td>
                                 <td className="text-lg-end">
-                                    <Address pubkey={voterPubkey} alignRight link />
+                                    <KitAddress address={voterPubkey} alignRight link />
                                 </td>
                             </tr>
                         )}
@@ -230,14 +214,14 @@ function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
                 <tr>
                     <td>Stake Authority Address</td>
                     <td className="text-lg-end">
-                        <Address pubkey={meta.authorized.staker} alignRight link />
+                        <KitAddress address={meta.authorized.staker} alignRight link />
                     </td>
                 </tr>
 
                 <tr>
                     <td>Withdraw Authority Address</td>
                     <td className="text-lg-end">
-                        <Address pubkey={meta.authorized.withdrawer} alignRight link />
+                        <KitAddress address={meta.authorized.withdrawer} alignRight link />
                     </td>
                 </tr>
 
@@ -245,7 +229,7 @@ function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
                     <tr>
                         <td>Lockup Authority Address</td>
                         <td className="text-lg-end">
-                            <Address pubkey={meta.lockup.custodian} alignRight link />
+                            <KitAddress address={meta.lockup.custodian} alignRight link />
                         </td>
                     </tr>
                 )}
@@ -264,5 +248,5 @@ function isFullyInactivated(stakeAccount: StakeAccountInfo, activation?: StakeAc
     const delegatedStake = stake.delegation.stake;
     const inactiveStake = BigInt(activation.inactive);
 
-    return stake.delegation.deactivationEpoch !== U64_MAX && delegatedStake === inactiveStake;
+    return stake.delegation.deactivationEpoch !== EPOCH_NEVER_SET && delegatedStake === inactiveStake;
 }

@@ -59,6 +59,7 @@
         "@solana-program/compute-budget": "0.15.0",
         "@solana-program/memo": "0.11.0",
         "@solana-program/program-metadata": "0.5.1",
+        "@solana-program/stake": "0.6.0",
         "@solana-program/system": "0.12.0",
         "@solana-program/token": "0.13.0",
         "@solana-program/token-2022": "0.9.0",

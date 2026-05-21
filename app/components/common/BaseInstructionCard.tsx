@@ -17,8 +17,8 @@ type InstructionProps = {
     index: number;
     ix: TransactionInstruction | ParsedInstruction;
     defaultRaw?: boolean;
-    innerCards?: JSX.Element[];
-    eventCards?: JSX.Element[];
+    innerCards?: React.ReactNode[];
+    eventCards?: React.ReactNode[];
     childIndex?: number;
     // raw can be used to display raw instruction information
     raw?: TransactionInstruction;
