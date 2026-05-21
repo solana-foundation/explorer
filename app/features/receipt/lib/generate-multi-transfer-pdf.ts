@@ -54,7 +54,7 @@ const TRANSFER_ROW_POST_LINE_GAP = 2.75;
 const TRANSFER_ROW_HEIGHT = TRANSFER_ROW_PRE_LINE_GAP + TRANSFER_ROW_POST_LINE_GAP;
 
 // Truncation warning bar geometry. The bar's vertical footprint is sized to
-// exactly two transfer-row heights so that "16 rows + warning" matches the
+// ~ 1.5-2 transfer-row heights so that "16 rows + warning" matches the
 // height of "18 rows" — the supplier section below starts at the same y in
 // both cases.
 const WARNING_BAR_HEIGHT = TRANSFER_ROW_HEIGHT * 1.5;

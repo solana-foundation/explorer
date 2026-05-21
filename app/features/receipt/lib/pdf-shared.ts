@@ -88,6 +88,12 @@ const ADDRESS_FIELD_EXTRA_TOP_GAP = 1;
 const ITEMS_DESCRIPTION_HEIGHT = 40;
 const FOOTER_HEIGHT = 37;
 
+const FOOTER_TOP_GAP = 5.25; // ~20px
+const FOOTER_DISCLAIMER_TO_QR_GAP = 10.5; // ~40px
+const DISCLAIMER_LINE_HEIGHT = 3.5;
+const DISCLAIMER_TO_LOGO_GAP = 4;
+const QR_CAPTION_GAP = 3;
+
 // Fixed vertical cost of everything from "Supplier / Seller Information" through
 // the bottom of the page footer. Used to compute the spacer that grows below the
 // data section so the receipt always fills exactly one A4 page.
@@ -367,12 +373,6 @@ export function drawSupplierAndItems(doc: jsPDF, y: number, includeTotalRow = tr
 
     return drawTotalRow(doc, 'Total', 'total', '', y);
 }
-
-const FOOTER_TOP_GAP = 5.25; // ~20px
-const FOOTER_DISCLAIMER_TO_QR_GAP = 10.5; // ~40px
-const DISCLAIMER_LINE_HEIGHT = 3.5;
-const DISCLAIMER_TO_LOGO_GAP = 4;
-const QR_CAPTION_GAP = 3;
 
 export async function drawPageFooter(
     deps: PdfDeps,
