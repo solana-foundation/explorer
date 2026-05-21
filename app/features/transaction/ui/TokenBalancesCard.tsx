@@ -1,7 +1,9 @@
+'use client'
+
+import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { useTransactionDetails } from '@providers/transactions';
-import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { ParsedMessageAccount, PublicKey, TokenBalance } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
@@ -11,11 +13,12 @@ import useAsyncEffect from 'use-async-effect';
 import { useScaledUiAmountForMint } from '@/app/providers/accounts/tokens';
 import { useCluster } from '@/app/providers/cluster';
 import { getTokenInfos } from '@/app/utils/token-info';
-
-import ScaledUiAmountMultiplierTooltip from '../account/token-extensions/ScaledUiAmountMultiplierTooltip';
+import { cn } from '@components/shared/utils';
+import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 
 type TokenBalanceRow = {
     account: PublicKey;
+    owner?: string;
     mint: string;
     balance: string;
     delta: BigNumber;
@@ -65,68 +68,91 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     }, []);
 
     return (
-        <CollapsibleCard title="Token Balances">
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">Address</th>
-                            <th className="text-muted">Token</th>
-                            <th className="text-muted">Change</th>
-                            <th className="text-muted">Post Balance</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">
-                        {rows.map(row => (
-                            <TokenBalanceRow
-                                key={row.account.toBase58() + row.mint}
-                                {...row}
-                                units={tokenSymbols.get(row.mint) || 'tokens'}
-                            />
-                        ))}
-                    </tbody>
-                </table>
+        <section id="tokens" className='e-flex e-flex-col e-gap-3'>
+            <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">Tokens</h2>
+            <div className='e-card'>
+                <div className={cn(
+                    "e-hidden e-py-1.5 e-px-3 lg:e-grid md:e-px-4",
+                    "e-text-xs e-uppercase e-text-muted e-gap-5 e-grid-cols-[1fr_minmax(auto,170px)_minmax(auto,140px)__minmax(auto,80px)]",
+                    "e-border-white/10 e-border-1 e-border-b [border-bottom-style:solid]"
+                )}>
+                    <div>Owner / Address</div>
+                    <div>Change</div>
+                    <div className="e-text-right">Post Balance</div>
+                    <div className="e-text-right">Token</div>
+                </div>
+                {rows.map(row => (
+                    <TokenBalanceRow
+                        key={row.account.toBase58() + row.mint}
+                        account={row.account}
+                        owner={row.owner}
+                        delta={row.delta}
+                        balance={row.balance}
+                        mint={row.mint}
+                        units={tokenSymbols.get(row.mint) || 'tokens'}
+                    />
+                ))}
             </div>
-        </CollapsibleCard>
+        </section>
     );
 }
 
 function TokenBalanceRow({
     account,
+    owner,
     delta,
     balance,
     mint,
     units,
 }: {
     account: PublicKey;
+    owner?: string;
     delta: BigNumber;
     balance: string;
     mint: string;
     units: string;
 }) {
+    const {isLg} = useBreakpoint();
     const key = account.toBase58() + mint;
     const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(mint, balance);
 
     return (
-        <tr key={key}>
-            <td>
-                <Address pubkey={account} link />
-            </td>
-            <td>
-                <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo />
-            </td>
-            <td>
+        <div 
+            key={key} 
+            className={cn(
+                "e-min-h-9 e-py-1.5 e-px-3 md:e-px-4",
+                "e-grid e-gap-x-5 e-gap-y-0.5 md:e-gap-y-0 e-items-start e-text-sm e-whitespace-nowrap",
+                "e-grid-cols-[1fr_auto] lg:e-grid-cols-[1fr_minmax(auto,170px)_minmax(auto,140px)__minmax(auto,80px)]",
+                "[grid-template-areas:'symbol_change'_'symbol_balance'_'address_address'] lg:[grid-template-areas:'address_change_balance_symbol']",
+                "e-border-white/10 e-border-1 e-border-b [border-bottom-style:solid] last:e-border-b-0"
+            )}
+        >
+            <div className="e-flex e-flex-col [grid-area:address]">
+                {owner && (
+                    <div className='e-flex e-gap-2 e-items-center'>
+                        <span className="e-text-sm e-text-muted">Owner</span>
+                        <Address pubkey={new PublicKey(owner)} link />
+                    </div>
+                )}
+                <div className='e-flex e-gap-2 e-items-center'>
+                    <span className="e-text-sm e-text-muted">Addr</span>
+                    <Address pubkey={account} link />
+                </div>
+            </div>
+            <div className="e-justify-self-end lg:e-justify-self-start [grid-area:change]">
                 <BalanceDelta delta={delta.multipliedBy(scaledUiAmountMultiplier)} />
-            </td>
-            <td>
+            </div>
+            <div className="e-justify-self-start lg:e-justify-self-end [grid-area:balance]">
                 {new BigNumber(balance).multipliedBy(scaledUiAmountMultiplier).toString()} {units}
                 <ScaledUiAmountMultiplierTooltip
                     rawAmount={balance}
                     scaledUiAmountMultiplier={scaledUiAmountMultiplier}
                 />
-            </td>
-        </tr>
+            </div>
+            <div className="e-justify-self-start [grid-area:symbol]">
+                <Address pubkey={new PublicKey(mint)} truncateChars={3} link fetchTokenLabelInfo={!isLg} />
+            </div>
+        </div>
     );
 }
 
@@ -163,7 +189,7 @@ export function generateTokenBalanceRows(
     const rows: TokenBalanceRow[] = [];
 
     for (const index in postBalanceMap) {
-        const { uiTokenAmount, accountIndex, mint } = postBalanceMap[index];
+        const { uiTokenAmount, accountIndex, mint, owner } = postBalanceMap[index];
         const preBalance = preBalanceMap[accountIndex];
         const account = accounts[accountIndex].pubkey;
 
@@ -188,6 +214,7 @@ export function generateTokenBalanceRows(
                 balance: '0',
                 delta: new BigNumber(-preBalanceUiAmountString),
                 mint: preBalance.mint,
+                owner,
             });
 
             rows.push({
@@ -196,6 +223,7 @@ export function generateTokenBalanceRows(
                 balance: postBalanceUiAmountString,
                 delta: new BigNumber(postBalanceUiAmountString),
                 mint: mint,
+                owner,
             });
             continue;
         }
@@ -219,6 +247,7 @@ export function generateTokenBalanceRows(
             balance: postBalanceUiAmountString,
             delta,
             mint,
+            owner,
         });
     }
 

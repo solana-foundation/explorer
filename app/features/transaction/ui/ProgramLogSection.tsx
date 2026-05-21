@@ -1,14 +1,27 @@
+import { cn } from '@components/shared/utils';
+import { Button } from '@/app/components/shared/ui/button';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
-import { cn } from '@shared/utils';
 import { SignatureProps } from '@utils/index';
 import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
-import { Code } from 'react-feather';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+type ChipProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean };
+export function Chip({ children, className, active, ...props }: ChipProps) {
+    return (
+        <Button
+            variant={active ? 'default' : 'outline'}
+            size="sm"
+            className={cn(active && 'e-border-accent', className)}
+            {...props}
+        >
+            {children}
+        </Button>
+    );
+}
+
 
 export function ProgramLogSection({ signature }: SignatureProps) {
     const [showRaw, setShowRaw] = React.useState(false);
@@ -28,17 +41,19 @@ export function ProgramLogSection({ signature }: SignatureProps) {
     }
 
     return (
-        <>
-            <div className="card">
-                <CardHeader ui="dashkit" className={!showRaw ? '!e-border-b-0' : undefined}>
-                    <h3 className="card-header-title">Program Instruction Logs</h3>
-                    <button
-                        className={cn('btn btn-sm e-flex e-items-center', showRaw ? 'btn-black active' : 'btn-white')}
-                        onClick={() => setShowRaw(r => !r)}
-                    >
-                        <Code className="e-mr-1.5" size={13} /> Raw
-                    </button>
-                </CardHeader>
+        <section id="logs" className="e-flex e-flex-col e-gap-3">
+            <div className="e-flex e-justify-between">
+                <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">Logs</h2>
+                <div className="e-flex e-shrink-0 e-gap-1">
+                    <Chip active={!showRaw} onClick={() => setShowRaw(false)}>
+                        Fancy
+                    </Chip>
+                    <Chip active={showRaw} onClick={() => setShowRaw(true)}>
+                        RAW
+                    </Chip>
+                </div>
+            </div>
+            <div className="e-card">
                 {prettyLogs !== null && logMessages !== null ? (
                     showRaw ? (
                         <RawProgramLogs raw={logMessages} />
@@ -46,10 +61,10 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                         <ProgramLogsCardBody message={message} logs={prettyLogs} cluster={cluster} url={url} />
                     )
                 ) : (
-                    <CardBody ui="dashkit">Logs not supported for this transaction</CardBody>
+                    <div className="e-px-4 e-py-3 e-text-sm e-text-muted">Logs not supported for this transaction</div>
                 )}
             </div>
-        </>
+        </section>
     );
 }
 

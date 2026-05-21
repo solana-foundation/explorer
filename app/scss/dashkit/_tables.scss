@@ -28,6 +28,14 @@ tbody td {
     border-bottom: 0;
 }
 
+.table {
+    tr:first-child {
+        td {
+            border-top: none;
+        }
+    }
+}
+
 .small-headers thead th {
     font-size: 0.7125rem !important;
 }

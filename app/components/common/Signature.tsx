@@ -13,11 +13,12 @@ import { useMidTruncation } from './useMidTruncation';
 type Props = {
     signature: TransactionSignature;
     alignRight?: boolean;
+    className?: string;
     link?: boolean;
     noTruncate?: boolean;
 };
 
-export function Signature({ signature, alignRight, link, noTruncate }: Props) {
+export function Signature({ signature, alignRight, className, link, noTruncate }: Props) {
     const transactionPath = useClusterPath({ pathname: `/tx/${signature}` });
     const { rowRef, hiddenTextRef, isMidTruncated, midTruncatedText } = useMidTruncation(!noTruncate, signature);
 
@@ -29,6 +30,7 @@ export function Signature({ signature, alignRight, link, noTruncate }: Props) {
             className={cn(
                 'e-relative e-flex e-w-full e-min-w-0 e-items-center e-justify-start',
                 alignRight && 'e-justify-end',
+                className,
             )}
         >
             {!noTruncate && (

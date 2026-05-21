@@ -1,14 +1,25 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { AddressLookupTableDetailsCard } from '@components/instruction/AddressLookupTableDetailsCard';
+import AnchorDetailsCard from '@components/instruction/AnchorDetailsCard';
 import { AssociatedTokenDetailsCard } from '@components/instruction/associated-token/AssociatedTokenDetailsCard';
 import { BpfLoaderDetailsCard } from '@components/instruction/bpf-loader/BpfLoaderDetailsCard';
 import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { ComputeBudgetDetailsCard } from '@components/instruction/ComputeBudgetDetailsCard';
+import { Ed25519DetailsCard } from '@components/instruction/ed25519/Ed25519DetailsCard';
+import { isEd25519Instruction } from '@components/instruction/ed25519/types';
+import { LighthouseDetailsCard } from '@components/instruction/lighthouse/LighthouseDetailsCard';
+import { isLighthouseInstruction } from '@components/instruction/lighthouse/types';
+import { isMangoInstruction } from '@components/instruction/mango/types';
 import { MangoDetailsCard } from '@components/instruction/MangoDetails';
 import { MemoDetailsCard } from '@components/instruction/MemoDetailsCard';
+import { ProgramMetadataIdlInstructionDetailsCard } from '@components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard';
 import { PythDetailsCard } from '@components/instruction/pyth/PythDetailsCard';
 import { isPythInstruction } from '@components/instruction/pyth/types';
+import {
+    isSolanaAttestationInstruction,
+    SolanaAttestationDetailsCard,
+} from '@components/instruction/sas/SolanaAttestationDetailsCard';
 import { isSerumInstruction } from '@components/instruction/serum/types';
 import { SerumDetailsCard } from '@components/instruction/SerumDetailsCard';
 import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
@@ -50,18 +61,6 @@ import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
-
-import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
-import { Ed25519DetailsCard } from '../instruction/ed25519/Ed25519DetailsCard';
-import { isEd25519Instruction } from '../instruction/ed25519/types';
-import { LighthouseDetailsCard } from '../instruction/lighthouse/LighthouseDetailsCard';
-import { isLighthouseInstruction } from '../instruction/lighthouse/types';
-import { isMangoInstruction } from '../instruction/mango/types';
-import { ProgramMetadataIdlInstructionDetailsCard } from '../instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard';
-import {
-    isSolanaAttestationInstruction,
-    SolanaAttestationDetailsCard,
-} from '../instruction/sas/SolanaAttestationDetailsCard';
 
 export type InstructionDetailsProps = {
     tx: ParsedTransaction;
@@ -111,14 +110,8 @@ export function InstructionsSection({ signature }: SignatureProps) {
 
     return (
         <>
-            <div className="container">
-                <div className="header">
-                    <div className="header-body">
-                        <h3 className="e-mb-0">
-                            {transaction.message.instructions.length > 1 ? 'Instructions' : 'Instruction'}
-                        </h3>
-                    </div>
-                </div>
+            <div className='e-mb-3'>
+                <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">Programs</h2>
             </div>
             <React.Suspense fallback={<LoadingCard message="Loading Instructions" />}>
                 {transaction.message.instructions.map((instruction, index) => {

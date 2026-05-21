@@ -1,5 +1,5 @@
 import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
-import { generateTokenBalanceRows, TokenBalancesCardInner } from '@components/transaction/TokenBalancesCard';
+import { generateTokenBalanceRows, TokenBalancesCardInner } from '@features/transaction';
 import { useCluster } from '@providers/cluster';
 import type { VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
