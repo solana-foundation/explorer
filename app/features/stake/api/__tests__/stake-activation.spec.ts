@@ -1,11 +1,9 @@
 import { type AccountInfoWithJsonData } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
+import { EPOCH_NEVER_SET } from '../../lib/constants';
 import { type Delegation } from '../../lib/stake-activation-math';
 import { getStakeActivation, type StakeActivationInput, type StakeActivationRpc } from '../stake-activation';
-
-// Sentinel deactivation epoch used on chain for stake that has never been deactivated.
-const NEVER_DEACTIVATED = 18446744073709551615n;
 
 describe('getStakeActivation', () => {
     it('should throw when the stake history sysvar is not found', async () => {
@@ -29,7 +27,7 @@ describe('getStakeActivation', () => {
         const result = await getStakeActivation(
             rpc,
             defaultInput({
-                delegation: { activationEpoch: 10n, deactivationEpoch: NEVER_DEACTIVATED, stake: 100_000_000n },
+                delegation: { activationEpoch: 10n, deactivationEpoch: EPOCH_NEVER_SET, stake: 100_000_000n },
                 lamports: 100_002_282_880n,
             }),
         );
@@ -85,7 +83,7 @@ type HistoryEntry = {
 function defaultInput(overrides: Partial<StakeActivationInput> = {}): StakeActivationInput {
     const defaultDelegation: Delegation = {
         activationEpoch: 0n,
-        deactivationEpoch: NEVER_DEACTIVATED,
+        deactivationEpoch: EPOCH_NEVER_SET,
         stake: 1_000_000n,
     };
     return {

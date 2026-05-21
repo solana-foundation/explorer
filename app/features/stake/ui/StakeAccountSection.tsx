@@ -10,6 +10,7 @@ import React from 'react';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 
 import type { StakeActivationStatus } from '../api/stake-activation';
+import { EPOCH_NEVER_SET } from '../lib/constants';
 import type { StakeAccountInfo, StakeAccountType, StakeMeta } from '../lib/validators';
 import { KitAddress } from './KitAddress';
 
@@ -18,9 +19,6 @@ type StakeActivationData = {
     active: number;
     inactive: number;
 };
-
-// Sentinel u64::MAX used on chain for activation/deactivation epochs that have never been set.
-const EPOCH_NEVER_SET = 0xffffffffffffffffn;
 
 export function StakeAccountSection({
     account,

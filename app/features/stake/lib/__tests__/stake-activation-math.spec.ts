@@ -1,15 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
+import { EPOCH_NEVER_SET } from '../constants';
 import { type Delegation, getStakeActivatingAndDeactivating, type StakeHistoryEntry } from '../stake-activation-math';
-
-// Sentinel deactivation epoch used on chain for stake that has never been deactivated.
-const NEVER_DEACTIVATED = 18446744073709551615n;
 
 describe('getStakeActivatingAndDeactivating', () => {
     it('should report no stake when target is before the activation epoch', () => {
         const delegation: Delegation = {
             activationEpoch: 100n,
-            deactivationEpoch: NEVER_DEACTIVATED,
+            deactivationEpoch: EPOCH_NEVER_SET,
             stake: 1_000_000n,
         };
         const result = getStakeActivatingAndDeactivating(delegation, 50n, []);
@@ -19,7 +17,7 @@ describe('getStakeActivatingAndDeactivating', () => {
     it('should report all stake as activating at the activation epoch', () => {
         const delegation: Delegation = {
             activationEpoch: 100n,
-            deactivationEpoch: NEVER_DEACTIVATED,
+            deactivationEpoch: EPOCH_NEVER_SET,
             stake: 1_000_000n,
         };
         const result = getStakeActivatingAndDeactivating(delegation, 100n, []);
@@ -71,7 +69,7 @@ describe('getStakeActivatingAndDeactivating', () => {
         // early-break clamps currentEffectiveStake to delegation.stake.
         // newlyEffective = round((1000/1000) * (1_000_000 * 0.09)) = 90_000, which is > stake (1_000),
         // so currentEffectiveStake is clamped to 1_000 in the same iteration.
-        const delegation: Delegation = { activationEpoch: 0n, deactivationEpoch: NEVER_DEACTIVATED, stake: 1_000n };
+        const delegation: Delegation = { activationEpoch: 0n, deactivationEpoch: EPOCH_NEVER_SET, stake: 1_000n };
         const history: StakeHistoryEntry[] = [
             { activating: 1_000n, deactivating: 0n, effective: 1_000_000n, epoch: 0n },
         ];
@@ -95,7 +93,7 @@ describe('getStakeActivatingAndDeactivating', () => {
     it('should treat the account as fully effective when cluster activating stake is zero', () => {
         // entry.activating === 0n would make weight = Infinity and BigInt(round(Infinity * …))
         // throw RangeError. The guard short-circuits to the delegation amount instead.
-        const delegation: Delegation = { activationEpoch: 0n, deactivationEpoch: NEVER_DEACTIVATED, stake: 1_000n };
+        const delegation: Delegation = { activationEpoch: 0n, deactivationEpoch: EPOCH_NEVER_SET, stake: 1_000n };
         const history: StakeHistoryEntry[] = [{ activating: 0n, deactivating: 0n, effective: 1_000_000n, epoch: 0n }];
         const result = getStakeActivatingAndDeactivating(delegation, 1n, history);
         expect(result).toEqual({ activating: 0n, deactivating: 0n, effective: 1_000n });

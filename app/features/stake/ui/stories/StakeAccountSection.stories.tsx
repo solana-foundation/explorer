@@ -8,6 +8,7 @@ import { expect, within } from 'storybook/test';
 import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
+import { EPOCH_NEVER_SET } from '../../lib/constants';
 import type { StakeAccountInfo, StakeAccountType } from '../../lib/validators';
 import { StakeAccountSection } from '../StakeAccountSection';
 
@@ -19,7 +20,6 @@ const STAKE_PROGRAM = toLegacyPublicKey(STAKE_PROGRAM_ADDRESS);
 const STAKER = address('2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8');
 const WITHDRAWER = address('4TPTXRKCbL39nMkWAtRDMRB4gQkUfrfCMvwKS4AYoH7e');
 const VOTER = address('3MRBUAxwx7gWoGvAtzxLtzmhzwPDGAEqStKWb8cJnYQX');
-const NEVER_DEACTIVATED = 0xffffffffffffffffn;
 
 const RENT_RESERVE = 2_282_880n;
 const DELEGATED_STAKE = 1_000_000_000n; // 1 SOL
@@ -52,7 +52,7 @@ function delegatedStakeInfo(overrides?: {
             creditsObserved: 12_345,
             delegation: {
                 activationEpoch: overrides?.activationEpoch ?? 100n,
-                deactivationEpoch: overrides?.deactivationEpoch ?? NEVER_DEACTIVATED,
+                deactivationEpoch: overrides?.deactivationEpoch ?? EPOCH_NEVER_SET,
                 stake: DELEGATED_STAKE,
                 voter: VOTER,
                 warmupCooldownRate: 0.09,
