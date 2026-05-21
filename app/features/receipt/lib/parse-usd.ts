@@ -1,4 +1,18 @@
 /**
+ * Formats an amount × price product as `~X.XX USD` with 2-decimal precision
+ * and thousands-separators. Returns `~0.00 USD` for NaN or negative results,
+ * so callers can render the string unconditionally without branching.
+ */
+export function formatUsdValue(amount: number, price: number): string {
+    const value = amount * price;
+    if (isNaN(value) || value < 0) return '~0.00 USD';
+    return `~${value.toLocaleString('en-US', {
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2,
+    })} USD`;
+}
+
+/**
  * Parses a formatted USD string into a number, stripping the `~` approximation
  * marker, `$`, comma thousands-separators, and the trailing ` USD` suffix
  * (e.g. `"~1,234.56 USD"` → `1234.56`, `"$50.00"` → `50`).

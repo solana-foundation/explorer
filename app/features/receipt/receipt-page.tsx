@@ -11,7 +11,6 @@ import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import { NATIVE_MINT } from '@solana/spl-token';
 import { TransactionSignature } from '@solana/web3.js';
 import { clusterName, ClusterStatus } from '@utils/cluster';
-import { formatUsdValue } from '@utils/index';
 import { useClusterPath } from '@utils/url';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect } from 'react';
@@ -25,6 +24,7 @@ import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app
 
 import { generateReceiptCsv } from './lib/generate-receipt-csv';
 import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
+import { formatUsdValue } from './lib/parse-usd';
 import { usePrimaryDomain } from './lib/use-primary-domain';
 import { extractReceiptData, type ReceiptUnavailabilityReason } from './model/create-receipt';
 import { PriceStatus, useTokenPrice } from './model/use-price';

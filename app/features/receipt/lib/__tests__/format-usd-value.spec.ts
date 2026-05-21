@@ -1,4 +1,4 @@
-import { formatUsdValue } from '@utils/index';
+import { formatUsdValue } from '../parse-usd';
 
 describe('formatUsdValue', () => {
     it('should format a normal value', () => {
