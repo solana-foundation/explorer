@@ -34,6 +34,7 @@ const dkColors = {
     'gray-600-dark': '#343a37',
     'gray-700-dark': '#282d2b',
     'gray-800-dark': '#1e2423',
+    'gray-900-dark': '#132a46', // used for $table-striped-bg, $pagination-hover-bg, $list-group-hover-bg, $lighter
     primary: '#42ba96', // light — unused at runtime; dark uses `primary-on-dark`
     'primary-dark': '#33a382', // active/link color (both themes)
     'primary-on-dark': '#1dd79b',
