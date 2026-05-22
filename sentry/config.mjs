@@ -78,7 +78,12 @@ export function createSentryBuildConfig() {
             },
         },
 
-        // Upload a larger set of source maps for prettier stack traces (increases build time)
-        widenClientFileUpload: true,
+        // Previews don't need symbolicated traces — uploading 800+ maps × 3 runtimes added ~90s/build.
+        sourcemaps: {
+            disable: process.env.VERCEL_ENV !== 'production',
+        },
+
+        // Off: widening pulls node_modules chunks into the upload.
+        widenClientFileUpload: false,
     };
 }
