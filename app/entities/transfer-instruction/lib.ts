@@ -27,7 +27,7 @@ export function collectTransferInstructions<T extends ParsedInstruction | Partia
 
 const TOKEN_TRANSFER_TYPES = new Set(['transfer', 'transferChecked', 'transfer2']);
 
-const SOL_TRANSFER_TYPES = new Set(['transfer']);
+const SOL_TRANSFER_TYPES = new Set(['transfer', 'transferWithSeed']);
 
 export function isTokenTransferInstruction(
     instruction: ParsedInstruction | PartiallyDecodedInstruction,

@@ -39,14 +39,26 @@ export type TokenTransferParsed =
           };
       };
 
-export type SolTransferParsed = {
-    type: 'transfer';
-    info: {
-        source?: string;
-        destination?: string;
-        lamports?: number;
-    };
-};
+export type SolTransferParsed =
+    | {
+          type: 'transfer';
+          info: {
+              source?: string;
+              destination?: string;
+              lamports?: number;
+          };
+      }
+    | {
+          type: 'transferWithSeed';
+          info: {
+              source?: string;
+              sourceBase?: string;
+              sourceSeed?: string;
+              sourceOwner?: string;
+              destination?: string;
+              lamports?: number;
+          };
+      };
 
 export type TokenTransferInstruction = ParsedInstruction & { parsed: TokenTransferParsed };
 
