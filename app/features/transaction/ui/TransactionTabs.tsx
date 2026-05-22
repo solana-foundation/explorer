@@ -1,5 +1,5 @@
 import { cn } from '@components/shared/utils';
-import { useEffect, useRef, useState } from 'react';
+import { MouseEvent, useEffect, useRef, useState } from 'react';
 
 const TABS = [
     { href: '#summary', title: 'Summary' },
@@ -8,6 +8,8 @@ const TABS = [
     { href: '#programs', title: 'Programs' },
     { href: '#logs', title: 'Logs' },
 ];
+
+const HEADER_PADDINGS = 10;
 
 export function TransactionTabs() {
     const tabsRef = useRef<HTMLDivElement>(null);
@@ -27,30 +29,36 @@ export function TransactionTabs() {
 
     useEffect(() => {
         const sectionIds = TABS.map(t => t.href.slice(1));
-        const visibleSections = new Set<string>();
 
-        const observer = new IntersectionObserver(
-            entries => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        visibleSections.add(entry.target.id);
-                    } else {
-                        visibleSections.delete(entry.target.id);
-                    }
-                });
-                const active = sectionIds.find(id => visibleSections.has(id));
-                if (active) setActiveTab(`#${active}`);
-            },
-            { rootMargin: '0px 0px -60% 0px', threshold: 0 },
-        );
+        const update = () => {
+            const tabHeight = tabsRef.current?.getBoundingClientRect().height ?? 0;
+            const threshold = window.scrollY + tabHeight + HEADER_PADDINGS;
 
-        sectionIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) observer.observe(el);
-        });
+            let active = sectionIds[0];
+            for (const id of sectionIds) {
+                const el = document.getElementById(id);
+                if (el && el.getBoundingClientRect().top + window.scrollY <= threshold) {
+                    active = id;
+                }
+            }
+            setActiveTab(`#${active}`);
+        };
 
-        return () => observer.disconnect();
+        window.addEventListener('scroll', update, { passive: true });
+        update();
+        return () => window.removeEventListener('scroll', update);
     }, []);
+
+    const handleTabClick = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
+        e.preventDefault();
+        const target = document.getElementById(href.slice(1));
+        if (!target || !tabsRef.current) return;
+        const offset = tabsRef.current.getBoundingClientRect().height;
+        window.scrollTo({
+            behavior: 'smooth',
+            top: target.getBoundingClientRect().top + window.scrollY - offset - HEADER_PADDINGS,
+        });
+    };
 
     return (
         <div
@@ -68,6 +76,7 @@ export function TransactionTabs() {
                 <a
                     key={t.href}
                     href={t.href}
+                    onClick={e => handleTabClick(e, t.href)}
                     className={cn(
                         activeTab === t.href && 'e-border-b-accent !e-text-accent',
                         'e-inline-flex e-items-center e-px-1 e-py-4 e-text-sm',

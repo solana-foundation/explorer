@@ -28,6 +28,11 @@ export function AccountsCard({ signature }: SignatureProps) {
 
     const { accounts, error, loading } = useAccountsInfo(pubkeys, url);
 
+    const totalAccountSize = useMemo(
+        () => Array.from(accounts.values()).reduce((acc, account) => acc + account.size, 0),
+        [accounts],
+    );
+
     if (!transactionWithMeta) {
         return null;
     }
@@ -63,7 +68,7 @@ export function AccountsCard({ signature }: SignatureProps) {
         );
 
         const dataCell = loading ? (
-            <span className="e-text-muted e-text-xs">Loading…</span>
+            <span className="e-text-xs e-text-muted">Loading…</span>
         ) : accountInfo && accountInfo.size > 0 ? (
             <Popover>
                 <PopoverTrigger asChild>
@@ -79,19 +84,25 @@ export function AccountsCard({ signature }: SignatureProps) {
         ) : null;
 
         return (
-            <div 
-                key={key} 
+            <div
+                key={key}
                 className={cn(
-                    "e-min-h-9 e-py-1.5 e-px-3 md:e-px-4",
-                    "e-grid e-gap-x-5 e-gap-y-0.5 md:e-gap-y-0 e-items-start e-text-sm e-whitespace-nowrap",
-                    "e-grid-cols-[1fr_auto] lg:e-grid-cols-[1fr_minmax(auto,200px)_minmax(auto,200px)]",
+                    'e-min-h-9 e-px-3 e-py-1.5 md:e-px-4',
+                    'e-grid e-items-start e-gap-x-5 e-gap-y-0.5 e-whitespace-nowrap e-text-sm md:e-gap-y-0',
+                    'e-grid-cols-[1fr_auto] lg:e-grid-cols-[1fr_minmax(auto,200px)_minmax(auto,200px)]',
                     "[grid-template-areas:'address_delta'_'address_balance'] lg:[grid-template-areas:'address_delta_balance']",
-                    "e-border-white/10 e-border-1 e-border-b [border-bottom-style:solid] last:e-border-b-0"
+                    'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid] last:e-border-b-0',
                 )}
             >
-                <div className='[grid-area:address]'>
+                <div className="[grid-area:address]">
                     <div className="e-flex e-items-center e-gap-1">
-                        <Address pubkey={pubkey} truncateChars={isSm ? undefined : 6} link fetchTokenLabelInfo truncate />
+                        <Address
+                            pubkey={pubkey}
+                            truncateChars={isSm ? undefined : 6}
+                            link
+                            fetchTokenLabelInfo
+                            truncate
+                        />
                         {dataCell}
                     </div>
                     <span className="e-mt-1 e-inline-flex e-flex-wrap e-gap-1">{badges}</span>
@@ -110,16 +121,31 @@ export function AccountsCard({ signature }: SignatureProps) {
         <section id="accounts" className="e-flex e-flex-col e-gap-3">
             <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">Accounts &amp; SOL balance</h2>
             <div className="e-card">
-                <div className={cn(
-                    "e-hidden e-py-1.5 e-px-3 lg:e-grid md:e-px-4",
-                    "e-text-xs e-uppercase e-text-muted e-gap-5 e-grid-cols-[1fr_minmax(auto,200px)_minmax(auto,200px)]", 
-                    "e-border-white/10 e-border-1 e-border-b [border-bottom-style:solid]"
-                )}>
+                <div
+                    className={cn(
+                        'e-hidden e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
+                        'e-grid-cols-[1fr_minmax(auto,200px)_minmax(auto,200px)] e-gap-5 e-text-xs e-uppercase e-text-muted',
+                        'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid]',
+                    )}
+                >
                     <div>Address</div>
                     <div className="e-text-right">Change (SOL)</div>
                     <div className="e-text-right">Post Balance (SOL)</div>
                 </div>
                 {accountRows}
+                {!loading && totalAccountSize > 0 && (
+                        <div className="e-flex e-items-baseline e-text-muted e-text-sm e-px-3 e-py-2 e-gap-2 md:e-px-4">
+                            <div className='e-flex e-flex-col'>
+                                <span className="e-uppercase e-tex-sm e-leading-none">
+                                    Total Account Size:
+                                </span>
+                                <span className="e-text-[10px] e-leading-none">reflects current state</span>
+                            </div>
+                            <span className="e-text-white">
+                                {totalAccountSize.toLocaleString('en-US')} bytes
+                            </span>
+                        </div>
+                )}
             </div>
         </section>
     );

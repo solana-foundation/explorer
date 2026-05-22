@@ -129,12 +129,12 @@ function TokenBalanceRow({
         >
             <div className="e-flex e-flex-col [grid-area:address]">
                 {owner && (
-                    <div className='e-flex e-gap-2 e-items-center'>
+                    <div className='e-flex e-gap-2 md:e-gap-3 e-items-center'>
                         <span className="e-text-sm e-text-muted">Owner</span>
                         <Address pubkey={new PublicKey(owner)} link />
                     </div>
                 )}
-                <div className='e-flex e-gap-2 e-items-center'>
+                <div className='e-flex e-gap-2 md:e-gap-3 e-items-center'>
                     <span className="e-text-sm e-text-muted">Addr</span>
                     <Address pubkey={account} link />
                 </div>
