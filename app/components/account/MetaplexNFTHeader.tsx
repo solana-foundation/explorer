@@ -6,7 +6,7 @@ import { NFTData, useFetchAccountInfo, useMintAccountInfo } from '@providers/acc
 import { PublicKey } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import React, { createRef } from 'react';
+import { createRef, useEffect } from 'react';
 import { AlertOctagon, Check, ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
@@ -17,7 +17,7 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
     const collectionMintInfo = useMintAccountInfo(collectionAddress?.toString());
     const fetchAccountInfo = useFetchAccountInfo();
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (collectionAddress && !collectionMintInfo) {
             fetchAccountInfo(new PublicKey(collectionAddress.toString()), 'parsed');
         }

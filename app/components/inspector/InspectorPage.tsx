@@ -21,7 +21,7 @@ import { generated, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/m
 import { useClusterPath } from '@utils/url';
 import bs58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
@@ -176,7 +176,7 @@ function decodeUrlParams(
 function SquadsProposalInspectorCard({ account, onClear }: { account: string; onClear: () => void }) {
     const { url } = useCluster();
 
-    const fetcher = React.useCallback(async () => {
+    const fetcher = useCallback(async () => {
         const connection = new Connection(url);
         try {
             // First check if the account exists and is owned by the Squads program
@@ -273,15 +273,15 @@ export function TransactionInspectorPage({
     signature?: string;
     showTokenBalanceChanges: boolean;
 }) {
-    const [inspectorData, setInspectorData] = React.useState<InspectorData>();
+    const [inspectorData, setInspectorData] = useState<InspectorData>();
     const currentSearchParams = useSearchParams();
     const currentPathname = usePathname();
     const router = useRouter();
-    const [paramString, setParamString] = React.useState<string>();
+    const [paramString, setParamString] = useState<string>();
 
     // Sync message with url search params
     const prevInspectorData = usePrevious(inspectorData);
-    React.useEffect(() => {
+    useEffect(() => {
         if (signature) return;
         if (inspectorData && inspectorData !== prevInspectorData) {
             if (isSquadsProposalAccountData(inspectorData)) {
@@ -319,7 +319,7 @@ export function TransactionInspectorPage({
         }
     }, [currentPathname, currentSearchParams, prevInspectorData, router, signature, inspectorData]);
 
-    const reset = React.useCallback(() => {
+    const reset = useCallback(() => {
         const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
         nextQueryParams.delete('message');
         nextQueryParams.delete('signatures');
@@ -329,7 +329,7 @@ export function TransactionInspectorPage({
     }, [currentPathname, currentSearchParams, router]);
 
     // Decode the message url param whenever it changes
-    React.useEffect(() => {
+    useEffect(() => {
         const [result, nextParams, refreshUrl] = decodeUrlParams(new URLSearchParams(currentSearchParams?.toString()));
         if (refreshUrl) {
             const queryString = nextParams.toString();
@@ -385,12 +385,12 @@ function PermalinkView({
     const transaction = details?.data?.raw;
     const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
     const router = useRouter();
-    const reset = React.useCallback(() => {
+    const reset = useCallback(() => {
         router.push(inspectorPath);
     }, [inspectorPath, router]);
 
     // Fetch details on load
-    React.useEffect(() => {
+    useEffect(() => {
         if (!details) fetchTransaction(signature);
     }, [signature, details, fetchTransaction]);
 
@@ -425,7 +425,7 @@ function LoadedView({
     const { message, rawMessage, signatures, accountBalances, compiledInnerInstructions } = transaction;
 
     const fetchAccountInfo = useFetchAccountInfo();
-    React.useEffect(() => {
+    useEffect(() => {
         for (const lookup of message.addressTableLookups) {
             fetchAccountInfo(lookup.accountKey, 'parsed');
         }
@@ -465,7 +465,7 @@ function OverviewCard({
     const fee = message.header.numRequiredSignatures * DEFAULT_FEES.lamportsPerSignature;
     const feePayerValidator = createFeePayerValidator(fee);
 
-    const size = React.useMemo(() => {
+    const size = useMemo(() => {
         const sigBytes = 1 + 64 * message.header.numRequiredSignatures;
         return sigBytes + raw.length;
     }, [message, raw]);

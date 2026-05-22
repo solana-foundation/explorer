@@ -1,6 +1,6 @@
 import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { BarElement, CategoryScale, Chart, type ChartData, type ChartOptions, LinearScale, Tooltip } from 'chart.js';
-import React from 'react';
+import { useEffect, useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 
 import type { InstructionCUData } from '../lib/types';
@@ -184,7 +184,7 @@ type CUProfilingCardProps = {
 };
 
 export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCardProps) {
-    const instructionsWithDisplay = React.useMemo(
+    const instructionsWithDisplay = useMemo(
         () =>
             instructions.map(item => ({
                 ...item,
@@ -193,12 +193,12 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
         [instructions],
     );
 
-    const totalDisplayCU = React.useMemo(
+    const totalDisplayCU = useMemo(
         () => instructionsWithDisplay.reduce((sum, item) => sum + item.displayCU, 0),
         [instructionsWithDisplay],
     );
 
-    React.useEffect(() => {
+    useEffect(() => {
         return () => {
             const tooltipEl = document.getElementById('cu-chartjs-tooltip');
             if (tooltipEl) {
@@ -207,12 +207,12 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
         };
     }, []);
 
-    const chartOptions = React.useMemo<ChartOptions<'bar'>>(
+    const chartOptions = useMemo<ChartOptions<'bar'>>(
         () => getCUProfileChartOptions(totalDisplayCU),
         [totalDisplayCU],
     );
 
-    const chartData: ChartData<'bar'> = React.useMemo(
+    const chartData: ChartData<'bar'> = useMemo(
         () => ({
             datasets: instructionsWithDisplay.map((item, i) => ({
                 actualCU: item.computeUnits,

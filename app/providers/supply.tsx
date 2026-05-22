@@ -3,7 +3,7 @@
 import { useCluster } from '@providers/cluster';
 import { createSolanaRpc } from '@solana/kit';
 import { Cluster, ClusterStatus } from '@utils/cluster';
-import React from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -24,15 +24,15 @@ type Supply = Readonly<{
 type State = Supply | Status | string;
 
 type Dispatch = React.Dispatch<React.SetStateAction<State>>;
-const StateContext = React.createContext<State | undefined>(undefined);
-const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+const StateContext = createContext<State | undefined>(undefined);
+const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 type Props = { children: React.ReactNode };
 export function SupplyProvider({ children }: Props) {
-    const [state, setState] = React.useState<State>(Status.Idle);
+    const [state, setState] = useState<State>(Status.Idle);
     const { status: clusterStatus, cluster, url } = useCluster();
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (state !== Status.Idle) {
             if (clusterStatus === ClusterStatus.Connecting) setState(Status.Disconnected);
             if (clusterStatus === ClusterStatus.Connected) fetch(setState, cluster, url);
@@ -75,7 +75,7 @@ async function fetch(dispatch: Dispatch, cluster: Cluster, url: string) {
 }
 
 export function useSupply() {
-    const state = React.useContext(StateContext);
+    const state = useContext(StateContext);
     if (state === undefined) {
         throw new Error(`useSupply must be used within a SupplyProvider`);
     }
@@ -83,13 +83,13 @@ export function useSupply() {
 }
 
 export function useFetchSupply() {
-    const dispatch = React.useContext(DispatchContext);
+    const dispatch = useContext(DispatchContext);
     if (!dispatch) {
         throw new Error(`useFetchSupply must be used within a SupplyProvider`);
     }
 
     const { cluster, url } = useCluster();
-    return React.useCallback(() => {
+    return useCallback(() => {
         fetch(dispatch, cluster, url);
     }, [dispatch, cluster, url]);
 }

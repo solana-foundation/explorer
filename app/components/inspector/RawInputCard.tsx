@@ -2,7 +2,7 @@ import { cn } from '@shared/utils';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import base58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
@@ -43,7 +43,7 @@ type TabData = {
 };
 
 function TabInstructions() {
-    const [activeTab, setActiveTab] = React.useState('cli');
+    const [activeTab, setActiveTab] = useState('cli');
 
     const tabs: TabData[] = [
         {
@@ -134,14 +134,14 @@ export function RawInput({
     value?: string;
     setTransactionData: (param: InspectorData | undefined) => void;
 }) {
-    const rawInput = React.useRef<HTMLTextAreaElement>(null);
-    const [error, setError] = React.useState<string>();
-    const [rows, setRows] = React.useState(3);
+    const rawInput = useRef<HTMLTextAreaElement>(null);
+    const [error, setError] = useState<string>();
+    const [rows, setRows] = useState(3);
     const currentPathname = usePathname();
     const currentSearchParams = useSearchParams();
     const router = useRouter();
 
-    const onInput = React.useCallback(() => {
+    const onInput = useCallback(() => {
         const input = rawInput.current?.value;
         if (!input) {
             setError(undefined);
@@ -211,7 +211,7 @@ export function RawInput({
         }
     }, [currentSearchParams, router, currentPathname, setTransactionData]);
 
-    const clearInput = React.useCallback(() => {
+    const clearInput = useCallback(() => {
         if (rawInput.current) {
             rawInput.current.value = '';
             setError(undefined);
@@ -228,7 +228,7 @@ export function RawInput({
         }
     }, [currentSearchParams, router, currentPathname, setTransactionData]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const input = rawInput.current;
         if (input && value) {
             input.value = value;

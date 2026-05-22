@@ -27,7 +27,7 @@ import { getTokenProgramInstructionName } from '@utils/instruction';
 import { displayAddress, intoTransactionInstruction } from '@utils/tx';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import React, { useCallback } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, MinusSquare, PlusSquare } from 'react-feather';
 
 import { INITIAL_TOKENS_TO_FETCH, INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
@@ -75,12 +75,12 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     const accountHistories = useAccountHistories();
     const fetchAccountHistory = useFetchAccountHistory();
     const transactionDetailsCache = useTransactionDetailsCache();
-    const [showDropdown, setDropdown] = React.useState(false);
-    const [tokensToFetchCount, setTokensToFetchCount] = React.useState(INITIAL_TOKENS_TO_FETCH);
-    const [visibleTxCount, setVisibleTxCount] = React.useState(INITIAL_VISIBLE_COUNT);
+    const [showDropdown, setDropdown] = useState(false);
+    const [tokensToFetchCount, setTokensToFetchCount] = useState(INITIAL_TOKENS_TO_FETCH);
+    const [visibleTxCount, setVisibleTxCount] = useState(INITIAL_VISIBLE_COUNT);
     const filter = useQueryFilter();
 
-    const filteredTokens = React.useMemo(
+    const filteredTokens = useMemo(
         () =>
             tokens.filter(token => {
                 if (filter === ALL_TOKENS) {
@@ -92,12 +92,12 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     );
 
     // Slice tokens - this controls what gets fetched
-    const tokensToFetch = React.useMemo(
+    const tokensToFetch = useMemo(
         () => filteredTokens.slice(0, tokensToFetchCount),
         [filteredTokens, tokensToFetchCount],
     );
 
-    const fetchHistories = React.useCallback(
+    const fetchHistories = useCallback(
         (refresh?: boolean) => {
             tokensToFetch.forEach(token => {
                 fetchAccountHistory(token.pubkey, false, refresh);
@@ -107,8 +107,8 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     );
 
     // Fetch histories when tokensToFetch expands (user clicks Load More)
-    const prevTokensToFetchCount = React.useRef(0);
-    React.useEffect(() => {
+    const prevTokensToFetchCount = useRef(0);
+    useEffect(() => {
         if (prevTokensToFetchCount.current < tokensToFetchCount) {
             // Only fetch newly added tokens
             const newTokens = tokensToFetch.slice(prevTokensToFetchCount.current);
@@ -356,7 +356,7 @@ const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
     );
 };
 
-const TokenTransactionRow = React.memo(function TokenTransactionRow({
+const TokenTransactionRow = memo(function TokenTransactionRow({
     mint,
     tx,
     details,
@@ -399,7 +399,7 @@ const TokenTransactionRow = React.memo(function TokenTransactionRow({
 });
 
 function InstructionDetails({ instructionType, tx }: { instructionType: InstructionType; tx: ConfirmedSignatureInfo }) {
-    const [expanded, setExpanded] = React.useState(false);
+    const [expanded, setExpanded] = useState(false);
 
     const instructionTypes = instructionType.innerInstructions
         .map(ix => {
@@ -463,7 +463,7 @@ function InstructionDetailsCell({
     const fetchDetails = useFetchTransactionDetails();
     const { cluster } = useCluster();
 
-    const handleLoadClick = React.useCallback(() => {
+    const handleLoadClick = useCallback(() => {
         fetchDetails(signature);
     }, [fetchDetails, signature]);
 

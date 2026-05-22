@@ -4,7 +4,7 @@ import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { cn } from '@shared/utils';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
-import React from 'react';
+import { useState } from 'react';
 import { Code } from 'react-feather';
 
 import { BaseRawDetails } from './BaseRawDetails';
@@ -46,7 +46,7 @@ export function BaseInstructionCard({
     collapsible = false,
 }: InstructionProps) {
     const [resultClass] = ixResult(result, index);
-    const [showRaw, setShowRaw] = React.useState(defaultRaw || false);
+    const [showRaw, setShowRaw] = useState(defaultRaw || false);
     const rawClickHandler = () => {
         if (!defaultRaw && !showRaw && !raw) {
             // trigger handler to simulate behaviour for the InstructionCard for the transcation which contains logic in it to fetch raw transaction data

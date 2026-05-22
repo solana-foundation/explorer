@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import * as React from 'react';
+import { useState } from 'react';
 import { expect, userEvent, within } from 'storybook/test';
 
 import { Switch } from './switch';
@@ -98,7 +98,7 @@ export const WithLabel: Story = {
 export const Controlled: Story = {
     render: () => {
         const ControlledSwitch = () => {
-            const [checked, setChecked] = React.useState(false);
+            const [checked, setChecked] = useState(false);
 
             return (
                 <div className="e-flex e-flex-col e-gap-4">

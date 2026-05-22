@@ -9,7 +9,7 @@ import {
 } from '@solana/web3.js';
 import { normalizeTokenAmount } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
-import React, { ComponentType } from 'react';
+import { ComponentType, useEffect, useMemo } from 'react';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
@@ -63,7 +63,7 @@ function TokenInstruction({
     title,
     ...props
 }: InfoProps) {
-    const { mintAddress: infoMintAddress, tokenAddress } = React.useMemo(() => {
+    const { mintAddress: infoMintAddress, tokenAddress } = useMemo(() => {
         let mintAddress: string | undefined;
         let tokenAddress: string | undefined;
 
@@ -88,13 +88,13 @@ function TokenInstruction({
     const mintInfo = useMintAccountInfo(mintAddress);
     const fetchAccountInfo = useFetchAccountInfo();
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (tokenAddress && !tokenInfo) {
             fetchAccountInfo(new PublicKey(tokenAddress), 'parsed');
         }
     }, [fetchAccountInfo, tokenAddress]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (mintAddress && !mintInfo) {
             fetchAccountInfo(new PublicKey(mintAddress), 'parsed');
         }

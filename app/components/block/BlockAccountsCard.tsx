@@ -2,7 +2,7 @@ import { Address } from '@components/common/Address';
 import { PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import React from 'react';
+import { useMemo, useState } from 'react';
 
 import { invariant } from '@/app/shared/lib/invariant';
 
@@ -14,10 +14,10 @@ type AccountStats = {
 const PAGE_SIZE = 25;
 
 export function BlockAccountsCard({ block, blockSlot }: { block: VersionedBlockResponse; blockSlot: number }) {
-    const [numDisplayed, setNumDisplayed] = React.useState(10);
+    const [numDisplayed, setNumDisplayed] = useState(10);
     const totalTransactions = block.transactions.length;
 
-    const accountStats = React.useMemo(() => {
+    const accountStats = useMemo(() => {
         const statsMap = new Map<string, AccountStats>();
         block.transactions.forEach(tx => {
             const message = tx.transaction.message;

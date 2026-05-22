@@ -2,7 +2,7 @@ import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/account
 import { cn } from '@shared/utils';
 import { ConcurrentMerkleTreeAccount, MerkleTree } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
-import React from 'react';
+import { useEffect } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
 import {
@@ -33,7 +33,7 @@ function DasCompressionInfoCard({ proof, compressedNft }: { proof: CompressedNft
     const treeAccountInfo = useAccountInfo(compressedInfo.tree);
     const treeAddress = new PublicKey(compressedInfo.tree);
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchAccountInfo(treeAddress, 'raw');
     }, [compressedInfo.tree]); // eslint-disable-line react-hooks/exhaustive-deps
 

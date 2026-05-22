@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { useMemo } from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 import {
@@ -32,16 +32,16 @@ export function BaseNavigationTabs({
 }: BaseNavigationTabsProps) {
     const { registeredTabs, registerTab, unregisterTab } = useTabRegistration();
 
-    const staticPaths = React.useMemo(() => new Set(tabs.map(t => t.path)), [tabs]);
+    const staticPaths = useMemo(() => new Set(tabs.map(t => t.path)), [tabs]);
 
-    const contextValue = React.useMemo(
+    const contextValue = useMemo(
         () => ({ activeValue, buildHref, registerTab, renderTabLink: true, staticPaths, unregisterTab }),
         [activeValue, buildHref, registerTab, staticPaths, unregisterTab],
     );
 
-    const hiddenContextValue = React.useMemo(() => ({ ...contextValue, renderTabLink: false }), [contextValue]);
+    const hiddenContextValue = useMemo(() => ({ ...contextValue, renderTabLink: false }), [contextValue]);
 
-    const allTabs = React.useMemo(
+    const allTabs = useMemo(
         () => [...tabs, ...registeredTabs.filter(t => !staticPaths.has(t.path))],
         [tabs, registeredTabs, staticPaths],
     );

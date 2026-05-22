@@ -14,7 +14,7 @@ import { Cluster } from '@utils/cluster';
 import { fetchAll } from '@utils/fetch-all';
 import { fetchOnce } from '@utils/fetch-once';
 import { withBackoff } from '@utils/with-backoff';
-import React from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 
 import { mergeTransactionMap } from '@/app/entities/transaction-data';
 import { Logger } from '@/app/shared/lib/logger';
@@ -102,17 +102,17 @@ function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | 
     };
 }
 
-const StateContext = React.createContext<State | undefined>(undefined);
-const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
-const InFlightContext = React.createContext<Set<string> | undefined>(undefined);
+const StateContext = createContext<State | undefined>(undefined);
+const DispatchContext = createContext<Dispatch | undefined>(undefined);
+const InFlightContext = createContext<Set<string> | undefined>(undefined);
 
 type HistoryProviderProps = { children: React.ReactNode };
 export function HistoryProvider({ children }: HistoryProviderProps) {
     const { url } = useCluster();
     const [state, dispatch] = Cache.useCustomReducer(url, reconcile);
-    const inFlightRef = React.useRef(new Set<string>());
+    const inFlightRef = useRef(new Set<string>());
 
-    React.useEffect(() => {
+    useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
         inFlightRef.current.clear();
     }, [dispatch, url]);
@@ -224,7 +224,7 @@ async function fetchAccountHistory(
 }
 
 export function useAccountHistories() {
-    const context = React.useContext(StateContext);
+    const context = useContext(StateContext);
 
     if (!context) {
         throw new Error(`useAccountHistories must be used within a AccountsProvider`);
@@ -234,7 +234,7 @@ export function useAccountHistories() {
 }
 
 export function useAccountHistory(address: string): Cache.CacheEntry<AccountHistory> | undefined {
-    const context = React.useContext(StateContext);
+    const context = useContext(StateContext);
 
     if (!context) {
         throw new Error(`useAccountHistory must be used within a AccountsProvider`);
@@ -258,14 +258,14 @@ function getUnfetchedSignatures(before: Cache.CacheEntry<AccountHistory>) {
 
 export function useFetchTransactionsForHistory() {
     const { cluster, url } = useCluster();
-    const state = React.useContext(StateContext);
-    const dispatch = React.useContext(DispatchContext);
-    const inFlight = React.useContext(InFlightContext);
+    const state = useContext(StateContext);
+    const dispatch = useContext(DispatchContext);
+    const inFlight = useContext(InFlightContext);
     if (!state || !dispatch || !inFlight) {
         throw new Error(`useFetchTransactionsForHistory must be used within a HistoryProvider`);
     }
 
-    return React.useCallback(
+    return useCallback(
         (pubkey: PublicKey, history: AccountHistory) => {
             const unfetched = getUnfetchedSignaturesFromHistory(history);
             if (unfetched.length === 0) return;
@@ -298,14 +298,14 @@ export function useFetchTransactionsForHistory() {
 
 export function useFetchAccountHistory(limit = 25) {
     const { cluster, url } = useCluster();
-    const state = React.useContext(StateContext);
-    const dispatch = React.useContext(DispatchContext);
-    const inFlight = React.useContext(InFlightContext);
+    const state = useContext(StateContext);
+    const dispatch = useContext(DispatchContext);
+    const inFlight = useContext(InFlightContext);
     if (!state || !dispatch || !inFlight) {
         throw new Error(`useFetchAccountHistory must be used within a HistoryProvider`);
     }
 
-    return React.useCallback(
+    return useCallback(
         (pubkey: PublicKey, fetchTransactions?: boolean, refresh?: boolean) => {
             const before = state.entries[pubkey.toBase58()];
             if (!refresh && before?.data?.fetched && before.data.fetched.length > 0) {

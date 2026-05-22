@@ -6,7 +6,7 @@ import type { Cluster } from '@utils/cluster';
 import { getEpochForSlot } from '@utils/epoch-schedule';
 import type { SignatureProps } from '@utils/index';
 import { type InstructionLogs, parseProgramLogs } from '@utils/program-logs';
-import React from 'react';
+import { useMemo } from 'react';
 
 export function CUProfilingSection({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
@@ -17,12 +17,12 @@ export function CUProfilingSection({ signature }: SignatureProps) {
     const unitsConsumed = transactionWithMeta?.meta?.computeUnitsConsumed || undefined;
     const slot = transactionWithMeta?.slot;
 
-    const instructionLogs: InstructionLogs[] = React.useMemo(
+    const instructionLogs: InstructionLogs[] = useMemo(
         () => formatTransactionLogs(transactionWithMeta, cluster),
         [transactionWithMeta, cluster],
     );
 
-    const instructionsForCU = React.useMemo(() => {
+    const instructionsForCU = useMemo(() => {
         if (!transactionWithMeta || !slot || !clusterInfo) return [];
 
         const epoch = getEpochForSlot(clusterInfo.epochSchedule, BigInt(slot));

@@ -1,7 +1,7 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Account, isTokenProgramData } from '@providers/accounts';
-import React from 'react';
+import { useEffect, useState } from 'react';
 
 import { getProxiedUri } from '@/app/features/metadata/utils';
 import { useCluster } from '@/app/providers/cluster';
@@ -27,8 +27,8 @@ export function MetaplexNFTAttributesCard({ account, onNotFound }: { account?: A
 }
 
 function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: string }) {
-    const [attributes, setAttributes] = React.useState<Attribute[]>([]);
-    const [status, setStatus] = React.useState<'loading' | 'success' | 'error'>('loading');
+    const [attributes, setAttributes] = useState<Attribute[]>([]);
+    const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
 
     async function fetchMetadataAttributes() {
         try {
@@ -56,7 +56,7 @@ function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: string 
         }
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchMetadataAttributes();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

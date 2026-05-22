@@ -9,17 +9,17 @@ import { useFetchRewards, useRewards } from '@providers/accounts/rewards';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { lamportsToSolString } from '@utils/index';
-import React from 'react';
+import { useEffect, useMemo } from 'react';
 
 const U64_MAX = BigInt('0xffffffffffffffff');
 
 export function RewardsCard({ address }: { address: string }) {
-    const pubkey = React.useMemo(() => new PublicKey(address), [address]);
+    const pubkey = useMemo(() => new PublicKey(address), [address]);
     const info = useAccountInfo(address);
     const account = info?.data;
     const parsedData = account?.data.parsed;
 
-    const highestEpoch = React.useMemo(() => {
+    const highestEpoch = useMemo(() => {
         if (!parsedData) return;
         if (parsedData.program !== 'stake') return;
         const stakeInfo = parsedData.parsed.info.stake;
@@ -32,7 +32,7 @@ export function RewardsCard({ address }: { address: string }) {
     const fetchRewards = useFetchRewards();
     const loadMore = () => fetchRewards(pubkey, highestEpoch);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!rewards) {
             fetchRewards(pubkey, highestEpoch);
         }

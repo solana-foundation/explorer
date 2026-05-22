@@ -9,7 +9,7 @@ import { useFetchAccountHistory } from '@providers/accounts/history';
 import { FetchStatus } from '@providers/cache';
 import { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { getTokenInstructionName, InstructionContainer } from '@utils/instruction';
-import React, { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import Moment from 'react-moment';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
@@ -22,20 +22,20 @@ export function TokenInstructionsCard({ address }: { address: string }) {
     const refresh = () => fetchAccountHistory(pubkey, true, true);
     const loadMore = () => fetchAccountHistory(pubkey, true);
 
-    const transactionRows = React.useMemo(() => {
+    const transactionRows = useMemo(() => {
         if (history?.data?.fetched) {
             return getTransactionRows(history.data.fetched);
         }
         return [];
     }, [history]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!history || !history.data?.transactionMap?.size) {
             refresh();
         }
     }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const { hasTimestamps, detailsList } = React.useMemo(() => {
+    const { hasTimestamps, detailsList } = useMemo(() => {
         const detailedHistoryMap = history?.data?.transactionMap || new Map<string, ParsedTransactionWithMeta>();
         const hasTimestamps = transactionRows.some(element => element.blockTime);
         const detailsList: React.ReactNode[] = [];

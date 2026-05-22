@@ -10,7 +10,7 @@ import { useCluster } from '@providers/cluster';
 import { useEpoch, useFetchEpoch } from '@providers/epoch';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestampUtc } from '@utils/date';
-import React from 'react';
+import { useEffect } from 'react';
 
 import { getFirstSlotInEpoch, getLastSlotInEpoch } from '@/app/utils/epoch-schedule';
 
@@ -50,7 +50,7 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
     const fetchEpoch = useFetchEpoch();
 
     // Fetch extra epoch info on load
-    React.useEffect(() => {
+    useEffect(() => {
         if (!clusterInfo) return;
         const { epochInfo, epochSchedule } = clusterInfo;
         const currentEpoch = epochInfo.epoch;

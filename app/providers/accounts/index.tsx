@@ -28,7 +28,7 @@ import {
 } from '@validators/accounts/upgradeable-program';
 import { VoteAccount } from '@validators/accounts/vote';
 import { ParsedInfo } from '@validators/index';
-import React from 'react';
+import { createContext, useCallback,useContext, useEffect, useMemo, useState } from 'react';
 import { create } from 'superstruct';
 
 import { alloc } from '@/app/shared/lib/bytes';
@@ -131,9 +131,9 @@ export type State = Cache.State<Account>;
 export type Dispatch = Cache.Dispatch<Account>;
 type Fetchers = { [mode in FetchAccountDataMode]: MultipleAccountFetcher };
 
-export const FetchersContext = React.createContext<Fetchers | undefined>(undefined);
-export const StateContext = React.createContext<State | undefined>(undefined);
-export const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+export const FetchersContext = createContext<Fetchers | undefined>(undefined);
+export const StateContext = createContext<State | undefined>(undefined);
+export const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 class MultipleAccountFetcher {
     pubkeys: Set<string> = new Set();
@@ -144,7 +144,7 @@ class MultipleAccountFetcher {
         private cluster: Cluster,
         private url: string,
         private dataMode: FetchAccountDataMode,
-    ) {}
+    ) { }
     fetch = (pubkey: PublicKey) => {
         if (this.pubkeys !== undefined) this.pubkeys.add(pubkey.toBase58());
         if (this.fetchTimeout === undefined) {
@@ -168,14 +168,14 @@ type AccountsProviderProps = { children: React.ReactNode };
 export function AccountsProvider({ children }: AccountsProviderProps) {
     const { cluster, url } = useCluster();
     const [state, dispatch] = Cache.useReducer<Account>(url);
-    const [fetchers, setFetchers] = React.useState<Fetchers>(() => ({
+    const [fetchers, setFetchers] = useState<Fetchers>(() => ({
         parsed: new MultipleAccountFetcher(dispatch, cluster, url, 'parsed'),
         raw: new MultipleAccountFetcher(dispatch, cluster, url, 'raw'),
         skip: new MultipleAccountFetcher(dispatch, cluster, url, 'skip'),
     }));
 
     // Clear accounts cache whenever cluster is changed
-    React.useEffect(() => {
+    useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
         setFetchers({
             parsed: new MultipleAccountFetcher(dispatch, cluster, url, 'parsed'),
@@ -354,10 +354,10 @@ async function handleParsedAccountData(
             return {
                 activation: activation
                     ? {
-                          active: Number(activation.active),
-                          inactive: Number(activation.inactive),
-                          state: activation.status as any,
-                      }
+                        active: Number(activation.active),
+                        inactive: Number(activation.inactive),
+                        state: activation.status as any,
+                    }
                     : undefined,
                 parsed,
                 program: accountData.program,
@@ -419,7 +419,7 @@ async function handleParsedAccountData(
 }
 
 export function useAccounts() {
-    const context = React.useContext(StateContext);
+    const context = useContext(StateContext);
     if (!context) {
         throw new Error(`useAccounts must be used within a AccountsProvider`);
     }
@@ -427,7 +427,7 @@ export function useAccounts() {
 }
 
 export function useAccountInfo(address: string | undefined): Cache.CacheEntry<Account> | undefined {
-    const context = React.useContext(StateContext);
+    const context = useContext(StateContext);
 
     if (!context) {
         throw new Error(`useAccountInfo must be used within a AccountsProvider`);
@@ -437,7 +437,7 @@ export function useAccountInfo(address: string | undefined): Cache.CacheEntry<Ac
 }
 
 export function useAccountInfos(addresses: string[]): Cache.CacheEntry<Account>[] {
-    const context = React.useContext(StateContext);
+    const context = useContext(StateContext);
     if (!context) {
         throw new Error(`useAccountInfos must be used within a AccountsProvider`);
     }
@@ -446,7 +446,7 @@ export function useAccountInfos(addresses: string[]): Cache.CacheEntry<Account>[
 
 export function useMintAccountInfo(address: string | undefined): MintAccountInfo | undefined {
     const accountInfo = useAccountInfo(address);
-    return React.useMemo(() => {
+    return useMemo(() => {
         if (address === undefined || accountInfo?.data === undefined) return;
         const account = accountInfo.data;
 
@@ -466,7 +466,7 @@ export function useMintAccountInfo(address: string | undefined): MintAccountInfo
 
 export function useTokenAccountInfo(address: string | undefined): TokenAccountInfo | undefined {
     const accountInfo = useAccountInfo(address);
-    return React.useMemo(() => {
+    return useMemo(() => {
         if (address === undefined || accountInfo?.data === undefined) return;
         const account = accountInfo.data;
 
@@ -526,7 +526,7 @@ function parseAddressLookupTableFromCache(
 
 export function useAddressLookupTables(addresses: string[]) {
     const accountInfos = useAccountInfos(addresses);
-    return React.useMemo(() => {
+    return useMemo(() => {
         return accountInfos.map((accountInfo, index) =>
             parseAddressLookupTableFromCache(accountInfo, addresses[index]),
         );
@@ -537,16 +537,16 @@ export function useAddressLookupTable(
     address: string,
 ): [AddressLookupTableAccount | string | undefined, FetchStatus] | undefined {
     const accountInfo = useAccountInfo(address);
-    return React.useMemo(() => parseAddressLookupTableFromCache(accountInfo, address), [address, accountInfo]);
+    return useMemo(() => parseAddressLookupTableFromCache(accountInfo, address), [address, accountInfo]);
 }
 
 export function useFetchAccountInfo() {
-    const fetchers = React.useContext(FetchersContext);
+    const fetchers = useContext(FetchersContext);
     if (!fetchers) {
         throw new Error(`useFetchAccountInfo must be used within a AccountsProvider`);
     }
 
-    return React.useCallback(
+    return useCallback(
         (pubkey: PublicKey, dataMode: FetchAccountDataMode) => {
             fetchers[dataMode].fetch(pubkey);
         },

@@ -17,7 +17,7 @@ import { displayAddress } from '@utils/tx';
 import { pickClusterParams } from '@utils/url';
 import Link from 'next/link';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { createRef, useMemo } from 'react';
+import { createRef, useMemo, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
@@ -64,7 +64,7 @@ type TransactionWithInvocations = {
 };
 
 export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockResponse; epoch: bigint | undefined }) {
-    const [numDisplayed, setNumDisplayed] = React.useState(PAGE_SIZE);
+    const [numDisplayed, setNumDisplayed] = useState(PAGE_SIZE);
     const currentPathname = usePathname();
     const currentSearchParams = useSearchParams();
     const programFilter = useQueryProgramFilter(currentSearchParams);
@@ -73,7 +73,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
     const router = useRouter();
     const { cluster } = useCluster();
 
-    const { transactions, invokedPrograms } = React.useMemo(() => {
+    const { transactions, invokedPrograms } = useMemo(() => {
         const invokedPrograms = new Map<string, number>();
 
         const transactions: TransactionWithInvocations[] = block.transactions.map((tx, index) => {
@@ -144,7 +144,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
         return { invokedPrograms, transactions };
     }, [block, cluster, epoch]);
 
-    const [filteredTransactions, showComputeUnits] = React.useMemo((): [TransactionWithInvocations[], boolean] => {
+    const [filteredTransactions, showComputeUnits] = useMemo((): [TransactionWithInvocations[], boolean] => {
         const voteFilter = VOTE_PROGRAM_ID.toBase58();
         const filteredTxs: TransactionWithInvocations[] = transactions
             .filter(({ invocations }) => {

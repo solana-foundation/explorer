@@ -20,7 +20,7 @@ import { Status, SupplyProvider, useFetchSupply, useSupply } from '@providers/su
 import { ClusterStatus } from '@utils/cluster';
 import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/index';
 import { percentage } from '@utils/math';
-import React from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { DeveloperResources } from './components/DeveloperResources';
 import { SimpleCardSkeleton } from './components/shared/Skeletons';
@@ -71,19 +71,19 @@ function StakingComponent() {
         fetchVoteAccounts();
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (status === ClusterStatus.Connected) {
             fetchData();
         }
     }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const delinquentStake = React.useMemo(() => {
+    const delinquentStake = useMemo(() => {
         if (voteAccounts) {
             return voteAccounts.delinquent.reduce((prev, current) => prev + current.activatedStake, BigInt(0));
         }
     }, [voteAccounts]);
 
-    const activeStake = React.useMemo(() => {
+    const activeStake = useMemo(() => {
         if (voteAccounts && delinquentStake) {
             return (
                 voteAccounts.current.reduce((prev, current) => prev + current.activatedStake, BigInt(0)) +
@@ -168,7 +168,7 @@ function StatsCardBody() {
     const { setActive } = useStatsProvider();
     const { cluster } = useCluster();
 
-    React.useEffect(() => {
+    useEffect(() => {
         setActive(true);
         return () => setActive(false);
     }, [setActive, cluster]);

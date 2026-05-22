@@ -6,7 +6,7 @@ import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Connection, InflationReward, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import React from 'react';
+import { createContext, useCallback, useContext, useEffect } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -53,8 +53,8 @@ function reconcile(rewards: Rewards | undefined, update: RewardsUpdate | undefin
     };
 }
 
-export const StateContext = React.createContext<State | undefined>(undefined);
-export const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+export const StateContext = createContext<State | undefined>(undefined);
+export const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 type RewardsProviderProps = { children: React.ReactNode };
 
@@ -62,7 +62,7 @@ export function RewardsProvider({ children }: RewardsProviderProps) {
     const { url } = useCluster();
     const [state, dispatch] = Cache.useCustomReducer(url, reconcile);
 
-    React.useEffect(() => {
+    useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
     }, [dispatch, url]);
 
@@ -150,7 +150,7 @@ async function fetchRewards(
 }
 
 export function useRewards(address: string): Cache.CacheEntry<Rewards> | undefined {
-    const context = React.useContext(StateContext);
+    const context = useContext(StateContext);
 
     if (!context) {
         throw new Error(`useRewards must be used within a AccountsProvider`);
@@ -161,14 +161,14 @@ export function useRewards(address: string): Cache.CacheEntry<Rewards> | undefin
 
 export function useFetchRewards() {
     const { cluster, url } = useCluster();
-    const state = React.useContext(StateContext);
-    const dispatch = React.useContext(DispatchContext);
+    const state = useContext(StateContext);
+    const dispatch = useContext(DispatchContext);
 
     if (!state || !dispatch) {
         throw new Error(`useFetchRewards must be used within a AccountsProvider`);
     }
 
-    return React.useCallback(
+    return useCallback(
         (pubkey: PublicKey, highestEpoch?: number) => {
             const before = state.entries[pubkey.toBase58()];
             if (before?.data) {

@@ -3,10 +3,10 @@ import { useAddressLookupTable } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
-import React from 'react';
+import { useMemo } from 'react';
 
 export function AddressTableLookupsCard({ message }: { message: VersionedMessage }) {
-    const lookupRows = React.useMemo(() => {
+    const lookupRows = useMemo(() => {
         let key = 0;
         return message.addressTableLookups.flatMap(lookup => {
             const indexes = [

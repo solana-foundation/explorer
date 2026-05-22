@@ -6,7 +6,7 @@ import { useCluster } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
 import { getEpochForSlot } from '@utils/epoch-schedule';
 import { notFound } from 'next/navigation';
-import React from 'react';
+import { useEffect, useMemo } from 'react';
 
 type Props = Readonly<{ params: { slot: string } }>;
 
@@ -20,7 +20,7 @@ export default function BlockTransactionsTabClient({ params: { slot } }: Props) 
     const { status, clusterInfo } = useCluster();
 
     // Calculate epoch from slot
-    const epoch = React.useMemo(() => {
+    const epoch = useMemo(() => {
         if (clusterInfo) {
             return getEpochForSlot(clusterInfo.epochSchedule, BigInt(slotNumber));
         }
@@ -28,7 +28,7 @@ export default function BlockTransactionsTabClient({ params: { slot } }: Props) 
     }, [clusterInfo, slotNumber]);
 
     // Fetch block on load
-    React.useEffect(() => {
+    useEffect(() => {
         if (!confirmedBlock && status === ClusterStatus.Connected) {
             fetchBlock(slotNumber);
         }

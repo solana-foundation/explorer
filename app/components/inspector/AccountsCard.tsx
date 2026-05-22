@@ -5,7 +5,7 @@ import { type AccountInfo, useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
 import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { toHex } from '@/app/shared/lib/bytes';
 
@@ -17,7 +17,7 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
     const pubkeys = useMemo(() => message.staticAccountKeys, [message.staticAccountKeys]);
     const { accounts, error: fetchError, loading } = useAccountsInfo(pubkeys, url);
 
-    const { validMessage, error } = React.useMemo(() => {
+    const { validMessage, error } = useMemo(() => {
         const { numRequiredSignatures, numReadonlySignedAccounts, numReadonlyUnsignedAccounts } = message.header;
 
         if (numReadonlySignedAccounts >= numRequiredSignatures) {
@@ -34,7 +34,7 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
         };
     }, [message]);
 
-    const { accountRows, numAccounts } = React.useMemo(() => {
+    const { accountRows, numAccounts } = useMemo(() => {
         const message = validMessage;
         if (!message) return { accountRows: undefined, numAccounts: 0 };
         const staticAccountRows = message.staticAccountKeys.map((publicKey, accountIndex) => {
@@ -98,7 +98,7 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
         };
     }, [accounts, loading, validMessage]);
 
-    const totalAccountSize = React.useMemo(
+    const totalAccountSize = useMemo(
         () => Array.from(accounts.values()).reduce((acc, account) => acc + account.size, 0),
         [accounts],
     );

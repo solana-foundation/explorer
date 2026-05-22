@@ -1,6 +1,6 @@
 import { useCluster } from '@providers/cluster';
 import { useStatsProvider } from '@providers/stats/solanaClusterStats';
-import React from 'react';
+import { useEffect } from 'react';
 import { RefreshCw } from 'react-feather';
 
 const CLUSTER_STATS_TIMEOUT = 5000;
@@ -9,7 +9,7 @@ export function StatsNotReady({ error }: { error: boolean }) {
     const { setTimedOut, retry, active } = useStatsProvider();
     const { cluster } = useCluster();
 
-    React.useEffect(() => {
+    useEffect(() => {
         let timedOut: NodeJS.Timeout;
         if (!error) {
             timedOut = setTimeout(setTimedOut, CLUSTER_STATS_TIMEOUT);

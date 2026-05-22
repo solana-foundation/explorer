@@ -4,7 +4,7 @@ import { useCluster } from '@providers/cluster';
 import { createSolanaRpc } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
 import useTabVisibility from '@utils/use-tab-visibility';
-import React from 'react';
+import { createContext, useCallback, useContext, useEffect, useReducer, useState } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -56,31 +56,31 @@ const initialDashboardInfo: DashboardInfo = {
 };
 
 type SetActive = React.Dispatch<React.SetStateAction<boolean>>;
-const StatsProviderContext = React.createContext<
+const StatsProviderContext = createContext<
     | {
-          setActive: SetActive;
-          setTimedOut: () => void;
-          retry: () => void;
-          active: boolean;
-      }
+        setActive: SetActive;
+        setTimedOut: () => void;
+        retry: () => void;
+        active: boolean;
+    }
     | undefined
 >(undefined);
 
 type DashboardState = { info: DashboardInfo };
-const DashboardContext = React.createContext<DashboardState | undefined>(undefined);
+const DashboardContext = createContext<DashboardState | undefined>(undefined);
 
 type PerformanceState = { info: PerformanceInfo };
-const PerformanceContext = React.createContext<PerformanceState | undefined>(undefined);
+const PerformanceContext = createContext<PerformanceState | undefined>(undefined);
 
 type Props = { children: React.ReactNode };
 
 export function SolanaClusterStatsProvider({ children }: Props) {
     const { cluster, url } = useCluster();
-    const [active, setActive] = React.useState(false);
-    const [dashboardInfo, dispatchDashboardInfo] = React.useReducer(dashboardInfoReducer, initialDashboardInfo);
-    const [performanceInfo, dispatchPerformanceInfo] = React.useReducer(performanceInfoReducer, initialPerformanceInfo);
+    const [active, setActive] = useState(false);
+    const [dashboardInfo, dispatchDashboardInfo] = useReducer(dashboardInfoReducer, initialDashboardInfo);
+    const [performanceInfo, dispatchPerformanceInfo] = useReducer(performanceInfoReducer, initialPerformanceInfo);
     const { visible: isTabVisible } = useTabVisibility();
-    React.useEffect(() => {
+    useEffect(() => {
         if (!active || !isTabVisible || !url) return;
 
         const rpc = createSolanaRpc(url);
@@ -233,7 +233,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
     }, [active, cluster, isTabVisible, url]);
 
     // Reset when cluster changes
-    React.useEffect(() => {
+    useEffect(() => {
         return () => {
             resetData();
         };
@@ -250,7 +250,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
         });
     }
 
-    const setTimedOut = React.useCallback(() => {
+    const setTimedOut = useCallback(() => {
         dispatchDashboardInfo({
             data: 'Cluster stats timed out',
             type: DashboardInfoActionType.SetError,
@@ -263,7 +263,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
         setActive(false);
     }, []);
 
-    const retry = React.useCallback(() => {
+    const retry = useCallback(() => {
         resetData();
         setActive(true);
     }, []);
@@ -278,7 +278,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
 }
 
 export function useStatsProvider() {
-    const context = React.useContext(StatsProviderContext);
+    const context = useContext(StatsProviderContext);
     if (!context) {
         throw new Error(`useContext must be used within a StatsProvider`);
     }
@@ -286,7 +286,7 @@ export function useStatsProvider() {
 }
 
 export function useDashboardInfo() {
-    const context = React.useContext(DashboardContext);
+    const context = useContext(DashboardContext);
     if (!context) {
         throw new Error(`useDashboardInfo must be used within a StatsProvider`);
     }
@@ -294,7 +294,7 @@ export function useDashboardInfo() {
 }
 
 export function usePerformanceInfo() {
-    const context = React.useContext(PerformanceContext);
+    const context = useContext(PerformanceContext);
     if (!context) {
         throw new Error(`usePerformanceInfo must be used within a StatsProvider`);
     }

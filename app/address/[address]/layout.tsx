@@ -41,7 +41,7 @@ import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useSearchParams } from 'next/navigation';
-import React, { PropsWithChildren, Suspense, use } from 'react';
+import { PropsWithChildren, Suspense, use, useCallback, useEffect } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
 import useSWRImmutable from 'swr/immutable';
@@ -159,7 +159,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     const isTokenInfoLoading = isAccountLoading || isFullTokenInfoLoading;
 
     // Fetch account on load
-    React.useEffect(() => {
+    useEffect(() => {
         if (!info && status === ClusterStatus.Connected && pubkey) {
             fetchAccount(pubkey, 'parsed');
         }
@@ -332,7 +332,7 @@ function MoreSection({
     asyncChildren?: React.ReactNode;
 }) {
     const searchParams = useSearchParams();
-    const buildHref = React.useCallback(
+    const buildHref = useCallback(
         (path: string) => pickClusterParams(`${baseUrl}/${path}`, searchParams ?? undefined),
         [baseUrl, searchParams],
     );

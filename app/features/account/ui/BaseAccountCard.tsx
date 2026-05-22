@@ -1,6 +1,6 @@
 import { TableCardBody, type TableCardBodyProps } from '@components/common/TableCardBody';
 import { RefreshButton } from '@shared/ui/refresh-button';
-import React from 'react';
+import { useState } from 'react';
 import { Code } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
@@ -24,7 +24,7 @@ export function BaseAccountCard({
     children,
     ...tableProps
 }: BaseAccountCardProps) {
-    const [showRaw, setShowRaw] = React.useState(false);
+    const [showRaw, setShowRaw] = useState(false);
 
     return (
         <div className="card">

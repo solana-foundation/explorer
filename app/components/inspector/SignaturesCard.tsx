@@ -2,7 +2,7 @@ import { Address } from '@components/common/Address';
 import { Signature } from '@components/common/Signature';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import bs58 from 'bs58';
-import React from 'react';
+import { useMemo } from 'react';
 import * as nacl from 'tweetnacl';
 
 export function TransactionSignatures({
@@ -14,7 +14,7 @@ export function TransactionSignatures({
     message: VersionedMessage;
     rawMessage: Uint8Array;
 }) {
-    const signatureRows = React.useMemo(() => {
+    const signatureRows = useMemo(() => {
         return signatures.map((signature, index) => {
             const publicKey = message.staticAccountKeys[index];
 

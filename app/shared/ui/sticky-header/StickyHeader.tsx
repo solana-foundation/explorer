@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
@@ -10,8 +10,8 @@ type Props = {
 };
 
 export function StickyHeader({ children, className }: Props) {
-    const sentinelRef = React.useRef<HTMLDivElement>(null);
-    const [isStuck, setIsStuck] = React.useState(false);
+    const sentinelRef = useRef<HTMLDivElement>(null);
+    const [isStuck, setIsStuck] = useState(false);
 
     useEffect(() => {
         const sentinel = sentinelRef.current;

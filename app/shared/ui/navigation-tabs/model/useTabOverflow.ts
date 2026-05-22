@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { type NavigationTab } from './types';
 
@@ -34,20 +34,20 @@ function getVisibleTabsCount({
 }
 
 export function useTabOverflow(allTabs: NavigationTab[]) {
-    const tablistRef = React.useRef<HTMLDivElement>(null);
-    const moreMeasureRef = React.useRef<HTMLDivElement>(null);
+    const tablistRef = useRef<HTMLDivElement>(null);
+    const moreMeasureRef = useRef<HTMLDivElement>(null);
 
-    const allTabsKey = React.useMemo(() => getTabsKey(allTabs), [allTabs]);
+    const allTabsKey = useMemo(() => getTabsKey(allTabs), [allTabs]);
 
-    const [measuring, setMeasuring] = React.useState(true);
-    const [visibleCount, setVisibleCount] = React.useState<number>(allTabs.length);
+    const [measuring, setMeasuring] = useState(true);
+    const [visibleCount, setVisibleCount] = useState<number>(allTabs.length);
 
-    React.useLayoutEffect(() => {
+    useLayoutEffect(() => {
         setMeasuring(true);
         setVisibleCount(allTabs.length);
     }, [allTabs.length, allTabsKey]);
 
-    React.useLayoutEffect(() => {
+    useLayoutEffect(() => {
         if (!measuring) return;
 
         const tablist = tablistRef.current;
@@ -66,7 +66,7 @@ export function useTabOverflow(allTabs: NavigationTab[]) {
         setMeasuring(false);
     }, [allTabs.length, allTabsKey, measuring]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const tablist = tablistRef.current;
         if (!tablist) return;
 

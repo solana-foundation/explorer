@@ -6,7 +6,7 @@ import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { AddressLookupTableAccount } from '@solana/web3.js';
 import { AddressLookupTableAccountInfo } from '@validators/accounts/address-lookup-table';
-import React from 'react';
+import { useMemo } from 'react';
 
 export function AddressLookupTableAccountSection(
     params:
@@ -20,7 +20,7 @@ export function AddressLookupTableAccountSection(
           },
 ) {
     const account = params.account;
-    const lookupTableState = React.useMemo(() => {
+    const lookupTableState = useMemo(() => {
         if ('data' in params) {
             return AddressLookupTableAccount.deserialize(params.data);
         } else {

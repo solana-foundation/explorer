@@ -15,7 +15,7 @@ import { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstructi
 import { Cluster } from '@utils/cluster';
 import { normalizeTokenAmount } from '@utils/index';
 import { InstructionContainer } from '@utils/instruction';
-import React, { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import Moment from 'react-moment';
 import { create } from 'superstruct';
 import useSWR from 'swr';
@@ -104,20 +104,20 @@ export function TokenTransfersCard({ address }: { address: string }) {
     const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, url), [address, cluster, url]);
     const { data: tokenInfo, isLoading: tokenInfoLoading } = useSWR(swrKey, fetchTokenInfo);
 
-    const transactionRows = React.useMemo(() => {
+    const transactionRows = useMemo(() => {
         if (history?.data?.fetched) {
             return getTransactionRows(history.data.fetched);
         }
         return [];
     }, [history]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!history || !history.data?.transactionMap?.size) {
             refresh();
         }
     }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const { allTransfers, hasTimestamps } = React.useMemo(() => {
+    const { allTransfers, hasTimestamps } = useMemo(() => {
         const detailedHistoryMap = history?.data?.transactionMap || new Map<string, ParsedTransactionWithMeta>();
         const hasTimestamps = transactionRows.some(element => element.blockTime);
         const mintMap = new Map<string, MintDetails>();

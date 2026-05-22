@@ -1,16 +1,16 @@
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { cn } from '@shared/utils';
-import * as React from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
 const Accordion = AccordionPrimitive.Root;
 const AccordionItem = AccordionPrimitive.Item;
 
 function AccordionTrigger({ className, children, ...props }: React.ComponentProps<typeof AccordionPrimitive.Trigger>) {
-    const [isOpen, setIsOpen] = React.useState(false);
-    const triggerRef = React.useRef<HTMLButtonElement>(null);
+    const [isOpen, setIsOpen] = useState(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const trigger = triggerRef.current;
         if (!trigger) return;
 

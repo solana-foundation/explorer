@@ -3,14 +3,14 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { Status, useFetchSupply, useSupply } from '@providers/supply';
-import React from 'react';
+import { useEffect } from 'react';
 
 export function SupplyCard() {
     const supply = useSupply();
     const fetchSupply = useFetchSupply();
 
     // Fetch supply on load
-    React.useEffect(() => {
+    useEffect(() => {
         if (supply === Status.Idle) fetchSupply();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

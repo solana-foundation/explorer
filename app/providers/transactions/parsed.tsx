@@ -5,7 +5,7 @@ import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Connection, ParsedTransactionWithMeta, TransactionSignature } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import React from 'react';
+import { createContext, useCallback, useContext, useEffect } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -16,15 +16,15 @@ export interface Details {
 type State = Cache.State<Details>;
 type Dispatch = Cache.Dispatch<Details>;
 
-export const StateContext = React.createContext<State | undefined>(undefined);
-export const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+export const StateContext = createContext<State | undefined>(undefined);
+export const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 type DetailsProviderProps = { children: React.ReactNode };
 export function DetailsProvider({ children }: DetailsProviderProps) {
     const { url } = useCluster();
     const [state, dispatch] = Cache.useReducer<Details>(url);
 
-    React.useEffect(() => {
+    useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
     }, [dispatch, url]);
 
@@ -67,13 +67,13 @@ async function fetchDetails(dispatch: Dispatch, signature: TransactionSignature,
 }
 
 export function useFetchTransactionDetails() {
-    const dispatch = React.useContext(DispatchContext);
+    const dispatch = useContext(DispatchContext);
     if (!dispatch) {
         throw new Error(`useFetchTransactionDetails must be used within a TransactionsProvider`);
     }
 
     const { cluster, url } = useCluster();
-    return React.useCallback(
+    return useCallback(
         (signature: TransactionSignature) => {
             url && fetchDetails(dispatch, signature, cluster, url);
         },
@@ -82,7 +82,7 @@ export function useFetchTransactionDetails() {
 }
 
 export function useTransactionDetails(signature: TransactionSignature): Cache.CacheEntry<Details> | undefined {
-    const context = React.useContext(StateContext);
+    const context = useContext(StateContext);
 
     if (!context) {
         throw new Error(`useTransactionDetails must be used within a TransactionsProvider`);
@@ -95,7 +95,7 @@ export type TransactionDetailsCache = {
     [key: string]: Cache.CacheEntry<Details>;
 };
 export function useTransactionDetailsCache(): TransactionDetailsCache {
-    const context = React.useContext(StateContext);
+    const context = useContext(StateContext);
 
     if (!context) {
         throw new Error(`useTransactionDetailsCache must be used within a TransactionsProvider`);

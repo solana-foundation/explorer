@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import * as React from 'react';
+import { useState } from 'react';
 import { expect, userEvent, within } from 'storybook/test';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs';
@@ -140,7 +140,7 @@ export const WithLongContent: Story = {
 export const Controlled: Story = {
     render: () => {
         const ControlledTabs = () => {
-            const [value, setValue] = React.useState('tab1');
+            const [value, setValue] = useState('tab1');
 
             return (
                 <div className="e-space-y-4">

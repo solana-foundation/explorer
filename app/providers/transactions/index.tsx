@@ -5,7 +5,7 @@ import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Connection, SignatureResult, TransactionConfirmationStatus, TransactionSignature } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import React from 'react';
+import { createContext, useCallback, useContext, useEffect } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -34,8 +34,8 @@ export interface TransactionStatus {
 type State = Cache.State<TransactionStatus>;
 type Dispatch = Cache.Dispatch<TransactionStatus>;
 
-const StateContext = React.createContext<State | undefined>(undefined);
-const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+const StateContext = createContext<State | undefined>(undefined);
+const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 type TransactionsProviderProps = { children: React.ReactNode };
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
@@ -43,7 +43,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     const [state, dispatch] = Cache.useReducer<TransactionStatus>(url);
 
     // Clear accounts cache whenever cluster is changed
-    React.useEffect(() => {
+    useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
     }, [dispatch, url]);
 
@@ -127,7 +127,7 @@ export async function fetchTransactionStatus(
 export function useTransactionStatus(
     signature: TransactionSignature | undefined,
 ): Cache.CacheEntry<TransactionStatus> | undefined {
-    const context = React.useContext(StateContext);
+    const context = useContext(StateContext);
 
     if (!context) {
         throw new Error(`useTransactionStatus must be used within a TransactionsProvider`);
@@ -141,13 +141,13 @@ export function useTransactionStatus(
 }
 
 export function useFetchTransactionStatus() {
-    const dispatch = React.useContext(DispatchContext);
+    const dispatch = useContext(DispatchContext);
     if (!dispatch) {
         throw new Error(`useFetchTransactionStatus must be used within a TransactionsProvider`);
     }
 
     const { cluster, url } = useCluster();
-    return React.useCallback(
+    return useCallback(
         (signature: TransactionSignature) => {
             fetchTransactionStatus(dispatch, signature, cluster, url);
         },

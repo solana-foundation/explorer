@@ -1,12 +1,12 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
 import { PublicKey, VersionedBlockResponse } from '@solana/web3.js';
-import React from 'react';
+import { useState } from 'react';
 
 const PAGE_SIZE = 10;
 
 export function BlockRewardsCard({ block }: { block: VersionedBlockResponse }) {
-    const [rewardsDisplayed, setRewardsDisplayed] = React.useState(PAGE_SIZE);
+    const [rewardsDisplayed, setRewardsDisplayed] = useState(PAGE_SIZE);
 
     if (!block.rewards || block.rewards.length < 1) {
         return null;

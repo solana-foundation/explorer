@@ -6,7 +6,7 @@ import { ClusterStatsStatus, PERF_UPDATE_SEC, usePerformanceInfo } from '@provid
 import { PerformanceInfo } from '@providers/stats/solanaPerformanceInfo';
 import { BarElement, CategoryScale, Chart, ChartData, ChartOptions, LinearScale, Tooltip } from 'chart.js';
 import classNames from 'classnames';
-import React from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
 
@@ -31,7 +31,7 @@ const SERIES_INFO = {
 };
 
 export function LiveTransactionStatsCard() {
-    const [series, setSeries] = React.useState<Series>('short');
+    const [series, setSeries] = useState<Series>('short');
     return (
         <div className="card flex-grow-1 d-flex flex-column">
             <div className="card-header">
@@ -154,7 +154,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
     const averageTps = Math.round(avgTps != null ? avgTps : 0.0).toLocaleString('en-US');
     const transactionCount = <AnimatedTransactionCount info={performanceInfo} />;
     const seriesData = perfHistory[series];
-    const chartOptions = React.useMemo<ChartOptions<'bar'>>(() => TPS_CHART_OPTIONS(historyMaxTps), [historyMaxTps]);
+    const chartOptions = useMemo<ChartOptions<'bar'>>(() => TPS_CHART_OPTIONS(historyMaxTps), [historyMaxTps]);
 
     const seriesLength = seriesData.length;
     const chartData: ChartData<'bar'> = {
@@ -227,8 +227,8 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
 }
 
 function AnimatedTransactionCount({ info }: { info: PerformanceInfo }) {
-    const txCountRef = React.useRef(0);
-    const countUpRef = React.useRef({ lastUpdate: 0, period: 0, start: 0 });
+    const txCountRef = useRef(0);
+    const countUpRef = useRef({ lastUpdate: 0, period: 0, start: 0 });
     const countUp = countUpRef.current;
 
     const { transactionCount, avgTps } = info;

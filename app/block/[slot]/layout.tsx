@@ -14,7 +14,7 @@ import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { IBRL_EXPLORER_URL } from '@utils/env';
 import { notFound, useSearchParams } from 'next/navigation';
-import React, { PropsWithChildren, use } from 'react';
+import { PropsWithChildren, use, useCallback, useEffect } from 'react';
 import { ExternalLink } from 'react-feather';
 
 import { type NavigationTab, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
@@ -37,7 +37,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
     const refresh = () => fetchBlock(slotNumber);
 
     // Fetch block on load
-    React.useEffect(() => {
+    useEffect(() => {
         if (!confirmedBlock && status === ClusterStatus.Connected) refresh();
     }, [slotNumber, status]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -250,7 +250,7 @@ const TABS: NavigationTab[] = [
 
 function MoreSection({ children, slot }: { children: React.ReactNode; slot: number }) {
     const searchParams = useSearchParams();
-    const buildHref = React.useCallback(
+    const buildHref = useCallback(
         (path: string) => pickClusterParams(`/block/${slot}/${path}`, searchParams ?? undefined),
         [slot, searchParams],
     );

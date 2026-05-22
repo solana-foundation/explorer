@@ -4,7 +4,7 @@ import * as Cache from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Connection, PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import React from 'react';
+import { createContext, useCallback, useContext, useEffect } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -30,8 +30,8 @@ type Block = {
 type State = Cache.State<Block>;
 type Dispatch = Cache.Dispatch<Block>;
 
-const StateContext = React.createContext<State | undefined>(undefined);
-const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+const StateContext = createContext<State | undefined>(undefined);
+const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 type BlockProviderProps = { children: React.ReactNode };
 
@@ -39,7 +39,7 @@ export function BlockProvider({ children }: BlockProviderProps) {
     const { url } = useCluster();
     const [state, dispatch] = Cache.useReducer<Block>(url);
 
-    React.useEffect(() => {
+    useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
     }, [dispatch, url]);
 
@@ -51,7 +51,7 @@ export function BlockProvider({ children }: BlockProviderProps) {
 }
 
 export function useBlock(key: number): Cache.CacheEntry<Block> | undefined {
-    const context = React.useContext(StateContext);
+    const context = useContext(StateContext);
 
     if (!context) {
         throw new Error(`useBlock must be used within a BlockProvider`);
@@ -122,11 +122,11 @@ export async function fetchBlock(dispatch: Dispatch, url: string, cluster: Clust
 }
 
 export function useFetchBlock() {
-    const dispatch = React.useContext(DispatchContext);
+    const dispatch = useContext(DispatchContext);
     if (!dispatch) {
         throw new Error(`useFetchBlock must be used within a BlockProvider`);
     }
 
     const { cluster, url } = useCluster();
-    return React.useCallback((key: number) => fetchBlock(dispatch, url, cluster, key), [dispatch, cluster, url]);
+    return useCallback((key: number) => fetchBlock(dispatch, url, cluster, key), [dispatch, cluster, url]);
 }

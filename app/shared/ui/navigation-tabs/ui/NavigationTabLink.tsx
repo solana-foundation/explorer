@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { useEffect } from 'react';
 
 import { useNavigationTabsContext } from '@/app/shared/ui/navigation-tabs/model/navigation-tabs-context';
 
@@ -9,7 +9,7 @@ import { TabLink } from './TabLink';
 export function NavigationTabLink({ path, title, className }: { path: string; title: string; className?: string }) {
     const { registerTab, renderTabLink, staticPaths, unregisterTab } = useNavigationTabsContext();
 
-    React.useEffect(() => {
+    useEffect(() => {
         registerTab({ path, title });
         return () => unregisterTab(path);
     }, [path, title, registerTab, unregisterTab]);

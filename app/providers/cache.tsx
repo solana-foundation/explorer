@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 export enum FetchStatus {
     Fetching,
@@ -64,7 +64,7 @@ export function useReducer<T>(url: string) {
 }
 
 export function useCustomReducer<T, U>(url: string, reconciler: Reconciler<T, U>) {
-    const customReducer = React.useMemo(() => {
+    const customReducer = useMemo(() => {
         return (state: State<T>, action: Action<U>) => {
             return reducer(state, action, reconciler);
         };

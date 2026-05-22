@@ -10,7 +10,7 @@ import { useAccountHistory, useFetchAccountHistory } from '@providers/accounts/h
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc } from '@utils/date';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import Moment from 'react-moment';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
@@ -27,14 +27,14 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     const refresh = () => fetchAccountHistory(pubkey, false, true);
     const loadMore = () => fetchAccountHistory(pubkey, false);
 
-    const transactionRows = React.useMemo(() => {
+    const transactionRows = useMemo(() => {
         if (history?.data?.fetched) {
             return getTransactionRows(history.data.fetched);
         }
         return [];
     }, [history]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!history) {
             refresh();
         }

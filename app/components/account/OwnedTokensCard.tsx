@@ -16,7 +16,7 @@ import { BigNumber } from 'bignumber.js';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
 import { getProxiedUri } from '@/app/features/metadata/utils';
@@ -41,12 +41,12 @@ export function OwnedTokensCard({ address }: { address: string }) {
     const ownedTokens = useAccountOwnedTokens(address);
     const fetchAccountTokens = useFetchAccountOwnedTokens();
     const refresh = () => fetchAccountTokens(pubkey);
-    const [showDropdown, setDropdown] = React.useState(false);
-    const [visibleCount, setVisibleCount] = React.useState(INITIAL_VISIBLE_COUNT);
+    const [showDropdown, setDropdown] = useState(false);
+    const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
     const display = useQueryDisplay();
 
     // Fetch owned tokens
-    React.useEffect(() => {
+    useEffect(() => {
         if (!ownedTokens) refresh();
     }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -14,7 +14,7 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { Trash2 } from 'react-feather';
 
 import { Overlay } from './common/Overlay';
@@ -74,16 +74,16 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
     const { customUrl } = useCluster();
     const updateCustomUrl = useUpdateCustomUrl();
     const addSavedCluster = useSetAtom(addSavedClusterAtom);
-    const [editing, setEditing] = React.useState(false);
-    const [saving, setSaving] = React.useState(false);
-    const [savedName, setSavedName] = React.useState('');
-    const [saveError, setSaveError] = React.useState<Error | undefined>(undefined);
-    const [localUrl, setLocalUrl] = React.useState(customUrl);
+    const [editing, setEditing] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [savedName, setSavedName] = useState('');
+    const [saveError, setSaveError] = useState<Error | undefined>(undefined);
+    const [localUrl, setLocalUrl] = useState(customUrl);
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!editing) setLocalUrl(customUrl);
     }, [customUrl, editing]);
 

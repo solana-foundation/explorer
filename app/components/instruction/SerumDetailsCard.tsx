@@ -1,6 +1,6 @@
 import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import React from 'react';
+import { useMemo } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -53,7 +53,7 @@ export function SerumDetailsCard(initialProps: {
 }) {
     const { ix, index, result, signature, innerCards, childIndex } = initialProps;
 
-    const props = React.useMemo(() => {
+    const props = useMemo(() => {
         const programName = initialProps.ix.programId.toBase58() === OPEN_BOOK_PROGRAM_ID ? 'OpenBook' : 'Serum';
         return { ...initialProps, programName };
     }, [initialProps]);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSelectedLayoutSegment } from 'next/navigation';
-import React from 'react';
+import { useCallback } from 'react';
 
 import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
 
@@ -19,7 +19,7 @@ export function NavigationTabs({ buildHref, tabs, children, className }: Navigat
     const activeValue = segment ?? '';
     const router = useRouter();
 
-    const onSelectChange = React.useCallback(
+    const onSelectChange = useCallback(
         (path: string) => {
             router.push(buildHref(path), { scroll: false });
         },

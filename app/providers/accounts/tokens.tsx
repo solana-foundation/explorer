@@ -7,7 +7,7 @@ import { useCluster } from '@providers/cluster';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { TokenAccountInfo } from '@validators/accounts/token';
-import React from 'react';
+import { createContext, useCallback, useContext, useEffect } from 'react';
 import { create } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -29,15 +29,15 @@ interface AccountTokens {
 type State = Cache.State<AccountTokens>;
 type Dispatch = Cache.Dispatch<AccountTokens>;
 
-const StateContext = React.createContext<State | undefined>(undefined);
-const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+const StateContext = createContext<State | undefined>(undefined);
+const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 type ProviderProps = { children: React.ReactNode };
 export function TokensProvider({ children }: ProviderProps) {
     const { url } = useCluster();
     const [state, dispatch] = Cache.useReducer<AccountTokens>(url);
 
-    React.useEffect(() => {
+    useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
     }, [dispatch, url]);
 
@@ -126,7 +126,7 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
 }
 
 export function useAccountOwnedTokens(address: string): Cache.CacheEntry<AccountTokens> | undefined {
-    const context = React.useContext(StateContext);
+    const context = useContext(StateContext);
 
     if (!context) {
         throw new Error(`useAccountOwnedTokens must be used within a AccountsProvider`);
@@ -136,13 +136,13 @@ export function useAccountOwnedTokens(address: string): Cache.CacheEntry<Account
 }
 
 export function useFetchAccountOwnedTokens() {
-    const dispatch = React.useContext(DispatchContext);
+    const dispatch = useContext(DispatchContext);
     if (!dispatch) {
         throw new Error(`useFetchAccountOwnedTokens must be used within a AccountsProvider`);
     }
 
     const { cluster, url } = useCluster();
-    return React.useCallback(
+    return useCallback(
         (pubkey: PublicKey) => {
             fetchAccountTokens(dispatch, pubkey, cluster, url);
         },
@@ -154,7 +154,7 @@ export function useScaledUiAmountForMint(address: string | undefined, rawAmount:
     const mint = useAccountInfo(address);
     const refresh = useFetchAccountInfo();
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (address && !mint) {
             refresh(new PublicKey(address), 'parsed');
         }

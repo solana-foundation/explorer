@@ -5,7 +5,7 @@ import { PublicKey, SystemProgram } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { lamportsToSolString } from '@utils/index';
 import { addressLabel } from '@utils/tx';
-import React from 'react';
+import { useEffect } from 'react';
 
 type AccountValidator = (account: Account) => string | undefined;
 
@@ -83,7 +83,7 @@ function AccountInfo({ pubkey, validator }: { pubkey: PublicKey; validator?: Acc
     const { cluster, status } = useCluster();
 
     // Fetch account on load
-    React.useEffect(() => {
+    useEffect(() => {
         if (!info && status === ClusterStatus.Connected && pubkey) {
             fetchAccount(pubkey, 'skip');
         }

@@ -1,5 +1,5 @@
 import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
-import React from 'react';
+import { useEffect } from 'react';
 import {
     Attestation as SasAttestation,
     convertSasSchemaToBorshSchema,
@@ -55,7 +55,7 @@ function SchemaCard({ schema }: { schema: SasSchema }) {
 function AttestationCard({ attestation }: { attestation: SasAttestation }) {
     const schemaAccountInfo = useAccountInfo(mapToPublicKey(attestation.schema).toBase58());
     const fetchAccountInfo = useFetchAccountInfo();
-    React.useEffect(() => {
+    useEffect(() => {
         if (!schemaAccountInfo?.data) {
             fetchAccountInfo(mapToPublicKey(attestation.schema), 'parsed');
         }

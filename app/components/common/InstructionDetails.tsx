@@ -1,7 +1,7 @@
 import { isTokenProgramData } from '@providers/accounts';
 import { ConfirmedSignatureInfo } from '@solana/web3.js';
 import { getTokenProgramInstructionName, InstructionType } from '@utils/instruction';
-import React from 'react';
+import { useState } from 'react';
 import { MinusSquare, PlusSquare } from 'react-feather';
 
 export function InstructionDetails({
@@ -11,7 +11,7 @@ export function InstructionDetails({
     instructionType: InstructionType;
     tx: ConfirmedSignatureInfo;
 }) {
-    const [expanded, setExpanded] = React.useState(false);
+    const [expanded, setExpanded] = useState(false);
 
     const instructionTypes = instructionType.innerInstructions
         .map(ix => {

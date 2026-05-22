@@ -5,7 +5,7 @@ import { useBlock, useFetchBlock } from '@providers/block';
 import { useCluster } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
 import { notFound } from 'next/navigation';
-import React from 'react';
+import { useEffect } from 'react';
 
 type Props = Readonly<{ params: { slot: string } }>;
 
@@ -18,7 +18,7 @@ export default function BlockAccountsTab({ params: { slot } }: Props) {
     const fetchBlock = useFetchBlock();
     const { status } = useCluster();
     // Fetch block on load
-    React.useEffect(() => {
+    useEffect(() => {
         if (!confirmedBlock && status === ClusterStatus.Connected) {
             fetchBlock(slotNumber);
         }

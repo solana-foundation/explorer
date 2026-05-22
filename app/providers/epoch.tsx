@@ -4,7 +4,7 @@ import * as Cache from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Connection } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import React from 'react';
+import { createContext, useCallback, useContext, useEffect } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -31,8 +31,8 @@ type Epoch = {
 type State = Cache.State<Epoch>;
 type Dispatch = Cache.Dispatch<Epoch>;
 
-const StateContext = React.createContext<State | undefined>(undefined);
-const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+const StateContext = createContext<State | undefined>(undefined);
+const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 type EpochProviderProps = { children: React.ReactNode };
 
@@ -40,7 +40,7 @@ export function EpochProvider({ children }: EpochProviderProps) {
     const { url } = useCluster();
     const [state, dispatch] = Cache.useReducer<Epoch>(url);
 
-    React.useEffect(() => {
+    useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
     }, [dispatch, url]);
 
@@ -52,7 +52,7 @@ export function EpochProvider({ children }: EpochProviderProps) {
 }
 
 export function useEpoch(key: number): Cache.CacheEntry<Epoch> | undefined {
-    const context = React.useContext(StateContext);
+    const context = useContext(StateContext);
 
     if (!context) {
         throw new Error(`useEpoch must be used within a EpochProvider`);
@@ -129,13 +129,13 @@ export async function fetchEpoch(
 }
 
 export function useFetchEpoch() {
-    const dispatch = React.useContext(DispatchContext);
+    const dispatch = useContext(DispatchContext);
     if (!dispatch) {
         throw new Error(`useFetchEpoch must be used within a EpochProvider`);
     }
 
     const { cluster, url } = useCluster();
-    return React.useCallback(
+    return useCallback(
         (key: number, currentEpoch: bigint, epochSchedule: EpochSchedule) =>
             fetchEpoch(dispatch, url, cluster, epochSchedule, currentEpoch, key),
         [dispatch, cluster, url],

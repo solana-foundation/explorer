@@ -12,7 +12,7 @@ import {
     type VersionedMessage,
 } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import React from 'react';
+import { createContext, useCallback, useContext, useEffect } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -32,15 +32,15 @@ export interface Details {
 type State = Cache.State<Details>;
 type Dispatch = Cache.Dispatch<Details>;
 
-export const StateContext = React.createContext<State | undefined>(undefined);
-export const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+export const StateContext = createContext<State | undefined>(undefined);
+export const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 type DetailsProviderProps = { children: React.ReactNode };
 export function RawDetailsProvider({ children }: DetailsProviderProps) {
     const { url } = useCluster();
     const [state, dispatch] = Cache.useReducer<Details>(url);
 
-    React.useEffect(() => {
+    useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
     }, [dispatch, url]);
 
@@ -52,7 +52,7 @@ export function RawDetailsProvider({ children }: DetailsProviderProps) {
 }
 
 export function useRawTransactionDetails(signature: TransactionSignature): Cache.CacheEntry<Details> | undefined {
-    const context = React.useContext(StateContext);
+    const context = useContext(StateContext);
 
     if (!context) {
         throw new Error(`useRawTransactionDetails must be used within a TransactionsProvider`);
@@ -105,13 +105,13 @@ async function fetchRawTransaction(dispatch: Dispatch, signature: TransactionSig
 }
 
 export function useFetchRawTransaction() {
-    const dispatch = React.useContext(DispatchContext);
+    const dispatch = useContext(DispatchContext);
     if (!dispatch) {
         throw new Error(`useFetchRawTransaction must be used within a TransactionsProvider`);
     }
 
     const { cluster, url } = useCluster();
-    return React.useCallback(
+    return useCallback(
         (signature: TransactionSignature) => {
             url && fetchRawTransaction(dispatch, signature, cluster, url);
         },
