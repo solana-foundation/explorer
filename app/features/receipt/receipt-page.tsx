@@ -130,8 +130,6 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
 
 function messageForReason(reason: ReceiptUnavailabilityReason | undefined): string | undefined {
     switch (reason) {
-        case 'inner-instructions':
-            return 'Receipts are only available for simple transfers. This transaction contains inner program instructions.';
         case 'mixed-mint':
             return 'Receipts are only available when all token transfers in a transaction use the same mint. This transaction transfers multiple different tokens.';
         case 'no-transfers':

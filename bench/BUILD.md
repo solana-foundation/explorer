@@ -15,10 +15,10 @@
 | Dynamic | `/address/[address]/domains` | 10 kB | 1.15 MB |
 | Dynamic | `/address/[address]/entries` | 10 kB | 1.15 MB |
 | Dynamic | `/address/[address]/feature-gate` | 200 B | 1.07 MB |
-| Dynamic | `/address/[address]/idl` | 160 kB | 1.47 MB |
+| Dynamic | `/address/[address]/idl` | 170 kB | 1.47 MB |
 | Dynamic | `/address/[address]/instructions` | 10 kB | 1.26 MB |
 | Dynamic | `/address/[address]/metadata` | 10 kB | 1.15 MB |
-| Dynamic | `/address/[address]/nftoken-collection-nfts` | 10 kB | 1.20 MB |
+| Dynamic | `/address/[address]/nftoken-collection-nfts` | 20 kB | 1.20 MB |
 | Dynamic | `/address/[address]/program-multisig` | 10 kB | 1.21 MB |
 | Dynamic | `/address/[address]/rewards` | 10 kB | 1.14 MB |
 | Dynamic | `/address/[address]/security` | 10 kB | 1.28 MB |

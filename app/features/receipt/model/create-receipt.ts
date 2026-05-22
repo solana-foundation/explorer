@@ -14,7 +14,7 @@ import { createSolTransferReceipt } from './sol-transfer';
 import { createTokenTransferReceipt } from './token-transfer';
 import { hasTransfers, isSolReceipt, isTokenReceipt, type Receipt } from './types';
 
-export type ReceiptUnavailabilityReason = 'inner-instructions' | 'mixed-mint' | 'no-transfers';
+export type ReceiptUnavailabilityReason = 'mixed-mint' | 'no-transfers';
 
 export type ReceiptResult =
     | { kind: 'ok'; receipt: FormattedReceipt }
@@ -26,10 +26,6 @@ export async function createReceipt(signature: string, cluster?: QueryCluster): 
 }
 
 export async function extractReceiptData(tx: ParsedTransactionWithMeta, cluster: Cluster): Promise<ReceiptResult> {
-    if (tx.meta?.innerInstructions?.length) {
-        return { kind: 'unavailable', reason: 'inner-instructions' };
-    }
-
     const tokenOutcome = await createTokenTransferReceipt(tx, (mint: string | undefined) =>
         getParsedTokenInfo(mint, cluster),
     );
