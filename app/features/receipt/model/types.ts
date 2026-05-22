@@ -42,15 +42,6 @@ export function hasTransfers(receipt: Receipt): receipt is Receipt & { transfers
     return Boolean(receipt.transfers?.length);
 }
 
-export type SolTransferParsed = {
-    type: 'transfer';
-    info: {
-        source?: string;
-        destination?: string;
-        lamports?: number;
-    };
-};
-
 export function isParsedInstruction(
     instruction: ParsedInstruction | PartiallyDecodedInstruction,
 ): instruction is ParsedInstruction {

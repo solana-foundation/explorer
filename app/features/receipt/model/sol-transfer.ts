@@ -1,14 +1,17 @@
-import { type ParsedInstruction, type ParsedTransactionWithMeta, PartiallyDecodedInstruction } from '@solana/web3.js';
+import {
+    collectTransferInstructions,
+    isSolTransferInstruction,
+    type SolTransferInstruction,
+} from '@entities/transfer-instruction';
+import type { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction } from '@solana/web3.js';
 import { validate } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 import { isJitoTransfer } from './jito';
 import { extractMemoFromTransaction } from './memo';
-import { SolTransferPayload, SystemTransferInstructionRefinedSchema } from './schemas';
-import { isParsedInstruction, type ReceiptSol, type SolTransferParsed, type Transfer } from './types';
-
-type SolTransferInstruction = ParsedInstruction & { parsed: SolTransferParsed };
+import { SolTransferPayload } from './schemas';
+import { type ReceiptSol, type Transfer } from './types';
 
 export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta): ReceiptSol | undefined {
     const instructions = getSolTransferInstructions(transaction);
@@ -42,16 +45,11 @@ export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta)
 }
 
 function getSolTransferInstructions(transaction: ParsedTransactionWithMeta): SolTransferInstruction[] {
-    return transaction.transaction.message.instructions.filter(
-        (instruction): instruction is SolTransferInstruction =>
-            isSolTransfer(instruction) && !isJitoTransfer(instruction),
+    return collectTransferInstructions(
+        transaction,
+        (instr: ParsedInstruction | PartiallyDecodedInstruction): instr is SolTransferInstruction =>
+            isSolTransferInstruction(instr) && !isJitoTransfer(instr),
     );
-}
-
-function isSolTransfer(instruction: ParsedInstruction | PartiallyDecodedInstruction): boolean {
-    if (!isParsedInstruction(instruction)) return false;
-    const [err] = validate(instruction, SystemTransferInstructionRefinedSchema, { coerce: true });
-    return err === undefined;
 }
 
 function buildTransfers(

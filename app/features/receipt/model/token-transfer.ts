@@ -1,7 +1,10 @@
-import type { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
+import {
+    collectTransferInstructions,
+    isTokenTransferInstruction,
+    type TokenTransferInstruction,
+    type TokenTransferParsed,
+} from '@entities/transfer-instruction';
+import type { ParsedTransactionWithMeta } from '@solana/web3.js';
 import { validate } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -9,48 +12,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import type { TokenInfo } from '../api/get-token-info';
 import { extractMemoFromTransaction } from './memo';
 import { TokenTransferPayload } from './schemas';
-import { isParsedInstruction, type ReceiptToken, type Transfer } from './types';
-
-type TokenTransferParsed =
-    | {
-          type: 'transferChecked';
-          info: {
-              source?: string;
-              destination?: string;
-              authority?: string;
-              mint?: string;
-              tokenAmount?: {
-                  uiAmountString?: string | null;
-                  amount?: string;
-                  decimals?: number;
-              };
-          };
-      }
-    | {
-          type: 'transfer2';
-          info: {
-              source?: string;
-              destination?: string;
-              authority?: string;
-              mint?: string;
-              tokenAmount?: {
-                  uiAmountString?: string | null;
-                  amount?: string;
-                  decimals?: number;
-              };
-          };
-      }
-    | {
-          type: 'transfer';
-          info: {
-              amount?: string;
-              source?: string;
-              destination?: string;
-              authority?: string;
-          };
-      };
-
-type TokenTransferInstruction = ParsedInstruction & { parsed: TokenTransferParsed };
+import { type ReceiptToken, type Transfer } from './types';
 
 type MultisigTransferInfo = {
     multisigAuthority: string;
@@ -114,9 +76,7 @@ export async function createTokenTransferReceipt(
 }
 
 function getTokenTransferInstructions(transaction: ParsedTransactionWithMeta): TokenTransferInstruction[] {
-    return transaction.transaction.message.instructions.filter((instruction): instruction is TokenTransferInstruction =>
-        isTokenTransfer(instruction),
-    );
+    return collectTransferInstructions(transaction, isTokenTransferInstruction);
 }
 
 type BuildTokenTransfersResult =
@@ -185,14 +145,6 @@ function extractAmountInfo(
     const decimals = getTokenDecimals(transaction, (parsed.info.destination || parsed.info.source)?.toString());
     if (decimals === undefined) return undefined;
     return { decimals, rawAmount: parsed.info.amount };
-}
-
-function isTokenTransfer(instruction: ParsedInstruction | PartiallyDecodedInstruction): boolean {
-    return (
-        isTokenProgram(instruction.programId) &&
-        isParsedInstruction(instruction) &&
-        ['transfer', 'transferChecked', 'transfer2'].includes(instruction.parsed.type)
-    );
 }
 
 function extractTokenTransferPayload(transaction: ParsedTransactionWithMeta, instruction: TokenTransferInstruction) {
@@ -280,9 +232,3 @@ function getTokenDecimals(
     return tokenBalance?.uiTokenAmount.decimals;
 }
 
-function isTokenProgram(programId: PublicKey): boolean {
-    return (
-        programId.equals(new PublicKey(TOKEN_PROGRAM_ADDRESS)) ||
-        programId.equals(new PublicKey(TOKEN_2022_PROGRAM_ADDRESS))
-    );
-}
