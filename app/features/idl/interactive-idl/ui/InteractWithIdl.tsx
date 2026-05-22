@@ -11,7 +11,7 @@ import { originalIdlAtom, programIdAtom } from '../model/state-atoms';
 import { isEnabled, useInstruction } from '../model/use-instruction';
 import type { InstructionCallParams } from '../model/use-instruction-form';
 import { useMainnetConfirmation } from '../model/use-mainnet-confirmation';
-import { BaseWarningCard } from './BaseWarningCard';
+import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 import { InteractWithIdlView } from './InteractWithIdlView';
 import { MainnetWarningDialog } from './MainnetWarningDialog';
 

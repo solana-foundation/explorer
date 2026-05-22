@@ -1,6 +1,6 @@
 import { Slot } from '@radix-ui/react-slot';
 import { Button } from '@shared/ui/button';
-import { Card } from '@shared/ui/card';
+import { Card } from '@/app/shared/ui/Card';
 import { cn } from '@shared/utils';
 import { cva } from 'class-variance-authority';
 import { ReactNode } from 'react';

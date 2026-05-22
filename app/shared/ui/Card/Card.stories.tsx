@@ -1,19 +1,24 @@
+// Story stub kept at title `Components/Shared/UI/Card` so existing visual-regression
+// screenshots (keyed off the story id) keep matching during the dashkit migration.
+// TODO: After dashkit removal, rename `title` to `Shared/UI/Card` to match the new FSD location
+// at app/shared/ui/Card, and migrate these stories into BaseCard.stories.tsx.
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card';
+import {
+    BaseCard as Card,
+    BaseCardBody as CardContent,
+    BaseCardDescription as CardDescription,
+    BaseCardFooter as CardFooter,
+    BaseCardHeader as CardHeader,
+    BaseCardTitle as CardTitle,
+} from './BaseCard';
 
 type CardVariant = NonNullable<React.ComponentProps<typeof Card>['variant']>;
 
 const variantOptions = ['default', 'narrow', 'tight'] as const satisfies readonly CardVariant[];
 
 const meta: Meta<typeof Card> = {
-    argTypes: {
-        variant: {
-            control: 'select',
-            options: variantOptions,
-        },
-    },
     component: Card,
     parameters: {
         layout: 'centered',
@@ -26,6 +31,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     args: {
+        ui: 'tw',
         variant: 'default',
     },
     play: async ({ canvasElement }) => {
@@ -61,7 +67,7 @@ export const AllVariants: Story = {
                 {variantOptions.map(variant => (
                     <div key={variant} className="e-flex e-flex-col e-gap-2">
                         <h3 className="e-text-sm e-font-semibold e-text-white">{variantLabels[variant]}</h3>
-                        <Card variant={variant}>
+                        <Card ui="tw" variant={variant}>
                             {variant === 'tight' ? (
                                 <>
                                     <h3 className="e-border e-border-neutral-800 e-bg-neutral-900 e-px-6 e-py-4 e-text-[10px] e-font-medium e-uppercase e-tracking-widest e-text-gray-400">
@@ -91,6 +97,7 @@ export const AllVariants: Story = {
 
 export const CompleteCard: Story = {
     args: {
+        ui: 'tw',
         variant: 'default',
     },
     render: args => (

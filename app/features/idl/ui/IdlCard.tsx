@@ -10,7 +10,7 @@ import { AlertTriangle, ExternalLink } from 'react-feather';
 
 import { clusterSlug } from '@/app/utils/cluster';
 
-import { BaseWarningCard } from '../interactive-idl/ui/BaseWarningCard';
+import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 import { IdlVariant, useIdlLastTransactionDate } from '../model/use-idl-last-transaction-date';
 import { IdlInstructionSection } from './IdlInstructionSection';
 import { IdlSection } from './IdlSection';

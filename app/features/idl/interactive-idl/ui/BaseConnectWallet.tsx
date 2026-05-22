@@ -2,7 +2,7 @@ import { truncateAddress } from '@entities/address';
 import WalletIcon from '@img/icons/wallet.svg';
 import { Slot } from '@radix-ui/react-slot';
 import { Button } from '@shared/ui/button';
-import { Card } from '@shared/ui/card';
+import { Card } from '@/app/shared/ui/Card';
 import { cn } from '@shared/utils';
 import { cva } from 'class-variance-authority';
 import Image from 'next/image';

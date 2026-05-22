@@ -5,7 +5,7 @@ import type {
     SupportedIdl,
 } from '@entities/idl';
 import { Button } from '@shared/ui/button';
-import { Card } from '@shared/ui/card';
+import { Card, CardSection } from '@/app/shared/ui/Card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Loader, Send } from 'react-feather';
@@ -149,17 +149,6 @@ export function InteractInstruction({
                 </AccordionContent>
             </AccordionItem>
         </Card>
-    );
-}
-
-function CardSection({ title, children }: { title: string; children: React.ReactNode }) {
-    return (
-        <div className="e-mb-6">
-            <h3 className="e-border e-border-neutral-800 e-bg-neutral-900 e-px-6 e-py-4 e-text-[10px] e-font-medium e-uppercase e-tracking-widest e-text-gray-400">
-                {title}
-            </h3>
-            {children}
-        </div>
     );
 }
 

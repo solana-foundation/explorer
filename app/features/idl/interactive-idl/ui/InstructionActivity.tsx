@@ -1,6 +1,6 @@
 import { useExplorerLink } from '@entities/cluster';
 import { ProgramLogs, TxErrorStatus, TxSuccessStatus } from '@entities/program-logs';
-import { Card } from '@shared/ui/card';
+import { Card } from '@/app/shared/ui/Card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import { ReactNode } from 'react';
 

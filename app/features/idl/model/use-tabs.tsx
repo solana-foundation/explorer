@@ -17,7 +17,7 @@ import { BaseIdlInstructions } from '../formatted-idl/ui/BaseIdlInstructions';
 import { BaseIdlPdas } from '../formatted-idl/ui/BaseIdlPdas';
 import { BaseIdlTypes } from '../formatted-idl/ui/BaseIdlTypes';
 import type { FormattedIdlDataView, IdlDataKeys } from '../formatted-idl/ui/types';
-import { BaseWarningCard } from '../interactive-idl/ui/BaseWarningCard';
+import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 import { InteractWithIdl } from '../interactive-idl/ui/InteractWithIdl';
 
 const IS_INTERACTIVE_IDL_ENABLED = isEnvEnabled(process.env.NEXT_PUBLIC_INTERACTIVE_IDL_ENABLED);
