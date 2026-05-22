@@ -652,6 +652,48 @@ describe('createReceipt', () => {
             });
         });
 
+        it('should produce a single SOL receipt when paired with an ATA createIdempotent (inner rent funding ignored)', async () => {
+            // SOL-only counterpart to the USDC + ATA case below: top-level System.transfer to the
+            // recipient + top-level ATA createIdempotent whose inner System.transfer tops up rent.
+            // Only the intentional payment should surface; the rent CPI must be filtered.
+            const feePayer = Keypair.generate().publicKey;
+            const recipient = Keypair.generate().publicKey;
+            const ataAddress = Keypair.generate().publicKey;
+            const owner = Keypair.generate().publicKey;
+            const mint = Keypair.generate().publicKey;
+            const ataProgram = new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ID.toBase58());
+
+            const tx = buildParsedTransaction({
+                accountKeys: [feePayer, recipient, ataAddress, owner, mint, ataProgram, SystemProgram.programId],
+                innerInstructions: [
+                    buildInnerGroup(1, [
+                        buildSolTransferIx({
+                            destination: ataAddress,
+                            lamports: 1148400,
+                            source: feePayer,
+                        }),
+                    ]),
+                ],
+                instructions: [
+                    buildSolTransferIx({
+                        destination: recipient,
+                        lamports: 1000000,
+                        source: feePayer,
+                    }),
+                    buildPartiallyDecodedIx({ programId: ataProgram }),
+                ],
+            });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
+
+            const receipt = unwrap(await createReceipt(mockSignature));
+
+            expect(receipt.kind).toBe('sol');
+            expect(receipt.total).toMatchObject({ formatted: '0.001', raw: 1000000, unit: 'SOL' });
+            expect(receipt.sender.address).toBe(feePayer.toBase58());
+            expect(receipt.receiver.address).toBe(recipient.toBase58());
+            expect(receipt.transfers).toBeUndefined();
+        });
+
         it('should produce a single USDC receipt when paired with an ATA createIdempotent (inner rent funding ignored)', async () => {
             // Realistic combo: send USDC to a fresh ATA. The ATA program's createIdempotent
             // emits an inner SystemProgram transfer (rent funding) which must NOT be surfaced

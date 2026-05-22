@@ -1,5 +1,6 @@
 import {
     collectTransferInstructions,
+    isRentFundingProgram,
     isSolTransferInstruction,
     type LocatedInstruction,
     type SolTransferInstruction,
@@ -48,11 +49,18 @@ export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta)
 function getSolTransferInstructions(
     transaction: ParsedTransactionWithMeta,
 ): LocatedInstruction<SolTransferInstruction>[] {
-    return collectTransferInstructions(
+    const collected = collectTransferInstructions(
         transaction,
         (instr: ParsedInstruction | PartiallyDecodedInstruction): instr is SolTransferInstruction =>
             isSolTransferInstruction(instr) && !isJitoTransfer(instr),
     );
+    // Drop inner System.transfers whose parent top-level instruction is a known rent-funding
+    // program (e.g. ATA Create): those are bookkeeping CPIs, not user-intended payments.
+    const topLevel = transaction.transaction.message.instructions;
+    return collected.filter(({ innerIndex, topLevelIndex }) => {
+        if (innerIndex === undefined) return true;
+        return !isRentFundingProgram(topLevel[topLevelIndex].programId);
+    });
 }
 
 function buildTransfers(

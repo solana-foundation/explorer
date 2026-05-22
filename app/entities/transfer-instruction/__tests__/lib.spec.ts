@@ -1,15 +1,24 @@
 import { describe, expect, it } from 'vitest';
 
+import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { PublicKey, SystemProgram } from '@solana/web3.js';
+
 import {
     devnetMultiSolMemoTx,
     devnetSingleSolMemoTx,
+    devnetSolWithAtaRentTx,
     devnetTransferWithSeedTx,
     mainnetMultiSolTx,
     mainnetSingleSolTx,
     mainnetSingleUsdcTx,
     surfpoolMultiTransferTx,
 } from '../__fixtures__/load-fixture';
-import { collectTransferInstructions, isSolTransferInstruction, isTokenTransferInstruction } from '../lib';
+import {
+    collectTransferInstructions,
+    isRentFundingProgram,
+    isSolTransferInstruction,
+    isTokenTransferInstruction,
+} from '../lib';
 
 describe('transfer-instruction entity against surfpool multi-transfer tx', () => {
     it('should collect the four inner transferChecked instructions, skipping closeAccount and the top-level wrapper', () => {
@@ -130,6 +139,45 @@ describe('collectTransferInstructions location metadata', () => {
             { innerIndex: 1, topLevelIndex: 2 },
             { innerIndex: 2, topLevelIndex: 2 },
             { innerIndex: 3, topLevelIndex: 2 },
+        ]);
+    });
+});
+
+describe('isRentFundingProgram', () => {
+    it('should recognize the Associated Token Account program', () => {
+        expect(isRentFundingProgram(ASSOCIATED_TOKEN_PROGRAM_ID)).toBe(true);
+    });
+
+    it('should not flag the System program', () => {
+        expect(isRentFundingProgram(SystemProgram.programId)).toBe(false);
+    });
+
+    it('should not flag arbitrary program IDs', () => {
+        expect(isRentFundingProgram(new PublicKey('11111111111111111111111111111112'))).toBe(false);
+    });
+});
+
+describe('collectTransferInstructions against ATA rent-funding fixture', () => {
+    // Real devnet tx: top-level System.transfer (intent) + top-level ATA CreateIdempotent.
+    // The ATA program CPIs an inner System.transfer for rent top-up — that's the spurious
+    // match the receipt layer must filter out.
+    it('should surface both the top-level payment and the inner rent transfer raw', () => {
+        const sol = collectTransferInstructions(devnetSolWithAtaRentTx, isSolTransferInstruction);
+        expect(sol.map(({ topLevelIndex, innerIndex }) => ({ innerIndex, topLevelIndex }))).toEqual([
+            { innerIndex: undefined, topLevelIndex: 0 },
+            { innerIndex: 1, topLevelIndex: 1 },
+        ]);
+    });
+
+    it('should let the receipt layer drop the inner match by inspecting the parent program', () => {
+        const sol = collectTransferInstructions(devnetSolWithAtaRentTx, isSolTransferInstruction);
+        const topLevel = devnetSolWithAtaRentTx.transaction.message.instructions;
+        const filtered = sol.filter(({ innerIndex, topLevelIndex }) => {
+            if (innerIndex === undefined) return true;
+            return !isRentFundingProgram(topLevel[topLevelIndex].programId);
+        });
+        expect(filtered.map(({ topLevelIndex, innerIndex }) => ({ innerIndex, topLevelIndex }))).toEqual([
+            { innerIndex: undefined, topLevelIndex: 0 },
         ]);
     });
 });

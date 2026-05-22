@@ -1,9 +1,18 @@
 import type { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction } from '@solana/web3.js';
-import { SystemProgram } from '@solana/web3.js';
+import { PublicKey, SystemProgram } from '@solana/web3.js';
+import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 import { isTokenProgram } from '@/app/shared/model/token-program';
 
 import type { SolTransferInstruction, TokenTransferInstruction } from './types';
+
+// Programs whose top-level invocation may CPI a System.transfer as rent funding for an
+// account they create. Such inner transfers are bookkeeping, not user-intended payments.
+const RENT_FUNDING_PROGRAMS: PublicKey[] = [ASSOCIATED_TOKEN_PROGRAM_ID];
+
+export function isRentFundingProgram(programId: PublicKey): boolean {
+    return RENT_FUNDING_PROGRAMS.some(p => p.equals(programId));
+}
 
 export type LocatedInstruction<T> = {
     instruction: T;
