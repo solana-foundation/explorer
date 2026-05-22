@@ -10,6 +10,7 @@ import {
     buildParsedTransaction,
     buildPartiallyDecodedIx,
     buildSolTransferIx,
+    buildSolTransferWithSeedIx,
     buildTokenTransferCheckedIx,
 } from '../__fixtures__/builders';
 import { getTokenInfo } from '../../api/get-token-info';
@@ -195,6 +196,74 @@ describe('createReceipt', () => {
                     raw: 1,
                     unit: 'TOKEN',
                 },
+            });
+        });
+
+        it('should create a SOL receipt from a transferWithSeed instruction with the derived source as sender', async () => {
+            const base = PublicKey.unique();
+            const derived = PublicKey.unique();
+            const tx = buildParsedTransaction({
+                accountKeys: [base, derived, RECEIVER.publicKey, SystemProgram.programId],
+                instructions: [
+                    buildSolTransferWithSeedIx({
+                        destination: RECEIVER.publicKey,
+                        lamports: 50000000,
+                        source: derived,
+                        sourceBase: base,
+                        sourceOwner: SystemProgram.programId,
+                        sourceSeed: 'tws-fixture',
+                    }),
+                ],
+            });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.Devnet, transaction: tx });
+
+            const receipt = unwrap(await createReceipt(mockSignature));
+
+            expect(receipt).toMatchObject({
+                kind: 'sol',
+                receiver: { address: RECEIVER.publicKey.toBase58() },
+                sender: { address: derived.toBase58() },
+                total: { formatted: '0.05', raw: 50000000, unit: 'SOL' },
+            });
+        });
+
+        it('should aggregate transfer and transferWithSeed instructions into transfers[]', async () => {
+            const base = PublicKey.unique();
+            const derived = PublicKey.unique();
+            const tx = buildParsedTransaction({
+                accountKeys: [SENDER.publicKey, base, derived, RECEIVER.publicKey, RECEIVER_2.publicKey, SystemProgram.programId],
+                instructions: [
+                    buildSolTransferIx({
+                        destination: RECEIVER.publicKey,
+                        lamports: 80000000,
+                        source: SENDER.publicKey,
+                    }),
+                    buildSolTransferWithSeedIx({
+                        destination: RECEIVER_2.publicKey,
+                        lamports: 50000000,
+                        source: derived,
+                        sourceBase: base,
+                        sourceOwner: SystemProgram.programId,
+                        sourceSeed: 'tws-fixture',
+                    }),
+                ],
+            });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
+
+            const receipt = unwrap(await createReceipt(mockSignature));
+
+            expect(receipt.kind).toBe('sol');
+            expect(receipt.total).toMatchObject({ formatted: '0.13', raw: 130000000, unit: 'SOL' });
+            expect(receipt.transfers).toHaveLength(2);
+            expect(receipt.transfers?.[0]).toMatchObject({
+                amount: { raw: 80000000, unit: 'SOL' },
+                receiver: { address: RECEIVER.publicKey.toBase58() },
+                sender: { address: SENDER.publicKey.toBase58() },
+            });
+            expect(receipt.transfers?.[1]).toMatchObject({
+                amount: { raw: 50000000, unit: 'SOL' },
+                receiver: { address: RECEIVER_2.publicKey.toBase58() },
+                sender: { address: derived.toBase58() },
             });
         });
 

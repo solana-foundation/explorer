@@ -33,6 +33,31 @@ export function buildSolTransferIx(opts: {
     };
 }
 
+export function buildSolTransferWithSeedIx(opts: {
+    source: PublicKey;
+    sourceBase: PublicKey;
+    sourceSeed: string;
+    sourceOwner: PublicKey;
+    destination: PublicKey;
+    lamports: number;
+}): ParsedInstruction {
+    return {
+        parsed: {
+            info: {
+                destination: opts.destination.toBase58(),
+                lamports: opts.lamports,
+                source: opts.source.toBase58(),
+                sourceBase: opts.sourceBase.toBase58(),
+                sourceOwner: opts.sourceOwner.toBase58(),
+                sourceSeed: opts.sourceSeed,
+            },
+            type: 'transferWithSeed',
+        },
+        program: 'system',
+        programId: SYSTEM_PROGRAM,
+    };
+}
+
 export function buildTokenTransferCheckedIx(opts: {
     authority: PublicKey;
     sourceTokenAccount: PublicKey;

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
     devnetMultiSolMemoTx,
     devnetSingleSolMemoTx,
+    devnetTransferWithSeedTx,
     mainnetMultiSolTx,
     mainnetSingleSolTx,
     mainnetSingleUsdcTx,
@@ -91,5 +92,15 @@ describe('transfer-instruction entity against real-world fixtures', () => {
         const sol = collectTransferInstructions(devnetMultiSolMemoTx, isSolTransferInstruction);
         expect(sol).toHaveLength(2);
         expect(sol.map(ix => ix.parsed.info.lamports)).toEqual([100000000, 50000000]);
+    });
+
+    it('should recognize transferWithSeed as a SOL transfer instruction on a devnet tx', () => {
+        const sol = collectTransferInstructions(devnetTransferWithSeedTx, isSolTransferInstruction);
+        expect(sol).toHaveLength(1);
+        expect(sol[0].parsed.type).toBe('transferWithSeed');
+        expect(sol[0].parsed.info.lamports).toBe(50000000);
+        if (sol[0].parsed.type === 'transferWithSeed') {
+            expect(sol[0].parsed.info.sourceSeed).toBe('tws-fixture');
+        }
     });
 });
