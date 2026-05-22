@@ -115,9 +115,9 @@ describe('collectTransferInstructions location metadata', () => {
         // mainnetMultiSolTx top-level layout: [advanceNonce, ComputeBudget, ComputeBudget, transfer, transfer].
         // The two transfers sit at topLevelIndex 3 and 4; neither came from inner instructions.
         const sol = collectTransferInstructions(mainnetMultiSolTx, isSolTransferInstruction);
-        expect(sol.map(({ topLevelIndex, innerIndex }) => ({ topLevelIndex, innerIndex }))).toEqual([
-            { topLevelIndex: 3, innerIndex: undefined },
-            { topLevelIndex: 4, innerIndex: undefined },
+        expect(sol.map(({ topLevelIndex, innerIndex }) => ({ innerIndex, topLevelIndex }))).toEqual([
+            { innerIndex: undefined, topLevelIndex: 3 },
+            { innerIndex: undefined, topLevelIndex: 4 },
         ]);
     });
 
@@ -125,11 +125,11 @@ describe('collectTransferInstructions location metadata', () => {
         // Surfpool wrapper emits 4 transferChecked + 1 closeAccount under top-level index 2.
         const found = collectTransferInstructions(surfpoolMultiTransferTx, isTokenTransferInstruction);
 
-        expect(found.map(({ topLevelIndex, innerIndex }) => ({ topLevelIndex, innerIndex }))).toEqual([
-            { topLevelIndex: 2, innerIndex: 0 },
-            { topLevelIndex: 2, innerIndex: 1 },
-            { topLevelIndex: 2, innerIndex: 2 },
-            { topLevelIndex: 2, innerIndex: 3 },
+        expect(found.map(({ topLevelIndex, innerIndex }) => ({ innerIndex, topLevelIndex }))).toEqual([
+            { innerIndex: 0, topLevelIndex: 2 },
+            { innerIndex: 1, topLevelIndex: 2 },
+            { innerIndex: 2, topLevelIndex: 2 },
+            { innerIndex: 3, topLevelIndex: 2 },
         ]);
     });
 });

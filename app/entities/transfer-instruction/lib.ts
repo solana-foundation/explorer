@@ -31,7 +31,7 @@ export function collectTransferInstructions<T extends ParsedInstruction | Partia
         if (isMatch(instruction)) result.push({ instruction, topLevelIndex });
         const inners = innerByIndex.get(topLevelIndex) ?? [];
         inners.forEach((inner, innerIndex) => {
-            if (isMatch(inner)) result.push({ instruction: inner, innerIndex, topLevelIndex });
+            if (isMatch(inner)) result.push({ innerIndex, instruction: inner, topLevelIndex });
         });
     });
     return result;
