@@ -171,8 +171,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const priceResult = useTokenPrice(receiptMint ?? NATIVE_MINT.toBase58());
     const isPriceLoading = priceResult?.status === PriceStatus.Loading;
     const amount = getReceiptAmount(receipt);
-    const usdValue =
-        priceResult?.price != null ? formatUsdValue(amount, priceResult.price, USD_FALLBACK) : undefined;
+    const usdValue = priceResult?.price != null ? formatUsdValue(amount, priceResult.price, USD_FALLBACK) : undefined;
 
     const downloadCsv = useCallback(async () => {
         try {

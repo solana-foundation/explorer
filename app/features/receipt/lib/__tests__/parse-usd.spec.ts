@@ -45,12 +45,9 @@ describe('prorateUsd', () => {
         [Infinity, 2, 100],
         [1, 2, Infinity],
         [-Infinity, 2, 100],
-    ])(
-        'should return null for invalid results (transfer=%s, total=%s, usd=%s)',
-        (transferRaw, totalRaw, totalUsd) => {
-            expect(prorateUsd(transferRaw, totalRaw, totalUsd)).toBeNull();
-        },
-    );
+    ])('should return null for invalid results (transfer=%s, total=%s, usd=%s)', (transferRaw, totalRaw, totalUsd) => {
+        expect(prorateUsd(transferRaw, totalRaw, totalUsd)).toBeNull();
+    });
 
     it('should return the orFallback override for invalid input', () => {
         expect(prorateUsd(1, 2, NaN, USD_FALLBACK)).toBe('~0.00 USD');
