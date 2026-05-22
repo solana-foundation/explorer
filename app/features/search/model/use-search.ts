@@ -10,12 +10,15 @@ export function useSearch(query: string) {
     const { cluster, clusterInfo } = useCluster();
     const trimmed = query.trim();
 
+    const genesisHash = clusterInfo?.genesisHash;
+
     return useSWR(
-        trimmed.length > 0 ? ['search', trimmed, cluster] : null,
+        trimmed.length > 0 ? ['search', trimmed, cluster, genesisHash] : null,
         () =>
             search(searchProviders, trimmed, {
                 cluster,
                 currentEpoch: clusterInfo?.epochInfo.epoch,
+                genesisHash,
             }),
         {
             keepPreviousData: false,
@@ -60,7 +63,9 @@ export async function resolveProviders(
     const settled = await Promise.allSettled(providers.map(async p => p.search(query, ctx)));
     return settled.flatMap((result, i) => {
         if (result.status === 'rejected') {
-            Logger.error(new Error(`Failed to run ${providers[i].name} search provider`, { cause: result.reason }));
+            Logger.error(new Error(`Failed to run ${providers[i].name} search provider`, { cause: result.reason }), {
+                sentry: true,
+            });
             return [];
         }
         return result.value;

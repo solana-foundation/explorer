@@ -30,10 +30,6 @@ export const errors = {
     504: gatewayTimeoutError,
 };
 
-export function matchAbortError(error: unknown): error is Error {
-    return Boolean(error instanceof Error && error.name === 'AbortError');
-}
-
 export function matchMaxSizeError(error: unknown): error is Error {
     // eslint-disable-next-line no-restricted-syntax -- pattern matching for error message detection
     return Boolean(error instanceof Error && error.message.match(/over limit:/));
@@ -41,4 +37,8 @@ export function matchMaxSizeError(error: unknown): error is Error {
 
 export function matchTimeoutError(error: unknown): error is Error {
     return Boolean(error instanceof Error && error.name === 'TimeoutError');
+}
+
+export function matchAbortError(error: unknown): error is Error {
+    return Boolean(error instanceof Error && error.name === 'AbortError');
 }
