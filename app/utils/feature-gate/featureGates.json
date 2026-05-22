@@ -1764,7 +1764,7 @@
     "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": 958,
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1074,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": ""
@@ -1836,6 +1836,172 @@
     "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": 947,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "AnAP9zPV4KL7czAPQbFhpDKV2tx7g4UGNbK9wvXwjaRo",
+    "title": "SIMD-0387: BLS Pubkey Management in Vote Account",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0387-bls-pubkey-management-in-vote-account.md"
+    ],
+    "simds": [
+      "0387"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.1.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v1.0"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "B8JJXCy5amZyWG9r7EnUYLwzXSXTxG7GZ1qZ1qggo83g",
+    "title": "SIMD-0500: Disable deployment of SBPF v0, v1 and v2 programs",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0500-disable-deployment-of-sbpf-v0-v1-v2.md"
+    ],
+    "simds": [
+      "0500"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.1.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v1.0"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "YbbRLkvenrocjGPGyoQE4wjnvYzTgfsk38NFmcYK7a5",
+    "title": "SIMD-0431: Loader V3 minimum extend program size",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0431-minimum-extend-program-size.md"
+    ],
+    "simds": [
+      "0431"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.1.0-beta.0"
+    ],
+    "min_fd_versions": [],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "s512oDwgx8hjMnaQjXfqqrZroVj4HvC6TkN3iSSWXCh",
+    "title": "SIMD-0512: SHA512 Syscall",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0512-sha512-syscall.md"
+    ],
+    "simds": [
+      "0512"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.1.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v1.0"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "Eg7tXEwMZzS98xaZ1YHUbdRHsaYZiCsSaR6sKgxreoaj",
+    "title": "SIMD-0291: Commission rate in basis points",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0291-commission-rate-in-basis-points.md"
+    ],
+    "simds": [
+      "0291"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.1.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v1.0"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "disCA4efguFL6Wqa4pGdG7jpjC7C5uiKzKnhEBqchBe",
+    "title": "SIMD-0337: Markers for Alpenglow Fast Leader Handover, DATA_COMPLETE_SHRED placement rules",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0337-parent-ready-update-marker.md"
+    ],
+    "simds": [
+      "0337"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.1.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v1.0"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
+    "devnet_activation_epoch": null,
+    "comms_required": null,
+    "mainnet_activation_epoch": null,
+    "description": ""
+  },
+  {
+    "key": "ptr9umikaeAS7ZBBp2fsfRhie16F1V2jCKA2y6gXNAK",
+    "title": "SIMD-0449: Direct Account Pointers in Program Input",
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0449-direct-account-pointers-in-program-input.md"
+    ],
+    "simds": [
+      "0449"
+    ],
+    "owners": [],
+    "min_agave_versions": [
+      "v4.1.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v1.0"
+    ],
+    "min_jito_versions": [],
+    "planned_testnet_order": null,
+    "testnet_activation_epoch": null,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
