@@ -1,45 +1,36 @@
-/**
- * Formats an amount × price product as `~X.XX USD` with 2-decimal precision
- * and thousands-separators. Returns `~0.00 USD` for NaN or negative results,
- * so callers can render the string unconditionally without branching.
- */
-export function formatUsdValue(amount: number, price: number): string {
+export const USD_FALLBACK = '~0.00 USD';
+
+export function formatUsdValue(amount: number, price: number): string | null;
+export function formatUsdValue(amount: number, price: number, orFallback: string): string;
+export function formatUsdValue(amount: number, price: number, orFallback?: string): string | null {
     const value = amount * price;
-    if (isNaN(value) || value < 0) return '~0.00 USD';
+    if (!Number.isFinite(value) || value < 0) return orFallback ?? null;
     return `~${value.toLocaleString('en-US', {
         maximumFractionDigits: 2,
         minimumFractionDigits: 2,
     })} USD`;
 }
 
-/**
- * Parses a formatted USD string into a number, stripping the `~` approximation
- * marker, `$`, comma thousands-separators, and the trailing ` USD` suffix
- * (e.g. `"~1,234.56 USD"` → `1234.56`, `"$50.00"` → `50`).
- */
 export function parseUsdNumber(usdValue: string): number | null {
-    // eslint-disable-next-line no-restricted-syntax -- regex is the clearest way to strip currency formatting chars
-    const n = parseFloat(usdValue.replace(/[~$,]|\s*USD\s*$/gi, ''));
+    let s = usdValue.trim();
+    if (s.toLowerCase().endsWith('usd')) s = s.slice(0, -3).trimEnd();
+    if (s.startsWith('~')) s = s.slice(1);
+    if (s.startsWith('$')) s = s.slice(1);
+    const n = parseFloat(s.split(',').join(''));
     return Number.isFinite(n) ? n : null;
 }
 
-/**
- * Returns this transfer's share of the receipt's total USD value, formatted as
- * `"~X.XX USD"` (2 decimal places, thousands-separators) — matching
- * `formatUsdValue`'s output shape, including its `~0.00 USD` clamp for
- * NaN/negative results.
- *
- * The share is proportional: `(transferRaw / totalRaw) * totalUsd`. Use this
- * when a single aggregate USD figure (e.g. from Jupiter) must be split across
- * multiple transfers within the same receipt.
- *
- * Returns an empty string when `totalRaw` is `0` (the division would yield
- * `Infinity`/`NaN`) — callers should treat `""` as "no proration available"
- * and render nothing.
- */
-export function prorateUsd(transferRaw: number, totalRaw: number, totalUsd: number): string {
+// Returns `''` for div-by-zero (no proration possible) — distinct from invalid input.
+export function prorateUsd(transferRaw: number, totalRaw: number, totalUsd: number): string | null;
+export function prorateUsd(transferRaw: number, totalRaw: number, totalUsd: number, orFallback: string): string;
+export function prorateUsd(
+    transferRaw: number,
+    totalRaw: number,
+    totalUsd: number,
+    orFallback?: string,
+): string | null {
     if (totalRaw === 0) return '';
     const value = (transferRaw / totalRaw) * totalUsd;
-    if (isNaN(value) || value < 0) return '~0.00 USD';
+    if (!Number.isFinite(value) || value < 0) return orFallback ?? null;
     return `~${value.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 })} USD`;
 }

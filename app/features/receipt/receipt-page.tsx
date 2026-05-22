@@ -24,7 +24,7 @@ import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app
 
 import { generateReceiptCsv } from './lib/generate-receipt-csv';
 import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
-import { formatUsdValue } from './lib/parse-usd';
+import { formatUsdValue, USD_FALLBACK } from './lib/parse-usd';
 import { usePrimaryDomain } from './lib/use-primary-domain';
 import { extractReceiptData, type ReceiptUnavailabilityReason } from './model/create-receipt';
 import { PriceStatus, useTokenPrice } from './model/use-price';
@@ -171,7 +171,8 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const priceResult = useTokenPrice(receiptMint ?? NATIVE_MINT.toBase58());
     const isPriceLoading = priceResult?.status === PriceStatus.Loading;
     const amount = getReceiptAmount(receipt);
-    const usdValue = priceResult?.price != null ? formatUsdValue(amount, priceResult.price) : undefined;
+    const usdValue =
+        priceResult?.price != null ? formatUsdValue(amount, priceResult.price, USD_FALLBACK) : undefined;
 
     const downloadCsv = useCallback(async () => {
         try {

@@ -136,14 +136,14 @@ describe('generateSingleTransferPdf', () => {
         expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
     });
 
-    it('should save the PDF when the QR code generation fails', async () => {
+    it('should propagate the error when the QR code generation fails', async () => {
         const qrError = new Error('QR generation failed');
         mockToDataURL.mockRejectedValueOnce(qrError);
 
         const deps = await loadPdfDeps(mockOnError);
-        await generateSingleTransferPdf(deps, SOL_RECEIPT, PDF_OPTS);
-
-        expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
-        expect(mockOnError).toHaveBeenCalledWith(qrError);
+        await expect(generateSingleTransferPdf(deps, SOL_RECEIPT, PDF_OPTS)).rejects.toThrow(
+            'Failed to render QR code in receipt footer',
+        );
+        expect(mockSave).not.toHaveBeenCalled();
     });
 });

@@ -285,15 +285,15 @@ describe('generateMultiTransferPdf', () => {
         expect(allText).not.toContain('$');
     });
 
-    it('should handle QR code generation failure gracefully', async () => {
+    it('should propagate the error when QR code generation fails', async () => {
         const qrError = new Error('QR generation failed');
         mockToDataURL.mockRejectedValueOnce(qrError);
         const deps = await loadPdfDeps(mockOnError);
 
-        await generateMultiTransferPdf(deps, RECEIPT, PDF_OPTS);
-
-        expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
-        expect(mockOnError).toHaveBeenCalledWith(qrError);
+        await expect(generateMultiTransferPdf(deps, RECEIPT, PDF_OPTS)).rejects.toThrow(
+            'Failed to render QR code in receipt footer',
+        );
+        expect(mockSave).not.toHaveBeenCalled();
     });
 
     describe('error paths', () => {
@@ -357,7 +357,7 @@ describe('generateMultiTransferPdf', () => {
             }
         });
 
-        it('should save the PDF even when logo, warning icon, and QR code all fail', async () => {
+        it('should save the PDF when logo and warning icon fail but QR succeeds', async () => {
             const transfers = Array.from({ length: 20 }, (_, i) => ({
                 amount: { formatted: '0.1', raw: 100000000, unit: 'SOL' },
                 receiver: { address: `Recv${i}`.padEnd(43, 'x'), truncated: `R${i}` },
@@ -368,8 +368,6 @@ describe('generateMultiTransferPdf', () => {
                 total: { ...RECEIPT.total, raw: 2000000000 },
                 transfers,
             };
-            const qrError = new Error('QR generation failed');
-            mockToDataURL.mockRejectedValue(qrError);
 
             const { error: svgError, restore } = breakSvgConversion();
             try {
@@ -379,10 +377,8 @@ describe('generateMultiTransferPdf', () => {
                 expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
                 const reported = mockOnError.mock.calls.map(([e]) => e);
                 expect(reported).toContain(svgError);
-                expect(reported).toContain(qrError);
             } finally {
                 restore();
-                mockToDataURL.mockResolvedValue('data:image/png;base64,qrcode');
             }
         });
     });

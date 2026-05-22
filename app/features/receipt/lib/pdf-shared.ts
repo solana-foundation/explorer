@@ -454,7 +454,8 @@ export async function drawPageFooter(
             align: 'center',
         });
     } catch (error) {
-        deps.onError(error);
+        // QR is a convenience for "verify on-chain"; the receipt body has all the data, so degrade gracefully and log with context rather than abort the whole PDF.
+        deps.onError(new Error('Failed to render QR code in receipt footer', { cause: error }));
     }
 
     const logoY = y + disclaimerLines.length * DISCLAIMER_LINE_HEIGHT + DISCLAIMER_TO_LOGO_GAP;

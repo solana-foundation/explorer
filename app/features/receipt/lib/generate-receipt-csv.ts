@@ -3,7 +3,7 @@ import { writeToString } from '@fast-csv/format';
 import { getReceiptMint } from '@/app/entities/token-receipt';
 
 import type { FormattedReceipt } from '../types';
-import { parseUsdNumber, prorateUsd } from './parse-usd';
+import { parseUsdNumber, prorateUsd, USD_FALLBACK } from './parse-usd';
 
 const CSV_HEADERS = [
     'Date (UTC)',
@@ -42,7 +42,7 @@ export function buildReceiptCsvRows(receipt: FormattedReceipt, signature: string
             t.amount.formatted,
             unit,
             mint ?? '',
-            totalUsd !== null ? prorateUsd(t.amount.raw, receipt.total.raw, totalUsd) : '',
+            totalUsd !== null ? prorateUsd(t.amount.raw, receipt.total.raw, totalUsd, USD_FALLBACK) : '',
             '',
             '',
         ]);

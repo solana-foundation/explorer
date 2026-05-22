@@ -1,4 +1,4 @@
-import { parseUsdNumber, prorateUsd } from '../parse-usd';
+import { parseUsdNumber, prorateUsd, USD_FALLBACK } from '../parse-usd';
 
 describe('parseUsdNumber', () => {
     it.each<[string, number]>([
@@ -42,10 +42,25 @@ describe('prorateUsd', () => {
         [NaN, 2, 100],
         [-1, 2, 100],
         [1, 2, -100],
+        [Infinity, 2, 100],
+        [1, 2, Infinity],
+        [-Infinity, 2, 100],
     ])(
-        'should clamp NaN/negative results to ~0.00 USD (transfer=%s, total=%s, usd=%s)',
+        'should return null for invalid results (transfer=%s, total=%s, usd=%s)',
         (transferRaw, totalRaw, totalUsd) => {
-            expect(prorateUsd(transferRaw, totalRaw, totalUsd)).toBe('~0.00 USD');
+            expect(prorateUsd(transferRaw, totalRaw, totalUsd)).toBeNull();
         },
     );
+
+    it('should return the orFallback override for invalid input', () => {
+        expect(prorateUsd(1, 2, NaN, USD_FALLBACK)).toBe('~0.00 USD');
+    });
+
+    it('should accept a custom orFallback string', () => {
+        expect(prorateUsd(1, 2, NaN, '—')).toBe('—');
+    });
+
+    it('should ignore orFallback for valid input', () => {
+        expect(prorateUsd(1, 2, 100, 'UNUSED')).toBe('~50.00 USD');
+    });
 });
