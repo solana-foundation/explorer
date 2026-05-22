@@ -100,6 +100,7 @@ describe('AccountHeader', () => {
         });
 
         it('should render with PMP security.txt data including logo and version for non-trusted program', () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'false');
             const pmpSecurityTxt = createPmpSecurityTxt();
             vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
 
@@ -124,6 +125,7 @@ describe('AccountHeader', () => {
         });
 
         it('should render with trusted program name and PMP security.txt logo/version for trusted program', () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'false');
             const pmpSecurityTxt = createPmpSecurityTxt();
             vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
 

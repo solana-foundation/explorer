@@ -1,0 +1,168 @@
+import { Logger } from '@/app/shared/lib/logger';
+
+import {
+    accessDeniedError,
+    badGatewayError,
+    errors,
+    matchAbortError,
+    matchMaxSizeError,
+    matchTimeoutError,
+    StatusError,
+    unsupportedMediaError,
+} from './errors';
+import { checkURLForPrivateIP, isHTTPProtocol } from './ip';
+import { processBinary, processJson, processTextAsJson } from './processors';
+import { readBodyWithLimit } from './read-body-with-limit';
+
+// Content-type matchers
+export const matchJson = (header?: string | null) => header?.includes('application/json');
+export const matchTextPlain = (header?: string | null) => header?.includes('text/plain');
+export const matchImage = (header?: string | null) => header?.includes('image/');
+export const matchJsonContent = (header?: string | null) => matchJson(header) || matchTextPlain(header);
+
+// Redirects are followed manually so each hop's hostname can be re-validated
+// against private IP ranges. This closes an SSRF bypass where the initial
+// hostname resolves to a public IP but the upstream returns a 3xx pointing at
+// an internal address (e.g. 169.254.169.254 AWS metadata endpoint). Many
+// legitimate metadata hosts (Arweave, CDNs) use 302s, so blocking all
+// redirects is too aggressive — instead we follow up to MAX_REDIRECTS hops
+// with per-hop validation.
+const MAX_REDIRECTS = 3;
+
+type FetchResourceResult = Awaited<
+    ReturnType<typeof processJson> | ReturnType<typeof processTextAsJson> | ReturnType<typeof processBinary>
+>;
+
+type HopResult = { kind: 'done'; value: FetchResourceResult } | { kind: 'redirect'; location: string };
+
+export async function fetchResource(
+    uri: string,
+    headers: Headers,
+    timeout: number,
+    size: number,
+): Promise<FetchResourceResult> {
+    let currentUrl = new URL(uri);
+    const visited = new Set<string>([currentUrl.href]);
+
+    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+        const outcome = await executeHop(currentUrl, headers, timeout, size);
+        if (outcome.kind === 'done') return outcome.value;
+
+        currentUrl = await validateRedirectTarget(outcome.location, currentUrl);
+
+        if (visited.has(currentUrl.href)) {
+            Logger.warn('[api:metadata-proxy] Redirect loop detected', { url: currentUrl.href });
+            throw badGatewayError;
+        }
+        visited.add(currentUrl.href);
+    }
+
+    Logger.warn('[api:metadata-proxy] Too many redirects', { url: currentUrl.href });
+    throw badGatewayError;
+}
+
+async function executeHop(url: URL, headers: Headers, timeout: number, size: number): Promise<HopResult> {
+    const response = await doFetch(url, headers, timeout);
+
+    if (isRedirect(response)) {
+        return extractRedirect(response, url);
+    }
+
+    if (!response.ok) {
+        Logger.warn('[api:metadata-proxy] Upstream returned error', { status: response.status, url: url.href });
+        throw badGatewayError;
+    }
+
+    return { kind: 'done', value: await processResponse(response, size) };
+}
+
+async function validateRedirectTarget(location: string, currentUrl: URL): Promise<URL> {
+    const nextUrl = new URL(location, currentUrl);
+
+    if (!isHTTPProtocol(nextUrl)) {
+        Logger.warn('[api:metadata-proxy] Redirect to non-HTTP protocol blocked', { location, url: currentUrl.href });
+        throw accessDeniedError;
+    }
+
+    if (await checkURLForPrivateIP(nextUrl)) {
+        Logger.warn('[api:metadata-proxy] Redirect to private IP blocked (SSRF protection)', {
+            location,
+            url: currentUrl.href,
+        });
+        throw accessDeniedError;
+    }
+
+    return nextUrl;
+}
+
+function isRedirect(response: Response): boolean {
+    return response.status >= 300 && response.status < 400;
+}
+
+function extractRedirect(response: Response, url: URL): HopResult & { kind: 'redirect' } {
+    const location = response.headers.get('location');
+    if (!location) {
+        Logger.warn('[api:metadata-proxy] Redirect without Location header', {
+            status: response.status,
+            url: url.href,
+        });
+        throw badGatewayError;
+    }
+    return { kind: 'redirect', location };
+}
+
+async function doFetch(url: URL, headers: Headers, timeout: number): Promise<Response> {
+    try {
+        return await fetch(url.href, {
+            headers,
+            redirect: 'manual',
+            signal: AbortSignal.timeout(timeout),
+        });
+    } catch (e) {
+        throw handleFetchError(e, url);
+    }
+}
+
+async function processResponse(response: Response, size: number): Promise<FetchResourceResult> {
+    // Pre-check Content-Length when present so oversize bodies fail fast.
+    // A malformed header (e.g. "abc") parses to NaN; ignore it and fall through
+    // to readBodyWithLimit, which enforces the limit on the actual byte count.
+    const contentLength = Number(response.headers.get('content-length'));
+    if (Number.isFinite(contentLength) && contentLength > size) {
+        await response.body?.cancel();
+        throw errors[413];
+    }
+
+    let buffered: ArrayBuffer;
+    try {
+        buffered = await readBodyWithLimit(response, size);
+    } catch (e) {
+        if (matchMaxSizeError(e)) throw errors[413];
+        throw e;
+    }
+    // Re-wrap so processors keep using `.arrayBuffer()` / `.json()` / `.text()`.
+    const rewrapped = new Response(buffered, { headers: response.headers, status: response.status });
+
+    const contentType = response.headers.get('content-type');
+    if (matchJson(contentType)) return processJson(rewrapped);
+    if (matchTextPlain(contentType)) return processTextAsJson(rewrapped);
+    if (matchImage(contentType)) return processBinary(rewrapped);
+
+    throw unsupportedMediaError;
+}
+
+function handleFetchError(e: unknown, url: URL): StatusError {
+    const error = e instanceof Error ? e : new Error('Cannot fetch resource');
+    if (!(e instanceof Error)) {
+        Logger.debug('[api:metadata-proxy] Failed to fetch resource', { error: e });
+    }
+
+    if (error instanceof StatusError) return error;
+    if (matchTimeoutError(error)) return errors[504];
+    if (matchMaxSizeError(error)) return errors[413];
+    if (matchAbortError(error)) return errors[504];
+
+    // Reported to Sentry so we can gauge whether network failures are common.
+    Logger.warn('[api:metadata-proxy] Fetch failed', { sentry: true, url: url.href });
+    return errors[500];
+}

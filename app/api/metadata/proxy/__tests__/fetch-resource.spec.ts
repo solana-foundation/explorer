@@ -1,9 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { fetchResource } from '../feature';
+import { checkURLForPrivateIP } from '../feature/ip';
 
 const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
+
+vi.mock('../feature/ip', async () => {
+    const actual = await vi.importActual('../feature/ip');
+    return {
+        ...actual,
+        checkURLForPrivateIP: vi.fn(),
+    };
+});
 
 function mockJsonResponseOnce(data: unknown, contentType = 'application/json') {
     fetchMock.mockResolvedValueOnce(
@@ -15,6 +26,10 @@ function mockJsonResponseOnce(data: unknown, contentType = 'application/json') {
 
 function mockResponseOnce(body: BodyInit | null, init?: ResponseInit) {
     fetchMock.mockResolvedValueOnce(new Response(body, init));
+}
+
+function mockRedirectOnce(location: string, status = 302) {
+    fetchMock.mockResolvedValueOnce(new Response(null, { headers: { Location: location }, status }));
 }
 
 function mockRejectOnce<T extends Error>(error: T) {
@@ -34,7 +49,7 @@ describe('fetchResource', () => {
 
         const resource = await fetchResource(uri, headers, 100, 100);
 
-        expect(fetchMock).toHaveBeenCalledWith(uri, expect.anything());
+        expect(fetchMock).toHaveBeenCalledWith(uri, expect.objectContaining({ redirect: 'manual' }));
         expect(resource.data).toEqual({});
     });
 
@@ -68,8 +83,6 @@ describe('fetchResource', () => {
     });
 
     it('should throw exception when streamed body exceeds limit without Content-Length', async () => {
-        // Chunked response with no Content-Length — only the streaming counter in
-        // readBodyWithLimit can catch the overflow.
         const stream = new ReadableStream<Uint8Array>({
             start(controller) {
                 controller.enqueue(new Uint8Array(60));
@@ -113,12 +126,8 @@ describe('fetchResource', () => {
     it('should handle unexpected result', async () => {
         fetchMock.mockRejectedValueOnce({ data: 'unexpected exception' });
 
-        const fn = () => {
-            return fetchResource(uri, headers, 100, 100);
-        };
-
         try {
-            await fn();
+            await fetchResource(uri, headers, 100, 100);
         } catch (e: unknown) {
             const err = e as { message: string; status: number };
             expect(err.message).toEqual('General Error');
@@ -127,11 +136,84 @@ describe('fetchResource', () => {
     });
 
     it('should handle malformed JSON response gracefully', async () => {
-        // Malformed JSON with a JSON content-type → 415 Unsupported Media Type.
         mockResponseOnce('<html>not json</html>', {
             headers: { 'Content-Type': 'application/json' },
         });
 
         await expect(fetchResource(uri, headers, 1000, 1000)).rejects.toThrowError('Unsupported Media Type');
+    });
+
+    it('should warn to Sentry when fetch fails with a general error', async () => {
+        mockRejectOnce(new Error('connection refused'));
+
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrow();
+
+        expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Fetch failed', {
+            sentry: true,
+            url: uri,
+        });
+    });
+
+    it('should throw Bad Gateway when upstream returns a non-2xx status', async () => {
+        mockResponseOnce(null, { headers: { 'Content-Type': 'text/html' }, status: 403 });
+
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Bad Gateway');
+
+        expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Upstream returned error', {
+            status: 403,
+            url: uri,
+        });
+    });
+
+    it('should follow redirect when target resolves to a public IP', async () => {
+        mockRedirectOnce('http://cdn.hello.world/data.json');
+        vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(false);
+        mockJsonResponseOnce({ redirected: true });
+
+        const result = await fetchResource(uri, headers, 100, 1000);
+
+        expect(result.data).toEqual({ redirected: true });
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should block redirect to a private IP (SSRF protection)', async () => {
+        mockRedirectOnce('http://169.254.169.254/latest/meta-data/');
+        vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(true);
+
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Access Denied');
+    });
+
+    it('should throw Bad Gateway when redirect has no Location header', async () => {
+        mockResponseOnce(null, { status: 302 });
+
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Bad Gateway');
+    });
+
+    it('should throw Bad Gateway after too many redirects', async () => {
+        // 4 consecutive redirects (exceeds MAX_REDIRECTS of 3)
+        for (let i = 0; i < 4; i++) {
+            mockRedirectOnce(`http://hop${i}.example.com/`);
+            vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(false);
+        }
+
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Bad Gateway');
+    });
+
+    it('should throw Bad Gateway when a redirect loop is detected', async () => {
+        mockRedirectOnce('http://b.example.com/');
+        vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(false);
+        mockRedirectOnce(uri);
+        vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(false);
+
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Bad Gateway');
+
+        // Should bail after 2 fetches, not exhaust MAX_REDIRECTS
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should block redirect to non-HTTP protocol', async () => {
+        mockRedirectOnce('file:///etc/passwd');
+
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Access Denied');
     });
 });

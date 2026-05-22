@@ -1,140 +1,253 @@
-import _dns from 'dns';
+import { getProxiedUri } from '@features/metadata/utils';
 import { vi } from 'vitest';
 
 import { GET } from '../route';
 
-const dns = _dns.promises;
+const { dnsLookupMock, fetchMock } = vi.hoisted(() => ({
+    dnsLookupMock: vi.fn(),
+    fetchMock: vi.fn(),
+}));
 
-function setEnvironment(key: string, value: string) {
-    Object.assign(process.env, { ...process.env, [key]: value });
-}
-
-const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
 
 vi.mock('dns', async () => {
     const originalDns = await vi.importActual('dns');
-    const lookupFn = vi.fn();
     return {
         ...originalDns,
         default: {
             promises: {
-                lookup: lookupFn,
+                lookup: dnsLookupMock,
             },
         },
         promises: {
-            lookup: lookupFn,
+            lookup: dnsLookupMock,
         },
     };
 });
 
-function mockFileResponseOnce(data: unknown, headers: Record<string, string>) {
-    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(data), { headers }));
-}
-
-const ORIGIN = 'http://explorer.solana.com';
-const EMPTY_PARAMS = Promise.resolve({});
-
-function requestFactory(uri?: string): {
-    nextParams: { params: Promise<{ network: string }> };
-    request: Request;
-} {
-    const params = new URLSearchParams({ uri: uri ?? '' });
-    const request = new Request(`${ORIGIN}/api/metadata/devnet?${params.toString()}`);
-    const nextParams = { params: Promise.resolve({ network: 'devnet' }) };
-
-    return { nextParams, request };
-}
+const ORIGIN = 'http://localhost:3000';
+const ROUTE = `${ORIGIN}/api/metadata/proxy`;
 
 describe('Metadata Proxy Route', () => {
-    const validUrl = encodeURIComponent('http://external.resource/file.json');
-    const unsupportedUri = encodeURIComponent('ftp://unsupported.resource/file.json');
-
     afterEach(() => {
         vi.clearAllMocks();
+        vi.unstubAllEnvs();
     });
 
-    it('should return status when disabled', async () => {
-        setEnvironment('NEXT_PUBLIC_METADATA_ENABLED', 'false');
+    describe('feature toggle', () => {
+        it('should return 404 when proxy is disabled', async () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'false');
 
-        const { request, nextParams } = requestFactory();
-        const response = await GET(request, nextParams);
-        expect(response.status).toBe(404);
+            // Bypass getProxiedUri — it returns the raw URI when disabled,
+            // so we hit the route directly to test its own feature toggle.
+            const request = new Request(`${ROUTE}?uri=http%3A%2F%2Fexample.com`);
+            const response = await GET(request);
+            expect(response.status).toBe(404);
+        });
     });
 
-    it('should return 400 for URIs with unsupported protocols', async () => {
-        setEnvironment('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+    describe('URI validation', () => {
+        it('should return 400 when uri param is missing', async () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
 
-        const request = requestFactory(unsupportedUri);
-        const response = await GET(request.request, request.nextParams);
-        expect(response.status).toBe(400);
+            const request = new Request(ROUTE);
+            const response = await GET(request);
+            expect(response.status).toBe(400);
+        });
+
+        it('should return 400 for malformed URI', async () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+
+            const request = new Request(`${ROUTE}?uri=not-a-valid-url`);
+            const response = await GET(request);
+            expect(response.status).toBe(400);
+        });
+
+        it('should return 400 for unsupported protocols', async () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+
+            // Route receives the URI directly — the client would never proxy ftp://,
+            // but the route must still reject it.
+            const request = new Request(`${ROUTE}?uri=ftp%3A%2F%2Fexample.com%2Ffile.json`);
+            const response = await GET(request);
+            expect(response.status).toBe(400);
+        });
+
+        it('should return 403 when hostname resolves to a private IP', async () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+            dnsLookupMock.mockResolvedValueOnce([{ address: '127.0.0.1' }]);
+
+            const request = new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`);
+            const response = await GET(request);
+            expect(response.status).toBe(403);
+        });
     });
 
-    it('should return proper status upon processing data', async () => {
-        setEnvironment('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+    describe('SSRF protection', () => {
+        it.each([301, 302, 307, 308])(
+            'should return 403 when upstream %i redirect targets a private IP',
+            async status => {
+                vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+                // Initial URL resolves to a public IP
+                dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+                fetchMock.mockResolvedValueOnce(
+                    new Response(null, {
+                        headers: { Location: 'http://169.254.169.254/latest/meta-data/' },
+                        status,
+                    }),
+                );
+                // Redirect target resolves to a private IP — blocked
+                dnsLookupMock.mockResolvedValueOnce([{ address: '169.254.169.254' }]);
 
-        const { request, nextParams } = requestFactory();
-        const response = await GET(request, nextParams);
-        expect(response.status).toBe(400);
-
-        // fail on encoded incorrectly input
-        const request2 = requestFactory('https://example.com/%E0%A4%A');
-        expect((await GET(request2.request, request2.nextParams)).status).toBe(400);
-
-        // fail due to unexpected error
-        const request3 = requestFactory(validUrl);
-        const result = await GET(request3.request, request3.nextParams);
-        expect(result.status).toBe(403);
-    });
-
-    it('should handle valid response successfully', async () => {
-        mockFileResponseOnce(
-            { attributes: [], name: 'NFT' },
-            {
-                'Cache-Control': 'no-cache',
-                'Content-Length': '140',
-                'Content-Type': 'application/json',
-                Etag: 'random-etag',
+                const request = new Request(`${ORIGIN}${getProxiedUri('http://attacker.com/redirect')}`);
+                const response = await GET(request);
+                expect(response.status).toBe(403);
             },
         );
-        // @ts-expect-error lookup does not have mocked fn
-        dns.lookup.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
-
-        const request = requestFactory(validUrl);
-        expect((await GET(request.request, request.nextParams)).status).toBe(200);
-    });
-});
-
-describe('Metadata Proxy Route :: resource fetching', () => {
-    const testUri = 'http://google.com/metadata.json';
-    const testData = { description: 'Test Description', name: 'Test NFT' };
-
-    beforeEach(() => {
-        process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
     });
 
-    it('should handle response without Content-Length header', async () => {
-        const sourceHeaders = {
-            'Cache-Control': 'max-age=3600',
-            'Content-Type': 'application/json',
-            ETag: 'test-etag',
+    // Locks in the original passthrough contract: when fetchResource throws a
+    // StatusError with one of these statuses, the route must surface it as-is
+    // rather than collapsing to 500.
+    describe('upstream status passthrough', () => {
+        const TEN_MB = 10 * 1024 * 1024;
+
+        it.each([
+            {
+                description: '413 when upstream Content-Length exceeds MAX_SIZE',
+                mock: () =>
+                    fetchMock.mockResolvedValueOnce(
+                        new Response('{}', {
+                            headers: { 'Content-Length': String(TEN_MB), 'Content-Type': 'application/json' },
+                        }),
+                    ),
+                status: 413,
+            },
+            {
+                description: '415 when upstream returns unsupported content-type',
+                mock: () =>
+                    fetchMock.mockResolvedValueOnce(
+                        new Response('<html></html>', { headers: { 'Content-Type': 'text/html' } }),
+                    ),
+                status: 415,
+            },
+            {
+                description: '504 when upstream fetch times out',
+                mock: () => {
+                    const timeoutError = new Error('Upstream timed out');
+                    timeoutError.name = 'TimeoutError';
+                    fetchMock.mockRejectedValueOnce(timeoutError);
+                },
+                status: 504,
+            },
+            {
+                description: '500 on unclassified upstream failure',
+                mock: () => fetchMock.mockRejectedValueOnce(new Error('boom')),
+                status: 500,
+            },
+        ])('should return $description', async ({ mock, status }) => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+            dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+            mock();
+
+            const request = new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`);
+            const response = await GET(request);
+            expect(response.status).toBe(status);
+        });
+    });
+
+    describe('successful response', () => {
+        it('should return 200 and forward upstream headers', async () => {
+            const { response } = await setup('http://external.resource/file.json', {
+                upstream: {
+                    data: { attributes: [], name: 'NFT' },
+                    headers: {
+                        'Cache-Control': 'max-age=3600',
+                        'Content-Type': 'application/json',
+                        ETag: 'test-etag',
+                    },
+                },
+            });
+
+            expect(response.status).toBe(200);
+            expect(response.headers.get('content-type')).toBe('application/json');
+            expect(response.headers.get('cache-control')).toBe('max-age=3600');
+            expect(response.headers.get('etag')).toBe('test-etag');
+        });
+
+        it('should omit Content-Length to avoid browser CORS issues', async () => {
+            const { response } = await setup('http://google.com/metadata.json', {
+                upstream: {
+                    data: { name: 'Test NFT' },
+                    headers: {
+                        'Cache-Control': 'max-age=3600',
+                        'Content-Length': '140',
+                        'Content-Type': 'application/json',
+                        ETag: 'test-etag',
+                    },
+                },
+            });
+
+            expect(response.status).toBe(200);
+            expect(response.headers.get('content-length')).toBeNull();
+        });
+    });
+
+    // Verifies that searchParams.get() is the only decode step — an extra
+    // decodeURIComponent would corrupt URIs containing percent-encoded characters.
+    describe('URI encoding round-trip (no double-decoding)', () => {
+        const upstreamJson = {
+            data: { name: 'Test' },
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                ETag: 'test-etag',
+            },
         };
 
-        // @ts-expect-error lookup does not have mocked fn
-        dns.lookup.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+        it.each([
+            ['plain URL', 'https://arweave.net/abc123'],
+            ['%20 (space) in path', 'https://arweave.net/hello%20world.json'],
+            ['%23 (hash) in path', 'https://example.com/file%23name.json'],
+            ['%2F (slash) in query', 'https://example.com/api?path=%2Ffoo%2Fbar'],
+            ['multiple %20 (spaced words) in path', 'https://arweave.net/my%20cool%20nft%20metadata.json'],
+            // %2520 means the literal path contains "%20" (the % is encoded as %25).
+            // The proxy must fetch it as-is — decoding it to %20 would hit a different resource.
+            // If the on-chain program stored this by mistake, that's the program's bug, not ours.
+            ['nested %2520 (literal %20 in path)', 'https://arweave.net/hello%2520world.json'],
+            ['nested %2523 (literal %23 in path)', 'https://example.com/file%2523name.json'],
+        ])('should preserve %s', async (_label, uri) => {
+            const { response, fetchedUrl } = await setup(uri, { upstream: upstreamJson });
 
-        fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(testData), { headers: sourceHeaders }));
-
-        const request = new Request(`http://localhost:3000/api/metadata/proxy?uri=${encodeURIComponent(testUri)}`);
-        const response = await GET(request, { params: EMPTY_PARAMS });
-
-        expect(response.status).toBe(200);
-        expect(response.headers.get('content-type')).toBe('application/json');
-        expect(response.headers.get('cache-control')).toBe('max-age=3600');
-        expect(response.headers.get('etag')).toBe('test-etag');
-
-        // Content-Length should not be forwarded by the proxy.
-        const contentLength = response.headers.get('content-length');
-        expect(contentLength).toBeNull();
+            expect(response.status).toBe(200);
+            expect(fetchedUrl()).toBe(uri);
+        });
     });
 });
+
+interface SetupOptions {
+    enabled?: boolean;
+    upstream?: {
+        data: object;
+        headers: Record<string, string>;
+    };
+}
+
+async function setup(uri: string, options: SetupOptions = {}) {
+    const { enabled = true, upstream } = options;
+
+    vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', enabled ? 'true' : 'false');
+
+    if (upstream) {
+        dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+        fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(upstream.data), { headers: upstream.headers }));
+    }
+
+    const request = new Request(`${ORIGIN}${getProxiedUri(uri)}`);
+    const response = await GET(request);
+
+    return {
+        fetchedUrl: () => fetchMock.mock.calls[0][0],
+        response,
+    };
+}
