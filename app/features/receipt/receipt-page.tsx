@@ -194,9 +194,9 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                 receiptUrl: window.location.href,
                 signature,
                 transactionUrl,
-                usdValue,
                 usdUnavailableNote:
                     cluster === Cluster.MainnetBeta ? undefined : 'USD conversion is only available on Mainnet Beta',
+                usdValue,
             });
         } catch (error) {
             Logger.error(new Error('PDF generation failed', { cause: error }), {

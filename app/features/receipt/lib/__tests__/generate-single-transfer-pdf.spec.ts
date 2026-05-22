@@ -146,8 +146,8 @@ describe('generateSingleTransferPdf', () => {
         const note = 'USD conversion is only available on Mainnet Beta';
         await generateSingleTransferPdf(deps, SOL_RECEIPT, {
             ...PDF_OPTS,
-            usdValue: '~2.36 USD',
             usdUnavailableNote: note,
+            usdValue: '~2.36 USD',
         });
 
         const allText = collectText();
