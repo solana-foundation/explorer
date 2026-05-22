@@ -81,7 +81,7 @@ export async function generateSingleTransferPdf(
     );
     y = Math.max(senderBottom, amountBottom) + DETAIL_ROW_GAP;
 
-    // Row 3: Receiver | Amount USD (always shown; dash + no caption when missing)
+    // Row 3: Receiver | Amount USD (always shown; en-dash + no caption when missing)
     applyTextStyle(doc, TEXT_STYLES.valueMono);
     const receiverLines = doc.splitTextToSize(receipt.receiver.address, GRID.col.innerWidth) as string[];
     const receiverBottom = drawDetailCell(doc, 'Receiver', receiverLines, DETAILS_COL1_X, y, TEXT_STYLES.valueMono);
@@ -89,7 +89,7 @@ export async function generateSingleTransferPdf(
     const usdValueBottom = drawDetailCell(
         doc,
         'Amount USD - equivalent by Jupiter API',
-        [usdValue ?? '-'],
+        [usdValue ?? '–'],
         DETAILS_COL2_X,
         y,
         TEXT_STYLES.valueMono,

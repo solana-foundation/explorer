@@ -285,15 +285,18 @@ describe('generateMultiTransferPdf', () => {
         expect(allText).not.toContain('$');
     });
 
-    it('should propagate the error when QR code generation fails', async () => {
+    it('should still save the PDF and report a wrapped error when QR generation fails', async () => {
         const qrError = new Error('QR generation failed');
         mockToDataURL.mockRejectedValueOnce(qrError);
         const deps = await loadPdfDeps(mockOnError);
 
-        await expect(generateMultiTransferPdf(deps, RECEIPT, PDF_OPTS)).rejects.toThrow(
-            'Failed to render QR code in receipt footer',
-        );
-        expect(mockSave).not.toHaveBeenCalled();
+        await generateMultiTransferPdf(deps, RECEIPT, PDF_OPTS);
+
+        expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
+        const reported = mockOnError.mock.calls.map(([e]) => e as Error);
+        const qrReport = reported.find(e => e.message === 'Failed to render QR code in receipt footer');
+        expect(qrReport).toBeDefined();
+        expect(qrReport?.cause).toBe(qrError);
     });
 
     describe('error paths', () => {
@@ -357,7 +360,7 @@ describe('generateMultiTransferPdf', () => {
             }
         });
 
-        it('should save the PDF when logo and warning icon fail but QR succeeds', async () => {
+        it('should save the PDF even when logo, warning icon, and QR code all fail', async () => {
             const transfers = Array.from({ length: 20 }, (_, i) => ({
                 amount: { formatted: '0.1', raw: 100000000, unit: 'SOL' },
                 receiver: { address: `Recv${i}`.padEnd(43, 'x'), truncated: `R${i}` },
@@ -368,6 +371,8 @@ describe('generateMultiTransferPdf', () => {
                 total: { ...RECEIPT.total, raw: 2000000000 },
                 transfers,
             };
+            const qrError = new Error('QR generation failed');
+            mockToDataURL.mockRejectedValue(qrError);
 
             const { error: svgError, restore } = breakSvgConversion();
             try {
@@ -375,10 +380,13 @@ describe('generateMultiTransferPdf', () => {
                 await generateMultiTransferPdf(deps, multiReceipt, PDF_OPTS);
 
                 expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
-                const reported = mockOnError.mock.calls.map(([e]) => e);
+                const reported = mockOnError.mock.calls.map(([e]) => e as Error);
                 expect(reported).toContain(svgError);
+                const qrReport = reported.find(e => e.message === 'Failed to render QR code in receipt footer');
+                expect(qrReport?.cause).toBe(qrError);
             } finally {
                 restore();
+                mockToDataURL.mockResolvedValue('data:image/png;base64,qrcode');
             }
         });
     });

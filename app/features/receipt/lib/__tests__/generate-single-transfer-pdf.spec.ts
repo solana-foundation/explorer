@@ -120,12 +120,13 @@ describe('generateSingleTransferPdf', () => {
         expect(allText).toContain('not transaction date');
     });
 
-    it('should always render the Amount USD label and show a dash when usdValue is undefined', async () => {
+    it('should always render the Amount USD label and show an en-dash when usdValue is undefined', async () => {
         const deps = await loadPdfDeps(mockOnError);
         await generateSingleTransferPdf(deps, SOL_RECEIPT, PDF_OPTS);
 
         const allText = collectText();
         expect(allText).toContain('Amount USD - equivalent by Jupiter API');
+        expect(allText).toContain('–');
         expect(allText).not.toContain('Equivalent on report date');
     });
 
@@ -136,14 +137,17 @@ describe('generateSingleTransferPdf', () => {
         expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
     });
 
-    it('should propagate the error when the QR code generation fails', async () => {
+    it('should still save the PDF and report a wrapped error when QR generation fails', async () => {
         const qrError = new Error('QR generation failed');
         mockToDataURL.mockRejectedValueOnce(qrError);
 
         const deps = await loadPdfDeps(mockOnError);
-        await expect(generateSingleTransferPdf(deps, SOL_RECEIPT, PDF_OPTS)).rejects.toThrow(
-            'Failed to render QR code in receipt footer',
-        );
-        expect(mockSave).not.toHaveBeenCalled();
+        await generateSingleTransferPdf(deps, SOL_RECEIPT, PDF_OPTS);
+
+        expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
+        const reported = mockOnError.mock.calls.map(([e]) => e as Error);
+        const qrReport = reported.find(e => e.message === 'Failed to render QR code in receipt footer');
+        expect(qrReport).toBeDefined();
+        expect(qrReport?.cause).toBe(qrError);
     });
 });
