@@ -144,7 +144,11 @@ describe('generateSingleTransferPdf', () => {
     it('should ignore usdUnavailableNote when usdValue is provided', async () => {
         const deps = await loadPdfDeps(mockOnError);
         const note = 'USD conversion is only available on Mainnet Beta';
-        await generateSingleTransferPdf(deps, SOL_RECEIPT, { ...PDF_OPTS, usdValue: '~2.36 USD', usdUnavailableNote: note });
+        await generateSingleTransferPdf(deps, SOL_RECEIPT, {
+            ...PDF_OPTS,
+            usdValue: '~2.36 USD',
+            usdUnavailableNote: note,
+        });
 
         const allText = collectText();
         expect(allText).toContain('~2.36 USD');

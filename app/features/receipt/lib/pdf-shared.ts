@@ -370,13 +370,7 @@ export function drawMemoCell(doc: jsPDF, memo: string | undefined | null, y: num
 }
 
 // Inline "ⓘ {text}" — drawn under the Amount USD value. Caller passes the y at which the icon top sits.
-export async function drawInfoCaption(
-    deps: PdfDeps,
-    doc: jsPDF,
-    x: number,
-    y: number,
-    text: string,
-): Promise<number> {
+export async function drawInfoCaption(deps: PdfDeps, doc: jsPDF, x: number, y: number, text: string): Promise<number> {
     try {
         const iconUrl = await svgToDataUrl(INFO_CIRCLE_SVG, JUPITER_ICON_NATIVE_SIZE, JUPITER_ICON_NATIVE_SIZE);
         doc.addImage(iconUrl, 'PNG', x, y, JUPITER_ICON_SIZE, JUPITER_ICON_SIZE);
