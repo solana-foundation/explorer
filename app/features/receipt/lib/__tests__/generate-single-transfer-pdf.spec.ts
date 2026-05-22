@@ -130,6 +130,28 @@ describe('generateSingleTransferPdf', () => {
         expect(allText).not.toContain('Equivalent on report date');
     });
 
+    it('should render usdUnavailableNote as a caption when usdValue is undefined', async () => {
+        const deps = await loadPdfDeps(mockOnError);
+        const note = 'USD conversion is only available on Mainnet Beta';
+        await generateSingleTransferPdf(deps, SOL_RECEIPT, { ...PDF_OPTS, usdUnavailableNote: note });
+
+        const allText = collectText();
+        expect(allText).toContain('–');
+        expect(allText).toContain(note);
+        expect(allText).not.toContain('Equivalent on report date');
+    });
+
+    it('should ignore usdUnavailableNote when usdValue is provided', async () => {
+        const deps = await loadPdfDeps(mockOnError);
+        const note = 'USD conversion is only available on Mainnet Beta';
+        await generateSingleTransferPdf(deps, SOL_RECEIPT, { ...PDF_OPTS, usdValue: '~2.36 USD', usdUnavailableNote: note });
+
+        const allText = collectText();
+        expect(allText).toContain('~2.36 USD');
+        expect(allText).not.toContain(note);
+        expect(allText).toContain('Equivalent on report date');
+    });
+
     it('should call doc.save with the full signature filename', async () => {
         const deps = await loadPdfDeps(mockOnError);
         await generateSingleTransferPdf(deps, SOL_RECEIPT, PDF_OPTS);

@@ -30,6 +30,7 @@ export type ReceiptPdfOpts = {
     transactionUrl?: string;
     reportDate?: Date;
     usdValue?: string;
+    usdUnavailableNote?: string;
 };
 
 export type TitleBlockSizes = {
@@ -368,17 +369,14 @@ export function drawMemoCell(doc: jsPDF, memo: string | undefined | null, y: num
     return drawDetailCell(doc, 'Memo', lines, DETAILS_COL2_X, y, TEXT_STYLES.valueMono);
 }
 
-// Inline "ⓘ Equivalent on report date (… UTC), not transaction date" — drawn
-// under the Amount USD value. Caller passes the y at which the icon top sits.
-export async function drawJupiterEquivalentCaption(
+// Inline "ⓘ {text}" — drawn under the Amount USD value. Caller passes the y at which the icon top sits.
+export async function drawInfoCaption(
     deps: PdfDeps,
     doc: jsPDF,
     x: number,
     y: number,
-    reportDateUtc: string,
+    text: string,
 ): Promise<number> {
-    const text = `Equivalent on report date (${reportDateUtc}), not transaction date`;
-
     try {
         const iconUrl = await svgToDataUrl(INFO_CIRCLE_SVG, JUPITER_ICON_NATIVE_SIZE, JUPITER_ICON_NATIVE_SIZE);
         doc.addImage(iconUrl, 'PNG', x, y, JUPITER_ICON_SIZE, JUPITER_ICON_SIZE);
@@ -393,6 +391,16 @@ export async function drawJupiterEquivalentCaption(
     doc.text(text, textX, textBaselineY);
 
     return textBaselineY;
+}
+
+export function drawJupiterEquivalentCaption(
+    deps: PdfDeps,
+    doc: jsPDF,
+    x: number,
+    y: number,
+    reportDateUtc: string,
+): Promise<number> {
+    return drawInfoCaption(deps, doc, x, y, `Equivalent on report date (${reportDateUtc}), not transaction date`);
 }
 
 export function drawSupplierAndItems(doc: jsPDF, y: number, includeTotalRow = true): number {

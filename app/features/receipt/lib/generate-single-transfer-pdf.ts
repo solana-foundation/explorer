@@ -6,6 +6,7 @@ import {
     DETAILS_COL1_X,
     DETAILS_COL2_X,
     drawDetailCell,
+    drawInfoCaption,
     drawJupiterEquivalentCaption,
     drawMemoCell,
     drawPageFooter,
@@ -41,7 +42,7 @@ export async function generateSingleTransferPdf(
     receipt: FormattedReceipt,
     opts: ReceiptPdfOpts,
 ): Promise<void> {
-    const { signature, receiptUrl, transactionUrl, usdValue } = opts;
+    const { signature, receiptUrl, transactionUrl, usdValue, usdUnavailableNote } = opts;
     const { doc, y: initialY } = initReceiptDoc(deps, opts.clusterLabel);
     let y = initialY;
 
@@ -99,6 +100,9 @@ export async function generateSingleTransferPdf(
     if (usdValue) {
         const reportDateUtc = formatReportDateUtc(opts.reportDate ?? new Date());
         usdBottom = await drawJupiterEquivalentCaption(deps, doc, DETAILS_COL2_X, usdValueBottom - 1.5, reportDateUtc);
+        usdBottom += USD_CAPTION_RESERVE - TEXT_STYLES.valueMono.size * LINE_HEIGHT_RATIO;
+    } else if (usdUnavailableNote) {
+        usdBottom = await drawInfoCaption(deps, doc, DETAILS_COL2_X, usdValueBottom - 1.5, usdUnavailableNote);
         usdBottom += USD_CAPTION_RESERVE - TEXT_STYLES.valueMono.size * LINE_HEIGHT_RATIO;
     }
     y = Math.max(receiverBottom, usdBottom) + DETAIL_ROW_GAP;

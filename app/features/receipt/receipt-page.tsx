@@ -10,7 +10,7 @@ import { useFetchTransactionStatus, useTransactionDetails, useTransactionStatus 
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import { NATIVE_MINT } from '@solana/spl-token';
 import { TransactionSignature } from '@solana/web3.js';
-import { clusterName, ClusterStatus } from '@utils/cluster';
+import { Cluster, clusterName, ClusterStatus } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect } from 'react';
@@ -195,6 +195,8 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                 signature,
                 transactionUrl,
                 usdValue,
+                usdUnavailableNote:
+                    cluster === Cluster.MainnetBeta ? undefined : 'USD conversion is only available on Mainnet Beta',
             });
         } catch (error) {
             Logger.error(new Error('PDF generation failed', { cause: error }), {
