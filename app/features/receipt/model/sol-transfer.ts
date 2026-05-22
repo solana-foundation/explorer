@@ -1,6 +1,7 @@
 import {
     collectTransferInstructions,
     isSolTransferInstruction,
+    type LocatedInstruction,
     type SolTransferInstruction,
 } from '@entities/transfer-instruction';
 import type { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction } from '@solana/web3.js';
@@ -14,21 +15,21 @@ import { SolTransferPayload } from './schemas';
 import { type ReceiptSol, type Transfer } from './types';
 
 export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta): ReceiptSol | undefined {
-    const instructions = getSolTransferInstructions(transaction);
-    if (instructions.length === 0) return undefined;
+    const located = getSolTransferInstructions(transaction);
+    if (located.length === 0) return undefined;
 
-    const primary = instructions[0];
-    const raw = extractSolTransferPayload(transaction, primary);
+    const primary = located[0];
+    const raw = extractSolTransferPayload(transaction, primary.instruction);
 
     const [err, validated] = validate(raw, SolTransferPayload, { coerce: true });
     if (err) {
-        Logger.error(err, { instructionIndex: 0 });
+        Logger.error(err, { innerIndex: primary.innerIndex, topLevelIndex: primary.topLevelIndex });
         return undefined;
     }
 
     let transfers: Transfer[] | undefined;
-    if (instructions.length > 1) {
-        const validatedTransfers = buildTransfers(transaction, instructions);
+    if (located.length > 1) {
+        const validatedTransfers = buildTransfers(transaction, located);
         if (!validatedTransfers) return undefined;
         transfers = validatedTransfers;
     }
@@ -44,7 +45,9 @@ export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta)
     };
 }
 
-function getSolTransferInstructions(transaction: ParsedTransactionWithMeta): SolTransferInstruction[] {
+function getSolTransferInstructions(
+    transaction: ParsedTransactionWithMeta,
+): LocatedInstruction<SolTransferInstruction>[] {
     return collectTransferInstructions(
         transaction,
         (instr: ParsedInstruction | PartiallyDecodedInstruction): instr is SolTransferInstruction =>
@@ -54,14 +57,14 @@ function getSolTransferInstructions(transaction: ParsedTransactionWithMeta): Sol
 
 function buildTransfers(
     transaction: ParsedTransactionWithMeta,
-    instructions: SolTransferInstruction[],
+    located: LocatedInstruction<SolTransferInstruction>[],
 ): Transfer[] | undefined {
     const result: Transfer[] = [];
-    for (const [i, instr] of instructions.entries()) {
-        const payload = extractSolTransferPayload(transaction, instr);
+    for (const { instruction, innerIndex, topLevelIndex } of located) {
+        const payload = extractSolTransferPayload(transaction, instruction);
         const [err, v] = validate(payload, SolTransferPayload, { coerce: true });
         if (err) {
-            Logger.error(err, { instructionIndex: i });
+            Logger.error(err, { innerIndex, topLevelIndex });
             return undefined;
         }
         result.push({ receiver: v.receiver, sender: v.sender, total: v.total });

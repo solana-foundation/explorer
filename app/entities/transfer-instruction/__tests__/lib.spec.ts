@@ -16,21 +16,21 @@ describe('transfer-instruction entity against surfpool multi-transfer tx', () =>
         const found = collectTransferInstructions(surfpoolMultiTransferTx, isTokenTransferInstruction);
 
         expect(found).toHaveLength(4);
-        for (const ix of found) {
-            expect(ix.parsed.type).toBe('transferChecked');
-            expect(ix.program).toBe('spl-token');
+        for (const { instruction } of found) {
+            expect(instruction.parsed.type).toBe('transferChecked');
+            expect(instruction.program).toBe('spl-token');
         }
     });
 
     it('should expose mint, source, destination, and tokenAmount on each recognized transfer', () => {
         const [first] = collectTransferInstructions(surfpoolMultiTransferTx, isTokenTransferInstruction);
 
-        expect(first.parsed.info).toMatchObject({
+        expect(first.instruction.parsed.info).toMatchObject({
             authority: 'At4u6xXnARsRow7EzozCZ8iesMSs5zZy6tKXVs6JSw2b',
             mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
         });
-        if (first.parsed.type !== 'transferChecked') throw new Error('expected transferChecked');
-        expect(first.parsed.info.tokenAmount?.decimals).toBe(6);
+        if (first.instruction.parsed.type !== 'transferChecked') throw new Error('expected transferChecked');
+        expect(first.instruction.parsed.info.tokenAmount?.decimals).toBe(6);
     });
 
     it('should find no SOL transfers in this tx (no System Program transfer instructions)', () => {
@@ -63,7 +63,7 @@ describe('transfer-instruction entity against real-world fixtures', () => {
         const token = collectTransferInstructions(mainnetSingleSolTx, isTokenTransferInstruction);
         expect(sol).toHaveLength(1);
         expect(token).toHaveLength(0);
-        expect(sol[0].parsed.info.lamports).toBe(24922118);
+        expect(sol[0].instruction.parsed.info.lamports).toBe(24922118);
     });
 
     it('should recognize exactly one token transfer in a single-USDC mainnet tx', () => {
@@ -71,34 +71,65 @@ describe('transfer-instruction entity against real-world fixtures', () => {
         const token = collectTransferInstructions(mainnetSingleUsdcTx, isTokenTransferInstruction);
         expect(sol).toHaveLength(0);
         expect(token).toHaveLength(1);
-        expect(token[0].parsed.type).toBe('transferChecked');
+        expect(token[0].instruction.parsed.type).toBe('transferChecked');
     });
 
     it('should recognize one SOL transfer in a devnet single-transfer-with-memo tx (memo program not a transfer)', () => {
         const sol = collectTransferInstructions(devnetSingleSolMemoTx, isSolTransferInstruction);
         expect(sol).toHaveLength(1);
-        expect(sol[0].parsed.info.lamports).toBe(100000000);
+        expect(sol[0].instruction.parsed.info.lamports).toBe(100000000);
     });
 
     it('should recognize two SOL transfers in a mainnet multi-SOL tx with system/ComputeBudget noise', () => {
         const sol = collectTransferInstructions(mainnetMultiSolTx, isSolTransferInstruction);
         expect(sol).toHaveLength(2);
-        expect(sol.map(ix => ix.parsed.info.lamports)).toEqual([105673070, 30923508650]);
+        expect(sol.map(({ instruction }) => instruction.parsed.info.lamports)).toEqual([105673070, 30923508650]);
     });
 
     it('should recognize two SOL transfers in a devnet multi-SOL-with-memo tx', () => {
         const sol = collectTransferInstructions(devnetMultiSolMemoTx, isSolTransferInstruction);
         expect(sol).toHaveLength(2);
-        expect(sol.map(ix => ix.parsed.info.lamports)).toEqual([100000000, 50000000]);
+        expect(sol.map(({ instruction }) => instruction.parsed.info.lamports)).toEqual([100000000, 50000000]);
     });
 
     it('should recognize transferWithSeed as a SOL transfer instruction on a devnet tx', () => {
         const sol = collectTransferInstructions(devnetTransferWithSeedTx, isSolTransferInstruction);
         expect(sol).toHaveLength(1);
-        expect(sol[0].parsed.type).toBe('transferWithSeed');
-        expect(sol[0].parsed.info.lamports).toBe(50000000);
-        if (sol[0].parsed.type === 'transferWithSeed') {
-            expect(sol[0].parsed.info.sourceSeed).toBe('tws-fixture');
+        expect(sol[0].instruction.parsed.type).toBe('transferWithSeed');
+        expect(sol[0].instruction.parsed.info.lamports).toBe(50000000);
+        if (sol[0].instruction.parsed.type === 'transferWithSeed') {
+            expect(sol[0].instruction.parsed.info.sourceSeed).toBe('tws-fixture');
         }
+    });
+});
+
+describe('collectTransferInstructions location metadata', () => {
+    it('should report a top-level match with the parent index and an undefined innerIndex', () => {
+        const sol = collectTransferInstructions(mainnetSingleSolTx, isSolTransferInstruction);
+        expect(sol).toHaveLength(1);
+        expect(sol[0].topLevelIndex).toBe(0);
+        expect(sol[0].innerIndex).toBeUndefined();
+    });
+
+    it('should carry the parent topLevelIndex for each top-level match when other instructions sit before them', () => {
+        // mainnetMultiSolTx top-level layout: [advanceNonce, ComputeBudget, ComputeBudget, transfer, transfer].
+        // The two transfers sit at topLevelIndex 3 and 4; neither came from inner instructions.
+        const sol = collectTransferInstructions(mainnetMultiSolTx, isSolTransferInstruction);
+        expect(sol.map(({ topLevelIndex, innerIndex }) => ({ topLevelIndex, innerIndex }))).toEqual([
+            { topLevelIndex: 3, innerIndex: undefined },
+            { topLevelIndex: 4, innerIndex: undefined },
+        ]);
+    });
+
+    it('should distinguish inner matches by innerIndex while preserving the parent topLevelIndex', () => {
+        // Surfpool wrapper emits 4 transferChecked + 1 closeAccount under top-level index 2.
+        const found = collectTransferInstructions(surfpoolMultiTransferTx, isTokenTransferInstruction);
+
+        expect(found.map(({ topLevelIndex, innerIndex }) => ({ topLevelIndex, innerIndex }))).toEqual([
+            { topLevelIndex: 2, innerIndex: 0 },
+            { topLevelIndex: 2, innerIndex: 1 },
+            { topLevelIndex: 2, innerIndex: 2 },
+            { topLevelIndex: 2, innerIndex: 3 },
+        ]);
     });
 });

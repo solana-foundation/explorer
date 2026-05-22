@@ -1,6 +1,7 @@
 import {
     collectTransferInstructions,
     isTokenTransferInstruction,
+    type LocatedInstruction,
     type TokenTransferInstruction,
     type TokenTransferParsed,
 } from '@entities/transfer-instruction';
@@ -31,26 +32,26 @@ export async function createTokenTransferReceipt(
     transaction: ParsedTransactionWithMeta,
     getTokenInfo: (mint: string | undefined) => Promise<TokenInfo | undefined>,
 ): Promise<TokenReceiptOutcome> {
-    const instructions = getTokenTransferInstructions(transaction);
-    if (instructions.length === 0) return { kind: 'not-applicable' };
+    const located = getTokenTransferInstructions(transaction);
+    if (located.length === 0) return { kind: 'not-applicable' };
 
-    const primary = instructions[0];
-    const raw = extractTokenTransferPayload(transaction, primary);
+    const primary = located[0];
+    const raw = extractTokenTransferPayload(transaction, primary.instruction);
 
     const [err, validated] = validate(raw, TokenTransferPayload, { coerce: true });
     if (err) {
-        Logger.error(err, { instructionIndex: 0 });
+        Logger.error(err, { innerIndex: primary.innerIndex, topLevelIndex: primary.topLevelIndex });
         return { kind: 'not-applicable' };
     }
 
     let transfers: Transfer[] | undefined;
     let total = validated.total;
 
-    if (instructions.length > 1) {
-        const primaryAmount = extractAmountInfo(primary.parsed, transaction);
+    if (located.length > 1) {
+        const primaryAmount = extractAmountInfo(primary.instruction.parsed, transaction);
         if (!primaryAmount) return { kind: 'not-applicable' };
 
-        const built = buildTokenTransfers(transaction, instructions, {
+        const built = buildTokenTransfers(transaction, located, {
             amount: primaryAmount,
             transfer: { receiver: validated.receiver, sender: validated.sender, total: validated.total },
             validated,
@@ -75,7 +76,9 @@ export async function createTokenTransferReceipt(
     };
 }
 
-function getTokenTransferInstructions(transaction: ParsedTransactionWithMeta): TokenTransferInstruction[] {
+function getTokenTransferInstructions(
+    transaction: ParsedTransactionWithMeta,
+): LocatedInstruction<TokenTransferInstruction>[] {
     return collectTransferInstructions(transaction, isTokenTransferInstruction);
 }
 
@@ -97,25 +100,25 @@ type PrimaryToken = {
 // (and therefore the same decimals).
 function buildTokenTransfers(
     transaction: ParsedTransactionWithMeta,
-    instructions: TokenTransferInstruction[],
+    located: LocatedInstruction<TokenTransferInstruction>[],
     primary: PrimaryToken,
 ): BuildTokenTransfersResult {
     const transfers: Transfer[] = [primary.transfer];
     let totalRaw = BigInt(primary.amount.rawAmount);
     const decimals = primary.amount.decimals;
 
-    for (let i = 1; i < instructions.length; i++) {
-        const instr = instructions[i];
-        const payload = extractTokenTransferPayload(transaction, instr);
+    for (let i = 1; i < located.length; i++) {
+        const { instruction, innerIndex, topLevelIndex } = located[i];
+        const payload = extractTokenTransferPayload(transaction, instruction);
         const [err, v] = validate(payload, TokenTransferPayload, { coerce: true });
         if (err) {
-            Logger.error(err, { instructionIndex: i });
+            Logger.error(err, { innerIndex, topLevelIndex });
             return { kind: 'not-applicable' };
         }
         // Mixed-mint receipts are out of scope: a single total only makes sense for one mint.
         if (v.mint !== primary.validated.mint) return { kind: 'rejected', reason: 'mixed-mint' };
 
-        const amount = extractAmountInfo(instr.parsed, transaction);
+        const amount = extractAmountInfo(instruction.parsed, transaction);
         if (!amount) return { kind: 'not-applicable' };
 
         totalRaw += BigInt(amount.rawAmount);
