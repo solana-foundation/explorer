@@ -41,9 +41,7 @@ describe('transfer-instruction entity against surfpool multi-transfer tx', () =>
     it('should reject the closeAccount inner instruction even though it shares the token program id', () => {
         const innerGroup = surfpoolMultiTransferTx.meta?.innerInstructions?.[0];
         if (!innerGroup) throw new Error('expected at least one inner instruction group');
-        const closeAccount = innerGroup.instructions.find(
-            ix => 'parsed' in ix && ix.parsed?.type === 'closeAccount',
-        );
+        const closeAccount = innerGroup.instructions.find(ix => 'parsed' in ix && ix.parsed?.type === 'closeAccount');
         expect(closeAccount).toBeDefined();
         if (closeAccount) {
             expect(isTokenTransferInstruction(closeAccount)).toBe(false);

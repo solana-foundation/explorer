@@ -5,14 +5,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster } from '@/app/utils/cluster';
 
-import {
-    buildInnerGroup,
-    buildParsedTransaction,
-    buildPartiallyDecodedIx,
-    buildSolTransferIx,
-    buildSolTransferWithSeedIx,
-    buildTokenTransferCheckedIx,
-} from '../__fixtures__/builders';
 import { getTokenInfo } from '../../api/get-token-info';
 import { getTx } from '../../api/get-tx';
 import { MULTISIG_AUTHORITY, RECEIVER, RECEIVER_2, SENDER } from '../../mocks/addresses';
@@ -34,6 +26,14 @@ import {
 import { mockUsdcMultisigTransferTransaction } from '../../mocks/usdc-multisig-transfer';
 import { mockUsdcRegularTransferTransaction } from '../../mocks/usdc-regular-transfer';
 import { mockZeroTransferTransaction } from '../../mocks/zero-transfer';
+import {
+    buildInnerGroup,
+    buildParsedTransaction,
+    buildPartiallyDecodedIx,
+    buildSolTransferIx,
+    buildSolTransferWithSeedIx,
+    buildTokenTransferCheckedIx,
+} from '../__fixtures__/builders';
 import { createReceipt, type ReceiptResult } from '../create-receipt';
 
 vi.mock('../../api/get-tx');
@@ -231,7 +231,14 @@ describe('createReceipt', () => {
             const base = PublicKey.unique();
             const derived = PublicKey.unique();
             const tx = buildParsedTransaction({
-                accountKeys: [SENDER.publicKey, base, derived, RECEIVER.publicKey, RECEIVER_2.publicKey, SystemProgram.programId],
+                accountKeys: [
+                    SENDER.publicKey,
+                    base,
+                    derived,
+                    RECEIVER.publicKey,
+                    RECEIVER_2.publicKey,
+                    SystemProgram.programId,
+                ],
                 instructions: [
                     buildSolTransferIx({
                         destination: RECEIVER.publicKey,
@@ -521,8 +528,13 @@ describe('createReceipt', () => {
         it('should build a multi-transfer SOL receipt from inner SystemProgram transfers', async () => {
             const wrapperProgram = Keypair.generate().publicKey;
             const tx = buildParsedTransaction({
-                accountKeys: [SENDER.publicKey, RECEIVER.publicKey, RECEIVER_2.publicKey, SystemProgram.programId, wrapperProgram],
-                instructions: [buildPartiallyDecodedIx({ programId: wrapperProgram })],
+                accountKeys: [
+                    SENDER.publicKey,
+                    RECEIVER.publicKey,
+                    RECEIVER_2.publicKey,
+                    SystemProgram.programId,
+                    wrapperProgram,
+                ],
                 innerInstructions: [
                     buildInnerGroup(0, [
                         buildSolTransferIx({
@@ -542,6 +554,7 @@ describe('createReceipt', () => {
                         }),
                     ]),
                 ],
+                instructions: [buildPartiallyDecodedIx({ programId: wrapperProgram })],
             });
             vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
 
@@ -583,7 +596,6 @@ describe('createReceipt', () => {
 
             const tx = buildParsedTransaction({
                 accountKeys,
-                instructions: [buildPartiallyDecodedIx({ programId: wrapperProgram })],
                 innerInstructions: [
                     buildInnerGroup(0, [
                         buildTokenTransferCheckedIx({
@@ -604,6 +616,7 @@ describe('createReceipt', () => {
                         }),
                     ]),
                 ],
+                instructions: [buildPartiallyDecodedIx({ programId: wrapperProgram })],
                 postTokenBalances: [
                     {
                         accountIndex: indexOf(destinationTokenAccount1),

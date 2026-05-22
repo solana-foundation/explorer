@@ -231,4 +231,3 @@ function getTokenDecimals(
 
     return tokenBalance?.uiTokenAmount.decimals;
 }
-
