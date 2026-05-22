@@ -64,11 +64,15 @@ describe('Jupiter API Route', () => {
         expect(await response.json()).toEqual({ verified: false });
     });
 
-    it('should return verified: false when the response shape is unexpected', async () => {
+    it('should return 502 with short cache when the response shape is unexpected', async () => {
         mockFetchResponse(200, { unexpected: 'shape' });
         const response = await callRoute(VALID_MINT);
-        expect(response.status).toBe(200);
-        expect(await response.json()).toEqual({ verified: false });
+        expect(response.status).toBe(502);
+        expect(await response.json()).toEqual({ error: 'Upstream schema mismatch' });
+        expect(Logger.error).toHaveBeenCalledWith(
+            expect.any(Error),
+            expect.objectContaining({ mintAddress: VALID_MINT, sentry: true }),
+        );
     });
 
     it('should return 404 silently when Jupiter responds with 404', async () => {

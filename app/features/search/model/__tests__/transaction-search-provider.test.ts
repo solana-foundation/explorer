@@ -17,8 +17,8 @@ describe('transactionSearchProvider', () => {
         const results = transactionSearchProvider.search(sig, ctx);
         expect(results).toEqual([
             {
-                label: 'Transaction',
-                options: [{ label: sig, pathname: '/tx/' + sig, value: [sig] }],
+                label: 'Transactions',
+                options: [{ label: sig, pathname: '/tx/' + sig, type: 'tx', value: [sig] }],
             },
         ]);
     });

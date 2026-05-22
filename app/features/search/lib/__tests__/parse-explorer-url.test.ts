@@ -45,6 +45,7 @@ describe('parseExplorerUrl', () => {
                     entity: 'Account',
                     pathname: '/address/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E',
                     source: 'solscan.io',
+                    type: 'address',
                 },
             );
         });
@@ -55,6 +56,7 @@ describe('parseExplorerUrl', () => {
                 entity: 'Token',
                 pathname: '/address/So11111111111111111111111111111111111111112',
                 source: 'solscan.io',
+                type: 'address',
             });
         });
 
@@ -64,6 +66,7 @@ describe('parseExplorerUrl', () => {
                 entity: 'Transaction',
                 pathname: '/tx/5abc123',
                 source: 'solscan.io',
+                type: 'tx',
             });
         });
 
@@ -73,6 +76,7 @@ describe('parseExplorerUrl', () => {
                 entity: 'Block',
                 pathname: '/block/300000000',
                 source: 'solscan.io',
+                type: 'block',
             });
         });
 
@@ -84,6 +88,7 @@ describe('parseExplorerUrl', () => {
                 entity: 'Account',
                 pathname: '/address/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E',
                 source: 'solscan.io',
+                type: 'address',
             });
         });
 
@@ -142,6 +147,7 @@ describe('parseExplorerUrl', () => {
                 entity: 'Address',
                 pathname: '/address/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E',
                 source: 'orb.markets',
+                type: 'address',
             });
         });
 
@@ -151,6 +157,7 @@ describe('parseExplorerUrl', () => {
                 entity: 'Transaction',
                 pathname: '/tx/5abc123',
                 source: 'orb.markets',
+                type: 'tx',
             });
         });
 
@@ -160,6 +167,7 @@ describe('parseExplorerUrl', () => {
                 entity: 'Block',
                 pathname: '/block/300000000',
                 source: 'orb.markets',
+                type: 'block',
             });
         });
 
@@ -169,6 +177,7 @@ describe('parseExplorerUrl', () => {
                 entity: 'Epoch',
                 pathname: '/epoch/500',
                 source: 'orb.markets',
+                type: 'epoch',
             });
         });
 
@@ -178,6 +187,7 @@ describe('parseExplorerUrl', () => {
                 entity: 'Address',
                 pathname: '/address/abc',
                 source: 'orb.markets',
+                type: 'address',
             });
         });
 
