@@ -1,4 +1,5 @@
 import { truncateAddress } from '@entities/address';
+import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -649,6 +650,80 @@ describe('createReceipt', () => {
                 receiver: { address: receiverOwner2.toBase58() },
                 sender: { address: authority.toBase58() },
             });
+        });
+
+        it('should produce a single USDC receipt when paired with an ATA createIdempotent (inner rent funding ignored)', async () => {
+            // Realistic combo: send USDC to a fresh ATA. The ATA program's createIdempotent
+            // emits an inner SystemProgram transfer (rent funding) which must NOT be surfaced
+            // — the user-intended payment is the top-level transferChecked.
+            const feePayer = Keypair.generate().publicKey;
+            const authority = Keypair.generate().publicKey;
+            const sourceTokenAccount = Keypair.generate().publicKey;
+            const destinationTokenAccount = Keypair.generate().publicKey;
+            const receiverOwner = Keypair.generate().publicKey;
+            const mint = Keypair.generate().publicKey;
+            const tokenProgram = new PublicKey(TOKEN_PROGRAM_ADDRESS);
+            const ataProgram = new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ID.toBase58());
+
+            const accountKeys = [
+                feePayer,
+                authority,
+                sourceTokenAccount,
+                destinationTokenAccount,
+                receiverOwner,
+                mint,
+                tokenProgram,
+                ataProgram,
+                SystemProgram.programId,
+            ];
+
+            const tx = buildParsedTransaction({
+                accountKeys,
+                innerInstructions: [
+                    buildInnerGroup(0, [
+                        // ATA createIdempotent funds the new account by CPI'ing System.transfer.
+                        buildSolTransferIx({
+                            destination: destinationTokenAccount,
+                            lamports: 2039280,
+                            source: feePayer,
+                        }),
+                    ]),
+                ],
+                instructions: [
+                    // Top-level [0]: ATA createIdempotent (PartiallyDecoded — not an SPL transfer).
+                    buildPartiallyDecodedIx({ programId: ataProgram }),
+                    // Top-level [1]: the actual USDC payment.
+                    buildTokenTransferCheckedIx({
+                        amount: '1000000',
+                        authority,
+                        decimals: 6,
+                        destinationTokenAccount,
+                        mint,
+                        sourceTokenAccount,
+                    }),
+                ],
+                postTokenBalances: [
+                    {
+                        accountIndex: accountKeys.findIndex(k => k.equals(destinationTokenAccount)),
+                        mint: mint.toBase58(),
+                        owner: receiverOwner.toBase58(),
+                        programId: tokenProgram.toBase58(),
+                        uiTokenAmount: { amount: '1000000', decimals: 6, uiAmount: 1, uiAmountString: '1' },
+                    },
+                ],
+            });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
+            vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
+
+            const receipt = unwrap(await createReceipt(mockSignature));
+
+            expect(receipt.kind).toBe('token');
+            expect(receipt.total).toMatchObject({ formatted: '1', raw: 1, unit: 'USDC' });
+            expect(receipt.sender.address).toBe(authority.toBase58());
+            expect(receipt.receiver.address).toBe(receiverOwner.toBase58());
+            // Single token transfer => no multi-row table; the inner rent SOL transfer must NOT promote
+            // this to a multi-transfer receipt.
+            expect(receipt.transfers).toBeUndefined();
         });
     });
 
