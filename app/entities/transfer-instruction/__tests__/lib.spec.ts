@@ -1,7 +1,6 @@
-import { describe, expect, it } from 'vitest';
-
 import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
+import { describe, expect, it } from 'vitest';
 
 import {
     devnetMultiSolMemoTx,

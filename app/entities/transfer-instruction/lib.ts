@@ -1,6 +1,6 @@
+import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import type { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction } from '@solana/web3.js';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
-import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 import { isTokenProgram } from '@/app/shared/model/token-program';
 
