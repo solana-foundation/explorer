@@ -1,0 +1,57 @@
+name: Update Verified Programs
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # Daily at 8 AM UTC
+  workflow_dispatch:
+
+env:
+  PNPM_CACHE_FOLDER: ~/.pnpm-store
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Read .nvmrc
+        id: nvmrc
+        run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+
+      - name: Install package manager
+        uses: pnpm/action-setup@v4
+
+      - name: Setup pnpm config
+        run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ steps.nvmrc.outputs.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch verified programs
+        env:
+          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
+        run: pnpm exec tsx scripts/update-verified-programs.ts
+
+      - name: Check for changes
+        id: diff
+        run: |
+          git diff --exit-code public/verified-programs.json && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/verified-programs.json
+          git commit -m "chore: update verified programs list"
+          git push

@@ -167,6 +167,9 @@ importers:
       '@solana/buffer-layout':
         specifier: 3.0.0
         version: 3.0.0
+      '@solana/idl':
+        specifier: 0.1.0
+        version: 0.1.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana/kit':
         specifier: 6.5.0
         version: 6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
@@ -4498,6 +4501,13 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  '@solana/idl@0.1.0':
+    resolution: {integrity: sha512-sMPBKycMR76vWRSFc7ZCus9oca5xX4941xIBkdckpGzXNDHT1/VJh/qcH6Aesgj9ZJaAPFVNUPY1WG3UPOh3+g==}
+    engines: {node: '>=20'}
+    hasBin: true
+    peerDependencies:
+      '@solana/kit': ^6.0.0
 
   '@solana/instruction-plans@6.5.0':
     resolution: {integrity: sha512-zp2asevpyMwvhajHYM1aruYpO+xf3LSwHEI2FK6E2hddYZaEhuBy+bz+NZ1ixCyfx3iXcq7MamlFQc2ySHDyUQ==}
@@ -16022,7 +16032,7 @@ snapshots:
   '@solana/errors@2.3.0(typescript@5.7.3)':
     dependencies:
       chalk: 5.6.2
-      commander: 14.0.1
+      commander: 14.0.3
       typescript: 5.7.3
 
   '@solana/errors@4.0.0(typescript@5.7.3)':
@@ -16068,6 +16078,13 @@ snapshots:
   '@solana/functional@6.5.0(typescript@5.7.3)':
     optionalDependencies:
       typescript: 5.7.3
+
+  '@solana/idl@0.1.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
+    dependencies:
+      '@solana-program/program-metadata': 0.5.1(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
+      '@solana/kit': 6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      commander: 13.1.0
+      picocolors: 1.1.1
 
   '@solana/instruction-plans@6.5.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)':
     dependencies:

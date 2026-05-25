@@ -1,3 +1,4 @@
 minimumReleaseAgeExclude:
   - '@codama/*'
+  - '@solana/idl'
   - codama
