@@ -15,7 +15,6 @@
         "sb": "storybook dev -p 6006",
         "scan": "next dev & react-scan localhost:3000",
         "start": "next start",
-        "types": "tsc --noEmit",
         "test": "vitest --project specs run",
         "test:ci": "vitest --project specs run",
         "test:e2e": "playwright test",
@@ -23,7 +22,9 @@
         "test:e2e:ui": "playwright test --ui",
         "test:sb": "vitest --project storybook run",
         "test:sb:watch": "vitest --project storybook --watch",
-        "test:watch": "vitest --project specs --watch"
+        "test:watch": "vitest --project specs --watch",
+        "pretypes": "next build",
+        "types": "tsc --noEmit"
     },
     "dependencies": {
         "@blockworks-foundation/mango-client": "3.6.7",
