@@ -26,11 +26,11 @@ interface AccountTokens {
     tokens?: TokenInfoWithPubkey[];
 }
 
-type State = Cache.State<AccountTokens>;
-type Dispatch = Cache.Dispatch<AccountTokens>;
+export type State = Cache.State<AccountTokens>;
+export type Dispatch = Cache.Dispatch<AccountTokens>;
 
-const StateContext = React.createContext<State | undefined>(undefined);
-const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+export const StateContext = React.createContext<State | undefined>(undefined);
+export const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
 
 type ProviderProps = { children: React.ReactNode };
 export function TokensProvider({ children }: ProviderProps) {

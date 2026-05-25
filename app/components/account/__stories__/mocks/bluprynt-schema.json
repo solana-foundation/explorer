@@ -1,0 +1,17 @@
+{
+  "address": "3q5CEU7HFwbVxjYMTzbRZa6MnVaJSNF5d9MeVxJEKAq6",
+  "capturedAt": "2026-05-25T22:13:18.611Z",
+  "info": {
+    "lamports": 1733040,
+    "data": [
+      "Ad6IkKiGDzEUuNYoZFw8nxzKJ1ytLU+8B3WK4jd7PQDpDAAAAEJsdXByeW50IEtZSR4AAABEZXZuZXQgQmx1cHJ5bnQgTWlDQSB2ZXJzaW9uIDECAAAADAIaAAAACQAAAGlwZnNfaGFzaAkAAAB0aW1lc3RhbXAAAQ==",
+      "base64"
+    ],
+    "owner": "22zoJMtdu4tQc2PzL74ZUT7FrwgB1Udec8DdW4yw4BdG",
+    "executable": false,
+    "rentEpoch": 18446744073709552000,
+    "space": 121
+  },
+  "source": "mainnet",
+  "version": 1
+}

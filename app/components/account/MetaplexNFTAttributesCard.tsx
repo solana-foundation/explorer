@@ -26,7 +26,7 @@ export function MetaplexNFTAttributesCard({ account, onNotFound }: { account?: A
     return <NormalMetaplexNFTAttributesCard metadataUri={parsedData.nftData.metadata.uri} />;
 }
 
-function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: string }) {
+export function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: string }) {
     const [attributes, setAttributes] = React.useState<Attribute[]>([]);
     const [status, setStatus] = React.useState<'loading' | 'success' | 'error'>('loading');
 
