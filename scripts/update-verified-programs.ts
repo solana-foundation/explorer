@@ -45,9 +45,10 @@ interface VerifiedProgram {
     verifiedAt: string | undefined;
 }
 
-const STATUS_CONCURRENCY = 5;
-const STATUS_RETRIES = 2;
-const RETRY_DELAY_MS = 500;
+const STATUS_CONCURRENCY = 2;
+const STATUS_RETRIES = 4;
+const RETRY_DELAY_MS = 1000;
+const CHUNK_DELAY_MS = 300;
 
 main();
 
@@ -85,7 +86,7 @@ async function main() {
                 verifiedAt: status?.last_verified_at?.split('.')[0] ?? undefined,
             };
         })
-        .sort((a, b) => a.name.localeCompare(b.name));
+        .sort((a, b) => a.address.localeCompare(b.address));
 
     if (programs.length === 0) {
         console.error('\nNo verified programs found -- aborting to avoid overwriting existing data');
@@ -114,9 +115,10 @@ async function fetchStatuses(addresses: string[]): Promise<Map<string, OSecStatu
     const chunks = chunkArray(addresses, STATUS_CONCURRENCY);
     let failures = 0;
 
-    for (const chunk of chunks) {
+    for (let i = 0; i < chunks.length; i++) {
+        if (i > 0) await sleep(CHUNK_DELAY_MS);
         const settled = await Promise.allSettled(
-            chunk.map(async addr => {
+            chunks[i].map(async addr => {
                 const status = await fetchJsonWithRetry<OSecStatus>(`${OSEC_BASE}/status/${addr}`, STATUS_RETRIES);
                 return { addr, status };
             }),
@@ -142,7 +144,7 @@ async function fetchStatuses(addresses: string[]): Promise<Map<string, OSecStatu
     return results;
 }
 
-const IDL_CONCURRENCY = 10;
+const IDL_CONCURRENCY = 5;
 
 function extractIdlName(idl: unknown): string | undefined {
     if (typeof idl !== 'object' || idl === undefined || idl === null) return undefined;
@@ -162,9 +164,10 @@ async function fetchIdlNames(addresses: string[]): Promise<Map<string, string>> 
     const rpc = createSolanaRpc(RPC_URL as string & { '~solana/rpc-api': unknown });
 
     const chunks = chunkArray(addresses, IDL_CONCURRENCY);
-    for (const chunk of chunks) {
+    for (let i = 0; i < chunks.length; i++) {
+        if (i > 0) await sleep(CHUNK_DELAY_MS);
         const settled = await Promise.allSettled(
-            chunk.map(async addr => {
+            chunks[i].map(async addr => {
                 const result = await fetchIdl(rpc, address(addr));
                 return { addr, name: result ? extractIdlName(result.idl) : undefined };
             }),
@@ -208,10 +211,14 @@ async function fetchJsonWithRetry<T>(url: string, retries: number): Promise<T> {
             return await fetchJson<T>(url);
         } catch (err) {
             if (attempt === retries) throw err;
-            await new Promise(r => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)));
+            await sleep(RETRY_DELAY_MS * 2 ** attempt);
         }
     }
     throw new Error('unreachable');
+}
+
+function sleep(ms: number): Promise<void> {
+    return new Promise(r => setTimeout(r, ms));
 }
 
 function chunkArray<T>(arr: T[], size: number): T[][] {
