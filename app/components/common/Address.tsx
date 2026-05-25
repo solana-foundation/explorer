@@ -8,20 +8,24 @@ import { PublicKey } from '@solana/web3.js';
 import { displayAddress, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import React from 'react';
-import { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { EditIcon, NicknameEditor, useNickname } from '@/app/features/nicknames';
 import { useVisibility } from '@/app/shared/lib/visibility';
 
 import { Copyable } from './Copyable';
 
+const MID_TRUNCATE_CHARS = 5;
+
+// Space reserved for Copyable's copy icon (13px SVG + 8px me-2 margin)
+const COPY_ICON_RESERVED_PX = 24;
+
 type Props = {
     pubkey: PublicKey;
     alignRight?: boolean;
     link?: boolean;
     raw?: boolean;
-    truncate?: boolean;
+    noTruncate?: boolean;
     truncateUnknown?: boolean;
     truncateChars?: number;
     useMetadata?: boolean;
@@ -36,8 +40,8 @@ export function Address({
     alignRight,
     link,
     raw,
-    truncate,
-    truncateUnknown,
+    noTruncate,
+    truncateUnknown: _truncateUnknown,
     truncateChars,
     useMetadata,
     overrideText,
@@ -50,12 +54,9 @@ export function Address({
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
     const [showNicknameEditor, setShowNicknameEditor] = useState(false);
     const nickname = useNickname(address);
-    const { ref: containerRef, isVisible } = useVisibility(fetchTokenLabelInfo);
+    const { ref: visibilityRef, isVisible } = useVisibility(fetchTokenLabelInfo);
 
     const display = displayAddress(address, cluster, tokenLabelInfo);
-    if (truncateUnknown && address === display) {
-        truncate = true;
-    }
 
     let addressLabel = raw ? address : display;
 
@@ -78,8 +79,47 @@ export function Address({
         addressLabel = overrideText;
     }
 
-    // Prepend nickname if exists
     const displayText = nickname ? `"${nickname}" (${addressLabel})` : addressLabel;
+
+    // Mid-truncation applies only to raw 44-char addresses (no nickname, no human-readable label)
+    const isMidTruncateCandidate = !noTruncate && !nickname && !overrideText && addressLabel === address;
+    const midTruncatedText = `${address.slice(0, MID_TRUNCATE_CHARS)}...${address.slice(-MID_TRUNCATE_CHARS)}`;
+
+    // Ref on the outer flex row — its clientWidth is the true available width
+    const rowRef = useRef<HTMLDivElement>(null);
+    const editBtnRef = useRef<HTMLButtonElement>(null);
+    const hiddenTextRef = useRef<HTMLSpanElement>(null);
+    const [isMidTruncated, setIsMidTruncated] = useState(false);
+
+    useEffect(() => {
+        if (!isMidTruncateCandidate) {
+            setIsMidTruncated(false);
+            return;
+        }
+
+        const check = () => {
+            const row = rowRef.current;
+            const hidden = hiddenTextRef.current;
+            if (!row || !hidden) return;
+
+            // Include the edit button's margin-start (e-ms-2 = 0.5rem) in the measurement
+            const editBtn = editBtnRef.current;
+            let editBtnSpace = 0;
+            if (editBtn) {
+                const style = getComputedStyle(editBtn);
+                editBtnSpace = editBtn.getBoundingClientRect().width + parseFloat(style.marginLeft || '0');
+            }
+            // Use getBoundingClientRect for sub-pixel precision
+            const available = row.clientWidth - COPY_ICON_RESERVED_PX - editBtnSpace;
+            setIsMidTruncated(hidden.getBoundingClientRect().width > available);
+        };
+
+        const observer = new ResizeObserver(check);
+        if (rowRef.current) observer.observe(rowRef.current);
+        check();
+
+        return () => observer.disconnect();
+    }, [isMidTruncateCandidate, displayText]);
 
     const handleMouseEnter = (text: string) => {
         const elements = document.querySelectorAll(`[data-address="${text}"]`);
@@ -95,48 +135,58 @@ export function Address({
         });
     };
 
-    const content = (
-        <div className="d-flex align-items-center gap-2" aria-label={ariaLabel}>
-            <Copyable text={address}>
-                <span
-                    data-address={address}
-                    className="font-monospace"
-                    onMouseEnter={() => handleMouseEnter(address)}
-                    onMouseLeave={() => handleMouseLeave(address)}
-                    title={nickname ? displayText : undefined}
-                >
-                    {link ? (
-                        <Link
-                            className={truncate || nickname ? 'text-truncate address-truncate' : ''}
-                            href={addressPath}
-                        >
-                            {displayText}
-                        </Link>
-                    ) : (
-                        <span className={truncate || nickname ? 'text-truncate address-truncate' : ''}>
-                            {displayText}
-                        </span>
-                    )}
-                </span>
-            </Copyable>
-            <button
-                className="btn btn-sm btn-link p-0 text-muted"
-                onClick={() => setShowNicknameEditor(true)}
-                title="Edit nickname"
-                style={{ fontSize: '0.875rem', lineHeight: 1 }}
-            >
-                <EditIcon />
-            </button>
-            {showNicknameEditor && <NicknameEditor address={address} onClose={() => setShowNicknameEditor(false)} />}
-        </div>
-    );
+    const visibleText = isMidTruncated ? midTruncatedText : displayText;
+
+    // Nickname uses CSS text-overflow truncation (trailing ellipsis)
+    const innerTextClassName = cn('e-font-mono', nickname && 'e-truncate');
 
     return (
-        <span ref={containerRef}>
-            <div className={cn('d-none d-md-flex align-items-center', alignRight && 'justify-content-end')}>
-                {content}
+        <span ref={visibilityRef} className="e-block e-w-full">
+            <div
+                ref={rowRef}
+                className={cn('e-relative e-flex e-w-full e-min-w-0 e-items-center', alignRight && 'md:e-justify-end')}
+                aria-label={ariaLabel}
+            >
+                {/* Hidden span for measuring the natural text width — absolutely positioned so it doesn't affect layout */}
+                {isMidTruncateCandidate && (
+                    <span
+                        ref={hiddenTextRef}
+                        className="e-pointer-events-none e-invisible e-absolute e-whitespace-nowrap e-font-mono"
+                        aria-hidden
+                    >
+                        {displayText}
+                    </span>
+                )}
+                <Copyable text={address}>
+                    <span
+                        data-address={address}
+                        className="e-relative e-min-w-0 e-overflow-hidden e-font-mono"
+                        onMouseEnter={() => handleMouseEnter(address)}
+                        onMouseLeave={() => handleMouseLeave(address)}
+                        title={nickname ? displayText : undefined}
+                    >
+                        {link ? (
+                            <Link href={addressPath} className={innerTextClassName}>
+                                {visibleText}
+                            </Link>
+                        ) : (
+                            <span className={innerTextClassName}>{visibleText}</span>
+                        )}
+                    </span>
+                </Copyable>
+                <button
+                    ref={editBtnRef}
+                    className="e-ms-2 e-flex-none e-shrink-0 e-cursor-pointer e-border-0 e-bg-transparent e-p-0 e-text-muted"
+                    onClick={() => setShowNicknameEditor(true)}
+                    title="Edit nickname"
+                    style={{ fontSize: '0.875rem', lineHeight: 1 }}
+                >
+                    <EditIcon />
+                </button>
+                {showNicknameEditor && (
+                    <NicknameEditor address={address} onClose={() => setShowNicknameEditor(false)} />
+                )}
             </div>
-            <div className="d-flex d-md-none align-items-center">{content}</div>
         </span>
     );
 }

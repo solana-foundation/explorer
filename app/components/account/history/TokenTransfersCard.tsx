@@ -66,7 +66,7 @@ function TransferRow({
     return (
         <tr key={signature + index + (childIndex || '')}>
             <td>
-                <Signature signature={signature} link truncateChars={24} />
+                <Signature signature={signature} link />
             </td>
 
             {hasTimestamps && <td className="text-muted">{blockTime && <RelativeTime date={blockTime * 1000} />}</td>}

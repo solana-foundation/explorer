@@ -91,7 +91,7 @@ function SignatureRow({
             <td>
                 <span className="badge bg-info-soft me-1">{index + 1}</span>
             </td>
-            <td>{signature ? <Signature signature={signature} truncateChars={40} /> : 'Missing Signature'}</td>
+            <td>{signature ? <Signature signature={signature} /> : 'Missing Signature'}</td>
             <td>
                 <Address pubkey={signer} link />
             </td>
