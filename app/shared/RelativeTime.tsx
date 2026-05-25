@@ -1,5 +1,3 @@
-'use client';
-
 import { formatRelativeTime } from '@utils/date';
 import { useEffect, useState } from 'react';
 
@@ -19,5 +17,9 @@ export function RelativeTime({ date, interval = 60_000 }: Props) {
         return () => clearInterval(id);
     }, [interval]);
 
-    return <time dateTime={new Date(date).toISOString()}>{formatRelativeTime(date, now)}</time>;
+    return (
+        <time dateTime={new Date(date).toISOString()} suppressHydrationWarning>
+            {formatRelativeTime(date, now)}
+        </time>
+    );
 }
