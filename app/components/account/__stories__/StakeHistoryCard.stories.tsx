@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { withCluster } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 
 import { StakeHistoryCard } from '../StakeHistoryCard';
 
 const meta: Meta<typeof StakeHistoryCard> = {
     component: StakeHistoryCard,
     decorators: [withCluster],
+    parameters: nextjsParameters,
     title: 'Components/Account/StakeHistoryCard',
 };
 

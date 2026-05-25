@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { withCluster } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 
 import { VotesCard } from '../VotesCard';
 
 const meta: Meta<typeof VotesCard> = {
     component: VotesCard,
     decorators: [withCluster],
+    parameters: nextjsParameters,
     title: 'Components/Account/VotesCard',
 };
 

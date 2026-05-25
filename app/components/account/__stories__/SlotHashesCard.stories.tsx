@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { withCluster } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 
 import { SlotHashesCard } from '../SlotHashesCard';
 
 const meta: Meta<typeof SlotHashesCard> = {
     component: SlotHashesCard,
     decorators: [withCluster],
+    parameters: nextjsParameters,
     title: 'Components/Account/SlotHashesCard',
 };
 
