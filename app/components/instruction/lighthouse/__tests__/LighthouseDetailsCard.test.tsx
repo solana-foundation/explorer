@@ -82,7 +82,7 @@ describe('LighthouseDetailsCard', () => {
     };
 
     describe('Assert Instructions', () => {
-        it('renders Assert Sysvar Clock instruction', () => {
+        it('should render Assert Sysvar Clock instruction', () => {
             // 5dakXwp5QTySbvc6P1Wp9MLZubnnG4R1Dh6cWSgNv6w1xt2JMsTp7EZvWEUxk9YLbJZHG97TT3jMVJ4yMTXKjM2L
             const ix = {
                 data: Buffer.from([15, 0, 0, 166, 238, 134, 18, 0, 0, 0, 0, 3]),
@@ -114,7 +114,7 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs2).toHaveTextContent('<');
         });
 
-        it('renders Assert Account Info instruction', () => {
+        it('should render Assert Account Info instruction', () => {
             // 43PnzYerXr5b4LNf8A1j8kqztt8Voa7oiL9pzDTmWwSKCeLdZbLLJRd9A2XebiJvRP6kjNW6pF4mnGYnbSsRNXoU
             const ix = {
                 data: Buffer.from([5, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
@@ -156,7 +156,7 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs2).toHaveTextContent('=');
         });
 
-        it('renders Assert Token Account instruction', () => {
+        it('should render Assert Token Account instruction', () => {
             // 5ZtLCLaUGDVXyCZhKLiiNTFqasqUAwahpEeFNHM86amL2awLDByWkuWAdz6C7gdt1GRmfDbjUooh8ozL6a5LUyeZ
             const ix = {
                 data: Buffer.from([9, 0, 2, 102, 198, 105, 197, 1, 0, 0, 0, 2]),
@@ -198,7 +198,7 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs2).toHaveTextContent('>');
         });
 
-        it('renders Assert Bubblegum Tree Config instruction', () => {
+        it('should render Assert Bubblegum Tree Config instruction', () => {
             // 5WA6DR6vBbyk6wsyxfFAQcsyFLLFamPFKWwgYMSpWbFdUBCCP2WweVggGKtrnJmUa8yyZE5ykqeaQe97daxpPMKZ
             const ix = {
                 data: Buffer.from([
@@ -243,7 +243,7 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs2).toHaveTextContent('=');
         });
 
-        it('renders Assert Upgradeable Loader Account instruction', () => {
+        it('should render Assert Upgradeable Loader Account instruction', () => {
             // 2PmrAtG26M6g8YiokmgbqrJYT4Rhe3kRN3AY3WCcu7NPuX4Jc4aiXoNb5aZuFK48vYhm8pDmwZhVZ9sP6KMAdsKw
             const ix = {
                 data: Buffer.from([
@@ -300,7 +300,7 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs3b).toHaveTextContent('=');
         });
 
-        it('Renders Assert Account Delta instruction', () => {
+        it('should render Assert Account Delta instruction', () => {
             // 66hhUzJEyouUj6Zge5kK8UQxKncTbmntXCPeHAL9pLEQQKeAAVKoyTwSRuF59EuMAhJcwgwEgyY6X3svHdSgHZzL
             const ix = {
                 data: Buffer.from([
@@ -361,7 +361,7 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs4).toHaveTextContent('>=');
         });
 
-        it('Renders Memory Write instruction', () => {
+        it('should render Memory Write instruction', () => {
             // 66hhUzJEyouUj6Zge5kK8UQxKncTbmntXCPeHAL9pLEQQKeAAVKoyTwSRuF59EuMAhJcwgwEgyY6X3svHdSgHZzL
             const ix = {
                 data: Buffer.from([0, 0, 254, 0, 1, 1]),
@@ -444,7 +444,7 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs1b).toHaveTextContent('1');
         });
 
-        it('Renders Memory Close instruction', () => {
+        it('should render Memory Close instruction', () => {
             // 4L7Bfjj8P5GyChqaVmVFbxxgzrhzAkBJU6Tk3DtsL75m35GYTS35q9mQbUUcpffDj2g14xxWRARWFtMUGpeEDxnG
             const ix = {
                 data: Buffer.from([1, 0, 254]),
@@ -497,7 +497,7 @@ describe('LighthouseDetailsCard', () => {
     });
 
     describe('Assert Multi Instructions', () => {
-        it('renders AssertTokenAccountMulti instruction', () => {
+        it('should render AssertTokenAccountMulti instruction', () => {
             const ix = {
                 data: Buffer.from([
                     10, 5, 6, 8, 2, 204, 80, 128, 133, 6, 0, 0, 0, 4, 2, 168, 134, 128, 222, 10, 0, 0, 0, 5, 3, 0, 0, 6,
@@ -519,7 +519,7 @@ describe('LighthouseDetailsCard', () => {
             expect(screen.getByText('Lighthouse: Assert Token Account Multi')).toBeInTheDocument();
         });
 
-        it('renders Assert Account Info Multi instruction', () => {
+        it('should render Assert Account Info Multi instruction', () => {
             // 6LHBhFVLwuqiH93znCkyzMBZCkye5eHSBBeNZsz7m7M4SmJny9PQkiWtzdquEQvPfHVmn6bT6AeMa4pjNCVbefA
             const ix = {
                 data: Buffer.from([6, 5, 3, 0, 112, 1, 103, 2, 0, 0, 0, 0, 4, 0, 100, 2, 1, 4, 0, 0, 0, 0, 5, 3, 0, 0]),
@@ -597,7 +597,7 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs1cChild1).toHaveTextContent('=');
         });
 
-        it('renders Assert Stake Account Multi instruction', () => {
+        it('should render Assert Stake Account Multi instruction', () => {
             // 6LHBhFVLwuqiH93znCkyzMBZCkye5eHSBBeNZsz7m7M4SmJny9PQkiWtzdquEQvPfHVmn6bT6AeMa4pjNCVbefA
             const ix = {
                 data: Buffer.from([

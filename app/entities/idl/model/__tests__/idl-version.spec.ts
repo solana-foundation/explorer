@@ -102,51 +102,51 @@ describe('isInteractiveIdlSupported', () => {
 
 describe('isIdlProgramIdMismatch', () => {
     describe('Anchor IDL', () => {
-        it('returns false when address matches programAddress', () => {
+        it('should return false when address matches programAddress', () => {
             const idl = createMockIdl('anchor', '0.1.0', DEFAULT_PUBKEY);
             expect(isIdlProgramIdMismatch(idl, DEFAULT_PUBKEY)).toBe(false);
         });
 
-        it('returns true when address differs from programAddress', () => {
+        it('should return true when address differs from programAddress', () => {
             const idl = createMockIdl('anchor', '0.1.0', DEFAULT_PUBKEY);
             const randomAddress = PublicKey.unique().toBase58();
             expect(isIdlProgramIdMismatch(idl, randomAddress)).toBe(true);
         });
 
-        it('returns false when address is undefined', () => {
+        it('should return false when address is undefined', () => {
             const idl = { ...createMockIdl('anchor', '0.1.0'), address: undefined } as unknown as SupportedIdl;
             expect(isIdlProgramIdMismatch(idl, DEFAULT_PUBKEY)).toBe(false);
         });
 
-        it('returns false when address is empty string', () => {
+        it('should return false when address is empty string', () => {
             const idl = createMockIdl('anchor', '0.1.0', '');
             expect(isIdlProgramIdMismatch(idl, DEFAULT_PUBKEY)).toBe(false);
         });
 
-        it('returns true when IDL address is invalid', () => {
+        it('should return true when IDL address is invalid', () => {
             const idl = createMockIdl('anchor', '0.1.0', 'not-a-key');
             expect(isIdlProgramIdMismatch(idl, DEFAULT_PUBKEY)).toBe(true);
         });
 
-        it('returns true when programAddress is invalid', () => {
+        it('should return true when programAddress is invalid', () => {
             const idl = createMockIdl('anchor', '0.1.0', DEFAULT_PUBKEY);
             expect(isIdlProgramIdMismatch(idl, 'not-a-key')).toBe(true);
         });
     });
 
     describe('Codama IDL', () => {
-        it('returns false when program.publicKey matches programAddress', () => {
+        it('should return false when program.publicKey matches programAddress', () => {
             const idl = createMockIdl('codama', '1.0.0', DEFAULT_PUBKEY);
             expect(isIdlProgramIdMismatch(idl, DEFAULT_PUBKEY)).toBe(false);
         });
 
-        it('returns true when program.publicKey differs from programAddress', () => {
+        it('should return true when program.publicKey differs from programAddress', () => {
             const idl = createMockIdl('codama', '1.0.0', DEFAULT_PUBKEY);
             const randomAddress = PublicKey.unique().toBase58();
             expect(isIdlProgramIdMismatch(idl, randomAddress)).toBe(true);
         });
 
-        it('returns false when program.publicKey is empty string', () => {
+        it('should return false when program.publicKey is empty string', () => {
             const idl = createMockIdl('codama', '1.0.0', '');
             expect(isIdlProgramIdMismatch(idl, DEFAULT_PUBKEY)).toBe(false);
         });

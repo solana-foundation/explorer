@@ -13,7 +13,7 @@ import { isEnvEnabled } from '@utils/env';
 import { BotIdClient } from 'botid/client';
 import type { Viewport } from 'next';
 import { Rubik } from 'next/font/google';
-import { Metadata } from 'next/types';
+import { type Metadata } from 'next/types';
 import { Suspense } from 'react';
 
 import { SearchBar } from '@/app/components/SearchBarLoader';

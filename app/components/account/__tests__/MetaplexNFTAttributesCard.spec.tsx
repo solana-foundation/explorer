@@ -45,7 +45,7 @@ describe('MetaplexNFTAttributesCard', () => {
         vi.restoreAllMocks();
     });
 
-    it('renders attributes table after successful fetch', async () => {
+    it('should render attributes table after successful fetch', async () => {
         const mockAttributes = {
             attributes: [
                 { trait_type: 'Background', value: 'Blue' },
@@ -69,7 +69,7 @@ describe('MetaplexNFTAttributesCard', () => {
         expect(screen.getByText('Legendary')).toBeDefined();
     });
 
-    it('shows error card when fetch fails', async () => {
+    it('should show error card when fetch fails', async () => {
         global.fetch = vi.fn().mockRejectedValueOnce(new Error('Network error'));
 
         const account = makeAccount('https://example.com/metadata.json');

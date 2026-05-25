@@ -113,7 +113,7 @@ describe('base64TxSearchProvider', () => {
             // data character ('q' → 'x') changes trailing bits so the
             // decoded bytes re-encode to a different string.
             const valid = Buffer.alloc(70, 0xab).toString('base64');
-            const corrupted = valid.slice(0, -4) + 'qx==';
+            const corrupted = `${valid.slice(0, -4)}qx==`;
             expect(await base64TxSearchProvider.search(corrupted, ctx)).toEqual([]);
         });
 

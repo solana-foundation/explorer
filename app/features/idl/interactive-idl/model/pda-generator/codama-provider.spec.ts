@@ -500,7 +500,7 @@ describe('createCodamaPdaProvider', () => {
 
             expect(result.pdaAccount).toBeDefined();
             // 32 zero bytes in hex = 64 hex chars
-            expect(result.pdaAccount.seeds[0].name).toBe('0x' + '0'.repeat(64));
+            expect(result.pdaAccount.seeds[0].name).toBe(`0x${'0'.repeat(64)}`);
         });
 
         it('should handle constant seed with programIdValueNode', async () => {

@@ -10,7 +10,13 @@ import React, { useEffect } from 'react';
 // messaging), which throws on BigInt. Story fixtures here use BigInt for lamports / epoch values,
 // so teach BigInt how to encode itself as a string.
 
-(BigInt.prototype as any).toJSON = function () {
+declare global {
+    interface BigInt {
+        toJSON(): string;
+    }
+}
+
+BigInt.prototype.toJSON = function () {
     return this.toString();
 };
 

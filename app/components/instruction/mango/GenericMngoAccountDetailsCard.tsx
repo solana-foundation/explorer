@@ -20,7 +20,7 @@ export function GenericMngoAccountDetailsCard(props: {
             ix={ix}
             index={index}
             result={result}
-            title={'Mango Program: ' + title}
+            title={`Mango Program: ${title}`}
             innerCards={innerCards}
             childIndex={childIndex}
         >
