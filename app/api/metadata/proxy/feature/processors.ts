@@ -1,6 +1,6 @@
 import { Logger } from '@/app/shared/lib/logger';
 
-import { errors, matchMaxSizeError } from './errors';
+import { matchMaxSizeError, statusError } from './errors';
 
 /**
  * process binary data and catch any specific errors
@@ -15,11 +15,10 @@ export async function processBinary(data: Response) {
         return { data: buffer, headers };
     } catch (error) {
         if (matchMaxSizeError(error)) {
-            throw errors[413];
-        } else {
-            Logger.debug('[api:metadata-proxy] Failed to process binary data', { error });
-            throw errors[500];
+            throw statusError(413, 'Binary body exceeds max size', { cause: error });
         }
+        Logger.debug('[api:metadata-proxy] Failed to process binary data', { error });
+        throw statusError(500, 'Failed to process binary data', { cause: error });
     }
 }
 
@@ -35,14 +34,13 @@ export async function processJson(data: Response) {
         return { data: json, headers };
     } catch (error) {
         if (matchMaxSizeError(error)) {
-            throw errors[413];
+            throw statusError(413, 'JSON body exceeds max size', { cause: error });
         } else if (error instanceof SyntaxError) {
             // Handle JSON syntax errors specifically
-            throw errors[415];
-        } else {
-            Logger.debug('[api:metadata-proxy] Failed to process JSON data', { error });
-            throw errors[500];
+            throw statusError(415, 'Malformed JSON in upstream response', { cause: error });
         }
+        Logger.debug('[api:metadata-proxy] Failed to process JSON data', { error });
+        throw statusError(500, 'Failed to process JSON data', { cause: error });
     }
 }
 
@@ -62,12 +60,11 @@ export async function processTextAsJson(data: Response) {
         return { data: json, headers };
     } catch (error) {
         if (matchMaxSizeError(error)) {
-            throw errors[413];
+            throw statusError(413, 'Text body exceeds max size', { cause: error });
         } else if (error instanceof SyntaxError) {
-            throw errors[415];
-        } else {
-            Logger.debug('[api:metadata-proxy] Failed to process text-as-JSON data', { error });
-            throw errors[500];
+            throw statusError(415, 'Malformed JSON in text upstream response', { cause: error });
         }
+        Logger.debug('[api:metadata-proxy] Failed to process text-as-JSON data', { error });
+        throw statusError(500, 'Failed to process text-as-JSON data', { cause: error });
     }
 }

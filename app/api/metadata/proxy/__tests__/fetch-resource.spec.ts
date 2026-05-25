@@ -59,7 +59,7 @@ describe('fetchResource', () => {
 
         await expect(() => {
             return fetchResource(uri, headers, 100, 100);
-        }).rejects.toThrowError('Unsupported Media Type');
+        }).rejects.toMatchObject({ status: 415 });
     });
 
     it('should throw exception upon exceeded size when fetch rejects', async () => {
@@ -67,7 +67,7 @@ describe('fetchResource', () => {
 
         await expect(() => {
             return fetchResource(uri, headers, 100, 100);
-        }).rejects.toThrowError('Max Content Size Exceeded');
+        }).rejects.toMatchObject({ status: 413 });
     });
 
     it('should throw exception when content-length exceeds limit', async () => {
@@ -79,7 +79,7 @@ describe('fetchResource', () => {
 
         await expect(() => {
             return fetchResource(uri, headers, 100, 100);
-        }).rejects.toThrowError('Max Content Size Exceeded');
+        }).rejects.toMatchObject({ status: 413 });
     });
 
     it('should throw exception when streamed body exceeds limit without Content-Length', async () => {
@@ -98,7 +98,7 @@ describe('fetchResource', () => {
 
         await expect(() => {
             return fetchResource(uri, headers, 100, 100);
-        }).rejects.toThrowError('Max Content Size Exceeded');
+        }).rejects.toMatchObject({ status: 413 });
     });
 
     it('should handle AbortSignal', async () => {
@@ -112,7 +112,7 @@ describe('fetchResource', () => {
 
         await expect(() => {
             return fetchResource(uri, headers, 100, 100);
-        }).rejects.toThrowError('Gateway Timeout');
+        }).rejects.toMatchObject({ status: 504 });
     });
 
     it('should handle size overflow', async () => {
@@ -120,19 +120,13 @@ describe('fetchResource', () => {
 
         await expect(() => {
             return fetchResource(uri, headers, 100, 100);
-        }).rejects.toThrowError('Max Content Size Exceeded');
+        }).rejects.toMatchObject({ status: 413 });
     });
 
     it('should handle unexpected result', async () => {
         fetchMock.mockRejectedValueOnce({ data: 'unexpected exception' });
 
-        try {
-            await fetchResource(uri, headers, 100, 100);
-        } catch (e: unknown) {
-            const err = e as { message: string; status: number };
-            expect(err.message).toEqual('General Error');
-            expect(err.status).toEqual(500);
-        }
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 500 });
     });
 
     it('should handle malformed JSON response gracefully', async () => {
@@ -140,7 +134,7 @@ describe('fetchResource', () => {
             headers: { 'Content-Type': 'application/json' },
         });
 
-        await expect(fetchResource(uri, headers, 1000, 1000)).rejects.toThrowError('Unsupported Media Type');
+        await expect(fetchResource(uri, headers, 1000, 1000)).rejects.toMatchObject({ status: 415 });
     });
 
     it('should warn to Sentry when fetch fails with a general error', async () => {
@@ -154,10 +148,10 @@ describe('fetchResource', () => {
         });
     });
 
-    it('should throw Bad Gateway when upstream returns a non-2xx status', async () => {
+    it('should throw 502 when upstream returns a non-2xx status', async () => {
         mockResponseOnce(null, { headers: { 'Content-Type': 'text/html' }, status: 403 });
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Bad Gateway');
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 502 });
 
         expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Upstream returned error', {
             status: 403,
@@ -180,13 +174,13 @@ describe('fetchResource', () => {
         mockRedirectOnce('http://169.254.169.254/latest/meta-data/');
         vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(true);
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Access Denied');
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 403 });
     });
 
-    it('should throw Bad Gateway when redirect has no Location header', async () => {
+    it('should throw 502 when redirect has no Location header', async () => {
         mockResponseOnce(null, { status: 302 });
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Bad Gateway');
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 502 });
     });
 
     // 304/305 are 3xx but don't carry a Location header by spec; they must be
@@ -194,7 +188,7 @@ describe('fetchResource', () => {
     it.each([304, 305])('should classify %i as an upstream error, not a redirect', async status => {
         mockResponseOnce(null, { status });
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Bad Gateway');
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 502 });
 
         expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Upstream returned error', {
             status,
@@ -202,23 +196,23 @@ describe('fetchResource', () => {
         });
     });
 
-    it('should throw Bad Gateway after too many redirects', async () => {
+    it('should throw 502 after too many redirects', async () => {
         // 4 consecutive redirects (exceeds MAX_REDIRECTS of 3)
         for (let i = 0; i < 4; i++) {
             mockRedirectOnce(`http://hop${i}.example.com/`);
             vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(false);
         }
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Bad Gateway');
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 502 });
     });
 
-    it('should throw Bad Gateway when a redirect loop is detected', async () => {
+    it('should throw 502 when a redirect loop is detected', async () => {
         mockRedirectOnce('http://b.example.com/');
         vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(false);
         mockRedirectOnce(uri);
         vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(false);
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Bad Gateway');
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 502 });
 
         // Should bail after 2 fetches, not exhaust MAX_REDIRECTS
         expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -227,6 +221,6 @@ describe('fetchResource', () => {
     it('should block redirect to non-HTTP protocol', async () => {
         mockRedirectOnce('file:///etc/passwd');
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Access Denied');
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 403 });
     });
 });

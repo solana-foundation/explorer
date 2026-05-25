@@ -2,7 +2,15 @@ import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { checkURLForPrivateIP, errors, fetchResource, isHTTPProtocol, matchJsonContent, StatusError } from './feature';
+import {
+    checkURLForPrivateIP,
+    fetchResource,
+    isHTTPProtocol,
+    matchJsonContent,
+    STATUS_MESSAGES,
+    type StatusCode,
+    StatusError,
+} from './feature';
 
 export const dynamic = 'force-dynamic';
 
@@ -98,10 +106,10 @@ function buildResponse(data: unknown, resourceHeaders: Headers): NextResponse {
     return respondWithError(415);
 }
 
-function isKnownStatus(status: number): status is keyof typeof errors {
-    return status in errors;
+function isKnownStatus(status: number): status is StatusCode {
+    return status in STATUS_MESSAGES;
 }
 
-function respondWithError(status: keyof typeof errors) {
-    return NextResponse.json({ error: errors[status].message }, { status });
+function respondWithError(status: StatusCode) {
+    return NextResponse.json({ error: STATUS_MESSAGES[status] }, { status });
 }

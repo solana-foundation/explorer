@@ -1,15 +1,6 @@
 import { Logger } from '@/app/shared/lib/logger';
 
-import {
-    accessDeniedError,
-    badGatewayError,
-    errors,
-    matchAbortError,
-    matchMaxSizeError,
-    matchTimeoutError,
-    StatusError,
-    unsupportedMediaError,
-} from './errors';
+import { matchAbortError, matchMaxSizeError, matchTimeoutError, StatusError, statusError } from './errors';
 import { checkURLForPrivateIP, isHTTPProtocol } from './ip';
 import { processBinary, processJson, processTextAsJson } from './processors';
 import { readBodyWithLimit } from './read-body-with-limit';
@@ -52,13 +43,13 @@ export async function fetchResource(
 
         if (visited.has(currentUrl.href)) {
             Logger.warn('[api:metadata-proxy] Redirect loop detected', { url: currentUrl.href });
-            throw badGatewayError;
+            throw statusError(502, 'Redirect loop detected');
         }
         visited.add(currentUrl.href);
     }
 
     Logger.warn('[api:metadata-proxy] Too many redirects', { url: currentUrl.href });
-    throw badGatewayError;
+    throw statusError(502, 'Too many redirects');
 }
 
 async function executeHop(url: URL, headers: Headers, timeout: number, size: number): Promise<HopResult> {
@@ -70,7 +61,7 @@ async function executeHop(url: URL, headers: Headers, timeout: number, size: num
 
     if (!response.ok) {
         Logger.warn('[api:metadata-proxy] Upstream returned error', { status: response.status, url: url.href });
-        throw badGatewayError;
+        throw statusError(502, `Upstream returned ${response.status}`);
     }
 
     return { kind: 'done', value: await processResponse(response, size) };
@@ -81,7 +72,7 @@ async function validateRedirectTarget(location: string, currentUrl: URL): Promis
 
     if (!isHTTPProtocol(nextUrl)) {
         Logger.warn('[api:metadata-proxy] Redirect to non-HTTP protocol blocked', { location, url: currentUrl.href });
-        throw accessDeniedError;
+        throw statusError(403, 'Redirect target uses non-HTTP protocol');
     }
 
     if (await checkURLForPrivateIP(nextUrl)) {
@@ -89,7 +80,7 @@ async function validateRedirectTarget(location: string, currentUrl: URL): Promis
             location,
             url: currentUrl.href,
         });
-        throw accessDeniedError;
+        throw statusError(403, 'Redirect target resolves to a private IP');
     }
 
     return nextUrl;
@@ -112,7 +103,7 @@ function extractRedirect(response: Response, url: URL): HopResult & { kind: 'red
             status: response.status,
             url: url.href,
         });
-        throw badGatewayError;
+        throw statusError(502, 'Redirect missing Location header');
     }
     return { kind: 'redirect', location };
 }
@@ -136,14 +127,14 @@ async function processResponse(response: Response, size: number): Promise<FetchR
     const contentLength = Number(response.headers.get('content-length'));
     if (Number.isFinite(contentLength) && contentLength > size) {
         await response.body?.cancel();
-        throw errors[413];
+        throw statusError(413, `Content-Length ${contentLength} exceeds max size ${size}`);
     }
 
     let buffered: ArrayBuffer;
     try {
         buffered = await readBodyWithLimit(response, size);
     } catch (e) {
-        if (matchMaxSizeError(e)) throw errors[413];
+        if (matchMaxSizeError(e)) throw statusError(413, 'Streamed body exceeds max size', { cause: e });
         throw e;
     }
     // Re-wrap so processors keep using `.arrayBuffer()` / `.json()` / `.text()`.
@@ -154,7 +145,7 @@ async function processResponse(response: Response, size: number): Promise<FetchR
     if (matchTextPlain(contentType)) return processTextAsJson(rewrapped);
     if (matchImage(contentType)) return processBinary(rewrapped);
 
-    throw unsupportedMediaError;
+    throw statusError(415, `Unsupported content-type: ${contentType ?? '(none)'}`);
 }
 
 function handleFetchError(e: unknown, url: URL): StatusError {
@@ -164,11 +155,11 @@ function handleFetchError(e: unknown, url: URL): StatusError {
     }
 
     if (error instanceof StatusError) return error;
-    if (matchTimeoutError(error)) return errors[504];
-    if (matchMaxSizeError(error)) return errors[413];
-    if (matchAbortError(error)) return errors[504];
+    if (matchTimeoutError(error)) return statusError(504, 'Upstream fetch timed out', { cause: error });
+    if (matchMaxSizeError(error)) return statusError(413, 'Streamed body exceeds max size', { cause: error });
+    if (matchAbortError(error)) return statusError(504, 'Upstream fetch aborted', { cause: error });
 
     // Reported to Sentry so we can gauge whether network failures are common.
     Logger.warn('[api:metadata-proxy] Fetch failed', { sentry: true, url: url.href });
-    return errors[500];
+    return statusError(500, 'Fetch failed', { cause: error });
 }
