@@ -17,7 +17,12 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
 
         return (
             <div ref={ref} className={cn('card', className)}>
-                <div className={cn('card-header e-min-h-[60px] e-h-auto e-gap-2', collapsible && !expanded && 'border-0')}>
+                <div
+                    className={cn(
+                        'card-header e-h-auto e-min-h-[60px] e-gap-2',
+                        collapsible && !expanded && 'border-0',
+                    )}
+                >
                     <h3 className="card-header-title e-flex e-items-center e-break-all">{title}</h3>
                     {headerButtons}
                     {collapsible && (

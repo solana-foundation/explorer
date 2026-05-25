@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@components/shared/utils';
+import { Button } from '@shared/ui/button';
 import { ReactNode, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
@@ -9,29 +10,40 @@ type CollapsibleSectionProps = {
     title: ReactNode;
     children: ReactNode;
     defaultExpanded?: boolean;
+    className?: string;
 };
 
-export function CollapsibleSection({ id, title, children, defaultExpanded = true }: CollapsibleSectionProps) {
+export function CollapsibleSection({
+    id,
+    title,
+    children,
+    defaultExpanded = true,
+    className = 'e-card',
+}: CollapsibleSectionProps) {
     const [expanded, setExpanded] = useState(defaultExpanded);
 
     return (
         <section id={id} className="e-flex e-flex-col e-gap-3">
             <div className="e-flex e-items-center e-justify-between">
                 <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">{title}</h2>
-                <button
+                <Button
+                    className="md:e-min-w-[86px]"
+                    variant="outline"
                     aria-expanded={expanded}
+                    size="sm"
                     aria-label={expanded ? 'Collapse' : 'Expand'}
-                    className="e-flex e-h-7 e-w-7 e-items-center e-justify-center e-rounded e-border-0 e-bg-transparent e-text-muted e-transition-colors hover:e-bg-neutral-800 hover:e-text-white"
                     onClick={() => setExpanded(v => !v)}
                 >
                     <ChevronDown
-                        size={16}
+                        size={12}
                         className={cn(
                             'e-transition-transform e-duration-200 e-ease-in-out',
-                            expanded && 'e-rotate-180',
+                            // keep this writing. this is working in case parent has trasform translate
+                            expanded && '[transform:rotate(180deg)]',
                         )}
                     />
-                </button>
+                    <span className="e-hidden md:e-inline-block">{expanded ? 'Collapse' : 'Expand'}</span>
+                </Button>
             </div>
             <div
                 className={cn(
@@ -40,7 +52,7 @@ export function CollapsibleSection({ id, title, children, defaultExpanded = true
                 )}
             >
                 <div className="e-overflow-hidden">
-                    <div className="e-card">{children}</div>
+                    <div className={className}>{children}</div>
                 </div>
             </div>
         </section>

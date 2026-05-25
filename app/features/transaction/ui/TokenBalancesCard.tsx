@@ -2,7 +2,8 @@
 
 import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
-import { BalanceDelta } from '@components/common/BalanceDelta';
+import { BalanceDelta, toBigNumber } from '@components/common/BalanceDelta';
+import { cn } from '@components/shared/utils';
 import { useTransactionDetails } from '@providers/transactions';
 import { ParsedMessageAccount, PublicKey, TokenBalance } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
@@ -12,9 +13,8 @@ import useAsyncEffect from 'use-async-effect';
 
 import { useScaledUiAmountForMint } from '@/app/providers/accounts/tokens';
 import { useCluster } from '@/app/providers/cluster';
-import { getTokenInfos } from '@/app/utils/token-info';
-import { cn } from '@components/shared/utils';
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
+import { getTokenInfos } from '@/app/utils/token-info';
 
 import { CollapsibleSection } from './CollapsibleSection';
 
@@ -74,17 +74,19 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
             <div
                 className={cn(
                     'e-hidden e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
-                    'e-grid-cols-[1fr_minmax(auto,170px)_minmax(auto,140px)__minmax(auto,80px)] e-gap-5 e-text-xs e-uppercase e-text-muted',
+                    'e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,140px)] e-gap-5 e-text-xs e-uppercase e-text-muted',
                     'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid]',
                 )}
             >
-                <div>Owner / Address</div>
+                <div>#</div>
+                <div>Owner / Address / Token</div>
                 <div>Change</div>
                 <div className="e-text-right">Post Balance</div>
-                <div className="e-text-right">Token</div>
+                {/* <div className="e-text-right">Token</div> */}
             </div>
-            {rows.map(row => (
+            {rows.map((row, index) => (
                 <TokenBalanceRow
+                    index={index}
                     key={row.account.toBase58() + row.mint}
                     account={row.account}
                     owner={row.owner}
@@ -105,6 +107,7 @@ function TokenBalanceRow({
     balance,
     mint,
     units,
+    index,
 }: {
     account: PublicKey;
     owner?: string;
@@ -112,22 +115,25 @@ function TokenBalanceRow({
     balance: string;
     mint: string;
     units: string;
+    index: number;
 }) {
     const { isLg } = useBreakpoint();
     const key = account.toBase58() + mint;
     const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(mint, balance);
+    const isDeltaExists = toBigNumber(delta).gt(0) || toBigNumber(delta).lt(0);
 
     return (
         <div
             key={key}
             className={cn(
                 'e-min-h-9 e-px-3 e-py-1.5 md:e-px-4',
-                'e-grid e-items-start e-gap-x-5 e-gap-y-0.5 e-whitespace-nowrap e-text-sm md:e-gap-y-0',
-                'e-grid-cols-[1fr_auto] lg:e-grid-cols-[1fr_minmax(auto,170px)_minmax(auto,140px)__minmax(auto,80px)]',
-                "[grid-template-areas:'symbol_change'_'symbol_balance'_'address_address'] lg:[grid-template-areas:'address_change_balance_symbol']",
+                'e-grid e-items-start e-gap-y-0.5 e-whitespace-nowrap e-text-sm md:e-gap-y-0 lg:e-gap-x-5',
+                'e-grid-cols-[minmax(auto,1.75rem)_1fr] lg:e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,140px)]',
+                "[grid-template-areas:'number_address'_'number_balance'_'number_change'] lg:[grid-template-areas:'number_address_change_balance']",
                 'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid] last:e-border-b-0',
             )}
         >
+            <div className="e-text-muted [grid-area:number]">{index + 1}</div>
             <div className="e-flex e-flex-col [grid-area:address]">
                 {owner && (
                     <div className="e-flex e-items-center e-gap-2 md:e-gap-3">
@@ -139,19 +145,20 @@ function TokenBalanceRow({
                     <span className="e-min-w-11 e-text-sm e-text-muted">Addr</span>
                     <Address pubkey={account} link />
                 </div>
+                <div className="e-flex e-items-center e-gap-2 md:e-gap-3">
+                    <span className="e-min-w-11 e-text-sm e-text-muted">Token</span>
+                    <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo />
+                </div>
             </div>
             <div className="e-justify-self-end [grid-area:change] lg:e-justify-self-start">
-                <BalanceDelta delta={delta.multipliedBy(scaledUiAmountMultiplier)} />
+                {(isDeltaExists || isLg) && <BalanceDelta delta={delta.multipliedBy(scaledUiAmountMultiplier)} />}
             </div>
-            <div className="e-justify-self-start [grid-area:balance] lg:e-justify-self-end">
+            <div className="e-justify-self-end [grid-area:balance]">
                 {new BigNumber(balance).multipliedBy(scaledUiAmountMultiplier).toString()} {units}
                 <ScaledUiAmountMultiplierTooltip
                     rawAmount={balance}
                     scaledUiAmountMultiplier={scaledUiAmountMultiplier}
                 />
-            </div>
-            <div className="e-justify-self-start [grid-area:symbol]">
-                <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo={!isLg} />
             </div>
         </div>
     );

@@ -5,11 +5,8 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
 import { SolBalance } from '@components/common/SolBalance';
-import { SignatureContext } from '@components/instruction/SignatureContext';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
-import { CUProfilingSection } from '@features/cu-profiling';
-import { Receipt, ViewReceiptButton } from '@features/receipt';
-import { isReceiptEnabled } from '@features/receipt';
+import { ViewReceiptButton } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import {
@@ -18,11 +15,10 @@ import {
     useTransactionDetails,
     useTransactionStatus,
 } from '@providers/transactions';
-import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import { Button } from '@shared/ui/button';
 import { RefreshButton } from '@shared/ui/refresh-button';
 import { cn } from '@shared/utils';
-import { ParsedTransaction, SystemInstruction, SystemProgram, TransactionSignature } from '@solana/web3.js';
+import { ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { displayTimestamp } from '@utils/date';
 import { SignatureProps } from '@utils/index';
@@ -30,7 +26,7 @@ import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { ZoomIn } from 'react-feather';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
@@ -59,7 +55,7 @@ function Label({ children, className, ...props }: React.HTMLAttributes<HTMLDivEl
     return (
         <div
             className={cn(
-                'e-flex e-flex-wrap e-items-center e-gap-1 e-text-sm e-text-muted e-overflow-hidden',
+                'e-flex e-flex-wrap e-items-center e-gap-1 e-overflow-hidden e-text-sm e-text-muted',
                 className,
             )}
             {...props}
@@ -71,13 +67,7 @@ function Label({ children, className, ...props }: React.HTMLAttributes<HTMLDivEl
 
 function Value({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
     return (
-        <div
-            className={cn(
-                'e-break-all e-font-mono e-text-sm e-text-white',
-                className,
-            )}
-            {...props}
-        >
+        <div className={cn('e-break-all e-font-mono e-text-sm e-text-white', className)} {...props}>
             {children}
         </div>
     );
@@ -216,7 +206,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
         <section id="summary" className="e-flex e-flex-col e-gap-3">
             <div className="e-flex e-justify-between">
                 <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">Summary</h2>
-                <div className='e-flex e-shrink-0 e-gap-1'>
+                <div className="e-flex e-shrink-0 e-gap-1">
                     <ViewReceiptButton
                         signature={signature}
                         transactionWithMeta={transactionWithMeta}
@@ -246,7 +236,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                 </div>
             </div>
 
-            <div className='e-card'>
+            <div className="e-card">
                 {/* Status */}
                 <Row divider>
                     <Label>Status</Label>
@@ -269,16 +259,16 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                 <Row divider>
                     <Label>Signature</Label>
                     <Value>
-                        <Signature signature={signature} className='!e-items-start' />
+                        <Signature signature={signature} className="!e-items-start" />
                     </Value>
                 </Row>
 
                 {/* Signed by (fee payer) */}
                 {feePayer && (
                     <Row divider>
-                        <Label>Signed by</Label>
+                        <Label>Fee payer</Label>
                         <Value>
-                            <Address pubkey={feePayer} link truncate />
+                            <Address pubkey={feePayer} link />
                         </Value>
                     </Row>
                 )}
@@ -294,7 +284,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                 {/* Recent Blockhash / Nonce */}
                 {blockhash && (
                     <Row divider>
-                        <Label>
+                        <Label className="e-overflow-visible">
                             {isNonce ? (
                                 'Nonce'
                             ) : (

@@ -62,6 +62,8 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
 
+import { CollapsibleSection } from './CollapsibleSection';
+
 export type InstructionDetailsProps = {
     tx: ParsedTransaction;
     ix: ParsedInstruction;
@@ -109,10 +111,7 @@ export function InstructionsSection({ signature }: SignatureProps) {
     }
 
     return (
-        <>
-            <div className='e-mb-3'>
-                <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">Programs</h2>
-            </div>
+        <CollapsibleSection id="programs" title="Programs" className="">
             <React.Suspense fallback={<LoadingCard message="Loading Instructions" />}>
                 {transaction.message.instructions.map((instruction, index) => {
                     const innerCards: JSX.Element[] = [];
@@ -151,7 +150,7 @@ export function InstructionsSection({ signature }: SignatureProps) {
                     );
                 })}
             </React.Suspense>
-        </>
+        </CollapsibleSection>
     );
 }
 

@@ -8,8 +8,8 @@ const BREAKPOINTS = {
     md: 768,
     sm: 576,
     xl: 1200,
-    xxl: 1400,
     xs: 375,
+    xxl: 1400,
 } as const;
 
 function useMediaQuery(query: string): boolean {

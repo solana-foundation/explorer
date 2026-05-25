@@ -1,12 +1,13 @@
-import { cn } from '@components/shared/utils';
-import { Button } from '@/app/components/shared/ui/button';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
+import { cn } from '@components/shared/utils';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import { SignatureProps } from '@utils/index';
 import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
+
+import { Button } from '@/app/components/shared/ui/button';
 
 type ChipProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean };
 export function Chip({ children, className, active, ...props }: ChipProps) {

@@ -1,16 +1,12 @@
 'use client';
 
-import { Address } from '@components/common/Address';
+import './transaction-page.css';
+
 import { ErrorCard } from '@components/common/ErrorCard';
-import { InfoTooltip } from '@components/common/InfoTooltip';
 import { LoadingCard } from '@components/common/LoadingCard';
-import { Signature } from '@components/common/Signature';
-import { Slot } from '@components/common/Slot';
-import { SolBalance } from '@components/common/SolBalance';
 import { SignatureContext } from '@components/instruction/SignatureContext';
-import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
 import { CUProfilingSection } from '@features/cu-profiling';
-import { Receipt, ViewReceiptButton } from '@features/receipt';
+import { Receipt } from '@features/receipt';
 import { isReceiptEnabled } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
@@ -22,7 +18,7 @@ import { SignatureProps } from '@utils/index';
 import useTabVisibility from '@utils/use-tab-visibility';
 import bs58 from 'bs58';
 import { useSearchParams } from 'next/navigation';
-import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
 
@@ -101,7 +97,7 @@ export default function TransactionDetailsPageClient({ params: { signature: raw 
     }
 
     return (
-        <div className="e-mx-auto e-flex e-max-w-5xl e-flex-col e-gap-9 e-px-4 e-pt-3 lg:e-gap-12 lg:e-px-6 lg:e-pt-5">
+        <div className="transaction-page e-mx-auto e-flex e-max-w-5xl e-flex-col e-gap-9 e-px-4 e-pt-3 lg:e-gap-12 lg:e-px-6 lg:e-pt-5">
             <header className="-e-mb-6 e-flex e-flex-col e-gap-1.5 e-pb-3 e-pt-2 lg:e-mb-0">
                 <span className="e-text-xs e-font-normal e-uppercase e-text-muted">Details</span>
                 <h1 className="e-m-0 e-text-2xl e-font-normal e-leading-none e-text-white md:e-text-3xl">
@@ -165,9 +161,9 @@ function DetailsSection({ signature }: SignatureProps) {
             </Suspense>
             <TokenBalancesCard signature={signature} />
             <div className="e-flex e-flex-col e-gap-9 e-pb-10 xl:e-relative xl:e-left-1/2 xl:e-w-screen xl:-e-translate-x-1/2 xl:e-flex-row xl:e-items-start xl:e-gap-6 xl:e-px-6">
-                <section className="xl:e-min-w-0 xl:e-flex-[1_1_0%] xl:e-overflow-hidden" id="programs">
+                <div className="xl:e-min-w-0 xl:e-flex-[1_1_0%] xl:e-overflow-hidden">
                     <InstructionsSection signature={signature} />
-                </section>
+                </div>
                 <div className="e-sticky e-top-[70px] xl:e-min-w-0 xl:e-flex-[1_1_0%] xl:e-overflow-hidden" id="logs">
                     <ProgramLogSection signature={signature} />
                     <CUProfilingSection signature={signature} />
