@@ -14,10 +14,7 @@ import { Receipt, ViewReceiptButton } from '@features/receipt';
 import { isReceiptEnabled } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import {
-    useTransactionDetails,
-    useTransactionStatus,
-} from '@providers/transactions';
+import { useTransactionDetails, useTransactionStatus } from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import { TransactionSignature } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
@@ -27,12 +24,21 @@ import bs58 from 'bs58';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 
+import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
+
 import { AccountsCard } from './AccountsCard';
 import { InstructionsSection } from './InstructionsSection';
 import { ProgramLogSection } from './ProgramLogSection';
-import { TokenBalancesCard } from './TokenBalancesCard';
-import { TransactionTabs } from './TransactionTabs';
 import { SummaryCard } from './SummaryCard';
+import { TokenBalancesCard } from './TokenBalancesCard';
+
+const TRANSACTION_TABS = [
+    { path: 'summary', title: 'Summary' },
+    { path: 'accounts', title: 'Accounts' },
+    { path: 'tokens', title: 'Tokens' },
+    { path: 'programs', title: 'Programs' },
+    { path: 'logs', title: 'Logs' },
+];
 
 export const AUTO_REFRESH_INTERVAL = 2000;
 const ZERO_CONFIRMATION_BAILOUT = 5;
@@ -50,7 +56,6 @@ export type AutoRefreshProps = {
 type Props = Readonly<{
     params: SignatureProps;
 }>;
-
 
 export default function TransactionDetailsPageClient({ params: { signature: raw } }: Props) {
     let signature: TransactionSignature | undefined;
@@ -96,9 +101,9 @@ export default function TransactionDetailsPageClient({ params: { signature: raw 
     }
 
     return (
-        <div className='e-mx-auto e-flex e-max-w-5xl e-flex-col e-gap-9 e-px-4 e-pt-3 lg:e-gap-12 lg:e-px-6 lg:e-pt-5'>
-            <header className='-e-mb-6 e-flex e-flex-col e-gap-1.5 e-pb-3 e-pt-2 lg:e-mb-0'>
-                <span className='e-text-xs e-font-normal e-uppercase e-text-muted'>Details</span>
+        <div className="e-mx-auto e-flex e-max-w-5xl e-flex-col e-gap-9 e-px-4 e-pt-3 lg:e-gap-12 lg:e-px-6 lg:e-pt-5">
+            <header className="-e-mb-6 e-flex e-flex-col e-gap-1.5 e-pb-3 e-pt-2 lg:e-mb-0">
+                <span className="e-text-xs e-font-normal e-uppercase e-text-muted">Details</span>
                 <h1 className="e-m-0 e-text-2xl e-font-normal e-leading-none e-text-white md:e-text-3xl">
                     Transaction
                 </h1>
@@ -119,7 +124,6 @@ export default function TransactionDetailsPageClient({ params: { signature: raw 
         </div>
     );
 }
-
 
 function DetailsSection({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
@@ -149,16 +153,22 @@ function DetailsSection({ signature }: SignatureProps) {
 
     return (
         <>
-            <TransactionTabs />
+            <BaseNavigationTabs
+                scrollSpy
+                tabs={TRANSACTION_TABS}
+                buildHref={path => `#${path}`}
+                wrapperClassName="e-bg-heavy-metal-900"
+                className="e-gap-5"
+            />
             <Suspense fallback={<LoadingCard message="Loading accounts" />}>
                 <AccountsCard signature={signature} />
             </Suspense>
             <TokenBalancesCard signature={signature} />
-            <div className='e-flex e-flex-col e-gap-9 e-pb-10 lg:e-flex-row lg:e-items-start lg:e-gap-6'>
-                <section className="lg:e-min-w-0 lg:e-flex-[1_1_0%] lg:e-overflow-hidden" id="programs">
+            <div className="e-flex e-flex-col e-gap-9 e-pb-10 xl:e-relative xl:e-left-1/2 xl:e-w-screen xl:-e-translate-x-1/2 xl:e-flex-row xl:e-items-start xl:e-gap-6 xl:e-px-6">
+                <section className="xl:e-min-w-0 xl:e-flex-[1_1_0%] xl:e-overflow-hidden" id="programs">
                     <InstructionsSection signature={signature} />
                 </section>
-                <div className="lg:e-min-w-0 lg:e-flex-[1_1_0%] lg:e-overflow-hidden e-sticky e-top-[70px]" id="logs">
+                <div className="e-sticky e-top-[70px] xl:e-min-w-0 xl:e-flex-[1_1_0%] xl:e-overflow-hidden" id="logs">
                     <ProgramLogSection signature={signature} />
                     <CUProfilingSection signature={signature} />
                 </div>

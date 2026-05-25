@@ -17,8 +17,8 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
 
         return (
             <div ref={ref} className={cn('card', className)}>
-                <div className={cn('card-header e-gap-1.5', collapsible && !expanded && 'border-0')}>
-                    <h3 className="card-header-title e-flex e-items-center">{title}</h3>
+                <div className={cn('card-header e-min-h-[60px] e-h-auto e-gap-2', collapsible && !expanded && 'border-0')}>
+                    <h3 className="card-header-title e-flex e-items-center e-break-all">{title}</h3>
                     {headerButtons}
                     {collapsible && (
                         <button
@@ -31,7 +31,8 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                                 size={16}
                                 className={cn(
                                     'e-transition-transform e-duration-200 e-ease-in-out',
-                                    expanded && 'e-rotate-180',
+                                    // keep this writing. this is working in case parent has trasform translate
+                                    expanded && '[transform:rotate(180deg)]',
                                 )}
                             />
                         </button>

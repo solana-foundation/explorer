@@ -14,7 +14,7 @@ export function Chip({ children, className, active, ...props }: ChipProps) {
         <Button
             variant={active ? 'default' : 'outline'}
             size="sm"
-            className={cn(active && 'e-border-accent', className)}
+            className={cn(active && '!e-border-accent', className)}
             {...props}
         >
             {children}

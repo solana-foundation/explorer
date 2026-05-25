@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
@@ -15,6 +15,8 @@ import { useCluster } from '@/app/providers/cluster';
 import { getTokenInfos } from '@/app/utils/token-info';
 import { cn } from '@components/shared/utils';
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
+
+import { CollapsibleSection } from './CollapsibleSection';
 
 type TokenBalanceRow = {
     account: PublicKey;
@@ -68,32 +70,31 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     }, []);
 
     return (
-        <section id="tokens" className='e-flex e-flex-col e-gap-3'>
-            <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">Tokens</h2>
-            <div className='e-card'>
-                <div className={cn(
-                    "e-hidden e-py-1.5 e-px-3 lg:e-grid md:e-px-4",
-                    "e-text-xs e-uppercase e-text-muted e-gap-5 e-grid-cols-[1fr_minmax(auto,170px)_minmax(auto,140px)__minmax(auto,80px)]",
-                    "e-border-white/10 e-border-1 e-border-b [border-bottom-style:solid]"
-                )}>
-                    <div>Owner / Address</div>
-                    <div>Change</div>
-                    <div className="e-text-right">Post Balance</div>
-                    <div className="e-text-right">Token</div>
-                </div>
-                {rows.map(row => (
-                    <TokenBalanceRow
-                        key={row.account.toBase58() + row.mint}
-                        account={row.account}
-                        owner={row.owner}
-                        delta={row.delta}
-                        balance={row.balance}
-                        mint={row.mint}
-                        units={tokenSymbols.get(row.mint) || 'tokens'}
-                    />
-                ))}
+        <CollapsibleSection id="tokens" title="Tokens">
+            <div
+                className={cn(
+                    'e-hidden e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
+                    'e-grid-cols-[1fr_minmax(auto,170px)_minmax(auto,140px)__minmax(auto,80px)] e-gap-5 e-text-xs e-uppercase e-text-muted',
+                    'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid]',
+                )}
+            >
+                <div>Owner / Address</div>
+                <div>Change</div>
+                <div className="e-text-right">Post Balance</div>
+                <div className="e-text-right">Token</div>
             </div>
-        </section>
+            {rows.map(row => (
+                <TokenBalanceRow
+                    key={row.account.toBase58() + row.mint}
+                    account={row.account}
+                    owner={row.owner}
+                    delta={row.delta}
+                    balance={row.balance}
+                    mint={row.mint}
+                    units={tokenSymbols.get(row.mint) || 'tokens'}
+                />
+            ))}
+        </CollapsibleSection>
     );
 }
 
@@ -112,37 +113,37 @@ function TokenBalanceRow({
     mint: string;
     units: string;
 }) {
-    const {isLg} = useBreakpoint();
+    const { isLg } = useBreakpoint();
     const key = account.toBase58() + mint;
     const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(mint, balance);
 
     return (
-        <div 
-            key={key} 
+        <div
+            key={key}
             className={cn(
-                "e-min-h-9 e-py-1.5 e-px-3 md:e-px-4",
-                "e-grid e-gap-x-5 e-gap-y-0.5 md:e-gap-y-0 e-items-start e-text-sm e-whitespace-nowrap",
-                "e-grid-cols-[1fr_auto] lg:e-grid-cols-[1fr_minmax(auto,170px)_minmax(auto,140px)__minmax(auto,80px)]",
+                'e-min-h-9 e-px-3 e-py-1.5 md:e-px-4',
+                'e-grid e-items-start e-gap-x-5 e-gap-y-0.5 e-whitespace-nowrap e-text-sm md:e-gap-y-0',
+                'e-grid-cols-[1fr_auto] lg:e-grid-cols-[1fr_minmax(auto,170px)_minmax(auto,140px)__minmax(auto,80px)]',
                 "[grid-template-areas:'symbol_change'_'symbol_balance'_'address_address'] lg:[grid-template-areas:'address_change_balance_symbol']",
-                "e-border-white/10 e-border-1 e-border-b [border-bottom-style:solid] last:e-border-b-0"
+                'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid] last:e-border-b-0',
             )}
         >
             <div className="e-flex e-flex-col [grid-area:address]">
                 {owner && (
-                    <div className='e-flex e-gap-2 md:e-gap-3 e-items-center'>
-                        <span className="e-text-sm e-text-muted">Owner</span>
+                    <div className="e-flex e-items-center e-gap-2 md:e-gap-3">
+                        <span className="e-min-w-11 e-text-sm e-text-muted">Owner</span>
                         <Address pubkey={new PublicKey(owner)} link />
                     </div>
                 )}
-                <div className='e-flex e-gap-2 md:e-gap-3 e-items-center'>
-                    <span className="e-text-sm e-text-muted">Addr</span>
+                <div className="e-flex e-items-center e-gap-2 md:e-gap-3">
+                    <span className="e-min-w-11 e-text-sm e-text-muted">Addr</span>
                     <Address pubkey={account} link />
                 </div>
             </div>
-            <div className="e-justify-self-end lg:e-justify-self-start [grid-area:change]">
+            <div className="e-justify-self-end [grid-area:change] lg:e-justify-self-start">
                 <BalanceDelta delta={delta.multipliedBy(scaledUiAmountMultiplier)} />
             </div>
-            <div className="e-justify-self-start lg:e-justify-self-end [grid-area:balance]">
+            <div className="e-justify-self-start [grid-area:balance] lg:e-justify-self-end">
                 {new BigNumber(balance).multipliedBy(scaledUiAmountMultiplier).toString()} {units}
                 <ScaledUiAmountMultiplierTooltip
                     rawAmount={balance}
@@ -150,7 +151,7 @@ function TokenBalanceRow({
                 />
             </div>
             <div className="e-justify-self-start [grid-area:symbol]">
-                <Address pubkey={new PublicKey(mint)} truncateChars={3} link fetchTokenLabelInfo={!isLg} />
+                <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo={!isLg} />
             </div>
         </div>
     );

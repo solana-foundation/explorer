@@ -15,6 +15,8 @@ import React, { useMemo } from 'react';
 import { Code } from 'react-feather';
 import { cn } from '@components/shared/utils';
 
+import { CollapsibleSection } from './CollapsibleSection';
+
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { url } = useCluster();
@@ -118,35 +120,28 @@ export function AccountsCard({ signature }: SignatureProps) {
     });
 
     return (
-        <section id="accounts" className="e-flex e-flex-col e-gap-3">
-            <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">Accounts &amp; SOL balance</h2>
-            <div className="e-card">
-                <div
-                    className={cn(
-                        'e-hidden e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
-                        'e-grid-cols-[1fr_minmax(auto,200px)_minmax(auto,200px)] e-gap-5 e-text-xs e-uppercase e-text-muted',
-                        'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid]',
-                    )}
-                >
-                    <div>Address</div>
-                    <div className="e-text-right">Change (SOL)</div>
-                    <div className="e-text-right">Post Balance (SOL)</div>
-                </div>
-                {accountRows}
-                {!loading && totalAccountSize > 0 && (
-                        <div className="e-flex e-items-baseline e-text-muted e-text-sm e-px-3 e-py-2 e-gap-2 md:e-px-4">
-                            <div className='e-flex e-flex-col'>
-                                <span className="e-uppercase e-tex-sm e-leading-none">
-                                    Total Account Size:
-                                </span>
-                                <span className="e-text-[10px] e-leading-none">reflects current state</span>
-                            </div>
-                            <span className="e-text-white">
-                                {totalAccountSize.toLocaleString('en-US')} bytes
-                            </span>
-                        </div>
+        <CollapsibleSection id="accounts" title="Accounts &amp; SOL balance">
+            <div
+                className={cn(
+                    'e-hidden e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
+                    'e-grid-cols-[1fr_minmax(auto,200px)_minmax(auto,200px)] e-gap-5 e-text-xs e-uppercase e-text-muted',
+                    'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid]',
                 )}
+            >
+                <div>Address</div>
+                <div className="e-text-right">Change (SOL)</div>
+                <div className="e-text-right">Post Balance (SOL)</div>
             </div>
-        </section>
+            {accountRows}
+            {!loading && totalAccountSize > 0 && (
+                <div className="e-flex e-items-baseline e-gap-2 e-px-3 e-py-2 e-text-sm e-text-muted md:e-px-4">
+                    <div className="e-flex e-flex-col">
+                        <span className="e-tex-sm e-uppercase e-leading-none">Total Account Size:</span>
+                        <span className="e-text-[10px] e-leading-none">reflects current state</span>
+                    </div>
+                    <span className="e-text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
+                </div>
+            )}
+        </CollapsibleSection>
     );
 }

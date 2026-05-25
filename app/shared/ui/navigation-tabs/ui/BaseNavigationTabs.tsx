@@ -13,33 +13,44 @@ import { useTabOverflow } from '@/app/shared/ui/navigation-tabs/model/useTabOver
 import { MobileMoreDropdown } from './MobileMoreDropdown';
 import { TabLink } from './TabLink';
 
+const SCROLL_OFFSET = 10;
+
 export type BaseNavigationTabsProps = {
-    activeValue: string;
+    activeValue?: string;
     buildHref: (path: string) => string;
     children?: React.ReactNode;
     className?: string;
-    onSelectChange: (path: string) => void;
+    onSelectChange?: (path: string) => void;
+    onTabClick?: (path: string, e: React.MouseEvent<HTMLAnchorElement>) => void;
+    /**
+     * Enables scroll-spy mode: active tab tracks scroll position, clicking scrolls smoothly.
+     * Wraps the tab bar in a sticky full-width container with a shadow on stuck.
+     * Use `wrapperClassName` to provide the background color (e.g. "e-bg-heavy-metal-900").
+     */
+    scrollSpy?: boolean;
     tabs: NavigationTab[];
+    /** Applied to the sticky wrapper when `scrollSpy` is true. Use for background color. */
+    wrapperClassName?: string;
 };
 
 export function BaseNavigationTabs({
     tabs,
-    activeValue,
+    activeValue: activeValueProp,
     onSelectChange,
+    onTabClick: onTabClickProp,
     buildHref,
     children,
     className,
+    scrollSpy,
+    wrapperClassName,
 }: BaseNavigationTabsProps) {
     const { registeredTabs, registerTab, unregisterTab } = useTabRegistration();
 
+    const wrapperRef = React.useRef<HTMLDivElement>(null);
+    const [stuck, setStuck] = React.useState(false);
+    const [spyActive, setSpyActive] = React.useState(() => tabs[0]?.path ?? '');
+
     const staticPaths = React.useMemo(() => new Set(tabs.map(t => t.path)), [tabs]);
-
-    const contextValue = React.useMemo(
-        () => ({ activeValue, buildHref, registerTab, renderTabLink: true, staticPaths, unregisterTab }),
-        [activeValue, buildHref, registerTab, staticPaths, unregisterTab],
-    );
-
-    const hiddenContextValue = React.useMemo(() => ({ ...contextValue, renderTabLink: false }), [contextValue]);
 
     const allTabs = React.useMemo(
         () => [...tabs, ...registeredTabs.filter(t => !staticPaths.has(t.path))],
@@ -48,7 +59,72 @@ export function BaseNavigationTabs({
 
     const { measuring, moreMeasureRef, moreTabs, tablistRef, visibleTabs } = useTabOverflow(allTabs);
 
-    return (
+    const scrollToSection = React.useCallback(
+        (path: string) => {
+            const target = document.getElementById(path);
+            const headerEl = wrapperRef.current ?? tablistRef.current;
+            if (!target || !headerEl) return;
+            const offset = headerEl.getBoundingClientRect().height;
+            window.scrollTo({
+                behavior: 'smooth',
+                top: target.getBoundingClientRect().top + window.scrollY - offset - SCROLL_OFFSET,
+            });
+        },
+        [tablistRef],
+    );
+
+    const scrollSpyTabClick = React.useCallback(
+        (path: string, e: React.MouseEvent<HTMLAnchorElement>) => {
+            e.preventDefault();
+            scrollToSection(path);
+        },
+        [scrollToSection],
+    );
+
+    React.useEffect(() => {
+        if (!scrollSpy) return;
+        const el = wrapperRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(([entry]) => setStuck(!entry.isIntersecting), {
+            rootMargin: '-1px 0px 0px 0px',
+            threshold: [1],
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [scrollSpy]);
+
+    React.useEffect(() => {
+        if (!scrollSpy) return;
+        const update = () => {
+            const tabHeight = (wrapperRef.current ?? tablistRef.current)?.getBoundingClientRect().height ?? 0;
+            // Activate when section is in the upper third of the visible content area
+            const threshold = window.scrollY + tabHeight + window.innerHeight * 0.3;
+            let active = tabs[0]?.path ?? '';
+            for (const tab of tabs) {
+                const el = document.getElementById(tab.path);
+                if (el && el.getBoundingClientRect().top + window.scrollY <= threshold) {
+                    active = tab.path;
+                }
+            }
+            setSpyActive(active);
+        };
+        window.addEventListener('scroll', update, { passive: true });
+        update();
+        return () => window.removeEventListener('scroll', update);
+    }, [scrollSpy, tabs, tablistRef]);
+
+    const activeValue = scrollSpy ? spyActive : (activeValueProp ?? '');
+    const onTabClick = scrollSpy ? scrollSpyTabClick : onTabClickProp;
+    const handleSelectChange = scrollSpy ? scrollToSection : onSelectChange;
+
+    const contextValue = React.useMemo(
+        () => ({ activeValue, buildHref, onTabClick, registerTab, renderTabLink: true, staticPaths, unregisterTab }),
+        [activeValue, buildHref, onTabClick, registerTab, staticPaths, unregisterTab],
+    );
+
+    const hiddenContextValue = React.useMemo(() => ({ ...contextValue, renderTabLink: false }), [contextValue]);
+
+    const tabBar = (
         <NavigationTabsContext.Provider value={contextValue}>
             <div
                 ref={tablistRef}
@@ -65,7 +141,7 @@ export function BaseNavigationTabs({
                     </div>
                 )}
 
-                {moreTabs.length > 0 && <MobileMoreDropdown tabs={moreTabs} onSelectChange={onSelectChange} />}
+                {moreTabs.length > 0 && <MobileMoreDropdown tabs={moreTabs} onSelectChange={handleSelectChange} />}
             </div>
 
             {children && (
@@ -75,4 +151,25 @@ export function BaseNavigationTabs({
             )}
         </NavigationTabsContext.Provider>
     );
+
+    if (scrollSpy) {
+        return (
+            <div
+                ref={wrapperRef}
+                className={cn(
+                    'e-sticky e-top-0 e-z-10',
+                    'e-ml-[calc(50%-50vw)] e-mr-[calc(50%-50vw)]',
+                    'e-pl-[calc(50vw-50%)] e-pr-[calc(50vw-50%)]',
+                    'e-[scrollbar-width:none] e-overflow-x-auto [&::-webkit-scrollbar]:e-hidden',
+                    'e-transition-[box-shadow] e-duration-200',
+                    stuck && 'e-shadow-[0_6px_16px_rgba(0,0,0,0.45)]',
+                    wrapperClassName,
+                )}
+            >
+                {tabBar}
+            </div>
+        );
+    }
+
+    return tabBar;
 }
