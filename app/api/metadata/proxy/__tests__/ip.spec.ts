@@ -158,4 +158,29 @@ describe('lookupHostnameSafely — pinned lookup behaviour', () => {
             });
         });
     });
+
+    // undici 6.x's `Agent` calls the lookup with `{ all: true }`, expecting
+    // an array callback. If we only supported the single-result form, real
+    // connections would fail with "Invalid IP address: undefined".
+    test('pinned lookup should return the full array when called with { all: true }', async () => {
+        mockLookupOnce([
+            { address: '8.8.8.8', family: 4 },
+            { address: '2001:4860:4860::8888', family: 6 },
+        ]);
+
+        const result = await lookupHostnameSafely('google.com');
+        if (result.kind !== 'public') throw new Error('expected public');
+
+        await new Promise<void>((resolve, reject) => {
+            result.lookup('google.com', { all: true }, (err, addresses) => {
+                if (err) return reject(err);
+                if (!Array.isArray(addresses)) return reject(new Error('expected array'));
+                expect(addresses).toEqual([
+                    { address: '8.8.8.8', family: 4 },
+                    { address: '2001:4860:4860::8888', family: 6 },
+                ]);
+                resolve();
+            });
+        });
+    });
 });

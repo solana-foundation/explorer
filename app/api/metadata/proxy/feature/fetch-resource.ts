@@ -1,4 +1,3 @@
-import type { LookupFunction } from 'net';
 import { Agent } from 'undici';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -73,18 +72,32 @@ async function executeHop(url: URL, headers: Headers, timeout: number, size: num
         throw statusError(403, `Hostname resolution blocked: ${validation.reason}`);
     }
 
-    const response = await doFetch(url, headers, timeout, validation.lookup);
+    // Dispatcher ownership lives here, not inside doFetch — closing it must
+    // happen *after* processResponse has drained the response body, otherwise
+    // we'd be tearing down sockets while the body stream is still being read.
+    const dispatcher = new Agent({ connect: { lookup: validation.lookup } });
+    try {
+        const response = await doFetch(url, headers, timeout, dispatcher);
 
-    if (isRedirect(response)) {
-        return extractRedirect(response, url);
+        if (isRedirect(response)) {
+            return extractRedirect(response, url);
+        }
+
+        if (!response.ok) {
+            Logger.warn('[api:metadata-proxy] Upstream returned error', { status: response.status, url: url.href });
+            throw statusError(502, `Upstream returned ${response.status}`);
+        }
+
+        return { kind: 'done', value: await processResponse(response, size) };
+    } finally {
+        // By this point the body has either been fully consumed (success
+        // path), cancelled (size pre-check), or abandoned (errors in
+        // processResponse). `close()` waits for any remaining in-flight
+        // stream to settle and is preferred over `destroy()`; swallowing
+        // the rejection avoids masking an upstream error with a cleanup
+        // error.
+        await dispatcher.close().catch(() => undefined);
     }
-
-    if (!response.ok) {
-        Logger.warn('[api:metadata-proxy] Upstream returned error', { status: response.status, url: url.href });
-        throw statusError(502, `Upstream returned ${response.status}`);
-    }
-
-    return { kind: 'done', value: await processResponse(response, size) };
 }
 
 function resolveRedirectUrl(location: string, currentUrl: URL): URL {
@@ -113,8 +126,7 @@ function extractRedirect(response: Response, url: URL): HopResult & { kind: 'red
     return { kind: 'redirect', location };
 }
 
-async function doFetch(url: URL, headers: Headers, timeout: number, lookup: LookupFunction): Promise<Response> {
-    const dispatcher = new Agent({ connect: { lookup } });
+async function doFetch(url: URL, headers: Headers, timeout: number, dispatcher: Agent): Promise<Response> {
     try {
         return await fetch(url.href, {
             headers,
@@ -123,15 +135,12 @@ async function doFetch(url: URL, headers: Headers, timeout: number, lookup: Look
             // `dispatcher` is an undici-specific extension to RequestInit, not
             // in the Web Fetch spec; spreading defeats the excess-property
             // check while still passing it through to Node's native fetch
-            // (which is undici under the hood).
+            // (which is undici under the hood). Lifecycle is owned by the
+            // caller (`executeHop`) so cleanup runs after body consumption.
             ...{ dispatcher },
         });
     } catch (e) {
         throw handleFetchError(e, url);
-    } finally {
-        // Free sockets owned by this hop. Fire-and-forget — the body has
-        // already been consumed by processResponse by the time we return.
-        void dispatcher.close();
     }
 }
 

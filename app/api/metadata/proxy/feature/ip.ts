@@ -93,17 +93,24 @@ export async function lookupHostnameSafely(hostname: string): Promise<LookupResu
 
 // The returned function ignores its `hostname` argument and replays the
 // already-validated addresses. Undici's `Agent` calls it via `net.connect`
-// during socket setup, so the kernel never performs a second DNS lookup.
+// during socket setup with `all: true`, so the kernel never performs a
+// second DNS lookup. Both callback shapes are supported (single result for
+// `all: false`, array for `all: true`) since Node's LookupFunction is
+// polymorphic via `options.all`.
 function makePinnedLookup(addresses: LookupAddress[]): LookupFunction {
     return (_hostname, options, callback) => {
         const family = options.family;
         const candidates = family ? addresses.filter(a => a.family === family) : addresses;
-        const pick = candidates[0];
-        if (!pick) {
+        if (candidates.length === 0) {
             const err: NodeJS.ErrnoException = Object.assign(new Error('ENOTFOUND'), { code: 'ENOTFOUND' });
             callback(err, '', 0);
             return;
         }
+        if (options.all) {
+            callback(null, candidates);
+            return;
+        }
+        const pick = candidates[0];
         callback(null, pick.address, pick.family);
     };
 }
