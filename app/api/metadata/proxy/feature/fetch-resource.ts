@@ -1,7 +1,10 @@
+import type { LookupFunction } from 'net';
+import { Agent } from 'undici';
+
 import { Logger } from '@/app/shared/lib/logger';
 
 import { matchAbortError, matchMaxSizeError, matchTimeoutError, StatusError, statusError } from './errors';
-import { checkURLForPrivateIP, isHTTPProtocol } from './ip';
+import { isHTTPProtocol, lookupHostnameSafely } from './ip';
 import { processBinary, processJson, processTextAsJson } from './processors';
 import { readBodyWithLimit } from './read-body-with-limit';
 
@@ -39,7 +42,7 @@ export async function fetchResource(
         const outcome = await executeHop(currentUrl, headers, timeout, size);
         if (outcome.kind === 'done') return outcome.value;
 
-        currentUrl = await validateRedirectTarget(outcome.location, currentUrl);
+        currentUrl = resolveRedirectUrl(outcome.location, currentUrl);
 
         if (visited.has(currentUrl.href)) {
             Logger.warn('[api:metadata-proxy] Redirect loop detected', { url: currentUrl.href });
@@ -53,7 +56,24 @@ export async function fetchResource(
 }
 
 async function executeHop(url: URL, headers: Headers, timeout: number, size: number): Promise<HopResult> {
-    const response = await doFetch(url, headers, timeout);
+    if (!isHTTPProtocol(url)) {
+        Logger.warn('[api:metadata-proxy] Non-HTTP protocol blocked', { url: url.href });
+        throw statusError(403, 'Hostname uses non-HTTP protocol');
+    }
+
+    // Resolve DNS *and* pin the result. The returned `lookup` is plugged into
+    // undici's connect call below, so the kernel never re-resolves the
+    // hostname — closing the DNS-rebinding TOCTOU window.
+    const validation = await lookupHostnameSafely(url.hostname);
+    if (validation.kind === 'private') {
+        Logger.warn('[api:metadata-proxy] Hostname resolution blocked (SSRF protection)', {
+            hostname: url.hostname,
+            reason: validation.reason,
+        });
+        throw statusError(403, `Hostname resolution blocked: ${validation.reason}`);
+    }
+
+    const response = await doFetch(url, headers, timeout, validation.lookup);
 
     if (isRedirect(response)) {
         return extractRedirect(response, url);
@@ -67,23 +87,8 @@ async function executeHop(url: URL, headers: Headers, timeout: number, size: num
     return { kind: 'done', value: await processResponse(response, size) };
 }
 
-async function validateRedirectTarget(location: string, currentUrl: URL): Promise<URL> {
-    const nextUrl = new URL(location, currentUrl);
-
-    if (!isHTTPProtocol(nextUrl)) {
-        Logger.warn('[api:metadata-proxy] Redirect to non-HTTP protocol blocked', { location, url: currentUrl.href });
-        throw statusError(403, 'Redirect target uses non-HTTP protocol');
-    }
-
-    if (await checkURLForPrivateIP(nextUrl)) {
-        Logger.warn('[api:metadata-proxy] Redirect to private IP blocked (SSRF protection)', {
-            location,
-            url: currentUrl.href,
-        });
-        throw statusError(403, 'Redirect target resolves to a private IP');
-    }
-
-    return nextUrl;
+function resolveRedirectUrl(location: string, currentUrl: URL): URL {
+    return new URL(location, currentUrl);
 }
 
 // Only statuses that carry a `Location` header by spec. Excludes 304/305/306
@@ -108,15 +113,25 @@ function extractRedirect(response: Response, url: URL): HopResult & { kind: 'red
     return { kind: 'redirect', location };
 }
 
-async function doFetch(url: URL, headers: Headers, timeout: number): Promise<Response> {
+async function doFetch(url: URL, headers: Headers, timeout: number, lookup: LookupFunction): Promise<Response> {
+    const dispatcher = new Agent({ connect: { lookup } });
     try {
         return await fetch(url.href, {
             headers,
             redirect: 'manual',
             signal: AbortSignal.timeout(timeout),
+            // `dispatcher` is an undici-specific extension to RequestInit, not
+            // in the Web Fetch spec; spreading defeats the excess-property
+            // check while still passing it through to Node's native fetch
+            // (which is undici under the hood).
+            ...{ dispatcher },
         });
     } catch (e) {
         throw handleFetchError(e, url);
+    } finally {
+        // Free sockets owned by this hop. Fire-and-forget — the body has
+        // already been consumed by processResponse by the time we return.
+        void dispatcher.close();
     }
 }
 

@@ -126,6 +126,7 @@
         "tailwind-merge": "3.0.2",
         "tweetnacl": "1.0.3",
         "typescript": "5.7.3",
+        "undici": "^8.2.0",
         "use-async-effect": "2.2.7"
     },
     "devDependencies": {

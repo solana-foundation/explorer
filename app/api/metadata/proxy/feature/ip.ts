@@ -1,5 +1,6 @@
-import _dns from 'dns';
+import _dns, { type LookupAddress } from 'dns';
 import Address, { parse } from 'ipaddr.js';
+import { type LookupFunction } from 'net';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -18,18 +19,12 @@ const privateIPv4CIDRs = [
 
 const privateIPv6CIDRs = ['::1/128', 'fc00::/7', 'fe80::/10', '::ffff:0:0/96'];
 
-/**
- *  Check if an IP is in a CIDR block
- */
 function ipInRange(ip: Address.IPv4 | Address.IPv6, cidr: string) {
     const [network, prefix] = cidr.split('/');
     const range = parse(network);
     return ip.match(range, parseInt(prefix, 10));
 }
 
-/**
- *  Check if an IP falls within a private range
- */
 export function isPrivateIP(ip: string) {
     const isIPv4 = Address.IPv4.isIPv4(ip);
     const normalizedIP = parse(ip);
@@ -47,58 +42,68 @@ export function isHTTPProtocol(url: URL) {
     return ['http:', 'https:'].includes(url.protocol);
 }
 
-export function isLocalhost(url: URL) {
-    const { hostname } = url;
+function isLocalhostName(hostname: string): boolean {
     return hostname === 'localhost' || hostname === '0' || hostname === '::1';
 }
 
+export type LookupResult =
+    | { kind: 'public'; lookup: LookupFunction; addresses: LookupAddress[] }
+    | { kind: 'private'; reason: string };
+
 /**
- *  Check for IP address to be in private range
+ * Resolve a hostname once, validate every returned address against the private
+ * IP ranges, and return a `lookup` function that always replays those same
+ * pre-validated addresses. Passing this `lookup` into an undici `Agent` closes
+ * the DNS-rebinding TOCTOU window: a malicious authoritative DNS server cannot
+ * flip the answer between our validation and the kernel's `connect()`, because
+ * the kernel never resolves the hostname again — it sees only the IP we
+ * already approved.
  */
-export async function checkURLForPrivateIP(uri: URL | string) {
-    try {
-        let url: URL;
-        if (uri instanceof URL) {
-            url = uri;
-        } else {
-            url = new URL(uri);
-        }
-
-        // Ensure the protocol is only HTTP or HTTPS
-        if (!isHTTPProtocol(url)) {
-            return true;
-        }
-
-        const { hostname } = url;
-
-        // Block localhost explicitly
-        if (isLocalhost(url)) {
-            return true;
-        }
-
-        // Resolve DNS and check against private IP ranges
-        // Enrich type as there are cases when addresses are undefined which is against the original DNS's types
-        type LookupAddressResult = Awaited<ReturnType<typeof dns.lookup>>;
-        const addresses: LookupAddressResult | LookupAddressResult[] | undefined = await dns.lookup(hostname, {
-            all: true,
-        });
-
-        if (addresses === undefined) return true;
-
-        if (Array.isArray(addresses)) {
-            for (const address of addresses) {
-                if (isPrivateIP(address.address)) {
-                    return true;
-                }
-            }
-        } else {
-            const singleResult = addresses as unknown as LookupAddressResult;
-            return isPrivateIP(singleResult.address);
-        }
-
-        return false;
-    } catch (error) {
-        Logger.debug('[api:metadata-proxy] Error while processing URL', { error, url: uri.toString() });
-        return true;
+export async function lookupHostnameSafely(hostname: string): Promise<LookupResult> {
+    if (isLocalhostName(hostname)) {
+        return { kind: 'private', reason: 'localhost' };
     }
+
+    let addresses: LookupAddress[];
+    try {
+        const result = await dns.lookup(hostname, { all: true });
+        // `all: true` is supposed to return an array, but the Node type union
+        // includes the single-result shape; normalise either way.
+        if (result === undefined) {
+            return { kind: 'private', reason: 'no addresses' };
+        }
+        addresses = Array.isArray(result) ? result : [result];
+    } catch (error) {
+        Logger.debug('[api:metadata-proxy] DNS resolution failed', { error, hostname });
+        return { kind: 'private', reason: 'DNS resolution failed' };
+    }
+
+    if (addresses.length === 0) {
+        return { kind: 'private', reason: 'no addresses' };
+    }
+
+    for (const a of addresses) {
+        if (isPrivateIP(a.address)) {
+            return { kind: 'private', reason: `private address ${a.address}` };
+        }
+    }
+
+    return { addresses, kind: 'public', lookup: makePinnedLookup(addresses) };
+}
+
+// The returned function ignores its `hostname` argument and replays the
+// already-validated addresses. Undici's `Agent` calls it via `net.connect`
+// during socket setup, so the kernel never performs a second DNS lookup.
+function makePinnedLookup(addresses: LookupAddress[]): LookupFunction {
+    return (_hostname, options, callback) => {
+        const family = options.family;
+        const candidates = family ? addresses.filter(a => a.family === family) : addresses;
+        const pick = candidates[0];
+        if (!pick) {
+            const err: NodeJS.ErrnoException = Object.assign(new Error('ENOTFOUND'), { code: 'ENOTFOUND' });
+            callback(err, '', 0);
+            return;
+        }
+        callback(null, pick.address, pick.family);
+    };
 }

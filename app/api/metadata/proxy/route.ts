@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server';
 import { Logger } from '@/app/shared/lib/logger';
 
 import {
-    checkURLForPrivateIP,
     fetchResource,
     isHTTPProtocol,
     matchJsonContent,
@@ -47,11 +46,9 @@ export async function GET(request: Request) {
         return respondWithError(400);
     }
 
-    if (await checkURLForPrivateIP(parsedUri)) {
-        Logger.error(new Error('[api:metadata-proxy] Private IP detected'), { hostname: parsedUri.hostname });
-        return respondWithError(403);
-    }
-
+    // Note: hostname validation (private-IP, localhost, DNS rebinding) happens
+    // inside fetchResource via the pinned-lookup mechanism — once per hop.
+    // The kernel never sees a hostname that wasn't pre-validated.
     try {
         const { data, headers } = await fetchResource(
             parsedUri.href,

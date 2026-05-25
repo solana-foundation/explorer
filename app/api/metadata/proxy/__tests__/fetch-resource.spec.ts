@@ -1,9 +1,10 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { LookupAddress } from 'dns';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 import { fetchResource } from '../feature';
-import { checkURLForPrivateIP } from '../feature/ip';
+import { lookupHostnameSafely } from '../feature/ip';
 
 const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
@@ -12,9 +13,16 @@ vi.mock('../feature/ip', async () => {
     const actual = await vi.importActual('../feature/ip');
     return {
         ...actual,
-        checkURLForPrivateIP: vi.fn(),
+        lookupHostnameSafely: vi.fn(),
     };
 });
+
+// By default every hop resolves to a public IP so test bodies only override
+// for SSRF/private-IP cases. The returned `lookup` is a no-op stub — undici
+// never actually connects in these tests (the global `fetch` is mocked).
+function publicLookup(address = '8.8.8.8'): { kind: 'public'; lookup: () => void; addresses: LookupAddress[] } {
+    return { addresses: [{ address, family: 4 }], kind: 'public', lookup: () => undefined };
+}
 
 function mockJsonResponseOnce(data: unknown, contentType = 'application/json') {
     fetchMock.mockResolvedValueOnce(
@@ -39,6 +47,11 @@ function mockRejectOnce<T extends Error>(error: T) {
 describe('fetchResource', () => {
     const uri = 'http://hello.world/data.json';
     const headers = new Headers({ 'Content-Type': 'application/json' });
+
+    beforeEach(() => {
+        // Default: every hop resolves to a public IP unless a test says otherwise.
+        vi.mocked(lookupHostnameSafely).mockResolvedValue(publicLookup());
+    });
 
     afterEach(() => {
         vi.clearAllMocks();
@@ -161,7 +174,7 @@ describe('fetchResource', () => {
 
     it('should follow redirect when target resolves to a public IP', async () => {
         mockRedirectOnce('http://cdn.hello.world/data.json');
-        vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(false);
+        vi.mocked(lookupHostnameSafely).mockResolvedValueOnce(publicLookup());
         mockJsonResponseOnce({ redirected: true });
 
         const result = await fetchResource(uri, headers, 100, 1000);
@@ -172,7 +185,7 @@ describe('fetchResource', () => {
 
     it('should block redirect to a private IP (SSRF protection)', async () => {
         mockRedirectOnce('http://169.254.169.254/latest/meta-data/');
-        vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(true);
+        vi.mocked(lookupHostnameSafely).mockResolvedValueOnce({ kind: 'private', reason: 'private address 169.254.169.254' });
 
         await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 403 });
     });
@@ -200,7 +213,7 @@ describe('fetchResource', () => {
         // 4 consecutive redirects (exceeds MAX_REDIRECTS of 3)
         for (let i = 0; i < 4; i++) {
             mockRedirectOnce(`http://hop${i}.example.com/`);
-            vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(false);
+            vi.mocked(lookupHostnameSafely).mockResolvedValueOnce(publicLookup());
         }
 
         await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 502 });
@@ -208,9 +221,9 @@ describe('fetchResource', () => {
 
     it('should throw 502 when a redirect loop is detected', async () => {
         mockRedirectOnce('http://b.example.com/');
-        vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(false);
+        vi.mocked(lookupHostnameSafely).mockResolvedValueOnce(publicLookup());
         mockRedirectOnce(uri);
-        vi.mocked(checkURLForPrivateIP).mockResolvedValueOnce(false);
+        vi.mocked(lookupHostnameSafely).mockResolvedValueOnce(publicLookup());
 
         await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 502 });
 
@@ -222,5 +235,36 @@ describe('fetchResource', () => {
         mockRedirectOnce('file:///etc/passwd');
 
         await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 403 });
+    });
+
+    // DNS-rebinding (TOCTOU) regression. The legacy code resolved DNS once for
+    // validation, then `fetch()` resolved DNS a *second* time — leaving a
+    // window where a malicious authoritative server could answer "public" then
+    // "private". The new code pins the validated addresses via undici's
+    // connect.lookup, so the kernel sees only the IP we approved.
+    //
+    // We assert that `lookupHostnameSafely` is called *once per hop* and the
+    // hop fetches against that pinned lookup, never re-resolving externally.
+    it('should resolve the hostname exactly once per hop (no second DNS lookup before connect)', async () => {
+        mockJsonResponseOnce({ ok: true });
+
+        await fetchResource(uri, headers, 100, 100);
+
+        // One hop, one resolution. If a second resolution snuck in we'd see 2.
+        expect(lookupHostnameSafely).toHaveBeenCalledTimes(1);
+        expect(lookupHostnameSafely).toHaveBeenCalledWith(new URL(uri).hostname);
+    });
+
+    it('should resolve each redirect hop exactly once before fetching', async () => {
+        // 2 hops total: initial + one redirect target. Both resolve to public.
+        mockRedirectOnce('http://cdn.hello.world/data.json');
+        mockJsonResponseOnce({ ok: true });
+
+        await fetchResource(uri, headers, 100, 1000);
+
+        expect(lookupHostnameSafely).toHaveBeenCalledTimes(2);
+        expect(lookupHostnameSafely).toHaveBeenNthCalledWith(1, 'hello.world');
+        expect(lookupHostnameSafely).toHaveBeenNthCalledWith(2, 'cdn.hello.world');
+        expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 });
