@@ -1,13 +1,13 @@
 import type { CacheEntry } from '@providers/cache';
 import { DispatchContext, StateContext, type TransactionStatus } from '@providers/transactions';
 import {
-    DispatchContext as ParsedDispatchContext,
     type Details as ParsedDetails,
+    DispatchContext as ParsedDispatchContext,
     StateContext as ParsedStateContext,
 } from '@providers/transactions/parsed';
 import {
-    DispatchContext as RawDispatchContext,
     type Details as RawDetails,
+    DispatchContext as RawDispatchContext,
     StateContext as RawStateContext,
 } from '@providers/transactions/raw';
 import { MAINNET_BETA_URL } from '@utils/cluster';
@@ -37,9 +37,7 @@ export function MockTransactionsProvider({ children, status = {}, parsed = {}, r
                 <RawStateContext.Provider value={{ entries: raw, url: MAINNET_BETA_URL }}>
                     <RawDispatchContext.Provider value={() => {}}>
                         <ParsedStateContext.Provider value={{ entries: parsed, url: MAINNET_BETA_URL }}>
-                            <ParsedDispatchContext.Provider value={() => {}}>
-                                {children}
-                            </ParsedDispatchContext.Provider>
+                            <ParsedDispatchContext.Provider value={() => {}}>{children}</ParsedDispatchContext.Provider>
                         </ParsedStateContext.Provider>
                     </RawDispatchContext.Provider>
                 </RawStateContext.Provider>
