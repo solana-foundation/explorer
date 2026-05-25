@@ -34,8 +34,12 @@ export interface TransactionStatus {
 type State = Cache.State<TransactionStatus>;
 type Dispatch = Cache.Dispatch<TransactionStatus>;
 
-const StateContext = React.createContext<State | undefined>(undefined);
-const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+export const StateContext: React.Context<Readonly<State> | undefined> = React.createContext<State | undefined>(
+    undefined,
+);
+export const DispatchContext: React.Context<Readonly<Dispatch> | undefined> = React.createContext<Dispatch | undefined>(
+    undefined,
+);
 
 type TransactionsProviderProps = { children: React.ReactNode };
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
