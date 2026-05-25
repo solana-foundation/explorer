@@ -1,12 +1,17 @@
 import type { Idl } from '@coral-xyz/anchor/dist/cjs/idl';
 import type { FormattedIdl, InstructionData } from '@entities/idl';
 import { useFormatAnchorIdl, useFormatCodamaIdl } from '@entities/idl';
-import { getIdlSpecType } from '@entities/idl/model/converters/convert-legacy-idl';
 import { renderHook } from '@testing-library/react';
 import { camelCase } from 'change-case';
+import type { RootNode } from 'codama';
+
+function isCodamaIdl(idl: unknown): idl is RootNode {
+    if (typeof idl !== 'object' || idl === null) return false;
+    return 'standard' in idl && idl.standard === 'codama';
+}
 
 export function formatIdlForTest(idl: unknown): FormattedIdl | null {
-    if (getIdlSpecType(idl) === 'codama') {
+    if (isCodamaIdl(idl)) {
         const { result } = renderHook(() => useFormatCodamaIdl(idl));
         return result.current;
     }

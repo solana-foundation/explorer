@@ -35,7 +35,7 @@ export function parseProgramLogs(logs: string[], error: TransactionError | null,
         } else {
             prefix = new Array(indentLevel - 1).fill('\u00A0\u00A0').join('');
         }
-        return prefix + '> ';
+        return `${prefix}> `;
     }
 
     let prettyError;

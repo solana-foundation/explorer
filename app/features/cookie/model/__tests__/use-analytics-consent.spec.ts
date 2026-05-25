@@ -16,24 +16,24 @@ describe('useAnalyticsConsent', () => {
         vi.mocked(getCookie).mockReturnValue(null);
     });
 
-    it('returns isConsentGiven=false when no consent', () => {
+    it('should return isConsentGiven=false when no consent', () => {
         const { result } = renderHook(() => useAnalyticsConsent());
         expect(result.current.isConsentGiven).toBe(false);
     });
 
-    it('returns isConsentGiven=true when granted', () => {
+    it('should return isConsentGiven=true when granted', () => {
         vi.mocked(getCookie).mockReturnValue(EConsentStatus.Granted);
         const { result } = renderHook(() => useAnalyticsConsent());
         expect(result.current.isConsentGiven).toBe(true);
     });
 
-    it('returns isConsentGiven=false when denied', () => {
+    it('should return isConsentGiven=false when denied', () => {
         vi.mocked(getCookie).mockReturnValue(EConsentStatus.Denied);
         const { result } = renderHook(() => useAnalyticsConsent());
         expect(result.current.isConsentGiven).toBe(false);
     });
 
-    it('updates on consent change event', () => {
+    it('should update on consent change event', () => {
         const { result } = renderHook(() => useAnalyticsConsent());
         expect(result.current.isConsentGiven).toBe(false);
 

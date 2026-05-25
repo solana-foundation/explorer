@@ -106,8 +106,8 @@ const TPS_CHART_OPTIONS = (historyMaxTps: number): ChartOptions<'bar'> => {
                     // Display, position, and set styles for font
                     tooltipEl.style.opacity = '1';
                     tooltipEl.style.position = 'absolute';
-                    tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
-                    tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretY + 'px';
+                    tooltipEl.style.left = `${position.left + window.pageXOffset + tooltipModel.caretX}px`;
+                    tooltipEl.style.top = `${position.top + window.pageYOffset + tooltipModel.caretY}px`;
                     tooltipEl.style.pointerEvents = 'none';
                 },
                 intersect: false,

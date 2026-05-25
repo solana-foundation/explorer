@@ -30,7 +30,7 @@ export function microLamportsToLamports(microLamports: number | bigint): number 
 
     const microLamportsString = microLamports.toString().padStart(7, '0');
     const splitIndex = microLamportsString.length - 6;
-    const lamportString = microLamportsString.slice(0, splitIndex) + '.' + microLamportsString.slice(splitIndex);
+    const lamportString = `${microLamportsString.slice(0, splitIndex)}.${microLamportsString.slice(splitIndex)}`;
     return parseFloat(lamportString);
 }
 
@@ -52,7 +52,7 @@ export function lamportsToSol(lamports: number | bigint): number {
     const absLamports = lamports < 0 ? -lamports : lamports;
     const lamportsString = absLamports.toString(10).padStart(10, '0');
     const splitIndex = lamportsString.length - 9;
-    const solString = lamportsString.slice(0, splitIndex) + '.' + lamportsString.slice(splitIndex);
+    const solString = `${lamportsString.slice(0, splitIndex)}.${lamportsString.slice(splitIndex)}`;
     return signMultiplier * parseFloat(solString);
 }
 
@@ -130,10 +130,10 @@ export function capitalizeFirstLetter(input: string) {
 
 export function abbreviatedNumber(value: number, fixed = 1) {
     if (value < 1e3) return String(value);
-    if (value >= 1e3 && value < 1e6) return +(value / 1e3).toFixed(fixed) + 'K';
-    if (value >= 1e6 && value < 1e9) return +(value / 1e6).toFixed(fixed) + 'M';
-    if (value >= 1e9 && value < 1e12) return +(value / 1e9).toFixed(fixed) + 'B';
-    if (value >= 1e12) return +(value / 1e12).toFixed(fixed) + 'T';
+    if (value >= 1e3 && value < 1e6) return `${+(value / 1e3).toFixed(fixed)}K`;
+    if (value >= 1e6 && value < 1e9) return `${+(value / 1e6).toFixed(fixed)}M`;
+    if (value >= 1e9 && value < 1e12) return `${+(value / 1e9).toFixed(fixed)}B`;
+    if (value >= 1e12) return `${+(value / 1e12).toFixed(fixed)}T`;
 }
 
 export const pubkeyToString = (key: PublicKey | string = '') => {

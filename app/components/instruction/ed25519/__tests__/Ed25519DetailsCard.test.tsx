@@ -41,7 +41,7 @@ describe('Ed25519DetailsCard', () => {
         result: { err: null },
     };
 
-    it('renders basic Ed25519 verification instruction with single signature', () => {
+    it('should render basic Ed25519 verification instruction with single signature', () => {
         // 56JcSVYUPr8hdg8q2bfDhiPm5W9XQtr45VEevK9ye6Ec7DcyvD9CvnDgUoQhL3eQEmz32RRtLcaRdU9xyaDyCLiT (devnet)
 
         // Example of single signature verification
@@ -130,7 +130,7 @@ describe('Ed25519DetailsCard', () => {
         );
     });
 
-    it('renders basic Ed25519 verification instruction with self-contained single signature', () => {
+    it('should render basic Ed25519 verification instruction with self-contained single signature', () => {
         // XBHwdBYNu8J326yKeHiRyEudMaFVhz3Pb6ahgcfceRLV6kbmd14Z8vE6YnV4zu5WWNESmvhxmjUj4CpoQmwwhLJ
 
         // Example of single signature verification
@@ -176,7 +176,7 @@ describe('Ed25519DetailsCard', () => {
         expect(card).toHaveTextContent('B5MrvqsIcDUTKXV4jJryosGmPjceCGbvzbWhlSodJCI=');
     });
 
-    it('renders card even when Ed25519 instruction contains invalid references', () => {
+    it('should render card even when Ed25519 instruction contains invalid references', () => {
         // faked from XBHwdBYNu8J326yKeHiRyEudMaFVhz3Pb6ahgcfceRLV6kbmd14Z8vE6YnV4zu5WWNESmvhxmjUj4CpoQmwwhLJ
 
         // Example of failed single signature verification

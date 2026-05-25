@@ -7,7 +7,7 @@ import { estimateRequestedComputeUnits, getReservedComputeUnits } from '../compu
 
 describe('getReservedComputeUnits', () => {
     describe('mainnet', () => {
-        it('returns default compute units before builtin feature activation', () => {
+        it('should return default compute units before builtin feature activation', () => {
             // Before epoch 759 on mainnet
             expect(
                 getReservedComputeUnits({
@@ -26,7 +26,7 @@ describe('getReservedComputeUnits', () => {
             ).toEqual(200_000);
         });
 
-        it('returns minimal compute units for builtins after feature activation', () => {
+        it('should return minimal compute units for builtins after feature activation', () => {
             // After epoch 759 on mainnet
             expect(
                 getReservedComputeUnits({
@@ -53,7 +53,7 @@ describe('getReservedComputeUnits', () => {
             ).toEqual(3_000);
         });
 
-        it('returns default compute units for non-builtins after feature activation', () => {
+        it('should return default compute units for non-builtins after feature activation', () => {
             expect(
                 getReservedComputeUnits({
                     cluster: Cluster.MainnetBeta,
@@ -63,7 +63,7 @@ describe('getReservedComputeUnits', () => {
             ).toEqual(200_000);
         });
 
-        it('handles feature gate program migration correctly', () => {
+        it('should handle feature gate program migration correctly', () => {
             // Before migration (epoch 753), feature gate is builtin
             expect(
                 getReservedComputeUnits({
@@ -94,7 +94,7 @@ describe('getReservedComputeUnits', () => {
     });
 
     describe('devnet', () => {
-        it('returns correct compute units based on devnet activation epochs', () => {
+        it('should return correct compute units based on devnet activation epochs', () => {
             // Before epoch 842 on devnet
             expect(
                 getReservedComputeUnits({
@@ -116,7 +116,7 @@ describe('getReservedComputeUnits', () => {
     });
 
     describe('testnet', () => {
-        it('returns correct compute units based on testnet activation epochs', () => {
+        it('should return correct compute units based on testnet activation epochs', () => {
             // Before epoch 750 on testnet
             expect(
                 getReservedComputeUnits({
@@ -138,7 +138,7 @@ describe('getReservedComputeUnits', () => {
     });
 
     describe('custom cluster', () => {
-        it('always uses most recent configuration', () => {
+        it('should always use most recent configuration', () => {
             expect(
                 getReservedComputeUnits({
                     cluster: Cluster.Custom,
@@ -158,7 +158,7 @@ describe('getReservedComputeUnits', () => {
     });
 
     describe('edge cases', () => {
-        it('handles undefined epoch', () => {
+        it('should handle undefined epoch', () => {
             expect(
                 getReservedComputeUnits({
                     cluster: Cluster.MainnetBeta,
@@ -167,7 +167,7 @@ describe('getReservedComputeUnits', () => {
             ).toEqual(200_000);
         });
 
-        it('handles negative epoch', () => {
+        it('should handle negative epoch', () => {
             expect(
                 getReservedComputeUnits({
                     cluster: Cluster.MainnetBeta,
@@ -202,7 +202,7 @@ describe('estimateRequestedComputeUnits', () => {
     };
 
     describe('with explicit compute budget', () => {
-        it('returns compute units from SetComputeUnitLimit instruction', () => {
+        it('should return compute units from SetComputeUnitLimit instruction', () => {
             const computeUnits = 300_000;
             const data = alloc(5);
             data[0] = 2; // SetComputeUnitLimit instruction type
@@ -218,7 +218,7 @@ describe('estimateRequestedComputeUnits', () => {
             expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(computeUnits);
         });
 
-        it('returns compute units from deprecated RequestUnits instruction', () => {
+        it('should return compute units from deprecated RequestUnits instruction', () => {
             const computeUnits = 150_000;
             const data = alloc(9); // RequestUnits needs 9 bytes
             data[0] = 0; // RequestUnits instruction type
@@ -235,7 +235,7 @@ describe('estimateRequestedComputeUnits', () => {
             expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(computeUnits);
         });
 
-        it('prioritizes first compute budget instruction found', () => {
+        it('should prioritize first compute budget instruction found', () => {
             const data1 = alloc(5);
             data1[0] = 2;
             writeUint32LE(data1, 100_000, 1);
@@ -260,7 +260,7 @@ describe('estimateRequestedComputeUnits', () => {
     });
 
     describe('without explicit compute budget', () => {
-        it('returns default for non-builtin programs', () => {
+        it('should return default for non-builtin programs', () => {
             const tx = createMockTransaction([
                 {
                     data: new Uint8Array([1, 2, 3]),
@@ -271,7 +271,7 @@ describe('estimateRequestedComputeUnits', () => {
             expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(200_000);
         });
 
-        it('returns minimal units for builtin programs after activation', () => {
+        it('should return minimal units for builtin programs after activation', () => {
             const tx = createMockTransaction([
                 {
                     data: new Uint8Array([1, 2, 3]),
@@ -286,7 +286,7 @@ describe('estimateRequestedComputeUnits', () => {
             expect(estimateRequestedComputeUnits(tx, 758n, Cluster.MainnetBeta)).toEqual(200_000);
         });
 
-        it('returns sum of reserved units for mixed instructions', () => {
+        it('should return sum of reserved units for mixed instructions', () => {
             const tx = createMockTransaction([
                 {
                     data: new Uint8Array([1, 2, 3]),
@@ -302,7 +302,7 @@ describe('estimateRequestedComputeUnits', () => {
             expect(estimateRequestedComputeUnits(tx, 759n, Cluster.MainnetBeta)).toEqual(203_000);
         });
 
-        it('handles feature gate program correctly across epochs', () => {
+        it('should handle feature gate program correctly across epochs', () => {
             const tx = createMockTransaction([
                 {
                     data: new Uint8Array([1, 2, 3]),
@@ -319,7 +319,7 @@ describe('estimateRequestedComputeUnits', () => {
     });
 
     describe('edge cases', () => {
-        it('handles empty instruction data', () => {
+        it('should handle empty instruction data', () => {
             const tx = createMockTransaction([
                 {
                     data: new Uint8Array([]),
@@ -331,7 +331,7 @@ describe('estimateRequestedComputeUnits', () => {
             expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(3_000);
         });
 
-        it('handles invalid compute budget instruction data', () => {
+        it('should handle invalid compute budget instruction data', () => {
             const tx = createMockTransaction([
                 {
                     data: new Uint8Array([2, 1, 2]), // Too short for SetComputeUnitLimit
@@ -343,12 +343,12 @@ describe('estimateRequestedComputeUnits', () => {
             expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(3_000);
         });
 
-        it('handles transactions with no instructions', () => {
+        it('should handle transactions with no instructions', () => {
             const tx = createMockTransaction([]);
             expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(0);
         });
 
-        it('respects the 1.4M compute unit cap', () => {
+        it('should respect the 1.4M compute unit cap', () => {
             // Create a transaction with many instructions that would exceed 1.4M
             const instructions = [];
             for (let i = 0; i < 10; i++) {
@@ -363,7 +363,7 @@ describe('estimateRequestedComputeUnits', () => {
             expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(1_400_000);
         });
 
-        it('handles compute budget with other instructions', () => {
+        it('should handle compute budget with other instructions', () => {
             const data = alloc(5);
             data[0] = 2; // SetComputeUnitLimit
             writeUint32LE(data, 500_000, 1);

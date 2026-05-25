@@ -382,7 +382,7 @@ describe('instructionIsSelfCPI - Buffer operations', () => {
 });
 
 describe('number overflow demonstration', () => {
-    it('demonstrates the problem with toNumber() on large values', () => {
+    it('should demonstrate the problem with toNumber() on large values', () => {
         const largeNumber = new BN('18446744073709551615'); // Max u64
 
         // BN.js will actually throw an error if the number is too large for toNumber()
@@ -394,7 +394,7 @@ describe('number overflow demonstration', () => {
         expect(usingToString).toBe('18446744073709551615');
     });
 
-    it('shows MAX_SAFE_INTEGER limitation', () => {
+    it('should show MAX_SAFE_INTEGER limitation', () => {
         const maxSafe = Number.MAX_SAFE_INTEGER; // 2^53 - 1 = 9007199254740991
 
         // Numbers beyond this lose precision

@@ -18,7 +18,7 @@ if (!AbortSignal.timeout) {
 // See https://github.com/anza-xyz/solana-pay/issues/106
 const originalHasInstance = Uint8Array[Symbol.hasInstance];
 Object.defineProperty(Uint8Array, Symbol.hasInstance, {
-    value(potentialInstance: any) {
+    value(potentialInstance: unknown) {
         return originalHasInstance.call(this, potentialInstance) || Buffer.isBuffer(potentialInstance);
     },
 });

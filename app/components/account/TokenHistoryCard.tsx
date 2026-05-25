@@ -445,7 +445,7 @@ function formatTokenName(pubkey: string, cluster: Cluster, tokenInfo: TokenInfoW
     let display = displayAddress(pubkey, cluster, tokenInfo);
 
     if (display === pubkey) {
-        display = display.slice(0, TRUNCATE_TOKEN_LENGTH) + '\u2026';
+        display = `${display.slice(0, TRUNCATE_TOKEN_LENGTH)}\u2026`;
     }
 
     return display;

@@ -67,7 +67,7 @@ describe('tokenSearchProvider', () => {
                     {
                         icon: 'https://example.com/sol.png',
                         label: 'SOL - Wrapped SOL',
-                        pathname: '/address/' + TOKEN_ADDRESS,
+                        pathname: `/address/${TOKEN_ADDRESS}`,
                         sublabel: TOKEN_ADDRESS,
                         type: 'address',
                         value: ['Wrapped SOL', 'SOL', TOKEN_ADDRESS],

@@ -18,7 +18,7 @@ describe('accountSearchProvider', () => {
         expect(results).toEqual([
             {
                 label: 'Accounts',
-                options: [{ label: address, pathname: '/address/' + address, type: 'address', value: [address] }],
+                options: [{ label: address, pathname: `/address/${address}`, type: 'address', value: [address] }],
             },
         ]);
     });

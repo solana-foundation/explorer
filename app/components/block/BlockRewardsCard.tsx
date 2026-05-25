@@ -52,7 +52,7 @@ export function BlockRewardsCard({ block }: { block: VersionedBlockResponse }) {
                                         <SolBalance lamports={reward.lamports} />
                                     </td>
                                     <td>{reward.postBalance ? <SolBalance lamports={reward.postBalance} /> : '-'}</td>
-                                    <td>{percentChange ? percentChange + '%' : '-'}</td>
+                                    <td>{percentChange ? `${percentChange}%` : '-'}</td>
                                 </tr>
                             );
                         })}

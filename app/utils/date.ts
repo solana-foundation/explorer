@@ -1,3 +1,7 @@
+export function unixTimestampToMs(seconds: number): number {
+    return seconds * 1000;
+}
+
 export function displayTimestamp(unixTimestamp: number, shortTimeZoneName = false): string {
     const expireDate = new Date(unixTimestamp);
     const dateString = new Intl.DateTimeFormat('en-US', {

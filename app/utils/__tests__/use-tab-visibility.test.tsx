@@ -12,7 +12,7 @@ const App: React.FC = () => {
     return <div data-testid={isVisibleTestId} data-visible={visible} />;
 };
 
-test('detects visibility', async () => {
+test('should detect visibility', async () => {
     render(<App />);
 
     const el = screen.getByTestId(isVisibleTestId);

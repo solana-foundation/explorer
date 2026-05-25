@@ -144,7 +144,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         vi.clearAllMocks();
     });
 
-    test('renders SystemProgram::CreateAccount instruction', async () => {
+    test('should render SystemProgram::CreateAccount instruction', async () => {
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramCreateAccountQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
@@ -184,7 +184,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         });
     });
 
-    test('renders SystemProgram::CreateAccountWithSeed instruction', async () => {
+    test('should render SystemProgram::CreateAccountWithSeed instruction', async () => {
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramCreateAccountWithSeedQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
@@ -225,7 +225,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         });
     });
 
-    test('renders SystemProgram::Allocate instruction', async () => {
+    test('should render SystemProgram::Allocate instruction', async () => {
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramAllocateQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
@@ -261,7 +261,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         });
     });
 
-    test('renders SystemProgram::Assign instruction', async () => {
+    test('should render SystemProgram::Assign instruction', async () => {
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramAssignQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
@@ -295,7 +295,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         });
     });
 
-    test('renders SystemProgram::Transfer instruction', async () => {
+    test('should render SystemProgram::Transfer instruction', async () => {
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramTransferQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
@@ -332,7 +332,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         });
     });
 
-    test('renders SystemProgram::AdvanceNonceAccount instruction', async () => {
+    test('should render SystemProgram::AdvanceNonceAccount instruction', async () => {
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramAdvanceNonceQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
@@ -368,7 +368,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         });
     });
 
-    test('renders SystemProgram::WithdrawNonceAccount instruction', async () => {
+    test('should render SystemProgram::WithdrawNonceAccount instruction', async () => {
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramWithdrawNonceQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
@@ -406,7 +406,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         });
     });
 
-    test('renders SystemProgram::AuthorizeNonceAccount instruction', async () => {
+    test('should render SystemProgram::AuthorizeNonceAccount instruction', async () => {
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramAuthorizeNonceQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);
@@ -443,7 +443,7 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
         });
     });
 
-    test('renders SystemProgram::InitializeNonceAccount instruction', async () => {
+    test('should render SystemProgram::InitializeNonceAccount instruction', async () => {
         // Setup search params mock
         const mockUseSearchParamsReturn = mockUseSearchParams(stubs.systemProgramInitializeNonceQueryParam);
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(mockUseSearchParamsReturn as any);

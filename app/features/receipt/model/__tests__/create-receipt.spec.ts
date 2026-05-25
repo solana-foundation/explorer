@@ -172,7 +172,7 @@ describe('createReceipt', () => {
             });
         });
 
-        it('when transaction has USDC transferChecked and Jito SOL tip, creates SOL receipt for the tip', async () => {
+        it('should create SOL receipt for the tip when transaction has USDC transferChecked and Jito SOL tip', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
                 cluster: Cluster.Devnet,
                 transaction: mockUsdcJitoTransferTransaction,

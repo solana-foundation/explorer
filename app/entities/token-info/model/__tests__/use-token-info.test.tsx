@@ -35,12 +35,12 @@ describe('useTokenInfo', () => {
         ['false', false, ADDR],
         ['undefined', undefined, ADDR],
         ['true with empty pubkey', true, ''],
-    ])('does not request token info when fetchTokenLabelInfo is %s', async (_label, fetch, pubkey) => {
+    ])('should not request token info when fetchTokenLabelInfo is %s', async (_label, fetch, pubkey) => {
         renderHook(() => useTokenInfo(fetch, pubkey, Cluster.MainnetBeta));
         await waitFor(() => expect(mockRequestTokenInfo).not.toHaveBeenCalled());
     });
 
-    it('requests token info with correct args including genesisHash', async () => {
+    it('should request token info with correct args including genesisHash', async () => {
         renderHook(() => useTokenInfo(true, ADDR, Cluster.MainnetBeta, 'abc123'));
 
         await waitFor(() => {
@@ -48,7 +48,7 @@ describe('useTokenInfo', () => {
         });
     });
 
-    it('passes SWR key when enabled, null when disabled', () => {
+    it('should pass SWR key when enabled, null when disabled', () => {
         renderHook(() => useTokenInfo(true, ADDR, Cluster.MainnetBeta));
         expect(useSWR).toHaveBeenCalledWith(['get-token-info', ADDR, Cluster.MainnetBeta, undefined], null);
 
@@ -58,7 +58,7 @@ describe('useTokenInfo', () => {
         expect(useSWR).toHaveBeenCalledWith(null, null);
     });
 
-    it('returns token data from SWR', () => {
+    it('should return token data from SWR', () => {
         const mockToken = { address: ADDR, name: 'Wrapped SOL', symbol: 'SOL' };
         vi.mocked(useSWR).mockReturnValue({ data: mockToken } as ReturnType<typeof useSWR>);
 
@@ -66,7 +66,7 @@ describe('useTokenInfo', () => {
         expect(result.current).toEqual(mockToken);
     });
 
-    it('re-requests when pubkey or cluster changes', async () => {
+    it('should re-request when pubkey or cluster changes', async () => {
         const { rerender } = renderHook(({ pubkey, cluster }) => useTokenInfo(true, pubkey, cluster), {
             initialProps: { cluster: Cluster.MainnetBeta, pubkey: 'address1' },
         });

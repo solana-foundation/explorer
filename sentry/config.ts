@@ -9,12 +9,6 @@ import {
 
 type RuntimeContext = 'client' | 'server' | 'edge';
 
-/**
- * Type-safe wrapper for the Sentry configuration
- */
-export const createSentryConfig = createSentryConfigMjs as (context: RuntimeContext) => Options;
+export const createSentryConfig = (context: RuntimeContext): Options => createSentryConfigMjs(context);
 
-/**
- * Type-safe wrapper for the Sentry build configuration
- */
-export const createSentryBuildConfig = createSentryBuildConfigMjs as () => SentryBuildOptions;
+export const createSentryBuildConfig = (): SentryBuildOptions => createSentryBuildConfigMjs();

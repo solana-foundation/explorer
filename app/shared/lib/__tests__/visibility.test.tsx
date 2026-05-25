@@ -37,17 +37,17 @@ afterEach(() => {
 const wrapper = ({ children }: { children: ReactNode }) => <VisibilityProvider>{children}</VisibilityProvider>;
 
 describe('VisibilityProvider + useVisibility', () => {
-    it('returns isVisible=false initially', () => {
+    it('should return isVisible=false initially', () => {
         const { result } = renderHook(() => useVisibility<HTMLDivElement>(true), { wrapper });
         expect(result.current.isVisible).toBe(false);
     });
 
-    it('does not observe when disabled', () => {
+    it('should not observe when disabled', () => {
         renderHook(() => useVisibility(false), { wrapper });
         expect(mockObserve).not.toHaveBeenCalled();
     });
 
-    it('observes the ref element when enabled', () => {
+    it('should observe the ref element when enabled', () => {
         function TestComponent() {
             const { ref } = useVisibility<HTMLDivElement>(true);
             return <div ref={ref} data-testid="target" />;
@@ -57,7 +57,7 @@ describe('VisibilityProvider + useVisibility', () => {
         expect(mockObserve).toHaveBeenCalledTimes(1);
     });
 
-    it('sets isVisible=true when element intersects', () => {
+    it('should set isVisible=true when element intersects', () => {
         function TestComponent() {
             const { ref, isVisible } = useVisibility<HTMLDivElement>(true);
             return <div ref={ref} data-testid={isVisible ? 'visible' : 'hidden'} />;
@@ -71,7 +71,7 @@ describe('VisibilityProvider + useVisibility', () => {
         expect(screen.getByTestId('visible')).toBeDefined();
     });
 
-    it('unobserves the element after it becomes visible', () => {
+    it('should unobserve the element after it becomes visible', () => {
         function TestComponent() {
             const { ref } = useVisibility<HTMLDivElement>(true);
             return <div ref={ref} data-testid="target" />;
@@ -85,7 +85,7 @@ describe('VisibilityProvider + useVisibility', () => {
         expect(mockUnobserve).toHaveBeenCalledWith(el);
     });
 
-    it('does not set isVisible for non-intersecting entries', () => {
+    it('should not set isVisible for non-intersecting entries', () => {
         function TestComponent() {
             const { ref, isVisible } = useVisibility<HTMLDivElement>(true);
             return <div ref={ref} data-testid={isVisible ? 'visible' : 'hidden'} />;
@@ -99,7 +99,7 @@ describe('VisibilityProvider + useVisibility', () => {
         expect(screen.getByTestId('hidden')).toBeDefined();
     });
 
-    it('creates only one IntersectionObserver for multiple elements', () => {
+    it('should create only one IntersectionObserver for multiple elements', () => {
         function TestComponent() {
             const a = useVisibility<HTMLDivElement>(true);
             const b = useVisibility<HTMLDivElement>(true);
@@ -115,7 +115,7 @@ describe('VisibilityProvider + useVisibility', () => {
         expect(IntersectionObserver).toHaveBeenCalledTimes(1);
     });
 
-    it('unobserves on cleanup when component unmounts', () => {
+    it('should unobserve on cleanup when component unmounts', () => {
         function TestComponent() {
             const { ref } = useVisibility<HTMLDivElement>(true);
             return <div ref={ref} data-testid="target" />;
@@ -129,12 +129,12 @@ describe('VisibilityProvider + useVisibility', () => {
         expect(mockUnobserve).toHaveBeenCalledWith(el);
     });
 
-    it('does not observe without VisibilityProvider', () => {
+    it('should not observe without VisibilityProvider', () => {
         renderHook(() => useVisibility<HTMLDivElement>(true));
         expect(mockObserve).not.toHaveBeenCalled();
     });
 
-    it('creates observer with rootMargin 50px', () => {
+    it('should create observer with rootMargin 50px', () => {
         function TestComponent() {
             const { ref } = useVisibility<HTMLDivElement>(true);
             return <div ref={ref} />;

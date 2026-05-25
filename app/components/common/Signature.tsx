@@ -18,7 +18,7 @@ export function Signature({ signature, alignRight, link, truncate, truncateChars
     let signatureLabel = signature;
 
     if (truncateChars) {
-        signatureLabel = signature.slice(0, truncateChars) + '…';
+        signatureLabel = `${signature.slice(0, truncateChars)}…`;
     }
     const transactionPath = useClusterPath({ pathname: `/tx/${signature}` });
     return (
