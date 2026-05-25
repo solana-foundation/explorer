@@ -119,7 +119,14 @@ export default tseslint.config(
         files: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
         plugins: { vitest },
         rules: {
-            'vitest/valid-title': ['error', { mustMatch: { it: '^should\\b', test: '^should\\b' } }],
+            'vitest/valid-title': [
+                'error',
+                {
+                    // Allow `it.each` template titles like `'$scenario'` — the rule sees the literal
+                    // template, not the resolved row value, so we accept any leading `$varname`.
+                    mustMatch: { it: '^(should\\b|\\$)', test: '^(should\\b|\\$)' },
+                },
+            ],
         },
     },
 
@@ -233,6 +240,8 @@ export default tseslint.config(
             // app/components (pre-FSD legacy)
             'app/components/ClusterModalDeveloperSettings.tsx',
             'app/components/account/token-extensions/ScaledUiAmountMultiplierTooltip.tsx',
+            'app/components/common/token-market-data/stories/MarketData.s.tsx',
+            'app/components/common/token-market-data/stories/MarketDataSeries.s.tsx',
             'app/components/instruction/AnchorDetailsCard.tsx',
             'app/components/instruction/pyth/AddMappingDetailsCard.tsx',
             'app/components/instruction/pyth/AddPriceDetailsCard.tsx',
@@ -378,6 +387,8 @@ export default tseslint.config(
             'app/features/idl/interactive-idl/model/__tests__/use-mainnet-confirmation.spec.ts',
             'app/features/idl/interactive-idl/model/use-mainnet-confirmation.ts',
             'app/features/receipt/receipt-page.tsx',
+            'app/features/search/api/discover-with-utl.ts',
+            'app/features/search/api/resolve-search-tokens.ts',
 
             // app/features deep imports into entities (must go via barrel)
             'app/features/idl/formatted-idl/model/__tests__/search.test.ts',
@@ -533,6 +544,7 @@ export default tseslint.config(
             'app/api/metadata/proxy/route.ts',
             'app/api/program-metadata-idl/route.ts',
             'app/api/receipt/price/[[]mintAddress[]]/route.ts',
+            'app/api/search/route.ts',
 
             // app/components (pre-FSD legacy — to be migrated into features/entities)
             'app/components/ClusterModal.tsx',
@@ -630,6 +642,7 @@ export default tseslint.config(
             'app/entities/account/model/use-accounts-info.ts',
             'app/entities/compute-unit/lib/compute-units-schedule.ts',
             'app/entities/compute-unit/ui/CUProfilingCard.tsx',
+            'app/entities/digital-asset/api.ts',
             'app/entities/domain/api/fetch-ans-domains.ts',
             'app/entities/domain/api/resolve-domain.ts',
             'app/entities/domain/model/use-user-ans-domains.ts',
@@ -694,6 +707,7 @@ export default tseslint.config(
             'app/features/nicknames/model/use-nickname.ts',
             'app/features/receipt/__e2e__/receipt.e2e.ts',
             'app/features/receipt/lib/generate-receipt-csv.ts',
+            'app/features/receipt/lib/parse-usd.ts',
             'app/features/receipt/lib/use-primary-domain.ts',
             'app/features/receipt/mocks/custom-fee-payer.ts',
             'app/features/receipt/mocks/jito-only-transfer.ts',
@@ -714,6 +728,7 @@ export default tseslint.config(
             'app/features/receipt/receipt-page.tsx',
             'app/features/receipt/ui/BaseReceiptImage.tsx',
             'app/features/receipt/ui/ViewReceiptButton.tsx',
+            'app/features/search/lib/filter-tabs.ts',
             'app/features/search/model/use-search.ts',
             'app/features/search/ui/BaseSearch.tsx',
             'app/features/security-txt/ui/SecurityCard.tsx',

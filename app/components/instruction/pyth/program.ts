@@ -32,7 +32,7 @@ function decodeData(type: any, buffer: Uint8Array): any {
     try {
         data = type.layout.decode(buffer);
     } catch (err) {
-        throw new Error('invalid instruction; ' + err);
+        throw new Error(`invalid instruction; ${err}`);
     }
 
     if (data.header.type !== type.index) {

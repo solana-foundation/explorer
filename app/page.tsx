@@ -183,7 +183,7 @@ function StatsCardBody() {
     const hourlySlotTime = Math.round(1000 * avgSlotTime_1h);
     const averageSlotTime = Math.round(1000 * avgSlotTime_1min);
     const { slotIndex, slotsInEpoch } = epochInfo;
-    const epochProgress = percentage(slotIndex, slotsInEpoch, 2).toFixed(1) + '%';
+    const epochProgress = `${percentage(slotIndex, slotsInEpoch, 2).toFixed(1)}%`;
     const epochTimeRemaining = slotsToHumanString(Number(slotsInEpoch - slotIndex), hourlySlotTime);
     const { blockHeight, absoluteSlot } = epochInfo;
 

@@ -120,7 +120,7 @@ const renderAccountRow = (account: AccountBalancePair, index: number, supply: bi
             <td className="text-end">
                 <SolBalance lamports={account.lamports} maximumFractionDigits={0} />
             </td>
-            <td className="text-end">{percentage(BigInt(100 * account.lamports), supply, 4).toFixed(3) + '%'}</td>
+            <td className="text-end">{`${percentage(BigInt(100 * account.lamports), supply, 4).toFixed(3)}%`}</td>
         </tr>
     );
 };

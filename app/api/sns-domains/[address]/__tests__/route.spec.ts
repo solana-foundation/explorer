@@ -10,7 +10,7 @@ vi.mock('@entities/domain/api/fetch-sns-domains', () => ({
 }));
 
 const VALID_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
-const mockRequest = new Request('http://localhost:3000/api/sns-domains/' + VALID_ADDRESS);
+const mockRequest = new Request(`http://localhost:3000/api/sns-domains/${VALID_ADDRESS}`);
 
 describe('GET /api/sns-domains/[address]', () => {
     beforeEach(() => {

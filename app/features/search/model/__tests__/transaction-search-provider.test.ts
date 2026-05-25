@@ -18,7 +18,7 @@ describe('transactionSearchProvider', () => {
         expect(results).toEqual([
             {
                 label: 'Transactions',
-                options: [{ label: sig, pathname: '/tx/' + sig, type: 'tx', value: [sig] }],
+                options: [{ label: sig, pathname: `/tx/${sig}`, type: 'tx', value: [sig] }],
             },
         ]);
     });

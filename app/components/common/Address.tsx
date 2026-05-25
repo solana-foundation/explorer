@@ -71,7 +71,7 @@ export function Address({
     }
 
     if (truncateChars && addressLabel === address) {
-        addressLabel = addressLabel.slice(0, truncateChars) + '…';
+        addressLabel = `${addressLabel.slice(0, truncateChars)}…`;
     }
 
     if (overrideText) {

@@ -109,7 +109,7 @@ export function fromHex(hex: string): Uint8Array {
         return new Uint8Array(0);
     }
     // Normalise odd-length to even, matching Buffer.from('hex') semantics
-    const normalised = cleanHex.length % 2 === 0 ? cleanHex : '0' + cleanHex;
+    const normalised = cleanHex.length % 2 === 0 ? cleanHex : `0${cleanHex}`;
     // Use native Uint8Array.fromHex when available (Chrome 133+, Firefox 133+, Safari 18.2+)
     if ('fromHex' in Uint8Array) {
         return (Uint8Array.fromHex as (s: string) => Uint8Array)(normalised);

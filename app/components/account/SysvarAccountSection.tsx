@@ -259,7 +259,7 @@ function SysvarAccountRentCard({ account, sysvarAccount }: { account: Account; s
 
             <tr>
                 <td>Burn Percent</td>
-                <td className="text-lg-end">{sysvarAccount.info.burnPercent + '%'}</td>
+                <td className="text-lg-end">{`${sysvarAccount.info.burnPercent}%`}</td>
             </tr>
 
             <tr>
