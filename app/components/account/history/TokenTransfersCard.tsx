@@ -72,11 +72,11 @@ function TransferRow({
             {hasTimestamps && <td className="text-muted">{blockTime && <RelativeTime date={blockTime * 1000} />}</td>}
 
             <td>
-                <Address pubkey={transfer.source} link truncateChars={16} />
+                <Address pubkey={transfer.source} link />
             </td>
 
             <td>
-                <Address pubkey={transfer.destination} link truncateChars={16} />
+                <Address pubkey={transfer.destination} link />
             </td>
 
             <td>

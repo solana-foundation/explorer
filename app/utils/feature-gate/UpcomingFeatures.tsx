@@ -143,7 +143,6 @@ function FeaturesTable({
                                     <Address
                                         pubkey={new PublicKey(feature.key ?? '')}
                                         link
-                                        truncateChars={feature.simds[0] ? 12 : 20}
                                     />
                                 </td>
                                 <td>

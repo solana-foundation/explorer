@@ -23,7 +23,6 @@ type Props = {
     link?: boolean;
     raw?: boolean;
     noTruncate?: boolean;
-    truncateChars?: number;
     useMetadata?: boolean;
     overrideText?: string;
     tokenLabelInfo?: TokenLabelInfo;
@@ -37,7 +36,6 @@ export function Address({
     link,
     raw,
     noTruncate,
-    truncateChars,
     useMetadata,
     overrideText,
     tokenLabelInfo,
@@ -64,10 +62,6 @@ export function Address({
     const tokenInfo = useTokenInfo(shouldFetchTokenInfo, address, cluster, clusterInfo?.genesisHash);
     if (tokenInfo) {
         addressLabel = displayAddress(address, cluster, tokenInfo);
-    }
-
-    if (truncateChars && addressLabel === address) {
-        addressLabel = `${addressLabel.slice(0, truncateChars)}…`;
     }
 
     if (overrideText) {

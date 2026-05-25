@@ -23,18 +23,16 @@ export function useMidTruncation(enabled: boolean, text: string, trailingRef?: R
             return;
         }
 
-        // Cache trailing element space once — it's static for the lifetime of this effect run
-        let trailingSpace = 0;
-        const trailing = trailingRef?.current;
-        if (trailing) {
-            const style = getComputedStyle(trailing);
-            trailingSpace = trailing.getBoundingClientRect().width + parseFloat(style.marginLeft || '0');
-        }
-
         const check = () => {
             const row = rowRef.current;
             const hidden = hiddenTextRef.current;
             if (!row || !hidden) return;
+            let trailingSpace = 0;
+            const trailing = trailingRef?.current;
+            if (trailing) {
+                const style = getComputedStyle(trailing);
+                trailingSpace = trailing.getBoundingClientRect().width + parseFloat(style.marginLeft || '0');
+            }
             setIsMidTruncated(
                 hidden.getBoundingClientRect().width > row.clientWidth - COPY_ICON_RESERVED_PX - trailingSpace,
             );
