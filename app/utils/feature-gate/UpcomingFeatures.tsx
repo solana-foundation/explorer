@@ -140,10 +140,7 @@ function FeaturesTable({
                                     </div>
                                 </td>
                                 <td className="fs-sm">
-                                    <Address
-                                        pubkey={new PublicKey(feature.key ?? '')}
-                                        link
-                                    />
+                                    <Address pubkey={new PublicKey(feature.key ?? '')} link />
                                 </td>
                                 <td>
                                     {feature.simds.map((simd, index) => (
