@@ -5,6 +5,9 @@ on:
     - cron: '0 8 * * *' # Daily at 8 AM UTC
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 env:
   PNPM_CACHE_FOLDER: ~/.pnpm-store
 
