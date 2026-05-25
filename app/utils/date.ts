@@ -1,3 +1,6 @@
+import { formatDistance, type Locale } from 'date-fns';
+import { enUS } from 'date-fns/locale';
+
 export function unixTimestampToMs(seconds: number): number {
     return seconds * 1000;
 }
@@ -50,28 +53,35 @@ export function displayTimestampWithoutDate(unixTimestamp: number, shortTimeZone
     return timeString;
 }
 
-// Mirrors moment.js `fromNow()` English thresholds & textual quantifiers so the migration
-// off react-moment is visually faithful. See https://momentjs.com/docs/#/displaying/fromnow/
-function relativePhrase(absSeconds: number): string {
-    if (absSeconds < 45) return 'a few seconds';
-    if (absSeconds < 90) return 'a minute';
-    const absMinutes = Math.round(absSeconds / 60);
-    if (absMinutes < 45) return `${absMinutes} minutes`;
-    if (absMinutes < 90) return 'an hour';
-    const absHours = Math.round(absMinutes / 60);
-    if (absHours < 22) return `${absHours} hours`;
-    if (absHours < 36) return 'a day';
-    const absDays = Math.round(absHours / 24);
-    if (absDays < 26) return `${absDays} days`;
-    if (absDays < 46) return 'a month';
-    const absMonths = Math.round(absDays / 30);
-    if (absMonths < 11) return `${absMonths} months`;
-    if (absMonths < 18) return 'a year';
-    return `${Math.round(absMonths / 12)} years`;
+// Drops date-fns' "less than" prefixes on sub-minute buckets; everything else
+// inherits stock en-US phrasing (about/almost/over/half a).
+const relativeLocale: Locale = {
+    ...enUS,
+    formatDistance: (token, count, options) => {
+        const noLessThan: Record<string, { one: string; other: string }> = {
+            lessThanXMinutes: { one: '1 minute', other: '{{count}} minutes' },
+            lessThanXSeconds: { one: '1 second', other: '{{count}} seconds' },
+        };
+        const override = noLessThan[token];
+        if (!override) return enUS.formatDistance(token, count, options);
+        const tpl = count === 1 ? override.one : override.other.replace('{{count}}', String(count));
+        if (!options?.addSuffix) return tpl;
+        return options.comparison && options.comparison > 0 ? `in ${tpl}` : `${tpl} ago`;
+    },
+};
+
+export function formatDuration(value: number, _unit: 'seconds'): string {
+    const abs = Math.abs(value);
+    if (abs < 2) return '1 second';
+    return formatDistance(0, abs * 1000, { includeSeconds: true, locale: relativeLocale });
 }
 
 export function formatRelativeTime(unixTimestamp: number, now: number = Date.now()): string {
     const diffMs = unixTimestamp - now;
-    const phrase = relativePhrase(Math.abs(diffMs) / 1000);
-    return diffMs <= 0 ? `${phrase} ago` : `in ${phrase}`;
+    if (Math.abs(diffMs) < 2000) return diffMs > 0 ? 'in 1 second' : '1 second ago';
+    return formatDistance(unixTimestamp, now, {
+        addSuffix: true,
+        includeSeconds: true,
+        locale: relativeLocale,
+    });
 }

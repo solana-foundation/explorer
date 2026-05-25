@@ -11,9 +11,9 @@ import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc } from '@utils/date';
 import React, { useCallback, useMemo } from 'react';
-import Moment from 'react-moment';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
+import { RelativeTime } from '@/app/shared/RelativeTime';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
@@ -129,7 +129,7 @@ function TransactionRow({ signature, slot, blockTime, statusClass, statusText, h
 
             {hasTimestamps && (
                 <>
-                    <td className="text-muted">{blockTime ? <Moment date={blockTime * 1000} fromNow /> : '---'}</td>
+                    <td className="text-muted">{blockTime ? <RelativeTime date={blockTime * 1000} /> : '---'}</td>
                     <td className="text-muted">{blockTime ? displayTimestampUtc(blockTime * 1000, true) : '---'}</td>
                 </>
             )}

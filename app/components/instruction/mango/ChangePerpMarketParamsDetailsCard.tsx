@@ -1,6 +1,6 @@
 import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import moment from 'moment';
+import { formatDuration } from '@utils/date';
 import { useEffect, useState } from 'react';
 
 import { InstructionCard } from '../InstructionCard';
@@ -71,7 +71,7 @@ export function ChangePerpMarketParamsDetailsCard(props: {
                 <tr>
                     <td>
                         MNGO per{' '}
-                        {targetPeriodLength !== null && moment.duration(targetPeriodLength, 'seconds').humanize()}
+                        {targetPeriodLength !== null && formatDuration(targetPeriodLength, 'seconds')}
                     </td>
                     <td className="text-lg-end">
                         {info.mngoPerPeriod} {}

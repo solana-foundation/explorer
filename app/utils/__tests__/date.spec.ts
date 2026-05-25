@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatRelativeTime } from '../date';
+import { formatDuration, formatRelativeTime } from '../date';
 
 const NOW = new Date('2026-05-25T12:00:00Z').getTime();
 const SECOND = 1_000;
@@ -8,35 +8,44 @@ const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-// Cases mirror moment.js `fromNow()` English thresholds:
-// 0–44s → "a few seconds"; 45–89s → "a minute"; 90s–44m → "X minutes";
-// 45–89m → "an hour"; 90m–21h → "X hours"; 22–35h → "a day"; 36h–25d → "X days";
-// 26–45d → "a month"; 46d–10mo → "X months"; 11–17mo → "a year"; ≥18mo → "X years".
 const PAST_CASES: Array<[label: string, offsetMs: number, expected: string]> = [
-    ['1s', 1 * SECOND, 'a few seconds ago'],
-    ['44s (upper "a few seconds")', 44 * SECOND, 'a few seconds ago'],
-    ['45s (lower "a minute")', 45 * SECOND, 'a minute ago'],
-    ['60s', 60 * SECOND, 'a minute ago'],
-    ['89s (upper "a minute")', 89 * SECOND, 'a minute ago'],
-    ['90s (lower "X minutes")', 90 * SECOND, '2 minutes ago'],
+    ['1s', 1 * SECOND, '1 second ago'],
+    ['3s', 3 * SECOND, '5 seconds ago'],
+    ['5s', 5 * SECOND, '10 seconds ago'],
+    ['10s', 10 * SECOND, '20 seconds ago'],
+    ['20s', 20 * SECOND, 'half a minute ago'],
+    ['30s', 30 * SECOND, 'half a minute ago'],
+    ['40s', 40 * SECOND, '1 minute ago'],
+    ['60s', 60 * SECOND, '1 minute ago'],
+    ['89s', 89 * SECOND, '1 minute ago'],
+    ['90s', 90 * SECOND, '2 minutes ago'],
     ['5min', 5 * MINUTE, '5 minutes ago'],
-    ['44min (upper "X minutes")', 44 * MINUTE, '44 minutes ago'],
-    ['45min (lower "an hour")', 45 * MINUTE, 'an hour ago'],
-    ['89min (upper "an hour")', 89 * MINUTE, 'an hour ago'],
-    ['90min (lower "X hours")', 90 * MINUTE, '2 hours ago'],
-    ['21h (upper "X hours")', 21 * HOUR, '21 hours ago'],
-    ['22h (lower "a day")', 22 * HOUR, 'a day ago'],
-    ['35h (upper "a day")', 35 * HOUR, 'a day ago'],
-    ['36h (lower "X days")', 36 * HOUR, '2 days ago'],
-    ['25d (upper "X days")', 25 * DAY, '25 days ago'],
-    ['26d (lower "a month")', 26 * DAY, 'a month ago'],
-    ['45d (upper "a month")', 45 * DAY, 'a month ago'],
-    ['46d (lower "X months")', 46 * DAY, '2 months ago'],
-    ['10mo (upper "X months")', 10 * 30 * DAY, '10 months ago'],
-    ['11mo (lower "a year")', 11 * 30 * DAY, 'a year ago'],
-    ['17mo (upper "a year")', 17 * 30 * DAY, 'a year ago'],
-    ['18mo (lower "X years")', 18 * 30 * DAY, '2 years ago'],
-    ['3y', 3 * 12 * 30 * DAY, '3 years ago'],
+    ['44min', 44 * MINUTE, '44 minutes ago'],
+    ['45min', 45 * MINUTE, 'about 1 hour ago'],
+    ['90min', 90 * MINUTE, 'about 2 hours ago'],
+    ['22h', 22 * HOUR, 'about 22 hours ago'],
+    ['36h', 36 * HOUR, '1 day ago'],
+    ['25d', 25 * DAY, '25 days ago'],
+    ['45d', 45 * DAY, 'about 2 months ago'],
+    ['11mo', 11 * 30 * DAY, '11 months ago'],
+    ['13mo', 13 * 30 * DAY, 'about 1 year ago'],
+    ['18mo', 18 * 30 * DAY, 'over 1 year ago'],
+    ['3y', 3 * 12 * 30 * DAY, 'almost 3 years ago'],
+];
+
+const FUTURE_CASES: Array<[label: string, offsetMs: number, expected: string]> = [
+    ['1s', 1 * SECOND, 'in 1 second'],
+    ['3s', 3 * SECOND, 'in 5 seconds'],
+    ['30s', 30 * SECOND, 'in half a minute'],
+    ['60s', 60 * SECOND, 'in 1 minute'],
+    ['90s', 90 * SECOND, 'in 2 minutes'],
+    ['5min', 5 * MINUTE, 'in 5 minutes'],
+    ['45min', 45 * MINUTE, 'in about 1 hour'],
+    ['22h', 22 * HOUR, 'in about 22 hours'],
+    ['36h', 36 * HOUR, 'in 1 day'],
+    ['25d', 25 * DAY, 'in 25 days'],
+    ['45d', 45 * DAY, 'in about 2 months'],
+    ['18mo', 18 * 30 * DAY, 'in over 1 year'],
 ];
 
 describe('formatRelativeTime', () => {
@@ -44,12 +53,32 @@ describe('formatRelativeTime', () => {
         expect(formatRelativeTime(NOW - offset, NOW)).toBe(expected);
     });
 
-    it.each(PAST_CASES)('should render future %s with `in` prefix', (_label, offset, expectedPast) => {
-        const expectedFuture = `in ${expectedPast.replace(/ ago$/, '')}`;
-        expect(formatRelativeTime(NOW + offset, NOW)).toBe(expectedFuture);
+    it.each(FUTURE_CASES)('should render future %s as %s', (_label, offset, expected) => {
+        expect(formatRelativeTime(NOW + offset, NOW)).toBe(expected);
     });
+});
 
-    it('should treat current time as "a few seconds ago"', () => {
-        expect(formatRelativeTime(NOW, NOW)).toBe('a few seconds ago');
+const DURATION_CASES: Array<[seconds: number, expected: string]> = [
+    [0, '1 second'],
+    [1, '1 second'],
+    [3, '5 seconds'],
+    [30, 'half a minute'],
+    [60, '1 minute'],
+    [90, '2 minutes'],
+    [5 * 60, '5 minutes'],
+    [60 * 60, 'about 1 hour'],
+    [5 * 60 * 60, 'about 5 hours'],
+    [24 * 60 * 60, '1 day'],
+    [5 * 24 * 60 * 60, '5 days'],
+    [30 * 24 * 60 * 60, 'about 1 month'],
+    [365 * 24 * 60 * 60, 'about 1 year'],
+    [-1, '1 second'],
+    [-60, '1 minute'],
+    [-86400, '1 day'],
+];
+
+describe('formatDuration', () => {
+    it.each(DURATION_CASES)('should render %i seconds as %s', (seconds, expected) => {
+        expect(formatDuration(seconds, 'seconds')).toBe(expected);
     });
 });
