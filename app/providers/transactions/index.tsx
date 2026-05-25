@@ -37,7 +37,7 @@ type Dispatch = Cache.Dispatch<TransactionStatus>;
 export const StateContext: React.Context<Readonly<State> | undefined> = React.createContext<State | undefined>(
     undefined,
 );
-export const DispatchContext: React.Context<Readonly<Dispatch> | undefined> = React.createContext<Dispatch | undefined>(
+export const DispatchContext: React.Context<Dispatch | undefined> = React.createContext<Dispatch | undefined>(
     undefined,
 );
 
