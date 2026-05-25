@@ -35,14 +35,14 @@ interface OSecPage {
 interface OSecStatus {
     is_verified: boolean;
     repo_url: string;
-    last_verified_at: string | null;
+    last_verified_at: string | undefined;
 }
 
 interface VerifiedProgram {
     address: string;
     name: string;
-    repoUrl: string | null;
-    verifiedAt: string | null;
+    repoUrl: string | undefined;
+    verifiedAt: string | undefined;
 }
 
 const STATUS_CONCURRENCY = 5;
@@ -75,14 +75,14 @@ async function main() {
         .map(addr => {
             const status = statuses.get(addr);
             const idlName = idlNames.get(addr);
-            const repoUrl = status?.repo_url || null;
-            const name = idlName || deriveNameFromRepo(repoUrl) || addr.slice(0, 12) + '...';
+            const repoUrl = status?.repo_url || undefined;
+            const name = idlName || deriveNameFromRepo(repoUrl) || `${addr.slice(0, 12)}...`;
 
             return {
                 address: addr,
                 name,
-                repoUrl: repoUrl || null,
-                verifiedAt: status?.last_verified_at?.split('.')[0] ?? null,
+                repoUrl,
+                verifiedAt: status?.last_verified_at?.split('.')[0] ?? undefined,
             };
         })
         .sort((a, b) => a.name.localeCompare(b.name));
@@ -92,17 +92,17 @@ async function main() {
         process.exit(1);
     }
 
-    await writeFile(OUTPUT_PATH, JSON.stringify(programs, null, 2) + '\n', 'utf8');
+    await writeFile(OUTPUT_PATH, `${JSON.stringify(programs, undefined, 2)}\n`, 'utf8');
     console.log(`\nWritten ${programs.length} programs to ${OUTPUT_PATH}`);
 }
 
 async function fetchAllAddresses(): Promise<string[]> {
-    const firstPage: OSecPage = await fetchJson(`${OSEC_BASE}/verified-programs`);
+    const firstPage = await fetchJson<OSecPage>(`${OSEC_BASE}/verified-programs`);
     const allAddresses = [...firstPage.verified_programs];
 
     const totalPages = firstPage.meta.total_pages;
     for (let page = 2; page <= totalPages; page++) {
-        const data: OSecPage = await fetchJson(`${OSEC_BASE}/verified-programs/${page}`);
+        const data = await fetchJson<OSecPage>(`${OSEC_BASE}/verified-programs/${page}`);
         allAddresses.push(...data.verified_programs);
     }
 
@@ -117,12 +117,9 @@ async function fetchStatuses(addresses: string[]): Promise<Map<string, OSecStatu
     for (const chunk of chunks) {
         const settled = await Promise.allSettled(
             chunk.map(async addr => {
-                const status = await fetchJsonWithRetry<OSecStatus>(
-                    `${OSEC_BASE}/status/${addr}`,
-                    STATUS_RETRIES
-                );
+                const status = await fetchJsonWithRetry<OSecStatus>(`${OSEC_BASE}/status/${addr}`, STATUS_RETRIES);
                 return { addr, status };
-            })
+            }),
         );
         for (const result of settled) {
             if (result.status === 'fulfilled') {
@@ -138,7 +135,7 @@ async function fetchStatuses(addresses: string[]): Promise<Map<string, OSecStatu
     const failRate = failures / addresses.length;
     if (failRate > 0.5) {
         throw new Error(
-            `OSecure API too unreliable: ${failures}/${addresses.length} status requests failed (${(failRate * 100).toFixed(0)}%)`
+            `OSecure API too unreliable: ${failures}/${addresses.length} status requests failed (${(failRate * 100).toFixed(0)}%)`,
         );
     }
 
@@ -147,27 +144,30 @@ async function fetchStatuses(addresses: string[]): Promise<Map<string, OSecStatu
 
 const IDL_CONCURRENCY = 10;
 
+function extractIdlName(idl: unknown): string | undefined {
+    if (typeof idl !== 'object' || idl === undefined || idl === null) return undefined;
+    const obj = idl;
+    if ('name' in obj && typeof obj.name === 'string' && obj.name) return obj.name;
+    if ('metadata' in obj && typeof obj.metadata === 'object' && obj.metadata !== null) {
+        const meta = obj.metadata;
+        if ('name' in meta && typeof meta.name === 'string' && meta.name) return meta.name;
+    }
+    return undefined;
+}
+
 async function fetchIdlNames(addresses: string[]): Promise<Map<string, string>> {
     const { fetchIdl } = await import('@solana/idl');
     const names = new Map<string, string>();
-    const rpc = createSolanaRpc(RPC_URL!);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- @solana/kit requires a branded URL type
+    const rpc = createSolanaRpc(RPC_URL as string & { '~solana/rpc-api': unknown });
 
     const chunks = chunkArray(addresses, IDL_CONCURRENCY);
     for (const chunk of chunks) {
         const settled = await Promise.allSettled(
             chunk.map(async addr => {
                 const result = await fetchIdl(rpc, address(addr));
-                if (!result) return { addr, name: null };
-
-                let name: string | null = null;
-                const idl = result.idl;
-                if (typeof idl === 'object' && idl !== null) {
-                    name = (idl as Record<string, unknown>).name as string
-                        || ((idl as Record<string, unknown>).metadata as Record<string, unknown>)?.name as string
-                        || null;
-                }
-                return { addr, name };
-            })
+                return { addr, name: result ? extractIdlName(result.idl) : undefined };
+            }),
         );
         for (const r of settled) {
             if (r.status === 'fulfilled' && r.value.name) {
@@ -179,24 +179,26 @@ async function fetchIdlNames(addresses: string[]): Promise<Map<string, string>> 
     return names;
 }
 
-function deriveNameFromRepo(repoUrl: string | null): string | null {
-    if (!repoUrl) return null;
+function deriveNameFromRepo(repoUrl: string | undefined): string | undefined {
+    if (!repoUrl) return undefined;
     try {
         const url = new URL(repoUrl);
         const parts = url.pathname.split('/').filter(Boolean);
         // GitHub URLs: /org/repo or /org/repo/tree/<ref>
         const org = parts[0];
+        // eslint-disable-next-line no-restricted-syntax -- strip .git suffix from repo URLs
         const repo = parts[1]?.replace(/\.git$/, '');
         if (org && repo) return `${org}/${repo}`;
-        return repo || null;
+        return repo || undefined;
     } catch {
-        return null;
+        return undefined;
     }
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- fetch response.json() returns unknown
     return response.json() as Promise<T>;
 }
 
