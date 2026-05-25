@@ -72,14 +72,14 @@ async function main() {
     }
 
     const programs: VerifiedProgram[] = verifiedAddresses
-        .map(address => {
-            const status = statuses.get(address);
-            const idlName = idlNames.get(address);
+        .map(addr => {
+            const status = statuses.get(addr);
+            const idlName = idlNames.get(addr);
             const repoUrl = status?.repo_url || null;
-            const name = idlName || deriveNameFromRepo(repoUrl) || address.slice(0, 12) + '...';
+            const name = idlName || deriveNameFromRepo(repoUrl) || addr.slice(0, 12) + '...';
 
             return {
-                address,
+                address: addr,
                 name,
                 repoUrl: repoUrl || null,
                 verifiedAt: status?.last_verified_at?.split('.')[0] ?? null,

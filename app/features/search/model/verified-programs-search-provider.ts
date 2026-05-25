@@ -31,9 +31,10 @@ export const verifiedProgramsSearchProvider: SearchProvider = {
         if (ctx.cluster !== Cluster.MainnetBeta) return [];
 
         const q = query.toLowerCase();
-        const matched = programs.filter(
-            p => p.name.toLowerCase().includes(q) || p.address.toLowerCase().includes(q)
-        );
+        const MAX_RESULTS = 10;
+        const matched = programs
+            .filter(p => p.name.toLowerCase().includes(q) || p.address.toLowerCase().includes(q))
+            .slice(0, MAX_RESULTS);
 
         if (matched.length === 0) return [];
 
