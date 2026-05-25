@@ -72,9 +72,7 @@ export function TokenInstructionsCard({ address }: { address: string }) {
                             </td>
 
                             {hasTimestamps && (
-                                <td className="text-muted">
-                                    {blockTime && <RelativeTime date={blockTime * 1000} />}
-                                </td>
+                                <td className="text-muted">{blockTime && <RelativeTime date={blockTime * 1000} />}</td>
                             )}
 
                             <td>{instructionName}</td>

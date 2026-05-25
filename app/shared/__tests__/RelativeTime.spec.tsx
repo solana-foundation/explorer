@@ -1,4 +1,4 @@
-import { act, render } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RelativeTime } from '../RelativeTime';
@@ -22,10 +22,10 @@ describe('RelativeTime', () => {
 
     it('should render a <time> element with an ISO dateTime attribute', () => {
         const date = NOW - 5 * 60_000;
-        const { container } = render(<RelativeTime date={date} />);
-        const time = container.querySelector('time');
-        expect(time).not.toBeNull();
-        expect(time?.getAttribute('datetime')).toBe(new Date(date).toISOString());
+        render(<RelativeTime date={date} />);
+        const time = screen.getByText('5 minutes ago');
+        expect(time.tagName).toBe('TIME');
+        expect(time.getAttribute('datetime')).toBe(new Date(date).toISOString());
     });
 
     it('should refresh the rendered string when the interval elapses', () => {

@@ -13,9 +13,9 @@ import { displayTimestampUtc } from '@utils/date';
 import React, { useCallback, useMemo } from 'react';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
-import { RelativeTime } from '@/app/shared/RelativeTime';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
+import { RelativeTime } from '@/app/shared/RelativeTime';
 
 import { useInstructionNames } from '../lib/use-instruction-names';
 import { InstructionList, InstructionListSkeleton } from './InstructionList';

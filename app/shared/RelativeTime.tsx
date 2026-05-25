@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 import { formatRelativeTime } from '@utils/date';
+import { useEffect, useState } from 'react';
 
 type Props = {
     /** Unix timestamp in milliseconds. */

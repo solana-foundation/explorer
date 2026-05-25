@@ -69,10 +69,7 @@ export function ChangePerpMarketParamsDetailsCard(props: {
             )}
             {info.mngoPerPeriodOption && (
                 <tr>
-                    <td>
-                        MNGO per{' '}
-                        {targetPeriodLength !== null && formatDuration(targetPeriodLength, 'seconds')}
-                    </td>
+                    <td>MNGO per {targetPeriodLength !== null && formatDuration(targetPeriodLength, 'seconds')}</td>
                     <td className="text-lg-end">
                         {info.mngoPerPeriod} {}
                     </td>

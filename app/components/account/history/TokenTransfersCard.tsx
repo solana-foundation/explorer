@@ -19,8 +19,8 @@ import React, { useMemo } from 'react';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
-import { RelativeTime } from '@/app/shared/RelativeTime';
 import { Logger } from '@/app/shared/lib/logger';
+import { RelativeTime } from '@/app/shared/RelativeTime';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
