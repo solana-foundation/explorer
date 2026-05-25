@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { withCluster } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 
 import { BlockAccountsCard } from '../BlockAccountsCard';
 
 const meta: Meta<typeof BlockAccountsCard> = {
     component: BlockAccountsCard,
     decorators: [withCluster],
+    parameters: nextjsParameters,
     title: 'Components/Block/BlockAccountsCard',
 };
 

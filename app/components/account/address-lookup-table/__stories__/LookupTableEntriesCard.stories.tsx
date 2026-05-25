@@ -1,13 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { PublicKey } from '@solana/web3.js';
-import { withCluster } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 
 import { LookupTableEntriesCard } from '../LookupTableEntriesCard';
 
 const meta: Meta<typeof LookupTableEntriesCard> = {
     component: LookupTableEntriesCard,
     decorators: [withCluster],
+    parameters: nextjsParameters,
     title: 'Components/Account/AddressLookupTable/LookupTableEntriesCard',
 };
 

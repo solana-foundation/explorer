@@ -1,7 +1,10 @@
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { createNextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
+import { Suspense } from 'react';
+
+import { LoadingCard } from '@/app/components/common/LoadingCard';
 
 import {
     UpgradeableLoaderAccountSection,
@@ -30,11 +33,18 @@ const sampleProgramData = {
     slot: 312_456_789,
 };
 
-// Devnet cluster keeps useSquadsMultisigLookup from firing — the hook returns null
-// immediately when cluster !== Mainnet, avoiding a Suspense throw in Storybook.
+// Devnet cluster makes useSquadsMultisigLookup return null without a real fetch, but the
+// hook still throws a Suspense promise on first render (suspense: true). Wrap each story
+// in <Suspense> so the autodocs view doesn't crash all stories together.
+const withSuspense: Decorator = Story => (
+    <Suspense fallback={<LoadingCard />}>
+        <Story />
+    </Suspense>
+);
+
 const meta = {
     component: UpgradeableLoaderAccountSection,
-    decorators: [withClusterAndAccounts],
+    decorators: [withSuspense, withClusterAndAccounts],
     parameters: createNextjsParameters({ query: { cluster: 'devnet' } }),
     tags: ['autodocs'],
     title: 'Components/Account/UpgradeableLoaderAccountSection',
