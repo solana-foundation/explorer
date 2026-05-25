@@ -185,7 +185,10 @@ describe('fetchResource', () => {
 
     it('should block redirect to a private IP (SSRF protection)', async () => {
         mockRedirectOnce('http://169.254.169.254/latest/meta-data/');
-        vi.mocked(lookupHostnameSafely).mockResolvedValueOnce({ kind: 'private', reason: 'private address 169.254.169.254' });
+        vi.mocked(lookupHostnameSafely).mockResolvedValueOnce({
+            kind: 'private',
+            reason: 'private address 169.254.169.254',
+        });
 
         await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 403 });
     });
