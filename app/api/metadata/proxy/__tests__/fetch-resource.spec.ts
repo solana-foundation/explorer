@@ -189,6 +189,19 @@ describe('fetchResource', () => {
         await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Bad Gateway');
     });
 
+    // 304/305 are 3xx but don't carry a Location header by spec; they must be
+    // classified as upstream errors, not as redirects with a missing Location.
+    it.each([304, 305])('should classify %i as an upstream error, not a redirect', async status => {
+        mockResponseOnce(null, { status });
+
+        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrowError('Bad Gateway');
+
+        expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Upstream returned error', {
+            status,
+            url: uri,
+        });
+    });
+
     it('should throw Bad Gateway after too many redirects', async () => {
         // 4 consecutive redirects (exceeds MAX_REDIRECTS of 3)
         for (let i = 0; i < 4; i++) {

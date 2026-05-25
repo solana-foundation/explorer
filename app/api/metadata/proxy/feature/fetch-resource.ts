@@ -95,8 +95,14 @@ async function validateRedirectTarget(location: string, currentUrl: URL): Promis
     return nextUrl;
 }
 
+// Only statuses that carry a `Location` header by spec. Excludes 304/305/306
+// and `300 Multiple Choices` — they're 3xx but not "follow this redirect",
+// and treating them as redirects turns a missing Location into a confusing
+// 502. Anything else falls through to the `!response.ok` branch.
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+
 function isRedirect(response: Response): boolean {
-    return response.status >= 300 && response.status < 400;
+    return REDIRECT_STATUSES.has(response.status);
 }
 
 function extractRedirect(response: Response, url: URL): HopResult & { kind: 'redirect' } {
