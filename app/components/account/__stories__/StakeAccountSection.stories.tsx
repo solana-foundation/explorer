@@ -1,7 +1,7 @@
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
-import { createNextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
+import { createNextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { StakeAccountInfo } from '@validators/accounts/stake';
 
 import { StakeAccountSection } from '../StakeAccountSection';
@@ -47,7 +47,7 @@ const initializedOnly: StakeAccountInfo = {
 
 const meta = {
     component: StakeAccountSection,
-    decorators: [withClusterAndAccounts],
+    decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: createNextjsParameters({ query: { cluster: 'devnet' } }),
     tags: ['autodocs'],
     title: 'Components/Account/StakeAccountSection',

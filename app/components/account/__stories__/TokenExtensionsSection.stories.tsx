@@ -6,13 +6,22 @@ import type { ParsedTokenExtension } from '../types';
 
 const MINT_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 
+const tokenMetadataState = {
+    additionalMetadata: [],
+    mint: MINT_ADDRESS,
+    name: 'Sample Token',
+    symbol: 'SAMP',
+    updateAuthority: MINT_ADDRESS,
+    uri: 'https://example.test/sample.json',
+};
+
 const sampleParsedExtensions: ParsedTokenExtension[] = [
     {
         description: 'Metadata stored directly in the mint',
         extension: 'tokenMetadata',
         externalLinks: [],
         name: 'Token Metadata',
-        parsed: { mint: MINT_ADDRESS, name: 'Sample Token', symbol: 'SAMP', updateAuthority: MINT_ADDRESS, uri: 'https://example.test/sample.json' } as any,
+        parsed: tokenMetadataState as any,
         status: 'active',
     } as ParsedTokenExtension,
     {

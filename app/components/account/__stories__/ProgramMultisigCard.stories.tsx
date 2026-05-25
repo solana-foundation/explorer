@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
-import { createNextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
+import { createNextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 
 import { ProgramMultisigCard } from '../ProgramMultisigCard';
 
@@ -9,7 +9,7 @@ import { ProgramMultisigCard } from '../ProgramMultisigCard';
 // inner card with empty multisig info.
 const meta = {
     component: ProgramMultisigCard,
-    decorators: [withClusterAndAccounts],
+    decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: createNextjsParameters({ query: { cluster: 'devnet' } }),
     tags: ['autodocs'],
     title: 'Components/Account/ProgramMultisigCard',

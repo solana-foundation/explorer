@@ -3,7 +3,8 @@ import { FetchStatus } from '@providers/cache';
 import { ClusterProvider } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import type { Decorator, Meta, StoryObj } from '@storybook/react';
-import { nextjsParameters } from '@storybook-config/decorators';
+import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
+import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import React from 'react';
 
 import { OwnedTokensCard } from '../OwnedTokensCard';
@@ -39,9 +40,11 @@ const sampleTokensEntry = {
 function MockTokensState({ children, value }: { children: React.ReactNode; value: TokensState }) {
     return (
         <ClusterProvider>
-            <TokensStateCtx.Provider value={value}>
-                <TokensDispatch.Provider value={noop as any}>{children}</TokensDispatch.Provider>
-            </TokensStateCtx.Provider>
+            <MockAccountsProvider>
+                <TokensStateCtx.Provider value={value}>
+                    <TokensDispatch.Provider value={noop as any}>{children}</TokensDispatch.Provider>
+                </TokensStateCtx.Provider>
+            </MockAccountsProvider>
         </ClusterProvider>
     );
 }
@@ -64,6 +67,7 @@ const WithNoTokens: Decorator = Story => (
 
 const meta = {
     component: OwnedTokensCard,
+    decorators: [withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs'],
     title: 'Components/Account/OwnedTokensCard',

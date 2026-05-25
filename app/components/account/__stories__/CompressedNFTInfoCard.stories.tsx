@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
-import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
+import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 
 import type { CompressedNft, CompressedNftProof } from '@/app/providers/compressed-nft';
 
@@ -42,7 +42,7 @@ const sampleCompressedNft = {
 // Hazard" badge (>8 entries) if desired.
 const meta = {
     component: DasCompressionInfoCard,
-    decorators: [withClusterAndAccounts],
+    decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs'],
     title: 'Components/Account/CompressedNFTInfoCard',

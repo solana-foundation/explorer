@@ -3,7 +3,7 @@ import { FetchStatus } from '@providers/cache';
 import { ClusterProvider } from '@providers/cluster';
 import { AddressLookupTableProgram, PublicKey, VersionedMessage } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
-import { nextjsParameters } from '@storybook-config/decorators';
+import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import React from 'react';
 
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
@@ -85,6 +85,7 @@ const resolvedState = createAccountsState({
 
 const meta = {
     component: AddressTableLookupsCard,
+    decorators: [withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs'],
     title: 'Components/Inspector/AddressTableLookupsCard',

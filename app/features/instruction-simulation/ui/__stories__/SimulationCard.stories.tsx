@@ -6,6 +6,8 @@ import { SimulatorCard } from '../SimulationCard';
 
 const FEE_PAYER = new PublicKey('11111111111111111111111111111111');
 
+// useSimulation calls message.serialize() to build a fingerprint cache key — stub it so the
+// fake message satisfies the contract without constructing a real serializable transaction.
 const idleMessage = {
     addressTableLookups: [],
     compiledInstructions: [],
@@ -15,6 +17,7 @@ const idleMessage = {
         numRequiredSignatures: 1,
     },
     recentBlockhash: '4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZAMdL4VZHirm',
+    serialize: () => new Uint8Array(),
     staticAccountKeys: [FEE_PAYER],
     version: 0,
 } as unknown as VersionedMessage;

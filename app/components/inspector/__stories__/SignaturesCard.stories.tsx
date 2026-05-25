@@ -1,6 +1,6 @@
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
-import { nextjsParameters, withCluster } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 
 import { TransactionSignatures } from '../SignaturesCard';
 
@@ -26,7 +26,7 @@ const rawMessage = new Uint8Array(64);
 
 const meta = {
     component: TransactionSignatures,
-    decorators: [withCluster],
+    decorators: [withCluster, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs'],
     title: 'Components/Inspector/SignaturesCard',

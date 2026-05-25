@@ -4,9 +4,12 @@ import {
 } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { ClusterProvider } from '@providers/cluster';
+import { DispatchContext as ParsedDetailsDispatch, StateContext as ParsedDetailsStateCtx } from '@providers/transactions/parsed';
 import { PublicKey } from '@solana/web3.js';
 import type { Decorator, Meta, StoryObj } from '@storybook/react';
-import { nextjsParameters } from '@storybook-config/decorators';
+import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
+import { MockHistoryProvider } from '@storybook-config/__mocks__/MockHistoryProvider';
+import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import React from 'react';
 
 import { TokenHistoryCard } from '../TokenHistoryCard';
@@ -40,18 +43,29 @@ const tokensStateValue = {
     url: 'https://api.mainnet-beta.solana.com',
 };
 
+const emptyParsedDetailsState = { entries: {}, url: 'https://api.mainnet-beta.solana.com' };
+
 const WithToken: Decorator = Story => (
     <ClusterProvider>
-        <TokensStateCtx.Provider value={tokensStateValue as any}>
-            <TokensDispatch.Provider value={noop as any}>
-                <Story />
-            </TokensDispatch.Provider>
-        </TokensStateCtx.Provider>
+        <MockAccountsProvider>
+            <TokensStateCtx.Provider value={tokensStateValue as any}>
+                <TokensDispatch.Provider value={noop as any}>
+                    <MockHistoryProvider>
+                        <ParsedDetailsStateCtx.Provider value={emptyParsedDetailsState as any}>
+                            <ParsedDetailsDispatch.Provider value={noop as any}>
+                                <Story />
+                            </ParsedDetailsDispatch.Provider>
+                        </ParsedDetailsStateCtx.Provider>
+                    </MockHistoryProvider>
+                </TokensDispatch.Provider>
+            </TokensStateCtx.Provider>
+        </MockAccountsProvider>
     </ClusterProvider>
 );
 
 const meta = {
     component: TokenHistoryCard,
+    decorators: [withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs'],
     title: 'Components/Account/TokenHistoryCard',
