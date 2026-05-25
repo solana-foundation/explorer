@@ -42,6 +42,15 @@ async function collectFromNodeStream(body: Readable, maxSize: number): Promise<A
     const chunks: Uint8Array[] = [];
     let received = 0;
     for await (const chunk of body) {
+        // `Readable` is typed as `any`; guard against string chunks (object-mode
+        // or `setEncoding`-configured streams). `chunk.byteLength` would be
+        // `undefined` there, `received` would become `NaN`, and `NaN > maxSize`
+        // would silently bypass the size limit. `Buffer` extends `Uint8Array`,
+        // so the zlib.Gunzip happy path is unaffected.
+        if (!(chunk instanceof Uint8Array)) {
+            body.destroy();
+            throw new Error('Expected binary chunk in response body');
+        }
         received += chunk.byteLength;
         if (received > maxSize) {
             body.destroy();

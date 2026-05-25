@@ -106,5 +106,17 @@ describe('readBodyWithLimit', () => {
 
             expect(result.byteLength).toBe(100);
         });
+
+        // Without the guard, `chunk.byteLength` would be undefined for a string
+        // chunk, `received` would become NaN, and `NaN > maxSize` would always
+        // be false — silently bypassing the size limit. Throw fast instead.
+        it('should reject non-binary chunks (e.g. strings) instead of silently bypassing the size limit', async () => {
+            const stream = Readable.from(['x'.repeat(200)]);
+
+            await expect(readBodyWithLimit(nodeStreamResponse(stream), 100)).rejects.toThrow(
+                'Expected binary chunk in response body',
+            );
+            expect(stream.destroyed).toBe(true);
+        });
     });
 });
