@@ -342,6 +342,7 @@ export default tseslint.config(
             'app/features/receipt/receipt-page.tsx',
             'app/features/search/api/discover-with-utl.ts',
             'app/features/search/api/resolve-search-tokens.ts',
+            'app/features/stake/ui/StakeAccountSection.tsx',
 
             // app/features deep imports into entities (must go via barrel)
             'app/features/idl/formatted-idl/model/__tests__/search.test.ts',
@@ -673,6 +674,8 @@ export default tseslint.config(
             'app/features/security-txt/ui/SecurityNotification.tsx',
             'app/features/security-txt/ui/common.tsx',
             'app/features/security-txt/ui/utils.ts',
+            'app/features/stake/lib/stake-activation-math.ts',
+            'app/features/stake/ui/StakeAccountSection.tsx',
             'app/features/token-verification-badge/model/use-bluprynt.ts',
             'app/features/token-verification-badge/model/use-coingecko.ts',
             'app/features/token-verification-badge/model/use-jupiter.ts',
