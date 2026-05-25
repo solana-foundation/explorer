@@ -8,17 +8,13 @@ import { PublicKey } from '@solana/web3.js';
 import { displayAddress, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { EditIcon, NicknameEditor, useNickname } from '@/app/features/nicknames';
 import { useVisibility } from '@/app/shared/lib/visibility';
 
 import { Copyable } from './Copyable';
-
-const MID_TRUNCATE_CHARS = 5;
-
-// Space reserved for Copyable's copy icon (13px SVG + 8px me-2 margin)
-const COPY_ICON_RESERVED_PX = 24;
+import { useMidTruncation } from './useMidTruncation';
 
 type Props = {
     pubkey: PublicKey;
@@ -26,7 +22,6 @@ type Props = {
     link?: boolean;
     raw?: boolean;
     noTruncate?: boolean;
-    truncateUnknown?: boolean;
     truncateChars?: number;
     useMetadata?: boolean;
     overrideText?: string;
@@ -41,7 +36,6 @@ export function Address({
     link,
     raw,
     noTruncate,
-    truncateUnknown: _truncateUnknown,
     truncateChars,
     useMetadata,
     overrideText,
@@ -83,43 +77,13 @@ export function Address({
 
     // Mid-truncation applies only to raw 44-char addresses (no nickname, no human-readable label)
     const isMidTruncateCandidate = !noTruncate && !nickname && !overrideText && addressLabel === address;
-    const midTruncatedText = `${address.slice(0, MID_TRUNCATE_CHARS)}...${address.slice(-MID_TRUNCATE_CHARS)}`;
 
-    // Ref on the outer flex row — its clientWidth is the true available width
-    const rowRef = useRef<HTMLDivElement>(null);
     const editBtnRef = useRef<HTMLButtonElement>(null);
-    const hiddenTextRef = useRef<HTMLSpanElement>(null);
-    const [isMidTruncated, setIsMidTruncated] = useState(false);
-
-    useEffect(() => {
-        if (!isMidTruncateCandidate) {
-            setIsMidTruncated(false);
-            return;
-        }
-
-        const check = () => {
-            const row = rowRef.current;
-            const hidden = hiddenTextRef.current;
-            if (!row || !hidden) return;
-
-            // Include the edit button's margin-start (e-ms-2 = 0.5rem) in the measurement
-            const editBtn = editBtnRef.current;
-            let editBtnSpace = 0;
-            if (editBtn) {
-                const style = getComputedStyle(editBtn);
-                editBtnSpace = editBtn.getBoundingClientRect().width + parseFloat(style.marginLeft || '0');
-            }
-            // Use getBoundingClientRect for sub-pixel precision
-            const available = row.clientWidth - COPY_ICON_RESERVED_PX - editBtnSpace;
-            setIsMidTruncated(hidden.getBoundingClientRect().width > available);
-        };
-
-        const observer = new ResizeObserver(check);
-        if (rowRef.current) observer.observe(rowRef.current);
-        check();
-
-        return () => observer.disconnect();
-    }, [isMidTruncateCandidate, displayText]);
+    const { rowRef, hiddenTextRef, isMidTruncated, midTruncatedText } = useMidTruncation(
+        isMidTruncateCandidate,
+        address,
+        editBtnRef,
+    );
 
     const handleMouseEnter = (text: string) => {
         const elements = document.querySelectorAll(`[data-address="${text}"]`);
