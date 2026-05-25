@@ -1,14 +1,21 @@
+// @vitest-environment node
+//
+// Real undici path: a tiny HTTP server in-process, no `fetch` global stub.
+// Locks in the dispatcher-lifecycle invariant Greptile flagged on PR #1013 —
+// closing the per-hop undici `Agent` must happen *after* `processResponse`
+// drains the body, otherwise large bodies could be truncated mid-stream.
+//
+// Must run in the `node` environment, not jsdom (the default for this
+// workspace). JSDOM ships its own `AbortSignal` class; undici's webidl
+// converter does an `instanceof` check against Node's `AbortSignal`, and
+// the mismatch makes the request fail with
+// `RequestInit: Expected signal ("AbortSignal {}") to be an instance of AbortSignal`.
 import { createServer, type Server } from 'http';
 import type { AddressInfo } from 'net';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchResource } from '../feature';
 import { lookupHostnameSafely } from '../feature/ip';
-
-// Real undici path: a tiny HTTP server in-process, no `fetch` global stub.
-// Locks in the dispatcher-lifecycle invariant Greptile flagged on PR #1013 —
-// closing the per-hop undici `Agent` must happen *after* `processResponse`
-// drains the body, otherwise large bodies could be truncated mid-stream.
 vi.mock('../feature/ip', async () => {
     const actual = await vi.importActual('../feature/ip');
     return {
