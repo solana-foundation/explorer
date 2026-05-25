@@ -1,9 +1,11 @@
 'use client';
 
 import { fetchNftData } from '@entities/nft';
+import { getStakeActivation, StakeAccount } from '@features/stake';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
+import { createSolanaRpc } from '@solana/kit';
 import {
     AddressLookupTableAccount,
     AddressLookupTableProgram,
@@ -18,7 +20,6 @@ import { assertIsTokenProgram, TokenProgram } from '@utils/programs';
 import { ParsedAddressLookupTableAccount } from '@validators/accounts/address-lookup-table';
 import { ConfigAccount } from '@validators/accounts/config';
 import { NonceAccount } from '@validators/accounts/nonce';
-import { StakeAccount } from '@validators/accounts/stake';
 import { SysvarAccount } from '@validators/accounts/sysvar';
 import { MintAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import {
@@ -37,7 +38,6 @@ import { Logger } from '@/app/shared/lib/logger';
 import { HistoryProvider } from './history';
 import { RewardsProvider } from './rewards';
 import { TokensProvider } from './tokens';
-import { getStakeActivation } from './utils/stake';
 export { useAccountHistory } from './history';
 
 export type StakeProgramData = {
@@ -262,7 +262,13 @@ async function fetchMultipleAccounts({
                         const accountData: ParsedAccountData = result.data;
                         space = result.data.space;
                         try {
-                            parsedData = await handleParsedAccountData(connection, pubkey, accountData, url);
+                            parsedData = await handleParsedAccountData(
+                                connection,
+                                pubkey,
+                                accountData,
+                                url,
+                                result.lamports,
+                            );
                         } catch (error) {
                             Logger.error(error, {
                                 address: pubkey.toBase58(),
@@ -322,6 +328,7 @@ async function handleParsedAccountData(
     accountKey: PublicKey,
     accountData: ParsedAccountData,
     url: string,
+    lamports: number,
 ): Promise<ParsedData | undefined> {
     const info = create(accountData.parsed, ParsedInfo);
     switch (accountData.program) {
@@ -347,16 +354,22 @@ async function handleParsedAccountData(
 
         case 'stake': {
             const parsed = create(info, StakeAccount);
-            const isDelegated = parsed.type === 'delegated';
+            const stakeInfo = parsed.info;
 
-            // TODO(ngundotra): replace with web3.js fix when live
-            const activation = isDelegated ? await getStakeActivation(connection, accountKey) : undefined;
+            const activation =
+                parsed.type === 'delegated' && stakeInfo.stake !== null
+                    ? await getStakeActivation(createSolanaRpc(url), {
+                          delegation: stakeInfo.stake.delegation,
+                          lamports: BigInt(lamports),
+                          rentExemptReserve: stakeInfo.meta.rentExemptReserve,
+                      })
+                    : undefined;
             return {
                 activation: activation
                     ? {
                           active: Number(activation.active),
                           inactive: Number(activation.inactive),
-                          state: activation.status as any,
+                          state: activation.status,
                       }
                     : undefined,
                 parsed,
