@@ -3,6 +3,7 @@
 import { useTokenMetadata } from '@entities/nft';
 import { useTokenInfo } from '@entities/token-info';
 import { useCluster } from '@providers/cluster';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { displayAddress, TokenLabelInfo } from '@utils/tx';
@@ -122,21 +123,30 @@ export function Address({
                     </span>
                 )}
                 <Copyable text={address}>
-                    <span
-                        data-address={address}
-                        className="e-relative e-min-w-0 e-overflow-hidden e-font-mono"
-                        onMouseEnter={() => handleMouseEnter(address)}
-                        onMouseLeave={() => handleMouseLeave(address)}
-                        title={nickname ? displayText : undefined}
-                    >
-                        {link ? (
-                            <Link href={addressPath} className={innerTextClassName}>
-                                {visibleText}
-                            </Link>
-                        ) : (
-                            <span className={innerTextClassName}>{visibleText}</span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span
+                                data-address={address}
+                                className="e-relative e-min-w-0 e-overflow-hidden e-font-mono"
+                                onMouseEnter={() => handleMouseEnter(address)}
+                                onMouseLeave={() => handleMouseLeave(address)}
+                                title={nickname ? displayText : undefined}
+                            >
+                                {link ? (
+                                    <Link href={addressPath} className={innerTextClassName}>
+                                        {visibleText}
+                                    </Link>
+                                ) : (
+                                    <span className={innerTextClassName}>{visibleText}</span>
+                                )}
+                            </span>
+                        </TooltipTrigger>
+                        {isMidTruncated && (
+                            <TooltipContent>
+                                <span className="e-font-mono">{address}</span>
+                            </TooltipContent>
                         )}
-                    </span>
+                    </Tooltip>
                 </Copyable>
                 <button
                     ref={editBtnRef}

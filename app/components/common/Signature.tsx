@@ -1,5 +1,6 @@
 'use client';
 
+import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { cn } from '@shared/utils';
 import { TransactionSignature } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
@@ -40,15 +41,24 @@ export function Signature({ signature, alignRight, link, noTruncate }: Props) {
                 </span>
             )}
             <Copyable text={signature}>
-                <span className="e-relative e-min-w-0 e-overflow-hidden e-font-mono">
-                    {link ? (
-                        <Link href={transactionPath} className="e-font-mono">
-                            {visibleText}
-                        </Link>
-                    ) : (
-                        <span className="e-font-mono">{visibleText}</span>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <span className="e-relative e-min-w-0 e-overflow-hidden e-font-mono">
+                            {link ? (
+                                <Link href={transactionPath} className="e-font-mono">
+                                    {visibleText}
+                                </Link>
+                            ) : (
+                                <span className="e-font-mono">{visibleText}</span>
+                            )}
+                        </span>
+                    </TooltipTrigger>
+                    {isMidTruncated && (
+                        <TooltipContent className="e-max-w-[min(320px,90vw)]">
+                            <span className="e-break-all e-font-mono">{signature}</span>
+                        </TooltipContent>
                     )}
-                </span>
+                </Tooltip>
             </Copyable>
         </div>
     );
