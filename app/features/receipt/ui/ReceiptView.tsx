@@ -35,7 +35,6 @@ export function ReceiptView({
 }: ReceiptViewProps) {
     const canNativeShare = useCanNativeShare();
     const toast = useToast();
-    const isMultiTransfer = data.transfers && data.transfers.length > 1;
 
     function handleViewTxClick() {
         receiptAnalytics.trackViewTxClicked(signature);
@@ -109,6 +108,7 @@ export function ReceiptView({
                             label="CSV"
                             download={downloadCsv}
                             signature={signature}
+                            onError={() => toast.custom({ title: 'Failed to download receipt CSV', type: 'error' })}
                         />
                         <DownloadReceiptItem
                             icon={<FileText size={12} />}
@@ -116,7 +116,7 @@ export function ReceiptView({
                             label="PDF"
                             download={downloadPdf}
                             signature={signature}
-                            disabled={isMultiTransfer}
+                            onError={() => toast.custom({ title: 'Failed to download receipt PDF', type: 'error' })}
                         />
                     </PopoverButton>
                 </div>

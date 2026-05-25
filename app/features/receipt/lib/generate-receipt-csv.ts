@@ -3,6 +3,7 @@ import { writeToString } from '@fast-csv/format';
 import { getReceiptMint } from '@/app/entities/token-receipt';
 
 import type { FormattedReceipt } from '../types';
+import { parseUsdNumber, prorateUsd, USD_FALLBACK } from './parse-usd';
 
 const CSV_HEADERS = [
     'Date (UTC)',
@@ -26,18 +27,6 @@ function sanitizeCsvField(value: string): string {
     return /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
 }
 
-function parseUsdNumber(usdValue: string): number | null {
-    // eslint-disable-next-line no-restricted-syntax -- regex is the clearest way to strip currency formatting chars
-    const n = parseFloat(usdValue.replace(/[$,]/g, ''));
-    return isNaN(n) ? null : n;
-}
-
-function prorateUsd(transferRaw: number, totalRaw: number, totalUsd: number): string {
-    if (totalRaw === 0) return '';
-    const value = (transferRaw / totalRaw) * totalUsd;
-    return `$${value.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`;
-}
-
 export function buildReceiptCsvRows(receipt: FormattedReceipt, signature: string, usdValue?: string): string[][] {
     const mint = getReceiptMint(receipt);
     const unit = sanitizeCsvField(receipt.total.unit);
@@ -53,7 +42,7 @@ export function buildReceiptCsvRows(receipt: FormattedReceipt, signature: string
             t.amount.formatted,
             unit,
             mint ?? '',
-            totalUsd !== null ? prorateUsd(t.amount.raw, receipt.total.raw, totalUsd) : '',
+            totalUsd !== null ? prorateUsd(t.amount.raw, receipt.total.raw, totalUsd, USD_FALLBACK) : '',
             '',
             '',
         ]);
@@ -100,11 +89,17 @@ export async function generateReceiptCsv(
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `solana-receipt-${signature}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    try {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `solana-receipt-${signature}.csv`;
+        document.body.appendChild(link);
+        try {
+            link.click();
+        } finally {
+            document.body.removeChild(link);
+        }
+    } finally {
+        URL.revokeObjectURL(url);
+    }
 }

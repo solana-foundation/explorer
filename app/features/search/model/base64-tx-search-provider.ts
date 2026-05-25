@@ -82,6 +82,7 @@ export const base64TxSearchProvider: SearchProvider = {
                     {
                         label: 'Inspect Decoded Transaction',
                         pathname: `${pathname}?${searchParams.toString()}`,
+                        type: 'tx/inspector',
                         value: [query],
                     },
                 ],

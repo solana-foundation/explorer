@@ -1,6 +1,8 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 
+import { searchAnalytics } from '@/app/shared/lib/analytics';
+
 import type { SearchOptions } from '../../lib/types';
 import { useSearch } from '../../model/use-search';
 import { useSearchNavigation } from '../../model/use-search-navigation';
@@ -25,6 +27,12 @@ afterEach(() => {
 
 vi.mock('../../model/use-search', () => ({ useSearch: vi.fn() }));
 vi.mock('../../model/use-search-navigation', () => ({ useSearchNavigation: vi.fn() }));
+vi.mock('@/app/shared/lib/analytics', () => ({
+    searchAnalytics: {
+        trackPerformed: vi.fn(),
+        trackResultSelected: vi.fn(),
+    },
+}));
 
 const mockNavigate = vi.fn();
 
@@ -32,8 +40,20 @@ const tokenResults: SearchOptions[] = [
     {
         label: 'Tokens',
         options: [
-            { label: 'Token A', pathname: '/address/tokenA', value: ['token-a'] },
-            { label: 'Token B', pathname: '/address/tokenB', value: ['token-b'] },
+            {
+                label: 'Token A',
+                pathname: '/address/tokenA',
+                type: 'address',
+                value: ['token-a'],
+                verified: true,
+            },
+            {
+                label: 'Token B',
+                pathname: '/address/tokenB',
+                type: 'address',
+                value: ['token-b'],
+                verified: false,
+            },
         ],
     },
 ];
@@ -57,6 +77,30 @@ describe('SearchBar', () => {
         fireEvent.click(screen.getByText('Token B'));
 
         expect(mockNavigate).toHaveBeenCalledWith(tokenResults[0].options[1]);
+    });
+
+    it('should track result selection in analytics with type and verified status', () => {
+        setup();
+
+        typeAndSettle('token');
+        fireEvent.click(screen.getByText('Token A'));
+
+        expect(searchAnalytics.trackResultSelected).toHaveBeenCalledWith('address', true);
+    });
+
+    it('should fall back to "unknown" type when option has no type', () => {
+        const untypedResults: SearchOptions[] = [
+            {
+                label: 'Tokens',
+                options: [{ label: 'Token X', pathname: '/x', value: ['token-x'] }],
+            },
+        ];
+        setup(untypedResults);
+
+        typeAndSettle('token');
+        fireEvent.click(screen.getByText('Token X'));
+
+        expect(searchAnalytics.trackResultSelected).toHaveBeenCalledWith('unknown', undefined);
     });
 
     it('should close the popover on Escape', () => {
@@ -89,7 +133,7 @@ describe('SearchBar', () => {
 
         typeAndSettle('xyznonexistent');
 
-        expect(screen.getByText('No Results')).toBeInTheDocument();
+        expect(screen.getByText('No results found')).toBeInTheDocument();
     });
 
     it('should show loading state', () => {
@@ -97,7 +141,7 @@ describe('SearchBar', () => {
 
         typeAndSettle('loading');
 
-        expect(screen.getByText('loading...')).toBeInTheDocument();
+        expect(screen.getByText('Searching...')).toBeInTheDocument();
     });
 
     describe('debounce pending state', () => {
@@ -108,7 +152,7 @@ describe('SearchBar', () => {
             fireEvent.change(input, { target: { value: 'token' } });
 
             // Debounce hasn't fired yet → search !== debouncedSearch → loading shown
-            expect(screen.getByText('loading...')).toBeInTheDocument();
+            expect(screen.getByText('Searching...')).toBeInTheDocument();
         });
 
         it('should stop showing loading indicator after debounce settles', () => {
@@ -121,7 +165,7 @@ describe('SearchBar', () => {
             act(() => vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS));
 
             // Debounce settled, fetch not loading → no loading indicator
-            expect(screen.queryByText('loading...')).not.toBeInTheDocument();
+            expect(screen.queryByText('Searching...')).not.toBeInTheDocument();
         });
 
         it('should not show loading indicator for whitespace-only input during debounce', () => {
@@ -131,7 +175,7 @@ describe('SearchBar', () => {
             fireEvent.change(input, { target: { value: '   ' } });
 
             // Whitespace-only search should not trigger pending state
-            expect(screen.queryByText('loading...')).not.toBeInTheDocument();
+            expect(screen.queryByText('Searching...')).not.toBeInTheDocument();
         });
     });
 });

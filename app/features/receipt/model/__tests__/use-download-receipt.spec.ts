@@ -71,6 +71,20 @@ describe('useDownloadReceipt', () => {
         expect(result.current[0]).toBe('idle');
     });
 
+    it('should invoke onError with the rejection reason', async () => {
+        const error = new Error('network error');
+        const download = vi.fn().mockRejectedValue(error);
+        const onError = vi.fn();
+        const { result } = renderHook(() => useDownloadReceipt(download, 2000, onError));
+
+        await act(async () => {
+            result.current[1]();
+        });
+
+        expect(onError).toHaveBeenCalledWith(error);
+        expect(result.current[0]).toBe('errored');
+    });
+
     it('should reset to idle after resetMs when errored', async () => {
         const download = vi.fn().mockRejectedValue(new Error('fail'));
         const { result } = renderHook(() => useDownloadReceipt(download, 500));

@@ -49,6 +49,7 @@ describe('resolveProviders', () => {
         expect(errorSpy).toHaveBeenCalledOnce();
         expect(errorSpy).toHaveBeenCalledWith(
             expect.objectContaining({ cause: expect.any(Error), message: expect.stringContaining('Bad') }),
+            { sentry: true },
         );
 
         errorSpy.mockRestore();

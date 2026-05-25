@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Logger } from '@/app/shared/lib/logger';
-
 import type { DownloadReceiptFn } from '../types';
 
 export type DownloadState = 'idle' | 'downloading' | 'downloaded' | 'errored';
 
-export function useDownloadReceipt(download: DownloadReceiptFn, resetMs = 2000): readonly [DownloadState, () => void] {
+export function useDownloadReceipt(
+    download: DownloadReceiptFn,
+    resetMs = 2000,
+    onError?: (error: unknown) => void,
+): readonly [DownloadState, () => void] {
     const [state, setState] = useState<DownloadState>('idle');
     const stateRef = useRef<DownloadState>('idle');
     const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -43,13 +45,13 @@ export function useDownloadReceipt(download: DownloadReceiptFn, resetMs = 2000):
             },
             (error: unknown) => {
                 if (!mountedRef.current) return;
-                Logger.error(new Error('Download failed', { cause: error }));
+                onError?.(error);
                 stateRef.current = 'errored';
                 setState('errored');
                 scheduleReset();
             },
         );
-    }, [download, scheduleReset]);
+    }, [download, scheduleReset, onError]);
 
     return [state, trigger] as const;
 }

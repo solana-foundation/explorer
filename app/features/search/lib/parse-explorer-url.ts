@@ -56,6 +56,8 @@ export type ParsedExplorerUrl = {
     entity: string;
     /** Local pathname without cluster query string (e.g. "/address/ABC"). */
     pathname: string;
+    /** Route type derived from the local route prefix (e.g. "address", "tx"). */
+    type: string;
     /** Resolved cluster from the external URL. */
     cluster: Cluster;
 };
@@ -89,6 +91,7 @@ export function parseExplorerUrl(input: string): ParsedExplorerUrl | undefined {
         entity: route.displayName,
         pathname: `${route.localRoute}/${identifier}`,
         source: explorer.hostname,
+        type: route.localRoute.slice(1),
     };
 }
 
