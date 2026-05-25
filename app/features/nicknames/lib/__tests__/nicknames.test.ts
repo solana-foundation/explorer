@@ -12,12 +12,12 @@ describe('nicknames', () => {
     });
 
     describe('getNickname', () => {
-        it('returns null when no nickname exists', () => {
+        it('should return null when no nickname exists', () => {
             const result = getNickname('TestAddress123');
             expect(result).toBeNull();
         });
 
-        it('returns the nickname when it exists', () => {
+        it('should return the nickname when it exists', () => {
             // Setup: add nickname to localStorage
             localStorage.setItem(
                 'solana-explorer-nicknames',
@@ -30,7 +30,7 @@ describe('nicknames', () => {
             expect(result).toBe('My Wallet');
         });
 
-        it('handles invalid JSON gracefully', () => {
+        it('should handle invalid JSON gracefully', () => {
             // Setup: corrupt localStorage data
             localStorage.setItem('solana-explorer-nicknames', 'invalid-json');
 
@@ -40,7 +40,7 @@ describe('nicknames', () => {
     });
 
     describe('setNickname', () => {
-        it('saves a nickname to localStorage', () => {
+        it('should save a nickname to localStorage', () => {
             setNickname('TestAddress123', 'My Wallet');
 
             // Verify it was saved correctly
@@ -48,14 +48,14 @@ describe('nicknames', () => {
             expect(stored['TestAddress123']).toBe('My Wallet');
         });
 
-        it('trims whitespace from nicknames', () => {
+        it('should trim whitespace from nicknames', () => {
             setNickname('TestAddress123', '  My Wallet  ');
 
             const stored = JSON.parse(localStorage.getItem('solana-explorer-nicknames') || '{}');
             expect(stored['TestAddress123']).toBe('My Wallet');
         });
 
-        it('removes nickname when empty string provided', () => {
+        it('should remove nickname when empty string provided', () => {
             // Setup: save a nickname
             setNickname('TestAddress123', 'My Wallet');
 
@@ -66,7 +66,7 @@ describe('nicknames', () => {
             expect(stored['TestAddress123']).toBeUndefined();
         });
 
-        it('preserves other nicknames', () => {
+        it('should preserve other nicknames', () => {
             setNickname('Address1', 'Wallet 1');
             setNickname('Address2', 'Wallet 2');
 
@@ -75,7 +75,7 @@ describe('nicknames', () => {
             expect(stored['Address2']).toBe('Wallet 2');
         });
 
-        it('dispatches nicknameUpdated event', () => {
+        it('should dispatch nicknameUpdated event', () => {
             const listener = vi.fn();
             window.addEventListener('nicknameUpdated', listener);
 
@@ -91,7 +91,7 @@ describe('nicknames', () => {
             window.removeEventListener('nicknameUpdated', listener);
         });
 
-        it('truncates nicknames longer than MAX_NICKNAME_LENGTH', () => {
+        it('should truncate nicknames longer than MAX_NICKNAME_LENGTH', () => {
             const longNickname = 'This is a very long nickname that exceeds the maximum allowed length';
             setNickname('TestAddress123', longNickname);
 
@@ -102,7 +102,7 @@ describe('nicknames', () => {
     });
 
     describe('removeNickname', () => {
-        it('removes a nickname from localStorage', () => {
+        it('should remove a nickname from localStorage', () => {
             // Setup: save a nickname first
             setNickname('TestAddress123', 'My Wallet');
 
@@ -112,7 +112,7 @@ describe('nicknames', () => {
             expect(stored['TestAddress123']).toBeUndefined();
         });
 
-        it('preserves other nicknames when removing one', () => {
+        it('should preserve other nicknames when removing one', () => {
             // Setup: save multiple nicknames
             setNickname('Address1', 'Wallet 1');
             setNickname('Address2', 'Wallet 2');
@@ -124,7 +124,7 @@ describe('nicknames', () => {
             expect(stored['Address2']).toBe('Wallet 2');
         });
 
-        it('dispatches nicknameUpdated event', () => {
+        it('should dispatch nicknameUpdated event', () => {
             const listener = vi.fn();
             window.addEventListener('nicknameUpdated', listener);
 

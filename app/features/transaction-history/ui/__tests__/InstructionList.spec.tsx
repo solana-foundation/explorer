@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { InstructionList } from '../InstructionList';
 
 describe('InstructionList', () => {
-    it('renders all instructions inline when instructions.length <= 3', () => {
+    it('should render all instructions inline when instructions.length <= 3', () => {
         render(
             <InstructionList
                 instructions={[
@@ -22,7 +22,7 @@ describe('InstructionList', () => {
         expect(screen.queryByText(/more/)).not.toBeInTheDocument();
     });
 
-    it('renders first 3 instructions and overflow badge when instructions.length > 3', () => {
+    it('should render first 3 instructions and overflow badge when instructions.length > 3', () => {
         const instructions = [
             { name: 'Transfer', program: 'System' },
             { name: 'Mint To', program: 'Token' },
@@ -40,7 +40,7 @@ describe('InstructionList', () => {
         expect(screen.getByText('+2 more')).toBeInTheDocument();
     });
 
-    it('renders single instruction without overflow', () => {
+    it('should render single instruction without overflow', () => {
         render(<InstructionList instructions={[{ name: 'Transfer', program: 'System' }]} />);
 
         expect(screen.getByText('Transfer')).toBeInTheDocument();
@@ -48,7 +48,7 @@ describe('InstructionList', () => {
         expect(screen.queryByText(/more/)).not.toBeInTheDocument();
     });
 
-    it('renders exactly 4 instructions with +1 more overflow badge', () => {
+    it('should render exactly 4 instructions with +1 more overflow badge', () => {
         render(
             <InstructionList
                 instructions={[

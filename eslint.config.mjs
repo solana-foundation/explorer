@@ -19,6 +19,15 @@ const compat = new FlatCompat({
     recommendedConfig: js.configs.recommended,
 });
 
+const TEST_AND_STORY_FILES = [
+    '**/__tests__/**/*.[jt]s?(x)',
+    '**/__mocks__/**/*.[jt]s?(x)',
+    '**/__fixtures__/**/*.[jt]s?(x)',
+    '**/fixtures/**/*.[jt]s?(x)',
+    '**/?(*.)+(spec|test).[jt]s?(x)',
+    '**/*.stories.[jt]s?(x)',
+];
+
 export default tseslint.config(
     // Global ignores
     {
@@ -110,13 +119,13 @@ export default tseslint.config(
 
     // Testing library config for test files
     {
-        files: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
+        files: TEST_AND_STORY_FILES,
         ...testingLibrary.configs['flat/react'],
     },
 
     // Vitest: enforce `it()` / `test()` titles start with "should"
     {
-        files: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
+        files: TEST_AND_STORY_FILES,
         plugins: { vitest },
         rules: {
             'vitest/valid-title': [
@@ -136,64 +145,8 @@ export default tseslint.config(
     // subject to the rule. Remove a path once its titles have been migrated.
     {
         files: [
-            // app root
-            'app/__tests__/mock-stubs.ts',
-            'app/__tests__/mocks.ts',
-
-            // app/api (Next route handlers)
-            'app/api/receipt/price/[[]mintAddress[]]/__tests__/route.spec.ts',
-            'app/api/sns-domains/[[]address[]]/__tests__/route.spec.ts',
-            'app/api/verified-programs/list/[[]page[]]/__tests__/route.spec.ts',
-            'app/api/verified-programs/metadata/[[]programId[]]/__tests__/route.spec.ts',
-
-            // app/components (pre-FSD legacy)
-            'app/components/account/__tests__/MetaplexNFTAttributesCard.spec.tsx',
-            'app/components/account/__tests__/MetaplexNFTHeader.spec.tsx',
-            'app/components/account/nftoken/__tests__/isNFTokenAccount-test.ts',
-            'app/components/common/__tests__/VerifiedProgramBadge.spec.tsx',
-            'app/components/inspector/__tests__/InspectorPage-SystemProgram.spec.tsx',
-            'app/components/inspector/instruction-parsers/__tests__/system-program.parser.spec.ts',
-            'app/components/instruction/ed25519/__tests__/Ed25519DetailsCard.test.tsx',
-            'app/components/instruction/lighthouse/__tests__/LighthouseDetailsCard.test.tsx',
-
-            // app/utils (pre-FSD legacy)
-            'app/utils/__tests__/anchor.test.tsx',
-            'app/utils/__tests__/epoch-schedule.test.ts',
-            'app/utils/__tests__/lamportsToSol.test.ts',
-            'app/utils/__tests__/math.test.ts',
-            'app/utils/__tests__/parseFeatureAccount.test.ts',
-            'app/utils/__tests__/use-tab-visibility.test.tsx',
-
-            // app/shared (FSD shared)
-            'app/shared/lib/__tests__/http-utils.spec.ts',
-            'app/shared/lib/__tests__/visibility.test.tsx',
-            'app/shared/model/__tests__/token-program.spec.ts',
-
-            // app/entities (FSD entities)
-            'app/entities/cluster/model/__tests__/use-explorer-link.spec.ts',
-            'app/entities/compute-unit/lib/__tests__/compute-units-schedule.spec.ts',
-            'app/entities/domain/model/__tests__/use-user-ans-domains.test.ts',
-            'app/entities/domain/model/__tests__/use-user-sns-domains.test.ts',
-            'app/entities/idl/model/__tests__/idl-version.spec.ts',
-            'app/entities/idl/model/__tests__/use-format-codama-idl.spec.ts',
             'app/entities/idl/model/converters/type-handlers/leaf-tuple-type-handler.spec.ts',
             'app/entities/idl/model/converters/type-handlers/tuple-type-handlers.spec.ts',
-            'app/entities/nft/lib/__tests__/is-metaplex-nft.spec.ts',
-            'app/entities/token-info/model/__tests__/use-token-info.test.tsx',
-
-            // app/features (FSD features)
-            'app/features/cookie/model/__tests__/use-analytics-consent.spec.ts',
-            'app/features/cookie/ui/__tests__/CookieConsent.spec.tsx',
-            'app/features/idl/interactive-idl/model/__tests__/use-pdas.spec.ts',
-            'app/features/metadata/__tests__/utils.spec.ts',
-            'app/features/nicknames/lib/__tests__/nicknames.test.ts',
-            'app/features/receipt/lib/__tests__/normalize-search-params.spec.ts',
-            'app/features/receipt/lib/__tests__/use-primary-domain.spec.ts',
-            'app/features/receipt/model/__tests__/create-receipt.spec.ts',
-            'app/features/transaction-history/ui/__tests__/InstructionList.spec.tsx',
-            'app/features/verified-programs/__tests__/api.spec.ts',
-            'app/features/verified-programs/__tests__/model.spec.ts',
-            'app/features/verified-programs/ui/__tests__/VerifiedProgramsCard.test.tsx',
         ],
         rules: {
             'vitest/valid-title': 'off',
@@ -202,7 +155,7 @@ export default tseslint.config(
 
     // Allow `null` in tests and Storybook stories — they mirror the component APIs they exercise
     {
-        files: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', '**/*.stories.[jt]s?(x)'],
+        files: TEST_AND_STORY_FILES,
         rules: {
             'unicorn/no-null': 'off',
         },
@@ -394,7 +347,6 @@ export default tseslint.config(
             'app/features/idl/formatted-idl/model/__tests__/search.test.ts',
             'app/features/idl/formatted-idl/ui/stories/AnchorFormattedIdl.stories.tsx',
             'app/features/idl/formatted-idl/ui/stories/CodamaFormattedIdl.stories.tsx',
-            'app/features/idl/interactive-idl/model/__tests__/utils.ts',
             'app/features/idl/interactive-idl/model/codama/codama-interpreter.ts',
             'app/features/idl/model/use-idl-last-transaction-date.tsx',
 
@@ -441,14 +393,7 @@ export default tseslint.config(
     // partial shapes to exercise component/module surfaces and shouldn't be held to the production
     // typecast prohibition.
     {
-        files: [
-            '**/__tests__/**/*.[jt]s?(x)',
-            '**/__mocks__/**/*.[jt]s?(x)',
-            '**/__fixtures__/**/*.[jt]s?(x)',
-            '**/fixtures/**/*.[jt]s?(x)',
-            '**/?(*.)+(spec|test).[jt]s?(x)',
-            '**/*.stories.[jt]s?(x)',
-        ],
+        files: TEST_AND_STORY_FILES,
         rules: {
             '@typescript-eslint/consistent-type-assertions': 'off',
         },
@@ -457,14 +402,7 @@ export default tseslint.config(
     // Allow type-import flexibility in tests, mocks, fixtures, and Storybook stories — they often
     // use dynamic mock shapes and shouldn't be forced into static `import type` form.
     {
-        files: [
-            '**/__tests__/**/*.[jt]s?(x)',
-            '**/__mocks__/**/*.[jt]s?(x)',
-            '**/__fixtures__/**/*.[jt]s?(x)',
-            '**/fixtures/**/*.[jt]s?(x)',
-            '**/?(*.)+(spec|test).[jt]s?(x)',
-            '**/*.stories.[jt]s?(x)',
-        ],
+        files: TEST_AND_STORY_FILES,
         rules: {
             '@typescript-eslint/consistent-type-imports': 'off',
         },
@@ -755,14 +693,7 @@ export default tseslint.config(
     // shapes to exercise component/module surfaces and shouldn't be held to the production
     // no-explicit-any prohibition.
     {
-        files: [
-            '**/__tests__/**/*.[jt]s?(x)',
-            '**/__mocks__/**/*.[jt]s?(x)',
-            '**/__fixtures__/**/*.[jt]s?(x)',
-            '**/fixtures/**/*.[jt]s?(x)',
-            '**/?(*.)+(spec|test).[jt]s?(x)',
-            '**/*.stories.[jt]s?(x)',
-        ],
+        files: TEST_AND_STORY_FILES,
         rules: {
             '@typescript-eslint/no-explicit-any': 'off',
         },

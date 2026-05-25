@@ -35,7 +35,7 @@ describe('useUserANSDomains', () => {
         vi.mocked(useSWR).mockReturnValue(swrResponse());
     });
 
-    it('returns SWR response with no request when cluster is not Mainnet or Custom', () => {
+    it('should return SWR response with no request when cluster is not Mainnet or Custom', () => {
         vi.mocked(useCluster).mockReturnValue({
             cluster: Cluster.Devnet,
             url: 'https://api.devnet.solana.com',
@@ -48,7 +48,7 @@ describe('useUserANSDomains', () => {
         expect(result.current.isLoading).toBe(false);
     });
 
-    it('returns SWR response with no request when userAddress is empty', () => {
+    it('should return SWR response with no request when userAddress is empty', () => {
         const { result } = renderHook(() => useUserANSDomains(''));
 
         expect(useSWR).toHaveBeenCalledWith(null, expect.any(Function), expect.any(Object));
@@ -56,7 +56,7 @@ describe('useUserANSDomains', () => {
         expect(result.current.isLoading).toBe(false);
     });
 
-    it('requests with correct SWR key on Mainnet', () => {
+    it('should request with correct SWR key on Mainnet', () => {
         renderHook(() => useUserANSDomains(USER_ADDRESS));
 
         expect(useSWR).toHaveBeenCalledWith(
@@ -66,7 +66,7 @@ describe('useUserANSDomains', () => {
         );
     });
 
-    it('requests with correct SWR key on Custom cluster', () => {
+    it('should request with correct SWR key on Custom cluster', () => {
         vi.mocked(useCluster).mockReturnValue({
             cluster: Cluster.Custom,
             url: 'https://custom.rpc.com',
@@ -81,7 +81,7 @@ describe('useUserANSDomains', () => {
         );
     });
 
-    it('returns isLoading true when loading', () => {
+    it('should return isLoading true when loading', () => {
         vi.mocked(useSWR).mockReturnValue(swrResponse({ isLoading: true }));
 
         const { result } = renderHook(() => useUserANSDomains(USER_ADDRESS));
@@ -90,7 +90,7 @@ describe('useUserANSDomains', () => {
         expect(result.current.data).toBeUndefined();
     });
 
-    it('returns data when loaded', () => {
+    it('should return data when loaded', () => {
         vi.mocked(useSWR).mockReturnValue(swrResponse({ data: mockDomains }));
 
         const { result } = renderHook(() => useUserANSDomains(USER_ADDRESS));
@@ -99,7 +99,7 @@ describe('useUserANSDomains', () => {
         expect(result.current.isLoading).toBe(false);
     });
 
-    it('returns error when fetch fails', () => {
+    it('should return error when fetch fails', () => {
         const err = new Error('fetch failed');
         vi.mocked(useSWR).mockReturnValue(swrResponse({ error: err }));
 

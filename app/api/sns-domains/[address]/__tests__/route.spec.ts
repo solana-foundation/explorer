@@ -84,7 +84,7 @@ describe('GET /api/sns-domains/[address]', () => {
             expect(Logger.error).toHaveBeenCalledWith(error, { address: VALID_ADDRESS });
         });
 
-        it('does not cache error responses', async () => {
+        it('should not cache error responses', async () => {
             vi.mocked(fetchSnsDomains).mockRejectedValueOnce(new Error('fail'));
 
             const response = await GET(mockRequest, { params: Promise.resolve({ address: VALID_ADDRESS }) });
