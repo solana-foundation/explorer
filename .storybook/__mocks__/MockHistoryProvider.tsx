@@ -17,7 +17,9 @@ type Props = {
  * `useAccountHistory` / `useAccountHistories` / `useFetchAccountHistory` find data without
  * hitting the RPC. Defaults to an empty cache.
  */
-export function MockHistoryProvider({ children, history = {}, inFlight = new Set<string>() }: Props) {
+const EMPTY_IN_FLIGHT = new Set<string>();
+
+export function MockHistoryProvider({ children, history = {}, inFlight = EMPTY_IN_FLIGHT }: Props) {
     return (
         <StateContext.Provider value={{ entries: history, url: MAINNET_BETA_URL }}>
             <DispatchContext.Provider value={() => {}}>
