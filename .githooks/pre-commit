@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+
+# Lint + format staged files only. Full pipeline still runs on pre-push.
+files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.ts' '*.tsx' '*.mts' '*.mjs' '*.cjs' '*.js')
+[ -z "$files" ] && exit 0
+
+echo "$files" | xargs corepack pnpm pretty:format && \
+echo "$files" | xargs corepack pnpm eslint:lint && \
+echo "$files" | xargs corepack pnpm test:changed
