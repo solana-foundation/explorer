@@ -23,8 +23,7 @@ const expectedHash = hashProgramData(programData);
 
 type OsecOutcome = 'verified' | 'unverified' | 'loading' | 'error';
 
-const withMockedOsec =
-    (outcome: OsecOutcome): Decorator =>
+const withMockedOsec = (outcome: OsecOutcome): Decorator =>
     function WithMockedOsec(Story) {
         const originalFetch = window.fetch;
         window.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
