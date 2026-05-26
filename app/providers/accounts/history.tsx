@@ -339,8 +339,9 @@ async function fetchAccountHistory(
         });
         history = {
             fetched: result.data,
-            // A null/absent cursor or a short page means there is nothing more to load.
-            foundOldest: !result.paginationToken || result.data.length < options.limit,
+            // A null/absent paginationToken is the canonical end-of-stream signal; a
+            // short page is not, since the server may still hand back a token for more.
+            foundOldest: !result.paginationToken,
             paginationToken: result.paginationToken,
         };
         status = FetchStatus.Fetched;
