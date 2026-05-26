@@ -6,7 +6,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
-import { useAccountHistory, useClearAccountHistories, useFetchAccountHistory } from '@providers/accounts/history';
+import { useAccountHistory, useFetchAccountHistory, useResetAccountHistory } from '@providers/accounts/history';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc } from '@utils/date';
@@ -29,7 +29,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     const filtersKey = JSON.stringify(filters);
     const history = useAccountHistory(address);
     const fetchAccountHistory = useFetchAccountHistory(25, filters);
-    const clearHistories = useClearAccountHistories();
+    const resetHistory = useResetAccountHistory();
     const refresh = useCallback(() => fetchAccountHistory(pubkey, false, true), [fetchAccountHistory, pubkey]);
     const loadMore = () => fetchAccountHistory(pubkey, false);
 
@@ -47,16 +47,17 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Refetch from scratch when any filter changes. The cache is keyed by address
-    // only, so we drop the cached entries before refetching to avoid mixing pre- and
-    // post-filter results in combineFetched.
+    // only, so we reset this address's entry (which also supersedes any in-flight
+    // request for it) before refetching to avoid mixing pre- and post-filter results
+    // in combineFetched.
     const previousFiltersKey = React.useRef(filtersKey);
     React.useEffect(() => {
         if (previousFiltersKey.current !== filtersKey) {
             previousFiltersKey.current = filtersKey;
-            clearHistories();
+            resetHistory(address);
             refresh();
         }
-    }, [filtersKey, clearHistories, refresh]);
+    }, [filtersKey, address, resetHistory, refresh]);
 
     if (!history) {
         return null;

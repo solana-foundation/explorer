@@ -123,22 +123,30 @@ function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | 
 const StateContext = React.createContext<State | undefined>(undefined);
 const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
 const InFlightContext = React.createContext<Set<string> | undefined>(undefined);
+// Monotonic per-address counter. Bumped whenever a request is superseded (e.g. a
+// filter change) so the in-flight response can be discarded instead of overwriting
+// the freshly-cleared cache. See `useResetAccountHistory`.
+const GenerationContext = React.createContext<Map<string, number> | undefined>(undefined);
 
 type HistoryProviderProps = { children: React.ReactNode };
 export function HistoryProvider({ children }: HistoryProviderProps) {
     const { url } = useCluster();
     const [state, dispatch] = Cache.useCustomReducer(url, reconcile);
     const inFlightRef = React.useRef(new Set<string>());
+    const generationRef = React.useRef(new Map<string, number>());
 
     React.useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
         inFlightRef.current.clear();
+        generationRef.current.clear();
     }, [dispatch, url]);
 
     return (
         <StateContext.Provider value={state}>
             <DispatchContext.Provider value={dispatch}>
-                <InFlightContext.Provider value={inFlightRef.current}>{children}</InFlightContext.Provider>
+                <InFlightContext.Provider value={inFlightRef.current}>
+                    <GenerationContext.Provider value={generationRef.current}>{children}</GenerationContext.Provider>
+                </InFlightContext.Provider>
             </DispatchContext.Provider>
         </StateContext.Provider>
     );
@@ -233,9 +241,48 @@ async function getTransactionsForAddress(
     });
     const json = await response.json();
     if (json.error) {
-        throw new Error(json.error.message ?? 'getTransactionsForAddress failed');
+        const error = new Error(json.error.message ?? 'getTransactionsForAddress failed') as Error & {
+            code?: number;
+        };
+        error.code = json.error.code;
+        throw error;
     }
     return json.result as GetTransactionsForAddressResult;
+}
+
+// getTransactionsForAddress is a Triton extension; standard RPC nodes answer with a
+// JSON-RPC "method not found" (-32601). We use that to fall back to getSignaturesForAddress.
+function isMethodNotFound(error: unknown): boolean {
+    const e = error as { code?: number; message?: string };
+    if (e?.code === -32601) return true;
+    const message = typeof e?.message === 'string' ? e.message.toLowerCase() : '';
+    return message.includes('method not found') || message.includes('unsupported method');
+}
+
+// Legacy fallback path for endpoints without getTransactionsForAddress. Uses
+// getSignaturesForAddress, whose pagination cursor is the trailing `before` signature
+// rather than a paginationToken. Slot bounds are passed through as the Hydrant
+// `untilSlot`/`beforeSlot` extension (a no-op on nodes that don't support it); block
+// time and status filters are not applied on this path.
+async function fetchViaSignatures(
+    url: string,
+    pubkey: PublicKey,
+    options: { limit: number; before?: string; filters: HistoryFilters },
+): Promise<AccountHistory> {
+    const connection = new Connection(url);
+    const rpcOptions: Record<string, unknown> = { limit: options.limit };
+    if (options.before) rpcOptions.before = options.before;
+    if (options.filters.slot?.gte !== undefined) rpcOptions.untilSlot = options.filters.slot.gte;
+    if (options.filters.slot?.lte !== undefined) rpcOptions.beforeSlot = options.filters.slot.lte;
+    const fetched = await connection.getSignaturesForAddress(
+        pubkey,
+        rpcOptions as Parameters<Connection['getSignaturesForAddress']>[1],
+    );
+    return {
+        fetched,
+        foundOldest: fetched.length < options.limit,
+        paginationToken: null,
+    };
 }
 
 async function fetchAccountHistory(
@@ -246,11 +293,16 @@ async function fetchAccountHistory(
     options: {
         limit: number;
         paginationToken?: string | null;
+        // Trailing-signature cursor used only by the getSignaturesForAddress fallback.
+        before?: string;
         filters: HistoryFilters;
         append: boolean;
     },
     fetchTransactions?: boolean,
     additionalSignatures?: string[],
+    // Returns false once this request has been superseded (e.g. by a filter change),
+    // in which case its result is dropped rather than written into the cache.
+    isCurrent: () => boolean = () => true,
 ) {
     dispatch({
         key: pubkey.toBase58(),
@@ -275,10 +327,28 @@ async function fetchAccountHistory(
         };
         status = FetchStatus.Fetched;
     } catch (error) {
-        if (cluster !== Cluster.Custom) {
-            Logger.error(error, { url });
+        if (isMethodNotFound(error)) {
+            // Endpoint doesn't implement getTransactionsForAddress: fall back to the
+            // standard getSignaturesForAddress path.
+            try {
+                history = await fetchViaSignatures(url, pubkey, {
+                    before: options.before,
+                    filters: options.filters,
+                    limit: options.limit,
+                });
+                status = FetchStatus.Fetched;
+            } catch (fallbackError) {
+                if (cluster !== Cluster.Custom) {
+                    Logger.error(fallbackError, { url });
+                }
+                status = FetchStatus.FetchFailed;
+            }
+        } else {
+            if (cluster !== Cluster.Custom) {
+                Logger.error(error, { url });
+            }
+            status = FetchStatus.FetchFailed;
         }
-        status = FetchStatus.FetchFailed;
     }
 
     let failedTransactionSignatures;
@@ -294,6 +364,10 @@ async function fetchAccountHistory(
             status = FetchStatus.FetchFailed;
         }
     }
+
+    // A newer request (e.g. triggered by a filter change) has taken over for this
+    // address; discard this stale result so it can't overwrite the fresh cache.
+    if (!isCurrent()) return;
 
     dispatch({
         data: {
@@ -318,6 +392,28 @@ export function useClearAccountHistories() {
     return React.useCallback(() => {
         dispatch({ type: ActionType.Clear, url });
     }, [dispatch, url]);
+}
+
+// Resets a single address's history so the next fetch starts from a clean slate.
+// Bumps the address generation (so any in-flight request for it is discarded) and
+// evicts its in-flight marker (so the immediately-following refetch isn't deduped),
+// then clears only that address's cache entry.
+export function useResetAccountHistory() {
+    const { url } = useCluster();
+    const dispatch = React.useContext(DispatchContext);
+    const inFlight = React.useContext(InFlightContext);
+    const generations = React.useContext(GenerationContext);
+    if (!dispatch || !inFlight || !generations) {
+        throw new Error(`useResetAccountHistory must be used within a HistoryProvider`);
+    }
+    return React.useCallback(
+        (address: string) => {
+            generations.set(address, (generations.get(address) ?? 0) + 1);
+            inFlight.delete(address);
+            dispatch({ key: address, type: ActionType.Clear, url });
+        },
+        [dispatch, inFlight, generations, url],
+    );
 }
 
 export function useAccountHistories() {
@@ -398,7 +494,8 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
     const state = React.useContext(StateContext);
     const dispatch = React.useContext(DispatchContext);
     const inFlight = React.useContext(InFlightContext);
-    if (!state || !dispatch || !inFlight) {
+    const generations = React.useContext(GenerationContext);
+    if (!state || !dispatch || !inFlight || !generations) {
         throw new Error(`useFetchAccountHistory must be used within a HistoryProvider`);
     }
 
@@ -416,7 +513,13 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                 slot: { gte: slotGte, lte: slotLte },
                 status,
             };
-            const before = state.entries[pubkey.toBase58()];
+            const key = pubkey.toBase58();
+            // Snapshot the generation at dispatch time; if it advances before the
+            // response lands (a filter change), the result is treated as stale.
+            const generation = generations.get(key) ?? 0;
+            const isCurrent = () => (generations.get(key) ?? 0) === generation;
+
+            const before = state.entries[key];
             if (!refresh && before?.data?.fetched && before.data.fetched.length > 0) {
                 if (before.data.foundOldest) return;
 
@@ -425,7 +528,10 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                     additionalSignatures = getUnfetchedSignatures(before);
                 }
 
-                fetchOnce(pubkey.toBase58(), inFlight, () =>
+                // Cursor for the next page: paginationToken drives getTransactionsForAddress,
+                // the trailing signature drives the getSignaturesForAddress fallback.
+                const oldest = before.data.fetched[before.data.fetched.length - 1].signature;
+                fetchOnce(key, inFlight, () =>
                     fetchAccountHistory(
                         dispatch,
                         pubkey,
@@ -433,16 +539,18 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                         url,
                         {
                             append: true,
+                            before: oldest,
                             filters: activeFilters,
                             limit,
                             paginationToken: before.data?.paginationToken,
                         },
                         fetchTransactions,
                         additionalSignatures,
+                        isCurrent,
                     ),
                 ).catch(e => Logger.error(e));
             } else {
-                fetchOnce(pubkey.toBase58(), inFlight, () =>
+                fetchOnce(key, inFlight, () =>
                     fetchAccountHistory(
                         dispatch,
                         pubkey,
@@ -450,6 +558,8 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                         url,
                         { append: false, filters: activeFilters, limit },
                         fetchTransactions,
+                        undefined,
+                        isCurrent,
                     ),
                 ).catch(e => Logger.error(e));
             }
@@ -466,6 +576,7 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
             cluster,
             url,
             inFlight,
+            generations,
         ],
     );
 }
