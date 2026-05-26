@@ -3,7 +3,7 @@
 import { Button } from '@components/shared/ui/button';
 import { Input } from '@components/shared/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
-import { HistoryFilters } from '@providers/accounts/history';
+import { HistoryFilters, useHistoryFiltersSupported } from '@providers/accounts/history';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { Filter, X } from 'react-feather';
@@ -75,6 +75,22 @@ function useUpdateHistoryFilters() {
             router.replace(`${pathname}${qs ? `?${qs}` : ''}`, { scroll: false });
         },
         [router, pathname, searchParams],
+    );
+}
+
+// Clears every filter param from the URL in one update.
+export function useClearHistoryFilters() {
+    const updateFilters = useUpdateHistoryFilters();
+    return React.useCallback(
+        () =>
+            updateFilters({
+                [BLOCK_TIME_GTE_PARAM]: undefined,
+                [BLOCK_TIME_LTE_PARAM]: undefined,
+                [SLOT_GTE_PARAM]: undefined,
+                [SLOT_LTE_PARAM]: undefined,
+                [STATUS_PARAM]: undefined,
+            }),
+        [updateFilters],
     );
 }
 
@@ -174,6 +190,7 @@ const SELECT_CLASS =
 export function HistoryFilterTrigger(filters: HistoryFilters) {
     const { slot, blockTime, status } = filters;
     const updateFilters = useUpdateHistoryFilters();
+    const supported = useHistoryFiltersSupported();
     const [open, setOpen] = React.useState(false);
 
     const [slotGteDraft, setSlotGteDraft] = React.useState('');
@@ -234,6 +251,23 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
         (blockTime?.gte !== undefined ? 1 : 0) +
         (blockTime?.lte !== undefined ? 1 : 0);
     const triggerLabel = activeCount === 0 ? 'Filters' : 'Edit filters';
+
+    // The endpoint doesn't support getTransactionsForAddress, so filtering can't be
+    // applied server-side; show a disabled control rather than a misleading filter UI.
+    if (!supported) {
+        return (
+            <Button
+                size="sm"
+                variant="outline"
+                disabled
+                aria-label="Filters unavailable"
+                title="Transaction filtering requires a Triton- or Helius-compatible RPC endpoint"
+            >
+                <Filter />
+                <span className="e-hidden md:e-inline">Filters</span>
+            </Button>
+        );
+    }
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
