@@ -40,6 +40,7 @@ interface OSecStatus {
     last_verified_at: string | undefined;
 }
 
+// eslint-disable-next-line no-restricted-syntax -- base58 character-set validation requires a regex
 const BASE58_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
 const Base58Address = refine(
@@ -61,6 +62,7 @@ const HttpsUrl = refine(string(), 'HttpsUrl', value => {
 const IsoDateTime = refine(
     string(),
     'IsoDateTime',
+    // eslint-disable-next-line no-restricted-syntax -- ISO 8601 datetime validation requires a regex
     value => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(value) || `not ISO datetime: ${value}`,
 );
 
