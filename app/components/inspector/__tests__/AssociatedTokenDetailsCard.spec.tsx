@@ -71,7 +71,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        // waitFor absorbs ClusterProvider's post-mount dispatch inside an act() boundary
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
         await waitFor(() => {
             expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
             [/Source/, /Account/, /Mint/, /Wallet/].forEach(pattern => {
@@ -103,12 +103,14 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        // waitFor absorbs ClusterProvider's post-mount dispatch inside an act() boundary
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
         await waitFor(() => {
             expect(screen.getByText(/Associated Token Program: Recover Nested/)).toBeInTheDocument();
-            [/Destination/, /Nested Mint/, /Nested Owner/, /Nested Source/, /Owner Mint/, /^Owner$/].forEach(pattern => {
-                expect(screen.getByText(pattern)).toBeInTheDocument();
-            });
+            [/Destination/, /Nested Mint/, /Nested Owner/, /Nested Source/, /Owner Mint/, /^Owner$/].forEach(
+                pattern => {
+                    expect(screen.getByText(pattern)).toBeInTheDocument();
+                },
+            );
             expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(3);
         });
     });
@@ -137,8 +139,9 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        // waitFor absorbs ClusterProvider's post-mount dispatch inside an act() boundary
+        // Positive assertion forces waitFor to poll until the async render settles; the negative one alone would pass immediately.
         await waitFor(() => {
+            expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
             expect(screen.queryByText(/Inner Instructions/)).not.toBeInTheDocument();
         });
     });
