@@ -1,8 +1,8 @@
 import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
-import { ClusterProvider } from '@providers/cluster';
 import { AddressLookupTableProgram, PublicKey, VersionedMessage } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
+import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import React from 'react';
 
