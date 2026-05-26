@@ -40,10 +40,10 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
     const hasData = data !== undefined && data.length > 0;
     const tooLarge = data !== undefined && data.length > MAX_INLINE_BYTES;
 
-    const hexString = useMemo(() => (data && data.length > 0 && !tooLarge ? toHex(data) : ''), [data, tooLarge]);
+    const hexString = useMemo(() => (data && data.length > 0 ? toHex(data) : ''), [data]);
     const base64String = useMemo(
-        () => (data && data.length > 0 && !tooLarge ? toBase64(new Uint8Array(data)) : ''),
-        [data, tooLarge],
+        () => (data && data.length > 0 ? toBase64(new Uint8Array(data)) : ''),
+        [data],
     );
 
     const hasMoreHex = data !== undefined && data.length > VISIBLE_ROWS * HEX_ROW_BYTES;
