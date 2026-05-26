@@ -1,18 +1,1 @@
-{
-  "address": "CH92oNMa1jC3ysRKCG3QWe5xFB5HtVAqcnWBbogD9XyL",
-  "capturedAt": "2026-05-25T22:13:18.611Z",
-  "info": {
-    "lamports": 2470800,
-    "data": [
-      "Asb6evO+2606PWXzaqvJdDGxu+TC0vbg5HymAgNFL11h3oiQqIYPMRS41ihkXDyfHMonXK0tT7wHdYriN3s9AOkqB/6VyuejDzD1WIt026iAQeDqqnJf7BVvrXzGukOcKTYAAAAuAAAAUW1VblBFUDNUbUxXMjRDWG5hOTdDQVBreFR4cHhGcExtdGpIOHZ4MTF4Mm9GdeTiiGi8KJIDQ1e2FAFAP02jworF2MpDHEqoq77/lJ+o6+v/K+RvsGgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
-      "base64"
-    ],
-    "owner": "22zoJMtdu4tQc2PzL74ZUT7FrwgB1Udec8DdW4yw4BdG",
-    "executable": false,
-    "rentEpoch": 18446744073709552000,
-    "space": 227
-  },
-  "nonceMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-  "schemaAddress": "3q5CEU7HFwbVxjYMTzbRZa6MnVaJSNF5d9MeVxJEKAq6",
-  "source": "mainnet"
-}
+{"address":"CH92oNMa1jC3ysRKCG3QWe5xFB5HtVAqcnWBbogD9XyL","capturedAt":"2026-05-25T22:13:18.611Z","info":{"lamports":2470800,"data":["Asb6evO+2606PWXzaqvJdDGxu+TC0vbg5HymAgNFL11h3oiQqIYPMRS41ihkXDyfHMonXK0tT7wHdYriN3s9AOkqB/6VyuejDzD1WIt026iAQeDqqnJf7BVvrXzGukOcKTYAAAAuAAAAUW1VblBFUDNUbUxXMjRDWG5hOTdDQVBreFR4cHhGcExtdGpIOHZ4MTF4Mm9GdeTiiGi8KJIDQ1e2FAFAP02jworF2MpDHEqoq77/lJ+o6+v/K+RvsGgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=","base64"],"owner":"22zoJMtdu4tQc2PzL74ZUT7FrwgB1Udec8DdW4yw4BdG","executable":false,"rentEpoch":18446744073709552000,"space":227},"nonceMint":"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v","schemaAddress":"3q5CEU7HFwbVxjYMTzbRZa6MnVaJSNF5d9MeVxJEKAq6","source":"mainnet"}

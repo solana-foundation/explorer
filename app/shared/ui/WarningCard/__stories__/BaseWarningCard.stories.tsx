@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { BaseWarningCard } from './BaseWarningCard';
+import { BaseWarningCard } from '../BaseWarningCard';
 
 const meta: Meta<typeof BaseWarningCard> = {
     component: BaseWarningCard,

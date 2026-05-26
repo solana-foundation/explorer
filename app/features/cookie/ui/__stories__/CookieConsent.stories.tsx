@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { CookieCard, PrivacyPolicyLink } from './CookieConsent';
+import { CookieCard, PrivacyPolicyLink } from '../CookieConsent';
 
 const meta = {
     component: CookieCard,
