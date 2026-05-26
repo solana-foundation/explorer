@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 
 import { VotesCard } from '../VotesCard';
@@ -16,8 +15,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const votes = Array.from({ length: 6 }, (_, i) => ({
-    slot: 312_456_780 + i,
     confirmationCount: 31 - i,
+    slot: 312_456_780 + i,
 }));
 
 export const WithVotes: Story = {

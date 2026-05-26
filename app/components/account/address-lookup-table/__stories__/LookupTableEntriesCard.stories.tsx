@@ -1,6 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-
 import { PublicKey } from '@solana/web3.js';
+import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 
 import { LookupTableEntriesCard } from '../LookupTableEntriesCard';

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 
 import { SlotHashesCard } from '../SlotHashesCard';
@@ -21,10 +20,10 @@ export const WithEntries: Story = {
     args: {
         sysvarAccount: {
             info: [
-                { slot: 312_456_789n, hash: hash(0) },
-                { slot: 312_456_788n, hash: hash(1) },
-                { slot: 312_456_787n, hash: hash(2) },
-                { slot: 312_456_786n, hash: hash(3) },
+                { hash: hash(0), slot: 312_456_789n },
+                { hash: hash(1), slot: 312_456_788n },
+                { hash: hash(2), slot: 312_456_787n },
+                { hash: hash(3), slot: 312_456_786n },
             ],
             // Other SysvarAccount fields aren't read by SlotHashesCard; cast keeps TS happy.
         } as any,
