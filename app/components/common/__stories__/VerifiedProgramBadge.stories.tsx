@@ -23,26 +23,28 @@ const expectedHash = hashProgramData(programData);
 
 type OsecOutcome = 'verified' | 'unverified' | 'loading' | 'error';
 
-const withMockedOsec = (outcome: OsecOutcome): Decorator => Story => {
-    const originalFetch = window.fetch;
-    window.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-        const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
-        if (!url.includes('verify.osec.io')) return originalFetch(input as any, init);
-        if (outcome === 'loading') return new Promise<Response>(() => {});
-        if (outcome === 'error') throw new Error('mocked OSEC failure');
-        return new Response(
-            JSON.stringify({ is_verified: outcome === 'verified', on_chain_hash: expectedHash }),
-            { headers: { 'content-type': 'application/json' }, status: 200 },
+const withMockedOsec =
+    (outcome: OsecOutcome): Decorator =>
+    Story => {
+        const originalFetch = window.fetch;
+        window.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+            const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+            if (!url.includes('verify.osec.io')) return originalFetch(input as any, init);
+            if (outcome === 'loading') return new Promise<Response>(() => {});
+            if (outcome === 'error') throw new Error('mocked OSEC failure');
+            return new Response(JSON.stringify({ is_verified: outcome === 'verified', on_chain_hash: expectedHash }), {
+                headers: { 'content-type': 'application/json' },
+                status: 200,
+            });
+        }) as typeof window.fetch;
+        return (
+            <SWRConfig value={{ provider: () => new Map() }}>
+                <MockClusterProvider>
+                    <Story />
+                </MockClusterProvider>
+            </SWRConfig>
         );
-    }) as typeof window.fetch;
-    return (
-        <SWRConfig value={{ provider: () => new Map() }}>
-            <MockClusterProvider>
-                <Story />
-            </MockClusterProvider>
-        </SWRConfig>
-    );
-};
+    };
 
 const devnetState: ClusterState = {
     cluster: Cluster.Devnet,

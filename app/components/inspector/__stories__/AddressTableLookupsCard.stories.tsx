@@ -26,7 +26,9 @@ function MockProvider({ children, state }: { children: React.ReactNode; state: S
         <ClusterProvider>
             <StateContext.Provider value={state}>
                 <DispatchContext.Provider value={noop}>
-                    <FetchersContext.Provider value={{ parsed: { fetch: noop }, raw: { fetch: noop }, skip: { fetch: noop } } as any}>
+                    <FetchersContext.Provider
+                        value={{ parsed: { fetch: noop }, raw: { fetch: noop }, skip: { fetch: noop } } as any}
+                    >
                         {children}
                     </FetchersContext.Provider>
                 </DispatchContext.Provider>

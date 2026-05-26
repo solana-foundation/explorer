@@ -25,7 +25,11 @@ export default meta;
 type Story = StoryObj;
 
 export const Header: Story = {
-    render: () => <div className="card"><AccountHeader title="Account Overview" analyticsSection="story" refresh={() => undefined} /></div>,
+    render: () => (
+        <div className="card">
+            <AccountHeader title="Account Overview" analyticsSection="story" refresh={() => undefined} />
+        </div>
+    ),
 };
 
 export const Rows: Story = {

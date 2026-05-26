@@ -1,9 +1,9 @@
-import {
-    DispatchContext as TokensDispatch,
-    StateContext as TokensStateCtx,
-} from '@providers/accounts/tokens';
+import { DispatchContext as TokensDispatch, StateContext as TokensStateCtx } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
-import { DispatchContext as ParsedDetailsDispatch, StateContext as ParsedDetailsStateCtx } from '@providers/transactions/parsed';
+import {
+    DispatchContext as ParsedDetailsDispatch,
+    StateContext as ParsedDetailsStateCtx,
+} from '@providers/transactions/parsed';
 import { PublicKey } from '@solana/web3.js';
 import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';

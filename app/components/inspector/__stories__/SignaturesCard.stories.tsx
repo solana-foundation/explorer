@@ -6,8 +6,7 @@ import { TransactionSignatures } from '../SignaturesCard';
 
 const FEE_PAYER = new PublicKey('11111111111111111111111111111111');
 const SIGNER_2 = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
-const BOGUS_SIGNATURE =
-    '5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW';
+const BOGUS_SIGNATURE = '5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW';
 
 const baseMessage = {
     addressTableLookups: [],

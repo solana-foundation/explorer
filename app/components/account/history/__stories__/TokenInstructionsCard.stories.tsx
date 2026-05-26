@@ -25,7 +25,9 @@ export const EmptyHistory: Story = {
         Story => (
             <ClusterProvider>
                 <MockAccountsProvider>
-                    <MockHistoryProvider history={{ [ADDRESS]: mockAccountHistory({ fetched: [], foundOldest: true }) }}>
+                    <MockHistoryProvider
+                        history={{ [ADDRESS]: mockAccountHistory({ fetched: [], foundOldest: true }) }}
+                    >
                         <Story />
                     </MockHistoryProvider>
                 </MockAccountsProvider>

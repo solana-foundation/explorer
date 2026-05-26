@@ -15,9 +15,10 @@ const NEODYME_FOOTER = '=======END SECURITY.TXT V1=======\0';
 // Build the embedded security.txt section that fromProgramData() looks for.
 function encodeNeodymeSecurityTxt(fields: Record<string, string>): string {
     const enc = new TextEncoder();
-    const body = Object.entries(fields)
-        .flatMap(([k, v]) => [k, v])
-        .join('\0') + '\0';
+    const body =
+        Object.entries(fields)
+            .flatMap(([k, v]) => [k, v])
+            .join('\0') + '\0';
     const bytes = enc.encode(NEODYME_HEADER + body + NEODYME_FOOTER);
     return toBase64(bytes);
 }
@@ -56,7 +57,11 @@ export const WithEmbeddedSecurityTxt: Story = {
 export const NoSecurityTxt: Story = {
     args: {
         data: {
-            programData: { authority: AUTHORITY, data: [toBase64(new Uint8Array([0, 1, 2, 3])), 'base64'], slot: 312_000_000 },
+            programData: {
+                authority: AUTHORITY,
+                data: [toBase64(new Uint8Array([0, 1, 2, 3])), 'base64'],
+                slot: 312_000_000,
+            },
         } as any,
         pubkey: PUBKEY,
     },

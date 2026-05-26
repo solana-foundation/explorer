@@ -2,7 +2,7 @@
 
 import { type ClusterState, DispatchContext, StateContext } from '@providers/cluster';
 import { Cluster, ClusterStatus, MAINNET_BETA_URL } from '@utils/cluster';
-import { type ReactNode,useState } from 'react';
+import { type ReactNode, useState } from 'react';
 
 const defaultState: ClusterState = {
     cluster: Cluster.MainnetBeta,
