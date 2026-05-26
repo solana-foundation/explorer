@@ -16,6 +16,11 @@ const useResolvedUI = (override?: UI | null) => {
 };
 
 const cardVariants = cva(['e-relative e-flex e-min-w-0 e-flex-col e-break-words'], {
+    compoundVariants: [
+        { class: 'e-px-6 e-py-2.5', ui: 'tw', variant: 'default' },
+        { class: 'e-px-3 e-py-2', ui: 'tw', variant: 'narrow' },
+        { class: '', ui: 'tw', variant: 'tight' },
+    ],
     defaultVariants: { flex: 'default', ui: 'tw', variant: 'default' },
     variants: {
         flex: {
@@ -40,11 +45,6 @@ const cardVariants = cva(['e-relative e-flex e-min-w-0 e-flex-col e-break-words'
             tight: '',
         },
     },
-    compoundVariants: [
-        { class: 'e-px-6 e-py-2.5', ui: 'tw', variant: 'default' },
-        { class: 'e-px-3 e-py-2', ui: 'tw', variant: 'narrow' },
-        { class: '', ui: 'tw', variant: 'tight' },
-    ],
 });
 
 export interface BaseCardProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof cardVariants> {}

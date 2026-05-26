@@ -5,11 +5,12 @@ import type {
     SupportedIdl,
 } from '@entities/idl';
 import { Button } from '@shared/ui/button';
-import { Card, CardSection } from '@/app/shared/ui/Card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Loader, Send } from 'react-feather';
 import { Control, Controller, FieldPath } from 'react-hook-form';
+
+import { Card, CardSection } from '@/app/shared/ui/Card';
 
 import { createGetAutocompleteItems } from '../model/account-autocomplete/createGetAutocompleteItems';
 import type { AutocompleteItem } from '../model/account-autocomplete/types';

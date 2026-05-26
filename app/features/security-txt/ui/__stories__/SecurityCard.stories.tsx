@@ -15,11 +15,10 @@ const NEODYME_FOOTER = '=======END SECURITY.TXT V1=======\0';
 // Build the embedded security.txt section that fromProgramData() looks for.
 function encodeNeodymeSecurityTxt(fields: Record<string, string>): string {
     const enc = new TextEncoder();
-    const body =
-        Object.entries(fields)
-            .flatMap(([k, v]) => [k, v])
-            .join('\0') + '\0';
-    const bytes = enc.encode(NEODYME_HEADER + body + NEODYME_FOOTER);
+    const body = `${Object.entries(fields)
+        .flatMap(([k, v]) => [k, v])
+        .join('\0')}\0`;
+    const bytes = enc.encode(`${NEODYME_HEADER}${body}${NEODYME_FOOTER}`);
     return toBase64(bytes);
 }
 

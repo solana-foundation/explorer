@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { PlayCircle, XCircle } from 'react-feather';
 
 import { idlAnalytics } from '@/app/shared/lib/analytics';
+import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 
 import { BaseIdlAccounts } from '../formatted-idl/ui/BaseIdlAccounts';
 import { BaseIdlConstants } from '../formatted-idl/ui/BaseIdlConstants';
@@ -17,7 +18,6 @@ import { BaseIdlInstructions } from '../formatted-idl/ui/BaseIdlInstructions';
 import { BaseIdlPdas } from '../formatted-idl/ui/BaseIdlPdas';
 import { BaseIdlTypes } from '../formatted-idl/ui/BaseIdlTypes';
 import type { FormattedIdlDataView, IdlDataKeys } from '../formatted-idl/ui/types';
-import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 import { InteractWithIdl } from '../interactive-idl/ui/InteractWithIdl';
 
 const IS_INTERACTIVE_IDL_ENABLED = isEnvEnabled(process.env.NEXT_PUBLIC_INTERACTIVE_IDL_ENABLED);

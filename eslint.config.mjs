@@ -355,8 +355,8 @@ export default tseslint.config(
 
             // app/features deep imports into entities (must go via barrel)
             'app/features/idl/formatted-idl/model/__tests__/search.test.ts',
-            'app/features/idl/formatted-idl/ui/stories/AnchorFormattedIdl.stories.tsx',
-            'app/features/idl/formatted-idl/ui/stories/CodamaFormattedIdl.stories.tsx',
+            'app/features/idl/formatted-idl/ui/__stories__/AnchorFormattedIdl.stories.tsx',
+            'app/features/idl/formatted-idl/ui/__stories__/CodamaFormattedIdl.stories.tsx',
             'app/features/idl/interactive-idl/model/codama/codama-interpreter.ts',
             'app/features/idl/model/use-idl-last-transaction-date.tsx',
 

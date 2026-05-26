@@ -25,7 +25,7 @@ type OsecOutcome = 'verified' | 'unverified' | 'loading' | 'error';
 
 const withMockedOsec =
     (outcome: OsecOutcome): Decorator =>
-    Story => {
+    function WithMockedOsec(Story) {
         const originalFetch = window.fetch;
         window.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
             const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;

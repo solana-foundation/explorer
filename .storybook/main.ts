@@ -13,7 +13,7 @@ function toAliasArray(alias: AliasOptions | undefined) {
     if (Array.isArray(alias)) return alias;
     return Object.entries(alias ?? {}).map(([find, replacement]) => ({
         find,
-        replacement: replacement as string,
+        replacement,
     }));
 }
 
