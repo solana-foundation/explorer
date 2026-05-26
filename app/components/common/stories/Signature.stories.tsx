@@ -21,9 +21,17 @@ export const Default: Story = {
     args: {
         signature: EXAMPLE_SIG,
     },
+    decorators: [
+        Story => (
+            <div style={{ width: 1000 }}>
+                <Story />
+            </div>
+        ),
+    ],
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
-        expect(canvas.getByText(EXAMPLE_SIG)).toBeInTheDocument();
+        const [visible] = canvas.getAllByText(EXAMPLE_SIG).filter(el => !el.hasAttribute('aria-hidden'));
+        expect(visible).toBeInTheDocument();
     },
 };
 

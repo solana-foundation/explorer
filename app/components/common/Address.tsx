@@ -99,6 +99,14 @@ export function Address({
     // Nickname uses CSS text-overflow truncation (trailing ellipsis)
     const innerTextClassName = cn('e-font-mono', nickname && 'e-truncate');
 
+    const innerContent = link ? (
+        <Link href={addressPath} className={innerTextClassName}>
+            {visibleText}
+        </Link>
+    ) : (
+        <span className={innerTextClassName}>{visibleText}</span>
+    );
+
     return (
         <span ref={visibilityRef} className="e-block e-w-full">
             <div
@@ -117,30 +125,35 @@ export function Address({
                     </span>
                 )}
                 <Copyable text={address}>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <span
-                                data-address={address}
-                                className="e-relative e-min-w-0 e-overflow-hidden e-font-mono"
-                                onMouseEnter={() => handleMouseEnter(address)}
-                                onMouseLeave={() => handleMouseLeave(address)}
-                                title={nickname ? displayText : undefined}
-                            >
-                                {link ? (
-                                    <Link href={addressPath} className={innerTextClassName}>
-                                        {visibleText}
-                                    </Link>
-                                ) : (
-                                    <span className={innerTextClassName}>{visibleText}</span>
-                                )}
-                            </span>
-                        </TooltipTrigger>
-                        {isMidTruncated && (
-                            <TooltipContent>
-                                <span className="e-font-mono">{address}</span>
-                            </TooltipContent>
-                        )}
-                    </Tooltip>
+                    {isMidTruncateCandidate ? (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <span
+                                    data-address={address}
+                                    className="e-relative e-min-w-0 e-overflow-hidden e-font-mono"
+                                    onMouseEnter={() => handleMouseEnter(address)}
+                                    onMouseLeave={() => handleMouseLeave(address)}
+                                >
+                                    {innerContent}
+                                </span>
+                            </TooltipTrigger>
+                            {isMidTruncated && (
+                                <TooltipContent>
+                                    <span className="e-font-mono">{address}</span>
+                                </TooltipContent>
+                            )}
+                        </Tooltip>
+                    ) : (
+                        <span
+                            data-address={address}
+                            className="e-relative e-min-w-0 e-overflow-hidden e-font-mono"
+                            onMouseEnter={() => handleMouseEnter(address)}
+                            onMouseLeave={() => handleMouseLeave(address)}
+                            title={nickname ? displayText : undefined}
+                        >
+                            {innerContent}
+                        </span>
+                    )}
                 </Copyable>
                 <button
                     ref={editBtnRef}

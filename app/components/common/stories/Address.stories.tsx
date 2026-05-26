@@ -27,9 +27,19 @@ export const Default: Story = {
     args: {
         pubkey: WSOL,
     },
+    decorators: [
+        Story => (
+            <div style={{ width: 1000 }}>
+                <Story />
+            </div>
+        ),
+    ],
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
-        expect(canvas.getByText('So11111111111111111111111111111111111111112')).toBeInTheDocument();
+        const [visible] = canvas
+            .getAllByText('So11111111111111111111111111111111111111112')
+            .filter(el => !el.hasAttribute('aria-hidden'));
+        expect(visible).toBeInTheDocument();
     },
 };
 
