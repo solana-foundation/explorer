@@ -3,11 +3,11 @@ import {
     StateContext as TokensStateCtx,
 } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
-import { ClusterProvider } from '@providers/cluster';
 import { DispatchContext as ParsedDetailsDispatch, StateContext as ParsedDetailsStateCtx } from '@providers/transactions/parsed';
 import { PublicKey } from '@solana/web3.js';
 import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
+import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { MockHistoryProvider } from '@storybook-config/__mocks__/MockHistoryProvider';
 import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import React from 'react';
@@ -45,7 +45,7 @@ const tokensStateValue = {
 
 const emptyParsedDetailsState = { entries: {}, url: 'https://api.mainnet-beta.solana.com' };
 
-const WithToken: Decorator = Story => (
+const withToken: Decorator = Story => (
     <ClusterProvider>
         <MockAccountsProvider>
             <TokensStateCtx.Provider value={tokensStateValue as any}>
@@ -77,5 +77,5 @@ type Story = StoryObj<typeof meta>;
 // Token present but no history seeded → renders the initial "Click to load token history" card.
 export const InitialLoadPrompt: Story = {
     args: { address: ADDRESS },
-    decorators: [WithToken],
+    decorators: [withToken],
 };

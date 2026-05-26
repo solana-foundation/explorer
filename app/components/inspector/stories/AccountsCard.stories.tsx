@@ -1,7 +1,8 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
-import { ClusterProvider } from '@providers/cluster';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
+import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
+import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import React from 'react';
 import { expect, within } from 'storybook/test';
 
@@ -9,7 +10,6 @@ import { DispatchContext, FetchersContext, State, StateContext } from '@/app/pro
 import { FetchStatus } from '@/app/providers/cache';
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
 
-import { nextjsParameters, withTokenInfoBatch } from '../../../../.storybook/decorators';
 import { AccountsCard } from '../AccountsCard';
 
 // No-op function for mock fetchers

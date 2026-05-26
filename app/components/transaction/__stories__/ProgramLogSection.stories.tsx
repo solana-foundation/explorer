@@ -1,7 +1,7 @@
 import { FetchStatus } from '@providers/cache';
-import { ClusterProvider } from '@providers/cluster';
 import { DispatchContext, StateContext } from '@providers/transactions/parsed';
 import type { Meta, StoryObj } from '@storybook/react';
+import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
 import React from 'react';
 
@@ -11,9 +11,7 @@ const SIGNATURE = '5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKho
 
 const noop = () => undefined;
 
-// Construct a minimal ParsedTransactionWithMeta-shaped object. Only the fields the card
-// actually reads are populated; the rest are stubbed so the JSON viewer / raw view paths
-// both render.
+// Minimal ParsedTransactionWithMeta — only fields the card reads are populated.
 const mockDetails = {
     data: {
         transactionWithMeta: {

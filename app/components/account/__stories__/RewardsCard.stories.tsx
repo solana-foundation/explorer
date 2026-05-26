@@ -1,7 +1,7 @@
 import { DispatchContext as RewardsDispatch, StateContext as RewardsStateCtx } from '@providers/accounts/rewards';
 import { FetchStatus } from '@providers/cache';
-import { ClusterProvider } from '@providers/cluster';
 import type { Decorator, Meta, StoryObj } from '@storybook/react';
+import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import React from 'react';
 
@@ -28,7 +28,7 @@ const rewardsState = {
     url: 'https://api.mainnet-beta.solana.com',
 };
 
-const WithRewards: Decorator = Story => (
+const withRewards: Decorator = Story => (
     <ClusterProvider>
         <RewardsStateCtx.Provider value={rewardsState as any}>
             <RewardsDispatch.Provider value={noop as any}>
@@ -51,5 +51,5 @@ type Story = StoryObj<typeof meta>;
 
 export const WithRewardsList: Story = {
     args: { address: ADDRESS },
-    decorators: [WithRewards],
+    decorators: [withRewards],
 };

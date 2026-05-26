@@ -1,10 +1,10 @@
-import { ClusterProvider } from '@providers/cluster';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
+import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
+import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import React from 'react';
 import { expect, within } from 'storybook/test';
 
-import { nextjsParameters, withTokenInfoBatch } from '../../../../.storybook/decorators';
 import { BaseRawDetails } from '../BaseRawDetails';
 
 // Wrapper to render in a table context with required providers

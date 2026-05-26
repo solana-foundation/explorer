@@ -1,9 +1,9 @@
 import { DispatchContext as TokensDispatch, type State as TokensState, StateContext as TokensStateCtx } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
-import { ClusterProvider } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
+import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import React from 'react';
 
@@ -49,13 +49,13 @@ function MockTokensState({ children, value }: { children: React.ReactNode; value
     );
 }
 
-const WithTokens: Decorator = Story => (
+const withTokens: Decorator = Story => (
     <MockTokensState value={tokensState({ [ADDRESS]: sampleTokensEntry as any })}>
         <Story />
     </MockTokensState>
 );
 
-const WithNoTokens: Decorator = Story => (
+const withNoTokens: Decorator = Story => (
     <MockTokensState
         value={tokensState({
             [ADDRESS]: { data: { tokens: [] }, status: FetchStatus.Fetched },
@@ -78,10 +78,10 @@ type Story = StoryObj<typeof meta>;
 
 export const WithHoldings: Story = {
     args: { address: ADDRESS },
-    decorators: [WithTokens],
+    decorators: [withTokens],
 };
 
 export const Empty: Story = {
     args: { address: ADDRESS },
-    decorators: [WithNoTokens],
+    decorators: [withNoTokens],
 };
