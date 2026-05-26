@@ -19,22 +19,44 @@ vi.mock('@solana/web3.js', async () => {
     };
 });
 
+vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
+
 // Must import after mocks
-import { HistoryProvider, useAccountHistory, useFetchAccountHistory } from '../history';
+import { FetchStatus } from '@providers/cache';
+
+import { HistoryProvider, useAccountHistory, useFetchAccountHistory, useResetAccountHistory } from '../history';
 
 const ADDRESS = 'rexav5eNTUSNT1K2N7cfRjnthwhcP5BC25v2tA4rW4h';
+const ADDRESS_B = '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
 
 function sig(signature: string, slot: number) {
     return { blockTime: null, confirmationStatus: 'finalized', err: null, memo: null, signature, slot };
 }
 
+function envelope(data: ReturnType<typeof sig>[], paginationToken: string | null) {
+    return { json: async () => ({ id: 1, jsonrpc: '2.0', result: { data, paginationToken } }) };
+}
+
+// A promise we resolve by hand, to model a request that is still in flight.
+function deferred<T>() {
+    let resolve!: (value: T) => void;
+    const promise = new Promise<T>(r => {
+        resolve = r;
+    });
+    return { promise, resolve };
+}
+
 const fetchMock = vi.fn();
+const mockConnection = { getSignaturesForAddress: vi.fn() };
 
 // Resolve the next fetch call with a getTransactionsForAddress result envelope.
 function mockResult(data: ReturnType<typeof sig>[], paginationToken: string | null) {
-    fetchMock.mockResolvedValueOnce({
-        json: async () => ({ id: 1, jsonrpc: '2.0', result: { data, paginationToken } }),
-    });
+    fetchMock.mockResolvedValueOnce(envelope(data, paginationToken));
+}
+
+// Resolve the next fetch call with a JSON-RPC error (e.g. method-not-found).
+function mockRpcError(code: number, message: string) {
+    fetchMock.mockResolvedValueOnce({ json: async () => ({ error: { code, message }, id: 1, jsonrpc: '2.0' }) });
 }
 
 // Parse the JSON body of the Nth fetch call into [address, options].
@@ -50,7 +72,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(Connection).mockImplementation(() => ({}) as unknown as Connection);
+    vi.mocked(Connection).mockImplementation(() => mockConnection as unknown as Connection);
     vi.stubGlobal('fetch', fetchMock);
     // Fallback response; tests queue page-specific results with mockResult (once).
     fetchMock.mockResolvedValue({
@@ -177,5 +199,122 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
 
         // foundOldest short-circuits the load-more, so no further request is made.
         expect(fetchMock).not.toHaveBeenCalled();
+    });
+});
+
+describe('useResetAccountHistory', () => {
+    it('discards an in-flight response that resolves after a reset (no stale write)', async () => {
+        // First request is left pending to model a page-load still in flight.
+        const pending = deferred<ReturnType<typeof envelope>>();
+        fetchMock.mockReturnValueOnce(pending.promise);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+                reset: useResetAccountHistory(),
+            }),
+            { wrapper },
+        );
+
+        // Kick off the initial (unfiltered) fetch; it does not resolve yet.
+        act(() => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+        await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+        // User applies a filter: reset supersedes the in-flight request, then refetch.
+        mockResult([sig('filtered', 200)], null);
+        act(() => {
+            result.current.reset(ADDRESS);
+            result.current.fetch(new PublicKey(ADDRESS), false, true);
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('filtered'));
+
+        // Now the original request resolves with unfiltered data — it must be dropped.
+        await act(async () => {
+            pending.resolve(envelope([sig('stale', 1)], null));
+            await pending.promise;
+        });
+
+        expect(result.current.history?.data?.fetched).toHaveLength(1);
+        expect(result.current.history?.data?.fetched[0].signature).toBe('filtered');
+    });
+
+    it('clears only the target address, leaving other addresses intact', async () => {
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                historyA: useAccountHistory(ADDRESS),
+                historyB: useAccountHistory(ADDRESS_B),
+                reset: useResetAccountHistory(),
+            }),
+            { wrapper },
+        );
+
+        mockResult([sig('a', 10)], null);
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+        mockResult([sig('b', 20)], null);
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS_B));
+        });
+
+        await waitFor(() => expect(result.current.historyA?.data?.fetched?.length).toBe(1));
+        await waitFor(() => expect(result.current.historyB?.data?.fetched?.length).toBe(1));
+
+        act(() => {
+            result.current.reset(ADDRESS);
+        });
+
+        expect(result.current.historyA).toBeUndefined();
+        expect(result.current.historyB?.data?.fetched?.[0]?.signature).toBe('b');
+    });
+});
+
+describe('getSignaturesForAddress fallback', () => {
+    it('falls back when getTransactionsForAddress is not found, mapping slot bounds', async () => {
+        mockRpcError(-32601, 'Method not found');
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('legacy', 5)]);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, { slot: { gte: 10, lte: 99 } }),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('legacy'));
+        expect(mockConnection.getSignaturesForAddress).toHaveBeenCalledTimes(1);
+        const [pubkey, opts] = mockConnection.getSignaturesForAddress.mock.calls[0];
+        expect(pubkey.toBase58()).toBe(ADDRESS);
+        // Slot bounds are passed via the Hydrant untilSlot/beforeSlot extension.
+        expect(opts).toMatchObject({ beforeSlot: 99, limit: 25, untilSlot: 10 });
+    });
+
+    it('does not fall back on a generic RPC error', async () => {
+        mockRpcError(-32000, 'boom');
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.FetchFailed));
+        expect(mockConnection.getSignaturesForAddress).not.toHaveBeenCalled();
     });
 });
