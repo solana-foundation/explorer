@@ -180,6 +180,36 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
         });
     });
 
+    it('keeps loading more on a short page that still carries a token', async () => {
+        // Fewer items than the limit, but a non-null token means more data exists.
+        mockResult([sig('partial', 10)], 'token-page-2');
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.length).toBe(1));
+        expect(result.current.history?.data?.foundOldest).toBe(false);
+
+        // Load More should issue another request, threading the token forward.
+        fetchMock.mockClear();
+        mockResult([], null);
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        expect(requestParams()[1]).toMatchObject({ paginationToken: 'token-page-2' });
+    });
+
     it('stops paginating once a page returns a null token', async () => {
         mockResult([sig('only', 10)], null);
 
