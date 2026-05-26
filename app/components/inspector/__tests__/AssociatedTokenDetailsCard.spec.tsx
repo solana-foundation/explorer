@@ -46,8 +46,8 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         [/Source/, /Account/, /Mint/, /Wallet/].forEach(pattern => {
             expect(screen.getByText(pattern)).toBeInTheDocument();
         });
-        expect(screen.queryAllByText(/^System Program$/)).toHaveLength(3);
-        expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(3);
+        expect(screen.queryAllByText(/^System Program$/)).toHaveLength(2);
+        expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(2);
     });
 
     test('should render "Create" card', async () => {

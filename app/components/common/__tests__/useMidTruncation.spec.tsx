@@ -39,9 +39,9 @@ describe('useMidTruncation', () => {
         vi.restoreAllMocks();
     });
 
-    it('should format midTruncatedText as first-5 + "..." + last-5', () => {
+    it('should format midTruncatedText as first-5 + "…" + last-5', () => {
         render(<Harness enabled text="So1111111111111111111111111111111111111111112" />);
-        expect(screen.getByTestId('mid-text')).toHaveTextContent('So111...11112');
+        expect(screen.getByTestId('mid-text')).toHaveTextContent('So111…11112');
     });
 
     it('should not truncate when disabled', () => {
@@ -91,7 +91,7 @@ describe('useMidTruncation', () => {
             if (this.tagName === 'SPAN') return { width: 200 } as DOMRect;
             return { width: 0 } as DOMRect;
         });
-        vi.spyOn(global, 'getComputedStyle').mockReturnValue({ marginLeft: '8px' } as CSSStyleDeclaration);
+        vi.spyOn(global, 'getComputedStyle').mockReturnValue({ marginInlineStart: '8px' } as CSSStyleDeclaration);
 
         render(<Harness enabled text="So1111111111111111111111111111111111111111112" withTrailing />);
 
