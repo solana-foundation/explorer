@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 env:
   PNPM_CACHE_FOLDER: ~/.pnpm-store
@@ -50,11 +51,19 @@ jobs:
         run: |
           git diff --exit-code public/verified-programs.json && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
 
-      - name: Commit and push
+      - name: Create or update pull request
         if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          branch="chore/update-verified-programs"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
           git add public/verified-programs.json
           git commit -m "chore: update verified programs list"
-          git push
+          git push -f origin "$branch"
+          gh pr create \
+            --title "chore: update verified programs list" \
+            --body "Automated daily update of verified programs from OSecure." \
+            --base main 2>/dev/null || echo "PR already exists"
