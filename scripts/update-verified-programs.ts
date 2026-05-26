@@ -14,6 +14,7 @@
 import { address, createSolanaRpc } from '@solana/kit';
 import { writeFile } from 'fs/promises';
 import { dirname, join } from 'path';
+import { array, create, type Infer, optional, refine, string, type } from 'superstruct';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -38,12 +39,34 @@ interface OSecStatus {
     last_verified_at: string | undefined;
 }
 
-interface VerifiedProgram {
-    address: string;
-    name: string;
-    repoUrl: string | undefined;
-    verifiedAt: string | undefined;
-}
+const BASE58_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+
+const Base58Address = refine(string(), 'Base58Address', value => BASE58_RE.test(value) || `not a base58 address: ${value}`);
+
+const NonEmptyString = refine(string(), 'NonEmptyString', value => value.length > 0 || 'must be non-empty');
+
+const HttpsUrl = refine(string(), 'HttpsUrl', value => {
+    try {
+        return new URL(value).protocol === 'https:' || `not https: ${value}`;
+    } catch {
+        return `not a URL: ${value}`;
+    }
+});
+
+const IsoDateTime = refine(string(), 'IsoDateTime', value =>
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(value) || `not ISO datetime: ${value}`,
+);
+
+const VerifiedProgramStruct = type({
+    address: Base58Address,
+    name: NonEmptyString,
+    repoUrl: optional(HttpsUrl),
+    verifiedAt: optional(IsoDateTime),
+});
+
+const VerifiedProgramsArray = array(VerifiedProgramStruct);
+
+type VerifiedProgram = Infer<typeof VerifiedProgramStruct>;
 
 const STATUS_CONCURRENCY = 2;
 const STATUS_RETRIES = 4;
@@ -93,8 +116,9 @@ async function main() {
         process.exit(1);
     }
 
-    await writeFile(OUTPUT_PATH, `${JSON.stringify(programs, undefined, 2)}\n`, 'utf8');
-    console.log(`\nWritten ${programs.length} programs to ${OUTPUT_PATH}`);
+    const validated = create(programs, VerifiedProgramsArray);
+    await writeFile(OUTPUT_PATH, `${JSON.stringify(validated, undefined, 2)}\n`, 'utf8');
+    console.log(`\nWritten ${validated.length} programs to ${OUTPUT_PATH}`);
 }
 
 async function fetchAllAddresses(): Promise<string[]> {
@@ -107,7 +131,15 @@ async function fetchAllAddresses(): Promise<string[]> {
         allAddresses.push(...data.verified_programs);
     }
 
-    return [...new Set(allAddresses)];
+    const unique = [...new Set(allAddresses)];
+    const valid = unique.filter(addr => {
+        if (!BASE58_RE.test(addr)) {
+            console.warn(`  Skipping invalid address from OSecure: ${addr}`);
+            return false;
+        }
+        return true;
+    });
+    return valid;
 }
 
 async function fetchStatuses(addresses: string[]): Promise<Map<string, OSecStatus>> {

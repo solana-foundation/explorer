@@ -8,8 +8,8 @@ import type { SearchContext, SearchOptions, SearchProvider } from '../lib/types'
 type VerifiedProgramEntry = {
     address: string;
     name: string;
-    repoUrl: string | null;
-    verifiedAt: string | null;
+    repoUrl?: string;
+    verifiedAt?: string;
 };
 
 const programs: VerifiedProgramEntry[] = verifiedPrograms as VerifiedProgramEntry[];
