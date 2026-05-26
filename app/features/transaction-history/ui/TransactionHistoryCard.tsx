@@ -25,8 +25,8 @@ import { InstructionList, InstructionListSkeleton } from './InstructionList';
 export function TransactionHistoryCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
     const filters = useHistoryFilters();
-    const { untilSlot, beforeSlot, status, blockTimeFrom, blockTimeTo, tokenAccounts } = filters;
     const hasActiveFilters = Object.values(filters).some(value => value !== undefined);
+    const filtersKey = JSON.stringify(filters);
     const history = useAccountHistory(address);
     const fetchAccountHistory = useFetchAccountHistory(25, filters);
     const clearHistories = useClearAccountHistories();
@@ -49,22 +49,14 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     // Refetch from scratch when any filter changes. The cache is keyed by address
     // only, so we drop the cached entries before refetching to avoid mixing pre- and
     // post-filter results in combineFetched.
-    const previousFilters = React.useRef(filters);
+    const previousFiltersKey = React.useRef(filtersKey);
     React.useEffect(() => {
-        const prev = previousFilters.current;
-        if (
-            prev.untilSlot !== untilSlot ||
-            prev.beforeSlot !== beforeSlot ||
-            prev.status !== status ||
-            prev.blockTimeFrom !== blockTimeFrom ||
-            prev.blockTimeTo !== blockTimeTo ||
-            prev.tokenAccounts !== tokenAccounts
-        ) {
-            previousFilters.current = { beforeSlot, blockTimeFrom, blockTimeTo, status, tokenAccounts, untilSlot };
+        if (previousFiltersKey.current !== filtersKey) {
+            previousFiltersKey.current = filtersKey;
             clearHistories();
             refresh();
         }
-    }, [untilSlot, beforeSlot, status, blockTimeFrom, blockTimeTo, tokenAccounts, clearHistories, refresh]);
+    }, [filtersKey, clearHistories, refresh]);
 
     if (!history) {
         return null;
