@@ -13,7 +13,7 @@ type Story = StoryObj<typeof meta>;
 
 const sampleBlockhash = (i: number) => ({
     blockhash: `5o7n8u${'A'.repeat(20)}${i}xY${'k'.repeat(20)}`,
-    feeCalculator: { lamportsPerSignature: 5000 },
+    feeCalculator: { lamportsPerSignature: '5000' },
 });
 
 export const WithEntries: Story = {
