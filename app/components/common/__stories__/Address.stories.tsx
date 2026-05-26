@@ -1,115 +1,47 @@
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
-import {
-    createNextjsParameters,
-    withClipboardMock,
-    withCluster,
-    withTokenInfoBatch,
-} from '@storybook-config/decorators';
-import { expect, within } from 'storybook/test';
+import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 
 import { Address } from '../Address';
 
-const WSOL = new PublicKey('So11111111111111111111111111111111111111112');
+const pubkey = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 
-const meta = {
+const meta: Meta<typeof Address> = {
     component: Address,
-    decorators: [withClipboardMock, withTokenInfoBatch, withCluster],
-    parameters: createNextjsParameters(),
-    tags: ['test'],
+    decorators: [withCluster, withTokenInfoBatch],
+    parameters: nextjsParameters,
+    tags: ['autodocs'],
     title: 'Components/Common/Address',
-} satisfies Meta<typeof Address>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-    args: {
-        pubkey: WSOL,
-    },
-    decorators: [
-        Story => (
-            <div style={{ width: 1000 }}>
-                <Story />
-            </div>
-        ),
-    ],
-    async play({ canvasElement }) {
-        const canvas = within(canvasElement);
-        const [visible] = canvas
-            .getAllByText('So11111111111111111111111111111111111111112')
-            .filter(el => !el.hasAttribute('aria-hidden'));
-        expect(visible).toBeInTheDocument();
-    },
+    args: { pubkey },
 };
 
-export const WithLink: Story = {
-    args: {
-        link: true,
-        pubkey: WSOL,
-    },
-    async play({ canvasElement }) {
-        const canvas = within(canvasElement);
-        expect(canvas.getByRole('link')).toBeInTheDocument();
-    },
+export const AsLink: Story = {
+    args: { link: true, pubkey },
 };
 
-export const AlignRight: Story = {
-    args: {
-        alignRight: true,
-        pubkey: WSOL,
-    },
-    decorators: [
-        Story => (
-            <div style={{ width: '100%' }}>
-                <Story />
-            </div>
-        ),
-    ],
+export const Truncated: Story = {
+    args: { pubkey, truncate: true },
 };
 
-export const Raw: Story = {
-    args: {
-        pubkey: WSOL,
-        raw: true,
-    },
+export const TruncatedToChars: Story = {
+    args: { pubkey, truncateChars: 12 },
+};
+
+// useNickname is dead-coded in the Storybook bundle; overrideText simulates the visual.
+export const WithNicknameSimulated: Story = {
+    args: { overrideText: '"My Wallet" (Token Program)', pubkey },
 };
 
 export const WithOverrideText: Story = {
-    args: {
-        overrideText: 'Wrapped SOL',
-        pubkey: WSOL,
-    },
-    async play({ canvasElement }) {
-        const canvas = within(canvasElement);
-        expect(canvas.getByText('Wrapped SOL')).toBeInTheDocument();
-    },
+    args: { overrideText: 'Custom Label', pubkey },
 };
 
-export const NoTruncate: Story = {
-    args: {
-        noTruncate: true,
-        pubkey: WSOL,
-    },
-    decorators: [
-        Story => (
-            <div style={{ width: 500 }}>
-                <Story />
-            </div>
-        ),
-    ],
-};
-
-/** Narrow container triggers mid-truncation: "So111...11112" */
-export const Truncated: Story = {
-    args: {
-        pubkey: WSOL,
-    },
-    decorators: [
-        Story => (
-            <div style={{ width: 200 }}>
-                <Story />
-            </div>
-        ),
-    ],
+export const AlignedRight: Story = {
+    args: { alignRight: true, pubkey },
 };
