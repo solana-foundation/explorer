@@ -2,9 +2,9 @@
 import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { SystemProgram } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
+import { nextjsParameters, withCardTableField, withTokenInfoBatch } from '@storybook-config/decorators';
 import { expect, within } from 'storybook/test';
 
-import { nextjsParameters, withCardTableField, withTokenInfoBatch } from '../../../../../.storybook/decorators';
 import { ProgramField } from '../ProgramField';
 
 const meta = {

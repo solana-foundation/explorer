@@ -1,8 +1,8 @@
 import type { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
+import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
 import { BaseAccountCard } from '../BaseAccountCard';
 import { BaseRawAccountRows } from '../BaseRawAccountRows';
 

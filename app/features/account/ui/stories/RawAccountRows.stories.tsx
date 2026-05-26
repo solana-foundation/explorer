@@ -1,8 +1,8 @@
 import type { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
+import { nextjsParameters, withCardTableField, withTokenInfoBatch } from '@storybook-config/decorators';
 
-import { nextjsParameters, withCardTableField, withTokenInfoBatch } from '../../../../../.storybook/decorators';
 import { BaseRawAccountRows } from '../BaseRawAccountRows';
 
 const mockAccount: Account = {

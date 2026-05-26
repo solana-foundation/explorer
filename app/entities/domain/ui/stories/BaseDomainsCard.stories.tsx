@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { expect, within } from 'storybook/test';
 
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
 import { BaseDomainsCard } from '../BaseDomainsCard';
 
 const meta = {
