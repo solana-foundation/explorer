@@ -19,33 +19,77 @@ vi.mock('@solana/web3.js', async () => {
     };
 });
 
-const mockConnection = {
-    getSignaturesForAddress: vi.fn(),
-};
-
 // Must import after mocks
 import { HistoryProvider, useAccountHistory, useFetchAccountHistory } from '../history';
 
 const ADDRESS = 'rexav5eNTUSNT1K2N7cfRjnthwhcP5BC25v2tA4rW4h';
 
+function sig(signature: string, slot: number) {
+    return { blockTime: null, confirmationStatus: 'finalized', err: null, memo: null, signature, slot };
+}
+
+const fetchMock = vi.fn();
+
+// Resolve the next fetch call with a getTransactionsForAddress result envelope.
+function mockResult(data: ReturnType<typeof sig>[], paginationToken: string | null) {
+    fetchMock.mockResolvedValueOnce({
+        json: async () => ({ id: 1, jsonrpc: '2.0', result: { data, paginationToken } }),
+    });
+}
+
+// Parse the JSON body of the Nth fetch call into [address, options].
+function requestParams(call = 0): [string, Record<string, any>] {
+    const body = JSON.parse(fetchMock.mock.calls[call][1].body);
+    expect(body.method).toBe('getTransactionsForAddress');
+    return body.params;
+}
+
 function wrapper({ children }: { children: React.ReactNode }) {
     return <HistoryProvider>{children}</HistoryProvider>;
 }
 
-function sig(signature: string, slot: number) {
-    return { blockTime: null, err: null, memo: null, signature, slot };
-}
-
 beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(Connection).mockImplementation(() => mockConnection as unknown as Connection);
-    mockConnection.getSignaturesForAddress.mockResolvedValue([]);
+    vi.mocked(Connection).mockImplementation(() => ({}) as unknown as Connection);
+    vi.stubGlobal('fetch', fetchMock);
+    // Fallback response; tests queue page-specific results with mockResult (once).
+    fetchMock.mockResolvedValue({
+        json: async () => ({ id: 1, jsonrpc: '2.0', result: { data: [], paginationToken: null } }),
+    });
 });
 
-describe('useFetchAccountHistory — slot filters', () => {
-    it('passes afterSlot and beforeSlot to getSignaturesForAddress on the initial fetch', async () => {
+describe('useFetchAccountHistory — getTransactionsForAddress', () => {
+    it('maps slot filters onto the filters object on the initial fetch', async () => {
+        const { result } = renderHook(() => useFetchAccountHistory(25, { beforeSlot: 500, untilSlot: 100 }), {
+            wrapper,
+        });
+
+        await act(async () => {
+            result.current(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+
+        const [address, options] = requestParams();
+        expect(address).toBe(ADDRESS);
+        expect(options).toMatchObject({
+            filters: { slot: { gte: 100, lte: 500 } },
+            limit: 25,
+            paginationToken: null,
+            sortOrder: 'desc',
+            transactionDetails: 'signatures',
+        });
+    });
+
+    it('maps status, block time, and token-account filters', async () => {
         const { result } = renderHook(
-            () => useFetchAccountHistory(25, { afterSlot: 100, beforeSlot: 500 }),
+            () =>
+                useFetchAccountHistory(25, {
+                    blockTimeFrom: 1_700_000_000,
+                    blockTimeTo: 1_700_100_000,
+                    status: 'failed',
+                    tokenAccounts: 'balanceChanged',
+                }),
             { wrapper },
         );
 
@@ -53,37 +97,37 @@ describe('useFetchAccountHistory — slot filters', () => {
             result.current(new PublicKey(ADDRESS));
         });
 
-        await waitFor(() => expect(mockConnection.getSignaturesForAddress).toHaveBeenCalled());
-
-        const [pubkey, options] = mockConnection.getSignaturesForAddress.mock.calls[0];
-        expect(pubkey.toBase58()).toBe(ADDRESS);
-        expect(options).toMatchObject({ afterSlot: 100, beforeSlot: 500, limit: 25 });
-        expect((options as { before?: string }).before).toBeUndefined();
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        const [, options] = requestParams();
+        expect(options.filters).toEqual({
+            blockTime: { gte: 1_700_000_000, lte: 1_700_100_000 },
+            status: 'failed',
+            tokenAccounts: 'balanceChanged',
+        });
     });
 
-    it('omits filter keys when not provided', async () => {
+    it('omits the filters key when no filter is provided', async () => {
         const { result } = renderHook(() => useFetchAccountHistory(25, {}), { wrapper });
 
         await act(async () => {
             result.current(new PublicKey(ADDRESS));
         });
 
-        await waitFor(() => expect(mockConnection.getSignaturesForAddress).toHaveBeenCalled());
-        const [, options] = mockConnection.getSignaturesForAddress.mock.calls[0];
-        expect(options).toMatchObject({ limit: 25 });
-        expect((options as { afterSlot?: number }).afterSlot).toBeUndefined();
-        expect((options as { beforeSlot?: number }).beforeSlot).toBeUndefined();
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        const [, options] = requestParams();
+        expect(options).toMatchObject({ limit: 25, paginationToken: null });
+        expect('filters' in options).toBe(false);
     });
 
-    it('threads slot filters alongside the `before` cursor when loading more', async () => {
-        mockConnection.getSignaturesForAddress.mockResolvedValueOnce(
+    it('threads the paginationToken from the previous page when loading more', async () => {
+        mockResult(
             Array.from({ length: 25 }, (_, i) => sig(`sig${i}`, 1000 - i)),
+            'token-page-2',
         );
 
-        // Render the fetch hook + a reader of the same cache so we can observe the first page.
         const { result } = renderHook(
             () => ({
-                fetch: useFetchAccountHistory(25, { afterSlot: 100, beforeSlot: 2000 }),
+                fetch: useFetchAccountHistory(25, { untilSlot: 100 }),
                 history: useAccountHistory(ADDRESS),
             }),
             { wrapper },
@@ -95,20 +139,46 @@ describe('useFetchAccountHistory — slot filters', () => {
 
         await waitFor(() => expect(result.current.history?.data?.fetched?.length).toBe(25));
 
-        mockConnection.getSignaturesForAddress.mockClear();
-        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([]);
+        fetchMock.mockClear();
+        mockResult([], null);
 
         await act(async () => {
             result.current.fetch(new PublicKey(ADDRESS));
         });
 
-        await waitFor(() => expect(mockConnection.getSignaturesForAddress).toHaveBeenCalled());
-        const [, options] = mockConnection.getSignaturesForAddress.mock.calls[0];
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        const [, options] = requestParams();
         expect(options).toMatchObject({
-            afterSlot: 100,
-            before: 'sig24',
-            beforeSlot: 2000,
+            filters: { slot: { gte: 100 } },
             limit: 25,
+            paginationToken: 'token-page-2',
         });
+    });
+
+    it('stops paginating once a page returns a null token', async () => {
+        mockResult([sig('only', 10)], null);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.foundOldest).toBe(true));
+
+        fetchMock.mockClear();
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        // foundOldest short-circuits the load-more, so no further request is made.
+        expect(fetchMock).not.toHaveBeenCalled();
     });
 });

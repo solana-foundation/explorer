@@ -8,7 +8,6 @@ import {
     Connection,
     ParsedTransactionWithMeta,
     PublicKey,
-    TransactionSignature,
 } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { fetchAll } from '@utils/fetch-all';
@@ -22,18 +21,32 @@ import { Logger } from '@/app/shared/lib/logger';
 type TransactionMap = Map<string, ParsedTransactionWithMeta>;
 type FailedTransactionSignatures = Set<string>;
 
+// Filters surfaced in the UI, mapped onto the Triton `getTransactionsForAddress`
+// `filters` object inside `buildRpcFilters`.
+export type HistoryFilters = {
+    untilSlot?: number; // lower slot bound -> filters.slot.gte
+    beforeSlot?: number; // upper slot bound -> filters.slot.lte
+    status?: 'succeeded' | 'failed'; // filters.status (omit for "any")
+    blockTimeFrom?: number; // unix seconds, lower bound -> filters.blockTime.gte
+    blockTimeTo?: number; // unix seconds, upper bound -> filters.blockTime.lte
+    tokenAccounts?: 'all' | 'balanceChanged'; // filters.tokenAccounts (omit for "none")
+};
+
 type AccountHistory = {
     fetched: ConfirmedSignatureInfo[];
     transactionMap?: TransactionMap;
     failedTransactionSignatures?: FailedTransactionSignatures;
     foundOldest: boolean;
+    // Opaque cursor returned by the RPC; threaded back to load the next page.
+    paginationToken?: string | null;
 };
 
 type HistoryUpdate = {
     history?: AccountHistory;
     transactionMap?: TransactionMap;
     failedTransactionSignatures?: FailedTransactionSignatures;
-    before?: TransactionSignature;
+    // true when this page extends the tail (Load More); false on a refresh.
+    append?: boolean;
 };
 
 type State = Cache.State<AccountHistory>;
@@ -42,25 +55,23 @@ type Dispatch = Cache.Dispatch<HistoryUpdate>;
 function combineFetched(
     fetched: ConfirmedSignatureInfo[],
     current: ConfirmedSignatureInfo[] | undefined,
-    before: TransactionSignature | undefined,
-) {
+    append: boolean,
+): { combined: ConfirmedSignatureInfo[]; replaced: boolean } {
     if (current === undefined || current.length === 0) {
-        return fetched;
+        return { combined: fetched, replaced: true };
     }
 
-    // History was refreshed, fetch results should be prepended if contiguous
-    if (before === undefined) {
-        const end = fetched.findIndex(f => f.signature === current[0].signature);
-        if (end < 0) return fetched;
-        return fetched.slice(0, end).concat(current);
+    // More history was loaded: append, dropping any signatures we already hold.
+    if (append) {
+        const seen = new Set(current.map(c => c.signature));
+        return { combined: current.concat(fetched.filter(f => !seen.has(f.signature))), replaced: false };
     }
 
-    // More history was loaded, fetch results should be appended
-    if (current[current.length - 1].signature === before) {
-        return current.concat(fetched);
-    }
-
-    return fetched;
+    // History was refreshed: prepend the newly-seen prefix if the page overlaps
+    // what we already have, otherwise treat it as a full replacement.
+    const end = fetched.findIndex(f => f.signature === current[0].signature);
+    if (end < 0) return { combined: fetched, replaced: true };
+    return { combined: fetched.slice(0, end).concat(current), replaced: false };
 }
 
 function mergeFailedTransactionSignatures(
@@ -88,16 +99,24 @@ function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | 
         return history;
     }
 
+    const append = update.append ?? false;
+    const { combined, replaced } = combineFetched(update.history.fetched, history?.fetched, append);
+
+    // The tail cursor only changes when we extended the tail (append) or replaced
+    // the whole list; a refresh that merely prepends new items keeps the old tail.
+    const tailFromUpdate = append || replaced;
+
     const transactionMap = mergeTransactionMap(history?.transactionMap, update.transactionMap);
     const failedTransactionSignatures = mergeFailedTransactionSignatures(
-        update.before === undefined ? undefined : history?.failedTransactionSignatures,
+        append ? history?.failedTransactionSignatures : undefined,
         update.failedTransactionSignatures,
     );
 
     return {
         failedTransactionSignatures,
-        fetched: combineFetched(update.history.fetched, history?.fetched, update?.before),
-        foundOldest: update?.history?.foundOldest || history?.foundOldest || false,
+        fetched: combined,
+        foundOldest: tailFromUpdate ? update.history.foundOldest : (history?.foundOldest ?? false),
+        paginationToken: tailFromUpdate ? update.history.paginationToken : history?.paginationToken,
         transactionMap,
     };
 }
@@ -159,16 +178,77 @@ async function fetchParsedTransactions(url: string, cluster: Cluster, transactio
     return { failedTransactionSignatures, transactionMap };
 }
 
+// Maps the UI filter selection onto the Triton `getTransactionsForAddress`
+// `filters` object. Returns undefined when no filter is active so the key is omitted.
+function buildRpcFilters(filters: HistoryFilters): Record<string, unknown> | undefined {
+    const out: Record<string, unknown> = {};
+
+    const slot: Record<string, number> = {};
+    if (filters.untilSlot !== undefined) slot.gte = filters.untilSlot;
+    if (filters.beforeSlot !== undefined) slot.lte = filters.beforeSlot;
+    if (Object.keys(slot).length > 0) out.slot = slot;
+
+    const blockTime: Record<string, number> = {};
+    if (filters.blockTimeFrom !== undefined) blockTime.gte = filters.blockTimeFrom;
+    if (filters.blockTimeTo !== undefined) blockTime.lte = filters.blockTimeTo;
+    if (Object.keys(blockTime).length > 0) out.blockTime = blockTime;
+
+    if (filters.status) out.status = filters.status;
+    if (filters.tokenAccounts) out.tokenAccounts = filters.tokenAccounts;
+
+    return Object.keys(out).length > 0 ? out : undefined;
+}
+
+type RpcHistoryItem = ConfirmedSignatureInfo & { transactionIndex?: number };
+type GetTransactionsForAddressResult = {
+    data: RpcHistoryItem[];
+    paginationToken: string | null;
+};
+
+// Calls the Triton `getTransactionsForAddress` method directly (it is not part of
+// web3.js). `signatures` detail level keeps the response shape compatible with the
+// existing `ConfirmedSignatureInfo`-based table.
+async function getTransactionsForAddress(
+    url: string,
+    address: string,
+    options: { limit: number; paginationToken?: string | null; filters: HistoryFilters },
+): Promise<GetTransactionsForAddressResult> {
+    const params: Record<string, unknown> = {
+        limit: options.limit,
+        paginationToken: options.paginationToken ?? null,
+        sortOrder: 'desc',
+        transactionDetails: 'signatures',
+    };
+    const filters = buildRpcFilters(options.filters);
+    if (filters) params.filters = filters;
+
+    const response = await fetch(url, {
+        body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'getTransactionsForAddress',
+            params: [address, params],
+        }),
+        headers: { 'content-type': 'application/json' },
+        method: 'POST',
+    });
+    const json = await response.json();
+    if (json.error) {
+        throw new Error(json.error.message ?? 'getTransactionsForAddress failed');
+    }
+    return json.result as GetTransactionsForAddressResult;
+}
+
 async function fetchAccountHistory(
     dispatch: Dispatch,
     pubkey: PublicKey,
     cluster: Cluster,
     url: string,
     options: {
-        before?: TransactionSignature;
         limit: number;
-        afterSlot?: number;
-        beforeSlot?: number;
+        paginationToken?: string | null;
+        filters: HistoryFilters;
+        append: boolean;
     },
     fetchTransactions?: boolean,
     additionalSignatures?: string[],
@@ -183,13 +263,16 @@ async function fetchAccountHistory(
     let status;
     let history;
     try {
-        const connection = new Connection(url);
-        // Hydrant accepts `afterSlot` (and `beforeSlot`) on getSignaturesForAddress;
-        // web3.js 1.x spreads unknown options into the RPC call, so pass it through.
-        const fetched = await connection.getSignaturesForAddress(pubkey, options as Parameters<Connection['getSignaturesForAddress']>[1]);
+        const result = await getTransactionsForAddress(url, pubkey.toBase58(), {
+            filters: options.filters,
+            limit: options.limit,
+            paginationToken: options.paginationToken,
+        });
         history = {
-            fetched,
-            foundOldest: fetched.length < options.limit,
+            fetched: result.data,
+            // A null/absent cursor or a short page means there is nothing more to load.
+            foundOldest: !result.paginationToken || result.data.length < options.limit,
+            paginationToken: result.paginationToken,
         };
         status = FetchStatus.Fetched;
     } catch (error) {
@@ -215,7 +298,7 @@ async function fetchAccountHistory(
 
     dispatch({
         data: {
-            before: options?.before,
+            append: options.append,
             failedTransactionSignatures,
             history,
             transactionMap,
@@ -311,10 +394,7 @@ export function useFetchTransactionsForHistory() {
     );
 }
 
-export function useFetchAccountHistory(
-    limit = 25,
-    slotFilters: { afterSlot?: number; beforeSlot?: number } = {},
-) {
+export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {}) {
     const { cluster, url } = useCluster();
     const state = React.useContext(StateContext);
     const dispatch = React.useContext(DispatchContext);
@@ -323,10 +403,19 @@ export function useFetchAccountHistory(
         throw new Error(`useFetchAccountHistory must be used within a HistoryProvider`);
     }
 
-    const { afterSlot, beforeSlot } = slotFilters;
+    // Destructure into primitives so the callback identity tracks filter changes.
+    const { untilSlot, beforeSlot, status, blockTimeFrom, blockTimeTo, tokenAccounts } = filters;
 
     return React.useCallback(
         (pubkey: PublicKey, fetchTransactions?: boolean, refresh?: boolean) => {
+            const activeFilters: HistoryFilters = {
+                beforeSlot,
+                blockTimeFrom,
+                blockTimeTo,
+                status,
+                tokenAccounts,
+                untilSlot,
+            };
             const before = state.entries[pubkey.toBase58()];
             if (!refresh && before?.data?.fetched && before.data.fetched.length > 0) {
                 if (before.data.foundOldest) return;
@@ -336,14 +425,18 @@ export function useFetchAccountHistory(
                     additionalSignatures = getUnfetchedSignatures(before);
                 }
 
-                const oldest = before.data.fetched[before.data.fetched.length - 1].signature;
                 fetchOnce(pubkey.toBase58(), inFlight, () =>
                     fetchAccountHistory(
                         dispatch,
                         pubkey,
                         cluster,
                         url,
-                        { afterSlot, before: oldest, beforeSlot, limit },
+                        {
+                            append: true,
+                            filters: activeFilters,
+                            limit,
+                            paginationToken: before.data?.paginationToken,
+                        },
                         fetchTransactions,
                         additionalSignatures,
                     ),
@@ -355,12 +448,25 @@ export function useFetchAccountHistory(
                         pubkey,
                         cluster,
                         url,
-                        { afterSlot, beforeSlot, limit },
+                        { append: false, filters: activeFilters, limit },
                         fetchTransactions,
                     ),
                 ).catch(e => Logger.error(e));
             }
         },
-        [limit, afterSlot, beforeSlot, state, dispatch, cluster, url, inFlight],
+        [
+            limit,
+            untilSlot,
+            beforeSlot,
+            status,
+            blockTimeFrom,
+            blockTimeTo,
+            tokenAccounts,
+            state,
+            dispatch,
+            cluster,
+            url,
+            inFlight,
+        ],
     );
 }
