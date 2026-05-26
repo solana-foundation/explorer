@@ -1,0 +1,35 @@
+{
+  "capturedAt": "2026-05-26T14:03:51.531Z",
+  "collection": "D2VpbKpT725tdQyaNNZZwwS7Mqzgw4SZb2o4az5wA9vr",
+  "nfts": [
+    {
+      "address": "1tyLXuxughaJDr696ZYcB1WaN65xocz7UMU8WWeZQrU",
+      "authority": "au19QGSfERnBsa9ep6y29PFgNhVLaeSKiCdETotMnm1",
+      "authority_can_update": true,
+      "collection": "D2VpbKpT725tdQyaNNZZwwS7Mqzgw4SZb2o4az5wA9vr",
+      "delegate": "11111111111111111111111111111111",
+      "holder": "FC1ChRTYty41npkp3BnK1sxERxXnzfYYQA7jUet9DzBz",
+      "metadata_url": "\u0000\u0000\u0000\u0000\u0000)\u0000\u0000\u0000https://cdn.glow.app/g/b2/u32536f7zv.json"
+    },
+    {
+      "address": "13KhhKUZBMTN6pQ9oVJMc3KrkALdBvWBAQXbL7nCiYWN",
+      "authority": "au19QGSfERnBsa9ep6y29PFgNhVLaeSKiCdETotMnm1",
+      "authority_can_update": true,
+      "collection": "D2VpbKpT725tdQyaNNZZwwS7Mqzgw4SZb2o4az5wA9vr",
+      "delegate": "11111111111111111111111111111111",
+      "holder": "FWXVkwFE5biPKgJVz1mbY1Xt7bbScGDptLCzgjaTFrdx",
+      "metadata_url": "\u0000\u0000\u0000\u0000\u0000)\u0000\u0000\u0000https://cdn.glow.app/g/5e/rwwih1nsp8.json"
+    },
+    {
+      "address": "13Y9iPURvuUhugHqfPqAhWsiugoG3ahbA78k3sMS1Esn",
+      "authority": "au19QGSfERnBsa9ep6y29PFgNhVLaeSKiCdETotMnm1",
+      "authority_can_update": true,
+      "collection": "D2VpbKpT725tdQyaNNZZwwS7Mqzgw4SZb2o4az5wA9vr",
+      "delegate": "11111111111111111111111111111111",
+      "holder": "9BaQ2JJTo8SaQrn4CtMvg6nZq1FL2BpXk4suzYaTZ27b",
+      "metadata_url": "\u0000\u0000\u0000\u0000\u0000)\u0000\u0000\u0000https://cdn.glow.app/g/je/z3f1wvjffm.json"
+    }
+  ],
+  "source": "mainnet",
+  "totalInCollection": 633
+}
