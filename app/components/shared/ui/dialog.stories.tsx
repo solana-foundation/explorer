@@ -20,6 +20,7 @@ const meta: Meta<typeof Dialog> = {
     parameters: {
         layout: 'centered',
     },
+    tags: ['autodocs'],
     title: 'Components/Shared/UI/Dialog',
 };
 

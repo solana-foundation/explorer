@@ -10,6 +10,7 @@ const meta: Meta<typeof BaseFeatureGateImage> = {
             control: 'object',
             description: 'SIMD proposal numbers',
         },
+    tags: ['autodocs'],
         title: {
             control: 'text',
             description: 'Feature gate title',

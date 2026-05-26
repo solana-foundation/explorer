@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './popover';
 
 const meta: Meta<typeof Popover> = {
     component: Popover,
+    tags: ['autodocs'],
     title: 'Components/Shared/UI/Popover',
 };
 

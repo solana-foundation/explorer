@@ -23,6 +23,7 @@ const meta: Meta<typeof BaseSearch> = {
     parameters: {
         layout: 'padded',
     },
+    tags: ['autodocs'],
     title: 'Features/Search/BaseSearch',
 };
 

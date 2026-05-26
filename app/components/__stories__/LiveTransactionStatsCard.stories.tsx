@@ -8,6 +8,7 @@ const meta: Meta<typeof LiveTransactionStatsCard> = {
     component: LiveTransactionStatsCard,
     decorators: [withStats],
     parameters: nextjsParameters,
+    tags: ['autodocs'],
     title: 'Components/LiveTransactionStatsCard',
 };
 

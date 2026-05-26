@@ -23,6 +23,7 @@ const meta: Meta<typeof Card> = {
     parameters: {
         layout: 'centered',
     },
+    tags: ['autodocs'],
     title: 'Components/Shared/UI/Card',
 };
 

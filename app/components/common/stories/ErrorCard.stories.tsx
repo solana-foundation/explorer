@@ -4,6 +4,7 @@ import { ErrorCard } from '../ErrorCard';
 
 const meta = {
     component: ErrorCard,
+    tags: ['autodocs'],
     title: 'Components/Common/ErrorCard',
 } satisfies Meta<typeof ErrorCard>;
 

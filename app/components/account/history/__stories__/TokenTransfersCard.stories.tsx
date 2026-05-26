@@ -13,6 +13,7 @@ const ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const meta: Meta<typeof TokenTransfersCard> = {
     component: TokenTransfersCard,
     parameters: nextjsParameters,
+    tags: ['autodocs'],
     title: 'Components/Account/History/TokenTransfersCard',
 };
 

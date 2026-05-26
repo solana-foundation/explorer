@@ -4,6 +4,7 @@ import { DeveloperResources } from '../DeveloperResources';
 
 const meta: Meta<typeof DeveloperResources> = {
     component: DeveloperResources,
+    tags: ['autodocs'],
     title: 'Components/DeveloperResources',
 };
 

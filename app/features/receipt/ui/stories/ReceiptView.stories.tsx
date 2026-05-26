@@ -21,7 +21,7 @@ const meta: Meta<typeof ReceiptView> = {
         transactionPath: 'https://example.com/tx/ExampleTransactionSignature',
     },
     component: ReceiptView,
-    tags: ['test'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Receipt/ReceiptView',
 };
 

@@ -24,6 +24,7 @@ const meta: Meta<typeof BaseAccountCard> = {
     component: BaseAccountCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
+    tags: ['autodocs'],
     title: 'Features/Account/BaseAccountCard',
 };
 

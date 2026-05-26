@@ -12,6 +12,7 @@ import {
 
 const meta = {
     component: BaseTokenVerificationBadge,
+    tags: ['autodocs'],
     title: 'Features/TokenVerification/TokenVerificationBadge',
 } satisfies Meta<typeof BaseTokenVerificationBadge>;
 

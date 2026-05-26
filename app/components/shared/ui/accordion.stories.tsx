@@ -24,6 +24,7 @@ const meta: Meta<typeof Accordion> = {
     parameters: {
         layout: 'centered',
     },
+    tags: ['autodocs'],
     title: 'Components/Shared/UI/Accordion',
 };
 

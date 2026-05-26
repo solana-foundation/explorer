@@ -9,6 +9,7 @@ const meta: Meta<typeof LookupTableEntriesCard> = {
     component: LookupTableEntriesCard,
     decorators: [withCluster, withTokenInfoBatch],
     parameters: nextjsParameters,
+    tags: ['autodocs'],
     title: 'Components/Account/AddressLookupTable/LookupTableEntriesCard',
 };
 

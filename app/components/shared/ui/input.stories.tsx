@@ -38,6 +38,7 @@ const meta: Meta<typeof Input> = {
     parameters: {
         layout: 'centered',
     },
+    tags: ['autodocs'],
     title: 'Components/Shared/UI/Input',
 };
 

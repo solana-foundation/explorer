@@ -47,6 +47,7 @@ const meta: Meta<typeof Badge> = {
     parameters: {
         layout: 'centered',
     },
+    tags: ['autodocs'],
     title: 'Components/Shared/UI/Badge',
 };
 

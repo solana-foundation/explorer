@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 
 const meta: Meta = {
+    tags: ['autodocs'],
     title: 'Components/Account/HistoryCardComponents',
 };
 

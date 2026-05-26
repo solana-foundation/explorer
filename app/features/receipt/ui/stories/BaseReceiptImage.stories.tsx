@@ -33,6 +33,7 @@ const meta: Meta<typeof BaseReceiptImage> = {
             </div>
         ),
     ],
+    tags: ['autodocs'],
     title: 'Features/Receipt/BaseReceiptImage',
 };
 

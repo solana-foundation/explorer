@@ -8,6 +8,7 @@ const meta: Meta<typeof StakeHistoryCard> = {
     component: StakeHistoryCard,
     decorators: [withCluster],
     parameters: nextjsParameters,
+    tags: ['autodocs'],
     title: 'Components/Account/StakeHistoryCard',
 };
 

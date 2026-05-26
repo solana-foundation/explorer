@@ -14,6 +14,7 @@ const ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const meta: Meta<typeof TransactionHistoryCard> = {
     component: TransactionHistoryCard,
     parameters: nextjsParameters,
+    tags: ['autodocs'],
     title: 'Features/TransactionHistory/TransactionHistoryCard',
 };
 

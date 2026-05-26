@@ -9,6 +9,7 @@ const meta: Meta<typeof BaseInstructionCard> = {
     component: BaseInstructionCard,
     decorators: [withCluster, withScrollAnchor],
     parameters: nextjsParameters,
+    tags: ['autodocs'],
     title: 'Components/Common/BaseInstructionCard',
 };
 

@@ -16,6 +16,7 @@ const meta: Meta<typeof Tabs> = {
     parameters: {
         layout: 'centered',
     },
+    tags: ['autodocs'],
     title: 'Components/Shared/UI/Tabs',
 };
 

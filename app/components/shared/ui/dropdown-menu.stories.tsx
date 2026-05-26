@@ -26,6 +26,7 @@ const meta: Meta<typeof DropdownMenu> = {
     parameters: {
         layout: 'centered',
     },
+    tags: ['autodocs'],
     title: 'Components/Shared/UI/DropdownMenu',
 };
 

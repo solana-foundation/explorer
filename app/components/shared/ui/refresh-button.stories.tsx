@@ -8,6 +8,7 @@ const meta: Meta<typeof RefreshButton> = {
     parameters: {
         layout: 'centered',
     },
+    tags: ['autodocs'],
     title: 'Components/Shared/UI/RefreshButton',
 };
 

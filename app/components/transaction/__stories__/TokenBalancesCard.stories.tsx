@@ -10,6 +10,7 @@ const meta: Meta<typeof TokenBalancesCardInner> = {
     component: TokenBalancesCardInner,
     decorators: [withTokenInfoBatch, withMockTransactions],
     parameters: nextjsParameters,
+    tags: ['autodocs'],
     title: 'Components/Transaction/TokenBalancesCard',
 };
 

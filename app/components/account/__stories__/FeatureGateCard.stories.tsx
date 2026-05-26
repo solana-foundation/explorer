@@ -4,6 +4,7 @@ import { FeatureGateCard } from '../FeatureGateCard';
 
 const meta: Meta<typeof FeatureGateCard> = {
     component: FeatureGateCard,
+    tags: ['autodocs'],
     title: 'Components/Account/FeatureGateCard',
 };
 

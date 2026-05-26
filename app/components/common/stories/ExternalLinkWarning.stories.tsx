@@ -9,6 +9,7 @@ const meta: Meta<typeof ExternalLinkWarning> = {
     parameters: {
         layout: 'centered',
     },
+    tags: ['autodocs'],
     title: 'Components/Common/ExternalLinkWarning',
 };
 

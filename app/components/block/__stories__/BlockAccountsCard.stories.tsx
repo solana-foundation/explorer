@@ -8,6 +8,7 @@ const meta: Meta<typeof BlockAccountsCard> = {
     component: BlockAccountsCard,
     decorators: [withCluster],
     parameters: nextjsParameters,
+    tags: ['autodocs'],
     title: 'Components/Block/BlockAccountsCard',
 };
 
