@@ -1,3 +1,4 @@
+packages: []
 minimumReleaseAgeExclude:
   - '@codama/*'
   - '@solana/idl'

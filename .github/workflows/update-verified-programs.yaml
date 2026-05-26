@@ -66,4 +66,4 @@ jobs:
           gh pr create \
             --title "chore: update verified programs list" \
             --body "Automated daily update of verified programs from OSecure." \
-            --base main 2>/dev/null || echo "PR already exists"
+            --base master 2>/dev/null || echo "PR already exists"

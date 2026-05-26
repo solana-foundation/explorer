@@ -171,8 +171,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       '@solana/idl':
-        specifier: 0.1.0
-        version: 0.1.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
+        specifier: 0.1.1
+        version: 0.1.1(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana/kit':
         specifier: 6.5.0
         version: 6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
@@ -4515,8 +4515,8 @@ packages:
       typescript:
         optional: true
 
-  '@solana/idl@0.1.0':
-    resolution: {integrity: sha512-sMPBKycMR76vWRSFc7ZCus9oca5xX4941xIBkdckpGzXNDHT1/VJh/qcH6Aesgj9ZJaAPFVNUPY1WG3UPOh3+g==}
+  '@solana/idl@0.1.1':
+    resolution: {integrity: sha512-VMDq437gdMzolNfA1GnAPiBFjks7FKhu7RbAgoBxzyner636/e1BBtc4/2PywiE197mXanepJj0BBg4HoYjVLw==}
     engines: {node: '>=20'}
     hasBin: true
     peerDependencies:
@@ -16207,7 +16207,7 @@ snapshots:
     optionalDependencies:
       typescript: 5.7.3
 
-  '@solana/idl@0.1.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
+  '@solana/idl@0.1.1(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana-program/program-metadata': 0.5.1(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana/kit': 6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)

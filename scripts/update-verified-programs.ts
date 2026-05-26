@@ -11,6 +11,7 @@
  *   - public/verified-programs.json
  */
 
+import { fetchIdl } from '@solana/idl';
 import { address, createSolanaRpc } from '@solana/kit';
 import { writeFile } from 'fs/promises';
 import { dirname, join } from 'path';
@@ -196,7 +197,6 @@ function extractIdlName(idl: unknown): string | undefined {
 }
 
 async function fetchIdlNames(addresses: string[]): Promise<Map<string, string>> {
-    const { fetchIdl } = await import('@solana/idl');
     const names = new Map<string, string>();
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- @solana/kit requires a branded URL type
     const rpc = createSolanaRpc(RPC_URL as string & { '~solana/rpc-api': unknown });
