@@ -65,7 +65,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
         <Tabs
             value={tab}
             onValueChange={handleTabChange}
-            className="e-max-w-[100vw] lg:e-max-w-[540px] e-overflow-hidden e-rounded-lg e-border e-border-solid e-border-outer-space-800 e-bg-heavy-metal-900"
+            className="e-max-w-[100vw] e-overflow-hidden e-rounded-lg e-border e-border-solid e-border-outer-space-800 e-bg-heavy-metal-900 lg:e-max-w-[540px]"
         >
             <div className="e-flex e-flex-wrap e-justify-between e-gap-8 e-border-b e-border-outer-space-800 e-px-3 [border-bottom-style:solid]">
                 <TabsList>
@@ -102,7 +102,14 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                 </div>
             </div>
 
-            <TabsContent value="hex" className={cn('e-text-start e-max-h-80 e-overflow-y-auto e-p-1.5', loading && 'e-p-3', tooLarge && 'e-px-3 e-py-2')}>
+            <TabsContent
+                value="hex"
+                className={cn(
+                    'e-max-h-80 e-overflow-y-auto e-p-1.5 e-text-start',
+                    loading && 'e-p-3',
+                    tooLarge && 'e-px-3 e-py-2',
+                )}
+            >
                 {loading ? (
                     <span className="spinner-grow spinner-grow-sm" />
                 ) : tooLarge ? (
@@ -118,7 +125,10 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                 )}
             </TabsContent>
 
-            <TabsContent value="base64" className={cn('e-p-3 e-text-start e-max-h-80 e-overflow-y-auto', !loading && data?.length && 'e-py-2')}>
+            <TabsContent
+                value="base64"
+                className={cn('e-max-h-80 e-overflow-y-auto e-p-3 e-text-start', !loading && data?.length && 'e-py-2')}
+            >
                 {loading ? (
                     <span className="spinner-grow spinner-grow-sm" />
                 ) : !hasData ? (
@@ -133,7 +143,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                 )}
             </TabsContent>
 
-            {(hasMore && !tooLarge) && !loading && hasData && (
+            {hasMore && !tooLarge && !loading && hasData && (
                 <div className="e-mt-1 e-flex e-justify-center e-border-t e-border-outer-space-800 [border-top-style:solid]">
                     <Button
                         variant="ghost"
