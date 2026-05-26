@@ -24,7 +24,13 @@ vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
 // Must import after mocks
 import { FetchStatus } from '@providers/cache';
 
-import { HistoryProvider, useAccountHistory, useFetchAccountHistory, useResetAccountHistory } from '../history';
+import {
+    HistoryProvider,
+    useAccountHistory,
+    useFetchAccountHistory,
+    useHistoryFiltersSupported,
+    useResetAccountHistory,
+} from '../history';
 
 const ADDRESS = 'rexav5eNTUSNT1K2N7cfRjnthwhcP5BC25v2tA4rW4h';
 const ADDRESS_B = '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
@@ -316,5 +322,27 @@ describe('getSignaturesForAddress fallback', () => {
 
         await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.FetchFailed));
         expect(mockConnection.getSignaturesForAddress).not.toHaveBeenCalled();
+    });
+
+    it('marks filtering unsupported after a method-not-found, and stays supported otherwise', async () => {
+        mockRpcError(-32601, 'Method not found');
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('legacy', 5)]);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                supported: useHistoryFiltersSupported(),
+            }),
+            { wrapper },
+        );
+
+        // Optimistically supported until the first request reveals otherwise.
+        expect(result.current.supported).toBe(true);
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.supported).toBe(false));
     });
 });

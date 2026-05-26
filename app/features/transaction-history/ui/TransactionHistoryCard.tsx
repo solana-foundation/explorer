@@ -6,7 +6,12 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
-import { useAccountHistory, useFetchAccountHistory, useResetAccountHistory } from '@providers/accounts/history';
+import {
+    useAccountHistory,
+    useFetchAccountHistory,
+    useHistoryFiltersSupported,
+    useResetAccountHistory,
+} from '@providers/accounts/history';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc } from '@utils/date';
@@ -17,7 +22,12 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
-import { HistoryFilterChips, HistoryFilterTrigger, useHistoryFilters } from '@components/account/history/HistoryFilterBar';
+import {
+    HistoryFilterChips,
+    HistoryFilterTrigger,
+    useClearHistoryFilters,
+    useHistoryFilters,
+} from '@components/account/history/HistoryFilterBar';
 
 import { useInstructionNames } from '../lib/use-instruction-names';
 import { InstructionList, InstructionListSkeleton } from './InstructionList';
@@ -30,6 +40,8 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     const history = useAccountHistory(address);
     const fetchAccountHistory = useFetchAccountHistory(25, filters);
     const resetHistory = useResetAccountHistory();
+    const filtersSupported = useHistoryFiltersSupported();
+    const clearFilters = useClearHistoryFilters();
     const refresh = useCallback(() => fetchAccountHistory(pubkey, false, true), [fetchAccountHistory, pubkey]);
     const loadMore = () => fetchAccountHistory(pubkey, false);
 
@@ -58,6 +70,14 @@ export function TransactionHistoryCard({ address }: { address: string }) {
             refresh();
         }
     }, [filtersKey, address, resetHistory, refresh]);
+
+    // If the endpoint turns out not to support filtering, drop any active filters so the
+    // (unfiltered) results aren't shown alongside misleading filter chips.
+    React.useEffect(() => {
+        if (!filtersSupported && hasActiveFilters) {
+            clearFilters();
+        }
+    }, [filtersSupported, hasActiveFilters, clearFilters]);
 
     if (!history) {
         return null;

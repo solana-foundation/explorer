@@ -128,24 +128,39 @@ const InFlightContext = React.createContext<Set<string> | undefined>(undefined);
 // the freshly-cleared cache. See `useResetAccountHistory`.
 const GenerationContext = React.createContext<Map<string, number> | undefined>(undefined);
 
+// Whether the current endpoint supports getTransactionsForAddress. Flips to false the
+// first time the method is not found, so the UI can disable filtering (the
+// getSignaturesForAddress fallback can't honour block-time/status filters).
+type MethodSupport = { supported: boolean; markUnsupported: () => void };
+const MethodSupportContext = React.createContext<MethodSupport | undefined>(undefined);
+
 type HistoryProviderProps = { children: React.ReactNode };
 export function HistoryProvider({ children }: HistoryProviderProps) {
     const { url } = useCluster();
     const [state, dispatch] = Cache.useCustomReducer(url, reconcile);
     const inFlightRef = React.useRef(new Set<string>());
     const generationRef = React.useRef(new Map<string, number>());
+    const [supported, setSupported] = React.useState(true);
 
     React.useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
         inFlightRef.current.clear();
         generationRef.current.clear();
+        setSupported(true);
     }, [dispatch, url]);
+
+    const markUnsupported = React.useCallback(() => setSupported(false), []);
+    const methodSupport = React.useMemo(() => ({ markUnsupported, supported }), [markUnsupported, supported]);
 
     return (
         <StateContext.Provider value={state}>
             <DispatchContext.Provider value={dispatch}>
                 <InFlightContext.Provider value={inFlightRef.current}>
-                    <GenerationContext.Provider value={generationRef.current}>{children}</GenerationContext.Provider>
+                    <GenerationContext.Provider value={generationRef.current}>
+                        <MethodSupportContext.Provider value={methodSupport}>
+                            {children}
+                        </MethodSupportContext.Provider>
+                    </GenerationContext.Provider>
                 </InFlightContext.Provider>
             </DispatchContext.Provider>
         </StateContext.Provider>
@@ -303,6 +318,9 @@ async function fetchAccountHistory(
     // Returns false once this request has been superseded (e.g. by a filter change),
     // in which case its result is dropped rather than written into the cache.
     isCurrent: () => boolean = () => true,
+    // Called when the endpoint reports getTransactionsForAddress as unavailable, so the
+    // UI can disable filtering before the request falls back to getSignaturesForAddress.
+    onMethodNotFound?: () => void,
 ) {
     dispatch({
         key: pubkey.toBase58(),
@@ -328,8 +346,9 @@ async function fetchAccountHistory(
         status = FetchStatus.Fetched;
     } catch (error) {
         if (isMethodNotFound(error)) {
-            // Endpoint doesn't implement getTransactionsForAddress: fall back to the
-            // standard getSignaturesForAddress path.
+            // Endpoint doesn't implement getTransactionsForAddress: disable filtering
+            // and fall back to the standard getSignaturesForAddress path.
+            onMethodNotFound?.();
             try {
                 history = await fetchViaSignatures(url, pubkey, {
                     before: options.before,
@@ -426,6 +445,12 @@ export function useAccountHistories() {
     return context.entries;
 }
 
+// Whether the current endpoint supports getTransactionsForAddress, and therefore
+// filtering. Defaults to true outside a HistoryProvider (e.g. isolated component tests).
+export function useHistoryFiltersSupported(): boolean {
+    return React.useContext(MethodSupportContext)?.supported ?? true;
+}
+
 export function useAccountHistory(address: string): Cache.CacheEntry<AccountHistory> | undefined {
     const context = React.useContext(StateContext);
 
@@ -495,9 +520,11 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
     const dispatch = React.useContext(DispatchContext);
     const inFlight = React.useContext(InFlightContext);
     const generations = React.useContext(GenerationContext);
-    if (!state || !dispatch || !inFlight || !generations) {
+    const methodSupport = React.useContext(MethodSupportContext);
+    if (!state || !dispatch || !inFlight || !generations || !methodSupport) {
         throw new Error(`useFetchAccountHistory must be used within a HistoryProvider`);
     }
+    const { markUnsupported } = methodSupport;
 
     // Destructure into primitives so the callback identity tracks filter changes.
     const { slot, blockTime, status } = filters;
@@ -547,6 +574,7 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                         fetchTransactions,
                         additionalSignatures,
                         isCurrent,
+                        markUnsupported,
                     ),
                 ).catch(e => Logger.error(e));
             } else {
@@ -560,6 +588,7 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                         fetchTransactions,
                         undefined,
                         isCurrent,
+                        markUnsupported,
                     ),
                 ).catch(e => Logger.error(e));
             }
@@ -577,6 +606,7 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
             url,
             inFlight,
             generations,
+            markUnsupported,
         ],
     );
 }
