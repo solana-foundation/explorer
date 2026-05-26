@@ -27,79 +27,76 @@ describe('useHistoryFilters', () => {
         setSearch('');
         const { result } = renderHook(() => useHistoryFilters());
         expect(result.current).toEqual({
-            beforeSlot: undefined,
-            blockTimeFrom: undefined,
-            blockTimeTo: undefined,
+            blockTime: undefined,
+            slot: undefined,
             status: undefined,
-            tokenAccounts: undefined,
-            untilSlot: undefined,
         });
     });
 
-    it('parses both slot bounds from the URL', () => {
-        setSearch('untilSlot=100&beforeSlot=200');
+    it('parses both slot bounds from the gTFA filter paths', () => {
+        setSearch('slot.gte=100&slot.lte=200');
         const { result } = renderHook(() => useHistoryFilters());
-        expect(result.current).toMatchObject({ beforeSlot: 200, untilSlot: 100 });
+        expect(result.current.slot).toEqual({ gte: 100, lte: 200 });
     });
 
     it('ignores negative and non-numeric values', () => {
-        setSearch('untilSlot=-5&beforeSlot=abc');
+        setSearch('slot.gte=-5&slot.lte=abc');
         const { result } = renderHook(() => useHistoryFilters());
-        expect(result.current).toMatchObject({ beforeSlot: undefined, untilSlot: undefined });
+        expect(result.current.slot).toBeUndefined();
     });
 
     it('floors fractional values', () => {
-        setSearch('untilSlot=100.9');
+        setSearch('slot.gte=100.9');
         const { result } = renderHook(() => useHistoryFilters());
-        expect(result.current.untilSlot).toBe(100);
+        expect(result.current.slot).toEqual({ gte: 100, lte: undefined });
     });
 
-    it('parses status and token-account enums, rejecting unknown values', () => {
-        setSearch('status=failed&tokenAccounts=balanceChanged');
+    it('parses the status enum, rejecting unknown values', () => {
+        setSearch('status=failed');
         const { result } = renderHook(() => useHistoryFilters());
-        expect(result.current).toMatchObject({ status: 'failed', tokenAccounts: 'balanceChanged' });
+        expect(result.current).toMatchObject({ status: 'failed' });
 
-        setSearch('status=bogus&tokenAccounts=nope');
+        setSearch('status=bogus');
         const { result: rejected } = renderHook(() => useHistoryFilters());
-        expect(rejected.current).toMatchObject({ status: undefined, tokenAccounts: undefined });
+        expect(rejected.current).toMatchObject({ status: undefined });
     });
 
-    it('parses block-time bounds', () => {
-        setSearch('blockTimeFrom=1700000000&blockTimeTo=1700100000');
+    it('parses block-time bounds from the gTFA filter paths', () => {
+        setSearch('blockTime.gte=1700000000&blockTime.lte=1700100000');
         const { result } = renderHook(() => useHistoryFilters());
-        expect(result.current).toMatchObject({ blockTimeFrom: 1_700_000_000, blockTimeTo: 1_700_100_000 });
+        expect(result.current.blockTime).toEqual({ gte: 1_700_000_000, lte: 1_700_100_000 });
     });
 });
 
 describe('HistoryFilterBar', () => {
     it('shows a single Filters button when no filter is active', () => {
-        render(<HistoryFilterBar untilSlot={undefined} beforeSlot={undefined} />);
+        render(<HistoryFilterBar />);
         expect(screen.getByRole('button', { name: /^Filters$/ })).toBeInTheDocument();
-        expect(screen.queryByText(/Until slot:/)).not.toBeInTheDocument();
-        expect(screen.queryByText(/Before slot:/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Slot ≥:/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Slot ≤:/)).not.toBeInTheDocument();
     });
 
-    it('renders a chip per active filter', () => {
-        render(<HistoryFilterBar untilSlot={100} beforeSlot={2_000_000} />);
-        expect(screen.getByText(/Until slot:\s*100/)).toBeInTheDocument();
+    it('renders a chip per active slot bound', () => {
+        render(<HistoryFilterBar slot={{ gte: 100, lte: 2_000_000 }} />);
+        expect(screen.getByText(/Slot ≥:\s*100/)).toBeInTheDocument();
         // Use a regex since jsdom's toLocaleString thousand separator varies by ICU build.
-        expect(screen.getByText(/Before slot:\s*2[,.\s  ]?000[,.\s  ]?000/)).toBeInTheDocument();
+        expect(screen.getByText(/Slot ≤:\s*2[,.\s  ]?000[,.\s  ]?000/)).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /Edit filters/ })).toBeInTheDocument();
     });
 
-    it('clears a single filter when its chip × is clicked', () => {
-        setSearch('untilSlot=100&beforeSlot=200');
-        render(<HistoryFilterBar untilSlot={100} beforeSlot={200} />);
+    it('clears a single slot bound when its chip × is clicked', () => {
+        setSearch('slot.gte=100&slot.lte=200');
+        render(<HistoryFilterBar slot={{ gte: 100, lte: 200 }} />);
 
-        fireEvent.click(screen.getByRole('button', { name: /Clear until slot filter/ }));
+        fireEvent.click(screen.getByRole('button', { name: /Clear slot ≥ filter/ }));
 
         expect(replaceMock).toHaveBeenCalledTimes(1);
         const [href] = replaceMock.mock.calls[0];
-        expect(href).toBe('/address/testAddress?beforeSlot=200');
+        expect(href).toBe('/address/testAddress?slot.lte=200');
     });
 
-    it('applies both bounds from the popover', () => {
-        render(<HistoryFilterBar untilSlot={undefined} beforeSlot={undefined} />);
+    it('applies both slot bounds from the popover', () => {
+        render(<HistoryFilterBar />);
 
         fireEvent.click(screen.getByRole('button', { name: /^Filters$/ }));
         fireEvent.change(screen.getByPlaceholderText(/lower bound/), { target: { value: '100' } });
@@ -108,22 +105,22 @@ describe('HistoryFilterBar', () => {
 
         expect(replaceMock).toHaveBeenCalledTimes(1);
         const [href] = replaceMock.mock.calls[0];
-        expect(href).toMatch(/untilSlot=100/);
-        expect(href).toMatch(/beforeSlot=500/);
+        expect(href).toMatch(/slot\.gte=100/);
+        expect(href).toMatch(/slot\.lte=500/);
     });
 
     it('preserves unrelated query params when updating the URL', () => {
-        setSearch('cluster=devnet&untilSlot=100');
-        render(<HistoryFilterBar untilSlot={100} beforeSlot={undefined} />);
+        setSearch('cluster=devnet&slot.gte=100');
+        render(<HistoryFilterBar slot={{ gte: 100 }} />);
 
-        fireEvent.click(screen.getByRole('button', { name: /Clear until slot filter/ }));
+        fireEvent.click(screen.getByRole('button', { name: /Clear slot ≥ filter/ }));
 
         const [href] = replaceMock.mock.calls[0];
         expect(href).toBe('/address/testAddress?cluster=devnet');
     });
 
-    it('disables Apply and shows an error when until > before', () => {
-        render(<HistoryFilterBar untilSlot={undefined} beforeSlot={undefined} />);
+    it('disables Apply and shows an error when slot ≥ exceeds slot ≤', () => {
+        render(<HistoryFilterBar />);
 
         fireEvent.click(screen.getByRole('button', { name: /^Filters$/ }));
         fireEvent.change(screen.getByPlaceholderText(/lower bound/), { target: { value: '500' } });
@@ -131,44 +128,41 @@ describe('HistoryFilterBar', () => {
 
         const apply = screen.getByRole('button', { name: /^Apply$/ });
         expect(apply).toBeDisabled();
-        expect(screen.getByText(/Until slot must be/)).toBeInTheDocument();
+        expect(screen.getByText(/Slot ≥ must be/)).toBeInTheDocument();
 
         fireEvent.click(apply);
         expect(replaceMock).not.toHaveBeenCalled();
     });
 
-    it('applies the status and token-account selects', () => {
-        render(<HistoryFilterBar untilSlot={undefined} beforeSlot={undefined} />);
+    it('applies the status select', () => {
+        render(<HistoryFilterBar />);
 
         fireEvent.click(screen.getByRole('button', { name: /^Filters$/ }));
         fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'succeeded' } });
-        fireEvent.change(screen.getByLabelText('Token accounts'), { target: { value: 'all' } });
         fireEvent.click(screen.getByRole('button', { name: /^Apply$/ }));
 
         const [href] = replaceMock.mock.calls[0];
         expect(href).toMatch(/status=succeeded/);
-        expect(href).toMatch(/tokenAccounts=all/);
     });
 
-    it('renders chips for status and token-account filters', () => {
-        render(<HistoryFilterBar untilSlot={undefined} beforeSlot={undefined} status="failed" tokenAccounts="all" />);
+    it('renders a chip for the status filter', () => {
+        render(<HistoryFilterBar status="failed" />);
         expect(screen.getByText(/Status:\s*Failed/)).toBeInTheDocument();
-        expect(screen.getByText(/Token accounts:\s*All token accounts/)).toBeInTheDocument();
     });
 
     it('clears a single non-slot filter via its chip', () => {
-        setSearch('status=failed&beforeSlot=200');
-        render(<HistoryFilterBar untilSlot={undefined} beforeSlot={200} status="failed" />);
+        setSearch('status=failed&slot.lte=200');
+        render(<HistoryFilterBar slot={{ lte: 200 }} status="failed" />);
 
         fireEvent.click(screen.getByRole('button', { name: /Clear status filter/ }));
 
         const [href] = replaceMock.mock.calls[0];
-        expect(href).toBe('/address/testAddress?beforeSlot=200');
+        expect(href).toBe('/address/testAddress?slot.lte=200');
     });
 
     it('clears all filters via Clear all', () => {
-        setSearch('untilSlot=100&beforeSlot=500');
-        render(<HistoryFilterBar untilSlot={100} beforeSlot={500} />);
+        setSearch('slot.gte=100&slot.lte=500');
+        render(<HistoryFilterBar slot={{ gte: 100, lte: 500 }} />);
 
         fireEvent.click(screen.getByRole('button', { name: /Edit filters/ }));
         fireEvent.click(screen.getByRole('button', { name: /Clear all/ }));

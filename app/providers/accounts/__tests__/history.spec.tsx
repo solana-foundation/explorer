@@ -60,7 +60,7 @@ beforeEach(() => {
 
 describe('useFetchAccountHistory — getTransactionsForAddress', () => {
     it('maps slot filters onto the filters object on the initial fetch', async () => {
-        const { result } = renderHook(() => useFetchAccountHistory(25, { beforeSlot: 500, untilSlot: 100 }), {
+        const { result } = renderHook(() => useFetchAccountHistory(25, { slot: { gte: 100, lte: 500 } }), {
             wrapper,
         });
 
@@ -81,14 +81,12 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
         });
     });
 
-    it('maps status, block time, and token-account filters', async () => {
+    it('maps status and block time filters', async () => {
         const { result } = renderHook(
             () =>
                 useFetchAccountHistory(25, {
-                    blockTimeFrom: 1_700_000_000,
-                    blockTimeTo: 1_700_100_000,
+                    blockTime: { gte: 1_700_000_000, lte: 1_700_100_000 },
                     status: 'failed',
-                    tokenAccounts: 'balanceChanged',
                 }),
             { wrapper },
         );
@@ -102,7 +100,6 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
         expect(options.filters).toEqual({
             blockTime: { gte: 1_700_000_000, lte: 1_700_100_000 },
             status: 'failed',
-            tokenAccounts: 'balanceChanged',
         });
     });
 
@@ -127,7 +124,7 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
 
         const { result } = renderHook(
             () => ({
-                fetch: useFetchAccountHistory(25, { untilSlot: 100 }),
+                fetch: useFetchAccountHistory(25, { slot: { gte: 100 } }),
                 history: useAccountHistory(ADDRESS),
             }),
             { wrapper },

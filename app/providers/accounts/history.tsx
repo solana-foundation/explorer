@@ -21,15 +21,14 @@ import { Logger } from '@/app/shared/lib/logger';
 type TransactionMap = Map<string, ParsedTransactionWithMeta>;
 type FailedTransactionSignatures = Set<string>;
 
-// Filters surfaced in the UI, mapped onto the Triton `getTransactionsForAddress`
-// `filters` object inside `buildRpcFilters`.
+// Mirrors the Triton `getTransactionsForAddress` `filters` object one-to-one, so the
+// UI/URL layer and the RPC payload share the same shape and field names. The UI only
+// surfaces range bounds (gte/lte); the RPC also accepts gt/lt/eq which we don't use yet.
+export type RangeFilter = { gte?: number; lte?: number };
 export type HistoryFilters = {
-    untilSlot?: number; // lower slot bound -> filters.slot.gte
-    beforeSlot?: number; // upper slot bound -> filters.slot.lte
+    slot?: RangeFilter; // filters.slot
+    blockTime?: RangeFilter; // filters.blockTime (unix seconds)
     status?: 'succeeded' | 'failed'; // filters.status (omit for "any")
-    blockTimeFrom?: number; // unix seconds, lower bound -> filters.blockTime.gte
-    blockTimeTo?: number; // unix seconds, upper bound -> filters.blockTime.lte
-    tokenAccounts?: 'all' | 'balanceChanged'; // filters.tokenAccounts (omit for "none")
 };
 
 type AccountHistory = {
@@ -178,24 +177,24 @@ async function fetchParsedTransactions(url: string, cluster: Cluster, transactio
     return { failedTransactionSignatures, transactionMap };
 }
 
-// Maps the UI filter selection onto the Triton `getTransactionsForAddress`
-// `filters` object. Returns undefined when no filter is active so the key is omitted.
+// Prunes undefined leaves so the RPC never receives an empty range like `{ slot: {} }`.
+function pruneRange(range: RangeFilter | undefined): RangeFilter | undefined {
+    if (!range) return undefined;
+    const out: RangeFilter = {};
+    if (range.gte !== undefined) out.gte = range.gte;
+    if (range.lte !== undefined) out.lte = range.lte;
+    return Object.keys(out).length > 0 ? out : undefined;
+}
+
+// `HistoryFilters` already mirrors the RPC `filters` shape, so this just drops empty
+// entries. Returns undefined when no filter is active so the key is omitted entirely.
 function buildRpcFilters(filters: HistoryFilters): Record<string, unknown> | undefined {
     const out: Record<string, unknown> = {};
-
-    const slot: Record<string, number> = {};
-    if (filters.untilSlot !== undefined) slot.gte = filters.untilSlot;
-    if (filters.beforeSlot !== undefined) slot.lte = filters.beforeSlot;
-    if (Object.keys(slot).length > 0) out.slot = slot;
-
-    const blockTime: Record<string, number> = {};
-    if (filters.blockTimeFrom !== undefined) blockTime.gte = filters.blockTimeFrom;
-    if (filters.blockTimeTo !== undefined) blockTime.lte = filters.blockTimeTo;
-    if (Object.keys(blockTime).length > 0) out.blockTime = blockTime;
-
+    const slot = pruneRange(filters.slot);
+    if (slot) out.slot = slot;
+    const blockTime = pruneRange(filters.blockTime);
+    if (blockTime) out.blockTime = blockTime;
     if (filters.status) out.status = filters.status;
-    if (filters.tokenAccounts) out.tokenAccounts = filters.tokenAccounts;
-
     return Object.keys(out).length > 0 ? out : undefined;
 }
 
@@ -404,17 +403,18 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
     }
 
     // Destructure into primitives so the callback identity tracks filter changes.
-    const { untilSlot, beforeSlot, status, blockTimeFrom, blockTimeTo, tokenAccounts } = filters;
+    const { slot, blockTime, status } = filters;
+    const slotGte = slot?.gte;
+    const slotLte = slot?.lte;
+    const blockTimeGte = blockTime?.gte;
+    const blockTimeLte = blockTime?.lte;
 
     return React.useCallback(
         (pubkey: PublicKey, fetchTransactions?: boolean, refresh?: boolean) => {
             const activeFilters: HistoryFilters = {
-                beforeSlot,
-                blockTimeFrom,
-                blockTimeTo,
+                blockTime: { gte: blockTimeGte, lte: blockTimeLte },
+                slot: { gte: slotGte, lte: slotLte },
                 status,
-                tokenAccounts,
-                untilSlot,
             };
             const before = state.entries[pubkey.toBase58()];
             if (!refresh && before?.data?.fetched && before.data.fetched.length > 0) {
@@ -456,12 +456,11 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
         },
         [
             limit,
-            untilSlot,
-            beforeSlot,
+            slotGte,
+            slotLte,
+            blockTimeGte,
+            blockTimeLte,
             status,
-            blockTimeFrom,
-            blockTimeTo,
-            tokenAccounts,
             state,
             dispatch,
             cluster,

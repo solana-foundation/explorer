@@ -8,19 +8,18 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { Filter, X } from 'react-feather';
 
-export const UNTIL_SLOT_PARAM = 'untilSlot';
-export const BEFORE_SLOT_PARAM = 'beforeSlot';
+// URL params map one-to-one onto the Triton `getTransactionsForAddress` filter paths.
+export const SLOT_GTE_PARAM = 'slot.gte';
+export const SLOT_LTE_PARAM = 'slot.lte';
+export const BLOCK_TIME_GTE_PARAM = 'blockTime.gte';
+export const BLOCK_TIME_LTE_PARAM = 'blockTime.lte';
 export const STATUS_PARAM = 'status';
-export const BLOCK_TIME_FROM_PARAM = 'blockTimeFrom';
-export const BLOCK_TIME_TO_PARAM = 'blockTimeTo';
-export const TOKEN_ACCOUNTS_PARAM = 'tokenAccounts';
 
 const STATUS_VALUES = ['succeeded', 'failed'] as const;
-const TOKEN_ACCOUNTS_VALUES = ['all', 'balanceChanged'] as const;
 
-const TOKEN_ACCOUNTS_LABELS: Record<(typeof TOKEN_ACCOUNTS_VALUES)[number], string> = {
-    all: 'All token accounts',
-    balanceChanged: 'Balance changed',
+const STATUS_LABELS: Record<(typeof STATUS_VALUES)[number], string> = {
+    failed: 'Failed',
+    succeeded: 'Succeeded',
 };
 
 function parseSlotParam(raw: string | null | undefined): number | undefined {
@@ -33,26 +32,29 @@ function parseEnumParam<T extends string>(raw: string | null | undefined, allowe
     return raw && (allowed as readonly string[]).includes(raw) ? (raw as T) : undefined;
 }
 
+// Collapses an undefined-only range back to `undefined` so consumers can treat a
+// present range object as "this filter is active".
+function toRange(gte: number | undefined, lte: number | undefined) {
+    return gte === undefined && lte === undefined ? undefined : { gte, lte };
+}
+
 export function useHistoryFilters(): HistoryFilters {
     const searchParams = useSearchParams();
     return {
-        beforeSlot: parseSlotParam(searchParams?.get(BEFORE_SLOT_PARAM)),
-        blockTimeFrom: parseSlotParam(searchParams?.get(BLOCK_TIME_FROM_PARAM)),
-        blockTimeTo: parseSlotParam(searchParams?.get(BLOCK_TIME_TO_PARAM)),
+        blockTime: toRange(
+            parseSlotParam(searchParams?.get(BLOCK_TIME_GTE_PARAM)),
+            parseSlotParam(searchParams?.get(BLOCK_TIME_LTE_PARAM)),
+        ),
+        slot: toRange(
+            parseSlotParam(searchParams?.get(SLOT_GTE_PARAM)),
+            parseSlotParam(searchParams?.get(SLOT_LTE_PARAM)),
+        ),
         status: parseEnumParam(searchParams?.get(STATUS_PARAM), STATUS_VALUES),
-        tokenAccounts: parseEnumParam(searchParams?.get(TOKEN_ACCOUNTS_PARAM), TOKEN_ACCOUNTS_VALUES),
-        untilSlot: parseSlotParam(searchParams?.get(UNTIL_SLOT_PARAM)),
     };
 }
 
-const PARAM_BY_KEY: Record<keyof HistoryFilters, string> = {
-    beforeSlot: BEFORE_SLOT_PARAM,
-    blockTimeFrom: BLOCK_TIME_FROM_PARAM,
-    blockTimeTo: BLOCK_TIME_TO_PARAM,
-    status: STATUS_PARAM,
-    tokenAccounts: TOKEN_ACCOUNTS_PARAM,
-    untilSlot: UNTIL_SLOT_PARAM,
-};
+// Update operates directly on URL param names so callers reference the same gTFA paths.
+type ParamUpdate = Record<string, number | string | undefined>;
 
 function useUpdateHistoryFilters() {
     const router = useRouter();
@@ -60,15 +62,13 @@ function useUpdateHistoryFilters() {
     const searchParams = useSearchParams();
 
     return React.useCallback(
-        (next: Partial<HistoryFilters>) => {
+        (next: ParamUpdate) => {
             const params = new URLSearchParams(searchParams?.toString() ?? '');
-            (Object.keys(next) as (keyof HistoryFilters)[]).forEach(key => {
-                const value = next[key];
-                const param = PARAM_BY_KEY[key];
+            Object.entries(next).forEach(([key, value]) => {
                 if (value === undefined) {
-                    params.delete(param);
+                    params.delete(key);
                 } else {
-                    params.set(param, String(value));
+                    params.set(key, String(value));
                 }
             });
             const qs = params.toString();
@@ -123,58 +123,45 @@ function FilterChip({ label, value, onClear }: { label: string; value: string; o
 }
 
 export function HistoryFilterChips(filters: HistoryFilters) {
-    const { untilSlot, beforeSlot, status, blockTimeFrom, blockTimeTo, tokenAccounts } = filters;
+    const { slot, blockTime, status } = filters;
     const updateFilters = useUpdateHistoryFilters();
-    const hasAny =
-        untilSlot !== undefined ||
-        beforeSlot !== undefined ||
-        status !== undefined ||
-        blockTimeFrom !== undefined ||
-        blockTimeTo !== undefined ||
-        tokenAccounts !== undefined;
+    const hasAny = slot !== undefined || blockTime !== undefined || status !== undefined;
     if (!hasAny) return null;
     return (
         <>
-            {untilSlot !== undefined && (
+            {slot?.gte !== undefined && (
                 <FilterChip
-                    label="Until slot"
-                    value={untilSlot.toLocaleString()}
-                    onClear={() => updateFilters({ untilSlot: undefined })}
+                    label="Slot ≥"
+                    value={slot.gte.toLocaleString()}
+                    onClear={() => updateFilters({ [SLOT_GTE_PARAM]: undefined })}
                 />
             )}
-            {beforeSlot !== undefined && (
+            {slot?.lte !== undefined && (
                 <FilterChip
-                    label="Before slot"
-                    value={beforeSlot.toLocaleString()}
-                    onClear={() => updateFilters({ beforeSlot: undefined })}
+                    label="Slot ≤"
+                    value={slot.lte.toLocaleString()}
+                    onClear={() => updateFilters({ [SLOT_LTE_PARAM]: undefined })}
                 />
             )}
             {status !== undefined && (
                 <FilterChip
                     label="Status"
-                    value={status === 'succeeded' ? 'Succeeded' : 'Failed'}
-                    onClear={() => updateFilters({ status: undefined })}
+                    value={STATUS_LABELS[status]}
+                    onClear={() => updateFilters({ [STATUS_PARAM]: undefined })}
                 />
             )}
-            {blockTimeFrom !== undefined && (
+            {blockTime?.gte !== undefined && (
                 <FilterChip
-                    label="From"
-                    value={new Date(blockTimeFrom * 1000).toLocaleString()}
-                    onClear={() => updateFilters({ blockTimeFrom: undefined })}
+                    label="Block time ≥"
+                    value={new Date(blockTime.gte * 1000).toLocaleString()}
+                    onClear={() => updateFilters({ [BLOCK_TIME_GTE_PARAM]: undefined })}
                 />
             )}
-            {blockTimeTo !== undefined && (
+            {blockTime?.lte !== undefined && (
                 <FilterChip
-                    label="To"
-                    value={new Date(blockTimeTo * 1000).toLocaleString()}
-                    onClear={() => updateFilters({ blockTimeTo: undefined })}
-                />
-            )}
-            {tokenAccounts !== undefined && (
-                <FilterChip
-                    label="Token accounts"
-                    value={TOKEN_ACCOUNTS_LABELS[tokenAccounts]}
-                    onClear={() => updateFilters({ tokenAccounts: undefined })}
+                    label="Block time ≤"
+                    value={new Date(blockTime.lte * 1000).toLocaleString()}
+                    onClear={() => updateFilters({ [BLOCK_TIME_LTE_PARAM]: undefined })}
                 />
             )}
         </>
@@ -185,71 +172,67 @@ const SELECT_CLASS =
     'e-w-full e-rounded-md e-border e-border-neutral-700 e-bg-neutral-900 e-px-2 e-py-1.5 e-text-sm e-text-neutral-100';
 
 export function HistoryFilterTrigger(filters: HistoryFilters) {
-    const { untilSlot, beforeSlot, status, blockTimeFrom, blockTimeTo, tokenAccounts } = filters;
+    const { slot, blockTime, status } = filters;
     const updateFilters = useUpdateHistoryFilters();
     const [open, setOpen] = React.useState(false);
 
-    const [untilDraft, setUntilDraft] = React.useState('');
-    const [beforeDraft, setBeforeDraft] = React.useState('');
+    const [slotGteDraft, setSlotGteDraft] = React.useState('');
+    const [slotLteDraft, setSlotLteDraft] = React.useState('');
     const [statusDraft, setStatusDraft] = React.useState('');
-    const [fromDraft, setFromDraft] = React.useState('');
-    const [toDraft, setToDraft] = React.useState('');
-    const [tokenAccountsDraft, setTokenAccountsDraft] = React.useState('');
+    const [blockTimeGteDraft, setBlockTimeGteDraft] = React.useState('');
+    const [blockTimeLteDraft, setBlockTimeLteDraft] = React.useState('');
 
     React.useEffect(() => {
-        setUntilDraft(untilSlot !== undefined ? String(untilSlot) : '');
-        setBeforeDraft(beforeSlot !== undefined ? String(beforeSlot) : '');
+        setSlotGteDraft(slot?.gte !== undefined ? String(slot.gte) : '');
+        setSlotLteDraft(slot?.lte !== undefined ? String(slot.lte) : '');
         setStatusDraft(status ?? '');
-        setFromDraft(unixToLocalInput(blockTimeFrom));
-        setToDraft(unixToLocalInput(blockTimeTo));
-        setTokenAccountsDraft(tokenAccounts ?? '');
-    }, [untilSlot, beforeSlot, status, blockTimeFrom, blockTimeTo, tokenAccounts, open]);
+        setBlockTimeGteDraft(unixToLocalInput(blockTime?.gte));
+        setBlockTimeLteDraft(unixToLocalInput(blockTime?.lte));
+    }, [slot, blockTime, status, open]);
 
-    const untilValue = slotDraftToValue(untilDraft);
-    const beforeValue = slotDraftToValue(beforeDraft);
-    const fromValue = localInputToUnix(fromDraft);
-    const toValue = localInputToUnix(toDraft);
+    const slotGteValue = slotDraftToValue(slotGteDraft);
+    const slotLteValue = slotDraftToValue(slotLteDraft);
+    const blockTimeGteValue = localInputToUnix(blockTimeGteDraft);
+    const blockTimeLteValue = localInputToUnix(blockTimeLteDraft);
 
-    const untilInvalid = untilValue === 'invalid';
-    const beforeInvalid = beforeValue === 'invalid';
+    const slotGteInvalid = slotGteValue === 'invalid';
+    const slotLteInvalid = slotLteValue === 'invalid';
     const slotRangeInvalid =
-        typeof untilValue === 'number' && typeof beforeValue === 'number' && untilValue > beforeValue;
-    const timeRangeInvalid = fromValue !== undefined && toValue !== undefined && fromValue > toValue;
-    const hasError = untilInvalid || beforeInvalid || slotRangeInvalid || timeRangeInvalid;
+        typeof slotGteValue === 'number' && typeof slotLteValue === 'number' && slotGteValue > slotLteValue;
+    const timeRangeInvalid =
+        blockTimeGteValue !== undefined && blockTimeLteValue !== undefined && blockTimeGteValue > blockTimeLteValue;
+    const hasError = slotGteInvalid || slotLteInvalid || slotRangeInvalid || timeRangeInvalid;
 
     const apply = () => {
         if (hasError) return;
         // The hasError guard above rules out the 'invalid' sentinel for both slots.
         updateFilters({
-            beforeSlot: beforeValue as number | undefined,
-            blockTimeFrom: fromValue,
-            blockTimeTo: toValue,
-            status: parseEnumParam(statusDraft, STATUS_VALUES),
-            tokenAccounts: parseEnumParam(tokenAccountsDraft, TOKEN_ACCOUNTS_VALUES),
-            untilSlot: untilValue as number | undefined,
+            [BLOCK_TIME_GTE_PARAM]: blockTimeGteValue,
+            [BLOCK_TIME_LTE_PARAM]: blockTimeLteValue,
+            [SLOT_GTE_PARAM]: slotGteValue as number | undefined,
+            [SLOT_LTE_PARAM]: slotLteValue as number | undefined,
+            [STATUS_PARAM]: parseEnumParam(statusDraft, STATUS_VALUES),
         });
         setOpen(false);
     };
 
     const clearAll = () => {
         updateFilters({
-            beforeSlot: undefined,
-            blockTimeFrom: undefined,
-            blockTimeTo: undefined,
-            status: undefined,
-            tokenAccounts: undefined,
-            untilSlot: undefined,
+            [BLOCK_TIME_GTE_PARAM]: undefined,
+            [BLOCK_TIME_LTE_PARAM]: undefined,
+            [SLOT_GTE_PARAM]: undefined,
+            [SLOT_LTE_PARAM]: undefined,
+            [STATUS_PARAM]: undefined,
         });
         setOpen(false);
     };
 
     const activeCount =
-        (untilSlot !== undefined ? 1 : 0) +
-        (beforeSlot !== undefined ? 1 : 0) +
+        (slot?.gte !== undefined ? 1 : 0) +
+        (slot?.lte !== undefined ? 1 : 0) +
         (status !== undefined ? 1 : 0) +
-        (blockTimeFrom !== undefined ? 1 : 0) +
-        (blockTimeTo !== undefined ? 1 : 0) +
-        (tokenAccounts !== undefined ? 1 : 0);
+        (blockTime?.gte !== undefined ? 1 : 0) +
+        (blockTime?.lte !== undefined ? 1 : 0);
     const triggerLabel = activeCount === 0 ? 'Filters' : 'Edit filters';
 
     return (
@@ -269,33 +252,31 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
                     className="e-flex e-flex-col e-gap-3"
                 >
                     <div className="e-flex e-flex-col e-gap-1">
-                        <label className="e-text-xs e-text-neutral-300">Until slot</label>
+                        <label className="e-text-xs e-text-neutral-300">Slot ≥</label>
                         <Input
                             autoFocus
                             variant="dark"
                             inputMode="numeric"
                             pattern="[0-9]*"
                             placeholder="lower bound (optional)"
-                            value={untilDraft}
-                            aria-invalid={untilInvalid || slotRangeInvalid}
-                            onChange={e => setUntilDraft(e.target.value)}
+                            value={slotGteDraft}
+                            aria-invalid={slotGteInvalid || slotRangeInvalid}
+                            onChange={e => setSlotGteDraft(e.target.value)}
                         />
                     </div>
                     <div className="e-flex e-flex-col e-gap-1">
-                        <label className="e-text-xs e-text-neutral-300">Before slot</label>
+                        <label className="e-text-xs e-text-neutral-300">Slot ≤</label>
                         <Input
                             variant="dark"
                             inputMode="numeric"
                             pattern="[0-9]*"
                             placeholder="upper bound (optional)"
-                            value={beforeDraft}
-                            aria-invalid={beforeInvalid || slotRangeInvalid}
-                            onChange={e => setBeforeDraft(e.target.value)}
+                            value={slotLteDraft}
+                            aria-invalid={slotLteInvalid || slotRangeInvalid}
+                            onChange={e => setSlotLteDraft(e.target.value)}
                         />
                     </div>
-                    {slotRangeInvalid && (
-                        <div className="e-text-xs e-text-red-400">Until slot must be ≤ before slot.</div>
-                    )}
+                    {slotRangeInvalid && <div className="e-text-xs e-text-red-400">Slot ≥ must be ≤ slot ≤.</div>}
 
                     <div className="e-flex e-flex-col e-gap-1">
                         <label className="e-text-xs e-text-neutral-300" htmlFor="history-status-filter">
@@ -315,45 +296,28 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
                     </div>
 
                     <div className="e-flex e-flex-col e-gap-1">
-                        <label className="e-text-xs e-text-neutral-300">From (block time)</label>
+                        <label className="e-text-xs e-text-neutral-300">Block time ≥</label>
                         <Input
                             type="datetime-local"
                             variant="dark"
-                            value={fromDraft}
+                            value={blockTimeGteDraft}
                             aria-invalid={timeRangeInvalid}
-                            onChange={e => setFromDraft(e.target.value)}
+                            onChange={e => setBlockTimeGteDraft(e.target.value)}
                         />
                     </div>
                     <div className="e-flex e-flex-col e-gap-1">
-                        <label className="e-text-xs e-text-neutral-300">To (block time)</label>
+                        <label className="e-text-xs e-text-neutral-300">Block time ≤</label>
                         <Input
                             type="datetime-local"
                             variant="dark"
-                            value={toDraft}
+                            value={blockTimeLteDraft}
                             aria-invalid={timeRangeInvalid}
-                            onChange={e => setToDraft(e.target.value)}
+                            onChange={e => setBlockTimeLteDraft(e.target.value)}
                         />
                     </div>
                     {timeRangeInvalid && (
-                        <div className="e-text-xs e-text-red-400">From must be on or before To.</div>
+                        <div className="e-text-xs e-text-red-400">Block time ≥ must be on or before block time ≤.</div>
                     )}
-
-                    <div className="e-flex e-flex-col e-gap-1">
-                        <label className="e-text-xs e-text-neutral-300" htmlFor="history-token-accounts-filter">
-                            Token accounts
-                        </label>
-                        <select
-                            id="history-token-accounts-filter"
-                            aria-label="Token accounts"
-                            className={SELECT_CLASS}
-                            value={tokenAccountsDraft}
-                            onChange={e => setTokenAccountsDraft(e.target.value)}
-                        >
-                            <option value="">None (direct activity)</option>
-                            <option value="all">All token accounts</option>
-                            <option value="balanceChanged">Balance changed</option>
-                        </select>
-                    </div>
 
                     <div className="e-flex e-justify-end e-gap-2 e-pt-1">
                         {activeCount > 0 && (
