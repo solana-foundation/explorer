@@ -17,7 +17,7 @@ export async function processBinary(data: Response) {
         if (matchMaxSizeError(error)) {
             throw statusError(413, 'Binary body exceeds max size', { cause: error });
         }
-        Logger.debug('[api:metadata-proxy] Failed to process binary data', { error });
+        Logger.warn('[api:metadata-proxy] Failed to process binary data', { error });
         throw statusError(500, 'Failed to process binary data', { cause: error });
     }
 }
@@ -39,7 +39,7 @@ export async function processJson(data: Response) {
             // Handle JSON syntax errors specifically
             throw statusError(415, 'Malformed JSON in upstream response', { cause: error });
         }
-        Logger.debug('[api:metadata-proxy] Failed to process JSON data', { error });
+        Logger.warn('[api:metadata-proxy] Failed to process JSON data', { error });
         throw statusError(500, 'Failed to process JSON data', { cause: error });
     }
 }
@@ -64,7 +64,7 @@ export async function processTextAsJson(data: Response) {
         } else if (error instanceof SyntaxError) {
             throw statusError(415, 'Malformed JSON in text upstream response', { cause: error });
         }
-        Logger.debug('[api:metadata-proxy] Failed to process text-as-JSON data', { error });
+        Logger.warn('[api:metadata-proxy] Failed to process text-as-JSON data', { error });
         throw statusError(500, 'Failed to process text-as-JSON data', { cause: error });
     }
 }

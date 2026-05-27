@@ -66,16 +66,10 @@ afterAll(async () => {
 });
 
 beforeEach(() => {
-    // Bypass the private-IP guard for 127.0.0.1 by stubbing
-    // lookupHostnameSafely. The pinned lookup we return resolves the loopback
-    // hostname to 127.0.0.1 so undici can actually connect.
+    // Stub only the validation decision: report 127.0.0.1 as public so the
+    // private-IP guard is bypassed, and return a pinned lookup matching the
+    // shape the production helper produces so undici can connect to loopback.
     vi.mocked(lookupHostnameSafely).mockReset();
-    // Use the real `makePinnedLookup` path by stubbing only the validation
-    // decision: addresses come back as a single IPv4 to 127.0.0.1. Defer
-    // the callback with `setImmediate` since Node's `net.connect` expects
-    // an async-shaped lookup (sync callbacks misbehave in some versions).
-    // Use the real `makePinnedLookup` path indirectly: stub only the
-    // validation decision, return the same shape the production code does.
     const addresses = [{ address: '127.0.0.1', family: 4 }];
     vi.mocked(lookupHostnameSafely).mockResolvedValue({
         addresses,
