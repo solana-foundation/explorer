@@ -248,6 +248,9 @@ importers:
       cross-spawn:
         specifier: 7.0.6
         version: 7.0.6
+      date-fns:
+        specifier: 4.1.0
+        version: 4.1.0
       fuse.js:
         specifier: 7.1.0
         version: 7.1.0
@@ -269,9 +272,6 @@ importers:
       micromatch:
         specifier: 4.0.8
         version: 4.0.8
-      moment:
-        specifier: 2.29.4
-        version: 2.29.4
       next:
         specifier: 15.5.14
         version: 15.5.14(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.53.0)
@@ -314,9 +314,6 @@ importers:
       react-markdown:
         specifier: 10.1.0
         version: 10.1.0(@types/react@19.2.14)(react@19.2.4)
-      react-moment:
-        specifier: 1.1.3
-        version: 1.1.3(moment@2.29.4)(prop-types@15.8.1)(react@19.2.4)
       remark-frontmatter:
         specifier: 5.0.0
         version: 5.0.0
@@ -6845,6 +6842,9 @@ packages:
     resolution: {integrity: sha512-BS8PfmtDGnrgYdOonGZQdLZslWIeCGFP9tpan0hi1Co2Zr2NKADsvGYA8XxuG/4UWgJ6Cjtv+YJnB6MM69QGlQ==}
     engines: {node: '>= 0.4'}
 
+  date-fns@4.1.0:
+    resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
+
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
     peerDependencies:
@@ -9704,13 +9704,6 @@ packages:
     peerDependencies:
       '@types/react': '>=18'
       react: '>=18'
-
-  react-moment@1.1.3:
-    resolution: {integrity: sha512-8EPvlUL8u6EknPp1ISF5MQ3wx2OHJVXIP/iZc4wRh3iV3XozftZERDv9ANZeAtMlhNNQHdFoqcZHFUkBSTONfA==}
-    peerDependencies:
-      moment: ^2.29.0
-      prop-types: ^15.7.0
-      react: ^16.0 || ^17.0.0 || ^18.0.0
 
   react-native@0.82.1:
     resolution: {integrity: sha512-tFAqcU7Z4g49xf/KnyCEzI4nRTu1Opcx05Ov2helr8ZTg1z7AJR/3sr2rZ+AAVlAs2IXk+B0WOxXGmdD3+4czA==}
@@ -19452,6 +19445,8 @@ snapshots:
       es-errors: 1.3.0
       is-data-view: 1.0.2
 
+  date-fns@4.1.0: {}
+
   debug@2.6.9:
     dependencies:
       ms: 2.0.0
@@ -23139,12 +23134,6 @@ snapshots:
       vfile: 6.0.3
     transitivePeerDependencies:
       - supports-color
-
-  react-moment@1.1.3(moment@2.29.4)(prop-types@15.8.1)(react@19.2.4):
-    dependencies:
-      moment: 2.29.4
-      prop-types: 15.8.1
-      react: 19.2.4
 
   react-native@0.82.1(@babel/core@7.28.5)(@types/react@19.2.14)(bufferutil@4.0.7)(react@19.2.4)(utf-8-validate@5.0.10):
     dependencies:
