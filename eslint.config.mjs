@@ -31,7 +31,16 @@ const TEST_AND_STORY_FILES = [
 export default tseslint.config(
     // Global ignores
     {
-        ignores: ['dist/**', 'lib/**', '.next/**', '.next-dev/**', 'node_modules/**', '.claude/**', 'next-env.d.ts'],
+        ignores: [
+            'dist/**',
+            'lib/**',
+            '.next/**',
+            '.next-dev/**',
+            'node_modules/**',
+            '.claude/**',
+            '.worktrees/**',
+            'next-env.d.ts',
+        ],
     },
 
     // Next.js config via compat (still legacy format in v15)

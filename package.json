@@ -8,14 +8,17 @@
         "build-sb": "storybook build",
         "coverage": "vitest --coverage",
         "dev": "next dev",
-        "format": "prettier --config .prettierrc.cjs '**/*.{ts,tsx,mts,mjs,cjs}' '*.json' --check",
+        "eslint:lint": "eslint",
+        "format": "pnpm pretty:format '**/*.{ts,tsx,mts,mjs,cjs}' '*.json'",
         "format:ci": "pnpm format",
         "gen": "pnpx shadcn@^2.4.0 add",
-        "lint": "eslint .",
+        "lint": "pnpm eslint:lint .",
+        "pretty:format": "prettier --config .prettierrc.cjs --check",
         "sb": "storybook dev -p 6006",
         "scan": "next dev & react-scan localhost:3000",
         "start": "next start",
         "test": "vitest --project specs run",
+        "test:changed": "pnpm vitest:test related --run",
         "test:ci": "vitest --project specs run",
         "test:e2e": "playwright test",
         "test:e2e:ci": "playwright test",
@@ -24,7 +27,8 @@
         "test:sb:watch": "vitest --project storybook --watch",
         "test:watch": "vitest --project specs --watch",
         "pretypes": "next build",
-        "types": "tsc --noEmit"
+        "types": "tsc --noEmit",
+        "vitest:test": "vitest --project specs"
     },
     "dependencies": {
         "@blockworks-foundation/mango-client": "3.6.7",
@@ -187,6 +191,12 @@
         "vitest": "3.2.4"
     },
     "packageManager": "pnpm@10.17.1",
+    "devEngines": {
+        "packageManager": {
+            "name": "pnpm",
+            "onFail": "error"
+        }
+    },
     "engines": {
         "node": "^22"
     },
