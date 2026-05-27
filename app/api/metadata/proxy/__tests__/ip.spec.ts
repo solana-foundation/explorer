@@ -120,7 +120,7 @@ describe('lookupHostnameSafely — pinned lookup behaviour', () => {
         vi.clearAllMocks();
     });
 
-    test('pinned lookup should return the validated address regardless of the hostname argument', async () => {
+    test('should return the validated address regardless of the hostname argument', async () => {
         mockLookupOnce([{ address: '8.8.8.8', family: 4 }]);
 
         const result = await lookupHostnameSafely('google.com');
@@ -139,7 +139,7 @@ describe('lookupHostnameSafely — pinned lookup behaviour', () => {
         });
     });
 
-    test('pinned lookup should respect the requested family filter', async () => {
+    test('should respect the requested family filter', async () => {
         mockLookupOnce([
             { address: '8.8.8.8', family: 4 },
             { address: '2001:4860:4860::8888', family: 6 },
@@ -162,7 +162,7 @@ describe('lookupHostnameSafely — pinned lookup behaviour', () => {
     // undici 6.x's `Agent` calls the lookup with `{ all: true }`, expecting
     // an array callback. If we only supported the single-result form, real
     // connections would fail with "Invalid IP address: undefined".
-    test('pinned lookup should return the full array when called with { all: true }', async () => {
+    test('should return the full array when called with { all: true }', async () => {
         mockLookupOnce([
             { address: '8.8.8.8', family: 4 },
             { address: '2001:4860:4860::8888', family: 6 },

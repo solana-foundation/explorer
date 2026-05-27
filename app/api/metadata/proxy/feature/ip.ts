@@ -106,11 +106,15 @@ function makePinnedLookup(addresses: LookupAddress[]): LookupFunction {
             callback(err, '', 0);
             return;
         }
+        // Node's LookupFunction typings require `null` (not `undefined`) for
+        // the no-error callback slot, so disable the prefer-undefined rule here.
         if (options.all) {
+            // eslint-disable-next-line unicorn/no-null
             callback(null, candidates);
             return;
         }
         const pick = candidates[0];
+        // eslint-disable-next-line unicorn/no-null
         callback(null, pick.address, pick.family);
     };
 }
