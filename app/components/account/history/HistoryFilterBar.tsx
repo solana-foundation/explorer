@@ -142,7 +142,7 @@ export function HistoryFilterChips(filters: HistoryFilters) {
     const { slot, blockTime, status } = filters;
     const updateFilters = useUpdateHistoryFilters();
     const hasAny = slot !== undefined || blockTime !== undefined || status !== undefined;
-    if (!hasAny) return null;
+    if (!hasAny) return undefined;
     return (
         <>
             {slot?.gte !== undefined && (
@@ -277,7 +277,7 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
                     <span className="e-hidden md:e-inline">{triggerLabel}</span>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="e-p-3 e-w-80">
+            <PopoverContent align="end" className="e-w-80 e-p-3">
                 <form
                     onSubmit={e => {
                         e.preventDefault();

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { fireEvent, render, renderHook, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -23,7 +24,7 @@ beforeEach(() => {
 });
 
 describe('useHistoryFilters', () => {
-    it('returns all-undefined when no params are set', () => {
+    it('should return all-undefined when no params are set', () => {
         setSearch('');
         const { result } = renderHook(() => useHistoryFilters());
         expect(result.current).toEqual({
@@ -33,25 +34,25 @@ describe('useHistoryFilters', () => {
         });
     });
 
-    it('parses both slot bounds from the gTFA filter paths', () => {
+    it('should parse both slot bounds from the gTFA filter paths', () => {
         setSearch('slot.gte=100&slot.lte=200');
         const { result } = renderHook(() => useHistoryFilters());
         expect(result.current.slot).toEqual({ gte: 100, lte: 200 });
     });
 
-    it('ignores negative and non-numeric values', () => {
+    it('should ignore negative and non-numeric values', () => {
         setSearch('slot.gte=-5&slot.lte=abc');
         const { result } = renderHook(() => useHistoryFilters());
         expect(result.current.slot).toBeUndefined();
     });
 
-    it('floors fractional values', () => {
+    it('should floor fractional values', () => {
         setSearch('slot.gte=100.9');
         const { result } = renderHook(() => useHistoryFilters());
         expect(result.current.slot).toEqual({ gte: 100, lte: undefined });
     });
 
-    it('parses the status enum, rejecting unknown values', () => {
+    it('should parse the status enum, rejecting unknown values', () => {
         setSearch('status=failed');
         const { result } = renderHook(() => useHistoryFilters());
         expect(result.current).toMatchObject({ status: 'failed' });
@@ -61,7 +62,7 @@ describe('useHistoryFilters', () => {
         expect(rejected.current).toMatchObject({ status: undefined });
     });
 
-    it('parses block-time bounds from the gTFA filter paths', () => {
+    it('should parse block-time bounds from the gTFA filter paths', () => {
         setSearch('blockTime.gte=1700000000&blockTime.lte=1700100000');
         const { result } = renderHook(() => useHistoryFilters());
         expect(result.current.blockTime).toEqual({ gte: 1_700_000_000, lte: 1_700_100_000 });
@@ -69,14 +70,14 @@ describe('useHistoryFilters', () => {
 });
 
 describe('HistoryFilterBar', () => {
-    it('shows a single Filters button when no filter is active', () => {
+    it('should show a single Filters button when no filter is active', () => {
         render(<HistoryFilterBar />);
         expect(screen.getByRole('button', { name: /^Filters$/ })).toBeInTheDocument();
         expect(screen.queryByText(/Slot ≥:/)).not.toBeInTheDocument();
         expect(screen.queryByText(/Slot ≤:/)).not.toBeInTheDocument();
     });
 
-    it('renders a chip per active slot bound', () => {
+    it('should render a chip per active slot bound', () => {
         render(<HistoryFilterBar slot={{ gte: 100, lte: 2_000_000 }} />);
         expect(screen.getByText(/Slot ≥:\s*100/)).toBeInTheDocument();
         // Use a regex since jsdom's toLocaleString thousand separator varies by ICU build.
@@ -84,7 +85,7 @@ describe('HistoryFilterBar', () => {
         expect(screen.getByRole('button', { name: /Edit filters/ })).toBeInTheDocument();
     });
 
-    it('clears a single slot bound when its chip × is clicked', () => {
+    it('should clear a single slot bound when its chip × is clicked', () => {
         setSearch('slot.gte=100&slot.lte=200');
         render(<HistoryFilterBar slot={{ gte: 100, lte: 200 }} />);
 
@@ -95,7 +96,7 @@ describe('HistoryFilterBar', () => {
         expect(href).toBe('/address/testAddress?slot.lte=200');
     });
 
-    it('applies both slot bounds from the popover', () => {
+    it('should apply both slot bounds from the popover', () => {
         render(<HistoryFilterBar />);
 
         fireEvent.click(screen.getByRole('button', { name: /^Filters$/ }));
@@ -109,7 +110,7 @@ describe('HistoryFilterBar', () => {
         expect(href).toMatch(/slot\.lte=500/);
     });
 
-    it('preserves unrelated query params when updating the URL', () => {
+    it('should preserve unrelated query params when updating the URL', () => {
         setSearch('cluster=devnet&slot.gte=100');
         render(<HistoryFilterBar slot={{ gte: 100 }} />);
 
@@ -119,7 +120,7 @@ describe('HistoryFilterBar', () => {
         expect(href).toBe('/address/testAddress?cluster=devnet');
     });
 
-    it('disables Apply and shows an error when slot ≥ exceeds slot ≤', () => {
+    it('should disable Apply and show an error when slot ≥ exceeds slot ≤', () => {
         render(<HistoryFilterBar />);
 
         fireEvent.click(screen.getByRole('button', { name: /^Filters$/ }));
@@ -134,7 +135,7 @@ describe('HistoryFilterBar', () => {
         expect(replaceMock).not.toHaveBeenCalled();
     });
 
-    it('applies the status select', () => {
+    it('should apply the status select', () => {
         render(<HistoryFilterBar />);
 
         fireEvent.click(screen.getByRole('button', { name: /^Filters$/ }));
@@ -145,12 +146,12 @@ describe('HistoryFilterBar', () => {
         expect(href).toMatch(/status=succeeded/);
     });
 
-    it('renders a chip for the status filter', () => {
+    it('should render a chip for the status filter', () => {
         render(<HistoryFilterBar status="failed" />);
         expect(screen.getByText(/Status:\s*Failed/)).toBeInTheDocument();
     });
 
-    it('clears a single non-slot filter via its chip', () => {
+    it('should clear a single non-slot filter via its chip', () => {
         setSearch('status=failed&slot.lte=200');
         render(<HistoryFilterBar slot={{ lte: 200 }} status="failed" />);
 
@@ -160,7 +161,7 @@ describe('HistoryFilterBar', () => {
         expect(href).toBe('/address/testAddress?slot.lte=200');
     });
 
-    it('clears all filters via Clear all', () => {
+    it('should clear all filters via Clear all', () => {
         setSearch('slot.gte=100&slot.lte=500');
         render(<HistoryFilterBar slot={{ gte: 100, lte: 500 }} />);
 
