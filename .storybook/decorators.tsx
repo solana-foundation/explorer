@@ -1,17 +1,29 @@
 import { ClusterProvider } from '@providers/cluster';
+import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { TransactionsProvider } from '@providers/transactions';
 import type { Decorator, Parameters } from '@storybook/react';
 import React from 'react';
 import { fn } from 'storybook/test';
 
 import { MockAccountsProvider } from './__mocks__/MockAccountsProvider';
+import { MockHistoryProvider } from './__mocks__/MockHistoryProvider';
+import { MockStatsProvider } from './__mocks__/MockStatsProvider';
+import { MockSupplyProvider } from './__mocks__/MockSupplyProvider';
 import { MockTokenInfoBatchProvider } from './__mocks__/MockTokenInfoBatchProvider';
+import { MockTransactionsProvider } from './__mocks__/MockTransactionsProvider';
 
 /** Wraps stories with ClusterProvider. Usage: `decorators: [withCluster]` */
 export const withCluster: Decorator = Story => (
     <ClusterProvider>
         <Story />
     </ClusterProvider>
+);
+
+/** Wraps stories with the real ScrollAnchorProvider. Usage: `decorators: [withScrollAnchor]` */
+export const withScrollAnchor: Decorator = Story => (
+    <ScrollAnchorProvider>
+        <Story />
+    </ScrollAnchorProvider>
 );
 
 /** Wraps stories with ClusterProvider and MockAccountsProvider. Usage: `decorators: [withClusterAndAccounts]` */
@@ -57,6 +69,54 @@ export const withTokenInfoBatch: Decorator = Story => (
     <MockTokenInfoBatchProvider>
         <Story />
     </MockTokenInfoBatchProvider>
+);
+
+/** Wraps stories with ClusterProvider and MockSupplyProvider. Usage: `decorators: [withSupply]` */
+export const withSupply: Decorator = Story => (
+    <ClusterProvider>
+        <MockSupplyProvider>
+            <Story />
+        </MockSupplyProvider>
+    </ClusterProvider>
+);
+
+/** Wraps stories with ClusterProvider and MockStatsProvider. Usage: `decorators: [withStats]` */
+export const withStats: Decorator = Story => (
+    <ClusterProvider>
+        <MockStatsProvider>
+            <Story />
+        </MockStatsProvider>
+    </ClusterProvider>
+);
+
+/**
+ * Wraps stories with ClusterProvider, MockTransactionsProvider, and MockAccountsProvider.
+ * Replaces the production TransactionsProvider so consumers don't fire RPC calls.
+ * Usage: `decorators: [withMockTransactions]`
+ */
+export const withMockTransactions: Decorator = Story => (
+    <ClusterProvider>
+        <MockTransactionsProvider>
+            <MockAccountsProvider>
+                <Story />
+            </MockAccountsProvider>
+        </MockTransactionsProvider>
+    </ClusterProvider>
+);
+
+/**
+ * Wraps stories with ClusterProvider, MockAccountsProvider, and MockHistoryProvider.
+ * Provides empty history cache for components consuming `useAccountHistory` and friends.
+ * Usage: `decorators: [withHistory]`
+ */
+export const withHistory: Decorator = Story => (
+    <ClusterProvider>
+        <MockAccountsProvider>
+            <MockHistoryProvider>
+                <Story />
+            </MockHistoryProvider>
+        </MockAccountsProvider>
+    </ClusterProvider>
 );
 
 type NextjsNavigationOptions = {

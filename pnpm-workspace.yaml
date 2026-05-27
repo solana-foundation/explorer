@@ -1,3 +1,7 @@
+autoInstallPeers: true
+minimumReleaseAge: 20160
 minimumReleaseAgeExclude:
   - '@codama/*'
   - codama
+  - '@solana-program/token'
+  - '@solana/kit'

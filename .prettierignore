@@ -8,3 +8,4 @@ dist/
 build/
 .pnpm-store/
 .claude/
+.worktrees/

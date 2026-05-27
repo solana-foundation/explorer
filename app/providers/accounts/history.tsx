@@ -13,8 +13,8 @@ import React from 'react';
 import { mergeTransactionMap } from '@/app/entities/transaction-data';
 import { Logger } from '@/app/shared/lib/logger';
 
-type TransactionMap = Map<string, ParsedTransactionWithMeta>;
-type FailedTransactionSignatures = Set<string>;
+export type TransactionMap = Map<string, ParsedTransactionWithMeta>;
+export type FailedTransactionSignatures = Set<string>;
 
 // Mirrors the Triton `getTransactionsForAddress` `filters` object one-to-one, so the
 // UI/URL layer and the RPC payload share the same shape and field names. The UI only
@@ -26,7 +26,7 @@ export type HistoryFilters = {
     status?: 'succeeded' | 'failed'; // filters.status (omit for "any")
 };
 
-type AccountHistory = {
+export type AccountHistory = {
     fetched: ConfirmedSignatureInfo[];
     transactionMap?: TransactionMap;
     failedTransactionSignatures?: FailedTransactionSignatures;
@@ -115,9 +115,15 @@ function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | 
     };
 }
 
-const StateContext = React.createContext<State | undefined>(undefined);
-const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
-const InFlightContext = React.createContext<Set<string> | undefined>(undefined);
+export const StateContext: React.Context<Readonly<State> | undefined> = React.createContext<State | undefined>(
+    undefined,
+);
+export const DispatchContext: React.Context<Dispatch | undefined> = React.createContext<Dispatch | undefined>(
+    undefined,
+);
+export const InFlightContext: React.Context<Readonly<Set<string>> | undefined> = React.createContext<
+    Set<string> | undefined
+>(undefined);
 // Monotonic per-address counter. Bumped whenever a request is superseded (e.g. a
 // filter change) so the in-flight response can be discarded instead of overwriting
 // the freshly-cleared cache. See `useResetAccountHistory`.

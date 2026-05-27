@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+# Mirrors the CI pipeline: format → lint → build → test
+corepack pnpm format:ci && corepack pnpm lint && corepack pnpm build && corepack pnpm test:ci
