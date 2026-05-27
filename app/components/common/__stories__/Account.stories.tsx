@@ -25,22 +25,16 @@ export default meta;
 type Story = StoryObj;
 
 export const Header: Story = {
-    render: () => (
-        <div className="card">
-            <AccountHeader title="Account Overview" analyticsSection="story" refresh={() => undefined} />
-        </div>
-    ),
+    render: () => <AccountHeader title="Account Overview" analyticsSection="story" refresh={() => undefined} />,
 };
 
 export const Rows: Story = {
     render: () => (
-        <div className="card">
-            <table className="table table-sm table-nowrap card-table">
-                <tbody>
-                    <AccountAddressRow account={sampleAccount} />
-                    <AccountBalanceRow account={sampleAccount} />
-                </tbody>
-            </table>
-        </div>
+        <table className="table table-sm table-nowrap card-table">
+            <tbody>
+                <AccountAddressRow account={sampleAccount} />
+                <AccountBalanceRow account={sampleAccount} />
+            </tbody>
+        </table>
     ),
 };

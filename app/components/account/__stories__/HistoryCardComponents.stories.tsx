@@ -1,15 +1,8 @@
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 
 import { HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 
-const withCardWrap: Decorator = Story => (
-    <div className="card">
-        <Story />
-    </div>
-);
-
 const meta: Meta = {
-    decorators: [withCardWrap],
     tags: ['autodocs'],
     title: 'Components/Account/HistoryCardComponents',
 };

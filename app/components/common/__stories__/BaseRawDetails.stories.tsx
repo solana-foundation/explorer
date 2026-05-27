@@ -11,12 +11,10 @@ import { BaseRawDetails } from '../BaseRawDetails';
 function TableWrapper({ children }: { children: React.ReactNode }) {
     return (
         <ClusterProvider>
-            <div className="card">
-                <div className="table-responsive mb-0">
-                    <table className="table table-sm table-nowrap card-table">
-                        <tbody className="list">{children}</tbody>
-                    </table>
-                </div>
+            <div className="table-responsive mb-0">
+                <table className="table table-sm table-nowrap card-table">
+                    <tbody className="list">{children}</tbody>
+                </table>
             </div>
         </ClusterProvider>
     );

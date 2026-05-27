@@ -80,6 +80,7 @@ function FeaturesTable({
             <div className="card-header">
                 <h4 className="card-header-title">{header}</h4>
             </div>
+            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive small-headers">
                 <table className="table">
                     <thead>
