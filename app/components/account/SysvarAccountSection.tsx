@@ -4,7 +4,7 @@ import { Slot } from '@components/common/Slot';
 import { useRefreshAccount } from '@entities/account';
 import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
-import { displayTimestamp } from '@utils/date';
+import { displayTimestamp, unixTimestampToMs } from '@utils/date';
 import {
     SysvarAccount,
     SysvarClockAccount,
@@ -217,7 +217,7 @@ function SysvarAccountClockCard({ account, sysvarAccount }: { account: Account; 
             <tr>
                 <td>Timestamp</td>
                 <td className="text-lg-end font-monospace">
-                    {displayTimestamp(sysvarAccount.info.unixTimestamp * 1000)}
+                    {displayTimestamp(unixTimestampToMs(sysvarAccount.info.unixTimestamp))}
                 </td>
             </tr>
 
@@ -259,7 +259,7 @@ function SysvarAccountRentCard({ account, sysvarAccount }: { account: Account; s
 
             <tr>
                 <td>Burn Percent</td>
-                <td className="text-lg-end">{sysvarAccount.info.burnPercent + '%'}</td>
+                <td className="text-lg-end">{`${sysvarAccount.info.burnPercent}%`}</td>
             </tr>
 
             <tr>

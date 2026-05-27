@@ -6,6 +6,20 @@ import type { Preview } from '@storybook/react';
 import { Rubik } from 'next/font/google';
 import React, { useEffect } from 'react';
 
+// Storybook serialises story args with JSON.stringify (for the controls panel and inter-frame
+// messaging), which throws on BigInt. Story fixtures here use BigInt for lamports / epoch values,
+// so teach BigInt how to encode itself as a string.
+
+declare global {
+    interface BigInt {
+        toJSON(): string;
+    }
+}
+
+BigInt.prototype.toJSON = function () {
+    return this.toString();
+};
+
 // Load font with display: swap for better loading behavior
 const rubikFont = Rubik({
     display: 'swap',

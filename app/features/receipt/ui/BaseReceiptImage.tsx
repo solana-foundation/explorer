@@ -1,5 +1,6 @@
 import { Logo } from '@/app/shared/components/SolanaLogo';
 
+import { splitAtFirstNonZeroDigit } from '../lib/split-at-first-non-zero-digit';
 import type { FormattedReceipt } from '../types';
 import { BottomLine } from './BottomLine';
 
@@ -375,26 +376,16 @@ function Description({ text }: { text: string }) {
 }
 
 function AmountDisplay({ amount, unit }: { amount: string; unit: string }) {
-    const { bright, dim } = splitAmount(amount);
+    const { leadingZeros, significantDigits } = splitAtFirstNonZeroDigit(amount);
     return (
         <span style={{ alignItems: 'center', display: 'flex', gap: '8px' }}>
             <span style={{ display: 'flex' }}>
-                {dim && <span style={{ ...amountTextStyle, color: colors.neutral500 }}>{dim}</span>}
-                <span style={{ ...amountTextStyle, color: colors.neutral950 }}>{bright}</span>
+                {leadingZeros && <span style={{ ...amountTextStyle, color: colors.neutral500 }}>{leadingZeros}</span>}
+                <span style={{ ...amountTextStyle, color: colors.neutral950 }}>{significantDigits}</span>
             </span>
             <span style={{ ...amountTextStyle, color: colors.neutral500 }}>{unit}</span>
         </span>
     );
-}
-
-// Split "0.000123" into dim="0.00" + bright="123". Non-zero integer parts are unsplit.
-// eslint-disable-next-line no-restricted-syntax -- way to separate the leading zero fraction from the first significant digit
-const AMOUNT_SPLIT_RE = /^(0\.0*)([1-9].*)/;
-
-function splitAmount(formatted: string): { bright: string; dim: string } {
-    const match = formatted.match(AMOUNT_SPLIT_RE);
-    if (!match) return { bright: formatted, dim: '' };
-    return { bright: match[2], dim: match[1] };
 }
 
 function NoReceipt({ size }: { size: { width: number; height: number } }) {

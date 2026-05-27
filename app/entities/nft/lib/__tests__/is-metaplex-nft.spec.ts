@@ -37,61 +37,61 @@ function makeTokenProgramData(
 }
 
 describe('isMetaplexNFT', () => {
-    it('returns true for standard NFT with supply=1', () => {
+    it('should return true for standard NFT with supply=1', () => {
         const parsedData = makeTokenProgramData();
         const mintInfo = makeMintInfo({ supply: '1' });
         expect(isMetaplexNFT(parsedData, mintInfo)).toBe(true);
     });
 
-    it('returns true for NonFungible tokenStandard (0) even with supply > 1', () => {
+    it('should return true for NonFungible tokenStandard (0) even with supply > 1', () => {
         const parsedData = makeTokenProgramData({ tokenStandard: TokenStandard.NonFungible });
         const mintInfo = makeMintInfo({ supply: '100' });
         expect(isMetaplexNFT(parsedData, mintInfo)).toBe(true);
     });
 
-    it('returns true for NonFungibleEdition tokenStandard (3)', () => {
+    it('should return true for NonFungibleEdition tokenStandard (3)', () => {
         const parsedData = makeTokenProgramData({ tokenStandard: TokenStandard.NonFungibleEdition });
         const mintInfo = makeMintInfo({ supply: '100' });
         expect(isMetaplexNFT(parsedData, mintInfo)).toBe(true);
     });
 
-    it('returns true for ProgrammableNonFungible tokenStandard (4)', () => {
+    it('should return true for ProgrammableNonFungible tokenStandard (4)', () => {
         const parsedData = makeTokenProgramData({ tokenStandard: TokenStandard.ProgrammableNonFungible });
         const mintInfo = makeMintInfo({ supply: '100' });
         expect(isMetaplexNFT(parsedData, mintInfo)).toBe(true);
     });
 
-    it('returns false when decimals > 0', () => {
+    it('should return false when decimals > 0', () => {
         const parsedData = makeTokenProgramData();
         const mintInfo = makeMintInfo({ decimals: 6 });
         expect(isMetaplexNFT(parsedData, mintInfo)).toBe(false);
     });
 
-    it('returns false when parsedData is undefined', () => {
+    it('should return false when parsedData is undefined', () => {
         const mintInfo = makeMintInfo();
         expect(isMetaplexNFT(undefined, mintInfo)).toBe(false);
     });
 
-    it('returns false when nftData is absent', () => {
+    it('should return false when nftData is absent', () => {
         const parsedData = makeTokenProgramData({ hasNftData: false });
         const mintInfo = makeMintInfo();
         expect(isMetaplexNFT(parsedData, mintInfo)).toBe(false);
     });
 
-    it('returns false when parsed type is not mint', () => {
+    it('should return false when parsed type is not mint', () => {
         const parsedData = makeTokenProgramData();
         (parsedData.parsed as any).type = 'account';
         const mintInfo = makeMintInfo();
         expect(isMetaplexNFT(parsedData, mintInfo)).toBe(false);
     });
 
-    it('returns false for FungibleAsset tokenStandard (1) with supply > 1', () => {
+    it('should return false for FungibleAsset tokenStandard (1) with supply > 1', () => {
         const parsedData = makeTokenProgramData({ tokenStandard: TokenStandard.FungibleAsset });
         const mintInfo = makeMintInfo({ supply: '100' });
         expect(isMetaplexNFT(parsedData, mintInfo)).toBe(false);
     });
 
-    it('returns false for Fungible tokenStandard (2) with supply > 1', () => {
+    it('should return false for Fungible tokenStandard (2) with supply > 1', () => {
         const parsedData = makeTokenProgramData({ tokenStandard: TokenStandard.Fungible });
         const mintInfo = makeMintInfo({ supply: '100' });
         expect(isMetaplexNFT(parsedData, mintInfo)).toBe(false);

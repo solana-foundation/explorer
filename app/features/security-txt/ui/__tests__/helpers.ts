@@ -33,7 +33,7 @@ export function encodeSecurityTxt(
         parts.push(k, v);
     }
 
-    const content = parts.join('\0') + '\0';
+    const content = `${parts.join('\0')}\0`;
     return Buffer.from(HEADER + content + FOOTER, 'utf8').toString('base64');
 }
 

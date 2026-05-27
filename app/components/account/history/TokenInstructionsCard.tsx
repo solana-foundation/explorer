@@ -10,7 +10,8 @@ import { FetchStatus } from '@providers/cache';
 import { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { getTokenInstructionName, InstructionContainer } from '@utils/instruction';
 import React, { useMemo } from 'react';
-import Moment from 'react-moment';
+
+import { RelativeTime } from '@/app/shared/RelativeTime';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 import { extractMintDetails, MintDetails } from './common';
@@ -71,9 +72,7 @@ export function TokenInstructionsCard({ address }: { address: string }) {
                             </td>
 
                             {hasTimestamps && (
-                                <td className="text-muted">
-                                    {blockTime && <Moment date={blockTime * 1000} fromNow />}
-                                </td>
+                                <td className="text-muted">{blockTime && <RelativeTime date={blockTime * 1000} />}</td>
                             )}
 
                             <td>{instructionName}</td>

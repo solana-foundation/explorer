@@ -3,41 +3,41 @@ import { describe, expect, it } from 'vitest';
 import { extractProgramNameFromRepo, getProgramName, isValidGitHubUrl } from '../model';
 
 describe('isValidGitHubUrl', () => {
-    it('validates github.com URLs', () => {
+    it('should validate github.com URLs', () => {
         expect(isValidGitHubUrl('https://github.com/org/repo')).toBe(true);
         expect(isValidGitHubUrl('https://www.github.com/org/repo')).toBe(true);
     });
 
-    it('rejects non-GitHub URLs', () => {
+    it('should reject non-GitHub URLs', () => {
         expect(isValidGitHubUrl('https://gitlab.com/org/repo')).toBe(false);
         expect(isValidGitHubUrl('https://malicious.com/org/repo')).toBe(false);
     });
 
-    it('handles invalid URLs', () => {
+    it('should handle invalid URLs', () => {
         expect(isValidGitHubUrl('not-a-url')).toBe(false);
     });
 });
 
 describe('extractProgramNameFromRepo', () => {
-    it('extracts name from GitHub URL', () => {
+    it('should extract name from GitHub URL', () => {
         expect(extractProgramNameFromRepo('https://github.com/Ellipsis-Labs/phoenix-v1')).toBe('Phoenix V1');
     });
 
-    it('handles underscores', () => {
+    it('should handle underscores', () => {
         expect(extractProgramNameFromRepo('https://github.com/org/token_metadata')).toBe('Token Metadata');
     });
 
-    it('returns null for invalid URLs', () => {
+    it('should return null for invalid URLs', () => {
         expect(extractProgramNameFromRepo('not-a-url')).toBeNull();
     });
 
-    it('returns null for non-GitHub URLs (security)', () => {
+    it('should return null for non-GitHub URLs (security)', () => {
         expect(extractProgramNameFromRepo('https://malicious.com/org/repo')).toBeNull();
     });
 });
 
 describe('getProgramName', () => {
-    it('uses repo name from GitHub URL', () => {
+    it('should use repo name from GitHub URL', () => {
         expect(
             getProgramName(
                 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
@@ -46,15 +46,15 @@ describe('getProgramName', () => {
         ).toBe('Solana Program Library');
     });
 
-    it('extracts repo name correctly', () => {
+    it('should extract repo name correctly', () => {
         expect(getProgramName('unknown123', 'https://github.com/org/my-program')).toBe('My Program');
     });
 
-    it('falls back to address when no repo URL', () => {
+    it('should fall back to address when no repo URL', () => {
         expect(getProgramName('12UJ...8KF')).toBe('12UJ...8KF');
     });
 
-    it('falls back to address for non-GitHub URLs', () => {
+    it('should fall back to address for non-GitHub URLs', () => {
         expect(getProgramName('unknown123', 'https://malicious.com/org/repo')).toBe('unknown123');
     });
 });

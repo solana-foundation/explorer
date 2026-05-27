@@ -36,7 +36,7 @@ describe('parseSystemProgramInstruction', () => {
         const lamports = 2100000;
         const space = 165;
 
-        test('parses 3-account variant (payer !== baseAccount)', () => {
+        test('should parse 3-account variant (payer !== baseAccount)', () => {
             // Create instruction with 3 accounts: payer, newAccount, baseAccount
             const instruction = new TransactionInstruction({
                 data: createCreateAccountWithSeedData({
@@ -67,7 +67,7 @@ describe('parseSystemProgramInstruction', () => {
             expect(result.info.owner.equals(tokenProgram)).toBe(true);
         });
 
-        test('parses 2-account variant (payer === baseAccount)', () => {
+        test('should parse 2-account variant (payer === baseAccount)', () => {
             // Create instruction with 2 accounts: payer (who is also baseAccount), newAccount
             // This is the case that was causing the "Not enough accounts" error
             const instruction = new TransactionInstruction({
@@ -105,7 +105,7 @@ describe('parseSystemProgramInstruction', () => {
             expect(result.info.owner.equals(tokenProgram)).toBe(true);
         });
 
-        test('handles different seed lengths correctly', () => {
+        test('should handle different seed lengths correctly', () => {
             const longSeed = 'this-is-a-very-long-seed-for-testing-purposes';
 
             const instruction = new TransactionInstruction({
@@ -129,7 +129,7 @@ describe('parseSystemProgramInstruction', () => {
             expect(result.info.seed).toBe(longSeed);
         });
 
-        test('returns null for non-System Program instructions', () => {
+        test('should return null for non-System Program instructions', () => {
             const instruction = new TransactionInstruction({
                 // Not System Program
                 data: Buffer.from([0, 0, 0, 0]),
@@ -143,7 +143,7 @@ describe('parseSystemProgramInstruction', () => {
             expect(result).toBeNull();
         });
 
-        test('returns null for unrecognized System Program instructions', () => {
+        test('should return null for unrecognized System Program instructions', () => {
             const instruction = new TransactionInstruction({
                 data: Buffer.from([255, 255, 255, 255]),
                 keys: [],

@@ -486,7 +486,7 @@ describe('getUniqPdaNodesFromIxs — conditional branches', () => {
             name: 'ix',
         });
 
-    it('does not throw when only ifTrue is a PdaValueNode', () => {
+    it('should not throw when only ifTrue is a PdaValueNode', () => {
         const ix = makeIxWithConditional(pdaValueNode(pdaLinkNode('poll')), accountValueNode('authority'));
         expect(() => getUniqPdaNodesFromIxs([ix])).not.toThrow();
         const result = getUniqPdaNodesFromIxs([ix]);
@@ -494,7 +494,7 @@ describe('getUniqPdaNodesFromIxs — conditional branches', () => {
         expect(result[0].pda.name).toBe('poll');
     });
 
-    it('does not throw when only ifFalse is a PdaValueNode', () => {
+    it('should not throw when only ifFalse is a PdaValueNode', () => {
         const ix = makeIxWithConditional(accountValueNode('authority'), pdaValueNode(pdaLinkNode('otherPda')));
         expect(() => getUniqPdaNodesFromIxs([ix])).not.toThrow();
         const result = getUniqPdaNodesFromIxs([ix]);
@@ -502,7 +502,7 @@ describe('getUniqPdaNodesFromIxs — conditional branches', () => {
         expect(result[0].pda.name).toBe('otherPda');
     });
 
-    it('collects both PdaValueNode branches when both are PDAs', () => {
+    it('should collect both PdaValueNode branches when both are PDAs', () => {
         const ix = makeIxWithConditional(pdaValueNode(pdaLinkNode('pdaA')), pdaValueNode(pdaLinkNode('pdaB')));
         const result = getUniqPdaNodesFromIxs([ix]);
         expect(result.map(r => r.pda.name).sort()).toEqual(['pdaA', 'pdaB']);

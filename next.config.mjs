@@ -47,19 +47,19 @@ const nextConfig = {
             ...SUPPLY_ALIASES.map(oldRoot => ({
                 destination: '/supply',
                 permanent: true,
-                source: '/' + oldRoot,
+                source: `/${oldRoot}`,
             })),
             ...ADDRESS_ALIASES.flatMap(oldRoot =>
                 [':address', ':address/:tab'].map(path => ({
-                    destination: '/' + ['address', path].join('/'),
+                    destination: `/${['address', path].join('/')}`,
                     permanent: true,
-                    source: '/' + [oldRoot, path].join('/'),
+                    source: `/${[oldRoot, path].join('/')}`,
                 })),
             ),
             ...TX_ALIASES.map(oldRoot => ({
-                destination: '/' + ['tx', ':signature'].join('/'),
+                destination: `/${['tx', ':signature'].join('/')}`,
                 permanent: true,
-                source: '/' + [oldRoot, ':signature'].join('/'),
+                source: `/${[oldRoot, ':signature'].join('/')}`,
             })),
             {
                 destination: '/address/:address',

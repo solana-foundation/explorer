@@ -57,7 +57,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
 
             <tr>
                 <td>Commission</td>
-                <td className="text-lg-end">{voteAccount.info.commission + '%'}</td>
+                <td className="text-lg-end">{`${voteAccount.info.commission}%`}</td>
             </tr>
 
             <tr>

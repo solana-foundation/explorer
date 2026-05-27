@@ -98,7 +98,7 @@ async function main() {
         console.log(`  Static pages: ${routes.length}`);
         console.log(`  Program accounts: ${PROGRAM_ADDRESSES.length}`);
     } catch (error) {
-        console.error('Error:', (error as Error).message);
+        console.error('Error:', error instanceof Error ? error.message : error);
         process.exit(1);
     }
 }

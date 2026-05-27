@@ -90,7 +90,7 @@ describe('VerifiedProgramsCard', () => {
         });
     });
 
-    it('renders loading state initially', () => {
+    it('should render loading state initially', () => {
         // Mock a slow fetch that never resolves
         vi.mocked(fetchProgramsPage).mockImplementation(
             () =>
@@ -105,7 +105,7 @@ describe('VerifiedProgramsCard', () => {
         expect(screen.getByText('Loading verified programs...')).toBeInTheDocument();
     });
 
-    it('renders error state', async () => {
+    it('should render error state', async () => {
         vi.mocked(fetchProgramsPage).mockRejectedValue(new Error('Failed to fetch'));
 
         render(<VerifiedProgramsCard />);
@@ -116,7 +116,7 @@ describe('VerifiedProgramsCard', () => {
         expect(screen.getByText('Failed to load verified programs.')).toBeInTheDocument();
     });
 
-    it('renders programs list', async () => {
+    it('should render programs list', async () => {
         render(<VerifiedProgramsCard />);
 
         await waitFor(() => {
@@ -130,7 +130,7 @@ describe('VerifiedProgramsCard', () => {
         expect(screen.getByText('Phoenix V1')).toBeInTheDocument();
     });
 
-    it('renders status badges for all programs', async () => {
+    it('should render status badges for all programs', async () => {
         render(<VerifiedProgramsCard />);
 
         await waitFor(() => {
@@ -139,7 +139,7 @@ describe('VerifiedProgramsCard', () => {
         });
     });
 
-    it('renders search input', async () => {
+    it('should render search input', async () => {
         render(<VerifiedProgramsCard />);
 
         await waitFor(() => {
@@ -150,7 +150,7 @@ describe('VerifiedProgramsCard', () => {
         expect(searchInput).toHaveAttribute('aria-label', 'Search programs by name or address');
     });
 
-    it('filters programs by search query (name)', async () => {
+    it('should filter programs by search query (name)', async () => {
         const user = userEvent.setup();
         render(<VerifiedProgramsCard />);
 
@@ -169,7 +169,7 @@ describe('VerifiedProgramsCard', () => {
         expect(screen.queryByText('Token 2022')).not.toBeInTheDocument();
     });
 
-    it('shows no results message when search has no matches', async () => {
+    it('should show no results message when search has no matches', async () => {
         const user = userEvent.setup();
         render(<VerifiedProgramsCard />);
 
@@ -185,7 +185,7 @@ describe('VerifiedProgramsCard', () => {
         });
     });
 
-    it('renders table headers including Source Code column', async () => {
+    it('should render table headers including Source Code column', async () => {
         render(<VerifiedProgramsCard />);
 
         await waitFor(() => {
@@ -197,7 +197,7 @@ describe('VerifiedProgramsCard', () => {
         expect(screen.getByText('Status')).toBeInTheDocument();
     });
 
-    it('renders copyable addresses with correct program IDs', async () => {
+    it('should render copyable addresses with correct program IDs', async () => {
         render(<VerifiedProgramsCard />);
 
         await waitFor(() => {
@@ -208,7 +208,7 @@ describe('VerifiedProgramsCard', () => {
         expect(screen.getByText('PhoeNiXZ8ByJGLkxNfZRnkUfjvmuYqLR89jjFHGqdXY')).toBeInTheDocument();
     });
 
-    it('renders GitHub links for programs with repos', async () => {
+    it('should render GitHub links for programs with repos', async () => {
         render(<VerifiedProgramsCard />);
 
         await waitFor(() => {
@@ -221,7 +221,7 @@ describe('VerifiedProgramsCard', () => {
         expect(link).toHaveAttribute('rel', 'noopener noreferrer');
     });
 
-    it('shows Load More button and loads additional pages', async () => {
+    it('should show Load More button and loads additional pages', async () => {
         const user = userEvent.setup();
 
         vi.mocked(fetchProgramsPage).mockResolvedValueOnce({

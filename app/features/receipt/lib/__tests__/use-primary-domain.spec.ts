@@ -22,12 +22,12 @@ describe('usePrimaryDomain', () => {
         vi.mocked(useUserANSDomains).mockReturnValue(swrStyle(undefined) as ReturnType<typeof useUserANSDomains>);
     });
 
-    it('returns undefined when both SOL and ANS domains are null', () => {
+    it('should return undefined when both SOL and ANS domains are null', () => {
         const { result } = renderHook(() => usePrimaryDomain(VALID_ADDRESS));
         expect(result.current).toBeUndefined();
     });
 
-    it('returns undefined when both SOL and ANS domains are empty arrays', () => {
+    it('should return undefined when both SOL and ANS domains are empty arrays', () => {
         vi.mocked(useUserSnsDomains).mockReturnValue(swrStyle([]) as ReturnType<typeof useUserSnsDomains>);
         vi.mocked(useUserANSDomains).mockReturnValue(swrStyle([]) as ReturnType<typeof useUserANSDomains>);
 
@@ -35,7 +35,7 @@ describe('usePrimaryDomain', () => {
         expect(result.current).toBeUndefined();
     });
 
-    it('returns first SOL domain when only SOL domains exist (sorted by name)', () => {
+    it('should return first SOL domain when only SOL domains exist (sorted by name)', () => {
         vi.mocked(useUserSnsDomains).mockReturnValue(
             swrStyle([
                 { address: 'addr1', name: 'alex.sol' },
@@ -47,7 +47,7 @@ describe('usePrimaryDomain', () => {
         expect(result.current).toBe('alex.sol');
     });
 
-    it('returns first ANS domain when SNS domains are empty (sorted by name)', () => {
+    it('should return first ANS domain when SNS domains are empty (sorted by name)', () => {
         vi.mocked(useUserSnsDomains).mockReturnValue(swrStyle([]) as ReturnType<typeof useUserSnsDomains>);
         vi.mocked(useUserANSDomains).mockReturnValue(
             swrStyle([
@@ -60,7 +60,7 @@ describe('usePrimaryDomain', () => {
         expect(result.current).toBe('alice.abc');
     });
 
-    it('prefers SOL domain over ANS when both exist', () => {
+    it('should prefer SOL domain over ANS when both exist', () => {
         vi.mocked(useUserSnsDomains).mockReturnValue(
             swrStyle([{ address: 'addr1', name: 'user.sol' }]) as ReturnType<typeof useUserSnsDomains>,
         );
@@ -72,7 +72,7 @@ describe('usePrimaryDomain', () => {
         expect(result.current).toBe('user.sol');
     });
 
-    it('returns ANS domain when SOL is empty and ANS has domains', () => {
+    it('should return ANS domain when SOL is empty and ANS has domains', () => {
         vi.mocked(useUserSnsDomains).mockReturnValue(swrStyle([]) as ReturnType<typeof useUserSnsDomains>);
         vi.mocked(useUserANSDomains).mockReturnValue(
             swrStyle([{ address: 'addr1', name: 'fallback.abc' }]) as ReturnType<typeof useUserANSDomains>,
@@ -82,13 +82,13 @@ describe('usePrimaryDomain', () => {
         expect(result.current).toBe('fallback.abc');
     });
 
-    it('passes address to SNS hook and disables ANS when SNS is still loading', () => {
+    it('should pass address to SNS hook and disables ANS when SNS is still loading', () => {
         renderHook(() => usePrimaryDomain(VALID_ADDRESS));
         expect(useUserSnsDomains).toHaveBeenCalledWith(VALID_ADDRESS);
         expect(useUserANSDomains).toHaveBeenCalledWith('');
     });
 
-    it('passes address to ANS hook only when SNS returns empty', () => {
+    it('should pass address to ANS hook only when SNS returns empty', () => {
         vi.mocked(useUserSnsDomains).mockReturnValue(swrStyle([]) as ReturnType<typeof useUserSnsDomains>);
         renderHook(() => usePrimaryDomain(VALID_ADDRESS));
         expect(useUserANSDomains).toHaveBeenCalledWith(VALID_ADDRESS);

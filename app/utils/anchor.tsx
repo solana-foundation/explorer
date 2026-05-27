@@ -531,7 +531,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 </SimpleRow>
             );
         } else {
-            throw Error('Unsupported type kind: ' + fieldType.type.kind);
+            throw Error(`Unsupported type kind: ${fieldType.type.kind}`);
         }
     } else if ('option' in type) {
         if (value === null) {

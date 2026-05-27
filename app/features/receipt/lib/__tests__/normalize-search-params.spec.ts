@@ -3,31 +3,31 @@ import { describe, expect, it } from 'vitest';
 import { normalizeSearchParams } from '../normalize-search-params';
 
 describe('normalizeSearchParams', () => {
-    it('returns empty object for empty input', () => {
+    it('should return empty object for empty input', () => {
         expect(normalizeSearchParams({})).toEqual({});
     });
 
-    it('leaves normal params unchanged', () => {
+    it('should leave normal params unchanged', () => {
         expect(normalizeSearchParams({ foo: 'bar', view: 'receipt' })).toEqual({
             foo: 'bar',
             view: 'receipt',
         });
     });
 
-    it('exposes HTML-entity-mangled key under real name (amp;cluster → cluster)', () => {
+    it('should expose HTML-entity-mangled key under real name (amp;cluster → cluster)', () => {
         expect(normalizeSearchParams({ 'amp;cluster': 'devnet', view: 'receipt' })).toEqual({
             cluster: 'devnet',
             view: 'receipt',
         });
     });
 
-    it('prefers real key when both real and amp;-prefixed param exist', () => {
+    it('should prefer real key when both real and amp;-prefixed param exist', () => {
         expect(normalizeSearchParams({ 'amp;cluster': 'devnet', cluster: 'testnet' })).toEqual({
             cluster: 'testnet',
         });
     });
 
-    it('normalizes multiple amp;-prefixed params', () => {
+    it('should normalize multiple amp;-prefixed params', () => {
         expect(
             normalizeSearchParams({
                 'amp;cluster': 'devnet',
@@ -41,14 +41,14 @@ describe('normalizeSearchParams', () => {
         });
     });
 
-    it('preserves array values', () => {
+    it('should preserve array values', () => {
         expect(normalizeSearchParams({ 'amp;cluster': 'devnet', ids: ['a', 'b'] })).toEqual({
             cluster: 'devnet',
             ids: ['a', 'b'],
         });
     });
 
-    it('normalizes many amp;-prefixed params (long query string)', () => {
+    it('should normalize many amp;-prefixed params (long query string)', () => {
         expect(
             normalizeSearchParams({
                 'amp;a': '1',
@@ -68,7 +68,7 @@ describe('normalizeSearchParams', () => {
         });
     });
 
-    it('prefers real keys when multiple pairs of real and amp;-prefixed exist', () => {
+    it('should prefer real keys when multiple pairs of real and amp;-prefixed exist', () => {
         expect(
             normalizeSearchParams({
                 'amp;cluster': 'devnet',
@@ -85,7 +85,7 @@ describe('normalizeSearchParams', () => {
         });
     });
 
-    it('handles only amp;-prefixed params (no normal keys)', () => {
+    it('should handle only amp;-prefixed params (no normal keys)', () => {
         expect(
             normalizeSearchParams({
                 'amp;bar': 'y',
@@ -99,7 +99,7 @@ describe('normalizeSearchParams', () => {
         });
     });
 
-    it('normalizes double-encoded amp;amp;foo to single amp;foo key (one level)', () => {
+    it('should normalize double-encoded amp;amp;foo to single amp;foo key (one level)', () => {
         // If a client sent ?foo=1&amp;amp;bar=2, we get key "amp;amp;bar" -> realKey "amp;bar"
         expect(normalizeSearchParams({ 'amp;amp;bar': '2', foo: '1' })).toEqual({
             'amp;bar': '2',
@@ -107,13 +107,13 @@ describe('normalizeSearchParams', () => {
         });
     });
 
-    it('key exactly "amp;" becomes empty string key', () => {
+    it('should treat key exactly "amp;" as becoming empty string key', () => {
         expect(normalizeSearchParams({ 'amp;': 'orphan' })).toEqual({
             '': 'orphan',
         });
     });
 
-    it('returns empty object for null/undefined-like input', () => {
+    it('should return empty object for null/undefined-like input', () => {
         expect(normalizeSearchParams(null as unknown as Record<string, string>)).toEqual({});
         expect(normalizeSearchParams(undefined as unknown as Record<string, string>)).toEqual({});
     });

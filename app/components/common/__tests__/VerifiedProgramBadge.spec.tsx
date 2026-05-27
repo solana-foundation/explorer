@@ -33,7 +33,7 @@ const mockPubkey = new PublicKey('cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK');
 describe('VerifiedProgramBadge (mocked useIsProgramVerified)', () => {
     afterEach(() => vi.clearAllMocks());
 
-    it('shows verified badge when isVerified is true', () => {
+    it('should show verified badge when isVerified is true', () => {
         (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.MainnetBeta });
         (useIsProgramVerified as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
             data: true,
@@ -44,7 +44,7 @@ describe('VerifiedProgramBadge (mocked useIsProgramVerified)', () => {
         expect(screen.getByText(/Program Source Verified/i)).toBeInTheDocument();
     });
 
-    it('shows not verified badge when isVerified is false', () => {
+    it('should show not verified badge when isVerified is false', () => {
         (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.MainnetBeta });
         (useIsProgramVerified as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
             data: false,
@@ -55,7 +55,7 @@ describe('VerifiedProgramBadge (mocked useIsProgramVerified)', () => {
         expect(screen.getByText(/Not verified/i)).toBeInTheDocument();
     });
 
-    it('shows error badge when error is true', () => {
+    it('should show error badge when error is true', () => {
         (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.MainnetBeta });
         (useIsProgramVerified as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
             data: false,
@@ -66,7 +66,7 @@ describe('VerifiedProgramBadge (mocked useIsProgramVerified)', () => {
         expect(screen.getByText(/Error fetching verified build information/i)).toBeInTheDocument();
     });
 
-    it('shows loading badge when isLoading is true', () => {
+    it('should show loading badge when isLoading is true', () => {
         (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.MainnetBeta });
         (useIsProgramVerified as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
             data: false,

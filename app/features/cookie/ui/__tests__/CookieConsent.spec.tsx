@@ -21,14 +21,14 @@ describe('CookieConsent', () => {
         );
     });
 
-    it('does not render when consent exists and skips geo-location fetch', async () => {
+    it('should not render when consent exists and skips geo-location fetch', async () => {
         vi.mocked(getCookie).mockReturnValue(EConsentStatus.Granted);
         render(<CookieConsent />);
         await waitFor(() => expect(screen.queryByText('ACCEPT')).toBeNull());
         expect(fetch).not.toHaveBeenCalled();
     });
 
-    it('does not render for non-EU users and auto-grants consent', async () => {
+    it('should not render for non-EU users and auto-grants consent', async () => {
         vi.stubGlobal(
             'fetch',
             vi.fn(() => Promise.resolve({ json: () => Promise.resolve({ isEU: false }) })),
@@ -39,7 +39,7 @@ describe('CookieConsent', () => {
         expect(setCookie).toHaveBeenCalledWith(COOKIE_CONSENT_NAME, EConsentStatus.Granted, expect.any(Number));
     });
 
-    it('auto-grants consent when geo-location fails', async () => {
+    it('should auto-grant consent when geo-location fails', async () => {
         vi.stubGlobal(
             'fetch',
             vi.fn(() => Promise.reject(new Error('Network error'))),
@@ -52,7 +52,7 @@ describe('CookieConsent', () => {
         expect(screen.queryByText('ACCEPT')).toBeNull();
     });
 
-    it('does not overwrite existing consent and skips geo-location fetch', async () => {
+    it('should not overwrite existing consent and skips geo-location fetch', async () => {
         vi.mocked(getCookie).mockReturnValue(EConsentStatus.Denied);
         render(<CookieConsent />);
         await waitFor(() => expect(screen.queryByText('ACCEPT')).toBeNull());
@@ -60,14 +60,14 @@ describe('CookieConsent', () => {
         expect(setCookie).not.toHaveBeenCalled();
     });
 
-    it('handles accept click', async () => {
+    it('should handle accept click', async () => {
         render(<CookieConsent />);
         const btn = await screen.findByText('ACCEPT', {}, { timeout: 3000 });
         await userEvent.click(btn);
         expect(setCookie).toHaveBeenCalledWith(COOKIE_CONSENT_NAME, EConsentStatus.Granted, expect.any(Number));
     });
 
-    it('handles opt-out click', async () => {
+    it('should handle opt-out click', async () => {
         render(<CookieConsent />);
         const btn = await screen.findByText('OPT-OUT', {}, { timeout: 3000 });
         await userEvent.click(btn);

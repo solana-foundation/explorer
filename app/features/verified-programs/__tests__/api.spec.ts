@@ -86,7 +86,7 @@ describe('fetchProgramsPage', () => {
     });
 
     describe('successful requests', () => {
-        it('fetches programs page with all metadata', async () => {
+        it('should fetch programs page with all metadata', async () => {
             // Mock list API response
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockListResponse,
@@ -109,7 +109,7 @@ describe('fetchProgramsPage', () => {
             expect(result.currentPage).toBe(1);
         });
 
-        it('calls list API with correct page number', async () => {
+        it('should call list API with correct page number', async () => {
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockListResponse,
                 ok: true,
@@ -128,7 +128,7 @@ describe('fetchProgramsPage', () => {
             expect(fetch).toHaveBeenCalledWith('/api/verified-programs/list/2');
         });
 
-        it('fetches metadata for all programs', async () => {
+        it('should fetch metadata for all programs', async () => {
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockListResponse,
                 ok: true,
@@ -150,7 +150,7 @@ describe('fetchProgramsPage', () => {
             expect(fetch).toHaveBeenCalledWith(`/api/verified-programs/metadata/${mockProgramIds[2]}`);
         });
 
-        it('enriches programs with metadata', async () => {
+        it('should enrich programs with metadata', async () => {
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockListResponse,
                 ok: true,
@@ -190,7 +190,7 @@ describe('fetchProgramsPage', () => {
             });
         });
 
-        it('calls getProgramName with program ID and repo URL', async () => {
+        it('should call getProgramName with program ID and repo URL', async () => {
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockListResponse,
                 ok: true,
@@ -218,7 +218,7 @@ describe('fetchProgramsPage', () => {
     });
 
     describe('partial metadata', () => {
-        it('handles programs with missing metadata', async () => {
+        it('should handle programs with missing metadata', async () => {
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockListResponse,
                 ok: true,
@@ -260,7 +260,7 @@ describe('fetchProgramsPage', () => {
             expect(result.programs[2].lastVerifiedAt).toBe('2024-11-18T15:30:00.000000');
         });
 
-        it('handles empty metadata array', async () => {
+        it('should handle empty metadata array', async () => {
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockListResponse,
                 ok: true,
@@ -287,7 +287,7 @@ describe('fetchProgramsPage', () => {
             });
         });
 
-        it('handles metadata fetch errors gracefully', async () => {
+        it('should handle metadata fetch errors gracefully', async () => {
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockListResponse,
                 ok: true,
@@ -318,7 +318,7 @@ describe('fetchProgramsPage', () => {
     });
 
     describe('error handling', () => {
-        it('throws error when list API fails', async () => {
+        it('should throw error when list API fails', async () => {
             vi.mocked(fetch).mockResolvedValueOnce({
                 ok: false,
                 status: 500,
@@ -327,7 +327,7 @@ describe('fetchProgramsPage', () => {
             await expect(fetchProgramsPage(1)).rejects.toThrow('Failed to fetch verified programs page 1');
         });
 
-        it('logs error when list API fails', async () => {
+        it('should log error when list API fails', async () => {
             vi.mocked(fetch).mockResolvedValueOnce({
                 ok: false,
                 status: 500,
@@ -342,14 +342,14 @@ describe('fetchProgramsPage', () => {
             expect(Logger.error).toHaveBeenCalledWith(expect.any(Error), { page: 1 });
         });
 
-        it('throws error on network failure', async () => {
+        it('should throw error on network failure', async () => {
             const networkError = new Error('Network error');
             vi.mocked(fetch).mockRejectedValueOnce(networkError);
 
             await expect(fetchProgramsPage(1)).rejects.toThrow('Network error');
         });
 
-        it('logs error on network failure', async () => {
+        it('should log error on network failure', async () => {
             const networkError = new Error('Network error');
             vi.mocked(fetch).mockRejectedValueOnce(networkError);
 
@@ -362,7 +362,7 @@ describe('fetchProgramsPage', () => {
             expect(Logger.error).toHaveBeenCalledWith(networkError, { page: 1 });
         });
 
-        it('logs debug message for failed metadata fetch', async () => {
+        it('should log debug message for failed metadata fetch', async () => {
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockListResponse,
                 ok: true,
@@ -392,7 +392,7 @@ describe('fetchProgramsPage', () => {
             });
         });
 
-        it('logs debug message for empty metadata', async () => {
+        it('should log debug message for empty metadata', async () => {
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockListResponse,
                 ok: true,
@@ -414,7 +414,7 @@ describe('fetchProgramsPage', () => {
             );
         });
 
-        it('logs error for metadata fetch exception', async () => {
+        it('should log error for metadata fetch exception', async () => {
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockListResponse,
                 ok: true,
@@ -441,7 +441,7 @@ describe('fetchProgramsPage', () => {
     });
 
     describe('pagination', () => {
-        it('returns correct pagination info for first page', async () => {
+        it('should return correct pagination info for first page', async () => {
             vi.mocked(fetch).mockResolvedValueOnce({
                 json: async () => mockListResponse,
                 ok: true,
@@ -461,7 +461,7 @@ describe('fetchProgramsPage', () => {
             expect(result.totalCount).toBe(150);
         });
 
-        it('returns correct pagination info for middle page', async () => {
+        it('should return correct pagination info for middle page', async () => {
             const middlePageResponse = {
                 ...mockListResponse,
                 meta: {
@@ -491,7 +491,7 @@ describe('fetchProgramsPage', () => {
             expect(result.totalCount).toBe(150);
         });
 
-        it('handles empty page response', async () => {
+        it('should handle empty page response', async () => {
             const emptyPageResponse = {
                 ...mockListResponse,
                 verified_programs: [],

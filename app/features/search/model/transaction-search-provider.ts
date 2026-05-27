@@ -1,6 +1,7 @@
 import { SIGNATURE_LENGTH_IN_BYTES } from '@solana/web3.js';
 import bs58 from 'bs58';
 
+import { SearchGroup } from '../lib/filter-tabs';
 import type { SearchOptions, SearchProvider } from '../lib/types';
 
 /**
@@ -30,11 +31,12 @@ export const transactionSearchProvider: SearchProvider = {
 
         return [
             {
-                label: 'Transaction',
+                label: SearchGroup.Transactions,
                 options: [
                     {
                         label: query,
                         pathname: `/tx/${query}`,
+                        type: 'tx',
                         value: [query],
                     },
                 ],

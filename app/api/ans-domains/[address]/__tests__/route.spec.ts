@@ -10,7 +10,7 @@ vi.mock('@entities/domain/api/fetch-ans-domains', () => ({
 }));
 
 const VALID_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
-const mockRequest = new Request('http://localhost:3000/api/ans-domains/' + VALID_ADDRESS);
+const mockRequest = new Request(`http://localhost:3000/api/ans-domains/${VALID_ADDRESS}`);
 
 describe('GET /api/ans-domains/[address]', () => {
     beforeEach(() => {

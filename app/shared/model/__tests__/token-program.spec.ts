@@ -6,19 +6,19 @@ import { describe, expect, expectTypeOf, it } from 'vitest';
 import { identifyTokenAccountType, isTokenMintByOwner, isTokenProgram } from '../token-program';
 
 describe('token-program types', () => {
-    it('isTokenMintByOwner should accept Address and return boolean', () => {
+    it('should accept Address and return boolean from isTokenMintByOwner', () => {
         expectTypeOf(isTokenMintByOwner).parameter(0).toEqualTypeOf<Address>();
         expectTypeOf(isTokenMintByOwner).parameter(1).toEqualTypeOf<ReadonlyUint8Array | undefined>();
         expectTypeOf(isTokenMintByOwner).returns.toEqualTypeOf<boolean>();
     });
 
-    it('identifyTokenAccountType should return TokenAccount | Token2022Account | undefined', () => {
+    it('should return TokenAccount | Token2022Account | undefined from identifyTokenAccountType', () => {
         expectTypeOf(identifyTokenAccountType).parameter(0).toEqualTypeOf<Address>();
         expectTypeOf(identifyTokenAccountType).parameter(1).toEqualTypeOf<ReadonlyUint8Array>();
         expectTypeOf(identifyTokenAccountType).returns.toEqualTypeOf<TokenAccount | Token2022Account | undefined>();
     });
 
-    it('TokenAccount and Token2022Account should have matching Mint values', () => {
+    it('should have matching Mint values for TokenAccount and Token2022Account', () => {
         expect(TokenAccount.Mint).toBe(Token2022Account.Mint);
         expect(TokenAccount.Token).toBe(Token2022Account.Token);
         expect(TokenAccount.Multisig).toBe(Token2022Account.Multisig);

@@ -37,7 +37,7 @@ export default async function getReadableTitleFromAddress(props: AddressPageMeta
         if (tokenName == null) {
             return address;
         }
-        const tokenDisplayAddress = address.slice(0, 2) + '\u2026' + address.slice(-2);
+        const tokenDisplayAddress = `${address.slice(0, 2)}\u2026${address.slice(-2)}`;
         return `Token | ${tokenName} (${tokenDisplayAddress})`;
     } catch {
         return address;

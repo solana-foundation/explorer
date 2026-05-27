@@ -10,7 +10,7 @@ vi.mock('@entities/domain/api/fetch-sns-domains', () => ({
 }));
 
 const VALID_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
-const mockRequest = new Request('http://localhost:3000/api/sns-domains/' + VALID_ADDRESS);
+const mockRequest = new Request(`http://localhost:3000/api/sns-domains/${VALID_ADDRESS}`);
 
 describe('GET /api/sns-domains/[address]', () => {
     beforeEach(() => {
@@ -84,7 +84,7 @@ describe('GET /api/sns-domains/[address]', () => {
             expect(Logger.error).toHaveBeenCalledWith(error, { address: VALID_ADDRESS });
         });
 
-        it('does not cache error responses', async () => {
+        it('should not cache error responses', async () => {
             vi.mocked(fetchSnsDomains).mockRejectedValueOnce(new Error('fail'));
 
             const response = await GET(mockRequest, { params: Promise.resolve({ address: VALID_ADDRESS }) });

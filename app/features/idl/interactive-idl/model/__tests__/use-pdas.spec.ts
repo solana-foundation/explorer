@@ -277,7 +277,7 @@ describe('usePdas', () => {
             return view.current;
         }
 
-        it('generates PDA for account seeds (debouncer, tokenProgram, mint)', async () => {
+        it('should generate PDA for account seeds (debouncer, tokenProgram, mint)', async () => {
             const pdas = await runDonateTest({
                 accounts: {
                     debouncer: '11111111111111111111111111111111',
@@ -291,7 +291,7 @@ describe('usePdas', () => {
             expect(pdas.debouncerTokenAccount?.seeds[2].name).toBe('mint');
         });
 
-        it('generates distribution, epochTracker, debouncer PDAs when config_id (hex) and epoch are set', async () => {
+        it('should generate distribution, epochTracker, debouncer PDAs when config_id (hex) and epoch are set', async () => {
             const configId = '0'.repeat(64);
             const mint = PublicKey.default.toString();
             const pdas = await runDonateTest({
@@ -306,7 +306,7 @@ describe('usePdas', () => {
             expect(pdas.distribution.seeds.find(s => s.name === 'epoch')?.value).toBe('1');
         });
 
-        it('generates PDAs when config_id is comma-separated u8 bytes', async () => {
+        it('should generate PDAs when config_id is comma-separated u8 bytes', async () => {
             const pdas = await runDonateTest({
                 accounts: { mint: PublicKey.default.toString() },
                 arguments: { configId: Array(32).fill(0).join(', '), epoch: '42' },
@@ -316,7 +316,7 @@ describe('usePdas', () => {
             expect(pdas.debouncer.generated).toBeTruthy();
         });
 
-        it('returns null for distribution/epochTracker/debouncer when config_id is missing', async () => {
+        it('should return null for distribution/epochTracker/debouncer when config_id is missing', async () => {
             const form = createMockForm();
             form.setValue(`accounts.${DONATE_KEY}.mint`, PublicKey.default.toString());
             form.setValue(`arguments.${DONATE_KEY}.epoch`, '1');

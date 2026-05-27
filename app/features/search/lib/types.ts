@@ -6,6 +6,10 @@ export type SearchItem = {
     pathname: string;
     /** When set, overrides the current cluster context during navigation. */
     cluster?: Cluster;
+    icon?: string;
+    sublabel?: string;
+    type?: string;
+    verified?: boolean;
 };
 
 export interface SearchOptions {
@@ -16,6 +20,7 @@ export interface SearchOptions {
 export type SearchContext = {
     cluster: Cluster;
     currentEpoch: bigint | undefined;
+    genesisHash?: string;
 };
 
 export interface SearchProvider {

@@ -10,7 +10,7 @@ import {
 import { vi } from 'vitest';
 
 // stub a test to not allow passing without tests
-test('stub', () => expect(true).toBeTruthy());
+test('should stub', () => expect(true).toBeTruthy());
 
 vi.mock('next/navigation', () => {
     const actual = vi.importActual('next/navigation');

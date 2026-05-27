@@ -19,51 +19,51 @@ describe('buildExplorerLink', () => {
             { cluster: Cluster.Devnet, expectedParam: 'cluster=devnet' },
             { cluster: Cluster.Testnet, expectedParam: 'cluster=testnet' },
             { cluster: Cluster.Simd296, expectedParam: 'cluster=simd296' },
-        ])('appends $expectedParam for $cluster', ({ cluster, expectedParam }) => {
+        ])('should append $expectedParam for $cluster', ({ cluster, expectedParam }) => {
             const result = buildExplorerLink(cluster, undefined, '/tx/abc');
             expect(result).toBe(`${BASE}/tx/abc?${expectedParam}`);
         });
 
-        it('omits cluster param for MainnetBeta', () => {
+        it('should omit cluster param for MainnetBeta', () => {
             const result = buildExplorerLink(Cluster.MainnetBeta, undefined, '/tx/abc');
             expect(result).toBe(`${BASE}/tx/abc`);
         });
 
-        it('appends cluster=custom when customUrl is absent', () => {
+        it('should append cluster=custom when customUrl is absent', () => {
             const result = buildExplorerLink(Cluster.Custom, undefined, '/tx/abc');
             expect(result).toBe(`${BASE}/tx/abc?cluster=custom`);
         });
 
-        it('appends cluster=custom and encodes customUrl', () => {
+        it('should append cluster=custom and encodes customUrl', () => {
             const result = buildExplorerLink(Cluster.Custom, 'http://localhost:8899', '/tx/abc');
             expect(result).toBe(`${BASE}/tx/abc?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899`);
         });
     });
 
     describe('path joining', () => {
-        it('joins path without leading slash using a separator', () => {
+        it('should join path without leading slash using a separator', () => {
             const result = buildExplorerLink(Cluster.MainnetBeta, undefined, 'tx/abc');
             expect(result).toBe(`${BASE}/tx/abc`);
         });
 
-        it('returns base URL when path is empty', () => {
+        it('should return base URL when path is empty', () => {
             const result = buildExplorerLink(Cluster.MainnetBeta, undefined, '');
             expect(result).toBe(BASE);
         });
 
-        it('returns base URL with cluster param when path is empty and cluster is non-mainnet', () => {
+        it('should return base URL with cluster param when path is empty and cluster is non-mainnet', () => {
             const result = buildExplorerLink(Cluster.Devnet, undefined, '');
             expect(result).toBe(`${BASE}?cluster=devnet`);
         });
     });
 
     describe('existing query params in path', () => {
-        it('places cluster param before existing query params', () => {
+        it('should place cluster param before existing query params', () => {
             const result = buildExplorerLink(Cluster.Devnet, undefined, '/inspector?message=abc123');
             expect(result).toBe(`${BASE}/inspector?cluster=devnet&message=abc123`);
         });
 
-        it('places cluster and customUrl before existing query params', () => {
+        it('should place cluster and customUrl before existing query params', () => {
             const result = buildExplorerLink(Cluster.Custom, 'http://localhost:8899', '/inspector?message=abc');
             expect(result).toBe(`${BASE}/inspector?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899&message=abc`);
         });

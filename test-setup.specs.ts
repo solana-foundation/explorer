@@ -1,4 +1,7 @@
+import type * as SolanaKit from '@solana/kit';
 import { vi } from 'vitest';
+
+import type * as TokenInfoBatchProvider from '@/app/entities/token-info/model/token-info-batch-provider';
 
 // Global no-op mock for Logger to suppress console output in all tests.
 vi.mock('@/app/shared/lib/logger', () => ({
@@ -14,7 +17,7 @@ vi.mock('@/app/shared/lib/sentry', () => ({
 // Global no-op mock for TokenInfoBatchProvider to prevent network requests in all tests.
 // Tests that need to assert on batch behavior should override with a local vi.mock().
 vi.mock('@/app/entities/token-info/model/token-info-batch-provider', async () => {
-    const actual = await vi.importActual<typeof import('@/app/entities/token-info/model/token-info-batch-provider')>(
+    const actual = await vi.importActual<typeof TokenInfoBatchProvider>(
         '@/app/entities/token-info/model/token-info-batch-provider',
     );
 
@@ -27,7 +30,7 @@ vi.mock('@/app/entities/token-info/model/token-info-batch-provider', async () =>
 // Global mock for @solana/kit to prevent real RPC calls (429s) in tests.
 // Tests that need custom RPC behavior should override with a local vi.mock().
 vi.mock('@solana/kit', async () => {
-    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
+    const actual = await vi.importActual<typeof SolanaKit>('@solana/kit');
     const { mockSolanaRpc } = await import('./app/__tests__/mock-rpc');
     return {
         ...actual,

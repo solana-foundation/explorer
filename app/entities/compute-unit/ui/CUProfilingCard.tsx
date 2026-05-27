@@ -140,8 +140,8 @@ const getCUProfileChartOptions = (totalCU: number): ChartOptions<'bar'> => {
                         transform = 'translate(0, calc(-100% - 10px))';
                     }
 
-                    tooltipEl.style.left = left + 'px';
-                    tooltipEl.style.top = top + 'px';
+                    tooltipEl.style.left = `${left}px`;
+                    tooltipEl.style.top = `${top}px`;
                     tooltipEl.style.transform = transform;
                 },
             },
