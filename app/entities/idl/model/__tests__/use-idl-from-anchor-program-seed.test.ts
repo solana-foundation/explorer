@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster } from '@/app/utils/cluster';
 
-import { useIdlFromAnchorProgramSeed } from '../use-idl-from-anchor-program-seed';
+import { resetCacheForTesting, useIdlFromAnchorProgramSeed } from '../use-idl-from-anchor-program-seed';
 
 describe('useIdlFromAnchorProgramSeed', () => {
     const url = 'https://any.rpc.address';
@@ -12,6 +12,7 @@ describe('useIdlFromAnchorProgramSeed', () => {
     afterEach(() => {
         vi.unstubAllGlobals();
         vi.restoreAllMocks();
+        resetCacheForTesting();
     });
 
     it('should not fire duplicate /api/anchor requests for the same key while the request is in flight', () => {

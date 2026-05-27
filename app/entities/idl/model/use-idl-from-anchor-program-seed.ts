@@ -19,6 +19,12 @@ function recordInFlight(key: string, promise: Promise<void>) {
     cachedAnchorProgramPromises[key] = { __type: 'promise', promise };
 }
 
+export function resetCacheForTesting() {
+    for (const k of Object.keys(cachedAnchorProgramPromises)) {
+        delete cachedAnchorProgramPromises[k];
+    }
+}
+
 export function useIdlFromAnchorProgramSeed(programAddress: string, url: string, cluster?: Cluster): Idl | null {
     const key = `${programAddress}-${url}`;
     const cacheEntry = cachedAnchorProgramPromises[key];
