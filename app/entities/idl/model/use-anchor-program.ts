@@ -13,11 +13,10 @@ export function useAnchorProgram(
     programAddress: string,
     url: string,
     cluster?: Cluster,
-): { program: Program | null; idl: Idl | null } {
+): { program: Program | null; idl: Idl | null; isLoading: boolean } {
     // TODO(ngundotra): Rewrite this to be more efficient
     // const idlFromBinary = useIdlFromSolanaProgramBinary(programAddress);
-    const idlFromAnchorProgram = useIdlFromAnchorProgramSeed(programAddress, url, cluster);
-    const idl = idlFromAnchorProgram;
+    const { idl, isLoading } = useIdlFromAnchorProgramSeed(programAddress, url, cluster);
     const program: Program<Idl> | null = useMemo(() => {
         if (!idl) return null;
 
@@ -30,7 +29,7 @@ export function useAnchorProgram(
         }
     }, [idl, programAddress, url]);
 
-    return { idl, program };
+    return { idl, isLoading, program };
 }
 
 export type AnchorAccount = {

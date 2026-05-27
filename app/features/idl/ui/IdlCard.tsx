@@ -1,4 +1,5 @@
 'use client';
+import { LoadingCard } from '@components/common/LoadingCard';
 import { getIdlVersion, isIdlProgramIdMismatch, type SupportedIdl, useAnchorProgram } from '@entities/idl';
 import { useProgramMetadataCodamaIdl, useProgramMetadataIdl } from '@entities/program-metadata';
 import { useCluster } from '@providers/cluster';
@@ -24,7 +25,7 @@ type IdlTab = {
 export function IdlCard({ programId }: { programId: string }) {
     const { url, cluster } = useCluster();
     const network = clusterSlug(cluster);
-    const { idl } = useAnchorProgram(programId, url, cluster);
+    const { idl, isLoading: isAnchorIdlLoading } = useAnchorProgram(programId, url, cluster);
     const { programMetadataIdl } = useProgramMetadataIdl(programId, url, cluster);
     const { codamaIdl } = useProgramMetadataCodamaIdl(programId, url, cluster);
     const [activeTabIndex, setActiveTabIndex] = useState<number>();
@@ -82,6 +83,9 @@ export function IdlCard({ programId }: { programId: string }) {
     }, [tabs, activeTabIndex]);
 
     if (tabs.length === 0 || activeTabIndex === undefined) {
+        if (isAnchorIdlLoading || tabs.length > 0) {
+            return <LoadingCard message="Loading program IDL" />;
+        }
         return (
             <div className="card">
                 <div className="card-header">
