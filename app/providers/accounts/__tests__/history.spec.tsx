@@ -87,7 +87,7 @@ beforeEach(() => {
 });
 
 describe('useFetchAccountHistory — getTransactionsForAddress', () => {
-    it('maps slot filters onto the filters object on the initial fetch', async () => {
+    it('should map slot filters onto the filters object on the initial fetch', async () => {
         const { result } = renderHook(() => useFetchAccountHistory(25, { slot: { gte: 100, lte: 500 } }), {
             wrapper,
         });
@@ -109,7 +109,7 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
         });
     });
 
-    it('maps status and block time filters', async () => {
+    it('should map status and block time filters', async () => {
         const { result } = renderHook(
             () =>
                 useFetchAccountHistory(25, {
@@ -131,7 +131,7 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
         });
     });
 
-    it('omits the filters key when no filter is provided', async () => {
+    it('should omit the filters key when no filter is provided', async () => {
         const { result } = renderHook(() => useFetchAccountHistory(25, {}), { wrapper });
 
         await act(async () => {
@@ -144,7 +144,7 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
         expect('filters' in options).toBe(false);
     });
 
-    it('threads the paginationToken from the previous page when loading more', async () => {
+    it('should thread the paginationToken from the previous page when loading more', async () => {
         mockResult(
             Array.from({ length: 25 }, (_, i) => sig(`sig${i}`, 1000 - i)),
             'token-page-2',
@@ -180,7 +180,7 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
         });
     });
 
-    it('keeps loading more on a short page that still carries a token', async () => {
+    it('should keep loading more on a short page that still carries a token', async () => {
         // Fewer items than the limit, but a non-null token means more data exists.
         mockResult([sig('partial', 10)], 'token-page-2');
 
@@ -210,7 +210,7 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
         expect(requestParams()[1]).toMatchObject({ paginationToken: 'token-page-2' });
     });
 
-    it('stops paginating once a page returns a null token', async () => {
+    it('should stop paginating once a page returns a null token', async () => {
         mockResult([sig('only', 10)], null);
 
         const { result } = renderHook(
@@ -239,7 +239,7 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
 });
 
 describe('useResetAccountHistory', () => {
-    it('discards an in-flight response that resolves after a reset (no stale write)', async () => {
+    it('should discard an in-flight response that resolves after a reset (no stale write)', async () => {
         // First request is left pending to model a page-load still in flight.
         const pending = deferred<ReturnType<typeof envelope>>();
         fetchMock.mockReturnValueOnce(pending.promise);
@@ -278,7 +278,7 @@ describe('useResetAccountHistory', () => {
         expect(result.current.history?.data?.fetched[0].signature).toBe('filtered');
     });
 
-    it('clears only the target address, leaving other addresses intact', async () => {
+    it('should clear only the target address, leaving other addresses intact', async () => {
         const { result } = renderHook(
             () => ({
                 fetch: useFetchAccountHistory(25, {}),
@@ -311,7 +311,7 @@ describe('useResetAccountHistory', () => {
 });
 
 describe('getSignaturesForAddress fallback', () => {
-    it('falls back when getTransactionsForAddress is not found, mapping slot bounds', async () => {
+    it('should fall back when getTransactionsForAddress is not found, mapping slot bounds', async () => {
         mockRpcError(-32601, 'Method not found');
         mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('legacy', 5)]);
 
@@ -335,7 +335,7 @@ describe('getSignaturesForAddress fallback', () => {
         expect(opts).toMatchObject({ beforeSlot: 99, limit: 25, untilSlot: 10 });
     });
 
-    it('does not fall back on a generic RPC error', async () => {
+    it('should not fall back on a generic RPC error', async () => {
         mockRpcError(-32000, 'boom');
 
         const { result } = renderHook(
@@ -354,7 +354,7 @@ describe('getSignaturesForAddress fallback', () => {
         expect(mockConnection.getSignaturesForAddress).not.toHaveBeenCalled();
     });
 
-    it('marks filtering unsupported after a method-not-found, and stays supported otherwise', async () => {
+    it('should mark filtering unsupported after a method-not-found, and stay supported otherwise', async () => {
         mockRpcError(-32601, 'Method not found');
         mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('legacy', 5)]);
 

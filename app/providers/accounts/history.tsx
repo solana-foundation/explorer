@@ -3,12 +3,7 @@
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import {
-    ConfirmedSignatureInfo,
-    Connection,
-    ParsedTransactionWithMeta,
-    PublicKey,
-} from '@solana/web3.js';
+import { ConfirmedSignatureInfo, Connection, ParsedTransactionWithMeta, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { fetchAll } from '@utils/fetch-all';
 import { fetchOnce } from '@utils/fetch-once';
@@ -157,9 +152,7 @@ export function HistoryProvider({ children }: HistoryProviderProps) {
             <DispatchContext.Provider value={dispatch}>
                 <InFlightContext.Provider value={inFlightRef.current}>
                     <GenerationContext.Provider value={generationRef.current}>
-                        <MethodSupportContext.Provider value={methodSupport}>
-                            {children}
-                        </MethodSupportContext.Provider>
+                        <MethodSupportContext.Provider value={methodSupport}>{children}</MethodSupportContext.Provider>
                     </GenerationContext.Provider>
                 </InFlightContext.Provider>
             </DispatchContext.Provider>
