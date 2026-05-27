@@ -1,25 +1,21 @@
-import { PublicKey, VersionedMessage } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
+import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 
 import { TransactionSignatures } from '../SignaturesCard';
 
-const FEE_PAYER = new PublicKey('11111111111111111111111111111111');
 const SIGNER_2 = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 const BOGUS_SIGNATURE = '5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW';
 
-const baseMessage = {
-    addressTableLookups: [],
-    compiledInstructions: [],
+const baseMessage = mockVersionedMessage({
     header: {
         numReadonlySignedAccounts: 0,
         numReadonlyUnsignedAccounts: 0,
         numRequiredSignatures: 2,
     },
-    recentBlockhash: '4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZAMdL4VZHirm',
-    staticAccountKeys: [FEE_PAYER, SIGNER_2],
-    version: 0,
-} as unknown as VersionedMessage;
+    staticAccountKeys: [PublicKey.default, SIGNER_2],
+});
 
 const rawMessage = new Uint8Array(64);
 

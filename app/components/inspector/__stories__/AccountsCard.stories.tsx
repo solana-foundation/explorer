@@ -1,6 +1,8 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import type { Meta, StoryObj } from '@storybook/react';
+import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import React from 'react';
@@ -12,6 +14,8 @@ import { MAINNET_BETA_URL } from '@/app/utils/cluster';
 
 import { AccountsCard } from '../AccountsCard';
 
+const TOKEN_PROGRAM_PUBKEY = new PublicKey(TOKEN_PROGRAM_ADDRESS);
+
 // No-op function for mock fetchers
 const noop = () => {
     // intentionally empty
@@ -19,52 +23,43 @@ const noop = () => {
 
 // Create a message without lookups
 const createMessage = (): VersionedMessage => {
-    return {
-        addressTableLookups: [],
-        compiledInstructions: [],
+    const staticAccountKeys = [PublicKey.default, TOKEN_PROGRAM_PUBKEY];
+    return mockVersionedMessage({
         getAccountKeys: () => ({
             accountKeysFromLookups: undefined,
-            staticAccountKeys: [
-                new PublicKey('11111111111111111111111111111111'),
-                new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-            ],
+            staticAccountKeys,
         }),
         header: {
             numReadonlySignedAccounts: 0,
             numReadonlyUnsignedAccounts: 1,
             numRequiredSignatures: 1,
         },
-        recentBlockhash: '4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZAMdL4VZHirm',
-        staticAccountKeys: [
-            new PublicKey('11111111111111111111111111111111'),
-            new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-        ],
-        version: 0,
-    } as unknown as VersionedMessage;
+        staticAccountKeys,
+    });
 };
 
 // Mock provider with accounts
 function MockAccountsProvider({ children }: { children: React.ReactNode }) {
     const mockState: State = {
         entries: {
-            '11111111111111111111111111111111': {
+            [PublicKey.default.toBase58()]: {
                 data: {
                     data: {},
                     executable: false,
                     lamports: 1_000_000_000,
-                    owner: new PublicKey('11111111111111111111111111111111'),
-                    pubkey: new PublicKey('11111111111111111111111111111111'),
+                    owner: PublicKey.default,
+                    pubkey: PublicKey.default,
                     space: 0,
                 },
                 status: FetchStatus.Fetched,
             },
-            TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: {
+            [TOKEN_PROGRAM_ADDRESS]: {
                 data: {
                     data: {},
                     executable: true,
                     lamports: 5_000_000_000,
                     owner: new PublicKey('BPFLoaderUpgradeab1e11111111111111111111111'),
-                    pubkey: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+                    pubkey: TOKEN_PROGRAM_PUBKEY,
                     space: 36,
                 },
                 status: FetchStatus.Fetched,

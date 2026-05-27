@@ -1,26 +1,14 @@
-import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
+import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 
 import { SimulatorCard } from '../SimulationCard';
 
-const FEE_PAYER = new PublicKey('11111111111111111111111111111111');
-
 // useSimulation calls message.serialize() to build a fingerprint cache key — stub it so the
 // fake message satisfies the contract without constructing a real serializable transaction.
-const idleMessage = {
-    addressTableLookups: [],
-    compiledInstructions: [],
-    header: {
-        numReadonlySignedAccounts: 0,
-        numReadonlyUnsignedAccounts: 0,
-        numRequiredSignatures: 1,
-    },
-    recentBlockhash: '4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZAMdL4VZHirm',
+const idleMessage = mockVersionedMessage({
     serialize: () => new Uint8Array(),
-    staticAccountKeys: [FEE_PAYER],
-    version: 0,
-} as unknown as VersionedMessage;
+});
 
 const meta = {
     component: SimulatorCard,

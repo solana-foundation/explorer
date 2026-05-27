@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 
+import type { TokenExtension } from '@/app/validators/accounts/token-extension';
+
 import { TokenExtensionsSection } from '../TokenExtensionsSection';
 import type { ParsedTokenExtension } from '../types';
 
@@ -21,23 +23,23 @@ const sampleParsedExtensions: ParsedTokenExtension[] = [
         extension: 'tokenMetadata',
         externalLinks: [],
         name: 'Token Metadata',
-        parsed: tokenMetadataState as any,
+        parsed: tokenMetadataState,
         status: 'active',
-    } as ParsedTokenExtension,
+    },
     {
         description: 'Mint can be permanently delegated to a different address',
         extension: 'permanentDelegate',
         externalLinks: [],
         name: 'Permanent Delegate',
-        parsed: { delegate: MINT_ADDRESS } as any,
+        parsed: { delegate: MINT_ADDRESS },
         status: 'active',
-    } as ParsedTokenExtension,
+    },
 ];
 
-const sampleExtensions = [
+const sampleExtensions: TokenExtension[] = [
     { extension: 'tokenMetadata', state: sampleParsedExtensions[0].parsed },
     { extension: 'permanentDelegate', state: sampleParsedExtensions[1].parsed },
-] as any[];
+];
 
 const meta = {
     component: TokenExtensionsSection,

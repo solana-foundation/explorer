@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 
+import type { SysvarSlotHashesAccount } from '@/app/validators/accounts/sysvar';
+
 import { SlotHashesCard } from '../SlotHashesCard';
 
 const meta: Meta<typeof SlotHashesCard> = {
@@ -20,18 +22,18 @@ export const WithEntries: Story = {
     args: {
         sysvarAccount: {
             info: [
-                { hash: hash(0), slot: 312_456_789n },
-                { hash: hash(1), slot: 312_456_788n },
-                { hash: hash(2), slot: 312_456_787n },
-                { hash: hash(3), slot: 312_456_786n },
+                { hash: hash(0), slot: 312_456_789 },
+                { hash: hash(1), slot: 312_456_788 },
+                { hash: hash(2), slot: 312_456_787 },
+                { hash: hash(3), slot: 312_456_786 },
             ],
-            // Other SysvarAccount fields aren't read by SlotHashesCard; cast keeps TS happy.
-        } as any,
+            type: 'slotHashes',
+        } satisfies SysvarSlotHashesAccount,
     },
 };
 
 export const Empty: Story = {
     args: {
-        sysvarAccount: { info: [] } as any,
+        sysvarAccount: { info: [], type: 'slotHashes' } satisfies SysvarSlotHashesAccount,
     },
 };

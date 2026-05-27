@@ -1,7 +1,8 @@
 import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
-import { AddressLookupTableProgram, PublicKey, VersionedMessage } from '@solana/web3.js';
+import { AddressLookupTableProgram, PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
+import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import React from 'react';
@@ -37,7 +38,7 @@ function MockProvider({ children, state }: { children: React.ReactNode; state: S
     );
 }
 
-const messageWithLookups = {
+const messageWithLookups = mockVersionedMessage({
     addressTableLookups: [
         {
             accountKey: LOOKUP_TABLE_KEY,
@@ -45,16 +46,13 @@ const messageWithLookups = {
             writableIndexes: [0],
         },
     ],
-    compiledInstructions: [],
     header: {
         numReadonlySignedAccounts: 0,
         numReadonlyUnsignedAccounts: 0,
         numRequiredSignatures: 0,
     },
-    recentBlockhash: '4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZAMdL4VZHirm',
     staticAccountKeys: [],
-    version: 0,
-} as unknown as VersionedMessage;
+});
 
 const resolvedState = createAccountsState({
     [LOOKUP_TABLE_KEY.toBase58()]: {
@@ -107,10 +105,10 @@ export const WithResolvedAddresses: Story = {
     ],
 };
 
-const messageNoLookups = {
+const messageNoLookups = mockVersionedMessage({
     ...messageWithLookups,
     addressTableLookups: [],
-} as unknown as VersionedMessage;
+});
 
 export const Empty: Story = {
     args: { message: messageNoLookups },

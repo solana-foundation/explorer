@@ -2,6 +2,8 @@ import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { createNextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 
+import type { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
+
 import { ProgramMultisigCard } from '../ProgramMultisigCard';
 
 // Devnet cluster short-circuits useSquadsMultisigLookup (returns null immediately) so
@@ -21,11 +23,16 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
     args: {
         data: {
+            parsed: {
+                info: { programData: PublicKey.default },
+                type: 'program',
+            },
+            program: 'bpf-upgradeable-loader',
             programData: {
-                authority: new PublicKey('11111111111111111111111111111111'),
-                data: new Uint8Array(),
+                authority: PublicKey.default,
+                data: ['', 'base64'],
                 slot: 312_000_000,
             },
-        } as any,
+        } satisfies UpgradeableLoaderAccountData,
     },
 };
