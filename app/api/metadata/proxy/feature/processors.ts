@@ -3,7 +3,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { matchMaxSizeError, statusError } from './errors';
 
 /**
- * process binary data and catch any specific errors
+ * Process binary data and catch any specific errors.
  */
 export async function processBinary(data: Response) {
     const headers = data.headers;
@@ -23,7 +23,7 @@ export async function processBinary(data: Response) {
 }
 
 /**
- * process text data as json and handle specific errors
+ * Process JSON data and handle specific errors.
  */
 export async function processJson(data: Response) {
     const headers = data.headers;
@@ -45,7 +45,7 @@ export async function processJson(data: Response) {
 }
 
 /**
- * Process text response as JSON, handling newlines and whitespace issues
+ * Process a text response as JSON, handling newlines and whitespace issues.
  */
 export async function processTextAsJson(data: Response) {
     const headers = data.headers;
