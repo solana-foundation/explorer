@@ -3,7 +3,7 @@ import { intoParsedInstruction, intoParsedTransaction } from '@components/inspec
 import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
 import { ParsedInstruction, PublicKey, TransactionMessage } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, vi } from 'vitest';
 
 vi.mock('next/navigation', () => ({
@@ -23,7 +23,8 @@ import { TokenDetailsCard } from '../token/TokenDetailsCard';
 
 describe('instruction::TokenDetailsCard', () => {
     beforeEach(() => {
-        vi.useFakeTimers();
+        // shouldAdvanceTime keeps waitFor's polling alive while the original setTimeout fix stays in place
+        vi.useFakeTimers({ shouldAdvanceTime: true });
     });
 
     afterEach(() => {
@@ -57,7 +58,10 @@ describe('instruction::TokenDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.getByText(/Token Program: Transfer/)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/Token Program: Transfer/)).toBeInTheDocument();
+        });
     });
 
     test('should render Token::TransferChecked instruction', async () => {
@@ -88,6 +92,9 @@ describe('instruction::TokenDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.getByText(/Token Program: Transfer \(Checked\)/)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/Token Program: Transfer \(Checked\)/)).toBeInTheDocument();
+        });
     });
 });

@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
 vi.mock('next/navigation');
@@ -23,11 +23,11 @@ describe('inspector::AccountsCard', () => {
             </ClusterProvider>,
         );
 
-        // Should show account list header
-        expect(screen.getByText(/Account List/)).toBeInTheDocument();
-
-        // Should show account rows
-        expect(screen.getByText('Account #1')).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/Account List/)).toBeInTheDocument();
+            expect(screen.getByText('Account #1')).toBeInTheDocument();
+        });
     });
 
     test('should render accounts from versioned message', async () => {
@@ -41,10 +41,10 @@ describe('inspector::AccountsCard', () => {
             </ClusterProvider>,
         );
 
-        // Should show account list header
-        expect(screen.getByText(/Account List/)).toBeInTheDocument();
-
-        // Should show account rows
-        expect(screen.getByText('Account #1')).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/Account List/)).toBeInTheDocument();
+            expect(screen.getByText('Account #1')).toBeInTheDocument();
+        });
     });
 });
