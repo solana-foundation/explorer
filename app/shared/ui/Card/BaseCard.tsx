@@ -3,9 +3,7 @@ import * as React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
-// `ui` picks the visual lineage. Phase 2 swaps Bootstrap `.card*` to <BaseCard ui="dashkit"> (default).
-// Existing OKLCH-styled consumers use ui="tw". When the dashkit period ends, flip ui="dashkit" → "tw"
-// per consumer to complete the design refresh; then the "dashkit" branch + dk-* tokens can be deleted.
+// `ui` picks the visual lineage. Default is "tw" since most consumers already use Tailwind — pass ui="dashkit" explicitly when migrating Bootstrap `.card*` callsites; the "dashkit" branch + dk-* tokens get deleted once migration completes.
 type UI = 'dashkit' | 'tw';
 
 const BaseCardUIContext = React.createContext<UI>('tw');
