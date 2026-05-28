@@ -40,7 +40,7 @@ function sig(signature: string, slot: number) {
 }
 
 function envelope(data: ReturnType<typeof sig>[], paginationToken: string | null) {
-    return { json: async () => ({ id: 1, jsonrpc: '2.0', result: { data, paginationToken } }) };
+    return { json: async () => ({ id: 1, jsonrpc: '2.0', result: { data, paginationToken } }), ok: true, status: 200 };
 }
 
 // A promise we resolve by hand, to model a request that is still in flight.
@@ -62,7 +62,12 @@ function mockResult(data: ReturnType<typeof sig>[], paginationToken: string | nu
 
 // Resolve the next fetch call with a JSON-RPC error (e.g. method-not-found).
 function mockRpcError(code: number, message: string) {
-    fetchMock.mockResolvedValueOnce({ json: async () => ({ error: { code, message }, id: 1, jsonrpc: '2.0' }) });
+    // Standard RPC nodes return JSON-RPC errors (including method-not-found) with HTTP 200.
+    fetchMock.mockResolvedValueOnce({
+        json: async () => ({ error: { code, message }, id: 1, jsonrpc: '2.0' }),
+        ok: true,
+        status: 200,
+    });
 }
 
 // Parse the JSON body of the Nth fetch call into [address, options].
@@ -83,6 +88,8 @@ beforeEach(() => {
     // Fallback response; tests queue page-specific results with mockResult (once).
     fetchMock.mockResolvedValue({
         json: async () => ({ id: 1, jsonrpc: '2.0', result: { data: [], paginationToken: null } }),
+        ok: true,
+        status: 200,
     });
 });
 
