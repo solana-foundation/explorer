@@ -182,6 +182,9 @@ export const receiptMultiTokenTransferWithLongMemo: FormattedReceipt = formatRec
 export const mixedMintNoReceiptMessage =
     'Receipts are only available when all token transfers in a transaction use the same mint. This transaction transfers multiple different tokens.';
 
+export const innerInstructionsNoReceiptMessage =
+    'Receipts are only available for simple transfers. This transaction may contain inner program instructions.';
+
 export function forBaseReceipt(
     data: FormattedReceipt,
     overrides?: Partial<FormattedExtendedReceipt>,

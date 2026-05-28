@@ -132,7 +132,10 @@ function messageForReason(reason: ReceiptUnavailabilityReason | undefined): stri
     switch (reason) {
         case 'mixed-mint':
             return 'Receipts are only available when all token transfers in a transaction use the same mint. This transaction transfers multiple different tokens.';
+        case 'inner-transfers':
+            return 'Receipts are only available for simple transfers. This transaction contains inner program instructions.';
         case 'no-transfers':
+            return 'No transfer instructions found. Receipts are only available for SOL and token transfers.';
         case undefined:
             return undefined;
     }

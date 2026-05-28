@@ -22,12 +22,12 @@ test.describe('receipt feature validation', () => {
         await page
             .locator('h3:has-text("Solana Receipt")')
             .or(page.locator('h2:has-text("Transaction")'))
-            .or(page.locator('text=Receipts can only be generated'))
+            .or(page.locator('text=Receipts are only available'))
             .first()
             .waitFor({ state: 'visible', timeout: CONTENT_TIMEOUT });
 
         const hasReceipt = await hasElement(page, 'h3:has-text("Solana Receipt")');
-        const hasNoReceipt = await hasElement(page, 'text=Receipts can only be generated');
+        const hasNoReceipt = await hasElement(page, 'text=Receipts are only available');
         const hasTransactionPage = await hasElement(page, 'h2:has-text("Transaction")');
 
         if (FEATURE_ENABLED) {
@@ -49,7 +49,7 @@ test.describe('when feature enabled', () => {
     test('renders receipt for valid transaction', async ({ page }) => {
         const hasReceipt = await navigateToReceipt(page);
         const hasError = await hasElement(page, 'text=Not Found');
-        const hasNoReceipt = await hasElement(page, 'text=Receipts can only be generated');
+        const hasNoReceipt = await hasElement(page, 'text=Receipts are only available');
 
         expect(hasReceipt || hasError || hasNoReceipt).toBe(true);
 
@@ -67,7 +67,7 @@ test.describe('when feature enabled', () => {
             () => {
                 const text = document.body?.innerText || '';
                 return (
-                    text.includes('Receipts can only be generated') ||
+                    text.includes('Receipts are only available') ||
                     text.includes('Fetch Failed') ||
                     text.includes('Error')
                 );
@@ -190,7 +190,7 @@ async function navigateToReceipt(page: Page): Promise<boolean> {
     await page
         .locator('h3:has-text("Solana Receipt")')
         .or(page.locator('text=Not Found'))
-        .or(page.locator('text=Receipts can only be generated'))
+        .or(page.locator('text=Receipts are only available'))
         .first()
         .waitFor({ state: 'visible', timeout: CONTENT_TIMEOUT });
 
