@@ -74,8 +74,6 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
     }
 }
 
-const JUPITER_IMAGES_CACHE_REVALIDATE_S = 30;
-
 // Fetches logo URIs for tokens whose discovery response didn't include one.
 // Searches by symbol (not address) because Jupiter strips the logo field from address-based queries.
 export async function fetchJupiterImages(tokens: DiscoveredToken[], signal: AbortSignal): Promise<Map<string, string>> {
@@ -87,23 +85,15 @@ export async function fetchJupiterImages(tokens: DiscoveredToken[], signal: Abor
 
     const results = new Map<string, string>();
 
-    const abortPromise = new Promise<never>((_, reject) => {
-        if (signal.aborted) {
-            reject(signal.reason);
-        } else {
-            signal.addEventListener('abort', () => reject(signal.reason), { once: true });
-        }
-    });
-
     await Promise.allSettled(
         missing.map(async token => {
             try {
                 const url = `https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(token.symbol)}`;
-                const fetchPromise = fetch(url, {
+                
+                const response = await fetch(url, {
                     headers: { Accept: 'application/json', 'x-api-key': jupiterApiKey },
-                    next: { revalidate: JUPITER_IMAGES_CACHE_REVALIDATE_S },
+                    signal,
                 });
-                const response = await Promise.race([fetchPromise, abortPromise]);
                 if (!response.ok) {
                     Logger.warn(`[jupiter-images] ${response.status} for ${token.address}`);
                     return;
