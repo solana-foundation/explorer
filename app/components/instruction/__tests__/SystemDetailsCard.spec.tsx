@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { intoParsedInstruction, intoParsedTransaction } from '@components/inspector/into-parsed-data';
 import { ParsedInstruction, SystemProgram, TransactionMessage } from '@solana/web3.js';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
 vi.mock('next/navigation', () => ({
@@ -47,7 +47,10 @@ describe('instruction::SystemDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.getByText(/System Program: Transfer/)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/System Program: Transfer/)).toBeInTheDocument();
+        });
     });
 
     test('should render SystemProgram::TransferWithSeed instruction', async () => {
@@ -77,6 +80,9 @@ describe('instruction::SystemDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.getByText(/System Program: Transfer w\/ Seed/)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/System Program: Transfer w\/ Seed/)).toBeInTheDocument();
+        });
     });
 });

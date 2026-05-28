@@ -1,5 +1,5 @@
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import moment from 'moment';
+import { formatDuration } from '@utils/date';
 
 import { InstructionCard } from '../InstructionCard';
 import { AddPerpMarket } from './types';
@@ -64,7 +64,7 @@ export function AddPerpMarketDetailsCard(props: {
                 <td className="text-lg-end">{info.maxDepthBps}</td>
             </tr>
             <tr>
-                <td>MNGO per {moment.duration(info.targetPeriodLength, 'seconds').humanize()}</td>
+                <td>MNGO per {formatDuration(info.targetPeriodLength, 'seconds')}</td>
                 <td className="text-lg-end">
                     {info.mngoPerPeriod} {}
                 </td>
