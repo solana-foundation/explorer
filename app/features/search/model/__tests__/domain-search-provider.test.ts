@@ -38,6 +38,21 @@ describe('domainSearchProvider', () => {
         vi.restoreAllMocks();
     });
 
+    it('should normalize mixed-case input to lowercase in the result', async () => {
+        const mockOwner = '7v91N7iZ9mNicL8WfG6cgSCKyRXydQjLh6UYBWwm6y1Q';
+        const mockAddress = '9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b';
+        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+            new Response(JSON.stringify({ address: mockAddress, owner: mockOwner })),
+        );
+
+        const results = await domainSearchProvider.search('TOLY.sol', ctx);
+
+        expect(results[0].options[0].label).toBe('toly.sol');
+        expect(results[0].options[0].value).toEqual(['toly.sol', mockOwner]);
+
+        vi.restoreAllMocks();
+    });
+
     it('should return empty for non-mainnet clusters', async () => {
         const devnetCtx = createSearchContext({ cluster: Cluster.Devnet });
         const results = await domainSearchProvider.search('toly.sol', devnetCtx);

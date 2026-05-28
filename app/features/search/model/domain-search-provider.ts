@@ -42,16 +42,17 @@ export const domainSearchProvider: SearchProvider = {
 
             if (!is(domainInfo, ResolvedDomainInfoSchema) || !domainInfo) return [];
 
+            const canonical = query.toLowerCase();
             return [
                 {
                     label: SearchGroup.DomainOwners,
                     options: [
                         {
-                            label: query,
+                            label: canonical,
                             pathname: `/address/${domainInfo.owner}`,
                             sublabel: domainInfo.owner,
                             type: 'address',
-                            value: [query, domainInfo.owner],
+                            value: [canonical, domainInfo.owner],
                         },
                     ],
                 },
