@@ -2,7 +2,7 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import * as spl from '@solana/spl-token';
 import { PublicKey, TransactionMessage } from '@solana/web3.js';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
 
@@ -24,7 +24,7 @@ useSearchParams.mockReturnValue({
 });
 
 describe('instruction::AssociatedTokenDetailsCard', () => {
-    test('should render "CreateIdempotentDetailsCard"', () => {
+    test('should render "CreateIdempotentDetailsCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
         const lookups = resolveAddressLookupTables(m.addressTableLookups);
@@ -59,10 +59,13 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
+        });
     });
 
-    test('should render "CreateDetailsCard"', () => {
+    test('should render "CreateDetailsCard"', async () => {
         const index = 2;
         const m = mock.deserializeMessage(stubs.aTokenCreateMsgWithInnerCards);
         const lookups = resolveAddressLookupTables(m.addressTableLookups);
@@ -96,10 +99,13 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
+        });
     });
 
-    test('should render "RecoverNestedDetailsCard"', () => {
+    test('should render "RecoverNestedDetailsCard"', async () => {
         const index = 0;
         const m = mock.deserializeMessage(stubs.aTokenRecoverNestedMsg);
         const lookups = resolveAddressLookupTables(m.addressTableLookups);
@@ -134,6 +140,9 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.getByText(/Associated Token Program: Recover Nested/)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/Associated Token Program: Recover Nested/)).toBeInTheDocument();
+        });
     });
 });

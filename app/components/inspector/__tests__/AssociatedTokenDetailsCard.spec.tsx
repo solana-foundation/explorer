@@ -50,7 +50,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(3);
     });
 
-    test('should render "Create" card', () => {
+    test('should render "Create" card', async () => {
         const index = 2;
         const m = mock.deserializeMessage(stubs.aTokenCreateMsgWithInnerCards);
         const lookups = resolveAddressLookupTables(m.addressTableLookups);
@@ -71,15 +71,18 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
-        [/Source/, /Account/, /Mint/, /Wallet/].forEach(pattern => {
-            expect(screen.getByText(pattern)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
+            [/Source/, /Account/, /Mint/, /Wallet/].forEach(pattern => {
+                expect(screen.getByText(pattern)).toBeInTheDocument();
+            });
+            expect(screen.queryAllByText(/^System Program$/)).toHaveLength(3);
+            expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(3);
         });
-        expect(screen.queryAllByText(/^System Program$/)).toHaveLength(3);
-        expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(3);
     });
 
-    test('should render "RecoverNested" card', () => {
+    test('should render "RecoverNested" card', async () => {
         const index = 0;
         const m = mock.deserializeMessage(stubs.aTokenRecoverNestedMsg);
         const lookups = resolveAddressLookupTables(m.addressTableLookups);
@@ -100,16 +103,21 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.getByText(/Associated Token Program: Recover Nested/)).toBeInTheDocument();
-        [/Destination/, /Nested Mint/, /Nested Owner/, /Nested Source/, /Owner Mint/, /^Owner$/].forEach(pattern => {
-            expect(screen.getByText(pattern)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/Associated Token Program: Recover Nested/)).toBeInTheDocument();
+            [/Destination/, /Nested Mint/, /Nested Owner/, /Nested Source/, /Owner Mint/, /^Owner$/].forEach(
+                pattern => {
+                    expect(screen.getByText(pattern)).toBeInTheDocument();
+                },
+            );
+            expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(3);
         });
-        expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(3);
     });
 });
 
 describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
-    test('should render "CreateIdempotentDetailsCard"', () => {
+    test('should render "CreateIdempotentDetailsCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsgWithInnerCards);
         const lookups = resolveAddressLookupTables(m.addressTableLookups);
@@ -131,6 +139,10 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.queryByText(/Inner Instructions/)).not.toBeInTheDocument();
+        // Positive assertion forces waitFor to poll until the async render settles; the negative one alone would pass immediately.
+        await waitFor(() => {
+            expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
+            expect(screen.queryByText(/Inner Instructions/)).not.toBeInTheDocument();
+        });
     });
 });

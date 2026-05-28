@@ -19,10 +19,10 @@ import React from 'react';
 import { mergeTransactionMap } from '@/app/entities/transaction-data';
 import { Logger } from '@/app/shared/lib/logger';
 
-type TransactionMap = Map<string, ParsedTransactionWithMeta>;
-type FailedTransactionSignatures = Set<string>;
+export type TransactionMap = Map<string, ParsedTransactionWithMeta>;
+export type FailedTransactionSignatures = Set<string>;
 
-type AccountHistory = {
+export type AccountHistory = {
     fetched: ConfirmedSignatureInfo[];
     transactionMap?: TransactionMap;
     failedTransactionSignatures?: FailedTransactionSignatures;
@@ -102,9 +102,15 @@ function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | 
     };
 }
 
-const StateContext = React.createContext<State | undefined>(undefined);
-const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
-const InFlightContext = React.createContext<Set<string> | undefined>(undefined);
+export const StateContext: React.Context<Readonly<State> | undefined> = React.createContext<State | undefined>(
+    undefined,
+);
+export const DispatchContext: React.Context<Dispatch | undefined> = React.createContext<Dispatch | undefined>(
+    undefined,
+);
+export const InFlightContext: React.Context<Readonly<Set<string>> | undefined> = React.createContext<
+    Set<string> | undefined
+>(undefined);
 
 type HistoryProviderProps = { children: React.ReactNode };
 export function HistoryProvider({ children }: HistoryProviderProps) {

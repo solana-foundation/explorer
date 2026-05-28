@@ -16,11 +16,11 @@ import { Cluster } from '@utils/cluster';
 import { normalizeTokenAmount } from '@utils/index';
 import { InstructionContainer } from '@utils/instruction';
 import React, { useMemo } from 'react';
-import Moment from 'react-moment';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { RelativeTime } from '@/app/shared/RelativeTime';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
@@ -69,7 +69,7 @@ function TransferRow({
                 <Signature signature={signature} link truncateChars={24} />
             </td>
 
-            {hasTimestamps && <td className="text-muted">{blockTime && <Moment date={blockTime * 1000} fromNow />}</td>}
+            {hasTimestamps && <td className="text-muted">{blockTime && <RelativeTime date={blockTime * 1000} />}</td>}
 
             <td>
                 <Address pubkey={transfer.source} link truncateChars={16} />

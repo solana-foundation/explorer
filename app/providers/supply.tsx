@@ -21,11 +21,16 @@ type Supply = Readonly<{
     total: Lamports;
 }>;
 
-type State = Supply | Status | string;
+export type State = Supply | Status | string;
+export type { Supply };
 
 type Dispatch = React.Dispatch<React.SetStateAction<State>>;
-const StateContext = React.createContext<State | undefined>(undefined);
-const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
+export const StateContext: React.Context<Readonly<State> | undefined> = React.createContext<State | undefined>(
+    undefined,
+);
+export const DispatchContext: React.Context<Dispatch | undefined> = React.createContext<Dispatch | undefined>(
+    undefined,
+);
 
 type Props = { children: React.ReactNode };
 export function SupplyProvider({ children }: Props) {
