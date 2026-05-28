@@ -253,13 +253,22 @@ async function getTransactionsForAddress(
         headers: { 'content-type': 'application/json' },
         method: 'POST',
     });
-    const json = await response.json();
-    if (json.error) {
+    // Parse the body before consulting the HTTP status: standard RPC nodes return the
+    // JSON-RPC "method not found" error with HTTP 200, so checking response.ok first
+    // would mask the -32601 code that drives the getSignaturesForAddress fallback.
+    const json = await response.json().catch(() => null);
+    if (json?.error) {
         const error = new Error(json.error.message ?? 'getTransactionsForAddress failed') as Error & {
             code?: number;
         };
         error.code = json.error.code;
         throw error;
+    }
+    if (!response.ok) {
+        throw new Error(`getTransactionsForAddress HTTP ${response.status}`);
+    }
+    if (!json?.result) {
+        throw new Error('getTransactionsForAddress: malformed response');
     }
     return json.result as GetTransactionsForAddressResult;
 }
@@ -269,6 +278,10 @@ async function getTransactionsForAddress(
 function isMethodNotFound(error: unknown): boolean {
     const e = error as { code?: number; message?: string };
     if (e?.code === -32601) return true;
+    // A structured JSON-RPC code is authoritative: any other numeric code means this is
+    // not a method-not-found, so don't let a coincidental message substring (e.g. a proxy
+    // error page) downgrade the endpoint and permanently disable filtering for the session.
+    if (typeof e?.code === 'number') return false;
     const message = typeof e?.message === 'string' ? e.message.toLowerCase() : '';
     return message.includes('method not found') || message.includes('unsupported method');
 }
@@ -400,17 +413,6 @@ async function fetchAccountHistory(
         type: ActionType.Update,
         url,
     });
-}
-
-export function useClearAccountHistories() {
-    const { url } = useCluster();
-    const dispatch = React.useContext(DispatchContext);
-    if (!dispatch) {
-        throw new Error(`useClearAccountHistories must be used within a HistoryProvider`);
-    }
-    return React.useCallback(() => {
-        dispatch({ type: ActionType.Clear, url });
-    }, [dispatch, url]);
 }
 
 // Resets a single address's history so the next fetch starts from a clean slate.
