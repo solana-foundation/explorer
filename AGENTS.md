@@ -53,16 +53,22 @@
 
 ## CI
 
-- The CI pipeline runs `pnpm format:ci` → `pnpm lint` → `pnpm build` → `pnpm test:ci`. These checks are mandatory — fix violations, never bypass them (no `--no-verify`, no skipping, no disabling rules to silence output). The local hooks below are a developer convenience to surface failures before push; the checks themselves are not optional. Enable with `git config core.hooksPath .githooks`:
+- The CI pipeline runs `pnpm format:ci` → `pnpm lint` → `pnpm openspec:validate` → `pnpm build` → `pnpm test:ci`. These checks are mandatory — fix violations, never bypass them (no `--no-verify`, no skipping, no disabling rules to silence output). The local hooks below are a developer convenience to surface failures before push; the checks themselves are not optional. Enable with `git config core.hooksPath .githooks`:
   - `pre-commit` — runs `pretty:format`, `eslint:lint`, and `test:changed` scoped to staged files.
-  - `pre-push` — runs the full pipeline (format, lint, build, test).
+  - `pre-push` — runs the full pipeline (format, lint, openspec:validate, build, test).
 - Optionally, use [`act`](https://github.com/nektos/act) to run GitHub Actions workflows locally before pushing.
+
+## Design Decisions (OpenSpec)
+
+Non-trivial design and architectural choices are captured as **OpenSpec change proposals** under `openspec/changes/<change-id>/proposal.md`. `proposal.md` is the only required artifact; specs/tasks/design are optional per-change. See [`openspec/README.md`](openspec/README.md) for the convention and [`openspec/changes/pick-adr-methodology/proposal.md`](openspec/changes/pick-adr-methodology/proposal.md) for the rationale. Validate with `openspec validate <change-id> --type change --strict`.
 
 ## PR Review
 
 When reviewing a pull request, agents are encouraged to launch their available review tooling and surface findings to the contributor. Scope reviews to the PR's changed files unless instructed otherwise. Findings are advisory — the contributor decides whether and how to act on them. We do suggest addressing the most destructive findings (bugs, security issues, data-loss risks) before merging.
 
 Recommended: check whether the PR's changed files appear in any per-file ignore block (like `eslint.config.mjs`). For overlapping files, suggest fixing existing violations and removing the file from the ignore list — opportunistic cleanup, not a blocker. Flag any *new* violations added in the same file: the ignore list exempts existing code, not new additions.
+
+Recommended: when the diff includes files under `openspec/`, focus on **semantic quality** of the rationale — CI already covers well-formedness via `pnpm openspec:validate`. *Flag:* `## Why` sections that don't list alternatives or the trade-off; requirement scenarios too vague to fail when violated; proposals re-asking a question settled by an earlier change. *Do NOT flag:* missing proposals on code-only PRs (*non-trivial* is the author's judgement call, not an automated gate); absence of optional artifacts (`tasks.md`, `design.md`, secondary specs); proposals lacking tests or implementation detail (proposals capture rationale, not feature specs).
 
 ---
 

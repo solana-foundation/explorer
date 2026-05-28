@@ -19,5 +19,11 @@ module.exports = {
                 singleQuote: false,
             },
         },
+        {
+            files: 'openspec/**/*.md',
+            options: {
+                proseWrap: 'never',
+            },
+        },
     ],
 };

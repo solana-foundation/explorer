@@ -84,6 +84,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: OpenSpec
+        run: pnpm openspec:validate
+
       - name: Build
         run: pnpm build
 
