@@ -47,25 +47,27 @@ export const domainSearchProvider: SearchProvider = {
                     label: SearchGroup.DomainOwners,
                     options: [
                         {
-                            label: domainInfo.owner,
-                            pathname: `/address/${domainInfo.owner}`,
-                            type: 'address',
-                            value: [query],
-                        },
-                    ],
-                },
-                {
-                    label: SearchGroup.NameServiceAccounts,
-                    options: [
-                        {
                             label: query,
-                            pathname: `/address/${domainInfo.address}`,
-                            sublabel: domainInfo.address,
+                            pathname: `/address/${domainInfo.owner}`,
+                            sublabel: domainInfo.owner,
                             type: 'address',
-                            value: [query],
+                            value: [query, domainInfo.owner],
                         },
                     ],
                 },
+                // Temporarily hidden — restore to surface the SNS name account itself.
+                // {
+                //     label: SearchGroup.NameServiceAccounts,
+                //     options: [
+                //         {
+                //             label: query,
+                //             pathname: `/address/${domainInfo.address}`,
+                //             sublabel: domainInfo.address,
+                //             type: 'address',
+                //             value: [query],
+                //         },
+                //     ],
+                // },
             ];
         } catch (error) {
             Logger.error(new Error('Domain search request failed', { cause: error }), { query, sentry: true });

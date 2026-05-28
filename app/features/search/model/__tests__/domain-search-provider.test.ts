@@ -11,7 +11,7 @@ describe('domainSearchProvider', () => {
         expect(domainSearchProvider.kind).toBe('remote');
     });
 
-    it('should return domain owner and name service account on success', async () => {
+    it('should return domain owner with domain as label on success', async () => {
         const mockOwner = '7v91N7iZ9mNicL8WfG6cgSCKyRXydQjLh6UYBWwm6y1Q';
         const mockAddress = '9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b';
         vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
@@ -24,18 +24,12 @@ describe('domainSearchProvider', () => {
             {
                 label: 'Domain Owners',
                 options: [
-                    { label: mockOwner, pathname: `/address/${mockOwner}`, type: 'address', value: ['toly.sol'] },
-                ],
-            },
-            {
-                label: 'Name Service Accounts',
-                options: [
                     {
                         label: 'toly.sol',
-                        pathname: `/address/${mockAddress}`,
-                        sublabel: mockAddress,
+                        pathname: `/address/${mockOwner}`,
+                        sublabel: mockOwner,
                         type: 'address',
-                        value: ['toly.sol'],
+                        value: ['toly.sol', mockOwner],
                     },
                 ],
             },
