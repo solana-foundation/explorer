@@ -66,6 +66,11 @@ const nextConfig = {
                 permanent: true,
                 source: '/address/:address/history',
             },
+            {
+                destination: '/',
+                permanent: true,
+                source: '/verified-programs',
+            },
         ];
     },
     webpack: (config, { isServer }) => {

@@ -9,11 +9,11 @@
 | Dynamic | `/address/[address]/anchor-program` | 200 B | 1.07 MB |
 | Dynamic | `/address/[address]/attestation` | 10 kB | 1.25 MB |
 | Dynamic | `/address/[address]/attributes` | 10 kB | 1.20 MB |
-| Dynamic | `/address/[address]/blockhashes` | 10 kB | 1.20 MB |
+| Dynamic | `/address/[address]/blockhashes` | 790 B | 1.20 MB |
 | Dynamic | `/address/[address]/compression` | 10 kB | 1.22 MB |
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 10 kB | 1.22 MB |
 | Dynamic | `/address/[address]/domains` | 10 kB | 1.20 MB |
-| Dynamic | `/address/[address]/entries` | 10 kB | 1.20 MB |
+| Dynamic | `/address/[address]/entries` | 930 B | 1.20 MB |
 | Dynamic | `/address/[address]/feature-gate` | 200 B | 1.07 MB |
 | Dynamic | `/address/[address]/idl` | 160 kB | 1.48 MB |
 | Dynamic | `/address/[address]/instructions` | 10 kB | 1.27 MB |
@@ -22,13 +22,13 @@
 | Dynamic | `/address/[address]/program-multisig` | 10 kB | 1.26 MB |
 | Dynamic | `/address/[address]/rewards` | 10 kB | 1.20 MB |
 | Dynamic | `/address/[address]/security` | 10 kB | 1.32 MB |
-| Dynamic | `/address/[address]/slot-hashes` | 10 kB | 1.20 MB |
-| Dynamic | `/address/[address]/stake-history` | 10 kB | 1.20 MB |
+| Dynamic | `/address/[address]/slot-hashes` | 890 B | 1.20 MB |
+| Dynamic | `/address/[address]/stake-history` | 440 B | 1.20 MB |
 | Dynamic | `/address/[address]/token-extensions` | 10 kB | 1.23 MB |
 | Dynamic | `/address/[address]/tokens` | 10 kB | 1.38 MB |
 | Dynamic | `/address/[address]/transfers` | 10 kB | 1.28 MB |
 | Dynamic | `/address/[address]/verified-build` | 10 kB | 1.26 MB |
-| Dynamic | `/address/[address]/vote-history` | 10 kB | 1.20 MB |
+| Dynamic | `/address/[address]/vote-history` | 920 B | 1.20 MB |
 | Dynamic | `/api/anchor` | 180 B | 190 kB |
 | Dynamic | `/api/ans-domains/[address]` | 180 B | 190 kB |
 | Dynamic | `/api/domain-info/[domain]` | 10 kB | 1.20 MB |
@@ -44,8 +44,6 @@
 | Dynamic | `/api/verification/coingecko/[address]` | 180 B | 190 kB |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | 180 B | 190 kB |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | 180 B | 190 kB |
-| Dynamic | `/api/verified-programs/list/[page]` | 180 B | 190 kB |
-| Dynamic | `/api/verified-programs/metadata/[programId]` | 180 B | 190 kB |
 | Dynamic | `/block/[slot]` | 10 kB | 1.27 MB |
 | Dynamic | `/block/[slot]/accounts` | 10 kB | 1.20 MB |
 | Dynamic | `/block/[slot]/programs` | 10 kB | 1.20 MB |
@@ -60,4 +58,3 @@
 | Dynamic | `/tx/[signature]` | 70 kB | 1.66 MB |
 | Dynamic | `/tx/[signature]/inspect` | 430 B | 1.44 MB |
 | Static | `/tx/inspector` | 410 B | 1.44 MB |
-| Static | `/verified-programs` | 10 kB | 200 kB |
