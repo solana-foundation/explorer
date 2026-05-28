@@ -252,6 +252,7 @@
             "@solana-developers/helpers@2.8.1": "patches/@solana-developers__helpers@2.8.1.patch"
         },
         "ignoredBuiltDependencies": [
+            "@fission-ai/openspec",
             "bufferutil",
             "keccak",
             "msw",

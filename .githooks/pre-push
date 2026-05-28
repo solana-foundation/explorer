@@ -1,4 +1,8 @@
 #!/usr/bin/env sh
 
+# Opt out of @fission-ai/openspec telemetry (posthog-node). CI sets CI=true which
+# the validator auto-detects; locally we need to set the flag ourselves.
+export OPENSPEC_TELEMETRY=0
+
 # Mirrors the CI pipeline: format → lint → openspec → build → test
 corepack pnpm format:ci && corepack pnpm lint && corepack pnpm openspec:validate && corepack pnpm build && corepack pnpm test:ci
