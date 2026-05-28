@@ -17,6 +17,7 @@ export enum SearchGroup {
     NameServiceAccounts = 'Name Service Accounts',
     ProgramLoaders = 'Program Loaders',
     Programs = 'Programs',
+    VerifiedPrograms = 'Source Verified Programs',
     Sysvars = 'Sysvars',
     Tokens = 'Tokens',
     Transactions = 'Transactions',
@@ -25,7 +26,7 @@ export enum SearchGroup {
 export const FILTER_TABS: FilterTab[] = [
     { groups: null, id: 'all', label: 'All' },
     { groups: [SearchGroup.Tokens], id: 'tokens', label: 'Tokens' },
-    { groups: [SearchGroup.Programs, SearchGroup.ProgramLoaders], id: 'programs', label: 'Programs' },
+    { groups: [SearchGroup.Programs, SearchGroup.VerifiedPrograms, SearchGroup.ProgramLoaders], id: 'programs', label: 'Programs' },
     { groups: [SearchGroup.FeatureGates], id: 'feature-gates', label: 'Feature Gates' },
     {
         groups: [

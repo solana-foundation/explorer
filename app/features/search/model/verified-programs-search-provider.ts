@@ -1,5 +1,6 @@
 import { Cluster } from '@utils/cluster';
 
+import { PROGRAM_INFO_BY_ID } from '@/app/utils/programs';
 import verifiedPrograms from '@/public/verified-programs.json';
 
 import { SearchGroup } from '../lib/filter-tabs';
@@ -33,17 +34,20 @@ export const verifiedProgramsSearchProvider: SearchProvider = {
         const q = query.toLowerCase();
         const MAX_RESULTS = 10;
         const matched = programs
-            .filter(p => p.name.toLowerCase().includes(q) || p.address.toLowerCase().includes(q))
+            .filter(p => {
+                if (p.address in PROGRAM_INFO_BY_ID) return false;
+                return p.name.toLowerCase().includes(q) || p.address.toLowerCase().includes(q);
+            })
             .slice(0, MAX_RESULTS);
 
         if (matched.length === 0) return [];
 
         return [
             {
-                label: SearchGroup.Programs,
+                label: SearchGroup.VerifiedPrograms,
                 options: matched.map(p => ({
                     label: p.name,
-                    pathname: `/address/${p.address}`,
+                    pathname: `/address/${p.address}/verified-build`,
                     sublabel: p.address,
                     type: 'address',
                     value: [p.name, p.address],
