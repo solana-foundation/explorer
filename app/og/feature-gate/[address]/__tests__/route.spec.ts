@@ -18,9 +18,13 @@ vi.mock('@features/feature-gate/server', async importOriginal => {
     };
 });
 
-vi.mock('@/app/utils/feature-gate/utils', () => ({
-    getFeatureInfo: vi.fn(),
-}));
+vi.mock('@entities/feature-gate/server', async importOriginal => {
+    const actual = await importOriginal<typeof import('@entities/feature-gate/server')>();
+    return {
+        ...actual,
+        getFeatureInfo: vi.fn(),
+    };
+});
 
 // Known feature gate address from featureGates.json
 const validAddress = '7bTK6Jis8Xpfrs8ZoUfiMDPazTcdPcTWheZFJTA5Z6X4';
@@ -51,7 +55,7 @@ describe('GET /og/feature-gate/[address]', () => {
 
     it('should generate image successfully for a known feature gate', async () => {
         const { GET } = await import('../route');
-        const { getFeatureInfo } = await import('@/app/utils/feature-gate/utils');
+        const { getFeatureInfo } = await import('@entities/feature-gate/server');
         vi.mocked(getFeatureInfo).mockReturnValue({
             comms_required: null,
             description: 'Two new instructions for moving value between stake accounts',
@@ -79,7 +83,7 @@ describe('GET /og/feature-gate/[address]', () => {
 
     it('should return 400 for an invalid base58 address', async () => {
         const { GET } = await import('../route');
-        const { getFeatureInfo } = await import('@/app/utils/feature-gate/utils');
+        const { getFeatureInfo } = await import('@entities/feature-gate/server');
 
         const response = await GET(makeRequest('not-valid!!!'), {
             params: Promise.resolve({ address: 'not-valid!!!' }),
@@ -92,7 +96,7 @@ describe('GET /og/feature-gate/[address]', () => {
 
     it('should return 404 for a valid address that is not a known feature gate', async () => {
         const { GET } = await import('../route');
-        const { getFeatureInfo } = await import('@/app/utils/feature-gate/utils');
+        const { getFeatureInfo } = await import('@entities/feature-gate/server');
         vi.mocked(getFeatureInfo).mockReturnValue(undefined);
 
         const response = await GET(makeRequest(unknownAddress), {
@@ -105,7 +109,7 @@ describe('GET /og/feature-gate/[address]', () => {
 
     it('should return 500 when image generation fails', async () => {
         const { GET } = await import('../route');
-        const { getFeatureInfo } = await import('@/app/utils/feature-gate/utils');
+        const { getFeatureInfo } = await import('@entities/feature-gate/server');
         const { ImageResponse } = await import('next/og');
         vi.mocked(getFeatureInfo).mockReturnValue({
             comms_required: null,

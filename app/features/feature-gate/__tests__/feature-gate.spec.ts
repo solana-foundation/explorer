@@ -1,11 +1,10 @@
+import { type FeatureInfoType } from '@entities/feature-gate';
 import fetch from 'cross-fetch';
 import { vi } from 'vitest';
 
-import { FeatureInfoType } from '@/app/utils/feature-gate/types';
+import { fetchFeatureGateInformation, getLink } from '../api/fetch-feature-gate-information';
 
-import { fetchFeatureGateInformation, getLink } from '../api/fetchFeatureGateInformation';
-
-// Taken from ../../../utils/feature-gate/featureGates.json
+// Taken from app/entities/feature-gate/feature-gates.json
 const FEATURE: FeatureInfoType = {
     comms_required: null,
     description: 'Two instructions for moving value between stake accounts without holding Withdrawer',

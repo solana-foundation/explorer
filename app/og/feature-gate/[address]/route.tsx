@@ -1,10 +1,10 @@
+import { getFeatureInfo } from '@entities/feature-gate/server';
 import { BaseFeatureGateImage, isFeatureGateOgEnabled, OG_IMAGE_SIZE } from '@features/feature-gate/server';
 import { isAddress } from '@solana/kit';
 import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
-import { getFeatureInfo } from '@/app/utils/feature-gate/utils';
 
 export const runtime = 'edge';
 

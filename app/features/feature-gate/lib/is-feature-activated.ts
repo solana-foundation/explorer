@@ -1,5 +1,6 @@
+import type { FeatureInfoType } from '@entities/feature-gate';
+
 import { Cluster } from '@/app/utils/cluster';
-import { FeatureInfoType } from '@/app/utils/feature-gate/types';
 
 export function isFeatureActivated(feature: FeatureInfoType, cluster: Cluster) {
     switch (cluster) {

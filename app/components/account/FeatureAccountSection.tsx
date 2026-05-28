@@ -1,5 +1,6 @@
 import { Address } from '@components/common/Address';
 import { Slot } from '@components/common/Slot';
+import { type FeatureInfoType, getFeatureInfo } from '@entities/feature-gate';
 import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
@@ -12,8 +13,6 @@ import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 import { ClusterInfo, useCluster } from '@/app/providers/cluster';
 import { Cluster, clusterName } from '@/app/utils/cluster';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
-import { FeatureInfoType } from '@/app/utils/feature-gate/types';
-import { getFeatureInfo } from '@/app/utils/feature-gate/utils';
 
 import { UnknownAccountCard } from './UnknownAccountCard';
 
