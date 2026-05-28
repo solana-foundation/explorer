@@ -62,6 +62,10 @@
 
 Non-trivial design and architectural choices are captured as **OpenSpec change proposals** under `openspec/changes/<change-id>/proposal.md`. `proposal.md` is the only required artifact; specs/tasks/design are optional per-change. See [`openspec/README.md`](openspec/README.md) for the convention and [`openspec/changes/pick-adr-methodology/proposal.md`](openspec/changes/pick-adr-methodology/proposal.md) for the rationale. Validate with `openspec validate <change-id> --type change --strict`.
 
+## PR Authoring
+
+- When opening a PR via `gh pr create`, populate `--body` from [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md). The CLI's `--body` flag bypasses the template that GitHub auto-loads in the web UI, so it must be filled in by hand. Map your content to the template's sections (`Description`, `Type of change`, `Screenshots`, `Testing`, `Related Issues`, `Checklist`, `Additional Notes`); mark non-applicable sections `N/A` rather than removing them.
+
 ## PR Review
 
 When reviewing a pull request, agents are encouraged to launch their available review tooling and surface findings to the contributor. Scope reviews to the PR's changed files unless instructed otherwise. Findings are advisory — the contributor decides whether and how to act on them. We do suggest addressing the most destructive findings (bugs, security issues, data-loss risks) before merging.
