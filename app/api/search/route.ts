@@ -54,6 +54,8 @@ export async function GET(request: Request) {
         );
     }
 
+    const filterUnverified = Boolean(process.env.NEXT_PUBLIC_SEARCH_DISABLE_UNVERIFIED_TOKENS);
+
     if (cluster === Cluster.Custom) {
         const genesisHash = searchParams.get('genesisHash');
         const resolvedCluster = genesisHash ? clusterFromGenesisHash(genesisHash) : null;
@@ -72,7 +74,7 @@ export async function GET(request: Request) {
         }
 
         const queryType = detectQueryType(trimmed);
-        const tokens = await resolveSearchTokens(trimmed, resolvedCluster);
+        const tokens = await resolveSearchTokens(trimmed, resolvedCluster, '', { filterUnverified });
         return NextResponse.json(
             { meta: { total: tokens.length }, query: trimmed, queryType, results: { tokens }, success: true },
             { headers: SEARCH_CACHE_HEADERS },
@@ -94,7 +96,7 @@ export async function GET(request: Request) {
     }
 
     const queryType = detectQueryType(trimmed);
-    const tokens = await resolveSearchTokens(trimmed, cluster);
+    const tokens = await resolveSearchTokens(trimmed, cluster, '', { filterUnverified });
 
     return NextResponse.json(
         { meta: { total: tokens.length }, query: trimmed, queryType, results: { tokens }, success: true },

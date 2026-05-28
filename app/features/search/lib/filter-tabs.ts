@@ -88,6 +88,10 @@ export function computeFilterArgs(results: SearchOptions[], activeFilter: Filter
     const tokensIdx = reordered.findIndex(g => g.label === SearchGroup.Tokens);
     if (tokensIdx > 0) reordered.unshift(reordered.splice(tokensIdx, 1)[0]);
 
+    // Domain Owners above Tokens (provider only fires for .sol queries)
+    const domainsIdx = reordered.findIndex(g => g.label === SearchGroup.DomainOwners);
+    if (domainsIdx > 0) reordered.unshift(reordered.splice(domainsIdx, 1)[0]);
+
     // Feature Gates last
     const fgIndex = reordered.findIndex(g => g.label === SearchGroup.FeatureGates);
     if (fgIndex !== -1 && fgIndex < reordered.length - 1) reordered.push(reordered.splice(fgIndex, 1)[0]);
