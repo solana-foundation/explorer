@@ -438,7 +438,6 @@ export default tseslint.config(
             'app/tx/**/*.[jt]s?(x)',
             'app/utils/**/*.[jt]s?(x)',
             'app/validators/**/*.[jt]s?(x)',
-            'app/verified-programs/**/*.[jt]s?(x)',
         ],
         rules: {
             '@typescript-eslint/consistent-type-imports': 'off',
@@ -692,9 +691,6 @@ export default tseslint.config(
             'app/features/token-verification-badge/ui/VerificationIcon.tsx',
             'app/features/transaction-history/lib/use-instruction-names.ts',
             'app/features/transaction-history/ui/TransactionHistoryCard.tsx',
-            'app/features/verified-programs/api.ts',
-            'app/features/verified-programs/model.ts',
-            'app/features/verified-programs/useVerifiedProgramsPagination.ts',
         ],
         rules: {
             'unicorn/no-null': 'off',
