@@ -1,0 +1,27 @@
+schema: spec-driven
+
+context: |
+  Solana Explorer — web app for inspecting Solana transactions, accounts, blocks,
+  and epochs.
+
+  Stack: Next.js 15 (App Router) + React 19 + TypeScript 5.7. Package manager
+  pnpm 10.17.1, Node ^22. Tailwind 3.4 with `e-` prefix + shadcn/ui (new-york)
+  in app/components/shared/; legacy SCSS in app/scss/. State: Jotai 2 + SWR 2
+  + React Context. Tests: Vitest 3 + @testing-library/react; Storybook 10.
+
+  Architecture: Feature-Sliced Design under app/ (entities/, features/,
+  components/, providers/, utils/, api/).
+
+  Solana libraries: new on-chain code prefers @solana/kit + @solana-program/*;
+  @solana/web3.js 1.x remains for legacy code paths (no forced migration). The
+  compat layer at app/shared/lib/web3js-compat.ts bridges the two.
+
+  Full conventions (FSD layout, code style, libraries, testing, CI) live in
+  AGENTS.md at the repo root.
+
+# Per-artifact rules
+rules:
+  proposal:
+    - Sections in order — Context, Why, What Changes, Impact
+    - Under Why, list the alternatives considered and the trade-off that decided it
+    - Keep it self-contained — a reader should not need the PR to understand the decision
