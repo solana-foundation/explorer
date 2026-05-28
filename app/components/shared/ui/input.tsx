@@ -9,6 +9,9 @@ const inputVariants = cva(
         'e-font-normal e-font-mono',
         'e-flex e-h-9 e-w-full e-rounded e-border',
         'e-px-4 e-py-2.5 e-text-xs',
+        // Native date/time pickers render a dark calendar glyph that's invisible on
+        // our dark input backgrounds; invert it so it matches the light input text.
+        '[&::-webkit-calendar-picker-indicator]:e-invert',
         'focus-visible:e-outline-none focus-visible:e-ring-2 focus-visible:e-ring-offset-2 focus-visible:e-ring-offset-neutral-900',
         'disabled:e-cursor-not-allowed disabled:e-opacity-50',
         'aria-[invalid="true"]:!e-border-destructive aria-[invalid="true"]:focus-visible:e-ring-destructive',
