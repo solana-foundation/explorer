@@ -49,7 +49,7 @@ export function SearchResultItem({ option }: { option: SearchItem }) {
                         {option.sublabel}
                     </span>
                 )}
-                {option.verified && (
+                {option.verified && option.pathname.includes('/verified-build') && (
                     <span className="e-block e-text-xs e-text-heavy-metal-400">
                         Source verified — Make sure you trust the source code
                     </span>
