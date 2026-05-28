@@ -482,7 +482,6 @@ export default tseslint.config(
             'app/block/[[]slot[]]/page-client.tsx',
             'app/block/[[]slot[]]/programs/page-client.tsx',
             'app/block/[[]slot[]]/rewards/page-client.tsx',
-            'app/supply/page-client.tsx',
             'app/tx/[[]signature[]]/page-client.tsx',
 
             // app/api (Next route handlers)

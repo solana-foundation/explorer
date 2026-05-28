@@ -3,14 +3,11 @@ import { withBotId } from 'botid/next/config';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { buildRedirects } from './config/redirects.mjs';
 import { createSentryBuildConfig } from './sentry/config.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const ADDRESS_ALIASES = ['account', 'accounts', 'addresses'];
-const TX_ALIASES = ['txs', 'txn', 'txns', 'transaction', 'transactions'];
-const SUPPLY_ALIASES = ['accounts', 'accounts/top'];
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -42,36 +39,7 @@ const nextConfig = {
         ];
     },
     async redirects() {
-        return [
-            // Leave this above `ADDRESS_ALIASES`, since it also provides an alias for `/accounts`.
-            ...SUPPLY_ALIASES.map(oldRoot => ({
-                destination: '/supply',
-                permanent: true,
-                source: `/${oldRoot}`,
-            })),
-            ...ADDRESS_ALIASES.flatMap(oldRoot =>
-                [':address', ':address/:tab'].map(path => ({
-                    destination: `/${['address', path].join('/')}`,
-                    permanent: true,
-                    source: `/${[oldRoot, path].join('/')}`,
-                })),
-            ),
-            ...TX_ALIASES.map(oldRoot => ({
-                destination: `/${['tx', ':signature'].join('/')}`,
-                permanent: true,
-                source: `/${[oldRoot, ':signature'].join('/')}`,
-            })),
-            {
-                destination: '/address/:address',
-                permanent: true,
-                source: '/address/:address/history',
-            },
-            {
-                destination: '/',
-                permanent: true,
-                source: '/verified-programs',
-            },
-        ];
+        return buildRedirects();
     },
     webpack: (config, { isServer }) => {
         config.resolve.alias = {
