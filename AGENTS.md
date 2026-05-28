@@ -64,7 +64,7 @@ Non-trivial design and architectural choices are captured as **OpenSpec change p
 
 ## PR Authoring
 
-- When opening a PR via `gh pr create`, populate `--body` from [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md). The CLI's `--body` flag bypasses the template that GitHub auto-loads in the web UI, so it must be filled in by hand. Map your content to the template's sections (`Description`, `Type of change`, `Screenshots`, `Testing`, `Related Issues`, `Checklist`, `Additional Notes`); mark non-applicable sections `N/A` rather than removing them.
+- When opening a PR via `gh pr create --body`, fill the body from [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md) — the `--body` flag bypasses the template that GitHub's web UI auto-loads.
 
 ## PR Review
 
