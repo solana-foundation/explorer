@@ -1,7 +1,10 @@
 import { PROGRAM_INFO_BY_ID } from '@/app/utils/programs';
+import verifiedPrograms from '@/public/verified-programs.json';
 
 import { SearchGroup } from '../lib/filter-tabs';
 import type { SearchContext, SearchOptions, SearchProvider } from '../lib/types';
+
+const verifiedAddresses = new Set(verifiedPrograms.map((p: { address: string }) => p.address));
 
 /**
  * Local search provider that matches well-known Solana programs by name or
@@ -38,6 +41,7 @@ export const programSearchProvider: SearchProvider = {
                     sublabel: address,
                     type: 'address',
                     value: [name, address],
+                    ...(verifiedAddresses.has(address) && { verified: true }),
                 })),
             },
         ];

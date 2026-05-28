@@ -33,7 +33,7 @@ export default defineConfig({
     plugins: [react()],
     resolve: {
         alias: {
-            '@/': path.resolve(__dirname, './'),
+            '@/': `${path.resolve(__dirname, './')}/`,
 
             '@/app': path.resolve(__dirname, './app'),
             '@/components': path.resolve(__dirname, './app/components'),
