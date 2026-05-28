@@ -26,7 +26,11 @@ export enum SearchGroup {
 export const FILTER_TABS: FilterTab[] = [
     { groups: null, id: 'all', label: 'All' },
     { groups: [SearchGroup.Tokens], id: 'tokens', label: 'Tokens' },
-    { groups: [SearchGroup.Programs, SearchGroup.VerifiedPrograms, SearchGroup.ProgramLoaders], id: 'programs', label: 'Programs' },
+    {
+        groups: [SearchGroup.Programs, SearchGroup.VerifiedPrograms, SearchGroup.ProgramLoaders],
+        id: 'programs',
+        label: 'Programs',
+    },
     { groups: [SearchGroup.FeatureGates], id: 'feature-gates', label: 'Feature Gates' },
     {
         groups: [
