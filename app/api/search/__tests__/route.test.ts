@@ -286,6 +286,64 @@ describe('GET /api/search', () => {
         });
     });
 
+    describe('NEXT_PUBLIC_SEARCH_DISABLE_UNVERIFIED_TOKENS', () => {
+        const OTHER_ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+        beforeEach(() => {
+            process.env.NEXT_PUBLIC_SEARCH_DISABLE_UNVERIFIED_TOKENS = 'true';
+        });
+
+        it('should filter out unverified Jupiter tokens when flag is set', async () => {
+            mockFetch(200, [
+                makeJupiterToken({ isVerified: true }),
+                makeJupiterToken({ id: OTHER_ADDRESS, isVerified: false, name: 'Other', symbol: 'OTH' }),
+            ]);
+
+            const res = await GET(makeRequest('sol'));
+            const data = await res.json();
+
+            expect(data.results.tokens).toHaveLength(1);
+            expect(data.results.tokens[0].isVerified).toBe(true);
+            expect(data.results.tokens[0].tokenAddress).toBe(VALID_ADDRESS);
+        });
+
+        it('should keep verified Jupiter tokens when flag is set', async () => {
+            mockFetch(200, [makeJupiterToken({ isVerified: true })]);
+
+            const res = await GET(makeRequest('sol'));
+            const data = await res.json();
+
+            expect(data.results.tokens).toHaveLength(1);
+            expect(data.results.tokens[0].isVerified).toBe(true);
+        });
+
+        it('should return empty when all Jupiter results are unverified', async () => {
+            mockFetch(200, [
+                makeJupiterToken({ isVerified: false }),
+                makeJupiterToken({ id: OTHER_ADDRESS, isVerified: false, name: 'Other', symbol: 'OTH' }),
+            ]);
+
+            const res = await GET(makeRequest('sol'));
+            const data = await res.json();
+
+            expect(data.results.tokens).toHaveLength(0);
+        });
+
+        it('should keep UTL fallback tokens even when flag is set', async () => {
+            // Jupiter fails → UTL fallback. UTL hardcodes isVerified=false but bypasses the filter.
+            mockFetch(500, {});
+            mockFetch(200, {
+                content: [{ address: VALID_ADDRESS, name: 'Wrapped SOL', symbol: 'SOL' }],
+            });
+
+            const res = await GET(makeRequest('sol'));
+            const data = await res.json();
+
+            expect(data.results.tokens).toHaveLength(1);
+            expect(data.results.tokens[0].isVerified).toBe(false);
+        });
+    });
+
     describe('cluster routing', () => {
         it('should return 400 for unknown cluster slug', async () => {
             const res = await GET(new Request(`http://localhost/api/search?q=sol-${++testSeq}&cluster=bogus`));
