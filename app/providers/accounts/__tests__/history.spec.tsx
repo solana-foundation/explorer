@@ -318,7 +318,7 @@ describe('useResetAccountHistory', () => {
 });
 
 describe('getSignaturesForAddress fallback', () => {
-    it('should fall back when getTransactionsForAddress is not found, mapping slot bounds', async () => {
+    it('should fall back when getTransactionsForAddress is not found, applying no filters', async () => {
         mockRpcError(-32601, 'Method not found');
         mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('legacy', 5)]);
 
@@ -338,8 +338,8 @@ describe('getSignaturesForAddress fallback', () => {
         expect(mockConnection.getSignaturesForAddress).toHaveBeenCalledTimes(1);
         const [pubkey, opts] = mockConnection.getSignaturesForAddress.mock.calls[0];
         expect(pubkey.toBase58()).toBe(ADDRESS);
-        // Slot bounds are passed via the Hydrant untilSlot/beforeSlot extension.
-        expect(opts).toMatchObject({ beforeSlot: 99, limit: 25, untilSlot: 10 });
+        // Standard RPCs support none of the filters, so slot bounds are not forwarded.
+        expect(opts).toEqual({ limit: 25 });
     });
 
     it('should not fall back on a generic RPC error', async () => {

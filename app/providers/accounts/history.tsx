@@ -131,7 +131,7 @@ const GenerationContext = React.createContext<Map<string, number> | undefined>(u
 
 // Whether the current endpoint supports getTransactionsForAddress. Flips to false the
 // first time the method is not found, so the UI can disable filtering (the
-// getSignaturesForAddress fallback can't honour block-time/status filters).
+// getSignaturesForAddress fallback can't honour any of the filters).
 type MethodSupport = { supported: boolean; markUnsupported: () => void };
 const MethodSupportContext = React.createContext<MethodSupport | undefined>(undefined);
 
@@ -288,19 +288,17 @@ function isMethodNotFound(error: unknown): boolean {
 
 // Legacy fallback path for endpoints without getTransactionsForAddress. Uses
 // getSignaturesForAddress, whose pagination cursor is the trailing `before` signature
-// rather than a paginationToken. Slot bounds are passed through as the Hydrant
-// `untilSlot`/`beforeSlot` extension (a no-op on nodes that don't support it); block
-// time and status filters are not applied on this path.
+// rather than a paginationToken. Standard RPCs support none of the filters, so slot,
+// block time and status are all left unapplied here — the caller marks filtering
+// unsupported and clears them.
 async function fetchViaSignatures(
     url: string,
     pubkey: PublicKey,
-    options: { limit: number; before?: string; filters: HistoryFilters },
+    options: { limit: number; before?: string },
 ): Promise<AccountHistory> {
     const connection = new Connection(url);
     const rpcOptions: Record<string, unknown> = { limit: options.limit };
     if (options.before) rpcOptions.before = options.before;
-    if (options.filters.slot?.gte !== undefined) rpcOptions.untilSlot = options.filters.slot.gte;
-    if (options.filters.slot?.lte !== undefined) rpcOptions.beforeSlot = options.filters.slot.lte;
     const fetched = await connection.getSignaturesForAddress(
         pubkey,
         rpcOptions as Parameters<Connection['getSignaturesForAddress']>[1],
@@ -365,7 +363,6 @@ async function fetchAccountHistory(
             try {
                 history = await fetchViaSignatures(url, pubkey, {
                     before: options.before,
-                    filters: options.filters,
                     limit: options.limit,
                 });
                 status = FetchStatus.Fetched;
