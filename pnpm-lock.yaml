@@ -344,6 +344,9 @@ importers:
       typescript:
         specifier: 5.7.3
         version: 5.7.3
+      undici:
+        specifier: 6.25.0
+        version: 6.25.0
       use-async-effect:
         specifier: 2.2.7
         version: 2.2.7(react@19.2.4)
@@ -10830,6 +10833,10 @@ packages:
 
   undici-types@7.25.0:
     resolution: {integrity: sha512-AXNgS1Byr27fTI+2bsPEkV9CxkT8H6xNyRI68b3TatlZo3RkzlqQBLL+w7SmGPVpokjHbcuNVQUWE7FRTg+LRA==}
+
+  undici@6.25.0:
+    resolution: {integrity: sha512-ZgpWDC5gmNiuY9CnLVXEH8rl50xhRCuLNA97fAUnKi8RRuV4E6KG31pDTsLVUKnohJE0I3XDrTeEydAXRw47xg==}
+    engines: {node: '>=18.17'}
 
   unified@11.0.5:
     resolution: {integrity: sha512-xKvGhPWw3k84Qjh8bI3ZeJjqnyadK+GEFtazSfZv/rKeTkTjOJho6mFqh2SM96iIcZokxiOpg78GazTSg8+KHA==}
@@ -24660,6 +24667,8 @@ snapshots:
   undici-types@7.12.0: {}
 
   undici-types@7.25.0: {}
+
+  undici@6.25.0: {}
 
   unified@11.0.5:
     dependencies:

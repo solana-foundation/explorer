@@ -1,7 +1,7 @@
-import _dns from 'dns';
+import _dns, { type LookupAddress } from 'dns';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { checkURLForPrivateIP } from '../feature/ip';
+import { lookupHostnameSafely } from '../feature/ip';
 
 const dns = _dns.promises;
 
@@ -21,91 +21,166 @@ vi.mock('dns', async () => {
     };
 });
 
-/**
- *  mock valid response
- */
-
-type LookupAddress = { address: string };
-
 function mockLookupOnce(addresses: LookupAddress | LookupAddress[] | undefined) {
     // @ts-expect-error lookup does not have mockImplementation
     dns.lookup.mockResolvedValueOnce(addresses);
 }
 
-describe('ip::checkURLForPrivateIP', () => {
+describe('lookupHostnameSafely', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
-    // do not throw exceptions forinvalid input to not break the execution flow
-    test('should handle invalid URL gracefully', async () => {
-        await expect(checkURLForPrivateIP('not-a-valid-url')).resolves.toBe(true);
+    test('should return public + pinned lookup for a valid public IPv4', async () => {
+        mockLookupOnce([{ address: '8.8.8.8', family: 4 }]);
+
+        const result = await lookupHostnameSafely('google.com');
+
+        expect(result.kind).toBe('public');
+        if (result.kind === 'public') {
+            expect(result.addresses).toEqual([{ address: '8.8.8.8', family: 4 }]);
+            expect(typeof result.lookup).toBe('function');
+        }
     });
 
-    test('should block unsupported protocols', async () => {
-        await expect(checkURLForPrivateIP('ftp://example.com')).resolves.toBe(true);
-    });
+    test('should return public for a valid public IPv6', async () => {
+        mockLookupOnce([{ address: '2606:4700:4700::1111', family: 6 }]);
 
-    test('should allow valid public URL', async () => {
-        mockLookupOnce([{ address: '8.8.8.8' }]);
-        expect(await checkURLForPrivateIP('http://google.com')).toBe(false);
-    });
+        const result = await lookupHostnameSafely('one.one.one.one');
 
-    test('should allow valid public IPv6', async () => {
-        mockLookupOnce([{ address: '2606:4700:4700::1111' }]);
-        await expect(checkURLForPrivateIP('https://[2606:4700:4700::1111]')).resolves.toBe(false);
+        expect(result.kind).toBe('public');
     });
 
     test('should block private IPv4', async () => {
-        mockLookupOnce([{ address: '192.168.1.1' }]);
-        await expect(checkURLForPrivateIP('http://192.168.1.1')).resolves.toBe(true);
+        mockLookupOnce([{ address: '192.168.1.1', family: 4 }]);
+
+        const result = await lookupHostnameSafely('intranet.local');
+
+        expect(result).toMatchObject({ kind: 'private' });
     });
 
-    test('should block decimal-encoded private IP', async () => {
-        mockLookupOnce([{ address: '192.168.1.1' }]);
-        await expect(checkURLForPrivateIP('http://3232235777')).resolves.toBe(true);
+    test('should block the AWS metadata IP', async () => {
+        mockLookupOnce([{ address: '169.254.169.254', family: 4 }]);
+
+        const result = await lookupHostnameSafely('attacker.com');
+
+        expect(result).toMatchObject({ kind: 'private' });
     });
 
-    test('should block hex-encoded private IP', async () => {
-        mockLookupOnce([{ address: '192.168.1.1' }]);
-        await expect(checkURLForPrivateIP('http://0xC0A80101')).resolves.toBe(true);
+    test('should block if ANY resolved address is private (mixed result)', async () => {
+        // A malicious resolver could return a public + a private address to
+        // try to slip past — every address must be public.
+        mockLookupOnce([
+            { address: '8.8.8.8', family: 4 },
+            { address: '127.0.0.1', family: 4 },
+        ]);
+
+        const result = await lookupHostnameSafely('attacker.com');
+
+        expect(result).toMatchObject({ kind: 'private' });
     });
 
-    test('should block cloud metadata IP', async () => {
-        mockLookupOnce([{ address: '169.254.169.254' }]);
-        await expect(checkURLForPrivateIP('http://169.254.169.254')).resolves.toBe(true);
+    test('should block localhost without doing DNS at all', async () => {
+        const result = await lookupHostnameSafely('localhost');
+
+        expect(result).toMatchObject({ kind: 'private' });
+        expect(dns.lookup).not.toHaveBeenCalled();
     });
 
-    test('should handle absent address negatively', async () => {
-        mockLookupOnce(undefined);
-        await expect(checkURLForPrivateIP('http://hello.world')).resolves.toBe(true);
-    });
-
-    test('should handle DNS resolution failure gracefully', async () => {
+    test('should treat DNS resolution failure as private', async () => {
         // @ts-expect-error lookup does not have mockImplementation
         dns.lookup.mockRejectedValueOnce(new Error('DNS resolution failed'));
-        await expect(checkURLForPrivateIP('http://unknown.domain')).resolves.toBe(true);
+
+        const result = await lookupHostnameSafely('unknown.domain');
+
+        expect(result).toMatchObject({ kind: 'private', reason: 'DNS resolution failed' });
+    });
+
+    test('should treat empty address list as private', async () => {
+        mockLookupOnce([]);
+
+        const result = await lookupHostnameSafely('vanishes.local');
+
+        expect(result).toMatchObject({ kind: 'private', reason: 'no addresses' });
+    });
+
+    test('should treat undefined dns result as private', async () => {
+        mockLookupOnce(undefined);
+
+        const result = await lookupHostnameSafely('vanishes.local');
+
+        expect(result).toMatchObject({ kind: 'private' });
     });
 });
 
-describe('ip::checkURLForPrivateIP with single resolved address', () => {
+// The pinned lookup is the core of the DNS-rebinding fix: it must replay the
+// pre-validated addresses no matter what the kernel would have resolved.
+describe('lookupHostnameSafely — pinned lookup behaviour', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
-    test('should handle single address positively', async () => {
-        mockLookupOnce({ address: '76.76.21.21' });
-        await expect(checkURLForPrivateIP('http://solana.com')).resolves.toBe(false);
-    });
-});
+    test('should return the validated address regardless of the hostname argument', async () => {
+        mockLookupOnce([{ address: '8.8.8.8', family: 4 }]);
 
-// move case for localhost to a separate test case as it's a special case and doesn't require DNS resolution
-describe('ip::checkURLForPrivateIP with localhost', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
+        const result = await lookupHostnameSafely('google.com');
+        if (result.kind !== 'public') throw new Error('expected public');
+
+        // Call the pinned lookup with a totally different hostname — it must
+        // ignore the argument and return what we already validated.
+        await new Promise<void>((resolve, reject) => {
+            result.lookup('attacker.evil', {}, (err, address, family) => {
+                if (err) return reject(err);
+                if (Array.isArray(address)) return reject(new Error('expected single address'));
+                expect(address).toBe('8.8.8.8');
+                expect(family).toBe(4);
+                resolve();
+            });
+        });
     });
 
-    test('should block localhost', async () => {
-        await expect(checkURLForPrivateIP('http://localhost')).resolves.toBe(true);
+    test('should respect the requested family filter', async () => {
+        mockLookupOnce([
+            { address: '8.8.8.8', family: 4 },
+            { address: '2001:4860:4860::8888', family: 6 },
+        ]);
+
+        const result = await lookupHostnameSafely('google.com');
+        if (result.kind !== 'public') throw new Error('expected public');
+
+        await new Promise<void>((resolve, reject) => {
+            result.lookup('google.com', { family: 6 }, (err, address, family) => {
+                if (err) return reject(err);
+                if (Array.isArray(address)) return reject(new Error('expected single address'));
+                expect(address).toBe('2001:4860:4860::8888');
+                expect(family).toBe(6);
+                resolve();
+            });
+        });
+    });
+
+    // undici 6.x's `Agent` calls the lookup with `{ all: true }`, expecting
+    // an array callback. If we only supported the single-result form, real
+    // connections would fail with "Invalid IP address: undefined".
+    test('should return the full array when called with { all: true }', async () => {
+        mockLookupOnce([
+            { address: '8.8.8.8', family: 4 },
+            { address: '2001:4860:4860::8888', family: 6 },
+        ]);
+
+        const result = await lookupHostnameSafely('google.com');
+        if (result.kind !== 'public') throw new Error('expected public');
+
+        await new Promise<void>((resolve, reject) => {
+            result.lookup('google.com', { all: true }, (err, addresses) => {
+                if (err) return reject(err);
+                if (!Array.isArray(addresses)) return reject(new Error('expected array'));
+                expect(addresses).toEqual([
+                    { address: '8.8.8.8', family: 4 },
+                    { address: '2001:4860:4860::8888', family: 6 },
+                ]);
+                resolve();
+            });
+        });
     });
 });
