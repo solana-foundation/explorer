@@ -1,4 +1,4 @@
-import { array, type Infer, nullable, number, string, type } from 'superstruct';
+import { array, type Infer, nullable, number, object, string } from 'superstruct';
 
 /**
  * Runtime shape of an entry in `app/entities/feature-gate/feature-gates.json`.
@@ -7,8 +7,14 @@ import { array, type Infer, nullable, number, string, type } from 'superstruct';
  * and friends, and the read contract for the explorer UI — any drift between
  * the cron-generated JSON and what the UI expects will be caught by the
  * schema-validation test that loads the JSON through this schema.
+ *
+ * `object` (not `type`) on purpose: an unknown/renamed field must fail loudly
+ * rather than ride along silently. `feature-store.ts` round-trips the JSON
+ * through `create()`, where `object` rejects stray keys while `type` would
+ * pass them straight back to disk. Every field is required either way —
+ * `nullable()` covers "present but empty", not "absent".
  */
-export const FeatureGateSchema = type({
+export const FeatureGateSchema = object({
     comms_required: nullable(string()),
     description: nullable(string()),
     devnet_activation_epoch: nullable(number()),
