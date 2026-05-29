@@ -21,7 +21,7 @@ import { CollapsibleSection } from './CollapsibleSection';
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { url } = useCluster();
-    const { isSm } = useBreakpoint();
+    const { isSm, isLg } = useBreakpoint();
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const message = transactionWithMeta?.transaction.message;
@@ -55,6 +55,14 @@ export function AccountsCard({ signature }: SignatureProps) {
         const key = pubkey.toBase58();
         const delta = new BigNumber(post).minus(new BigNumber(pre));
         const accountInfo = accounts.get(key);
+
+        const hasBadges =
+    index === 0 ||
+    account.signer ||
+    account.writable ||
+    message.instructions.some(ix => ix.programId.equals(pubkey)) ||
+    account.source === 'lookupTable';
+
 
         const badges = (
             <>
@@ -92,8 +100,8 @@ export function AccountsCard({ signature }: SignatureProps) {
                 className={cn(
                     'e-min-h-9 e-px-3 e-py-1.5 md:e-px-4',
                     'e-grid e-items-start e-gap-x-0 e-gap-y-0.5 e-whitespace-nowrap e-text-sm md:e-gap-y-0 lg:e-gap-x-5',
-                    'e-grid-cols-[minmax(auto,1.75rem)_1fr_1fr] lg:e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,200px)_minmax(auto,200px)]',
-                    "[grid-template-areas:'number_address_delta'_'number_address_balance'] lg:[grid-template-areas:'number_address_delta_balance']",
+                    'e-grid-cols-[minmax(auto,1.75rem)_minmax(100px,auto)_1fr] lg:e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,200px)_minmax(auto,200px)]',
+                    "[grid-template-areas:'number_address_delta'_'number_address_balance'_'number_address_size'] lg:[grid-template-areas:'number_address_delta_balance']",
                     'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid] last:e-border-b-0',
                 )}
             >
@@ -107,9 +115,9 @@ export function AccountsCard({ signature }: SignatureProps) {
                             fetchTokenLabelInfo
                             truncate
                         />
-                        {dataCell}
+                        {isLg && dataCell}
                     </div>
-                    <span className="e-mt-1 e-inline-flex e-flex-wrap e-gap-1">{badges}</span>
+                    {hasBadges && <span className="e-mt-1 e-inline-flex e-flex-wrap e-gap-1">{badges}</span>}
                 </div>
                 <div className="e-justify-self-end [grid-area:delta]">
                     <BalanceDelta delta={delta} isSol />
@@ -117,6 +125,11 @@ export function AccountsCard({ signature }: SignatureProps) {
                 <div className="e-justify-self-end [grid-area:balance]">
                     <SolBalance lamports={post} />
                 </div>
+                {!isLg && 
+                    <div className='e-justify-self-end [grid-area:size]'>
+                        {dataCell}
+                    </div>
+                }
             </div>
         );
     });

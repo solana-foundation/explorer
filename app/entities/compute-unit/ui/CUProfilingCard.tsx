@@ -17,7 +17,8 @@ type ExtendedBarDataset = ChartData<'bar'>['datasets'][number] & {
 };
 
 const getCUProfileChartOptions = (totalCU: number): ChartOptions<'bar'> => {
-    let currentMouseX = 0;
+    let currentClientX = 0;
+    let currentClientY = 0;
 
     return {
         animation: false,
@@ -35,9 +36,16 @@ const getCUProfileChartOptions = (totalCU: number): ChartOptions<'bar'> => {
             if (canvas) {
                 canvas.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
             }
-            // Capture actual mouse position for the tooltip
+            // Capture pointer position — supports both mouse and touch events
             if (event.native) {
-                currentMouseX = (event.native as MouseEvent).clientX;
+                const nativeEvent = event.native as MouseEvent | TouchEvent;
+                if ('touches' in nativeEvent && nativeEvent.touches.length > 0) {
+                    currentClientX = nativeEvent.touches[0].clientX;
+                    currentClientY = nativeEvent.touches[0].clientY;
+                } else {
+                    currentClientX = (nativeEvent as MouseEvent).clientX;
+                    currentClientY = (nativeEvent as MouseEvent).clientY;
+                }
             }
         },
         plugins: {
@@ -120,31 +128,14 @@ const getCUProfileChartOptions = (totalCU: number): ChartOptions<'bar'> => {
                     tooltipEl.style.transition = 'all 0.1s ease';
                     tooltipEl.style.zIndex = '9999';
 
-                    const tooltipRect = tooltipEl.getBoundingClientRect();
-                    const tooltipWidth = tooltipRect.width || 180; // min-width
+                    const { width: tw = 180, height: th = 70 } = tooltipEl.getBoundingClientRect();
+                    const gap = 10;
+                    const left = Math.max(0, Math.min(window.innerWidth - tw, currentClientX - tw / 2));
+                    const top = currentClientY - th - gap < 0 ? currentClientY + gap : currentClientY - th - gap;
 
-                    const chartCanvas = context.chart.canvas;
-                    const canvasRect = chartCanvas.getBoundingClientRect();
-
-                    let left = currentMouseX;
-                    const top = canvasRect.top;
-                    let transform = 'translate(-50%, calc(-100% - 10px))';
-
-                    // Check right edge
-                    if (currentMouseX + tooltipWidth / 2 > canvasRect.right) {
-                        left = currentMouseX;
-                        transform = 'translate(-100%, calc(-100% - 10px))';
-                    }
-
-                    // Check left edge
-                    if (currentMouseX - tooltipWidth / 2 < canvasRect.left) {
-                        left = currentMouseX;
-                        transform = 'translate(0, calc(-100% - 10px))';
-                    }
-
-                    tooltipEl.style.left = `${left}px`;
-                    tooltipEl.style.top = `${top}px`;
-                    tooltipEl.style.transform = transform;
+                    tooltipEl.style.left = left + 'px';
+                    tooltipEl.style.top = top + 'px';
+                    tooltipEl.style.transform = '';
                 },
             },
         },
@@ -201,11 +192,15 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
     );
 
     React.useEffect(() => {
-        return () => {
+        const hideTooltip = () => {
             const tooltipEl = document.getElementById('cu-chartjs-tooltip');
-            if (tooltipEl) {
-                tooltipEl.remove();
-            }
+            if (tooltipEl) tooltipEl.style.opacity = '0';
+        };
+        window.addEventListener('scroll', hideTooltip, true);
+        return () => {
+            window.removeEventListener('scroll', hideTooltip, true);
+            const tooltipEl = document.getElementById('cu-chartjs-tooltip');
+            if (tooltipEl) tooltipEl.remove();
         };
     }, []);
 

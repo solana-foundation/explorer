@@ -26,7 +26,7 @@ type TokenBalanceRow = {
     accountIndex: number;
 };
 
-const GRID_TEMPLATE = '[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,140px)_minmax(auto,150px)]';
+const GRID_TEMPLATE = 'e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)]';
 
 export function TokenBalancesCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
@@ -75,15 +75,15 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
             <div
                 className={cn(
                     'e-hidden e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
-                    `e-grid-cols-${GRID_TEMPLATE} e-gap-5 e-text-xs e-uppercase e-text-muted`,
+                    'e-gap-5 e-text-xs e-uppercase e-text-muted',
                     'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid]',
+                    GRID_TEMPLATE
                 )}
             >
                 <div>#</div>
-                <div>Owner / Address</div>
+                <div>Owner / Address / Token</div>
                 <div className="e-text-right">Change</div>
                 <div className="e-text-right">Post Balance</div>
-                <div>Token</div>
             </div>
             {rows.map((row, index) => (
                 <TokenBalanceRow
@@ -128,13 +128,13 @@ function TokenBalanceRow({
             <div className="e-flex e-flex-col e-gap-1 e-px-3 e-py-3 e-text-sm md:e-px-4 lg:e-hidden">
                 <div className="e-flex e-items-center e-justify-between">
                     <div className="e-flex e-items-center e-gap-2">
-                        <span className="e-w-14 e-text-muted">Change</span>
+                        <span className="e-w-16 e-shrink-0 e-text-muted">Change</span>
                         <BalanceDelta delta={scaledDelta} />
                     </div>
                     <span className="e-text-muted">{index + 1}</span>
                 </div>
                 <div className="e-flex e-items-center e-gap-2">
-                    <span className="e-w-14 e-text-muted">Balance</span>
+                    <span className="e-w-16 e-shrink-0 e-text-muted">Balance</span>
                     <span className="e-whitespace-nowrap">
                         {scaledBalance} {units}
                         <ScaledUiAmountMultiplierTooltip
@@ -144,17 +144,17 @@ function TokenBalanceRow({
                     </span>
                 </div>
                 <div className="e-flex e-items-center e-gap-2">
-                    <span className="e-w-14 e-text-muted">Token</span>
+                    <span className="e-w-16 e-shrink-0 e-text-muted">Token</span>
                     <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo />
                 </div>
                 {owner && (
                     <div className="e-flex e-items-center e-gap-2">
-                        <span className="e-w-14 e-text-muted">Owner</span>
+                        <span className="e-w-16 e-shrink-0 e-text-muted">Owner</span>
                         <Address pubkey={new PublicKey(owner)} link />
                     </div>
                 )}
                 <div className="e-flex e-items-center e-gap-2">
-                    <span className="e-w-14 e-text-muted">Addr</span>
+                    <span className="e-w-16 e-shrink-0 e-text-muted">Addr</span>
                     <Address pubkey={account} link />
                 </div>
             </div>
@@ -164,8 +164,8 @@ function TokenBalanceRow({
                 className={cn(
                     'e-hidden e-min-h-9 e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
                     'e-items-start e-gap-x-5 e-whitespace-nowrap e-text-sm',
-                    `e-grid-cols-${GRID_TEMPLATE}`,
-                    "[grid-template-areas:'number_address_change_balance_token']",
+                    "[grid-template-areas:'number_address_change_balance']",
+                    GRID_TEMPLATE
                 )}
             >
                 <div className="e-text-muted [grid-area:number]">{index + 1}</div>
@@ -180,6 +180,10 @@ function TokenBalanceRow({
                         <span className="e-min-w-11 e-text-sm e-text-muted">Addr</span>
                         <Address pubkey={account} link />
                     </div>
+                    <div className="e-flex e-items-center e-gap-3">
+                        <span className="e-min-w-11 e-text-sm e-text-muted">Token</span>
+                        <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo />
+                    </div>
                 </div>
                 <div className="e-justify-self-end [grid-area:change]">
                     <BalanceDelta delta={scaledDelta} />
@@ -190,9 +194,6 @@ function TokenBalanceRow({
                         rawAmount={balance}
                         scaledUiAmountMultiplier={scaledUiAmountMultiplier}
                     />
-                </div>
-                <div className="[grid-area:token]">
-                    <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo />
                 </div>
             </div>
         </div>

@@ -248,7 +248,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                             </span>
                         )}
                         {errorReason && (
-                            <span className={`badge bg-${statusClass}-soft`}>
+                            <span className={`badge bg-${statusClass}-soft e-whitespace-normal e-break-words e-text-left`}>
                                 {errorLink ? <Link href={errorLink}>{errorReason}</Link> : errorReason}
                             </span>
                         )}
