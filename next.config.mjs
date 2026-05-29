@@ -1,13 +1,8 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import { withBotId } from 'botid/next/config';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 import { buildRedirects } from './config/redirects.mjs';
 import { createSentryBuildConfig } from './sentry/config.mjs';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -41,18 +36,15 @@ const nextConfig = {
     async redirects() {
         return buildRedirects();
     },
-    webpack: (config, { isServer }) => {
-        config.resolve.alias = {
-            ...(config.resolve.alias || {}),
-            borsh: path.resolve(__dirname, 'node_modules/borsh'), // force legacy version
-        };
-
-        if (!isServer) {
-            // Fixes npm packages that depend on `fs` module like `@project-serum/anchor`.
-            config.resolve.fallback.fs = false;
-        }
-
-        return config;
+    turbopack: {
+        resolveAlias: {
+            // Force the legacy borsh@0.7.0 (the `borsh` dependency) for all `borsh` imports.
+            // `borsh2` (npm:borsh@2.0.0) is a separate specifier and is unaffected.
+            borsh: './node_modules/borsh',
+            // Stub Node's `fs` in client bundles — packages like `@coral-xyz/anchor` reference it
+            // but never execute that path on the client (was `resolve.fallback.fs = false` in webpack).
+            fs: { browser: './empty.ts' },
+        },
     },
 };
 
