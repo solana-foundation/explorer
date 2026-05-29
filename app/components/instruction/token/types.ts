@@ -18,7 +18,7 @@ const InitializeMint = type({
 
 const InitializeMint2 = type({
     decimals: number(),
-    freezeAuthority: PublicKeyFromString,
+    freezeAuthority: optional(PublicKeyFromString),
     freezeAuthorityOption: optional(number()),
     mint: PublicKeyFromString,
     mintAuthority: PublicKeyFromString,
