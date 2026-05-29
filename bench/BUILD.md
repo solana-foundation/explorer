@@ -22,10 +22,10 @@
 | Dynamic | `/address/[address]/program-multisig` | 10 kB | 1.26 MB |
 | Dynamic | `/address/[address]/rewards` | 10 kB | 1.20 MB |
 | Dynamic | `/address/[address]/security` | 10 kB | 1.32 MB |
-| Dynamic | `/address/[address]/slot-hashes` | 890 B | 1.20 MB |
+| Dynamic | `/address/[address]/slot-hashes` | 880 B | 1.20 MB |
 | Dynamic | `/address/[address]/stake-history` | 440 B | 1.20 MB |
 | Dynamic | `/address/[address]/token-extensions` | 10 kB | 1.23 MB |
-| Dynamic | `/address/[address]/tokens` | 10 kB | 1.38 MB |
+| Dynamic | `/address/[address]/tokens` | 10 kB | 1.37 MB |
 | Dynamic | `/address/[address]/transfers` | 10 kB | 1.28 MB |
 | Dynamic | `/address/[address]/verified-build` | 10 kB | 1.26 MB |
 | Dynamic | `/address/[address]/vote-history` | 920 B | 1.20 MB |
@@ -56,4 +56,4 @@
 | Static | `/tos` | 180 B | 190 kB |
 | Dynamic | `/tx/[signature]` | 70 kB | 1.66 MB |
 | Dynamic | `/tx/[signature]/inspect` | 430 B | 1.44 MB |
-| Static | `/tx/inspector` | 410 B | 1.44 MB |
+| Static | `/tx/inspector` | 420 B | 1.44 MB |
