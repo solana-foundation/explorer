@@ -7,6 +7,7 @@ import React, { Fragment, type ReactNode, useState } from 'react';
 import { AddressLink } from '@/app/components/shared/address';
 import { Card, CardContent } from '@/app/components/shared/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/app/components/shared/ui/table';
+import { cn } from '@/app/components/shared/utils';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
 
 import type { ActivatedFeature, UpcomingFeature } from '../lib/partition-features';
@@ -100,9 +101,20 @@ function FeatureRowView<T extends FeatureRow>({
     onToggle: () => void;
 }) {
     const detailId = `feature-detail-${feature.key}`;
+    // Whole-row click is a mouse convenience; the ExpandInfoButton stays the
+    // keyboard/screen-reader control. Skip clicks that land on a real control
+    // (the title link, address/SIMD links, or the toggle button itself) so they
+    // keep their own behaviour and the button never toggles twice.
+    const handleRowClick = (event: React.MouseEvent<HTMLTableRowElement>) => {
+        if ((event.target as HTMLElement).closest('a, button')) return;
+        onToggle();
+    };
     return (
         <Fragment>
-            <TableRow className={isExpanded ? 'e-border-b-0' : undefined}>
+            <TableRow
+                onClick={handleRowClick}
+                className={cn('e-cursor-pointer hover:e-bg-dk-gray-900-dark/40', isExpanded && 'e-border-b-0')}
+            >
                 <TableCell className="e-font-medium [overflow-wrap:anywhere]">
                     <Link
                         href={`/address/${feature.key}/feature-gate?cluster=${clusterSlug(cluster)}`}
