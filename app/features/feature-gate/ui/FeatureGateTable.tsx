@@ -76,10 +76,12 @@ export function FeatureGateTable<T extends FeatureRow>({
     );
 }
 
-export function emptyStateCard(message: ReactNode) {
+export function EmptyStateCard({ children }: { children: ReactNode }) {
     return (
         <Card variant="tight" className="e-overflow-hidden">
-            <CardContent className="e-py-8 e-text-center e-text-dk-gray-700">{message}</CardContent>
+            <CardContent className="mt-4 e-flex e-items-center e-justify-center e-px-6 e-text-center e-text-dk-gray-700">
+                {children}
+            </CardContent>
         </Card>
     );
 }

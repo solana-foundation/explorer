@@ -41,7 +41,7 @@ The updater pipeline SHALL preserve already-persisted rows by default and SHALL 
 - `mainnet_activation_epoch` SHALL be re-derived from on-chain account reads only when `devnet_activation_epoch` and `testnet_activation_epoch` are both set and `mainnet_activation_epoch` is still `null`. Once mainnet activation is recorded, the field SHALL freeze.
 - `description` SHALL be back-filled from the linked SIMD markdown only when the persisted value is empty. A non-empty description SHALL NOT be re-fetched on subsequent runs.
 
-The trade-off accepted by this policy is that historical errors on fully-activated features are not auto-healed by the daily cron — correcting them requires a one-time backfill (typically by nulling the affected field on the affected rows so the next run re-derives) rather than a permanent change to the refresh predicates.
+The trade-off accepted by this policy is that historical errors on fully-activated features are not auto-healed by the daily cron — correcting them requires a manual rebuild via the `--refresh-activated` opt-in flag (see "manual rebuild" requirement below) rather than a permanent change to the refresh predicates.
 
 #### Scenario: Feature already activated on mainnet
 
@@ -65,6 +65,38 @@ The trade-off accepted by this policy is that historical errors on fully-activat
 
 - **WHEN** a feature already has a non-empty `description`
 - **THEN** the updater SHALL NOT re-fetch the SIMD markdown for that feature on subsequent runs
+
+### Requirement: The feature-gate updater SHALL support a manual `--refresh-activated` rebuild mode
+
+`scripts/update-feature-gates.ts` SHALL accept a `--refresh-activated` CLI flag that switches the activation-epoch refresh from the default field-specific policy to a full re-read of every feature on every cluster. The flag is intended for manual rebuilds only — the daily GitHub Actions workflow SHALL invoke the script without it.
+
+In `--refresh-activated` mode the eligibility predicates `stillPending` and `liveButNotOnMainnet` SHALL be replaced with "every feature is eligible" for all three cluster passes. The script SHALL trust the freshly-derived chain state over the persisted value: when the probe returns `missing` (RPC confirmed the account does not exist) or `unactivated` (account exists but the activated flag is clear), the corresponding field SHALL be set to `null`. When the probe returns `unreachable` (RPC retries exhausted), the existing value SHALL be preserved regardless of mode — a transient blip must not wipe known-good data.
+
+The CI workflow file SHALL invoke the script with no flags so the default mode applies, and SHALL NOT introduce the `--refresh-activated` flag into automated runs.
+
+#### Scenario: Default cron run with a feature whose account has disappeared from chain
+
+- **WHEN** the script runs without `--refresh-activated` and the on-chain account for a feature returns `value: null` from `getAccountInfo`
+- **THEN** the existing `*_activation_epoch` value for that feature SHALL be preserved
+- **AND** no row in the JSON is mutated solely because the account is currently missing on one cluster
+
+#### Scenario: Manual `--refresh-activated` run with a feature whose account has disappeared from chain
+
+- **WHEN** the script runs with `--refresh-activated` and the on-chain account returns `value: null` from `getAccountInfo`
+- **THEN** the `*_activation_epoch` field for that cluster SHALL be written as `null`
+- **AND** stale activation epochs for accounts no longer present on chain SHALL be corrected on this run
+
+#### Scenario: Either mode under transient RPC failure
+
+- **WHEN** the RPC call itself fails (network error, retries exhausted on rate-limit) for a feature
+- **THEN** the persisted `*_activation_epoch` value for that feature SHALL be preserved unchanged
+- **AND** the behaviour SHALL be the same in default and `--refresh-activated` modes
+
+#### Scenario: CI workflow stays in default mode
+
+- **WHEN** `.github/workflows/update-feature-gates.yml` runs the script
+- **THEN** the invocation SHALL be `pnpm exec tsx scripts/update-feature-gates.ts` with no flags
+- **AND** the automated cron PR SHALL NOT clear historical activation epochs as a side effect
 
 ### Requirement: The feature-gate JSON file SHALL be written with pure-ASCII encoding
 

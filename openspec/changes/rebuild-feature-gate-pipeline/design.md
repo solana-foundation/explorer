@@ -85,30 +85,50 @@ no stage mutates the input in place.
   lookup yields empty links, which would otherwise clobber persisted data on
   every cron run.
 
-### 2–4. `refreshEpochs(features, field, rpcUrl, isEligible)`
+### 2–4. `refreshEpochs(features, field, rpcUrl, isEligible, mode)`
 
-Each cluster runs as one sequential pass on purpose: all three can fall back
-to shared public RPCs, so parallel bursts just trip rate limits. The per-call
-delay is 500 ms; 429 responses retry with exponential backoff (1s / 2s / 4s)
-up to three attempts before falling back to the previously stored epoch.
+The three cluster passes run in parallel (devnet/testnet/mainnet are
+independent hosts); within a pass, requests stay sequential to respect the
+per-host rate limit. The per-call delay is 500 ms; 429 responses retry with
+exponential backoff (1s / 2s / 4s) up to three attempts before being treated
+as `unreachable`.
 
-Eligibility predicates control which existing rows the pass touches:
+Eligibility predicates control which existing rows each pass touches:
 
-- **Devnet & testnet passes** use `stillPending`: feature's
-  `mainnet_activation_epoch === null`. While a feature is in flight, its
-  devnet/testnet epochs can still shift (and historical off-by-one errors can
-  be healed on the next run). Once mainnet activates, both pre-mainnet epochs
-  freeze and the row is skipped.
-- **Mainnet pass** uses `liveButNotOnMainnet`: devnet **and** testnet are set
-  **and** mainnet is null. The pass only attempts mainnet for features that
-  have already shipped on both pre-mainnet clusters — the normal Solana
-  promotion order. Once mainnet activates, the row is skipped on all future
-  runs.
+- **Default (cron) mode:**
+  - Devnet & testnet passes use `stillPending`: feature's
+    `mainnet_activation_epoch === null`. Once mainnet activates, both
+    pre-mainnet epochs freeze and the row is skipped.
+  - Mainnet pass uses `liveButNotOnMainnet`: devnet **and** testnet are set
+    **and** mainnet is null. Once mainnet activates, the row is skipped on
+    all future runs.
+- **`--refresh-activated` mode:** every cluster pass re-reads every feature.
+  Used for manual rebuilds — multiplies RPC traffic ~3× and is never enabled
+  on the daily cron.
 
-The on-chain decoder reads the feature account's first byte as the activated
-flag, the next eight bytes as a little-endian `activation_slot`, then maps the
-slot to an epoch via the cluster's `EpochSchedule`. Unactivated, empty, or
-unreachable accounts fall back to `backupEpoch` (the previously stored value).
+The on-chain probe returns a discriminated `FeatureProbeResult`:
+
+| `kind` | Meaning |
+|---|---|
+| `activated` | Account exists, activated flag is set; `epoch` is the decoded value. |
+| `unactivated` | Account exists but the activated flag is clear (or the body is too short to decode). |
+| `missing` | RPC confirmed the account does not exist on chain. |
+| `unreachable` | RPC could not be reached or retries were exhausted. |
+
+What we write to disk for each result depends on the run mode:
+
+| Probe result | Default mode | `--refresh-activated` mode |
+|---|---|---|
+| `activated` | write the new epoch | write the new epoch |
+| `unreachable` | preserve existing value | preserve existing value |
+| `missing` | preserve existing value | **clear field to null** |
+| `unactivated` | preserve existing value | **clear field to null** |
+
+The `unreachable` path always preserves data: a transient RPC blip must not
+wipe a known-good activation epoch. The default-mode preservation of
+`missing` / `unactivated` is the source of "stale activation epoch" cases
+where the account has since disappeared from chain; running with
+`--refresh-activated` is the deliberate corrective path for those.
 
 ### 5. `enrichDescriptions(features)`
 

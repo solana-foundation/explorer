@@ -16,7 +16,7 @@ import {
     partitionFeatures,
     type UpcomingFeature,
 } from '../lib/partition-features';
-import { emptyStateCard, FeatureGateTable } from './FeatureGateTable';
+import { EmptyStateCard, FeatureGateTable } from './FeatureGateTable';
 
 type TabValue = 'activated' | 'upcoming';
 
@@ -72,11 +72,7 @@ export function FeatureGatesView() {
                             {activated.length}
                         </Badge>
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="upcoming"
-                        disabled={upcoming.length === 0}
-                        className="e-flex e-items-center e-gap-2"
-                    >
+                    <TabsTrigger value="upcoming" className="e-flex e-items-center e-gap-2">
                         Upcoming
                         <Badge variant={upcoming.length > 0 ? 'info' : 'secondary'} size="xs">
                             {upcoming.length}
@@ -98,7 +94,7 @@ export function FeatureGatesView() {
                                 />
                             ),
                         }}
-                        emptyState={emptyStateCard(`No activated features on ${clusterName(cluster)}.`)}
+                        emptyState={<EmptyStateCard>No activated features on {clusterName(cluster)}.</EmptyStateCard>}
                     />
                 </TabsContent>
                 <TabsContent value="upcoming">
@@ -109,7 +105,13 @@ export function FeatureGatesView() {
                             header: 'Activated elsewhere',
                             render: feature => <OtherActivationsCell activations={feature.otherActivations} />,
                         }}
-                        emptyState={undefined}
+                        emptyState={
+                            <EmptyStateCard>
+                                {cluster === Cluster.Testnet
+                                    ? 'No upcoming features on testnet. New features activate on testnet first, so this list is usually empty here.'
+                                    : `No upcoming features on ${clusterName(cluster)}.`}
+                            </EmptyStateCard>
+                        }
                     />
                 </TabsContent>
             </Tabs>

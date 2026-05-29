@@ -16,12 +16,18 @@
  *      with bounded concurrency to keep GitHub traffic gentle.
  *
  * Run from the repo root:
- *   pnpm exec tsx scripts/update-feature-gates.ts
+ *   pnpm exec tsx scripts/update-feature-gates.ts                 # CI / cron mode
+ *   pnpm exec tsx scripts/update-feature-gates.ts --refresh-activated
+ *     ↑ Re-reads every feature on every cluster (not just pending ones), and
+ *       trusts the chain over the stored value: when an account is missing or
+ *       unactivated, the corresponding field is set to `null` instead of being
+ *       preserved. Manual rebuild — multiplies RPC traffic ~3×, never enabled
+ *       on the daily cron.
  */
 
 import type { FeatureGate } from '../app/entities/feature-gate/server';
 import { readFeatureGates, writeFeatureGates } from './feature-gates/lib/feature-store';
-import { connectCluster, fetchActivationEpoch } from './feature-gates/lib/rpc';
+import { connectCluster, type FeatureProbeResult, probeFeatureActivation } from './feature-gates/lib/rpc';
 import { fetchSimdSummary } from './feature-gates/lib/simd-summary';
 import { fetchWikiFeatures } from './feature-gates/lib/wiki';
 
@@ -30,10 +36,17 @@ const TESTNET_RPC_URL = process.env.SOLANA_TESTNET_RPC ?? 'https://api.testnet.s
 const MAINNET_RPC_URL = process.env.SOLANA_MAINNET_RPC ?? 'https://api.mainnet-beta.solana.com';
 const DESCRIPTION_FETCH_CONCURRENCY = 6;
 
+type RefreshMode = 'default' | 'refresh-activated';
+
 async function main() {
+    const mode: RefreshMode = process.argv.includes('--refresh-activated') ? 'refresh-activated' : 'default';
+    if (mode === 'refresh-activated') {
+        console.log('Refresh mode: re-reading every feature on every cluster; stale values will be cleared.');
+    }
+
     const wikiFeatures = await fetchWikiFeatures();
     const seeded = appendNewFeatures(readFeatureGates(), wikiFeatures);
-    const withEpochs = await refreshAllEpochs(seeded);
+    const withEpochs = await refreshAllEpochs(seeded, mode);
     const enriched = await enrichDescriptions(withEpochs);
     writeFeatureGates(enriched);
 }
@@ -68,20 +81,27 @@ const liveButNotOnMainnet: EligibilityCheck = feature =>
     feature.testnet_activation_epoch !== null &&
     feature.mainnet_activation_epoch === null;
 
+const everyFeature: EligibilityCheck = () => true;
+
 /**
  * Refresh all three activation-epoch fields in parallel. Devnet, testnet and
  * mainnet RPCs are independent hosts, so parallel passes don't contend; within
  * a pass, requests stay sequential to respect per-host rate limits.
  */
-async function refreshAllEpochs(features: FeatureGate[]): Promise<FeatureGate[]> {
+async function refreshAllEpochs(features: FeatureGate[], mode: RefreshMode): Promise<FeatureGate[]> {
+    const eligibility =
+        mode === 'refresh-activated'
+            ? { devnet: everyFeature, mainnet: everyFeature, testnet: everyFeature }
+            : { devnet: stillPending, mainnet: liveButNotOnMainnet, testnet: stillPending };
+
     const passes = [
-        { field: 'devnet_activation_epoch', isEligible: stillPending, rpcUrl: DEVNET_RPC_URL },
-        { field: 'testnet_activation_epoch', isEligible: stillPending, rpcUrl: TESTNET_RPC_URL },
-        { field: 'mainnet_activation_epoch', isEligible: liveButNotOnMainnet, rpcUrl: MAINNET_RPC_URL },
+        { field: 'devnet_activation_epoch', isEligible: eligibility.devnet, rpcUrl: DEVNET_RPC_URL },
+        { field: 'testnet_activation_epoch', isEligible: eligibility.testnet, rpcUrl: TESTNET_RPC_URL },
+        { field: 'mainnet_activation_epoch', isEligible: eligibility.mainnet, rpcUrl: MAINNET_RPC_URL },
     ] as const;
 
     const epochsByField = await Promise.all(
-        passes.map(pass => refreshEpochs(features, pass.field, pass.rpcUrl, pass.isEligible)),
+        passes.map(pass => refreshEpochs(features, pass.field, pass.rpcUrl, pass.isEligible, mode)),
     );
 
     const [devnet, testnet, mainnet] = epochsByField;
@@ -95,7 +115,7 @@ async function refreshAllEpochs(features: FeatureGate[]): Promise<FeatureGate[]>
 
 /**
  * For one cluster, return an array of the same length as `features` where
- * eligible rows carry the freshly-derived epoch and skipped rows carry the
+ * eligible rows carry the freshly-derived value and skipped rows carry the
  * existing value (so the merge in `refreshAllEpochs` is a straight overwrite).
  */
 async function refreshEpochs(
@@ -103,6 +123,7 @@ async function refreshEpochs(
     field: EpochField,
     rpcUrl: string,
     isEligible: EligibilityCheck,
+    mode: RefreshMode,
 ): Promise<(number | null)[]> {
     const clusterName = field.replace('_activation_epoch', '');
     const targets = features.map((feature, index) => ({ feature, index })).filter(({ feature }) => isEligible(feature));
@@ -115,10 +136,44 @@ async function refreshEpochs(
     const { rpc, schedule } = await connectCluster(rpcUrl);
     const result = features.map(feature => feature[field]);
     for (const { feature, index } of targets) {
-        result[index] = await fetchActivationEpoch(rpc, schedule, feature.key, feature[field]);
-        console.log(`  [${clusterName}] Checked ${feature.key}`);
+        const probe = await probeFeatureActivation(rpc, schedule, feature.key);
+        result[index] = resolveEpoch(probe, feature[field], mode);
+        console.log(`  [${clusterName}] ${describeProbe(probe)} ${feature.key}`);
     }
     return result;
+}
+
+/**
+ * Decide what value to store for a feature/cluster pair based on the probe and
+ * the run mode.
+ *
+ * - `activated`: trust the freshly-derived epoch unconditionally.
+ * - `unreachable`: keep the existing value — a transient RPC blip must not
+ *   wipe known-good data, regardless of mode.
+ * - `missing` / `unactivated`: in default mode preserve existing data (we
+ *   could be hitting one bad cluster among three; not worth the diff churn);
+ *   in refresh mode trust the chain and clear the field. This is the path
+ *   that corrects stale activation epochs for accounts that have since
+ *   disappeared from chain (e.g. testnet reset, feature pruned upstream).
+ */
+function resolveEpoch(probe: FeatureProbeResult, backup: number | null, mode: RefreshMode): number | null {
+    if (probe.kind === 'activated') return probe.epoch;
+    if (probe.kind === 'unreachable') return backup;
+    // eslint-disable-next-line unicorn/no-null -- the schema uses nullable(number()); null is the on-disk "no activation" value
+    return mode === 'refresh-activated' ? null : backup;
+}
+
+function describeProbe(probe: FeatureProbeResult): string {
+    switch (probe.kind) {
+        case 'activated':
+            return `→ epoch ${probe.epoch}`;
+        case 'unactivated':
+            return '  unactivated';
+        case 'missing':
+            return '  missing';
+        case 'unreachable':
+            return '  unreachable';
+    }
 }
 
 /**
