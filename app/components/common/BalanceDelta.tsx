@@ -27,5 +27,5 @@ export function BalanceDelta({ delta, isSol = false }: { delta: DeltaValue; isSo
         return <span className="badge bg-warning-soft">{isSol ? <>-{sols}</> : deltaValue.toString()}</span>;
     }
 
-    return <span className="badge bg-secondary-soft font-monospace">◎0</span>;
+    return <span className="badge bg-secondary-soft font-monospace">+0</span>;
 }

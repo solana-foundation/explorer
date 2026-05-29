@@ -47,7 +47,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                 <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">Logs</h2>
                 <div className="e-flex e-shrink-0 e-gap-1">
                     <Chip active={!showRaw} onClick={() => setShowRaw(false)}>
-                        Fancy
+                        Parsed
                     </Chip>
                     <Chip active={showRaw} onClick={() => setShowRaw(true)}>
                         RAW
