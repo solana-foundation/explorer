@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/share
 import { useCluster } from '@/app/providers/cluster';
 import { Cluster, clusterName, clusterSlug } from '@/app/utils/cluster';
 
-import { epochCountdown } from '../lib/epoch-countdown';
+import { estimateTimeUntilEpoch } from '../lib/epoch-countdown';
 import {
     type ActivatedFeature,
     type ClusterActivation,
@@ -128,7 +128,9 @@ function ActivationCell({
     epoch: number;
     epochScheduleInfo: EpochScheduleInfo | undefined;
 }) {
-    const countdown = epochScheduleInfo ? epochCountdown({ ...epochScheduleInfo, targetEpoch: epoch }) : undefined;
+    const countdown = epochScheduleInfo
+        ? estimateTimeUntilEpoch({ ...epochScheduleInfo, targetEpoch: epoch })
+        : undefined;
     return (
         <>
             <Link

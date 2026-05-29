@@ -57,6 +57,24 @@ describe('partitionFeatures', () => {
         ]);
     });
 
+    it('should record other-cluster activations on a feature that is also activated on the given cluster', async () => {
+        const partition = await importWith([
+            makeFeature({
+                devnet_activation_epoch: 780,
+                key: 'A',
+                mainnet_activation_epoch: 800,
+                testnet_activation_epoch: 760,
+            }),
+        ]);
+        const { activated, upcoming } = partition(Cluster.MainnetBeta);
+        expect(upcoming).toHaveLength(0);
+        expect(activated[0]).toMatchObject({ clusterActivationEpoch: 800, key: 'A' });
+        expect(activated[0].otherActivations).toEqual([
+            { cluster: Cluster.Devnet, epoch: 780 },
+            { cluster: Cluster.Testnet, epoch: 760 },
+        ]);
+    });
+
     it('should pair simds with simd_link entries and drop entries missing either side', async () => {
         const partition = await importWith([
             makeFeature({

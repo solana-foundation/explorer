@@ -29,7 +29,8 @@ async function main() {
     console.log(`Saved real-agave-wiki.md (${wiki.length} bytes)`);
 
     const proposals = await fetchProposals();
-    writeFileSync(join(FIXTURE_DIR, 'real-simd-proposals.json'), `${JSON.stringify(proposals, undefined, 2)}\n`);
+    // Minified: it's a machine-read fixture, not hand-edited — keep the committed diff and file size small.
+    writeFileSync(join(FIXTURE_DIR, 'real-simd-proposals.json'), `${JSON.stringify(proposals)}\n`);
     console.log(`Saved real-simd-proposals.json (${proposals.length} entries)`);
 }
 

@@ -20,7 +20,7 @@ reading the code first.
 
 ## Pipeline
 
-The script is one linear `pipe()` over a list of `FeatureGate[] → FeatureGate[]` stages. The local file at the top and bottom is the same file (read once, written once). Solid arrows trace the data pipeline; dotted arrows are calls to external services, grouped by provider on the right.
+The script is a sequence of `FeatureGate[] → FeatureGate[]` stages applied with plain `await` steps in `main()`; the three cluster epoch passes (stages 3–5) run concurrently via `Promise.all`, then rejoin before description back-fill. The local file at the top and bottom is the same file (read once, written once). Solid arrows trace the data pipeline; dotted arrows are calls to external services, grouped by provider on the right.
 
 ```mermaid
 flowchart LR
@@ -36,7 +36,15 @@ flowchart LR
         S5["<b>5. refreshEpochs · mainnet</b><br/>if devnet+testnet set and mainnet null"]
         S6["<b>6. enrichDescriptions</b><br/>if description is empty"]
         Out["<b>writeFeatureGates</b><br/>schema-validate + ASCII-escape"]
-        S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> Out
+        %% stages 3-5 run concurrently (Promise.all), then rejoin
+        S1 --> S2
+        S2 --> S3
+        S2 --> S4
+        S2 --> S5
+        S3 --> S6
+        S4 --> S6
+        S5 --> S6
+        S6 --> Out
     end
 
     subgraph github [GitHub HTTP]
@@ -105,8 +113,8 @@ no stage mutates the input in place.
 The three cluster passes run in parallel (devnet/testnet/mainnet are
 independent hosts); within a pass, requests stay sequential to respect the
 per-host rate limit. The per-call delay is 500 ms; 429 responses retry with
-exponential backoff (1s / 2s / 4s) up to three attempts before being treated
-as `unreachable`.
+exponential backoff (2s then 4s) across up to three attempts before being
+treated as `unreachable`.
 
 Eligibility predicates control which existing rows each pass touches:
 

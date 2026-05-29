@@ -42,8 +42,10 @@ export function partitionFeatures(cluster: Cluster): FeaturePartition {
             })
             .filter((entry): entry is ClusterActivation => entry !== undefined);
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- drop the raw simd arrays; UI consumes simdEntries
+        const { simds: _simds, simd_link: _simdLink, ...rest } = feature;
         const base: EnrichedBase = {
-            ...stripSimdFields(feature),
+            ...rest,
             otherActivations,
             simdEntries: pairSimdLinks(feature.simds, feature.simd_link),
         };
@@ -89,13 +91,4 @@ function pairSimdLinks(simds: string[], links: string[]): SimdEntry[] {
         if (simd && link) out.push({ link, simd });
     }
     return out;
-}
-
-function stripSimdFields(feature: FeatureInfoType): Omit<FeatureInfoType, 'simds' | 'simd_link'> {
-    const rest: Omit<FeatureInfoType, 'simds' | 'simd_link'> & { simds?: string[]; simd_link?: string[] } = {
-        ...feature,
-    };
-    delete rest.simds;
-    delete rest.simd_link;
-    return rest;
 }

@@ -30,6 +30,7 @@
 
 import type { FeatureGate } from '../app/entities/feature-gate/server';
 import { readFeatureGates, writeFeatureGates } from './feature-gates/lib/feature-store';
+import { appendNewFeatures, hasDescription, type RefreshMode, resolveEpoch } from './feature-gates/lib/merge';
 import { connectCluster, type FeatureProbeResult, probeFeatureActivation } from './feature-gates/lib/rpc';
 import { resolveMissingSimdLinks } from './feature-gates/lib/simd-proposals';
 import { fetchSimdSummary } from './feature-gates/lib/simd-summary';
@@ -39,8 +40,6 @@ const DEVNET_RPC_URL = process.env.SOLANA_DEVNET_RPC ?? 'https://api.devnet.sola
 const TESTNET_RPC_URL = process.env.SOLANA_TESTNET_RPC ?? 'https://api.testnet.solana.com';
 const MAINNET_RPC_URL = process.env.SOLANA_MAINNET_RPC ?? 'https://api.mainnet-beta.solana.com';
 const DESCRIPTION_FETCH_CONCURRENCY = 6;
-
-type RefreshMode = 'default' | 'refresh-activated';
 
 async function main() {
     const mode: RefreshMode = process.argv.includes('--refresh-activated') ? 'refresh-activated' : 'default';
@@ -54,27 +53,6 @@ async function main() {
     const withEpochs = await refreshAllEpochs(relinked, mode);
     const enriched = await enrichDescriptions(withEpochs);
     writeFeatureGates(enriched);
-}
-
-/**
- * Append wiki features we haven't persisted before. Existing records are left
- * as-is at this stage: wiki metadata (`title`, `simds`, version floors, owners)
- * is deliberately not merged back into existing rows, because a failed
- * SIMD-proposals lookup yields empty links that would otherwise clobber good
- * persisted data. The exception is `simd_link`, whose empty slots are healed
- * by the separate `resolveMissingSimdLinks` pass right after this one — that
- * pass is guarded so non-empty links are never overwritten.
- */
-function appendNewFeatures(existing: FeatureGate[], scraped: FeatureGate[]): FeatureGate[] {
-    const knownKeys = new Set(existing.map(feature => feature.key));
-    const newFeatures = scraped.filter(feature => feature.key && !knownKeys.has(feature.key));
-    if (newFeatures.length > 0) {
-        console.log('New features:');
-        for (const feature of newFeatures) {
-            console.log(`  ${feature.key} - ${feature.title}`);
-        }
-    }
-    return [...existing, ...newFeatures];
 }
 
 type EpochField = 'devnet_activation_epoch' | 'mainnet_activation_epoch' | 'testnet_activation_epoch';
@@ -151,26 +129,6 @@ async function refreshEpochs(
     return result;
 }
 
-/**
- * Decide what value to store for a feature/cluster pair based on the probe and
- * the run mode.
- *
- * - `activated`: trust the freshly-derived epoch unconditionally.
- * - `unreachable`: keep the existing value — a transient RPC blip must not
- *   wipe known-good data, regardless of mode.
- * - `missing` / `unactivated`: in default mode preserve existing data (we
- *   could be hitting one bad cluster among three; not worth the diff churn);
- *   in refresh mode trust the chain and clear the field. This is the path
- *   that corrects stale activation epochs for accounts that have since
- *   disappeared from chain (e.g. testnet reset, feature pruned upstream).
- */
-function resolveEpoch(probe: FeatureProbeResult, backup: number | null, mode: RefreshMode): number | null {
-    if (probe.kind === 'activated') return probe.epoch;
-    if (probe.kind === 'unreachable') return backup;
-    // eslint-disable-next-line unicorn/no-null -- the schema uses nullable(number()); null is the on-disk "no activation" value
-    return mode === 'refresh-activated' ? null : backup;
-}
-
 function describeProbe(probe: FeatureProbeResult): string {
     switch (probe.kind) {
         case 'activated':
@@ -215,10 +173,6 @@ async function enrichDescriptions(features: FeatureGate[]): Promise<FeatureGate[
         const description = summaries.get(feature.key);
         return description === undefined ? feature : { ...feature, description };
     });
-}
-
-function hasDescription(feature: FeatureGate): boolean {
-    return Boolean(feature.description && feature.description.trim());
 }
 
 main().catch(error => {

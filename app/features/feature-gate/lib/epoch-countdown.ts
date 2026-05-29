@@ -14,7 +14,7 @@ type EpochCountdownInput = {
  * other inputs. Returns `undefined` when the target epoch isn't strictly in
  * the future (already activated or activating in the current epoch).
  */
-export function epochCountdown(input: EpochCountdownInput): string | undefined {
+export function estimateTimeUntilEpoch(input: EpochCountdownInput): string | undefined {
     const { targetEpoch, currentEpoch, slotIndex, slotsInEpoch, slotsPerEpoch, msPerSlot = MS_PER_SLOT } = input;
 
     const target = BigInt(targetEpoch);

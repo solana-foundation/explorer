@@ -95,10 +95,7 @@ function precedingHeading(markdown: string, tableStart: number): string | undefi
 }
 
 function parseTable(headerRow: string, body: string): { headers: string[]; rows: Record<string, string>[] } {
-    const headers = headerRow
-        .split('|')
-        .map(cell => cell.trim())
-        .filter(cell => cell.length > 0);
+    const headers = splitCsv(headerRow, '|');
 
     const rows: Record<string, string>[] = [];
     for (const line of body.trim().split('\n')) {
@@ -147,10 +144,10 @@ export function wikiRowToFeature(row: Record<string, string>, simdLinks: string[
     };
 }
 
-export function splitCsv(value: string | undefined): string[] {
+export function splitCsv(value: string | undefined, separator: string = ','): string[] {
     if (!value) return [];
     return value
-        .split(',')
+        .split(separator)
         .map(item => item.trim())
         .filter(item => item.length > 0);
 }
