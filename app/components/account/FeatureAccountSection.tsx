@@ -130,9 +130,7 @@ const BaseFeatureCard = ({
                     {activatedAt !== null ? (
                         <span className="badge bg-success">Active on {clusterName(cluster)}</span>
                     ) : isPending ? (
-                        <span className="badge bg-warning text-dark">
-                            Pending activation on {clusterName(cluster)}
-                        </span>
+                        <span className="badge bg-warning text-dark">Pending activation on {clusterName(cluster)}</span>
                     ) : (
                         <code>Not yet activated on {clusterName(cluster)}</code>
                     )}
@@ -180,7 +178,7 @@ function formatCountdown(totalSeconds: number): string {
 }
 
 function EpochCountdown({ remainingSlots }: { remainingSlots: bigint }) {
-    const estimatedSeconds = Math.ceil(Number(remainingSlots) * AVERAGE_SLOT_TIME_MS / 1000);
+    const estimatedSeconds = Math.ceil((Number(remainingSlots) * AVERAGE_SLOT_TIME_MS) / 1000);
     const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
 
     useEffect(() => {
