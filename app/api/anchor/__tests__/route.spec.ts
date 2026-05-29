@@ -243,8 +243,8 @@ describe('GET /api/anchor', () => {
 
     it('should escalate when the RPC reports a missing API plan', async () => {
         const rpcError = new SolanaError(SOLANA_ERROR__RPC__API_PLAN_MISSING_FOR_RPC_METHOD, {
-            rpcMethod: 'getAccountInfo',
-            rpcParams: [],
+            method: 'getAccountInfo',
+            params: [],
         });
         mocks.sendGetAccountInfo.mockRejectedValueOnce(rpcError);
 
