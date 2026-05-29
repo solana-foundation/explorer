@@ -20,8 +20,6 @@ reading the code first.
 
 ## Pipeline
 
-The script is one linear `pipe()` over a list of `FeatureGate[] → FeatureGate[]` stages. Each stage's external input (wiki, RPC, SIMD markdown) is shown on the right of its box; the file at the top and bottom is the same file.
-
 The script is one linear `pipe()` over a list of `FeatureGate[] → FeatureGate[]` stages. The local file at the top and bottom is the same file (read once, written once). Solid arrows trace the data pipeline; dotted arrows are calls to external services, grouped by provider on the right.
 
 ```mermaid
@@ -32,12 +30,13 @@ flowchart LR
     subgraph pipeline [Pipeline]
         direction TB
         S1["<b>1. appendNewFeatures</b><br/>add unseen keys only"]
-        S2["<b>2. refreshEpochs · devnet</b><br/>if mainnet epoch is null"]
-        S3["<b>3. refreshEpochs · testnet</b><br/>if mainnet epoch is null"]
-        S4["<b>4. refreshEpochs · mainnet</b><br/>if devnet+testnet set and mainnet null"]
-        S5["<b>5. enrichDescriptions</b><br/>if description is empty"]
+        S2["<b>2. resolveMissingSimdLinks</b><br/>fill empty simd_link slots"]
+        S3["<b>3. refreshEpochs · devnet</b><br/>if mainnet epoch is null"]
+        S4["<b>4. refreshEpochs · testnet</b><br/>if mainnet epoch is null"]
+        S5["<b>5. refreshEpochs · mainnet</b><br/>if devnet+testnet set and mainnet null"]
+        S6["<b>6. enrichDescriptions</b><br/>if description is empty"]
         Out["<b>writeFeatureGates</b><br/>schema-validate + ASCII-escape"]
-        S1 --> S2 --> S3 --> S4 --> S5 --> Out
+        S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> Out
     end
 
     subgraph github [GitHub HTTP]
@@ -57,10 +56,11 @@ flowchart LR
 
     Wiki -.-> S1
     Proposals -.-> S1
-    Devnet -.-> S2
-    Testnet -.-> S3
-    Mainnet -.-> S4
-    Simds -.-> S5
+    Proposals -.-> S2
+    Devnet -.-> S3
+    Testnet -.-> S4
+    Mainnet -.-> S5
+    Simds -.-> S6
 
     classDef ext fill:#1f3a5f,stroke:#5dade2,color:#fff
     class Wiki,Proposals,Simds,Devnet,Testnet,Mainnet ext
@@ -79,13 +79,28 @@ no stage mutates the input in place.
   by heading, not table position — an added or reordered table cannot silently
   shift which rows we pick up).
 - Appends scraped features whose `key` is not already in the persisted set.
-- **Existing rows are not modified.** Wiki metadata (title, SIMDs, SIMD links,
-  version floors) deliberately does not flow back into already-imported
-  features. The trade-off is documented in code: a failed SIMD-proposals
-  lookup yields empty links, which would otherwise clobber persisted data on
-  every cron run.
+- **Existing rows are not modified at this stage.** Wiki metadata (`title`,
+  `simds`, version floors, owners) deliberately does not flow back into
+  already-imported features — a failed SIMD-proposals lookup yields empty
+  links that would otherwise clobber persisted data on every cron run. The
+  one exception is `simd_link`, whose empty slots are healed by the next
+  stage; see below.
 
-### 2–4. `refreshEpochs(features, field, rpcUrl, isEligible, mode)`
+### 2. `resolveMissingSimdLinks(features, proposals)`
+
+- Recovery path for the "first cron run hit a transient GitHub rate-limit"
+  case: a feature was appended with `simds: ['337']` but `simd_link: ['']`
+  because the proposals listing fetch failed at that moment. Without this
+  pass, `appendNewFeatures` would skip the row on every future run (it's
+  already known) and the empty link would stay forever.
+- Scans every feature; for any row where `simd_link` is shorter than `simds`
+  or contains an empty entry, re-resolves the missing slots against the
+  current proposals map.
+- **Only empty slots are filled.** Non-empty `simd_link` entries are never
+  overwritten, so a successful first import can't be downgraded by a later
+  rate-limit on the proposals fetch.
+
+### 3–5. `refreshEpochs(features, field, rpcUrl, isEligible, mode)`
 
 The three cluster passes run in parallel (devnet/testnet/mainnet are
 independent hosts); within a pass, requests stay sequential to respect the
@@ -130,7 +145,7 @@ wipe a known-good activation epoch. The default-mode preservation of
 where the account has since disappeared from chain; running with
 `--refresh-activated` is the deliberate corrective path for those.
 
-### 5. `enrichDescriptions(features)`
+### 6. `enrichDescriptions(features)`
 
 - Triggered per-feature only when `description` is currently empty
   (`!feature.description?.trim()`).
@@ -162,7 +177,8 @@ After the last stage, `writeFeatureGates`:
 
 | Field | First write | Refreshes on later runs? | Stops refreshing when |
 |---|---|---|---|
-| `key`, `title`, `simds`, `simd_link`, `min_*_versions`, `owners`, `comms_required`, `planned_testnet_order` | On first wiki import | No (existing rows are not merged from the wiki) | n/a — write-once |
+| `key`, `title`, `simds`, `min_*_versions`, `owners`, `comms_required`, `planned_testnet_order` | On first wiki import | No (existing rows are not merged from the wiki) | n/a — write-once |
+| `simd_link` | On first wiki import | Yes — empty slots only (length mismatch or `''` entries are re-resolved against the current proposals listing) | All slots are non-empty |
 | `devnet_activation_epoch` | On first wiki import (may be set to wiki value) | Yes, re-derived on-chain | `mainnet_activation_epoch` becomes non-null |
 | `testnet_activation_epoch` | On first wiki import (may be set to wiki value) | Yes, re-derived on-chain | `mainnet_activation_epoch` becomes non-null |
 | `mainnet_activation_epoch` | Always `null` on first wiki import | Yes, derived on-chain | The feature activates on mainnet (field becomes non-null) |
@@ -175,9 +191,11 @@ After the last stage, `writeFeatureGates`:
   rerunning the pipeline) is the intended fix when a code-level decoder bug
   lands. Daily re-derivation of hundreds of frozen-on-chain values would
   multiply public-RPC traffic without producing new information.
-- **Wiki edits to already-imported feature metadata do not propagate.** Same
-  reason as above plus the empty-link clobber risk from a failed
-  SIMD-proposals lookup; if a refinement is wanted, a future change can
-  selectively merge non-empty wiki fields.
+- **Wiki edits to already-imported feature metadata do not propagate**, with
+  the single exception of `simd_link` (whose empty slots self-heal via
+  `resolveMissingSimdLinks`). A wiki rename of `title` or a SIMD column
+  change after first import will not flow back; correcting that requires a
+  manual edit. If broader selective merging is wanted, a future change can
+  extend the back-fill pass to other fields the same way.
 - **Descriptions can become stale relative to upstream SIMD edits.** Accepted
   in exchange for a stable cron PR diff and bounded GitHub traffic.

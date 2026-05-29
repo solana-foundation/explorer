@@ -1,3 +1,5 @@
+import { SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, SolanaError } from '@solana/kit';
+
 import type { EpochSchedule } from '../../../../app/utils/epoch-schedule';
 import { probeFeatureActivation, type SolanaRpc } from '../rpc';
 
@@ -71,5 +73,47 @@ describe('probeFeatureActivation', () => {
         // The retry loop only retries 429s; other errors fall through immediately.
         const probe = await probeFeatureActivation(failingRpc(new Error('network down')), SCHEDULE, KEY);
         expect(probe).toEqual({ kind: 'unreachable' });
+    });
+
+    it('should retry on a SolanaError TRANSPORT_HTTP_ERROR with statusCode 429 before giving up', async () => {
+        // Tracks how many times the retry loop calls into the RPC. We don't care about
+        // success — only that the kit-shaped 429 error is recognised as rate-limit and
+        // triggers the retry loop, not an immediate fall-through to `unreachable`.
+        let calls = 0;
+        const rpc = {
+            getAccountInfo: () => ({
+                send: async () => {
+                    calls += 1;
+                    throw new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
+                        headers: new Headers(),
+                        message: 'Too Many Requests',
+                        statusCode: 429,
+                    });
+                },
+            }),
+        } as unknown as SolanaRpc;
+
+        await probeFeatureActivation(rpc, SCHEDULE, KEY);
+        // MAX_RETRIES is 3 in the implementation; retries fire when the error is recognised.
+        expect(calls).toBeGreaterThan(1);
+    }, 60_000);
+
+    it('should NOT retry a SolanaError TRANSPORT_HTTP_ERROR whose statusCode is not 429', async () => {
+        let calls = 0;
+        const rpc = {
+            getAccountInfo: () => ({
+                send: async () => {
+                    calls += 1;
+                    throw new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
+                        headers: new Headers(),
+                        message: 'Bad Gateway',
+                        statusCode: 502,
+                    });
+                },
+            }),
+        } as unknown as SolanaRpc;
+
+        await probeFeatureActivation(rpc, SCHEDULE, KEY);
+        expect(calls).toBe(1);
     });
 });

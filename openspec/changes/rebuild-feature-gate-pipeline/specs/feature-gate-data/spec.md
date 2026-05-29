@@ -36,7 +36,8 @@ Server-only consumers SHALL import from `app/entities/feature-gate/server.ts`; R
 
 The updater pipeline SHALL preserve already-persisted rows by default and SHALL only mutate fields whose stage explicitly opts in. The per-field policy is:
 
-- Wiki-sourced metadata fields (`title`, `simds`, `simd_link`, `min_agave_versions`, `min_fd_versions`, `min_jito_versions`, `owners`, `comms_required`, `planned_testnet_order`) SHALL be set only on first import of a previously-unseen `key`, and SHALL NOT be overwritten on subsequent runs.
+- Wiki-sourced metadata fields (`title`, `simds`, `min_agave_versions`, `min_fd_versions`, `min_jito_versions`, `owners`, `comms_required`, `planned_testnet_order`) SHALL be set only on first import of a previously-unseen `key`, and SHALL NOT be overwritten on subsequent runs.
+- `simd_link` SHALL be set on first import alongside the other wiki fields. On every subsequent run the updater SHALL back-fill empty slots (entries equal to `''`, or array length shorter than `simds.length`) by re-resolving them against the current SIMD proposals listing. Non-empty entries SHALL NOT be overwritten. This is the recovery path for first-import runs that hit a transient GitHub rate-limit on the proposals listing fetch.
 - `devnet_activation_epoch` and `testnet_activation_epoch` SHALL be re-derived from on-chain account reads on every run, but only while `mainnet_activation_epoch` is `null`. Once mainnet activation is recorded, both fields SHALL freeze.
 - `mainnet_activation_epoch` SHALL be re-derived from on-chain account reads only when `devnet_activation_epoch` and `testnet_activation_epoch` are both set and `mainnet_activation_epoch` is still `null`. Once mainnet activation is recorded, the field SHALL freeze.
 - `description` SHALL be back-filled from the linked SIMD markdown only when the persisted value is empty. A non-empty description SHALL NOT be re-fetched on subsequent runs.
@@ -60,6 +61,13 @@ The trade-off accepted by this policy is that historical errors on fully-activat
 - **WHEN** the Agave wiki updates the `title`, `SIMD`, version-floor, or owner columns of a feature whose `key` is already persisted
 - **THEN** the updater SHALL leave the persisted fields unchanged
 - **AND** propagating the updated metadata SHALL require either a manual edit or a follow-up change to the merge logic
+
+#### Scenario: First-import run hit a transient GitHub rate-limit and stored `simd_link: ['']`
+
+- **WHEN** a previously-persisted feature has `simds: ['337']` and `simd_link: ['']` because the SIMD proposals listing fetch failed (rate-limit, network error, or any non-2xx response) at first-import time
+- **AND** the next run successfully fetches the SIMD proposals listing
+- **THEN** the updater SHALL back-fill the empty `simd_link` slot with the resolved GitHub URL
+- **AND** SHALL leave any non-empty `simd_link` entries on the same row untouched
 
 #### Scenario: Description back-fill is write-once
 

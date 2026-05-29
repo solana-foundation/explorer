@@ -53,3 +53,37 @@ export function resolveSimdLinks(simdCsv: string, proposals: Map<string, string>
         return proposals.get(trimmed.padStart(4, '0')) ?? '';
     });
 }
+
+/**
+ * Back-fill `simd_link` entries that are still empty on already-stored rows.
+ * Recovery path for the "first cron run hit a GitHub rate-limit" case: a
+ * feature was originally appended with `simds: ['337']` but `simd_link: ['']`
+ * because the proposals listing fetch failed at that moment. Without this
+ * pass, `appendNewFeatures` skips the row on every future run (it's already
+ * "known"), so the links stay empty forever. Only empty slots are filled —
+ * existing non-empty links are never overwritten.
+ */
+export function resolveMissingSimdLinks<T extends { simds: string[]; simd_link: string[] }>(
+    features: T[],
+    proposals: Map<string, string>,
+): T[] {
+    if (proposals.size === 0) return features;
+    let healed = 0;
+    const result = features.map(feature => {
+        if (feature.simds.length === 0) return feature;
+        const lengthMismatch = feature.simd_link.length !== feature.simds.length;
+        const hasEmptySlot = feature.simd_link.some(link => link.length === 0);
+        if (!lengthMismatch && !hasEmptySlot) return feature;
+
+        const resolved = resolveSimdLinks(feature.simds.join(','), proposals);
+        const merged = feature.simds.map((_, index) => {
+            const existing = feature.simd_link[index] ?? '';
+            return existing.length > 0 ? existing : (resolved[index] ?? '');
+        });
+        if (merged.every((link, index) => link === (feature.simd_link[index] ?? ''))) return feature;
+        healed += 1;
+        return { ...feature, simd_link: merged };
+    });
+    if (healed > 0) console.log(`Back-filled simd_link for ${healed} feature(s).`);
+    return result;
+}

@@ -17,15 +17,19 @@ const HEADING_PATTERN = /^#{1,6}\s+(.+?)\s*$/gm;
  * Fetch the Agave Feature-Gate-Tracker wiki page and the SIMD proposals listing,
  * then parse them into feature records. Throws if the wiki is unreachable (it's
  * the essential data source); a failed proposals lookup just yields empty links.
+ *
+ * Returns the proposals map alongside the features so the orchestrator can
+ * also use it to back-fill any previously-stored rows whose `simd_link` is
+ * still empty (e.g. a feature first scraped during a transient GitHub outage).
  */
-export async function fetchWikiFeatures(): Promise<FeatureGate[]> {
+export async function fetchWikiFeatures(): Promise<{ features: FeatureGate[]; proposals: Map<string, string> }> {
     const response = await fetch(WIKI_URL);
     if (!response.ok) {
         throw new Error(`Failed to fetch wiki: HTTP ${response.status}`);
     }
     const markdown = await response.text();
     const proposals = await fetchSimdProposals();
-    return featuresFromWikiMarkdown(markdown, proposals);
+    return { features: featuresFromWikiMarkdown(markdown, proposals), proposals };
 }
 
 // Columns the parser depends on in `wikiRowToFeature`. If the Agave wiki ever

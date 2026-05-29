@@ -8,11 +8,14 @@
  *   1. Scrape the "pending mainnet/devnet/testnet" tables from the Agave
  *      Feature-Gate-Tracker wiki page, resolve the SIMD column to GitHub URLs,
  *      and merge any newly-listed features into the persisted set.
- *   2. Refresh activation epochs for every cluster (devnet, testnet, mainnet)
+ *   2. Back-fill any `simd_link` slots that are still empty on already-stored
+ *      rows (recovery path for first-import runs where the proposals fetch
+ *      failed). Non-empty entries are never overwritten.
+ *   3. Refresh activation epochs for every cluster (devnet, testnet, mainnet)
  *      in parallel via on-chain account reads. The three RPCs are independent
  *      hosts, so parallel passes don't contend on each other; within a pass,
  *      requests stay sequential to respect per-host rate limits.
- *   3. Back-fill any missing `description` fields from the linked SIMD markdown,
+ *   4. Back-fill any missing `description` fields from the linked SIMD markdown,
  *      with bounded concurrency to keep GitHub traffic gentle.
  *
  * Run from the repo root:
@@ -28,6 +31,7 @@
 import type { FeatureGate } from '../app/entities/feature-gate/server';
 import { readFeatureGates, writeFeatureGates } from './feature-gates/lib/feature-store';
 import { connectCluster, type FeatureProbeResult, probeFeatureActivation } from './feature-gates/lib/rpc';
+import { resolveMissingSimdLinks } from './feature-gates/lib/simd-proposals';
 import { fetchSimdSummary } from './feature-gates/lib/simd-summary';
 import { fetchWikiFeatures } from './feature-gates/lib/wiki';
 
@@ -44,18 +48,22 @@ async function main() {
         console.log('Refresh mode: re-reading every feature on every cluster; stale values will be cleared.');
     }
 
-    const wikiFeatures = await fetchWikiFeatures();
+    const { features: wikiFeatures, proposals } = await fetchWikiFeatures();
     const seeded = appendNewFeatures(readFeatureGates(), wikiFeatures);
-    const withEpochs = await refreshAllEpochs(seeded, mode);
+    const relinked = resolveMissingSimdLinks(seeded, proposals);
+    const withEpochs = await refreshAllEpochs(relinked, mode);
     const enriched = await enrichDescriptions(withEpochs);
     writeFeatureGates(enriched);
 }
 
 /**
  * Append wiki features we haven't persisted before. Existing records are left
- * as-is: wiki metadata (versions, SIMDs, links) is deliberately not merged back,
- * since a failed SIMD-proposals lookup yields empty links that would otherwise
- * clobber good persisted data.
+ * as-is at this stage: wiki metadata (`title`, `simds`, version floors, owners)
+ * is deliberately not merged back into existing rows, because a failed
+ * SIMD-proposals lookup yields empty links that would otherwise clobber good
+ * persisted data. The exception is `simd_link`, whose empty slots are healed
+ * by the separate `resolveMissingSimdLinks` pass right after this one — that
+ * pass is guarded so non-empty links are never overwritten.
  */
 function appendNewFeatures(existing: FeatureGate[], scraped: FeatureGate[]): FeatureGate[] {
     const knownKeys = new Set(existing.map(feature => feature.key));

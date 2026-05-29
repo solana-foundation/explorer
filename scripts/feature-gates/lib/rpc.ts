@@ -1,4 +1,4 @@
-import { address, createSolanaRpc } from '@solana/kit';
+import { address, createSolanaRpc, isSolanaError, SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR } from '@solana/kit';
 
 import { type EpochSchedule, getEpochForSlot } from '../../../app/utils/epoch-schedule';
 import { delay, describeError } from './http';
@@ -88,6 +88,11 @@ export async function probeFeatureActivation(
     return { kind: 'unreachable' };
 }
 
+// `@solana/kit`'s HTTP transport raises every non-2xx response as a SolanaError
+// with code SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR and the raw `statusCode` on
+// the context. Use the kit-typed predicate over a string match on the message —
+// public RPC providers vary in how they word the body, but the status code is
+// always 429 for rate-limit responses.
 function isRateLimit(error: unknown): boolean {
-    return describeError(error).includes('429');
+    return isSolanaError(error, SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR) && error.context.statusCode === 429;
 }
