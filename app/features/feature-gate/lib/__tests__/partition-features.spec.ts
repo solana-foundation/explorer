@@ -43,17 +43,18 @@ describe('partitionFeatures', () => {
         expect(upcoming).toHaveLength(0);
     });
 
-    it('should put features active elsewhere but not here into "upcoming", sorted by most recent', async () => {
+    it('should put features active elsewhere but not here into "upcoming", soonest-to-activate first', async () => {
         const partition = await importWith([
-            makeFeature({ devnet_activation_epoch: 950, key: 'A', testnet_activation_epoch: 900 }),
             makeFeature({ devnet_activation_epoch: 1050, key: 'B', testnet_activation_epoch: 1000 }),
+            makeFeature({ devnet_activation_epoch: 950, key: 'A', testnet_activation_epoch: 900 }),
         ]);
         const { activated, upcoming } = partition(Cluster.MainnetBeta);
         expect(activated).toHaveLength(0);
-        expect(upcoming.map(feature => feature.key)).toEqual(['B', 'A']);
+        // A baked longest elsewhere (latest hop at epoch 950 vs B's 1050), so it is next in line here.
+        expect(upcoming.map(feature => feature.key)).toEqual(['A', 'B']);
         expect(upcoming[0].otherActivations).toEqual([
-            { cluster: Cluster.Devnet, epoch: 1050 },
-            { cluster: Cluster.Testnet, epoch: 1000 },
+            { cluster: Cluster.Devnet, epoch: 950 },
+            { cluster: Cluster.Testnet, epoch: 900 },
         ]);
     });
 

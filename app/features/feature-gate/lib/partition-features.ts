@@ -55,8 +55,10 @@ export function partitionFeatures(cluster: Cluster): FeaturePartition {
     }
 
     activated.sort((a, b) => b.clusterActivationEpoch - a.clusterActivationEpoch);
-    // Surface the most recently activated elsewhere first — usually the most relevant for "what's coming next".
-    upcoming.sort((a, b) => maxEpoch(b.otherActivations) - maxEpoch(a.otherActivations));
+    // Features roll out testnet → devnet → mainnet, so the one whose latest
+    // cross-cluster activation happened longest ago has baked the longest and is
+    // next in line here. Sort ascending by that epoch so "to be activated soon" is first.
+    upcoming.sort((a, b) => maxEpoch(a.otherActivations) - maxEpoch(b.otherActivations));
 
     return { activated, upcoming };
 }
