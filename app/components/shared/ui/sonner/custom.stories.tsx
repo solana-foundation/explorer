@@ -18,7 +18,7 @@ const meta = {
         ),
     ],
     parameters: {
-        // Centered so the trigger button sits next to the bottom-center toast in the Storybook canvas.
+        // Centers the trigger button + inline preview in the canvas so they're immediately visible.
         layout: 'centered',
     },
     tags: ['autodocs'],
