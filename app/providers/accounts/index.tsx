@@ -160,6 +160,9 @@ class MultipleAccountFetcher {
             }, 100);
         }
     };
+    cancel = () => {
+        clearTimeout(this.fetchTimeout);
+    };
 }
 
 export type FetchAccountDataMode = 'parsed' | 'raw' | 'skip';
@@ -174,14 +177,20 @@ export function AccountsProvider({ children }: AccountsProviderProps) {
         skip: new MultipleAccountFetcher(dispatch, cluster, url, 'skip'),
     }));
 
-    // Clear accounts cache whenever cluster is changed
+    // Cancel pending timers on deps-change and unmount so a debounced batch can't fire into a stale tree.
     React.useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
-        setFetchers({
+        const next: Fetchers = {
             parsed: new MultipleAccountFetcher(dispatch, cluster, url, 'parsed'),
             raw: new MultipleAccountFetcher(dispatch, cluster, url, 'raw'),
             skip: new MultipleAccountFetcher(dispatch, cluster, url, 'skip'),
-        });
+        };
+        setFetchers(next);
+        return () => {
+            next.parsed.cancel();
+            next.raw.cancel();
+            next.skip.cancel();
+        };
     }, [dispatch, cluster, url]);
 
     return (
