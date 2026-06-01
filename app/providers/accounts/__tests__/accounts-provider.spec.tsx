@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
-import { Cluster, clusterUrl } from '@utils/cluster';
 import { render, waitFor } from '@testing-library/react';
+import { Cluster, clusterUrl } from '@utils/cluster';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -42,7 +42,8 @@ describe('AccountsProvider', () => {
             </AccountsProvider>,
         );
         await waitFor(() => expect(captured).toBeDefined());
-        const fetchers = captured!;
+        if (!captured) throw new Error('Fetchers context was not captured');
+        const fetchers = captured;
 
         const parsedCancel = vi.spyOn(fetchers.parsed, 'cancel');
         const rawCancel = vi.spyOn(fetchers.raw, 'cancel');
@@ -64,7 +65,8 @@ describe('AccountsProvider', () => {
             </AccountsProvider>,
         );
         await waitFor(() => expect(captured).toBeDefined());
-        const oldFetchers = captured!;
+        if (!captured) throw new Error('Fetchers context was not captured');
+        const oldFetchers = captured;
 
         const parsedCancel = vi.spyOn(oldFetchers.parsed, 'cancel');
         const rawCancel = vi.spyOn(oldFetchers.raw, 'cancel');
@@ -72,7 +74,11 @@ describe('AccountsProvider', () => {
 
         oldFetchers.parsed.fetch(TEST_PUBKEY);
 
-        useClusterMock.mockReturnValue({ cluster: Cluster.Testnet, customUrl: '', url: clusterUrl(Cluster.Testnet, '') });
+        useClusterMock.mockReturnValue({
+            cluster: Cluster.Testnet,
+            customUrl: '',
+            url: clusterUrl(Cluster.Testnet, ''),
+        });
         rerender(
             <AccountsProvider>
                 <Capture />
