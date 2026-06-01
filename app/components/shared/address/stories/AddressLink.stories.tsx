@@ -10,10 +10,7 @@ const SAMPLE_ADDRESS = address('7bTK6Jis8Xpfrs8ZoUfiMDPazTcdPcTWheZFJTA5Z6X4');
 const meta: Meta<typeof AddressLink> = {
     component: AddressLink,
     decorators: [withClipboardMock, withCluster],
-    parameters: {
-        ...nextjsParameters,
-        layout: 'centered',
-    },
+    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Shared/Address/AddressLink',
 };

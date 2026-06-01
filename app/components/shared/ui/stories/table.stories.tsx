@@ -6,9 +6,6 @@ import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, Tabl
 
 const meta: Meta<typeof Table> = {
     component: Table,
-    parameters: {
-        layout: 'centered',
-    },
     tags: ['autodocs'],
     title: 'Components/Shared/UI/Table',
 };
