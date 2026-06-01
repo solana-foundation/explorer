@@ -33,11 +33,11 @@
 
 -   [ ] My code follows the project's style guidelines
 -   [ ] I have added tests that prove my fix/feature works
--   [ ] All tests pass locally and in CI
+-   [ ] All checks pass locally (`pnpm test`, `pnpm lint`, `pnpm types`)
 -   [ ] I have updated documentation as needed
 -   [ ] I have run `build:info` script to update build information
--   [ ] CI/CD checks pass
--   [ ] I have included screenshots for protocol screens (if applicable)
+-   [ ] CI/CD checks pass on the PR
+-   [ ] Screenshots included — required for protocol screens, recommended for other UI changes
 -   [ ] For security-related features, I have included links to related information
 
 ## Additional Notes
