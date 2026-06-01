@@ -92,8 +92,8 @@
   {
     "address": "3Ecf8gyRURyrBtGHS1XAVXyQik5PqgDch4VkxrH4ECcr",
     "name": "chiefstaker",
-    "repoUrl": "https://github.com/KarpelesLab/chiefstaker/tree/46b013c3b5f3b13512c4a28c5407781e17db0fca",
-    "verifiedAt": "2026-05-23T21:38:05"
+    "repoUrl": "https://github.com/KarpelesLab/chiefstaker/tree/e3afa9daacc8845c0ddc177edcb475ff0c52fa26",
+    "verifiedAt": "2026-05-30T00:53:16"
   },
   {
     "address": "3i5JeuZuUxeKtVysUnwQNGerJP2bSMX9fTFfS4Nxe3Br",
@@ -142,12 +142,6 @@
     "name": "solana-developers/verified-program-root",
     "repoUrl": "https://github.com/solana-developers/verified-program-root/tree/a1323cf31cb1884c844151ebf5cea8055568cfde",
     "verifiedAt": "2024-12-16T11:05:44"
-  },
-  {
-    "address": "4kCE2755q2W1XbGahQrw4ZS2guHBnajFq7UdJc7sjTdW",
-    "name": "MoreThanBlocks",
-    "repoUrl": "https://github.com/morethanblocks/contracts-solana/tree/9c5b16e5a8acfc048d7330bb106a6f629bd2de22",
-    "verifiedAt": "2026-05-08T20:04:39"
   },
   {
     "address": "4PeTcJYm5rPj4AU3Lq72nhpbyUxny2vJDTW6XUdpDDpk",
@@ -570,6 +564,18 @@
     "verifiedAt": "2026-05-16T09:40:53"
   },
   {
+    "address": "CMACYFENjoBMHzapRXyo1JZkVS6EtaDDzkjMrmQLvr4J",
+    "name": "candy_machine_core",
+    "repoUrl": "https://github.com/metaplex-foundation/mpl-core-candy-machine.git/tree/ea3620b7436004f62e1e7bc3d69147f4feef2ae0",
+    "verifiedAt": "2026-05-29T18:42:27"
+  },
+  {
+    "address": "CMAGAKJ67e9hRZgfC5SFTbZH8MgEmtqazKXjmkaJjWTJ",
+    "name": "candy_guard",
+    "repoUrl": "https://github.com/metaplex-foundation/mpl-core-candy-machine.git/tree/ea3620b7436004f62e1e7bc3d69147f4feef2ae0",
+    "verifiedAt": "2026-05-29T18:58:02"
+  },
+  {
     "address": "cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK",
     "name": "spl_account_compression",
     "repoUrl": "https://github.com/solana-labs/solana-program-library/tree/404466d0157b3979b2963fe401dc304be778a91a",
@@ -819,7 +825,7 @@
     "address": "FUTARELBfJfQ8RDGhg1wdhddq1odMAJUePHFuBYfUxKq",
     "name": "futarchy",
     "repoUrl": "https://github.com/metaDAOproject/programs/tree/6558679f6d90345950e36c1a94ce6a998a6c5f49",
-    "verifiedAt": "2026-04-23T22:13:59"
+    "verifiedAt": "2026-05-29T20:03:54"
   },
   {
     "address": "Fuww9mfc8ntAwxPUzFia7VJFAdvLppyZwhPJoXySZXf7",
@@ -928,6 +934,12 @@
     "name": "d3labs-io/hyperlane-monorepo",
     "repoUrl": "https://github.com/d3labs-io/hyperlane-monorepo/tree/a22379622297ad8baba7a6305442d079e8cd9fda",
     "verifiedAt": "2026-05-06T09:00:12"
+  },
+  {
+    "address": "gvnr27cVeyW3AVf3acL7VCJ5WjGAphytnsgcK1feHyH",
+    "name": "mint_governor",
+    "repoUrl": "https://github.com/metaDAOproject/programs/tree/496db48d11b7b025b69bd1b223be304a0d840168",
+    "verifiedAt": "2026-05-29T21:56:21"
   },
   {
     "address": "GXn1b7LVSwb7xwenDycdmn71hJPz2fYfM73FjdBj6ekH",
@@ -1092,12 +1104,6 @@
     "verifiedAt": "2025-04-26T14:28:20"
   },
   {
-    "address": "LiqARcPPdkvPhjasWYVHtKMY6nDsz1C3ANY9HdcRG5W",
-    "name": "TheRealTachi/liquiditybank",
-    "repoUrl": "https://github.com/TheRealTachi/liquiditybank/tree/66f8d3ee9b65b53f01e31ee42c56c9fdcec25e66",
-    "verifiedAt": "2026-05-29T14:18:14"
-  },
-  {
     "address": "LiQnowFbFQdYyZhF4pUbpsrZCjxRTQ1upKJxZ2VXjde",
     "name": "liquidation",
     "repoUrl": "https://github.com/metaDAOproject/programs/tree/fcb7e10d058e590e9b770cc925a3de24b9fb1440",
@@ -1156,12 +1162,6 @@
     "name": "gmsol_liquidity_provider",
     "repoUrl": "https://github.com/gmsol-labs/gmx-solana/tree/6a5e6b24d72fcd216f8314db4ef651c575e7fa72",
     "verifiedAt": "2026-02-11T11:17:47"
-  },
-  {
-    "address": "LStwN2E5Uw6MCtuxHRLhy8RY9hxqW2XRpLzettb696y",
-    "name": "ore-lst",
-    "repoUrl": "https://github.com/regolith-labs/ore-lst/tree/e913f8c7272c5fe12bc9828ae58aa372a5eb69e3",
-    "verifiedAt": "2026-05-28T21:55:01"
   },
   {
     "address": "LuxnEkqEwYi9VGxGd5oyc7ddHHYCEhnq42ZrGeYfzgg",
@@ -1240,6 +1240,12 @@
     "name": "Bonasa-Tech/manifest",
     "repoUrl": "https://github.com/Bonasa-Tech/manifest/tree/e6093c767089efb96bdd2eb030e671d1ec63fff1",
     "verifiedAt": "2026-04-23T20:56:48"
+  },
+  {
+    "address": "moonDJUoHteKkGATejA5bdJVwJ6V6Dg74gyqyJTx73n",
+    "name": "launchpad_v8",
+    "repoUrl": "https://github.com/metaDAOproject/programs/tree/e709fb5b7fe9b8be2607bd08965111633aa97247",
+    "verifiedAt": "2026-05-29T16:48:09"
   },
   {
     "address": "mooNhciQJi1LqHDmse2JPic2NqG2PXCanbE3ZYzP3qA",
@@ -1350,12 +1356,6 @@
     "verifiedAt": "2026-03-14T14:50:43"
   },
   {
-    "address": "omnixgS8fnqHfCcTGKWj6JtKjzpJZ1Y5y9pyFkQDkYE",
-    "name": "omnipair",
-    "repoUrl": "https://github.com/omnipair/omnipair-rs/tree/07d17ff9e526139e5c5b94d253eff9715c888c87",
-    "verifiedAt": "2026-05-14T15:59:09"
-  },
-  {
     "address": "opre2VP8uvjq3YS15NRhRagsWvsY5DybitvCeLPAwbK",
     "name": "operators",
     "repoUrl": "https://github.com/axelarnetwork/axelar-amplifier-solana/tree/3a1f2e7fa4c545e00f3334befa6b07d9f6d6a08c",
@@ -1396,6 +1396,12 @@
     "name": "pledge",
     "repoUrl": "https://github.com/timknapp12/pledge/tree/c048f107d1767f4dc8f28a439c79bb4326d80528",
     "verifiedAt": "2026-04-29T02:59:13"
+  },
+  {
+    "address": "pPV2pfrxnmstSb9j7kEeCLny5BGj6SNwCWGd6xbGGzz",
+    "name": "performance_package_v2",
+    "repoUrl": "https://github.com/metaDAOproject/programs/tree/e263bbf877e7772b200f1cece056d4f26abc64c3",
+    "verifiedAt": "2026-05-29T21:57:49"
   },
   {
     "address": "prismEvZiMYt64S5uRrYbmVCxvVKD5T3xLqoknNigmK",
