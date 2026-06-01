@@ -48,7 +48,7 @@ export function useProgramCanonicalMetadata(
     enabled: boolean,
     useSuspense = false,
 ) {
-    const { data } = useSWRImmutable(
+    const { data, isLoading } = useSWRImmutable(
         `program-metadata-${programAddress}-${url}-${seed}`,
         async () => {
             if (!enabled) {
@@ -84,5 +84,5 @@ export function useProgramCanonicalMetadata(
         },
         { suspense: useSuspense },
     );
-    return { programMetadata: data };
+    return { isLoading, programMetadata: data };
 }

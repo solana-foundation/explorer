@@ -142,11 +142,7 @@ function FeaturesTable({
                                     </div>
                                 </td>
                                 <td className="fs-sm">
-                                    <Address
-                                        pubkey={new PublicKey(feature.key ?? '')}
-                                        link
-                                        truncateChars={feature.simds[0] ? 12 : 20}
-                                    />
+                                    <Address pubkey={new PublicKey(feature.key ?? '')} link />
                                 </td>
                                 <td>
                                     {feature.simds.map((simd, index) => (

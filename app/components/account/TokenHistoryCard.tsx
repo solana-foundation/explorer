@@ -386,7 +386,7 @@ const TokenTransactionRow = React.memo(function TokenTransactionRow({
             </td>
 
             <td>
-                <Address pubkey={mint} link truncate />
+                <Address pubkey={mint} link />
             </td>
 
             <InstructionDetailsCell signature={tx.signature} details={details} tx={tx} />

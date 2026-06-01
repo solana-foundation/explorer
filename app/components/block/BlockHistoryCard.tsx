@@ -315,7 +315,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 }
 
                                 if (tx.signature) {
-                                    signature = <Signature signature={tx.signature} link truncateChars={32} />;
+                                    signature = <Signature signature={tx.signature} link />;
                                 }
 
                                 const entries = Array.from(tx.invocations.entries());

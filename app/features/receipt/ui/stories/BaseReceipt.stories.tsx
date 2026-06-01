@@ -6,6 +6,7 @@ import { BaseReceipt, NoReceipt as NoReceiptComponent } from '../BaseReceipt';
 import {
     defaultReceipt,
     forBaseReceipt,
+    innerInstructionsNoReceiptMessage,
     mixedMintNoReceiptMessage,
     receiptLargeAmount,
     receiptMultiTokenTransfer,
@@ -113,6 +114,15 @@ export const NoReceiptMixedMint: Story = {
         <NoReceiptComponent
             transactionPath="https://example.com/tx/ExampleTransactionSignature"
             message={mixedMintNoReceiptMessage}
+        />
+    ),
+};
+
+export const NoReceiptInnerInstructions: Story = {
+    render: () => (
+        <NoReceiptComponent
+            transactionPath="https://example.com/tx/ExampleTransactionSignature"
+            message={innerInstructionsNoReceiptMessage}
         />
     ),
 };

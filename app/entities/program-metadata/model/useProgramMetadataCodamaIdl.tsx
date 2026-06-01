@@ -14,7 +14,7 @@ export function useProgramMetadataCodamaIdl(
     cluster: Cluster,
     useSuspense = false,
 ) {
-    const { programMetadata } = useProgramCanonicalMetadata(
+    const { isLoading, programMetadata } = useProgramCanonicalMetadata(
         programAddress,
         CODAMA_IDL_SEED,
         url,
@@ -22,5 +22,5 @@ export function useProgramMetadataCodamaIdl(
         PMP_IDL_ENABLED,
         useSuspense,
     );
-    return { codamaIdl: programMetadata as CodamaIdl | undefined };
+    return { codamaIdl: programMetadata as CodamaIdl | undefined, isLoading };
 }

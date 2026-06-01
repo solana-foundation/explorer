@@ -1,80 +1,51 @@
 'use client';
 
-import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
+import { AnchorProvider, type Idl, Program } from '@coral-xyz/anchor';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
+import useSWRImmutable from 'swr/immutable';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
-const cachedAnchorProgramPromises: Record<
-    string,
-    void | { __type: 'promise'; promise: Promise<void> } | { __type: 'result'; result: Idl | null }
-> = {};
+type IdlSwrKey = readonly ['idl-anchor', string, Cluster, string];
 
-export function getProvider(url: string) {
+export function useIdlFromAnchorProgramSeed(
+    programAddress: string,
+    url: string,
+    cluster?: Cluster,
+): { idl: Idl | null; isLoading: boolean } {
+    const resolvedCluster = cluster ?? Cluster.MainnetBeta;
+    const swrKey: IdlSwrKey = ['idl-anchor', programAddress, resolvedCluster, url];
+    // No suspense: it's rendered without a <Suspense> boundary in the transaction inspector,
+    // where a thrown promise rolls back the render tree. Callers use `isLoading` instead.
+    const { data, isLoading } = useSWRImmutable(swrKey, fetchIdlForProgram);
+    return { idl: data ?? null, isLoading };
+}
+
+export function getProvider(url: string): AnchorProvider {
     return new AnchorProvider(new Connection(url), new NodeWallet(Keypair.generate()), {});
 }
 
-function recordInFlight(key: string, promise: Promise<void>) {
-    cachedAnchorProgramPromises[key] = { __type: 'promise', promise };
-}
-
-export function resetCacheForTesting() {
-    for (const k of Object.keys(cachedAnchorProgramPromises)) {
-        delete cachedAnchorProgramPromises[k];
-    }
-}
-
-export function useIdlFromAnchorProgramSeed(programAddress: string, url: string, cluster?: Cluster): Idl | null {
-    const key = `${programAddress}-${url}`;
-    const cacheEntry = cachedAnchorProgramPromises[key];
-
-    if (cacheEntry === undefined) {
-        let promise;
-        cluster = cluster || Cluster.MainnetBeta;
-        if (cluster !== undefined && cluster !== Cluster.Custom) {
-            promise = fetch(`/api/anchor?programAddress=${programAddress}&cluster=${cluster}`)
-                .then(async result => {
-                    return result
-                        .json()
-                        .then(({ idl, error }) => {
-                            if (!idl) {
-                                throw new Error(error || `IDL not found for program: ${programAddress.toString()}`);
-                            }
-                            cachedAnchorProgramPromises[key] = {
-                                __type: 'result',
-                                result: idl,
-                            };
-                        })
-                        .catch(_ => {
-                            cachedAnchorProgramPromises[key] = { __type: 'result', result: null };
-                        });
-                })
-                .catch(_ => {
-                    cachedAnchorProgramPromises[key] = { __type: 'result', result: null };
-                });
-            recordInFlight(key, promise);
-        } else {
-            const programId = new PublicKey(programAddress);
-            promise = Program.fetchIdl<Idl>(programId, getProvider(url))
-                .then(idl => {
-                    if (!idl) {
-                        throw new Error(`IDL not found for program: ${programAddress.toString()}`);
-                    }
-
-                    cachedAnchorProgramPromises[key] = {
-                        __type: 'result',
-                        result: idl,
-                    };
-                })
-                .catch(_ => {
-                    cachedAnchorProgramPromises[key] = { __type: 'result', result: null };
-                });
-            recordInFlight(key, promise);
+async function fetchIdlForProgram([, programAddress, cluster, url]: IdlSwrKey): Promise<Idl | null> {
+    try {
+        if (cluster === Cluster.Custom) {
+            return await Program.fetchIdl<Idl>(new PublicKey(programAddress), getProvider(url));
         }
-        throw promise;
-    } else if (cacheEntry.__type === 'promise') {
-        throw cacheEntry.promise;
+
+        const response = await fetch(`/api/anchor?programAddress=${programAddress}&cluster=${cluster}`);
+        if (!response.ok) {
+            Logger.warn('[idl] /api/anchor returned non-OK status', {
+                cluster,
+                programAddress,
+                status: response.status,
+            });
+            return null;
+        }
+        const { idl } = await response.json();
+        return idl ?? null;
+    } catch (error) {
+        Logger.error(new Error('[idl] Error fetching Anchor IDL', { cause: error }), { cluster, programAddress });
+        return null;
     }
-    return cacheEntry.result;
 }
