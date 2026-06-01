@@ -1,4 +1,5 @@
 import { SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, SolanaError } from '@solana/kit';
+import { vi } from 'vitest';
 
 import type { EpochSchedule } from '../../../../app/utils/epoch-schedule';
 import { probeFeatureActivation, type SolanaRpc } from '../rpc';

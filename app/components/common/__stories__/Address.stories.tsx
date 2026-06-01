@@ -25,12 +25,8 @@ export const AsLink: Story = {
     args: { link: true, pubkey },
 };
 
-export const Truncated: Story = {
-    args: { pubkey, truncate: true },
-};
-
-export const TruncatedToChars: Story = {
-    args: { pubkey, truncateChars: 12 },
+export const NotTruncated: Story = {
+    args: { noTruncate: true, pubkey },
 };
 
 // useNickname is dead-coded in the Storybook bundle; overrideText simulates the visual.

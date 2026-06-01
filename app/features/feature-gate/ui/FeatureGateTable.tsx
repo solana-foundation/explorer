@@ -4,7 +4,7 @@ import Link from 'next/link';
 import React, { Fragment, type ReactNode, useState } from 'react';
 
 import { AddressLink } from '@/app/components/shared/address';
-import { Card, CardContent } from '@/app/components/shared/ui/card';
+import { Card, CardContent } from '@/app/shared/ui/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/app/components/shared/ui/table';
 import { cn } from '@/app/components/shared/utils';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';

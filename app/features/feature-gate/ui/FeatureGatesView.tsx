@@ -4,7 +4,7 @@ import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 
 import { Badge } from '@/app/components/shared/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/shared/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/shared/ui/tabs';
 import { useCluster } from '@/app/providers/cluster';
 import { Cluster, clusterName, clusterSlug } from '@/app/utils/cluster';
