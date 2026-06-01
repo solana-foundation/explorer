@@ -1,16 +1,16 @@
+import { type FeatureInfoType } from '@entities/feature-gate';
+import { address } from '@solana/kit';
 import fetch from 'cross-fetch';
 import { vi } from 'vitest';
 
-import { FeatureInfoType } from '@/app/utils/feature-gate/types';
+import { fetchFeatureGateInformation, getLink } from '../api/fetch-feature-gate-information';
 
-import { fetchFeatureGateInformation, getLink } from '../api/fetchFeatureGateInformation';
-
-// Taken from ../../../utils/feature-gate/featureGates.json
+// Taken from app/entities/feature-gate/feature-gates.json
 const FEATURE: FeatureInfoType = {
     comms_required: null,
     description: 'Two instructions for moving value between stake accounts without holding Withdrawer',
     devnet_activation_epoch: 798,
-    key: '7bTK6Jis8Xpfrs8ZoUfiMDPazTcdPcTWheZFJTA5Z6X4',
+    key: address('7bTK6Jis8Xpfrs8ZoUfiMDPazTcdPcTWheZFJTA5Z6X4'),
     mainnet_activation_epoch: 727,
     min_agave_versions: [],
     min_fd_versions: [],

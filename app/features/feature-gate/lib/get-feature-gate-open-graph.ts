@@ -1,6 +1,5 @@
+import { getFeatureInfo } from '@entities/feature-gate';
 import type { Metadata } from 'next/types';
-
-import { getFeatureInfo } from '@/app/utils/feature-gate/utils';
 
 import { IMAGE_SIZE } from '../constants';
 import { FEATURE_GATE_BASE_URL, isFeatureGateOgEnabled } from '../env';

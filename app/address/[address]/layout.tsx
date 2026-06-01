@@ -48,13 +48,13 @@ import useSWRImmutable from 'swr/immutable';
 
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
+import { getFeatureInfo, useFeatureInfo } from '@/app/entities/feature-gate';
 import { hasTokenMetadata } from '@/app/features/metadata';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { type NavigationTab, NavigationTabLink, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
 import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
 import { isAttestationAccount } from '@/app/utils/attestation-service';
-import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import {
     fetchFullTokenInfo,
     FullTokenInfo,

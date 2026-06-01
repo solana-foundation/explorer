@@ -5,8 +5,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkGFM from 'remark-gfm';
 
+import { getFeatureInfo } from '@/app/entities/feature-gate/server';
 import { fetchFeatureGateInformation, getFeatureGateOpenGraph } from '@/app/features/feature-gate/server';
-import { getFeatureInfo } from '@/app/utils/feature-gate/utils';
 
 type Props = Readonly<{
     params: Promise<{

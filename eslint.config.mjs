@@ -571,7 +571,6 @@ export default tseslint.config(
             'app/utils/anchor.tsx',
             'app/utils/attestation-service.tsx',
             'app/utils/cluster.ts',
-            'app/utils/feature-gate/UpcomingFeatures.tsx',
             'app/utils/get-readable-title-from-address.ts',
             'app/utils/parseFeatureAccount.ts',
             'app/utils/program-logs.ts',

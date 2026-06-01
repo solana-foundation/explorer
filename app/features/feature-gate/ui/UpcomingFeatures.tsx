@@ -1,14 +1,13 @@
+import { FEATURE_GATES, type FeatureInfoType } from '@entities/feature-gate';
 import { PublicKey } from '@solana/web3.js';
+import { Cluster, clusterName, clusterSlug } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 
 import { Address } from '@/app/components/common/Address';
-import { isFeatureActivated } from '@/app/features/feature-gate';
 import { useCluster } from '@/app/providers/cluster';
 
-import { Cluster, clusterName } from '../cluster';
-import FEATURES from './featureGates.json';
-import { FeatureInfoType } from './types';
+import { isFeatureActivated } from '../lib/is-feature-activated';
 
 export function UpcomingFeatures() {
     const { cluster } = useCluster();
@@ -16,28 +15,26 @@ export function UpcomingFeatures() {
 
     // Don't show anything for localnet
     if (cluster === Cluster.Custom) {
-        return null;
+        return undefined;
     }
 
-    const filteredFeatures = (FEATURES as FeatureInfoType[])
-        .filter((feature: FeatureInfoType) => {
-            switch (cluster) {
-                case Cluster.MainnetBeta:
-                    // Show features activated on devnet and testnet
-                    return feature.devnet_activation_epoch !== null && feature.testnet_activation_epoch !== null;
-                case Cluster.Devnet:
-                    // Show features activated on testnet, mark if already activated on devnet
-                    return feature.testnet_activation_epoch !== null;
-                case Cluster.Testnet:
-                    // Only show features not yet activated on testnet
-                    return feature.testnet_activation_epoch === null;
-                default:
-                    return false;
-            }
-        })
-        .filter((feature: FeatureInfoType) => {
-            return !isFeatureActivated(feature, cluster);
-        });
+    const filteredFeatures = FEATURE_GATES.filter((feature: FeatureInfoType) => {
+        switch (cluster) {
+            case Cluster.MainnetBeta:
+                // Show features activated on devnet and testnet
+                return feature.devnet_activation_epoch !== null && feature.testnet_activation_epoch !== null;
+            case Cluster.Devnet:
+                // Show features activated on testnet, mark if already activated on devnet
+                return feature.testnet_activation_epoch !== null;
+            case Cluster.Testnet:
+                // Only show features not yet activated on testnet
+                return feature.testnet_activation_epoch === null;
+            default:
+                return false;
+        }
+    }).filter((feature: FeatureInfoType) => {
+        return !isFeatureActivated(feature, cluster);
+    });
 
     if (filteredFeatures.length === 0) {
         return (
@@ -98,7 +95,12 @@ function FeaturesTable({
                             <tr key={feature.key}>
                                 <td>
                                     <div className="mb-2 d-flex align-items-center">
-                                        <p className="mb-0 me-3 text-decoration-underline fs-sm">{feature.title}</p>
+                                        <Link
+                                            href={`/address/${feature.key}/feature-gate?cluster=${clusterSlug(cluster)}`}
+                                            className="mb-0 me-3 text-decoration-underline fs-sm"
+                                        >
+                                            {feature.title}
+                                        </Link>
                                         {cluster === Cluster.MainnetBeta && feature.mainnet_activation_epoch && (
                                             <span className="badge bg-success">Active on Mainnet</span>
                                         )}

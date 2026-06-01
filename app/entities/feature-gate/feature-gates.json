@@ -717,7 +717,7 @@
     "devnet_activation_epoch": 726,
     "comms_required": null,
     "mainnet_activation_epoch": 653,
-    "description": null
+    "description": "Create a new syscall and sysvar that can be used to get the last restart slot."
   },
   {
     "key": "6Uf8S75PVh91MYgPQSHnjRAPQq6an5BDv9vomrCwDqLe",
@@ -837,7 +837,7 @@
     "devnet_activation_epoch": 737,
     "comms_required": null,
     "mainnet_activation_epoch": 704,
-    "description": null
+    "description": "The commission_updates_only_allowed_in_first_half_of_epoch feature disallows commission decrease in the second half of epoch. Given that the purpose of this feature was to prevent 'rug pulls' which are accomplished by increasing commission at the end of epoch and then decreasing\u2026"
   },
   {
     "key": "PERzQrt5gBD1XEe2c9XdFWqwgHY3mr7cYWbm5V772V8",
@@ -861,7 +861,7 @@
     "devnet_activation_epoch": 790,
     "comms_required": null,
     "mainnet_activation_epoch": 707,
-    "description": null
+    "description": "A new way to distribute epoch rewards across multiple blocks is proposed to address the current performance problems associated with epoch reward distribution in a first block of a new epoch."
   },
   {
     "key": "FuS3FPfJDKSNot99ECLXtp3rueq36hMNStJkPJwWodLh",
@@ -885,7 +885,7 @@
     "devnet_activation_epoch": 793,
     "comms_required": null,
     "mainnet_activation_epoch": 722,
-    "description": null
+    "description": "Update the curve25519 syscalls functions from returning an error code 1 (Ok(1) in rust) to returning an error type Err(SyscallError::InvalidAttribute) when invoked on unsupported curve id or group op id."
   },
   {
     "key": "wLckV1a64ngtcKPRGU4S4grVTestXjmNjxBjaKZrAcn",
@@ -979,7 +979,7 @@
     "devnet_activation_epoch": 914,
     "comms_required": null,
     "mainnet_activation_epoch": 821,
-    "description": ""
+    "description": "As the new shred format is being sent by all clients, this feature deprecates the old shred format."
   },
   {
     "key": "5JsG4NWH8Jbrqdd8uL6BNwnyZK3dQSoieRXG5vmofj9y",
@@ -1001,7 +1001,7 @@
     "devnet_activation_epoch": 933,
     "comms_required": null,
     "mainnet_activation_epoch": 841,
-    "description": ""
+    "description": "The epoch leader schedule for block production will be migrated from being keyed by validator identity addresses to being keyed by vote account addresses. The expected block signer for a given slot will be determined by the vote account's designated validator identity."
   },
   {
     "key": "bn2puAyxUx6JUabAxYdKdJ5QHbNNmKw8dCGuGCyRrFN",
@@ -1097,7 +1097,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "This proposal describes an enshrined on-chain program to verify proofs that a validator committed a slashable infraction. This program creates reports on chain for use in future SIMDs."
   },
   {
     "key": "P1BCUMpAC7V2GRBRiJCNUgpMyWZhoqt3LKo712ePqsz",
@@ -1119,7 +1119,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Increase the block limit to 100M CUs."
   },
   {
     "key": "htsptAwi2yRoZH83SKaUXykeZGtZHgxkS2QwW1pssR8",
@@ -1141,7 +1141,7 @@
     "devnet_activation_epoch": 949,
     "comms_required": null,
     "mainnet_activation_epoch": 878,
-    "description": ""
+    "description": "Increase the per account CU limit from a static 12M to 40% of the block CU limit."
   },
   {
     "key": "bnYzodLwmybj7e1HAe98yZrdJTd7we69eMMLgCXqKZm",
@@ -1167,7 +1167,7 @@
     "devnet_activation_epoch": 1015,
     "comms_required": null,
     "mainnet_activation_epoch": 942,
-    "description": ""
+    "description": "The alt_bn128_pairing syscall takes a byte slice as input, interprets the bytes as an array of pairs of g1 and g2 points on bn128 elliptic curve, and applies a pairing operation. If the byte slice input has an improper length, the function should terminate early. Specifically, i\u2026"
   },
   {
     "key": "rent6iVy6PDoViPBeJ6k5EJQrkj62h7DPyLbWGHwjrC",
@@ -1193,7 +1193,7 @@
     "devnet_activation_epoch": 1023,
     "comms_required": null,
     "mainnet_activation_epoch": 943,
-    "description": ""
+    "description": "This proposal aims to eliminate the use of floating-point operations to determine whether an account is rent exempt or not in programs by deprecating the use of the exempt_threshold (f64) value."
   },
   {
     "key": "CHaChatUnR3s6cPyPMMGNJa3VdQQ8PNH2JqdD4LpCKnB",
@@ -1219,7 +1219,7 @@
     "devnet_activation_epoch": 1029,
     "comms_required": null,
     "mainnet_activation_epoch": 946,
-    "description": ""
+    "description": "Reduce the number of ChaCha rounds for turbine weighted shuffle calculation from 20 to 8 in order to reduce the amount of compute time spent on this."
   },
   {
     "key": "Gx4XFcrVMt4HUvPzTpTSVkdDVgcDSjKhDN1RqRS6KDuZ",
@@ -1245,7 +1245,7 @@
     "devnet_activation_epoch": 1033,
     "comms_required": null,
     "mainnet_activation_epoch": 949,
-    "description": ""
+    "description": "Add a new version of vote account state to support alpenglow, block revenue distribution, and commission improvements."
   },
   {
     "key": "5xXZc66h4UdB6Yq7FzdBxBiRAFMMScMLwHxk2QZDaNZL",
@@ -1271,7 +1271,7 @@
     "devnet_activation_epoch": 1034,
     "comms_required": null,
     "mainnet_activation_epoch": 950,
-    "description": ""
+    "description": "Provide a pointer to instruction data in VM register 2 (r2) at program entrypoint, enabling direct access to instruction data without having to parse the accounts section of the serialized input region."
   },
   {
     "key": "4WeHX6QoXCCwqbSFgi6dxnB6QsPo6YApaNTH7P4MLQ99",
@@ -1297,7 +1297,7 @@
     "devnet_activation_epoch": 1036,
     "comms_required": null,
     "mainnet_activation_epoch": 953,
-    "description": ""
+    "description": "Remove the constraint that transaction entries cannot contain conflicting transactions."
   },
   {
     "key": "rexav5eNTUSNT1K2N7cfRjnthwhcP5BC25v2tA4rW4h",
@@ -1323,7 +1323,7 @@
     "devnet_activation_epoch": 1043,
     "comms_required": null,
     "mainnet_activation_epoch": 956,
-    "description": ""
+    "description": "This proposal relaxes the requirements for runtime-level migrations of programs (such as builtins) to permit system-owned programdata accounts to hold lamports."
   },
   {
     "key": "ptokFjwyJtrwCa9Kgo9xoDS59V4QccBGEaRFnRPnSdP",
@@ -1349,7 +1349,7 @@
     "devnet_activation_epoch": 1044,
     "comms_required": null,
     "mainnet_activation_epoch": 971,
-    "description": ""
+    "description": "Replace the current version of SPL Token (TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA) program by a CU-optimized one (p-token)."
   },
   {
     "key": "2GCrNXbzmt4xrwdcKS2RdsLzsgu4V5zHAemW57pcHT6a",
@@ -1371,7 +1371,7 @@
     "devnet_activation_epoch": 1054,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "This proposal removes the use of statically defined compute unit (CU) costs for Simple Vote transactions and instead accounts for them in the same way as normal transactions when enforcing block CU limits. This also renders the Vote CU limit obsolete. Because this change affects\u2026"
   },
   {
     "key": "8MhfKhoZEoiySpVe248bDkisyEcBA7JQLyUS94xoTSqN",
@@ -1393,7 +1393,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "We propose augmenting BlockMarkerV1, introduced in SIMD-0307, to include BlockHeader and UpdateParent variants. BlockHeader, placed at the beginning of a block, indicates the parent of the block. UpdateParent signals that the intended parent is different from what was initially\u2026"
   },
   {
     "key": "6sPDzwyARRExKH52LECxcGoqziH8G7SZofwuxi8Ja331",
@@ -1415,7 +1415,7 @@
     "devnet_activation_epoch": 1052,
     "comms_required": null,
     "mainnet_activation_epoch": 979,
-    "description": ""
+    "description": "A CreateAccountAllowPrefund instruction added to the system program reduces network overhead for applications that need to fund account rent (in whole or in part) in advance of account creation."
   },
   {
     "key": "bn2oPgpkzQPT3tohMaAsMVGjhDmmDa4jCaVPqCFmtxM",
@@ -1437,7 +1437,7 @@
     "devnet_activation_epoch": 1056,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Extend the Alt-BN128 syscalls to add little endian support."
   },
   {
     "key": "bn1hKNURMGQaQoEVxahcEAcqiX3NwRs6hgKKNSLeKxH",
@@ -1459,7 +1459,7 @@
     "devnet_activation_epoch": 1058,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Extend the existing sol_alt_bn128_group_op syscall to support native G2 curve point arithmetic (addition, subtraction, and scalar multiplication) on the BN254 curve."
   },
   {
     "key": "76dHtohc2s5dR3ahJyBxs7eJJVipFkaPdih9CLgTTb4B",
@@ -1481,7 +1481,7 @@
     "devnet_activation_epoch": 1066,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Allow validators to update their commission rate at any time but delay those commission updates for at least one full epoch."
   },
   {
     "key": "6aHuNsUmwSzCEMjrBzBCYaxHAyAcQBjVES92JigHBDuC",
@@ -1503,7 +1503,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "This SIMD imposes a hard restriction on the maximum number of account references that an instruction may declare. There is already a limit of 255 account references imposed during serialization in ABI v0 and v1, but it does not currently apply to builtin invocations or precompil\u2026"
   },
   {
     "key": "vbiddkDHTSHSvL8B21AetWvTBLxxUZ1FmU6DFjztyRn",
@@ -1525,7 +1525,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Specify the protocol for validating chained block ids under both TowerBFT and Alpenglow."
   },
   {
     "key": "b1sgUiJ3qu7hYm3tNDyyqZNQd6gLGJmJppnLNa93PCQ",
@@ -1547,7 +1547,7 @@
     "devnet_activation_epoch": 1059,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "This proposal introduces a new family of syscalls to provide native support for cryptographic operations on the BLS12-381 elliptic curve. These syscalls will expose:"
   },
   {
     "key": "2uxQgtKa2ECHGs67Zdj7dgmzn2w9HiqhdcedwCWfYzzq",
@@ -1569,7 +1569,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "This proposal specifies in detail how a BLS public key can be generated by users via updated existing tools and how they can put the generated BLS public keys into their vote accounts for voting in Alpenglow."
   },
   {
     "key": "VATtb1DepUwdPh5bFVasdtkbeDNsftZSRzr2aKpKWJA",
@@ -1591,7 +1591,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "This SIMD describes how the validator admission ticket (VAT) collection described in [SIMD 326](https://github.com/solana-foundation/solana-improvement-documents/pull/326) will be implemented. Specifically, how it affects validator operation procedures."
   },
   {
     "key": "zkexuyPRdyTVbZqEAREueqL2xvvoBhRgth9xGSc1tMN",
@@ -1631,7 +1631,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Serialize pointers for instruction accounts to allow direct account access without requiring parsing of the account section."
   },
   {
     "key": "shredXP8xLjJWp1AWh3gAFsFn4GSH1vohhCMDHw5koU",
@@ -1653,7 +1653,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "We propose augmenting BlockMarkerV1, introduced in SIMD-0307, to include BlockHeader and UpdateParent variants. BlockHeader, placed at the beginning of a block, indicates the parent of the block. UpdateParent signals that the intended parent is different from what was initially\u2026"
   },
   {
     "key": "vcmrbYbiMVKaq1snKP6eCacNDcr6qZvpCNUjmk6gxvZ",
@@ -1675,7 +1675,7 @@
     "devnet_activation_epoch": 1067,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Specify the protocol for validating chained block ids under both TowerBFT and Alpenglow."
   },
   {
     "key": "STk5Xj8hdAx3sTzmtJ3QysKkq6X2A3yj73JtxttiRyk",
@@ -1697,7 +1697,7 @@
     "devnet_activation_epoch": 1065,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "This SIMD will upgrade the Core BPF Stake Program to v5.0.0."
   },
   {
     "key": "EDGMC5kxFxGk4ixsNkGt8bW7QL5hDMXnbwaZvYMwNfzF",
@@ -1721,7 +1721,7 @@
     "devnet_activation_epoch": 1070,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Syscall parameter related changes split off from SIMD-0219: Removing pitfalls and foot-guns from the ABI (including syscalls) and runtime."
   },
   {
     "key": "7VgiehxNxu53KdxgLspGQY8myE6f7UokaWa4jsGcaSz",
@@ -1745,7 +1745,7 @@
     "devnet_activation_epoch": 1073,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Virtual address space related changes split off from SIMD-0219: Removing pitfalls and foot-guns from the ABI (including syscalls) and runtime."
   },
   {
     "key": "CR3dVN2Yoo95Y96kLSTaziWDAQT2MNEpiWh5cqVq2pNE",
@@ -1789,7 +1789,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "This SIMD describes how the validator admission ticket (VAT) collection described in [SIMD 326](https://github.com/solana-foundation/solana-improvement-documents/pull/326) will be implemented. Specifically, how it affects validator operation procedures."
   },
   {
     "key": "5cC3foj77CWun58pC51ebHFUWavHWKarWyR5UUik7dnC",
@@ -1817,7 +1817,7 @@
     "devnet_activation_epoch": 1069,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "This SIMD introduces static syscalls, using the eBPF call instruction encoding, to remove runtime relocations while keeping compatibility with the eBPF encoding."
   },
   {
     "key": "dcomRRWHXP1FVWPqi9Mm4oxJhF4ehC795SvAtUdA9os",
@@ -1835,11 +1835,11 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 947,
+    "testnet_activation_epoch": null,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "We propose augmenting BlockMarkerV1, introduced in SIMD-0307, to include BlockHeader and UpdateParent variants. BlockHeader, placed at the beginning of a block, indicates the parent of the block. UpdateParent signals that the intended parent is different from what was initially\u2026"
   },
   {
     "key": "AnAP9zPV4KL7czAPQbFhpDKV2tx7g4UGNbK9wvXwjaRo",
@@ -1863,7 +1863,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "This proposal specifies in detail how a BLS public key can be generated by users via updated existing tools and how they can put the generated BLS public keys into their vote accounts for voting in Alpenglow."
   },
   {
     "key": "B8JJXCy5amZyWG9r7EnUYLwzXSXTxG7GZ1qZ1qggo83g",
@@ -1887,7 +1887,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Disable deployment of SBPFv0, SBPFv1 and SBPFv2."
   },
   {
     "key": "YbbRLkvenrocjGPGyoQE4wjnvYzTgfsk38NFmcYK7a5",
@@ -1909,7 +1909,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Enforce a minimum extension size of 10,240 bytes (10 KiB) on the ExtendProgram instruction in Loader V3, mitigating the existing denial-of-service vector through economic deterrence while preserving the instruction's permissionless nature."
   },
   {
     "key": "s512oDwgx8hjMnaQjXfqqrZroVj4HvC6TkN3iSSWXCh",
@@ -1933,7 +1933,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Introduce a sol_sha512 syscall with an identical interface to sol_sha256, producing SHA-512 hashes and outputting the 64-byte result."
   },
   {
     "key": "Eg7tXEwMZzS98xaZ1YHUbdRHsaYZiCsSaR6sKgxreoaj",
@@ -1957,7 +1957,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Allow validators to update their inflations reward commission rate with basis points and update commission calculation."
   },
   {
     "key": "disCA4efguFL6Wqa4pGdG7jpjC7C5uiKzKnhEBqchBe",
@@ -1981,7 +1981,7 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "We propose augmenting BlockMarkerV1, introduced in SIMD-0307, to include BlockHeader and UpdateParent variants. BlockHeader, placed at the beginning of a block, indicates the parent of the block. UpdateParent signals that the intended parent is different from what was initially\u2026"
   },
   {
     "key": "ptr9umikaeAS7ZBBp2fsfRhie16F1V2jCKA2y6gXNAK",
@@ -2005,6 +2005,6 @@
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
-    "description": ""
+    "description": "Serialize pointers for instruction accounts to allow direct account access without requiring parsing of the account section."
   }
 ]
