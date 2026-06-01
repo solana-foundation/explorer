@@ -33,7 +33,7 @@
 
 -   [ ] My code follows the project's style guidelines
 -   [ ] I have added tests that prove my fix/feature works
--   [ ] All checks pass locally (`pnpm test`, `pnpm lint`, `pnpm types`)
+-   [ ] All checks pass locally (`pnpm test`, `pnpm lint`,..)
 -   [ ] I have updated documentation as needed
 -   [ ] I have run `build:info` script to update build information
 -   [ ] CI/CD checks pass on the PR
