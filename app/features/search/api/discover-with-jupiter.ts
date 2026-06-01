@@ -1,5 +1,6 @@
 import { array, boolean, is, nullable, number, optional, string, type } from 'superstruct';
 
+import { fetchUpstream } from '@/app/api/verification/upstream';
 import { matchAbortError } from '@/app/shared/lib/errors';
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -27,7 +28,7 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
 
     try {
         const url = `https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(query)}`;
-        const response = await fetch(url, {
+        const response = await fetchUpstream(url, {
             headers: {
                 Accept: 'application/json',
                 'x-api-key': jupiterApiKey,
@@ -89,8 +90,8 @@ export async function fetchJupiterImages(tokens: DiscoveredToken[], signal: Abor
         missing.map(async token => {
             try {
                 const url = `https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(token.symbol)}`;
-                
-                const response = await fetch(url, {
+
+                const response = await fetchUpstream(url, {
                     headers: { Accept: 'application/json', 'x-api-key': jupiterApiKey },
                     signal,
                 });
