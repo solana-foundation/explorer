@@ -19,7 +19,7 @@ function createRequest(pathname: string, headers: Record<string, string> = {}): 
     return new NextRequest(url, { headers });
 }
 
-describe('proxy', () => {
+describe('Next.js proxy', () => {
     const originalEnv = { ...process.env };
 
     let loggerInfoSpy: ReturnType<typeof vi.spyOn>;
