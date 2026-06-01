@@ -37,6 +37,14 @@ function encode(bytes: number[]): { data: [string, string] } {
 }
 
 describe('probeFeatureActivation', () => {
+    beforeEach(() => {
+        vi.spyOn(console, 'warn').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
     it('should return "missing" when the RPC responds with value=null', async () => {
         const probe = await probeFeatureActivation(makeRpc(null), SCHEDULE, KEY);
         expect(probe).toEqual({ kind: 'missing' });
