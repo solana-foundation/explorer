@@ -6,7 +6,18 @@ import { Logger } from '@/app/shared/lib/logger';
 
 const BOT_RESPONSE = { body: { error: 'Access denied: request identified as automated bot' }, status: 401 } as const;
 
+// TEMP: remove after one preview deploy confirms whether Next 16.2 proxy.ts runs on Node or Edge.
+let runtimeProbed = false;
+
 export async function proxy(request: NextRequest) {
+    if (!runtimeProbed) {
+        runtimeProbed = true;
+        Logger.info('[proxy] runtime probe', {
+            hasEdgeRuntime: 'EdgeRuntime' in globalThis,
+            nodeVersion: typeof process !== 'undefined' && process.versions ? process.versions.node : undefined,
+        });
+    }
+
     const { pathname } = request.nextUrl;
 
     if (!isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_ENABLED)) {
