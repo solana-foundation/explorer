@@ -38,15 +38,12 @@ const nextConfig = {
     },
     turbopack: {
         resolveAlias: {
-            // Force the legacy borsh@0.7.0 (the `borsh` dependency) for all `borsh` imports.
-            // `borsh2` (npm:borsh@2.0.0) is a separate specifier and is unaffected.
+            // resolve-domain.ts uses deserializeUnchecked, removed in borsh@2 (also installed as borsh2).
             borsh: './node_modules/borsh',
-            // Stub Node's `fs` in client bundles — packages like `@coral-xyz/anchor` reference it
-            // but never execute that path on the client (was `resolve.fallback.fs = false` in webpack).
+            // @coral-xyz/anchor's nodewallet/workspace require('fs'), but those paths never run in the browser.
             fs: { browser: './empty.ts' },
         },
     },
 };
 
-/// Add wrapper to track errors with Sentry and BotID for bot protection
 export default withBotId(withSentryConfig(nextConfig, createSentryBuildConfig()));

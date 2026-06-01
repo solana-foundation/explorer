@@ -35,7 +35,7 @@ async function main() {
         logger.success(`Build completed in ${buildDuration}s`);
 
         const routes = await collectRoutes(config);
-        const sizeInfo = await loadRouteSizes(config, logger);
+        const sizeInfo = await loadRouteSizes(config);
         const content = formatTable(routes, sizeInfo);
 
         const outputPath = path.join(config.projectRoot, config.outputFile);
@@ -85,6 +85,21 @@ function runBuild(config) {
 // ================================================================================================
 // Route Collector
 // ================================================================================================
+async function readManifest(filePath) {
+    // Failing loud here is the script's whole job — these manifests are an internal Next.js contract.
+    let raw;
+    try {
+        raw = await fs.readFile(filePath, 'utf8');
+    } catch (error) {
+        throw new Error(`Failed to read ${path.basename(filePath)} at ${filePath}: ${error.message}. This usually means the Next.js manifest layout changed; update scripts/update-build-info.js.`);
+    }
+    try {
+        return JSON.parse(raw);
+    } catch (error) {
+        throw new Error(`Failed to parse ${path.basename(filePath)} at ${filePath}: ${error.message}. This usually means the Next.js manifest format changed; update scripts/update-build-info.js.`);
+    }
+}
+
 /**
  * Collects the app's routes and their render type from the build manifests
  * (no stdout parsing required).
@@ -102,8 +117,8 @@ function runBuild(config) {
  */
 async function collectRoutes(config) {
     const distDir = path.join(config.projectRoot, config.distDir);
-    const pathRoutes = JSON.parse(await fs.readFile(path.join(distDir, 'app-path-routes-manifest.json'), 'utf8'));
-    const prerender = JSON.parse(await fs.readFile(path.join(distDir, 'prerender-manifest.json'), 'utf8'));
+    const pathRoutes = await readManifest(path.join(distDir, 'app-path-routes-manifest.json'));
+    const prerender = await readManifest(path.join(distDir, 'prerender-manifest.json'));
 
     const staticRoutes = new Set(Object.keys(prerender.routes || {}));
     const routes = [...new Set(Object.values(pathRoutes))]
@@ -138,30 +153,25 @@ async function collectRoutes(config) {
  * BUILD.md snapshots even though First Load JS lines up.
  *
  * @param {Object} config - Configuration object
- * @param {Object} logger - Logger for non-fatal warnings
  * @returns {Promise<Map<string, {size: number, firstLoad: number}>>} Route → gzipped byte sizes
  */
-async function loadRouteSizes(config, logger) {
+async function loadRouteSizes(config) {
     const statsPath = path.join(config.projectRoot, config.distDir, 'diagnostics', 'route-bundle-stats.json');
-
-    let stats;
-    try {
-        stats = JSON.parse(await fs.readFile(statsPath, 'utf8'));
-    } catch {
-        logger.error(`Could not read route bundle stats at ${path.relative(config.projectRoot, statsPath)}; sizes will be omitted`);
-        return new Map();
-    }
+    const stats = await readManifest(statsPath);
 
     // Chunks are shared across many routes; gzip each one at most once.
     const gzipCache = new Map();
     const gzipSize = async chunkPath => {
         if (!gzipCache.has(chunkPath)) {
+            const absPath = path.join(config.projectRoot, chunkPath);
+            let buf;
             try {
-                gzipCache.set(chunkPath, zlib.gzipSync(await fs.readFile(path.join(config.projectRoot, chunkPath))).length);
-            } catch {
-                // A chunk listed in the manifest but missing on disk contributes nothing.
-                gzipCache.set(chunkPath, 0);
+                buf = await fs.readFile(absPath);
+            } catch (error) {
+                // Missing chunk = manifest/disk mismatch; surfacing this is the whole point of the script.
+                throw new Error(`Chunk listed in route-bundle-stats.json is missing on disk: ${chunkPath} (${error.message}). This usually means Next.js changed how it emits or names chunks; update scripts/update-build-info.js.`);
             }
+            gzipCache.set(chunkPath, zlib.gzipSync(buf).length);
         }
         return gzipCache.get(chunkPath);
     };
