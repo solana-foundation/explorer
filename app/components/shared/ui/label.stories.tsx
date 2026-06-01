@@ -14,9 +14,6 @@ const meta: Meta<typeof Label> = {
             </div>
         ),
     ],
-    parameters: {
-        layout: 'centered',
-    },
     tags: ['autodocs'],
     title: 'Components/Shared/UI/Label',
 };

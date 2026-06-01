@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { BaseTable } from './BaseTable';
+import { BaseTable } from '../BaseTable';
 
 const meta: Meta<typeof BaseTable> = {
     component: BaseTable,

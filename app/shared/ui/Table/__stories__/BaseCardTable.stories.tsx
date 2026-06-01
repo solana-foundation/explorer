@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { BaseCard, BaseCardBody, BaseCardHeader, BaseCardTitle } from '../Card';
-import { BaseCardTable } from './BaseCardTable';
+import { BaseCard, BaseCardBody, BaseCardHeader, BaseCardTitle } from '../../Card';
+import { BaseCardTable } from '../BaseCardTable';
 
 const meta: Meta<typeof BaseCardTable> = {
     component: BaseCardTable,

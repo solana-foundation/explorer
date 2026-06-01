@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { BaseCard, BaseCardBody } from './BaseCard';
-import { BaseCardSection } from './BaseCardSection';
+import { BaseCard, BaseCardBody } from '../BaseCard';
+import { BaseCardSection } from '../BaseCardSection';
 
 const meta: Meta<typeof BaseCardSection> = {
     component: BaseCardSection,

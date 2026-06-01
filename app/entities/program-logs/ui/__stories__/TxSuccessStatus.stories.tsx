@@ -18,9 +18,6 @@ const meta = {
             </div>
         ),
     ],
-    parameters: {
-        layout: 'centered',
-    },
     tags: ['autodocs'],
     title: 'Entities/Program Logs/UI/TxSuccessStatus',
 } satisfies Meta<typeof TxSuccessStatus>;

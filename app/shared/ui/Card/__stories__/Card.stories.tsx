@@ -12,7 +12,7 @@ import {
     BaseCardFooter as CardFooter,
     BaseCardHeader as CardHeader,
     BaseCardTitle as CardTitle,
-} from './BaseCard';
+} from '../BaseCard';
 
 type CardVariant = NonNullable<React.ComponentProps<typeof Card>['variant']>;
 
@@ -20,9 +20,6 @@ const variantOptions = ['default', 'narrow', 'tight'] as const satisfies readonl
 
 const meta: Meta<typeof Card> = {
     component: Card,
-    parameters: {
-        layout: 'centered',
-    },
     tags: ['autodocs'],
     title: 'Components/Shared/UI/Card',
 };

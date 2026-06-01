@@ -21,9 +21,6 @@ const meta = {
             </div>
         ),
     ],
-    parameters: {
-        layout: 'centered',
-    },
     tags: ['autodocs'],
     title: 'Entities/Program Logs/UI/ProgramLogs',
 } satisfies Meta<typeof ProgramLogs>;
