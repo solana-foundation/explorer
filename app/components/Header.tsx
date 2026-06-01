@@ -8,7 +8,7 @@ import {
     useCoinGeckoVerification,
     type VerificationTarget,
 } from '@/app/features/token-verification-badge';
-import { toAddress } from '@/app/shared/model/address';
+import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { isNativeMint, isTokenMintByOwner } from '@/app/shared/model/token-program';
 
 type HeaderProps = ComponentProps<typeof AccountHeader>;
@@ -21,7 +21,7 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
         parsedData &&
         isTokenProgramData(parsedData) &&
         parsedData?.parsed.type === 'mint' &&
-        isTokenMintByOwner(toAddress(account.owner), account.data.raw);
+        isTokenMintByOwner(toKitAddress(account.owner), account.data.raw);
 
     const coinInfo = useCoinGeckoVerification(address, !!isTokenMint);
 
