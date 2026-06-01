@@ -1,6 +1,5 @@
 'use client';
 
-import { address } from '@solana/kit';
 import Link from 'next/link';
 import React, { Fragment, type ReactNode, useState } from 'react';
 
@@ -128,7 +127,7 @@ function FeatureRowView<T extends FeatureRow>({
                     <SimdLinks entries={feature.simdEntries} />
                 </TableCell>
                 <TableCell className="e-hidden md:e-table-cell">
-                    <AddressLink address={address(feature.key)} />
+                    <AddressLink address={feature.key} />
                 </TableCell>
                 <TableCell className="e-text-right">
                     <ExpandInfoButton isExpanded={isExpanded} onToggle={onToggle} controlsId={detailId} />
@@ -143,7 +142,7 @@ function FeatureRowView<T extends FeatureRow>({
                         >
                             <div className="e-flex e-flex-col e-gap-2 md:e-hidden">
                                 <SimdLinks entries={feature.simdEntries} />
-                                <AddressLink address={address(feature.key)} truncate={{ head: 6, tail: 6 }} />
+                                <AddressLink address={feature.key} truncate={{ head: 6, tail: 6 }} />
                             </div>
                             {feature.description || (
                                 <span className="e-text-dk-gray-700">No description available.</span>

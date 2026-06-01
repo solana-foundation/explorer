@@ -6,7 +6,9 @@ export function getFeatureInfo(address: string): FeatureInfoType | undefined {
 
     if (index === -1) return undefined;
 
-    // feature-gates.json is validated against FeatureGatesArraySchema; the inferred
-    // literal type is narrower than the runtime shape, so assert the domain type.
-    return FEATURES[index] as FeatureInfoType;
+    // feature-gates.json is validated against FeatureGatesArraySchema; the raw JSON
+    // infers `key: string`, so assert the domain type (whose `key` is branded
+    // `Address`) via `unknown`. Imported directly rather than via the entity's
+    // branded `FEATURE_GATES` re-export to avoid a barrel import cycle.
+    return FEATURES[index] as unknown as FeatureInfoType;
 }

@@ -1,4 +1,4 @@
-import type { FeatureGate } from '../../../app/entities/feature-gate/server';
+import type { FeatureGateDraft } from '../../../app/entities/feature-gate/server';
 import type { FeatureProbeResult } from './rpc';
 
 export type RefreshMode = 'default' | 'refresh-activated';
@@ -12,7 +12,7 @@ export type RefreshMode = 'default' | 'refresh-activated';
  * by the separate `resolveMissingSimdLinks` pass — that pass is guarded so
  * non-empty links are never overwritten. Features without a `key` are dropped.
  */
-export function appendNewFeatures(existing: FeatureGate[], scraped: FeatureGate[]): FeatureGate[] {
+export function appendNewFeatures(existing: FeatureGateDraft[], scraped: FeatureGateDraft[]): FeatureGateDraft[] {
     const knownKeys = new Set(existing.map(feature => feature.key));
     const newFeatures = scraped.filter(feature => feature.key && !knownKeys.has(feature.key));
     if (newFeatures.length > 0) {
@@ -44,6 +44,6 @@ export function resolveEpoch(probe: FeatureProbeResult, backup: number | null, m
     return mode === 'refresh-activated' ? null : backup;
 }
 
-export function hasDescription(feature: FeatureGate): boolean {
+export function hasDescription(feature: FeatureGateDraft): boolean {
     return Boolean(feature.description && feature.description.trim());
 }

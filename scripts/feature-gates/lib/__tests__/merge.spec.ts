@@ -1,8 +1,11 @@
-import type { FeatureGate } from '../../../../app/entities/feature-gate/server';
+import type { FeatureGateDraft } from '../../../../app/entities/feature-gate/server';
 import { appendNewFeatures, hasDescription, resolveEpoch } from '../merge';
 import type { FeatureProbeResult } from '../rpc';
 
-function feature(overrides: Partial<FeatureGate> = {}): FeatureGate {
+// The merge pipeline operates on drafts (plain-string `key`), so these fixtures
+// use sentinel keys like 'A'/'KEY' to exercise dedup/append logic — base58
+// validation happens later, at the `create()` write boundary.
+function feature(overrides: Partial<FeatureGateDraft> = {}): FeatureGateDraft {
     return {
         comms_required: null,
         description: '',

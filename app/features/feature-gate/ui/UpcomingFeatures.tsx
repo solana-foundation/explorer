@@ -18,25 +18,23 @@ export function UpcomingFeatures() {
         return undefined;
     }
 
-    const filteredFeatures = (FEATURE_GATES as FeatureInfoType[])
-        .filter((feature: FeatureInfoType) => {
-            switch (cluster) {
-                case Cluster.MainnetBeta:
-                    // Show features activated on devnet and testnet
-                    return feature.devnet_activation_epoch !== null && feature.testnet_activation_epoch !== null;
-                case Cluster.Devnet:
-                    // Show features activated on testnet, mark if already activated on devnet
-                    return feature.testnet_activation_epoch !== null;
-                case Cluster.Testnet:
-                    // Only show features not yet activated on testnet
-                    return feature.testnet_activation_epoch === null;
-                default:
-                    return false;
-            }
-        })
-        .filter((feature: FeatureInfoType) => {
-            return !isFeatureActivated(feature, cluster);
-        });
+    const filteredFeatures = FEATURE_GATES.filter((feature: FeatureInfoType) => {
+        switch (cluster) {
+            case Cluster.MainnetBeta:
+                // Show features activated on devnet and testnet
+                return feature.devnet_activation_epoch !== null && feature.testnet_activation_epoch !== null;
+            case Cluster.Devnet:
+                // Show features activated on testnet, mark if already activated on devnet
+                return feature.testnet_activation_epoch !== null;
+            case Cluster.Testnet:
+                // Only show features not yet activated on testnet
+                return feature.testnet_activation_epoch === null;
+            default:
+                return false;
+        }
+    }).filter((feature: FeatureInfoType) => {
+        return !isFeatureActivated(feature, cluster);
+    });
 
     if (filteredFeatures.length === 0) {
         return (

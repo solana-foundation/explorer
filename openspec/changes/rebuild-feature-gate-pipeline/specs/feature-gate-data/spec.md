@@ -4,12 +4,19 @@
 
 The on-disk `app/entities/feature-gate/feature-gates.json` file SHALL be validated at runtime by `FeatureGatesArraySchema` (defined in `app/entities/feature-gate/lib/feature-gates-schema.ts`). The same schema MUST be the write contract for `scripts/update-feature-gates.ts` and the read contract for every UI consumer (the standalone Feature Gates page, the account section, the OG image route, the address layout, the feature-gate search provider).
 
+The schema SHALL validate `key` as a base58-encoded Solana address (not merely a string) and brand it to `@solana/kit`'s `Address` type on the read side, so a malformed key cannot reach a consumer that derives links or on-chain reads from it. Producers that assemble rows from untrusted sources (the wiki) SHALL use the plain-string `FeatureGateDraft` type; the schema brands `key` at the `create()` write boundary in `feature-store.ts`.
+
 A test that loads the committed JSON through the schema SHALL exist and run in CI, so that a drift between cron-generated output and UI expectations fails the build rather than surfacing as a runtime render error.
 
 #### Scenario: Cron writes a JSON record missing a required field
 
 - **WHEN** `scripts/update-feature-gates.ts` produces a record without a field the schema marks non-optional
 - **THEN** `pnpm test` fails on `feature-gates-schema.spec.ts` before the cron-generated PR can be merged
+
+#### Scenario: Cron writes a record whose key is not a valid base58 address
+
+- **WHEN** `scripts/update-feature-gates.ts` produces a record whose `key` is not a base58-encoded Solana address (e.g. a stray wiki heading parsed into the key column)
+- **THEN** `create()` in `writeFeatureGates` rejects it at cron time, and `feature-gates-schema.spec.ts` fails in CI for any such row that reaches the committed JSON — rather than the address being trusted by a UI consumer
 
 #### Scenario: UI imports the typed schema, not a hand-rolled shape
 
@@ -126,7 +133,7 @@ The purpose is to keep cron-generated PR diffs limited to real content changes r
 
 ### Requirement: The feature-gate cron updater SHALL run as a single TypeScript pipeline
 
-The daily feature-gate refresh SHALL be implemented as one TypeScript entry point (`scripts/update-feature-gates.ts`) that reads the JSON once, runs wiki ingestion + per-cluster epoch refreshes + SIMD description back-fill as a sequenced pipeline of pure `FeatureGate[] → FeatureGate[]` stages, and writes the JSON once.
+The daily feature-gate refresh SHALL be implemented as one TypeScript entry point (`scripts/update-feature-gates.ts`) that reads the JSON once, runs wiki ingestion + per-cluster epoch refreshes + SIMD description back-fill as a sequenced pipeline of pure `FeatureGateDraft[] → FeatureGateDraft[]` stages (branded to the validated `FeatureGate` type at the `create()` write boundary), and writes the JSON once.
 
 The pipeline MUST NOT depend on a Python runtime. The pipeline's stage helpers SHALL live under `scripts/feature-gates/lib/` and SHALL be unit-testable against frozen fixtures (wiki markdown, SIMD proposals JSON, SIMD summary markdown) so parser changes can be validated offline.
 

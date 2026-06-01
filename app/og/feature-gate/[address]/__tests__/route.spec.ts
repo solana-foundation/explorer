@@ -1,3 +1,4 @@
+import { address } from '@solana/kit';
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -26,8 +27,9 @@ vi.mock('@entities/feature-gate/server', async importOriginal => {
     };
 });
 
-// Known feature gate address from featureGates.json
-const validAddress = '7bTK6Jis8Xpfrs8ZoUfiMDPazTcdPcTWheZFJTA5Z6X4';
+// Known feature gate address from feature-gates.json (branded so it can be used
+// as a `FeatureInfoType['key']` in the getFeatureInfo mock returns below).
+const validAddress = address('7bTK6Jis8Xpfrs8ZoUfiMDPazTcdPcTWheZFJTA5Z6X4');
 // Valid base58 address but not a known feature gate
 const unknownAddress = '11111111111111111111111111111112';
 

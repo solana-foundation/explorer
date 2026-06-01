@@ -39,7 +39,7 @@ export async function fetchFeatureGateInformation(featureInfo?: FeatureInfoType)
 }
 
 export function getLink(simdLink: string) {
-    // All the READMEs are stored at the same directory. That's why we only need the file name.
+    // All SIMD proposal files live in the same directory, so only the file name matters.
     const components = simdLink.split('/');
     const file = components[components.length - 1];
 

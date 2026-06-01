@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax -- markdown table parsing needs regexes */
 /* eslint-disable unicorn/no-null -- null literals match the nullable feature-gate schema fields */
-import type { FeatureGate } from '../../../app/entities/feature-gate/server';
+import type { FeatureGateDraft } from '../../../app/entities/feature-gate/server';
 import { fetchSimdProposals, resolveSimdLinks } from './simd-proposals';
 
 export type MarkdownTable = {
@@ -22,7 +22,7 @@ const HEADING_PATTERN = /^#{1,6}\s+(.+?)\s*$/gm;
  * also use it to back-fill any previously-stored rows whose `simd_link` is
  * still empty (e.g. a feature first scraped during a transient GitHub outage).
  */
-export async function fetchWikiFeatures(): Promise<{ features: FeatureGate[]; proposals: Map<string, string> }> {
+export async function fetchWikiFeatures(): Promise<{ features: FeatureGateDraft[]; proposals: Map<string, string> }> {
     const response = await fetch(WIKI_URL);
     if (!response.ok) {
         throw new Error(`Failed to fetch wiki: HTTP ${response.status}`);
@@ -52,8 +52,8 @@ const REQUIRED_PENDING_COLUMNS = [
  * are skipped); selection is by section heading, not table position, so an
  * added or reordered table can't silently shift which rows we pick up.
  */
-export function featuresFromWikiMarkdown(markdown: string, proposals: Map<string, string>): FeatureGate[] {
-    const features: FeatureGate[] = [];
+export function featuresFromWikiMarkdown(markdown: string, proposals: Map<string, string>): FeatureGateDraft[] {
+    const features: FeatureGateDraft[] = [];
     for (const table of extractTables(markdown)) {
         if (!isPendingTable(table)) continue;
         assertExpectedColumns(table);
@@ -125,7 +125,7 @@ function isPendingTable(table: MarkdownTable): boolean {
  * the long-form description is empty here and gets back-filled later from
  * the linked SIMD markdown.
  */
-export function wikiRowToFeature(row: Record<string, string>, simdLinks: string[]): FeatureGate {
+export function wikiRowToFeature(row: Record<string, string>, simdLinks: string[]): FeatureGateDraft {
     return {
         comms_required: null,
         description: '',

@@ -33,7 +33,7 @@ export function partitionFeatures(cluster: Cluster): FeaturePartition {
     const activated: ActivatedFeature[] = [];
     const upcoming: UpcomingFeature[] = [];
 
-    for (const feature of FEATURE_GATES as FeatureInfoType[]) {
+    for (const feature of FEATURE_GATES) {
         const epoch = activationEpochFor(feature, cluster);
         const otherActivations = others
             .map(other => {

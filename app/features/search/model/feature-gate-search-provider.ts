@@ -1,4 +1,4 @@
-import { FEATURE_GATES, type FeatureInfoType } from '@entities/feature-gate';
+import { FEATURE_GATES } from '@entities/feature-gate';
 
 import { SearchGroup } from '../lib/filter-tabs';
 import type { SearchOptions, SearchProvider } from '../lib/types';
@@ -7,7 +7,7 @@ import type { SearchOptions, SearchProvider } from '../lib/types';
  * Local search provider that matches Solana feature gates by title.
  *
  * Feature gates control the activation of runtime features across the
- * cluster. This provider searches the static `featureGates.json` registry
+ * cluster. This provider searches the static `feature-gates.json` registry
  * and links to each gate's account page.
  *
  * @example
@@ -21,7 +21,7 @@ export const featureGateSearchProvider: SearchProvider = {
     search(query: string): SearchOptions[] {
         if (query.length < 2) return [];
 
-        const features = (FEATURE_GATES as FeatureInfoType[]).filter(
+        const features = FEATURE_GATES.filter(
             feature => feature.key && feature.title.toUpperCase().includes(query.toUpperCase()),
         );
 

@@ -3,12 +3,17 @@ import { vi } from 'vitest';
 
 import { Cluster } from '@/app/utils/cluster';
 
-function makeFeature(overrides: Partial<FeatureInfoType>): FeatureInfoType {
+// `key` is loosened to a plain string so tests can use readable sentinels
+// ('A', 'IDLE', …); it's branded to `FeatureInfoType['key']` (kit's `Address`)
+// once here rather than at every call site. partitionFeatures never parses the
+// key, so the sentinels are fine.
+function makeFeature(overrides: Partial<Omit<FeatureInfoType, 'key'>> & { key?: string }): FeatureInfoType {
+    const { key = 'PLACEHOLDER', ...rest } = overrides;
     return {
         comms_required: null,
         description: '',
         devnet_activation_epoch: null,
-        key: 'PLACEHOLDER',
+        key: key as FeatureInfoType['key'],
         mainnet_activation_epoch: null,
         min_agave_versions: [],
         min_fd_versions: [],
@@ -19,7 +24,7 @@ function makeFeature(overrides: Partial<FeatureInfoType>): FeatureInfoType {
         simds: [],
         testnet_activation_epoch: null,
         title: 'placeholder',
-        ...overrides,
+        ...rest,
     };
 }
 

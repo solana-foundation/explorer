@@ -20,7 +20,7 @@ reading the code first.
 
 ## Pipeline
 
-The script is a sequence of `FeatureGate[] → FeatureGate[]` stages applied with plain `await` steps in `main()`; the three cluster epoch passes (stages 3–5) run concurrently via `Promise.all`, then rejoin before description back-fill. The local file at the top and bottom is the same file (read once, written once). Solid arrows trace the data pipeline; dotted arrows are calls to external services, grouped by provider on the right.
+The script is a sequence of `FeatureGateDraft[] → FeatureGateDraft[]` stages applied with plain `await` steps in `main()`; the three cluster epoch passes (stages 3–5) run concurrently via `Promise.all`, then rejoin before description back-fill. The local file at the top and bottom is the same file (read once, written once). Solid arrows trace the data pipeline; dotted arrows are calls to external services, grouped by provider on the right.
 
 ```mermaid
 flowchart LR
@@ -74,9 +74,13 @@ flowchart LR
     class Wiki,Proposals,Simds,Devnet,Testnet,Mainnet ext
 ```
 
-Each numbered box is a pure `FeatureGate[] → FeatureGate[]` stage. The list is
-read from disk once at the start and written back once after the last stage;
-no stage mutates the input in place.
+Each numbered box is a pure `FeatureGateDraft[] → FeatureGateDraft[]` stage —
+the producer-side shape, whose `key` is a plain string. The list is read from
+disk once at the start and written back once after the last stage; no stage
+mutates the input in place. `writeFeatureGates` is where the drafts become the
+on-disk/read shape: `create(FeatureGatesArraySchema)` validates each `key` as a
+base58 address and brands it to `@solana/kit`'s `Address`, the type every reader
+imports as `FeatureGate`.
 
 ## Stage-by-stage behaviour
 
@@ -110,9 +114,10 @@ no stage mutates the input in place.
 
 ### 3–5. `refreshEpochs(features, field, rpcUrl, isEligible, mode)`
 
-The three cluster passes run in parallel (devnet/testnet/mainnet are
-independent hosts); within a pass, requests stay sequential to respect the
-per-host rate limit. The per-call delay is 500 ms; 429 responses retry with
+`refreshAllEpochs` dispatches the three cluster passes together via
+`Promise.all` and rejoins their results; each pass is one `refreshEpochs` call.
+They run in parallel (devnet/testnet/mainnet are independent hosts); within a
+pass, requests stay sequential to respect the per-host rate limit. The per-call delay is 500 ms; 429 responses retry with
 exponential backoff (2s then 4s) across up to three attempts before being
 treated as `unreachable`.
 
@@ -159,9 +164,10 @@ where the account has since disappeared from chain; running with
   (`!feature.description?.trim()`).
 - Resolves each `simd_link[0]` from `github.com/.../blob/...` to its
   `raw.githubusercontent.com` form and fetches the markdown.
-- Extracts the first paragraph of the `## Summary` section (or `## Abstract`
-  as fallback), stripping markdown emphasis and front matter, truncated to
-  280 characters with a trailing `…`.
+- Extracts the first paragraph of the first matching section heading — tried
+  in order: `## Summary`, `## Abstract`, `## Overview`, `## Description` —
+  stripping markdown emphasis and front matter, truncated to 280 characters
+  with a trailing `…`.
 - **Write-once.** Descriptions are not re-fetched after the first successful
   fill. A later edit to the SIMD doc does not propagate into the JSON — the
   trade-off is keeping daily SIMD fetches bounded and avoiding spurious diffs

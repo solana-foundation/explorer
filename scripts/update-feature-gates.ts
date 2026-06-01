@@ -28,7 +28,7 @@
  *       on the daily cron.
  */
 
-import type { FeatureGate } from '../app/entities/feature-gate/server';
+import type { FeatureGateDraft } from '../app/entities/feature-gate/server';
 import { readFeatureGates, writeFeatureGates } from './feature-gates/lib/feature-store';
 import { appendNewFeatures, hasDescription, type RefreshMode, resolveEpoch } from './feature-gates/lib/merge';
 import { connectCluster, type FeatureProbeResult, probeFeatureActivation } from './feature-gates/lib/rpc';
@@ -56,7 +56,7 @@ async function main() {
 }
 
 type EpochField = 'devnet_activation_epoch' | 'mainnet_activation_epoch' | 'testnet_activation_epoch';
-type EligibilityCheck = (feature: FeatureGate) => boolean;
+type EligibilityCheck = (feature: FeatureGateDraft) => boolean;
 
 /** Worth re-checking on devnet/testnet only while the feature hasn't shipped to mainnet. */
 const stillPending: EligibilityCheck = feature => feature.mainnet_activation_epoch === null;
@@ -74,7 +74,7 @@ const everyFeature: EligibilityCheck = () => true;
  * mainnet RPCs are independent hosts, so parallel passes don't contend; within
  * a pass, requests stay sequential to respect per-host rate limits.
  */
-async function refreshAllEpochs(features: FeatureGate[], mode: RefreshMode): Promise<FeatureGate[]> {
+async function refreshAllEpochs(features: FeatureGateDraft[], mode: RefreshMode): Promise<FeatureGateDraft[]> {
     const eligibility =
         mode === 'refresh-activated'
             ? { devnet: everyFeature, mainnet: everyFeature, testnet: everyFeature }
@@ -105,7 +105,7 @@ async function refreshAllEpochs(features: FeatureGate[], mode: RefreshMode): Pro
  * existing value (so the merge in `refreshAllEpochs` is a straight overwrite).
  */
 async function refreshEpochs(
-    features: FeatureGate[],
+    features: FeatureGateDraft[],
     field: EpochField,
     rpcUrl: string,
     isEligible: EligibilityCheck,
@@ -147,7 +147,7 @@ function describeProbe(probe: FeatureProbeResult): string {
  * Eligible features are fetched in bounded-concurrency chunks so a wave of new
  * pending features doesn't serialize into N × HTTP-RTT.
  */
-async function enrichDescriptions(features: FeatureGate[]): Promise<FeatureGate[]> {
+async function enrichDescriptions(features: FeatureGateDraft[]): Promise<FeatureGateDraft[]> {
     const targets = features.filter(feature => !hasDescription(feature));
     if (targets.length === 0) {
         console.log('No descriptions to enrich.');

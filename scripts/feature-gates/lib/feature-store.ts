@@ -4,7 +4,11 @@ import { fileURLToPath } from 'node:url';
 
 import { create } from 'superstruct';
 
-import { type FeatureGate, FeatureGatesArraySchema } from '../../../app/entities/feature-gate/server';
+import {
+    type FeatureGate,
+    type FeatureGateDraft,
+    FeatureGatesArraySchema,
+} from '../../../app/entities/feature-gate/server';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(SCRIPT_DIR, '..', '..', '..');
@@ -16,7 +20,10 @@ export function readFeatureGates(): FeatureGate[] {
     return create(raw, FeatureGatesArraySchema);
 }
 
-export function writeFeatureGates(features: FeatureGate[]): void {
+export function writeFeatureGates(features: FeatureGateDraft[]): void {
+    // `create` validates each draft's plain-string `key` as a base58 address and
+    // returns rows with `key` branded to kit's `Address` — the write boundary
+    // where producer drafts become the validated on-disk/read shape.
     const validated = create(features, FeatureGatesArraySchema);
     writeFileSync(FEATURE_GATES_PATH, `${escapeNonAscii(JSON.stringify(validated, undefined, 2))}\n`);
 }
