@@ -162,6 +162,7 @@ class MultipleAccountFetcher {
     };
     cancel = () => {
         clearTimeout(this.fetchTimeout);
+        this.fetchTimeout = undefined;
     };
 }
 
