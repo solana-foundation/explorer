@@ -1,5 +1,6 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import { withBotId } from 'botid/next/config';
+import { fileURLToPath } from 'url';
 
 import { buildRedirects } from './config/redirects.mjs';
 import { createSentryBuildConfig } from './sentry/config.mjs';
@@ -37,6 +38,8 @@ const nextConfig = {
         return buildRedirects();
     },
     turbopack: {
+        // Pin to project root; otherwise Turbopack walks up to a parent pnpm-workspace.yaml (e.g. in git worktrees).
+        root: fileURLToPath(new URL('.', import.meta.url)),
         resolveAlias: {
             // resolve-domain.ts uses deserializeUnchecked, removed in borsh@2 (also installed as borsh2).
             borsh: './node_modules/borsh',
