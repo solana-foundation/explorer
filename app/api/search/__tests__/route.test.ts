@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GENESIS_HASHES } from '@/app/entities/chain-id/lib/const';
 import { getAssetBatch } from '@/app/entities/digital-asset/api';
+import { clearLogoCacheForTests } from '@/app/features/search/api/discover-with-jupiter';
 
 import { GET } from '../route';
 
@@ -47,6 +48,7 @@ beforeEach(() => {
     vi.stubGlobal('fetch', fetchMock);
     process.env = { ...originalEnv, JUPITER_API_KEY: 'test-key' };
     getAssetBatchMock.mockResolvedValue(undefined);
+    clearLogoCacheForTests();
 });
 
 afterEach(() => {

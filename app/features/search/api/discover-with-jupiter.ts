@@ -79,6 +79,8 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
 const logoCache = new Map<string, { expiresAt: number; logo: string }>();
 const LOGO_CACHE_TTL_MS = 30_000;
 
+export const clearLogoCacheForTests = () => logoCache.clear();
+
 // Fetches logo URIs for tokens whose discovery response didn't include one.
 // Searches by symbol (not address) because Jupiter strips the logo field from address-based queries.
 export async function fetchJupiterImages(tokens: DiscoveredToken[], signal: AbortSignal): Promise<Map<string, string>> {
