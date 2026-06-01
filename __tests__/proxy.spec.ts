@@ -12,14 +12,14 @@ import { checkBotId } from 'botid/server';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { middleware } from '../middleware';
+import { proxy } from '../proxy';
 
 function createRequest(pathname: string, headers: Record<string, string> = {}): NextRequest {
     const url = new URL(pathname, 'http://localhost');
     return new NextRequest(url, { headers });
 }
 
-describe('middleware', () => {
+describe('proxy', () => {
     const originalEnv = { ...process.env };
 
     let loggerInfoSpy: ReturnType<typeof vi.spyOn>;
@@ -59,7 +59,7 @@ describe('middleware', () => {
             { description: 'without x-is-human header', headers: {} },
         ])('should allow request to pass through $description', async ({ headers }) => {
             const request = createRequest('/api/test', headers);
-            const response = await middleware(request);
+            const response = await proxy(request);
 
             expect(response.status).toBe(200);
             expect(checkBotId).not.toHaveBeenCalled();
@@ -74,12 +74,12 @@ describe('middleware', () => {
         describe('without x-is-human header', () => {
             it('should allow request without verification and log info', async () => {
                 const request = createRequest('/api/test');
-                const response = await middleware(request);
+                const response = await proxy(request);
 
                 expect(response.status).toBe(200);
                 expect(checkBotId).not.toHaveBeenCalled();
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
-                    '[middleware] No x-is-human header, allowing',
+                    '[proxy] No x-is-human header, allowing',
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
@@ -90,11 +90,11 @@ describe('middleware', () => {
                 vi.mocked(checkBotId).mockRejectedValue(new SyntaxError('Unexpected token < in JSON'));
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
-                const response = await middleware(request);
+                const response = await proxy(request);
 
                 expect(response.status).toBe(200);
                 expect(loggerWarnSpy).toHaveBeenCalledWith(
-                    '[middleware] BotId verification failed, allowing request',
+                    '[proxy] BotId verification failed, allowing request',
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
@@ -110,16 +110,16 @@ describe('middleware', () => {
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
-                const response = await middleware(request);
+                const response = await proxy(request);
 
                 expect(response.status).toBe(200);
                 expect(checkBotId).toHaveBeenCalled();
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
-                    '[middleware] BotId verification',
+                    '[proxy] BotId verification',
                     expect.objectContaining({ isHuman: true }),
                 );
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
-                    '[middleware] Human verified',
+                    '[proxy] Human verified',
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
@@ -133,11 +133,11 @@ describe('middleware', () => {
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
-                const response = await middleware(request);
+                const response = await proxy(request);
 
                 expect(response.status).toBe(200);
                 expect(loggerWarnSpy).toHaveBeenCalledWith(
-                    '[middleware] Bot detected',
+                    '[proxy] Bot detected',
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
@@ -157,17 +157,17 @@ describe('middleware', () => {
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
-                const response = await middleware(request);
+                const response = await proxy(request);
 
                 expect(response.status).toBe(401);
                 const body = await response.json();
                 expect(body).toEqual({ error: 'Access denied: request identified as automated bot' });
                 expect(loggerWarnSpy).toHaveBeenCalledWith(
-                    '[middleware] Bot detected',
+                    '[proxy] Bot detected',
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
-                    new Error('[middleware] Challenge mode enabled, blocking'),
+                    new Error('[proxy] Challenge mode enabled, blocking'),
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
@@ -181,11 +181,11 @@ describe('middleware', () => {
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
-                const response = await middleware(request);
+                const response = await proxy(request);
 
                 expect(response.status).toBe(401);
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
-                    new Error('[middleware] Challenge mode enabled, blocking'),
+                    new Error('[proxy] Challenge mode enabled, blocking'),
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
@@ -199,11 +199,11 @@ describe('middleware', () => {
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
-                const response = await middleware(request);
+                const response = await proxy(request);
 
                 expect(response.status).toBe(200);
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
-                    '[middleware] Human verified',
+                    '[proxy] Human verified',
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
@@ -223,11 +223,11 @@ describe('middleware', () => {
             });
 
             const request = createRequest('/api/test', { 'x-is-human': 'true' });
-            const response = await middleware(request);
+            const response = await proxy(request);
 
             expect(response.status).toBe(200);
             expect(loggerWarnSpy).toHaveBeenCalledWith(
-                '[middleware] Bot detected',
+                '[proxy] Bot detected',
                 expect.objectContaining({ pathname: '/api/test' }),
             );
         });
@@ -245,11 +245,11 @@ describe('middleware', () => {
             });
 
             const request = createRequest('/api/test', { 'x-is-human': 'true' });
-            const response = await middleware(request);
+            const response = await proxy(request);
 
             expect(response.status).toBe(401);
             expect(loggerErrorSpy).toHaveBeenCalledWith(
-                new Error('[middleware] Challenge mode enabled, blocking'),
+                new Error('[proxy] Challenge mode enabled, blocking'),
                 expect.objectContaining({ pathname: '/api/test' }),
             );
         });

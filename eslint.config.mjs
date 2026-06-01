@@ -281,7 +281,7 @@ export default tseslint.config(
             'empty.ts', // Turbopack `resolveAlias` stub for Node built-ins (see next.config.mjs)
             'instrumentation.ts',
             'instrumentation-client.ts',
-            'middleware.ts',
+            'proxy.ts',
             'sentry.*.config.ts',
 
             // Storybook
