@@ -57,12 +57,11 @@ export function AccountsCard({ signature }: SignatureProps) {
         const accountInfo = accounts.get(key);
 
         const hasBadges =
-    index === 0 ||
-    account.signer ||
-    account.writable ||
-    message.instructions.some(ix => ix.programId.equals(pubkey)) ||
-    account.source === 'lookupTable';
-
+            index === 0 ||
+            account.signer ||
+            account.writable ||
+            message.instructions.some(ix => ix.programId.equals(pubkey)) ||
+            account.source === 'lookupTable';
 
         const badges = (
             <>
@@ -125,11 +124,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                 <div className="e-justify-self-end [grid-area:balance]">
                     <SolBalance lamports={post} />
                 </div>
-                {!isLg && 
-                    <div className='e-justify-self-end [grid-area:size]'>
-                        {dataCell}
-                    </div>
-                }
+                {!isLg && <div className="e-justify-self-end [grid-area:size]">{dataCell}</div>}
             </div>
         );
     });

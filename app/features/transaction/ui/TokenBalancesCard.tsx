@@ -77,7 +77,7 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
                     'e-hidden e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
                     'e-gap-5 e-text-xs e-uppercase e-text-muted',
                     'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid]',
-                    GRID_TEMPLATE
+                    GRID_TEMPLATE,
                 )}
             >
                 <div>#</div>
@@ -165,7 +165,7 @@ function TokenBalanceRow({
                     'e-hidden e-min-h-9 e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
                     'e-items-start e-gap-x-5 e-whitespace-nowrap e-text-sm',
                     "[grid-template-areas:'number_address_change_balance']",
-                    GRID_TEMPLATE
+                    GRID_TEMPLATE,
                 )}
             >
                 <div className="e-text-muted [grid-area:number]">{index + 1}</div>

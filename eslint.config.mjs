@@ -370,10 +370,13 @@ export default tseslint.config(
             // app/features cross-feature imports
             'app/features/idl/interactive-idl/model/__tests__/use-mainnet-confirmation.spec.ts',
             'app/features/idl/interactive-idl/model/use-mainnet-confirmation.ts',
+            'app/features/instruction-simulation/ui/SimulationCard.tsx',
             'app/features/receipt/receipt-page.tsx',
             'app/features/search/api/discover-with-utl.ts',
             'app/features/search/api/resolve-search-tokens.ts',
             'app/features/stake/ui/StakeAccountSection.tsx',
+            'app/features/transaction/ui/InstructionsSection.tsx',
+            'app/features/transaction/ui/SummaryCard.tsx',
 
             // app/features deep imports into entities (must go via barrel)
             'app/features/idl/formatted-idl/model/__tests__/search.test.ts',
@@ -712,6 +715,9 @@ export default tseslint.config(
             'app/features/token-verification-badge/ui/VerificationIcon.tsx',
             'app/features/transaction-history/lib/use-instruction-names.ts',
             'app/features/transaction-history/ui/TransactionHistoryCard.tsx',
+            'app/features/transaction/ui/AccountsCard.tsx',
+            'app/features/transaction/ui/ProgramLogSection.tsx',
+            'app/features/transaction/ui/TokenBalancesCard.tsx',
         ],
         rules: {
             'unicorn/no-null': 'off',

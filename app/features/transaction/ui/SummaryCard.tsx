@@ -7,6 +7,7 @@ import { Slot } from '@components/common/Slot';
 import { SolBalance } from '@components/common/SolBalance';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
 import { ViewReceiptButton } from '@features/receipt';
+import { AUTO_REFRESH_INTERVAL, AutoRefresh, AutoRefreshProps } from '@features/transaction';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import {
@@ -32,8 +33,6 @@ import { ZoomIn } from 'react-feather';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
-
-import { AUTO_REFRESH_INTERVAL, AutoRefresh, AutoRefreshProps } from './TransactionPage';
 
 type RowProps = React.HTMLAttributes<HTMLDivElement> & { divider?: boolean };
 export function Row({ children, className, divider, ...props }: RowProps) {
@@ -248,7 +247,9 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                             </span>
                         )}
                         {errorReason && (
-                            <span className={`badge bg-${statusClass}-soft e-whitespace-normal e-break-words e-text-left`}>
+                            <span
+                                className={`badge bg-${statusClass}-soft e-whitespace-normal e-break-words e-text-left`}
+                            >
                                 {errorLink ? <Link href={errorLink}>{errorReason}</Link> : errorReason}
                             </span>
                         )}

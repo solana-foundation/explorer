@@ -1,6 +1,6 @@
 'use client';
 
-import './transaction-page.css';
+import '@features/transaction/ui/transaction-page.css';
 
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
@@ -8,6 +8,7 @@ import { SignatureContext } from '@components/instruction/SignatureContext';
 import { CUProfilingSection } from '@features/cu-profiling';
 import { Receipt } from '@features/receipt';
 import { isReceiptEnabled } from '@features/receipt';
+import { AutoRefresh } from '@features/transaction';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails, useTransactionStatus } from '@providers/transactions';
@@ -20,13 +21,12 @@ import bs58 from 'bs58';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
 
+import { AccountsCard } from '@/app/features/transaction/ui/AccountsCard';
+import { InstructionsSection } from '@/app/features/transaction/ui/InstructionsSection';
+import { ProgramLogSection } from '@/app/features/transaction/ui/ProgramLogSection';
+import { SummaryCard } from '@/app/features/transaction/ui/SummaryCard';
+import { TokenBalancesCard } from '@/app/features/transaction/ui/TokenBalancesCard';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
-
-import { AccountsCard } from './AccountsCard';
-import { InstructionsSection } from './InstructionsSection';
-import { ProgramLogSection } from './ProgramLogSection';
-import { SummaryCard } from './SummaryCard';
-import { TokenBalancesCard } from './TokenBalancesCard';
 
 const TRANSACTION_TABS = [
     { path: 'summary', title: 'Summary' },
@@ -36,24 +36,13 @@ const TRANSACTION_TABS = [
     { path: 'logs', title: 'Logs' },
 ];
 
-export const AUTO_REFRESH_INTERVAL = 2000;
 const ZERO_CONFIRMATION_BAILOUT = 5;
-
-export enum AutoRefresh {
-    Active,
-    Inactive,
-    BailedOut,
-}
-
-export type AutoRefreshProps = {
-    autoRefresh: AutoRefresh;
-};
 
 type Props = Readonly<{
     params: SignatureProps;
 }>;
 
-export default function TransactionDetailsPageClient({ params: { signature: raw } }: Props) {
+export function TransactionDetailsPageClient({ params: { signature: raw } }: Props) {
     let signature: TransactionSignature | undefined;
     const searchParams = useSearchParams();
 

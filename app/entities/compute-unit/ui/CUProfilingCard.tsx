@@ -133,8 +133,8 @@ const getCUProfileChartOptions = (totalCU: number): ChartOptions<'bar'> => {
                     const left = Math.max(0, Math.min(window.innerWidth - tw, currentClientX - tw / 2));
                     const top = currentClientY - th - gap < 0 ? currentClientY + gap : currentClientY - th - gap;
 
-                    tooltipEl.style.left = left + 'px';
-                    tooltipEl.style.top = top + 'px';
+                    tooltipEl.style.left = `${left}px`;
+                    tooltipEl.style.top = `${top}px`;
                     tooltipEl.style.transform = '';
                 },
             },

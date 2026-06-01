@@ -2,7 +2,7 @@
 
 import { cn } from '@components/shared/utils';
 import { Button } from '@shared/ui/button';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useId, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
 type CollapsibleSectionProps = {
@@ -21,11 +21,14 @@ export function CollapsibleSection({
     className = 'e-card',
 }: CollapsibleSectionProps) {
     const [expanded, setExpanded] = useState(defaultExpanded);
+    const headingId = useId();
 
     return (
-        <section id={id} className="e-flex e-flex-col e-gap-3">
+        <section id={id} aria-labelledby={headingId} className="e-flex e-flex-col e-gap-3">
             <div className="e-flex e-items-center e-justify-between">
-                <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">{title}</h2>
+                <h2 id={headingId} className="e-m-0 e-text-lg e-font-normal e-text-white">
+                    {title}
+                </h2>
                 <Button
                     className="md:e-min-w-[86px]"
                     variant="outline"

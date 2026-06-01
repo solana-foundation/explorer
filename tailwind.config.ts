@@ -1,6 +1,6 @@
 import type { Config } from 'tailwindcss';
 
-const breakpoints = new Map([
+export const breakpoints = new Map([
     ['xxs', 320],
     ['xs', 375],
     ['sm', 576],

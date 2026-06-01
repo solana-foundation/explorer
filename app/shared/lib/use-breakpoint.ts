@@ -2,15 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-// Matches Tailwind breakpoints defined in tailwind.config.ts
-const BREAKPOINTS = {
-    lg: 992,
-    md: 768,
-    sm: 576,
-    xl: 1200,
-    xs: 375,
-    xxl: 1400,
-} as const;
+import { breakpoints } from '@/tailwind.config';
 
 function useMediaQuery(query: string): boolean {
     const [matches, setMatches] = useState(false);
@@ -26,14 +18,20 @@ function useMediaQuery(query: string): boolean {
     return matches;
 }
 
+function bp(name: string): number {
+    const value = breakpoints.get(name);
+    if (value === undefined) throw new Error(`Unknown breakpoint: ${name}`);
+    return value;
+}
+
 /** Returns true when viewport width >= the given breakpoint */
 export function useBreakpoint() {
-    const isXs = useMediaQuery(`(min-width: ${BREAKPOINTS.xs}px)`);
-    const isSm = useMediaQuery(`(min-width: ${BREAKPOINTS.sm}px)`);
-    const isMd = useMediaQuery(`(min-width: ${BREAKPOINTS.md}px)`);
-    const isLg = useMediaQuery(`(min-width: ${BREAKPOINTS.lg}px)`);
-    const isXl = useMediaQuery(`(min-width: ${BREAKPOINTS.xl}px)`);
-    const is2xl = useMediaQuery(`(min-width: ${BREAKPOINTS.xxl}px)`);
+    const isXs = useMediaQuery(`(min-width: ${bp('xs')}px)`);
+    const isSm = useMediaQuery(`(min-width: ${bp('sm')}px)`);
+    const isMd = useMediaQuery(`(min-width: ${bp('md')}px)`);
+    const isLg = useMediaQuery(`(min-width: ${bp('lg')}px)`);
+    const isXl = useMediaQuery(`(min-width: ${bp('xl')}px)`);
+    const is2xl = useMediaQuery(`(min-width: ${bp('xxl')}px)`);
 
     return { is2xl, isLg, isMd, isSm, isXl, isXs };
 }
