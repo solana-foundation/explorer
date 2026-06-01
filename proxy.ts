@@ -6,15 +6,15 @@ import { Logger } from '@/app/shared/lib/logger';
 
 const BOT_RESPONSE = { body: { error: 'Access denied: request identified as automated bot' }, status: 401 } as const;
 
-// TEMP: remove after one preview deploy confirms whether Next 16.2 proxy.ts runs on Node or Edge.
-let runtimeProbed = false;
+// Log runtime once per cold start so any future edge↔node drift is visible without per-request overhead.
+let runtimeLogged = false;
 
 export async function proxy(request: NextRequest) {
-    if (!runtimeProbed) {
-        runtimeProbed = true;
-        Logger.info('[proxy] runtime probe', {
-            hasEdgeRuntime: 'EdgeRuntime' in globalThis,
+    if (!runtimeLogged) {
+        runtimeLogged = true;
+        Logger.info('[proxy] cold start', {
             nodeVersion: typeof process !== 'undefined' && process.versions ? process.versions.node : undefined,
+            runtime: 'EdgeRuntime' in globalThis ? 'edge' : 'node',
         });
     }
 
