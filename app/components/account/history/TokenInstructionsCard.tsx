@@ -68,7 +68,7 @@ export function TokenInstructionsCard({ address }: { address: string }) {
                     detailsList.push(
                         <tr key={signature + index}>
                             <td>
-                                <Signature signature={signature} link truncateChars={48} />
+                                <Signature signature={signature} link />
                             </td>
 
                             {hasTimestamps && (
@@ -78,7 +78,7 @@ export function TokenInstructionsCard({ address }: { address: string }) {
                             <td>{instructionName}</td>
 
                             <td>
-                                <Address pubkey={programId} link truncate truncateChars={16} />
+                                <Address pubkey={programId} link />
                             </td>
 
                             <td>

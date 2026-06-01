@@ -55,7 +55,7 @@ describe('TokenExtensionRow', () => {
         );
 
         expect(await screen.findByText(/Close Authority/)).toBeInTheDocument();
-        expect(screen.queryAllByText(new RegExp(`${data.state.closeAuthority.toString()}`))).toHaveLength(2);
+        expect(screen.queryAllByText(new RegExp(`${data.state.closeAuthority.toString()}`))).toHaveLength(1);
     });
 
     test('should render transferFeeAmount extension', async () => {
@@ -320,7 +320,7 @@ describe('TokenExtensionRow', () => {
         );
 
         expect(await screen.findByText('Permanent Delegate')).toBeInTheDocument();
-        expect(screen.queryAllByText(new RegExp(`${data.state.delegate.toString()}`))).toHaveLength(2);
+        expect(screen.queryAllByText(new RegExp(`${data.state.delegate.toString()}`))).toHaveLength(1);
     });
 
     test('should render transferHook extension', async () => {

@@ -115,7 +115,7 @@ function TransactionRow({ signature, slot, blockTime, statusClass, statusText, h
     return (
         <tr>
             <td>
-                <Signature signature={signature} link truncateChars={40} />
+                <Signature signature={signature} link />
                 {instructionNames !== null && instructionNames.length > 0 ? (
                     <InstructionList instructions={instructionNames} />
                 ) : instructionNames === null ? (

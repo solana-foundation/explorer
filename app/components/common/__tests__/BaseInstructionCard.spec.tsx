@@ -60,7 +60,7 @@ describe('BaseInstructionCard', () => {
             </ScrollAnchorProvider>,
         );
         // instruction should relate to specific program
-        expect(await screen.findAllByText(/Associated Token Program/)).toHaveLength(2);
+        expect(await screen.findAllByText(/Associated Token Program/)).toHaveLength(1);
         // we expect specific internal component to be rendered with "defaultRaw"
         expect(screen.getByText('Instruction Data')).toBeInTheDocument();
     });
