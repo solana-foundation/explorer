@@ -26,13 +26,13 @@ export const Inactive: Story = {
 };
 
 export const WithinSentence: Story = {
+    args: {
+        children: 'fox',
+        isActive: true,
+    },
     render: args => (
         <p>
             The quick brown <BaseHighlightNode {...args}>fox</BaseHighlightNode> jumps over the lazy dog.
         </p>
     ),
-    args: {
-        children: 'fox',
-        isActive: true,
-    },
 };

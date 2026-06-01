@@ -5,6 +5,7 @@ import type { InstructionCallParams } from '../model/use-instruction-form';
 import { Accordion } from './Accordion';
 import { InteractInstruction } from './InteractInstruction';
 
+// FIXME: missing Storybook story — pure props, but renders InteractInstruction (useWallet) so inherits the wallet provider need.
 export function InteractInstructions({
     idl,
     expandedSections,

@@ -6,7 +6,7 @@ import { Cluster } from '@utils/cluster';
 import type { ActivatedFeature, UpcomingFeature } from '../../lib/partition-features';
 import { EmptyStateCard, FeatureGateTable } from '../FeatureGateTable';
 
-const KEY = address(PublicKey.default.toBase58());
+const uniqueKey = () => address(PublicKey.unique().toBase58());
 
 const baseFields = {
     comms_required: null,
@@ -25,19 +25,21 @@ const activated: ActivatedFeature[] = [
     {
         ...baseFields,
         clusterActivationEpoch: 850,
-        key: KEY,
+        key: uniqueKey(),
         otherActivations: [
             { cluster: Cluster.Devnet, epoch: 700 },
             { cluster: Cluster.Testnet, epoch: 680 },
         ],
-        simdEntries: [{ link: 'https://github.com/solana-foundation/solana-improvement-documents/pull/148', simd: '148' }],
+        simdEntries: [
+            { link: 'https://github.com/solana-foundation/solana-improvement-documents/pull/148', simd: '148' },
+        ],
         title: 'MoveStake and MoveLamports',
     },
     {
         ...baseFields,
         clusterActivationEpoch: 820,
         description: null,
-        key: KEY,
+        key: uniqueKey(),
         otherActivations: [],
         simdEntries: [],
         title: 'Feature without description or SIMDs',
@@ -48,12 +50,14 @@ const upcoming: UpcomingFeature[] = [
     {
         ...baseFields,
         description: 'Pending activation on mainnet — active on devnet and testnet.',
-        key: KEY,
+        key: address(PublicKey.default.toBase58()),
         otherActivations: [
             { cluster: Cluster.Devnet, epoch: 750 },
             { cluster: Cluster.Testnet, epoch: 720 },
         ],
-        simdEntries: [{ link: 'https://github.com/solana-foundation/solana-improvement-documents/pull/123', simd: '123' }],
+        simdEntries: [
+            { link: 'https://github.com/solana-foundation/solana-improvement-documents/pull/123', simd: '123' },
+        ],
         title: 'Upcoming Feature Gate',
     },
 ];
@@ -87,9 +91,7 @@ export const UpcomingRows: StoryObj<typeof FeatureGateTable<UpcomingFeature>> = 
         features: upcoming,
         secondColumn: {
             header: 'Activated elsewhere',
-            render: feature => (
-                <div>{feature.otherActivations.map(a => `${a.cluster}:${a.epoch}`).join(', ')}</div>
-            ),
+            render: feature => <div>{feature.otherActivations.map(a => `${a.cluster}:${a.epoch}`).join(', ')}</div>,
         },
     },
 };

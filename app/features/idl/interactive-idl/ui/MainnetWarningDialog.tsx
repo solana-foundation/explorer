@@ -17,6 +17,7 @@ type MainnetWarningDialogProps = {
     onCancel: () => void;
 };
 
+// FIXME: missing Storybook story — pure-prop dialog, easy to story (open/closed variants + fn callbacks).
 export function MainnetWarningDialog({ open, onOpenChange, onConfirm, onCancel }: MainnetWarningDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

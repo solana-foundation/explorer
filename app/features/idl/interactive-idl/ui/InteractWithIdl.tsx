@@ -24,6 +24,7 @@ export interface InteractWithIdlAnalyticsCallbacks {
     onWalletConnected?: (programId?: string, walletType?: string) => void;
 }
 
+// FIXME: missing Storybook story — uses useWallet + jotai atoms (originalIdlAtom, programIdAtom).
 export function InteractWithIdl({
     data: instructions,
     onSectionsExpanded,

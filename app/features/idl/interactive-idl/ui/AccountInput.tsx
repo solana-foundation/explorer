@@ -18,6 +18,7 @@ export interface AccountInputProps extends React.ComponentProps<'input'> {
     seeds: { name: string }[];
 }
 
+// FIXME: missing Storybook story — pure props (InstructionAccountData + autocomplete items), could be storied with fixtures.
 export const AccountInput = forwardRef<
     HTMLInputElement,
     Omit<AccountInputProps, 'onChange'> & {

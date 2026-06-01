@@ -32,8 +32,20 @@ export const TwoInstructions: Story = {
         cluster: Cluster.MainnetBeta,
         epoch: 800n,
         logs: [
-            { computeUnits: 45000, failed: false, invokedProgram: SYSTEM_PROGRAM.toBase58(), logs: [], truncated: false },
-            { computeUnits: 30000, failed: false, invokedProgram: TOKEN_PROGRAM.toBase58(), logs: [], truncated: false },
+            {
+                computeUnits: 45000,
+                failed: false,
+                invokedProgram: SYSTEM_PROGRAM.toBase58(),
+                logs: [],
+                truncated: false,
+            },
+            {
+                computeUnits: 30000,
+                failed: false,
+                invokedProgram: TOKEN_PROGRAM.toBase58(),
+                logs: [],
+                truncated: false,
+            },
         ],
         message,
         unitsConsumed: 75000,

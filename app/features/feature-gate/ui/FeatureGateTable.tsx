@@ -4,9 +4,9 @@ import Link from 'next/link';
 import React, { Fragment, type ReactNode, useState } from 'react';
 
 import { AddressLink } from '@/app/components/shared/address';
-import { Card, CardContent } from '@/app/shared/ui/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/app/components/shared/ui/table';
 import { cn } from '@/app/components/shared/utils';
+import { Card, CardContent } from '@/app/shared/ui/Card';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
 
 import type { ActivatedFeature, UpcomingFeature } from '../lib/partition-features';
