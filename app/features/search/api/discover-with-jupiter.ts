@@ -75,16 +75,36 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
     }
 }
 
+// In-memory cache for logo lookups — replaces Next.js fetch cache (unavailable when passing signal).
+const logoCache = new Map<string, { expiresAt: number; logo: string }>();
+const LOGO_CACHE_TTL_MS = 30_000;
+
 // Fetches logo URIs for tokens whose discovery response didn't include one.
 // Searches by symbol (not address) because Jupiter strips the logo field from address-based queries.
 export async function fetchJupiterImages(tokens: DiscoveredToken[], signal: AbortSignal): Promise<Map<string, string>> {
     const jupiterApiKey = getJupiterApiKey();
     if (!jupiterApiKey) return new Map();
 
-    const missing = tokens.filter(t => !t.logoUri);
-    if (missing.length === 0) return new Map();
-
+    const now = Date.now();
     const results = new Map<string, string>();
+    const missing: DiscoveredToken[] = [];
+
+    for (const t of tokens) {
+        if (t.logoUri) continue;
+        const cached = logoCache.get(t.address);
+        if (cached) {
+            if (cached.expiresAt > now) {
+                results.set(t.address, cached.logo);
+            } else {
+                logoCache.delete(t.address);
+                missing.push(t);
+            }
+        } else {
+            missing.push(t);
+        }
+    }
+
+    if (missing.length === 0) return results;
 
     await Promise.allSettled(
         missing.map(async token => {
@@ -108,6 +128,7 @@ export async function fetchJupiterImages(tokens: DiscoveredToken[], signal: Abor
                 const logo = match?.icon ?? match?.logoURI;
                 if (logo) {
                     results.set(token.address, logo);
+                    logoCache.set(token.address, { expiresAt: Date.now() + LOGO_CACHE_TTL_MS, logo });
                 } else if (!match) {
                     Logger.warn(`[jupiter-images] no match for ${token.symbol} in ${data.length} results`);
                 }
