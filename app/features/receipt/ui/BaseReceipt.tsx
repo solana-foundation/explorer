@@ -61,10 +61,16 @@ export function BaseReceipt({
     );
 }
 
-export function Header({ date }: { date?: FormattedExtendedReceipt['date'] }) {
+export function Header({
+    date,
+    title = 'Solana Receipt',
+}: {
+    date?: FormattedExtendedReceipt['date'];
+    title?: string;
+}) {
     return (
         <div className="e-flex e-items-center e-justify-between e-gap-x-4 e-border-b e-border-white/10 e-p-6 [border-bottom-style:solid]">
-            <h3 className="e-m-0 e-flex-shrink-0 e-font-medium e-text-white">Solana Receipt</h3>
+            <h3 className="e-m-0 e-flex-shrink-0 e-font-medium e-text-white">{title}</h3>
             {date && (
                 <Tooltip>
                     <TooltipTrigger asChild>
@@ -268,10 +274,10 @@ export function NoReceipt({
 
             <div className="e-w-full e-max-w-lg">
                 <div className="e-min-h-96 e-bg-outer-space-900">
-                    <Header date={date} />
+                    <Header date={date} title="No Receipt" />
                     <div className="e-p-6 e-text-sm e-text-gray-400">
                         <p className="e-m-0">
-                            {message ?? 'Receipts can only be generated for SOL or token transfer transactions.'}
+                            {message ?? 'Receipts are only available for simple SOL and token transfers.'}
                         </p>
                         <p className="e-m-0 e-mt-4">Forwarding to transaction view in {countdown}...</p>
                     </div>

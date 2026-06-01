@@ -14,7 +14,7 @@ import { createSolTransferReceipt } from './sol-transfer';
 import { createTokenTransferReceipt } from './token-transfer';
 import { hasTransfers, isSolReceipt, isTokenReceipt, type Receipt } from './types';
 
-export type ReceiptUnavailabilityReason = 'mixed-mint' | 'no-transfers';
+export type ReceiptUnavailabilityReason = 'inner-transfers' | 'mixed-mint' | 'no-transfers';
 
 export type ReceiptResult =
     | { kind: 'ok'; receipt: FormattedReceipt }
@@ -41,7 +41,8 @@ export async function extractReceiptData(tx: ParsedTransactionWithMeta, cluster:
         return { kind: 'ok', receipt: formatReceiptData(solReceipt, cluster) };
     }
 
-    return { kind: 'unavailable', reason: 'no-transfers' };
+    const hasInnerInstructions = (tx.meta?.innerInstructions?.length ?? 0) > 0;
+    return { kind: 'unavailable', reason: hasInnerInstructions ? 'inner-transfers' : 'no-transfers' };
 }
 
 export function formatReceiptData(receipt: Receipt, cluster: Cluster): FormattedReceipt {
