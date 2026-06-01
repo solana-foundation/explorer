@@ -53,9 +53,9 @@ export function FeatureGateTable<T extends FeatureRow>({
                 <TableHeader>
                     <TableRow>
                         <TableHead>Feature</TableHead>
-                        <TableHead className="md:e-whitespace-nowrap">{secondColumn.header}</TableHead>
-                        <TableHead className="e-hidden md:e-table-cell">SIMDs</TableHead>
-                        <TableHead className="e-hidden md:e-table-cell">Key</TableHead>
+                        <TableHead className="lg:e-whitespace-nowrap">{secondColumn.header}</TableHead>
+                        <TableHead className="e-hidden lg:e-table-cell">SIMDs</TableHead>
+                        <TableHead className="e-hidden lg:e-table-cell">Key</TableHead>
                         <TableHead className="e-w-10" aria-label="Toggle details" />
                     </TableRow>
                 </TableHeader>
@@ -123,10 +123,10 @@ function FeatureRowView<T extends FeatureRow>({
                     </Link>
                 </TableCell>
                 <TableCell>{secondColumn.render(feature)}</TableCell>
-                <TableCell className="e-hidden md:e-table-cell">
+                <TableCell className="e-hidden lg:e-table-cell">
                     <SimdLinks entries={feature.simdEntries} />
                 </TableCell>
-                <TableCell className="e-hidden md:e-table-cell">
+                <TableCell className="e-hidden lg:e-table-cell">
                     <AddressLink address={feature.key} />
                 </TableCell>
                 <TableCell className="e-text-right">
@@ -140,7 +140,7 @@ function FeatureRowView<T extends FeatureRow>({
                             id={detailId}
                             className="e-flex e-max-w-[48rem] e-flex-col e-gap-3 e-whitespace-normal e-text-dk-white [overflow-wrap:anywhere]"
                         >
-                            <div className="e-flex e-flex-col e-gap-2 md:e-hidden">
+                            <div className="e-flex e-flex-col e-gap-2 lg:e-hidden">
                                 <SimdLinks entries={feature.simdEntries} />
                                 <AddressLink address={feature.key} truncate={{ head: 6, tail: 6 }} />
                             </div>
