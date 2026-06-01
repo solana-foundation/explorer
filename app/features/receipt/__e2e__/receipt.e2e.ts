@@ -77,9 +77,7 @@ test.describe('when feature enabled', () => {
 
         const text = await page.textContent('body');
         const showsError =
-            text?.includes('Receipts can only be generated') ||
-            text?.includes('Fetch Failed') ||
-            text?.includes('Error');
+            text?.includes('Receipts are only available') || text?.includes('Fetch Failed') || text?.includes('Error');
 
         expect(showsError).toBe(true);
     });
