@@ -21,8 +21,9 @@ const PROGRAM_ID = PublicKey.default.toBase58();
 // Minimal Anchor 0.30 IDL with `metadata.spec` so the formatter routes via the 0.30 path
 // (the legacy fallback in convert-legacy-idl chokes on 0.30-shaped accounts/events).
 const anchorIdl: AnchorIdl = {
+    accounts: [{ discriminator: [216, 146, 107, 94, 104, 75, 182, 177], name: 'State' }],
     address: PROGRAM_ID,
-    metadata: { name: 'demo', spec: '0.1.0', version: '0.1.0' },
+    errors: [{ code: 6000, msg: 'The provided value is invalid.', name: 'InvalidValue' }],
     instructions: [
         {
             accounts: [
@@ -44,8 +45,7 @@ const anchorIdl: AnchorIdl = {
             name: 'update',
         },
     ],
-    accounts: [{ discriminator: [216, 146, 107, 94, 104, 75, 182, 177], name: 'State' }],
-    errors: [{ code: 6000, msg: 'The provided value is invalid.', name: 'InvalidValue' }],
+    metadata: { name: 'demo', spec: '0.1.0', version: '0.1.0' },
     types: [
         {
             name: 'State',
