@@ -32,7 +32,7 @@ export function UnknownAccountCard({ account }: { account: Account }) {
             )}
             <tr>
                 <td>Balance (SOL)</td>
-                <td className="text-lg-end">
+                <td className="text-lg-end" style={{ whiteSpace: 'normal' }}>
                     {account.lamports === 0 ? (
                         <AccountNofFound account={account} />
                     ) : (
@@ -159,8 +159,17 @@ function useClusterAccountSearch(address: string, currentCluster: Cluster, _enab
 }
 
 const LABELS = {
-    'not-found': 'Account does not exist',
+    'not-found':
+        'This address currently has no system account on-chain because it holds 0 lamports. It may still have associated token accounts, NFTs, or previous activity.',
 };
+
+// The table cell forces `white-space: nowrap`, so let the longer message wrap within the card.
+const MESSAGE_STYLE = {
+    display: 'inline-block',
+    maxWidth: 'min(22rem, 60vw)',
+    verticalAlign: 'middle',
+    whiteSpace: 'normal',
+} as const;
 
 function AccountNofFound({ account, labels = LABELS }: { account: Account; labels?: typeof LABELS }) {
     const { cluster } = useCluster();
@@ -171,7 +180,9 @@ function AccountNofFound({ account, labels = LABELS }: { account: Account; label
         return (
             <span>
                 <SearchingAddressIndicator searchingCluster={searchingCluster} />
-                <span className="align-middle">{labels['not-found']}</span>
+                <span className="align-middle" style={MESSAGE_STYLE}>
+                    {labels['not-found']}
+                </span>
             </span>
         );
     }
@@ -181,10 +192,12 @@ function AccountNofFound({ account, labels = LABELS }: { account: Account; label
     return isAddressFoundOnAnotherClsuter ? (
         <span>
             <AdjacentAddressLink address={address} foundCluster={foundCluster} />
-            <span className="align-middle">{labels['not-found']}</span>
+            <span className="align-middle" style={MESSAGE_STYLE}>
+                {labels['not-found']}
+            </span>
         </span>
     ) : (
-        <span>{labels['not-found']}</span>
+        <span style={MESSAGE_STYLE}>{labels['not-found']}</span>
     );
 }
 
