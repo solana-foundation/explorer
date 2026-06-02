@@ -56,7 +56,7 @@ function CopyButton({ text }: { text: string }) {
                 'e-rounded e-border-0 e-bg-transparent e-p-0 e-leading-none',
                 'e-text-dark-muted-foreground hover:e-text-dk-white',
                 state === 'copied' && 'e-text-dark-accent',
-                state === 'errored' && 'e-text-dk-warning-on-dark',
+                state === 'errored' && 'e-text-destructive',
             )}
             aria-label={state === 'copied' ? 'Copied' : 'Copy address'}
         >
