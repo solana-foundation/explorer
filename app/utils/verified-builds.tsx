@@ -10,6 +10,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { useCluster } from '../providers/cluster';
 import { ProgramDataAccountInfo } from '../validators/accounts/upgradeable-program';
 import { Cluster } from './cluster';
+import { normalizeRepoUrl } from './verified-builds-url';
 
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
@@ -277,7 +278,7 @@ function useEnrichedOsecInfo({
               : VerificationStatus.NotVerified,
         verify_command: '',
     };
-    enrichedOsecInfo.repo_url = pdaData.gitUrl;
+    enrichedOsecInfo.repo_url = normalizeRepoUrl(pdaData.gitUrl) ?? '';
     enrichedOsecInfo.repo_url += pdaData.commit.length ? `/tree/${pdaData.commit}` : '';
     if (pdaData) {
         // Create command from the args of the verified build PDA
