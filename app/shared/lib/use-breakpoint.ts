@@ -5,7 +5,9 @@ import { useEffect, useState } from 'react';
 import { breakpoints } from '@/tailwind.config';
 
 function useMediaQuery(query: string): boolean {
-    const [matches, setMatches] = useState(false);
+    const [matches, setMatches] = useState(() =>
+        typeof window !== 'undefined' ? window.matchMedia(query).matches : false,
+    );
 
     useEffect(() => {
         const mql = globalThis.matchMedia(query);

@@ -60,15 +60,19 @@ export type TokenBalancesCardInnerProps = {
 export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     const { cluster, url } = useCluster();
     const [tokenSymbols, setTokenSymbols] = useState<Map<string, string>>(new Map());
+    const mintKey = rows.map(r => r.mint).join(',');
 
-    useAsyncEffect(async isMounted => {
-        const mints = rows.map(r => new PublicKey(r.mint));
-        getTokenInfos(mints, cluster, url).then(tokens => {
-            if (isMounted()) {
-                setTokenSymbols(new Map(tokens?.map(t => [t.address, t.symbol])));
-            }
-        });
-    }, []);
+    useAsyncEffect(
+        async isMounted => {
+            const mints = rows.map(r => new PublicKey(r.mint));
+            getTokenInfos(mints, cluster, url).then(tokens => {
+                if (isMounted()) {
+                    setTokenSymbols(new Map(tokens?.map(t => [t.address, t.symbol])));
+                }
+            });
+        },
+        [mintKey],
+    );
 
     return (
         <CollapsibleSection id="tokens" title="Tokens">

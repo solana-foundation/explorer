@@ -1,4 +1,4 @@
-> Sizes are gzipped, approximate, and rounded to reduce build-output noise. Next.js 16 (Turbopack) no longer prints sizes to stdout; these are derived by gzipping the first-load chunks listed in `.next/diagnostics/route-bundle-stats.json`. `Size` is First Load JS minus the chunks shared by all routes. Routes with no client JS (e.g. API routes) show `—`.
+> Sizes are approximate and rounded to reduce build-output noise. Run `pnpm build` to see exact values.
 
 | Type | Route | Size | First Load JS |
 |------|-------|------|---------------|

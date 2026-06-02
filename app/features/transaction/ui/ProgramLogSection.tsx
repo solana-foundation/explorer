@@ -42,7 +42,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
     }
 
     return (
-        <section id="logs" className="e-flex e-flex-col e-gap-3">
+        <section className="e-flex e-flex-col e-gap-3">
             <div className="e-flex e-justify-between">
                 <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">Logs</h2>
                 <div className="e-flex e-shrink-0 e-gap-1">
