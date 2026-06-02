@@ -13,6 +13,8 @@ import {
 } from '@components/instruction/token-lending/types';
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
 import { isTokenProgramData } from '@providers/accounts';
+
+import { CardFooter } from '@/app/shared/ui/Card';
 import { useAccountHistories, useFetchAccountHistory } from '@providers/accounts/history';
 import { isTokenProgramId, TokenInfoWithPubkey, useAccountOwnedTokens } from '@providers/accounts/tokens';
 import { CacheEntry, FetchStatus } from '@providers/cache';
@@ -197,14 +199,14 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                             Click the button below to load token transaction history
                         </p>
                     </div>
-                    <div className="card-footer">
+                    <CardFooter ui="dashkit">
                         <button
                             className="btn btn-primary w-100"
                             onClick={() => setTokensToFetchCount(LOAD_MORE_COUNT)}
                         >
                             Load Token History
                         </button>
-                    </div>
+                    </CardFooter>
                 </div>
             );
         }
@@ -261,7 +263,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 </table>
             </div>
 
-            <div className="card-footer">
+            <CardFooter ui="dashkit">
                 {visibleTxCount < mintAndTxs.length ? (
                     <button
                         className="btn btn-primary w-100"
@@ -298,7 +300,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         )}
                     </button>
                 )}
-            </div>
+            </CardFooter>
         </div>
     );
 }

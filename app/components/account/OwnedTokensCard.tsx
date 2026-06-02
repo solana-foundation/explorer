@@ -13,6 +13,8 @@ import { FetchStatus } from '@providers/cache';
 import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
+
+import { CardFooter } from '@/app/shared/ui/Card';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -299,11 +301,11 @@ function TokensCardFooter({
     }
 
     return (
-        <div className="card-footer">
+        <CardFooter ui="dashkit">
             <button className="btn btn-primary w-100" onClick={loadMore}>
                 Load More ({visibleCount} of {totalCount})
             </button>
-        </div>
+        </CardFooter>
     );
 }
 

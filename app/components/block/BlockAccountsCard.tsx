@@ -5,6 +5,7 @@ import Link from 'next/link';
 import React from 'react';
 
 import { invariant } from '@/app/shared/lib/invariant';
+import { CardFooter } from '@/app/shared/ui/Card';
 
 type AccountStats = {
     reads: number;
@@ -95,14 +96,14 @@ export function BlockAccountsCard({ block, blockSlot }: { block: VersionedBlockR
             </div>
 
             {accountStats.length > numDisplayed && (
-                <div className="card-footer">
+                <CardFooter ui="dashkit">
                     <button
                         className="btn btn-primary w-100"
                         onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More
                     </button>
-                </div>
+                </CardFooter>
             )}
         </div>
     );

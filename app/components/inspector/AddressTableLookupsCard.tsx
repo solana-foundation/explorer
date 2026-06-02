@@ -45,7 +45,7 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
                     {lookupRows.length > 0 ? (
                         <tbody className="list">{lookupRows}</tbody>
                     ) : (
-                        <tbody className="card-footer">
+                        <tbody className="e-border-0 e-border-t e-border-solid e-border-dark-border e-px-dk-4 e-py-4">
                             <tr>
                                 <td colSpan={4}>
                                     <span className="text-muted text-center">No entries found</span>

@@ -2,6 +2,8 @@ import { Slot } from '@components/common/Slot';
 import { SlotHashEntry, SlotHashesInfo, SysvarAccount } from '@validators/accounts/sysvar';
 import React from 'react';
 
+import { CardFooter } from '@/app/shared/ui/Card';
+
 export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount }) {
     const slotHashes = sysvarAccount.info as SlotHashesInfo;
     return (
@@ -32,9 +34,9 @@ export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount
                 </table>
             </div>
 
-            <div className="card-footer">
+            <CardFooter ui="dashkit">
                 <div className="text-muted text-center">{slotHashes.length > 0 ? '' : 'No hashes found'}</div>
-            </div>
+            </CardFooter>
         </div>
     );
 }

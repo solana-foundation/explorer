@@ -6,6 +6,7 @@ import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
+import { CardFooter } from '@/app/shared/ui/Card';
 
 import type { InspectorData } from './InspectorPage';
 
@@ -270,10 +271,10 @@ export function RawInput({
                     </div>
                 </div>
             </div>
-            <div className="card-footer">
+            <CardFooter ui="dashkit">
                 <h3>Instructions</h3>
                 <TabInstructions />
-            </div>
+            </CardFooter>
         </div>
     );
 }

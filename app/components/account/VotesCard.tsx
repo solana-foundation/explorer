@@ -2,6 +2,8 @@ import { Slot } from '@components/common/Slot';
 import { Vote, VoteAccount } from '@validators/accounts/vote';
 import React from 'react';
 
+import { CardFooter } from '@/app/shared/ui/Card';
+
 export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
     return (
         <>
@@ -32,11 +34,11 @@ export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
                     </table>
                 </div>
 
-                <div className="card-footer">
+                <CardFooter ui="dashkit">
                     <div className="text-muted text-center">
                         {voteAccount.info.votes.length > 0 ? '' : 'No votes found'}
                     </div>
-                </div>
+                </CardFooter>
             </div>
         </>
     );

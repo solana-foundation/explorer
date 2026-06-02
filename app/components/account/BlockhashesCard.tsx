@@ -1,6 +1,8 @@
 import { RecentBlockhashesEntry, RecentBlockhashesInfo } from '@validators/accounts/sysvar';
 import React from 'react';
 
+import { CardFooter } from '@/app/shared/ui/Card';
+
 export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashesInfo }) {
     return (
         <>
@@ -32,9 +34,9 @@ export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashe
                     </table>
                 </div>
 
-                <div className="card-footer">
+                <CardFooter ui="dashkit">
                     <div className="text-muted text-center">{blockhashes.length > 0 ? '' : 'No blockhashes found'}</div>
-                </div>
+                </CardFooter>
             </div>
         </>
     );

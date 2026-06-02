@@ -11,6 +11,8 @@ import { PublicKey } from '@solana/web3.js';
 import { lamportsToSolString } from '@utils/index';
 import React from 'react';
 
+import { CardFooter } from '@/app/shared/ui/Card';
+
 const U64_MAX = BigInt('0xffffffffffffffff');
 
 export function RewardsCard({ address }: { address: string }) {
@@ -104,7 +106,7 @@ export function RewardsCard({ address }: { address: string }) {
                     </div>
                 )}
 
-                <div className="card-footer">
+                <CardFooter ui="dashkit">
                     {foundOldest ? (
                         <div className="text-muted text-center">Fetched full reward history</div>
                     ) : (
@@ -119,7 +121,7 @@ export function RewardsCard({ address }: { address: string }) {
                             )}
                         </button>
                     )}
-                </div>
+                </CardFooter>
             </div>
         </>
     );

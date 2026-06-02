@@ -99,7 +99,7 @@ const footerVariants = cva([], {
     defaultVariants: { ui: 'tw' },
     variants: {
         ui: {
-            dashkit: 'e-border-t e-border-solid e-border-dk-card-outline-dark e-px-dk-4 e-py-4',
+            dashkit: 'e-border-0 e-border-t e-border-solid e-border-dark-border e-rounded-b-[7px] e-px-dk-4 e-py-4',
             tw: 'e-flex e-items-center e-p-6 e-pt-0',
         },
     },

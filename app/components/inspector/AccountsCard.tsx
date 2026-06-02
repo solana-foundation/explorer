@@ -8,6 +8,7 @@ import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 
 import { toHex } from '@/app/shared/lib/bytes';
+import { CardFooter } from '@/app/shared/ui/Card';
 
 import { AddressFromLookupTableWithContext, AddressWithContext } from './AddressWithContext';
 
@@ -115,12 +116,12 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
         <CollapsibleCard title={`Account List (${numAccounts})`}>
             <TableCardBody>{accountRows}</TableCardBody>
             {!loading && totalAccountSize > 0 && (
-                <div className="card-footer">
+                <CardFooter ui="dashkit">
                     <div className="e-flex e-items-baseline e-justify-end">
                         <span className="text-muted e-me-2 e-text-[0.625rem] e-uppercase">Total Account Size:</span>
                         <span className="text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
                     </div>
-                </div>
+                </CardFooter>
             )}
         </CollapsibleCard>
     );

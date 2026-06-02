@@ -13,6 +13,8 @@ import {
     VOTE_PROGRAM_ID,
 } from '@solana/web3.js';
 import { parseProgramLogs } from '@utils/program-logs';
+
+import { CardFooter } from '@/app/shared/ui/Card';
 import { displayAddress } from '@utils/tx';
 import { pickClusterParams } from '@utils/url';
 import Link from 'next/link';
@@ -373,14 +375,14 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
             )}
 
             {filteredTransactions.length > numDisplayed && (
-                <div className="card-footer">
+                <CardFooter ui="dashkit">
                     <button
                         className="btn btn-primary w-100"
                         onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More
                     </button>
-                </div>
+                </CardFooter>
             )}
         </div>
     );

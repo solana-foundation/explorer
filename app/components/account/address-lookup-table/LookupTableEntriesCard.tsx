@@ -3,6 +3,8 @@ import { AddressLookupTableAccount, PublicKey } from '@solana/web3.js';
 import { AddressLookupTableAccountInfo } from '@validators/accounts/address-lookup-table';
 import React from 'react';
 
+import { CardFooter } from '@/app/shared/ui/Card';
+
 export function LookupTableEntriesCard(
     params:
         | {
@@ -49,9 +51,9 @@ export function LookupTableEntriesCard(
             </div>
 
             {lookupTableState.addresses.length === 0 && (
-                <div className="card-footer">
+                <CardFooter ui="dashkit">
                     <div className="text-muted text-center">No entries found</div>
-                </div>
+                </CardFooter>
             )}
         </div>
     );

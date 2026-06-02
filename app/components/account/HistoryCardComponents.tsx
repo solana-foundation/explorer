@@ -2,6 +2,8 @@ import { RefreshButton } from '@shared/ui/refresh-button';
 import { ConfirmedSignatureInfo, TransactionError } from '@solana/web3.js';
 import React from 'react';
 
+import { CardFooter } from '@/app/shared/ui/Card';
+
 export type TransactionRow = {
     slot: number;
     signature: string;
@@ -41,7 +43,7 @@ export function HistoryCardFooter({
     loadMore: () => void;
 }) {
     return (
-        <div className="card-footer">
+        <CardFooter ui="dashkit">
             {foundOldest ? (
                 <div className="text-muted text-center">Fetched full history</div>
             ) : (
@@ -56,7 +58,7 @@ export function HistoryCardFooter({
                     )}
                 </button>
             )}
-        </div>
+        </CardFooter>
     );
 }
 
