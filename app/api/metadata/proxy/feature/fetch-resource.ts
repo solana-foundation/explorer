@@ -28,17 +28,16 @@ type FetchResourceResult = Awaited<
 
 type HopResult = { kind: 'done'; value: FetchResourceResult } | { kind: 'redirect'; location: string };
 
-export async function fetchResource(
-    uri: string,
-    headers: Headers,
-    timeout: number,
-    size: number,
-): Promise<FetchResourceResult> {
+// Per-request fetch parameters that travel together through every hop. Bundled
+// into one object so helpers don't grow long positional argument lists.
+export type FetchRequest = { headers: Headers; timeout: number; size: number };
+
+export async function fetchResource(uri: string, request: FetchRequest): Promise<FetchResourceResult> {
     let currentUrl = new URL(uri);
     const visited = new Set<string>([currentUrl.href]);
 
     for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-        const outcome = await executeHop(currentUrl, headers, timeout, size);
+        const outcome = await executeHop(currentUrl, request);
         if (outcome.kind === 'done') return outcome.value;
 
         currentUrl = resolveRedirectUrl(outcome.location, currentUrl);
@@ -54,7 +53,7 @@ export async function fetchResource(
     throw statusError(502, 'Too many redirects');
 }
 
-async function executeHop(url: URL, headers: Headers, timeout: number, size: number): Promise<HopResult> {
+async function executeHop(url: URL, request: FetchRequest): Promise<HopResult> {
     if (!isHTTPProtocol(url)) {
         Logger.warn('[api:metadata-proxy] Non-HTTP protocol blocked', { url: url.href });
         throw statusError(403, 'Hostname uses non-HTTP protocol');
@@ -77,7 +76,7 @@ async function executeHop(url: URL, headers: Headers, timeout: number, size: num
     // we'd be tearing down sockets while the body stream is still being read.
     const dispatcher = new Agent({ connect: { lookup: validation.lookup } });
     try {
-        const response = await doFetch(url, headers, timeout, dispatcher);
+        const response = await doFetch(url, request, dispatcher);
 
         if (isRedirect(response)) {
             return extractRedirect(response, url);
@@ -88,7 +87,7 @@ async function executeHop(url: URL, headers: Headers, timeout: number, size: num
             throw statusError(502, `Upstream returned ${response.status}`);
         }
 
-        return { kind: 'done', value: await processResponse(response, size, url) };
+        return { kind: 'done', value: await processResponse(response, request, url) };
     } finally {
         // By this point the body has either been fully consumed (success
         // path), cancelled (size pre-check), or abandoned (errors in
@@ -126,12 +125,12 @@ function extractRedirect(response: Response, url: URL): HopResult & { kind: 'red
     return { kind: 'redirect', location };
 }
 
-async function doFetch(url: URL, headers: Headers, timeout: number, dispatcher: Agent): Promise<Response> {
+async function doFetch(url: URL, request: FetchRequest, dispatcher: Agent): Promise<Response> {
     try {
         return await fetch(url.href, {
-            headers,
+            headers: request.headers,
             redirect: 'manual',
-            signal: AbortSignal.timeout(timeout),
+            signal: AbortSignal.timeout(request.timeout),
             // `dispatcher` is an undici-specific extension to RequestInit, not
             // in the Web Fetch spec; spreading defeats the excess-property
             // check while still passing it through to Node's native fetch
@@ -140,11 +139,12 @@ async function doFetch(url: URL, headers: Headers, timeout: number, dispatcher: 
             ...{ dispatcher },
         });
     } catch (e) {
-        throw handleFetchError(e, url);
+        throw handleFetchError(e, url, request.size);
     }
 }
 
-async function processResponse(response: Response, size: number, url: URL): Promise<FetchResourceResult> {
+async function processResponse(response: Response, request: FetchRequest, url: URL): Promise<FetchResourceResult> {
+    const { size } = request;
     // Pre-check Content-Length when present so oversize bodies fail fast.
     // A malformed header (e.g. "abc") parses to NaN; ignore it and fall through
     // to readBodyWithLimit, which enforces the limit on the actual byte count.
@@ -187,7 +187,7 @@ async function processResponse(response: Response, size: number, url: URL): Prom
     throw statusError(415, `Unsupported content-type: ${contentType ?? '(none)'}`);
 }
 
-function handleFetchError(e: unknown, url: URL): StatusError {
+function handleFetchError(e: unknown, url: URL, size: number): StatusError {
     const error = e instanceof Error ? e : new Error('Cannot fetch resource');
     if (!(e instanceof Error)) {
         Logger.debug('[api:metadata-proxy] Failed to fetch resource', { error: e });
@@ -195,7 +195,16 @@ function handleFetchError(e: unknown, url: URL): StatusError {
 
     if (error instanceof StatusError) return error;
     if (matchTimeoutError(error)) return statusError(504, 'Upstream fetch timed out', { cause: error });
-    if (matchMaxSizeError(error)) return statusError(413, 'Streamed body exceeds max size', { cause: error });
+    if (matchMaxSizeError(error)) {
+        // fetch() itself rejected with a size error (limit hit before a Response
+        // was returned). Reported as a warning for the same reason as the other
+        // 413 paths in processResponse.
+        Logger.warn('[api:metadata-proxy] Resource exceeds max size (streamed)', {
+            sentry: true,
+            sentryExtras: { host: url.host, maxSize: size },
+        });
+        return statusError(413, 'Streamed body exceeds max size', { cause: error });
+    }
     if (matchAbortError(error)) return statusError(504, 'Upstream fetch aborted', { cause: error });
 
     // Reported to Sentry so we can gauge whether network failures are common.

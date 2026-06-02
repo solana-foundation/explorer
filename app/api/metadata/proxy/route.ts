@@ -50,12 +50,11 @@ export async function GET(request: Request) {
     // inside fetchResource via the pinned-lookup mechanism — once per hop.
     // The kernel never sees a hostname that wasn't pre-validated.
     try {
-        const { data, headers } = await fetchResource(
-            parsedUri.href,
-            new Headers({ 'Content-Type': 'application/json; charset=utf-8', 'User-Agent': USER_AGENT }),
-            TIMEOUT,
-            MAX_SIZE,
-        );
+        const { data, headers } = await fetchResource(parsedUri.href, {
+            headers: new Headers({ 'Content-Type': 'application/json; charset=utf-8', 'User-Agent': USER_AGENT }),
+            size: MAX_SIZE,
+            timeout: TIMEOUT,
+        });
         return buildResponse(data, headers);
     } catch (e) {
         if (e instanceof StatusError && isKnownStatus(e.status)) {

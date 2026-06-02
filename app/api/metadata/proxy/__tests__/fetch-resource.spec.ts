@@ -60,7 +60,7 @@ describe('fetchResource', () => {
     it('should be called with proper arguments', async () => {
         mockJsonResponseOnce({}, 'application/json, charset=utf-8');
 
-        const resource = await fetchResource(uri, headers, 100, 100);
+        const resource = await fetchResource(uri, { headers, size: 100, timeout: 100 });
 
         expect(fetchMock).toHaveBeenCalledWith(uri, expect.objectContaining({ redirect: 'manual' }));
         expect(resource.data).toEqual({});
@@ -71,7 +71,7 @@ describe('fetchResource', () => {
         mockResponseOnce(null);
 
         await expect(() => {
-            return fetchResource(uri, headers, 100, 100);
+            return fetchResource(uri, { headers, size: 100, timeout: 100 });
         }).rejects.toMatchObject({ status: 415 });
     });
 
@@ -79,8 +79,12 @@ describe('fetchResource', () => {
         mockRejectOnce(new Error('FetchError: content size at https://path/to/resour.ce over limit: 100'));
 
         await expect(() => {
-            return fetchResource(uri, headers, 100, 100);
+            return fetchResource(uri, { headers, size: 100, timeout: 100 });
         }).rejects.toMatchObject({ status: 413 });
+        expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Resource exceeds max size (streamed)', {
+            sentry: true,
+            sentryExtras: { host: 'hello.world', maxSize: 100 },
+        });
     });
 
     it('should throw exception when content-length exceeds limit', async () => {
@@ -91,7 +95,7 @@ describe('fetchResource', () => {
         });
 
         await expect(() => {
-            return fetchResource(uri, headers, 100, 100);
+            return fetchResource(uri, { headers, size: 100, timeout: 100 });
         }).rejects.toMatchObject({ status: 413 });
         expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Resource exceeds max size (Content-Length)', {
             sentry: true,
@@ -114,7 +118,7 @@ describe('fetchResource', () => {
         );
 
         await expect(() => {
-            return fetchResource(uri, headers, 100, 100);
+            return fetchResource(uri, { headers, size: 100, timeout: 100 });
         }).rejects.toMatchObject({ status: 413 });
         expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Resource exceeds max size (streamed)', {
             sentry: true,
@@ -132,7 +136,7 @@ describe('fetchResource', () => {
         mockRejectOnce(new TimeoutError());
 
         await expect(() => {
-            return fetchResource(uri, headers, 100, 100);
+            return fetchResource(uri, { headers, size: 100, timeout: 100 });
         }).rejects.toMatchObject({ status: 504 });
     });
 
@@ -140,14 +144,14 @@ describe('fetchResource', () => {
         mockRejectOnce(new Error('file is over limit: 100'));
 
         await expect(() => {
-            return fetchResource(uri, headers, 100, 100);
+            return fetchResource(uri, { headers, size: 100, timeout: 100 });
         }).rejects.toMatchObject({ status: 413 });
     });
 
     it('should handle unexpected result', async () => {
         fetchMock.mockRejectedValueOnce({ data: 'unexpected exception' });
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 500 });
+        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toMatchObject({ status: 500 });
     });
 
     it('should handle malformed JSON response gracefully', async () => {
@@ -155,13 +159,15 @@ describe('fetchResource', () => {
             headers: { 'Content-Type': 'application/json' },
         });
 
-        await expect(fetchResource(uri, headers, 1000, 1000)).rejects.toMatchObject({ status: 415 });
+        await expect(fetchResource(uri, { headers, size: 1000, timeout: 1000 })).rejects.toMatchObject({
+            status: 415,
+        });
     });
 
     it('should warn to Sentry when fetch fails with a general error', async () => {
         mockRejectOnce(new Error('connection refused'));
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toThrow();
+        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toThrow();
 
         expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Fetch failed', {
             sentry: true,
@@ -172,7 +178,7 @@ describe('fetchResource', () => {
     it('should throw 502 when upstream returns a non-2xx status', async () => {
         mockResponseOnce(null, { headers: { 'Content-Type': 'text/html' }, status: 403 });
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 502 });
+        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toMatchObject({ status: 502 });
 
         expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Upstream returned error', {
             status: 403,
@@ -185,7 +191,7 @@ describe('fetchResource', () => {
         vi.mocked(lookupHostnameSafely).mockResolvedValueOnce(publicLookup());
         mockJsonResponseOnce({ redirected: true });
 
-        const result = await fetchResource(uri, headers, 100, 1000);
+        const result = await fetchResource(uri, { headers, size: 1000, timeout: 100 });
 
         expect(result.data).toEqual({ redirected: true });
         expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -198,13 +204,13 @@ describe('fetchResource', () => {
             reason: 'private address 169.254.169.254',
         });
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 403 });
+        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toMatchObject({ status: 403 });
     });
 
     it('should throw 502 when redirect has no Location header', async () => {
         mockResponseOnce(null, { status: 302 });
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 502 });
+        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toMatchObject({ status: 502 });
     });
 
     // 304/305 are 3xx but don't carry a Location header by spec; they must be
@@ -212,7 +218,7 @@ describe('fetchResource', () => {
     it.each([304, 305])('should classify %i as an upstream error, not a redirect', async status => {
         mockResponseOnce(null, { status });
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 502 });
+        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toMatchObject({ status: 502 });
 
         expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Upstream returned error', {
             status,
@@ -227,7 +233,7 @@ describe('fetchResource', () => {
             vi.mocked(lookupHostnameSafely).mockResolvedValueOnce(publicLookup());
         }
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 502 });
+        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toMatchObject({ status: 502 });
     });
 
     it('should throw 502 when a redirect loop is detected', async () => {
@@ -236,7 +242,7 @@ describe('fetchResource', () => {
         mockRedirectOnce(uri);
         vi.mocked(lookupHostnameSafely).mockResolvedValueOnce(publicLookup());
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 502 });
+        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toMatchObject({ status: 502 });
 
         // Should bail after 2 fetches, not exhaust MAX_REDIRECTS
         expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -245,7 +251,7 @@ describe('fetchResource', () => {
     it('should block redirect to non-HTTP protocol', async () => {
         mockRedirectOnce('file:///etc/passwd');
 
-        await expect(fetchResource(uri, headers, 100, 100)).rejects.toMatchObject({ status: 403 });
+        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toMatchObject({ status: 403 });
     });
 
     // DNS-rebinding (TOCTOU) regression. The legacy code resolved DNS once for
@@ -259,7 +265,7 @@ describe('fetchResource', () => {
     it('should resolve the hostname exactly once per hop (no second DNS lookup before connect)', async () => {
         mockJsonResponseOnce({ ok: true });
 
-        await fetchResource(uri, headers, 100, 100);
+        await fetchResource(uri, { headers, size: 100, timeout: 100 });
 
         // One hop, one resolution. If a second resolution snuck in we'd see 2.
         expect(lookupHostnameSafely).toHaveBeenCalledTimes(1);
@@ -271,7 +277,7 @@ describe('fetchResource', () => {
         mockRedirectOnce('http://cdn.hello.world/data.json');
         mockJsonResponseOnce({ ok: true });
 
-        await fetchResource(uri, headers, 100, 1000);
+        await fetchResource(uri, { headers, size: 1000, timeout: 100 });
 
         expect(lookupHostnameSafely).toHaveBeenCalledTimes(2);
         expect(lookupHostnameSafely).toHaveBeenNthCalledWith(1, 'hello.world');
