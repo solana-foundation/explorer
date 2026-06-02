@@ -177,7 +177,7 @@ function ActiveBadge({ feature, cluster }: { feature: FeatureInfoType; cluster: 
 function FeatureExpandRow({ feature, detailId }: { feature: FeatureInfoType; detailId: string }) {
     return (
         <TableRow id={detailId} className="e-bg-dk-gray-900-dark/40 md:e-hidden">
-            <TableCell colSpan={2} className="e-pt-2">
+            <TableCell colSpan={5} className="e-pt-2">
                 <div className="e-flex e-flex-col e-gap-3">
                     <ExpandDetail label="Activation Epochs">
                         <EpochLinks feature={feature} />

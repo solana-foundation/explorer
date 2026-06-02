@@ -175,7 +175,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
 
     return (
         <div className="e-flex e-grow e-flex-col">
-            <TableCardBody>
+            <TableCardBody layout="expanded" className="[&_td:first-child]:!e-w-2/5 md:[&_td:first-child]:!e-w-auto">
                 <tr>
                     <td className="e-w-full">Transaction count</td>
                     <td className="font-monospace e-text-right">{transactionCount} </td>
