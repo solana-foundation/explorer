@@ -111,7 +111,10 @@ export function Address({
         <span ref={visibilityRef} className="e-block e-w-full">
             <div
                 ref={rowRef}
-                className={cn('e-relative e-flex e-w-full e-min-w-0 e-items-center', alignRight && 'e-justify-end')}
+                className={cn(
+                    'e-relative e-flex e-w-full e-min-w-0 e-items-baseline',
+                    alignRight && 'md:e-justify-end',
+                )}
                 aria-label={ariaLabel}
             >
                 {/* Hidden span for measuring the natural text width — absolutely positioned so it doesn't affect layout */}
@@ -157,7 +160,7 @@ export function Address({
                 </Copyable>
                 <button
                     ref={editBtnRef}
-                    className="e-ms-2 e-flex-none e-shrink-0 e-cursor-pointer e-border-0 e-bg-transparent e-p-0 e-text-muted"
+                    className="e-ms-1.5 e-flex-none e-shrink-0 e-cursor-pointer e-border-0 e-bg-transparent e-p-0 e-text-muted"
                     onClick={() => setShowNicknameEditor(true)}
                     title="Edit nickname"
                     style={{ fontSize: '0.875rem', lineHeight: 1 }}

@@ -21,7 +21,7 @@ import { CollapsibleSection } from './CollapsibleSection';
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { url } = useCluster();
-    const { isSm, isLg } = useBreakpoint();
+    const { isLg } = useBreakpoint();
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const message = transactionWithMeta?.transaction.message;
@@ -82,7 +82,7 @@ export function AccountsCard({ signature }: SignatureProps) {
         ) : accountInfo && accountInfo.size > 0 ? (
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button variant="ghost" className="e-h-auto !e-p-1 e-text-xs">
+                    <Button variant="ghost" className="e-h-auto !e-px-1 !e-py-0 e-text-xs">
                         <Code size={11} />
                         <span>{accountInfo.size.toLocaleString('en-US')}</span>
                     </Button>
@@ -99,7 +99,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                 className={cn(
                     'e-min-h-9 e-px-3 e-py-1.5 md:e-px-4',
                     'e-grid e-items-start e-gap-x-0 e-gap-y-0.5 e-whitespace-nowrap e-text-sm md:e-gap-y-0 lg:e-gap-x-5',
-                    'e-grid-cols-[minmax(auto,1.75rem)_minmax(100px,auto)_1fr] lg:e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,200px)_minmax(auto,200px)]',
+                    'e-grid-cols-[minmax(auto,1.75rem)_minmax(100px,auto)_1fr] sm:e-grid-cols-[minmax(auto,1.75rem)_1fr_auto] lg:e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)]',
                     "[grid-template-areas:'number_address_delta'_'number_address_balance'_'number_address_size'] lg:[grid-template-areas:'number_address_delta_balance']",
                     'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid] last:e-border-b-0',
                 )}
@@ -107,16 +107,14 @@ export function AccountsCard({ signature }: SignatureProps) {
                 <div className="e-mr-2 e-text-muted [grid-area:number] lg:e-mr-0">{index + 1}</div>
                 <div className="[grid-area:address]">
                     <div className="e-flex e-items-center e-justify-between e-gap-1 lg:e-justify-normal">
-                        <Address
-                            pubkey={pubkey}
-                            truncateChars={isSm ? undefined : 6}
-                            link
-                            fetchTokenLabelInfo
-                            truncate
-                        />
-                        {isLg && dataCell}
+                        <Address pubkey={pubkey} link fetchTokenLabelInfo />
                     </div>
-                    {hasBadges && <span className="e-mt-1 e-inline-flex e-flex-wrap e-gap-1">{badges}</span>}
+                    {hasBadges && (
+                        <span className="e-mt-1 e-inline-flex e-flex-wrap e-gap-1">
+                            {badges}
+                            {isLg && dataCell}
+                        </span>
+                    )}
                 </div>
                 <div className="e-justify-self-end [grid-area:delta]">
                     <BalanceDelta delta={delta} isSol />
@@ -134,7 +132,7 @@ export function AccountsCard({ signature }: SignatureProps) {
             <div
                 className={cn(
                     'e-hidden e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
-                    'e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,200px)_minmax(auto,200px)] e-gap-5 e-text-xs e-uppercase e-text-muted',
+                    'e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)] e-gap-5 e-text-xs e-uppercase e-text-muted',
                     'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid]',
                 )}
             >

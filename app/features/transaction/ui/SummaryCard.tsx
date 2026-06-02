@@ -187,7 +187,6 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
     if (info.result.err) {
         statusClass = 'warning';
         statusText = 'Error';
-        statusFinality = '';
 
         const err = getTransactionErrorReason(info, transaction);
         errorReason = err.errorReason;
@@ -241,11 +240,6 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                     <Label>Status</Label>
                     <Value className="e-flex e-flex-wrap e-items-center e-gap-x-3 e-gap-y-2">
                         <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
-                        {statusFinality && (
-                            <span className="e-font-mono e-text-sm e-tracking-[-0.28px] e-text-[#f9fafb]">
-                                {statusFinality}
-                            </span>
-                        )}
                         {errorReason && (
                             <span
                                 className={`badge bg-${statusClass}-soft e-whitespace-normal e-break-words e-text-left`}
@@ -256,11 +250,17 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                     </Value>
                 </Row>
 
+                {/* Confirmation */}
+                <Row divider>
+                    <Label>Confirmation</Label>
+                    <Value>{statusFinality}</Value>
+                </Row>
+
                 {/* Signature */}
                 <Row divider>
                     <Label>Signature</Label>
                     <Value>
-                        <Signature signature={signature} className="!e-items-start" />
+                        <Signature signature={signature} className="!e-items-start" noTruncate />
                     </Value>
                 </Row>
 
@@ -269,7 +269,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                     <Row divider>
                         <Label>Fee payer</Label>
                         <Value>
-                            <Address pubkey={feePayer} link />
+                            <Address pubkey={feePayer} link noTruncate />
                         </Value>
                     </Row>
                 )}
