@@ -117,6 +117,11 @@ const config: Config = {
             },
             colors: {
                 dk: dkColors,
+                legacy: {
+                    'black-dark': '#141816',
+                    'gray-700': '#698582',
+                    'primary-on-dark': '#1dd79b',
+                },
                 // TODO: replace with e-text-neutral-400
                 muted: 'oklch(0.6406 0.0038 174.41)', // #8a8d8c
                 'heavy-metal': {

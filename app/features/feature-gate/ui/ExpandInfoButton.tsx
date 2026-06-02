@@ -22,8 +22,8 @@ export function ExpandInfoButton({
             className={cn(
                 'e-inline-flex e-h-6 e-w-6 e-items-center e-justify-center',
                 'e-rounded-full e-border-0 e-bg-transparent e-p-0 e-leading-none',
-                'e-text-dk-gray-700 hover:e-bg-dk-black-dark hover:e-text-dk-white',
-                isExpanded && 'e-bg-dk-black-dark e-text-dk-primary-on-dark',
+                'e-text-legacy-gray-700 hover:e-bg-legacy-black-dark hover:e-text-white',
+                isExpanded && 'e-bg-legacy-black-dark e-text-legacy-primary-on-dark',
             )}
         >
             <Info size={14} />
