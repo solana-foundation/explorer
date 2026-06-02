@@ -8,11 +8,10 @@ import React, { Fragment, type ReactNode, useState } from 'react';
 
 import { AddressLink } from '@/app/components/shared/address';
 import { Badge } from '@/app/components/shared/ui/badge';
-import { Card } from '@/app/shared/ui/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/app/components/shared/ui/table';
 import { cn } from '@/app/components/shared/utils';
 import { useCluster } from '@/app/providers/cluster';
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { Card } from '@/app/shared/ui/Card';
 
 import { isFeatureActivated } from '../lib/is-feature-activated';
 import { ExpandInfoButton } from './ExpandInfoButton';
