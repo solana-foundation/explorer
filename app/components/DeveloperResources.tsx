@@ -1,6 +1,44 @@
 'use client';
 
-export function DeveloperResources() {
+import { useState } from 'react';
+
+type Resource = {
+    title: string;
+    description: string;
+    image: string;
+    link: string;
+    imageBackground?: string;
+};
+
+const DEFAULT_RESOURCES: Resource[] = [
+    {
+        description: 'Get started in 5 minutes or less!',
+        image: 'https://solana.com/opengraph/developers/docs/intro/installation',
+        link: 'https://solana.com/docs/intro/installation',
+        title: 'Setup Your Solana Environment',
+    },
+    {
+        description: 'Hands-on guide to the core concepts for building on Solana',
+        image: 'https://solana.com/_next/image?url=%2Fassets%2Fdocs%2Fintro%2Fquickstart%2Fpg-not-connected.png&w=1920&q=75',
+        link: 'https://solana.com/docs/intro/quick-start',
+        title: 'Quick Start Guide',
+    },
+    {
+        description: '11 hours of video lessons on Solana Development',
+        image: 'https://i.ytimg.com/vi/amAq-WHAFs8/maxresdefault.jpg',
+        link: 'https://www.youtube.com/watch?v=amAq-WHAFs8',
+        title: 'Solana Developer Bootcamp',
+    },
+    {
+        description: 'A course designed for EVM developers to learn Solana',
+        image: 'https://www.rareskills.io/wp-content/uploads/2024/08/og-image-rareskills.png',
+        imageBackground: 'white',
+        link: 'https://www.rareskills.io/solana-tutorial',
+        title: '60 Days of Solana',
+    },
+];
+
+export function DeveloperResources({ resources = DEFAULT_RESOURCES }: { resources?: Resource[] }) {
     return (
         <div className="card">
             <div className="card-body">
@@ -14,65 +52,40 @@ export function DeveloperResources() {
                     </div>
                 </div>
                 <div className="d-flex gap-4 pb-3 overflow-auto">
-                    <ResourceCard
-                        title="Setup Your Solana Environment"
-                        description="Get started in 5 minutes or less!"
-                        image="https://solana.com/opengraph/developers/docs/intro/installation"
-                        link="https://solana.com/docs/intro/installation"
-                    />
-                    <ResourceCard
-                        title="Quick Start Guide"
-                        description="Hands-on guide to the core concepts for building on Solana"
-                        image="https://solana.com/_next/image?url=%2Fassets%2Fdocs%2Fintro%2Fquickstart%2Fpg-not-connected.png&w=1920&q=75"
-                        link="https://solana.com/docs/intro/quick-start"
-                    />
-                    <ResourceCard
-                        title="Solana Developer Bootcamp"
-                        description="11 hours of video lessons on Solana Development"
-                        image="https://i.ytimg.com/vi/amAq-WHAFs8/maxresdefault.jpg"
-                        link="https://www.youtube.com/watch?v=amAq-WHAFs8"
-                    />
-                    <ResourceCard
-                        title="60 Days of Solana"
-                        description="A course designed for EVM developers to learn Solana"
-                        image="https://www.rareskills.io/wp-content/uploads/2024/08/og-image-rareskills.png"
-                        imageBackground="white"
-                        link="https://www.rareskills.io/solana-tutorial"
-                    />
+                    {resources.map(resource => (
+                        <ResourceCard key={resource.link} {...resource} />
+                    ))}
                 </div>
             </div>
         </div>
     );
 }
 
-function ResourceCard({
-    title,
-    description,
-    image,
-    link,
-    imageBackground,
-}: {
-    title: string;
-    description: string;
-    image: string;
-    imageBackground?: string;
-    link: string;
-}) {
+function ResourceCard({ title, description, image, link, imageBackground }: Resource) {
+    const [loaded, setLoaded] = useState(false);
+
     return (
         <div className="flex flex-col" style={{ height: '200px', width: '250px' }}>
             <div className="w-full mb-3">
                 <a href={link} target="_blank" rel="noopener noreferrer" className="hover:cursor-pointer">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src={image}
-                        alt={`${title} preview`}
-                        style={{
-                            backgroundColor: imageBackground,
-                            height: '120px',
-                            objectFit: 'cover',
-                            width: '250px',
-                        }}
-                    />
+                    <div className="e-bg-heavy-metal-700" style={{ height: '120px', width: '250px' }}>
+                        {image && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                                src={image}
+                                alt={`${title} preview`}
+                                onLoad={() => setLoaded(true)}
+                                onError={() => setLoaded(false)}
+                                style={{
+                                    backgroundColor: imageBackground,
+                                    display: loaded ? 'block' : 'none',
+                                    height: '120px',
+                                    objectFit: 'cover',
+                                    width: '250px',
+                                }}
+                            />
+                        )}
+                    </div>
                 </a>
             </div>
             <div className="flex flex-col">

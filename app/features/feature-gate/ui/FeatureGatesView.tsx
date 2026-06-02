@@ -135,11 +135,11 @@ function ActivationCell({
         <>
             <Link
                 href={`/epoch/${epoch}?cluster=${clusterSlug(cluster)}`}
-                className="e-text-dk-primary-dark hover:e-text-dk-primary-on-dark"
+                className="e-text-dk-primary-dark hover:e-text-dark-accent"
             >
                 {epoch}
             </Link>
-            {countdown && <div className="e-mt-0.5 e-text-dk-xs e-text-dk-gray-700">in ~{countdown}</div>}
+            {countdown && <div className="e-mt-0.5 e-text-dk-xs e-text-dark-muted-foreground">in ~{countdown}</div>}
         </>
     );
 }
@@ -151,7 +151,7 @@ function OtherActivationsCell({ activations }: { activations: ClusterActivation[
                 <Link
                     key={cluster}
                     href={`/epoch/${epoch}?cluster=${clusterSlug(cluster)}`}
-                    className="e-text-dk-primary-dark hover:e-text-dk-primary-on-dark"
+                    className="e-text-dk-primary-dark hover:e-text-dark-accent"
                 >
                     {clusterName(cluster)}: {epoch}
                 </Link>

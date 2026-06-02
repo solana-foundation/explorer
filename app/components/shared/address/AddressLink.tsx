@@ -28,7 +28,7 @@ export function AddressLink({ address, truncate, className, 'aria-label': ariaLa
             <CopyButton text={address} />
             <Link
                 href={href}
-                className="e-text-dk-primary-dark hover:e-text-dk-primary-on-dark"
+                className="e-text-dk-primary-dark hover:e-text-dark-accent"
                 aria-label={ariaLabel ?? `Open address ${address}`}
                 title={truncate ? address : undefined}
             >
@@ -54,8 +54,8 @@ function CopyButton({ text }: { text: string }) {
             className={cn(
                 'e-inline-flex e-h-5 e-w-5 e-shrink-0 e-items-center e-justify-center',
                 'e-rounded e-border-0 e-bg-transparent e-p-0 e-leading-none',
-                'e-text-dk-gray-700 hover:e-text-dk-white',
-                state === 'copied' && 'e-text-dk-primary-on-dark',
+                'e-text-dark-muted-foreground hover:e-text-dk-white',
+                state === 'copied' && 'e-text-dark-accent',
                 state === 'errored' && 'e-text-dk-warning-on-dark',
             )}
             aria-label={state === 'copied' ? 'Copied' : 'Copy address'}
