@@ -3,6 +3,7 @@ import { cn } from '@shared/utils';
 import * as React from 'react';
 import { ChevronDown } from 'react-feather';
 
+// FIXME: missing Storybook story — pure Radix primitives, could be storied without provider setup.
 const Accordion = AccordionPrimitive.Root;
 const AccordionItem = AccordionPrimitive.Item;
 

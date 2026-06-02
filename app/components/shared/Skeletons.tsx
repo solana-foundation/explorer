@@ -66,6 +66,7 @@ export function RichListSkeleton({ rows = 2 }: { rows?: number }) {
                     </div>
                 </div>
             </div>
+            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive e-mb-0">
                 <table className="table table-sm card-table table-nowrap">
                     <tbody className="list">
@@ -89,6 +90,7 @@ export function StatsTableSkeleton({ rows = 8 }: { rows?: number }) {
                     </div>
                 </div>
             </div>
+            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive e-mb-0">
                 <table className="table table-sm card-table table-nowrap">
                     <tbody className="list">
@@ -108,6 +110,7 @@ export function TableCardSkeleton({ cols = 4, rows = 6 }: { cols?: number; rows?
             <div className="card-header">
                 <Skeleton className="e-h-5 e-w-64" />
             </div>
+            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive small-headers">
                 <table className="table">
                     <thead>

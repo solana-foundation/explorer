@@ -18,13 +18,11 @@ type Story = StoryObj<typeof meta>;
 
 const SAMPLE_DATA = new Uint8Array([72, 101, 108, 108, 111]);
 
-// Centered default for autodocs preview
 export const Default: Story = {
     args: {
         data: SAMPLE_DATA,
         filename: 'test-transaction',
     },
-    parameters: { layout: 'centered' },
 };
 
 export const WithData: Story = {

@@ -2,10 +2,20 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import type { StorybookConfig } from '@storybook/nextjs-vite';
+import type { AliasOptions } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Normalize Vite's `resolve.alias` to array form so regex `find` entries can be appended.
+function toAliasArray(alias: AliasOptions | undefined) {
+    if (Array.isArray(alias)) return alias;
+    return Object.entries(alias ?? {}).map(([find, replacement]) => ({
+        find,
+        replacement,
+    }));
+}
 
 const config: StorybookConfig = {
     stories: ['../app/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
@@ -31,11 +41,20 @@ const config: StorybookConfig = {
             ],
             resolve: {
                 ...config.resolve,
-                alias: {
-                    ...config.resolve?.alias,
+                alias: [
+                    ...toAliasArray(config.resolve?.alias),
                     // Mock @bundlr-network/client which uses Node.js stream.Transform incompatible with browser
-                    '@bundlr-network/client': path.resolve(__dirname, './__mocks__/@bundlr-network/client.ts'),
-                },
+                    {
+                        find: '@bundlr-network/client',
+                        replacement: path.resolve(__dirname, './__mocks__/@bundlr-network/client.ts'),
+                    },
+                    // Stub useCollectionNfts so suspense-mode SWR never fires getProgramAccounts.
+                    {
+                        // eslint-disable-next-line no-restricted-syntax -- module path matcher for Vite alias
+                        find: /^\.\/nftoken-hooks(?:\.tsx?)?$/,
+                        replacement: path.resolve(__dirname, './__mocks__/nftoken-hooks.tsx'),
+                    },
+                ],
             },
         };
     },

@@ -49,9 +49,7 @@ const meta: Meta<typeof Button> = {
         },
     },
     component: Button,
-    parameters: {
-        layout: 'centered',
-    },
+    tags: ['autodocs'],
     title: 'Components/Shared/UI/Button',
 };
 

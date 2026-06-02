@@ -8,6 +8,7 @@ import type { SignatureProps } from '@utils/index';
 import { type InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
 
+// FIXME: missing Storybook story — needs useTransactionDetails provider + ParsedTransactionWithMeta fixture.
 export function CUProfilingSection({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { cluster, clusterInfo } = useCluster();

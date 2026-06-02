@@ -13,9 +13,7 @@ const meta: Meta<typeof Tooltip> = {
             </div>
         ),
     ],
-    parameters: {
-        layout: 'centered',
-    },
+    tags: ['autodocs'],
     title: 'Components/Shared/UI/Tooltip',
 };
 

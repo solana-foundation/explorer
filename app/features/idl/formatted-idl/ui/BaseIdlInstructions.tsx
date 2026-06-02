@@ -12,6 +12,7 @@ type IxArgsData = NonNullable<FormattedIdl['instructions']>[0]['args'];
 export function BaseIdlInstructions({ data }: FormattedIdlDataView<'instructions'>) {
     if (!data) return null;
     return (
+        // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
         <table className="table table-sm table-nowrap card-table">
             <thead>
                 <tr>

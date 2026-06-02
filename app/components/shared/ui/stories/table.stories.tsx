@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
 
-import { Card } from '../card';
+import { Card } from '@/app/shared/ui/Card';
+
 import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '../table';
 
 const meta: Meta<typeof Table> = {

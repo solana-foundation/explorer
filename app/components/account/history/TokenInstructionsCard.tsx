@@ -117,6 +117,7 @@ export function TokenInstructionsCard({ address }: { address: string }) {
                 title="Token Instructions"
                 analyticsSection="token_instructions_header"
             />
+            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>

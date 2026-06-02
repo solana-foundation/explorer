@@ -22,6 +22,7 @@ import { triggerDownload } from '@/app/shared/lib/triggerDownload';
 import { type IdlVariant } from '../model/use-idl-last-transaction-date';
 import { IdlRenderer } from './IdlRenderer';
 
+// FIXME: missing Storybook story — wraps content in WalletProvider and dynamic-imports bootstrap dropdown.
 export function IdlSection({
     idl,
     badge,

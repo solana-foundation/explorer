@@ -18,6 +18,7 @@ const meta = {
         ),
     ],
     parameters: {
+        // Centers the trigger button + inline preview in the canvas so they're immediately visible.
         layout: 'centered',
     },
     tags: ['autodocs'],

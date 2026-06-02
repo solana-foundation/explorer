@@ -20,6 +20,7 @@ export function BaseDomainsCard({ domains }: { domains: DomainInfo[] }) {
             <div className="card-header align-items-center">
                 <h3 className="card-header-title">Owned Domain Names</h3>
             </div>
+            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>

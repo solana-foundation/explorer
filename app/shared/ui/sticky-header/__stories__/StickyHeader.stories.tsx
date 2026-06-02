@@ -6,6 +6,7 @@ import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
 
 const meta: Meta<typeof StickyHeader> = {
     component: StickyHeader,
+    tags: ['autodocs'],
     title: 'Components/Shared/UI/StickyHeader',
 };
 

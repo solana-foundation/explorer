@@ -9,6 +9,7 @@ import { formatParsedInstruction } from '../lib/format-sub-instruction';
 import type { DecodedField, DecodedParams, LabeledAccount } from '../lib/types';
 import { useSubInstructionMintInfo } from '../model/use-sub-instruction-mint-info';
 
+// FIXME: missing Storybook story — needs useSubInstructionMintInfo (useAccountQuery chain) mocked.
 export function SubInstructionRow({
     parsed,
     extraSigners,

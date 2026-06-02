@@ -3,6 +3,7 @@ import { Cluster } from '@/app/utils/cluster';
 
 import { BaseClusterSelector } from './BaseClusterSelector';
 
+// FIXME: missing Storybook story — uses useCluster + useClusterModal; pure BaseClusterSelector is already covered.
 export function ClusterSelector() {
     const { cluster, name } = useCluster();
     const [, setClusterModalShow] = useClusterModal();

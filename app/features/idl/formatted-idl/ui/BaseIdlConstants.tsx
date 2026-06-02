@@ -7,6 +7,7 @@ import type { FormattedIdlDataView } from './types';
 export function BaseIdlConstants({ data }: FormattedIdlDataView<'constants'>) {
     if (!data) return null;
     return (
+        // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
         <table className="table table-sm table-nowrap card-table">
             <thead>
                 <tr>

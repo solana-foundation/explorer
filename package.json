@@ -27,8 +27,8 @@
         "test:sb": "vitest --project storybook run",
         "test:sb:watch": "vitest --project storybook --watch",
         "test:watch": "vitest --project specs --watch",
-        "pretypes": "next build",
-        "types": "tsc --noEmit",
+        "pretypecheck": "next build",
+        "typecheck": "tsc --noEmit",
         "vitest:test": "vitest --project specs"
     },
     "dependencies": {

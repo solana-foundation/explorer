@@ -26,7 +26,7 @@ export function MetaplexNFTAttributesCard({ account, onNotFound }: { account?: A
     return <NormalMetaplexNFTAttributesCard metadataUri={parsedData.nftData.metadata.uri} />;
 }
 
-function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: string }) {
+export function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: string }) {
     const [attributes, setAttributes] = React.useState<Attribute[]>([]);
     const [status, setStatus] = React.useState<'loading' | 'success' | 'error'>('loading');
 
@@ -82,6 +82,7 @@ function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: string 
             <div className="card-header align-items-center">
                 <h3 className="card-header-title">Attributes</h3>
             </div>
+            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>

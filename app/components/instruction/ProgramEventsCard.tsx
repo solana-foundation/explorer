@@ -86,6 +86,7 @@ function EventCard({
                     <Code className="me-2" size={13} /> Raw
                 </button>
             </div>
+            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <tbody className="list">

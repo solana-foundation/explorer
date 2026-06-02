@@ -7,6 +7,7 @@ import { AnchorProgramName } from '@/app/utils/anchor';
 
 import { useProgramMetadataIdl } from '../model/useProgramMetadataIdl';
 
+// FIXME: missing Storybook story — needs useProgramMetadataIdl SWR mock.
 export default function ProgramName({
     programId,
     url,

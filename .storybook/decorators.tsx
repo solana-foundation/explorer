@@ -1,4 +1,3 @@
-import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { TransactionsProvider } from '@providers/transactions';
 import type { Decorator, Parameters } from '@storybook/react';
@@ -6,6 +5,7 @@ import React from 'react';
 import { fn } from 'storybook/test';
 
 import { MockAccountsProvider } from './__mocks__/MockAccountsProvider';
+import { MockClusterProvider as ClusterProvider } from './__mocks__/MockClusterProvider';
 import { MockHistoryProvider } from './__mocks__/MockHistoryProvider';
 import { MockStatsProvider } from './__mocks__/MockStatsProvider';
 import { MockSupplyProvider } from './__mocks__/MockSupplyProvider';

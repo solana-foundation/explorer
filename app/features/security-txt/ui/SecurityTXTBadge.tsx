@@ -8,6 +8,7 @@ import { useCluster } from '@/app/providers/cluster';
 
 import { fromProgramData } from '../lib/fromProgramData';
 
+// FIXME: missing Storybook story — needs useProgramMetadataSecurityTxt SWR mock + useCluster (pure SecurityTXTBadge is already covered).
 export function ProgramSecurityTXTBadge({
     programData,
     programPubkey,

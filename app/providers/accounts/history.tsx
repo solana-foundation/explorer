@@ -102,15 +102,13 @@ function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | 
     };
 }
 
-export const StateContext: React.Context<Readonly<State> | undefined> = React.createContext<State | undefined>(
-    undefined,
-);
+export const StateContext: React.Context<State | undefined> = React.createContext<State | undefined>(undefined);
 export const DispatchContext: React.Context<Dispatch | undefined> = React.createContext<Dispatch | undefined>(
     undefined,
 );
-export const InFlightContext: React.Context<Readonly<Set<string>> | undefined> = React.createContext<
-    Set<string> | undefined
->(undefined);
+export const InFlightContext: React.Context<Set<string> | undefined> = React.createContext<Set<string> | undefined>(
+    undefined,
+);
 
 type HistoryProviderProps = { children: React.ReactNode };
 export function HistoryProvider({ children }: HistoryProviderProps) {

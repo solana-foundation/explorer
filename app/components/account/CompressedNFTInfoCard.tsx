@@ -27,7 +27,13 @@ export function CompressedNFTInfoCard({ account, onNotFound }: { account?: Accou
     return onNotFound();
 }
 
-function DasCompressionInfoCard({ proof, compressedNft }: { proof: CompressedNftProof; compressedNft: CompressedNft }) {
+export function DasCompressionInfoCard({
+    proof,
+    compressedNft,
+}: {
+    proof: CompressedNftProof;
+    compressedNft: CompressedNft;
+}) {
     const compressedInfo = compressedNft.compression;
     const fetchAccountInfo = useFetchAccountInfo();
     const treeAccountInfo = useAccountInfo(compressedInfo.tree);

@@ -18,6 +18,7 @@ interface ViewReceiptButtonProps {
     transactionWithMeta: ParsedTransactionWithMeta | null | undefined;
 }
 
+// FIXME: missing Storybook story — gated on NEXT_PUBLIC_RECEIPT_ENABLED + needs a populated transactionWithMeta to render.
 export function ViewReceiptButton({ signature, receiptPath, transactionWithMeta }: ViewReceiptButtonProps) {
     const { cluster } = useCluster();
 

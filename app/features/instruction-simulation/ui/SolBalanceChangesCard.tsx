@@ -11,6 +11,7 @@ export function SolBalanceChangesCard({ balanceChanges }: { balanceChanges: SolB
                 <h3 className="card-header-title">SOL Balance Changes</h3>
             </div>
             <div className="e-mb-0 e-overflow-x-auto">
+                {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>

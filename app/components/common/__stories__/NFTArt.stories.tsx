@@ -1,0 +1,30 @@
+import type { Meta, StoryObj } from '@storybook/react';
+
+import { ArtContent, NFTImageContent } from '../NFTArt';
+
+const meta = {
+    tags: ['autodocs'],
+    title: 'Components/Common/NFTArt',
+} satisfies Meta;
+
+export default meta;
+type Story = StoryObj;
+
+const SAMPLE_URI = 'https://arweave.net/sample-image.png';
+
+export const WithUri: Story = {
+    render: () => <NFTImageContent uri={SAMPLE_URI} />,
+};
+
+export const Placeholder: Story = {
+    render: () => <NFTImageContent />,
+};
+
+export const FromMetadata: Story = {
+    render: () => (
+        <ArtContent
+            data={{ image: SAMPLE_URI, name: 'Sample NFT' } as any}
+            pubkey="TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        />
+    ),
+};

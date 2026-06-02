@@ -62,17 +62,17 @@ type StatsProviderState = {
     retry: () => void;
     active: boolean;
 };
-export const StatsProviderContext: React.Context<Readonly<StatsProviderState> | undefined> = React.createContext<
+export const StatsProviderContext: React.Context<StatsProviderState | undefined> = React.createContext<
     StatsProviderState | undefined
 >(undefined);
 
 type DashboardState = { info: DashboardInfo };
-export const DashboardContext: React.Context<Readonly<DashboardState> | undefined> = React.createContext<
+export const DashboardContext: React.Context<DashboardState | undefined> = React.createContext<
     DashboardState | undefined
 >(undefined);
 
 type PerformanceState = { info: PerformanceInfo };
-export const PerformanceContext: React.Context<Readonly<PerformanceState> | undefined> = React.createContext<
+export const PerformanceContext: React.Context<PerformanceState | undefined> = React.createContext<
     PerformanceState | undefined
 >(undefined);
 

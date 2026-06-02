@@ -12,6 +12,7 @@ import { ConnectWallet } from './ConnectWallet';
 import { InstructionActivity } from './InstructionActivity';
 import { InteractInstructions } from './InteractInstructions';
 
+// FIXME: missing Storybook story — composes ConnectWallet + ClusterSelector + InteractInstructions; inherits wallet/cluster provider need.
 export function InteractWithIdlView({
     instructions,
     idl,

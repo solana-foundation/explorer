@@ -1,9 +1,9 @@
 import { useExplorerLink } from '@entities/cluster';
 import { ProgramLogs, TxErrorStatus, TxSuccessStatus } from '@entities/program-logs';
-import { Card } from '@shared/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import { ReactNode } from 'react';
 
+import { Card } from '@/app/shared/ui/Card';
 import type { InstructionLogs } from '@/app/utils/program-logs';
 
 import type { InstructionInvocationResult } from '../model/use-instruction';
@@ -13,6 +13,7 @@ type InstructionActivityProps = {
     logs: string[];
     parseLogs: (logs: string[]) => InstructionLogs[];
 };
+// FIXME: missing Storybook story — pure props, but uses useExplorerLink internally so needs withCluster decorator.
 export function InstructionActivity({ lastResult, logs, parseLogs }: InstructionActivityProps) {
     const tabs = [
         {

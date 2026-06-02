@@ -6,6 +6,7 @@ import { Logger } from '@/app/shared/lib/logger';
 
 import { BaseConnectWallet } from './BaseConnectWallet';
 
+// FIXME: missing Storybook story — uses useWallet + useWalletModal; pure BaseConnectWallet is already covered.
 export function ConnectWallet() {
     const { wallet, connect, disconnect, connected, connecting, publicKey } = useWallet();
     const { setVisible: setModalVisible } = useWalletModal();

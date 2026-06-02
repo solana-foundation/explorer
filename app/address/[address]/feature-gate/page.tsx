@@ -38,6 +38,7 @@ export default async function FeatureGatePage(props: Props) {
                     h2: ({ children }) => <h2 className="e-mb-2 e-mt-5 e-text-gray-300">{children}</h2>,
                     li: ({ children }) => <li className="e-mb-1 e-text-gray-400">{children}</li>,
                     p: ({ children }) => <p className="e-mb-4 e-mt-0 e-text-gray-400">{children}</p>,
+                    // TODO: migrate to <BaseTable> from @/app/shared/ui/Table
                     table: ({ children }) => <table className="table table-sm">{children}</table>,
                 }}
             >

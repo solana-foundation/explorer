@@ -1,0 +1,34 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { nextjsParameters, withCluster } from '@storybook-config/decorators';
+
+import { VotesCard } from '../VotesCard';
+
+const meta: Meta<typeof VotesCard> = {
+    component: VotesCard,
+    decorators: [withCluster],
+    parameters: nextjsParameters,
+    tags: ['autodocs'],
+    title: 'Components/Account/VotesCard',
+};
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+const votes = Array.from({ length: 6 }, (_, i) => ({
+    confirmationCount: 31 - i,
+    slot: 312_456_780 + i,
+}));
+
+export const WithVotes: Story = {
+    args: {
+        voteAccount: {
+            info: { votes },
+        } as any,
+    },
+};
+
+export const Empty: Story = {
+    args: {
+        voteAccount: { info: { votes: [] } } as any,
+    },
+};

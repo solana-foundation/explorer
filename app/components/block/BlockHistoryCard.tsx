@@ -224,6 +224,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                         : 'No transactions found with this filter'}
                 </div>
             ) : (
+                // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
                 <div className="table-responsive mb-0">
                     <table className="table table-sm table-nowrap card-table">
                         <thead>
