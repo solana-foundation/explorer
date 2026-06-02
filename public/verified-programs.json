@@ -210,12 +210,6 @@
     "verifiedAt": "2025-07-11T01:28:44"
   },
   {
-    "address": "6DV1hTBVf6Ks9mguQiVY82B5uGPQS2nHddzgL3GhFaWe",
-    "name": "message_transmitter",
-    "repoUrl": "https://github.com/stablenaira/core/tree/60e5cfbcbb2ad4ccc3ef97d4031c019a686a3e40",
-    "verifiedAt": "2026-05-21T22:12:11"
-  },
-  {
     "address": "6hFfJP3EgJe8mL9rhBjXWhruJWHBaWnt8gvej14xDUuz",
     "name": "x3_monsterball",
     "repoUrl": "https://github.com/pepememe-dev/contracts/tree/b0aa41a655ebb7cf9441377cd96165d286ad3ff6",
@@ -226,6 +220,12 @@
     "name": "access_controller",
     "repoUrl": "https://github.com/smartcontractkit/chainlink-ccip/tree/0ee732e80586",
     "verifiedAt": "2025-09-30T20:57:16"
+  },
+  {
+    "address": "6MS8n87aRsXE5RjyVXuf9wcfARn5ut4m2YhBFE3kairo",
+    "name": "kairo",
+    "repoUrl": "https://github.com/KairoMine/kairo/tree/fe7d11fe8acb1660827f872d865a427e74cdb142",
+    "verifiedAt": "2026-06-01T03:12:20"
   },
   {
     "address": "6nGFQ3vek6SST6AhmfCeii2pj7GK2yiF2FkgeJUvXJPU",
@@ -322,6 +322,12 @@
     "name": "bank",
     "repoUrl": "https://gitlab.com/sorare/solana-public-programs-bank/tree/a8c6b73a008439a80d622087dbad994f1978467f",
     "verifiedAt": "2025-11-20T11:10:05"
+  },
+  {
+    "address": "8o9XyJy6jvPfSmABmVdHyenjBFx83tTbgWziz8QMS3BC",
+    "name": "hypecreator1/golazo-program",
+    "repoUrl": "https://github.com/hypecreator1/golazo-program/tree/6d5eb7e62b919e4e8fddb19368adbbea9fe4e8c5",
+    "verifiedAt": "2026-06-01T12:11:12"
   },
   {
     "address": "8R6yamgQEWRZCD6JDPLytJBQNLRBweYNiLAoAizmwuWM",
@@ -888,12 +894,6 @@
     "verifiedAt": "2025-04-22T13:38:37"
   },
   {
-    "address": "GGMoxtodCLEvPB3HuDJcS3kcS6JVpmfBQEHYfoUPe7kR",
-    "name": "validator_registry",
-    "repoUrl": "https://github.com/stablenaira/core/tree/60e5cfbcbb2ad4ccc3ef97d4031c019a686a3e40",
-    "verifiedAt": "2026-05-21T22:06:55"
-  },
-  {
     "address": "Gmso1uvJnLbawvw7yezdfCDcPydwW2s2iqG3w6MDucLo",
     "name": "gmsol_store",
     "repoUrl": "https://github.com/gmsol-labs/gmx-solana.git/tree/6d1cfe84c50ddcdf39982469b092e2494ea1dd30",
@@ -1018,6 +1018,12 @@
     "name": "spree_points",
     "repoUrl": "https://github.com/Spree-Finance/spree-points/tree/b9066980eb29e22ad1dc253c3027a7cfe17dc095",
     "verifiedAt": "2025-08-19T14:56:14"
+  },
+  {
+    "address": "HSuZqAbWgtJipGDV7h45ZqUPhh42hgQQYg3fiMuSUZLV",
+    "name": "pokeburn",
+    "repoUrl": "https://github.com/queiio/pokeburn-program/tree/b4ac0fb4b77e50e516a9797a4eac383576fb4cee",
+    "verifiedAt": "2026-06-01T19:24:53"
   },
   {
     "address": "HTJhkCtgwugSJyurUo3Gv7tqXJwtSGX4UyrCVfttMi3a",
@@ -1354,6 +1360,12 @@
     "name": "ohwoo_staking",
     "repoUrl": "https://github.com/OhwooProtocol/contract/tree/e6b080ab9464ea8b2f088299121c8141d46b1fcb",
     "verifiedAt": "2026-03-14T14:50:43"
+  },
+  {
+    "address": "omnixgS8fnqHfCcTGKWj6JtKjzpJZ1Y5y9pyFkQDkYE",
+    "name": "omnipair",
+    "repoUrl": "https://github.com/omnipair/omnipair-rs/tree/3e90a0bc8906975e25fb7789cdfaa5df716d053c",
+    "verifiedAt": "2026-05-31T10:44:31"
   },
   {
     "address": "opre2VP8uvjq3YS15NRhRagsWvsY5DybitvCeLPAwbK",
