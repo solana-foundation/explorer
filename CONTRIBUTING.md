@@ -159,9 +159,7 @@ pnpm test:ci
 
 ### Security Vulnerabilities
 
-For bugs relating to Solana Verify (aka Verified Builds), please send email to disclosures@solana.org.
-
-For other security vulnerabilities, please do NOT report them publicly on GitHub Issues. Instead, use our dedicated bug bounty form at [https://example.com/bug-bounty](https://example.com/bug-bounty).
+Please do NOT report security vulnerabilities publicly on GitHub Issues. Instead, email disclosures@solana.org — this includes bugs relating to Solana Verify (aka Verified Builds) as well as any other security issues.
 
 ### Non-Security Bugs
 
