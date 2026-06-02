@@ -18,6 +18,8 @@ import { dirname, join } from 'path';
 import { array, create, type Infer, optional, refine, string, type } from 'superstruct';
 import { fileURLToPath } from 'url';
 
+import { normalizeRepoUrl } from '../app/utils/verified-builds-url';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUTPUT_PATH = join(__dirname, '../public/verified-programs.json');
 
@@ -108,7 +110,7 @@ async function main() {
         .map(addr => {
             const status = statuses.get(addr);
             const idlName = idlNames.get(addr);
-            const repoUrl = normalizeOsecRepoUrl(status?.repo_url);
+            const repoUrl = normalizeRepoUrl(status?.repo_url);
             const name = idlName || deriveNameFromRepo(repoUrl) || `${addr.slice(0, 12)}...`;
 
             return {
@@ -220,17 +222,6 @@ async function fetchIdlNames(addresses: string[]): Promise<Map<string, string>> 
     }
 
     return names;
-}
-
-// OSecure's /status returns repo_url with `/tree/<sha>` already concatenated onto the
-// clone URL, producing `.../<repo>.git/tree/<sha>` -- which GitHub 404s. Strip `.git`
-// whether it sits mid-path (before `/`) or at the very end.
-// See also: `normalizeRepoUrl` in app/utils/verified-builds-url.ts (raw-input variant
-// without the mid-path strip).
-export function normalizeOsecRepoUrl(repoUrl: string | undefined): string | undefined {
-    if (!repoUrl) return undefined;
-    if (repoUrl.endsWith('.git')) return repoUrl.slice(0, -4);
-    return repoUrl.replace('.git/', '/');
 }
 
 function deriveNameFromRepo(repoUrl: string | undefined): string | undefined {

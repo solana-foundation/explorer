@@ -1,10 +1,9 @@
-// Verified-build PDAs store the git clone URL (`.../<repo>.git`). Callers append
-// `/tree/<commit>` to deep-link the verified commit, but GitHub only serves
-// `/tree/<sha>` under the bare repo path -- so the trailing `.git` must be stripped first.
-// See also: `normalizeOsecRepoUrl` in scripts/update-verified-programs.ts (handles the
-// upstream-pre-concatenated `.git/tree/<sha>` shape).
+// Strips `.git` from a repo URL whether it sits at the end of the URL (raw clone URL from
+// a verify PDA) or before `/tree/<sha>` (OSecure's pre-concatenated /status payload).
+// GitHub only serves `/tree/<sha>` under the bare repo path, so the strip is required for
+// the rendered link to resolve.
 export function normalizeRepoUrl(repoUrl: string | undefined): string | undefined {
     if (!repoUrl) return undefined;
     if (repoUrl.endsWith('.git')) return repoUrl.slice(0, -4);
-    return repoUrl;
+    return repoUrl.replace('.git/', '/');
 }
