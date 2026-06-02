@@ -87,7 +87,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                         <span>{accountInfo.size.toLocaleString('en-US')}</span>
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="e-w-auto e-mx-4 !e-rounded-lg e-border-none e-p-0" align="end">
+                <PopoverContent className="e-mx-4 e-w-auto !e-rounded-lg e-border-none e-p-0" align="end">
                     <RawDataField data={accountInfo.data} filename={key} />
                 </PopoverContent>
             </Popover>
