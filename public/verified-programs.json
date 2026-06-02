@@ -284,7 +284,7 @@
   {
     "address": "7v9sLrk92NNLLUfXLJw3o7MycZNvwsTK6kLWfWb8vcVA",
     "name": "Ibrahimsterlingjomany/sterling-amm-mainnet-7v9-verifiable-build",
-    "repoUrl": "https://github.com/Ibrahimsterlingjomany/sterling-amm-mainnet-7v9-verifiable-build.git/tree/b325ae45b786534336bb09243db9be633a37c90f",
+    "repoUrl": "https://github.com/Ibrahimsterlingjomany/sterling-amm-mainnet-7v9-verifiable-build/tree/b325ae45b786534336bb09243db9be633a37c90f",
     "verifiedAt": "2026-05-22T03:59:03"
   },
   {
@@ -314,7 +314,7 @@
   {
     "address": "8Hcd5Kmi47JhgNr1GVYfAbMyXfwYo5T7UUYhGeEu8qPr",
     "name": "berrie_staking",
-    "repoUrl": "https://github.com/BerrieDex/berrie-staking.git/tree/b281c65d9841569602fbb0e2b3c70d0a26b187eb",
+    "repoUrl": "https://github.com/BerrieDex/berrie-staking/tree/b281c65d9841569602fbb0e2b3c70d0a26b187eb",
     "verifiedAt": "2025-08-06T01:24:51"
   },
   {
@@ -368,7 +368,7 @@
   {
     "address": "9DK1L9UF4EmkrMPpv9FZs4B63RvVPwJR34NGWm9NEbVy",
     "name": "blitz_games",
-    "repoUrl": "https://github.com/Blitz99Win/blitz-games.git/tree/d5828d9b2cbc45d16435c04aa1bfc31ec72199d8",
+    "repoUrl": "https://github.com/Blitz99Win/blitz-games/tree/d5828d9b2cbc45d16435c04aa1bfc31ec72199d8",
     "verifiedAt": "2026-03-02T05:25:13"
   },
   {
@@ -380,7 +380,7 @@
   {
     "address": "9Mq2JHE2c38LTioLQYjqbLDd4jJkgftLj83VYiTYrfnJ",
     "name": "pepememe-dev/contracts",
-    "repoUrl": "https://github.com/pepememe-dev/contracts.git/tree/f69e51654433c61266063f29eab707d04d2f5e48",
+    "repoUrl": "https://github.com/pepememe-dev/contracts/tree/f69e51654433c61266063f29eab707d04d2f5e48",
     "verifiedAt": "2026-02-04T16:15:38"
   },
   {
@@ -392,7 +392,7 @@
   {
     "address": "9QRjXNEfR9ABnFunKbE2AWYUR2siRVhzosTDn8RmkAQV",
     "name": "zakitmobad-cloud/SonamiLayer2",
-    "repoUrl": "https://github.com/zakitmobad-cloud/SonamiLayer2.git/tree/d6a55c9fa45156b2cd985f5a9ca7e042c999dc5b",
+    "repoUrl": "https://github.com/zakitmobad-cloud/SonamiLayer2/tree/d6a55c9fa45156b2cd985f5a9ca7e042c999dc5b",
     "verifiedAt": "2025-11-10T13:37:49"
   },
   {
@@ -512,7 +512,7 @@
   {
     "address": "BUzLPyNSfEGnKY3RozDtny4us72bYPbiCq2njQLjtaff",
     "name": "contest",
-    "repoUrl": "https://github.com/istina-dev/smart-contracts.git/tree/81a1d5a39cfc5e452ea9195b45303269ce1cbfcd",
+    "repoUrl": "https://github.com/istina-dev/smart-contracts/tree/81a1d5a39cfc5e452ea9195b45303269ce1cbfcd",
     "verifiedAt": "2026-05-26T11:22:59"
   },
   {
@@ -572,13 +572,13 @@
   {
     "address": "CMACYFENjoBMHzapRXyo1JZkVS6EtaDDzkjMrmQLvr4J",
     "name": "candy_machine_core",
-    "repoUrl": "https://github.com/metaplex-foundation/mpl-core-candy-machine.git/tree/ea3620b7436004f62e1e7bc3d69147f4feef2ae0",
+    "repoUrl": "https://github.com/metaplex-foundation/mpl-core-candy-machine/tree/ea3620b7436004f62e1e7bc3d69147f4feef2ae0",
     "verifiedAt": "2026-05-29T18:42:27"
   },
   {
     "address": "CMAGAKJ67e9hRZgfC5SFTbZH8MgEmtqazKXjmkaJjWTJ",
     "name": "candy_guard",
-    "repoUrl": "https://github.com/metaplex-foundation/mpl-core-candy-machine.git/tree/ea3620b7436004f62e1e7bc3d69147f4feef2ae0",
+    "repoUrl": "https://github.com/metaplex-foundation/mpl-core-candy-machine/tree/ea3620b7436004f62e1e7bc3d69147f4feef2ae0",
     "verifiedAt": "2026-05-29T18:58:02"
   },
   {
@@ -632,7 +632,7 @@
   {
     "address": "DuwVxzTcYrXrBJWKeHeJp4H9PAF8pQbEqpNhrUpyYub1",
     "name": "Clutch-L4bs/k9-solana-programs",
-    "repoUrl": "https://github.com/Clutch-L4bs/k9-solana-programs.git/tree/dd393fbc68c0be83e34d5108846e4c944b41f727",
+    "repoUrl": "https://github.com/Clutch-L4bs/k9-solana-programs/tree/dd393fbc68c0be83e34d5108846e4c944b41f727",
     "verifiedAt": "2026-05-10T10:18:28"
   },
   {
@@ -644,7 +644,7 @@
   {
     "address": "DXxCKeaee3YD1HeA1UcBxTiHGZYFDZQ34Q2bjY87Nyoc",
     "name": "setto_payment",
-    "repoUrl": "https://github.com/setto-labs/gasless-solana.git/tree/38d2b7114fb2d0416026fc3cf43ff0f0b4353239",
+    "repoUrl": "https://github.com/setto-labs/gasless-solana/tree/38d2b7114fb2d0416026fc3cf43ff0f0b4353239",
     "verifiedAt": "2026-04-02T14:54:45"
   },
   {
@@ -710,7 +710,7 @@
   {
     "address": "EDY4bp4fXWkAJpJhXUMZLL7fjpDhpKZQFPpygzsTMzro",
     "name": "dmd_anchor",
-    "repoUrl": "https://github.com/LongosBongos/DMD-Allocatetd.git/tree/515dfea53f38562fada57a2c75fbedfc531c0811",
+    "repoUrl": "https://github.com/LongosBongos/DMD-Allocatetd/tree/515dfea53f38562fada57a2c75fbedfc531c0811",
     "verifiedAt": "2026-03-18T00:28:14"
   },
   {
@@ -896,7 +896,7 @@
   {
     "address": "Gmso1uvJnLbawvw7yezdfCDcPydwW2s2iqG3w6MDucLo",
     "name": "gmsol_store",
-    "repoUrl": "https://github.com/gmsol-labs/gmx-solana.git/tree/6d1cfe84c50ddcdf39982469b092e2494ea1dd30",
+    "repoUrl": "https://github.com/gmsol-labs/gmx-solana/tree/6d1cfe84c50ddcdf39982469b092e2494ea1dd30",
     "verifiedAt": "2026-03-20T15:48:45"
   },
   {
@@ -992,7 +992,7 @@
   {
     "address": "HfU7iK2hyesWG1abBD8nXDpsw2ijrA2vpdiNYNj3Hg3c",
     "name": "solana-developers/verified-program-root",
-    "repoUrl": "https://github.com/solana-developers/verified-program-root.git/tree/4f6a1bb9d56bbb17e9b19f65021fb508f95fe35f",
+    "repoUrl": "https://github.com/solana-developers/verified-program-root/tree/4f6a1bb9d56bbb17e9b19f65021fb508f95fe35f",
     "verifiedAt": "2026-01-21T04:56:27"
   },
   {
@@ -1286,7 +1286,7 @@
   {
     "address": "MPL4o4wMzndgh8T1NVDxELQCj5UQfYTYEkabX3wNKtb",
     "name": "metaplex-foundation/mpl-hybrid",
-    "repoUrl": "https://github.com/metaplex-foundation/mpl-hybrid.git/tree/aacf1a53c8a43bf395db7b562c02cf016ce604c5",
+    "repoUrl": "https://github.com/metaplex-foundation/mpl-hybrid/tree/aacf1a53c8a43bf395db7b562c02cf016ce604c5",
     "verifiedAt": "2026-05-27T18:37:07"
   },
   {
@@ -1448,7 +1448,7 @@
   {
     "address": "qYFPQppWpM5Ss1TxChtpUb1uLusc5oKZP6Jit1zND4A",
     "name": "automatizing/polybet",
-    "repoUrl": "https://github.com/automatizing/polybet.git/tree/c9806af1b85e569e917d92ec45a01136a1a79210",
+    "repoUrl": "https://github.com/automatizing/polybet/tree/c9806af1b85e569e917d92ec45a01136a1a79210",
     "verifiedAt": "2025-11-11T02:58:56"
   },
   {
@@ -1496,13 +1496,13 @@
   {
     "address": "SCALEwAvEK5gtkdHiFzXfPgtk2YwJxPDzaV3aDmR7tA",
     "name": "scale_amm",
-    "repoUrl": "https://github.com/scalecrx/programs.git/tree/79f567241772807713bb45c816d99af5cabc1686",
+    "repoUrl": "https://github.com/scalecrx/programs/tree/79f567241772807713bb45c816d99af5cabc1686",
     "verifiedAt": "2026-03-07T22:48:59"
   },
   {
     "address": "SCALEWoRSpVZpMRqHEcDfNvBh3nUSe34jDr9r689gLa",
     "name": "scale_vmm",
-    "repoUrl": "https://github.com/scalecrx/programs.git/tree/e76cc1a8faa0c55cac3780cff8c00f6d204e6eec",
+    "repoUrl": "https://github.com/scalecrx/programs/tree/e76cc1a8faa0c55cac3780cff8c00f6d204e6eec",
     "verifiedAt": "2026-03-09T22:03:37"
   },
   {
@@ -1514,7 +1514,7 @@
   {
     "address": "soLv1S6GsAEVEnXmVY3oz6GtrNJteQ28iTyRQrHXvkz",
     "name": "solvbtc",
-    "repoUrl": "https://github.com/solv-finance/SolvBTC-Solana-Contract.git/tree/4c8f194bb4c42faa617af820ed22e24b685feafb",
+    "repoUrl": "https://github.com/solv-finance/SolvBTC-Solana-Contract/tree/4c8f194bb4c42faa617af820ed22e24b685feafb",
     "verifiedAt": "2025-11-14T07:17:08"
   },
   {
@@ -1628,7 +1628,7 @@
   {
     "address": "twAP5sArq2vDS1mZCT7f4qRLwzTfHvf5Ay5R5Q5df1m",
     "name": "openbook_twap",
-    "repoUrl": "https://github.com/metaDAOproject/openbook-twap.git",
+    "repoUrl": "https://github.com/metaDAOproject/openbook-twap",
     "verifiedAt": "2024-03-26T20:32:16"
   },
   {
@@ -1736,7 +1736,7 @@
   {
     "address": "ZNXsqwVxaSuUPAeHk8GrQxXWzN5kKZB6pDer91U4Fxo",
     "name": "revshare",
-    "repoUrl": "https://git.lab.next-on.pro/zenexhub_public/zenex-pools.git/tree/8ce094562ef9c67675c4959fab2a4cc5b99aae08",
+    "repoUrl": "https://git.lab.next-on.pro/zenexhub_public/zenex-pools/tree/8ce094562ef9c67675c4959fab2a4cc5b99aae08",
     "verifiedAt": "2025-12-16T18:47:58"
   }
 ]
