@@ -21,7 +21,6 @@
         ],
         "paths": {
             "@/*": ["./*"],
-            "@__fixtures__/*": ["./app/__fixtures__/*"],
             "@components/*": ["./app/components/*"],
             "@entities/*": ["./app/entities/*"],
             "@features/*": ["./app/features/*"],
@@ -43,7 +42,5 @@
         ".next/dev/types/**/*.ts",
         ".next-dev/dev/types/**/*.ts"
     ],
-    "exclude": [
-        "node_modules"
-    ]
+    "exclude": ["node_modules"]
 }
