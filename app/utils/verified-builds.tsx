@@ -10,7 +10,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { useCluster } from '../providers/cluster';
 import { ProgramDataAccountInfo } from '../validators/accounts/upgradeable-program';
 import { Cluster } from './cluster';
-import { normalizeRepoUrl } from './verified-builds-url';
+import { composeOnchainRepoUrl, normalizeRepoUrl, safeRepoUrl } from './verified-builds-url';
 
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
@@ -30,6 +30,7 @@ export type OsecRegistryInfo = {
     executable_hash: string;
     last_verified_at: string | null;
     repo_url: string;
+    onchain_repo_url: string;
     verify_command: string;
 };
 
@@ -267,19 +268,21 @@ function useEnrichedOsecInfo({
           ? 'Verification information provided by the program deployer.'
           : 'Verification information provided by the program authority.';
 
+    const { repo_url, signer, is_verified, ...rest } = osecInfo;
     const enrichedOsecInfo: OsecRegistryInfo = {
-        ...osecInfo,
+        ...rest,
+        is_verified,
         message,
-        signer: osecInfo.signer || '',
-        verification_status: osecInfo.is_verified
+        onchain_repo_url: composeOnchainRepoUrl(pdaData.gitUrl, pdaData.commit) ?? '',
+        repo_url: safeRepoUrl(normalizeRepoUrl(repo_url)) ?? '',
+        signer: signer || '',
+        verification_status: is_verified
             ? VerificationStatus.Verified
             : pdaData
               ? VerificationStatus.PdaUploaded
               : VerificationStatus.NotVerified,
         verify_command: '',
     };
-    enrichedOsecInfo.repo_url = normalizeRepoUrl(pdaData.gitUrl) ?? '';
-    enrichedOsecInfo.repo_url += pdaData.commit.length ? `/tree/${pdaData.commit}` : '';
     if (pdaData) {
         // Create command from the args of the verified build PDA
         enrichedOsecInfo.verify_command = coalesceCommandFromPda(programId, pdaData);

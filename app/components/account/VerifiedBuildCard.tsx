@@ -142,7 +142,7 @@ const ROWS: TableRow[] = [
     },
     {
         display: 'Repository URL',
-        key: 'repo_url',
+        key: 'onchain_repo_url',
         type: DisplayType.URL,
     },
 ];
