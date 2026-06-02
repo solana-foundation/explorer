@@ -1,13 +1,9 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import { withBotId } from 'botid/next/config';
-import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { buildRedirects } from './config/redirects.mjs';
 import { createSentryBuildConfig } from './sentry/config.mjs';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -41,20 +37,16 @@ const nextConfig = {
     async redirects() {
         return buildRedirects();
     },
-    webpack: (config, { isServer }) => {
-        config.resolve.alias = {
-            ...(config.resolve.alias || {}),
-            borsh: path.resolve(__dirname, 'node_modules/borsh'), // force legacy version
-        };
-
-        if (!isServer) {
-            // Fixes npm packages that depend on `fs` module like `@project-serum/anchor`.
-            config.resolve.fallback.fs = false;
-        }
-
-        return config;
+    turbopack: {
+        // Pin to project root; otherwise Turbopack walks up to a parent pnpm-workspace.yaml (e.g. in git worktrees).
+        root: fileURLToPath(new URL('.', import.meta.url)),
+        resolveAlias: {
+            // resolve-domain.ts uses deserializeUnchecked, removed in borsh@2 (also installed as borsh2).
+            borsh: './node_modules/borsh',
+            // @coral-xyz/anchor's nodewallet/workspace require('fs'), but those paths never run in the browser.
+            fs: { browser: './empty.ts' },
+        },
     },
 };
 
-/// Add wrapper to track errors with Sentry and BotID for bot protection
 export default withBotId(withSentryConfig(nextConfig, createSentryBuildConfig()));

@@ -231,22 +231,27 @@
     @include button-size($btn-padding-y-sm, $btn-padding-x-sm, $font-size-sm, $btn-border-radius-sm);
     @include transition($btn-transition);
 
-    // Share hover and focus styles
+    // Share hover and focus styles. `&.focus` (a class) is dropped: a class selector after a
+    // `::before` pseudo-element is invalid CSS and rejected by Turbopack's Lightning CSS parser.
     &:hover,
     &:focus {
         text-decoration: none;
     }
 
-    &:focus,
-    &.focus {
+    &:focus {
         outline: 0;
         box-shadow: $btn-focus-box-shadow;
     }
 }
 
+// `button-variant` expands to interactive states (`&:active`, `&.active`, `.show > &`) which are
+// invalid CSS on a `::before` pseudo-element and rejected by Turbopack's Lightning CSS parser.
+// The pill is static `content`, so only the base button colors apply.
 .ql-tooltip .ql-action::before,
 .ql-tooltip.ql-editing .ql-action::before {
-    @include button-variant($primary, $primary);
+    color: color-contrast($primary);
+    background-color: $primary;
+    border-color: $primary;
 }
 
 .ql-tooltip .ql-action::before {
@@ -258,7 +263,9 @@
 }
 
 .ql-tooltip .ql-remove::before {
-    @include button-variant($white, $white);
+    // Base button colors only — see the note above; `button-variant` emits invalid `::before` states.
+    color: color-contrast($white);
+    background-color: $white;
     content: 'Remove';
     border-color: $gray-300;
 }

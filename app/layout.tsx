@@ -21,7 +21,7 @@ import { TokenInfoBatchProvider } from '@/app/entities/token-info';
 import { CookieConsent } from '@/app/features/cookie';
 import { VisibilityProvider } from '@/app/shared/lib/visibility';
 
-import { botIdProtectedRoutes } from '../middleware';
+import { botIdProtectedRoutes } from '../proxy';
 
 export const metadata: Metadata = {
     description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',

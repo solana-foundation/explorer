@@ -21,7 +21,10 @@ const TEST_PUBKEY = PublicKey.default;
 
 let captured: Captured | undefined;
 function Capture() {
-    captured = React.useContext(FetchersContext) ?? undefined;
+    const ctx = React.useContext(FetchersContext) ?? undefined;
+    React.useEffect(() => {
+        captured = ctx;
+    }, [ctx]);
     return null;
 }
 

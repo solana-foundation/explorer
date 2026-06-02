@@ -14,6 +14,7 @@
 const { spawn } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
+const zlib = require('zlib');
 const { performance } = require('perf_hooks');
 
 main();
@@ -27,14 +28,15 @@ async function main() {
         logger.separator();
 
         const buildStartTime = performance.now();
-        const buildOutput = await runBuild(config);
+        await runBuild(config);
         const buildEndTime = performance.now();
         const buildDuration = ((buildEndTime - buildStartTime) / 1000).toFixed(2);
         logger.separator();
         logger.success(`Build completed in ${buildDuration}s`);
 
-        const lines = extractTableLines(buildOutput);
-        const content = formatTableLines(lines);
+        const routes = await collectRoutes(config);
+        const sizeInfo = await loadRouteSizes(config);
+        const content = formatTable(routes, sizeInfo);
 
         const outputPath = path.join(config.projectRoot, config.outputFile);
         await writeOutputFile(outputPath, content);
@@ -48,40 +50,29 @@ async function main() {
     }
 }
 
-// ================================================================================================
+// =============================================================================
 // Build Runner
-// ================================================================================================
+// =============================================================================
 /**
- * Runs the build command and captures output
+ * Runs the build command, streaming its output straight to the terminal.
+ *
+ * We no longer parse stdout — all route/size information is read from the build
+ * manifests afterwards — so the build output is purely for the user to watch.
  * @param {Object} config - Configuration object
- * @returns {Promise<string>} Resolves with build output
+ * @returns {Promise<void>} Resolves when the build succeeds, rejects on failure
  */
 function runBuild(config) {
     return new Promise((resolve, reject) => {
-        let buildOutput = '';
-
         const build = spawn(config.buildCommand, config.buildArgs, {
             cwd: config.projectRoot,
-            stdio: ['inherit', 'pipe', 'pipe'],
-        });
-
-        build.stdout.on('data', data => {
-            const str = data.toString();
-            process.stdout.write(str);
-            buildOutput += str;
-        });
-
-        build.stderr.on('data', data => {
-            const str = data.toString();
-            process.stderr.write(str);
-            buildOutput += str;
+            stdio: 'inherit',
         });
 
         build.on('close', code => {
             if (code !== 0) {
                 reject(new Error(`Build failed with exit code ${code}`));
             } else {
-                resolve(buildOutput);
+                resolve();
             }
         });
 
@@ -91,134 +82,167 @@ function runBuild(config) {
     });
 }
 
-// ================================================================================================
-// Output Parser
-// ================================================================================================
-/**
- * Extracts table lines from build output starting from "Route (app)" to the end
- * @param {string} buildOutput - Raw build output from Next.js build command
- * @returns {string[]} Array of lines from the table section to the end of output
- * @throws {Error} If no table information is found
- */
-function extractTableLines(buildOutput) {
-    const lines = buildOutput.split('\n');
-    const tableStartIndex = lines.findIndex(line => isTableHeaderLine(line));
-    const otherDataStartIndex = lines.findIndex(line => isOtherDataHeaderLine(line));
-    if (tableStartIndex === -1) {
-        throw new Error('No route information found in build output');
+// =============================================================================
+// Route Collector
+// =============================================================================
+async function readManifest(filePath) {
+    // Failing loud here is the script's whole job — these manifests are an internal Next.js contract.
+    let raw;
+    try {
+        raw = await fs.readFile(filePath, 'utf8');
+    } catch (error) {
+        throw new Error(`Failed to read ${path.basename(filePath)} at ${filePath}: ${error.message}. This usually means the Next.js manifest layout changed; update scripts/update-build-info.js.`);
     }
-
-    if (otherDataStartIndex === -1) {
-        throw new Error('No other data information found in build output');
+    try {
+        return JSON.parse(raw);
+    } catch (error) {
+        throw new Error(`Failed to parse ${path.basename(filePath)} at ${filePath}: ${error.message}. This usually means the Next.js manifest format changed; update scripts/update-build-info.js.`);
     }
-
-    return lines.slice(tableStartIndex, otherDataStartIndex);
 }
 
 /**
- * Checks if a line is the first line of the table
- * @param {string} line - Line to check
- * @returns {boolean} True if the line is the first line of the table, false otherwise
+ * Collects the app's routes and their render type from the build manifests
+ * (no stdout parsing required).
+ *
+ * - `app-path-routes-manifest.json` maps every entry file (`…/page`, `…/route`)
+ *   to its public route path — the full route list.
+ * - `prerender-manifest.json`'s `routes` lists the statically prerendered paths;
+ *   a route is Static (○) iff it appears there, otherwise Dynamic (ƒ).
+ *
+ * The internal `/_global-error` boundary is excluded to match the routes
+ * Next.js prints in its build summary.
+ *
+ * @param {Object} config - Configuration object
+ * @returns {Promise<Array<{route: string, type: string}>>} Routes sorted by path
  */
-function isTableHeaderLine(line) {
-    return line.includes('Route (app)') || line.includes('Route (pages)');
+async function collectRoutes(config) {
+    const distDir = path.join(config.projectRoot, config.distDir);
+    const pathRoutes = await readManifest(path.join(distDir, 'app-path-routes-manifest.json'));
+    const prerender = await readManifest(path.join(distDir, 'prerender-manifest.json'));
+
+    const staticRoutes = new Set(Object.keys(prerender.routes || {}));
+    const routes = [...new Set(Object.values(pathRoutes))]
+        .filter(route => route !== '/_global-error')
+        .sort((a, b) => a.localeCompare(b))
+        .map(route => ({ route, type: staticRoutes.has(route) ? 'Static' : 'Dynamic' }));
+
+    return routes;
 }
 
+// =============================================================================
+// Route Size Loader
+// =============================================================================
 /**
- * Checks if a line is the other data header line
- * @param {string} line - Line to check
- * @returns {boolean} True if the line is the other data header line, false otherwise
+ * Loads per-route bundle sizes from the Next.js build diagnostics.
+ *
+ * Next.js 16 (Turbopack) no longer prints sizes to stdout; instead it writes
+ * `<distDir>/diagnostics/route-bundle-stats.json`, which lists the first-load
+ * chunk paths for every route that ships client JS. API routes ship none and
+ * are absent from the file.
+ *
+ * The file only records uncompressed byte totals, but Next.js historically
+ * reported gzipped sizes, so we gzip each chunk ourselves (matching the old
+ * ~1.28 MB-magnitude numbers). We derive two numbers per route, mirroring the
+ * columns Next.js used to print:
+ *   - First Load JS: the gzipped total of the route's first-load chunks.
+ *   - Size: the route-specific portion, i.e. First Load JS minus the baseline
+ *     of chunks shared by every route.
+ *
+ * Note: Turbopack splits chunks differently than the pre-16 webpack build, so
+ * the shared baseline (and therefore Size) differs in magnitude from older
+ * BUILD.md snapshots even though First Load JS lines up.
+ *
+ * @param {Object} config - Configuration object
+ * @returns {Promise<Map<string, {size: number, firstLoad: number}>>} Route → gzipped byte sizes
  */
-function isOtherDataHeaderLine(line) {
-    return line.includes('First Load JS shared by all');
+async function loadRouteSizes(config) {
+    const statsPath = path.join(config.projectRoot, config.distDir, 'diagnostics', 'route-bundle-stats.json');
+    const stats = await readManifest(statsPath);
+
+    // Chunks are shared across many routes; gzip each one at most once.
+    const gzipCache = new Map();
+    const gzipSize = async chunkPath => {
+        if (!gzipCache.has(chunkPath)) {
+            const absPath = path.join(config.projectRoot, chunkPath);
+            let buf;
+            try {
+                buf = await fs.readFile(absPath);
+            } catch (error) {
+                // Missing chunk = manifest/disk mismatch; surfacing this is the whole point of the script.
+                throw new Error(`Chunk listed in route-bundle-stats.json is missing on disk: ${chunkPath} (${error.message}). This usually means Next.js changed how it emits or names chunks; update scripts/update-build-info.js.`);
+            }
+            gzipCache.set(chunkPath, zlib.gzipSync(buf).length);
+        }
+        return gzipCache.get(chunkPath);
+    };
+    const sumGzip = async chunkPaths => {
+        let total = 0;
+        for (const chunkPath of chunkPaths) total += await gzipSize(chunkPath);
+        return total;
+    };
+
+    // "Shared by all" = the chunks every route loads. Their summed size is the
+    // baseline we subtract to get each route's own contribution.
+    const sharedChunks = stats.reduce(
+        (shared, entry) => shared.filter(chunk => entry.firstLoadChunkPaths.includes(chunk)),
+        stats[0] ? [...stats[0].firstLoadChunkPaths] : []
+    );
+    const sharedBytes = await sumGzip(sharedChunks);
+
+    const sizes = new Map();
+    for (const entry of stats) {
+        const firstLoad = await sumGzip(entry.firstLoadChunkPaths);
+        sizes.set(entry.route, { firstLoad, size: Math.max(0, firstLoad - sharedBytes) });
+    }
+    return sizes;
 }
 
-// ================================================================================================
+// =============================================================================
 // Output Formatter
-// ================================================================================================
+// =============================================================================
 /**
- * Formats route lines into a markdown file content
- * @param {string[]} lines - Array of route lines from build output
+ * Formats the collected routes and their sizes into markdown table content
+ * @param {Array<{route: string, type: string}>} routes - Routes from collectRoutes
+ * @param {Map<string, {size: number, firstLoad: number}>} sizes - Sizes from loadRouteSizes
  * @returns {string} Formatted markdown file content
  */
-function formatTableLines(lines) {
+function formatTable(routes, sizes) {
     const tableLines = [];
 
-    tableLines.push('> Sizes are approximate and rounded to reduce build-output noise. Run `pnpm build` to see exact values.');
+    tableLines.push('> Sizes are gzipped, approximate, and rounded to reduce build-output noise. Next.js 16 (Turbopack) no longer prints sizes to stdout; these are derived by gzipping the first-load chunks listed in `.next/diagnostics/route-bundle-stats.json`. `Size` is First Load JS minus the chunks shared by all routes. Routes with no client JS (e.g. API routes) show `—`.');
     tableLines.push('');
     tableLines.push('| Type | Route | Size | First Load JS |');
     tableLines.push('|------|-------|------|---------------|');
 
-    for (const line of lines) {
-        // Parse route lines (e.g., "├ ○ /path  123 kB  456 kB")
-        // eslint-disable-next-line no-restricted-syntax -- Parsing Next.js build output requires regex pattern matching
-        const match = line.match(/[├└┌]\s+([○ƒ])\s+(\/[^\s]*)\s+(\S+\s+\S+)\s+(\S+.*)/);
-        if (match) {
-            const [, type, route, size, firstLoad] = match;
-            const typeSymbol = type === '○' ? 'Static' : 'Dynamic';
-            tableLines.push(`| ${typeSymbol} | \`${route}\` | ${roundSize(size)} | ${roundSize(firstLoad.trim())} |`);
-        }
+    for (const { route, type } of routes) {
+        const stat = sizes.get(route);
+        const size = stat ? formatBytes(stat.size) : '—';
+        const firstLoad = stat ? formatBytes(stat.firstLoad) : '—';
+        tableLines.push(`| ${type} | \`${route}\` | ${size} | ${firstLoad} |`);
     }
 
     return tableLines.join('\n');
 }
 
 /**
- * Rounds a size string to reduce noise from minor changes while keeping
- * enough resolution to understand dependency cost from the generated table.
- * - B values: rounded to nearest 10 B
- * - kB values: ceiled to nearest 10 kB, carrying to MB at 1000 kB
- * - MB values: rounded to 2 decimal places (~10 kB granularity)
- * @param {string} sizeStr - Size string like "14.7 kB" or "1.03 MB"
- * @returns {string} Rounded size string
+ * Formats a raw byte count into a rounded human-readable size, trading exact
+ * resolution for stability across builds:
+ * - < 1 kB: rounded to nearest 10 B
+ * - < 1000 kB: ceiled to nearest 10 kB
+ * - otherwise: MB with 2 decimal places (~10 kB granularity)
+ * @param {number} bytes - Raw byte count
+ * @returns {string} Rounded size string like "790 B", "160 kB", or "1.48 MB"
  */
-function roundSize(sizeStr) {
-    // eslint-disable-next-line no-restricted-syntax -- Parsing size strings requires regex
-    const match = sizeStr.match(/^([\d.]+)\s+(B|kB|MB)$/);
-    if (!match) return sizeStr;
-    const [, valueStr, unit] = match;
-
-    if (unit === 'B') return `${snapToStep(valueStr, 0, 10, Math.round)} B`;
-    if (unit === 'kB') {
-        const snapped = snapToStep(valueStr, 1, 100, Math.ceil) / 10;
-        if (snapped >= 1000) return `${(snapped / 1000).toFixed(2)} MB`;
-        return `${snapped} kB`;
-    }
-    if (unit === 'MB') {
-        return `${(snapToStep(valueStr, 3, 10, Math.round) / 1000).toFixed(2)} MB`;
-    }
-    return sizeStr;
+function formatBytes(bytes) {
+    if (bytes < 1024) return `${Math.round(bytes / 10) * 10} B`;
+    const kb = Math.ceil(bytes / 1024 / 10) * 10;
+    if (kb < 1000) return `${kb} kB`;
+    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
-/**
- * Snaps a parsed decimal value to the nearest step using the given rounding function.
- * @param {string} valueStr - Decimal string like "14.7" or "1.03"
- * @param {number} scale - Number of decimal places to preserve (passed to parseDecimalToScaledInt)
- * @param {number} step - Rounding granularity in scaled units
- * @param {(n: number) => number} roundFn - Rounding strategy (Math.round, Math.ceil, etc.)
- * @returns {number} Snapped scaled integer
- */
-function snapToStep(valueStr, scale, step, roundFn) {
-    const scaled = parseDecimalToScaledInt(valueStr, scale);
-    return roundFn(scaled / step) * step;
-}
-
-/**
- * Parses a decimal string into an integer with a fixed scale, avoiding
- * floating-point rounding artifacts during size normalization.
- * @param {string} valueStr - Decimal string like "14.7" or "1.03"
- * @param {number} scale - Number of decimal places to preserve
- * @returns {number} Integer scaled by 10^scale
- */
-function parseDecimalToScaledInt(valueStr, scale) {
-    const [wholePart, fractionalPart = ''] = valueStr.split('.');
-    const normalizedFraction = fractionalPart.padEnd(scale, '0').slice(0, scale);
-    return Number(wholePart) * 10 ** scale + Number(normalizedFraction || '0');
-}
-
-// ================================================================================================
+// =============================================================================
 // File Writer
-// ================================================================================================
+// =============================================================================
 /**
  * Writes content to a file asynchronously
  * @param {string} filePath - Path to output file
@@ -233,9 +257,9 @@ async function writeOutputFile(filePath, content) {
     }
 }
 
-// ================================================================================================
+// =============================================================================
 // Logger
-// ================================================================================================
+// =============================================================================
 /**
  * Creates a logger object with utility methods for formatted console output
  * @returns {Object} Logger object with logging methods
@@ -253,9 +277,9 @@ function createLogger() {
     };
 }
 
-// ================================================================================================
+// =============================================================================
 // Config
-// ================================================================================================
+// =============================================================================
 /**
  * Parses command line arguments and returns configuration object
  * @returns {Object} Configuration object
@@ -263,6 +287,7 @@ function createLogger() {
  * @returns {string} returns.buildCommand - Build command to execute (default: 'pnpm')
  * @returns {string[]} returns.buildArgs - Arguments to pass to build command (default: ['build'])
  * @returns {string} returns.projectRoot - Absolute path to project root directory
+ * @returns {string} returns.distDir - Build output directory holding the diagnostics (default: '.next')
  */
 function getConfig() {
     const nonFlagArgs = process.argv.slice(2).filter(arg => !arg.startsWith('--') && !arg.startsWith('-'));
@@ -272,5 +297,8 @@ function getConfig() {
         buildCommand: 'pnpm',
         buildArgs: ['build'],
         projectRoot: path.join(__dirname, '..'),
+        // `next build` runs with NODE_ENV=production, so it always emits to `.next`
+        // (next.config's `.next-dev` distDir only applies to the dev server).
+        distDir: '.next',
     };
 }
