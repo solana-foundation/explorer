@@ -6,7 +6,7 @@ import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { parseFeatureAccount, useFeatureAccount } from '@utils/parseFeatureAccount';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
@@ -50,6 +50,7 @@ type Props = Readonly<{
 const FeatureCard = ({ account }: Props) => {
     const feature = parseFeatureAccount(account);
     const featureInfo = useMemo(() => getFeatureInfo(feature.address), [feature.address]);
+    const isPending = feature.activatedAt === null;
 
     return (
         <BaseFeatureCard
@@ -57,6 +58,7 @@ const FeatureCard = ({ account }: Props) => {
             address={feature.address}
             activatedAt={feature.activatedAt}
             featureInfo={featureInfo}
+            isPending={isPending}
         />
     );
 };
@@ -66,7 +68,12 @@ const BaseFeatureCard = ({
     activatedAt,
     address,
     featureInfo,
-}: ReturnType<typeof parseFeatureAccount> & { account: Account; featureInfo?: FeatureInfoType }) => {
+    isPending = false,
+}: ReturnType<typeof parseFeatureAccount> & {
+    account: Account;
+    featureInfo?: FeatureInfoType;
+    isPending?: boolean;
+}) => {
     const { cluster, clusterInfo } = useCluster();
 
     let activatedAtSlot;
@@ -121,6 +128,8 @@ const BaseFeatureCard = ({
                 <td className="text-lg-end">
                     {activatedAt !== null ? (
                         <span className="badge bg-success">Active on {clusterName(cluster)}</span>
+                    ) : isPending ? (
+                        <span className="badge bg-warning text-dark">Pending activation on {clusterName(cluster)}</span>
                     ) : (
                         <code>Not yet activated on {clusterName(cluster)}</code>
                     )}
@@ -136,6 +145,7 @@ const BaseFeatureCard = ({
                         cluster={cluster}
                         clusterInfo={clusterInfo}
                         activatedAt={activatedAt}
+                        isPending={isPending}
                     />
                 </td>
             </tr>
@@ -152,24 +162,79 @@ const BaseFeatureCard = ({
     );
 };
 
+const AVERAGE_SLOT_TIME_MS = 400;
+
+function formatCountdown(totalSeconds: number): string {
+    if (totalSeconds <= 0) return 'any moment now';
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    const parts: string[] = [];
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    if (parts.length === 0 || seconds > 0) parts.push(`${seconds}s`);
+    return `~${parts.join(' ')}`;
+}
+
+function EpochCountdown({ remainingSlots }: { remainingSlots: bigint }) {
+    const estimatedSeconds = Math.ceil((Number(remainingSlots) * AVERAGE_SLOT_TIME_MS) / 1000);
+    const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
+
+    useEffect(() => {
+        const target = Date.now() + estimatedSeconds * 1000;
+        const tick = () => setSecondsLeft(Math.max(0, Math.ceil((target - Date.now()) / 1000)));
+        tick();
+        const timer = setInterval(tick, 1000);
+        return () => clearInterval(timer);
+    }, [estimatedSeconds]);
+
+    if (secondsLeft === null) return null;
+
+    const label = formatCountdown(secondsLeft);
+
+    return (
+        <span className="text-warning-emphasis" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {secondsLeft > 0 ? `${label} remaining` : label}
+        </span>
+    );
+}
+
 function ClusterActivationEpochAtCluster({
     cluster,
     clusterInfo,
     activatedAt,
+    isPending = false,
 }: {
     cluster: Cluster;
     clusterInfo: ClusterInfo | undefined;
     activatedAt: number | null;
+    isPending?: boolean;
 }) {
     if (cluster === Cluster.Custom) return null;
 
     if (activatedAt !== null && clusterInfo?.epochSchedule) {
-        const epoch = getEpochForSlot(clusterInfo?.epochSchedule, BigInt(activatedAt));
+        const epoch = getEpochForSlot(clusterInfo.epochSchedule, BigInt(activatedAt));
         return (
             <Link href={`/epoch/${epoch}?cluster=${cluster}`} className="epoch-link">
                 {clusterName(cluster)} Epoch {epoch.toString()}
             </Link>
         );
     }
+
+    if (isPending && clusterInfo?.epochInfo) {
+        const nextEpoch = clusterInfo.epochInfo.epoch + 1n;
+        const remainingSlots = clusterInfo.epochInfo.slotsInEpoch - clusterInfo.epochInfo.slotIndex;
+        return (
+            <div>
+                <Link href={`/epoch/${nextEpoch}?cluster=${cluster}`} className="epoch-link">
+                    {clusterName(cluster)} Epoch {nextEpoch.toString()}
+                </Link>
+                <div className="mt-1">
+                    <EpochCountdown remainingSlots={remainingSlots} />
+                </div>
+            </div>
+        );
+    }
+
     return <code>No Activation Epoch</code>;
 }
