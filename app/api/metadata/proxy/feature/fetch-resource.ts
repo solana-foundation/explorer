@@ -88,7 +88,7 @@ async function executeHop(url: URL, headers: Headers, timeout: number, size: num
             throw statusError(502, `Upstream returned ${response.status}`);
         }
 
-        return { kind: 'done', value: await processResponse(response, size) };
+        return { kind: 'done', value: await processResponse(response, size, url) };
     } finally {
         // By this point the body has either been fully consumed (success
         // path), cancelled (size pre-check), or abandoned (errors in
@@ -144,13 +144,20 @@ async function doFetch(url: URL, headers: Headers, timeout: number, dispatcher: 
     }
 }
 
-async function processResponse(response: Response, size: number): Promise<FetchResourceResult> {
+async function processResponse(response: Response, size: number, url: URL): Promise<FetchResourceResult> {
     // Pre-check Content-Length when present so oversize bodies fail fast.
     // A malformed header (e.g. "abc") parses to NaN; ignore it and fall through
     // to readBodyWithLimit, which enforces the limit on the actual byte count.
     const contentLength = Number(response.headers.get('content-length'));
     if (Number.isFinite(contentLength) && contentLength > size) {
         await response.body?.cancel();
+        // Warning, not an exception: oversize content is expected upstream input,
+        // not an app fault. Reported to Sentry so we can gauge how often the size
+        // limit bites and whether it needs tuning.
+        Logger.warn('[api:metadata-proxy] Resource exceeds max size (Content-Length)', {
+            sentry: true,
+            sentryExtras: { declaredContentLength: contentLength, host: url.host, maxSize: size },
+        });
         throw statusError(413, `Content-Length ${contentLength} exceeds max size ${size}`);
     }
 
@@ -158,7 +165,15 @@ async function processResponse(response: Response, size: number): Promise<FetchR
     try {
         buffered = await readBodyWithLimit(response, size);
     } catch (e) {
-        if (matchMaxSizeError(e)) throw statusError(413, 'Streamed body exceeds max size', { cause: e });
+        if (matchMaxSizeError(e)) {
+            // Server omitted or understated Content-Length; the limit was hit
+            // mid-stream. Reported as a warning for the same reason as above.
+            Logger.warn('[api:metadata-proxy] Resource exceeds max size (streamed)', {
+                sentry: true,
+                sentryExtras: { host: url.host, maxSize: size },
+            });
+            throw statusError(413, 'Streamed body exceeds max size', { cause: e });
+        }
         throw e;
     }
     // Re-wrap so processors keep using `.arrayBuffer()` / `.json()` / `.text()`.

@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 const USER_AGENT = process.env.NEXT_PUBLIC_METADATA_USER_AGENT ?? 'Solana Explorer';
 const MAX_SIZE = process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE
     ? Number(process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE)
-    : 1_000_000; // 1 000 000 bytes
+    : 10_000_000; // 10 000 000 bytes
 const TIMEOUT = process.env.NEXT_PUBLIC_METADATA_TIMEOUT ? Number(process.env.NEXT_PUBLIC_METADATA_TIMEOUT) : 10_000;
 
 // Prevent proxied content (e.g. SVG with embedded scripts) from executing

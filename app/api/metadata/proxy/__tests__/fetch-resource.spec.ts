@@ -93,6 +93,10 @@ describe('fetchResource', () => {
         await expect(() => {
             return fetchResource(uri, headers, 100, 100);
         }).rejects.toMatchObject({ status: 413 });
+        expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Resource exceeds max size (Content-Length)', {
+            sentry: true,
+            sentryExtras: { declaredContentLength: 50_000, host: 'hello.world', maxSize: 100 },
+        });
     });
 
     it('should throw exception when streamed body exceeds limit without Content-Length', async () => {
@@ -112,6 +116,10 @@ describe('fetchResource', () => {
         await expect(() => {
             return fetchResource(uri, headers, 100, 100);
         }).rejects.toMatchObject({ status: 413 });
+        expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Resource exceeds max size (streamed)', {
+            sentry: true,
+            sentryExtras: { host: 'hello.world', maxSize: 100 },
+        });
     });
 
     it('should handle AbortSignal', async () => {
