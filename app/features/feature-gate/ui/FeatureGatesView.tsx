@@ -40,7 +40,7 @@ export function FeatureGatesView() {
                     <CardHeader>
                         <CardTitle>Custom cluster</CardTitle>
                     </CardHeader>
-                    <CardContent className="e-text-sm e-text-dk-gray-300">
+                    <CardContent className="e-text-sm e-text-dark-foreground">
                         Enumeration of feature gates is not available on a custom cluster.
                     </CardContent>
                 </Card>
@@ -61,7 +61,7 @@ export function FeatureGatesView() {
         <div className="e-mx-auto e-max-w-screen-xl e-px-4 e-py-4">
             <div className="e-mb-4 e-flex e-items-baseline e-gap-3">
                 <h1 className="e-text-2xl e-font-semibold e-text-dk-white">Feature Gates</h1>
-                <span className="e-text-sm e-text-dk-gray-400">{clusterName(cluster)}</span>
+                <span className="e-text-sm e-text-dark-foreground">{clusterName(cluster)}</span>
             </div>
 
             <Tabs value={tab} onValueChange={value => setTab(value as TabValue)}>

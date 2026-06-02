@@ -122,6 +122,7 @@ const config: Config = {
                     accent: '#1dd79b',
                     background: '#141816',
                     border: '#282d2b',
+                    foreground: '#e5ebe9',
                     'muted-foreground': '#698582',
                 },
                 // TODO: replace with e-text-neutral-400
