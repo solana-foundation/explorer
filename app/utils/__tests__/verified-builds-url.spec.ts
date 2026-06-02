@@ -8,9 +8,7 @@ describe('normalizeRepoUrl', () => {
     });
 
     it('should strip a mid-path .git/ so /tree/<sha> resolves on GitHub', () => {
-        expect(normalizeRepoUrl('https://github.com/foo/bar.git/tree/abc')).toBe(
-            'https://github.com/foo/bar/tree/abc',
-        );
+        expect(normalizeRepoUrl('https://github.com/foo/bar.git/tree/abc')).toBe('https://github.com/foo/bar/tree/abc');
     });
 
     it('should return the URL unchanged when it has no .git suffix', () => {
