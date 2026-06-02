@@ -42,7 +42,7 @@ export function DeveloperResources({ resources = DEFAULT_RESOURCES }: { resource
     return (
         <div className="card">
             <div className="card-body">
-                <div className="card-title d-flex justify-content-between border-bottom border-gray-300 pb-2">
+                <div className="e-mb-2 e-flex e-justify-between e-border-0 e-border-b e-border-solid e-border-dark-border e-pb-1.5">
                     <div className="me-4">Kickstart your development journey on Solana</div>
                     <div>
                         Find more on{' '}

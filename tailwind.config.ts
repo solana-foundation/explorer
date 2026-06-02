@@ -121,6 +121,7 @@ const config: Config = {
                 dark: {
                     accent: '#1dd79b',
                     background: '#141816',
+                    border: '#282d2b',
                     'muted-foreground': '#698582',
                 },
                 // TODO: replace with e-text-neutral-400
