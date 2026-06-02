@@ -65,9 +65,15 @@ export function BaseNavigationTabs({
             const headerEl = wrapperRef.current ?? tablistRef.current;
             if (!target || !headerEl) return;
             const offset = headerEl.getBoundingClientRect().height;
+            let naturalTop = 0;
+            let el: HTMLElement | null = target;
+            while (el) {
+                naturalTop += el.offsetTop;
+                el = el.offsetParent as HTMLElement | null;
+            }
             window.scrollTo({
                 behavior: 'smooth',
-                top: target.getBoundingClientRect().top + window.scrollY - offset - SCROLL_OFFSET,
+                top: naturalTop - offset - SCROLL_OFFSET,
             });
         },
         [tablistRef],
