@@ -6,13 +6,6 @@ import { cn } from '@/app/components/shared/utils';
 // `ui` picks the visual lineage. Default is "tw" since most consumers already use Tailwind — pass ui="dashkit" explicitly when migrating Bootstrap `.card*` callsites; the "dashkit" branch + dk-* tokens get deleted once migration completes.
 type UI = 'dashkit' | 'tw';
 
-const BaseCardUIContext = React.createContext<UI>('tw');
-
-const useResolvedUI = (override?: UI | null) => {
-    const ctx = React.useContext(BaseCardUIContext);
-    return override ?? ctx;
-};
-
 const cardVariants = cva(['e-relative e-flex e-min-w-0 e-flex-col e-break-words'], {
     compoundVariants: [
         { class: 'e-px-6 e-py-2.5', ui: 'tw', variant: 'default' },
@@ -49,9 +42,7 @@ export interface BaseCardProps extends React.HTMLAttributes<HTMLDivElement>, Var
 
 const BaseCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
     ({ className, flex, marginBottom, ui, variant, ...props }, ref) => (
-        <BaseCardUIContext.Provider value={ui ?? 'tw'}>
-            <div ref={ref} className={cn(cardVariants({ flex, marginBottom, ui, variant }), className)} {...props} />
-        </BaseCardUIContext.Provider>
+        <div ref={ref} className={cn(cardVariants({ flex, marginBottom, ui, variant }), className)} {...props} />
     ),
 );
 BaseCard.displayName = 'BaseCard';
@@ -73,7 +64,7 @@ interface UIPropOverride {
 
 const BaseCardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & UIPropOverride>(
     ({ className, ui, ...props }, ref) => (
-        <div ref={ref} className={cn(headerVariants({ ui: useResolvedUI(ui) }), className)} {...props} />
+        <div ref={ref} className={cn(headerVariants({ ui: ui }), className)} {...props} />
     ),
 );
 BaseCardHeader.displayName = 'BaseCardHeader';
@@ -90,7 +81,7 @@ const bodyVariants = cva([], {
 
 const BaseCardBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & UIPropOverride>(
     ({ className, ui, ...props }, ref) => (
-        <div ref={ref} className={cn(bodyVariants({ ui: useResolvedUI(ui) }), className)} {...props} />
+        <div ref={ref} className={cn(bodyVariants({ ui: ui }), className)} {...props} />
     ),
 );
 BaseCardBody.displayName = 'BaseCardBody';
@@ -107,7 +98,7 @@ const footerVariants = cva([], {
 
 const BaseCardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & UIPropOverride>(
     ({ className, ui, ...props }, ref) => (
-        <div ref={ref} className={cn(footerVariants({ ui: useResolvedUI(ui) }), className)} {...props} />
+        <div ref={ref} className={cn(footerVariants({ ui: ui }), className)} {...props} />
     ),
 );
 BaseCardFooter.displayName = 'BaseCardFooter';
@@ -124,7 +115,7 @@ const titleVariants = cva([], {
 
 const BaseCardTitle = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & UIPropOverride>(
     ({ className, ui, ...props }, ref) => (
-        <div ref={ref} className={cn(titleVariants({ ui: useResolvedUI(ui) }), className)} {...props} />
+        <div ref={ref} className={cn(titleVariants({ ui: ui }), className)} {...props} />
     ),
 );
 BaseCardTitle.displayName = 'BaseCardTitle';
