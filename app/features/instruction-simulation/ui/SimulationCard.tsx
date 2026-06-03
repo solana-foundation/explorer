@@ -40,7 +40,7 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
         return (
             <SimulationCardShell>
                 <CardBody ui="dashkit" className="e-text-center">
-                    <span className="spinner-grow spinner-grow-sm e-mr-2"></span>
+                    <span className="e-spinner-grow e-spinner-grow-sm e-mr-2"></span>
                     Simulating
                 </CardBody>
             </SimulationCardShell>
