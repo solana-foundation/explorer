@@ -160,7 +160,7 @@ export function BaseSearch({
                         align="start"
                         sideOffset={4}
                         className={cn(
-                            'e-z-10 e-rounded-md e-shadow-2xl [border-style:solid]',
+                            'e-z-50 e-rounded-md e-shadow-2xl [border-style:solid]',
                             'e-w-[var(--radix-popover-trigger-width)]',
                             'e-border e-border-heavy-metal-950 e-bg-heavy-metal-800',
                         )}
