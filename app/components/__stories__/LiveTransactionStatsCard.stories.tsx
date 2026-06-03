@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { nextjsParameters, withStats } from '@storybook-config/decorators';
+import { nextjsParameters, withMockRpc, withStats } from '@storybook-config/decorators';
 
 import { LiveTransactionStatsCard } from '../LiveTransactionStatsCard';
 
 const meta: Meta<typeof LiveTransactionStatsCard> = {
     component: LiveTransactionStatsCard,
-    decorators: [withStats],
+    decorators: [withMockRpc, withStats],
     parameters: nextjsParameters,
     tags: ['autodocs'],
     title: 'Components/LiveTransactionStatsCard',
