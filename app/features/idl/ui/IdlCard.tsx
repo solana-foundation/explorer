@@ -122,7 +122,7 @@ export function IdlCard({ programId }: { programId: string }) {
                                 className="btn btn-outline-primary btn-sm e-whitespace-nowrap"
                             >
                                 Full documentation
-                                <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                                <ExternalLink className="e-align-text-top e-ml-1.5" size={13} />
                             </a>
                         </div>
                     </div>
