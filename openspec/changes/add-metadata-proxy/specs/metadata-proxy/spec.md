@@ -66,7 +66,7 @@ A redirect status without a `Location` header SHALL be a `502`; a redirect that 
 
 ### Requirement: The proxy SHALL enforce a configurable per-request size cap
 
-The proxy SHALL reject any upstream body exceeding a per-request byte cap with `413`, where the cap defaults to 3 MB (3,000,000 bytes) — chosen to sit below Vercel's ~4.5 MB buffered-response limit and to bound memory/egress on this never-cached route — and is overridable via `NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE`.
+The proxy SHALL reject any upstream body exceeding a per-request byte cap with `413`, where the cap defaults to 3 MB (3,000,000 bytes) — chosen to sit below Vercel's ~4.5 MB buffered-response limit and to bound the memory the function buffers — and is overridable via `NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE`.
 
 The cap MUST be enforced everywhere the size becomes knowable so no oversize body is fully buffered: the `Content-Length` pre-check, the streamed read (which aborts mid-stream when `Content-Length` is omitted or understated), the `fetch()`-rejection path, and the decode step. A malformed `Content-Length` (parsing to `NaN`) SHALL be ignored by the pre-check and fall through to the streamed read.
 
@@ -87,7 +87,7 @@ The cap MUST be enforced everywhere the size becomes knowable so no oversize bod
 
 ### Requirement: The proxy SHALL bound each request with a timeout
 
-Each hop's `fetch` SHALL be aborted after a configurable timeout, defaulting to 10,000 ms and overridable via `NEXT_PUBLIC_METADATA_TIMEOUT`. A timed-out or aborted upstream fetch SHALL surface as `504`.
+Each hop's `fetch` SHALL be aborted after a configurable timeout, defaulting to 10,000 ms and overridable via `NEXT_PUBLIC_METADATA_TIMEOUT`. A timed-out or aborted upstream fetch SHALL surface as `504`. In addition, the route SHALL declare a platform-level `maxDuration` (15 s) as a backstop that bounds the whole invocation independently of the per-hop timeout — covering DNS resolution and multi-hop redirect chains the per-hop timeout does not.
 
 #### Scenario: Upstream is too slow
 
@@ -117,7 +117,7 @@ The proxy SHALL return only responses whose `Content-Type` is `application/json`
 
 The proxy response MUST carry `Content-Security-Policy: sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'none'` and `X-Content-Type-Options: nosniff`, so proxied SVG/HTML cannot execute scripts if the proxy URL is opened directly as a top-level document.
 
-The proxy SHALL omit `Content-Length` from its response (to keep the response a "simple" CORS response that browsers accept without `Access-Control-Allow-Origin`) and SHALL pass through `cache-control`, `content-type`, and `etag` from the upstream (with safe defaults when absent). The client-facing error body SHALL use the canonical `STATUS_MESSAGES` text, decoupled from the internal per-throw-site message preserved for logging.
+The proxy SHALL omit `Content-Length` from its response (to keep the response a "simple" CORS response that browsers accept without `Access-Control-Allow-Origin`) and SHALL forward `content-type` and `etag` from the upstream (with safe defaults when absent). It SHALL set its own caching headers (see the caching requirement below) rather than forwarding the upstream `cache-control`. The client-facing error body SHALL use the canonical `STATUS_MESSAGES` text, decoupled from the internal per-throw-site message preserved for logging.
 
 #### Scenario: Proxied SVG opened directly
 
@@ -128,6 +128,21 @@ The proxy SHALL omit `Content-Length` from its response (to keep the response a 
 
 - **WHEN** an upstream that sends no `Access-Control-Allow-Origin` is proxied
 - **THEN** the proxy response SHALL omit `Content-Length` so the browser accepts it as a simple CORS response
+
+### Requirement: The proxy SHALL cache successful responses at the edge
+
+Successful (2xx) responses SHALL be cached on Vercel's CDN via `Vercel-CDN-Cache-Control: public, s-maxage=86400, stale-while-revalidate=604800`, with a browser-facing `Cache-Control: public, max-age=300`. The cache key is the request URL (including the `uri` query parameter), so each distinct upstream resource is cached independently. The proxy SHALL NOT forward the upstream `cache-control` (it is frequently `no-store`/`no-cache`/`private`, any of which would disqualify the response from the CDN), and non-2xx responses SHALL NOT carry caching headers.
+
+#### Scenario: Successful response is edge-cacheable
+
+- **WHEN** the proxy serves a 2xx response
+- **THEN** it SHALL set `Vercel-CDN-Cache-Control: public, s-maxage=86400, stale-while-revalidate=604800` and `Cache-Control: public, max-age=300`
+- **AND** SHALL NOT forward the upstream `cache-control`
+
+#### Scenario: Errors are not cached
+
+- **WHEN** the proxy responds with a non-2xx status
+- **THEN** the response SHALL NOT carry `s-maxage` / `stale-while-revalidate` caching headers
 
 ### Requirement: The proxy SHALL report size-cap hits and network failures to Sentry as warnings
 
