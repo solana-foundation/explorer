@@ -53,7 +53,7 @@ export function DeveloperResources({ resources = DEFAULT_RESOURCES }: { resource
                 </div>
             </div>
             <CardBody ui="dashkit">
-                <div className="d-flex gap-4 pb-3 overflow-auto">
+                <div className="d-flex gap-4 pb-3 e-overflow-auto">
                     {resources.map(resource => (
                         <ResourceCard key={resource.link} {...resource} />
                     ))}
@@ -92,7 +92,7 @@ function ResourceCard({ title, description, image, link, imageBackground }: Reso
             </div>
             <div className="flex flex-col">
                 <p className="mb-1">{title}</p>
-                <p className="text-muted mb-2 text-wrap line-clamp-3">{description}</p>
+                <p className="text-muted mb-2 e-whitespace-normal line-clamp-3">{description}</p>
             </div>
         </div>
     );

@@ -102,7 +102,7 @@ function SysvarAccountSlotHistory({
             <AccountBalanceRow account={account} />
 
             <tr>
-                <td className="align-top">
+                <td className="e-align-top">
                     Slot History <span className="text-muted">(previous 100 slots)</span>
                 </td>
                 <td className="text-lg-end font-monospace">

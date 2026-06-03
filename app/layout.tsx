@@ -69,7 +69,7 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                                             <div className="container my-3 d-xl-none">
                                                 <SearchBar />
                                             </div>
-                                            <div className="container my-3 d-lg-none">
+                                            <div className="container my-3 lg:e-hidden">
                                                 <ClusterStatusButton />
                                             </div>
                                             {children}

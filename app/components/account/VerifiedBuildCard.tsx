@@ -186,7 +186,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
             return (
                 <td className="text-lg-end">
                     {value && (value as string).length > 1 ? (
-                        <div className="d-flex align-items-center justify-content-end">
+                        <div className="d-flex align-items-center e-justify-end">
                             <Copyable text={value as string}>
                                 <span />
                             </Copyable>

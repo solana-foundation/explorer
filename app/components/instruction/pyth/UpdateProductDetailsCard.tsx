@@ -66,10 +66,10 @@ export default function UpdateProductDetailsCard({
                     Attributes <span className="text-muted">(JSON)</span>
                 </td>
                 <td className="text-lg-end">
-                    <div className="d-none d-lg-flex align-items-center justify-content-end">
+                    <div className="d-none d-lg-flex align-items-center e-justify-end">
                         <Content />
                     </div>
-                    <div className="d-flex d-lg-none align-items-center">
+                    <div className="d-flex lg:e-hidden align-items-center">
                         <Content />
                     </div>
                 </td>
