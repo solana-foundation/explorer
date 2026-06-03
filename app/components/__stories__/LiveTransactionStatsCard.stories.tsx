@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { nextjsParameters, withMockRpc, withStats } from '@storybook-config/decorators';
+import { nextjsParameters, withStats } from '@storybook-config/decorators';
+import { withMockRpc } from '@storybook-config/responsive-decorators';
 
 import { LiveTransactionStatsCard } from '../LiveTransactionStatsCard';
 

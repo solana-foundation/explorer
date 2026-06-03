@@ -1,12 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import {
-    nextjsParameters,
-    responsiveDocsPage,
-    withMockRpc,
-    withStats,
-    withViewportFromGlobal,
-} from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS } from 'storybook/viewport';
+import { nextjsParameters, withStats } from '@storybook-config/decorators';
+import { INITIAL_VIEWPORTS, withMockRpc, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 
 import { LiveTransactionStatsCard } from '../LiveTransactionStatsCard';
 
@@ -16,7 +10,6 @@ const meta: Meta<typeof LiveTransactionStatsCard> = {
     decorators: [withMockRpc, withViewportFromGlobal, withStats],
     parameters: {
         ...nextjsParameters,
-        docs: { page: responsiveDocsPage },
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs'],

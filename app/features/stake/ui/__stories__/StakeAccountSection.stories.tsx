@@ -10,9 +10,9 @@ import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 import {
     nextjsParameters,
     withClusterAndAccounts,
-    withMockRpc,
     withTokenInfoBatch,
 } from '../../../../../.storybook/decorators';
+import { withMockRpc } from '../../../../../.storybook/responsive-decorators';
 import { EPOCH_NEVER_SET } from '../../lib/constants';
 import type { StakeAccountInfo, StakeAccountType } from '../../lib/validators';
 import { StakeAccountSection } from '../StakeAccountSection';

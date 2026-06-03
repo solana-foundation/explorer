@@ -4,8 +4,8 @@ import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsPr
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { MockHistoryProvider } from '@storybook-config/__mocks__/MockHistoryProvider';
 import { MockTransactionsProvider } from '@storybook-config/__mocks__/MockTransactionsProvider';
-import { nextjsParameters, withMockRpc, withViewportFromGlobal } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS } from 'storybook/viewport';
+import { nextjsParameters } from '@storybook-config/decorators';
+import { INITIAL_VIEWPORTS, withMockRpc, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 
 import { TransactionHistoryCard } from '../TransactionHistoryCard';
 

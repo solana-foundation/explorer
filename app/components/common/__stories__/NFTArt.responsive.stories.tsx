@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { responsiveDocsPage, withViewportFromGlobal } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS } from 'storybook/viewport';
+import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 
 import { NFTImageContent } from '../NFTArt';
 
@@ -10,7 +9,6 @@ const SAMPLE_URI = 'https://arweave.net/sample-image.png';
 const meta = {
     decorators: [withViewportFromGlobal],
     parameters: {
-        docs: { page: responsiveDocsPage },
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs'],

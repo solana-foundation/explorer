@@ -2,18 +2,10 @@ import type { Account } from '@providers/accounts';
 import { address } from '@solana/kit';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import type { Meta, StoryObj } from '@storybook/react';
-import { INITIAL_VIEWPORTS } from 'storybook/viewport';
-
 import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
-import {
-    nextjsParameters,
-    responsiveDocsPage,
-    withClusterAndAccounts,
-    withMockRpc,
-    withTokenInfoBatch,
-    withViewportFromGlobal,
-} from '../../../../../.storybook/decorators';
+import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
+import { INITIAL_VIEWPORTS, withMockRpc, withViewportFromGlobal } from '../../../../../.storybook/responsive-decorators';
 import { EPOCH_NEVER_SET } from '../../lib/constants';
 import type { StakeAccountInfo, StakeAccountType } from '../../lib/validators';
 import { StakeAccountSection } from '../StakeAccountSection';
@@ -66,7 +58,6 @@ const meta = {
     decorators: [withMockRpc, withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
     parameters: {
         ...nextjsParameters,
-        docs: { page: responsiveDocsPage },
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs'],
