@@ -32,7 +32,7 @@ const cardVariants = cva(['e-relative e-flex e-min-w-0 e-flex-col e-break-words'
         },
         ui: {
             dashkit:
-                'e-mb-dk-4 e-rounded-dk-lg e-border e-border-solid e-border-dk-card-outline-dark e-bg-dk-gray-800-dark e-shadow-dk-card',
+                'e-mb-6 e-rounded-lg e-border e-border-solid e-border-dk-card-outline-dark e-bg-dk-gray-800-dark e-shadow-dk-card',
             tw: 'e-rounded-xl e-border e-border-solid e-border-heavy-metal-950 e-bg-heavy-metal-800 e-text-neutral-200',
         },
         // Card-level padding; only meaningful when ui="tw" (matches the legacy OKLCH Card's `variant` prop).
@@ -82,7 +82,7 @@ const bodyVariants = cva([], {
     defaultVariants: { ui: 'tw' },
     variants: {
         ui: {
-            dashkit: 'e-flex-auto e-p-dk-4',
+            dashkit: 'e-flex-auto e-p-6',
             tw: 'e-p-6 e-pt-0',
         },
     },
