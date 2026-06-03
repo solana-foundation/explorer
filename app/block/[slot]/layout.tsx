@@ -86,13 +86,13 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                     <TableCardBody>
                         <tr>
                             <td className="e-w-full">Blockhash</td>
-                            <td className="e-text-right font-monospace">
+                            <td className="font-monospace e-text-right">
                                 <span>{block.blockhash}</span>
                             </td>
                         </tr>
                         <tr>
                             <td className="e-w-full">Slot</td>
-                            <td className="e-text-right font-monospace">
+                            <td className="font-monospace e-text-right">
                                 <Slot slot={slotNumber} />
                             </td>
                         </tr>
@@ -132,20 +132,20 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         {epoch !== undefined && (
                             <tr>
                                 <td className="e-w-full">Epoch</td>
-                                <td className="e-text-right font-monospace">
+                                <td className="font-monospace e-text-right">
                                     <Epoch epoch={epoch} link />
                                 </td>
                             </tr>
                         )}
                         <tr>
                             <td className="e-w-full">Parent Blockhash</td>
-                            <td className="e-text-right font-monospace">
+                            <td className="font-monospace e-text-right">
                                 <span>{block.previousBlockhash}</span>
                             </td>
                         </tr>
                         <tr>
                             <td className="e-w-full">Parent Slot</td>
-                            <td className="e-text-right font-monospace">
+                            <td className="font-monospace e-text-right">
                                 <Slot slot={block.parentSlot} link />
                             </td>
                         </tr>
@@ -160,7 +160,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         {childSlot !== undefined && (
                             <tr>
                                 <td className="e-w-full">Child Slot</td>
-                                <td className="e-text-right font-monospace">
+                                <td className="font-monospace e-text-right">
                                     <Slot slot={childSlot} link />
                                 </td>
                             </tr>
@@ -175,27 +175,27 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         )}
                         <tr>
                             <td className="e-w-full">Processed Transactions</td>
-                            <td className="e-text-right font-monospace">
+                            <td className="font-monospace e-text-right">
                                 <span>{block.transactions.length}</span>
                             </td>
                         </tr>
                         {showSuccessfulCount && (
                             <tr>
                                 <td className="e-w-full">Successful Transactions</td>
-                                <td className="e-text-right font-monospace">
+                                <td className="font-monospace e-text-right">
                                     <span>{successfulTxs.length}</span>
                                 </td>
                             </tr>
                         )}
                         <tr>
                             <td className="e-w-full">Total Compute Units Consumed</td>
-                            <td className="e-text-right font-monospace">
+                            <td className="font-monospace e-text-right">
                                 <span>{totalCUs.toLocaleString()}</span>
                             </td>
                         </tr>
                         <tr>
                             <td className="e-w-full">Transaction Cost Utilization</td>
-                            <td className="e-text-right font-monospace">
+                            <td className="font-monospace e-text-right">
                                 <span>
                                     {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
                                     {Math.round((totalCostUnits / maxComputeUnits) * 100)}%)
@@ -204,7 +204,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         </tr>
                         <tr>
                             <td className="e-w-full">Reserved Compute Units</td>
-                            <td className="e-text-right font-monospace">
+                            <td className="font-monospace e-text-right">
                                 <span>
                                     {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
                                     {Math.round((totalRequestedCUs / maxComputeUnits) * 100)}%)

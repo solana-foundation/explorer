@@ -212,7 +212,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
             {accountFilter !== null && (
                 <CardBody ui="dashkit">
                     Showing transactions which load account:
-                    <div className="e-inline-block e-ml-1.5">
+                    <div className="e-ml-1.5 e-inline-block">
                         <Address pubkey={accountFilter} link />
                     </div>
                 </CardBody>
@@ -360,7 +360,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                                       return (
                                                           <div key={i} className="e-flex e-items-center">
                                                               <Address pubkey={new PublicKey(programId)} link />
-                                                              <span className="e-ml-1.5 text-muted">{`(${count})`}</span>
+                                                              <span className="text-muted e-ml-1.5">{`(${count})`}</span>
                                                           </div>
                                                       );
                                                   })}

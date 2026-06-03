@@ -6,7 +6,11 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
-import { INITIAL_VIEWPORTS, withMockRpc, withViewportFromGlobal } from '../../../../../.storybook/responsive-decorators';
+import {
+    INITIAL_VIEWPORTS,
+    withMockRpc,
+    withViewportFromGlobal,
+} from '../../../../../.storybook/responsive-decorators';
 import { EPOCH_NEVER_SET } from '../../lib/constants';
 import type { StakeAccountInfo, StakeAccountType } from '../../lib/validators';
 import { StakeAccountSection } from '../StakeAccountSection';

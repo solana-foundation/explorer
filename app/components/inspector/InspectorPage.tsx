@@ -476,7 +476,7 @@ function OverviewCard({
             <div className="card">
                 <CardHeader ui="dashkit" className="e-gap-2">
                     <h3 className="card-header-title">Transaction Overview</h3>
-                    <button className="btn btn-sm e-flex btn-white" onClick={onClear}>
+                    <button className="btn btn-sm btn-white e-flex" onClick={onClear}>
                         Clear
                     </button>
                     <DownloadDropdown filename={signature || 'signature'} data={raw} />
@@ -485,7 +485,7 @@ function OverviewCard({
                     <tr>
                         <td>Serialized Size</td>
                         <td className="e-text-right">
-                            <div className="e-flex e-items-end e-flex-col">
+                            <div className="e-flex e-flex-col e-items-end">
                                 {size} bytes
                                 <span className={size <= PACKET_DATA_SIZE ? 'text-muted' : 'text-warning'}>
                                     Max transaction size is {PACKET_DATA_SIZE} bytes
@@ -496,7 +496,7 @@ function OverviewCard({
                     <tr>
                         <td>Fees</td>
                         <td className="e-text-right">
-                            <div className="e-flex e-items-end e-flex-col">
+                            <div className="e-flex e-flex-col e-items-end">
                                 <SolBalance lamports={fee} />
                                 <span className="text-muted">
                                     {`Each signature costs ${DEFAULT_FEES.lamportsPerSignature} lamports`}
@@ -507,7 +507,7 @@ function OverviewCard({
 
                     <tr>
                         <td>
-                            <div className="e-flex e-items-start e-flex-col">
+                            <div className="e-flex e-flex-col e-items-start">
                                 Fee payer
                                 <span className="e-mt-[3px]">
                                     <span className="badge bg-info-soft e-mr-1.5">Signer</span>

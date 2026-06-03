@@ -194,7 +194,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         <h3 className="card-header-title">Token History</h3>
                     </CardHeader>
                     <CardBody ui="dashkit">
-                        <p className="text-muted e-text-center e-mb-0">
+                        <p className="text-muted e-mb-0 e-text-center">
                             Click the button below to load token transaction history
                         </p>
                     </CardBody>
@@ -421,7 +421,7 @@ function InstructionDetails({ instructionType, tx }: { instructionType: Instruct
                             e.preventDefault();
                             setExpanded(!expanded);
                         }}
-                        className="e-cursor-pointer e-mr-1.5"
+                        className="e-mr-1.5 e-cursor-pointer"
                     >
                         {expanded ? (
                             <MinusSquare className="align-text-top" size={13} />
@@ -478,7 +478,7 @@ function InstructionDetailsCell({
         return (
             <td>
                 <span
-                    className="btn btn-sm btn-outline-primary e-py-0 e-px-[3px] e-leading-none"
+                    className="btn btn-sm btn-outline-primary e-px-[3px] e-py-0 e-leading-none"
                     role="button"
                     onClick={handleLoadClick}
                 >
@@ -501,7 +501,7 @@ function InstructionDetailsCell({
         return (
             <td>
                 <span
-                    className="btn btn-sm btn-outline-warning e-py-0 e-px-[3px] e-leading-none"
+                    className="btn btn-sm btn-outline-warning e-px-[3px] e-py-0 e-leading-none"
                     role="button"
                     onClick={handleLoadClick}
                 >

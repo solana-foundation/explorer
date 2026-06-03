@@ -54,7 +54,7 @@ export function TokenExtensionsCard({
                 analyticsSection="extensions_section"
                 refresh={() => refresh(new PublicKey(address), 'parsed')}
             />
-            <CardBody ui="dashkit" className="!e-p-0 e-overflow-x-scroll">
+            <CardBody ui="dashkit" className="e-overflow-x-scroll !e-p-0">
                 <TokenExtensionsSection
                     address={address}
                     decimals={decimals}
