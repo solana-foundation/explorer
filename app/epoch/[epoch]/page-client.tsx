@@ -12,6 +12,7 @@ import { ClusterStatus } from '@utils/cluster';
 import { displayTimestampUtc } from '@utils/date';
 import React from 'react';
 
+import { CardHeader } from '@/app/shared/ui/Card';
 import { getFirstSlotInEpoch, getLastSlotInEpoch } from '@/app/utils/epoch-schedule';
 
 type Props = {
@@ -79,9 +80,9 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
     return (
         <>
             <div className="card">
-                <div className="card-header">
+                <CardHeader ui="dashkit">
                     <h3 className="card-header-title mb-0 d-flex align-items-center">Overview</h3>
-                </div>
+                </CardHeader>
                 <TableCardBody>
                     <tr>
                         <td className="w-100">Epoch</td>

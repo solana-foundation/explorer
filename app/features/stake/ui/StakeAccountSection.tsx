@@ -8,6 +8,7 @@ import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import React from 'react';
 
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 import type { StakeActivationStatus } from '../api/stake-activation';
 import { EPOCH_NEVER_SET } from '../lib/constants';
@@ -139,9 +140,9 @@ function DelegationCard({
     const { stake } = stakeAccount;
     return (
         <div className="card">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">Stake Delegation</h3>
-            </div>
+            </CardHeader>
             <TableCardBody>
                 <tr>
                     <td>Status</td>
@@ -207,9 +208,9 @@ function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
     const hasLockup = meta.lockup.unixTimestamp > 0;
     return (
         <div className="card">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">Authorities</h3>
-            </div>
+            </CardHeader>
             <TableCardBody>
                 <tr>
                     <td>Stake Authority Address</td>

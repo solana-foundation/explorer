@@ -6,7 +6,7 @@ import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
-import { CardBody, CardFooter } from '@/app/shared/ui/Card';
+import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
 
 import type { InspectorData } from './InspectorPage';
 
@@ -240,14 +240,14 @@ export function RawInput({
     const placeholder = 'Paste a raw base58/base64 encoded transaction message or Squads vault transaction account';
     return (
         <div className="card">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <div className="d-flex justify-content-between align-items-center">
                     <h3 className="card-header-title">Inspector Input</h3>
                     <button className="btn btn-sm btn-white" onClick={clearInput} type="button">
                         Clear
                     </button>
                 </div>
-            </div>
+            </CardHeader>
             <CardBody ui="dashkit">
                 <textarea
                     rows={rows}

@@ -3,7 +3,7 @@ import { AddressLookupTableAccount, PublicKey } from '@solana/web3.js';
 import { AddressLookupTableAccountInfo } from '@validators/accounts/address-lookup-table';
 import React from 'react';
 
-import { CardFooter } from '@/app/shared/ui/Card';
+import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
 
 export function LookupTableEntriesCard(
     params:
@@ -24,13 +24,13 @@ export function LookupTableEntriesCard(
 
     return (
         <div className="card">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <div className="row align-items-center">
                     <div className="col">
                         <h3 className="card-header-title">Lookup Table Entries</h3>
                     </div>
                 </div>
-            </div>
+            </CardHeader>
 
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive mb-0">

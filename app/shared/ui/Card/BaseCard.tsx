@@ -61,7 +61,7 @@ const headerVariants = cva([], {
     variants: {
         ui: {
             dashkit:
-                'e-flex e-min-h-[60px] e-items-center e-border-b e-border-solid e-border-dk-card-outline-dark e-px-dk-4 e-py-4',
+                'e-flex e-h-[60px] e-items-center e-border-0 e-border-b e-border-solid e-border-dark-border e-px-dk-4 e-py-3 [&>:first-child]:e-flex-1',
             tw: 'e-flex e-flex-col e-space-y-1.5 e-p-6',
         },
     },

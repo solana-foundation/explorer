@@ -6,7 +6,7 @@ import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 import { ExternalLink } from 'react-feather';
 
-import { CardBody } from '@/app/shared/ui/Card';
+import { CardBody, CardHeader } from '@/app/shared/ui/Card';
 import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
 
 import { Address } from '../common/Address';
@@ -59,10 +59,10 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
 
     return (
         <div className="card security-txt">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">Verified Build</h3>
                 <small>{verificationMessage}</small>
-            </div>
+            </CardHeader>
             <div className="alert mt-2 mb-2">
                 A verified build badge indicates that this program was built from source code that is publicly
                 available, but does not imply that this program has been audited. For more details, refer to the{' '}

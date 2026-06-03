@@ -5,6 +5,8 @@ import bs58 from 'bs58';
 import React from 'react';
 import * as nacl from 'tweetnacl';
 
+import { CardHeader } from '@/app/shared/ui/Card';
+
 export function TransactionSignatures({
     signatures,
     message,
@@ -42,9 +44,9 @@ export function TransactionSignatures({
 
     return (
         <div className="card">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title">Signatures</h3>
-            </div>
+            </CardHeader>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">

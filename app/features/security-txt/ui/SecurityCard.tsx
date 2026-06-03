@@ -8,7 +8,7 @@ import { ErrorCard } from '@/app/components/common/ErrorCard';
 import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
 import type { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
 import { useCluster } from '@/app/providers/cluster';
-import { CardBody } from '@/app/shared/ui/Card';
+import { CardBody, CardHeader } from '@/app/shared/ui/Card';
 
 import { NO_SECURITY_TXT_ERROR } from '../lib/constants';
 import { fromProgramData } from '../lib/fromProgramData';
@@ -75,7 +75,7 @@ export function ProgramSecurityTxtCard({
 
     return (
         <div className="card security-txt e-overflow-hidden">
-            <div className="card-header e-flex e-h-auto e-min-h-[60px] e-items-center">
+            <CardHeader ui="dashkit" className="!e-h-auto e-min-h-[60px]">
                 <h3 className="card-header-title mb-0 d-flex align-items-center gap-3 e-mr-4">
                     Security.txt
                     <SecurityTxtVersionBadge version={pmpSecurityTxt ? 'pmp' : 'neodyme'} />
@@ -89,7 +89,7 @@ export function ProgramSecurityTxtCard({
                         Download
                     </DownloadableButton>
                 </div>
-            </div>
+            </CardHeader>
             <div className="e-px-6 e-py-4">
                 <small className="text-warning e-flex e-gap-1">
                     <AlertCircle size={16} className="e-mt-0.5" />

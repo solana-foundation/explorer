@@ -13,6 +13,8 @@ import { useCluster } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { IBRL_EXPLORER_URL } from '@utils/env';
+
+import { CardHeader } from '@/app/shared/ui/Card';
 import { notFound, useSearchParams } from 'next/navigation';
 import React, { PropsWithChildren, use } from 'react';
 import { ExternalLink } from 'react-feather';
@@ -71,7 +73,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
         content = (
             <>
                 <div className="card">
-                    <div className="card-header align-items-center">
+                    <CardHeader ui="dashkit">
                         <h3 className="card-header-title">Overview</h3>
                         {IBRL_EXPLORER_URL && (
                             <ExternalLinkWarning href={`${IBRL_EXPLORER_URL}/block/${slotNumber}`}>
@@ -81,7 +83,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                                 </>
                             </ExternalLinkWarning>
                         )}
-                    </div>
+                    </CardHeader>
                     <TableCardBody>
                         <tr>
                             <td className="w-100">Blockhash</td>

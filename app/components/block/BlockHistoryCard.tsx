@@ -14,7 +14,7 @@ import {
 } from '@solana/web3.js';
 import { parseProgramLogs } from '@utils/program-logs';
 
-import { CardBody, CardFooter } from '@/app/shared/ui/Card';
+import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
 import { displayAddress } from '@utils/tx';
 import { pickClusterParams } from '@utils/url';
 import Link from 'next/link';
@@ -201,14 +201,14 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
 
     return (
         <div className="card">
-            <div className="card-header align-items-center">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title">{title}</h3>
                 <FilterDropdown
                     filter={programFilter}
                     invokedPrograms={invokedPrograms}
                     totalTransactionCount={transactions.length}
                 ></FilterDropdown>
-            </div>
+            </CardHeader>
 
             {accountFilter !== null && (
                 <CardBody ui="dashkit">

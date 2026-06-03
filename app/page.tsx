@@ -23,7 +23,7 @@ import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/ind
 import { percentage } from '@utils/math';
 import React from 'react';
 
-import { CardBody } from '@/app/shared/ui/Card';
+import { CardBody, CardHeader } from '@/app/shared/ui/Card';
 
 import { DeveloperResources } from './components/DeveloperResources';
 import { SimpleCardSkeleton } from './components/shared/Skeletons';
@@ -191,13 +191,13 @@ function StatsCardBody() {
 
     return (
         <div className="card flex-grow-1">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <div className="row align-items-center">
                     <div className="col">
                         <h4 className="card-header-title">Live Cluster Stats</h4>
                     </div>
                 </div>
-            </div>
+            </CardHeader>
             <TableCardBody>
                 <tr>
                     <td className="w-100">Slot</td>

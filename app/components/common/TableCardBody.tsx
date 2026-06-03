@@ -1,7 +1,7 @@
 import { cva, VariantProps } from 'class-variance-authority';
 import React from 'react';
 
-const tableVariants = cva(['table table-sm card-table'], {
+const tableVariants = cva(['table table-sm card-table [&>tbody>tr:first-child>td]:!e-border-t-0'], {
     defaultVariants: {
         layout: 'compact',
     },

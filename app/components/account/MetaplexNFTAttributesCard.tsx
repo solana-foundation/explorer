@@ -6,6 +6,7 @@ import React from 'react';
 import { getProxiedUri } from '@/app/features/metadata/utils';
 import { useCluster } from '@/app/providers/cluster';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 interface Attribute {
     trait_type: string;
@@ -79,9 +80,9 @@ export function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: 
 
     return (
         <div className="card">
-            <div className="card-header align-items-center">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title">Attributes</h3>
-            </div>
+            </CardHeader>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">

@@ -9,6 +9,7 @@ import { Code } from 'react-feather';
 
 import { fromBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 export function ProgramEventsCard({
     eventDataList,
@@ -72,7 +73,7 @@ function EventCard({
 
     return (
         <div className="card mb-2">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">
                     <span className="badge bg-info-soft me-2">
                         #{instructionIndex + 1}.{eventIndex + 1}
@@ -85,7 +86,7 @@ function EventCard({
                 >
                     <Code className="me-2" size={13} /> Raw
                 </button>
-            </div>
+            </CardHeader>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">

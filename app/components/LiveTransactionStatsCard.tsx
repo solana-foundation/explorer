@@ -10,7 +10,7 @@ import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
 
-import { CardBody } from '@/app/shared/ui/Card';
+import { CardBody, CardHeader } from '@/app/shared/ui/Card';
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -36,9 +36,9 @@ export function LiveTransactionStatsCard() {
     const [series, setSeries] = React.useState<Series>('short');
     return (
         <div className="card flex-grow-1 d-flex flex-column">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <h4 className="card-header-title">Live Transaction Stats</h4>
-            </div>
+            </CardHeader>
             <TpsCardBody series={series} setSeries={setSeries} />
         </div>
     );

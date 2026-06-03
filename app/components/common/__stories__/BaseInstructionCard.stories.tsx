@@ -1,12 +1,12 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
-import { nextjsParameters, withCluster, withScrollAnchor } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster, withScrollAnchor, withTokenInfoBatch } from '@storybook-config/decorators';
 
 import { BaseInstructionCard } from '../BaseInstructionCard';
 
 const meta: Meta<typeof BaseInstructionCard> = {
     component: BaseInstructionCard,
-    decorators: [withCluster, withScrollAnchor],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs'],
     title: 'Components/Common/BaseInstructionCard',

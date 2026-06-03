@@ -2,6 +2,7 @@ import { ConcurrentMerkleTreeAccount } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 
 import { toBuffer } from '@/app/shared/lib/bytes';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 import { Address } from '../common/Address';
 import { Slot } from '../common/Slot';
@@ -20,13 +21,13 @@ export function ConcurrentMerkleTreeCard({ data }: { data: Uint8Array }) {
     return (
         <>
             <div className="card">
-                <div className="card-header">
+                <CardHeader ui="dashkit">
                     <div className="row align-items-center">
                         <div className="col">
                             <h3 className="card-header-title">Concurrent Merkle Tree</h3>
                         </div>
                     </div>
-                </div>
+                </CardHeader>
 
                 <TableCardBody>
                     <tr>

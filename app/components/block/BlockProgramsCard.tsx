@@ -4,6 +4,7 @@ import { PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import React from 'react';
 
 import { invariant } from '@/app/shared/lib/invariant';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) {
     const totalTransactions = block.transactions.length;
@@ -61,9 +62,9 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
     return (
         <>
             <div className="card">
-                <div className="card-header align-items-center">
+                <CardHeader ui="dashkit">
                     <h3 className="card-header-title">Block Program Stats</h3>
-                </div>
+                </CardHeader>
                 <TableCardBody>
                     <tr>
                         <td className="w-100">Unique Programs Count</td>
@@ -76,9 +77,9 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
                 </TableCardBody>
             </div>
             <div className="card">
-                <div className="card-header align-items-center">
+                <CardHeader ui="dashkit">
                     <h3 className="card-header-title">Block Programs</h3>
-                </div>
+                </CardHeader>
 
                 {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
                 <div className="table-responsive mb-0">

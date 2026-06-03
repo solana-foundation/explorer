@@ -5,7 +5,7 @@ import Link from 'next/link';
 import React from 'react';
 
 import { invariant } from '@/app/shared/lib/invariant';
-import { CardFooter } from '@/app/shared/ui/Card';
+import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
 
 type AccountStats = {
     reads: number;
@@ -64,9 +64,9 @@ export function BlockAccountsCard({ block, blockSlot }: { block: VersionedBlockR
 
     return (
         <div className="card">
-            <div className="card-header align-items-center">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title">Block Account Usage</h3>
-            </div>
+            </CardHeader>
 
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive mb-0">

@@ -8,7 +8,7 @@ import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
 import { Code } from 'react-feather';
 
-import { CardBody } from '@/app/shared/ui/Card';
+import { CardBody, CardHeader } from '@/app/shared/ui/Card';
 
 export function ProgramLogSection({ signature }: SignatureProps) {
     const [showRaw, setShowRaw] = React.useState(false);
@@ -30,7 +30,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
     return (
         <>
             <div className="card">
-                <div className="card-header">
+                <CardHeader ui="dashkit" className={!showRaw ? '!e-border-b-0' : undefined}>
                     <h3 className="card-header-title">Program Instruction Logs</h3>
                     <button
                         className={cn(
@@ -41,7 +41,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                     >
                         <Code className="me-2" size={13} /> Raw
                     </button>
-                </div>
+                </CardHeader>
                 {prettyLogs !== null && logMessages !== null ? (
                     showRaw ? (
                         <RawProgramLogs raw={logMessages} />

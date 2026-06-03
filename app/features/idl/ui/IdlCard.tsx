@@ -9,7 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'react-feather';
 
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
-import { CardBody } from '@/app/shared/ui/Card';
+import { CardBody, CardHeader } from '@/app/shared/ui/Card';
 import { clusterSlug } from '@/app/utils/cluster';
 
 import { IdlVariant, useIdlLastTransactionDate } from '../model/use-idl-last-transaction-date';
@@ -94,9 +94,9 @@ export function IdlCard({ programId }: { programId: string }) {
         }
         return (
             <div className="card">
-                <div className="card-header">
+                <CardHeader ui="dashkit">
                     <h4 className="card-header-title">Program IDL</h4>
-                </div>
+                </CardHeader>
                 <CardBody ui="dashkit">
                     <div className="e-mb-6 e-flex e-items-center e-gap-2 e-text-destructive">
                         <AlertTriangle size={16} />
@@ -136,7 +136,7 @@ export function IdlCard({ programId }: { programId: string }) {
 
     return (
         <div className="card">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <div className="nav nav-tabs e-border-0" role="tablist">
                     {tabs
                         .filter(tab => tab.idl)
@@ -155,7 +155,7 @@ export function IdlCard({ programId }: { programId: string }) {
                             </button>
                         ))}
                 </div>
-            </div>
+            </CardHeader>
             <CardBody ui="dashkit">
                 {isMismatch ? (
                     <BaseWarningCard

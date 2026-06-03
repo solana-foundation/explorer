@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 import { Address } from '@/app/components/common/Address';
 import { useCluster } from '@/app/providers/cluster';
-import { CardBody } from '@/app/shared/ui/Card';
+import { CardBody, CardHeader } from '@/app/shared/ui/Card';
 
 import { isFeatureActivated } from '../lib/is-feature-activated';
 
@@ -78,12 +78,12 @@ function FeaturesTable({
 }) {
     return (
         <div className="card">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <h4 className="card-header-title">{header}</h4>
-            </div>
+            </CardHeader>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive small-headers">
-                <table className="table">
+                <table className="table [&>thead>tr:first-child>th]:!e-border-t-0">
                     <thead>
                         <tr>
                             <th>Feature</th>

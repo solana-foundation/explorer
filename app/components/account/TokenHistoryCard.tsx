@@ -14,7 +14,7 @@ import {
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
 import { isTokenProgramData } from '@providers/accounts';
 
-import { CardBody, CardFooter } from '@/app/shared/ui/Card';
+import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
 import { useAccountHistories, useFetchAccountHistory } from '@providers/accounts/history';
 import { isTokenProgramId, TokenInfoWithPubkey, useAccountOwnedTokens } from '@providers/accounts/tokens';
 import { CacheEntry, FetchStatus } from '@providers/cache';
@@ -191,9 +191,9 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
         if (tokensToFetchCount === 0) {
             return (
                 <div className="card">
-                    <div className="card-header align-items-center">
+                    <CardHeader ui="dashkit">
                         <h3 className="card-header-title">Token History</h3>
-                    </div>
+                    </CardHeader>
                     <CardBody ui="dashkit">
                         <p className="text-muted text-center mb-0">
                             Click the button below to load token transaction history
@@ -223,7 +223,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
 
     return (
         <div className="card">
-            <div className="card-header align-items-center">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title">Token History</h3>
                 <FilterDropdown
                     filter={filter}
@@ -236,7 +236,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     onClick={() => fetchHistories(true)}
                     fetching={fetching}
                 />
-            </div>
+            </CardHeader>
 
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive mb-0">

@@ -4,6 +4,8 @@ import { Address } from '@components/common/Address';
 import { PublicKey } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 
+import { CardHeader } from '@/app/shared/ui/Card';
+
 import { DomainInfo } from '../model/types';
 
 export function BaseDomainsCard({ domains }: { domains: DomainInfo[] }) {
@@ -17,9 +19,9 @@ export function BaseDomainsCard({ domains }: { domains: DomainInfo[] }) {
 
     return (
         <div className="card">
-            <div className="card-header align-items-center">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title">Owned Domain Names</h3>
-            </div>
+            </CardHeader>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">

@@ -18,6 +18,8 @@ import {
     UpgradeableLoaderAccount,
 } from '@validators/accounts/upgradeable-program';
 import Link from 'next/link';
+
+import { CardHeader } from '@/app/shared/ui/Card';
 import React from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
 
@@ -78,7 +80,7 @@ export function UpgradeableProgramSection({
 
     return (
         <div className="card">
-            <div className="card-header e-gap-2">
+            <CardHeader ui="dashkit" className="e-gap-2">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">
                     {programData === undefined && 'Closed '}Program Account
                 </h3>
@@ -93,7 +95,7 @@ export function UpgradeableProgramSection({
                     Refresh
                 </button>
                 <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
-            </div>
+            </CardHeader>
 
             <TableCardBody>
                 <tr>
@@ -208,7 +210,7 @@ export function UpgradeableProgramDataSection({
     const refresh = useRefreshAccount();
     return (
         <div className="card">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">Program Executable Data Account</h3>
                 <button
                     className="btn btn-white btn-sm"
@@ -220,7 +222,7 @@ export function UpgradeableProgramDataSection({
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>
-            </div>
+            </CardHeader>
 
             <TableCardBody>
                 <tr>
@@ -278,7 +280,7 @@ export function UpgradeableProgramBufferSection({
     const refresh = useRefreshAccount();
     return (
         <div className="card">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">Program Deploy Buffer Account</h3>
                 <button
                     className="btn btn-white btn-sm"
@@ -290,7 +292,7 @@ export function UpgradeableProgramBufferSection({
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
                 </button>
-            </div>
+            </CardHeader>
 
             <TableCardBody>
                 <tr>

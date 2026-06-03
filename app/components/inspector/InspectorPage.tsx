@@ -18,6 +18,8 @@ import {
     VersionedMessage,
 } from '@solana/web3.js';
 import { generated, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
+
+import { CardHeader } from '@/app/shared/ui/Card';
 import { useClusterPath } from '@utils/url';
 import bs58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -473,13 +475,13 @@ function OverviewCard({
     return (
         <>
             <div className="card">
-                <div className="card-header e-gap-2">
+                <CardHeader ui="dashkit" className="e-gap-2">
                     <h3 className="card-header-title">Transaction Overview</h3>
                     <button className="btn btn-sm d-flex btn-white" onClick={onClear}>
                         Clear
                     </button>
                     <DownloadDropdown filename={signature || 'signature'} data={raw} />
-                </div>
+                </CardHeader>
                 <TableCardBody>
                     <tr>
                         <td>Serialized Size</td>

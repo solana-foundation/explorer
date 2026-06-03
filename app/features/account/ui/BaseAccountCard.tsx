@@ -4,6 +4,7 @@ import React from 'react';
 import { Code } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 export type BaseAccountCardProps = TableCardBodyProps & {
     title: React.ReactNode;
@@ -28,7 +29,7 @@ export function BaseAccountCard({
 
     return (
         <div className="card">
-            <div className="card-header e-gap-2">
+            <CardHeader ui="dashkit" className="e-gap-2">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">{title}</h3>
                 {refresh && analyticsSection && <RefreshButton analyticsSection={analyticsSection} onClick={refresh} />}
                 {showRawButton && (
@@ -44,7 +45,7 @@ export function BaseAccountCard({
                     </Button>
                 )}
                 {headerActions}
-            </div>
+            </CardHeader>
 
             <TableCardBody {...tableProps}>{showRaw ? rawContent : children}</TableCardBody>
         </div>

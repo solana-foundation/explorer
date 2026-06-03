@@ -23,6 +23,8 @@ import {
     useTransactionDetails,
     useTransactionStatus,
 } from '@providers/transactions';
+
+import { CardHeader } from '@/app/shared/ui/Card';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import { RefreshButton } from '@shared/ui/refresh-button';
 import { ParsedTransaction, SystemInstruction, SystemProgram, TransactionSignature } from '@solana/web3.js';
@@ -261,7 +263,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
 
     return (
         <div className="card">
-            <div className="card-header align-items-center e-gap-2">
+            <CardHeader ui="dashkit" className="e-gap-2">
                 <h3 className="card-header-title">Overview</h3>
                 <ViewReceiptButton
                     signature={signature}
@@ -289,7 +291,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                             : undefined
                     }
                 />
-            </div>
+            </CardHeader>
 
             <TableCardBody>
                 <tr>

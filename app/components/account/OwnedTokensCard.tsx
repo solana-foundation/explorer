@@ -14,7 +14,7 @@ import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
 
-import { CardFooter } from '@/app/shared/ui/Card';
+import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -79,10 +79,10 @@ export function OwnedTokensCard({ address }: { address: string }) {
             {showDropdown && <div className="dropdown-exit" onClick={() => setDropdown(false)} />}
 
             <div className="card">
-                <div className="card-header align-items-center">
+                <CardHeader ui="dashkit">
                     <h3 className="card-header-title">Token Holdings</h3>
                     <DisplayDropdown display={display} toggle={() => setDropdown(show => !show)} show={showDropdown} />
-                </div>
+                </CardHeader>
 
                 {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
                 <div className="table-responsive mb-0">

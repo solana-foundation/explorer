@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
-import { CardBody } from '@/app/shared/ui/Card';
+import { CardBody, CardHeader } from '@/app/shared/ui/Card';
 
 import { getNickname, MAX_NICKNAME_LENGTH, removeNickname, setNickname } from '../lib/nicknames';
 
@@ -70,9 +70,9 @@ export function NicknameEditor({ address, onClose }: Props) {
                 style={{ maxWidth: '500px', minWidth: '400px' }}
                 onClick={e => e.stopPropagation()}
             >
-                <div className="card-header">
+                <CardHeader ui="dashkit">
                     <h5 className="card-header-title mb-0">Edit Nickname</h5>
-                </div>
+                </CardHeader>
                 <CardBody ui="dashkit">
                     <div className="mb-3">
                         <label className="form-label small text-muted">Address</label>
