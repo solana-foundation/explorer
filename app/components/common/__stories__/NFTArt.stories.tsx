@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { ArtContent, NFTImageContent } from '../NFTArt';
+import { NFTImageContent } from '../NFTArt';
 
 const meta = {
     tags: ['autodocs'],
@@ -18,13 +18,4 @@ export const WithUri: Story = {
 
 export const Placeholder: Story = {
     render: () => <NFTImageContent />,
-};
-
-export const FromMetadata: Story = {
-    render: () => (
-        <ArtContent
-            data={{ image: SAMPLE_URI, name: 'Sample NFT' } as any}
-            pubkey="TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        />
-    ),
 };

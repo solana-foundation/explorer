@@ -1,5 +1,5 @@
 import { InfoTooltip } from '@components/common/InfoTooltip';
-import { ArtContent } from '@components/common/NFTArt';
+import { NFTImageContent } from '@components/common/NFTArt';
 import type { EditionInfo } from '@entities/nft';
 import { isSome } from '@metaplex-foundation/umi';
 import { NFTData, useFetchAccountInfo, useMintAccountInfo } from '@providers/accounts';
@@ -10,7 +10,7 @@ import React, { createRef } from 'react';
 import { AlertOctagon, Check, ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
-export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; address: string }) {
+export function MetaplexNFTHeader({ nftData }: { nftData: NFTData }) {
     const collectionOpt = nftData.metadata.collection;
     const collection = collectionOpt && isSome(collectionOpt) ? collectionOpt.value : null;
     const collectionAddress = collection?.key;
@@ -48,7 +48,7 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
     return (
         <div className="row">
             <div className="col-auto e-ml-1.5 e-flex e-items-center">
-                <ArtContent pubkey={address} data={data} />
+                <NFTImageContent uri={data?.image} />
             </div>
             <div className="col ms-0.5 e-mb-3 e-mt-3">
                 {<h6 className="header-pretitle e-ml-[3px]">Metaplex NFT</h6>}

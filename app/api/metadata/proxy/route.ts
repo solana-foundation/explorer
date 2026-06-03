@@ -14,9 +14,12 @@ import {
 export const dynamic = 'force-dynamic';
 
 const USER_AGENT = process.env.NEXT_PUBLIC_METADATA_USER_AGENT ?? 'Solana Explorer';
+// 3 MB default: well under Vercel's ~4.5 MB buffered-response cap. Oversize
+// fetches degrade to the ProxiedImage "view original" fallback. Tune from the
+// success-path size stats logged in fetch-resource.ts.
 const MAX_SIZE = process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE
     ? Number(process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE)
-    : 10_000_000; // 10 000 000 bytes
+    : 3_000_000;
 const TIMEOUT = process.env.NEXT_PUBLIC_METADATA_TIMEOUT ? Number(process.env.NEXT_PUBLIC_METADATA_TIMEOUT) : 10_000;
 
 // Prevent proxied content (e.g. SVG with embedded scripts) from executing

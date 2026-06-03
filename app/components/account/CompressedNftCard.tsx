@@ -12,7 +12,7 @@ import { CompressedNft, useCompressedNft, useMetadataJsonLink } from '@/app/prov
 import { Address } from '../common/Address';
 import { InfoTooltip } from '../common/InfoTooltip';
 import { LoadingArtPlaceholder } from '../common/LoadingArtPlaceholder';
-import { ArtContent } from '../common/NFTArt';
+import { NFTImageContent } from '../common/NFTArt';
 import { getCreatorDropdownItems, getIsMutablePill, getVerifiedCollectionPill } from './MetaplexNFTHeader';
 import { UnknownAccountCard } from './UnknownAccountCard';
 
@@ -113,7 +113,7 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
     return (
         <div className="row">
             <div className="col-auto e-ml-1.5 e-flex e-items-center">
-                <ArtContent pubkey={compressedNft.id} data={metadataJson} />
+                <NFTImageContent uri={metadataJson?.image} />
             </div>
             <div className="col ms-0.5 e-mb-3 e-mt-3">
                 {<h6 className="header-pretitle e-ml-[3px]">Metaplex Compressed NFT</h6>}

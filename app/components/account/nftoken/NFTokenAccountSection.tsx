@@ -6,7 +6,7 @@ import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { Suspense, useState } from 'react';
 
-import { getProxiedUri } from '@/app/features/metadata/utils';
+import { ProxiedImage } from '@/app/features/metadata';
 
 import { UnknownAccountCard } from '../UnknownAccountCard';
 import { parseNFTokenCollectionAccount, parseNFTokenNFTAccount } from './isNFTokenAccount';
@@ -90,14 +90,18 @@ export const NftokenImage = ({ url, size }: { url: string | undefined; size: num
                 />
             )}
             <div className={cn('mx-auto e-rounded-dk', isLoading ? 'e-hidden' : 'e-block')}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <ProxiedImage
                     alt="nft"
                     height={size}
+                    // Clear the skeleton on failure too, otherwise the e-hidden
+                    // wrapper would hide the fallback when the load errors.
+                    onError={() => {
+                        setIsLoading(false);
+                    }}
                     onLoad={() => {
                         setIsLoading(false);
                     }}
-                    src={url ? getProxiedUri(url) : url}
+                    uri={url}
                     width={size}
                 />
             </div>

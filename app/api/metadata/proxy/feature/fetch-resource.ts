@@ -176,10 +176,21 @@ async function processResponse(response: Response, request: FetchRequest, url: U
         }
         throw e;
     }
+    const contentType = response.headers.get('content-type');
+
+    // Record the fetched size on the success path so the full distribution (not
+    // just the over-cap tail from the Sentry warnings) can be queried from logs
+    // to tune `MAX_SIZE`. info-level, so no per-request Sentry event.
+    Logger.info('[api:metadata-proxy] Resource fetched', {
+        byteLength: buffered.byteLength,
+        contentType,
+        host: url.host,
+        maxSize: size,
+    });
+
     // Re-wrap so processors keep using `.arrayBuffer()` / `.json()` / `.text()`.
     const rewrapped = new Response(buffered, { headers: response.headers, status: response.status });
 
-    const contentType = response.headers.get('content-type');
     if (matchJson(contentType)) return processJson(rewrapped);
     if (matchTextPlain(contentType)) return processTextAsJson(rewrapped);
     if (matchImage(contentType)) return processBinary(rewrapped);
