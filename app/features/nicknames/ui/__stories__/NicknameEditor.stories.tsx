@@ -57,3 +57,13 @@ export const LongAddress: Story = {
         onClose: fn(),
     },
 };
+
+// Forces visible truncation by passing an oversized string. Used to confirm that the
+// text-truncate Bootstrap utility is replaceable with Tailwind's e-truncate without losing
+// the ellipsis behaviour for long values.
+export const TruncatedAddress: Story = {
+    args: {
+        address: 'OverflowOverflowOverflowOverflowOverflowOverflowOverflowOverflowOverflowOverflowOverflowOverflow',
+        onClose: fn(),
+    },
+};
