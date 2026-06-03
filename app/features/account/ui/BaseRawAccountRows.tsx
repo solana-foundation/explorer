@@ -43,7 +43,7 @@ export function BaseRawAccountRows({ account, rawData, isLoading }: BaseRawAccou
             <tr>
                 <td>Raw Data</td>
                 <td>
-                    <div className="e-flex e-justify-start md:e-justify-end">
+                    <div className="e-flex e-justify-end">
                         <RawDataField data={rawData} filename={account.pubkey.toBase58()} loading={isLoading} />
                     </div>
                 </td>
