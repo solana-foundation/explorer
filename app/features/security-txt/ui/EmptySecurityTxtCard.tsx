@@ -1,4 +1,5 @@
 import { Copyable } from '@/app/components/common/Copyable';
+import { CardBody } from '@/app/shared/ui/Card';
 
 import { NO_SECURITY_TXT_ERROR } from '../lib/constants';
 
@@ -8,7 +9,7 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
 
     return (
         <div className="card">
-            <div className="card-body text-center">
+            <CardBody ui="dashkit" className="text-center">
                 <div className="mb-4">{NO_SECURITY_TXT_ERROR}</div>
 
                 <div className="mb-4">
@@ -32,7 +33,7 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
                         For further details please follow the documentation
                     </a>
                 </div>
-            </div>
+            </CardBody>
         </div>
     );
 }

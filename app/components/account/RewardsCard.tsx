@@ -11,7 +11,7 @@ import { PublicKey } from '@solana/web3.js';
 import { lamportsToSolString } from '@utils/index';
 import React from 'react';
 
-import { CardFooter } from '@/app/shared/ui/Card';
+import { CardBody, CardFooter } from '@/app/shared/ui/Card';
 
 const U64_MAX = BigInt('0xffffffffffffffff');
 
@@ -101,9 +101,9 @@ export function RewardsCard({ address }: { address: string }) {
                         </table>
                     </div>
                 ) : (
-                    <div className="card-body">
+                    <CardBody ui="dashkit">
                         No rewards issued between epochs {lowestFetchedEpoch} and {highestFetchedEpoch}
-                    </div>
+                    </CardBody>
                 )}
 
                 <CardFooter ui="dashkit">

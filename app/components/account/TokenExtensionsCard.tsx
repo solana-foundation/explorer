@@ -11,6 +11,7 @@ import useSWR from 'swr';
 import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
+import { CardBody } from '@/app/shared/ui/Card';
 
 import { LoadingCard } from '../common/LoadingCard';
 import { TokenExtensionsSection } from './TokenExtensionsSection';
@@ -53,7 +54,7 @@ export function TokenExtensionsCard({
                 analyticsSection="extensions_section"
                 refresh={() => refresh(new PublicKey(address), 'parsed')}
             />
-            <div className="card-body p-0 e-overflow-x-scroll">
+            <CardBody ui="dashkit" className="!e-p-0 e-overflow-x-scroll">
                 <TokenExtensionsSection
                     address={address}
                     decimals={decimals}
@@ -61,7 +62,7 @@ export function TokenExtensionsCard({
                     parsedExtensions={extensions}
                     symbol={symbol}
                 />
-            </div>
+            </CardBody>
         </div>
     );
 }

@@ -7,6 +7,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
+import { CardBody } from '@/app/shared/ui/Card';
+
 import { getNickname, MAX_NICKNAME_LENGTH, removeNickname, setNickname } from '../lib/nicknames';
 
 type Props = {
@@ -71,7 +73,7 @@ export function NicknameEditor({ address, onClose }: Props) {
                 <div className="card-header">
                     <h5 className="card-header-title mb-0">Edit Nickname</h5>
                 </div>
-                <div className="card-body">
+                <CardBody ui="dashkit">
                     <div className="mb-3">
                         <label className="form-label small text-muted">Address</label>
                         <div className="font-monospace small text-truncate">{address}</div>
@@ -122,7 +124,7 @@ export function NicknameEditor({ address, onClose }: Props) {
                             </button>
                         </div>
                     </div>
-                </div>
+                </CardBody>
             </div>
         </div>
     );

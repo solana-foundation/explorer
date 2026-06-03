@@ -8,6 +8,8 @@ import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
 import { Code } from 'react-feather';
 
+import { CardBody } from '@/app/shared/ui/Card';
+
 export function ProgramLogSection({ signature }: SignatureProps) {
     const [showRaw, setShowRaw] = React.useState(false);
     const { cluster, url } = useCluster();
@@ -47,7 +49,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                         <ProgramLogsCardBody message={message} logs={prettyLogs} cluster={cluster} url={url} />
                     )
                 ) : (
-                    <div className="card-body">Logs not supported for this transaction</div>
+                    <CardBody ui="dashkit">Logs not supported for this transaction</CardBody>
                 )}
             </div>
         </>

@@ -23,6 +23,8 @@ import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/ind
 import { percentage } from '@utils/math';
 import React from 'react';
 
+import { CardBody } from '@/app/shared/ui/Card';
+
 import { DeveloperResources } from './components/DeveloperResources';
 import { SimpleCardSkeleton } from './components/shared/Skeletons';
 
@@ -125,7 +127,7 @@ function StakingComponent() {
         <div className="row staking-card">
             <div className="col-6 col-xl">
                 <div className="card">
-                    <div className="card-body">
+                    <CardBody ui="dashkit">
                         <h4>Circulating Supply</h4>
                         <h1>
                             <em>{displayLamports(supply.circulating)}</em> /{' '}
@@ -134,12 +136,12 @@ function StakingComponent() {
                         <h5>
                             <em>{circulatingPercentage}%</em> is circulating
                         </h5>
-                    </div>
+                    </CardBody>
                 </div>
             </div>
             <div className="col-6 col-xl">
                 <div className="card">
-                    <div className="card-body">
+                    <CardBody ui="dashkit">
                         <h4>Active Stake</h4>
                         {activeStake ? (
                             <h1>
@@ -151,7 +153,7 @@ function StakingComponent() {
                                 Delinquent stake: <em>{delinquentStakePercentage}%</em>
                             </h5>
                         )}
-                    </div>
+                    </CardBody>
                 </div>
             </div>
         </div>

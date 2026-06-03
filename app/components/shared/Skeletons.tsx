@@ -1,5 +1,7 @@
 import { ReactElement } from 'react';
 
+import { CardBody } from '@/app/shared/ui/Card';
+
 import { Skeleton } from './ui/skeleton';
 
 type ColDef = {
@@ -47,11 +49,11 @@ export function SimpleCardSkeleton({ withTitle = false, title }: { withTitle?: b
                     </div>
                 </div>
             )}
-            <div className="card-body">
+            <CardBody ui="dashkit">
                 {title || <Skeleton className="e-h-5 e-w-3/5" />}
                 <Skeleton className="e-mb-2.5 e-mt-2 e-h-7 e-w-full" />
                 <Skeleton className="e-h-3 e-w-2/5" />
-            </div>
+            </CardBody>
         </div>
     );
 }
@@ -153,7 +155,7 @@ function ImageSliderCardSkeleton() {
 export function ImageSliderSkeleton() {
     return (
         <div className="card">
-            <div className="card-body">
+            <CardBody ui="dashkit">
                 <div className="e-mb-3 e-flex e-justify-between e-border-b e-border-gray-300 e-pb-2">
                     <Skeleton className="e-h-5 e-w-80" />
                     <Skeleton className="e-h-4 e-w-40" />
@@ -164,7 +166,7 @@ export function ImageSliderSkeleton() {
                     <ImageSliderCardSkeleton />
                     <ImageSliderCardSkeleton />
                 </div>
-            </div>
+            </CardBody>
         </div>
     );
 }

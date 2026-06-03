@@ -8,6 +8,7 @@ import { ErrorCard } from '@/app/components/common/ErrorCard';
 import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
 import type { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
 import { useCluster } from '@/app/providers/cluster';
+import { CardBody } from '@/app/shared/ui/Card';
 
 import { NO_SECURITY_TXT_ERROR } from '../lib/constants';
 import { fromProgramData } from '../lib/fromProgramData';
@@ -95,7 +96,7 @@ export function ProgramSecurityTxtCard({
                     Note that this is self-reported by the author of the program and might not be accurate
                 </small>
             </div>
-            <ErrorBoundary fallback={<div className="card-body text-center">Invalid security.txt</div>}>
+            <ErrorBoundary fallback={<CardBody ui="dashkit" className="text-center">Invalid security.txt</CardBody>}>
                 {securityTable}
             </ErrorBoundary>
         </div>

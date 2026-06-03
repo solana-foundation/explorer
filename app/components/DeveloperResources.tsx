@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { CardBody } from '@/app/shared/ui/Card';
+
 type Resource = {
     title: string;
     description: string;
@@ -41,22 +43,22 @@ const DEFAULT_RESOURCES: Resource[] = [
 export function DeveloperResources({ resources = DEFAULT_RESOURCES }: { resources?: Resource[] }) {
     return (
         <div className="card">
-            <div className="card-body">
-                <div className="e-mb-2 e-flex e-justify-between e-border-0 e-border-b e-border-solid e-border-dark-border e-pb-1.5">
-                    <div className="me-4">Kickstart your development journey on Solana</div>
-                    <div>
-                        Find more on{' '}
-                        <a href="https://solana.com/developers" target="_blank" rel="noreferrer">
-                            solana.com/developers
-                        </a>
-                    </div>
+            <div className="e-flex e-justify-between e-border-0 e-border-b e-border-solid e-border-dark-border e-px-dk-4 e-py-3">
+                <div>Kickstart your development journey on Solana</div>
+                <div>
+                    Find more on{' '}
+                    <a href="https://solana.com/developers" target="_blank" rel="noreferrer">
+                        solana.com/developers
+                    </a>
                 </div>
+            </div>
+            <CardBody ui="dashkit">
                 <div className="d-flex gap-4 pb-3 overflow-auto">
                     {resources.map(resource => (
                         <ResourceCard key={resource.link} {...resource} />
                     ))}
                 </div>
-            </div>
+            </CardBody>
         </div>
     );
 }

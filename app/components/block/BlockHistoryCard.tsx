@@ -14,7 +14,7 @@ import {
 } from '@solana/web3.js';
 import { parseProgramLogs } from '@utils/program-logs';
 
-import { CardFooter } from '@/app/shared/ui/Card';
+import { CardBody, CardFooter } from '@/app/shared/ui/Card';
 import { displayAddress } from '@utils/tx';
 import { pickClusterParams } from '@utils/url';
 import Link from 'next/link';
@@ -211,20 +211,20 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
             </div>
 
             {accountFilter !== null && (
-                <div className="card-body">
+                <CardBody ui="dashkit">
                     Showing transactions which load account:
                     <div className="d-inline-block ms-2">
                         <Address pubkey={accountFilter} link />
                     </div>
-                </div>
+                </CardBody>
             )}
 
             {filteredTransactions.length === 0 ? (
-                <div className="card-body">
+                <CardBody ui="dashkit">
                     {accountFilter === null && programFilter === HIDE_VOTES
                         ? "This block doesn't contain any non-vote transactions"
                         : 'No transactions found with this filter'}
-                </div>
+                </CardBody>
             ) : (
                 // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
                 <div className="table-responsive mb-0">

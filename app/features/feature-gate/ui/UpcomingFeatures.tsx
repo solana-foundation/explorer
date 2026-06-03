@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 import { Address } from '@/app/components/common/Address';
 import { useCluster } from '@/app/providers/cluster';
+import { CardBody } from '@/app/shared/ui/Card';
 
 import { isFeatureActivated } from '../lib/is-feature-activated';
 
@@ -39,9 +40,9 @@ export function UpcomingFeatures() {
     if (filteredFeatures.length === 0) {
         return (
             <div className="card">
-                <div className="card-body">
+                <CardBody ui="dashkit">
                     <div className="text-center">No upcoming features for {clusterName(cluster)}</div>
-                </div>
+                </CardBody>
             </div>
         );
     }

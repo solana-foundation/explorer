@@ -3,6 +3,8 @@ import { useStatsProvider } from '@providers/stats/solanaClusterStats';
 import React from 'react';
 import { RefreshCw } from 'react-feather';
 
+import { CardBody } from '@/app/shared/ui/Card';
+
 const CLUSTER_STATS_TIMEOUT = 5000;
 
 export function StatsNotReady({ error }: { error: boolean }) {
@@ -23,7 +25,7 @@ export function StatsNotReady({ error }: { error: boolean }) {
 
     if (error || !active) {
         return (
-            <div className="card-body text-center">
+            <CardBody ui="dashkit" className="text-center">
                 There was a problem loading cluster stats.{' '}
                 <button
                     className="btn btn-white btn-sm"
@@ -34,14 +36,14 @@ export function StatsNotReady({ error }: { error: boolean }) {
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Try Again
                 </button>
-            </div>
+            </CardBody>
         );
     }
 
     return (
-        <div className="card-body text-center">
+        <CardBody ui="dashkit" className="text-center">
             <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
             Loading
-        </div>
+        </CardBody>
     );
 }

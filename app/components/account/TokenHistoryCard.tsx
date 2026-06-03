@@ -14,7 +14,7 @@ import {
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
 import { isTokenProgramData } from '@providers/accounts';
 
-import { CardFooter } from '@/app/shared/ui/Card';
+import { CardBody, CardFooter } from '@/app/shared/ui/Card';
 import { useAccountHistories, useFetchAccountHistory } from '@providers/accounts/history';
 import { isTokenProgramId, TokenInfoWithPubkey, useAccountOwnedTokens } from '@providers/accounts/tokens';
 import { CacheEntry, FetchStatus } from '@providers/cache';
@@ -194,11 +194,11 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     <div className="card-header align-items-center">
                         <h3 className="card-header-title">Token History</h3>
                     </div>
-                    <div className="card-body">
+                    <CardBody ui="dashkit">
                         <p className="text-muted text-center mb-0">
                             Click the button below to load token transaction history
                         </p>
-                    </div>
+                    </CardBody>
                     <CardFooter ui="dashkit">
                         <button
                             className="btn btn-primary w-100"

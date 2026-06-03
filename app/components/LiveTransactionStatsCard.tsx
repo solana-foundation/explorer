@@ -10,6 +10,8 @@ import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
 
+import { CardBody } from '@/app/shared/ui/Card';
+
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
 type Series = 'short' | 'medium' | 'long';
@@ -186,7 +188,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
 
             <hr className="my-0" />
 
-            <div className="card-body py-3 d-flex flex-column flex-grow-1">
+            <CardBody ui="dashkit" className="e-py-3 e-flex e-flex-col e-grow">
                 <div className="d-flex justify-content-between w-100">
                     <span className="mb-0 font-size-sm">TPS history</span>
 
@@ -221,7 +223,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
                         </a>
                     </p>
                 </div>
-            </div>
+            </CardBody>
         </div>
     );
 }
