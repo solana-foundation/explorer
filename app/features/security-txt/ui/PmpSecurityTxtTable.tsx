@@ -85,7 +85,7 @@ function displayStringValue(value: string) {
 
 function displayArrayValue(entryKey: string, value: any[]) {
     return (
-        <td className="font-monospace">
+        <td className="font-monospace e-text-right">
             <RenderList entryKey={entryKey} items={value} />
         </td>
     );
@@ -101,7 +101,7 @@ function displayFallbackValue(value: any) {
 
 function RenderList({ entryKey, items }: { entryKey: string; items: any[] }) {
     return (
-        <ul className="e-text-right security-txt-list e-list-none e-pl-0 [&.security-txt-list]:e-text-left">
+        <ul className="e-text-right e-list-none e-pl-0">
             {items.map((value, index) => {
                 const elementKey = `${entryKey}-${index}`;
                 if (!value) {
