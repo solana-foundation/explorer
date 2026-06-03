@@ -42,7 +42,7 @@ const DEFAULT_RESOURCES: Resource[] = [
 
 export function DeveloperResources({ resources = DEFAULT_RESOURCES }: { resources?: Resource[] }) {
     return (
-        <div className="card">
+        <div className="card e-mb-3 md:e-mb-6">
             <div className="e-flex e-justify-between e-border-0 e-border-b e-border-solid e-border-dark-border e-px-dk-4 e-py-3">
                 <div>Kickstart your development journey on Solana</div>
                 <div>

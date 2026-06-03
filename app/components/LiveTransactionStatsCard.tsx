@@ -35,7 +35,7 @@ const SERIES_INFO = {
 export function LiveTransactionStatsCard() {
     const [series, setSeries] = React.useState<Series>('short');
     return (
-        <div className="card e-flex e-grow e-flex-col">
+        <div className="card e-flex e-grow e-flex-col e-mb-3 md:e-mb-6">
             <CardHeader ui="dashkit">
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </CardHeader>

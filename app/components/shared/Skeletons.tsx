@@ -39,7 +39,7 @@ export function RichRowSkeleton() {
 
 export function SimpleCardSkeleton({ withTitle = false, title }: { withTitle?: boolean; title?: ReactElement }) {
     return (
-        <div className="card e-w-full">
+        <div className="card e-mb-3 md:e-mb-6 e-w-full">
             {withTitle && (
                 <CardHeader ui="dashkit">
                     <div className="row e-items-center">

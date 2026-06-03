@@ -126,7 +126,7 @@ function StakingComponent() {
     return (
         <div className="staking-card e-flex e-flex-col md:e-flex-row md:e-gap-6">
             <div className="e-w-full md:e-w-1/2">
-                <div className="card">
+                <div className="card e-mb-3 md:e-mb-6">
                     <CardBody ui="dashkit">
                         <h4>Circulating Supply</h4>
                         <h1>
@@ -140,7 +140,7 @@ function StakingComponent() {
                 </div>
             </div>
             <div className="e-w-full md:e-w-1/2">
-                <div className="card">
+                <div className="card e-mb-3 md:e-mb-6">
                     <CardBody ui="dashkit">
                         <h4>Active Stake</h4>
                         {activeStake ? (
@@ -190,7 +190,7 @@ function StatsCardBody() {
     const { blockHeight, absoluteSlot } = epochInfo;
 
     return (
-        <div className="card e-grow">
+        <div className="card e-grow e-mb-3 md:e-mb-6">
             <CardHeader ui="dashkit">
                 <div className="row e-items-center">
                     <div className="col">
