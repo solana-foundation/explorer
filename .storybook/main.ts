@@ -42,12 +42,6 @@ const config: StorybookConfig = {
             resolve: {
                 ...config.resolve,
                 alias: [
-                    // Stub useVerifiedProgram so VerifiedBuildCard renders without hitting verify.osec.io.
-                    // Must precede the generic `@/` alias from the inherited Vite config.
-                    {
-                        find: '@/app/utils/verified-builds',
-                        replacement: path.resolve(__dirname, './__mocks__/verified-builds.tsx'),
-                    },
                     ...toAliasArray(config.resolve?.alias),
                     // Mock @bundlr-network/client which uses Node.js stream.Transform incompatible with browser
                     {

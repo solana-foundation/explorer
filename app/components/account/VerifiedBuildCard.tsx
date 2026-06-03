@@ -21,6 +21,18 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
         programId: pubkey,
     });
 
+    return <BaseVerifiedBuildCard data={data} registryInfo={registryInfo ?? null} isLoading={isLoading} />;
+}
+
+export function BaseVerifiedBuildCard({
+    data,
+    registryInfo,
+    isLoading,
+}: {
+    data: UpgradeableLoaderAccountData;
+    registryInfo: OsecRegistryInfo | null;
+    isLoading: boolean;
+}) {
     if (!data.programData) {
         return <ErrorCard text="Account has no data" />;
     }
