@@ -66,7 +66,7 @@ A redirect status without a `Location` header SHALL be a `502`; a redirect that 
 
 ### Requirement: The proxy SHALL enforce a configurable per-request size cap
 
-The proxy SHALL reject any upstream body exceeding a per-request byte cap with `413`, where the cap defaults to 10 MB (10,000,000 bytes) and is overridable via `NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE`.
+The proxy SHALL reject any upstream body exceeding a per-request byte cap with `413`, where the cap defaults to 3 MB (3,000,000 bytes) — chosen to sit below Vercel's ~4.5 MB buffered-response limit and to bound memory/egress on this never-cached route — and is overridable via `NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE`.
 
 The cap MUST be enforced everywhere the size becomes knowable so no oversize body is fully buffered: the `Content-Length` pre-check, the streamed read (which aborts mid-stream when `Content-Length` is omitted or understated), the `fetch()`-rejection path, and the decode step. A malformed `Content-Length` (parsing to `NaN`) SHALL be ignored by the pre-check and fall through to the streamed read.
 
@@ -83,7 +83,7 @@ The cap MUST be enforced everywhere the size becomes knowable so no oversize bod
 #### Scenario: Cap overridden by environment
 
 - **WHEN** `NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE` is set
-- **THEN** that value SHALL be used as the cap, and the 10,000,000-byte default SHALL apply only when it is unset
+- **THEN** that value SHALL be used as the cap, and the 3,000,000-byte default SHALL apply only when it is unset
 
 ### Requirement: The proxy SHALL bound each request with a timeout
 
@@ -144,3 +144,35 @@ Every one of the three `413` size-cap paths (Content-Length pre-check, streamed 
 
 - **WHEN** `fetch()` fails for a reason other than timeout/abort/size
 - **THEN** the proxy SHALL emit a `warning`-level Sentry event and respond `500`
+
+### Requirement: The proxy SHALL log successful fetch sizes for cap tuning
+
+On the success path the proxy SHALL emit an `info`-level log recording the actual fetched byte length together with the upstream `host`, the response `contentType`, and the effective `maxSize`, so the full fetched-size distribution — not only the over-cap tail captured by the size-cap warnings — can be queried from logs to choose the long-term cap. This log MUST NOT be sent to Sentry (no per-request Sentry event on success).
+
+#### Scenario: A resource is fetched within the cap
+
+- **WHEN** the proxy successfully fetches and serves a resource
+- **THEN** it SHALL emit `Logger.info('[api:metadata-proxy] Resource fetched', { byteLength, contentType, host, maxSize })`
+- **AND** the event SHALL NOT be reported to Sentry
+
+### Requirement: Off-chain images SHALL degrade to a graceful fallback when they cannot be displayed
+
+Off-chain images rendered through the proxy SHALL be displayed via the `ProxiedImage` component, which composes proxy-agnostic image primitives from `app/components/shared/ui/image/` and renders a fallback in place of the image whenever it fails to load — including when the proxy rejects it with `413` for exceeding the size cap. Because a browser `<img>` element cannot read the HTTP status, the component SHALL treat every load failure (`413`/`404`/`502`/CORS) with the same fallback rather than an oversize-specific message.
+
+The fallback SHALL offer access to the original third-party URL only as an explicit, user-initiated link (opening in a new tab with `rel="noopener noreferrer"`), so the viewer's IP is exposed to the upstream host only on a deliberate click and never automatically. When no URI is available the fallback SHALL render without an outbound link.
+
+#### Scenario: Image exceeds the size cap
+
+- **WHEN** an image routed through the proxy is rejected with `413`
+- **THEN** the consumer SHALL render the `ProxiedImage` fallback (placeholder plus an opt-in "View original" link) rather than a broken-image icon
+
+#### Scenario: Image fails to load for any other reason
+
+- **WHEN** the image request fails with `404`, `502`, or a CORS error
+- **THEN** the same generic fallback SHALL be shown, since the `<img>` element cannot distinguish the cause
+
+#### Scenario: Opening the original is opt-in
+
+- **WHEN** the fallback is shown for a resource with a known URI
+- **THEN** it SHALL render a link to the original URI that navigates only on user click, with `target="_blank"` and `rel="noopener noreferrer"`
+- **AND** SHALL NOT fetch or preload the original automatically
