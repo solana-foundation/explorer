@@ -171,7 +171,7 @@ function AccountNofFound({ account, labels = LABELS }: { account: Account; label
         return (
             <span>
                 <SearchingAddressIndicator searchingCluster={searchingCluster} />
-                <span className="align-middle">{labels['not-found']}</span>
+                <span className="e-align-middle">{labels['not-found']}</span>
             </span>
         );
     }
@@ -181,7 +181,7 @@ function AccountNofFound({ account, labels = LABELS }: { account: Account; label
     return isAddressFoundOnAnotherClsuter ? (
         <span>
             <AdjacentAddressLink address={address} foundCluster={foundCluster} />
-            <span className="align-middle">{labels['not-found']}</span>
+            <span className="e-align-middle">{labels['not-found']}</span>
         </span>
     ) : (
         <span>{labels['not-found']}</span>
@@ -196,7 +196,7 @@ function AdjacentAddressLink({ address, foundCluster }: { address: string; found
     });
 
     return (
-        <a href={foundClusterPath} className="text-info align-middle" style={{ marginRight: '5px' }}>
+        <a href={foundClusterPath} className="text-info e-align-middle" style={{ marginRight: '5px' }}>
             Found on {clusterName(foundCluster)}
         </a>
     );
@@ -213,9 +213,9 @@ function SearchingAddressIndicator({ searchingCluster }: { searchingCluster: Clu
                     marginRight: '5px',
                     width: '10px',
                 }}
-                className={`${spinnerCls} align-middle d-inline-block`}
+                className={`${spinnerCls} e-align-middle d-inline-block`}
             />
-            <span className="text-muted align-middle" style={{ marginRight: '10px', verticalAlign: 'middle' }}>
+            <span className="text-muted e-align-middle" style={{ marginRight: '10px', verticalAlign: 'middle' }}>
                 checking {clusterName(searchingCluster).toLowerCase()}
             </span>
         </>

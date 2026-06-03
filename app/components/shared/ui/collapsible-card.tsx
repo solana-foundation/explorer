@@ -24,7 +24,7 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                         <button
                             aria-expanded={expanded}
                             aria-label={expanded ? 'Collapse' : 'Expand'}
-                            className="btn btn-sm btn-white d-flex align-items-center justify-content-center e-py-[5.3px] e-transition-colors"
+                            className="btn btn-sm btn-white d-flex align-items-center e-justify-center e-py-[5.3px] e-transition-colors"
                             onClick={() => setExpanded(current => !current)}
                         >
                             <ChevronDown

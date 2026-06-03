@@ -61,7 +61,7 @@ const RawProgramLogs = ({ raw }: { raw: string[] }) => {
         <TableCardBody>
             <tr>
                 <td>
-                    <pre className="text-start">{JSON.stringify(raw, null, 2)}</pre>
+                    <pre className="e-text-left">{JSON.stringify(raw, null, 2)}</pre>
                 </td>
             </tr>
         </TableCardBody>

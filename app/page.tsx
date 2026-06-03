@@ -190,7 +190,7 @@ function StatsCardBody() {
     const { blockHeight, absoluteSlot } = epochInfo;
 
     return (
-        <div className="card flex-grow-1">
+        <div className="card e-grow">
             <CardHeader ui="dashkit">
                 <div className="row align-items-center">
                     <div className="col">

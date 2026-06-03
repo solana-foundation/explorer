@@ -84,7 +84,7 @@ export function BpfLoaderWriteDetailsCard(props: Props<WriteInfo>) {
                     Bytes <span className="text-muted">(Base 64)</span>
                 </td>
                 <td className="text-lg-end">
-                    <pre className="d-inline-block text-start mb-0">{bytes}</pre>
+                    <pre className="d-inline-block e-text-left mb-0">{bytes}</pre>
                 </td>
             </tr>
 

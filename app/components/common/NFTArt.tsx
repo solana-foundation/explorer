@@ -18,7 +18,7 @@ const ViewOriginalArtContentLink = ({ src }: { src: string }) => {
     }
 
     return (
-        <h6 className="header-pretitle d-flex mt-2 justify-content-center">
+        <h6 className="header-pretitle d-flex mt-2 e-justify-center">
             {!isDisplayEnabled ? null : (
                 <Link href={src} target="_blank" className="d-flex align-items-center">
                     <div>VIEW ORIGINAL</div>

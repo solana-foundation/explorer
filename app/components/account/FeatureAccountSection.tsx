@@ -81,7 +81,7 @@ const BaseFeatureCard = ({
     if (activatedAt) {
         activatedAtSlot = (
             <tr>
-                <td className="text-nowrap">Activated At Slot</td>
+                <td className="e-whitespace-nowrap">Activated At Slot</td>
                 <td className="text-lg-end">
                     <Slot slot={activatedAt} link />
                 </td>
@@ -124,7 +124,7 @@ const BaseFeatureCard = ({
             </tr>
 
             <tr>
-                <td className="text-nowrap">Activated?</td>
+                <td className="e-whitespace-nowrap">Activated?</td>
                 <td className="text-lg-end">
                     {activatedAt !== null ? (
                         <span className="badge bg-success">Active on {clusterName(cluster)}</span>
@@ -139,7 +139,7 @@ const BaseFeatureCard = ({
             {activatedAtSlot}
 
             <tr>
-                <td className="text-nowrap">Cluster Activation</td>
+                <td className="e-whitespace-nowrap">Cluster Activation</td>
                 <td className="text-lg-end">
                     <ClusterActivationEpochAtCluster
                         cluster={cluster}

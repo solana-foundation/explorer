@@ -166,7 +166,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                             )}
                             <div className="d-flex gap-2 mt-1">
                                 <button
-                                    className="btn btn-primary flex-grow-1"
+                                    className="btn btn-primary e-grow"
                                     onClick={handleSave}
                                     disabled={!savedName.trim()}
                                     data-testid="confirm-save-cluster-btn"
@@ -174,7 +174,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                                     Save
                                 </button>
                                 <button
-                                    className="btn btn-white flex-grow-1"
+                                    className="btn btn-white e-grow"
                                     onClick={() => {
                                         setSaving(false);
                                         setSavedName('');

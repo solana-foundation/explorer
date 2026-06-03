@@ -191,7 +191,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                                 <span />
                             </Copyable>
                             <pre
-                                className="text-start mb-0 font-monospace"
+                                className="e-text-left mb-0 font-monospace"
                                 style={{ overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}
                             >
                                 {value}

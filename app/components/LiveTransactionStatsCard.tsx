@@ -35,7 +35,7 @@ const SERIES_INFO = {
 export function LiveTransactionStatsCard() {
     const [series, setSeries] = React.useState<Series>('short');
     return (
-        <div className="card flex-grow-1 d-flex flex-column">
+        <div className="card e-grow d-flex flex-column">
             <CardHeader ui="dashkit">
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </CardHeader>
@@ -174,7 +174,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
     };
 
     return (
-        <div className="d-flex flex-column flex-grow-1">
+        <div className="d-flex flex-column e-grow">
             <TableCardBody>
                 <tr>
                     <td className="w-100">Transaction count</td>
@@ -207,7 +207,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
                     </div>
                 </div>
 
-                <div id="perf-history" className="mt-3 flex-grow-1" style={{ minHeight: '200px' }}>
+                <div id="perf-history" className="mt-3 e-grow" style={{ minHeight: '200px' }}>
                     <Bar data={chartData} options={chartOptions} style={{ height: '100%' }} />
                 </div>
 

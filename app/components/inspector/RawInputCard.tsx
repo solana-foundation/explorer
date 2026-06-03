@@ -70,7 +70,7 @@ function TabInstructions() {
             content: (
                 <div className="e-p-3">
                     <div className="mb-3">
-                        <div className="text-decoration-underline mb-2">@solana/web3.js &lt; 2.0.0</div>
+                        <div className="e-underline mb-2">@solana/web3.js &lt; 2.0.0</div>
                         <div className="mb-2">
                             <div className="mb-1">Legacy Transaction:</div>
                             <code>console.log(tx.serializeMessage().toString(&quot;base64&quot;));</code>
@@ -81,7 +81,7 @@ function TabInstructions() {
                         </div>
                     </div>
                     <div>
-                        <div className="text-decoration-underline mb-2">@solana/web3.js &gt;= 2.0.0</div>
+                        <div className="e-underline mb-2">@solana/web3.js &gt;= 2.0.0</div>
                         <div>
                             <div className="mb-1">Legacy Transaction:</div>
                             <code>console.log(getBase64EncodedWireTransaction(tx));</code>

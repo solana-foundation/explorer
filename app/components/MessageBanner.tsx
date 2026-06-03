@@ -69,7 +69,7 @@ export function MessageBanner() {
     return (
         <div className="bg-info">
             <div className="container">
-                <div className="d-flex flex-column align-items-center justify-content-center text-center e-py-3">
+                <div className="d-flex flex-column align-items-center e-justify-center text-center e-py-3">
                     <h3 className="mb-0 line-height-md">
                         <AlertCircle className="me-2" size={15} />
                         {message}
