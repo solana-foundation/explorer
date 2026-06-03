@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
 
+import { CACHE_HEADERS, MAX_SIZE, SECURITY_HEADERS, TIMEOUT, USER_AGENT } from './config';
 import {
     fetchResource,
     isHTTPProtocol,
@@ -12,23 +13,12 @@ import {
 } from './feature';
 
 export const dynamic = 'force-dynamic';
-
-const USER_AGENT = process.env.NEXT_PUBLIC_METADATA_USER_AGENT ?? 'Solana Explorer';
-// 3 MB default: well under Vercel's ~4.5 MB buffered-response cap. Oversize
-// fetches degrade to the ProxiedImage "view original" fallback. Tune from the
-// success-path size stats logged in fetch-resource.ts.
-const MAX_SIZE = process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE
-    ? Number(process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE)
-    : 3_000_000;
-const TIMEOUT = process.env.NEXT_PUBLIC_METADATA_TIMEOUT ? Number(process.env.NEXT_PUBLIC_METADATA_TIMEOUT) : 10_000;
-
-// Prevent proxied content (e.g. SVG with embedded scripts) from executing
-// anything if the proxy URL is opened directly as a top-level document.
-const SECURITY_HEADERS = {
-    'Content-Security-Policy':
-        "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'none'",
-    'X-Content-Type-Options': 'nosniff',
-};
+// Platform backstop. The per-hop fetch timeout (NEXT_PUBLIC_METADATA_TIMEOUT,
+// 10s) bounds each hop, but not DNS resolution or the sum across redirect hops,
+// so cap the whole invocation here — every cache-miss for metadata/image
+// traffic runs through this one function once enabled. Kept inline (not in
+// config.ts): Next reads route segment config only as literal route exports.
+export const maxDuration = 15;
 
 export async function GET(request: Request) {
     if (process.env.NEXT_PUBLIC_METADATA_ENABLED !== 'true') {
@@ -89,8 +79,9 @@ function parseUrl(maybeUrl: string | null): URL | undefined {
 function buildResponse(data: unknown, resourceHeaders: Headers): NextResponse {
     const responseHeaders: Record<string, string> = {
         ...SECURITY_HEADERS,
-        'Cache-Control': resourceHeaders.get('cache-control') ?? 'no-cache',
+        ...CACHE_HEADERS,
         'Content-Type': resourceHeaders.get('content-type') ?? 'application/json; charset=utf-8',
+        // Forwarded so the edge can revalidate cheaply (304) when SWR refreshes.
         Etag: resourceHeaders.get('etag') ?? 'no-etag',
     };
 

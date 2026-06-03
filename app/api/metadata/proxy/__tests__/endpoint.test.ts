@@ -153,15 +153,18 @@ describe('Metadata Proxy Route', () => {
             const request = new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`);
             const response = await GET(request);
             expect(response.status).toBe(status);
+            // Errors must not be edge-cached.
+            expect(response.headers.get('vercel-cdn-cache-control')).toBeNull();
         });
     });
 
     describe('successful response', () => {
-        it('should return 200 and forward upstream headers', async () => {
+        it('should return 200, forward content-type/etag, and set its own cache policy', async () => {
             const { response } = await setup('http://external.resource/file.json', {
                 upstream: {
                     data: { attributes: [], name: 'NFT' },
                     headers: {
+                        // Upstream Cache-Control is intentionally overridden, not forwarded.
                         'Cache-Control': 'max-age=3600',
                         'Content-Type': 'application/json',
                         ETag: 'test-etag',
@@ -171,8 +174,12 @@ describe('Metadata Proxy Route', () => {
 
             expect(response.status).toBe(200);
             expect(response.headers.get('content-type')).toBe('application/json');
-            expect(response.headers.get('cache-control')).toBe('max-age=3600');
             expect(response.headers.get('etag')).toBe('test-etag');
+            // Our own edge-caching policy, not the upstream's value.
+            expect(response.headers.get('cache-control')).toBe('public, max-age=300');
+            expect(response.headers.get('vercel-cdn-cache-control')).toBe(
+                'public, s-maxage=86400, stale-while-revalidate=604800',
+            );
         });
 
         it('should omit Content-Length to avoid browser CORS issues', async () => {
