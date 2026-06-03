@@ -50,8 +50,12 @@ export function AccountHeader({
         </div>
     );
 
-    if (isTokenInfoLoading) return fallback;
-
+    // Headers derived purely from on-chain account data (NFTs, programs) don't
+    // depend on the async token-info (UTL) fetch, so resolve them before the
+    // isTokenInfoLoading gate. Gating them on it would blank and *remount* the
+    // header — re-requesting its image and flickering — on every account refetch
+    // or token-info revalidation. (The accounts cache keeps stale data during a
+    // refetch, so these conditions still hold and the header stays mounted.)
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} />;
     }
@@ -61,21 +65,24 @@ export function AccountHeader({
         return <NFTokenAccountHeader account={account} />;
     }
 
-    if (isToken && !isTokenInfoLoading) {
-        if (isRedactedTokenAddress(address)) {
-            return (
-                <TokenMintHeader address={address} mintInfo={mintInfo} parsedData={undefined} tokenInfo={undefined} />
-            );
-        }
-        return <TokenMintHeader address={address} mintInfo={mintInfo} parsedData={parsedData} tokenInfo={tokenInfo} />;
-    }
-
     if (isProgram) {
         return <ProgramHeader address={address} parsedData={parsedData} />;
     }
 
     if (isNativeProgram) {
         return <ProgramHeader address={address} />;
+    }
+
+    // The token-mint header consumes the token-info fetch, so wait for it.
+    if (isTokenInfoLoading) return fallback;
+
+    if (isToken) {
+        if (isRedactedTokenAddress(address)) {
+            return (
+                <TokenMintHeader address={address} mintInfo={mintInfo} parsedData={undefined} tokenInfo={undefined} />
+            );
+        }
+        return <TokenMintHeader address={address} mintInfo={mintInfo} parsedData={parsedData} tokenInfo={tokenInfo} />;
     }
 
     if (account) {
