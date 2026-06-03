@@ -1,6 +1,7 @@
 import type { Account } from '@providers/accounts';
 import { address } from '@solana/kit';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
@@ -35,7 +36,7 @@ const account: Account = {
 const stakeAccount: StakeAccountInfo = {
     meta: {
         authorized: { staker: STAKER, withdrawer: WITHDRAWER },
-        lockup: { custodian: STAKE_PROGRAM, epoch: 0, unixTimestamp: 0 },
+        lockup: { custodian: SYSTEM_PROGRAM_ADDRESS, epoch: 0, unixTimestamp: 0 },
         rentExemptReserve: RENT_RESERVE,
     },
     stake: {
