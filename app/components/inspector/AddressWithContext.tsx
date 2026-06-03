@@ -52,7 +52,7 @@ export function AddressFromLookupTableWithContext({
         const pubkey = lookupTable.state.addresses[lookupTableIndex];
         return (
             <div className="e-flex e-items-end e-flex-col">
-                <Address pubkey={pubkey} link />
+                <Address pubkey={pubkey} link alignRight />
                 {hideInfo ? null : <AccountInfo pubkey={pubkey} />}
             </div>
         );
@@ -70,7 +70,7 @@ export function AddressWithContext({
 }) {
     return (
         <div className="e-flex e-items-end e-flex-col">
-            <Address pubkey={pubkey} link />
+            <Address pubkey={pubkey} link alignRight />
             {hideInfo ? null : <AccountInfo pubkey={pubkey} validator={validator} />}
         </div>
     );
