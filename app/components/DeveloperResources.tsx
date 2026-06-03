@@ -53,7 +53,7 @@ export function DeveloperResources({ resources = DEFAULT_RESOURCES }: { resource
                 </div>
             </div>
             <CardBody ui="dashkit">
-                <div className="e-flex e-gap-6 e-pb-3 e-overflow-auto">
+                <div className="e-flex e-gap-6 e-overflow-auto e-pb-3">
                     {resources.map(resource => (
                         <ResourceCard key={resource.link} {...resource} />
                     ))}
@@ -68,7 +68,7 @@ function ResourceCard({ title, description, image, link, imageBackground }: Reso
 
     return (
         <div className="flex e-flex-col" style={{ height: '200px', width: '250px' }}>
-            <div className="e-w-full e-mb-3">
+            <div className="e-mb-3 e-w-full">
                 <a href={link} target="_blank" rel="noopener noreferrer" className="hover:cursor-pointer">
                     <div className="e-bg-heavy-metal-700" style={{ height: '120px', width: '250px' }}>
                         {image && (
@@ -92,7 +92,7 @@ function ResourceCard({ title, description, image, link, imageBackground }: Reso
             </div>
             <div className="flex e-flex-col">
                 <p className="e-mb-[3px]">{title}</p>
-                <p className="text-muted e-mb-1.5 e-whitespace-normal line-clamp-3">{description}</p>
+                <p className="text-muted line-clamp-3 e-mb-1.5 e-whitespace-normal">{description}</p>
             </div>
         </div>
     );

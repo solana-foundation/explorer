@@ -56,7 +56,7 @@ export function ClusterModal() {
                         &times;
                     </span>
 
-                    <h2 className="e-text-center e-mb-6 e-mt-6">Choose a Cluster</h2>
+                    <h2 className="e-mb-6 e-mt-6 e-text-center">Choose a Cluster</h2>
                     <ClusterToggle />
                     <ClusterModalDeveloperSettings />
                 </div>
@@ -143,7 +143,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                         }}
                     />
                     {saving ? (
-                        <div className="col-12 e-mt-1.5 e-mb-3" data-testid="save-cluster-form">
+                        <div className="col-12 e-mb-3 e-mt-1.5" data-testid="save-cluster-form">
                             <input
                                 type="text"
                                 className="form-control e-mb-1.5"
@@ -160,11 +160,14 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                                 </small>
                             )}
                             {saveError && (
-                                <div className="alert alert-danger e-mt-1.5 e-mb-0 e-py-1.5" data-testid="save-cluster-error">
+                                <div
+                                    className="alert alert-danger e-mb-0 e-mt-1.5 e-py-1.5"
+                                    data-testid="save-cluster-error"
+                                >
                                     {saveError.message}
                                 </div>
                             )}
-                            <div className="e-flex e-gap-1.5 e-mt-[3px]">
+                            <div className="e-mt-[3px] e-flex e-gap-1.5">
                                 <button
                                     className="btn btn-primary e-grow"
                                     onClick={handleSave}
@@ -187,7 +190,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                         </div>
                     ) : !savedClusters.some(sc => sc.url === localUrl) ? (
                         <button
-                            className="btn btn-sm btn-white col-12 e-mt-1.5 e-mb-3"
+                            className="btn btn-sm btn-white col-12 e-mb-3 e-mt-1.5"
                             onClick={() => setSaving(true)}
                             data-testid="save-custom-cluster-btn"
                         >
@@ -221,8 +224,11 @@ function SavedClusterItem({
     const clusterUrl = `${pathname}?${nextQueryString}`;
 
     return (
-        <div className="e-relative col-12 e-mb-3" data-testid={`saved-cluster-${cluster.name}`}>
-            <Link className={cn(clusterButtonVariants({ active: isActive, status }), 'e-text-center')} href={clusterUrl}>
+        <div className="col-12 e-relative e-mb-3" data-testid={`saved-cluster-${cluster.name}`}>
+            <Link
+                className={cn(clusterButtonVariants({ active: isActive, status }), 'e-text-center')}
+                href={clusterUrl}
+            >
                 {cluster.name}
             </Link>
             <button
@@ -261,7 +267,7 @@ function SavedClustersSection({ status, savedClusters }: { status: ClusterStatus
     return (
         <div className="e-w-full" data-testid="saved-clusters-section">
             <hr />
-            <h3 className="e-text-center e-mb-3">Saved Clusters</h3>
+            <h3 className="e-mb-3 e-text-center">Saved Clusters</h3>
             {savedClusters.map(sc => (
                 <SavedClusterItem
                     key={sc.name}
@@ -281,7 +287,7 @@ function ClusterToggle() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     return (
-        <div className="btn-group-toggle e-flex e-flex-wrap e-mb-6">
+        <div className="btn-group-toggle e-mb-6 e-flex e-flex-wrap">
             {CLUSTERS.map((net, index) => {
                 const active = net === cluster;
                 if (net === Cluster.Custom)

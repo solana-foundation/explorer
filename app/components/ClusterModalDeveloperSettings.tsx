@@ -17,7 +17,7 @@ export default function ClusterModalDeveloperSettings() {
     return (
         <>
             <hr />
-            <h2 className="e-text-center e-mb-6 e-mt-6">Developer Settings</h2>
+            <h2 className="e-mb-6 e-mt-6 e-text-center">Developer Settings</h2>
             <div className="e-flex e-justify-between">
                 <span className="e-mr-3">Enable custom url param</span>
                 <div className="form-check form-switch">

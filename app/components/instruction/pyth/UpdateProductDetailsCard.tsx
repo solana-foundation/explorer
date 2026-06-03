@@ -26,7 +26,7 @@ export default function UpdateProductDetailsCard({
     function Content() {
         return (
             <Copyable text={attrsJSON}>
-                <pre className="e-inline-block e-text-left e-mb-0">{attrsJSON}</pre>
+                <pre className="e-mb-0 e-inline-block e-text-left">{attrsJSON}</pre>
             </Copyable>
         );
     }
@@ -66,10 +66,10 @@ export default function UpdateProductDetailsCard({
                     Attributes <span className="text-muted">(JSON)</span>
                 </td>
                 <td className="e-text-right">
-                    <div className="e-hidden d-lg-flex e-items-center e-justify-end">
+                    <div className="d-lg-flex e-hidden e-items-center e-justify-end">
                         <Content />
                     </div>
-                    <div className="e-flex lg:e-hidden e-items-center">
+                    <div className="e-flex e-items-center lg:e-hidden">
                         <Content />
                     </div>
                 </td>

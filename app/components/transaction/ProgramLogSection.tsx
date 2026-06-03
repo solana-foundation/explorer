@@ -33,10 +33,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                 <CardHeader ui="dashkit" className={!showRaw ? '!e-border-b-0' : undefined}>
                     <h3 className="card-header-title">Program Instruction Logs</h3>
                     <button
-                        className={cn(
-                            'btn btn-sm e-flex e-items-center',
-                            showRaw ? 'btn-black active' : 'btn-white',
-                        )}
+                        className={cn('btn btn-sm e-flex e-items-center', showRaw ? 'btn-black active' : 'btn-white')}
                         onClick={() => setShowRaw(r => !r)}
                     >
                         <Code className="e-mr-1.5" size={13} /> Raw

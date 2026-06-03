@@ -141,7 +141,7 @@ function AccountFromLookupTableRow({
     return (
         <tr>
             <td>
-                <div className="e-flex e-items-start e-flex-col">
+                <div className="e-flex e-flex-col e-items-start">
                     Account #{accountIndex + 1}
                     <span className="e-mt-[3px]">
                         {!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
@@ -179,7 +179,7 @@ function AccountRow({
     return (
         <tr>
             <td>
-                <div className="e-flex e-items-start e-flex-col">
+                <div className="e-flex e-flex-col e-items-start">
                     Account #{accountIndex + 1}
                     <span className="e-mt-[3px]">
                         {signer && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}

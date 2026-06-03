@@ -105,7 +105,7 @@ function SysvarAccountSlotHistory({
                 <td className="e-align-top">
                     Slot History <span className="text-muted">(previous 100 slots)</span>
                 </td>
-                <td className="e-text-right font-monospace">
+                <td className="font-monospace e-text-right">
                     {history.map(val => (
                         <p key={val} className="e-mb-0">
                             <Slot slot={val} link />
@@ -216,7 +216,7 @@ function SysvarAccountClockCard({ account, sysvarAccount }: { account: Account; 
 
             <tr>
                 <td>Timestamp</td>
-                <td className="e-text-right font-monospace">
+                <td className="font-monospace e-text-right">
                     {displayTimestamp(unixTimestampToMs(sysvarAccount.info.unixTimestamp))}
                 </td>
             </tr>
@@ -300,7 +300,7 @@ function SysvarAccountRewardsCard({
 
             <tr>
                 <td>Validator Point Value</td>
-                <td className="e-text-right font-monospace">{validatorPointValueFormatted} lamports</td>
+                <td className="font-monospace e-text-right">{validatorPointValueFormatted} lamports</td>
             </tr>
         </AccountCard>
     );

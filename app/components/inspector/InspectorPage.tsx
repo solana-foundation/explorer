@@ -18,8 +18,6 @@ import {
     VersionedMessage,
 } from '@solana/web3.js';
 import { generated, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
-
-import { CardHeader } from '@/app/shared/ui/Card';
 import { useClusterPath } from '@utils/url';
 import bs58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -29,6 +27,7 @@ import useSWR from 'swr';
 import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';

@@ -89,7 +89,7 @@ export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
             >
                 <td>
                     <div className="e-flex e-flex-row e-items-center">
-                        {nestingLevel > 0 && <CornerDownRight className="e-mr-1.5 e-mb-[3px]" size={14} />}
+                        {nestingLevel > 0 && <CornerDownRight className="e-mb-[3px] e-mr-1.5" size={14} />}
                         <div>{key}</div>
                     </div>
                 </td>

@@ -38,7 +38,7 @@ export function SecurityTXTBadge({ error, tabPath }: { error?: string; tabPath: 
 
     return (
         <h3 className="e-mb-0">
-            <Link className="e-cursor-pointer badge bg-success-soft rank" href={tabPath}>
+            <Link className="badge bg-success-soft rank e-cursor-pointer" href={tabPath}>
                 Included
             </Link>
         </h3>

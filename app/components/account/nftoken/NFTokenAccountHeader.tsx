@@ -45,16 +45,16 @@ export function NFTokenNFTHeader({ nft }: { nft: NftokenTypes.NftAccount }) {
                 <NFTImageContent uri={metadata?.image.trim()} />
             </div>
 
-            <div className="col e-mb-3 ms-0.5 e-mt-3">
+            <div className="col ms-0.5 e-mb-3 e-mt-3">
                 {<h6 className="header-pretitle e-ml-[3px]">NFToken NFT</h6>}
                 <div className="e-flex e-items-center">
-                    <h2 className="header-title e-ml-[3px] e-items-center no-overflow-with-ellipsis">
+                    <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
                         {metadata ? metadata.name || 'No NFT name was found' : 'Loading...'}
                     </h2>
                 </div>
 
                 <div>
-                    <div className={'d-inline-flex e-items-center e-mt-1.5'}>
+                    <div className={'d-inline-flex e-mt-1.5 e-items-center'}>
                         <span className="badge badge-pill bg-dark">{`${
                             nft.authority_can_update ? 'Mutable' : 'Immutable'
                         }`}</span>
@@ -83,16 +83,16 @@ export function NFTokenCollectionHeader({ collection }: { collection: NftokenTyp
                 <NFTImageContent uri={metadata?.image} />
             </div>
 
-            <div className="col e-mb-3 ms-0.5 e-mt-3">
+            <div className="col ms-0.5 e-mb-3 e-mt-3">
                 {<h6 className="header-pretitle e-ml-[3px]">NFToken Collection</h6>}
                 <div className="e-flex e-items-center">
-                    <h2 className="header-title e-ml-[3px] e-items-center no-overflow-with-ellipsis">
+                    <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
                         {metadata ? metadata.name || 'No collection name was found' : 'Loading...'}
                     </h2>
                 </div>
 
                 <div>
-                    <div className={'d-inline-flex e-items-center e-mt-1.5'}>
+                    <div className={'d-inline-flex e-mt-1.5 e-items-center'}>
                         <span className="badge badge-pill bg-dark">{`${
                             collection.authority_can_update ? 'Mutable' : 'Immutable'
                         }`}</span>

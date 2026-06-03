@@ -16,7 +16,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
     args: {
         children: (
-            <span className="text-link e-items-center e-inline-flex">
+            <span className="text-link e-inline-flex e-items-center">
                 Visit External Site
                 <ExternalLink className="e-ml-1.5" size={13} />
             </span>
@@ -46,7 +46,7 @@ export const WithSimpleText: Story = {
 export const WithLongURL: Story = {
     args: {
         children: (
-            <span className="text-link e-items-center e-inline-flex">
+            <span className="text-link e-inline-flex e-items-center">
                 View Transaction
                 <ExternalLink className="e-ml-1.5" size={13} />
             </span>

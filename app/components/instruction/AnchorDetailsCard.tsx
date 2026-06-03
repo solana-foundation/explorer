@@ -273,7 +273,9 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                         <tr key={keyIndex} className={accountInfo?.isNested ? 'table-nested-account' : ''}>
                             <td>
                                 <div className="e-flex e-flex-row e-items-center">
-                                    {accountInfo?.isNested && <CornerDownRight className="e-mr-1.5 e-mb-[3px]" size={14} />}
+                                    {accountInfo?.isNested && (
+                                        <CornerDownRight className="e-mb-[3px] e-mr-1.5" size={14} />
+                                    )}
                                     <div className="e-mr-1.5 md:e-inline">
                                         {accountInfo
                                             ? `${camelToTitleCase(accountInfo.name)}`

@@ -72,7 +72,7 @@ export const WithHeaderButtons: Story = {
     render: () => (
         <CollapsibleCard
             title="Account Input(s) (3)"
-            headerButtons={<button className="btn btn-sm btn-white e-flex e-items-center e-mr-1.5">Raw</button>}
+            headerButtons={<button className="btn btn-sm btn-white e-mr-1.5 e-flex e-items-center">Raw</button>}
         >
             <SampleContent />
         </CollapsibleCard>

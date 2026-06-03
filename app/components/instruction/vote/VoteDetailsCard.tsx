@@ -66,7 +66,7 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
                 <tr key="vote-hash">
                     <td>Vote Hash</td>
                     <td className="e-text-right">
-                        <pre className="e-inline-block e-text-left e-mb-0">{value.hash}</pre>
+                        <pre className="e-mb-0 e-inline-block e-text-left">{value.hash}</pre>
                     </td>
                 </tr>,
             );
@@ -75,7 +75,7 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
                 attributes.push(
                     <tr key="timestamp">
                         <td>Timestamp</td>
-                        <td className="e-text-right font-monospace">{displayTimestamp(value.timestamp * 1000)}</td>
+                        <td className="font-monospace e-text-right">{displayTimestamp(value.timestamp * 1000)}</td>
                     </tr>,
                 );
             }
@@ -83,8 +83,8 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
             attributes.push(
                 <tr key="vote-slots">
                     <td>Slots</td>
-                    <td className="e-text-right font-monospace">
-                        <pre className="e-inline-block e-text-left e-mb-0">{value.slots.join('\n')}</pre>
+                    <td className="font-monospace e-text-right">
+                        <pre className="e-mb-0 e-inline-block e-text-left">{value.slots.join('\n')}</pre>
                     </td>
                 </tr>,
             );

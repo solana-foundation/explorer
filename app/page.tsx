@@ -201,14 +201,14 @@ function StatsCardBody() {
             <TableCardBody>
                 <tr>
                     <td className="e-w-full">Slot</td>
-                    <td className="e-text-right font-monospace">
+                    <td className="font-monospace e-text-right">
                         <Slot slot={absoluteSlot} link />
                     </td>
                 </tr>
                 {blockHeight !== undefined && (
                     <tr>
                         <td className="e-w-full">Block height</td>
-                        <td className="e-text-right font-monospace">
+                        <td className="font-monospace e-text-right">
                             <Slot slot={blockHeight} />
                         </td>
                     </tr>
@@ -216,32 +216,32 @@ function StatsCardBody() {
                 {blockTime && (
                     <tr>
                         <td className="e-w-full">Cluster time</td>
-                        <td className="e-text-right font-monospace">
+                        <td className="font-monospace e-text-right">
                             <TimestampToggle unixTimestamp={blockTime} shorter></TimestampToggle>
                         </td>
                     </tr>
                 )}
                 <tr>
                     <td className="e-w-full">Slot time (1min average)</td>
-                    <td className="e-text-right font-monospace">{averageSlotTime}ms</td>
+                    <td className="font-monospace e-text-right">{averageSlotTime}ms</td>
                 </tr>
                 <tr>
                     <td className="e-w-full">Slot time (1hr average)</td>
-                    <td className="e-text-right font-monospace">{hourlySlotTime}ms</td>
+                    <td className="font-monospace e-text-right">{hourlySlotTime}ms</td>
                 </tr>
                 <tr>
                     <td className="e-w-full">Epoch</td>
-                    <td className="e-text-right font-monospace">
+                    <td className="font-monospace e-text-right">
                         <Epoch epoch={epochInfo.epoch} link />
                     </td>
                 </tr>
                 <tr>
                     <td className="e-w-full">Epoch progress</td>
-                    <td className="e-text-right font-monospace">{epochProgress}</td>
+                    <td className="font-monospace e-text-right">{epochProgress}</td>
                 </tr>
                 <tr>
                     <td className="e-w-full">Epoch time remaining (approx.)</td>
-                    <td className="e-text-right font-monospace">~{epochTimeRemaining}</td>
+                    <td className="font-monospace e-text-right">~{epochTimeRemaining}</td>
                 </tr>
             </TableCardBody>
         </div>

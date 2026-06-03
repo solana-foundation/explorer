@@ -13,8 +13,6 @@ import {
 } from '@components/instruction/token-lending/types';
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
 import { isTokenProgramData } from '@providers/accounts';
-
-import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
 import { useAccountHistories, useFetchAccountHistory } from '@providers/accounts/history';
 import { isTokenProgramId, TokenInfoWithPubkey, useAccountOwnedTokens } from '@providers/accounts/tokens';
 import { CacheEntry, FetchStatus } from '@providers/cache';
@@ -34,6 +32,7 @@ import { ChevronDown, MinusSquare, PlusSquare } from 'react-feather';
 
 import { INITIAL_TOKENS_TO_FETCH, INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import { Logger } from '@/app/shared/lib/logger';
+import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
 
 const TRUNCATE_TOKEN_LENGTH = 10;
 const ALL_TOKENS = '';

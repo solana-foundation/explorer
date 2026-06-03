@@ -13,8 +13,6 @@ import { FetchStatus } from '@providers/cache';
 import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
-
-import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -24,6 +22,7 @@ import { ChevronDown } from 'react-feather';
 import { getProxiedUri } from '@/app/features/metadata/utils';
 import { INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import TokenLogoPlaceholder from '@/app/img/logos-solana/low-contrast-solana-logo.svg';
+import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
 import { normalizeTokenAmount } from '@/app/utils';
 
 type Display = 'summary' | 'detail' | null;

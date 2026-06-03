@@ -50,7 +50,7 @@ export function UpcomingFeatures() {
     return (
         <FeaturesTable
             header={
-                <div className="e-flex e-justify-between e-items-center">
+                <div className="e-flex e-items-center e-justify-between">
                     <div>
                         <span className="e-mr-1.5">🚀</span>
                         Upcoming {clusterName(cluster)} Features
@@ -99,7 +99,7 @@ function FeaturesTable({
                                     <div className="e-mb-1.5 e-flex e-items-center">
                                         <Link
                                             href={`/address/${feature.key}/feature-gate?cluster=${clusterSlug(cluster)}`}
-                                            className="e-mb-0 e-mr-3 e-underline fs-sm"
+                                            className="fs-sm e-mb-0 e-mr-3 e-underline"
                                         >
                                             {feature.title}
                                         </Link>
@@ -113,10 +113,10 @@ function FeaturesTable({
                                             <span className="badge bg-success">Active on Testnet</span>
                                         )}
                                     </div>
-                                    <p className="e-mb-0 fs-sm">{feature.description}</p>
+                                    <p className="fs-sm e-mb-0">{feature.description}</p>
                                 </td>
                                 <td>
-                                    <div className="e-flex e-flex-col fs-sm">
+                                    <div className="fs-sm e-flex e-flex-col">
                                         {feature.mainnet_activation_epoch && (
                                             <Link
                                                 href={`/epoch/${feature.mainnet_activation_epoch}?cluster=mainnet`}

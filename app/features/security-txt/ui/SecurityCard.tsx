@@ -76,7 +76,7 @@ export function ProgramSecurityTxtCard({
     return (
         <div className="card security-txt e-overflow-hidden">
             <CardHeader ui="dashkit" className="!e-h-auto e-min-h-[60px]">
-                <h3 className="card-header-title e-mb-0 e-flex e-items-center e-gap-3 e-mr-4">
+                <h3 className="card-header-title e-mb-0 e-mr-4 e-flex e-items-center e-gap-3">
                     Security.txt
                     <SecurityTxtVersionBadge version={pmpSecurityTxt ? 'pmp' : 'neodyme'} />
                 </h3>
@@ -96,7 +96,13 @@ export function ProgramSecurityTxtCard({
                     Note that this is self-reported by the author of the program and might not be accurate
                 </small>
             </div>
-            <ErrorBoundary fallback={<CardBody ui="dashkit" className="e-text-center">Invalid security.txt</CardBody>}>
+            <ErrorBoundary
+                fallback={
+                    <CardBody ui="dashkit" className="e-text-center">
+                        Invalid security.txt
+                    </CardBody>
+                }
+            >
                 {securityTable}
             </ErrorBoundary>
         </div>

@@ -190,7 +190,7 @@ function TokenMintHeaderCard({
                             alt="Token logo"
                             height={64}
                             width={64}
-                            className="avatar-img e-rounded-full border border-4 border-body"
+                            className="avatar-img border border-4 border-body e-rounded-full"
                         />
                     ) : (
                         <Image

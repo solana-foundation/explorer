@@ -99,7 +99,7 @@ export function ExternalLinkCell({ url }: { url: string }) {
 }
 
 export function StringCell({ value }: { value: string }) {
-    return <td className="e-text-right font-monospace">{value}</td>;
+    return <td className="font-monospace e-text-right">{value}</td>;
 }
 
 export function RenderCode({ value }: { value: any }) {

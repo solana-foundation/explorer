@@ -77,7 +77,7 @@ export function ZkElGamalProofDetailsCard({
             {!isClose && proofBytes > 0 && (
                 <tr>
                     <td>Proof size</td>
-                    <td className="e-text-right font-monospace">{proofBytes} bytes</td>
+                    <td className="font-monospace e-text-right">{proofBytes} bytes</td>
                 </tr>
             )}
         </InstructionCardComponent>

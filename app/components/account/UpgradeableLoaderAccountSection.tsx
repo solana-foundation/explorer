@@ -18,8 +18,6 @@ import {
     UpgradeableLoaderAccount,
 } from '@validators/accounts/upgradeable-program';
 import Link from 'next/link';
-
-import { CardHeader } from '@/app/shared/ui/Card';
 import React from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
 
@@ -27,6 +25,7 @@ import { ProgramSecurityTXTBadge } from '@/app/features/security-txt/ui/Security
 import { ProgramSecurityTXTLabel } from '@/app/features/security-txt/ui/SecurityTXTLabel';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { refreshAnalytics } from '@/app/shared/lib/analytics';
+import { CardHeader } from '@/app/shared/ui/Card';
 import { Cluster } from '@/app/utils/cluster';
 import { useClusterPath } from '@/app/utils/url';
 

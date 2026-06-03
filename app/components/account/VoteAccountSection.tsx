@@ -50,7 +50,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
 
             <tr>
                 <td>Last Timestamp</td>
-                <td className="e-text-right font-monospace">
+                <td className="font-monospace e-text-right">
                     {displayTimestamp(voteAccount.info.lastTimestamp.timestamp * 1000)}
                 </td>
             </tr>

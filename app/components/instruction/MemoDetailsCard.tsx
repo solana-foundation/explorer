@@ -38,7 +38,7 @@ export function MemoDetailsCard({
             <tr>
                 <td>Data (UTF-8)</td>
                 <td className="e-text-right">
-                    <pre className="e-inline-block e-text-left e-mb-0">{data}</pre>
+                    <pre className="e-mb-0 e-inline-block e-text-left">{data}</pre>
                 </td>
             </tr>
         </InstructionCard>

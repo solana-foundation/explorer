@@ -115,17 +115,17 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
             <div className="col-auto e-ml-1.5 e-flex e-items-center">
                 <ArtContent pubkey={compressedNft.id} data={metadataJson} />
             </div>
-            <div className="col e-mb-3 ms-0.5 e-mt-3">
+            <div className="col ms-0.5 e-mb-3 e-mt-3">
                 {<h6 className="header-pretitle e-ml-[3px]">Metaplex Compressed NFT</h6>}
                 <div className="e-flex e-items-center">
-                    <h2 className="header-title e-ml-[3px] e-items-center no-overflow-with-ellipsis">
+                    <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
                         {compressedNft.content.metadata.name !== ''
                             ? compressedNft.content.metadata.name
                             : 'No NFT name was found'}
                     </h2>
                     {getVerifiedCollectionPill()}
                 </div>
-                <h4 className="header-pretitle e-ml-[3px] e-mt-[3px] no-overflow-with-ellipsis">
+                <h4 className="header-pretitle no-overflow-with-ellipsis e-ml-[3px] e-mt-[3px]">
                     {compressedNft.content.metadata.symbol !== ''
                         ? compressedNft.content.metadata.symbol
                         : 'No Symbol was found'}
@@ -154,7 +154,7 @@ function getCompressedNftPill() {
     const onchainVerifiedToolTip =
         'This NFT does not have a corresponding account, but uses verified ledger data to allow for transfers and trades. The existence of this tag ensures that the compressed NFT is verifiably up-to-date with the chain.';
     return (
-        <div className={'d-inline-flex e-items-center e-ml-1.5'}>
+        <div className={'d-inline-flex e-ml-1.5 e-items-center'}>
             <span className="badge badge-pill bg-dark">{'Compressed'}</span>
             <InfoTooltip bottom text={onchainVerifiedToolTip} />
         </div>

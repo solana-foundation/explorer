@@ -35,7 +35,7 @@ const SERIES_INFO = {
 export function LiveTransactionStatsCard() {
     const [series, setSeries] = React.useState<Series>('short');
     return (
-        <div className="card e-grow e-flex e-flex-col">
+        <div className="card e-flex e-grow e-flex-col">
             <CardHeader ui="dashkit">
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </CardHeader>
@@ -174,22 +174,22 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
     };
 
     return (
-        <div className="e-flex e-flex-col e-grow">
+        <div className="e-flex e-grow e-flex-col">
             <TableCardBody>
                 <tr>
                     <td className="e-w-full">Transaction count</td>
-                    <td className="e-text-right font-monospace">{transactionCount} </td>
+                    <td className="font-monospace e-text-right">{transactionCount} </td>
                 </tr>
                 <tr>
                     <td className="e-w-full">Transactions per second (TPS)</td>
-                    <td className="e-text-right font-monospace">{averageTps} </td>
+                    <td className="font-monospace e-text-right">{averageTps} </td>
                 </tr>
             </TableCardBody>
 
             <hr className="e-my-0" />
 
-            <CardBody ui="dashkit" className="e-py-3 e-flex e-flex-col e-grow">
-                <div className="e-flex e-justify-between e-w-full">
+            <CardBody ui="dashkit" className="e-flex e-grow e-flex-col e-py-3">
+                <div className="e-flex e-w-full e-justify-between">
                     <span className="e-mb-0">TPS history</span>
 
                     <div>
@@ -211,7 +211,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
                     <Bar data={chartData} options={chartOptions} style={{ height: '100%' }} />
                 </div>
 
-                <div className="e-text-center text-muted e-mt-3">
+                <div className="text-muted e-mt-3 e-text-center">
                     <p className="e-mb-0">
                         For transaction confirmation time statistics, please visit{' '}
                         <a href="https://www.validators.app" target="_blank" rel="noopener noreferrer">

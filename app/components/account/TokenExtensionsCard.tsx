@@ -8,10 +8,10 @@ import { Cluster } from '@utils/cluster';
 import { useMemo } from 'react';
 import useSWR from 'swr';
 
+import { CardBody } from '@/app/shared/ui/Card';
 import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
-import { CardBody } from '@/app/shared/ui/Card';
 
 import { LoadingCard } from '../common/LoadingCard';
 import { TokenExtensionsSection } from './TokenExtensionsSection';

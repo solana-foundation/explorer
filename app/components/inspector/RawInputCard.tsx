@@ -70,7 +70,7 @@ function TabInstructions() {
             content: (
                 <div className="e-p-3">
                     <div className="e-mb-3">
-                        <div className="e-underline e-mb-1.5">@solana/web3.js &lt; 2.0.0</div>
+                        <div className="e-mb-1.5 e-underline">@solana/web3.js &lt; 2.0.0</div>
                         <div className="e-mb-1.5">
                             <div className="e-mb-[3px]">Legacy Transaction:</div>
                             <code>console.log(tx.serializeMessage().toString(&quot;base64&quot;));</code>
@@ -81,7 +81,7 @@ function TabInstructions() {
                         </div>
                     </div>
                     <div>
-                        <div className="e-underline e-mb-1.5">@solana/web3.js &gt;= 2.0.0</div>
+                        <div className="e-mb-1.5 e-underline">@solana/web3.js &gt;= 2.0.0</div>
                         <div>
                             <div className="e-mb-[3px]">Legacy Transaction:</div>
                             <code>console.log(getBase64EncodedWireTransaction(tx));</code>
@@ -241,7 +241,7 @@ export function RawInput({
     return (
         <div className="card">
             <CardHeader ui="dashkit">
-                <div className="e-flex e-justify-between e-items-center">
+                <div className="e-flex e-items-center e-justify-between">
                     <h3 className="card-header-title">Inspector Input</h3>
                     <button className="btn btn-sm btn-white" onClick={clearInput} type="button">
                         Clear

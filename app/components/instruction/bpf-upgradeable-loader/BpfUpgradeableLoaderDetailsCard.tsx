@@ -74,7 +74,7 @@ function renderDetails<T extends object>(props: DetailsProps, parsed: ParsedInfo
         if (value instanceof PublicKey) {
             value = <Address pubkey={value} alignRight link />;
         } else if (key === 'bytes') {
-            value = <pre className="e-inline-block e-text-left e-mb-0 data-wrap">{value}</pre>;
+            value = <pre className="data-wrap e-mb-0 e-inline-block e-text-left">{value}</pre>;
         } else if (value === null) {
             value = <span className="text-muted">None</span>;
         }

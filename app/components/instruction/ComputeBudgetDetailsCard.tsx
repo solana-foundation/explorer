@@ -64,7 +64,7 @@ export function ComputeBudgetDetailsCard({
 
                         <tr>
                             <td>Requested Compute Units</td>
-                            <td className="e-text-right font-monospace">{`${new Intl.NumberFormat('en-US').format(
+                            <td className="font-monospace e-text-right">{`${new Intl.NumberFormat('en-US').format(
                                 units,
                             )} compute units`}</td>
                         </tr>
@@ -100,7 +100,7 @@ export function ComputeBudgetDetailsCard({
 
                         <tr>
                             <td>Requested Heap Frame (Bytes)</td>
-                            <td className="e-text-right font-monospace">
+                            <td className="font-monospace e-text-right">
                                 {new Intl.NumberFormat('en-US').format(bytes)}
                             </td>
                         </tr>
@@ -129,7 +129,7 @@ export function ComputeBudgetDetailsCard({
 
                         <tr>
                             <td>Compute Unit Limit</td>
-                            <td className="e-text-right font-monospace">{`${new Intl.NumberFormat('en-US').format(
+                            <td className="font-monospace e-text-right">{`${new Intl.NumberFormat('en-US').format(
                                 units,
                             )} compute units`}</td>
                         </tr>
@@ -161,7 +161,7 @@ export function ComputeBudgetDetailsCard({
 
                         <tr>
                             <td>Compute Unit Price</td>
-                            <td className="e-text-right font-monospace">{`${microLamportsToLamportsString(
+                            <td className="font-monospace e-text-right">{`${microLamportsToLamportsString(
                                 microLamports,
                             )} lamports per compute unit`}</td>
                         </tr>
@@ -193,7 +193,7 @@ export function ComputeBudgetDetailsCard({
 
                         <tr>
                             <td>Account Data Size Limit</td>
-                            <td className="e-text-right font-monospace">{`${accountDataSizeLimit} bytes`}</td>
+                            <td className="font-monospace e-text-right">{`${accountDataSizeLimit} bytes`}</td>
                         </tr>
                     </InstructionCardComponent>
                 );

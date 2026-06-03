@@ -13,12 +13,11 @@ import { useCluster } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { IBRL_EXPLORER_URL } from '@utils/env';
-
-import { CardHeader } from '@/app/shared/ui/Card';
 import { notFound, useSearchParams } from 'next/navigation';
 import React, { PropsWithChildren, use } from 'react';
 import { ExternalLink } from 'react-feather';
 
+import { CardHeader } from '@/app/shared/ui/Card';
 import { type NavigationTab, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
 import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
 import { getEpochForSlot, getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';

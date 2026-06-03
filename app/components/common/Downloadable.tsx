@@ -16,7 +16,7 @@ export function DownloadableIcon({
 
     return (
         <>
-            <Download className="e-cursor-pointer e-mr-1.5" onClick={handleClick} size={15} />
+            <Download className="e-mr-1.5 e-cursor-pointer" onClick={handleClick} size={15} />
             {children}
         </>
     );

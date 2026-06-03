@@ -75,7 +75,7 @@ export function BaseVerifiedBuildCard({
                 <h3 className="card-header-title e-mb-0 e-flex e-items-center">Verified Build</h3>
                 <small>{verificationMessage}</small>
             </CardHeader>
-            <div className="alert e-mt-1.5 e-mb-1.5">
+            <div className="alert e-mb-1.5 e-mt-1.5">
                 A verified build badge indicates that this program was built from source code that is publicly
                 available, but does not imply that this program has been audited. For more details, refer to the{' '}
                 <a
@@ -163,7 +163,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
     switch (type) {
         case DisplayType.Boolean:
             return (
-                <td className={'e-text-right font-monospace'}>
+                <td className={'font-monospace e-text-right'}>
                     <span className={cn('badge', `bg-${value ? 'success' : 'warning'}-soft`)}>{new String(value)}</span>
                 </td>
             );
@@ -172,13 +172,13 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 const badgeClass = value === VerificationStatus.Verified ? 'bg-success-soft' : 'bg-warning-soft';
                 const badgeValue = value === VerificationStatus.Verified ? 'true' : 'false';
                 return (
-                    <td className="e-text-right font-monospace">
+                    <td className="font-monospace e-text-right">
                         <span className={`badge ${badgeClass}`}>{badgeValue}</span>
                     </td>
                 );
             }
             return (
-                <td className="e-text-right font-monospace" style={{ whiteSpace: 'pre' }}>
+                <td className="font-monospace e-text-right" style={{ whiteSpace: 'pre' }}>
                     {value && (value as string).length > 1 ? value : '-'}
                 </td>
             );
@@ -191,7 +191,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                                 <span />
                             </Copyable>
                             <pre
-                                className="e-text-left e-mb-0 font-monospace"
+                                className="font-monospace e-mb-0 e-text-left"
                                 style={{ overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}
                             >
                                 {value}
@@ -216,19 +216,19 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 );
             }
             return (
-                <td className="e-text-right font-monospace">
+                <td className="font-monospace e-text-right">
                     {value && (value as string).length > 1 ? (value as string).trim() : '-'}
                 </td>
             );
         case DisplayType.Date:
             return (
-                <td className="e-text-right font-monospace">
+                <td className="font-monospace e-text-right">
                     {value && (value as string).length > 1 ? new Date(value as string).toUTCString() : '-'}
                 </td>
             );
         case DisplayType.PublicKey:
             return (
-                <td className="e-text-right font-monospace">
+                <td className="font-monospace e-text-right">
                     <Address pubkey={new PublicKey(value as string)} link alignRight />
                 </td>
             );

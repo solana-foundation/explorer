@@ -127,7 +127,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                                     </p>
                                 </td>
                                 <td>
-                                    <span className="e-text-white e-ml-7">
+                                    <span className="e-ml-7 e-text-white">
                                         {totalAccountSize.toLocaleString('en-US')}
                                     </span>
                                 </td>

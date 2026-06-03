@@ -13,8 +13,6 @@ import {
     VOTE_PROGRAM_ID,
 } from '@solana/web3.js';
 import { parseProgramLogs } from '@utils/program-logs';
-
-import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
 import { displayAddress } from '@utils/tx';
 import { pickClusterParams } from '@utils/url';
 import Link from 'next/link';
@@ -24,6 +22,7 @@ import { ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
 import { invariant } from '@/app/shared/lib/invariant';
+import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
 
 const PAGE_SIZE = 25;
 

@@ -18,7 +18,7 @@ const ViewOriginalArtContentLink = ({ src }: { src: string }) => {
     }
 
     return (
-        <h6 className="header-pretitle e-flex e-mt-1.5 e-justify-center">
+        <h6 className="header-pretitle e-mt-1.5 e-flex e-justify-center">
             {!isDisplayEnabled ? null : (
                 <Link href={src} target="_blank" className="e-flex e-items-center">
                     <div>VIEW ORIGINAL</div>
@@ -34,7 +34,7 @@ const ViewOriginalArtContentLink = ({ src }: { src: string }) => {
 export const NFTImageContent = ({ uri }: { uri?: string }) => {
     return (
         <div style={{ maxHeight: 200, width: 150 }}>
-            <div className="e-rounded-dk mx-auto e-block" style={{ overflow: 'hidden' }}>
+            <div className="mx-auto e-block e-rounded-dk" style={{ overflow: 'hidden' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img alt="nft" src={uri ? getProxiedUri(uri) : lowContrastSolanalogo.src} width="100%" />
             </div>

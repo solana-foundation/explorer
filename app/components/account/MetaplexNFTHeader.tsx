@@ -50,16 +50,16 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
             <div className="col-auto e-ml-1.5 e-flex e-items-center">
                 <ArtContent pubkey={address} data={data} />
             </div>
-            <div className="col e-mb-3 ms-0.5 e-mt-3">
+            <div className="col ms-0.5 e-mb-3 e-mt-3">
                 {<h6 className="header-pretitle e-ml-[3px]">Metaplex NFT</h6>}
                 <div className="e-flex e-items-center">
-                    <h2 className="header-title e-ml-[3px] e-items-center no-overflow-with-ellipsis">
+                    <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
                         {metadata.name !== '' ? metadata.name : 'No NFT name was found'}
                     </h2>
                     {getEditionPill(nftData.editionInfo)}
                     {isVerifiedCollection ? getVerifiedCollectionPill() : null}
                 </div>
-                <h4 className="header-pretitle e-ml-[3px] e-mt-[3px] no-overflow-with-ellipsis">
+                <h4 className="header-pretitle no-overflow-with-ellipsis e-ml-[3px] e-mt-[3px]">
                     {metadata.symbol !== '' ? metadata.symbol : 'No Symbol was found'}
                 </h4>
                 <div className="e-mb-1.5 e-mt-1.5">{getSaleTypePill(metadata.primarySaleHappened)}</div>
@@ -91,12 +91,12 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
         const shareTooltip = 'The percentage of the proceeds a creator receives when this NFT is sold.';
 
         return (
-            <div className={'e-flex e-items-center dropdown-header creator-dropdown-entry'}>
-                <div className="e-flex font-monospace creator-dropdown-header">
+            <div className={'dropdown-header creator-dropdown-entry e-flex e-items-center'}>
+                <div className="font-monospace creator-dropdown-header e-flex">
                     <span>Creator Address</span>
                     <InfoTooltip bottom text={creatorTooltip} />
                 </div>
-                <div className="e-flex font-monospace">
+                <div className="font-monospace e-flex">
                     <span className="font-monospace">Royalty</span>
                     <InfoTooltip bottom text={shareTooltip} />
                 </div>
@@ -111,7 +111,7 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
     const CreatorEntry = (creator: { address: string; verified: boolean; share: number }) => {
         const creatorPath = useClusterPath({ pathname: `/address/${creator.address}` });
         return (
-            <div className={'e-flex e-items-center font-monospace creator-dropdown-entry e-ml-3 e-mr-3'}>
+            <div className={'font-monospace creator-dropdown-entry e-ml-3 e-mr-3 e-flex e-items-center'}>
                 {getVerifiedIcon(creator.verified)}
                 <Link className="dropdown-item font-monospace creator-dropdown-entry-address" href={creatorPath}>
                     {creator.address}
@@ -180,7 +180,7 @@ export function getVerifiedCollectionPill() {
     const onchainVerifiedToolTip =
         'This NFT has been verified as a member of an on-chain collection. This tag guarantees authenticity.';
     return (
-        <div className={'d-inline-flex e-items-center e-ml-1.5'}>
+        <div className={'d-inline-flex e-ml-1.5 e-items-center'}>
             <span className="badge badge-pill bg-dark">{'Verified Collection'}</span>
             <InfoTooltip bottom text={onchainVerifiedToolTip} />
         </div>

@@ -156,4 +156,3 @@ export const withClipboardMockErrored: Decorator = Story => {
 
     return <Story />;
 };
-

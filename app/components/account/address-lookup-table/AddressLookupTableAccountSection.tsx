@@ -53,9 +53,7 @@ export function AddressLookupTableAccountSection(
             </tr>
             <tr>
                 <td>Activation Status</td>
-                <td className="e-text-right e-uppercase">
-                    {lookupTableAccount.isActive() ? 'Active' : 'Deactivated'}
-                </td>
+                <td className="e-text-right e-uppercase">{lookupTableAccount.isActive() ? 'Active' : 'Deactivated'}</td>
             </tr>
             <tr>
                 <td>Last Extended Slot</td>
