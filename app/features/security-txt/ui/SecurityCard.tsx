@@ -76,7 +76,7 @@ export function ProgramSecurityTxtCard({
     return (
         <div className="card security-txt e-overflow-hidden">
             <CardHeader ui="dashkit" className="!e-h-auto e-min-h-[60px]">
-                <h3 className="card-header-title mb-0 d-flex align-items-center gap-3 e-mr-4">
+                <h3 className="card-header-title mb-0 d-flex align-items-center e-gap-3 e-mr-4">
                     Security.txt
                     <SecurityTxtVersionBadge version={pmpSecurityTxt ? 'pmp' : 'neodyme'} />
                 </h3>

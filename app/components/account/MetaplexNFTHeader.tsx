@@ -105,18 +105,18 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
     };
 
     const getVerifiedIcon = (isVerified: boolean) => {
-        return isVerified ? <Check className="ms-3" size={15} /> : <AlertOctagon className="me-3" size={15} />;
+        return isVerified ? <Check className="e-ml-3" size={15} /> : <AlertOctagon className="e-mr-3" size={15} />;
     };
 
     const CreatorEntry = (creator: { address: string; verified: boolean; share: number }) => {
         const creatorPath = useClusterPath({ pathname: `/address/${creator.address}` });
         return (
-            <div className={'d-flex align-items-center font-monospace creator-dropdown-entry ms-3 me-3'}>
+            <div className={'d-flex align-items-center font-monospace creator-dropdown-entry e-ml-3 e-mr-3'}>
                 {getVerifiedIcon(creator.verified)}
                 <Link className="dropdown-item font-monospace creator-dropdown-entry-address" href={creatorPath}>
                     {creator.address}
                 </Link>
-                <div className="me-3"> {`${creator.share}%`}</div>
+                <div className="e-mr-3"> {`${creator.share}%`}</div>
             </div>
         );
     };
@@ -134,7 +134,7 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
 
     return (
         <div className={'dropdown-item font-monospace'}>
-            <div className="me-3">No creators are associated with this NFT.</div>
+            <div className="e-mr-3">No creators are associated with this NFT.</div>
         </div>
     );
 }

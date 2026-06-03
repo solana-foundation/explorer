@@ -20,7 +20,7 @@ export function ErrorCard({
                 {text}
                 {retry && (
                     <>
-                        <span className="btn btn-white ms-3 d-none d-md-inline" onClick={retry}>
+                        <span className="btn btn-white e-ml-3 d-none d-md-inline" onClick={retry}>
                             {buttonText}
                         </span>
                         <div className="d-block d-md-none mt-4">

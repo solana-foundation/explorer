@@ -70,7 +70,7 @@ export function Navbar({ children }: INavbarProps) {
                                 href="https://github.com/solana-foundation/explorer"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mx-3"
+                                className="e-mx-3"
                             >
                                 <svg width="30" height="30" viewBox="0 0 98 98" xmlns="http://www.w3.org/2000/svg">
                                     <path

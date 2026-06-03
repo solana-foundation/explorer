@@ -53,7 +53,7 @@ export function DeveloperResources({ resources = DEFAULT_RESOURCES }: { resource
                 </div>
             </div>
             <CardBody ui="dashkit">
-                <div className="d-flex gap-4 pb-3 e-overflow-auto">
+                <div className="d-flex gap-4 e-pb-3 e-overflow-auto">
                     {resources.map(resource => (
                         <ResourceCard key={resource.link} {...resource} />
                     ))}

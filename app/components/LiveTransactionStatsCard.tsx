@@ -186,7 +186,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
                 </tr>
             </TableCardBody>
 
-            <hr className="my-0" />
+            <hr className="e-my-0" />
 
             <CardBody ui="dashkit" className="e-py-3 e-flex e-flex-col e-grow">
                 <div className="d-flex justify-content-between w-100">

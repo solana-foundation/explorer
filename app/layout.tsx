@@ -66,10 +66,10 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                                                 <SearchBar />
                                             </Navbar>
                                             <MessageBanner />
-                                            <div className="container my-3 d-xl-none">
+                                            <div className="container e-my-3 d-xl-none">
                                                 <SearchBar />
                                             </div>
-                                            <div className="container my-3 lg:e-hidden">
+                                            <div className="container e-my-3 lg:e-hidden">
                                                 <ClusterStatusButton />
                                             </div>
                                             {children}

@@ -49,7 +49,7 @@ function TabInstructions() {
     const tabs: TabData[] = [
         {
             content: (
-                <div className="p-3">
+                <div className="e-p-3">
                     Use <code>--dump-transaction-message</code> flag
                 </div>
             ),
@@ -58,7 +58,7 @@ function TabInstructions() {
         },
         {
             content: (
-                <div className="p-3">
+                <div className="e-p-3">
                     Add <code>base64</code> crate dependency and{' '}
                     <code>println!(&quot;{}&quot;, base64::encode(&transaction.message_data()));</code>
                 </div>
@@ -68,7 +68,7 @@ function TabInstructions() {
         },
         {
             content: (
-                <div className="p-3">
+                <div className="e-p-3">
                     <div className="mb-3">
                         <div className="text-decoration-underline mb-2">@solana/web3.js &lt; 2.0.0</div>
                         <div className="mb-2">
@@ -94,7 +94,7 @@ function TabInstructions() {
         },
         {
             content: (
-                <div className="p-3">
+                <div className="e-p-3">
                     Add <code>vault_transaction</code> from{' '}
                     <code>https://app.squads.so/squads/&lt;squad_id&gt;/transactions/&lt;vault_transaction&gt;</code>
                 </div>

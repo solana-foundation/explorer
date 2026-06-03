@@ -479,7 +479,7 @@ function InstructionDetailsCell({
         return (
             <td>
                 <span
-                    className="btn btn-sm btn-outline-primary py-0 px-1 lh-1 text-xs"
+                    className="btn btn-sm btn-outline-primary e-py-0 px-1 lh-1 text-xs"
                     role="button"
                     onClick={handleLoadClick}
                 >
@@ -502,7 +502,7 @@ function InstructionDetailsCell({
         return (
             <td>
                 <span
-                    className="btn btn-sm btn-outline-warning py-0 px-1 lh-1 text-xs"
+                    className="btn btn-sm btn-outline-warning e-py-0 px-1 lh-1 text-xs"
                     role="button"
                     onClick={handleLoadClick}
                 >
