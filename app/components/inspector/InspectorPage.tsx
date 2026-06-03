@@ -348,7 +348,7 @@ export function TransactionInspectorPage({
     }, [currentPathname, currentSearchParams, router]);
 
     return (
-        <div className="container mt-4">
+        <div className="container e-mt-6">
             <div className="header">
                 <div className="header-body">
                     <h2 className="header-title">Transaction Inspector</h2>
@@ -477,7 +477,7 @@ function OverviewCard({
             <div className="card">
                 <CardHeader ui="dashkit" className="e-gap-2">
                     <h3 className="card-header-title">Transaction Overview</h3>
-                    <button className="btn btn-sm d-flex btn-white" onClick={onClear}>
+                    <button className="btn btn-sm e-flex btn-white" onClick={onClear}>
                         Clear
                     </button>
                     <DownloadDropdown filename={signature || 'signature'} data={raw} />
@@ -486,7 +486,7 @@ function OverviewCard({
                     <tr>
                         <td>Serialized Size</td>
                         <td className="text-lg-end">
-                            <div className="d-flex align-items-end flex-column">
+                            <div className="e-flex align-items-end flex-column">
                                 {size} bytes
                                 <span className={size <= PACKET_DATA_SIZE ? 'text-muted' : 'text-warning'}>
                                     Max transaction size is {PACKET_DATA_SIZE} bytes
@@ -497,7 +497,7 @@ function OverviewCard({
                     <tr>
                         <td>Fees</td>
                         <td className="text-lg-end">
-                            <div className="d-flex align-items-end flex-column">
+                            <div className="e-flex align-items-end flex-column">
                                 <SolBalance lamports={fee} />
                                 <span className="text-muted">
                                     {`Each signature costs ${DEFAULT_FEES.lamportsPerSignature} lamports`}
@@ -508,11 +508,11 @@ function OverviewCard({
 
                     <tr>
                         <td>
-                            <div className="d-flex align-items-start flex-column">
+                            <div className="e-flex e-items-start flex-column">
                                 Fee payer
-                                <span className="mt-1">
-                                    <span className="badge bg-info-soft me-2">Signer</span>
-                                    <span className="badge bg-danger-soft me-2">Writable</span>
+                                <span className="e-mt-[3px]">
+                                    <span className="badge bg-info-soft e-mr-1.5">Signer</span>
+                                    <span className="badge bg-danger-soft e-mr-1.5">Writable</span>
                                 </span>
                             </div>
                         </td>

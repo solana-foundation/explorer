@@ -33,7 +33,7 @@ export function StatsNotReady({ error }: { error: boolean }) {
                         retry();
                     }}
                 >
-                    <RefreshCw className="align-text-top me-2" size={13} />
+                    <RefreshCw className="align-text-top e-mr-1.5" size={13} />
                     Try Again
                 </button>
             </CardBody>
@@ -42,7 +42,7 @@ export function StatsNotReady({ error }: { error: boolean }) {
 
     return (
         <CardBody ui="dashkit" className="text-center">
-            <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+            <span className="align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
             Loading
         </CardBody>
     );

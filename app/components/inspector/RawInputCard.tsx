@@ -70,20 +70,20 @@ function TabInstructions() {
             content: (
                 <div className="e-p-3">
                     <div className="e-mb-3">
-                        <div className="e-underline mb-2">@solana/web3.js &lt; 2.0.0</div>
-                        <div className="mb-2">
-                            <div className="mb-1">Legacy Transaction:</div>
+                        <div className="e-underline e-mb-1.5">@solana/web3.js &lt; 2.0.0</div>
+                        <div className="e-mb-1.5">
+                            <div className="e-mb-[3px]">Legacy Transaction:</div>
                             <code>console.log(tx.serializeMessage().toString(&quot;base64&quot;));</code>
                         </div>
                         <div>
-                            <div className="mb-1">Versioned Transaction:</div>
+                            <div className="e-mb-[3px]">Versioned Transaction:</div>
                             <code>console.log(Buffer.from(tx.serialize()).toString(&quot;base64&quot;));</code>
                         </div>
                     </div>
                     <div>
-                        <div className="e-underline mb-2">@solana/web3.js &gt;= 2.0.0</div>
+                        <div className="e-underline e-mb-1.5">@solana/web3.js &gt;= 2.0.0</div>
                         <div>
-                            <div className="mb-1">Legacy Transaction:</div>
+                            <div className="e-mb-[3px]">Legacy Transaction:</div>
                             <code>console.log(getBase64EncodedWireTransaction(tx));</code>
                         </div>
                     </div>
@@ -241,7 +241,7 @@ export function RawInput({
     return (
         <div className="card">
             <CardHeader ui="dashkit">
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="e-flex e-justify-between e-items-center">
                     <h3 className="card-header-title">Inspector Input</h3>
                     <button className="btn btn-sm btn-white" onClick={clearInput} type="button">
                         Clear
@@ -257,11 +257,11 @@ export function RawInput({
                     placeholder={placeholder}
                     name="tx-inspector-input"
                 ></textarea>
-                <div className="row align-items-center">
-                    <div className="col d-flex align-items-center">
+                <div className="row e-items-center">
+                    <div className="col e-flex e-items-center">
                         {error && (
                             <>
-                                <span className="text-warning small me-2">
+                                <span className="text-warning small e-mr-1.5">
                                     <i className="fe fe-alert-circle"></i>
                                 </span>
 

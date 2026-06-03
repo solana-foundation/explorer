@@ -23,8 +23,8 @@ export function ErrorCard({
                         <span className="btn btn-white e-ml-3 d-none d-md-inline" onClick={retry}>
                             {buttonText}
                         </span>
-                        <div className="d-block d-md-none mt-4">
-                            <span className="btn btn-white w-100" onClick={retry}>
+                        <div className="d-block d-md-none e-mt-6">
+                            <span className="btn btn-white e-w-full" onClick={retry}>
                                 {buttonText}
                             </span>
                         </div>

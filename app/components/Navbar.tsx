@@ -35,7 +35,7 @@ export function Navbar({ children }: INavbarProps) {
                 </button>
 
                 <div
-                    className="navbar-children d-flex align-items-center e-grow e-h-full d-none xl:e-block"
+                    className="navbar-children e-flex e-items-center e-grow e-h-full d-none xl:e-block"
                     style={{ minWidth: 0 }}
                 >
                     {children}
@@ -64,7 +64,7 @@ export function Navbar({ children }: INavbarProps) {
                                 Inspector
                             </Link>
                         </li>
-                        <li className="nav-item align-items-center e-justify-center e-pt-1.5">
+                        <li className="nav-item e-items-center e-justify-center e-pt-1.5">
                             <a
                                 aria-label="GitHub Repository"
                                 href="https://github.com/solana-foundation/explorer"
@@ -85,7 +85,7 @@ export function Navbar({ children }: INavbarProps) {
                     </ul>
                 </div>
 
-                <div className="d-none d-lg-block e-shrink-0 ms-1">
+                <div className="d-none d-lg-block e-shrink-0 e-ml-[3px]">
                     <ClusterStatusButton />
                 </div>
             </div>

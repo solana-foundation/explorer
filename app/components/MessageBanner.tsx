@@ -43,7 +43,7 @@ export function MessageBanner() {
     if (estimate || start || end) {
         timeframe = (
             <div>
-                <hr className="text-gray-500 w-100 e-my-3 e-opacity-50" />
+                <hr className="text-gray-500 e-w-full e-my-3 e-opacity-50" />
                 {estimate && (
                     <h5 className="font-sm text-gray-200">
                         <span className="text-uppercase">Estimated Duration: </span>
@@ -69,9 +69,9 @@ export function MessageBanner() {
     return (
         <div className="bg-info">
             <div className="container">
-                <div className="d-flex flex-column align-items-center e-justify-center text-center e-py-3">
+                <div className="e-flex flex-column e-items-center e-justify-center text-center e-py-3">
                     <h3 className="e-mb-0 line-height-md">
-                        <AlertCircle className="me-2" size={15} />
+                        <AlertCircle className="e-mr-1.5" size={15} />
                         {message}
                     </h3>
                     {timeframe}

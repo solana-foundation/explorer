@@ -8,7 +8,7 @@ function RawDetailsLoader() {
     return (
         <tr>
             <td colSpan={2} className="text-center">
-                <span className="spinner-grow spinner-grow-sm me-2"></span>
+                <span className="spinner-grow spinner-grow-sm e-mr-1.5"></span>
                 Loading instruction data...
             </td>
         </tr>
@@ -33,9 +33,9 @@ function BaseTransactionInstructionRawDetails({ ix }: { ix: TransactionInstructi
             {ix.keys.map(({ pubkey, isSigner, isWritable }, keyIndex) => (
                 <tr key={keyIndex}>
                     <td>
-                        <div className="me-2 d-md-inline">Account #{keyIndex + 1}</div>
-                        {isWritable && <span className="badge bg-danger-soft me-1">Writable</span>}
-                        {isSigner && <span className="badge bg-info-soft me-1">Signer</span>}
+                        <div className="e-mr-1.5 d-md-inline">Account #{keyIndex + 1}</div>
+                        {isWritable && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
+                        {isSigner && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
                     </td>
                     <td className="text-lg-end">
                         <Address pubkey={pubkey} alignRight link />

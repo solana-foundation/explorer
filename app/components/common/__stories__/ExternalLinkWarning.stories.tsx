@@ -16,9 +16,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
     args: {
         children: (
-            <span className="text-link align-items-center e-inline-flex">
+            <span className="text-link e-items-center e-inline-flex">
                 Visit External Site
-                <ExternalLink className="ms-2" size={13} />
+                <ExternalLink className="e-ml-1.5" size={13} />
             </span>
         ),
         href: 'https://example.com',
@@ -46,9 +46,9 @@ export const WithSimpleText: Story = {
 export const WithLongURL: Story = {
     args: {
         children: (
-            <span className="text-link align-items-center e-inline-flex">
+            <span className="text-link e-items-center e-inline-flex">
                 View Transaction
-                <ExternalLink className="ms-2" size={13} />
+                <ExternalLink className="e-ml-1.5" size={13} />
             </span>
         ),
         href: 'https://example.example.com/transaction/5wHu1qwD7nMHNuAMQqJWqjy9xKJpVLvJqHxYz6dGfHvM8Zk3pBqRtY2sXwV4uN7mK9jL8iH6gF5eD4cB3aA2zY1x',

@@ -27,7 +27,7 @@ export function UnknownDetailsCard({
             defaultExpanded={false}
             title={
                 <>
-                    <span className="badge bg-info-soft me-2">#{index + 1}</span>
+                    <span className="badge bg-info-soft e-mr-1.5">#{index + 1}</span>
                     {programName} Instruction
                 </>
             }

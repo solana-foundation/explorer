@@ -232,8 +232,8 @@ function ProgramLogRow({
     return (
         <tr>
             <td>
-                <Link className="d-flex align-items-center" href={anchorPath}>
-                    <span className={`badge bg-${badgeColor}-soft me-2`}>#{index + 1}</span>
+                <Link className="e-flex e-items-center" href={anchorPath}>
+                    <span className={`badge bg-${badgeColor}-soft e-mr-1.5`}>#{index + 1}</span>
                     <span className="program-log-instruction-name">
                         <ProgramNameWithInstruction
                             programId={programId}
@@ -243,10 +243,10 @@ function ProgramLogRow({
                             anchorProgram={anchorProgram}
                         />
                     </span>
-                    <ChevronsUp className="c-pointer e-m-1.5" size={13} />
+                    <ChevronsUp className="e-cursor-pointer e-m-1.5" size={13} />
                 </Link>
                 {programLogs && (
-                    <div className="d-flex align-items-start flex-column font-monospace e-p-1.5 font-size-sm">
+                    <div className="e-flex e-items-start flex-column font-monospace e-p-1.5">
                         {programLogs.logs.map((log, key) => {
                             return (
                                 <span key={key}>

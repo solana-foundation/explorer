@@ -59,7 +59,7 @@ export function InspectorInstructionCard({
             ref={scrollAnchorRef}
             title={
                 <>
-                    <span className={`badge bg-${resultClass}-soft me-2`}>
+                    <span className={`badge bg-${resultClass}-soft e-mr-1.5`}>
                         #{index + 1}
                         {childIndex !== undefined ? `.${childIndex + 1}` : ''}
                     </span>
@@ -70,13 +70,13 @@ export function InspectorInstructionCard({
                 <button
                     disabled={defaultRaw}
                     className={cn(
-                        'btn btn-sm d-flex align-items-center',
+                        'btn btn-sm e-flex e-items-center',
                         showRaw ? 'btn-black active' : 'btn-white',
                         defaultRaw && '!e-pointer-events-auto e-cursor-not-allowed',
                     )}
                     onClick={rawClickHandler}
                 >
-                    <Code className="me-2" size={13} /> Raw
+                    <Code className="e-mr-1.5" size={13} /> Raw
                 </button>
             }
         >

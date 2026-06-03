@@ -34,12 +34,12 @@ export function InfoTooltip({ bottom, right, text, children, withHelpIcon = true
 
     return (
         <div
-            className="popover-container w-100"
+            className="popover-container e-w-full"
             onMouseOver={() => setState('show')}
             onMouseOut={() => setState('hide')}
         >
-            <div className={`d-flex align-items-center justify-content-${justify}`}>
-                {children} {withHelpIcon && <HelpCircle className="ms-2" size={13} />}
+            <div className={`e-flex e-items-center justify-content-${justify}`}>
+                {children} {withHelpIcon && <HelpCircle className="e-ml-1.5" size={13} />}
             </div>
             <Popover bottom={bottom} right={right} state={state} text={text} />
         </div>

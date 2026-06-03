@@ -218,15 +218,15 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                                     <tr key={`group-${groupHeaderIndex}`} className="table-group-header">
                                         <td colSpan={2}>{camelToTitleCase(currentInfo.name)}</td>
                                         <td className="text-lg-end" onClick={() => toggleGroup(groupHeaderIndex)}>
-                                            <div className="c-pointer">
+                                            <div className="e-cursor-pointer">
                                                 {isExpanded ? (
                                                     <>
-                                                        <span className="text-info me-2">Collapse</span>
+                                                        <span className="text-info e-mr-1.5">Collapse</span>
                                                         <ChevronUp size={15} />
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <span className="text-info me-2">Expand</span>
+                                                        <span className="text-info e-mr-1.5">Expand</span>
                                                         <ChevronDown size={15} />
                                                     </>
                                                 )}
@@ -272,17 +272,17 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                     rows.push(
                         <tr key={keyIndex} className={accountInfo?.isNested ? 'table-nested-account' : ''}>
                             <td>
-                                <div className="d-flex flex-row align-items-center">
-                                    {accountInfo?.isNested && <CornerDownRight className="me-2 mb-1" size={14} />}
-                                    <div className="me-2 d-md-inline">
+                                <div className="e-flex flex-row e-items-center">
+                                    {accountInfo?.isNested && <CornerDownRight className="e-mr-1.5 e-mb-[3px]" size={14} />}
+                                    <div className="e-mr-1.5 d-md-inline">
                                         {accountInfo
                                             ? `${camelToTitleCase(accountInfo.name)}`
                                             : ixAccounts
                                               ? `Remaining Account #${keyIndex + 1 - actualAccountCount}`
                                               : `Account #${keyIndex + 1}`}
                                     </div>
-                                    {isWritable && <span className="badge bg-danger-soft me-1">Writable</span>}
-                                    {isSigner && <span className="badge bg-info-soft me-1">Signer</span>}
+                                    {isWritable && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
+                                    {isSigner && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
                                 </div>
                             </td>
                             <td className="text-lg-end" colSpan={2}>

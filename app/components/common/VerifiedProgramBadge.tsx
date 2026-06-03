@@ -57,7 +57,7 @@ export function VerifiedProgramBadge({
 
         return (
             <h3 className="e-mb-0">
-                <Link className={`c-pointer badge ${badgeClass} rank`} href={verifiedBuildTabPath}>
+                <Link className={`e-cursor-pointer badge ${badgeClass} rank`} href={verifiedBuildTabPath}>
                     {badgeText}
                 </Link>
             </h3>

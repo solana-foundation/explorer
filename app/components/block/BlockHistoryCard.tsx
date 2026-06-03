@@ -213,7 +213,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
             {accountFilter !== null && (
                 <CardBody ui="dashkit">
                     Showing transactions which load account:
-                    <div className="d-inline-block ms-2">
+                    <div className="d-inline-block e-ml-1.5">
                         <Address pubkey={accountFilter} link />
                     </div>
                 </CardBody>
@@ -232,7 +232,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                         <thead>
                             <tr>
                                 <th
-                                    className="text-muted c-pointer"
+                                    className="text-muted e-cursor-pointer"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.delete('sort');
@@ -246,7 +246,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 <th className="text-muted">Result</th>
                                 <th className="text-muted">Transaction Signature</th>
                                 <th
-                                    className="text-muted c-pointer"
+                                    className="text-muted e-cursor-pointer"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'fee');
@@ -258,7 +258,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                     Fee
                                 </th>
                                 <th
-                                    className="text-muted c-pointer"
+                                    className="text-muted e-cursor-pointer"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'reservedCUs');
@@ -271,7 +271,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 </th>
                                 {showComputeUnits && (
                                     <th
-                                        className="text-muted c-pointer"
+                                        className="text-muted e-cursor-pointer"
                                         onClick={() => {
                                             const additionalParams = new URLSearchParams(
                                                 currentSearchParams?.toString(),
@@ -290,7 +290,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                     </th>
                                 )}
                                 <th
-                                    className="text-muted c-pointer"
+                                    className="text-muted e-cursor-pointer"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'txnCost');
@@ -359,9 +359,9 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                                 ? 'NA'
                                                 : entries.map(([programId, count], i) => {
                                                       return (
-                                                          <div key={i} className="d-flex align-items-center">
+                                                          <div key={i} className="e-flex e-items-center">
                                                               <Address pubkey={new PublicKey(programId)} link />
-                                                              <span className="ms-2 text-muted">{`(${count})`}</span>
+                                                              <span className="e-ml-1.5 text-muted">{`(${count})`}</span>
                                                           </div>
                                                       );
                                                   })}
@@ -377,7 +377,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
             {filteredTransactions.length > numDisplayed && (
                 <CardFooter ui="dashkit">
                     <button
-                        className="btn btn-primary w-100"
+                        className="btn btn-primary e-w-full"
                         onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More
@@ -462,7 +462,7 @@ const FilterDropdown = ({ filter, invokedPrograms, totalTransactionCount }: Filt
     );
 
     return (
-        <div className="dropdown me-2">
+        <div className="dropdown e-mr-1.5">
             <button className="btn btn-white btn-sm" data-bs-toggle="dropdown" type="button" ref={dropdownRef}>
                 {currentFilterOption.name} <ChevronDown className="align-text-top" size={13} />
             </button>

@@ -112,7 +112,7 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
 
 function SimulateButton({ label, onClick }: { label: string; onClick: () => void }) {
     return (
-        <button className="btn btn-sm d-flex btn-white" onClick={onClick}>
+        <button className="btn btn-sm e-flex btn-white" onClick={onClick}>
             {label}
         </button>
     );

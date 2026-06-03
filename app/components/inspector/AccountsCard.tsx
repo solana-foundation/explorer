@@ -141,10 +141,10 @@ function AccountFromLookupTableRow({
     return (
         <tr>
             <td>
-                <div className="d-flex align-items-start flex-column">
+                <div className="e-flex e-items-start flex-column">
                     Account #{accountIndex + 1}
-                    <span className="mt-1">
-                        {!readOnly && <span className="badge bg-danger-soft me-1">Writable</span>}
+                    <span className="e-mt-[3px]">
+                        {!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
                         <span className="badge bg-gray-soft">Address Table Lookup</span>
                     </span>
                 </div>
@@ -179,11 +179,11 @@ function AccountRow({
     return (
         <tr>
             <td>
-                <div className="d-flex align-items-start flex-column">
+                <div className="e-flex e-items-start flex-column">
                     Account #{accountIndex + 1}
-                    <span className="mt-1">
-                        {signer && <span className="badge bg-info-soft me-1">Signer</span>}
-                        {!readOnly && <span className="badge bg-danger-soft me-1">Writable</span>}
+                    <span className="e-mt-[3px]">
+                        {signer && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
+                        {!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
                         {loading ? (
                             <span className="text-muted">Loading...</span>
                         ) : accountInfo ? (

@@ -78,7 +78,7 @@ export function RewardsCard({ address }: { address: string }) {
         <>
             <div className="card">
                 <CardHeader ui="dashkit">
-                    <div className="row align-items-center">
+                    <div className="row e-items-center">
                         <div className="col">
                             <h3 className="card-header-title">Rewards</h3>
                         </div>
@@ -110,10 +110,10 @@ export function RewardsCard({ address }: { address: string }) {
                     {foundOldest ? (
                         <div className="text-muted text-center">Fetched full reward history</div>
                     ) : (
-                        <button className="btn btn-primary w-100" onClick={() => loadMore()} disabled={fetching}>
+                        <button className="btn btn-primary e-w-full" onClick={() => loadMore()} disabled={fetching}>
                             {fetching ? (
                                 <>
-                                    <span className="align-text-top spinner-grow-sm me-2"></span>
+                                    <span className="align-text-top spinner-grow-sm e-mr-1.5"></span>
                                     Loading
                                 </>
                             ) : (

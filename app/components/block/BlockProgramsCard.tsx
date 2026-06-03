@@ -67,11 +67,11 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
                 </CardHeader>
                 <TableCardBody>
                     <tr>
-                        <td className="w-100">Unique Programs Count</td>
+                        <td className="e-w-full">Unique Programs Count</td>
                         <td className="text-lg-end font-monospace">{programEntries.length}</td>
                     </tr>
                     <tr>
-                        <td className="w-100">Total Instructions</td>
+                        <td className="e-w-full">Total Instructions</td>
                         <td className="text-lg-end font-monospace">{totalInstructions}</td>
                     </tr>
                 </TableCardBody>

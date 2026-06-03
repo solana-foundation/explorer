@@ -27,7 +27,7 @@ export function SolBalanceChangesCard({ balanceChanges }: { balanceChanges: SolB
                         {balanceChanges.map((change, i) => (
                             <tr key={change.pubkey.toBase58()}>
                                 <td>
-                                    <span className="badge bg-info-soft me-1">{i + 1}</span>
+                                    <span className="badge bg-info-soft e-mr-[3px]">{i + 1}</span>
                                 </td>
                                 <td>
                                     <Address pubkey={change.pubkey} link fetchTokenLabelInfo />

@@ -159,7 +159,7 @@ function TransactionRawDataDownloadField({ signature }: { signature: string }) {
     }, [transactionData, signature, fetchRaw]);
 
     return (
-        <div className="d-flex align-items-center gap-1" onMouseEnter={handleHover}>
+        <div className="e-flex e-items-center e-gap-[3px]" onMouseEnter={handleHover}>
             <Copyable text={transactionData ? toBase64(transactionData) : null}>
                 <DownloadDropdown data={transactionData} loading={loading} filename={signature} />
             </Copyable>

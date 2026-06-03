@@ -34,12 +34,12 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                     <h3 className="card-header-title">Program Instruction Logs</h3>
                     <button
                         className={cn(
-                            'btn btn-sm d-flex align-items-center',
+                            'btn btn-sm e-flex e-items-center',
                             showRaw ? 'btn-black active' : 'btn-white',
                         )}
                         onClick={() => setShowRaw(r => !r)}
                     >
-                        <Code className="me-2" size={13} /> Raw
+                        <Code className="e-mr-1.5" size={13} /> Raw
                     </button>
                 </CardHeader>
                 {prettyLogs !== null && logMessages !== null ? (

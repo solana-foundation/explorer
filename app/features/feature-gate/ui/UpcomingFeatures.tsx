@@ -50,13 +50,13 @@ export function UpcomingFeatures() {
     return (
         <FeaturesTable
             header={
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="e-flex e-justify-between e-items-center">
                     <div>
-                        <span className="me-2">🚀</span>
+                        <span className="e-mr-1.5">🚀</span>
                         Upcoming {clusterName(cluster)} Features
                     </div>
 
-                    <Link href={featureGatesPath} className="epoch-link mb-1">
+                    <Link href={featureGatesPath} className="epoch-link e-mb-[3px]">
                         View all feature gates
                     </Link>
                 </div>
@@ -96,7 +96,7 @@ function FeaturesTable({
                         {features.map(feature => (
                             <tr key={feature.key}>
                                 <td>
-                                    <div className="mb-2 d-flex align-items-center">
+                                    <div className="e-mb-1.5 e-flex e-items-center">
                                         <Link
                                             href={`/address/${feature.key}/feature-gate?cluster=${clusterSlug(cluster)}`}
                                             className="e-mb-0 e-mr-3 e-underline fs-sm"
@@ -116,11 +116,11 @@ function FeaturesTable({
                                     <p className="e-mb-0 fs-sm">{feature.description}</p>
                                 </td>
                                 <td>
-                                    <div className="d-flex flex-column fs-sm">
+                                    <div className="e-flex flex-column fs-sm">
                                         {feature.mainnet_activation_epoch && (
                                             <Link
                                                 href={`/epoch/${feature.mainnet_activation_epoch}?cluster=mainnet`}
-                                                className="epoch-link mb-1"
+                                                className="epoch-link e-mb-[3px]"
                                             >
                                                 Mainnet: {feature.mainnet_activation_epoch}
                                             </Link>
@@ -128,7 +128,7 @@ function FeaturesTable({
                                         {feature.devnet_activation_epoch && (
                                             <Link
                                                 href={`/epoch/${feature.devnet_activation_epoch}?cluster=devnet`}
-                                                className="epoch-link mb-1"
+                                                className="epoch-link e-mb-[3px]"
                                             >
                                                 Devnet: {feature.devnet_activation_epoch}
                                             </Link>

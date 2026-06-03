@@ -86,20 +86,20 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                     </CardHeader>
                     <TableCardBody>
                         <tr>
-                            <td className="w-100">Blockhash</td>
+                            <td className="e-w-full">Blockhash</td>
                             <td className="text-lg-end font-monospace">
                                 <span>{block.blockhash}</span>
                             </td>
                         </tr>
                         <tr>
-                            <td className="w-100">Slot</td>
+                            <td className="e-w-full">Slot</td>
                             <td className="text-lg-end font-monospace">
                                 <Slot slot={slotNumber} />
                             </td>
                         </tr>
                         {blockLeader !== undefined && (
                             <tr>
-                                <td className="w-100">Slot Leader</td>
+                                <td className="e-w-full">Slot Leader</td>
                                 <td className="text-lg-end">
                                     <Address pubkey={blockLeader} alignRight link />
                                 </td>
@@ -126,33 +126,33 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                             </>
                         ) : (
                             <tr>
-                                <td className="w-100">Timestamp</td>
+                                <td className="e-w-full">Timestamp</td>
                                 <td className="text-lg-end">Unavailable</td>
                             </tr>
                         )}
                         {epoch !== undefined && (
                             <tr>
-                                <td className="w-100">Epoch</td>
+                                <td className="e-w-full">Epoch</td>
                                 <td className="text-lg-end font-monospace">
                                     <Epoch epoch={epoch} link />
                                 </td>
                             </tr>
                         )}
                         <tr>
-                            <td className="w-100">Parent Blockhash</td>
+                            <td className="e-w-full">Parent Blockhash</td>
                             <td className="text-lg-end font-monospace">
                                 <span>{block.previousBlockhash}</span>
                             </td>
                         </tr>
                         <tr>
-                            <td className="w-100">Parent Slot</td>
+                            <td className="e-w-full">Parent Slot</td>
                             <td className="text-lg-end font-monospace">
                                 <Slot slot={block.parentSlot} link />
                             </td>
                         </tr>
                         {parentLeader !== undefined && (
                             <tr>
-                                <td className="w-100">Parent Slot Leader</td>
+                                <td className="e-w-full">Parent Slot Leader</td>
                                 <td className="text-lg-end">
                                     <Address pubkey={parentLeader} alignRight link />
                                 </td>
@@ -160,7 +160,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         )}
                         {childSlot !== undefined && (
                             <tr>
-                                <td className="w-100">Child Slot</td>
+                                <td className="e-w-full">Child Slot</td>
                                 <td className="text-lg-end font-monospace">
                                     <Slot slot={childSlot} link />
                                 </td>
@@ -168,34 +168,34 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         )}
                         {childLeader !== undefined && (
                             <tr>
-                                <td className="w-100">Child Slot Leader</td>
+                                <td className="e-w-full">Child Slot Leader</td>
                                 <td className="text-lg-end">
                                     <Address pubkey={childLeader} alignRight link />
                                 </td>
                             </tr>
                         )}
                         <tr>
-                            <td className="w-100">Processed Transactions</td>
+                            <td className="e-w-full">Processed Transactions</td>
                             <td className="text-lg-end font-monospace">
                                 <span>{block.transactions.length}</span>
                             </td>
                         </tr>
                         {showSuccessfulCount && (
                             <tr>
-                                <td className="w-100">Successful Transactions</td>
+                                <td className="e-w-full">Successful Transactions</td>
                                 <td className="text-lg-end font-monospace">
                                     <span>{successfulTxs.length}</span>
                                 </td>
                             </tr>
                         )}
                         <tr>
-                            <td className="w-100">Total Compute Units Consumed</td>
+                            <td className="e-w-full">Total Compute Units Consumed</td>
                             <td className="text-lg-end font-monospace">
                                 <span>{totalCUs.toLocaleString()}</span>
                             </td>
                         </tr>
                         <tr>
-                            <td className="w-100">Transaction Cost Utilization</td>
+                            <td className="e-w-full">Transaction Cost Utilization</td>
                             <td className="text-lg-end font-monospace">
                                 <span>
                                     {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
@@ -204,7 +204,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                             </td>
                         </tr>
                         <tr>
-                            <td className="w-100">Reserved Compute Units</td>
+                            <td className="e-w-full">Reserved Compute Units</td>
                             <td className="text-lg-end font-monospace">
                                 <span>
                                     {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()} (

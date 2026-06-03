@@ -43,7 +43,7 @@ function RenderTable({ entries }: { entries: [string, any][] }) {
             {entries.map(([entryKey, value], index) => {
                 return (
                     <tr key={index}>
-                        <td className="w-100">{entryKey}</td>
+                        <td className="e-w-full">{entryKey}</td>
                         <RenderEntry key={entryKey} entryKey={entryKey} value={value} />
                     </tr>
                 );

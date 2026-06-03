@@ -72,10 +72,10 @@ export function BaseVerifiedBuildCard({
     return (
         <div className="card security-txt">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title e-mb-0 d-flex align-items-center">Verified Build</h3>
+                <h3 className="card-header-title e-mb-0 e-flex e-items-center">Verified Build</h3>
                 <small>{verificationMessage}</small>
             </CardHeader>
-            <div className="alert mt-2 mb-2">
+            <div className="alert e-mt-1.5 e-mb-1.5">
                 A verified build badge indicates that this program was built from source code that is publicly
                 available, but does not imply that this program has been audited. For more details, refer to the{' '}
                 <a
@@ -83,7 +83,7 @@ export function BaseVerifiedBuildCard({
                     target="_blank"
                     rel="noopener noreferrer"
                 >
-                    Verified Builds Guide <ExternalLink className="align-text-top ms-1" size={13} />
+                    Verified Builds Guide <ExternalLink className="align-text-top e-ml-[3px]" size={13} />
                 </a>
                 .
             </div>
@@ -91,7 +91,7 @@ export function BaseVerifiedBuildCard({
                 {ROWS.filter(x => x.key in registryInfo).map((x, idx) => {
                     return (
                         <tr key={idx}>
-                            <td className="w-100">{x.display}</td>
+                            <td className="e-w-full">{x.display}</td>
                             <RenderEntry value={registryInfo[x.key]} type={x.type} />
                         </tr>
                     );
@@ -186,7 +186,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
             return (
                 <td className="text-lg-end">
                     {value && (value as string).length > 1 ? (
-                        <div className="d-flex align-items-center e-justify-end">
+                        <div className="e-flex e-items-center e-justify-end">
                             <Copyable text={value as string}>
                                 <span />
                             </Copyable>
@@ -209,7 +209,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                         <span className="font-monospace">
                             <a rel="noopener noreferrer" target="_blank" href={value as string}>
                                 {value}
-                                <ExternalLink className="align-text-top ms-2" size={13} />
+                                <ExternalLink className="align-text-top e-ml-1.5" size={13} />
                             </a>
                         </span>
                     </td>

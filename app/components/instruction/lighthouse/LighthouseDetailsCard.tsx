@@ -359,7 +359,7 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
                 return (
                     <tr key={keyIndex} data-testid={`account-row-${keyIndex}`}>
                         <td>
-                            <div className="me-2 d-md-inline">
+                            <div className="e-mr-1.5 d-md-inline">
                                 {parsedIx.accounts
                                     ? keyIndex < parsedAccountsLength
                                         ? `${camelToTitleCase(accountMap.get(address) ?? 'Unknown')}`
@@ -368,11 +368,11 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
                             </div>
                             {role == AccountRole.WRITABLE ||
                                 (role == AccountRole.WRITABLE_SIGNER && (
-                                    <span className="badge bg-danger-soft me-1">Writable</span>
+                                    <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>
                                 ))}
                             {role == AccountRole.READONLY_SIGNER ||
                                 (role == AccountRole.WRITABLE_SIGNER && (
-                                    <span className="badge bg-info-soft me-1">Signer</span>
+                                    <span className="badge bg-info-soft e-mr-[3px]">Signer</span>
                                 ))}
                         </td>
                         <td className="text-lg-end" colSpan={2}>

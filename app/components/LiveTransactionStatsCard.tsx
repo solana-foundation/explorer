@@ -35,7 +35,7 @@ const SERIES_INFO = {
 export function LiveTransactionStatsCard() {
     const [series, setSeries] = React.useState<Series>('short');
     return (
-        <div className="card e-grow d-flex flex-column">
+        <div className="card e-grow e-flex flex-column">
             <CardHeader ui="dashkit">
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </CardHeader>
@@ -174,14 +174,14 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
     };
 
     return (
-        <div className="d-flex flex-column e-grow">
+        <div className="e-flex flex-column e-grow">
             <TableCardBody>
                 <tr>
-                    <td className="w-100">Transaction count</td>
+                    <td className="e-w-full">Transaction count</td>
                     <td className="text-lg-end font-monospace">{transactionCount} </td>
                 </tr>
                 <tr>
-                    <td className="w-100">Transactions per second (TPS)</td>
+                    <td className="e-w-full">Transactions per second (TPS)</td>
                     <td className="text-lg-end font-monospace">{averageTps} </td>
                 </tr>
             </TableCardBody>
@@ -189,15 +189,15 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
             <hr className="e-my-0" />
 
             <CardBody ui="dashkit" className="e-py-3 e-flex e-flex-col e-grow">
-                <div className="d-flex justify-content-between w-100">
-                    <span className="e-mb-0 font-size-sm">TPS history</span>
+                <div className="e-flex e-justify-between e-w-full">
+                    <span className="e-mb-0">TPS history</span>
 
-                    <div className="font-size-sm">
+                    <div>
                         {SERIES.map(key => (
                             <button
                                 key={key}
                                 onClick={() => setSeries(key)}
-                                className={classNames('btn btn-sm btn-white ms-2', {
+                                className={classNames('btn btn-sm btn-white e-ml-1.5', {
                                     active: series === key,
                                 })}
                             >

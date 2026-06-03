@@ -72,19 +72,19 @@ function EventCard({
     const fields = ((eventFields?.type as IdlTypeDefTyStruct)?.fields as IdlField[]) ?? [];
 
     return (
-        <div className="card mb-2">
+        <div className="card e-mb-1.5">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title e-mb-0 d-flex align-items-center">
-                    <span className="badge bg-info-soft me-2">
+                <h3 className="card-header-title e-mb-0 e-flex e-items-center">
+                    <span className="badge bg-info-soft e-mr-1.5">
                         #{instructionIndex + 1}.{eventIndex + 1}
                     </span>
                     {camelToTitleCase(event.name)}
                 </h3>
                 <button
-                    className={cn('btn btn-sm d-flex align-items-center', showRaw ? 'btn-black active' : 'btn-white')}
+                    className={cn('btn btn-sm e-flex e-items-center', showRaw ? 'btn-black active' : 'btn-white')}
                     onClick={() => setShowRaw(r => !r)}
                 >
-                    <Code className="me-2" size={13} /> Raw
+                    <Code className="e-mr-1.5" size={13} /> Raw
                 </button>
             </CardHeader>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}

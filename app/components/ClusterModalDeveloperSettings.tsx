@@ -17,8 +17,8 @@ export default function ClusterModalDeveloperSettings() {
     return (
         <>
             <hr />
-            <h2 className="text-center mb-4 mt-4">Developer Settings</h2>
-            <div className="d-flex justify-content-between">
+            <h2 className="text-center e-mb-6 e-mt-6">Developer Settings</h2>
+            <div className="e-flex e-justify-between">
                 <span className="e-mr-3">Enable custom url param</span>
                 <div className="form-check form-switch">
                     <input
@@ -31,7 +31,7 @@ export default function ClusterModalDeveloperSettings() {
                     <label className="form-check-label" htmlFor="cardToggle"></label>
                 </div>
             </div>
-            <p className="text-muted font-size-sm e-mt-3">
+            <p className="text-muted e-mt-3">
                 Enable this setting to easily connect to a custom cluster via the &ldquo;customUrl&rdquo; url param.
             </p>
         </>

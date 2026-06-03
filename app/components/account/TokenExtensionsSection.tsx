@@ -165,7 +165,7 @@ function TokenExtensionStateHeader({ name }: { name: string }) {
 
 function ExtensionListItem({ ext }: { ext: ParsedTokenExtension }) {
     return (
-        <div className="w-100 e-w-100 text-white e-flex e-items-center e-gap-2 e-text-sm">
+        <div className="e-w-full e-w-100 text-white e-flex e-items-center e-gap-2 e-text-sm">
             {/* Name */}
             <div className="e-flex e-min-w-80 e-items-center e-gap-2 e-whitespace-nowrap e-font-normal">
                 <span>{ext.name}</span>

@@ -9,7 +9,7 @@ export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
         <>
             <div className="card">
                 <CardHeader ui="dashkit">
-                    <div className="row align-items-center">
+                    <div className="row e-items-center">
                         <div className="col">
                             <h3 className="card-header-title">Vote History</h3>
                         </div>

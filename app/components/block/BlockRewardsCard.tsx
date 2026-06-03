@@ -66,7 +66,7 @@ export function BlockRewardsCard({ block }: { block: VersionedBlockResponse }) {
             {block.rewards.length > rewardsDisplayed && (
                 <CardFooter ui="dashkit">
                     <button
-                        className="btn btn-primary w-100"
+                        className="btn btn-primary e-w-full"
                         onClick={() => setRewardsDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More

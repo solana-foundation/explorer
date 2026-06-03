@@ -98,7 +98,7 @@ export function BlockAccountsCard({ block, blockSlot }: { block: VersionedBlockR
             {accountStats.length > numDisplayed && (
                 <CardFooter ui="dashkit">
                     <button
-                        className="btn btn-primary w-100"
+                        className="btn btn-primary e-w-full"
                         onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More

@@ -11,7 +11,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
     }, [error]);
 
     return (
-        <div className="container mt-4">
+        <div className="container e-mt-6">
             <ErrorCard text="Something went wrong" retry={reset} />
         </div>
     );

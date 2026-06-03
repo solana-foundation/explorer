@@ -25,7 +25,7 @@ export function NeodymeSecurityTxtTable({ data }: { data: NeodymeSecurityTXT }) 
             {ROWS.filter(x => x.key in data).map((x, idx) => {
                 return (
                     <tr key={idx}>
-                        <td className="w-100">{x.display}</td>
+                        <td className="e-w-full">{x.display}</td>
                         <RenderEntry value={data[x.key]} type={x.type} />
                     </tr>
                 );

@@ -58,7 +58,7 @@ export function NicknameEditor({ address, onClose }: Props) {
 
     return (
         <div
-            className="e-fixed top-0 start-0 w-100 e-h-full d-flex align-items-center e-justify-center"
+            className="e-fixed top-0 start-0 e-w-full e-h-full e-flex e-items-center e-justify-center"
             style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                 zIndex: 9999,
@@ -94,14 +94,14 @@ export function NicknameEditor({ address, onClose }: Props) {
                             maxLength={MAX_NICKNAME_LENGTH}
                             autoFocus
                         />
-                        <div className="d-flex justify-content-between">
+                        <div className="e-flex e-justify-between">
                             <small className="text-muted">This nickname is stored locally on your device.</small>
                             <small className="text-muted">
                                 {nickname.length}/{MAX_NICKNAME_LENGTH}
                             </small>
                         </div>
                     </div>
-                    <div className="d-flex justify-content-between">
+                    <div className="e-flex e-justify-between">
                         <div>
                             {getNickname(address) && (
                                 <button className="btn btn-sm btn-outline-danger" onClick={handleRemove}>
@@ -109,7 +109,7 @@ export function NicknameEditor({ address, onClose }: Props) {
                                 </button>
                             )}
                         </div>
-                        <div className="d-flex gap-2">
+                        <div className="e-flex e-gap-1.5">
                             <button className="btn btn-sm btn-secondary" onClick={onClose}>
                                 Cancel
                             </button>

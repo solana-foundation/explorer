@@ -229,7 +229,7 @@ function ClusterActivationEpochAtCluster({
                 <Link href={`/epoch/${nextEpoch}?cluster=${cluster}`} className="epoch-link">
                     {clusterName(cluster)} Epoch {nextEpoch.toString()}
                 </Link>
-                <div className="mt-1">
+                <div className="e-mt-[3px]">
                     <EpochCountdown remainingSlots={remainingSlots} />
                 </div>
             </div>

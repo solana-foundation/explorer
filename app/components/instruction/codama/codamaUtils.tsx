@@ -88,8 +88,8 @@ export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
                 className={nestingLevel > 0 ? 'table-nested-account' : ''}
             >
                 <td>
-                    <div className="d-flex flex-row align-items-center">
-                        {nestingLevel > 0 && <CornerDownRight className="me-2 mb-1" size={14} />}
+                    <div className="e-flex flex-row e-items-center">
+                        {nestingLevel > 0 && <CornerDownRight className="e-mr-1.5 e-mb-[3px]" size={14} />}
                         <div>{key}</div>
                     </div>
                 </td>

@@ -112,7 +112,7 @@ export function DasCompressionInfoCard({
 
 function getVerifiedProofPill(verified: boolean) {
     return (
-        <div className={'d-inline-flex align-items-center ms-2'}>
+        <div className={'d-inline-flex e-items-center e-ml-1.5'}>
             <span className={cn('badge badge-pill bg-dark', !verified && 'bg-danger-soft')}>{`Proof ${
                 verified ? '' : 'Not'
             } Verified`}</span>
@@ -133,7 +133,7 @@ function getProofSizePill(proofSize: number) {
     }
 
     return (
-        <div className={'d-inline-flex align-items-center ms-2'}>
+        <div className={'d-inline-flex e-items-center e-ml-1.5'}>
             <span className={`badge badge-pill ${color}`}>{text}</span>
         </div>
     );

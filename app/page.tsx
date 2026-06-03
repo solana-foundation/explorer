@@ -32,14 +32,14 @@ export default function Page() {
     return (
         <StatsProvider>
             <SupplyProvider>
-                <div className="container mt-4">
+                <div className="container e-mt-6">
                     <StakingComponent />
 
-                    <div className="row d-flex">
-                        <div className="col-md-6 d-flex">
+                    <div className="row e-flex">
+                        <div className="col-md-6 e-flex">
                             <StatsCardBody />
                         </div>
-                        <div className="col-md-6 d-flex">
+                        <div className="col-md-6 e-flex">
                             <LiveTransactionStatsCard />
                         </div>
                     </div>
@@ -192,7 +192,7 @@ function StatsCardBody() {
     return (
         <div className="card e-grow">
             <CardHeader ui="dashkit">
-                <div className="row align-items-center">
+                <div className="row e-items-center">
                     <div className="col">
                         <h4 className="card-header-title">Live Cluster Stats</h4>
                     </div>
@@ -200,14 +200,14 @@ function StatsCardBody() {
             </CardHeader>
             <TableCardBody>
                 <tr>
-                    <td className="w-100">Slot</td>
+                    <td className="e-w-full">Slot</td>
                     <td className="text-lg-end font-monospace">
                         <Slot slot={absoluteSlot} link />
                     </td>
                 </tr>
                 {blockHeight !== undefined && (
                     <tr>
-                        <td className="w-100">Block height</td>
+                        <td className="e-w-full">Block height</td>
                         <td className="text-lg-end font-monospace">
                             <Slot slot={blockHeight} />
                         </td>
@@ -215,32 +215,32 @@ function StatsCardBody() {
                 )}
                 {blockTime && (
                     <tr>
-                        <td className="w-100">Cluster time</td>
+                        <td className="e-w-full">Cluster time</td>
                         <td className="text-lg-end font-monospace">
                             <TimestampToggle unixTimestamp={blockTime} shorter></TimestampToggle>
                         </td>
                     </tr>
                 )}
                 <tr>
-                    <td className="w-100">Slot time (1min average)</td>
+                    <td className="e-w-full">Slot time (1min average)</td>
                     <td className="text-lg-end font-monospace">{averageSlotTime}ms</td>
                 </tr>
                 <tr>
-                    <td className="w-100">Slot time (1hr average)</td>
+                    <td className="e-w-full">Slot time (1hr average)</td>
                     <td className="text-lg-end font-monospace">{hourlySlotTime}ms</td>
                 </tr>
                 <tr>
-                    <td className="w-100">Epoch</td>
+                    <td className="e-w-full">Epoch</td>
                     <td className="text-lg-end font-monospace">
                         <Epoch epoch={epochInfo.epoch} link />
                     </td>
                 </tr>
                 <tr>
-                    <td className="w-100">Epoch progress</td>
+                    <td className="e-w-full">Epoch progress</td>
                     <td className="text-lg-end font-monospace">{epochProgress}</td>
                 </tr>
                 <tr>
-                    <td className="w-100">Epoch time remaining (approx.)</td>
+                    <td className="e-w-full">Epoch time remaining (approx.)</td>
                     <td className="text-lg-end font-monospace">~{epochTimeRemaining}</td>
                 </tr>
             </TableCardBody>

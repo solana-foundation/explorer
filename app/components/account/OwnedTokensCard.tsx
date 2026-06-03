@@ -302,7 +302,7 @@ function TokensCardFooter({
 
     return (
         <CardFooter ui="dashkit">
-            <button className="btn btn-primary w-100" onClick={loadMore}>
+            <button className="btn btn-primary e-w-full" onClick={loadMore}>
                 Load More ({visibleCount} of {totalCount})
             </button>
         </CardFooter>

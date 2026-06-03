@@ -201,7 +201,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     </CardBody>
                     <CardFooter ui="dashkit">
                         <button
-                            className="btn btn-primary w-100"
+                            className="btn btn-primary e-w-full"
                             onClick={() => setTokensToFetchCount(LOAD_MORE_COUNT)}
                         >
                             Load Token History
@@ -266,20 +266,20 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
             <CardFooter ui="dashkit">
                 {visibleTxCount < mintAndTxs.length ? (
                     <button
-                        className="btn btn-primary w-100"
+                        className="btn btn-primary e-w-full"
                         onClick={() => setVisibleTxCount(c => c + LOAD_MORE_COUNT)}
                     >
                         {`Show More (${visibleTxCount} of ${mintAndTxs.length})`}
                     </button>
                 ) : tokensToFetchCount < filteredTokens.length ? (
                     <button
-                        className="btn btn-primary w-100"
+                        className="btn btn-primary e-w-full"
                         onClick={() => setTokensToFetchCount(c => c + LOAD_MORE_COUNT)}
                         disabled={fetching}
                     >
                         {fetching ? (
                             <>
-                                <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+                                <span className="align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
                                 Loading
                             </>
                         ) : (
@@ -289,10 +289,10 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 ) : allFoundOldest ? (
                     <div className="text-muted text-center">Fetched full history</div>
                 ) : (
-                    <button className="btn btn-primary w-100" onClick={() => fetchHistories()} disabled={fetching}>
+                    <button className="btn btn-primary e-w-full" onClick={() => fetchHistories()} disabled={fetching}>
                         {fetching ? (
                             <>
-                                <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+                                <span className="align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
                                 Loading
                             </>
                         ) : (
@@ -335,8 +335,8 @@ const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
     });
 
     return (
-        <div className="dropdown me-2">
-            <small className="me-2">Filter:</small>
+        <div className="dropdown e-mr-1.5">
+            <small className="e-mr-1.5">Filter:</small>
             <button className="btn btn-white btn-sm" type="button" onClick={toggle}>
                 {filter === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filter)}{' '}
                 <ChevronDown size={15} className="align-text-top" />
@@ -422,7 +422,7 @@ function InstructionDetails({ instructionType, tx }: { instructionType: Instruct
                             e.preventDefault();
                             setExpanded(!expanded);
                         }}
-                        className="c-pointer me-2"
+                        className="e-cursor-pointer e-mr-1.5"
                     >
                         {expanded ? (
                             <MinusSquare className="align-text-top" size={13} />
@@ -479,7 +479,7 @@ function InstructionDetailsCell({
         return (
             <td>
                 <span
-                    className="btn btn-sm btn-outline-primary e-py-0 e-px-[3px] lh-1 text-xs"
+                    className="btn btn-sm btn-outline-primary e-py-0 e-px-[3px] lh-1"
                     role="button"
                     onClick={handleLoadClick}
                 >
@@ -492,7 +492,7 @@ function InstructionDetailsCell({
     if (isFetching) {
         return (
             <td>
-                <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+                <span className="align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
                 Loading
             </td>
         );
@@ -502,7 +502,7 @@ function InstructionDetailsCell({
         return (
             <td>
                 <span
-                    className="btn btn-sm btn-outline-warning e-py-0 e-px-[3px] lh-1 text-xs"
+                    className="btn btn-sm btn-outline-warning e-py-0 e-px-[3px] lh-1"
                     role="button"
                     onClick={handleLoadClick}
                 >

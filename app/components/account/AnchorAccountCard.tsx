@@ -52,7 +52,7 @@ export function AnchorAccountCard({ account }: { account: Account }) {
         <div>
             <div className="card">
                 <CardHeader ui="dashkit">
-                    <div className="row align-items-center">
+                    <div className="row e-items-center">
                         <div className="col">
                             <h3 className="card-header-title">
                                 {programName}: {accountDef.name.charAt(0).toUpperCase() + accountDef.name.slice(1)}

@@ -309,7 +309,7 @@ export function mapIxArgsToRows(ixArgs: any, ixType: IdlInstruction, idl: Idl) {
                 <tr key={key}>
                     <td>{key}</td>
                     <td>{ixType.name}</td>
-                    <td className="metadata-json-viewer m-4">
+                    <td className="metadata-json-viewer e-m-6">
                         <ReactJson src={ixArgs} />
                     </td>
                 </tr>
@@ -347,7 +347,7 @@ export function mapAccountToRows(accountData: any, accountType: IdlTypeDef, idl:
                 <tr key={key}>
                     <td>{key}</td>
                     <td>{accountType.name}</td>
-                    <td className="metadata-json-viewer m-4">
+                    <td className="metadata-json-viewer e-m-6">
                         <ReactJson src={accountData} />
                     </td>
                 </tr>
@@ -610,8 +610,8 @@ function SimpleRow({
     return (
         <tr className={cn(nestingLevel > 0 && 'table-nested-account')}>
             <td>
-                <div className="d-flex flex-row align-items-center">
-                    {nestingLevel > 0 && <CornerDownRight className="me-2 mb-1" size={14} />}
+                <div className="e-flex flex-row e-items-center">
+                    {nestingLevel > 0 && <CornerDownRight className="e-mr-1.5 e-mb-[3px]" size={14} />}
                     <div>{itemKey}</div>
                 </div>
             </td>
@@ -637,22 +637,22 @@ export function ExpandableRow({
         <>
             <tr className="table-group-header">
                 <td>
-                    <div className="d-flex flex-row align-items-center">
-                        {nestingLevel > 0 && <CornerDownRight className="me-2 mb-1" size={14} />}
+                    <div className="e-flex flex-row e-items-center">
+                        {nestingLevel > 0 && <CornerDownRight className="e-mr-1.5 e-mb-[3px]" size={14} />}
                         <div>{fieldName}</div>
                     </div>
                 </td>
                 <td>{fieldType}</td>
                 <td className="text-lg-end" onClick={() => setExpanded(current => !current)}>
-                    <div className="c-pointer">
+                    <div className="e-cursor-pointer">
                         {expanded ? (
                             <>
-                                <span className="text-info me-2">Collapse</span>
+                                <span className="text-info e-mr-1.5">Collapse</span>
                                 <ChevronUp size={15} />
                             </>
                         ) : (
                             <>
-                                <span className="text-info me-2">Expand</span>
+                                <span className="text-info e-mr-1.5">Expand</span>
                                 <ChevronDown size={15} />
                             </>
                         )}

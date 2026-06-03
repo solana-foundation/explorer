@@ -89,7 +89,7 @@ export const NftokenImage = ({ url, size }: { url: string | undefined; size: num
                     }}
                 />
             )}
-            <div className={cn('rounded mx-auto', isLoading ? 'd-none' : 'd-block')}>
+            <div className={cn('e-rounded-dk mx-auto', isLoading ? 'd-none' : 'd-block')}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     alt="nft"

@@ -92,7 +92,7 @@ function SignatureRow({
     return (
         <tr>
             <td>
-                <span className="badge bg-info-soft me-1">{index + 1}</span>
+                <span className="badge bg-info-soft e-mr-[3px]">{index + 1}</span>
             </td>
             <td>{signature ? <Signature signature={signature} /> : 'Missing Signature'}</td>
             <td>
@@ -102,12 +102,12 @@ function SignatureRow({
                 {verified === undefined ? (
                     'N/A'
                 ) : verified ? (
-                    <span className="badge bg-success-soft me-1">Valid</span>
+                    <span className="badge bg-success-soft e-mr-[3px]">Valid</span>
                 ) : (
-                    <span className="badge bg-warning-soft me-1">Invalid</span>
+                    <span className="badge bg-warning-soft e-mr-[3px]">Invalid</span>
                 )}
             </td>
-            <td>{index === 0 && <span className="badge bg-info-soft me-1">Fee Payer</span>}</td>
+            <td>{index === 0 && <span className="badge bg-info-soft e-mr-[3px]">Fee Payer</span>}</td>
         </tr>
     );
 }

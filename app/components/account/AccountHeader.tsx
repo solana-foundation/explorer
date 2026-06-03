@@ -180,7 +180,7 @@ function TokenMintHeaderCard({
 }) {
     const logoURI = token.logoURI ? getProxiedUri(token.logoURI) : undefined;
     return (
-        <div className="row align-items-center">
+        <div className="row e-items-center">
             <div className="col-auto">
                 <div className="avatar avatar-lg header-avatar-top">
                     {logoURI ? (

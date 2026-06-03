@@ -81,7 +81,7 @@ export function UpgradeableProgramSection({
     return (
         <div className="card">
             <CardHeader ui="dashkit" className="e-gap-2">
-                <h3 className="card-header-title e-mb-0 d-flex align-items-center">
+                <h3 className="card-header-title e-mb-0 e-flex e-items-center">
                     {programData === undefined && 'Closed '}Program Account
                 </h3>
                 <button
@@ -91,7 +91,7 @@ export function UpgradeableProgramSection({
                         refresh(account.pubkey, 'parsed');
                     }}
                 >
-                    <RefreshCw className="align-text-top me-2" size={13} />
+                    <RefreshCw className="align-text-top e-mr-1.5" size={13} />
                     Refresh
                 </button>
                 <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
@@ -194,7 +194,7 @@ function VerifiedLabel() {
                 href="https://github.com/Ellipsis-Labs/solana-verifiable-build"
             >
                 <span className="security-txt-link-color-hack-reee">Verified Build</span>
-                <ExternalLink className="align-text-top ms-2" size={13} />
+                <ExternalLink className="align-text-top e-ml-1.5" size={13} />
             </Link>
         </InfoTooltip>
     );
@@ -211,7 +211,7 @@ export function UpgradeableProgramDataSection({
     return (
         <div className="card">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title e-mb-0 d-flex align-items-center">Program Executable Data Account</h3>
+                <h3 className="card-header-title e-mb-0 e-flex e-items-center">Program Executable Data Account</h3>
                 <button
                     className="btn btn-white btn-sm"
                     onClick={() => {
@@ -219,7 +219,7 @@ export function UpgradeableProgramDataSection({
                         refresh(account.pubkey, 'parsed');
                     }}
                 >
-                    <RefreshCw className="align-text-top me-2" size={13} />
+                    <RefreshCw className="align-text-top e-mr-1.5" size={13} />
                     Refresh
                 </button>
             </CardHeader>
@@ -242,7 +242,7 @@ export function UpgradeableProgramDataSection({
                         <td>Data Size (Bytes)</td>
                         <td className="text-lg-end">
                             <DownloadableIcon data={programData.data[0]} filename={`${account.pubkey.toString()}.bin`}>
-                                <span className="me-2">{account.space}</span>
+                                <span className="e-mr-1.5">{account.space}</span>
                             </DownloadableIcon>
                         </td>
                     </tr>
@@ -281,7 +281,7 @@ export function UpgradeableProgramBufferSection({
     return (
         <div className="card">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title e-mb-0 d-flex align-items-center">Program Deploy Buffer Account</h3>
+                <h3 className="card-header-title e-mb-0 e-flex e-items-center">Program Deploy Buffer Account</h3>
                 <button
                     className="btn btn-white btn-sm"
                     onClick={() => {
@@ -289,7 +289,7 @@ export function UpgradeableProgramBufferSection({
                         refresh(account.pubkey, 'parsed');
                     }}
                 >
-                    <RefreshCw className="align-text-top me-2" size={13} />
+                    <RefreshCw className="align-text-top e-mr-1.5" size={13} />
                     Refresh
                 </button>
             </CardHeader>

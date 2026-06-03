@@ -62,7 +62,7 @@ export function RichListSkeleton({ rows = 2 }: { rows?: number }) {
     return (
         <div className="card e-flex-1">
             <CardHeader ui="dashkit">
-                <div className="row align-items-center">
+                <div className="row e-items-center">
                     <div className="col">
                         <Skeleton className="e-h-5 e-w-40" />
                     </div>
@@ -86,7 +86,7 @@ export function StatsTableSkeleton({ rows = 8 }: { rows?: number }) {
     return (
         <div className="card e-flex-1">
             <CardHeader ui="dashkit">
-                <div className="row align-items-center">
+                <div className="row e-items-center">
                     <div className="col">
                         <Skeleton className="e-h-5 e-w-40" />
                     </div>

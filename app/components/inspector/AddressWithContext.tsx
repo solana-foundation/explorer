@@ -40,7 +40,7 @@ export function AddressFromLookupTableWithContext({
     if (!lookupTable) {
         return (
             <span className="text-muted">
-                <span className="spinner-grow spinner-grow-sm me-2"></span>
+                <span className="spinner-grow spinner-grow-sm e-mr-1.5"></span>
                 Loading
             </span>
         );
@@ -51,7 +51,7 @@ export function AddressFromLookupTableWithContext({
     } else {
         const pubkey = lookupTable.state.addresses[lookupTableIndex];
         return (
-            <div className="d-flex align-items-lg-end flex-column">
+            <div className="e-flex align-items-lg-end flex-column">
                 <Address pubkey={pubkey} link />
                 {hideInfo ? null : <AccountInfo pubkey={pubkey} />}
             </div>
@@ -69,7 +69,7 @@ export function AddressWithContext({
     hideInfo?: boolean;
 }) {
     return (
-        <div className="d-flex align-items-lg-end flex-column">
+        <div className="e-flex align-items-lg-end flex-column">
             <Address pubkey={pubkey} link />
             {hideInfo ? null : <AccountInfo pubkey={pubkey} validator={validator} />}
         </div>
@@ -93,7 +93,7 @@ function AccountInfo({ pubkey, validator }: { pubkey: PublicKey; validator?: Acc
     if (!account)
         return (
             <span className="text-muted">
-                <span className="spinner-grow spinner-grow-sm me-2"></span>
+                <span className="spinner-grow spinner-grow-sm e-mr-1.5"></span>
                 Loading
             </span>
         );

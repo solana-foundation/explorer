@@ -72,7 +72,7 @@ function LookupRow({
 
     const loadingComponent = (
         <span className="text-muted">
-            <span className="spinner-grow spinner-grow-sm me-2"></span>
+            <span className="spinner-grow spinner-grow-sm e-mr-1.5"></span>
             Loading
         </span>
     );
@@ -103,7 +103,7 @@ function LookupRow({
             </td>
             <td className="text-lg-end">{lookupTableIndex}</td>
             <td className="text-lg-end">{resolvedKeyComponent}</td>
-            <td>{!readOnly && <span className="badge bg-danger-soft me-1">Writable</span>}</td>
+            <td>{!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}</td>
         </tr>
     );
 }

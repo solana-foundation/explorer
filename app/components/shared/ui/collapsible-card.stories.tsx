@@ -72,7 +72,7 @@ export const WithHeaderButtons: Story = {
     render: () => (
         <CollapsibleCard
             title="Account Input(s) (3)"
-            headerButtons={<button className="btn btn-sm btn-white d-flex align-items-center me-2">Raw</button>}
+            headerButtons={<button className="btn btn-sm btn-white e-flex e-items-center e-mr-1.5">Raw</button>}
         >
             <SampleContent />
         </CollapsibleCard>
@@ -95,7 +95,7 @@ export const WithBadgeTitle: Story = {
             collapsible
             title={
                 <>
-                    <span className="badge bg-success-soft me-2">#1</span>
+                    <span className="badge bg-success-soft e-mr-1.5">#1</span>
                     Token Program: Transfer
                 </>
             }
