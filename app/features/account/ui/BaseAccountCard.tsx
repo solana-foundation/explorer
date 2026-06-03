@@ -30,7 +30,7 @@ export function BaseAccountCard({
     return (
         <div className="card">
             <CardHeader ui="dashkit" className="e-gap-2">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">{title}</h3>
+                <h3 className="card-header-title e-mb-0 d-flex align-items-center">{title}</h3>
                 {refresh && analyticsSection && <RefreshButton analyticsSection={analyticsSection} onClick={refresh} />}
                 {showRawButton && (
                     <Button

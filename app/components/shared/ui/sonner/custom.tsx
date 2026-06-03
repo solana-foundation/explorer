@@ -49,11 +49,11 @@ export function CustomToast(props: CustomToastProps) {
                     {icon}
                 </div>
                 <div>
-                    <p id={titleId} className="mb-0 e-pr-3 e-text-sm e-font-medium">
+                    <p id={titleId} className="e-mb-0 e-pr-3 e-text-sm e-font-medium">
                         {title}
                     </p>
                     {typeof description === 'string' ? (
-                        <p id={descriptionId} className="mb-0 e-mt-1 e-text-xs">
+                        <p id={descriptionId} className="e-mb-0 e-mt-1 e-text-xs">
                             {description}
                         </p>
                     ) : (

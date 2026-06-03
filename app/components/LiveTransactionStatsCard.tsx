@@ -190,7 +190,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
 
             <CardBody ui="dashkit" className="e-py-3 e-flex e-flex-col e-grow">
                 <div className="d-flex justify-content-between w-100">
-                    <span className="mb-0 font-size-sm">TPS history</span>
+                    <span className="e-mb-0 font-size-sm">TPS history</span>
 
                     <div className="font-size-sm">
                         {SERIES.map(key => (
@@ -207,12 +207,12 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
                     </div>
                 </div>
 
-                <div id="perf-history" className="mt-3 e-grow" style={{ minHeight: '200px' }}>
+                <div id="perf-history" className="e-mt-3 e-grow" style={{ minHeight: '200px' }}>
                     <Bar data={chartData} options={chartOptions} style={{ height: '100%' }} />
                 </div>
 
-                <div className="text-center text-muted mt-3">
-                    <p className="mb-0">
+                <div className="text-center text-muted e-mt-3">
+                    <p className="e-mb-0">
                         For transaction confirmation time statistics, please visit{' '}
                         <a href="https://www.validators.app" target="_blank" rel="noopener noreferrer">
                             validators.app

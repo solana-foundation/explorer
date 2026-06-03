@@ -99,7 +99,7 @@ function FeaturesTable({
                                     <div className="mb-2 d-flex align-items-center">
                                         <Link
                                             href={`/address/${feature.key}/feature-gate?cluster=${clusterSlug(cluster)}`}
-                                            className="mb-0 e-mr-3 e-underline fs-sm"
+                                            className="e-mb-0 e-mr-3 e-underline fs-sm"
                                         >
                                             {feature.title}
                                         </Link>
@@ -113,7 +113,7 @@ function FeaturesTable({
                                             <span className="badge bg-success">Active on Testnet</span>
                                         )}
                                     </div>
-                                    <p className="mb-0 fs-sm">{feature.description}</p>
+                                    <p className="e-mb-0 fs-sm">{feature.description}</p>
                                 </td>
                                 <td>
                                     <div className="d-flex flex-column fs-sm">

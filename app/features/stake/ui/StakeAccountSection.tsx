@@ -141,7 +141,7 @@ function DelegationCard({
     return (
         <div className="card">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Stake Delegation</h3>
+                <h3 className="card-header-title e-mb-0 d-flex align-items-center">Stake Delegation</h3>
             </CardHeader>
             <TableCardBody>
                 <tr>
@@ -209,7 +209,7 @@ function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
     return (
         <div className="card">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Authorities</h3>
+                <h3 className="card-header-title e-mb-0 d-flex align-items-center">Authorities</h3>
             </CardHeader>
             <TableCardBody>
                 <tr>

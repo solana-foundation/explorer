@@ -107,7 +107,7 @@ function SysvarAccountSlotHistory({
                 </td>
                 <td className="text-lg-end font-monospace">
                     {history.map(val => (
-                        <p key={val} className="mb-0">
+                        <p key={val} className="e-mb-0">
                             <Slot slot={val} link />
                         </p>
                     ))}

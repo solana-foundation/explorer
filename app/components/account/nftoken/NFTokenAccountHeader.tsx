@@ -45,7 +45,7 @@ export function NFTokenNFTHeader({ nft }: { nft: NftokenTypes.NftAccount }) {
                 <NFTImageContent uri={metadata?.image.trim()} />
             </div>
 
-            <div className="col mb-3 ms-0.5 mt-3">
+            <div className="col e-mb-3 ms-0.5 e-mt-3">
                 {<h6 className="header-pretitle ms-1">NFToken NFT</h6>}
                 <div className="d-flex align-items-center">
                     <h2 className="header-title ms-1 align-items-center no-overflow-with-ellipsis">
@@ -83,7 +83,7 @@ export function NFTokenCollectionHeader({ collection }: { collection: NftokenTyp
                 <NFTImageContent uri={metadata?.image} />
             </div>
 
-            <div className="col mb-3 ms-0.5 mt-3">
+            <div className="col e-mb-3 ms-0.5 e-mt-3">
                 {<h6 className="header-pretitle ms-1">NFToken Collection</h6>}
                 <div className="d-flex align-items-center">
                     <h2 className="header-title ms-1 align-items-center no-overflow-with-ellipsis">

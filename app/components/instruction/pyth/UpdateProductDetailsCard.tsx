@@ -26,7 +26,7 @@ export default function UpdateProductDetailsCard({
     function Content() {
         return (
             <Copyable text={attrsJSON}>
-                <pre className="d-inline-block e-text-left mb-0">{attrsJSON}</pre>
+                <pre className="d-inline-block e-text-left e-mb-0">{attrsJSON}</pre>
             </Copyable>
         );
     }

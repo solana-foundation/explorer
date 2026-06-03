@@ -195,7 +195,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         <h3 className="card-header-title">Token History</h3>
                     </CardHeader>
                     <CardBody ui="dashkit">
-                        <p className="text-muted text-center mb-0">
+                        <p className="text-muted text-center e-mb-0">
                             Click the button below to load token transaction history
                         </p>
                     </CardBody>
@@ -239,7 +239,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
             </CardHeader>
 
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive mb-0">
+            <div className="table-responsive e-mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>

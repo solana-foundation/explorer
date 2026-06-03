@@ -74,7 +74,7 @@ function EventCard({
     return (
         <div className="card mb-2">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">
+                <h3 className="card-header-title e-mb-0 d-flex align-items-center">
                     <span className="badge bg-info-soft me-2">
                         #{instructionIndex + 1}.{eventIndex + 1}
                     </span>
@@ -88,7 +88,7 @@ function EventCard({
                 </button>
             </CardHeader>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive mb-0">
+            <div className="table-responsive e-mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <tbody className="list">
                         {showRaw ? (

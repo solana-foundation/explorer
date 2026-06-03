@@ -81,7 +81,7 @@ export function UpgradeableProgramSection({
     return (
         <div className="card">
             <CardHeader ui="dashkit" className="e-gap-2">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">
+                <h3 className="card-header-title e-mb-0 d-flex align-items-center">
                     {programData === undefined && 'Closed '}Program Account
                 </h3>
                 <button
@@ -177,7 +177,7 @@ export function UpgradeableProgramSection({
 function MultisigBadge({ pubkey }: { pubkey: PublicKey }) {
     const programMultisigTabPath = useClusterPath({ pathname: `/address/${pubkey.toBase58()}/program-multisig` });
     return (
-        <h3 className="mb-0">
+        <h3 className="e-mb-0">
             <Link className="badge bg-success-soft rank" href={programMultisigTabPath}>
                 Program Multisig
             </Link>
@@ -211,7 +211,7 @@ export function UpgradeableProgramDataSection({
     return (
         <div className="card">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Program Executable Data Account</h3>
+                <h3 className="card-header-title e-mb-0 d-flex align-items-center">Program Executable Data Account</h3>
                 <button
                     className="btn btn-white btn-sm"
                     onClick={() => {
@@ -281,7 +281,7 @@ export function UpgradeableProgramBufferSection({
     return (
         <div className="card">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Program Deploy Buffer Account</h3>
+                <h3 className="card-header-title e-mb-0 d-flex align-items-center">Program Deploy Buffer Account</h3>
                 <button
                     className="btn btn-white btn-sm"
                     onClick={() => {

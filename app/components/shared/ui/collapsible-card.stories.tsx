@@ -23,7 +23,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const SampleContent = () => (
-    <div className="table-responsive mb-0">
+    <div className="table-responsive e-mb-0">
         <table className="table table-sm table-nowrap card-table">
             <thead>
                 <tr>

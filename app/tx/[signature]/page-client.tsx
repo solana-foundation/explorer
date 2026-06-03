@@ -304,7 +304,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                 <tr>
                     <td>Result</td>
                     <td className="text-lg-end">
-                        <h3 className="mb-0">
+                        <h3 className="e-mb-0">
                             <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
                         </h3>
                     </td>
@@ -314,7 +314,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                     <tr>
                         <td>Error</td>
                         <td className="text-lg-end">
-                            <h3 className="mb-0">
+                            <h3 className="e-mb-0">
                                 {errorLink !== undefined ? (
                                     <Link href={errorLink}>
                                         <span className={`badge bg-${statusClass}-soft`}>{errorReason}</span>

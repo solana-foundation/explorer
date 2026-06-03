@@ -247,7 +247,7 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
     return (
         <CollapsibleCard title="CU profiling" className="e-card">
             <CardBody ui="dashkit">
-                {Boolean(unitsConsumed) && <div className="mb-3">Total: {unitsConsumed?.toLocaleString()} CU</div>}
+                {Boolean(unitsConsumed) && <div className="e-mb-3">Total: {unitsConsumed?.toLocaleString()} CU</div>}
 
                 <div style={{ height: '32px', marginLeft: '-8px' }}>
                     <Bar data={chartData} options={chartOptions} />

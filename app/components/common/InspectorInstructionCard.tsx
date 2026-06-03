@@ -81,7 +81,7 @@ export function InspectorInstructionCard({
             }
         >
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive mb-0">
+            <div className="table-responsive e-mb-0">
                 <table className="table table-sm table-nowrap card-table [&>tbody>tr:first-child>td]:!e-border-t-0">
                     <tbody className="list">
                         <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />

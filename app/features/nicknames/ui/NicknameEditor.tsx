@@ -71,14 +71,14 @@ export function NicknameEditor({ address, onClose }: Props) {
                 onClick={e => e.stopPropagation()}
             >
                 <CardHeader ui="dashkit">
-                    <h5 className="card-header-title mb-0">Edit Nickname</h5>
+                    <h5 className="card-header-title e-mb-0">Edit Nickname</h5>
                 </CardHeader>
                 <CardBody ui="dashkit">
-                    <div className="mb-3">
+                    <div className="e-mb-3">
                         <label className="form-label small text-muted">Address</label>
                         <div className="font-monospace small e-truncate">{address}</div>
                     </div>
-                    <div className="mb-3">
+                    <div className="e-mb-3">
                         <label htmlFor="nickname-input" className="form-label">
                             Nickname
                         </label>

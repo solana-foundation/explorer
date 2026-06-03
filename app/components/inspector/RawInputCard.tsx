@@ -69,7 +69,7 @@ function TabInstructions() {
         {
             content: (
                 <div className="e-p-3">
-                    <div className="mb-3">
+                    <div className="e-mb-3">
                         <div className="e-underline mb-2">@solana/web3.js &lt; 2.0.0</div>
                         <div className="mb-2">
                             <div className="mb-1">Legacy Transaction:</div>

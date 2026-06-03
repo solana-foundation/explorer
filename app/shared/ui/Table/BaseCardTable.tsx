@@ -12,7 +12,7 @@ const wrapperVariants = cva([], {
     defaultVariants: { ui: 'tw' },
     variants: {
         ui: {
-            dashkit: 'table-responsive mb-0',
+            dashkit: 'table-responsive e-mb-0',
             tw: 'e-overflow-x-auto e-mb-0',
         },
     },

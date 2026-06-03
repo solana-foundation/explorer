@@ -31,7 +31,7 @@ export default function ClusterModalDeveloperSettings() {
                     <label className="form-check-label" htmlFor="cardToggle"></label>
                 </div>
             </div>
-            <p className="text-muted font-size-sm mt-3">
+            <p className="text-muted font-size-sm e-mt-3">
                 Enable this setting to easily connect to a custom cluster via the &ldquo;customUrl&rdquo; url param.
             </p>
         </>

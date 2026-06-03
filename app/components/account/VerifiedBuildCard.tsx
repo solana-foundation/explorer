@@ -72,7 +72,7 @@ export function BaseVerifiedBuildCard({
     return (
         <div className="card security-txt">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Verified Build</h3>
+                <h3 className="card-header-title e-mb-0 d-flex align-items-center">Verified Build</h3>
                 <small>{verificationMessage}</small>
             </CardHeader>
             <div className="alert mt-2 mb-2">
@@ -191,7 +191,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                                 <span />
                             </Copyable>
                             <pre
-                                className="e-text-left mb-0 font-monospace"
+                                className="e-text-left e-mb-0 font-monospace"
                                 style={{ overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}
                             >
                                 {value}

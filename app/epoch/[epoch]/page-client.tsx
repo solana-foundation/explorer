@@ -81,7 +81,7 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
         <>
             <div className="card">
                 <CardHeader ui="dashkit">
-                    <h3 className="card-header-title mb-0 d-flex align-items-center">Overview</h3>
+                    <h3 className="card-header-title e-mb-0 d-flex align-items-center">Overview</h3>
                 </CardHeader>
                 <TableCardBody>
                     <tr>

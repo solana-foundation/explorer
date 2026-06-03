@@ -123,7 +123,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
     return (
         <>
             <Link
-                className={cn(clusterButtonVariants({ active, status }), 'mb-3')}
+                className={cn(clusterButtonVariants({ active, status }), 'e-mb-3')}
                 href={{ query: { cluster: 'custom', ...(customUrl.length > 0 ? { customUrl } : null) } }}
             >
                 Custom RPC URL
@@ -143,7 +143,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                         }}
                     />
                     {saving ? (
-                        <div className="col-12 mt-2 mb-3" data-testid="save-cluster-form">
+                        <div className="col-12 mt-2 e-mb-3" data-testid="save-cluster-form">
                             <input
                                 type="text"
                                 className="form-control mb-2"
@@ -160,7 +160,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                                 </small>
                             )}
                             {saveError && (
-                                <div className="alert alert-danger mt-2 mb-0 e-py-1.5" data-testid="save-cluster-error">
+                                <div className="alert alert-danger mt-2 e-mb-0 e-py-1.5" data-testid="save-cluster-error">
                                     {saveError.message}
                                 </div>
                             )}
@@ -187,7 +187,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                         </div>
                     ) : !savedClusters.some(sc => sc.url === localUrl) ? (
                         <button
-                            className="btn btn-sm btn-white col-12 mt-2 mb-3"
+                            className="btn btn-sm btn-white col-12 mt-2 e-mb-3"
                             onClick={() => setSaving(true)}
                             data-testid="save-custom-cluster-btn"
                         >
@@ -221,7 +221,7 @@ function SavedClusterItem({
     const clusterUrl = `${pathname}?${nextQueryString}`;
 
     return (
-        <div className="e-relative col-12 mb-3" data-testid={`saved-cluster-${cluster.name}`}>
+        <div className="e-relative col-12 e-mb-3" data-testid={`saved-cluster-${cluster.name}`}>
             <Link className={cn(clusterButtonVariants({ active: isActive, status }), 'text-center')} href={clusterUrl}>
                 {cluster.name}
             </Link>
@@ -261,7 +261,7 @@ function SavedClustersSection({ status, savedClusters }: { status: ClusterStatus
     return (
         <div className="w-100" data-testid="saved-clusters-section">
             <hr />
-            <h3 className="text-center mb-3">Saved Clusters</h3>
+            <h3 className="text-center e-mb-3">Saved Clusters</h3>
             {savedClusters.map(sc => (
                 <SavedClusterItem
                     key={sc.name}
@@ -301,7 +301,7 @@ function ClusterToggle() {
                 return (
                     <Link
                         key={index}
-                        className={cn(clusterButtonVariants({ active, status }), 'mb-3')}
+                        className={cn(clusterButtonVariants({ active, status }), 'e-mb-3')}
                         href={clusterUrl}
                     >
                         {clusterName(net)}

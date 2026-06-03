@@ -27,19 +27,19 @@ export function VerifiedProgramBadge({
 
     if (cluster !== Cluster.MainnetBeta) {
         return (
-            <h3 className="mb-0">
+            <h3 className="e-mb-0">
                 <span className="badge bg-warning-soft rank">Verified Builds only available on Mainnet</span>
             </h3>
         );
     } else if (isLoading) {
         return (
-            <h3 className="mb-0">
+            <h3 className="e-mb-0">
                 <span className="badge">Loading...</span>
             </h3>
         );
     } else if (error) {
         return (
-            <h3 className="mb-0">
+            <h3 className="e-mb-0">
                 <span className="badge bg-warning-soft rank">Error fetching verified build information</span>
             </h3>
         );
@@ -56,7 +56,7 @@ export function VerifiedProgramBadge({
         }
 
         return (
-            <h3 className="mb-0">
+            <h3 className="e-mb-0">
                 <Link className={`c-pointer badge ${badgeClass} rank`} href={verifiedBuildTabPath}>
                     {badgeText}
                 </Link>

@@ -50,7 +50,7 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
             <div className="col-auto ms-2 d-flex align-items-center">
                 <ArtContent pubkey={address} data={data} />
             </div>
-            <div className="col mb-3 ms-0.5 mt-3">
+            <div className="col e-mb-3 ms-0.5 e-mt-3">
                 {<h6 className="header-pretitle ms-1">Metaplex NFT</h6>}
                 <div className="d-flex align-items-center">
                     <h2 className="header-title ms-1 align-items-center no-overflow-with-ellipsis">
@@ -63,7 +63,7 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
                     {metadata.symbol !== '' ? metadata.symbol : 'No Symbol was found'}
                 </h4>
                 <div className="mb-2 mt-2">{getSaleTypePill(metadata.primarySaleHappened)}</div>
-                <div className="mb-3 mt-2">{getIsMutablePill(metadata.isMutable)}</div>
+                <div className="e-mb-3 mt-2">{getIsMutablePill(metadata.isMutable)}</div>
                 <div className="btn-group">
                     <button
                         className="btn btn-dark btn-sm creators-dropdown-button-width"

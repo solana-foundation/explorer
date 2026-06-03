@@ -49,7 +49,7 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
     return (
         <div className="card security-txt">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">
+                <h3 className="card-header-title e-mb-0 d-flex align-items-center">
                     Upgrade Authority Multisig Information
                 </h3>
             </CardHeader>

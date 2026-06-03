@@ -32,7 +32,7 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
     return (
         <CollapsibleCard title="Address Table Lookup(s)">
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive mb-0">
+            <div className="table-responsive e-mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
