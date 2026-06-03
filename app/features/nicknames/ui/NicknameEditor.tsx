@@ -58,7 +58,7 @@ export function NicknameEditor({ address, onClose }: Props) {
 
     return (
         <div
-            className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+            className="e-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
             style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                 zIndex: 9999,

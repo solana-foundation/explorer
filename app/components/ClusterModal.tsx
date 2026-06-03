@@ -221,12 +221,12 @@ function SavedClusterItem({
     const clusterUrl = `${pathname}?${nextQueryString}`;
 
     return (
-        <div className="position-relative col-12 mb-3" data-testid={`saved-cluster-${cluster.name}`}>
+        <div className="e-relative col-12 mb-3" data-testid={`saved-cluster-${cluster.name}`}>
             <Link className={cn(clusterButtonVariants({ active: isActive, status }), 'text-center')} href={clusterUrl}>
                 {cluster.name}
             </Link>
             <button
-                className="btn btn-sm position-absolute e-right-1 e-top-1/2 -e-translate-y-1/2"
+                className="btn btn-sm e-absolute e-right-1 e-top-1/2 -e-translate-y-1/2"
                 onClick={e => {
                     e.stopPropagation();
                     onDelete(cluster.name);

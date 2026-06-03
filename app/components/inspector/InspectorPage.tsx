@@ -516,7 +516,7 @@ function OverviewCard({
                                 </span>
                             </div>
                         </td>
-                        <td className="text-end">
+                        <td className="e-text-right">
                             {message.staticAccountKeys.length === 0 ? (
                                 'No Fee Payer'
                             ) : (

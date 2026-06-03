@@ -42,7 +42,7 @@ export function Navbar({ children }: INavbarProps) {
                 </div>
 
                 <div className={cn('collapse navbar-collapse ms-auto', navOpened && 'show', 'flex-shrink-0')}>
-                    <ul className="navbar-nav me-auto">
+                    <ul className="navbar-nav e-mr-auto">
                         <li className="nav-item">
                             <Link
                                 className={cn('nav-link', selectedLayoutSegment === 'feature-gates' && 'active')}
