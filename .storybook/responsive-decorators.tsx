@@ -6,23 +6,22 @@
 import { Connection } from '@solana/web3.js';
 import type { Decorator } from '@storybook/react';
 import React from 'react';
-import { INITIAL_VIEWPORTS } from 'storybook/viewport';
+import { INITIAL_VIEWPORTS, type InitialViewportKeys } from 'storybook/viewport';
 
-const connectionProto = Connection.prototype as unknown as Record<string, unknown>;
-const stubbedNull = async () => null;
+const stubbedUndefined = async () => undefined;
 const stubbedNumber = async () => 0;
 const stubbedArray = async () => [];
 const rpcMethodStubs: Record<string, unknown> = {
-    getAccountInfo: stubbedNull,
+    getAccountInfo: stubbedUndefined,
     getBalance: stubbedNumber,
     getBlockHeight: stubbedNumber,
     getMultipleAccountsInfo: stubbedArray,
-    getParsedAccountInfo: stubbedNull,
+    getParsedAccountInfo: stubbedUndefined,
     getParsedTokenAccountsByOwner: stubbedArray,
-    getParsedTransaction: stubbedNull,
+    getParsedTransaction: stubbedUndefined,
     getSignaturesForAddress: stubbedArray,
     getSlot: stubbedNumber,
-    getTransaction: stubbedNull,
+    getTransaction: stubbedUndefined,
 };
 
 /**
@@ -31,11 +30,11 @@ const rpcMethodStubs: Record<string, unknown> = {
  * and stays active for the session.
  */
 export const withMockRpc: Decorator = Story => {
-    for (const [method, stub] of Object.entries(rpcMethodStubs)) {
-        connectionProto[method] = stub;
-    }
+    Object.assign(Connection.prototype, rpcMethodStubs);
     return <Story />;
 };
+
+const isInitialViewportKey = (key: string): key is InitialViewportKeys => key in INITIAL_VIEWPORTS;
 
 /**
  * Reads the viewport global (set via `globals: { viewport: { value: 'iphonex' } }`) and constrains
@@ -47,9 +46,7 @@ export const withViewportFromGlobal: Decorator = (Story, context) => {
     const viewport = context.globals.viewport;
     const key = typeof viewport === 'object' ? viewport?.value : viewport;
     const isRotated = typeof viewport === 'object' ? viewport?.isRotated : false;
-    const def = key
-        ? (INITIAL_VIEWPORTS as Record<string, { styles: { width: string; height: string } }>)[key]
-        : undefined;
+    const def = key && isInitialViewportKey(key) ? INITIAL_VIEWPORTS[key] : undefined;
     if (!def) return <Story />;
     const width = isRotated ? def.styles.height : def.styles.width;
     return (
