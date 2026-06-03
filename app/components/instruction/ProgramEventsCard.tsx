@@ -97,7 +97,7 @@ function EventCard({
                                     <td>
                                         Event Data <span className="text-muted">(Hex)</span>
                                     </td>
-                                    <td className="text-lg-end">
+                                    <td className="e-text-right">
                                         <HexData raw={fromBase64(rawEventData)} />
                                     </td>
                                 </tr>
@@ -109,7 +109,7 @@ function EventCard({
                                         <tr className="table-sep">
                                             <td>Field Name</td>
                                             <td>Type</td>
-                                            <td className="text-lg-end">Value</td>
+                                            <td className="e-text-right">Value</td>
                                         </tr>
                                         {mapIxArgsToRows(event.data, { ...eventDef, args: fields } as any, program.idl)}
                                     </>

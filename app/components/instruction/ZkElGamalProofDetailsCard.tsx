@@ -62,14 +62,14 @@ export function ZkElGamalProofDetailsCard({
         >
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={ix.programId} alignRight link />
                 </td>
             </tr>
             {ix.keys.map((meta, i) => (
                 <tr key={i}>
                     <td>{labelFor(i, isClose, accountCount)}</td>
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         <Address pubkey={meta.pubkey} alignRight link />
                     </td>
                 </tr>
@@ -77,7 +77,7 @@ export function ZkElGamalProofDetailsCard({
             {!isClose && proofBytes > 0 && (
                 <tr>
                     <td>Proof size</td>
-                    <td className="text-lg-end font-monospace">{proofBytes} bytes</td>
+                    <td className="e-text-right font-monospace">{proofBytes} bytes</td>
                 </tr>
             )}
         </InstructionCardComponent>

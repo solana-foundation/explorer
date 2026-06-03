@@ -34,15 +34,15 @@ const SampleContent = () => (
             <tbody className="list">
                 <tr>
                     <td>Account #1</td>
-                    <td className="text-lg-end">Gzf3…k9Pq</td>
+                    <td className="e-text-right">Gzf3…k9Pq</td>
                 </tr>
                 <tr>
                     <td>Account #2</td>
-                    <td className="text-lg-end">5xRt…mN7v</td>
+                    <td className="e-text-right">5xRt…mN7v</td>
                 </tr>
                 <tr>
                     <td>Account #3</td>
-                    <td className="text-lg-end">BqWu…dL2j</td>
+                    <td className="e-text-right">BqWu…dL2j</td>
                 </tr>
             </tbody>
         </table>

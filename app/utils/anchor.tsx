@@ -582,7 +582,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
             <tr key={keySuffix ? `${key}-${keySuffix}` : key}>
                 <td>{camelToTitleCase(key)}</td>
                 <td></td>
-                <td className="text-lg-end">???</td>
+                <td className="e-text-right">???</td>
             </tr>
         );
     }
@@ -616,7 +616,7 @@ function SimpleRow({
                 </div>
             </td>
             <td>{typeDisplayName(type)}</td>
-            <td className="text-lg-end">{children}</td>
+            <td className="e-text-right">{children}</td>
         </tr>
     );
 }
@@ -643,7 +643,7 @@ export function ExpandableRow({
                     </div>
                 </td>
                 <td>{fieldType}</td>
-                <td className="text-lg-end" onClick={() => setExpanded(current => !current)}>
+                <td className="e-text-right" onClick={() => setExpanded(current => !current)}>
                     <div className="e-cursor-pointer">
                         {expanded ? (
                             <>

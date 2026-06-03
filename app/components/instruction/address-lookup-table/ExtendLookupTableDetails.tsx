@@ -19,19 +19,19 @@ export function ExtendLookupTableDetailsCard(props: InstructionDetailsProps & { 
         >
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={AddressLookupTableProgram.programId} alignRight link />
                 </td>
             </tr>
             <tr>
                 <td>Lookup Table</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.lookupTableAccount} alignRight link />
                 </td>
             </tr>
             <tr>
                 <td>Lookup Table Authority</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.lookupTableAuthority} alignRight link />
                 </td>
             </tr>
@@ -43,7 +43,7 @@ export function ExtendLookupTableDetailsCard(props: InstructionDetailsProps & { 
                             {info.newAddresses.map((address, index) => (
                                 <tr key={address.toString()}>
                                     <td className="w-1 font-monospace">{index}</td>
-                                    <td className="text-lg-end">
+                                    <td className="e-text-right">
                                         <Address pubkey={new PublicKey(address)} alignRight link />
                                     </td>
                                 </tr>

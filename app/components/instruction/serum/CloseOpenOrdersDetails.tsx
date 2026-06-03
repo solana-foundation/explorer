@@ -18,35 +18,35 @@ export function CloseOpenOrdersDetailsCard(props: SerumIxDetailsProps<CloseOpenO
         >
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.programId} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Open Orders</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.accounts.openOrders} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Open Orders Owner</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.accounts.openOrdersOwner} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Rent Receiver</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.accounts.rentReceiver} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Market</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
                 </td>
             </tr>

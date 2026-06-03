@@ -31,43 +31,43 @@ export default function UpdatePriceDetailsCard({
         >
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={ix.programId} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Publisher</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.publisherPubkey} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Price Account</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.pricePubkey} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Status</td>
-                <td className="text-lg-end">{TradingStatus[info.status]}</td>
+                <td className="e-text-right">{TradingStatus[info.status]}</td>
             </tr>
 
             <tr>
                 <td>Price</td>
-                <td className="text-lg-end">{info.price}</td>
+                <td className="e-text-right">{info.price}</td>
             </tr>
 
             <tr>
                 <td>Conf</td>
-                <td className="text-lg-end">{info.conf}</td>
+                <td className="e-text-right">{info.conf}</td>
             </tr>
 
             <tr>
                 <td>Publish Slot</td>
-                <td className="text-lg-end">{info.publishSlot}</td>
+                <td className="e-text-right">{info.publishSlot}</td>
             </tr>
         </InstructionCard>
     );

@@ -38,7 +38,7 @@ export function GenericSpotMngoDetailsCard(props: {
             {mangoSpotMarketConfig !== undefined && (
                 <tr>
                     <td>Spot market</td>
-                    <td className="text-lg-end">{mangoSpotMarketConfig.name}</td>
+                    <td className="e-text-right">{mangoSpotMarketConfig.name}</td>
                 </tr>
             )}
 

@@ -84,7 +84,7 @@ function renderDetails<T extends object>(props: DetailsProps, parsed: ParsedInfo
                 <td>
                     {camelToTitleCase(key)} {key === 'bytes' && <span className="text-muted">(Base 64)</span>}
                 </td>
-                <td className="text-lg-end">{value}</td>
+                <td className="e-text-right">{value}</td>
             </tr>,
         );
     }
@@ -93,7 +93,7 @@ function renderDetails<T extends object>(props: DetailsProps, parsed: ParsedInfo
         <InstructionCard {...props} title={`BPF Upgradeable Loader: ${camelToTitleCase(parsed.type)}`}>
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={props.ix.programId} alignRight link />
                 </td>
             </tr>

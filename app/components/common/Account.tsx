@@ -30,7 +30,7 @@ export function AccountAddressRow({ account }: AccountProps) {
     return (
         <tr>
             <td>Address</td>
-            <td className="text-lg-end">
+            <td className="e-text-right">
                 <Address pubkey={account.pubkey} alignRight raw />
             </td>
         </tr>
@@ -42,7 +42,7 @@ export function AccountBalanceRow({ account }: AccountProps) {
     return (
         <tr>
             <td>Balance (SOL)</td>
-            <td className="text-lg-end e-uppercase">
+            <td className="e-text-right e-uppercase">
                 <SolBalance lamports={lamports} />
             </td>
         </tr>

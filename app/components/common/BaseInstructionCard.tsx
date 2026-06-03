@@ -96,7 +96,7 @@ export function BaseInstructionCard({
                             <>
                                 <tr>
                                     <td>Program</td>
-                                    <td className="text-lg-end">
+                                    <td className="e-text-right">
                                         <Address pubkey={ix.programId} alignRight link />
                                     </td>
                                 </tr>

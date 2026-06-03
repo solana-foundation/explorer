@@ -28,19 +28,19 @@ export function CompressedNftCard({ account }: { account: Account }) {
         <AccountCard title="Overview" account={account}>
             <tr>
                 <td>Address</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
                 </td>
             </tr>
             <tr>
                 <td>Owner</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={new PublicKey(compressedNft.ownership.owner)} alignRight link />
                 </td>
             </tr>
             <tr>
                 <td>Verified Collection Address</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {collectionGroup ? (
                         <Address pubkey={new PublicKey(collectionGroup.group_value)} alignRight link />
                     ) : (
@@ -50,13 +50,13 @@ export function CompressedNftCard({ account }: { account: Account }) {
             </tr>
             <tr>
                 <td>Update Authority</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {updateAuthority ? <Address pubkey={new PublicKey(updateAuthority)} alignRight link /> : 'None'}
                 </td>
             </tr>
             <tr>
                 <td>Website</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <a rel="noopener noreferrer" target="_blank" href={compressedNft.content.links.external_url}>
                         {compressedNft.content.links.external_url}
                         <ExternalLink className="align-text-top e-ml-1.5" size={13} />
@@ -65,7 +65,7 @@ export function CompressedNftCard({ account }: { account: Account }) {
             </tr>
             <tr>
                 <td>Seller Fee</td>
-                <td className="text-lg-end">{`${compressedNft.royalty.basis_points / 100}%`}</td>
+                <td className="e-text-right">{`${compressedNft.royalty.basis_points / 100}%`}</td>
             </tr>
         </AccountCard>
     );

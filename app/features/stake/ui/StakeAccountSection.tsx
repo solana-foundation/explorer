@@ -93,26 +93,26 @@ function OverviewCard({
         >
             <tr>
                 <td>Address</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <KitAddress address={toKitAddress(account.pubkey)} alignRight raw />
                 </td>
             </tr>
             <tr>
                 <td>Balance (SOL)</td>
-                <td className="text-lg-end e-uppercase">
+                <td className="e-text-right e-uppercase">
                     <SolBalance lamports={account.lamports} />
                 </td>
             </tr>
             <tr>
                 <td>Rent Reserve (SOL)</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <SolBalance lamports={stakeAccount.meta.rentExemptReserve} />
                 </td>
             </tr>
             {status !== undefined && (
                 <tr>
                     <td>Status</td>
-                    <td className="text-lg-end">{status}</td>
+                    <td className="e-text-right">{status}</td>
                 </tr>
             )}
         </AccountCard>
@@ -146,14 +146,14 @@ function DelegationCard({
             <TableCardBody>
                 <tr>
                     <td>Status</td>
-                    <td className="text-lg-end">{activation ? `Delegated (${activation.state})` : 'Delegated'}</td>
+                    <td className="e-text-right">{activation ? `Delegated (${activation.state})` : 'Delegated'}</td>
                 </tr>
 
                 {stake && (
                     <>
                         <tr>
                             <td>Delegated Stake (SOL)</td>
-                            <td className="text-lg-end">
+                            <td className="e-text-right">
                                 <SolBalance lamports={stake.delegation.stake} />
                             </td>
                         </tr>
@@ -162,14 +162,14 @@ function DelegationCard({
                             <>
                                 <tr>
                                     <td>Active Stake (SOL)</td>
-                                    <td className="text-lg-end">
+                                    <td className="e-text-right">
                                         <SolBalance lamports={activation.active} />
                                     </td>
                                 </tr>
 
                                 <tr>
                                     <td>Inactive Stake (SOL)</td>
-                                    <td className="text-lg-end">
+                                    <td className="e-text-right">
                                         <SolBalance lamports={activation.inactive} />
                                     </td>
                                 </tr>
@@ -179,7 +179,7 @@ function DelegationCard({
                         {voterPubkey && (
                             <tr>
                                 <td>Delegated Vote Address</td>
-                                <td className="text-lg-end">
+                                <td className="e-text-right">
                                     <KitAddress address={voterPubkey} alignRight link />
                                 </td>
                             </tr>
@@ -187,13 +187,13 @@ function DelegationCard({
 
                         <tr>
                             <td>Activation Epoch</td>
-                            <td className="text-lg-end">
+                            <td className="e-text-right">
                                 {activationEpoch !== undefined ? <Epoch epoch={activationEpoch} link /> : '-'}
                             </td>
                         </tr>
                         <tr>
                             <td>Deactivation Epoch</td>
-                            <td className="text-lg-end">
+                            <td className="e-text-right">
                                 {deactivationEpoch !== undefined ? <Epoch epoch={deactivationEpoch} link /> : '-'}
                             </td>
                         </tr>
@@ -214,14 +214,14 @@ function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
             <TableCardBody>
                 <tr>
                     <td>Stake Authority Address</td>
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         <KitAddress address={meta.authorized.staker} alignRight link />
                     </td>
                 </tr>
 
                 <tr>
                     <td>Withdraw Authority Address</td>
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         <KitAddress address={meta.authorized.withdrawer} alignRight link />
                     </td>
                 </tr>
@@ -229,7 +229,7 @@ function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
                 {hasLockup && (
                     <tr>
                         <td>Lockup Authority Address</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <KitAddress address={meta.lockup.custodian} alignRight link />
                         </td>
                     </tr>

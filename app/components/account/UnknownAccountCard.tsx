@@ -20,19 +20,19 @@ export function UnknownAccountCard({ account }: { account: Account }) {
         <AccountCard title="Overview" account={account}>
             <tr>
                 <td>Address</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
                 </td>
             </tr>
             {label && (
                 <tr>
                     <td>Address Label</td>
-                    <td className="text-lg-end">{label}</td>
+                    <td className="e-text-right">{label}</td>
                 </tr>
             )}
             <tr>
                 <td>Balance (SOL)</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {account.lamports === 0 ? (
                         <AccountNofFound account={account} />
                     ) : (
@@ -44,20 +44,20 @@ export function UnknownAccountCard({ account }: { account: Account }) {
             {account.space !== undefined && (
                 <tr>
                     <td>Allocated Data Size</td>
-                    <td className="text-lg-end">{account.space} byte(s)</td>
+                    <td className="e-text-right">{account.space} byte(s)</td>
                 </tr>
             )}
 
             <tr>
                 <td>Assigned Program Id</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={account.owner} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Executable</td>
-                <td className="text-lg-end">{account.executable ? 'Yes' : 'No'}</td>
+                <td className="e-text-right">{account.executable ? 'Yes' : 'No'}</td>
             </tr>
         </AccountCard>
     );

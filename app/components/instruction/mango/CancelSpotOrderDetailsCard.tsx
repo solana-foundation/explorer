@@ -36,7 +36,7 @@ export function CancelSpotOrderDetailsCard(props: {
             {mangoSpotMarketConfig !== undefined && (
                 <tr>
                     <td>Spot market</td>
-                    <td className="text-lg-end">{mangoSpotMarketConfig.name}</td>
+                    <td className="e-text-right">{mangoSpotMarketConfig.name}</td>
                 </tr>
             )}
 
@@ -49,7 +49,7 @@ export function CancelSpotOrderDetailsCard(props: {
 
             <tr>
                 <td>Order Id</td>
-                <td className="text-lg-end">{info.orderId}</td>
+                <td className="e-text-right">{info.orderId}</td>
             </tr>
         </InstructionCard>
     );

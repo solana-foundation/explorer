@@ -26,7 +26,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
                     Authorized Voter
                     {voteAccount.info.authorizedVoters.length > 1 ? 's' : ''}
                 </td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {voteAccount.info.authorizedVoters.map(voter => {
                         return (
                             <Address
@@ -43,26 +43,26 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
 
             <tr>
                 <td>Authorized Withdrawer</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={voteAccount.info.authorizedWithdrawer} alignRight raw link />
                 </td>
             </tr>
 
             <tr>
                 <td>Last Timestamp</td>
-                <td className="text-lg-end font-monospace">
+                <td className="e-text-right font-monospace">
                     {displayTimestamp(voteAccount.info.lastTimestamp.timestamp * 1000)}
                 </td>
             </tr>
 
             <tr>
                 <td>Commission</td>
-                <td className="text-lg-end">{`${voteAccount.info.commission}%`}</td>
+                <td className="e-text-right">{`${voteAccount.info.commission}%`}</td>
             </tr>
 
             <tr>
                 <td>Root Slot</td>
-                <td className="text-lg-end">{rootSlot !== null ? <Slot slot={rootSlot} link /> : 'N/A'}</td>
+                <td className="e-text-right">{rootSlot !== null ? <Slot slot={rootSlot} link /> : 'N/A'}</td>
             </tr>
         </AccountCard>
     );

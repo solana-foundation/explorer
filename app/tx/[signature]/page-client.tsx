@@ -296,14 +296,14 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
             <TableCardBody>
                 <tr>
                     <td>Signature</td>
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         <Signature signature={signature} alignRight />
                     </td>
                 </tr>
 
                 <tr>
                     <td>Result</td>
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         <h3 className="e-mb-0">
                             <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
                         </h3>
@@ -313,7 +313,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                 {errorReason !== undefined && (
                     <tr>
                         <td>Error</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <h3 className="e-mb-0">
                                 {errorLink !== undefined ? (
                                     <Link href={errorLink}>
@@ -329,7 +329,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
 
                 <tr>
                     <td>Timestamp</td>
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         {info.timestamp !== 'unavailable' ? (
                             <span className="font-monospace">{displayTimestamp(info.timestamp * 1000)}</span>
                         ) : (
@@ -342,17 +342,17 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
 
                 <tr>
                     <td>Confirmation Status</td>
-                    <td className="text-lg-end e-uppercase">{info.confirmationStatus || 'Unknown'}</td>
+                    <td className="e-text-right e-uppercase">{info.confirmationStatus || 'Unknown'}</td>
                 </tr>
 
                 <tr>
                     <td>Confirmations</td>
-                    <td className="text-lg-end e-uppercase">{info.confirmations}</td>
+                    <td className="e-text-right e-uppercase">{info.confirmations}</td>
                 </tr>
 
                 <tr>
                     <td>Slot</td>
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         <Slot slot={info.slot} link />
                     </td>
                 </tr>
@@ -368,14 +368,14 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                                 </InfoTooltip>
                             )}
                         </td>
-                        <td className="text-lg-end">{blockhash}</td>
+                        <td className="e-text-right">{blockhash}</td>
                     </tr>
                 )}
 
                 {fee !== undefined && (
                     <tr>
                         <td>Fee (SOL)</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <SolBalance lamports={fee} />
                         </td>
                     </tr>
@@ -384,28 +384,28 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                 {computeUnitsConsumed !== undefined && (
                     <tr>
                         <td>Compute units consumed</td>
-                        <td className="text-lg-end">{computeUnitsConsumed.toLocaleString('en-US')}</td>
+                        <td className="e-text-right">{computeUnitsConsumed.toLocaleString('en-US')}</td>
                     </tr>
                 )}
 
                 {costUnits !== undefined && (
                     <tr>
                         <td>Transaction cost</td>
-                        <td className="text-lg-end">{costUnits.toLocaleString('en-US')}</td>
+                        <td className="e-text-right">{costUnits.toLocaleString('en-US')}</td>
                     </tr>
                 )}
 
                 {reservedCUs !== undefined && (
                     <tr>
                         <td>Reserved CUs</td>
-                        <td className="text-lg-end">{reservedCUs.toLocaleString('en-US')}</td>
+                        <td className="e-text-right">{reservedCUs.toLocaleString('en-US')}</td>
                     </tr>
                 )}
 
                 {version !== undefined && (
                     <tr>
                         <td>Transaction Version</td>
-                        <td className="text-lg-end e-uppercase">{version}</td>
+                        <td className="e-text-right e-uppercase">{version}</td>
                     </tr>
                 )}
             </TableCardBody>

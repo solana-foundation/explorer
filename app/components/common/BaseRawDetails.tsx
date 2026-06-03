@@ -37,7 +37,7 @@ function BaseTransactionInstructionRawDetails({ ix }: { ix: TransactionInstructi
                         {isWritable && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
                         {isSigner && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
                     </td>
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         <Address pubkey={pubkey} alignRight link />
                     </td>
                 </tr>
@@ -47,7 +47,7 @@ function BaseTransactionInstructionRawDetails({ ix }: { ix: TransactionInstructi
                 <td>
                     Instruction Data <span className="text-muted">(Hex)</span>
                 </td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <HexData raw={ix.data} />
                 </td>
             </tr>

@@ -77,15 +77,15 @@ export function DasCompressionInfoCard({
                 </tr>
                 <tr>
                     <td>Proof Size {getProofSizePill(proofSize)}</td>
-                    <td className="text-lg-end">{proofSize}</td>
+                    <td className="e-text-right">{proofSize}</td>
                 </tr>
                 <tr>
                     <td>Leaf Number</td>
-                    <td className="text-lg-end">{compressedInfo.leaf_id}</td>
+                    <td className="e-text-right">{compressedInfo.leaf_id}</td>
                 </tr>
                 <tr>
                     <td>Sequence Number of Last Update</td>
-                    <td className="text-lg-end">{compressedInfo.seq}</td>
+                    <td className="e-text-right">{compressedInfo.seq}</td>
                 </tr>
                 <tr>
                     <td>Compressed Nft Hash</td>

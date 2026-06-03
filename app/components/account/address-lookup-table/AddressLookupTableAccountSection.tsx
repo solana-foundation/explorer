@@ -41,25 +41,25 @@ export function AddressLookupTableAccountSection(
         >
             <tr>
                 <td>Address</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
                 </td>
             </tr>
             <tr>
                 <td>Balance (SOL)</td>
-                <td className="text-lg-end e-uppercase">
+                <td className="e-text-right e-uppercase">
                     <SolBalance lamports={account.lamports} />
                 </td>
             </tr>
             <tr>
                 <td>Activation Status</td>
-                <td className="text-lg-end e-uppercase">
+                <td className="e-text-right e-uppercase">
                     {lookupTableAccount.isActive() ? 'Active' : 'Deactivated'}
                 </td>
             </tr>
             <tr>
                 <td>Last Extended Slot</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {lookupTableAccount.state.lastExtendedSlot === 0 ? (
                         'None (Empty)'
                     ) : (
@@ -69,7 +69,7 @@ export function AddressLookupTableAccountSection(
             </tr>
             <tr>
                 <td>Authority</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {lookupTableAccount.state.authority === undefined ? (
                         'None (Frozen)'
                     ) : (

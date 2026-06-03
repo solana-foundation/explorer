@@ -6,7 +6,7 @@ import { isValidLink, parseCodeValue } from './utils';
 
 export function CodeCell({ value, alignRight = true }: { value: string; alignRight: boolean }) {
     return (
-        <td className={classNames({ 'text-lg-end': alignRight })}>
+        <td className={classNames({ 'e-text-right': alignRight })}>
             <RenderCode value={value} />
         </td>
     );
@@ -92,14 +92,14 @@ export function RenderExternalLink({ url }: { url: string }) {
 
 export function ExternalLinkCell({ url }: { url: string }) {
     return (
-        <td className="text-lg-end">
+        <td className="e-text-right">
             <RenderExternalLink url={url} />
         </td>
     );
 }
 
 export function StringCell({ value }: { value: string }) {
-    return <td className="text-lg-end font-monospace">{value}</td>;
+    return <td className="e-text-right font-monospace">{value}</td>;
 }
 
 export function RenderCode({ value }: { value: any }) {

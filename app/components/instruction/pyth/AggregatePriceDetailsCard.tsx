@@ -31,21 +31,21 @@ export default function AggregatePriceDetailsCard({
         >
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={ix.programId} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Funding Account</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.fundingPubkey} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Price Account</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.pricePubkey} alignRight link />
                 </td>
             </tr>

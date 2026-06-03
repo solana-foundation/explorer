@@ -163,7 +163,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
     switch (type) {
         case DisplayType.Boolean:
             return (
-                <td className={'text-lg-end font-monospace'}>
+                <td className={'e-text-right font-monospace'}>
                     <span className={cn('badge', `bg-${value ? 'success' : 'warning'}-soft`)}>{new String(value)}</span>
                 </td>
             );
@@ -172,19 +172,19 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 const badgeClass = value === VerificationStatus.Verified ? 'bg-success-soft' : 'bg-warning-soft';
                 const badgeValue = value === VerificationStatus.Verified ? 'true' : 'false';
                 return (
-                    <td className="text-lg-end font-monospace">
+                    <td className="e-text-right font-monospace">
                         <span className={`badge ${badgeClass}`}>{badgeValue}</span>
                     </td>
                 );
             }
             return (
-                <td className="text-lg-end font-monospace" style={{ whiteSpace: 'pre' }}>
+                <td className="e-text-right font-monospace" style={{ whiteSpace: 'pre' }}>
                     {value && (value as string).length > 1 ? value : '-'}
                 </td>
             );
         case DisplayType.LongString:
             return (
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {value && (value as string).length > 1 ? (
                         <div className="e-flex e-items-center e-justify-end">
                             <Copyable text={value as string}>
@@ -205,7 +205,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
         case DisplayType.URL:
             if (isValidLink(value as string)) {
                 return (
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         <span className="font-monospace">
                             <a rel="noopener noreferrer" target="_blank" href={value as string}>
                                 {value}
@@ -216,19 +216,19 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 );
             }
             return (
-                <td className="text-lg-end font-monospace">
+                <td className="e-text-right font-monospace">
                     {value && (value as string).length > 1 ? (value as string).trim() : '-'}
                 </td>
             );
         case DisplayType.Date:
             return (
-                <td className="text-lg-end font-monospace">
+                <td className="e-text-right font-monospace">
                     {value && (value as string).length > 1 ? new Date(value as string).toUTCString() : '-'}
                 </td>
             );
         case DisplayType.PublicKey:
             return (
-                <td className="text-lg-end font-monospace">
+                <td className="e-text-right font-monospace">
                     <Address pubkey={new PublicKey(value as string)} link alignRight />
                 </td>
             );

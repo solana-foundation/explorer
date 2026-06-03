@@ -98,11 +98,11 @@ function LookupRow({
 
     return (
         <tr>
-            <td className="text-lg-end">
+            <td className="e-text-right">
                 <Address pubkey={lookupTableKey} link />
             </td>
-            <td className="text-lg-end">{lookupTableIndex}</td>
-            <td className="text-lg-end">{resolvedKeyComponent}</td>
+            <td className="e-text-right">{lookupTableIndex}</td>
+            <td className="e-text-right">{resolvedKeyComponent}</td>
             <td>{!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}</td>
         </tr>
     );

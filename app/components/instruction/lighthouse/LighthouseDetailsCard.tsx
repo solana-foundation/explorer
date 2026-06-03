@@ -345,13 +345,13 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
         <>
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end" colSpan={2}>
+                <td className="e-text-right" colSpan={2}>
                     <Address pubkey={programId} alignRight link raw overrideText={programName} />
                 </td>
             </tr>
             <tr className="table-sep">
                 <td>Account Name</td>
-                <td className="text-lg-end" colSpan={2}>
+                <td className="e-text-right" colSpan={2}>
                     Address
                 </td>
             </tr>
@@ -375,7 +375,7 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
                                     <span className="badge bg-info-soft e-mr-[3px]">Signer</span>
                                 ))}
                         </td>
-                        <td className="text-lg-end" colSpan={2}>
+                        <td className="e-text-right" colSpan={2}>
                             <Address pubkey={new PublicKey(address)} alignRight link />
                         </td>
                     </tr>
@@ -387,7 +387,7 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
                     <tr className="table-sep">
                         <td>Argument Name</td>
                         <td>Type</td>
-                        <td className="text-lg-end">Value</td>
+                        <td className="e-text-right">Value</td>
                     </tr>
                     {mapCodamaIxArgsToRows(parsedIx.data)}
                 </>

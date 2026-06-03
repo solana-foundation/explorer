@@ -149,7 +149,7 @@ function AccountFromLookupTableRow({
                     </span>
                 </div>
             </td>
-            <td className="text-lg-end">
+            <td className="e-text-right">
                 <AddressFromLookupTableWithContext
                     lookupTableKey={lookupTableKey}
                     lookupTableIndex={lookupTableIndex}
@@ -194,7 +194,7 @@ function AccountRow({
                     </span>
                 </div>
             </td>
-            <td className="text-lg-end">
+            <td className="e-text-right">
                 <AddressWithContext pubkey={publicKey} />
             </td>
         </tr>

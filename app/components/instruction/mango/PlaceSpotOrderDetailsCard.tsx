@@ -70,7 +70,7 @@ export function PlaceSpotOrderDetailsCard(props: {
             {mangoSpotMarketConfig !== undefined && (
                 <tr>
                     <td>Spot market</td>
-                    <td className="text-lg-end">{mangoSpotMarketConfig.name}</td>
+                    <td className="e-text-right">{mangoSpotMarketConfig.name}</td>
                 </tr>
             )}
 
@@ -83,33 +83,33 @@ export function PlaceSpotOrderDetailsCard(props: {
 
             <tr>
                 <td>Order type</td>
-                <td className="text-lg-end">{info.orderType}</td>
+                <td className="e-text-right">{info.orderType}</td>
             </tr>
 
             {info.clientId !== '0' && (
                 <tr>
                     <td>Client Id</td>
-                    <td className="text-lg-end">{info.clientId}</td>
+                    <td className="e-text-right">{info.clientId}</td>
                 </tr>
             )}
 
             <tr>
                 <td>Side</td>
-                <td className="text-lg-end">{info.side}</td>
+                <td className="e-text-right">{info.side}</td>
             </tr>
 
             {orderLotDetails !== null && (
                 <tr>
                     <td>Limit price</td>
                     {/* todo fix price */}
-                    <td className="text-lg-end">{orderLotDetails?.price} USDC</td>
+                    <td className="e-text-right">{orderLotDetails?.price} USDC</td>
                 </tr>
             )}
 
             {orderLotDetails !== null && (
                 <tr>
                     <td>Size</td>
-                    <td className="text-lg-end">{orderLotDetails?.size}</td>
+                    <td className="e-text-right">{orderLotDetails?.size}</td>
                 </tr>
             )}
         </InstructionCard>

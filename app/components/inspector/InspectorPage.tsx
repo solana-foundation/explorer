@@ -485,7 +485,7 @@ function OverviewCard({
                 <TableCardBody>
                     <tr>
                         <td>Serialized Size</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <div className="e-flex e-items-end e-flex-col">
                                 {size} bytes
                                 <span className={size <= PACKET_DATA_SIZE ? 'text-muted' : 'text-warning'}>
@@ -496,7 +496,7 @@ function OverviewCard({
                     </tr>
                     <tr>
                         <td>Fees</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <div className="e-flex e-items-end e-flex-col">
                                 <SolBalance lamports={fee} />
                                 <span className="text-muted">

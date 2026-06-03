@@ -101,7 +101,7 @@ function displayFallbackValue(value: any) {
 
 function RenderList({ entryKey, items }: { entryKey: string; items: any[] }) {
     return (
-        <ul className="text-lg-end security-txt-list e-list-none e-pl-0 [&.security-txt-list]:e-text-left">
+        <ul className="e-text-right security-txt-list e-list-none e-pl-0 [&.security-txt-list]:e-text-left">
             {items.map((value, index) => {
                 const elementKey = `${entryKey}-${index}`;
                 if (!value) {

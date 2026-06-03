@@ -27,19 +27,19 @@ export function FreezeLookupTableDetailsCard(props: DetailsProps & { info: Freez
         >
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={AddressLookupTableProgram.programId} alignRight link />
                 </td>
             </tr>
             <tr>
                 <td>Lookup Table</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.lookupTableAccount} alignRight link />
                 </td>
             </tr>
             <tr>
                 <td>Lookup Table Authority</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.lookupTableAuthority} alignRight link />
                 </td>
             </tr>
