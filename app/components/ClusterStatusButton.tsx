@@ -25,7 +25,7 @@ export const ClusterStatusButton = () => {
     const statusName = cluster !== Cluster.Custom ? `${name}` : getCustomUrlClusterName(customUrl);
 
     const btnClasses = (variant: string) => {
-        return `btn d-block btn-${variant}`;
+        return `btn e-block btn-${variant}`;
     };
 
     const spinnerClasses = 'align-text-top spinner-grow spinner-grow-sm e-mr-1.5';

@@ -35,7 +35,7 @@ export function Navbar({ children }: INavbarProps) {
                 </button>
 
                 <div
-                    className="navbar-children e-flex e-items-center e-grow e-h-full d-none xl:e-block"
+                    className="navbar-children e-flex e-items-center e-grow e-h-full e-hidden xl:e-block"
                     style={{ minWidth: 0 }}
                 >
                     {children}
@@ -85,7 +85,7 @@ export function Navbar({ children }: INavbarProps) {
                     </ul>
                 </div>
 
-                <div className="d-none d-lg-block e-shrink-0 e-ml-[3px]">
+                <div className="e-hidden d-lg-block e-shrink-0 e-ml-[3px]">
                     <ClusterStatusButton />
                 </div>
             </div>

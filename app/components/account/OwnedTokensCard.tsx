@@ -89,7 +89,7 @@ export function OwnedTokensCard({ address }: { address: string }) {
                     <table className="table table-sm table-nowrap card-table">
                         <thead>
                             <tr>
-                                {showLogos && <th className="text-muted w-1 e-p-0 text-center">Logo</th>}
+                                {showLogos && <th className="text-muted w-1 e-p-0 e-text-center">Logo</th>}
                                 {display === 'detail' && <th className="text-muted">Account Address</th>}
                                 <th className="text-muted">Mint Address</th>
                                 <th className="text-muted">{display === 'detail' ? 'Total Balance' : 'Balance'}</th>
@@ -241,7 +241,7 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
     return (
         <tr>
             {showLogo && (
-                <td className="w-1 e-p-0 text-center">
+                <td className="w-1 e-p-0 e-text-center">
                     {logoURI ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -249,7 +249,7 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
                             alt="Token icon"
                             height={16}
                             width={16}
-                            className="token-icon rounded-circle border border-4 border-gray-dark"
+                            className="token-icon e-rounded-full border border-4 border-gray-dark"
                         />
                     ) : (
                         <Image

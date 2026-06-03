@@ -213,7 +213,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
             {accountFilter !== null && (
                 <CardBody ui="dashkit">
                     Showing transactions which load account:
-                    <div className="d-inline-block e-ml-1.5">
+                    <div className="e-inline-block e-ml-1.5">
                         <Address pubkey={accountFilter} link />
                     </div>
                 </CardBody>

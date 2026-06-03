@@ -56,7 +56,7 @@ export function ClusterModal() {
                         &times;
                     </span>
 
-                    <h2 className="text-center e-mb-6 e-mt-6">Choose a Cluster</h2>
+                    <h2 className="e-text-center e-mb-6 e-mt-6">Choose a Cluster</h2>
                     <ClusterToggle />
                     <ClusterModalDeveloperSettings />
                 </div>
@@ -222,7 +222,7 @@ function SavedClusterItem({
 
     return (
         <div className="e-relative col-12 e-mb-3" data-testid={`saved-cluster-${cluster.name}`}>
-            <Link className={cn(clusterButtonVariants({ active: isActive, status }), 'text-center')} href={clusterUrl}>
+            <Link className={cn(clusterButtonVariants({ active: isActive, status }), 'e-text-center')} href={clusterUrl}>
                 {cluster.name}
             </Link>
             <button
@@ -261,7 +261,7 @@ function SavedClustersSection({ status, savedClusters }: { status: ClusterStatus
     return (
         <div className="e-w-full" data-testid="saved-clusters-section">
             <hr />
-            <h3 className="text-center e-mb-3">Saved Clusters</h3>
+            <h3 className="e-text-center e-mb-3">Saved Clusters</h3>
             {savedClusters.map(sc => (
                 <SavedClusterItem
                     key={sc.name}
@@ -281,7 +281,7 @@ function ClusterToggle() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     return (
-        <div className="btn-group-toggle e-flex flex-wrap e-mb-6">
+        <div className="btn-group-toggle e-flex e-flex-wrap e-mb-6">
             {CLUSTERS.map((net, index) => {
                 const active = net === cluster;
                 if (net === Cluster.Custom)

@@ -118,7 +118,7 @@ function TokenExtensionAccordionItem({
                         aria-pressed={showRaw}
                     >
                         <Badge
-                            className="text-white e-font-normal"
+                            className="e-text-white e-font-normal"
                             as="link"
                             size="sm"
                             status={showRaw ? 'active' : 'inactive'}
@@ -129,7 +129,7 @@ function TokenExtensionAccordionItem({
                     </button>
                     {parsedExtension.externalLinks.map((link, index) => (
                         <a key={index} href={link.url} target="_blank" rel="noopener noreferrer">
-                            <Badge variant="transparent" size="sm" as="link" className="text-white e-font-normal">
+                            <Badge variant="transparent" size="sm" as="link" className="e-text-white e-font-normal">
                                 <ExternalLink size={16} />
                                 {link.label}
                             </Badge>
@@ -165,7 +165,7 @@ function TokenExtensionStateHeader({ name }: { name: string }) {
 
 function ExtensionListItem({ ext }: { ext: ParsedTokenExtension }) {
     return (
-        <div className="e-w-full e-w-100 text-white e-flex e-items-center e-gap-2 e-text-sm">
+        <div className="e-w-full e-w-100 e-text-white e-flex e-items-center e-gap-2 e-text-sm">
             {/* Name */}
             <div className="e-flex e-min-w-80 e-items-center e-gap-2 e-whitespace-nowrap e-font-normal">
                 <span>{ext.name}</span>

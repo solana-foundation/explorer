@@ -41,7 +41,7 @@ export function BaseAccountCard({
                         onClick={() => setShowRaw(r => !r)}
                     >
                         <Code size={12} />
-                        <span className="d-none d-md-inline">Raw</span>
+                        <span className="e-hidden md:e-inline">Raw</span>
                     </Button>
                 )}
                 {headerActions}

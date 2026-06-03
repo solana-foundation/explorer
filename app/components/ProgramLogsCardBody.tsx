@@ -246,7 +246,7 @@ function ProgramLogRow({
                     <ChevronsUp className="e-cursor-pointer e-m-1.5" size={13} />
                 </Link>
                 {programLogs && (
-                    <div className="e-flex e-items-start flex-column font-monospace e-p-1.5">
+                    <div className="e-flex e-items-start e-flex-col font-monospace e-p-1.5">
                         {programLogs.logs.map((log, key) => {
                             return (
                                 <span key={key}>

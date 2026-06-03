@@ -112,7 +112,7 @@ export function UpgradeableProgramSection({
                 )}
                 <tr>
                     <td>Balance (SOL)</td>
-                    <td className="text-lg-end text-uppercase">
+                    <td className="text-lg-end e-uppercase">
                         <SolBalance lamports={account.lamports} />
                     </td>
                 </tr>
@@ -233,7 +233,7 @@ export function UpgradeableProgramDataSection({
                 </tr>
                 <tr>
                     <td>Balance (SOL)</td>
-                    <td className="text-lg-end text-uppercase">
+                    <td className="text-lg-end e-uppercase">
                         <SolBalance lamports={account.lamports} />
                     </td>
                 </tr>
@@ -303,7 +303,7 @@ export function UpgradeableProgramBufferSection({
                 </tr>
                 <tr>
                     <td>Balance (SOL)</td>
-                    <td className="text-lg-end text-uppercase">
+                    <td className="text-lg-end e-uppercase">
                         <SolBalance lamports={account.lamports} />
                     </td>
                 </tr>

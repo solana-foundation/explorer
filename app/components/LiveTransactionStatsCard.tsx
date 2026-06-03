@@ -35,7 +35,7 @@ const SERIES_INFO = {
 export function LiveTransactionStatsCard() {
     const [series, setSeries] = React.useState<Series>('short');
     return (
-        <div className="card e-grow e-flex flex-column">
+        <div className="card e-grow e-flex e-flex-col">
             <CardHeader ui="dashkit">
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </CardHeader>
@@ -174,7 +174,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
     };
 
     return (
-        <div className="e-flex flex-column e-grow">
+        <div className="e-flex e-flex-col e-grow">
             <TableCardBody>
                 <tr>
                     <td className="e-w-full">Transaction count</td>
@@ -211,7 +211,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
                     <Bar data={chartData} options={chartOptions} style={{ height: '100%' }} />
                 </div>
 
-                <div className="text-center text-muted e-mt-3">
+                <div className="e-text-center text-muted e-mt-3">
                     <p className="e-mb-0">
                         For transaction confirmation time statistics, please visit{' '}
                         <a href="https://www.validators.app" target="_blank" rel="noopener noreferrer">

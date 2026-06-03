@@ -42,7 +42,7 @@ export function AccountBalanceRow({ account }: AccountProps) {
     return (
         <tr>
             <td>Balance (SOL)</td>
-            <td className="text-lg-end text-uppercase">
+            <td className="text-lg-end e-uppercase">
                 <SolBalance lamports={lamports} />
             </td>
         </tr>

@@ -195,7 +195,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         <h3 className="card-header-title">Token History</h3>
                     </CardHeader>
                     <CardBody ui="dashkit">
-                        <p className="text-muted text-center e-mb-0">
+                        <p className="text-muted e-text-center e-mb-0">
                             Click the button below to load token transaction history
                         </p>
                     </CardBody>
@@ -287,7 +287,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         )}
                     </button>
                 ) : allFoundOldest ? (
-                    <div className="text-muted text-center">Fetched full history</div>
+                    <div className="text-muted e-text-center">Fetched full history</div>
                 ) : (
                     <button className="btn btn-primary e-w-full" onClick={() => fetchHistories()} disabled={fetching}>
                         {fetching ? (
@@ -479,7 +479,7 @@ function InstructionDetailsCell({
         return (
             <td>
                 <span
-                    className="btn btn-sm btn-outline-primary e-py-0 e-px-[3px] lh-1"
+                    className="btn btn-sm btn-outline-primary e-py-0 e-px-[3px] e-leading-none"
                     role="button"
                     onClick={handleLoadClick}
                 >
@@ -502,7 +502,7 @@ function InstructionDetailsCell({
         return (
             <td>
                 <span
-                    className="btn btn-sm btn-outline-warning e-py-0 e-px-[3px] lh-1"
+                    className="btn btn-sm btn-outline-warning e-py-0 e-px-[3px] e-leading-none"
                     role="button"
                     onClick={handleLoadClick}
                 >

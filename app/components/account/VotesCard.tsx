@@ -35,7 +35,7 @@ export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
                 </div>
 
                 <CardFooter ui="dashkit">
-                    <div className="text-muted text-center">
+                    <div className="text-muted e-text-center">
                         {voteAccount.info.votes.length > 0 ? '' : 'No votes found'}
                     </div>
                 </CardFooter>

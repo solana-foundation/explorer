@@ -35,7 +35,7 @@ export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashe
                 </div>
 
                 <CardFooter ui="dashkit">
-                    <div className="text-muted text-center">{blockhashes.length > 0 ? '' : 'No blockhashes found'}</div>
+                    <div className="text-muted e-text-center">{blockhashes.length > 0 ? '' : 'No blockhashes found'}</div>
                 </CardFooter>
             </div>
         </>

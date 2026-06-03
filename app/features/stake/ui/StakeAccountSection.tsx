@@ -68,7 +68,7 @@ function LockupCard({ stakeAccount }: { stakeAccount: StakeAccountInfo }) {
         return null;
     }
     return (
-        <div className="alert alert-warning text-center">
+        <div className="alert alert-warning e-text-center">
             <strong>Account is locked!</strong> Lockup expires on {displayTimestampUtc(lockupExpiryMs)}
         </div>
     );
@@ -99,7 +99,7 @@ function OverviewCard({
             </tr>
             <tr>
                 <td>Balance (SOL)</td>
-                <td className="text-lg-end text-uppercase">
+                <td className="text-lg-end e-uppercase">
                     <SolBalance lamports={account.lamports} />
                 </td>
             </tr>

@@ -119,7 +119,7 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
                 <CardFooter ui="dashkit">
                     <div className="e-flex e-items-baseline e-justify-end">
                         <span className="text-muted e-me-2 e-text-[0.625rem] e-uppercase">Total Account Size:</span>
-                        <span className="text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
+                        <span className="e-text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
                     </div>
                 </CardFooter>
             )}
@@ -141,7 +141,7 @@ function AccountFromLookupTableRow({
     return (
         <tr>
             <td>
-                <div className="e-flex e-items-start flex-column">
+                <div className="e-flex e-items-start e-flex-col">
                     Account #{accountIndex + 1}
                     <span className="e-mt-[3px]">
                         {!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
@@ -179,7 +179,7 @@ function AccountRow({
     return (
         <tr>
             <td>
-                <div className="e-flex e-items-start flex-column">
+                <div className="e-flex e-items-start e-flex-col">
                     Account #{accountIndex + 1}
                     <span className="e-mt-[3px]">
                         {signer && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}

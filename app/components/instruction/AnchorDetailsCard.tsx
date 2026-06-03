@@ -272,9 +272,9 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                     rows.push(
                         <tr key={keyIndex} className={accountInfo?.isNested ? 'table-nested-account' : ''}>
                             <td>
-                                <div className="e-flex flex-row e-items-center">
+                                <div className="e-flex e-flex-row e-items-center">
                                     {accountInfo?.isNested && <CornerDownRight className="e-mr-1.5 e-mb-[3px]" size={14} />}
-                                    <div className="e-mr-1.5 d-md-inline">
+                                    <div className="e-mr-1.5 md:e-inline">
                                         {accountInfo
                                             ? `${camelToTitleCase(accountInfo.name)}`
                                             : ixAccounts

@@ -486,7 +486,7 @@ function OverviewCard({
                     <tr>
                         <td>Serialized Size</td>
                         <td className="text-lg-end">
-                            <div className="e-flex align-items-end flex-column">
+                            <div className="e-flex e-items-end e-flex-col">
                                 {size} bytes
                                 <span className={size <= PACKET_DATA_SIZE ? 'text-muted' : 'text-warning'}>
                                     Max transaction size is {PACKET_DATA_SIZE} bytes
@@ -497,7 +497,7 @@ function OverviewCard({
                     <tr>
                         <td>Fees</td>
                         <td className="text-lg-end">
-                            <div className="e-flex align-items-end flex-column">
+                            <div className="e-flex e-items-end e-flex-col">
                                 <SolBalance lamports={fee} />
                                 <span className="text-muted">
                                     {`Each signature costs ${DEFAULT_FEES.lamportsPerSignature} lamports`}
@@ -508,7 +508,7 @@ function OverviewCard({
 
                     <tr>
                         <td>
-                            <div className="e-flex e-items-start flex-column">
+                            <div className="e-flex e-items-start e-flex-col">
                                 Fee payer
                                 <span className="e-mt-[3px]">
                                     <span className="badge bg-info-soft e-mr-1.5">Signer</span>

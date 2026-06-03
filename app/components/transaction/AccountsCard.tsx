@@ -116,18 +116,18 @@ export function AccountsCard({ signature }: SignatureProps) {
                     {totalAccountSize > 0 && (
                         <tfoot>
                             <tr>
-                                <td colSpan={3} className="align-bottom">
+                                <td colSpan={3} className="e-align-bottom">
                                     <p className="text-muted e-m-0 e-text-right e-text-[0.625rem]">
                                         reflects current account state
                                     </p>
                                 </td>
-                                <td className="align-bottom">
+                                <td className="e-align-bottom">
                                     <p className="text-muted e-m-0 e-text-[0.625rem] e-uppercase">
                                         Total Account Size:
                                     </p>
                                 </td>
                                 <td>
-                                    <span className="text-white e-ml-7">
+                                    <span className="e-text-white e-ml-7">
                                         {totalAccountSize.toLocaleString('en-US')}
                                     </span>
                                 </td>

@@ -273,7 +273,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                 <Button variant="outline" size="sm" asChild aria-label="Inspect">
                     <Link href={inspectPath}>
                         <ZoomIn size={12} />
-                        <span className="d-none d-md-inline">Inspect</span>
+                        <span className="e-hidden md:e-inline">Inspect</span>
                     </Link>
                 </Button>
                 {autoRefresh === AutoRefresh.Active ? (
@@ -342,12 +342,12 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
 
                 <tr>
                     <td>Confirmation Status</td>
-                    <td className="text-lg-end text-uppercase">{info.confirmationStatus || 'Unknown'}</td>
+                    <td className="text-lg-end e-uppercase">{info.confirmationStatus || 'Unknown'}</td>
                 </tr>
 
                 <tr>
                     <td>Confirmations</td>
-                    <td className="text-lg-end text-uppercase">{info.confirmations}</td>
+                    <td className="text-lg-end e-uppercase">{info.confirmations}</td>
                 </tr>
 
                 <tr>
@@ -405,7 +405,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                 {version !== undefined && (
                     <tr>
                         <td>Transaction Version</td>
-                        <td className="text-lg-end text-uppercase">{version}</td>
+                        <td className="text-lg-end e-uppercase">{version}</td>
                     </tr>
                 )}
             </TableCardBody>

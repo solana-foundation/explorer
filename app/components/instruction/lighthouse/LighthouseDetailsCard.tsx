@@ -359,7 +359,7 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
                 return (
                     <tr key={keyIndex} data-testid={`account-row-${keyIndex}`}>
                         <td>
-                            <div className="e-mr-1.5 d-md-inline">
+                            <div className="e-mr-1.5 md:e-inline">
                                 {parsedIx.accounts
                                     ? keyIndex < parsedAccountsLength
                                         ? `${camelToTitleCase(accountMap.get(address) ?? 'Unknown')}`

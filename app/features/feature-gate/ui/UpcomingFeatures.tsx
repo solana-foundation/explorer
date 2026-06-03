@@ -41,7 +41,7 @@ export function UpcomingFeatures() {
         return (
             <div className="card">
                 <CardBody ui="dashkit">
-                    <div className="text-center">No upcoming features for {clusterName(cluster)}</div>
+                    <div className="e-text-center">No upcoming features for {clusterName(cluster)}</div>
                 </CardBody>
             </div>
         );
@@ -116,7 +116,7 @@ function FeaturesTable({
                                     <p className="e-mb-0 fs-sm">{feature.description}</p>
                                 </td>
                                 <td>
-                                    <div className="e-flex flex-column fs-sm">
+                                    <div className="e-flex e-flex-col fs-sm">
                                         {feature.mainnet_activation_epoch && (
                                             <Link
                                                 href={`/epoch/${feature.mainnet_activation_epoch}?cluster=mainnet`}

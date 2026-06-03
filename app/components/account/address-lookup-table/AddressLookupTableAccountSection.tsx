@@ -47,13 +47,13 @@ export function AddressLookupTableAccountSection(
             </tr>
             <tr>
                 <td>Balance (SOL)</td>
-                <td className="text-lg-end text-uppercase">
+                <td className="text-lg-end e-uppercase">
                     <SolBalance lamports={account.lamports} />
                 </td>
             </tr>
             <tr>
                 <td>Activation Status</td>
-                <td className="text-lg-end text-uppercase">
+                <td className="text-lg-end e-uppercase">
                     {lookupTableAccount.isActive() ? 'Active' : 'Deactivated'}
                 </td>
             </tr>

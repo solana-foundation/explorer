@@ -9,7 +9,7 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
 
     return (
         <div className="card">
-            <CardBody ui="dashkit" className="text-center">
+            <CardBody ui="dashkit" className="e-text-center">
                 <div className="e-mb-6">{NO_SECURITY_TXT_ERROR}</div>
 
                 <div className="e-mb-6">

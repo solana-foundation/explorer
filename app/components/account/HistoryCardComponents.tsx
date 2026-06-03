@@ -45,7 +45,7 @@ export function HistoryCardFooter({
     return (
         <CardFooter ui="dashkit">
             {foundOldest ? (
-                <div className="text-muted text-center">Fetched full history</div>
+                <div className="text-muted e-text-center">Fetched full history</div>
             ) : (
                 <button className="btn btn-primary e-w-full" onClick={() => loadMore()} disabled={fetching}>
                     {fetching ? (

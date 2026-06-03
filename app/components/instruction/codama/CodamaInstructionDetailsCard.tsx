@@ -49,7 +49,7 @@ export function CodamaInstructionCard({
         accountDetails.push(
             <tr key={i}>
                 <td>
-                    <div className="e-mr-1.5 d-md-inline">{accountName}</div>
+                    <div className="e-mr-1.5 md:e-inline">{accountName}</div>
                     {isWritable && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
                     {isSigner && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
                 </td>

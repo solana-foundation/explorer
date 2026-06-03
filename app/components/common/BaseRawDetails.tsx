@@ -7,7 +7,7 @@ import { HexData } from './HexData';
 function RawDetailsLoader() {
     return (
         <tr>
-            <td colSpan={2} className="text-center">
+            <td colSpan={2} className="e-text-center">
                 <span className="spinner-grow spinner-grow-sm e-mr-1.5"></span>
                 Loading instruction data...
             </td>
@@ -33,7 +33,7 @@ function BaseTransactionInstructionRawDetails({ ix }: { ix: TransactionInstructi
             {ix.keys.map(({ pubkey, isSigner, isWritable }, keyIndex) => (
                 <tr key={keyIndex}>
                     <td>
-                        <div className="e-mr-1.5 d-md-inline">Account #{keyIndex + 1}</div>
+                        <div className="e-mr-1.5 md:e-inline">Account #{keyIndex + 1}</div>
                         {isWritable && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
                         {isSigner && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
                     </td>

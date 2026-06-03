@@ -44,7 +44,7 @@ export function BaseVerifiedBuildCard({
     if (!registryInfo) {
         return (
             <div className="card">
-                <CardBody ui="dashkit" className="text-center">
+                <CardBody ui="dashkit" className="e-text-center">
                     Verified build information not yet uploaded by the program authority. For more information, see the{' '}
                     <Link href="https://solana.com/developers/guides/advanced/verified-builds" target="_blank">
                         Verified Build Guide

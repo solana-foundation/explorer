@@ -610,7 +610,7 @@ function SimpleRow({
     return (
         <tr className={cn(nestingLevel > 0 && 'table-nested-account')}>
             <td>
-                <div className="e-flex flex-row e-items-center">
+                <div className="e-flex e-flex-row e-items-center">
                     {nestingLevel > 0 && <CornerDownRight className="e-mr-1.5 e-mb-[3px]" size={14} />}
                     <div>{itemKey}</div>
                 </div>
@@ -637,7 +637,7 @@ export function ExpandableRow({
         <>
             <tr className="table-group-header">
                 <td>
-                    <div className="e-flex flex-row e-items-center">
+                    <div className="e-flex e-flex-row e-items-center">
                         {nestingLevel > 0 && <CornerDownRight className="e-mr-1.5 e-mb-[3px]" size={14} />}
                         <div>{fieldName}</div>
                     </div>

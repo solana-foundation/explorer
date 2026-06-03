@@ -96,7 +96,7 @@ export function ProgramSecurityTxtCard({
                     Note that this is self-reported by the author of the program and might not be accurate
                 </small>
             </div>
-            <ErrorBoundary fallback={<CardBody ui="dashkit" className="text-center">Invalid security.txt</CardBody>}>
+            <ErrorBoundary fallback={<CardBody ui="dashkit" className="e-text-center">Invalid security.txt</CardBody>}>
                 {securityTable}
             </ErrorBoundary>
         </div>
