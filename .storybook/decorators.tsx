@@ -1,8 +1,11 @@
+import { Description, Stories, Title } from '@storybook/addon-docs/blocks';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { TransactionsProvider } from '@providers/transactions';
+import { Connection } from '@solana/web3.js';
 import type { Decorator, Parameters } from '@storybook/react';
 import React from 'react';
 import { fn } from 'storybook/test';
+import { INITIAL_VIEWPORTS } from 'storybook/viewport';
 
 import { MockAccountsProvider } from './__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from './__mocks__/MockClusterProvider';
@@ -147,6 +150,40 @@ export const withClipboardMock: Decorator = Story => {
     return <Story />;
 };
 
+// Patch Connection prototype methods at module load so stories don't hit real RPC. Returning
+// null/zero matches "transaction not found" semantics which consumers treat as the empty path.
+const connectionProto = Connection.prototype as unknown as Record<string, unknown>;
+const stubbedNull = async () => null;
+const stubbedNumber = async () => 0;
+const stubbedArray = async () => [];
+const rpcMethodStubs: Record<string, unknown> = {
+    getParsedTransaction: stubbedNull,
+    getTransaction: stubbedNull,
+    getSignaturesForAddress: stubbedArray,
+    getAccountInfo: stubbedNull,
+    getParsedAccountInfo: stubbedNull,
+    getMultipleAccountsInfo: stubbedArray,
+    getParsedTokenAccountsByOwner: stubbedArray,
+    getBalance: stubbedNumber,
+    getBlockHeight: stubbedNumber,
+    getSlot: stubbedNumber,
+};
+for (const [method, stub] of Object.entries(rpcMethodStubs)) {
+    connectionProto[`__original_${method}`] = connectionProto[method];
+}
+
+/**
+ * Stubs `@solana/web3.js` Connection RPC methods on prototype so stories that render
+ * TransactionHistoryCard / etc. don't hit a real Solana RPC. Activates on first story render
+ * and stays active for the session.
+ */
+export const withMockRpc: Decorator = Story => {
+    for (const [method, stub] of Object.entries(rpcMethodStubs)) {
+        connectionProto[method] = stub;
+    }
+    return <Story />;
+};
+
 /** Errored variant — writeText rejects so consumers flip to 'errored' state. */
 export const withClipboardMockErrored: Decorator = Story => {
     Object.defineProperty(navigator, 'clipboard', {
@@ -155,4 +192,38 @@ export const withClipboardMockErrored: Decorator = Story => {
     });
 
     return <Story />;
+};
+
+/**
+ * Autodocs page renderer that omits the Primary preview block, so the first variant in the
+ * Stories section isn't duplicated at the top. Use as `parameters.docs.page = responsiveDocsPage`.
+ */
+export const responsiveDocsPage = () => (
+    <>
+        <Title />
+        <Description />
+        <Stories />
+    </>
+);
+
+/**
+ * Reads the viewport global (set via `globals: { viewport: { value: 'iphonex' } }`) and constrains
+ * the story width to that viewport's dimensions. Width-only — the Storybook viewport addon already
+ * sizes the canvas iframe (height + width, device emulation); this decorator complements it by
+ * applying the same width in docs (where the addon doesn't size). Height stays natural.
+ */
+export const withViewportFromGlobal: Decorator = (Story, context) => {
+    const viewport = context.globals.viewport;
+    const key = typeof viewport === 'object' ? viewport?.value : viewport;
+    const isRotated = typeof viewport === 'object' ? viewport?.isRotated : false;
+    const def = key
+        ? (INITIAL_VIEWPORTS as Record<string, { styles: { width: string; height: string } }>)[key]
+        : undefined;
+    if (!def) return <Story />;
+    const width = isRotated ? def.styles.height : def.styles.width;
+    return (
+        <div style={{ margin: '0 auto', width }}>
+            <Story />
+        </div>
+    );
 };
