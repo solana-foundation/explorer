@@ -13,7 +13,7 @@ import {
     withViewportFromGlobal,
 } from '../../../../../.storybook/responsive-decorators';
 import { EPOCH_NEVER_SET } from '../../lib/constants';
-import type { StakeAccountInfo, StakeAccountType } from '../../lib/validators';
+import type { StakeAccountInfo } from '../../lib/validators';
 import { StakeAccountSection } from '../StakeAccountSection';
 
 const STAKE_ACCOUNT_ADDRESS = toLegacyPublicKey(address('5ASxtmcPKDeD8NoE5QpskizPokqDdX1qHFiqZb1spLdo'));
@@ -55,7 +55,7 @@ const args = {
     account,
     activation: { active: Number(DELEGATED_STAKE), inactive: 0, state: 'active' as const },
     stakeAccount,
-    stakeAccountType: 'delegated' satisfies StakeAccountType,
+    stakeAccountType: 'delegated' as const,
 };
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
