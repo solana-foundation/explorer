@@ -23,7 +23,7 @@ export function NFTokenCollectionNFTGrid({ collection }: { collection: string })
                 <RefreshButton analyticsSection="nft_token_collection_grid" onClick={mutate} />
             </CardHeader>
 
-            <div className="py-4">
+            <div className="e-py-6">
                 {nfts.length === 0 && <div className={'px-4'}>No NFTs Found</div>}
 
                 {nfts.length > 0 && (

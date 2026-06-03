@@ -58,7 +58,7 @@ export function IdlRenderer({
 
 function IdlErrorFallback({ message, ...props }: { message: string }) {
     return (
-        <center className="pt-5">
+        <center className="e-pt-9">
             {message}
             {JSON.stringify(props, undefined, 2)}
         </center>

@@ -160,7 +160,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                                 </small>
                             )}
                             {saveError && (
-                                <div className="alert alert-danger mt-2 mb-0 py-2" data-testid="save-cluster-error">
+                                <div className="alert alert-danger mt-2 mb-0 e-py-1.5" data-testid="save-cluster-error">
                                     {saveError.message}
                                 </div>
                             )}

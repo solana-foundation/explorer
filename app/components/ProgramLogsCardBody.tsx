@@ -243,10 +243,10 @@ function ProgramLogRow({
                             anchorProgram={anchorProgram}
                         />
                     </span>
-                    <ChevronsUp className="c-pointer m-2" size={13} />
+                    <ChevronsUp className="c-pointer e-m-1.5" size={13} />
                 </Link>
                 {programLogs && (
-                    <div className="d-flex align-items-start flex-column font-monospace p-2 font-size-sm">
+                    <div className="d-flex align-items-start flex-column font-monospace e-p-1.5 font-size-sm">
                         {programLogs.logs.map((log, key) => {
                             return (
                                 <span key={key}>
