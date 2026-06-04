@@ -4,25 +4,7 @@ import { TableCardBody } from '@/app/components/common/TableCardBody';
 
 import { PMP_SECURITY_TXT_KEYS } from '../lib/constants';
 import { CodeCell, ContactInfo, ExternalLinkCell, RenderCode, RenderExternalLink, StringCell } from './common';
-import { isString, isValidLink, tryParseContactString } from './utils';
-
-const CONTACT_TYPES = new Set(['discord', 'email', 'link', 'other', 'telegram', 'twitter']);
-
-type ContactEntry = { kind: 'contact'; type: string; info: string } | { kind: 'text'; value: string };
-
-function parseContactList(value: string): ContactEntry[] {
-    const parts = value
-        .split(',')
-        .map(s => s.trim())
-        .filter(Boolean);
-    return parts.map(part => {
-        const result = tryParseContactString(part);
-        if (Array.isArray(result) && CONTACT_TYPES.has(result[0].toLowerCase())) {
-            return { info: result[1], kind: 'contact' as const, type: result[0] };
-        }
-        return { kind: 'text' as const, value: part };
-    });
-}
+import { isString, isValidLink, parseContactList, tryParseContactString } from './utils';
 
 export function PmpSecurityTxtTable({ data }: { data: Record<string, any> }) {
     const entries = useMemo(() => {
@@ -61,9 +43,9 @@ export function PmpSecurityTxtTable({ data }: { data: Record<string, any> }) {
 function RenderTable({ entries }: { entries: [string, any][] }) {
     return (
         <TableCardBody>
-            {entries.map(([entryKey, value], index) => {
+            {entries.map(([entryKey, value]) => {
                 return (
-                    <tr key={index}>
+                    <tr key={entryKey}>
                         <td className="w-100">{entryKey}</td>
                         <RenderEntry key={entryKey} entryKey={entryKey} value={value} />
                     </tr>
@@ -83,8 +65,8 @@ function RenderEntry({ entryKey, value }: { entryKey: string; value: any }) {
             const entries = parseContactList(value);
             return (
                 <td className="text-lg-end font-monospace">
-                    {entries.map((entry, i) => (
-                        <div key={i}>
+                    {entries.map(entry => (
+                        <div key={entry.kind === 'contact' ? `${entry.type}:${entry.info}` : entry.value}>
                             {entry.kind === 'contact' ? (
                                 <ContactInfo type={entry.type} information={entry.info} />
                             ) : (
