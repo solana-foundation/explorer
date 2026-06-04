@@ -9,7 +9,10 @@ import { isString, isValidLink, tryParseContactString } from './utils';
 const CONTACT_TYPES = new Set(['discord', 'email', 'link', 'other', 'telegram', 'twitter']);
 
 function parseContactList(value: string): [string, string][] {
-    const parts = value.split(',').map(s => s.trim()).filter(Boolean);
+    const parts = value
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
     const parsed: [string, string][] = [];
     for (const part of parts) {
         const result = tryParseContactString(part);
