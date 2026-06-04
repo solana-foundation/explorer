@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters } from '@storybook-config/decorators';
 
-import { AccountsCard } from '../AccountsCard';
 import {
     DEFAULT_SIGNATURE,
     MOCK_FAILED_STATUS,
     MOCK_FAILED_TX,
     MOCK_PARSED_TX,
     MOCK_STATUS,
-} from './__fixtures__/transaction';
-import { withTransactionProviders } from './__fixtures__/withTransactionProviders';
+} from '../__fixtures__/transaction';
+import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
+import { AccountsCard } from '../AccountsCard';
 
 const meta: Meta<typeof AccountsCard> = {
     args: {
@@ -19,7 +19,8 @@ const meta: Meta<typeof AccountsCard> = {
     parameters: {
         ...nextjsParameters,
     },
-    title: 'Components/Transaction/AccountsCard',
+    tags: ['autodocs', 'test'],
+    title: 'Features/Transaction/AccountsCard',
 };
 
 export default meta;

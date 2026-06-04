@@ -8,6 +8,7 @@ import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { displayAddress, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
+import { cva } from 'class-variance-authority';
 import Link from 'next/link';
 import React, { useRef, useState } from 'react';
 
@@ -16,6 +17,18 @@ import { useVisibility } from '@/app/shared/lib/visibility';
 
 import { Copyable } from './Copyable';
 import { useMidTruncation } from './useMidTruncation';
+
+const rowVariants = cva('e-relative e-flex e-w-full e-min-w-0 e-items-baseline', {
+    defaultVariants: {
+        alignRight: false,
+    },
+    variants: {
+        alignRight: {
+            false: '',
+            true: 'md:e-justify-end',
+        },
+    },
+});
 
 type Props = {
     pubkey: PublicKey;
@@ -109,14 +122,7 @@ export function Address({
 
     return (
         <span ref={visibilityRef} className="e-block e-w-full">
-            <div
-                ref={rowRef}
-                className={cn(
-                    'e-relative e-flex e-w-full e-min-w-0 e-items-baseline',
-                    alignRight && 'md:e-justify-end',
-                )}
-                aria-label={ariaLabel}
-            >
+            <div ref={rowRef} className={rowVariants({ alignRight: Boolean(alignRight) })} aria-label={ariaLabel}>
                 {/* Hidden span for measuring the natural text width — absolutely positioned so it doesn't affect layout */}
                 {isMidTruncateCandidate && (
                     <span

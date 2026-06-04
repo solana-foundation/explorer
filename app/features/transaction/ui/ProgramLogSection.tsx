@@ -8,6 +8,7 @@ import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
 
 import { Button } from '@/app/components/shared/ui/button';
+import { BaseCardBody } from '@/app/shared/ui/Card';
 
 type ChipProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean };
 export function Chip({ children, className, active, ...props }: ChipProps) {
@@ -22,7 +23,6 @@ export function Chip({ children, className, active, ...props }: ChipProps) {
         </Button>
     );
 }
-
 
 export function ProgramLogSection({ signature }: SignatureProps) {
     const [showRaw, setShowRaw] = React.useState(false);
@@ -62,7 +62,9 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                         <ProgramLogsCardBody message={message} logs={prettyLogs} cluster={cluster} url={url} />
                     )
                 ) : (
-                    <div className="e-px-4 e-py-3 e-text-sm e-text-muted">Logs not supported for this transaction</div>
+                    <BaseCardBody className="e-text-sm e-text-muted">
+                        Logs not supported for this transaction
+                    </BaseCardBody>
                 )}
             </div>
         </section>

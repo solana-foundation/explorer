@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters } from '@storybook-config/decorators';
 
-import { ProgramLogSection } from '../ProgramLogSection';
 import {
     DEFAULT_SIGNATURE,
     MOCK_FAILED_STATUS,
@@ -9,8 +8,9 @@ import {
     MOCK_NO_LOGS_TX,
     MOCK_PARSED_TX,
     MOCK_STATUS,
-} from './__fixtures__/transaction';
-import { withTransactionProviders } from './__fixtures__/withTransactionProviders';
+} from '../__fixtures__/transaction';
+import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
+import { ProgramLogSection } from '../ProgramLogSection';
 
 const meta: Meta<typeof ProgramLogSection> = {
     args: {
@@ -20,7 +20,8 @@ const meta: Meta<typeof ProgramLogSection> = {
     parameters: {
         ...nextjsParameters,
     },
-    title: 'Components/Transaction/ProgramLogSection',
+    tags: ['autodocs'],
+    title: 'Features/Transaction/ProgramLogSection',
 };
 
 export default meta;

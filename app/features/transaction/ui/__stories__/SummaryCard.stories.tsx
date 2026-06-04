@@ -3,15 +3,15 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { mockTransactionStatus } from '@storybook-config/__fixtures__/transactions';
 import { nextjsParameters } from '@storybook-config/decorators';
 
-import { SummaryCard } from '../SummaryCard';
 import {
     DEFAULT_SIGNATURE,
     MOCK_FAILED_STATUS,
     MOCK_FAILED_TX,
     MOCK_PARSED_TX,
     MOCK_STATUS,
-} from './__fixtures__/transaction';
-import { withTransactionProviders } from './__fixtures__/withTransactionProviders';
+} from '../__fixtures__/transaction';
+import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
+import { SummaryCard } from '../SummaryCard';
 
 const meta: Meta<typeof SummaryCard> = {
     args: {
@@ -22,7 +22,8 @@ const meta: Meta<typeof SummaryCard> = {
     parameters: {
         ...nextjsParameters,
     },
-    title: 'Components/Transaction/SummaryCard',
+    tags: ['autodocs'],
+    title: 'Features/Transaction/SummaryCard',
 };
 
 export default meta;

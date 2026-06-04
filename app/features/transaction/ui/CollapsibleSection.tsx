@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@components/shared/utils';
 import { Button } from '@shared/ui/button';
 import { ReactNode, useId, useState } from 'react';

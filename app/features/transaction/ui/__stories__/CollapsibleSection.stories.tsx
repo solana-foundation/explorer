@@ -11,7 +11,8 @@ const meta: Meta<typeof CollapsibleSection> = {
         title: 'Section Title',
     },
     component: CollapsibleSection,
-    title: 'Components/Transaction/CollapsibleSection',
+    tags: ['autodocs', 'test'],
+    title: 'Features/Transaction/CollapsibleSection',
 };
 
 export default meta;

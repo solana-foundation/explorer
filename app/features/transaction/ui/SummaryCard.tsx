@@ -260,7 +260,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                 <Row divider>
                     <Label>Signature</Label>
                     <Value>
-                        <Signature signature={signature} className="!e-items-start" noTruncate />
+                        <Signature signature={signature} alignItems="start" noTruncate />
                     </Value>
                 </Row>
 

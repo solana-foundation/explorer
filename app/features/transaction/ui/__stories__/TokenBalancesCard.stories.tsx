@@ -7,9 +7,9 @@ import { nextjsParameters } from '@storybook-config/decorators';
 import { BigNumber } from 'bignumber.js';
 import React from 'react';
 
+import { DEFAULT_SIGNATURE, MOCK_PARSED_TX, MOCK_STATUS, RECIPIENT, TOKEN_MINT } from '../__fixtures__/transaction';
+import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
 import { TokenBalancesCard, TokenBalancesCardInner } from '../TokenBalancesCard';
-import { DEFAULT_SIGNATURE, MOCK_PARSED_TX, MOCK_STATUS, RECIPIENT, TOKEN_MINT } from './__fixtures__/transaction';
-import { withTransactionProviders } from './__fixtures__/withTransactionProviders';
 
 const metaConnected: Meta<typeof TokenBalancesCard> = {
     args: {
@@ -19,7 +19,7 @@ const metaConnected: Meta<typeof TokenBalancesCard> = {
     parameters: {
         ...nextjsParameters,
     },
-    title: 'Components/Transaction/TokenBalancesCard',
+    title: 'Features/Transaction/TokenBalancesCard',
 };
 
 export default metaConnected;

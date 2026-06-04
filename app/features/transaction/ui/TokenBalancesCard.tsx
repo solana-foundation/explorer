@@ -125,6 +125,8 @@ function TokenBalanceRow({
     const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(mint, balance);
     const scaledBalance = new BigNumber(balance).multipliedBy(scaledUiAmountMultiplier).toString();
     const scaledDelta = delta.multipliedBy(scaledUiAmountMultiplier);
+    const mintPubkey = new PublicKey(mint);
+    const ownerPubkey = owner ? new PublicKey(owner) : undefined;
 
     return (
         <div className="e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid] last:e-border-b-0">
@@ -149,12 +151,12 @@ function TokenBalanceRow({
                 </div>
                 <div className="e-flex e-items-center e-gap-2">
                     <span className="e-w-16 e-shrink-0 e-text-muted">Token</span>
-                    <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo />
+                    <Address pubkey={mintPubkey} link fetchTokenLabelInfo />
                 </div>
-                {owner && (
+                {ownerPubkey && (
                     <div className="e-flex e-items-center e-gap-2">
                         <span className="e-w-16 e-shrink-0 e-text-muted">Owner</span>
-                        <Address pubkey={new PublicKey(owner)} link />
+                        <Address pubkey={ownerPubkey} link />
                     </div>
                 )}
                 <div className="e-flex e-items-center e-gap-2">
@@ -174,10 +176,10 @@ function TokenBalanceRow({
             >
                 <div className="e-text-muted [grid-area:number]">{index + 1}</div>
                 <div className="e-flex e-flex-col [grid-area:address]">
-                    {owner && (
+                    {ownerPubkey && (
                         <div className="e-flex e-items-center e-gap-3">
                             <span className="e-min-w-11 e-text-sm e-text-muted">Owner</span>
-                            <Address pubkey={new PublicKey(owner)} link />
+                            <Address pubkey={ownerPubkey} link />
                         </div>
                     )}
                     <div className="e-flex e-items-center e-gap-3">
@@ -186,7 +188,7 @@ function TokenBalanceRow({
                     </div>
                     <div className="e-flex e-items-center e-gap-3">
                         <span className="e-min-w-11 e-text-sm e-text-muted">Token</span>
-                        <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo />
+                        <Address pubkey={mintPubkey} link fetchTokenLabelInfo />
                     </div>
                 </div>
                 <div className="e-justify-self-end [grid-area:change]">

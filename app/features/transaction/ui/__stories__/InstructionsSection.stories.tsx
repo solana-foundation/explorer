@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters } from '@storybook-config/decorators';
 
-import { InstructionsSection } from '../InstructionsSection';
 import {
     DEFAULT_SIGNATURE,
     MOCK_FAILED_STATUS,
     MOCK_FAILED_TX,
     MOCK_PARSED_TX,
     MOCK_STATUS,
-} from './__fixtures__/transaction';
-import { withTransactionProviders } from './__fixtures__/withTransactionProviders';
+} from '../__fixtures__/transaction';
+import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
+import { InstructionsSection } from '../InstructionsSection';
 
 const meta: Meta<typeof InstructionsSection> = {
     args: {
@@ -19,7 +19,8 @@ const meta: Meta<typeof InstructionsSection> = {
     parameters: {
         ...nextjsParameters,
     },
-    title: 'Components/Transaction/InstructionsSection',
+    tags: ['autodocs'],
+    title: 'Features/Transaction/InstructionsSection',
 };
 
 export default meta;

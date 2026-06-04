@@ -1,3 +1,4 @@
+export { toBigNumber } from './lib/toBigNumber';
 export { selectMintDecimals, selectTokenAccountMint } from './model/selectors';
 export { useAccountQuery } from './model/use-account-query';
 export { useAccountsInfo } from './model/use-accounts-info';
