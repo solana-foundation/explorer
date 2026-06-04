@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
@@ -21,16 +22,13 @@ const meta: Meta<typeof SlotHashesCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const hash = (i: number) => `4xY${'k'.repeat(40)}${i}`;
-
+const baseSlot = gen.slot();
 const args = {
     sysvarAccount: {
-        info: [
-            { hash: hash(0), slot: 312_456_789 },
-            { hash: hash(1), slot: 312_456_788 },
-            { hash: hash(2), slot: 312_456_787 },
-            { hash: hash(3), slot: 312_456_786 },
-        ],
+        info: Array.from({ length: 4 }, (_, i) => ({
+            hash: gen.blockhash(i),
+            slot: Number(baseSlot) - i,
+        })),
         type: 'slotHashes',
     } satisfies SysvarSlotHashesAccount,
 };
