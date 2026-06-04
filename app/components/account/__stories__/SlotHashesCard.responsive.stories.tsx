@@ -22,7 +22,7 @@ const meta: Meta<typeof SlotHashesCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const baseSlot = gen.slot();
+const baseSlot = gen.slot(0);
 const args = {
     sysvarAccount: {
         info: Array.from({ length: 4 }, (_, i) => ({

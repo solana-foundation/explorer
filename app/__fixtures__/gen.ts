@@ -19,5 +19,7 @@ export const gen = {
         for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
         return bs58.encode(bytes);
     },
-    slot: () => gen.bigint(300_000_000n),
+    /** Deterministic when seed provided (same seed → same value) so story fixtures stay pixel-stable. */
+    slot: (seed?: number) =>
+        seed === undefined ? gen.bigint(300_000_000n) : ((BigInt(seed) + 1n) * 2_654_435_761n) % 300_000_000n,
 };
