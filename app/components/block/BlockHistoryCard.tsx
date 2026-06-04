@@ -22,6 +22,7 @@ import { ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
 import { invariant } from '@/app/shared/lib/invariant';
+import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
 
 const PAGE_SIZE = 25;
 
@@ -199,38 +200,38 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
 
     return (
         <div className="card">
-            <div className="card-header align-items-center">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title">{title}</h3>
                 <FilterDropdown
                     filter={programFilter}
                     invokedPrograms={invokedPrograms}
                     totalTransactionCount={transactions.length}
                 ></FilterDropdown>
-            </div>
+            </CardHeader>
 
             {accountFilter !== null && (
-                <div className="card-body">
+                <CardBody ui="dashkit">
                     Showing transactions which load account:
-                    <div className="d-inline-block ms-2">
+                    <div className="e-ml-1.5 e-inline-block">
                         <Address pubkey={accountFilter} link />
                     </div>
-                </div>
+                </CardBody>
             )}
 
             {filteredTransactions.length === 0 ? (
-                <div className="card-body">
+                <CardBody ui="dashkit">
                     {accountFilter === null && programFilter === HIDE_VOTES
                         ? "This block doesn't contain any non-vote transactions"
                         : 'No transactions found with this filter'}
-                </div>
+                </CardBody>
             ) : (
                 // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
-                <div className="table-responsive mb-0">
+                <div className="table-responsive e-mb-0">
                     <table className="table table-sm table-nowrap card-table">
                         <thead>
                             <tr>
                                 <th
-                                    className="text-muted c-pointer"
+                                    className="text-muted e-cursor-pointer"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.delete('sort');
@@ -244,7 +245,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 <th className="text-muted">Result</th>
                                 <th className="text-muted">Transaction Signature</th>
                                 <th
-                                    className="text-muted c-pointer"
+                                    className="text-muted e-cursor-pointer"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'fee');
@@ -256,7 +257,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                     Fee
                                 </th>
                                 <th
-                                    className="text-muted c-pointer"
+                                    className="text-muted e-cursor-pointer"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'reservedCUs');
@@ -269,7 +270,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 </th>
                                 {showComputeUnits && (
                                     <th
-                                        className="text-muted c-pointer"
+                                        className="text-muted e-cursor-pointer"
                                         onClick={() => {
                                             const additionalParams = new URLSearchParams(
                                                 currentSearchParams?.toString(),
@@ -288,7 +289,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                     </th>
                                 )}
                                 <th
-                                    className="text-muted c-pointer"
+                                    className="text-muted e-cursor-pointer"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'txnCost');
@@ -357,9 +358,9 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                                 ? 'NA'
                                                 : entries.map(([programId, count], i) => {
                                                       return (
-                                                          <div key={i} className="d-flex align-items-center">
+                                                          <div key={i} className="e-flex e-items-center">
                                                               <Address pubkey={new PublicKey(programId)} link />
-                                                              <span className="ms-2 text-muted">{`(${count})`}</span>
+                                                              <span className="text-muted e-ml-1.5">{`(${count})`}</span>
                                                           </div>
                                                       );
                                                   })}
@@ -373,14 +374,14 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
             )}
 
             {filteredTransactions.length > numDisplayed && (
-                <div className="card-footer">
+                <CardFooter ui="dashkit">
                     <button
-                        className="btn btn-primary w-100"
+                        className="btn btn-primary e-w-full"
                         onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More
                     </button>
-                </div>
+                </CardFooter>
             )}
         </div>
     );
@@ -460,7 +461,7 @@ const FilterDropdown = ({ filter, invokedPrograms, totalTransactionCount }: Filt
     );
 
     return (
-        <div className="dropdown me-2">
+        <div className="dropdown e-mr-1.5">
             <button className="btn btn-white btn-sm" data-bs-toggle="dropdown" type="button" ref={dropdownRef}>
                 {currentFilterOption.name} <ChevronDown className="align-text-top" size={13} />
             </button>

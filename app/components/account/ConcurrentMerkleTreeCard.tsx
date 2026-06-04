@@ -2,6 +2,7 @@ import { ConcurrentMerkleTreeAccount } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 
 import { toBuffer } from '@/app/shared/lib/bytes';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 import { Address } from '../common/Address';
 import { Slot } from '../common/Slot';
@@ -20,72 +21,72 @@ export function ConcurrentMerkleTreeCard({ data }: { data: Uint8Array }) {
     return (
         <>
             <div className="card">
-                <div className="card-header">
-                    <div className="row align-items-center">
+                <CardHeader ui="dashkit">
+                    <div className="row e-items-center">
                         <div className="col">
                             <h3 className="card-header-title">Concurrent Merkle Tree</h3>
                         </div>
                     </div>
-                </div>
+                </CardHeader>
 
                 <TableCardBody>
                     <tr>
                         <td>Authority</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <Address pubkey={authority} alignRight raw />
                         </td>
                     </tr>
                     <tr>
                         <td>Creation Slot</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <Slot slot={creationSlot.toNumber()} link />
                         </td>
                     </tr>
                     <tr>
                         <td>Max Depth</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <span className="text-monospace">{treeHeight}</span>
                         </td>
                     </tr>
                     <tr>
                         <td>Max Buffer Size</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <span className="text-monospace">{maxBufferSize}</span>
                         </td>
                     </tr>
                     <tr>
                         <td>Canopy Depth</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <span className="text-monospace">{canopyDepth}</span>
                         </td>
                     </tr>
                     <tr>
                         <td>Current Sequence Number</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <span className="text-monospace">{seq.toString()}</span>
                         </td>
                     </tr>
                     <tr>
                         <td>Current Root</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <Address pubkey={new PublicKey(root)} alignRight raw />
                         </td>
                     </tr>
                     <tr>
                         <td>Current Number of Leaves</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <span className="text-monospace">{rightMostIndex}</span>
                         </td>
                     </tr>
                     <tr>
                         <td>Remaining Leaves</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <span className="text-monospace">{Math.pow(2, treeHeight) - rightMostIndex}</span>
                         </td>
                     </tr>
                     <tr>
                         <td>Max Possible Leaves</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <span className="text-monospace">{Math.pow(2, treeHeight)}</span>
                         </td>
                     </tr>

@@ -61,15 +61,15 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                                 <TokenInfoBatchProvider>
                                     <ClusterModal />
                                     <div className="e-flex e-min-h-screen e-flex-col">
-                                        <div className="main-content pb-4 e-flex-1">
+                                        <div className="main-content e-flex-1 e-pb-6">
                                             <Navbar>
                                                 <SearchBar />
                                             </Navbar>
                                             <MessageBanner />
-                                            <div className="container my-3 d-xl-none">
+                                            <div className="container e-my-3 xl:e-hidden">
                                                 <SearchBar />
                                             </div>
-                                            <div className="container my-3 d-lg-none">
+                                            <div className="container e-my-3 lg:e-hidden">
                                                 <ClusterStatusButton />
                                             </div>
                                             {children}

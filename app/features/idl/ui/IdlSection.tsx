@@ -125,7 +125,7 @@ export function IdlSection({
                                 Download
                             </Button>
                             <div className="dropdown-menu-end dropdown-menu e-z-10">
-                                <div className="d-flex e-flex-col">
+                                <div className="e-flex e-flex-col">
                                     <Button onClick={handleDownloadIdl}>Download IDL</Button>
                                     <Button onClick={handleOpenCastawayDialog}>Generate SDK</Button>
                                 </div>

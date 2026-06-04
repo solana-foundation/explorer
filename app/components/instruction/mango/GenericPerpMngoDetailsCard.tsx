@@ -38,7 +38,7 @@ export function GenericPerpMngoDetailsCard(props: {
             {mangoPerpMarketConfig !== undefined && (
                 <tr>
                     <td>Perp market</td>
-                    <td className="text-lg-end">{mangoPerpMarketConfig.name}</td>
+                    <td className="e-text-right">{mangoPerpMarketConfig.name}</td>
                 </tr>
             )}
 

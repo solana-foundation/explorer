@@ -47,7 +47,7 @@ export function IdlRenderer({
             return (
                 <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering Anchor IDL" />}>
                     {spec === 'legacy-shank' ? (
-                        <div className="my-2">{`Note: Shank IDLs are not fully supported. Unused types may be absent from detailed view.`}</div>
+                        <div className="e-my-1.5">{`Note: Shank IDLs are not fully supported. Unused types may be absent from detailed view.`}</div>
                     ) : null}
 
                     <AnchorFormattedIdl idl={idl as AnchorIdl} programId={programId} searchStr={searchStr} />
@@ -58,7 +58,7 @@ export function IdlRenderer({
 
 function IdlErrorFallback({ message, ...props }: { message: string }) {
     return (
-        <center className="pt-5">
+        <center className="e-pt-9">
             {message}
             {JSON.stringify(props, undefined, 2)}
         </center>

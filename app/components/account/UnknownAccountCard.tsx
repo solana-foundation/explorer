@@ -20,19 +20,19 @@ export function UnknownAccountCard({ account }: { account: Account }) {
         <AccountCard title="Overview" account={account}>
             <tr>
                 <td>Address</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
                 </td>
             </tr>
             {label && (
                 <tr>
                     <td>Address Label</td>
-                    <td className="text-lg-end">{label}</td>
+                    <td className="e-text-right">{label}</td>
                 </tr>
             )}
             <tr>
                 <td>Balance (SOL)</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {account.lamports === 0 ? (
                         <AccountNofFound account={account} />
                     ) : (
@@ -44,20 +44,20 @@ export function UnknownAccountCard({ account }: { account: Account }) {
             {account.space !== undefined && (
                 <tr>
                     <td>Allocated Data Size</td>
-                    <td className="text-lg-end">{account.space} byte(s)</td>
+                    <td className="e-text-right">{account.space} byte(s)</td>
                 </tr>
             )}
 
             <tr>
                 <td>Assigned Program Id</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={account.owner} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Executable</td>
-                <td className="text-lg-end">{account.executable ? 'Yes' : 'No'}</td>
+                <td className="e-text-right">{account.executable ? 'Yes' : 'No'}</td>
             </tr>
         </AccountCard>
     );
@@ -171,7 +171,7 @@ function AccountNofFound({ account, labels = LABELS }: { account: Account; label
         return (
             <span>
                 <SearchingAddressIndicator searchingCluster={searchingCluster} />
-                <span className="align-middle">{labels['not-found']}</span>
+                <span className="e-align-middle">{labels['not-found']}</span>
             </span>
         );
     }
@@ -181,7 +181,7 @@ function AccountNofFound({ account, labels = LABELS }: { account: Account; label
     return isAddressFoundOnAnotherClsuter ? (
         <span>
             <AdjacentAddressLink address={address} foundCluster={foundCluster} />
-            <span className="align-middle">{labels['not-found']}</span>
+            <span className="e-align-middle">{labels['not-found']}</span>
         </span>
     ) : (
         <span>{labels['not-found']}</span>
@@ -196,7 +196,7 @@ function AdjacentAddressLink({ address, foundCluster }: { address: string; found
     });
 
     return (
-        <a href={foundClusterPath} className="text-info align-middle" style={{ marginRight: '5px' }}>
+        <a href={foundClusterPath} className="text-info e-align-middle" style={{ marginRight: '5px' }}>
             Found on {clusterName(foundCluster)}
         </a>
     );
@@ -213,9 +213,9 @@ function SearchingAddressIndicator({ searchingCluster }: { searchingCluster: Clu
                     marginRight: '5px',
                     width: '10px',
                 }}
-                className={`${spinnerCls} align-middle d-inline-block`}
+                className={`${spinnerCls} e-inline-block e-align-middle`}
             />
-            <span className="text-muted align-middle" style={{ marginRight: '10px', verticalAlign: 'middle' }}>
+            <span className="text-muted e-align-middle" style={{ marginRight: '10px', verticalAlign: 'middle' }}>
                 checking {clusterName(searchingCluster).toLowerCase()}
             </span>
         </>

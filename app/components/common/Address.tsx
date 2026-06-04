@@ -111,7 +111,7 @@ export function Address({
         <span ref={visibilityRef} className="e-block e-w-full">
             <div
                 ref={rowRef}
-                className={cn('e-relative e-flex e-w-full e-min-w-0 e-items-center', alignRight && 'md:e-justify-end')}
+                className={cn('e-relative e-flex e-w-full e-min-w-0 e-items-center', alignRight && 'e-justify-end')}
                 aria-label={ariaLabel}
             >
                 {/* Hidden span for measuring the natural text width — absolutely positioned so it doesn't affect layout */}

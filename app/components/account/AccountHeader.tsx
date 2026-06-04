@@ -180,7 +180,7 @@ function TokenMintHeaderCard({
 }) {
     const logoURI = token.logoURI ? getProxiedUri(token.logoURI) : undefined;
     return (
-        <div className="row align-items-center">
+        <div className="row e-items-center">
             <div className="col-auto">
                 <div className="avatar avatar-lg header-avatar-top">
                     {logoURI ? (
@@ -190,7 +190,7 @@ function TokenMintHeaderCard({
                             alt="Token logo"
                             height={64}
                             width={64}
-                            className="avatar-img rounded-circle border border-4 border-body"
+                            className="avatar-img border border-4 border-body e-rounded-full"
                         />
                     ) : (
                         <Image

@@ -35,14 +35,14 @@ export function Navbar({ children }: INavbarProps) {
                 </button>
 
                 <div
-                    className="navbar-children d-flex align-items-center flex-grow-1 h-100 d-none d-xl-block"
+                    className="navbar-children e-flex e-hidden e-h-full e-grow e-items-center xl:e-block"
                     style={{ minWidth: 0 }}
                 >
                     {children}
                 </div>
 
                 <div className={cn('collapse navbar-collapse ms-auto', navOpened && 'show', 'flex-shrink-0')}>
-                    <ul className="navbar-nav me-auto">
+                    <ul className="navbar-nav e-mr-auto">
                         <li className="nav-item">
                             <Link
                                 className={cn('nav-link', selectedLayoutSegment === 'feature-gates' && 'active')}
@@ -64,13 +64,13 @@ export function Navbar({ children }: INavbarProps) {
                                 Inspector
                             </Link>
                         </li>
-                        <li className="nav-item align-items-center justify-content-center pt-2">
+                        <li className="nav-item e-items-center e-justify-center e-pt-1.5">
                             <a
                                 aria-label="GitHub Repository"
                                 href="https://github.com/solana-foundation/explorer"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mx-3"
+                                className="e-mx-3"
                             >
                                 <svg width="30" height="30" viewBox="0 0 98 98" xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -85,7 +85,7 @@ export function Navbar({ children }: INavbarProps) {
                     </ul>
                 </div>
 
-                <div className="d-none d-lg-block flex-shrink-0 ms-1">
+                <div className="d-lg-block e-ml-[3px] e-hidden e-shrink-0">
                     <ClusterStatusButton />
                 </div>
             </div>

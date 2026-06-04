@@ -2,6 +2,8 @@ import { RefreshButton } from '@shared/ui/refresh-button';
 import { ConfirmedSignatureInfo, TransactionError } from '@solana/web3.js';
 import React from 'react';
 
+import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
+
 export type TransactionRow = {
     slot: number;
     signature: string;
@@ -24,10 +26,10 @@ export function HistoryCardHeader({
     fetching: boolean;
 }) {
     return (
-        <div className="card-header align-items-center">
+        <CardHeader ui="dashkit">
             <h3 className="card-header-title">{title}</h3>
             <RefreshButton analyticsSection={analyticsSection} onClick={refresh} fetching={fetching} />
-        </div>
+        </CardHeader>
     );
 }
 
@@ -41,14 +43,14 @@ export function HistoryCardFooter({
     loadMore: () => void;
 }) {
     return (
-        <div className="card-footer">
+        <CardFooter ui="dashkit">
             {foundOldest ? (
-                <div className="text-muted text-center">Fetched full history</div>
+                <div className="text-muted e-text-center">Fetched full history</div>
             ) : (
-                <button className="btn btn-primary w-100" onClick={() => loadMore()} disabled={fetching}>
+                <button className="btn btn-primary e-w-full" onClick={() => loadMore()} disabled={fetching}>
                     {fetching ? (
                         <>
-                            <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+                            <span className="align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
                             Loading
                         </>
                     ) : (
@@ -56,7 +58,7 @@ export function HistoryCardFooter({
                     )}
                 </button>
             )}
-        </div>
+        </CardFooter>
     );
 }
 

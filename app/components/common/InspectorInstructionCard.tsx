@@ -59,7 +59,7 @@ export function InspectorInstructionCard({
             ref={scrollAnchorRef}
             title={
                 <>
-                    <span className={`badge bg-${resultClass}-soft me-2`}>
+                    <span className={`badge bg-${resultClass}-soft e-mr-1.5`}>
                         #{index + 1}
                         {childIndex !== undefined ? `.${childIndex + 1}` : ''}
                     </span>
@@ -70,19 +70,19 @@ export function InspectorInstructionCard({
                 <button
                     disabled={defaultRaw}
                     className={cn(
-                        'btn btn-sm d-flex align-items-center',
+                        'btn btn-sm e-flex e-items-center',
                         showRaw ? 'btn-black active' : 'btn-white',
                         defaultRaw && '!e-pointer-events-auto e-cursor-not-allowed',
                     )}
                     onClick={rawClickHandler}
                 >
-                    <Code className="me-2" size={13} /> Raw
+                    <Code className="e-mr-1.5" size={13} /> Raw
                 </button>
             }
         >
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
+            <div className="table-responsive e-mb-0">
+                <table className="table table-sm table-nowrap card-table [&>tbody>tr:first-child>td]:!e-border-t-0">
                     <tbody className="list">
                         <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
                         {showRaw ? (

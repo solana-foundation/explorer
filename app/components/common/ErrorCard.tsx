@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { CardBody } from '@/app/shared/ui/Card';
+
 export function ErrorCard({
     retry,
     retryText,
@@ -14,15 +16,15 @@ export function ErrorCard({
     const buttonText = retryText || 'Try Again';
     return (
         <div className="card">
-            <div className="card-body text-center">
+            <CardBody ui="dashkit" className="e-text-center">
                 {text}
                 {retry && (
                     <>
-                        <span className="btn btn-white ms-3 d-none d-md-inline" onClick={retry}>
+                        <span className="btn btn-white e-ml-3 e-hidden md:e-inline" onClick={retry}>
                             {buttonText}
                         </span>
-                        <div className="d-block d-md-none mt-4">
-                            <span className="btn btn-white w-100" onClick={retry}>
+                        <div className="d-md-none e-mt-6 e-block">
+                            <span className="btn btn-white e-w-full" onClick={retry}>
                                 {buttonText}
                             </span>
                         </div>
@@ -34,7 +36,7 @@ export function ErrorCard({
                         )}
                     </>
                 )}
-            </div>
+            </CardBody>
         </div>
     );
 }

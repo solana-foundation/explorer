@@ -117,6 +117,14 @@ const config: Config = {
             },
             colors: {
                 dk: dkColors,
+                // TODO: replace hex with OKLCH.
+                dark: {
+                    accent: '#1dd79b',
+                    background: '#141816',
+                    border: '#282d2b',
+                    foreground: '#e5ebe9',
+                    'muted-foreground': '#698582',
+                },
                 // TODO: replace with e-text-neutral-400
                 muted: 'oklch(0.6406 0.0038 174.41)', // #8a8d8c
                 'heavy-metal': {

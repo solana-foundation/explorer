@@ -32,6 +32,7 @@ import { ChevronDown, MinusSquare, PlusSquare } from 'react-feather';
 
 import { INITIAL_TOKENS_TO_FETCH, INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import { Logger } from '@/app/shared/lib/logger';
+import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
 
 const TRUNCATE_TOKEN_LENGTH = 10;
 const ALL_TOKENS = '';
@@ -189,22 +190,22 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
         if (tokensToFetchCount === 0) {
             return (
                 <div className="card">
-                    <div className="card-header align-items-center">
+                    <CardHeader ui="dashkit">
                         <h3 className="card-header-title">Token History</h3>
-                    </div>
-                    <div className="card-body">
-                        <p className="text-muted text-center mb-0">
+                    </CardHeader>
+                    <CardBody ui="dashkit">
+                        <p className="text-muted e-mb-0 e-text-center">
                             Click the button below to load token transaction history
                         </p>
-                    </div>
-                    <div className="card-footer">
+                    </CardBody>
+                    <CardFooter ui="dashkit">
                         <button
-                            className="btn btn-primary w-100"
+                            className="btn btn-primary e-w-full"
                             onClick={() => setTokensToFetchCount(LOAD_MORE_COUNT)}
                         >
                             Load Token History
                         </button>
-                    </div>
+                    </CardFooter>
                 </div>
             );
         }
@@ -221,7 +222,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
 
     return (
         <div className="card">
-            <div className="card-header align-items-center">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title">Token History</h3>
                 <FilterDropdown
                     filter={filter}
@@ -234,10 +235,10 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     onClick={() => fetchHistories(true)}
                     fetching={fetching}
                 />
-            </div>
+            </CardHeader>
 
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive mb-0">
+            <div className="table-responsive e-mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
@@ -261,23 +262,23 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 </table>
             </div>
 
-            <div className="card-footer">
+            <CardFooter ui="dashkit">
                 {visibleTxCount < mintAndTxs.length ? (
                     <button
-                        className="btn btn-primary w-100"
+                        className="btn btn-primary e-w-full"
                         onClick={() => setVisibleTxCount(c => c + LOAD_MORE_COUNT)}
                     >
                         {`Show More (${visibleTxCount} of ${mintAndTxs.length})`}
                     </button>
                 ) : tokensToFetchCount < filteredTokens.length ? (
                     <button
-                        className="btn btn-primary w-100"
+                        className="btn btn-primary e-w-full"
                         onClick={() => setTokensToFetchCount(c => c + LOAD_MORE_COUNT)}
                         disabled={fetching}
                     >
                         {fetching ? (
                             <>
-                                <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+                                <span className="align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
                                 Loading
                             </>
                         ) : (
@@ -285,12 +286,12 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         )}
                     </button>
                 ) : allFoundOldest ? (
-                    <div className="text-muted text-center">Fetched full history</div>
+                    <div className="text-muted e-text-center">Fetched full history</div>
                 ) : (
-                    <button className="btn btn-primary w-100" onClick={() => fetchHistories()} disabled={fetching}>
+                    <button className="btn btn-primary e-w-full" onClick={() => fetchHistories()} disabled={fetching}>
                         {fetching ? (
                             <>
-                                <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+                                <span className="align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
                                 Loading
                             </>
                         ) : (
@@ -298,7 +299,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         )}
                     </button>
                 )}
-            </div>
+            </CardFooter>
         </div>
     );
 }
@@ -333,8 +334,8 @@ const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
     });
 
     return (
-        <div className="dropdown me-2">
-            <small className="me-2">Filter:</small>
+        <div className="dropdown e-mr-1.5">
+            <small className="e-mr-1.5">Filter:</small>
             <button className="btn btn-white btn-sm" type="button" onClick={toggle}>
                 {filter === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filter)}{' '}
                 <ChevronDown size={15} className="align-text-top" />
@@ -420,7 +421,7 @@ function InstructionDetails({ instructionType, tx }: { instructionType: Instruct
                             e.preventDefault();
                             setExpanded(!expanded);
                         }}
-                        className="c-pointer me-2"
+                        className="e-mr-1.5 e-cursor-pointer"
                     >
                         {expanded ? (
                             <MinusSquare className="align-text-top" size={13} />
@@ -477,7 +478,7 @@ function InstructionDetailsCell({
         return (
             <td>
                 <span
-                    className="btn btn-sm btn-outline-primary py-0 px-1 lh-1 text-xs"
+                    className="btn btn-sm btn-outline-primary e-px-[3px] e-py-0 e-leading-none"
                     role="button"
                     onClick={handleLoadClick}
                 >
@@ -490,7 +491,7 @@ function InstructionDetailsCell({
     if (isFetching) {
         return (
             <td>
-                <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+                <span className="align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
                 Loading
             </td>
         );
@@ -500,7 +501,7 @@ function InstructionDetailsCell({
         return (
             <td>
                 <span
-                    className="btn btn-sm btn-outline-warning py-0 px-1 lh-1 text-xs"
+                    className="btn btn-sm btn-outline-warning e-px-[3px] e-py-0 e-leading-none"
                     role="button"
                     onClick={handleLoadClick}
                 >

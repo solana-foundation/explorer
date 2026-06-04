@@ -98,13 +98,13 @@ export function SolanaAttestationDetailsCard({
         <InstructionCard title={`Solana Attestation: ${title}`} {...{ childIndex, index, innerCards, ix, result }}>
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end" colSpan={2}>
+                <td className="e-text-right" colSpan={2}>
                     <Address pubkey={new PublicKey(SAS_PROGRAM_ID)} alignRight link raw />
                 </td>
             </tr>
             <tr className="table-sep">
                 <td>Account Name</td>
-                <td className="text-lg-end" colSpan={2}>
+                <td className="e-text-right" colSpan={2}>
                     Address
                 </td>
             </tr>
@@ -113,7 +113,7 @@ export function SolanaAttestationDetailsCard({
                 Object.entries(parsed.accounts as Record<string, AccountMeta>).map(([key, value], idx: number) => (
                     <tr key={idx}>
                         <td>{key.charAt(0).toUpperCase() + key.slice(1)}</td>
-                        <td className="text-lg-end" colSpan={2}>
+                        <td className="e-text-right" colSpan={2}>
                             <Address pubkey={new PublicKey(value.address)} alignRight link />
                         </td>
                     </tr>
@@ -125,7 +125,7 @@ export function SolanaAttestationDetailsCard({
                     <tr className="table-sep">
                         <td>Argument Name</td>
                         <td>Type</td>
-                        <td className="text-lg-end">Value</td>
+                        <td className="e-text-right">Value</td>
                     </tr>
                     {mapCodamaIxArgsToRows(parsed.data)}
                 </>

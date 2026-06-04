@@ -3,6 +3,8 @@ import { Account } from '@providers/accounts';
 import { RefreshButton } from '@shared/ui/refresh-button';
 import React from 'react';
 
+import { CardHeader } from '@/app/shared/ui/Card';
+
 import { Address } from './Address';
 
 type AccountHeaderProps = {
@@ -17,10 +19,10 @@ type AccountProps = {
 
 export function AccountHeader({ title, analyticsSection, refresh }: AccountHeaderProps) {
     return (
-        <div className="card-header align-items-center">
+        <CardHeader ui="dashkit">
             <h3 className="card-header-title">{title}</h3>
             <RefreshButton analyticsSection={analyticsSection} onClick={refresh} />
-        </div>
+        </CardHeader>
     );
 }
 
@@ -28,7 +30,7 @@ export function AccountAddressRow({ account }: AccountProps) {
     return (
         <tr>
             <td>Address</td>
-            <td className="text-lg-end">
+            <td className="e-text-right">
                 <Address pubkey={account.pubkey} alignRight raw />
             </td>
         </tr>
@@ -40,7 +42,7 @@ export function AccountBalanceRow({ account }: AccountProps) {
     return (
         <tr>
             <td>Balance (SOL)</td>
-            <td className="text-lg-end text-uppercase">
+            <td className="e-text-right e-uppercase">
                 <SolBalance lamports={lamports} />
             </td>
         </tr>

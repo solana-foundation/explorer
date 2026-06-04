@@ -18,28 +18,28 @@ export function ConsumeEventsDetailsCard(props: SerumIxDetailsProps<ConsumeEvent
         >
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.programId} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Market</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Event Queue</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.accounts.eventQueue} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Open Orders Accounts</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {info.accounts.openOrders.map((account, index) => {
                         return <Address pubkey={account} key={index} alignRight link />;
                     })}
@@ -48,7 +48,7 @@ export function ConsumeEventsDetailsCard(props: SerumIxDetailsProps<ConsumeEvent
 
             <tr>
                 <td>Limit</td>
-                <td className="text-lg-end">{info.data.limit}</td>
+                <td className="e-text-right">{info.data.limit}</td>
             </tr>
         </InstructionCard>
     );

@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 
 import { equals, toBuffer } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 export function AnchorAccountCard({ account }: { account: Account }) {
     const { lamports } = account;
@@ -50,18 +51,18 @@ export function AnchorAccountCard({ account }: { account: Account }) {
     return (
         <div>
             <div className="card">
-                <div className="card-header">
-                    <div className="row align-items-center">
+                <CardHeader ui="dashkit">
+                    <div className="row e-items-center">
                         <div className="col">
                             <h3 className="card-header-title">
                                 {programName}: {accountDef.name.charAt(0).toUpperCase() + accountDef.name.slice(1)}
                             </h3>
                         </div>
                     </div>
-                </div>
+                </CardHeader>
 
                 {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-                <div className="table-responsive mb-0">
+                <div className="table-responsive e-mb-0">
                     <table className="table table-sm table-nowrap card-table">
                         <thead>
                             <tr>

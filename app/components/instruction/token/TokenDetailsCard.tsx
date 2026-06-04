@@ -121,7 +121,7 @@ function TokenInstruction({
         attributes.push(
             <tr key={mintAddress}>
                 <td>Token</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={new PublicKey(mintAddress)} alignRight link fetchTokenLabelInfo />
                 </td>
             </tr>,
@@ -141,7 +141,7 @@ function TokenInstruction({
                 attributes.push(
                     <tr key={key + i}>
                         <td>{label}</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <Address pubkey={publicKey} alignRight link />
                         </td>
                     </tr>,
@@ -184,7 +184,7 @@ function TokenInstruction({
         attributes.push(
             <tr key={key}>
                 <td>{label}</td>
-                <td className="text-lg-end">{tag}</td>
+                <td className="e-text-right">{tag}</td>
             </tr>,
         );
     }

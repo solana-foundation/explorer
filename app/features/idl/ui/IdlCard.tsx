@@ -8,6 +8,7 @@ import { cn } from '@shared/utils';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'react-feather';
 
+import { CardBody, CardHeader } from '@/app/shared/ui/Card';
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 import { clusterSlug } from '@/app/utils/cluster';
 
@@ -93,10 +94,10 @@ export function IdlCard({ programId }: { programId: string }) {
         }
         return (
             <div className="card">
-                <div className="card-header">
+                <CardHeader ui="dashkit">
                     <h4 className="card-header-title">Program IDL</h4>
-                </div>
-                <div className="card-body">
+                </CardHeader>
+                <CardBody ui="dashkit">
                     <div className="e-mb-6 e-flex e-items-center e-gap-2 e-text-destructive">
                         <AlertTriangle size={16} />
                         <span>
@@ -121,11 +122,11 @@ export function IdlCard({ programId }: { programId: string }) {
                                 className="btn btn-outline-primary btn-sm e-whitespace-nowrap"
                             >
                                 Full documentation
-                                <ExternalLink className="align-text-top ms-2" size={13} />
+                                <ExternalLink className="align-text-top e-ml-1.5" size={13} />
                             </a>
                         </div>
                     </div>
-                </div>
+                </CardBody>
             </div>
         );
     }
@@ -135,7 +136,7 @@ export function IdlCard({ programId }: { programId: string }) {
 
     return (
         <div className="card">
-            <div className="card-header">
+            <CardHeader ui="dashkit">
                 <div className="nav nav-tabs e-border-0" role="tablist">
                     {tabs
                         .filter(tab => tab.idl)
@@ -154,8 +155,8 @@ export function IdlCard({ programId }: { programId: string }) {
                             </button>
                         ))}
                 </div>
-            </div>
-            <div className="card-body">
+            </CardHeader>
+            <CardBody ui="dashkit">
                 {isMismatch ? (
                     <BaseWarningCard
                         message="IDL Program ID Mismatch"
@@ -179,7 +180,7 @@ export function IdlCard({ programId }: { programId: string }) {
                         onSearchChange={setSearchStr}
                     />
                 )}
-            </div>
+            </CardBody>
         </div>
     );
 }

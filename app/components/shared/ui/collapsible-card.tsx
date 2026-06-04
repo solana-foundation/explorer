@@ -17,14 +17,14 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
 
         return (
             <div ref={ref} className={cn('card', className)}>
-                <div className={cn('card-header', collapsible && !expanded && 'border-0')}>
-                    <h3 className="card-header-title d-flex align-items-center">{title}</h3>
+                <div className={cn('card-header e-gap-1.5', collapsible && !expanded && 'border-0')}>
+                    <h3 className="card-header-title e-flex e-items-center">{title}</h3>
                     {headerButtons}
                     {collapsible && (
                         <button
                             aria-expanded={expanded}
                             aria-label={expanded ? 'Collapse' : 'Expand'}
-                            className="btn btn-sm btn-white d-flex align-items-center justify-content-center e-py-[5.3px] e-transition-colors"
+                            className="btn btn-sm btn-white e-flex e-items-center e-justify-center e-py-[5.3px] e-transition-colors"
                             onClick={() => setExpanded(current => !current)}
                         >
                             <ChevronDown

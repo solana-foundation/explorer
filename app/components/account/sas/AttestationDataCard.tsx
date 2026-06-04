@@ -10,6 +10,7 @@ import {
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
 import { toBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
+import { CardHeader } from '@/app/shared/ui/Card';
 import {
     decodeAccount,
     decodeWithType,
@@ -37,15 +38,15 @@ function SchemaCard({ schema }: { schema: SasSchema }) {
     const borshSchema = convertSasSchemaToBorshSchema(schema);
     return (
         <div className="card">
-            <div className="card-header">
-                <div className="row align-items-center">
+            <CardHeader ui="dashkit">
+                <div className="row e-items-center">
                     <div className="col">
                         <h3 className="card-header-title">Schema Layout (Borsh)</h3>
                     </div>
                 </div>
-            </div>
+            </CardHeader>
 
-            <div className="card metadata-json-viewer m-4">
+            <div className="card metadata-json-viewer e-m-6">
                 <ReactJson src={borshSchema['schema']} style={{ padding: 25 }} name={false} />
             </div>
         </div>
@@ -73,16 +74,16 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
 
     return (
         <div className="card">
-            <div className="card-header">
-                <div className="row align-items-center">
+            <CardHeader ui="dashkit">
+                <div className="row e-items-center">
                     <div className="col">
                         <h3 className="card-header-title">Attestation Data {decoded ? '' : 'Raw (Base64)'}</h3>
                     </div>
                 </div>
-            </div>
+            </CardHeader>
 
             {decoded ? (
-                <div className="card metadata-json-viewer m-4">
+                <div className="card metadata-json-viewer e-m-6">
                     <ReactJson src={decoded} style={{ padding: 25 }} name={false} />
                 </div>
             ) : (

@@ -23,7 +23,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const SampleContent = () => (
-    <div className="table-responsive mb-0">
+    <div className="table-responsive e-mb-0">
         <table className="table table-sm table-nowrap card-table">
             <thead>
                 <tr>
@@ -34,15 +34,15 @@ const SampleContent = () => (
             <tbody className="list">
                 <tr>
                     <td>Account #1</td>
-                    <td className="text-lg-end">Gzf3…k9Pq</td>
+                    <td className="e-text-right">Gzf3…k9Pq</td>
                 </tr>
                 <tr>
                     <td>Account #2</td>
-                    <td className="text-lg-end">5xRt…mN7v</td>
+                    <td className="e-text-right">5xRt…mN7v</td>
                 </tr>
                 <tr>
                     <td>Account #3</td>
-                    <td className="text-lg-end">BqWu…dL2j</td>
+                    <td className="e-text-right">BqWu…dL2j</td>
                 </tr>
             </tbody>
         </table>
@@ -72,7 +72,7 @@ export const WithHeaderButtons: Story = {
     render: () => (
         <CollapsibleCard
             title="Account Input(s) (3)"
-            headerButtons={<button className="btn btn-sm btn-white d-flex align-items-center me-2">Raw</button>}
+            headerButtons={<button className="btn btn-sm btn-white e-mr-1.5 e-flex e-items-center">Raw</button>}
         >
             <SampleContent />
         </CollapsibleCard>
@@ -95,7 +95,7 @@ export const WithBadgeTitle: Story = {
             collapsible
             title={
                 <>
-                    <span className="badge bg-success-soft me-2">#1</span>
+                    <span className="badge bg-success-soft e-mr-1.5">#1</span>
                     Token Program: Transfer
                 </>
             }

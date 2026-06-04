@@ -26,14 +26,14 @@ export function UpgradeNonceDetailsCard(props: {
         >
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={SystemProgram.programId} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Nonce Address</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.nonceAccount} alignRight link />
                 </td>
             </tr>

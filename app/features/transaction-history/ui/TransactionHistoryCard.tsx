@@ -77,7 +77,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                 analyticsSection="transaction_history_header"
             />
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive mb-0">
+            <div className="table-responsive e-mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
@@ -159,7 +159,7 @@ function TransactionRawDataDownloadField({ signature }: { signature: string }) {
     }, [transactionData, signature, fetchRaw]);
 
     return (
-        <div className="d-flex align-items-center gap-1" onMouseEnter={handleHover}>
+        <div className="e-flex e-items-center e-gap-[3px]" onMouseEnter={handleHover}>
             <Copyable text={transactionData ? toBase64(transactionData) : null}>
                 <DownloadDropdown data={transactionData} loading={loading} filename={signature} />
             </Copyable>

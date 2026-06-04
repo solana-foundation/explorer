@@ -12,7 +12,7 @@ export function DetailRow(props: DetailRowProps) {
     return (
         <tr>
             <td>{props.label}</td>
-            <td className={cn('text-lg-end', monospace && 'font-monospace')}>
+            <td className={cn('e-text-right', monospace && 'font-monospace')}>
                 {'pubkey' in props ? <KitAddress address={props.pubkey} alignRight link /> : props.children}
             </td>
         </tr>

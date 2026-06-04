@@ -22,6 +22,7 @@ import { ChevronDown } from 'react-feather';
 import { getProxiedUri } from '@/app/features/metadata/utils';
 import { INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import TokenLogoPlaceholder from '@/app/img/logos-solana/low-contrast-solana-logo.svg';
+import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
 import { normalizeTokenAmount } from '@/app/utils';
 
 type Display = 'summary' | 'detail' | null;
@@ -77,17 +78,17 @@ export function OwnedTokensCard({ address }: { address: string }) {
             {showDropdown && <div className="dropdown-exit" onClick={() => setDropdown(false)} />}
 
             <div className="card">
-                <div className="card-header align-items-center">
+                <CardHeader ui="dashkit">
                     <h3 className="card-header-title">Token Holdings</h3>
                     <DisplayDropdown display={display} toggle={() => setDropdown(show => !show)} show={showDropdown} />
-                </div>
+                </CardHeader>
 
                 {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-                <div className="table-responsive mb-0">
+                <div className="table-responsive e-mb-0">
                     <table className="table table-sm table-nowrap card-table">
                         <thead>
                             <tr>
-                                {showLogos && <th className="text-muted w-1 p-0 text-center">Logo</th>}
+                                {showLogos && <th className="text-muted w-1 e-p-0 e-text-center">Logo</th>}
                                 {display === 'detail' && <th className="text-muted">Account Address</th>}
                                 <th className="text-muted">Mint Address</th>
                                 <th className="text-muted">{display === 'detail' ? 'Total Balance' : 'Balance'}</th>
@@ -239,7 +240,7 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
     return (
         <tr>
             {showLogo && (
-                <td className="w-1 p-0 text-center">
+                <td className="w-1 e-p-0 e-text-center">
                     {logoURI ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -247,7 +248,7 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
                             alt="Token icon"
                             height={16}
                             width={16}
-                            className="token-icon rounded-circle border border-4 border-gray-dark"
+                            className="token-icon border border-4 border-gray-dark e-rounded-full"
                         />
                     ) : (
                         <Image
@@ -299,11 +300,11 @@ function TokensCardFooter({
     }
 
     return (
-        <div className="card-footer">
-            <button className="btn btn-primary w-100" onClick={loadMore}>
+        <CardFooter ui="dashkit">
+            <button className="btn btn-primary e-w-full" onClick={loadMore}>
                 Load More ({visibleCount} of {totalCount})
             </button>
-        </div>
+        </CardFooter>
     );
 }
 

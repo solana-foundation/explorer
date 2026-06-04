@@ -62,7 +62,7 @@ export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
         } else if (type === 'string') {
             displayValue = (
                 <td
-                    className="text-lg-end"
+                    className="e-text-right"
                     style={{
                         fontSize: '0.85rem',
                         lineHeight: '1.2',
@@ -88,15 +88,15 @@ export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
                 className={nestingLevel > 0 ? 'table-nested-account' : ''}
             >
                 <td>
-                    <div className="d-flex flex-row align-items-center">
-                        {nestingLevel > 0 && <CornerDownRight className="me-2 mb-1" size={14} />}
+                    <div className="e-flex e-flex-row e-items-center">
+                        {nestingLevel > 0 && <CornerDownRight className="e-mb-[3px] e-mr-1.5" size={14} />}
                         <div>{key}</div>
                     </div>
                 </td>
                 <td>{type}</td>
                 {type === 'string' ? (
                     <td
-                        className="text-lg-end"
+                        className="e-text-right"
                         style={{
                             fontSize: '0.85rem',
                             lineHeight: '1.2',
@@ -111,7 +111,7 @@ export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
                         </Copyable>
                     </td>
                 ) : (
-                    <td className="text-lg-end">{displayValue}</td>
+                    <td className="e-text-right">{displayValue}</td>
                 )}
             </tr>
         );

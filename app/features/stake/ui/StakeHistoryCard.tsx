@@ -3,20 +3,22 @@ import { SolBalance } from '@components/common/SolBalance';
 import type { StakeHistoryEntry, SysvarStakeHistoryAccount } from '@validators/accounts/sysvar';
 import React from 'react';
 
+import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
+
 export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStakeHistoryAccount }) {
     const stakeHistory = sysvarAccount.info;
     return (
         <div className="card">
-            <div className="card-header">
-                <div className="row align-items-center">
+            <CardHeader ui="dashkit">
+                <div className="row e-items-center">
                     <div className="col">
                         <h3 className="card-header-title">Stake History</h3>
                     </div>
                 </div>
-            </div>
+            </CardHeader>
 
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive mb-0">
+            <div className="table-responsive e-mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
@@ -35,9 +37,9 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
             </div>
 
             {stakeHistory.length === 0 && (
-                <div className="card-footer">
-                    <div className="text-muted text-center">No stake history found</div>
-                </div>
+                <CardFooter ui="dashkit">
+                    <div className="text-muted e-text-center">No stake history found</div>
+                </CardFooter>
             )}
         </div>
     );

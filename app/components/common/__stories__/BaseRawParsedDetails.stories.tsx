@@ -37,7 +37,7 @@ export const WithChildRow: Story = {
         children: (
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end">System</td>
+                <td className="e-text-right">System</td>
             </tr>
         ),
         ix: sampleIx,

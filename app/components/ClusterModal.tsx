@@ -52,11 +52,11 @@ export function ClusterModal() {
         <>
             <div className={cn('offcanvas offcanvas-end', show && 'show')}>
                 <div className="modal-body" onClick={e => e.stopPropagation()}>
-                    <span className="c-pointer" onClick={onClose}>
+                    <span className="e-cursor-pointer" onClick={onClose}>
                         &times;
                     </span>
 
-                    <h2 className="text-center mb-4 mt-4">Choose a Cluster</h2>
+                    <h2 className="e-mb-6 e-mt-6 e-text-center">Choose a Cluster</h2>
                     <ClusterToggle />
                     <ClusterModalDeveloperSettings />
                 </div>
@@ -123,7 +123,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
     return (
         <>
             <Link
-                className={cn(clusterButtonVariants({ active, status }), 'mb-3')}
+                className={cn(clusterButtonVariants({ active, status }), 'e-mb-3')}
                 href={{ query: { cluster: 'custom', ...(customUrl.length > 0 ? { customUrl } : null) } }}
             >
                 Custom RPC URL
@@ -143,10 +143,10 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                         }}
                     />
                     {saving ? (
-                        <div className="col-12 mt-2 mb-3" data-testid="save-cluster-form">
+                        <div className="col-12 e-mb-3 e-mt-1.5" data-testid="save-cluster-form">
                             <input
                                 type="text"
-                                className="form-control mb-2"
+                                className="form-control e-mb-1.5"
                                 aria-label="Cluster name"
                                 placeholder="Cluster name"
                                 value={savedName}
@@ -160,13 +160,16 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                                 </small>
                             )}
                             {saveError && (
-                                <div className="alert alert-danger mt-2 mb-0 py-2" data-testid="save-cluster-error">
+                                <div
+                                    className="alert alert-danger e-mb-0 e-mt-1.5 e-py-1.5"
+                                    data-testid="save-cluster-error"
+                                >
                                     {saveError.message}
                                 </div>
                             )}
-                            <div className="d-flex gap-2 mt-1">
+                            <div className="e-mt-[3px] e-flex e-gap-1.5">
                                 <button
-                                    className="btn btn-primary flex-grow-1"
+                                    className="btn btn-primary e-grow"
                                     onClick={handleSave}
                                     disabled={!savedName.trim()}
                                     data-testid="confirm-save-cluster-btn"
@@ -174,7 +177,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                                     Save
                                 </button>
                                 <button
-                                    className="btn btn-white flex-grow-1"
+                                    className="btn btn-white e-grow"
                                     onClick={() => {
                                         setSaving(false);
                                         setSavedName('');
@@ -187,7 +190,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                         </div>
                     ) : !savedClusters.some(sc => sc.url === localUrl) ? (
                         <button
-                            className="btn btn-sm btn-white col-12 mt-2 mb-3"
+                            className="btn btn-sm btn-white col-12 e-mb-3 e-mt-1.5"
                             onClick={() => setSaving(true)}
                             data-testid="save-custom-cluster-btn"
                         >
@@ -221,12 +224,15 @@ function SavedClusterItem({
     const clusterUrl = `${pathname}?${nextQueryString}`;
 
     return (
-        <div className="position-relative col-12 mb-3" data-testid={`saved-cluster-${cluster.name}`}>
-            <Link className={cn(clusterButtonVariants({ active: isActive, status }), 'text-center')} href={clusterUrl}>
+        <div className="col-12 e-relative e-mb-3" data-testid={`saved-cluster-${cluster.name}`}>
+            <Link
+                className={cn(clusterButtonVariants({ active: isActive, status }), 'e-text-center')}
+                href={clusterUrl}
+            >
                 {cluster.name}
             </Link>
             <button
-                className="btn btn-sm position-absolute e-right-1 e-top-1/2 -e-translate-y-1/2"
+                className="btn btn-sm e-absolute e-right-1 e-top-1/2 -e-translate-y-1/2"
                 onClick={e => {
                     e.stopPropagation();
                     onDelete(cluster.name);
@@ -259,9 +265,9 @@ function SavedClustersSection({ status, savedClusters }: { status: ClusterStatus
     if (savedClusters.length === 0) return null;
 
     return (
-        <div className="w-100" data-testid="saved-clusters-section">
+        <div className="e-w-full" data-testid="saved-clusters-section">
             <hr />
-            <h3 className="text-center mb-3">Saved Clusters</h3>
+            <h3 className="e-mb-3 e-text-center">Saved Clusters</h3>
             {savedClusters.map(sc => (
                 <SavedClusterItem
                     key={sc.name}
@@ -281,7 +287,7 @@ function ClusterToggle() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     return (
-        <div className="btn-group-toggle d-flex flex-wrap mb-4">
+        <div className="btn-group-toggle e-mb-6 e-flex e-flex-wrap">
             {CLUSTERS.map((net, index) => {
                 const active = net === cluster;
                 if (net === Cluster.Custom)
@@ -301,7 +307,7 @@ function ClusterToggle() {
                 return (
                     <Link
                         key={index}
-                        className={cn(clusterButtonVariants({ active, status }), 'mb-3')}
+                        className={cn(clusterButtonVariants({ active, status }), 'e-mb-3')}
                         href={clusterUrl}
                     >
                         {clusterName(net)}

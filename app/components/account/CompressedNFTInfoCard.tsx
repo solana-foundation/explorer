@@ -12,6 +12,7 @@ import {
     useCompressedNftProof,
 } from '@/app/providers/compressed-nft';
 import { toBuffer } from '@/app/shared/lib/bytes';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 import { Address } from '../common/Address';
 import { TableCardBody } from '../common/TableCardBody';
@@ -57,9 +58,9 @@ export function DasCompressionInfoCard({
     const proofSize = proof.proof.length - canopyDepth;
     return (
         <div className="card">
-            <div className="card-header align-items-center">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title">Compression Info</h3>
-            </div>
+            </CardHeader>
 
             <TableCardBody>
                 <tr>
@@ -76,15 +77,15 @@ export function DasCompressionInfoCard({
                 </tr>
                 <tr>
                     <td>Proof Size {getProofSizePill(proofSize)}</td>
-                    <td className="text-lg-end">{proofSize}</td>
+                    <td className="e-text-right">{proofSize}</td>
                 </tr>
                 <tr>
                     <td>Leaf Number</td>
-                    <td className="text-lg-end">{compressedInfo.leaf_id}</td>
+                    <td className="e-text-right">{compressedInfo.leaf_id}</td>
                 </tr>
                 <tr>
                     <td>Sequence Number of Last Update</td>
-                    <td className="text-lg-end">{compressedInfo.seq}</td>
+                    <td className="e-text-right">{compressedInfo.seq}</td>
                 </tr>
                 <tr>
                     <td>Compressed Nft Hash</td>
@@ -111,7 +112,7 @@ export function DasCompressionInfoCard({
 
 function getVerifiedProofPill(verified: boolean) {
     return (
-        <div className={'d-inline-flex align-items-center ms-2'}>
+        <div className={'d-inline-flex e-ml-1.5 e-items-center'}>
             <span className={cn('badge badge-pill bg-dark', !verified && 'bg-danger-soft')}>{`Proof ${
                 verified ? '' : 'Not'
             } Verified`}</span>
@@ -132,7 +133,7 @@ function getProofSizePill(proofSize: number) {
     }
 
     return (
-        <div className={'d-inline-flex align-items-center ms-2'}>
+        <div className={'d-inline-flex e-ml-1.5 e-items-center'}>
             <span className={`badge badge-pill ${color}`}>{text}</span>
         </div>
     );

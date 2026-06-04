@@ -1,7 +1,7 @@
 import { cva, VariantProps } from 'class-variance-authority';
 import React from 'react';
 
-const tableVariants = cva(['table table-sm card-table'], {
+const tableVariants = cva(['table table-sm card-table [&>tbody>tr:first-child>td]:!e-border-t-0'], {
     defaultVariants: {
         layout: 'compact',
     },
@@ -18,7 +18,7 @@ export interface TableCardBodyProps extends VariantProps<typeof tableVariants>, 
 export function TableCardBody({ children, ...props }: TableCardBodyProps) {
     return (
         // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
-        <div className="table-responsive mb-0">
+        <div className="table-responsive e-mb-0">
             <table className={tableVariants(props)}>
                 <tbody className="list">{children}</tbody>
             </table>
@@ -33,7 +33,7 @@ export interface TableCardBodyProps extends VariantProps<typeof tableVariants>, 
 export function TableCardBodyHeaded({ children, headerComponent, ...props }: TableCardBodyProps) {
     return (
         // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
-        <div className="table-responsive mb-0">
+        <div className="table-responsive e-mb-0">
             <table className={tableVariants(props)}>
                 {headerComponent ? <thead>{headerComponent}</thead> : null}
                 <tbody className="list">{children}</tbody>
