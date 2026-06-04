@@ -4,12 +4,13 @@
 
 export const USER_AGENT = process.env.NEXT_PUBLIC_METADATA_USER_AGENT ?? 'Solana Explorer';
 
-// 3 MB default: well under Vercel's ~4.5 MB buffered-response cap. Oversize
-// fetches degrade to the ProxiedImage "view original" fallback. Tune from the
-// success-path size stats logged in fetch-resource.ts.
+// 4 MB default: just under Vercel's ~4.5 MB buffered-response cap (a thin
+// ~0.5 MB margin), so our cap stays the binding constraint while fitting more
+// images. Oversize fetches degrade to the ProxiedImage "view original"
+// fallback. Tune from the success-path size stats logged in fetch-resource.ts.
 export const MAX_SIZE = process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE
     ? Number(process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE)
-    : 3_000_000;
+    : 4_000_000;
 
 export const TIMEOUT = process.env.NEXT_PUBLIC_METADATA_TIMEOUT
     ? Number(process.env.NEXT_PUBLIC_METADATA_TIMEOUT)
@@ -23,18 +24,17 @@ export const SECURITY_HEADERS = {
     'X-Content-Type-Options': 'nosniff',
 };
 
-const BROWSER_MAX_AGE = 300; // 5 min
-const EDGE_MAX_AGE = 86_400; // 1 day
-const EDGE_SWR = 604_800; // 7 days
+const BROWSER_MAX_AGE = 86_400; // 1 day
 
-// Proxied metadata/images are effectively immutable (content-addressed Arweave/
-// IPFS or static CDN assets), so cache 2xx responses hard at the Vercel edge to
-// keep repeat views off this function and the upstream. The browser stays
-// modest (max-age) while the edge does the heavy lifting via a long s-maxage +
-// stale-while-revalidate. Set on success ONLY — error responses must not be
-// cached, and the upstream's own Cache-Control is intentionally not forwarded
-// (it's often no-store/no-cache, which would disqualify the response entirely).
+// Cache successful (2xx) responses in the viewer's own browser for up to a day
+// so repeat views skip the round-trip. The proxied content is effectively
+// immutable (content-addressed Arweave/IPFS, static CDN assets), so a day-long
+// browser cache is safe; a rare in-place overwrite of a mutable URL is still
+// picked up once the window lapses (no `immutable`). Browser-only by design: no
+// `Vercel-CDN-Cache-Control`, so responses are not cached at the Vercel edge —
+// every cold or cross-client view re-invokes the function. Set on success ONLY
+// (error responses must not be cached), and the upstream's own Cache-Control is
+// intentionally not forwarded (it's frequently no-store/no-cache/private).
 export const CACHE_HEADERS = {
     'Cache-Control': `public, max-age=${BROWSER_MAX_AGE}`,
-    'Vercel-CDN-Cache-Control': `public, s-maxage=${EDGE_MAX_AGE}, stale-while-revalidate=${EDGE_SWR}`,
 };

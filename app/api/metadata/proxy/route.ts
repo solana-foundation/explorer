@@ -77,12 +77,15 @@ function parseUrl(maybeUrl: string | null): URL | undefined {
 // Omitting it keeps only safelisted headers, letting the browser accept
 // the response without extra CORS checks.
 function buildResponse(data: unknown, resourceHeaders: Headers): NextResponse {
+    // CACHE_HEADERS sets a browser-only Cache-Control (set on success
+    // only); the upstream's own Cache-Control is not forwarded. The upstream
+    // ETag is dropped too — the route does no conditional revalidation, so a
+    // forwarded validator would be inert (and a placeholder default would risk
+    // false 304 matches across distinct resources).
     const responseHeaders: Record<string, string> = {
         ...SECURITY_HEADERS,
         ...CACHE_HEADERS,
         'Content-Type': resourceHeaders.get('content-type') ?? 'application/json; charset=utf-8',
-        // Forwarded so the edge can revalidate cheaply (304) when SWR refreshes.
-        Etag: resourceHeaders.get('etag') ?? 'no-etag',
     };
 
     if (data instanceof ArrayBuffer) {
