@@ -3,8 +3,7 @@ export const getProxiedUri = (uri: string): string | '' => {
 
     if (!isProxyEnabled) return uri;
 
-    // handle empty addresses as that is likely the case for metadata
-    if (uri === '') return '';
+    if (!uri) return '';
 
     let url: URL;
     try {
