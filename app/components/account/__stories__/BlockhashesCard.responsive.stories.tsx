@@ -11,7 +11,7 @@ const meta: Meta<typeof BlockhashesCard> = {
     parameters: {
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/BlockhashesCard/Responsive',
 };
 
