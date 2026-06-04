@@ -2,12 +2,17 @@
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
 import { cn } from '@components/shared/utils';
-import { FormattedIdl, isIdlProgramIdMismatch, isInteractiveIdlSupported, type SupportedIdl } from '@entities/idl';
+import {
+    FormattedIdl,
+    getIdlStandard,
+    isIdlProgramIdMismatch,
+    isInteractiveIdlSupported,
+    type SupportedIdl,
+} from '@entities/idl';
 import { isEnvEnabled } from '@utils/env';
 import React, { useMemo } from 'react';
 import { PlayCircle, XCircle } from 'react-feather';
 
-import { idlAnalytics } from '@/app/shared/lib/analytics';
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 
 import { BaseIdlAccounts } from '../formatted-idl/ui/BaseIdlAccounts';
@@ -18,6 +23,7 @@ import { BaseIdlInstructions } from '../formatted-idl/ui/BaseIdlInstructions';
 import { BaseIdlPdas } from '../formatted-idl/ui/BaseIdlPdas';
 import { BaseIdlTypes } from '../formatted-idl/ui/BaseIdlTypes';
 import type { FormattedIdlDataView, IdlDataKeys } from '../formatted-idl/ui/types';
+import { createIdlAnalytics } from '../interactive-idl/lib/analytics';
 import { InteractWithIdl } from '../interactive-idl/ui/InteractWithIdl';
 
 const IS_INTERACTIVE_IDL_ENABLED = isEnvEnabled(process.env.NEXT_PUBLIC_INTERACTIVE_IDL_ENABLED);
@@ -109,6 +115,8 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, pro
         // Show interactive tab for modern Anchor IDLs and Codama IDLs
         if (originalIdl && isInteractiveIdlSupported(originalIdl) && IS_INTERACTIVE_IDL_ENABLED) {
             const isProgramIdMismatch = programId ? isIdlProgramIdMismatch(originalIdl, programId) : false;
+            // Analytics is created during runtime because GA events are scoped to the IDL standard (Anchor | Codama).
+            const idlAnalytics = createIdlAnalytics(getIdlStandard(originalIdl));
 
             tabItems.push({
                 disabled: !idl.instructions?.length,
