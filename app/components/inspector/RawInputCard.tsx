@@ -253,7 +253,7 @@ export function RawInput({
                     rows={rows}
                     onInput={onInput}
                     ref={rawInput}
-                    className="form-control form-control-flush form-control-auto font-monospace"
+                    className="form-control form-control-flush form-control-auto e-font-mono"
                     placeholder={placeholder}
                     name="tx-inspector-input"
                 ></textarea>
@@ -261,11 +261,11 @@ export function RawInput({
                     <div className="col e-flex e-items-center">
                         {error && (
                             <>
-                                <span className="text-warning small e-mr-1.5">
+                                <span className="e-text-dk-warning-on-dark small e-mr-1.5">
                                     <i className="fe fe-alert-circle"></i>
                                 </span>
 
-                                <span className="text-warning">{error}</span>
+                                <span className="e-text-dk-warning-on-dark">{error}</span>
                             </>
                         )}
                     </div>
