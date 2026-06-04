@@ -35,7 +35,7 @@ export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount
             </div>
 
             <CardFooter ui="dashkit">
-                <div className="text-muted e-text-center">{slotHashes.length > 0 ? '' : 'No hashes found'}</div>
+                <div className="e-text-center e-text-dk-gray-700">{slotHashes.length > 0 ? '' : 'No hashes found'}</div>
             </CardFooter>
         </div>
     );
