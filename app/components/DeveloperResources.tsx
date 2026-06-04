@@ -92,7 +92,7 @@ function ResourceCard({ title, description, image, link, imageBackground }: Reso
             </div>
             <div className="e-flex e-flex-col">
                 <p className="e-mb-[3px]">{title}</p>
-                <p className="text-muted line-clamp-3 e-mb-1.5 e-whitespace-normal">{description}</p>
+                <p className="e-text-dk-gray-700 e-line-clamp-3 e-mb-1.5 e-whitespace-normal">{description}</p>
             </div>
         </div>
     );
