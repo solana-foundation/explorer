@@ -245,7 +245,16 @@ function InspectorInstructionCard({
                 <ErrorBoundary
                     fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
                 >
-                    <TokenDetailsCard key={index} ix={parsedIx} tx={parsedTx} index={index} result={INSPECTOR_RESULT} />
+                    <TokenDetailsCard
+                        key={index}
+                        ix={parsedIx}
+                        tx={parsedTx}
+                        index={index}
+                        result={INSPECTOR_RESULT}
+                        InstructionCardComponent={InspectorInstructionCardComponent}
+                        message={message}
+                        raw={ix}
+                    />
                 </ErrorBoundary>
             );
         case 'mpl-token-metadata':

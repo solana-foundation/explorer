@@ -50,7 +50,11 @@ function convertAccountKeysToParsedMessageAccounts(keys: LegacyAccountMeta[]): P
         (key): ParsedMessageAccount => ({
             pubkey: key.pubkey,
             signer: key.isSigner,
-            source: 'lookupTable',
+            // A bare `TransactionInstruction.keys` entry carries no provenance, so
+            // we can't tell static from lookup-table-loaded accounts here. Default
+            // to 'transaction' (the honest default) rather than mislabelling static
+            // keys as 'lookupTable'.
+            source: 'transaction',
             writable: key.isWritable,
         }),
     );
