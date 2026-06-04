@@ -55,10 +55,10 @@ export const DashkitInsideCard: Story = {
     args: { nowrap: true, ui: 'dashkit' },
     render: args => (
         <BaseCard ui="dashkit">
-            <BaseCardHeader>
-                <BaseCardTitle>Top Accounts</BaseCardTitle>
+            <BaseCardHeader ui="dashkit">
+                <BaseCardTitle ui="dashkit">Top Accounts</BaseCardTitle>
             </BaseCardHeader>
-            <BaseCardBody className="e-p-0">
+            <BaseCardBody ui="dashkit" className="e-p-0">
                 <BaseCardTable {...args}>
                     <SampleRows />
                 </BaseCardTable>
