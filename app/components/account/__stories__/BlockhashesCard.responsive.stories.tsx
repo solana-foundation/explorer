@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 
+import { gen } from '@__fixtures__/gen';
+
 import { BlockhashesCard } from '../BlockhashesCard';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
@@ -17,12 +19,12 @@ const meta: Meta<typeof BlockhashesCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const sampleBlockhash = (i: number) => ({
-    blockhash: `5o7n8u${'A'.repeat(20)}${i}xY${'k'.repeat(20)}`,
-    feeCalculator: { lamportsPerSignature: '5000' },
-});
-
-const args = { blockhashes: Array.from({ length: 4 }, (_, i) => sampleBlockhash(i)) };
+const args = {
+    blockhashes: Array.from({ length: 4 }, (_, i) => ({
+        blockhash: gen.blockhash(i),
+        feeCalculator: { lamportsPerSignature: '5000' },
+    })),
+};
 
 export const Mobile: Story = {
     args,
