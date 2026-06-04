@@ -1,6 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-
 import { gen } from '@__fixtures__/gen';
+import type { Meta, StoryObj } from '@storybook/react';
 
 import { BlockhashesCard } from '../BlockhashesCard';
 

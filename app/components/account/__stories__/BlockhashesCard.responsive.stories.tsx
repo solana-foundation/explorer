@@ -1,7 +1,6 @@
+import { gen } from '@__fixtures__/gen';
 import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
-
-import { gen } from '@__fixtures__/gen';
 
 import { BlockhashesCard } from '../BlockhashesCard';
 
