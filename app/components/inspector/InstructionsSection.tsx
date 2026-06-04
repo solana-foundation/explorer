@@ -191,6 +191,9 @@ function InspectorInstructionCard({
         );
     }
 
+    // `parsedTx` is non-null here by construction (it's built whenever `parsedIx`
+    // is a ParsedInstruction, which the guards above guarantee). This guard exists
+    // to narrow its type for the switch below — TS can't relate the two useMemos.
     if (!parsedTx) {
         return (
             <UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} innerCards={innerCards} />

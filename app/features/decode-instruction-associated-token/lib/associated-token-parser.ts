@@ -10,7 +10,7 @@ import {
 } from '@solana-program/token';
 import { create } from 'superstruct';
 
-import { alloc, bytes, equals } from '@/app/shared/lib/bytes';
+import { bytes } from '@/app/shared/lib/bytes';
 import type { KitInstruction } from '@/app/shared/lib/web3js-compat';
 import type { ParserProgramLabel } from '@/app/utils/programs';
 
@@ -82,7 +82,7 @@ export function parseAssociatedTokenRpcInstruction(ix: ParsedInstruction): Assoc
  * left untouched.
  */
 function effectiveInstructionData(data: Uint8Array): Uint8Array {
-    if (equals(data, alloc(CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR))) {
+    if (data.length === 0) {
         return bytes([CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR]);
     }
     return data;

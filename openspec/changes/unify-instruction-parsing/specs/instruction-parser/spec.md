@@ -112,7 +112,7 @@ Every page that renders instruction cards SHALL consume the dispatcher exported 
 
 #### Scenario: Adding a new program
 
-- **WHEN** a new program slice is added under `app/features/instruction-*/`
+- **WHEN** a new program slice is added under `app/features/decode-instruction-*/`
 - **THEN** its parser is appended to the shared dispatcher's `parsers` list
 - **AND** every `/tx` route picks up the new program through the layout provider with no further changes
 
