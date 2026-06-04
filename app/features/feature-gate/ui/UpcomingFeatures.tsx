@@ -26,7 +26,8 @@ export function UpcomingFeatures() {
             case Cluster.Devnet:
                 return feature.testnet_activation_epoch !== null && !feature.mainnet_activation_epoch;
             case Cluster.Testnet:
-                return !feature.mainnet_activation_epoch;
+                // Show features not yet activated on testnet (truly "upcoming" for this cluster)
+                return feature.testnet_activation_epoch === null;
             default:
                 return false;
         }
