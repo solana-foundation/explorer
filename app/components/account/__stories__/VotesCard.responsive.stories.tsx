@@ -20,7 +20,7 @@ const meta: Meta<typeof VotesCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const baseSlot = Number(gen.slot());
+const baseSlot = Number(gen.slot(0));
 const votes = Array.from({ length: 6 }, (_, i) => ({
     confirmationCount: 31 - i,
     slot: baseSlot + i,
