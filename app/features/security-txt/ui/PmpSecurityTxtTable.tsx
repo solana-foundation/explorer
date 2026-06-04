@@ -6,6 +6,20 @@ import { PMP_SECURITY_TXT_KEYS } from '../lib/constants';
 import { CodeCell, ContactInfo, ExternalLinkCell, RenderCode, RenderExternalLink, StringCell } from './common';
 import { isString, isValidLink, tryParseContactString } from './utils';
 
+const CONTACT_TYPES = new Set(['discord', 'email', 'link', 'other', 'telegram', 'twitter']);
+
+function parseContactList(value: string): [string, string][] {
+    const parts = value.split(',').map(s => s.trim()).filter(Boolean);
+    const parsed: [string, string][] = [];
+    for (const part of parts) {
+        const result = tryParseContactString(part);
+        if (Array.isArray(result) && CONTACT_TYPES.has(result[0].toLowerCase())) {
+            parsed.push([result[0], result[1]]);
+        }
+    }
+    return parsed.length === parts.length ? parsed : [];
+}
+
 export function PmpSecurityTxtTable({ data }: { data: Record<string, any> }) {
     const entries = useMemo(() => {
         if (!(data instanceof Object)) {
@@ -61,6 +75,18 @@ function RenderEntry({ entryKey, value }: { entryKey: string; value: any }) {
     } else if (isValidLink(value)) {
         return displayLinkValue(value);
     } else if (isString(value)) {
+        const contacts = parseContactList(value);
+        if (contacts.length > 0) {
+            return (
+                <td className="text-lg-end font-monospace">
+                    {contacts.map(([type, info], i) => (
+                        <div key={i}>
+                            <ContactInfo type={type} information={info} />
+                        </div>
+                    ))}
+                </td>
+            );
+        }
         return displayStringValue(value);
     } else if (Array.isArray(value)) {
         return displayArrayValue(entryKey, value);
