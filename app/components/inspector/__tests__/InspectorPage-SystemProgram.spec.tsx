@@ -6,10 +6,12 @@ import { describe, expect, test, vi } from 'vitest';
 
 import * as stubs from '@/app/__tests__/mock-stubs';
 import { GET } from '@/app/api/anchor/route';
+import { InstructionParserProvider } from '@/app/entities/instruction-parser';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { TransactionsProvider } from '@/app/providers/transactions';
+import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
 import { TransactionInspectorPage } from '../InspectorPage';
 
@@ -154,7 +156,9 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            </InstructionParserProvider>
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
@@ -194,7 +198,9 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            </InstructionParserProvider>
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
@@ -235,7 +241,9 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            </InstructionParserProvider>
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
@@ -271,7 +279,9 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            </InstructionParserProvider>
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
@@ -305,7 +315,9 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            </InstructionParserProvider>
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
@@ -342,7 +354,9 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            </InstructionParserProvider>
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
@@ -378,7 +392,9 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            </InstructionParserProvider>
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
@@ -416,7 +432,9 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            </InstructionParserProvider>
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
@@ -453,7 +471,9 @@ describe("TransactionInspectorPage with SystemProgram' instructions", () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <TransactionInspectorPage showTokenBalanceChanges={false} />
+                            </InstructionParserProvider>
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>

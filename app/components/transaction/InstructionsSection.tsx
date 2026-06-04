@@ -26,6 +26,7 @@ import {
     ZkElGamalProofDetailsCard,
 } from '@components/instruction/ZkElGamalProofDetailsCard';
 import { useAnchorProgram } from '@entities/idl';
+import { useInstructionParser } from '@entities/instruction-parser';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
 import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';
@@ -185,13 +186,19 @@ function InstructionCard({
     const key = `${index}-${childIndex}`;
     const { program: anchorProgram } = useAnchorProgram(ix.programId.toString(), url, cluster);
     const { programMetadataIdl } = useProgramMetadataIdl(ix.programId.toString(), url, cluster);
+    const dispatcher = useInstructionParser();
 
-    if ('parsed' in ix) {
+    const parsedIx = React.useMemo(
+        () => ('parsed' in ix ? dispatcher.fromParsedInstruction(ix) : undefined),
+        [dispatcher, ix],
+    );
+
+    if ('parsed' in ix && parsedIx) {
         const props = {
             childIndex,
             index,
             innerCards,
-            ix,
+            ix: parsedIx,
             result,
             tx,
         };

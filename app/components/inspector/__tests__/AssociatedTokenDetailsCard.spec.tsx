@@ -7,12 +7,15 @@ import { describe } from 'vitest';
 import { resolveAddressLookupTables } from '@/app/__tests__/mock-resolvers';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@/app/entities/instruction-parser';
+import { associatedTokenInstructionParser } from '@/app/features/decode-instruction-associated-token';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 
-import { intoParsedInstruction } from '../../inspector/into-parsed-data';
 import { AssociatedTokenDetailsCard } from '../associated-token/AssociatedTokenDetailsCard';
+
+const dispatcher = createInstructionParserDispatcher([associatedTokenInstructionParser]);
 
 describe('inspector::AssociatedTokenDetailsCard', () => {
     test('should render "CreateIdempotent" card', async () => {
@@ -24,7 +27,8 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         }).instructions[index];
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
-        const ix = intoParsedInstruction(ti);
+        const ix = dispatcher.fromTransactionInstruction(ti);
+        if (!isParsedInstruction(ix)) throw new Error('AT slice did not recognise fixture');
 
         // check that component is rendered properly
         render(
@@ -59,7 +63,8 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         }).instructions[index];
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
-        const ix = intoParsedInstruction(ti);
+        const ix = dispatcher.fromTransactionInstruction(ti);
+        if (!isParsedInstruction(ix)) throw new Error('AT slice did not recognise fixture');
 
         // check that component is rendered properly
         render(
@@ -91,7 +96,8 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         }).instructions[index];
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
-        const ix = intoParsedInstruction(ti);
+        const ix = dispatcher.fromTransactionInstruction(ti);
+        if (!isParsedInstruction(ix)) throw new Error('AT slice did not recognise fixture');
 
         // check that component is rendered properly
         render(
@@ -127,7 +133,8 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
 
         expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
 
-        const ix = intoParsedInstruction(ti);
+        const ix = dispatcher.fromTransactionInstruction(ti);
+        if (!isParsedInstruction(ix)) throw new Error('AT slice did not recognise fixture');
 
         // check that component is rendered properly
         render(

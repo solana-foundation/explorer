@@ -1,8 +1,15 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
-import { intoParsedInstruction, intoParsedTransaction } from '@components/inspector/into-parsed-data';
-import { ParsedInstruction, SystemProgram, TransactionMessage } from '@solana/web3.js';
+import {
+    createInstructionParserDispatcher,
+    isParsedInstruction,
+    toParsedTransaction,
+} from '@entities/instruction-parser';
+import { systemInstructionParser } from '@features/decode-instruction-system';
+import { SystemProgram, TransactionInstruction, TransactionMessage } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
+
+const dispatcher = createInstructionParserDispatcher([systemInstructionParser]);
 
 vi.mock('next/navigation', () => ({
     usePathname: vi.fn(),
@@ -25,8 +32,8 @@ describe('instruction::SystemDetailsCard', () => {
         const m = mock.deserializeMessage(stubs.systemTransferMsg);
         const ti = TransactionMessage.decompile(m, { addressLookupTableAccounts: [] }).instructions[index];
 
-        const parsedIx = intoParsedInstruction(ti);
-        const tx = intoParsedTransaction(ti, m, [parsedIx]);
+        const parsedIx = dispatchOrThrow(ti);
+        const tx = toParsedTransaction(ti, m, [parsedIx]);
 
         expect(ti.programId.equals(SystemProgram.programId)).toBeTruthy();
 
@@ -35,13 +42,7 @@ describe('instruction::SystemDetailsCard', () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <SystemDetailsCard
-                                index={index}
-                                ix={parsedIx as ParsedInstruction}
-                                raw={ti}
-                                result={{ err: null }}
-                                tx={tx}
-                            />
+                            <SystemDetailsCard index={index} ix={parsedIx} raw={ti} result={{ err: null }} tx={tx} />
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
@@ -58,8 +59,8 @@ describe('instruction::SystemDetailsCard', () => {
         const m = mock.deserializeMessage(stubs.systemTransferWithSeedMsg);
         const ti = TransactionMessage.decompile(m, { addressLookupTableAccounts: [] }).instructions[index];
 
-        const parsedIx = intoParsedInstruction(ti);
-        const tx = intoParsedTransaction(ti, m, [parsedIx]);
+        const parsedIx = dispatchOrThrow(ti);
+        const tx = toParsedTransaction(ti, m, [parsedIx]);
 
         expect(ti.programId.equals(SystemProgram.programId)).toBeTruthy();
 
@@ -68,13 +69,7 @@ describe('instruction::SystemDetailsCard', () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <SystemDetailsCard
-                                index={index}
-                                ix={parsedIx as ParsedInstruction}
-                                raw={ti}
-                                result={{ err: null }}
-                                tx={tx}
-                            />
+                            <SystemDetailsCard index={index} ix={parsedIx} raw={ti} result={{ err: null }} tx={tx} />
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
@@ -86,3 +81,9 @@ describe('instruction::SystemDetailsCard', () => {
         });
     });
 });
+
+function dispatchOrThrow(ti: TransactionInstruction) {
+    const parsedIx = dispatcher.fromTransactionInstruction(ti);
+    if (!isParsedInstruction(parsedIx)) throw new Error('System slice did not recognise fixture');
+    return parsedIx;
+}

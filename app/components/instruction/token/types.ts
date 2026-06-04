@@ -1,5 +1,5 @@
 import { PublicKeyFromString } from '@validators/pubkey';
-import { array, boolean, enums, Infer, nullable, number, optional, string, type, union } from 'superstruct';
+import { array, boolean, create, enums, Infer, nullable, number, optional, string, type, union } from 'superstruct';
 
 export type TokenAmountUi = Infer<typeof TokenAmountUi>;
 export const TokenAmountUi = type({
@@ -659,6 +659,11 @@ export const IX_STRUCTS = {
     withdrawConfidentialTransfer: WithdrawConfidentialTransfer,
     withdrawExcessLamports: WithdrawExcessLamports,
 };
+
+export function getTokenIxValidator(type: string): Parameters<typeof create>[1] | undefined {
+    // `type` arrives as a free string from RPC; IX_STRUCTS is keyed by the narrower TokenInstructionType.
+    return (IX_STRUCTS as Record<string, Parameters<typeof create>[1]>)[type];
+}
 
 export const IX_TITLES = {
     amountToUiAmount: 'Amount To UiAmount',

@@ -1,13 +1,14 @@
-import { Address } from '@solana/kit';
+import { type Address } from '@solana/kit';
 import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { getCreateAccountWithSeedInstructionDataEncoder } from '@solana-program/system';
 import { describe, expect, test } from 'vitest';
 
+import type { CreateAccountWithSeedInfo } from '@/app/components/instruction/system/types';
 import { invariant } from '@/app/shared/lib/invariant';
+import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
-import { parseSystemProgramInstruction } from '../system-program.parser';
+import { parseSystemInstruction } from '../lib/system-parser';
 
-/** Helper to encode CreateAccountWithSeed instruction data using @solana-program/system */
 function createCreateAccountWithSeedData(params: {
     base: PublicKey;
     seed: string;
@@ -26,7 +27,11 @@ function createCreateAccountWithSeedData(params: {
     return Buffer.from(data);
 }
 
-describe('parseSystemProgramInstruction', () => {
+function infoAsCreateAccountWithSeed(value: unknown): CreateAccountWithSeedInfo {
+    return value as CreateAccountWithSeedInfo;
+}
+
+describe('parseSystemInstruction', () => {
     describe('CreateAccountWithSeed', () => {
         const payer = new PublicKey('5beFUXg6tj7as2rVSvr39MsTQChSsyBNy13j8Em3ZMVV');
         const newAccount = new PublicKey('HGZxAm97YjZN2Ea8kk4zNv87fGYnUmEDphTiN9pVVRf1');
@@ -54,55 +59,53 @@ describe('parseSystemProgramInstruction', () => {
                 programId: SystemProgram.programId,
             });
 
-            const result = parseSystemProgramInstruction(instruction);
+            const result = parseSystemInstruction(toKitInstruction(instruction));
 
             invariant(result, 'expected parser to return an instruction for a valid CreateAccountWithSeed payload');
             expect(result.type).toBe('createAccountWithSeed');
-            expect(result.info.source.equals(payer)).toBe(true);
-            expect(result.info.newAccount.equals(newAccount)).toBe(true);
-            expect(result.info.base.equals(baseAccount)).toBe(true);
-            expect(result.info.seed).toBe(seed);
-            expect(result.info.lamports).toBe(lamports);
-            expect(result.info.space).toBe(space);
-            expect(result.info.owner.equals(tokenProgram)).toBe(true);
+            const info = infoAsCreateAccountWithSeed(result.info);
+            expect(info.source.equals(payer)).toBe(true);
+            expect(info.newAccount.equals(newAccount)).toBe(true);
+            expect(info.base.equals(baseAccount)).toBe(true);
+            expect(info.seed).toBe(seed);
+            expect(info.lamports).toBe(lamports);
+            expect(info.space).toBe(space);
+            expect(info.owner.equals(tokenProgram)).toBe(true);
         });
 
         test('should parse 2-account variant (payer === baseAccount)', () => {
-            // Create instruction with 2 accounts: payer (who is also baseAccount), newAccount
-            // This is the case that was causing the "Not enough accounts" error
+            // payer === baseAccount: the 3rd account is omitted and the
+            // base address must be recovered from instruction data.
             const instruction = new TransactionInstruction({
                 data: createCreateAccountWithSeedData({
                     base: payer,
                     lamports,
-
                     programId: tokenProgram,
-                    // base is the same as payer
                     seed,
                     space,
                 }),
                 keys: [
                     { isSigner: true, isWritable: true, pubkey: payer },
                     { isSigner: false, isWritable: true, pubkey: newAccount },
-                    // Note: no third account - baseAccount is omitted because payer === baseAccount
                 ],
                 programId: SystemProgram.programId,
             });
 
-            const result = parseSystemProgramInstruction(instruction);
+            const result = parseSystemInstruction(toKitInstruction(instruction));
 
             invariant(
                 result,
                 'expected parser to return an instruction for a valid 2-account CreateAccountWithSeed payload',
             );
             expect(result.type).toBe('createAccountWithSeed');
-            expect(result.info.source.equals(payer)).toBe(true);
-            expect(result.info.newAccount.equals(newAccount)).toBe(true);
-            // Base should be extracted from instruction data, not accounts
-            expect(result.info.base.equals(payer)).toBe(true);
-            expect(result.info.seed).toBe(seed);
-            expect(result.info.lamports).toBe(lamports);
-            expect(result.info.space).toBe(space);
-            expect(result.info.owner.equals(tokenProgram)).toBe(true);
+            const info = infoAsCreateAccountWithSeed(result.info);
+            expect(info.source.equals(payer)).toBe(true);
+            expect(info.newAccount.equals(newAccount)).toBe(true);
+            expect(info.base.equals(payer)).toBe(true);
+            expect(info.seed).toBe(seed);
+            expect(info.lamports).toBe(lamports);
+            expect(info.space).toBe(space);
+            expect(info.owner.equals(tokenProgram)).toBe(true);
         });
 
         test('should handle different seed lengths correctly', () => {
@@ -123,36 +126,34 @@ describe('parseSystemProgramInstruction', () => {
                 programId: SystemProgram.programId,
             });
 
-            const result = parseSystemProgramInstruction(instruction);
+            const result = parseSystemInstruction(toKitInstruction(instruction));
 
             invariant(result, 'expected parser to return an instruction when seed is long');
-            expect(result.info.seed).toBe(longSeed);
+            expect(infoAsCreateAccountWithSeed(result.info).seed).toBe(longSeed);
         });
 
-        test('should return null for non-System Program instructions', () => {
+        test('should return undefined for non-System Program instructions', () => {
             const instruction = new TransactionInstruction({
-                // Not System Program
                 data: Buffer.from([0, 0, 0, 0]),
-
                 keys: [],
                 programId: tokenProgram,
             });
 
-            const result = parseSystemProgramInstruction(instruction);
+            const result = parseSystemInstruction(toKitInstruction(instruction));
 
-            expect(result).toBeNull();
+            expect(result).toBeUndefined();
         });
 
-        test('should return null for unrecognized System Program instructions', () => {
+        test('should return undefined for unrecognised System Program instructions', () => {
             const instruction = new TransactionInstruction({
                 data: Buffer.from([255, 255, 255, 255]),
                 keys: [],
-                programId: SystemProgram.programId, // Invalid discriminator
+                programId: SystemProgram.programId,
             });
 
-            const result = parseSystemProgramInstruction(instruction);
+            const result = parseSystemInstruction(toKitInstruction(instruction));
 
-            expect(result).toBeNull();
+            expect(result).toBeUndefined();
         });
     });
 });
