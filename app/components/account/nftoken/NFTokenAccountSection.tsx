@@ -101,6 +101,7 @@ export const NftokenImage = ({ url, size }: { url: string | undefined; size: num
                     onLoad={() => {
                         setIsLoading(false);
                     }}
+                    showOriginalLink
                     uri={url}
                     width={size}
                 />
