@@ -67,7 +67,7 @@ function ResourceCard({ title, description, image, link, imageBackground }: Reso
     const [loaded, setLoaded] = useState(false);
 
     return (
-        <div className="flex e-flex-col" style={{ height: '200px', width: '250px' }}>
+        <div className="e-flex e-flex-col" style={{ height: '200px', width: '250px' }}>
             <div className="e-mb-3 e-w-full">
                 <a href={link} target="_blank" rel="noopener noreferrer" className="hover:cursor-pointer">
                     <div className="e-bg-heavy-metal-700" style={{ height: '120px', width: '250px' }}>
@@ -90,7 +90,7 @@ function ResourceCard({ title, description, image, link, imageBackground }: Reso
                     </div>
                 </a>
             </div>
-            <div className="flex e-flex-col">
+            <div className="e-flex e-flex-col">
                 <p className="e-mb-[3px]">{title}</p>
                 <p className="text-muted line-clamp-3 e-mb-1.5 e-whitespace-normal">{description}</p>
             </div>
