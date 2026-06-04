@@ -53,7 +53,7 @@
 | Dynamic | `/og/feature-gate/[address]` | — | — |
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Static | `/opengraph-image.png` | — | — |
-| Static | `/tos` | 890 B | 1.03 MB |
+| Static | `/tos` | 880 B | 1.03 MB |
 | Dynamic | `/tx/[signature]` | 590 kB | 1.59 MB |
 | Dynamic | `/tx/[signature]/inspect` | 380 kB | 1.39 MB |
 | Static | `/tx/inspector` | 380 kB | 1.39 MB |
