@@ -25,36 +25,36 @@ export function AddSpotMarketDetailsCard(props: {
             {spotMarketFromIndex(ix, info.marketIndex) !== 'UNKNOWN' && (
                 <tr>
                     <td>Market</td>
-                    <td className="text-lg-end">{spotMarketFromIndex(ix, info.marketIndex)}</td>
+                    <td className="e-text-right">{spotMarketFromIndex(ix, info.marketIndex)}</td>
                 </tr>
             )}
             <tr>
                 <td>Market index</td>
-                <td className="text-lg-end">{info.marketIndex}</td>
+                <td className="e-text-right">{info.marketIndex}</td>
             </tr>
             <tr>
                 <td>Maint leverage</td>
-                <td className="text-lg-end">{info.maintLeverage}</td>
+                <td className="e-text-right">{info.maintLeverage}</td>
             </tr>
             <tr>
                 <td>Init leverage</td>
-                <td className="text-lg-end">{info.initLeverage}</td>
+                <td className="e-text-right">{info.initLeverage}</td>
             </tr>
             <tr>
                 <td>Liquidation fee</td>
-                <td className="text-lg-end">{info.liquidationFee}</td>
+                <td className="e-text-right">{info.liquidationFee}</td>
             </tr>
             <tr>
                 <td>Optimal util</td>
-                <td className="text-lg-end">{info.optimalUtil}</td>
+                <td className="e-text-right">{info.optimalUtil}</td>
             </tr>
             <tr>
                 <td>Optimal rate</td>
-                <td className="text-lg-end">{info.optimalRate}</td>
+                <td className="e-text-right">{info.optimalRate}</td>
             </tr>
             <tr>
                 <td>Max rate</td>
-                <td className="text-lg-end">{info.maxRate}</td>
+                <td className="e-text-right">{info.maxRate}</td>
             </tr>
         </InstructionCard>
     );

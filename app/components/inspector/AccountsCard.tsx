@@ -8,6 +8,7 @@ import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 
 import { toHex } from '@/app/shared/lib/bytes';
+import { CardFooter } from '@/app/shared/ui/Card';
 
 import { AddressFromLookupTableWithContext, AddressWithContext } from './AddressWithContext';
 
@@ -115,12 +116,12 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
         <CollapsibleCard title={`Account List (${numAccounts})`}>
             <TableCardBody>{accountRows}</TableCardBody>
             {!loading && totalAccountSize > 0 && (
-                <div className="card-footer">
+                <CardFooter ui="dashkit">
                     <div className="e-flex e-items-baseline e-justify-end">
                         <span className="text-muted e-me-2 e-text-[0.625rem] e-uppercase">Total Account Size:</span>
-                        <span className="text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
+                        <span className="e-text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
                     </div>
-                </div>
+                </CardFooter>
             )}
         </CollapsibleCard>
     );
@@ -140,15 +141,15 @@ function AccountFromLookupTableRow({
     return (
         <tr>
             <td>
-                <div className="d-flex align-items-start flex-column">
+                <div className="e-flex e-flex-col e-items-start">
                     Account #{accountIndex + 1}
-                    <span className="mt-1">
-                        {!readOnly && <span className="badge bg-danger-soft me-1">Writable</span>}
+                    <span className="e-mt-[3px]">
+                        {!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
                         <span className="badge bg-gray-soft">Address Table Lookup</span>
                     </span>
                 </div>
             </td>
-            <td className="text-lg-end">
+            <td className="e-text-right">
                 <AddressFromLookupTableWithContext
                     lookupTableKey={lookupTableKey}
                     lookupTableIndex={lookupTableIndex}
@@ -178,11 +179,11 @@ function AccountRow({
     return (
         <tr>
             <td>
-                <div className="d-flex align-items-start flex-column">
+                <div className="e-flex e-flex-col e-items-start">
                     Account #{accountIndex + 1}
-                    <span className="mt-1">
-                        {signer && <span className="badge bg-info-soft me-1">Signer</span>}
-                        {!readOnly && <span className="badge bg-danger-soft me-1">Writable</span>}
+                    <span className="e-mt-[3px]">
+                        {signer && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
+                        {!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
                         {loading ? (
                             <span className="text-muted">Loading...</span>
                         ) : accountInfo ? (
@@ -193,7 +194,7 @@ function AccountRow({
                     </span>
                 </div>
             </td>
-            <td className="text-lg-end">
+            <td className="e-text-right">
                 <AddressWithContext pubkey={publicKey} />
             </td>
         </tr>

@@ -31,28 +31,28 @@ export default function AddProductDetailsCard({
         >
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={ix.programId} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Funding Account</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.fundingPubkey} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Mapping Account</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.mappingPubkey} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Product Account</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.productPubkey} alignRight link />
                 </td>
             </tr>

@@ -9,6 +9,7 @@ import { Code } from 'react-feather';
 
 import { fromBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 export function ProgramEventsCard({
     eventDataList,
@@ -71,23 +72,23 @@ function EventCard({
     const fields = ((eventFields?.type as IdlTypeDefTyStruct)?.fields as IdlField[]) ?? [];
 
     return (
-        <div className="card mb-2">
-            <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">
-                    <span className="badge bg-info-soft me-2">
+        <div className="card e-mb-1.5">
+            <CardHeader ui="dashkit">
+                <h3 className="card-header-title e-mb-0 e-flex e-items-center">
+                    <span className="badge bg-info-soft e-mr-1.5">
                         #{instructionIndex + 1}.{eventIndex + 1}
                     </span>
                     {camelToTitleCase(event.name)}
                 </h3>
                 <button
-                    className={cn('btn btn-sm d-flex align-items-center', showRaw ? 'btn-black active' : 'btn-white')}
+                    className={cn('btn btn-sm e-flex e-items-center', showRaw ? 'btn-black active' : 'btn-white')}
                     onClick={() => setShowRaw(r => !r)}
                 >
-                    <Code className="me-2" size={13} /> Raw
+                    <Code className="e-mr-1.5" size={13} /> Raw
                 </button>
-            </div>
+            </CardHeader>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive mb-0">
+            <div className="table-responsive e-mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <tbody className="list">
                         {showRaw ? (
@@ -96,7 +97,7 @@ function EventCard({
                                     <td>
                                         Event Data <span className="text-muted">(Hex)</span>
                                     </td>
-                                    <td className="text-lg-end">
+                                    <td className="e-text-right">
                                         <HexData raw={fromBase64(rawEventData)} />
                                     </td>
                                 </tr>
@@ -108,7 +109,7 @@ function EventCard({
                                         <tr className="table-sep">
                                             <td>Field Name</td>
                                             <td>Type</td>
-                                            <td className="text-lg-end">Value</td>
+                                            <td className="e-text-right">Value</td>
                                         </tr>
                                         {mapIxArgsToRows(event.data, { ...eventDef, args: fields } as any, program.idl)}
                                     </>

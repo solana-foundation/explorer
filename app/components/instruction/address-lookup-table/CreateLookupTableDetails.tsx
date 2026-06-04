@@ -20,37 +20,37 @@ export function CreateLookupTableDetailsCard(props: InstructionDetailsProps & { 
         >
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={AddressLookupTableProgram.programId} alignRight link />
                 </td>
             </tr>
             <tr>
                 <td>Lookup Table</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.lookupTableAccount} alignRight link />
                 </td>
             </tr>
             <tr>
                 <td>Lookup Table Authority</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.lookupTableAuthority} alignRight link />
                 </td>
             </tr>
             <tr>
                 <td>Payer Account</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.payerAccount} alignRight link />
                 </td>
             </tr>
             <tr>
                 <td>Recent Slot</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Slot slot={info.recentSlot} link />
                 </td>
             </tr>
             <tr>
                 <td>Bump Seed</td>
-                <td className="text-lg-end">{info.bumpSeed}</td>
+                <td className="e-text-right">{info.bumpSeed}</td>
             </tr>
         </InstructionCard>
     );

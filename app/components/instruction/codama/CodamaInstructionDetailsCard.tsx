@@ -49,11 +49,11 @@ export function CodamaInstructionCard({
         accountDetails.push(
             <tr key={i}>
                 <td>
-                    <div className="me-2 d-md-inline">{accountName}</div>
-                    {isWritable && <span className="badge bg-danger-soft me-1">Writable</span>}
-                    {isSigner && <span className="badge bg-info-soft me-1">Signer</span>}
+                    <div className="e-mr-1.5 md:e-inline">{accountName}</div>
+                    {isWritable && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
+                    {isSigner && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
                 </td>
-                <td className="text-lg-end" colSpan={2}>
+                <td className="e-text-right" colSpan={2}>
                     <Address pubkey={new PublicKey(account.address)} alignRight link />
                 </td>
             </tr>,
@@ -64,13 +64,13 @@ export function CodamaInstructionCard({
         <InstructionCard title={ixTitle} ix={ix} result={result} index={index} innerCards={innerCards}>
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end" colSpan={2}>
+                <td className="e-text-right" colSpan={2}>
                     <Address pubkey={new PublicKey(ix.programId)} alignRight link raw overrideText={programName} />
                 </td>
             </tr>
             <tr className="table-sep">
                 <td>Account Name</td>
-                <td className="text-lg-end" colSpan={2}>
+                <td className="e-text-right" colSpan={2}>
                     Address
                 </td>
             </tr>
@@ -80,7 +80,7 @@ export function CodamaInstructionCard({
                     <tr className="table-sep">
                         <td>Argument Name</td>
                         <td>Type</td>
-                        <td className="text-lg-end">Value</td>
+                        <td className="e-text-right">Value</td>
                     </tr>
                     {mapCodamaIxArgsToRows(parsedIx.data)}
                 </>

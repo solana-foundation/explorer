@@ -146,3 +146,13 @@ export const withClipboardMock: Decorator = Story => {
 
     return <Story />;
 };
+
+/** Errored variant — writeText rejects so consumers flip to 'errored' state. */
+export const withClipboardMockErrored: Decorator = Story => {
+    Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: { writeText: fn().mockRejectedValue(new Error('mock clipboard write failed')) },
+    });
+
+    return <Story />;
+};

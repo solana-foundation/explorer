@@ -38,43 +38,43 @@ export function RecoverNestedDetailsCard(props: {
         >
             <tr>
                 <td>Destination</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <AddressWithContext pubkey={raw.keys[2].pubkey} hideInfo />
                 </td>
             </tr>
             <tr>
                 <td>Nested Mint</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <AddressWithContext pubkey={raw.keys[1].pubkey} hideInfo />
                 </td>
             </tr>
             <tr>
                 <td>Nested Owner</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <AddressWithContext pubkey={raw.keys[3].pubkey} hideInfo />
                 </td>
             </tr>
             <tr>
                 <td>Nested Source</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <AddressWithContext pubkey={raw.keys[0].pubkey} hideInfo />
                 </td>
             </tr>
             <tr>
                 <td>Owner Mint</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <AddressWithContext pubkey={raw.keys[4].pubkey} hideInfo />
                 </td>
             </tr>
             <tr>
                 <td>Owner</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <AddressWithContext pubkey={raw.keys[5].pubkey} hideInfo />
                 </td>
             </tr>
             <tr>
                 <td>Token Program</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <AddressWithContext pubkey={raw.keys[6].pubkey} hideInfo />
                 </td>
             </tr>

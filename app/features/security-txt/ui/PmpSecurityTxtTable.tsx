@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import { TableCardBody } from '@/app/components/common/TableCardBody';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 import { PMP_SECURITY_TXT_KEYS } from '../lib/constants';
 import { CodeCell, ContactInfo, ExternalLinkCell, RenderCode, RenderExternalLink, StringCell } from './common';
@@ -30,9 +31,9 @@ export function PmpSecurityTxtTable({ data }: { data: Record<string, any> }) {
             <RenderTable entries={entries.main} />
             {entries.additional.length > 0 && (
                 <>
-                    <div className="card-header e-border-0 e-border-t e-border-solid e-border-t-[#282d2b]">
+                    <CardHeader ui="dashkit" className="!e-border-b-0 e-border-t">
                         <h3 className="card-header-title">Additional:</h3>
-                    </div>
+                    </CardHeader>
                     <RenderTable entries={entries.additional} />
                 </>
             )}
@@ -46,7 +47,7 @@ function RenderTable({ entries }: { entries: [string, any][] }) {
             {entries.map(([entryKey, value], index) => {
                 return (
                     <tr key={index}>
-                        <td className="w-100">{entryKey}</td>
+                        <td className="e-w-full">{entryKey}</td>
                         <RenderEntry key={entryKey} entryKey={entryKey} value={value} />
                     </tr>
                 );
@@ -88,7 +89,7 @@ function displayStringValue(value: string) {
 
 function displayArrayValue(entryKey: string, value: any[]) {
     return (
-        <td className="font-monospace">
+        <td className="font-monospace e-text-right">
             <RenderList entryKey={entryKey} items={value} />
         </td>
     );
@@ -104,7 +105,7 @@ function displayFallbackValue(value: any) {
 
 function RenderList({ entryKey, items }: { entryKey: string; items: any[] }) {
     return (
-        <ul className="text-lg-end security-txt-list e-list-none e-pl-0 [&.security-txt-list]:e-text-left">
+        <ul className="e-list-none e-pl-0 e-text-right">
             {items.map((value, index) => {
                 const elementKey = `${entryKey}-${index}`;
                 if (!value) {

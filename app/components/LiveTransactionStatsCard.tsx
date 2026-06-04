@@ -10,6 +10,8 @@ import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
 
+import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
 type Series = 'short' | 'medium' | 'long';
@@ -33,10 +35,10 @@ const SERIES_INFO = {
 export function LiveTransactionStatsCard() {
     const [series, setSeries] = React.useState<Series>('short');
     return (
-        <div className="card flex-grow-1 d-flex flex-column">
-            <div className="card-header">
+        <div className="card e-flex e-grow e-flex-col">
+            <CardHeader ui="dashkit">
                 <h4 className="card-header-title">Live Transaction Stats</h4>
-            </div>
+            </CardHeader>
             <TpsCardBody series={series} setSeries={setSeries} />
         </div>
     );
@@ -172,30 +174,30 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
     };
 
     return (
-        <div className="d-flex flex-column flex-grow-1">
+        <div className="e-flex e-grow e-flex-col">
             <TableCardBody>
                 <tr>
-                    <td className="w-100">Transaction count</td>
-                    <td className="text-lg-end font-monospace">{transactionCount} </td>
+                    <td className="e-w-full">Transaction count</td>
+                    <td className="font-monospace e-text-right">{transactionCount} </td>
                 </tr>
                 <tr>
-                    <td className="w-100">Transactions per second (TPS)</td>
-                    <td className="text-lg-end font-monospace">{averageTps} </td>
+                    <td className="e-w-full">Transactions per second (TPS)</td>
+                    <td className="font-monospace e-text-right">{averageTps} </td>
                 </tr>
             </TableCardBody>
 
-            <hr className="my-0" />
+            <hr className="e-my-0" />
 
-            <div className="card-body py-3 d-flex flex-column flex-grow-1">
-                <div className="d-flex justify-content-between w-100">
-                    <span className="mb-0 font-size-sm">TPS history</span>
+            <CardBody ui="dashkit" className="e-flex e-grow e-flex-col e-py-3">
+                <div className="e-flex e-w-full e-justify-between">
+                    <span className="e-mb-0">TPS history</span>
 
-                    <div className="font-size-sm">
+                    <div>
                         {SERIES.map(key => (
                             <button
                                 key={key}
                                 onClick={() => setSeries(key)}
-                                className={classNames('btn btn-sm btn-white ms-2', {
+                                className={classNames('btn btn-sm btn-white e-ml-1.5', {
                                     active: series === key,
                                 })}
                             >
@@ -205,12 +207,12 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
                     </div>
                 </div>
 
-                <div id="perf-history" className="mt-3 flex-grow-1" style={{ minHeight: '200px' }}>
+                <div id="perf-history" className="e-mt-3 e-grow" style={{ minHeight: '200px' }}>
                     <Bar data={chartData} options={chartOptions} style={{ height: '100%' }} />
                 </div>
 
-                <div className="text-center text-muted mt-3">
-                    <p className="mb-0">
+                <div className="text-muted e-mt-3 e-text-center">
+                    <p className="e-mb-0">
                         For transaction confirmation time statistics, please visit{' '}
                         <a href="https://www.validators.app" target="_blank" rel="noopener noreferrer">
                             validators.app
@@ -221,7 +223,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
                         </a>
                     </p>
                 </div>
-            </div>
+            </CardBody>
         </div>
     );
 }

@@ -27,6 +27,7 @@ import useSWR from 'swr';
 import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';
@@ -346,7 +347,7 @@ export function TransactionInspectorPage({
     }, [currentPathname, currentSearchParams, router]);
 
     return (
-        <div className="container mt-4">
+        <div className="container e-mt-6">
             <div className="header">
                 <div className="header-body">
                     <h2 className="header-title">Transaction Inspector</h2>
@@ -473,18 +474,18 @@ function OverviewCard({
     return (
         <>
             <div className="card">
-                <div className="card-header e-gap-2">
+                <CardHeader ui="dashkit" className="e-gap-2">
                     <h3 className="card-header-title">Transaction Overview</h3>
-                    <button className="btn btn-sm d-flex btn-white" onClick={onClear}>
+                    <button className="btn btn-sm btn-white e-flex" onClick={onClear}>
                         Clear
                     </button>
                     <DownloadDropdown filename={signature || 'signature'} data={raw} />
-                </div>
+                </CardHeader>
                 <TableCardBody>
                     <tr>
                         <td>Serialized Size</td>
-                        <td className="text-lg-end">
-                            <div className="d-flex align-items-end flex-column">
+                        <td className="e-text-right">
+                            <div className="e-flex e-flex-col e-items-end">
                                 {size} bytes
                                 <span className={size <= PACKET_DATA_SIZE ? 'text-muted' : 'text-warning'}>
                                     Max transaction size is {PACKET_DATA_SIZE} bytes
@@ -494,8 +495,8 @@ function OverviewCard({
                     </tr>
                     <tr>
                         <td>Fees</td>
-                        <td className="text-lg-end">
-                            <div className="d-flex align-items-end flex-column">
+                        <td className="e-text-right">
+                            <div className="e-flex e-flex-col e-items-end">
                                 <SolBalance lamports={fee} />
                                 <span className="text-muted">
                                     {`Each signature costs ${DEFAULT_FEES.lamportsPerSignature} lamports`}
@@ -506,15 +507,15 @@ function OverviewCard({
 
                     <tr>
                         <td>
-                            <div className="d-flex align-items-start flex-column">
+                            <div className="e-flex e-flex-col e-items-start">
                                 Fee payer
-                                <span className="mt-1">
-                                    <span className="badge bg-info-soft me-2">Signer</span>
-                                    <span className="badge bg-danger-soft me-2">Writable</span>
+                                <span className="e-mt-[3px]">
+                                    <span className="badge bg-info-soft e-mr-1.5">Signer</span>
+                                    <span className="badge bg-danger-soft e-mr-1.5">Writable</span>
                                 </span>
                             </div>
                         </td>
-                        <td className="text-end">
+                        <td className="e-text-right">
                             {message.staticAccountKeys.length === 0 ? (
                                 'No Fee Payer'
                             ) : (

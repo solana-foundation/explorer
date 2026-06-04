@@ -81,8 +81,8 @@ const BaseFeatureCard = ({
     if (activatedAt) {
         activatedAtSlot = (
             <tr>
-                <td className="text-nowrap">Activated At Slot</td>
-                <td className="text-lg-end">
+                <td className="e-whitespace-nowrap">Activated At Slot</td>
+                <td className="e-text-right">
                     <Slot slot={activatedAt} link />
                 </td>
             </tr>
@@ -92,7 +92,7 @@ const BaseFeatureCard = ({
         simdLink = (
             <tr>
                 <td>SIMDs</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {featureInfo.simds.map((simd, index) => (
                         <div key={index}>
                             {simd && featureInfo.simd_link[index] ? (
@@ -124,8 +124,8 @@ const BaseFeatureCard = ({
             </tr>
 
             <tr>
-                <td className="text-nowrap">Activated?</td>
-                <td className="text-lg-end">
+                <td className="e-whitespace-nowrap">Activated?</td>
+                <td className="e-text-right">
                     {activatedAt !== null ? (
                         <span className="badge bg-success">Active on {clusterName(cluster)}</span>
                     ) : isPending ? (
@@ -139,8 +139,8 @@ const BaseFeatureCard = ({
             {activatedAtSlot}
 
             <tr>
-                <td className="text-nowrap">Cluster Activation</td>
-                <td className="text-lg-end">
+                <td className="e-whitespace-nowrap">Cluster Activation</td>
+                <td className="e-text-right">
                     <ClusterActivationEpochAtCluster
                         cluster={cluster}
                         clusterInfo={clusterInfo}
@@ -153,7 +153,7 @@ const BaseFeatureCard = ({
             {featureInfo?.description && (
                 <tr>
                     <td>Description</td>
-                    <td className="text-lg-end">{featureInfo?.description}</td>
+                    <td className="e-text-right">{featureInfo?.description}</td>
                 </tr>
             )}
 
@@ -229,7 +229,7 @@ function ClusterActivationEpochAtCluster({
                 <Link href={`/epoch/${nextEpoch}?cluster=${cluster}`} className="epoch-link">
                     {clusterName(cluster)} Epoch {nextEpoch.toString()}
                 </Link>
-                <div className="mt-1">
+                <div className="e-mt-[3px]">
                     <EpochCountdown remainingSlots={remainingSlots} />
                 </div>
             </div>

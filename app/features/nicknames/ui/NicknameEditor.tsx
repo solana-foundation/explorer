@@ -7,6 +7,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
+import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+
 import { getNickname, MAX_NICKNAME_LENGTH, removeNickname, setNickname } from '../lib/nicknames';
 
 type Props = {
@@ -56,7 +58,7 @@ export function NicknameEditor({ address, onClose }: Props) {
 
     return (
         <div
-            className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+            className="top-0 start-0 e-fixed e-flex e-h-full e-w-full e-items-center e-justify-center"
             style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                 zIndex: 9999,
@@ -68,15 +70,15 @@ export function NicknameEditor({ address, onClose }: Props) {
                 style={{ maxWidth: '500px', minWidth: '400px' }}
                 onClick={e => e.stopPropagation()}
             >
-                <div className="card-header">
-                    <h5 className="card-header-title mb-0">Edit Nickname</h5>
-                </div>
-                <div className="card-body">
-                    <div className="mb-3">
+                <CardHeader ui="dashkit">
+                    <h5 className="card-header-title e-mb-0">Edit Nickname</h5>
+                </CardHeader>
+                <CardBody ui="dashkit">
+                    <div className="e-mb-3">
                         <label className="form-label small text-muted">Address</label>
-                        <div className="font-monospace small text-truncate">{address}</div>
+                        <div className="font-monospace small e-truncate">{address}</div>
                     </div>
-                    <div className="mb-3">
+                    <div className="e-mb-3">
                         <label htmlFor="nickname-input" className="form-label">
                             Nickname
                         </label>
@@ -92,14 +94,14 @@ export function NicknameEditor({ address, onClose }: Props) {
                             maxLength={MAX_NICKNAME_LENGTH}
                             autoFocus
                         />
-                        <div className="d-flex justify-content-between">
+                        <div className="e-flex e-justify-between">
                             <small className="text-muted">This nickname is stored locally on your device.</small>
                             <small className="text-muted">
                                 {nickname.length}/{MAX_NICKNAME_LENGTH}
                             </small>
                         </div>
                     </div>
-                    <div className="d-flex justify-content-between">
+                    <div className="e-flex e-justify-between">
                         <div>
                             {getNickname(address) && (
                                 <button className="btn btn-sm btn-outline-danger" onClick={handleRemove}>
@@ -107,7 +109,7 @@ export function NicknameEditor({ address, onClose }: Props) {
                                 </button>
                             )}
                         </div>
-                        <div className="d-flex gap-2">
+                        <div className="e-flex e-gap-1.5">
                             <button className="btn btn-sm btn-secondary" onClick={onClose}>
                                 Cancel
                             </button>
@@ -122,7 +124,7 @@ export function NicknameEditor({ address, onClose }: Props) {
                             </button>
                         </div>
                     </div>
-                </div>
+                </CardBody>
             </div>
         </div>
     );

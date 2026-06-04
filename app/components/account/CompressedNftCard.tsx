@@ -28,19 +28,19 @@ export function CompressedNftCard({ account }: { account: Account }) {
         <AccountCard title="Overview" account={account}>
             <tr>
                 <td>Address</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
                 </td>
             </tr>
             <tr>
                 <td>Owner</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={new PublicKey(compressedNft.ownership.owner)} alignRight link />
                 </td>
             </tr>
             <tr>
                 <td>Verified Collection Address</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {collectionGroup ? (
                         <Address pubkey={new PublicKey(collectionGroup.group_value)} alignRight link />
                     ) : (
@@ -50,22 +50,22 @@ export function CompressedNftCard({ account }: { account: Account }) {
             </tr>
             <tr>
                 <td>Update Authority</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {updateAuthority ? <Address pubkey={new PublicKey(updateAuthority)} alignRight link /> : 'None'}
                 </td>
             </tr>
             <tr>
                 <td>Website</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <a rel="noopener noreferrer" target="_blank" href={compressedNft.content.links.external_url}>
                         {compressedNft.content.links.external_url}
-                        <ExternalLink className="align-text-top ms-2" size={13} />
+                        <ExternalLink className="align-text-top e-ml-1.5" size={13} />
                     </a>
                 </td>
             </tr>
             <tr>
                 <td>Seller Fee</td>
-                <td className="text-lg-end">{`${compressedNft.royalty.basis_points / 100}%`}</td>
+                <td className="e-text-right">{`${compressedNft.royalty.basis_points / 100}%`}</td>
             </tr>
         </AccountCard>
     );
@@ -112,26 +112,26 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
 
     return (
         <div className="row">
-            <div className="col-auto ms-2 d-flex align-items-center">
+            <div className="col-auto e-ml-1.5 e-flex e-items-center">
                 <ArtContent pubkey={compressedNft.id} data={metadataJson} />
             </div>
-            <div className="col mb-3 ms-0.5 mt-3">
-                {<h6 className="header-pretitle ms-1">Metaplex Compressed NFT</h6>}
-                <div className="d-flex align-items-center">
-                    <h2 className="header-title ms-1 align-items-center no-overflow-with-ellipsis">
+            <div className="col ms-0.5 e-mb-3 e-mt-3">
+                {<h6 className="header-pretitle e-ml-[3px]">Metaplex Compressed NFT</h6>}
+                <div className="e-flex e-items-center">
+                    <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
                         {compressedNft.content.metadata.name !== ''
                             ? compressedNft.content.metadata.name
                             : 'No NFT name was found'}
                     </h2>
                     {getVerifiedCollectionPill()}
                 </div>
-                <h4 className="header-pretitle ms-1 mt-1 no-overflow-with-ellipsis">
+                <h4 className="header-pretitle no-overflow-with-ellipsis e-ml-[3px] e-mt-[3px]">
                     {compressedNft.content.metadata.symbol !== ''
                         ? compressedNft.content.metadata.symbol
                         : 'No Symbol was found'}
                 </h4>
-                <div className="mb-2 mt-2">{getCompressedNftPill()}</div>
-                <div className="mb-3 mt-2">{getIsMutablePill(compressedNft.mutable)}</div>
+                <div className="e-mb-1.5 e-mt-1.5">{getCompressedNftPill()}</div>
+                <div className="e-mb-3 e-mt-1.5">{getIsMutablePill(compressedNft.mutable)}</div>
                 <div className="btn-group">
                     <button
                         className="btn btn-dark btn-sm creators-dropdown-button-width"
@@ -143,7 +143,7 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
                     >
                         Creators <ChevronDown size={15} className="align-text-top" />
                     </button>
-                    <div className="dropdown-menu mt-2">{getCreatorDropdownItems(compressedNft.creators)}</div>
+                    <div className="dropdown-menu e-mt-1.5">{getCreatorDropdownItems(compressedNft.creators)}</div>
                 </div>
             </div>
         </div>
@@ -154,7 +154,7 @@ function getCompressedNftPill() {
     const onchainVerifiedToolTip =
         'This NFT does not have a corresponding account, but uses verified ledger data to allow for transfers and trades. The existence of this tag ensures that the compressed NFT is verifiably up-to-date with the chain.';
     return (
-        <div className={'d-inline-flex align-items-center ms-2'}>
+        <div className={'d-inline-flex e-ml-1.5 e-items-center'}>
             <span className="badge badge-pill bg-dark">{'Compressed'}</span>
             <InfoTooltip bottom text={onchainVerifiedToolTip} />
         </div>

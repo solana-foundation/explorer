@@ -41,20 +41,20 @@ export function NFTokenNFTHeader({ nft }: { nft: NftokenTypes.NftAccount }) {
 
     return (
         <div className="row">
-            <div className="col-auto ms-2 d-flex align-items-center">
+            <div className="col-auto e-ml-1.5 e-flex e-items-center">
                 <NFTImageContent uri={metadata?.image.trim()} />
             </div>
 
-            <div className="col mb-3 ms-0.5 mt-3">
-                {<h6 className="header-pretitle ms-1">NFToken NFT</h6>}
-                <div className="d-flex align-items-center">
-                    <h2 className="header-title ms-1 align-items-center no-overflow-with-ellipsis">
+            <div className="col ms-0.5 e-mb-3 e-mt-3">
+                {<h6 className="header-pretitle e-ml-[3px]">NFToken NFT</h6>}
+                <div className="e-flex e-items-center">
+                    <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
                         {metadata ? metadata.name || 'No NFT name was found' : 'Loading...'}
                     </h2>
                 </div>
 
                 <div>
-                    <div className={'d-inline-flex align-items-center mt-2'}>
+                    <div className={'d-inline-flex e-mt-1.5 e-items-center'}>
                         <span className="badge badge-pill bg-dark">{`${
                             nft.authority_can_update ? 'Mutable' : 'Immutable'
                         }`}</span>
@@ -79,20 +79,20 @@ export function NFTokenCollectionHeader({ collection }: { collection: NftokenTyp
 
     return (
         <div className="row">
-            <div className="col-auto ms-2 d-flex align-items-center">
+            <div className="col-auto e-ml-1.5 e-flex e-items-center">
                 <NFTImageContent uri={metadata?.image} />
             </div>
 
-            <div className="col mb-3 ms-0.5 mt-3">
-                {<h6 className="header-pretitle ms-1">NFToken Collection</h6>}
-                <div className="d-flex align-items-center">
-                    <h2 className="header-title ms-1 align-items-center no-overflow-with-ellipsis">
+            <div className="col ms-0.5 e-mb-3 e-mt-3">
+                {<h6 className="header-pretitle e-ml-[3px]">NFToken Collection</h6>}
+                <div className="e-flex e-items-center">
+                    <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
                         {metadata ? metadata.name || 'No collection name was found' : 'Loading...'}
                     </h2>
                 </div>
 
                 <div>
-                    <div className={'d-inline-flex align-items-center mt-2'}>
+                    <div className={'d-inline-flex e-mt-1.5 e-items-center'}>
                         <span className="badge badge-pill bg-dark">{`${
                             collection.authority_can_update ? 'Mutable' : 'Immutable'
                         }`}</span>

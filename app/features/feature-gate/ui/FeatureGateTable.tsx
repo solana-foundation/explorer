@@ -79,7 +79,7 @@ export function FeatureGateTable<T extends FeatureRow>({
 export function EmptyStateCard({ children }: { children: ReactNode }) {
     return (
         <Card variant="tight" className="e-overflow-hidden">
-            <CardContent className="mt-4 e-flex e-items-center e-justify-center e-px-6 e-text-center e-text-dk-gray-700">
+            <CardContent className="e-mt-6 e-flex e-items-center e-justify-center e-px-6 e-text-center e-text-dark-muted-foreground">
                 {children}
             </CardContent>
         </Card>
@@ -117,7 +117,7 @@ function FeatureRowView<T extends FeatureRow>({
                 <TableCell className="e-font-medium [overflow-wrap:anywhere]">
                     <Link
                         href={`/address/${feature.key}/feature-gate?cluster=${clusterSlug(cluster)}`}
-                        className="e-text-dk-white hover:e-text-dk-primary-on-dark hover:e-underline"
+                        className="e-text-dk-white hover:e-text-dark-accent hover:e-underline"
                     >
                         {feature.title}
                     </Link>
@@ -145,7 +145,7 @@ function FeatureRowView<T extends FeatureRow>({
                                 <AddressLink address={feature.key} truncate={{ head: 6, tail: 6 }} />
                             </div>
                             {feature.description || (
-                                <span className="e-text-dk-gray-700">No description available.</span>
+                                <span className="e-text-dark-muted-foreground">No description available.</span>
                             )}
                         </div>
                     </TableCell>

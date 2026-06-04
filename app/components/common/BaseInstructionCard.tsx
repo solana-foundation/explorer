@@ -64,7 +64,7 @@ export function BaseInstructionCard({
             collapsible={collapsible}
             title={
                 <>
-                    <span className={`badge bg-${resultClass}-soft me-2`}>
+                    <span className={`badge bg-${resultClass}-soft e-mr-1.5`}>
                         #{index + 1}
                         {childIndex !== undefined ? `.${childIndex + 1}` : ''}
                     </span>
@@ -72,31 +72,31 @@ export function BaseInstructionCard({
                 </>
             }
             headerButtons={
-                <div className="d-flex align-items-center gap-2">
+                <div className="e-flex e-items-center e-gap-1.5">
                     {headerButtons}
                     <button
                         disabled={defaultRaw}
                         className={cn(
-                            'btn btn-sm d-flex align-items-center',
+                            'btn btn-sm e-flex e-items-center',
                             showRaw ? 'btn-black active' : 'btn-white',
                             defaultRaw && '!e-pointer-events-auto e-cursor-not-allowed',
                         )}
                         onClick={rawClickHandler}
                     >
-                        <Code className="me-2" size={13} /> Raw
+                        <Code className="e-mr-1.5" size={13} /> Raw
                     </button>
                 </div>
             }
         >
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
+            <div className="table-responsive e-mb-0">
+                <table className="table table-sm table-nowrap card-table [&>tbody>tr:first-child>td]:!e-border-t-0">
                     <tbody className="list">
                         {showRaw ? (
                             <>
                                 <tr>
                                     <td>Program</td>
-                                    <td className="text-lg-end">
+                                    <td className="e-text-right">
                                         <Address pubkey={ix.programId} alignRight link />
                                     </td>
                                 </tr>

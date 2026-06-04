@@ -18,28 +18,28 @@ export function InitOpenOrdersDetailsCard(props: SerumIxDetailsProps<InitOpenOrd
         >
             <tr>
                 <td>Program</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.programId} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Open Orders</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.accounts.openOrders} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Open Orders Owner</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.accounts.openOrdersOwner} alignRight link />
                 </td>
             </tr>
 
             <tr>
                 <td>Market</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
                 </td>
             </tr>
@@ -47,7 +47,7 @@ export function InitOpenOrdersDetailsCard(props: SerumIxDetailsProps<InitOpenOrd
             {info.accounts.openOrdersMarketAuthority && (
                 <tr>
                     <td>Open Orders Market Authority</td>
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         <Address pubkey={info.accounts.openOrdersMarketAuthority} alignRight link />
                     </td>
                 </tr>

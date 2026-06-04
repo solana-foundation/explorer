@@ -52,7 +52,7 @@ function AccountRow({ label, pubkey }: { label: string; pubkey: unknown }) {
     return (
         <tr>
             <td>{label}</td>
-            <td className="text-lg-end">
+            <td className="e-text-right">
                 <Address pubkey={pubkey} alignRight link />
             </td>
         </tr>
@@ -64,7 +64,7 @@ function DataRow({ label, value }: { label: string; value: unknown }) {
     return (
         <tr>
             <td>{label}</td>
-            <td className="text-lg-end">{String(value)}</td>
+            <td className="e-text-right">{String(value)}</td>
         </tr>
     );
 }
@@ -75,7 +75,7 @@ function RoyaltyRow({ basisPoints }: { basisPoints: unknown }) {
     return (
         <tr>
             <td>Royalty</td>
-            <td className="text-lg-end">{pct % 1 === 0 ? `${pct}%` : `${pct.toFixed(2)}%`}</td>
+            <td className="e-text-right">{pct % 1 === 0 ? `${pct}%` : `${pct.toFixed(2)}%`}</td>
         </tr>
     );
 }
@@ -86,7 +86,7 @@ function GenericAccountRows({ ix }: { ix: TransactionInstruction }) {
             {ix.keys.map((key, i) => (
                 <tr key={i}>
                     <td>Account #{i + 1}</td>
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         <Address pubkey={key.pubkey} alignRight link />
                     </td>
                 </tr>

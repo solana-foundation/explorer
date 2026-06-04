@@ -1,4 +1,5 @@
 import { Copyable } from '@/app/components/common/Copyable';
+import { CardBody } from '@/app/shared/ui/Card';
 
 import { NO_SECURITY_TXT_ERROR } from '../lib/constants';
 
@@ -8,15 +9,15 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
 
     return (
         <div className="card">
-            <div className="card-body text-center">
-                <div className="mb-4">{NO_SECURITY_TXT_ERROR}</div>
+            <CardBody ui="dashkit" className="e-text-center">
+                <div className="e-mb-6">{NO_SECURITY_TXT_ERROR}</div>
 
-                <div className="mb-4">
+                <div className="e-mb-6">
                     <p>
                         This program did not provide Security.txt information yet. If you are the maintainer of this
                         program you can use the following command to add your information.
                     </p>
-                    <div className="p-2 rounded text-start border d-inline-flex align-items-center text-sm">
+                    <div className="border e-inline-flex e-items-center e-rounded-dk e-p-1.5 e-text-left">
                         <Copyable text={copyableTxt}>
                             <code className="font-monospace small text-muted">{copyableTxt}</code>
                         </Copyable>
@@ -32,7 +33,7 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
                         For further details please follow the documentation
                     </a>
                 </div>
-            </div>
+            </CardBody>
         </div>
     );
 }

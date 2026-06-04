@@ -4,6 +4,7 @@ import { PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import React from 'react';
 
 import { invariant } from '@/app/shared/lib/invariant';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) {
     const totalTransactions = block.transactions.length;
@@ -61,27 +62,27 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
     return (
         <>
             <div className="card">
-                <div className="card-header align-items-center">
+                <CardHeader ui="dashkit">
                     <h3 className="card-header-title">Block Program Stats</h3>
-                </div>
+                </CardHeader>
                 <TableCardBody>
                     <tr>
-                        <td className="w-100">Unique Programs Count</td>
-                        <td className="text-lg-end font-monospace">{programEntries.length}</td>
+                        <td className="e-w-full">Unique Programs Count</td>
+                        <td className="font-monospace e-text-right">{programEntries.length}</td>
                     </tr>
                     <tr>
-                        <td className="w-100">Total Instructions</td>
-                        <td className="text-lg-end font-monospace">{totalInstructions}</td>
+                        <td className="e-w-full">Total Instructions</td>
+                        <td className="font-monospace e-text-right">{totalInstructions}</td>
                     </tr>
                 </TableCardBody>
             </div>
             <div className="card">
-                <div className="card-header align-items-center">
+                <CardHeader ui="dashkit">
                     <h3 className="card-header-title">Block Programs</h3>
-                </div>
+                </CardHeader>
 
                 {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-                <div className="table-responsive mb-0">
+                <div className="table-responsive e-mb-0">
                     <table className="table table-sm table-nowrap card-table">
                         <thead>
                             <tr>

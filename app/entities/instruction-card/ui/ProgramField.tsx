@@ -11,7 +11,7 @@ export function ProgramField({ programId, showExtendedInfo = false }: ProgramFie
     return (
         <tr>
             <td>Program</td>
-            <td className="text-lg-end">
+            <td className="e-text-right">
                 {showExtendedInfo ? (
                     <AddressWithContext pubkey={programId} validator={programValidator} />
                 ) : (

@@ -28,7 +28,7 @@ export const Dashkit: Story = {
     render: args => (
         <BaseCard ui="dashkit" className="e-w-full e-max-w-xl">
             <BaseCardSection {...args}>
-                <BaseCardBody>Section body content.</BaseCardBody>
+                <BaseCardBody ui="dashkit">Section body content.</BaseCardBody>
             </BaseCardSection>
         </BaseCard>
     ),

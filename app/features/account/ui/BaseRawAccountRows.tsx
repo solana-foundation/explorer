@@ -14,36 +14,36 @@ export function BaseRawAccountRows({ account, rawData, isLoading }: BaseRawAccou
         <>
             <tr>
                 <td>Address</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
                 </td>
             </tr>
             <tr>
                 <td>Balance (SOL)</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <SolBalance lamports={account.lamports} />
                 </td>
             </tr>
             <tr>
                 <td>Assigned Program Id</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={account.owner} alignRight link />
                 </td>
             </tr>
             {account.space !== undefined && (
                 <tr>
                     <td>Allocated Data Size</td>
-                    <td className="text-lg-end">{account.space} byte(s)</td>
+                    <td className="e-text-right">{account.space} byte(s)</td>
                 </tr>
             )}
             <tr>
                 <td>Executable</td>
-                <td className="text-lg-end">{account.executable ? 'Yes' : 'No'}</td>
+                <td className="e-text-right">{account.executable ? 'Yes' : 'No'}</td>
             </tr>
             <tr>
                 <td>Raw Data</td>
                 <td>
-                    <div className="e-flex e-justify-start md:e-justify-end">
+                    <div className="e-flex e-justify-end">
                         <RawDataField data={rawData} filename={account.pubkey.toBase58()} loading={isLoading} />
                     </div>
                 </td>

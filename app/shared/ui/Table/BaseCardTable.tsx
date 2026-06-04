@@ -12,7 +12,7 @@ const wrapperVariants = cva([], {
     defaultVariants: { ui: 'tw' },
     variants: {
         ui: {
-            dashkit: 'table-responsive mb-0',
+            dashkit: 'table-responsive e-mb-0',
             tw: 'e-overflow-x-auto e-mb-0',
         },
     },
@@ -28,8 +28,8 @@ const innerTableVariants = cva([], {
             tw: [
                 'e-mb-0',
                 '[&_thead_th]:e-border-t-0',
-                '[&_thead_th:first-child]:e-pl-dk-4 [&_thead_th:last-child]:e-pr-dk-4',
-                '[&_tbody_td:first-child]:e-pl-dk-4 [&_tbody_td:last-child]:e-pr-dk-4',
+                '[&_thead_th:first-child]:e-pl-6 [&_thead_th:last-child]:e-pr-6',
+                '[&_tbody_td:first-child]:e-pl-6 [&_tbody_td:last-child]:e-pr-6',
             ].join(' '),
         },
     },

@@ -62,7 +62,7 @@ export function PlacePerpOrder2DetailsCard(props: {
             {mangoPerpMarketConfig !== undefined && (
                 <tr>
                     <td>Perp market</td>
-                    <td className="text-lg-end">{mangoPerpMarketConfig.name}</td>
+                    <td className="e-text-right">{mangoPerpMarketConfig.name}</td>
                 </tr>
             )}
             <tr>
@@ -74,37 +74,37 @@ export function PlacePerpOrder2DetailsCard(props: {
             {info.clientOrderId !== '0' && (
                 <tr>
                     <td>Client order Id</td>
-                    <td className="text-lg-end">{info.clientOrderId}</td>
+                    <td className="e-text-right">{info.clientOrderId}</td>
                 </tr>
             )}
             <tr>
                 <td>Order type</td>
-                <td className="text-lg-end">{info.orderType}</td>
+                <td className="e-text-right">{info.orderType}</td>
             </tr>
             <tr>
                 <td>Side</td>
-                <td className="text-lg-end">{info.side}</td>
+                <td className="e-text-right">{info.side}</td>
             </tr>
             {orderLotDetails !== null && (
                 <tr>
                     <td>price</td>
-                    <td className="text-lg-end">{orderLotDetails?.price} USDC</td>
+                    <td className="e-text-right">{orderLotDetails?.price} USDC</td>
                 </tr>
             )}
             {orderLotDetails !== null && (
                 <tr>
                     <td>quantity</td>
-                    <td className="text-lg-end">{orderLotDetails?.size}</td>
+                    <td className="e-text-right">{orderLotDetails?.size}</td>
                 </tr>
             )}
             <tr>
                 <td>Reduce only</td>
-                <td className="text-lg-end">{info.reduceOnly}</td>
+                <td className="e-text-right">{info.reduceOnly}</td>
             </tr>
 
             <tr>
                 <td>Expiry timestamp</td>
-                <td className="text-lg-end">{info.expiryTimestamp}</td>
+                <td className="e-text-right">{info.expiryTimestamp}</td>
             </tr>
         </InstructionCard>
     );

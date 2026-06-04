@@ -8,6 +8,8 @@ import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
 import { Code } from 'react-feather';
 
+import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+
 export function ProgramLogSection({ signature }: SignatureProps) {
     const [showRaw, setShowRaw] = React.useState(false);
     const { cluster, url } = useCluster();
@@ -28,18 +30,15 @@ export function ProgramLogSection({ signature }: SignatureProps) {
     return (
         <>
             <div className="card">
-                <div className="card-header">
+                <CardHeader ui="dashkit" className={!showRaw ? '!e-border-b-0' : undefined}>
                     <h3 className="card-header-title">Program Instruction Logs</h3>
                     <button
-                        className={cn(
-                            'btn btn-sm d-flex align-items-center',
-                            showRaw ? 'btn-black active' : 'btn-white',
-                        )}
+                        className={cn('btn btn-sm e-flex e-items-center', showRaw ? 'btn-black active' : 'btn-white')}
                         onClick={() => setShowRaw(r => !r)}
                     >
-                        <Code className="me-2" size={13} /> Raw
+                        <Code className="e-mr-1.5" size={13} /> Raw
                     </button>
-                </div>
+                </CardHeader>
                 {prettyLogs !== null && logMessages !== null ? (
                     showRaw ? (
                         <RawProgramLogs raw={logMessages} />
@@ -47,7 +46,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                         <ProgramLogsCardBody message={message} logs={prettyLogs} cluster={cluster} url={url} />
                     )
                 ) : (
-                    <div className="card-body">Logs not supported for this transaction</div>
+                    <CardBody ui="dashkit">Logs not supported for this transaction</CardBody>
                 )}
             </div>
         </>
@@ -59,7 +58,7 @@ const RawProgramLogs = ({ raw }: { raw: string[] }) => {
         <TableCardBody>
             <tr>
                 <td>
-                    <pre className="text-start">{JSON.stringify(raw, null, 2)}</pre>
+                    <pre className="e-text-left">{JSON.stringify(raw, null, 2)}</pre>
                 </td>
             </tr>
         </TableCardBody>

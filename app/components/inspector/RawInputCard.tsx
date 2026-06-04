@@ -6,6 +6,7 @@ import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
+import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
 
 import type { InspectorData } from './InspectorPage';
 
@@ -48,7 +49,7 @@ function TabInstructions() {
     const tabs: TabData[] = [
         {
             content: (
-                <div className="p-3">
+                <div className="e-p-3">
                     Use <code>--dump-transaction-message</code> flag
                 </div>
             ),
@@ -57,7 +58,7 @@ function TabInstructions() {
         },
         {
             content: (
-                <div className="p-3">
+                <div className="e-p-3">
                     Add <code>base64</code> crate dependency and{' '}
                     <code>println!(&quot;{}&quot;, base64::encode(&transaction.message_data()));</code>
                 </div>
@@ -67,22 +68,22 @@ function TabInstructions() {
         },
         {
             content: (
-                <div className="p-3">
-                    <div className="mb-3">
-                        <div className="text-decoration-underline mb-2">@solana/web3.js &lt; 2.0.0</div>
-                        <div className="mb-2">
-                            <div className="mb-1">Legacy Transaction:</div>
+                <div className="e-p-3">
+                    <div className="e-mb-3">
+                        <div className="e-mb-1.5 e-underline">@solana/web3.js &lt; 2.0.0</div>
+                        <div className="e-mb-1.5">
+                            <div className="e-mb-[3px]">Legacy Transaction:</div>
                             <code>console.log(tx.serializeMessage().toString(&quot;base64&quot;));</code>
                         </div>
                         <div>
-                            <div className="mb-1">Versioned Transaction:</div>
+                            <div className="e-mb-[3px]">Versioned Transaction:</div>
                             <code>console.log(Buffer.from(tx.serialize()).toString(&quot;base64&quot;));</code>
                         </div>
                     </div>
                     <div>
-                        <div className="text-decoration-underline mb-2">@solana/web3.js &gt;= 2.0.0</div>
+                        <div className="e-mb-1.5 e-underline">@solana/web3.js &gt;= 2.0.0</div>
                         <div>
-                            <div className="mb-1">Legacy Transaction:</div>
+                            <div className="e-mb-[3px]">Legacy Transaction:</div>
                             <code>console.log(getBase64EncodedWireTransaction(tx));</code>
                         </div>
                     </div>
@@ -93,7 +94,7 @@ function TabInstructions() {
         },
         {
             content: (
-                <div className="p-3">
+                <div className="e-p-3">
                     Add <code>vault_transaction</code> from{' '}
                     <code>https://app.squads.so/squads/&lt;squad_id&gt;/transactions/&lt;vault_transaction&gt;</code>
                 </div>
@@ -239,15 +240,15 @@ export function RawInput({
     const placeholder = 'Paste a raw base58/base64 encoded transaction message or Squads vault transaction account';
     return (
         <div className="card">
-            <div className="card-header">
-                <div className="d-flex justify-content-between align-items-center">
+            <CardHeader ui="dashkit">
+                <div className="e-flex e-items-center e-justify-between">
                     <h3 className="card-header-title">Inspector Input</h3>
                     <button className="btn btn-sm btn-white" onClick={clearInput} type="button">
                         Clear
                     </button>
                 </div>
-            </div>
-            <div className="card-body">
+            </CardHeader>
+            <CardBody ui="dashkit">
                 <textarea
                     rows={rows}
                     onInput={onInput}
@@ -256,11 +257,11 @@ export function RawInput({
                     placeholder={placeholder}
                     name="tx-inspector-input"
                 ></textarea>
-                <div className="row align-items-center">
-                    <div className="col d-flex align-items-center">
+                <div className="row e-items-center">
+                    <div className="col e-flex e-items-center">
                         {error && (
                             <>
-                                <span className="text-warning small me-2">
+                                <span className="text-warning small e-mr-1.5">
                                     <i className="fe fe-alert-circle"></i>
                                 </span>
 
@@ -269,11 +270,11 @@ export function RawInput({
                         )}
                     </div>
                 </div>
-            </div>
-            <div className="card-footer">
+            </CardBody>
+            <CardFooter ui="dashkit">
                 <h3>Instructions</h3>
                 <TabInstructions />
-            </div>
+            </CardFooter>
         </div>
     );
 }

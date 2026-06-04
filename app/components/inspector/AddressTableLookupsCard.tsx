@@ -32,7 +32,7 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
     return (
         <CollapsibleCard title="Address Table Lookup(s)">
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive mb-0">
+            <div className="table-responsive e-mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
@@ -45,10 +45,10 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
                     {lookupRows.length > 0 ? (
                         <tbody className="list">{lookupRows}</tbody>
                     ) : (
-                        <tbody className="card-footer">
+                        <tbody className="e-border-0 e-border-t e-border-solid e-border-dark-border e-px-dk-4 e-py-4">
                             <tr>
                                 <td colSpan={4}>
-                                    <span className="text-muted text-center">No entries found</span>
+                                    <span className="text-muted e-text-center">No entries found</span>
                                 </td>
                             </tr>
                         </tbody>
@@ -72,7 +72,7 @@ function LookupRow({
 
     const loadingComponent = (
         <span className="text-muted">
-            <span className="spinner-grow spinner-grow-sm me-2"></span>
+            <span className="spinner-grow spinner-grow-sm e-mr-1.5"></span>
             Loading
         </span>
     );
@@ -98,12 +98,12 @@ function LookupRow({
 
     return (
         <tr>
-            <td className="text-lg-end">
+            <td className="e-text-right">
                 <Address pubkey={lookupTableKey} link />
             </td>
-            <td className="text-lg-end">{lookupTableIndex}</td>
-            <td className="text-lg-end">{resolvedKeyComponent}</td>
-            <td>{!readOnly && <span className="badge bg-danger-soft me-1">Writable</span>}</td>
+            <td className="e-text-right">{lookupTableIndex}</td>
+            <td className="e-text-right">{resolvedKeyComponent}</td>
+            <td>{!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}</td>
         </tr>
     );
 }

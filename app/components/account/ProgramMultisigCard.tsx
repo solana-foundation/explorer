@@ -10,6 +10,7 @@ import {
     useSquadsMultisig,
     useSquadsMultisigLookup,
 } from '@/app/providers/squadsMultisig';
+import { CardHeader } from '@/app/shared/ui/Card';
 
 import { Address } from '../common/Address';
 import { LoadingCard } from '../common/LoadingCard';
@@ -47,19 +48,19 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
 
     return (
         <div className="card security-txt">
-            <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">
+            <CardHeader ui="dashkit">
+                <h3 className="card-header-title e-mb-0 e-flex e-items-center">
                     Upgrade Authority Multisig Information
                 </h3>
-            </div>
+            </CardHeader>
             <TableCardBody>
                 <tr>
                     <td>Multisig Program</td>
-                    <td className="text-lg-end">{squadMapInfo?.version === 'v4' ? 'Squads V4' : 'Squads V3'}</td>
+                    <td className="e-text-right">{squadMapInfo?.version === 'v4' ? 'Squads V4' : 'Squads V3'}</td>
                 </tr>
                 <tr>
                     <td>Multisig Program Id</td>
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         <Address
                             pubkey={
                                 new PublicKey(squadMapInfo?.version === 'v4' ? SQUADS_V4_ADDRESS : SQUADS_V3_ADDRESS)
@@ -71,7 +72,7 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
                 </tr>
                 <tr>
                     <td>Multisig Account</td>
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         {squadMapInfo?.isSquad ? (
                             <Address pubkey={new PublicKey(squadMapInfo.multisig)} alignRight link />
                         ) : null}
@@ -79,7 +80,7 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
                 </tr>
                 <tr>
                     <td>Multisig Approval Threshold</td>
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         {squadInfo?.multisig.threshold}
                         {' of '}
                         {squadInfo?.version === 'v4'
@@ -90,7 +91,7 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
                 {members.map((member, idx) => (
                     <tr key={idx}>
                         <td>Multisig Member {idx + 1}</td>
-                        <td className="text-lg-end">
+                        <td className="e-text-right">
                             <Address pubkey={member} alignRight link />
                         </td>
                     </tr>

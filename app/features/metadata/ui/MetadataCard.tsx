@@ -4,6 +4,7 @@ import { ErrorCard } from '@/app/components/common/ErrorCard';
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/shared/ui/tabs';
 import type { Account } from '@/app/providers/accounts';
+import { CardBody } from '@/app/shared/ui/Card';
 
 import { extractMetaplexMetadata } from '../lib/metaplexMetadata';
 import { extractTokenMetadata } from '../lib/tokenMetadata';
@@ -84,7 +85,7 @@ function BaseCard({ tabs }: { tabs: MetadataTab[] }) {
 
     return (
         <div className="card">
-            <div className="card-body">
+            <CardBody ui="dashkit">
                 <Tabs defaultValue={tabs[0]?.id}>
                     <TabsList>
                         {tabs.map(tab => (
@@ -108,7 +109,7 @@ function BaseCard({ tabs }: { tabs: MetadataTab[] }) {
                         </TabsContent>
                     ))}
                 </Tabs>
-            </div>
+            </CardBody>
         </div>
     );
 }

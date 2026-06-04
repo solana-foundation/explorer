@@ -183,7 +183,7 @@ function FungibleTokenMintAccountCard({
                     <td className="text-md-end">
                         <a rel="noopener noreferrer" target="_blank" href={tokenInfo.extensions.website}>
                             {tokenInfo.extensions.website}
-                            <ExternalLink className="align-text-top ms-2" size={13} />
+                            <ExternalLink className="align-text-top e-ml-1.5" size={13} />
                         </a>
                     </td>
                 </tr>
@@ -334,7 +334,7 @@ function NonFungibleTokenMintAccountCard({
                     <td className="text-md-end">
                         <a rel="noopener noreferrer" target="_blank" href={nftData.json.external_url}>
                             {nftData.json.external_url}
-                            <ExternalLink className="align-text-top ms-2" size={13} />
+                            <ExternalLink className="align-text-top e-ml-1.5" size={13} />
                         </a>
                     </td>
                 </tr>
@@ -987,7 +987,7 @@ export function TokenExtensionRow(
                             {extension.uri.startsWith('http') ? (
                                 <a rel="noopener noreferrer" target="_blank" href={extension.uri}>
                                     {extension.uri}
-                                    <ExternalLink className="align-text-top ms-2" size={13} />
+                                    <ExternalLink className="align-text-top e-ml-1.5" size={13} />
                                 </a>
                             ) : (
                                 extension.uri

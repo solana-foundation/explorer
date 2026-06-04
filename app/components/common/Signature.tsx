@@ -28,7 +28,7 @@ export function Signature({ signature, alignRight, link, noTruncate }: Props) {
             ref={rowRef}
             className={cn(
                 'e-relative e-flex e-w-full e-min-w-0 e-items-center e-justify-start',
-                alignRight && 'lg:e-justify-end',
+                alignRight && 'e-justify-end',
             )}
         >
             {!noTruncate && (

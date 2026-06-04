@@ -83,14 +83,14 @@ export function AccountsCard({ signature }: SignatureProps) {
                     )}
                 </td>
                 <td>
-                    {index === 0 && <span className="badge bg-info-soft me-1">Fee Payer</span>}
-                    {account.signer && <span className="badge bg-info-soft me-1">Signer</span>}
-                    {account.writable && <span className="badge bg-danger-soft me-1">Writable</span>}
+                    {index === 0 && <span className="badge bg-info-soft e-mr-[3px]">Fee Payer</span>}
+                    {account.signer && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
+                    {account.writable && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
                     {message.instructions.find(ix => ix.programId.equals(pubkey)) && (
-                        <span className="badge bg-warning-soft me-1">Program</span>
+                        <span className="badge bg-warning-soft e-mr-[3px]">Program</span>
                     )}
                     {account.source === 'lookupTable' && (
-                        <span className="badge bg-gray-soft me-1">Address Table Lookup</span>
+                        <span className="badge bg-gray-soft e-mr-[3px]">Address Table Lookup</span>
                     )}
                 </td>
             </tr>
@@ -100,7 +100,7 @@ export function AccountsCard({ signature }: SignatureProps) {
     return (
         <CollapsibleCard title={`Account Input(s) (${message.accountKeys.length})`}>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive mb-0">
+            <div className="table-responsive e-mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
@@ -116,18 +116,18 @@ export function AccountsCard({ signature }: SignatureProps) {
                     {totalAccountSize > 0 && (
                         <tfoot>
                             <tr>
-                                <td colSpan={3} className="align-bottom">
+                                <td colSpan={3} className="e-align-bottom">
                                     <p className="text-muted e-m-0 e-text-right e-text-[0.625rem]">
                                         reflects current account state
                                     </p>
                                 </td>
-                                <td className="align-bottom">
+                                <td className="e-align-bottom">
                                     <p className="text-muted e-m-0 e-text-[0.625rem] e-uppercase">
                                         Total Account Size:
                                     </p>
                                 </td>
                                 <td>
-                                    <span className="text-white e-ml-7">
+                                    <span className="e-ml-7 e-text-white">
                                         {totalAccountSize.toLocaleString('en-US')}
                                     </span>
                                 </td>

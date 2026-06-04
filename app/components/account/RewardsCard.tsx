@@ -11,6 +11,8 @@ import { PublicKey } from '@solana/web3.js';
 import { lamportsToSolString } from '@utils/index';
 import React from 'react';
 
+import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
+
 const U64_MAX = BigInt('0xffffffffffffffff');
 
 export function RewardsCard({ address }: { address: string }) {
@@ -75,17 +77,17 @@ export function RewardsCard({ address }: { address: string }) {
     return (
         <>
             <div className="card">
-                <div className="card-header">
-                    <div className="row align-items-center">
+                <CardHeader ui="dashkit">
+                    <div className="row e-items-center">
                         <div className="col">
                             <h3 className="card-header-title">Rewards</h3>
                         </div>
                     </div>
-                </div>
+                </CardHeader>
 
                 {rewardsFound ? (
                     // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
-                    <div className="table-responsive mb-0">
+                    <div className="table-responsive e-mb-0">
                         <table className="table table-sm table-nowrap card-table">
                             <thead>
                                 <tr>
@@ -99,19 +101,19 @@ export function RewardsCard({ address }: { address: string }) {
                         </table>
                     </div>
                 ) : (
-                    <div className="card-body">
+                    <CardBody ui="dashkit">
                         No rewards issued between epochs {lowestFetchedEpoch} and {highestFetchedEpoch}
-                    </div>
+                    </CardBody>
                 )}
 
-                <div className="card-footer">
+                <CardFooter ui="dashkit">
                     {foundOldest ? (
-                        <div className="text-muted text-center">Fetched full reward history</div>
+                        <div className="text-muted e-text-center">Fetched full reward history</div>
                     ) : (
-                        <button className="btn btn-primary w-100" onClick={() => loadMore()} disabled={fetching}>
+                        <button className="btn btn-primary e-w-full" onClick={() => loadMore()} disabled={fetching}>
                             {fetching ? (
                                 <>
-                                    <span className="align-text-top spinner-grow-sm me-2"></span>
+                                    <span className="align-text-top spinner-grow-sm e-mr-1.5"></span>
                                     Loading
                                 </>
                             ) : (
@@ -119,7 +121,7 @@ export function RewardsCard({ address }: { address: string }) {
                             )}
                         </button>
                     )}
-                </div>
+                </CardFooter>
             </div>
         </>
     );

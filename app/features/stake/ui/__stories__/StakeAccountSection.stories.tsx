@@ -8,6 +8,7 @@ import { expect, within } from 'storybook/test';
 import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
+import { withMockRpc } from '../../../../../.storybook/responsive-decorators';
 import { EPOCH_NEVER_SET } from '../../lib/constants';
 import type { StakeAccountInfo, StakeAccountType } from '../../lib/validators';
 import { StakeAccountSection } from '../StakeAccountSection';
@@ -74,7 +75,7 @@ function initializedStakeInfo(): StakeAccountInfo {
 
 const meta = {
     component: StakeAccountSection,
-    decorators: [withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withMockRpc, withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Stake/StakeAccountSection',

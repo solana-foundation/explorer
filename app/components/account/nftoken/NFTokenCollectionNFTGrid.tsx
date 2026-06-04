@@ -5,6 +5,8 @@ import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
 
+import { CardHeader } from '@/app/shared/ui/Card';
+
 import { useCollectionNfts } from './nftoken-hooks';
 import { NftokenTypes } from './nftoken-types';
 import { NftokenImage } from './NFTokenAccountSection';
@@ -15,13 +17,13 @@ export function NFTokenCollectionNFTGrid({ collection }: { collection: string })
     });
     return (
         <div className="card">
-            <div className="card-header align-items-center">
+            <CardHeader ui="dashkit">
                 <h3 className="card-header-title">NFTs</h3>
 
                 <RefreshButton analyticsSection="nft_token_collection_grid" onClick={mutate} />
-            </div>
+            </CardHeader>
 
-            <div className="py-4">
+            <div className="e-py-6">
                 {nfts.length === 0 && <div className={'px-4'}>No NFTs Found</div>}
 
                 {nfts.length > 0 && (

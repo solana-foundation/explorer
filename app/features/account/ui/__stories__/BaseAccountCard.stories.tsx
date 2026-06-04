@@ -40,11 +40,11 @@ export const Default: Story = {
         <BaseAccountCard {...args}>
             <tr>
                 <td>Token Balance</td>
-                <td className="text-lg-end">1,000.00</td>
+                <td className="e-text-right">1,000.00</td>
             </tr>
             <tr>
                 <td>Mint</td>
-                <td className="text-lg-end">So11...1112</td>
+                <td className="e-text-right">So11...1112</td>
             </tr>
         </BaseAccountCard>
     ),
@@ -60,7 +60,7 @@ export const WithRefresh: Story = {
         <BaseAccountCard {...args}>
             <tr>
                 <td>Owner</td>
-                <td className="text-lg-end">System Program</td>
+                <td className="e-text-right">System Program</td>
             </tr>
         </BaseAccountCard>
     ),
@@ -76,7 +76,7 @@ export const WithoutRawButton: Story = {
         <BaseAccountCard {...args}>
             <tr>
                 <td>Authority</td>
-                <td className="text-lg-end">4TPT...oH7e</td>
+                <td className="e-text-right">4TPT...oH7e</td>
             </tr>
         </BaseAccountCard>
     ),
@@ -92,7 +92,7 @@ export const WithRawContent: Story = {
         <BaseAccountCard {...args}>
             <tr>
                 <td>Token Balance</td>
-                <td className="text-lg-end">1,000.00</td>
+                <td className="e-text-right">1,000.00</td>
             </tr>
         </BaseAccountCard>
     ),

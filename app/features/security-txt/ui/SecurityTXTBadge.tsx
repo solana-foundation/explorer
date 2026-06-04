@@ -30,15 +30,15 @@ export function ProgramSecurityTXTBadge({
 export function SecurityTXTBadge({ error, tabPath }: { error?: string; tabPath: string }) {
     if (error) {
         return (
-            <h3 className="mb-0">
+            <h3 className="e-mb-0">
                 <span className="badge bg-warning-soft rank">{error}</span>
             </h3>
         );
     }
 
     return (
-        <h3 className="mb-0">
-            <Link className="c-pointer badge bg-success-soft rank" href={tabPath}>
+        <h3 className="e-mb-0">
+            <Link className="badge bg-success-soft rank e-cursor-pointer" href={tabPath}>
                 Included
             </Link>
         </h3>

@@ -15,7 +15,7 @@ function ScaledUiAmountMultiplierTooltip({
     return (
         <Tooltip>
             <TooltipTrigger className="e-border-0 e-bg-transparent e-p-0">
-                <Info color="white" size={13} className="ms-2" style={{ transform: 'translate(-2px, -1px)' }} />
+                <Info color="white" size={13} className="e-ml-1.5" style={{ transform: 'translate(-2px, -1px)' }} />
             </TooltipTrigger>
             <TooltipContent>
                 <div className="e-min-w-36 e-max-w-16">

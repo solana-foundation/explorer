@@ -39,31 +39,31 @@ const NFTCard = ({ account, nft }: { account: Account; nft: NftokenTypes.NftAcco
         >
             <tr>
                 <td>Address</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={new PublicKey(nft.address)} alignRight raw />
                 </td>
             </tr>
             <tr>
                 <td>Authority</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={new PublicKey(nft.authority)} alignRight link />
                 </td>
             </tr>
             <tr>
                 <td>Holder</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={new PublicKey(nft.holder)} alignRight link />
                 </td>
             </tr>
             <tr>
                 <td>Delegate</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {nft.delegate ? <Address pubkey={new PublicKey(nft.delegate)} alignRight link /> : 'Not Delegated'}
                 </td>
             </tr>
             <tr>
                 <td>Collection</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {nft.collection ? (
                         <Address pubkey={new PublicKey(nft.collection)} alignRight link />
                     ) : (
@@ -89,7 +89,7 @@ export const NftokenImage = ({ url, size }: { url: string | undefined; size: num
                     }}
                 />
             )}
-            <div className={cn('rounded mx-auto', isLoading ? 'd-none' : 'd-block')}>
+            <div className={cn('mx-auto e-rounded-dk', isLoading ? 'e-hidden' : 'e-block')}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     alt="nft"
@@ -117,19 +117,19 @@ const CollectionCard = ({ account, collection }: { account: Account; collection:
         >
             <tr>
                 <td>Address</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={new PublicKey(collection.address)} alignRight raw />
                 </td>
             </tr>
             <tr>
                 <td>Authority</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Address pubkey={new PublicKey(collection.authority)} alignRight link />
                 </td>
             </tr>
             <tr>
                 <td>Number of NFTs</td>
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     <Suspense fallback={<div>Loading...</div>}>
                         <NumNfts collection={collection.address} />
                     </Suspense>

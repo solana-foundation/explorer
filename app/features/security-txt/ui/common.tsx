@@ -6,7 +6,7 @@ import { isValidLink, parseCodeValue } from './utils';
 
 export function CodeCell({ value, alignRight = true }: { value: string; alignRight: boolean }) {
     return (
-        <td className={classNames({ 'text-lg-end': alignRight })}>
+        <td className={classNames({ 'e-text-right': alignRight })}>
             <RenderCode value={value} />
         </td>
     );
@@ -42,21 +42,21 @@ export function ContactInfo({ type, information }: { type: string; information: 
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`mailto:${information}`}>
                     {information}
-                    <ExternalLink className="align-text-top ms-2" size={13} />
+                    <ExternalLink className="align-text-top e-ml-1.5" size={13} />
                 </a>
             );
         case 'telegram':
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`https://t.me/${information}`}>
                     Telegram: {information}
-                    <ExternalLink className="align-text-top ms-2" size={13} />
+                    <ExternalLink className="align-text-top e-ml-1.5" size={13} />
                 </a>
             );
         case 'twitter':
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`https://twitter.com/${information}`}>
                     Twitter {information}
-                    <ExternalLink className="align-text-top ms-2" size={13} />
+                    <ExternalLink className="align-text-top e-ml-1.5" size={13} />
                 </a>
             );
         case 'link':
@@ -64,7 +64,7 @@ export function ContactInfo({ type, information }: { type: string; information: 
                 return (
                     <a rel="noopener noreferrer" target="_blank" href={`${information}`}>
                         {information}
-                        <ExternalLink className="align-text-top ms-2" size={13} />
+                        <ExternalLink className="align-text-top e-ml-1.5" size={13} />
                     </a>
                 );
             }
@@ -84,7 +84,7 @@ export function RenderExternalLink({ url }: { url: string }) {
         <span className="font-monospace">
             <a rel="noopener noreferrer" target="_blank" href={url}>
                 {url}
-                <ExternalLink className="align-text-top ms-2" size={13} />
+                <ExternalLink className="align-text-top e-ml-1.5" size={13} />
             </a>
         </span>
     );
@@ -92,19 +92,19 @@ export function RenderExternalLink({ url }: { url: string }) {
 
 export function ExternalLinkCell({ url }: { url: string }) {
     return (
-        <td className="text-lg-end">
+        <td className="e-text-right">
             <RenderExternalLink url={url} />
         </td>
     );
 }
 
 export function StringCell({ value }: { value: string }) {
-    return <td className="text-lg-end font-monospace">{value}</td>;
+    return <td className="font-monospace e-text-right">{value}</td>;
 }
 
 export function RenderCode({ value }: { value: any }) {
     return (
-        <div className="d-flex e-items-end">
+        <div className="e-flex e-items-end">
             <pre className="e-max-w-[500px] e-overflow-x-auto lg:e-ml-auto">{parseCodeValue(value)}</pre>
         </div>
     );

@@ -8,6 +8,7 @@ import { Cluster } from '@utils/cluster';
 import { useMemo } from 'react';
 import useSWR from 'swr';
 
+import { CardBody } from '@/app/shared/ui/Card';
 import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
@@ -53,7 +54,7 @@ export function TokenExtensionsCard({
                 analyticsSection="extensions_section"
                 refresh={() => refresh(new PublicKey(address), 'parsed')}
             />
-            <div className="card-body p-0 e-overflow-x-scroll">
+            <CardBody ui="dashkit" className="e-overflow-x-scroll !e-p-0">
                 <TokenExtensionsSection
                     address={address}
                     decimals={decimals}
@@ -61,7 +62,7 @@ export function TokenExtensionsCard({
                     parsedExtensions={extensions}
                     symbol={symbol}
                 />
-            </div>
+            </CardBody>
         </div>
     );
 }

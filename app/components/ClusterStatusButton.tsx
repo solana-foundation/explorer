@@ -25,16 +25,16 @@ export const ClusterStatusButton = () => {
     const statusName = cluster !== Cluster.Custom ? `${name}` : getCustomUrlClusterName(customUrl);
 
     const btnClasses = (variant: string) => {
-        return `btn d-block btn-${variant}`;
+        return `btn e-block btn-${variant}`;
     };
 
-    const spinnerClasses = 'align-text-top spinner-grow spinner-grow-sm me-2';
+    const spinnerClasses = 'align-text-top spinner-grow spinner-grow-sm e-mr-1.5';
 
     switch (status) {
         case ClusterStatus.Connected:
             return (
                 <span className={btnClasses('primary')} onClick={onClickHandler}>
-                    <CheckCircle className="fe me-2" size={15} />
+                    <CheckCircle className="fe e-mr-1.5" size={15} />
                     {statusName}
                 </span>
             );
@@ -50,7 +50,7 @@ export const ClusterStatusButton = () => {
         case ClusterStatus.Failure:
             return (
                 <span className={btnClasses('danger')} onClick={onClickHandler}>
-                    <AlertCircle className="me-2" size={15} />
+                    <AlertCircle className="e-mr-1.5" size={15} />
                     {statusName}
                 </span>
             );

@@ -6,6 +6,7 @@ import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 import { ExternalLink } from 'react-feather';
 
+import { CardBody, CardHeader } from '@/app/shared/ui/Card';
 import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
 
 import { Address } from '../common/Address';
@@ -21,6 +22,18 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
         programId: pubkey,
     });
 
+    return <BaseVerifiedBuildCard data={data} registryInfo={registryInfo ?? null} isLoading={isLoading} />;
+}
+
+export function BaseVerifiedBuildCard({
+    data,
+    registryInfo,
+    isLoading,
+}: {
+    data: UpgradeableLoaderAccountData;
+    registryInfo: OsecRegistryInfo | null;
+    isLoading: boolean;
+}) {
     if (!data.programData) {
         return <ErrorCard text="Account has no data" />;
     }
@@ -32,7 +45,7 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
     if (!registryInfo) {
         return (
             <div className="card">
-                <div className="card-body text-center">
+                <CardBody ui="dashkit" className="e-text-center">
                     Verified build information not yet uploaded by the program authority. For more information, see the{' '}
                     <Link href="https://solana.com/developers/guides/advanced/verified-builds" target="_blank">
                         Verified Build Guide
@@ -41,7 +54,7 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
                     <br />
                     Note: Some programs were verified using older, deprecated versions of the API and may not include
                     on-chain verification details.
-                </div>
+                </CardBody>
             </div>
         );
     }
@@ -59,11 +72,11 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
 
     return (
         <div className="card security-txt">
-            <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Verified Build</h3>
+            <CardHeader ui="dashkit">
+                <h3 className="card-header-title e-mb-0 e-flex e-items-center">Verified Build</h3>
                 <small>{verificationMessage}</small>
-            </div>
-            <div className="alert mt-2 mb-2">
+            </CardHeader>
+            <div className="alert e-mb-1.5 e-mt-1.5">
                 A verified build badge indicates that this program was built from source code that is publicly
                 available, but does not imply that this program has been audited. For more details, refer to the{' '}
                 <a
@@ -71,7 +84,7 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
                     target="_blank"
                     rel="noopener noreferrer"
                 >
-                    Verified Builds Guide <ExternalLink className="align-text-top ms-1" size={13} />
+                    Verified Builds Guide <ExternalLink className="align-text-top e-ml-[3px]" size={13} />
                 </a>
                 .
             </div>
@@ -79,7 +92,7 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
                 {ROWS.filter(x => x.key in registryInfo).map((x, idx) => {
                     return (
                         <tr key={idx}>
-                            <td className="w-100">{x.display}</td>
+                            <td className="e-w-full">{x.display}</td>
                             <RenderEntry value={registryInfo[x.key]} type={x.type} />
                         </tr>
                     );
@@ -151,7 +164,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
     switch (type) {
         case DisplayType.Boolean:
             return (
-                <td className={'text-lg-end font-monospace'}>
+                <td className={'font-monospace e-text-right'}>
                     <span className={cn('badge', `bg-${value ? 'success' : 'warning'}-soft`)}>{new String(value)}</span>
                 </td>
             );
@@ -160,26 +173,26 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 const badgeClass = value === VerificationStatus.Verified ? 'bg-success-soft' : 'bg-warning-soft';
                 const badgeValue = value === VerificationStatus.Verified ? 'true' : 'false';
                 return (
-                    <td className="text-lg-end font-monospace">
+                    <td className="font-monospace e-text-right">
                         <span className={`badge ${badgeClass}`}>{badgeValue}</span>
                     </td>
                 );
             }
             return (
-                <td className="text-lg-end font-monospace" style={{ whiteSpace: 'pre' }}>
+                <td className="font-monospace e-text-right" style={{ whiteSpace: 'pre' }}>
                     {value && (value as string).length > 1 ? value : '-'}
                 </td>
             );
         case DisplayType.LongString:
             return (
-                <td className="text-lg-end">
+                <td className="e-text-right">
                     {value && (value as string).length > 1 ? (
-                        <div className="d-flex align-items-center justify-content-end">
+                        <div className="e-flex e-items-center e-justify-end">
                             <Copyable text={value as string}>
                                 <span />
                             </Copyable>
                             <pre
-                                className="text-start mb-0 font-monospace"
+                                className="font-monospace e-mb-0 e-text-left"
                                 style={{ overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}
                             >
                                 {value}
@@ -193,30 +206,30 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
         case DisplayType.URL:
             if (isValidLink(value as string)) {
                 return (
-                    <td className="text-lg-end">
+                    <td className="e-text-right">
                         <span className="font-monospace">
                             <a rel="noopener noreferrer" target="_blank" href={value as string}>
                                 {value}
-                                <ExternalLink className="align-text-top ms-2" size={13} />
+                                <ExternalLink className="align-text-top e-ml-1.5" size={13} />
                             </a>
                         </span>
                     </td>
                 );
             }
             return (
-                <td className="text-lg-end font-monospace">
+                <td className="font-monospace e-text-right">
                     {value && (value as string).length > 1 ? (value as string).trim() : '-'}
                 </td>
             );
         case DisplayType.Date:
             return (
-                <td className="text-lg-end font-monospace">
+                <td className="font-monospace e-text-right">
                     {value && (value as string).length > 1 ? new Date(value as string).toUTCString() : '-'}
                 </td>
             );
         case DisplayType.PublicKey:
             return (
-                <td className="text-lg-end font-monospace">
+                <td className="font-monospace e-text-right">
                     <Address pubkey={new PublicKey(value as string)} link alignRight />
                 </td>
             );
