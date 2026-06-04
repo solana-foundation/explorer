@@ -42,6 +42,7 @@ export default defineConfig({
             '@/validators': path.resolve(__dirname, './app/validators'),
 
             // @ aliases
+            '@__fixtures__': path.resolve(__dirname, './app/__fixtures__'),
             '@app': path.resolve(__dirname, './app'),
             '@img': path.resolve(__dirname, './app/img'),
             '@components': path.resolve(__dirname, './app/components'),

@@ -7,6 +7,12 @@ import bs58 from 'bs58';
 export const gen = {
     bigint: (max = 1_000_000n) => BigInt(Math.floor(Math.random() * Number(max))),
     blockHeight: () => gen.bigint(250_000_000n),
+    /** Deterministic blockhash (same seed → same value) so story fixtures stay pixel-stable. */
+    blockhash: (seed = 0) => {
+        const bytes = new Uint8Array(32);
+        for (let i = 0; i < bytes.length; i++) bytes[i] = (seed * 7 + i * 13) & 0xff;
+        return bs58.encode(bytes);
+    },
     epoch: () => gen.bigint(1_000n),
     signature: () => {
         const bytes = new Uint8Array(64);
@@ -15,3 +21,6 @@ export const gen = {
     },
     slot: () => gen.bigint(300_000_000n),
 };
+
+/** Stable single-placeholder blockhash. */
+export const DEFAULT_BLOCKHASH = gen.blockhash();
