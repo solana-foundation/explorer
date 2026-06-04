@@ -8,19 +8,20 @@ import { isString, isValidLink, tryParseContactString } from './utils';
 
 const CONTACT_TYPES = new Set(['discord', 'email', 'link', 'other', 'telegram', 'twitter']);
 
-function parseContactList(value: string): [string, string][] {
+type ContactEntry = { kind: 'contact'; type: string; info: string } | { kind: 'text'; value: string };
+
+function parseContactList(value: string): ContactEntry[] {
     const parts = value
         .split(',')
         .map(s => s.trim())
         .filter(Boolean);
-    const parsed: [string, string][] = [];
-    for (const part of parts) {
+    return parts.map(part => {
         const result = tryParseContactString(part);
         if (Array.isArray(result) && CONTACT_TYPES.has(result[0].toLowerCase())) {
-            parsed.push([result[0], result[1]]);
+            return { info: result[1], kind: 'contact' as const, type: result[0] };
         }
-    }
-    return parsed.length === parts.length ? parsed : [];
+        return { kind: 'text' as const, value: part };
+    });
 }
 
 export function PmpSecurityTxtTable({ data }: { data: Record<string, any> }) {
@@ -78,13 +79,17 @@ function RenderEntry({ entryKey, value }: { entryKey: string; value: any }) {
     } else if (isValidLink(value)) {
         return displayLinkValue(value);
     } else if (isString(value)) {
-        const contacts = parseContactList(value);
-        if (contacts.length > 0) {
+        if (entryKey === 'contacts') {
+            const entries = parseContactList(value);
             return (
                 <td className="text-lg-end font-monospace">
-                    {contacts.map(([type, info], i) => (
+                    {entries.map((entry, i) => (
                         <div key={i}>
-                            <ContactInfo type={type} information={info} />
+                            {entry.kind === 'contact' ? (
+                                <ContactInfo type={entry.type} information={entry.info} />
+                            ) : (
+                                entry.value
+                            )}
                         </div>
                     ))}
                 </td>
