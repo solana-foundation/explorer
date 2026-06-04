@@ -55,10 +55,18 @@ export function partitionFeatures(cluster: Cluster): FeaturePartition {
     }
 
     activated.sort((a, b) => b.clusterActivationEpoch - a.clusterActivationEpoch);
-    // Features roll out testnet → devnet → mainnet, so the one whose latest
-    // cross-cluster activation happened longest ago has baked the longest and is
-    // next in line here. Sort ascending by that epoch so "to be activated soon" is first.
-    upcoming.sort((a, b) => maxEpoch(a.otherActivations) - maxEpoch(b.otherActivations));
+    // Features progress testnet -> devnet -> mainnet, so devnet activation is the
+    // strongest signal of mainnet readiness. Sort ascending by devnet epoch so the
+    // feature most likely to activate on mainnet soon appears first.
+    // Features with no devnet activation sort to the end.
+    upcoming.sort((a, b) => {
+        const aEpoch = a.devnet_activation_epoch;
+        const bEpoch = b.devnet_activation_epoch;
+        if (aEpoch === null && bEpoch === null) return 0;
+        if (aEpoch === null) return 1;
+        if (bEpoch === null) return -1;
+        return aEpoch - bEpoch;
+    });
 
     return { activated, upcoming };
 }
@@ -78,10 +86,6 @@ function activationEpochFor(feature: FeatureInfoType, cluster: Cluster): number 
     })();
     if (raw === null) return undefined;
     return Number.isFinite(raw) ? raw : undefined;
-}
-
-function maxEpoch(entries: ClusterActivation[]): number {
-    return entries.reduce((max, entry) => Math.max(max, entry.epoch), 0);
 }
 
 // Zip the JSON's parallel arrays into typed pairs and drop entries with no link.
