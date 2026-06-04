@@ -1370,7 +1370,7 @@
     "testnet_activation_epoch": 954,
     "devnet_activation_epoch": 1054,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 981,
     "description": "This proposal removes the use of statically defined compute unit (CU) costs for Simple Vote transactions and instead accounts for them in the same way as normal transactions when enforcing block CU limits. This also renders the Vote CU limit obsolete. Because this change affects\u2026"
   },
   {
@@ -1859,7 +1859,7 @@
     ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 968,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,

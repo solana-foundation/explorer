@@ -29,10 +29,14 @@ export function PmpSecurityTxtTable({ data }: { data: Record<string, any> }) {
     return (
         <>
             <RenderTable entries={entries.main} />
-            <CardHeader ui="dashkit" className="!e-border-b-0 e-border-t">
-                <h3 className="card-header-title">Additional:</h3>
-            </CardHeader>
-            <RenderTable entries={entries.additional} />
+            {entries.additional.length > 0 && (
+                <>
+                    <CardHeader ui="dashkit" className="!e-border-b-0 e-border-t">
+                        <h3 className="card-header-title">Additional:</h3>
+                    </CardHeader>
+                    <RenderTable entries={entries.additional} />
+                </>
+            )}
         </>
     );
 }

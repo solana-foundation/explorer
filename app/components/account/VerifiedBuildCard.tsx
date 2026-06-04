@@ -14,8 +14,9 @@ import { Copyable } from '../common/Copyable';
 import { LoadingCard } from '../common/LoadingCard';
 
 export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAccountData; pubkey: PublicKey }) {
+    // suspense:false -- the chain mixes with a non-suspense SWR (useIdlFromAnchorProgramSeed); the mixed path triggers hook-order warnings under HMR.
     const { data: registryInfo, isLoading } = useVerifiedProgram({
-        options: { suspense: true },
+        options: { suspense: false },
         programAuthority: data.programData?.authority ? new PublicKey(data.programData.authority) : null,
         programData: data.programData,
         programId: pubkey,
