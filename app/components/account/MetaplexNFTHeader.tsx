@@ -46,11 +46,11 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
         [dropdownRef],
     );
     return (
-        <div className="row">
-            <div className="col-auto e-ml-1.5 e-flex e-items-center">
+        <div className="-e-mx-3 e-flex e-flex-wrap">
+            <div className="e-ml-1.5 e-flex e-flex-none e-items-center e-px-3">
                 <ArtContent pubkey={address} data={data} />
             </div>
-            <div className="col e-mb-3 e-mt-3">
+            <div className="e-mb-3 e-mt-3 e-min-w-0 e-flex-1 e-px-3">
                 {<h6 className="header-pretitle e-ml-[3px]">Metaplex NFT</h6>}
                 <div className="e-flex e-items-center">
                     <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
