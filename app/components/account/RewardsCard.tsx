@@ -108,12 +108,12 @@ export function RewardsCard({ address }: { address: string }) {
 
                 <CardFooter ui="dashkit">
                     {foundOldest ? (
-                        <div className="text-muted e-text-center">Fetched full reward history</div>
+                        <div className="e-text-center e-text-dk-gray-700">Fetched full reward history</div>
                     ) : (
                         <button className="btn btn-primary e-w-full" onClick={() => loadMore()} disabled={fetching}>
                             {fetching ? (
                                 <>
-                                    <span className="align-text-top spinner-grow-sm e-mr-1.5"></span>
+                                    <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5 e-align-text-top"></span>
                                     Loading
                                 </>
                             ) : (
