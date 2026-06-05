@@ -74,13 +74,9 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
     return (
         <div className="card">
             <CardHeader ui="dashkit">
-                <div className="row e-items-center">
-                    <div className="col">
-                        <CardTitle as="h3" ui="dashkit">
-                            Attestation Data {decoded ? '' : 'Raw (Base64)'}
-                        </CardTitle>
-                    </div>
-                </div>
+                <CardTitle as="h3" ui="dashkit">
+                    Attestation Data {decoded ? '' : 'Raw (Base64)'}
+                </CardTitle>
             </CardHeader>
 
             {decoded ? (
