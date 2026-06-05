@@ -32,14 +32,14 @@ export default function Page() {
     return (
         <StatsProvider>
             <SupplyProvider>
-                <div className="container e-mt-6">
+                <div className="container e-mt-4">
                     <StakingComponent />
 
-                    <div className="row e-flex">
-                        <div className="col-md-6 e-flex">
+                    <div className="e-flex e-flex-col lg:e-flex-row lg:e-gap-6">
+                        <div className="e-w-full lg:e-w-1/2">
                             <StatsCardBody />
                         </div>
-                        <div className="col-md-6 e-flex">
+                        <div className="e-w-full lg:e-w-1/2">
                             <LiveTransactionStatsCard />
                         </div>
                     </div>
@@ -56,7 +56,7 @@ export default function Page() {
 const LoadingStatsCard = ({ title }: { title: string }) => {
     return (
         <div className="e-flex e-items-center e-gap-2">
-            <span className="spinner-grow spinner-grow-sm" />
+            <span className="spinner-grow spinner-grow-sm e-shrink-0" />
             {title}
         </div>
     );
@@ -101,7 +101,7 @@ function StakingComponent() {
 
     if (supply === Status.Idle || supply === Status.Connecting) {
         return (
-            <div className="e-flex e-gap-6">
+            <div className="e-flex e-flex-col md:e-flex-row md:e-gap-6">
                 <SimpleCardSkeleton title={<LoadingStatsCard title="Loading supply data" />} />
                 <SimpleCardSkeleton title={<LoadingStatsCard title="Loading staking data" />} />
             </div>
@@ -124,9 +124,9 @@ function StakingComponent() {
     }
 
     return (
-        <div className="row staking-card">
-            <div className="col-6 col-xl">
-                <div className="card">
+        <div className="staking-card e-flex e-flex-col md:e-flex-row md:e-gap-6">
+            <div className="e-w-full md:e-w-1/2">
+                <div className="card e-mb-3 md:e-mb-6">
                     <CardBody ui="dashkit">
                         <h4>Circulating Supply</h4>
                         <h1>
@@ -139,8 +139,8 @@ function StakingComponent() {
                     </CardBody>
                 </div>
             </div>
-            <div className="col-6 col-xl">
-                <div className="card">
+            <div className="e-w-full md:e-w-1/2">
+                <div className="card e-mb-3 md:e-mb-6">
                     <CardBody ui="dashkit">
                         <h4>Active Stake</h4>
                         {activeStake ? (
@@ -190,7 +190,7 @@ function StatsCardBody() {
     const { blockHeight, absoluteSlot } = epochInfo;
 
     return (
-        <div className="card e-grow">
+        <div className="card e-mb-3 e-grow md:e-mb-6">
             <CardHeader ui="dashkit">
                 <div className="row e-items-center">
                     <div className="col">
@@ -198,7 +198,7 @@ function StatsCardBody() {
                     </div>
                 </div>
             </CardHeader>
-            <TableCardBody>
+            <TableCardBody layout="expanded" className="[&_td:first-child]:!e-w-2/5 md:[&_td:first-child]:!e-w-auto">
                 <tr>
                     <td className="e-w-full">Slot</td>
                     <td className="font-monospace e-text-right">

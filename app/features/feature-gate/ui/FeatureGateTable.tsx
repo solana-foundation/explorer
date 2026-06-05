@@ -28,12 +28,15 @@ export function FeatureGateTable<T extends FeatureRow>({
     cluster,
     secondColumn,
     emptyState,
+    header,
 }: {
     features: T[];
     cluster: Cluster;
     secondColumn: SecondColumn<T>;
     /** Rendered in place of the table when `features` is empty. Pass `undefined` to render nothing. */
     emptyState: ReactNode;
+    /** Optional content rendered above the table, inside the card. */
+    header?: ReactNode;
 }) {
     const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
 
@@ -49,6 +52,7 @@ export function FeatureGateTable<T extends FeatureRow>({
 
     return (
         <Card variant="tight" className="e-overflow-hidden">
+            {header}
             <Table>
                 <TableHeader>
                     <TableRow>

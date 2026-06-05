@@ -53,7 +53,8 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                     protect={isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_ENABLED) ? botIdProtectedRoutes : []}
                 />
             </head>
-            <body>
+            {/* suppressHydrationWarning: browser extensions (e.g. wallet adapters, password managers) may inject attributes onto <body>, causing a mismatch */}
+            <body suppressHydrationWarning>
                 <Suspense fallback={null}>
                     <ScrollAnchorProvider>
                         <ClusterProvider>
