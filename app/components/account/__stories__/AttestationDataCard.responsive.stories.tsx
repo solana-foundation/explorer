@@ -1,11 +1,9 @@
-import { Account, DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
+import { Account, type State } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
-import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { nextjsParameters } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook/react';
+import { nextjsParameters, withAccountsState } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
-import React from 'react';
 
 import { fromBase64 } from '@/app/shared/lib/bytes';
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
@@ -34,8 +32,6 @@ function buildAccount(fixture: FixtureAccount): Account {
 const schemaAccount = buildAccount(schemaFixture as unknown as FixtureAccount);
 const attestationAccount = buildAccount(attestationFixture as unknown as FixtureAccount);
 
-const noop = () => undefined;
-
 const stateWithSchema: State = {
     entries: {
         [schemaAccount.pubkey.toBase58()]: { data: schemaAccount, status: FetchStatus.Fetched },
@@ -43,35 +39,13 @@ const stateWithSchema: State = {
     url: MAINNET_BETA_URL,
 };
 
-function MockAccountsState({ children, state }: { children: React.ReactNode; state: State }) {
-    return (
-        <ClusterProvider>
-            <StateContext.Provider value={state}>
-                <DispatchContext.Provider value={noop}>
-                    <FetchersContext.Provider
-                        value={{ parsed: { fetch: noop }, raw: { fetch: noop }, skip: { fetch: noop } } as any}
-                    >
-                        {children}
-                    </FetchersContext.Provider>
-                </DispatchContext.Provider>
-            </StateContext.Provider>
-        </ClusterProvider>
-    );
-}
-
 function onNotFound(): never {
     throw new Error('Fixture failed to decode — check the captured account bytes.');
 }
 
-const withSchemaInCache: Decorator = Story => (
-    <MockAccountsState state={stateWithSchema}>
-        <Story />
-    </MockAccountsState>
-);
-
 const meta = {
     component: AttestationDataCard,
-    decorators: [withViewportFromGlobal, withSchemaInCache],
+    decorators: [withViewportFromGlobal, withAccountsState(stateWithSchema)],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },

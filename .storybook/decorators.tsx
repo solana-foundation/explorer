@@ -1,3 +1,4 @@
+import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { TransactionsProvider } from '@providers/transactions';
 import type { Decorator, Parameters } from '@storybook/react';
@@ -11,6 +12,13 @@ import { MockStatsProvider } from './__mocks__/MockStatsProvider';
 import { MockSupplyProvider } from './__mocks__/MockSupplyProvider';
 import { MockTokenInfoBatchProvider } from './__mocks__/MockTokenInfoBatchProvider';
 import { MockTransactionsProvider } from './__mocks__/MockTransactionsProvider';
+
+const noopFetcher = async () => undefined;
+const noopAccountsFetchers: React.ContextType<typeof FetchersContext> = {
+    parsed: { fetch: noopFetcher },
+    raw: { fetch: noopFetcher },
+    skip: { fetch: noopFetcher },
+};
 
 /** Wraps stories with ClusterProvider. Usage: `decorators: [withCluster]` */
 export const withCluster: Decorator = Story => (
@@ -34,6 +42,27 @@ export const withClusterAndAccounts: Decorator = Story => (
         </MockAccountsProvider>
     </ClusterProvider>
 );
+
+/**
+ * Factory: seeds the real accounts contexts with a fixture `State` so consumers of `useAccountInfo`
+ * etc. resolve against the provided cache. Fetchers no-op (no RPC calls).
+ * Usage: `decorators: [withAccountsState(stateWithFixture)]`
+ */
+export function withAccountsState(state: State): Decorator {
+    return function WithAccountsState(Story) {
+        return (
+            <ClusterProvider>
+                <StateContext.Provider value={state}>
+                    <DispatchContext.Provider value={() => undefined}>
+                        <FetchersContext.Provider value={noopAccountsFetchers}>
+                            <Story />
+                        </FetchersContext.Provider>
+                    </DispatchContext.Provider>
+                </StateContext.Provider>
+            </ClusterProvider>
+        );
+    };
+}
 
 /** Decorator for card table field components. Usage: `decorators: [withCardTableField]` */
 export const withCardTableField: Decorator = Story => (
