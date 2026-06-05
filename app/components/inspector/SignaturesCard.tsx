@@ -52,11 +52,11 @@ export function TransactionSignatures({
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
-                            <th className="text-muted">#</th>
-                            <th className="text-muted">Signature</th>
-                            <th className="text-muted">Signer</th>
-                            <th className="text-muted">Validity</th>
-                            <th className="text-muted">Details</th>
+                            <th className="e-text-dk-gray-700">#</th>
+                            <th className="e-text-dk-gray-700">Signature</th>
+                            <th className="e-text-dk-gray-700">Signer</th>
+                            <th className="e-text-dk-gray-700">Validity</th>
+                            <th className="e-text-dk-gray-700">Details</th>
                         </tr>
                     </thead>
                     <tbody className="list">{signatureRows}</tbody>

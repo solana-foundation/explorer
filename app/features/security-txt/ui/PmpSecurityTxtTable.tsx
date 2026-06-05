@@ -65,7 +65,7 @@ function RenderEntry({ entryKey, value }: { entryKey: string; value: any }) {
         if (entryKey === 'contacts') {
             const entries = parseContactList(value);
             return (
-                <td className="text-lg-end font-monospace">
+                <td className="text-lg-end e-font-mono">
                     {entries.map(entry => (
                         <div key={entry.kind === 'contact' ? `${entry.type}:${entry.info}` : entry.value}>
                             {entry.kind === 'contact' ? (
@@ -105,7 +105,7 @@ function displayStringValue(value: string) {
 
 function displayArrayValue(entryKey: string, value: any[]) {
     return (
-        <td className="font-monospace e-text-right">
+        <td className="e-text-right e-font-mono">
             <RenderList entryKey={entryKey} items={value} />
         </td>
     );

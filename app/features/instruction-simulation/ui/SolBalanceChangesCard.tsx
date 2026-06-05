@@ -17,10 +17,10 @@ export function SolBalanceChangesCard({ balanceChanges }: { balanceChanges: SolB
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
-                            <th className="text-muted">#</th>
-                            <th className="text-muted">Address</th>
-                            <th className="text-muted">Change (SOL)</th>
-                            <th className="text-muted">Post Balance (SOL)</th>
+                            <th className="e-text-dk-gray-700">#</th>
+                            <th className="e-text-dk-gray-700">Address</th>
+                            <th className="e-text-dk-gray-700">Change (SOL)</th>
+                            <th className="e-text-dk-gray-700">Post Balance (SOL)</th>
                         </tr>
                     </thead>
                     <tbody>
