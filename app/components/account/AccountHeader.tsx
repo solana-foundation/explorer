@@ -173,7 +173,7 @@ function Token22MintHeader({
     throw new Error('Metadata loading for non-token 2022 programs is not yet supported');
 }
 
-function TokenMintHeaderCard({
+export function TokenMintHeaderCard({
     token,
 }: {
     token: { name?: string | undefined; logoURI?: string | undefined; symbol?: string | undefined };
