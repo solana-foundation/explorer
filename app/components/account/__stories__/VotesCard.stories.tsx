@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 
@@ -14,9 +15,10 @@ const meta: Meta<typeof VotesCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const baseSlot = Number(gen.slot(0));
 const votes = Array.from({ length: 6 }, (_, i) => ({
     confirmationCount: 31 - i,
-    slot: 312_456_780 + i,
+    slot: baseSlot + i,
 }));
 
 export const WithVotes: Story = {
