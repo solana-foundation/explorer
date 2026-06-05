@@ -23,13 +23,13 @@ export function ErrorCard({
                         <span className="btn btn-white e-ml-3 e-hidden md:e-inline" onClick={retry}>
                             {buttonText}
                         </span>
-                        <div className="d-md-none e-mt-6 e-block">
+                        <div className="e-mt-6 e-block md:e-hidden">
                             <span className="btn btn-white e-w-full" onClick={retry}>
                                 {buttonText}
                             </span>
                         </div>
                         {subtext && (
-                            <div className="text-muted">
+                            <div className="e-text-dk-gray-700">
                                 <hr></hr>
                                 {subtext}
                             </div>
