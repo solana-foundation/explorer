@@ -15,7 +15,9 @@ import { useDasImage } from '../use-das-image';
 describe('useDasImage', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.MainnetBeta, customUrl: '' } as ReturnType<typeof useCluster>);
+        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.MainnetBeta, customUrl: '' } as ReturnType<
+            typeof useCluster
+        >);
         vi.mocked(useSWR).mockReturnValue({ data: undefined } as ReturnType<typeof useSWR>);
     });
 
@@ -38,7 +40,10 @@ describe('useDasImage', () => {
     });
 
     it('should pass correct SWR key including cluster slug and customUrl', () => {
-        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.Devnet, customUrl: 'https://custom.rpc' } as ReturnType<typeof useCluster>);
+        vi.mocked(useCluster).mockReturnValue({
+            cluster: Cluster.Devnet,
+            customUrl: 'https://custom.rpc',
+        } as ReturnType<typeof useCluster>);
 
         renderHook(() => useDasImage('SomeMintAddress'));
 
