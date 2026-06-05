@@ -20,6 +20,7 @@ const meta = {
     ],
     parameters: {
         ...nextjsParameters,
+        docs: { story: { height: INITIAL_VIEWPORTS.ipad.styles.height } },
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
