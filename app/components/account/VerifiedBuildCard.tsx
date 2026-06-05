@@ -6,6 +6,7 @@ import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 import { ExternalLink } from 'react-feather';
 
+import { Alert } from '@/app/shared/ui/Alert';
 import { CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
 
@@ -78,7 +79,7 @@ export function BaseVerifiedBuildCard({
                 </CardTitle>
                 <small>{verificationMessage}</small>
             </CardHeader>
-            <div className="alert e-mb-1.5 e-mt-1.5">
+            <Alert className="e-mb-1.5 e-mt-1.5">
                 A verified build badge indicates that this program was built from source code that is publicly
                 available, but does not imply that this program has been audited. For more details, refer to the{' '}
                 <a
@@ -89,7 +90,7 @@ export function BaseVerifiedBuildCard({
                     Verified Builds Guide <ExternalLink className="e-ml-[3px] e-align-text-top" size={13} />
                 </a>
                 .
-            </div>
+            </Alert>
             <TableCardBody>
                 {ROWS.filter(x => x.key in registryInfo).map((x, idx) => {
                     return (
@@ -212,7 +213,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                         <span className="e-font-mono">
                             <a rel="noopener noreferrer" target="_blank" href={value as string}>
                                 {value}
-                                <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                                <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
                             </a>
                         </span>
                     </td>
