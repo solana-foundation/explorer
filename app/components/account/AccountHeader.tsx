@@ -44,8 +44,8 @@ export function AccountHeader({
 
     const fallback = (
         <div className="e-flex e-flex-col e-justify-center e-gap-1 md:e-min-h-[69px]">
-            <h6 className="header-pretitle">Details</h6>
-            <h2 className="header-title">Account</h2>
+            <h6 className="e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Details</h6>
+            <h2 className="e-mb-0">Account</h2>
         </div>
     );
 
@@ -182,7 +182,7 @@ export function TokenMintHeaderCard({
     return (
         <div className="-e-mx-3 e-flex e-flex-wrap e-items-center">
             <div className="e-flex-none e-px-3">
-                <div className="avatar avatar-lg header-avatar-top">
+                <div className="avatar avatar-lg">
                     {logoURI ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -205,9 +205,9 @@ export function TokenMintHeaderCard({
             </div>
 
             <div className="-e-ml-3 e-min-w-0 e-flex-1 e-px-3 md:-e-ml-1.5">
-                <h6 className="header-pretitle">Token</h6>
-                <h2 className="header-title">{token?.name || 'Unknown Token'}</h2>
-                <div className="header-pretitle no-overflow-with-ellipsis">
+                <h6 className="e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Token</h6>
+                <h2 className="e-mb-0">{token?.name || 'Unknown Token'}</h2>
+                <div className="e-overflow-hidden e-text-ellipsis e-whitespace-nowrap e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">
                     {token?.symbol ? token.symbol : 'No Symbol was found'}
                 </div>
             </div>

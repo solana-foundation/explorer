@@ -112,8 +112,8 @@ export function InstructionsSection({ signature }: SignatureProps) {
     return (
         <>
             <div className="container">
-                <div className="header">
-                    <div className="header-body">
+                <div className="e-mb-8">
+                    <div className="e-border-0 e-border-b e-border-solid e-border-dk-gray-700-dark e-py-6">
                         <h3 className="e-mb-0">
                             {transaction.message.instructions.length > 1 ? 'Instructions' : 'Instruction'}
                         </h3>

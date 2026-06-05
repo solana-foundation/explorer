@@ -112,12 +112,16 @@ export function ProgramHeader({
             </div>
 
             <div className="e-flex-1">
-                <h6 className="header-pretitle">Program account</h6>
+                <h6 className="e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Program account</h6>
                 <div className="e-inline-flex">
-                    <h2 className="header-title">{programName}</h2>
+                    <h2 className="e-mb-0">{programName}</h2>
                     {warningChunk}
                 </div>
-                {version && <div className="header-pretitle no-overflow-with-ellipsis">{version}</div>}
+                {version && (
+                    <div className="e-overflow-hidden e-text-ellipsis e-whitespace-nowrap e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">
+                        {version}
+                    </div>
+                )}
             </div>
         </div>
     );
