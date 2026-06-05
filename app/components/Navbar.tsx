@@ -9,6 +9,8 @@ import Link from 'next/link';
 import { useSelectedLayoutSegment, useSelectedLayoutSegments } from 'next/navigation';
 import React, { ReactNode } from 'react';
 
+import { NavbarItem, NavbarLink, NavbarList } from '@/app/shared/ui/Navbar';
+
 import { ClusterStatusButton } from './ClusterStatusButton';
 
 export interface INavbarProps {
@@ -42,29 +44,23 @@ export function Navbar({ children }: INavbarProps) {
                 </div>
 
                 <div className={cn('collapse navbar-collapse ms-auto', navOpened && 'show', 'flex-shrink-0')}>
-                    <ul className="navbar-nav e-mr-auto">
-                        <li className="nav-item">
-                            <Link
-                                className={cn('nav-link', selectedLayoutSegment === 'feature-gates' && 'active')}
-                                href={featureGatesPath}
+                    <NavbarList className="e-mr-auto">
+                        <NavbarItem>
+                            <NavbarLink asChild active={selectedLayoutSegment === 'feature-gates'}>
+                                <Link href={featureGatesPath}>Feature Gates</Link>
+                            </NavbarLink>
+                        </NavbarItem>
+                        <NavbarItem>
+                            <NavbarLink
+                                asChild
+                                active={
+                                    selectedLayoutSegments[0] === 'tx' && selectedLayoutSegments[1] === '(inspector)'
+                                }
                             >
-                                Feature Gates
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link
-                                className={cn(
-                                    'nav-link',
-                                    selectedLayoutSegments[0] === 'tx' &&
-                                        selectedLayoutSegments[1] === '(inspector)' &&
-                                        'active',
-                                )}
-                                href={inspectorPath}
-                            >
-                                Inspector
-                            </Link>
-                        </li>
-                        <li className="nav-item e-items-center e-justify-center e-pt-1.5">
+                                <Link href={inspectorPath}>Inspector</Link>
+                            </NavbarLink>
+                        </NavbarItem>
+                        <NavbarItem className="e-flex e-items-center e-justify-center e-pt-1.5">
                             <a
                                 aria-label="GitHub Repository"
                                 href="https://github.com/solana-foundation/explorer"
@@ -81,8 +77,8 @@ export function Navbar({ children }: INavbarProps) {
                                     />
                                 </svg>
                             </a>
-                        </li>
-                    </ul>
+                        </NavbarItem>
+                    </NavbarList>
                 </div>
 
                 <div className="d-lg-block e-ml-[3px] e-hidden e-shrink-0">
