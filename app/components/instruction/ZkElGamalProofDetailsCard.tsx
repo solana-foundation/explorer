@@ -1,34 +1,13 @@
 import { Address } from '@components/common/Address';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { ZK_ELGAMAL_PROOF_PROGRAM_ID } from '@utils/programs';
+import { getZkElGamalProofInstructionName } from '@utils/zk-elgamal-proof';
 import React from 'react';
 
 import { InstructionCard } from './InstructionCard';
 
-// Indexed by the 1-byte discriminator (0..=12).
-const INSTRUCTION_NAMES: readonly string[] = [
-    'Close Context State',
-    'Verify Zero Ciphertext',
-    'Verify Ciphertext-Ciphertext Equality',
-    'Verify Ciphertext-Commitment Equality',
-    'Verify Pubkey Validity',
-    'Verify Percentage With Cap',
-    'Verify Batched Range Proof (U64)',
-    'Verify Batched Range Proof (U128)',
-    'Verify Batched Range Proof (U256)',
-    'Verify Grouped Ciphertext (2 handles)',
-    'Verify Batched Grouped Ciphertext (2 handles)',
-    'Verify Grouped Ciphertext (3 handles)',
-    'Verify Batched Grouped Ciphertext (3 handles)',
-];
-
 export function isZkElGamalProofInstruction(ix: TransactionInstruction): boolean {
     return ix.programId.toBase58() === ZK_ELGAMAL_PROOF_PROGRAM_ID;
-}
-
-// Maps the 1-byte instruction discriminator to a human-readable name.
-export function getZkElGamalProofInstructionName(discriminator: number): string {
-    return INSTRUCTION_NAMES[discriminator] ?? 'Unknown Instruction';
 }
 
 export function ZkElGamalProofDetailsCard({

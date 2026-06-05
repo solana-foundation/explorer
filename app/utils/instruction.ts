@@ -5,7 +5,6 @@ import {
     parseTokenLendingInstructionTitle,
 } from '@components/instruction/token-lending/types';
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
-import { getZkElGamalProofInstructionName } from '@components/instruction/ZkElGamalProofDetailsCard';
 import { isTokenProgramId } from '@providers/accounts/tokens';
 import {
     ComputeBudgetProgram,
@@ -17,6 +16,7 @@ import {
 import { camelToTitleCase } from '@utils/index';
 import { isTokenProgram, ZK_ELGAMAL_PROOF_PROGRAM_ID } from '@utils/programs';
 import { intoTransactionInstruction } from '@utils/tx';
+import { getZkElGamalProofInstructionName } from '@utils/zk-elgamal-proof';
 import { ParsedInfo } from '@validators/index';
 import bs58 from 'bs58';
 import { create } from 'superstruct';

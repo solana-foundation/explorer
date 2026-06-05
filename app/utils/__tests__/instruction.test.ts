@@ -118,6 +118,18 @@ describe('getTransactionInstructionNames', () => {
 
             expect(result).toEqual({ name: 'Unknown Instruction', program: 'ZK ElGamal Proof Program' });
         });
+
+        it('should fall back to Unknown Instruction for empty instruction data', () => {
+            const ix: PartiallyDecodedInstruction = {
+                accounts: [],
+                data: bs58.encode(new Uint8Array([])),
+                programId: ZK_ELGAMAL_PROOF_PROGRAM_ID,
+            };
+
+            const [result] = getTransactionInstructionNames(makeTx([ix]));
+
+            expect(result).toEqual({ name: 'Unknown Instruction', program: 'ZK ElGamal Proof Program' });
+        });
     });
 
     describe('multiple instructions', () => {
