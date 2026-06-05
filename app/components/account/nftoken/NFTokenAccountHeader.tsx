@@ -30,8 +30,8 @@ export function NFTokenAccountHeader({ account }: { account: Account }) {
 
     return (
         <>
-            <h6 className="header-pretitle">Details</h6>
-            <h2 className="header-title">Account</h2>
+            <h6 className="e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Details</h6>
+            <h2 className="e-mb-0">Account</h2>
         </>
     );
 }
@@ -46,9 +46,9 @@ export function NFTokenNFTHeader({ nft }: { nft: NftokenTypes.NftAccount }) {
             </div>
 
             <div className="e-mb-3 e-mt-3 e-min-w-0 e-flex-1 e-px-3">
-                {<h6 className="header-pretitle e-ml-[3px]">NFToken NFT</h6>}
+                {<h6 className="e-ml-[3px] e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">NFToken NFT</h6>}
                 <div className="e-flex e-items-center">
-                    <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
+                    <h2 className="e-mb-0 e-ml-[3px] e-items-center e-overflow-hidden e-text-ellipsis e-whitespace-nowrap">
                         {metadata ? metadata.name || 'No NFT name was found' : 'Loading...'}
                     </h2>
                 </div>
@@ -84,9 +84,9 @@ export function NFTokenCollectionHeader({ collection }: { collection: NftokenTyp
             </div>
 
             <div className="e-mb-3 e-mt-3 e-min-w-0 e-flex-1 e-px-3">
-                {<h6 className="header-pretitle e-ml-[3px]">NFToken Collection</h6>}
+                {<h6 className="e-ml-[3px] e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">NFToken Collection</h6>}
                 <div className="e-flex e-items-center">
-                    <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
+                    <h2 className="e-mb-0 e-ml-[3px] e-items-center e-overflow-hidden e-text-ellipsis e-whitespace-nowrap">
                         {metadata ? metadata.name || 'No collection name was found' : 'Loading...'}
                     </h2>
                 </div>

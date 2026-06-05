@@ -219,10 +219,10 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
     }
     return (
         <div className="container mt-n3">
-            <div className="header">
-                <div className="header-body">
-                    <h6 className="header-pretitle">Details</h6>
-                    <h2 className="header-title">Block</h2>
+            <div className="e-mb-8">
+                <div className="e-border-0 e-border-b e-border-solid e-border-dk-gray-700-dark e-py-6">
+                    <h6 className="e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Details</h6>
+                    <h2 className="e-mb-0">Block</h2>
                 </div>
             </div>
             {content}
