@@ -19,6 +19,7 @@ import { create } from 'superstruct';
 
 import { ProgramHeader } from '@/app/components/shared/account/ProgramHeader';
 import { ProxiedImage } from '@/app/features/metadata';
+import { useDasImage } from '@/app/entities/digital-asset/model/use-das-image';
 import { getProxiedUri } from '@/app/features/metadata/utils';
 import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 
@@ -112,11 +113,13 @@ function TokenMintHeader({
     const metadataPointerExtension = mintInfo?.extensions?.find(
         ({ extension }: { extension: string }) => extension === 'metadataPointer',
     );
+    const dasImage = useDasImage(address);
 
-    const defaultCard = useMemo(
-        () => <TokenMintHeaderCard token={tokenInfo ? tokenInfo : { logoURI: undefined, name: undefined }} />,
-        [tokenInfo],
-    );
+    const defaultCard = useMemo(() => {
+        const logoURI = tokenInfo?.logoURI ?? dasImage;
+        const token = tokenInfo ? { ...tokenInfo, logoURI } : { logoURI, name: undefined };
+        return <TokenMintHeaderCard token={token} />;
+    }, [dasImage, tokenInfo]);
 
     if (metadataPointerExtension && metadataExtension) {
         return (
@@ -125,6 +128,7 @@ function TokenMintHeader({
                     <Suspense fallback={defaultCard}>
                         <Token22MintHeader
                             address={address}
+                            fallbackLogoURI={dasImage}
                             metadataExtension={metadataExtension as any}
                             metadataPointerExtension={metadataPointerExtension as any}
                         />
@@ -138,23 +142,23 @@ function TokenMintHeader({
         return defaultCard;
     } else if (parsedData?.nftData) {
         const token = {
-            logoURI: parsedData?.nftData?.json?.image,
+            logoURI: parsedData?.nftData?.json?.image ?? dasImage,
             name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.name,
             symbol: parsedData?.nftData?.metadata.symbol,
         };
         return <TokenMintHeaderCard token={token} />;
-    } else if (tokenInfo) {
-        return defaultCard;
     }
     return defaultCard;
 }
 
 function Token22MintHeader({
     address,
+    fallbackLogoURI,
     metadataExtension,
     metadataPointerExtension,
 }: {
     address: string;
+    fallbackLogoURI?: string;
     metadataExtension: { extension: 'tokenMetadata'; state?: any };
     metadataPointerExtension: { extension: 'metadataPointer'; state?: any };
 }) {
@@ -163,13 +167,10 @@ function Token22MintHeader({
     const metadata = useMetadataJsonLink(getProxiedUri(tokenMetadata.uri));
 
     const headerTokenMetadata = {
-        logoURI: '',
+        logoURI: metadata?.image ?? fallbackLogoURI ?? '',
         name: tokenMetadata.name,
         symbol: tokenMetadata.symbol,
     };
-    if (metadata) {
-        headerTokenMetadata.logoURI = metadata.image;
-    }
 
     // Handles the basic case where MetadataPointer is referencing the Token Metadata extension directly
     // Does not handle the case where MetadataPointer is pointing at a separate account.
