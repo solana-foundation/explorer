@@ -7,7 +7,7 @@ export function FeatureGateCard({ children }: { children: React.ReactNode }) {
                 <h3 className="card-header-title">Feature Information</h3>
             </CardHeader>
             <CardFooter ui="dashkit" className="e-border-t-0">
-                <div className="text-muted">{children}</div>
+                <div className="e-text-dk-gray-700">{children}</div>
             </CardFooter>
         </div>
     );
