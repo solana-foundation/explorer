@@ -10,13 +10,9 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
     return (
         <div className="card">
             <CardHeader ui="dashkit">
-                <div className="row e-items-center">
-                    <div className="col">
-                        <CardTitle as="h3" ui="dashkit">
-                            Stake History
-                        </CardTitle>
-                    </div>
-                </div>
+                <CardTitle as="h3" ui="dashkit">
+                    Stake History
+                </CardTitle>
             </CardHeader>
 
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}

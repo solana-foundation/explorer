@@ -78,13 +78,9 @@ export function RewardsCard({ address }: { address: string }) {
         <>
             <div className="card">
                 <CardHeader ui="dashkit">
-                    <div className="row e-items-center">
-                        <div className="col">
-                            <CardTitle as="h3" ui="dashkit">
-                                Rewards
-                            </CardTitle>
-                        </div>
-                    </div>
+                    <CardTitle as="h3" ui="dashkit">
+                        Rewards
+                    </CardTitle>
                 </CardHeader>
 
                 {rewardsFound ? (

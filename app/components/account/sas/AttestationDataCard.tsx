@@ -39,13 +39,9 @@ function SchemaCard({ schema }: { schema: SasSchema }) {
     return (
         <div className="card">
             <CardHeader ui="dashkit">
-                <div className="row e-items-center">
-                    <div className="col">
-                        <CardTitle as="h3" ui="dashkit">
-                            Schema Layout (Borsh)
-                        </CardTitle>
-                    </div>
-                </div>
+                <CardTitle as="h3" ui="dashkit">
+                    Schema Layout (Borsh)
+                </CardTitle>
             </CardHeader>
 
             {/* .string-value is emitted by the ReactJson library — the arbitrary variant scopes the break-all rule to its descendant nodes only. */}

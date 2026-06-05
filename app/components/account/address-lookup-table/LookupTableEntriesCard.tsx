@@ -25,13 +25,9 @@ export function LookupTableEntriesCard(
     return (
         <div className="card">
             <CardHeader ui="dashkit">
-                <div className="row e-items-center">
-                    <div className="col">
-                        <CardTitle as="h3" ui="dashkit">
-                            Lookup Table Entries
-                        </CardTitle>
-                    </div>
-                </div>
+                <CardTitle as="h3" ui="dashkit">
+                    Lookup Table Entries
+                </CardTitle>
             </CardHeader>
 
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}

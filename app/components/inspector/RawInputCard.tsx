@@ -259,18 +259,16 @@ export function RawInput({
                     placeholder={placeholder}
                     name="tx-inspector-input"
                 ></textarea>
-                <div className="row e-items-center">
-                    <div className="col e-flex e-items-center">
-                        {error && (
-                            <>
-                                <span className="e-mr-1.5 e-text-sm e-text-dk-warning-on-dark">
-                                    <i className="fe fe-alert-circle"></i>
-                                </span>
+                <div className="e-flex e-items-center">
+                    {error && (
+                        <>
+                            <span className="e-mr-1.5 e-text-sm e-text-dk-warning-on-dark">
+                                <i className="fe fe-alert-circle"></i>
+                            </span>
 
-                                <span className="e-text-dk-warning-on-dark">{error}</span>
-                            </>
-                        )}
-                    </div>
+                            <span className="e-text-dk-warning-on-dark">{error}</span>
+                        </>
+                    )}
                 </div>
             </CardBody>
             <CardFooter ui="dashkit">
