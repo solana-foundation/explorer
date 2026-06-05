@@ -146,7 +146,7 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
     if (!ixAccounts || !decodedIxData || !ixDef) {
         return (
             <tr>
-                <td colSpan={3} className="text-lg-center">
+                <td colSpan={3} className="lg:e-text-center">
                     Failed to decode account data according to the public Anchor interface
                 </td>
             </tr>

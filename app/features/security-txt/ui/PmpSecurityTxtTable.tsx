@@ -65,7 +65,7 @@ function RenderEntry({ entryKey, value }: { entryKey: string; value: any }) {
         if (entryKey === 'contacts') {
             const entries = parseContactList(value);
             return (
-                <td className="text-lg-end e-font-mono">
+                <td className="e-font-mono lg:e-text-right">
                     {entries.map(entry => (
                         <div key={entry.kind === 'contact' ? `${entry.type}:${entry.info}` : entry.value}>
                             {entry.kind === 'contact' ? (
