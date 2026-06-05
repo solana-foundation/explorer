@@ -221,12 +221,12 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                                             <div className="e-cursor-pointer">
                                                 {isExpanded ? (
                                                     <>
-                                                        <span className="text-info e-mr-1.5">Collapse</span>
+                                                        <span className="e-mr-1.5 e-text-dk-info">Collapse</span>
                                                         <ChevronUp size={15} />
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <span className="text-info e-mr-1.5">Expand</span>
+                                                        <span className="e-mr-1.5 e-text-dk-info">Expand</span>
                                                         <ChevronDown size={15} />
                                                     </>
                                                 )}

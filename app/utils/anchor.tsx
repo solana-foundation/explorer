@@ -647,12 +647,12 @@ export function ExpandableRow({
                     <div className="e-cursor-pointer">
                         {expanded ? (
                             <>
-                                <span className="text-info e-mr-1.5">Collapse</span>
+                                <span className="e-mr-1.5 e-text-dk-info">Collapse</span>
                                 <ChevronUp size={15} />
                             </>
                         ) : (
                             <>
-                                <span className="text-info e-mr-1.5">Expand</span>
+                                <span className="e-mr-1.5 e-text-dk-info">Expand</span>
                                 <ChevronDown size={15} />
                             </>
                         )}
