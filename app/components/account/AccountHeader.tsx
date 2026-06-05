@@ -113,7 +113,7 @@ function TokenMintHeader({
     const metadataPointerExtension = mintInfo?.extensions?.find(
         ({ extension }: { extension: string }) => extension === 'metadataPointer',
     );
-    const dasImage = useDasImage(address);
+    const dasImage = useDasImage(tokenInfo?.logoURI ? undefined : address);
 
     const defaultCard = useMemo(() => {
         const logoURI = tokenInfo?.logoURI ?? dasImage;

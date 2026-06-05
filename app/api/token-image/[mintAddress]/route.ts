@@ -41,8 +41,8 @@ export async function GET(request: Request, props: Params) {
         const asset = assets?.find(a => a.id === mintAddress);
         const image = asset?.content.links?.image;
         return NextResponse.json({ image }, { headers: IMAGE_CACHE_HEADERS });
-    } catch {
-        Logger.warn('[api:token-image] DAS request failed', { mintAddress, sentry: false });
-        return NextResponse.json({ image: undefined }, { headers: IMAGE_CACHE_HEADERS });
+    } catch (error) {
+        Logger.panic(error instanceof Error ? error : new Error('[api:token-image] DAS request failed'));
+        return NextResponse.json({ error: 'Failed to fetch token image' }, { headers: NO_STORE_HEADERS, status: 500 });
     }
 }
