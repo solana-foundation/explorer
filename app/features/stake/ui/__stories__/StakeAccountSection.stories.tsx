@@ -1,3 +1,4 @@
+import { DEFAULT_TIMESTAMP } from '@__fixtures__/gen';
 import type { Account } from '@providers/accounts';
 import { address } from '@solana/kit';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
@@ -172,7 +173,7 @@ export const WithActiveLockup: Story = {
         account,
         activation: { active: Number(DELEGATED_STAKE), inactive: 0, state: 'active' },
         stakeAccount: delegatedStakeInfo({
-            lockupTimestamp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365, // 1 year out
+            lockupTimestamp: DEFAULT_TIMESTAMP + 60 * 60 * 24 * 365, // 1 year past the fixed reference timestamp
         }),
         stakeAccountType: 'delegated',
     },

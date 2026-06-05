@@ -1,4 +1,4 @@
-import { gen } from '@__fixtures__/gen';
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -10,7 +10,7 @@ import { TransactionSignatures } from '../SignaturesCard';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const SIGNER_2 = TOKEN_PROGRAM_ID;
-const BOGUS_SIGNATURE = gen.signature();
+const BOGUS_SIGNATURE = DEFAULT_SIGNATURE;
 
 const baseMessage = mockVersionedMessage({
     header: {
