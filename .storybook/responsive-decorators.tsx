@@ -38,11 +38,15 @@ const isInitialViewportKey = (key: string): key is InitialViewportKeys => key in
 
 /**
  * Reads the viewport global (set via `globals: { viewport: { value: 'iphonex' } }`) and constrains
- * the story width to that viewport's dimensions. Width-only — the Storybook viewport addon already
- * sizes the canvas iframe (height + width, device emulation); this decorator complements it by
- * applying the same width in docs (where the addon doesn't size). Height stays natural.
+ * the story width to that viewport's dimensions in docs view only. The Storybook viewport addon
+ * already sizes the canvas iframe (height + width, device emulation) in story view, so adding a
+ * fixed-width wrapper there would double-set the width and clip against the padded canvas.
+ * Height stays natural.
  */
 export const withViewportFromGlobal: Decorator = (Story, context) => {
+    // In standalone story view the addon already sizes the iframe; only constrain in docs view.
+    if (context.viewMode !== 'docs') return <Story />;
+
     const viewport = context.globals.viewport;
     const key = typeof viewport === 'object' ? viewport?.value : viewport;
     const isRotated = typeof viewport === 'object' ? viewport?.isRotated : false;
