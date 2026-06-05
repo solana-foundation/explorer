@@ -19,7 +19,7 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
                     </p>
                     <div className="e-flex e-items-start e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-p-1.5 e-text-left md:e-items-center">
                         <Copyable text={copyableTxt}>
-                            <code className="e-min-w-0 e-flex-1 e-font-mono e-text-sm e-text-dk-gray-700 md:e-overflow-x-auto md:e-whitespace-nowrap">
+                            <code className="e-min-w-0 e-flex-1 e-break-all e-font-mono e-text-sm e-text-dk-gray-700 md:e-overflow-x-auto md:e-whitespace-nowrap md:e-break-normal">
                                 {copyableTxt}
                             </code>
                         </Copyable>
