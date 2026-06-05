@@ -11,7 +11,7 @@ import {
 } from '@/app/features/token-extensions/use-token-extension-navigation';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
-import { TokenExtensionBadge } from '../common/TokenExtensionBadge';
+import { TokenExtensionBadge } from './token-extensions/TokenExtensionBadge';
 import { TokenExtensionRow } from './TokenAccountSection';
 import { ParsedTokenExtension } from './types';
 
