@@ -26,10 +26,10 @@ import {
 } from 'lighthouse-sdk';
 import React from 'react';
 
+import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 import { camelToTitleCase } from '@/app/utils';
 
 import { Address } from '../../common/Address';
-import { upcastTransactionInstruction } from '../../inspector/into-parsed-data';
 import { mapCodamaIxArgsToRows } from '../codama/codamaUtils';
 import { InstructionCard } from '../InstructionCard';
 import { LIGHTHOUSE_ADDRESS } from './types';
@@ -55,17 +55,17 @@ export function LighthouseDetailsCard({
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
-    const _ix = upcastTransactionInstruction(ix);
-    const { title, info } = parseLighthouseInstruction(_ix);
+    const kitIx = toKitInstruction(ix);
+    const { title, info } = parseLighthouseInstruction(kitIx);
 
     return (
         <InstructionCard title={`Lighthouse: ${title}`} {...{ childIndex, index, innerCards, ix, result }}>
-            <CodamaCard ix={_ix} parsedIx={info} />
+            <CodamaCard ix={kitIx} parsedIx={info} />
         </InstructionCard>
     );
 }
 
-function parseLighthouseInstruction(ix: ReturnType<typeof upcastTransactionInstruction>) {
+function parseLighthouseInstruction(ix: ReturnType<typeof toKitInstruction>) {
     let title = 'Unknown';
     let info: ParsedCodamaInstruction;
     const subEnum = (pix: ParsedCodamaInstruction, key: string, array = false) => {

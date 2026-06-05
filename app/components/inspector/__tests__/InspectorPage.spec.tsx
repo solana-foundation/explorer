@@ -7,9 +7,11 @@ import React from 'react';
 import type { Key } from 'swr';
 import { describe, expect, type Mock, test, vi } from 'vitest';
 
+import { InstructionParserProvider } from '@/app/entities/instruction-parser';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
+import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
 import { TransactionInspectorPage } from '../InspectorPage';
 
@@ -135,7 +137,9 @@ function setup() {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <TransactionInspectorPage showTokenBalanceChanges={false} />
+                        <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                            <TransactionInspectorPage showTokenBalanceChanges={false} />
+                        </InstructionParserProvider>
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>,

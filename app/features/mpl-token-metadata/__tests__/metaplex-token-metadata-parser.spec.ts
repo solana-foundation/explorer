@@ -8,7 +8,9 @@ import { none, publicKey as umiPublicKey, some } from '@metaplex-foundation/umi'
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, test } from 'vitest';
 
-import { identifyInstructionType, parseMetaplexTokenMetadataInstruction } from '../lib/metaplex-token-metadata.parser';
+import { type KitInstruction, toKitInstruction } from '@/app/shared/lib/web3js-compat';
+
+import { identifyInstructionType, parseMetaplexTokenMetadataInstruction } from '../lib/metaplex-token-metadata-parser';
 
 const PROGRAM_ID = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
 
@@ -24,12 +26,14 @@ const createMetadataV3Serializer = getCreateMetadataAccountV3InstructionDataSeri
 const updateMetadataV2Serializer = getUpdateMetadataAccountV2InstructionDataSerializer();
 const createMasterEditionV3Serializer = getCreateMasterEditionV3InstructionDataSerializer();
 
-function makeIx(data: Uint8Array | Buffer, keys: PublicKey[] = []): TransactionInstruction {
-    return new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: keys.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
-        programId: PROGRAM_ID,
-    });
+function makeIx(data: Uint8Array | Buffer, keys: PublicKey[] = []): KitInstruction {
+    return toKitInstruction(
+        new TransactionInstruction({
+            data: Buffer.from(data),
+            keys: keys.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
+            programId: PROGRAM_ID,
+        }),
+    );
 }
 
 function assertParsed<T>(val: T | null | undefined): T {
@@ -237,12 +241,12 @@ describe('parseMetaplexTokenMetadataInstruction', () => {
             expect(result.info.name).toBe('Updated Name');
         });
 
-        test('should return null name/symbol/uri when data is None', () => {
+        test('should return undefined name/symbol/uri when data is None', () => {
             const result = assertParsed(parseMetaplexTokenMetadataInstruction(allNoneIx));
 
-            expect(result.info.name).toBeNull();
-            expect(result.info.symbol).toBeNull();
-            expect(result.info.uri).toBeNull();
+            expect(result.info.name).toBeUndefined();
+            expect(result.info.symbol).toBeUndefined();
+            expect(result.info.uri).toBeUndefined();
         });
 
         test('should decode newUpdateAuthority as a PublicKey when Some', () => {
@@ -253,10 +257,10 @@ describe('parseMetaplexTokenMetadataInstruction', () => {
             expect((result.info.newUpdateAuthority as PublicKey).equals(KEY_C)).toBe(true);
         });
 
-        test('should return null newUpdateAuthority when None', () => {
+        test('should return undefined newUpdateAuthority when None', () => {
             const result = assertParsed(parseMetaplexTokenMetadataInstruction(allNoneIx));
 
-            expect(result.info.newUpdateAuthority).toBeNull();
+            expect(result.info.newUpdateAuthority).toBeUndefined();
         });
 
         test('should decode isMutable and primarySaleHappened', () => {
@@ -293,13 +297,13 @@ describe('parseMetaplexTokenMetadataInstruction', () => {
             expect(result.info.maxSupply).toBe(100);
         });
 
-        test('should decode maxSupply as null and map account keys', () => {
+        test('should decode maxSupply as undefined and map account keys', () => {
             // keys: edition[0], mint[1], updateAuth[2], mintAuth[3], payer[4], metadata[5]
             const keys = [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E, KEY_A];
             const ix = makeIx(buildData(null), keys);
             const result = assertParsed(parseMetaplexTokenMetadataInstruction(ix));
 
-            expect(result.info.maxSupply).toBeNull();
+            expect(result.info.maxSupply).toBeUndefined();
             expect((result.info.edition as PublicKey).equals(KEY_A)).toBe(true);
             expect((result.info.mint as PublicKey).equals(KEY_B)).toBe(true);
             expect((result.info.updateAuthority as PublicKey).equals(KEY_C)).toBe(true);

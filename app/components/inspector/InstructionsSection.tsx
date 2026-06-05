@@ -1,21 +1,18 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { useAnchorProgram } from '@entities/idl';
+import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
-import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';
-import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
     AddressLookupTableAccount,
     type CompiledInnerInstruction,
     ComputeBudgetProgram,
-    SystemProgram,
-    TransactionInstruction,
+    type TransactionInstruction,
     TransactionMessage,
-    VersionedMessage,
+    type VersionedMessage,
 } from '@solana/web3.js';
-import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { getProgramName } from '@utils/tx';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { isTokenBatchInstruction, resolveInnerBatchInstructions, TokenBatchCard } from '@/app/features/token-batch';
@@ -30,10 +27,10 @@ import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCar
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
-import { intoParsedInstruction, intoParsedTransaction } from './into-parsed-data';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
 
 const INSPECTOR_RESULT = { err: null };
+const INSPECTOR_SIGNATURE = '';
 
 export function InstructionsSection({
     message,
@@ -42,7 +39,6 @@ export function InstructionsSection({
     message: VersionedMessage;
     compiledInnerInstructions?: CompiledInnerInstruction[];
 }) {
-    // Fetch all address lookup tables
     const hydratedTables = useAddressLookupTables(
         message.addressTableLookups.map(lookup => lookup.accountKey.toString()),
     );
@@ -114,10 +110,16 @@ function InspectorInstructionCard({
     innerCards?: React.ReactNode[];
 }) {
     const { cluster, url } = useCluster();
+    const dispatcher = useInstructionParser();
 
     const programId = ix.programId;
     const programName = getProgramName(programId.toBase58(), cluster);
     const anchorProgram = useAnchorProgram(programId.toString(), url, cluster);
+    const parsedIx = useMemo(() => dispatcher.fromTransactionInstruction(ix), [dispatcher, ix]);
+    const parsedTx = useMemo(
+        () => (isParsedInstruction(parsedIx) ? toParsedTransaction(ix, message, [parsedIx]) : undefined),
+        [ix, message, parsedIx],
+    );
 
     if (anchorProgram.program) {
         return (
@@ -129,8 +131,8 @@ function InspectorInstructionCard({
                     index={index}
                     innerCards={undefined}
                     ix={ix}
-                    result={{ err: null }}
-                    signature=""
+                    result={INSPECTOR_RESULT}
+                    signature={INSPECTOR_SIGNATURE}
                 />
             </ErrorBoundary>
         );
@@ -146,100 +148,30 @@ function InspectorInstructionCard({
         );
     }
 
-    /// Handle program-specific cards here
-    //  - keep signature (empty string as we do not submit anything) for backward compatibility with the data from Transaction
-    //  - result is `err: null` as at this point there should not be errors
-    const result = { err: null };
-    const signature = '';
+    // Compute Budget instructions are not RPC-pre-parsed and its DetailsCard
+    // decodes raw bytes directly, so no parser entry is needed today. Phase 3
+    // of the unification will fold this into the registry.
+    if (ComputeBudgetProgram.programId.equals(programId)) {
+        return (
+            <ComputeBudgetDetailsCard
+                key={index}
+                ix={ix}
+                index={index}
+                result={INSPECTOR_RESULT}
+                signature={INSPECTOR_SIGNATURE}
+                InstructionCardComponent={BaseInstructionCard}
+            />
+        );
+    }
 
-    switch (ix.programId.toString()) {
-        case ASSOCIATED_TOKEN_PROGRAM_ID.toString(): {
-            const asParsedInstruction = intoParsedInstruction(ix);
-            return (
-                <AssociatedTokenDetailsCard
-                    key={index}
-                    ix={asParsedInstruction}
-                    raw={ix}
-                    message={message}
-                    index={index}
-                    result={result}
-                />
-            );
-        }
-        case ComputeBudgetProgram.programId.toString(): {
-            return (
-                <ComputeBudgetDetailsCard
-                    key={index}
-                    ix={ix}
-                    index={index}
-                    result={result}
-                    signature={signature}
-                    InstructionCardComponent={BaseInstructionCard}
-                />
-            );
-        }
-        case SystemProgram.programId.toString(): {
-            const asParsedInstruction = intoParsedInstruction(ix);
-            const asParsedTransaction = intoParsedTransaction(ix, message);
-            return (
-                <SystemDetailsCard
-                    key={index}
-                    ix={asParsedInstruction}
-                    tx={asParsedTransaction}
-                    index={index}
-                    result={result}
-                    raw={ix}
-                />
-            );
-        }
-        case TOKEN_PROGRAM_ID.toString(): {
-            const asParsedInstruction = intoParsedInstruction(ix);
-            const asParsedTransaction = intoParsedTransaction(ix, message, [asParsedInstruction]);
-            // Only render TokenDetailsCard if the instruction was successfully parsed
-            if (asParsedInstruction.parsed?.type) {
-                return (
-                    <ErrorBoundary
-                        fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
-                    >
-                        <TokenDetailsCard
-                            key={index}
-                            ix={asParsedInstruction}
-                            tx={asParsedTransaction}
-                            index={index}
-                            result={result}
-                            InstructionCardComponent={InspectorInstructionCardComponent}
-                            message={message}
-                            raw={ix}
-                        />
-                    </ErrorBoundary>
-                );
-            }
-            // Fall through to unknown if parsing failed
-            break;
-        }
-        case TOKEN_2022_PROGRAM_ADDRESS: {
-            const asParsedInstruction = intoParsedInstruction(ix);
-            const asParsedTransaction = intoParsedTransaction(ix, message, [asParsedInstruction]);
-            // Only render TokenDetailsCard if the instruction was successfully parsed
-            if (asParsedInstruction.parsed?.type) {
-                return (
-                    <ErrorBoundary
-                        fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
-                    >
-                        <TokenDetailsCard
-                            key={index}
-                            ix={asParsedInstruction}
-                            tx={asParsedTransaction}
-                            index={index}
-                            result={result}
-                        />
-                    </ErrorBoundary>
-                );
-            }
-            // Fall through to unknown if parsing failed
-            break;
-        }
-        case MPL_TOKEN_METADATA_PROGRAM_ID: {
+    if (!parsedIx) {
+        return (
+            <UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} innerCards={innerCards} />
+        );
+    }
+
+    if ('unknown' in parsedIx) {
+        if (parsedIx.programLabel === 'mpl-token-metadata') {
             return (
                 <ErrorBoundary
                     fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
@@ -248,15 +180,98 @@ function InspectorInstructionCard({
                         key={index}
                         ix={ix}
                         index={index}
-                        result={result}
+                        result={INSPECTOR_RESULT}
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ErrorBoundary>
             );
         }
-        default: {
-            // unknown program; allow to render the next card
-        }
+        return (
+            <UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} innerCards={innerCards} />
+        );
+    }
+
+    // `parsedTx` is non-null here by construction (it's built whenever `parsedIx`
+    // is a ParsedInstruction, which the guards above guarantee). This guard exists
+    // to narrow its type for the switch below — TS can't relate the two useMemos.
+    if (!parsedTx) {
+        return (
+            <UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} innerCards={innerCards} />
+        );
+    }
+
+    switch (parsedIx.program) {
+        case 'system':
+            return (
+                <SystemDetailsCard
+                    key={index}
+                    ix={parsedIx}
+                    tx={parsedTx}
+                    index={index}
+                    result={INSPECTOR_RESULT}
+                    raw={ix}
+                />
+            );
+        case 'spl-associated-token-account':
+            return (
+                <AssociatedTokenDetailsCard
+                    key={index}
+                    ix={parsedIx}
+                    raw={ix}
+                    message={message}
+                    index={index}
+                    result={INSPECTOR_RESULT}
+                />
+            );
+        case 'spl-token':
+            return (
+                <ErrorBoundary
+                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                >
+                    <TokenDetailsCard
+                        key={index}
+                        ix={parsedIx}
+                        tx={parsedTx}
+                        index={index}
+                        result={INSPECTOR_RESULT}
+                        InstructionCardComponent={InspectorInstructionCardComponent}
+                        message={message}
+                        raw={ix}
+                    />
+                </ErrorBoundary>
+            );
+        case 'spl-token-2022':
+            return (
+                <ErrorBoundary
+                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                >
+                    <TokenDetailsCard
+                        key={index}
+                        ix={parsedIx}
+                        tx={parsedTx}
+                        index={index}
+                        result={INSPECTOR_RESULT}
+                        InstructionCardComponent={InspectorInstructionCardComponent}
+                        message={message}
+                        raw={ix}
+                    />
+                </ErrorBoundary>
+            );
+        case 'mpl-token-metadata':
+            return (
+                <ErrorBoundary
+                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                >
+                    <MetaplexTokenMetadataDetailsCard
+                        key={index}
+                        ix={ix}
+                        parsedIx={parsedIx}
+                        index={index}
+                        result={INSPECTOR_RESULT}
+                        InstructionCardComponent={BaseInstructionCard}
+                    />
+                </ErrorBoundary>
+            );
     }
 
     return <UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} innerCards={innerCards} />;

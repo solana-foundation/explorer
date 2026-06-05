@@ -21,7 +21,7 @@
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 380 kB | 1.39 MB |
 | Dynamic | `/address/[address]/program-multisig` | 380 kB | 1.39 MB |
 | Dynamic | `/address/[address]/rewards` | 380 kB | 1.39 MB |
-| Dynamic | `/address/[address]/security` | 380 kB | 1.40 MB |
+| Dynamic | `/address/[address]/security` | 380 kB | 1.39 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 380 kB | 1.39 MB |
 | Dynamic | `/address/[address]/stake-history` | 380 kB | 1.39 MB |
 | Dynamic | `/address/[address]/token-extensions` | 380 kB | 1.40 MB |
@@ -44,7 +44,7 @@
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
-| Dynamic | `/block/[slot]` | 220 kB | 1.24 MB |
+| Dynamic | `/block/[slot]` | 220 kB | 1.23 MB |
 | Dynamic | `/block/[slot]/accounts` | 210 kB | 1.23 MB |
 | Dynamic | `/block/[slot]/programs` | 210 kB | 1.23 MB |
 | Dynamic | `/block/[slot]/rewards` | 210 kB | 1.23 MB |
