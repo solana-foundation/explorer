@@ -12,7 +12,7 @@ import {
     useCompressedNftProof,
 } from '@/app/providers/compressed-nft';
 import { toBuffer } from '@/app/shared/lib/bytes';
-import { CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import { Address } from '../common/Address';
 import { TableCardBody } from '../common/TableCardBody';
@@ -57,7 +57,7 @@ export function DasCompressionInfoCard({
             : 0;
     const proofSize = proof.proof.length - canopyDepth;
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
                 <CardTitle as="h3" ui="dashkit">
                     Compression Info
@@ -108,7 +108,7 @@ export function DasCompressionInfoCard({
                     </td>
                 </tr>
             </TableCardBody>
-        </div>
+        </Card>
     );
 }
 

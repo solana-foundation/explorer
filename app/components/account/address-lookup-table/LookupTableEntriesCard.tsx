@@ -3,7 +3,7 @@ import { AddressLookupTableAccount, PublicKey } from '@solana/web3.js';
 import { AddressLookupTableAccountInfo } from '@validators/accounts/address-lookup-table';
 import React from 'react';
 
-import { CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export function LookupTableEntriesCard(
     params:
@@ -23,7 +23,7 @@ export function LookupTableEntriesCard(
     }, [params]);
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
                 <CardTitle as="h3" ui="dashkit">
                     Lookup Table Entries
@@ -53,7 +53,7 @@ export function LookupTableEntriesCard(
                     <div className="e-text-center e-text-dk-gray-700">No entries found</div>
                 </CardFooter>
             )}
-        </div>
+        </Card>
     );
 }
 

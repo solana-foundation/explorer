@@ -106,7 +106,7 @@ function RenderEntry({ value, type }: { value: NeodymeSecurityTXT[keyof NeodymeS
             return <StringCell value={value} />;
         case DisplayType.Contacts:
             return (
-                <td className="font-monospace e-text-right">
+                <td className="e-text-right e-font-mono">
                     <ul className="e-m-0 e-list-none e-pl-0 e-text-right">
                         {value?.split(',').map((c, i) => {
                             const idx = c.indexOf(':');
