@@ -2,7 +2,7 @@ import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { SolBalance } from '@components/common/SolBalance';
 
-import { Card, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import type { SolBalanceChange } from '../lib/types';
 
@@ -10,7 +10,9 @@ export function SolBalanceChangesCard({ balanceChanges }: { balanceChanges: SolB
     return (
         <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title">SOL Balance Changes</h3>
+                <CardTitle as="h3" ui="dashkit">
+                    SOL Balance Changes
+                </CardTitle>
             </CardHeader>
             <div className="e-mb-0 e-overflow-x-auto">
                 {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
