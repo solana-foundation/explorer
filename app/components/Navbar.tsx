@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSelectedLayoutSegment, useSelectedLayoutSegments } from 'next/navigation';
 import React, { ReactNode } from 'react';
+import { Menu } from 'react-feather';
 
 import { NavbarItem, NavbarLink, NavbarList } from '@/app/shared/ui/Navbar';
 
@@ -26,14 +27,19 @@ export function Navbar({ children }: INavbarProps) {
     const selectedLayoutSegments = useSelectedLayoutSegments();
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-light">
-            <div className="container navbar-container">
+        <nav className="e-flex e-flex-wrap e-items-center e-bg-dk-gray-800-dark e-py-3 e-text-dk-white">
+            <div className="e-mx-auto e-flex e-w-full e-max-w-[1140px] e-flex-wrap e-items-center e-justify-between e-px-6">
                 <Link href={homePath}>
                     <Image alt="Solana Explorer" height={22} src={Logo} width={214} priority />
                 </Link>
 
-                <button className="navbar-toggler" type="button" onClick={navHandlers.toggle}>
-                    <span className="navbar-toggler-icon"></span>
+                <button
+                    type="button"
+                    aria-label="Toggle navigation"
+                    onClick={navHandlers.toggle}
+                    className="e-rounded-dk e-border e-border-solid e-border-transparent e-bg-transparent e-px-0 e-py-1 e-text-dk-gray-700 lg:e-hidden"
+                >
+                    <Menu size={24} aria-hidden />
                 </button>
 
                 <div
@@ -43,8 +49,15 @@ export function Navbar({ children }: INavbarProps) {
                     {children}
                 </div>
 
-                <div className={cn('collapse navbar-collapse ms-auto', navOpened && 'show', 'flex-shrink-0')}>
-                    <NavbarList className="e-mr-auto">
+                <div
+                    className={cn(
+                        'e-ml-auto e-shrink-0',
+                        navOpened
+                            ? 'e-flex e-w-full e-flex-col'
+                            : 'e-hidden lg:e-flex lg:e-w-auto lg:e-flex-row lg:e-items-center',
+                    )}
+                >
+                    <NavbarList className="e-mr-auto e-flex-col lg:e-flex-row">
                         <NavbarItem>
                             <NavbarLink asChild active={selectedLayoutSegment === 'feature-gates'}>
                                 <Link href={featureGatesPath}>Feature Gates</Link>
@@ -81,7 +94,7 @@ export function Navbar({ children }: INavbarProps) {
                     </NavbarList>
                 </div>
 
-                <div className="d-lg-block e-ml-[3px] e-hidden e-shrink-0">
+                <div className="e-ml-[3px] e-hidden e-shrink-0 lg:e-block">
                     <ClusterStatusButton />
                 </div>
             </div>
