@@ -28,7 +28,10 @@ export function Navbar({ children }: INavbarProps) {
 
     return (
         <nav className="e-flex e-flex-wrap e-items-center e-bg-dk-gray-800-dark e-py-3 e-text-dk-white">
-            <div className="e-mx-auto e-flex e-w-full e-max-w-[1140px] e-flex-wrap e-items-center e-justify-between e-px-6">
+            <div
+                // Per-breakpoint max-widths mirror Bootstrap `.container` (sm 540 / md 720 / lg 960 / xl 1140 / xxl 1320) so logo + links land in the same gutter as before the shell migration.
+                className="e-mx-auto e-flex e-w-full e-flex-wrap e-items-center e-justify-between e-px-6 sm:e-max-w-[540px] md:e-max-w-[720px] lg:e-max-w-[960px] xl:e-max-w-[1140px] xxl:e-max-w-[1320px]"
+            >
                 <Link href={homePath}>
                     <Image alt="Solana Explorer" height={22} src={Logo} width={214} priority />
                 </Link>
