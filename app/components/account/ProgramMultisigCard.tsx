@@ -10,7 +10,7 @@ import {
     useSquadsMultisig,
     useSquadsMultisigLookup,
 } from '@/app/providers/squadsMultisig';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader } from '@/app/shared/ui/Card';
 
 import { Address } from '../common/Address';
 import { LoadingCard } from '../common/LoadingCard';
@@ -47,7 +47,7 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
     }
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
                 <h3 className="card-header-title e-mb-0 e-flex e-items-center">
                     Upgrade Authority Multisig Information
@@ -97,6 +97,6 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
                     </tr>
                 ))}
             </TableCardBody>
-        </div>
+        </Card>
     );
 }
