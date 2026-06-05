@@ -38,7 +38,10 @@ export async function GET(request: Request, props: Params) {
 
     try {
         const assets = await getAssetBatch([mintAddress], rpcUrl);
-        const asset = assets?.find(a => a.id === mintAddress);
+        if (!assets) {
+            return NextResponse.json({ image: undefined }, { headers: NO_STORE_HEADERS });
+        }
+        const asset = assets.find(a => a.id === mintAddress);
         const image = asset?.content.links?.image;
         return NextResponse.json({ image }, { headers: IMAGE_CACHE_HEADERS });
     } catch (error) {
