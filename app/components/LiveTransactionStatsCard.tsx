@@ -178,11 +178,11 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
             <TableCardBody layout="expanded" className="[&_td:first-child]:!e-w-2/5 md:[&_td:first-child]:!e-w-auto">
                 <tr>
                     <td className="e-w-full">Transaction count</td>
-                    <td className="font-monospace e-text-right">{transactionCount} </td>
+                    <td className="e-text-right e-font-mono">{transactionCount} </td>
                 </tr>
                 <tr>
                     <td className="e-w-full">Transactions per second (TPS)</td>
-                    <td className="font-monospace e-text-right">{averageTps} </td>
+                    <td className="e-text-right e-font-mono">{averageTps} </td>
                 </tr>
             </TableCardBody>
 

@@ -75,8 +75,8 @@ export function NicknameEditor({ address, onClose }: Props) {
                 </CardHeader>
                 <CardBody ui="dashkit">
                     <div className="e-mb-3">
-                        <label className="form-label small e-text-dk-gray-700">Address</label>
-                        <div className="small e-truncate e-font-mono">{address}</div>
+                        <label className="form-label e-text-sm e-text-dk-gray-700">Address</label>
+                        <div className="e-truncate e-font-mono e-text-sm">{address}</div>
                     </div>
                     <div className="e-mb-3">
                         <label htmlFor="nickname-input" className="form-label">

@@ -164,7 +164,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
     switch (type) {
         case DisplayType.Boolean:
             return (
-                <td className={'font-monospace e-text-right'}>
+                <td className={'e-text-right e-font-mono'}>
                     <span className={cn('badge', `bg-${value ? 'success' : 'warning'}-soft`)}>{new String(value)}</span>
                 </td>
             );
@@ -173,13 +173,13 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 const badgeClass = value === VerificationStatus.Verified ? 'bg-success-soft' : 'bg-warning-soft';
                 const badgeValue = value === VerificationStatus.Verified ? 'true' : 'false';
                 return (
-                    <td className="font-monospace e-text-right">
+                    <td className="e-text-right e-font-mono">
                         <span className={`badge ${badgeClass}`}>{badgeValue}</span>
                     </td>
                 );
             }
             return (
-                <td className="font-monospace e-text-right" style={{ whiteSpace: 'pre' }}>
+                <td className="e-text-right e-font-mono" style={{ whiteSpace: 'pre' }}>
                     {value && (value as string).length > 1 ? value : '-'}
                 </td>
             );
@@ -192,7 +192,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                                 <span />
                             </Copyable>
                             <pre
-                                className="font-monospace e-mb-0 e-text-left"
+                                className="e-mb-0 e-text-left e-font-mono"
                                 style={{ overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}
                             >
                                 {value}
@@ -207,7 +207,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
             if (isValidLink(value as string)) {
                 return (
                     <td className="e-text-right">
-                        <span className="font-monospace">
+                        <span className="e-font-mono">
                             <a rel="noopener noreferrer" target="_blank" href={value as string}>
                                 {value}
                                 <ExternalLink className="align-text-top e-ml-1.5" size={13} />
@@ -217,19 +217,19 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 );
             }
             return (
-                <td className="font-monospace e-text-right">
+                <td className="e-text-right e-font-mono">
                     {value && (value as string).length > 1 ? (value as string).trim() : '-'}
                 </td>
             );
         case DisplayType.Date:
             return (
-                <td className="font-monospace e-text-right">
+                <td className="e-text-right e-font-mono">
                     {value && (value as string).length > 1 ? new Date(value as string).toUTCString() : '-'}
                 </td>
             );
         case DisplayType.PublicKey:
             return (
-                <td className="font-monospace e-text-right">
+                <td className="e-text-right e-font-mono">
                     <Address pubkey={new PublicKey(value as string)} link alignRight />
                 </td>
             );

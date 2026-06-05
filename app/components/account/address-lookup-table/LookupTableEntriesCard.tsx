@@ -62,8 +62,8 @@ export function LookupTableEntriesCard(
 const renderRow = (entry: PublicKey, index: number) => {
     return (
         <tr key={index}>
-            <td className="w-1 font-monospace">{index}</td>
-            <td className="font-monospace">
+            <td className="w-1 e-font-mono">{index}</td>
+            <td className="e-font-mono">
                 <Address pubkey={entry} link />
             </td>
         </tr>

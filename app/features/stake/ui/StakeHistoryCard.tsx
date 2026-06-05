@@ -48,16 +48,16 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
 function HistoryEntryRow({ entry }: { entry: StakeHistoryEntry }) {
     return (
         <tr>
-            <td className="w-1 font-monospace">
+            <td className="w-1 e-font-mono">
                 <Epoch epoch={entry.epoch} link />
             </td>
-            <td className="font-monospace">
+            <td className="e-font-mono">
                 <SolBalance lamports={entry.stakeHistory.effective} />
             </td>
-            <td className="font-monospace">
+            <td className="e-font-mono">
                 <SolBalance lamports={entry.stakeHistory.activating} />
             </td>
-            <td className="font-monospace">
+            <td className="e-font-mono">
                 <SolBalance lamports={entry.stakeHistory.deactivating} />
             </td>
         </tr>

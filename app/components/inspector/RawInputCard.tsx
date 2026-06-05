@@ -261,7 +261,7 @@ export function RawInput({
                     <div className="col e-flex e-items-center">
                         {error && (
                             <>
-                                <span className="small e-mr-1.5 e-text-dk-warning-on-dark">
+                                <span className="e-mr-1.5 e-text-sm e-text-dk-warning-on-dark">
                                     <i className="fe fe-alert-circle"></i>
                                 </span>
 
