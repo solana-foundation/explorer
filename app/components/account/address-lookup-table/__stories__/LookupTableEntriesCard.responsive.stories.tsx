@@ -16,7 +16,7 @@ const meta = {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/AddressLookupTable/LookupTableEntriesCard/Responsive',
 } satisfies Meta<ParsedArgs>;
 

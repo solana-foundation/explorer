@@ -28,7 +28,7 @@ const meta = {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Inspector/SignaturesCard/Responsive',
 } satisfies Meta<typeof TransactionSignatures>;
 

@@ -36,7 +36,7 @@ const meta = {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/VerifiedBuildCard/Responsive',
 } satisfies Meta<typeof BaseVerifiedBuildCard>;
 

@@ -39,7 +39,7 @@ const meta = {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/SecurityTxt/SecurityCard/Responsive',
 } satisfies Meta<typeof SecurityCard>;
 

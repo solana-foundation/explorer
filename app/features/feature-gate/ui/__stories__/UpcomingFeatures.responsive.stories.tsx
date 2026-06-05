@@ -12,7 +12,7 @@ const meta = {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/UpcomingFeatures/Responsive',
 } satisfies Meta<typeof UpcomingFeatures>;
 

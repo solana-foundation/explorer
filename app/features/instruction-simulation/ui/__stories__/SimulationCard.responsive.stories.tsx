@@ -17,7 +17,7 @@ const meta = {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/InstructionSimulation/SimulationCard/Responsive',
 } satisfies Meta<typeof SimulatorCard>;
 

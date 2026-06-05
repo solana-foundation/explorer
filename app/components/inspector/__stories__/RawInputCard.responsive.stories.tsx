@@ -13,7 +13,7 @@ const meta = {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Inspector/RawInputCard/Responsive',
 } satisfies Meta<typeof RawInput>;
 

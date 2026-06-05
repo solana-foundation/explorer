@@ -13,7 +13,7 @@ const meta = {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/IDL/UI/IdlCard/Responsive',
 } satisfies Meta<typeof IdlCard>;
 
