@@ -115,7 +115,7 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
             <div className="col-auto e-ml-1.5 e-flex e-items-center">
                 <NFTImageContent uri={metadataJson?.image} />
             </div>
-            <div className="col ms-0.5 e-mb-3 e-mt-3">
+            <div className="col e-mb-3 e-mt-3">
                 {<h6 className="header-pretitle e-ml-[3px]">Metaplex Compressed NFT</h6>}
                 <div className="e-flex e-items-center">
                     <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
@@ -154,7 +154,7 @@ function getCompressedNftPill() {
     const onchainVerifiedToolTip =
         'This NFT does not have a corresponding account, but uses verified ledger data to allow for transfers and trades. The existence of this tag ensures that the compressed NFT is verifiably up-to-date with the chain.';
     return (
-        <div className="d-inline-flex e-ml-1.5 e-items-center">
+        <div className="e-ml-1.5 e-inline-flex e-items-center">
             <span className="badge badge-pill bg-dark">{'Compressed'}</span>
             <InfoTooltip bottom text={onchainVerifiedToolTip} />
         </div>

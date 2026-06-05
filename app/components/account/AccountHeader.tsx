@@ -198,7 +198,7 @@ function TokenMintHeaderCard({
                 </div>
             </div>
 
-            <div className="col ms-n3 ms-md-n2">
+            <div className="col -e-ml-3 md:-e-ml-1.5">
                 <h6 className="header-pretitle">Token</h6>
                 <h2 className="header-title">{token?.name || 'Unknown Token'}</h2>
                 <div className="header-pretitle no-overflow-with-ellipsis">

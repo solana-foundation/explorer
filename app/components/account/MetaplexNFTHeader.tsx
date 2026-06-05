@@ -50,7 +50,7 @@ export function MetaplexNFTHeader({ nftData }: { nftData: NFTData }) {
             <div className="col-auto e-ml-1.5 e-flex e-items-center">
                 <NFTImageContent uri={data?.image} />
             </div>
-            <div className="col ms-0.5 e-mb-3 e-mt-3">
+            <div className="col e-mb-3 e-mt-3">
                 {<h6 className="header-pretitle e-ml-[3px]">Metaplex NFT</h6>}
                 <div className="e-flex e-items-center">
                     <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
@@ -144,7 +144,7 @@ function getEditionPill(editionInfo: EditionInfo) {
     const edition = editionInfo.edition;
 
     return (
-        <div className="d-inline-flex e-ml-1.5">
+        <div className="e-ml-1.5 e-inline-flex">
             <span className="badge badge-pill bg-dark">{`${
                 edition && masterEdition
                     ? `Edition ${Number(edition.edition)} / ${Number(masterEdition.supply)}`
@@ -163,7 +163,7 @@ function getSaleTypePill(hasPrimarySaleHappened: boolean) {
         'Creator(s) split the Seller Fee when this NFT is sold. The owner receives the remaining proceeds.';
 
     return (
-        <div className="d-inline-flex e-items-center">
+        <div className="e-inline-flex e-items-center">
             <span className="badge badge-pill bg-dark">{`${
                 hasPrimarySaleHappened ? 'Secondary Market' : 'Primary Market'
             }`}</span>
@@ -180,7 +180,7 @@ export function getVerifiedCollectionPill() {
     const onchainVerifiedToolTip =
         'This NFT has been verified as a member of an on-chain collection. This tag guarantees authenticity.';
     return (
-        <div className="d-inline-flex e-ml-1.5 e-items-center">
+        <div className="e-ml-1.5 e-inline-flex e-items-center">
             <span className="badge badge-pill bg-dark">{'Verified Collection'}</span>
             <InfoTooltip bottom text={onchainVerifiedToolTip} />
         </div>
