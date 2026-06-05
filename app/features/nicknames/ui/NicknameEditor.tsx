@@ -75,8 +75,8 @@ export function NicknameEditor({ address, onClose }: Props) {
                 </CardHeader>
                 <CardBody ui="dashkit">
                     <div className="e-mb-3">
-                        <label className="form-label small text-muted">Address</label>
-                        <div className="font-monospace small e-truncate">{address}</div>
+                        <label className="form-label small e-text-dk-gray-700">Address</label>
+                        <div className="small e-truncate e-font-mono">{address}</div>
                     </div>
                     <div className="e-mb-3">
                         <label htmlFor="nickname-input" className="form-label">
@@ -95,8 +95,10 @@ export function NicknameEditor({ address, onClose }: Props) {
                             autoFocus
                         />
                         <div className="e-flex e-justify-between">
-                            <small className="text-muted">This nickname is stored locally on your device.</small>
-                            <small className="text-muted">
+                            <small className="e-text-dk-gray-700">
+                                This nickname is stored locally on your device.
+                            </small>
+                            <small className="e-text-dk-gray-700">
                                 {nickname.length}/{MAX_NICKNAME_LENGTH}
                             </small>
                         </div>
