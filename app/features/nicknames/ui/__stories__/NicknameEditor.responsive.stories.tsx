@@ -6,17 +6,12 @@ import { fn } from 'storybook/test';
 import { NicknameEditor } from '../NicknameEditor';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
+// layout: 'fullscreen' removes Storybook's default canvas padding so the editor's `position: fixed` overlay anchors to the iframe viewport directly.
 const meta = {
     component: NicknameEditor,
-    decorators: [
-        withViewportFromGlobal,
-        Story => (
-            <div style={{ height: '100vh', width: '100vw' }}>
-                <Story />
-            </div>
-        ),
-    ],
+    decorators: [withViewportFromGlobal],
     parameters: {
+        layout: 'fullscreen',
         nextjs: { appDirectory: true },
         viewport: { options: INITIAL_VIEWPORTS },
     },
