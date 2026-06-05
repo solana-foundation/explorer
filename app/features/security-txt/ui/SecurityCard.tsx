@@ -74,7 +74,7 @@ export function ProgramSecurityTxtCard({
     ) : null;
 
     return (
-        <Card ui="dashkit" className="security-txt e-overflow-hidden">
+        <Card ui="dashkit" className="e-overflow-hidden">
             <CardHeader ui="dashkit">
                 <CardTitle as="h3" ui="dashkit" className="e-mr-4 e-flex e-items-center e-gap-3">
                     Security.txt

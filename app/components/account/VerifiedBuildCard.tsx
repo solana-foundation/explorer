@@ -72,7 +72,7 @@ export function BaseVerifiedBuildCard({
     }
 
     return (
-        <Card ui="dashkit" className="security-txt">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
                 <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
                     Verified Build
@@ -210,7 +210,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
             if (isValidLink(value as string)) {
                 return (
                     <td className="e-text-right">
-                        <span className="e-font-mono">
+                        <span className="e-whitespace-nowrap e-font-mono">
                             <a rel="noopener noreferrer" target="_blank" href={value as string}>
                                 {value}
                                 <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
