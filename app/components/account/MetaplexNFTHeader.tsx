@@ -91,7 +91,7 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
         const shareTooltip = 'The percentage of the proceeds a creator receives when this NFT is sold.';
 
         return (
-            <div className={'dropdown-header creator-dropdown-entry e-flex e-items-center'}>
+            <div className="dropdown-header creator-dropdown-entry e-flex e-items-center">
                 <div className="font-monospace creator-dropdown-header e-flex">
                     <span>Creator Address</span>
                     <InfoTooltip bottom text={creatorTooltip} />
@@ -111,7 +111,7 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
     const CreatorEntry = (creator: { address: string; verified: boolean; share: number }) => {
         const creatorPath = useClusterPath({ pathname: `/address/${creator.address}` });
         return (
-            <div className={'font-monospace creator-dropdown-entry e-ml-3 e-mr-3 e-flex e-items-center'}>
+            <div className="font-monospace creator-dropdown-entry e-ml-3 e-mr-3 e-flex e-items-center">
                 {getVerifiedIcon(creator.verified)}
                 <Link className="dropdown-item font-monospace creator-dropdown-entry-address" href={creatorPath}>
                     {creator.address}
@@ -133,7 +133,7 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
     }
 
     return (
-        <div className={'dropdown-item font-monospace'}>
+        <div className="dropdown-item font-monospace">
             <div className="e-mr-3">No creators are associated with this NFT.</div>
         </div>
     );
@@ -144,7 +144,7 @@ function getEditionPill(editionInfo: EditionInfo) {
     const edition = editionInfo.edition;
 
     return (
-        <div className={'d-inline-flex e-ml-1.5'}>
+        <div className="d-inline-flex e-ml-1.5">
             <span className="badge badge-pill bg-dark">{`${
                 edition && masterEdition
                     ? `Edition ${Number(edition.edition)} / ${Number(masterEdition.supply)}`
@@ -163,7 +163,7 @@ function getSaleTypePill(hasPrimarySaleHappened: boolean) {
         'Creator(s) split the Seller Fee when this NFT is sold. The owner receives the remaining proceeds.';
 
     return (
-        <div className={'d-inline-flex e-items-center'}>
+        <div className="d-inline-flex e-items-center">
             <span className="badge badge-pill bg-dark">{`${
                 hasPrimarySaleHappened ? 'Secondary Market' : 'Primary Market'
             }`}</span>
@@ -180,7 +180,7 @@ export function getVerifiedCollectionPill() {
     const onchainVerifiedToolTip =
         'This NFT has been verified as a member of an on-chain collection. This tag guarantees authenticity.';
     return (
-        <div className={'d-inline-flex e-ml-1.5 e-items-center'}>
+        <div className="d-inline-flex e-ml-1.5 e-items-center">
             <span className="badge badge-pill bg-dark">{'Verified Collection'}</span>
             <InfoTooltip bottom text={onchainVerifiedToolTip} />
         </div>

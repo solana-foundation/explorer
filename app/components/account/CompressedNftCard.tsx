@@ -154,7 +154,7 @@ function getCompressedNftPill() {
     const onchainVerifiedToolTip =
         'This NFT does not have a corresponding account, but uses verified ledger data to allow for transfers and trades. The existence of this tag ensures that the compressed NFT is verifiably up-to-date with the chain.';
     return (
-        <div className={'d-inline-flex e-ml-1.5 e-items-center'}>
+        <div className="d-inline-flex e-ml-1.5 e-items-center">
             <span className="badge badge-pill bg-dark">{'Compressed'}</span>
             <InfoTooltip bottom text={onchainVerifiedToolTip} />
         </div>
