@@ -3,10 +3,12 @@ import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import base58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
+import { AlertCircle } from 'react-feather';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 import { CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { FormControl } from '@/app/shared/ui/FormControl';
 
 import type { InspectorData } from './InspectorPage';
 
@@ -251,21 +253,19 @@ export function RawInput({
                 </div>
             </CardHeader>
             <CardBody ui="dashkit">
-                <textarea
-                    rows={rows}
-                    onInput={onInput}
-                    ref={rawInput}
-                    className="form-control form-control-flush form-control-auto e-font-mono"
-                    placeholder={placeholder}
-                    name="tx-inspector-input"
-                ></textarea>
+                <FormControl variant="flush-auto" className="e-font-mono">
+                    <textarea
+                        rows={rows}
+                        onInput={onInput}
+                        ref={rawInput}
+                        placeholder={placeholder}
+                        name="tx-inspector-input"
+                    />
+                </FormControl>
                 <div className="e-flex e-items-center">
                     {error && (
                         <>
-                            <span className="e-mr-1.5 e-text-sm e-text-dk-warning-on-dark">
-                                <i className="fe fe-alert-circle"></i>
-                            </span>
-
+                            <AlertCircle className="e-mr-1.5 e-text-dk-warning-on-dark" size={14} aria-hidden />
                             <span className="e-text-dk-warning-on-dark">{error}</span>
                         </>
                     )}
