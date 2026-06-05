@@ -21,6 +21,7 @@ import useSWR from 'swr';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { RelativeTime } from '@/app/shared/RelativeTime';
+import { Card } from '@/app/shared/ui/Card';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
@@ -236,7 +237,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
 
     const fetching = history.status === FetchStatus.Fetching;
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <HistoryCardHeader
                 fetching={fetching}
                 refresh={() => refresh()}
@@ -269,7 +270,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
                 </table>
             </div>
             <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />
-        </div>
+        </Card>
     );
 }
 

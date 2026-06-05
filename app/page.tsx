@@ -23,7 +23,7 @@ import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/ind
 import { percentage } from '@utils/math';
 import React from 'react';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import { DeveloperResources } from './components/DeveloperResources';
 import { SimpleCardSkeleton } from './components/shared/Skeletons';
@@ -126,7 +126,7 @@ function StakingComponent() {
     return (
         <div className="staking-card e-flex e-flex-col md:e-flex-row md:e-gap-6">
             <div className="e-w-full md:e-w-1/2">
-                <div className="card e-mb-3 md:e-mb-6">
+                <Card ui="dashkit" className="e-mb-3 md:e-mb-6">
                     <CardBody ui="dashkit">
                         <h4>Circulating Supply</h4>
                         <h1>
@@ -137,10 +137,10 @@ function StakingComponent() {
                             <em>{circulatingPercentage}%</em> is circulating
                         </h5>
                     </CardBody>
-                </div>
+                </Card>
             </div>
             <div className="e-w-full md:e-w-1/2">
-                <div className="card e-mb-3 md:e-mb-6">
+                <Card ui="dashkit" className="e-mb-3 md:e-mb-6">
                     <CardBody ui="dashkit">
                         <h4>Active Stake</h4>
                         {activeStake ? (
@@ -154,7 +154,7 @@ function StakingComponent() {
                             </h5>
                         )}
                     </CardBody>
-                </div>
+                </Card>
             </div>
         </div>
     );
@@ -190,13 +190,11 @@ function StatsCardBody() {
     const { blockHeight, absoluteSlot } = epochInfo;
 
     return (
-        <div className="card e-mb-3 e-grow md:e-mb-6">
+        <Card ui="dashkit" flex="grow" className="e-mb-3 md:e-mb-6">
             <CardHeader ui="dashkit">
-                <div className="row e-items-center">
-                    <div className="col">
-                        <h4 className="card-header-title">Live Cluster Stats</h4>
-                    </div>
-                </div>
+                <CardTitle as="h4" ui="dashkit">
+                    Live Cluster Stats
+                </CardTitle>
             </CardHeader>
             <TableCardBody layout="expanded" className="[&_td:first-child]:!e-w-2/5 md:[&_td:first-child]:!e-w-auto">
                 <tr>
@@ -244,6 +242,6 @@ function StatsCardBody() {
                     <td className="font-monospace e-text-right">~{epochTimeRemaining}</td>
                 </tr>
             </TableCardBody>
-        </div>
+        </Card>
     );
 }

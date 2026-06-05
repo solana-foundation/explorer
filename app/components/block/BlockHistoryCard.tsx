@@ -22,7 +22,7 @@ import { ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
 import { invariant } from '@/app/shared/lib/invariant';
-import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 const PAGE_SIZE = 25;
 
@@ -199,9 +199,11 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
     }
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title">{title}</h3>
+                <CardTitle as="h3" ui="dashkit">
+                    {title}
+                </CardTitle>
                 <FilterDropdown
                     filter={programFilter}
                     invokedPrograms={invokedPrograms}
@@ -383,7 +385,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                     </button>
                 </CardFooter>
             )}
-        </div>
+        </Card>
     );
 }
 

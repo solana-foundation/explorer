@@ -27,7 +27,7 @@ import useSWR from 'swr';
 import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';
@@ -473,9 +473,11 @@ function OverviewCard({
 
     return (
         <>
-            <div className="card">
+            <Card ui="dashkit">
                 <CardHeader ui="dashkit" className="e-gap-2">
-                    <h3 className="card-header-title">Transaction Overview</h3>
+                    <CardTitle as="h3" ui="dashkit">
+                        Transaction Overview
+                    </CardTitle>
                     <button className="btn btn-sm btn-white e-flex" onClick={onClear}>
                         Clear
                     </button>
@@ -527,7 +529,7 @@ function OverviewCard({
                         </td>
                     </tr>
                 </TableCardBody>
-            </div>
+            </Card>
         </>
     );
 }
