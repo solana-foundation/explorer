@@ -1,7 +1,7 @@
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withMockTransactions, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import React from 'react';
 
@@ -33,7 +33,7 @@ const ix = new TransactionInstruction({
 const meta = {
     component: AnchorDetailsCard,
     decorators: [
-        withClusterAndAccounts,
+        withMockTransactions,
         withTokenInfoBatch,
         Story => (
             <SignatureContext.Provider value="">
