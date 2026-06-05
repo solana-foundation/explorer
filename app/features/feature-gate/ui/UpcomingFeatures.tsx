@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
 
+import { filterUpcomingForCluster } from '../lib/filter-upcoming-features';
 import { partitionFeatures, type UpcomingFeature } from '../lib/partition-features';
 import { EmptyStateCard, FeatureGateTable } from './FeatureGateTable';
 
@@ -19,19 +20,7 @@ export function UpcomingFeatures() {
         return undefined;
     }
 
-    const features = upcoming.filter(feature => {
-        switch (cluster) {
-            case Cluster.MainnetBeta:
-                return feature.devnet_activation_epoch !== null && feature.testnet_activation_epoch !== null;
-            case Cluster.Devnet:
-                return feature.testnet_activation_epoch !== null && !feature.mainnet_activation_epoch;
-            case Cluster.Testnet:
-                // Show features not yet activated on testnet (truly "upcoming" for this cluster)
-                return feature.testnet_activation_epoch === null;
-            default:
-                return false;
-        }
-    });
+    const features = filterUpcomingForCluster(upcoming, cluster);
 
     const header = (
         <div className="e-flex e-flex-col e-gap-1.5 e-border-b e-border-heavy-metal-950 e-px-4 e-py-3 md:e-flex-row md:e-items-center md:e-justify-between">
