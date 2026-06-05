@@ -1,4 +1,3 @@
-import { cn } from '@shared/utils';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import base58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -9,6 +8,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { FormControl } from '@/app/shared/ui/FormControl';
+import { TabsContent, TabsList, TabsTrigger } from '@/app/shared/ui/Tabs';
 
 import type { InspectorData } from './InspectorPage';
 
@@ -108,22 +108,18 @@ function TabInstructions() {
 
     return (
         <div className="instruction-tabs">
-            <div className="nav nav-tabs" role="tablist">
+            <TabsList>
                 {tabs.map(tab => (
-                    <button
-                        key={tab.id}
-                        className={cn('me-3 nav-link', activeTab === tab.id && 'active')}
-                        onClick={() => setActiveTab(tab.id)}
-                    >
+                    <TabsTrigger key={tab.id} active={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>
                         {tab.label}
-                    </button>
+                    </TabsTrigger>
                 ))}
-            </div>
-            <div className="tab-content">
+            </TabsList>
+            <div>
                 {tabs.map(tab => (
-                    <div key={tab.id} className={cn('tab-pane', activeTab === tab.id && 'show active')} role="tabpanel">
+                    <TabsContent key={tab.id} active={activeTab === tab.id}>
                         {tab.content}
-                    </div>
+                    </TabsContent>
                 ))}
             </div>
         </div>

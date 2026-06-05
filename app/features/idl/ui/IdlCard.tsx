@@ -4,11 +4,11 @@ import { getIdlVersion, isIdlProgramIdMismatch, type SupportedIdl, useAnchorProg
 import { useProgramMetadataCodamaIdl, useProgramMetadataIdl } from '@entities/program-metadata';
 import { useCluster } from '@providers/cluster';
 import { Badge } from '@shared/ui/badge';
-import { cn } from '@shared/utils';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'react-feather';
 
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { TabsList, TabsTrigger } from '@/app/shared/ui/Tabs';
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 import { clusterSlug } from '@/app/utils/cluster';
 
@@ -139,24 +139,22 @@ export function IdlCard({ programId }: { programId: string }) {
     return (
         <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <div className="nav nav-tabs e-border-0" role="tablist">
+                <TabsList className="e-border-0">
                     {tabs
                         .filter(tab => tab.idl)
                         .map(tab => (
-                            <button
+                            <TabsTrigger
                                 key={tab.title}
-                                className={cn('nav-item nav-link', {
-                                    active: tab.id === activeTab?.id,
-                                })}
+                                active={tab.id === activeTab?.id}
                                 onClick={() => {
                                     setActiveTabIndex(tabs.findIndex(t => t.id === tab.id));
                                     setSearchStr('');
                                 }}
                             >
                                 {tab.title}
-                            </button>
+                            </TabsTrigger>
                         ))}
-                </div>
+                </TabsList>
             </CardHeader>
             <CardBody ui="dashkit">
                 {isMismatch ? (
