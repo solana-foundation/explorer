@@ -14,11 +14,13 @@ import { MockTokenInfoBatchProvider } from './__mocks__/MockTokenInfoBatchProvid
 import { MockTransactionsProvider } from './__mocks__/MockTransactionsProvider';
 
 const noopFetcher = async () => undefined;
-const noopAccountsFetchers: React.ContextType<typeof FetchersContext> = {
+// MultipleAccountFetcher has private constructor params (nominal-typed) — no structural object matches.
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- decorator-only stub
+const noopAccountsFetchers = {
     parsed: { fetch: noopFetcher },
     raw: { fetch: noopFetcher },
     skip: { fetch: noopFetcher },
-};
+} as unknown as React.ContextType<typeof FetchersContext>;
 
 /** Wraps stories with ClusterProvider. Usage: `decorators: [withCluster]` */
 export const withCluster: Decorator = Story => (
