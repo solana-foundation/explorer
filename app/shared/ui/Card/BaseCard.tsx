@@ -107,16 +107,38 @@ const titleVariants = cva([], {
     defaultVariants: { ui: 'tw' },
     variants: {
         ui: {
-            dashkit: 'e-m-0 e-text-dk-h4 e-font-medium e-leading-[1.1] e-tracking-[-0.02em]',
+            // Size token is appended separately so polymorphic `as` matches the original heading level.
+            dashkit: 'e-m-0 e-font-medium e-leading-[1.1] e-tracking-[-0.02em]',
             tw: 'e-text-sm e-font-medium e-leading-none e-tracking-tight',
         },
     },
 });
 
-const BaseCardTitle = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & UIPropOverride>(
-    ({ className, ui, ...props }, ref) => (
-        <div ref={ref} className={cn(titleVariants({ ui: ui }), className)} {...props} />
-    ),
+type CardTitleAs = 'div' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+
+// Maps the rendered element to its Dashkit font-size token. `<div>` defaults to h4 size for backward
+// compatibility with pre-`as` callers; explicit heading levels get their matching size so swaps from
+// raw `<hN class="card-header-title">` preserve both semantics and visual size.
+const dashkitTitleSizeByAs: Record<CardTitleAs, string> = {
+    div: 'e-text-dk-h4',
+    h1: 'e-text-dk-h1',
+    h2: 'e-text-dk-h2',
+    h3: 'e-text-dk-h3',
+    h4: 'e-text-dk-h4',
+    h5: 'e-text-dk-h5',
+    h6: 'e-text-dk-h6',
+};
+
+interface BaseCardTitleProps extends React.HTMLAttributes<HTMLElement>, UIPropOverride {
+    as?: CardTitleAs;
+}
+
+const BaseCardTitle = React.forwardRef<HTMLElement, BaseCardTitleProps>(
+    ({ as = 'div', className, ui, ...props }, ref) => {
+        const Element = as as React.ElementType;
+        const sizeClass = ui === 'dashkit' ? dashkitTitleSizeByAs[as] : '';
+        return <Element ref={ref} className={cn(titleVariants({ ui: ui }), sizeClass, className)} {...props} />;
+    },
 );
 BaseCardTitle.displayName = 'BaseCardTitle';
 

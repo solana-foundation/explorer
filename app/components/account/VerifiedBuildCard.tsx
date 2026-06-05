@@ -6,7 +6,7 @@ import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 import { ExternalLink } from 'react-feather';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
 
 import { Address } from '../common/Address';
@@ -73,7 +73,9 @@ export function BaseVerifiedBuildCard({
     return (
         <div className="card security-txt">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title e-mb-0 e-flex e-items-center">Verified Build</h3>
+                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
+                    Verified Build
+                </CardTitle>
                 <small>{verificationMessage}</small>
             </CardHeader>
             <div className="alert e-mb-1.5 e-mt-1.5">

@@ -10,7 +10,7 @@ import {
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
 import { toBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import {
     decodeAccount,
     decodeWithType,
@@ -41,7 +41,9 @@ function SchemaCard({ schema }: { schema: SasSchema }) {
             <CardHeader ui="dashkit">
                 <div className="row e-items-center">
                     <div className="col">
-                        <h3 className="card-header-title">Schema Layout (Borsh)</h3>
+                        <CardTitle as="h3" ui="dashkit">
+                            Schema Layout (Borsh)
+                        </CardTitle>
                     </div>
                 </div>
             </CardHeader>
@@ -78,7 +80,9 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
             <CardHeader ui="dashkit">
                 <div className="row e-items-center">
                     <div className="col">
-                        <h3 className="card-header-title">Attestation Data {decoded ? '' : 'Raw (Base64)'}</h3>
+                        <CardTitle as="h3" ui="dashkit">
+                            Attestation Data {decoded ? '' : 'Raw (Base64)'}
+                        </CardTitle>
                     </div>
                 </div>
             </CardHeader>

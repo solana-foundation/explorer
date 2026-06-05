@@ -2,7 +2,7 @@ import { RefreshButton } from '@shared/ui/refresh-button';
 import { ConfirmedSignatureInfo, TransactionError } from '@solana/web3.js';
 import React from 'react';
 
-import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export type TransactionRow = {
     slot: number;
@@ -27,7 +27,9 @@ export function HistoryCardHeader({
 }) {
     return (
         <CardHeader ui="dashkit">
-            <h3 className="card-header-title">{title}</h3>
+            <CardTitle as="h3" ui="dashkit">
+                {title}
+            </CardTitle>
             <RefreshButton analyticsSection={analyticsSection} onClick={refresh} fetching={fetching} />
         </CardHeader>
     );

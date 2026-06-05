@@ -8,7 +8,7 @@ import { cn } from '@shared/utils';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'react-feather';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 import { clusterSlug } from '@/app/utils/cluster';
 
@@ -95,7 +95,9 @@ export function IdlCard({ programId }: { programId: string }) {
         return (
             <div className="card">
                 <CardHeader ui="dashkit">
-                    <h4 className="card-header-title">Program IDL</h4>
+                    <CardTitle as="h4" ui="dashkit">
+                        Program IDL
+                    </CardTitle>
                 </CardHeader>
                 <CardBody ui="dashkit">
                     <div className="e-mb-6 e-flex e-items-center e-gap-2 e-text-destructive">

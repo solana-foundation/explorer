@@ -11,7 +11,7 @@ import { PublicKey } from '@solana/web3.js';
 import { lamportsToSolString } from '@utils/index';
 import React from 'react';
 
-import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 const U64_MAX = BigInt('0xffffffffffffffff');
 
@@ -80,7 +80,9 @@ export function RewardsCard({ address }: { address: string }) {
                 <CardHeader ui="dashkit">
                     <div className="row e-items-center">
                         <div className="col">
-                            <h3 className="card-header-title">Rewards</h3>
+                            <CardTitle as="h3" ui="dashkit">
+                                Rewards
+                            </CardTitle>
                         </div>
                     </div>
                 </CardHeader>

@@ -4,7 +4,7 @@ import { useCluster } from '@providers/cluster';
 import type { VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import { useSimulation } from '../model/use-simulation';
 import { SimulatorCUProfilingCard } from './SimulatorCUProfilingCard';
@@ -122,7 +122,9 @@ function SimulationCardShell({ action, children }: { action?: React.ReactNode; c
     return (
         <div className="card">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title">Transaction Simulation</h3>
+                <CardTitle as="h3" ui="dashkit">
+                    Transaction Simulation
+                </CardTitle>
                 {action}
             </CardHeader>
             {children}

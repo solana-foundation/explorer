@@ -6,7 +6,7 @@ import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
-import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import type { InspectorData } from './InspectorPage';
 
@@ -242,7 +242,9 @@ export function RawInput({
         <div className="card">
             <CardHeader ui="dashkit">
                 <div className="e-flex e-items-center e-justify-between">
-                    <h3 className="card-header-title">Inspector Input</h3>
+                    <CardTitle as="h3" ui="dashkit">
+                        Inspector Input
+                    </CardTitle>
                     <button className="btn btn-sm btn-white" onClick={clearInput} type="button">
                         Clear
                     </button>
