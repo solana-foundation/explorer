@@ -185,8 +185,8 @@ export function TokenMintHeaderCard({
     token: { name?: string | undefined; logoURI?: string | undefined; symbol?: string | undefined };
 }) {
     return (
-        <div className="row e-items-center">
-            <div className="col-auto">
+        <div className="-e-mx-3 e-flex e-flex-wrap e-items-center">
+            <div className="e-flex-none e-px-3">
                 <div className="avatar avatar-lg header-avatar-top">
                     <ProxiedImage
                         alt="Token logo"
@@ -198,7 +198,7 @@ export function TokenMintHeaderCard({
                 </div>
             </div>
 
-            <div className="col -e-ml-3 md:-e-ml-1.5">
+            <div className="-e-ml-3 e-min-w-0 e-flex-1 e-px-3 md:-e-ml-1.5">
                 <h6 className="header-pretitle">Token</h6>
                 <h2 className="header-title">{token?.name || 'Unknown Token'}</h2>
                 <div className="header-pretitle no-overflow-with-ellipsis">
