@@ -1,4 +1,4 @@
-import { gen } from '@__fixtures__/gen';
+import { DEFAULT_BLOCKHASH, gen } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
@@ -12,7 +12,7 @@ import { DasCompressionInfoCard } from '../CompressedNFTInfoCard';
 const TREE_KEY = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 
 const sampleProof: CompressedNftProof = {
-    leaf: gen.blockhash(0),
+    leaf: DEFAULT_BLOCKHASH,
     node_index: 0,
     proof: [gen.blockhash(1), gen.blockhash(2), gen.blockhash(3), gen.blockhash(4)],
     root: gen.blockhash(5),
