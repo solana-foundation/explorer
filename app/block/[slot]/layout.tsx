@@ -17,7 +17,7 @@ import { notFound, useSearchParams } from 'next/navigation';
 import React, { PropsWithChildren, use } from 'react';
 import { ExternalLink } from 'react-feather';
 
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { type NavigationTab, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
 import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
 import { getEpochForSlot, getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
@@ -71,9 +71,11 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
 
         content = (
             <>
-                <div className="card">
+                <Card ui="dashkit">
                     <CardHeader ui="dashkit">
-                        <h3 className="card-header-title">Overview</h3>
+                        <CardTitle as="h3" ui="dashkit">
+                            Overview
+                        </CardTitle>
                         {IBRL_EXPLORER_URL && (
                             <ExternalLinkWarning href={`${IBRL_EXPLORER_URL}/block/${slotNumber}`}>
                                 <>
@@ -212,7 +214,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                             </td>
                         </tr>
                     </TableCardBody>
-                </div>
+                </Card>
                 <MoreSection slot={slotNumber}>{children}</MoreSection>
             </>
         );

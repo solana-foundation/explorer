@@ -3,7 +3,7 @@ import { SolBalance } from '@components/common/SolBalance';
 import { PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import React from 'react';
 
-import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 const PAGE_SIZE = 10;
 
@@ -15,9 +15,11 @@ export function BlockRewardsCard({ block }: { block: VersionedBlockResponse }) {
     }
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title">Block Rewards</h3>
+                <CardTitle as="h3" ui="dashkit">
+                    Block Rewards
+                </CardTitle>
             </CardHeader>
 
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
@@ -73,6 +75,6 @@ export function BlockRewardsCard({ block }: { block: VersionedBlockResponse }) {
                     </button>
                 </CardFooter>
             )}
-        </div>
+        </Card>
     );
 }

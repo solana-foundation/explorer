@@ -16,6 +16,7 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 import { RelativeTime } from '@/app/shared/RelativeTime';
+import { Card } from '@/app/shared/ui/Card';
 
 import { useInstructionNames } from '../lib/use-instruction-names';
 import { InstructionList, InstructionListSkeleton } from './InstructionList';
@@ -69,7 +70,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
 
     const fetching = history.status === FetchStatus.Fetching;
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <HistoryCardHeader
                 fetching={fetching}
                 refresh={() => refresh()}
@@ -97,7 +98,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                 </table>
             </div>
             <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />
-        </div>
+        </Card>
     );
 }
 

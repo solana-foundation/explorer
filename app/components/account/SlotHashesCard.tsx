@@ -2,18 +2,16 @@ import { Slot } from '@components/common/Slot';
 import { SlotHashEntry, SlotHashesInfo, SysvarAccount } from '@validators/accounts/sysvar';
 import React from 'react';
 
-import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount }) {
     const slotHashes = sysvarAccount.info as SlotHashesInfo;
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <div className="row e-items-center">
-                    <div className="col">
-                        <h3 className="card-header-title">Slot Hashes</h3>
-                    </div>
-                </div>
+                <CardTitle as="h3" ui="dashkit">
+                    Slot Hashes
+                </CardTitle>
             </CardHeader>
 
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
@@ -37,7 +35,7 @@ export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount
             <CardFooter ui="dashkit">
                 <div className="e-text-center e-text-dk-gray-700">{slotHashes.length > 0 ? '' : 'No hashes found'}</div>
             </CardFooter>
-        </div>
+        </Card>
     );
 }
 

@@ -43,7 +43,7 @@ import { Button } from '@/app/components/shared/ui/button';
 import { AccountsCard } from '@/app/components/transaction/AccountsCard';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
 export const AUTO_REFRESH_INTERVAL = 2000;
@@ -261,9 +261,11 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
     }
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit" className="e-gap-2">
-                <h3 className="card-header-title">Overview</h3>
+                <CardTitle as="h3" ui="dashkit">
+                    Overview
+                </CardTitle>
                 <ViewReceiptButton
                     signature={signature}
                     transactionWithMeta={transactionWithMeta}
@@ -408,7 +410,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                     </tr>
                 )}
             </TableCardBody>
-        </div>
+        </Card>
     );
 }
 

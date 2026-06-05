@@ -25,7 +25,7 @@ import { ProgramSecurityTXTBadge } from '@/app/features/security-txt/ui/Security
 import { ProgramSecurityTXTLabel } from '@/app/features/security-txt/ui/SecurityTXTLabel';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { refreshAnalytics } from '@/app/shared/lib/analytics';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { Cluster } from '@/app/utils/cluster';
 import { useClusterPath } from '@/app/utils/url';
 
@@ -78,11 +78,11 @@ export function UpgradeableProgramSection({
     const label = addressLabel(account.pubkey.toBase58(), cluster);
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit" className="e-gap-2">
-                <h3 className="card-header-title e-mb-0 e-flex e-items-center">
+                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
                     {programData === undefined && 'Closed '}Program Account
-                </h3>
+                </CardTitle>
                 <button
                     className="btn btn-white btn-sm"
                     onClick={() => {
@@ -169,7 +169,7 @@ export function UpgradeableProgramSection({
                     </>
                 )}
             </TableCardBody>
-        </div>
+        </Card>
     );
 }
 
@@ -208,9 +208,11 @@ export function UpgradeableProgramDataSection({
 }) {
     const refresh = useRefreshAccount();
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title e-mb-0 e-flex e-items-center">Program Executable Data Account</h3>
+                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
+                    Program Executable Data Account
+                </CardTitle>
                 <button
                     className="btn btn-white btn-sm"
                     onClick={() => {
@@ -265,7 +267,7 @@ export function UpgradeableProgramDataSection({
                     </tr>
                 )}
             </TableCardBody>
-        </div>
+        </Card>
     );
 }
 
@@ -278,9 +280,11 @@ export function UpgradeableProgramBufferSection({
 }) {
     const refresh = useRefreshAccount();
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title e-mb-0 e-flex e-items-center">Program Deploy Buffer Account</h3>
+                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
+                    Program Deploy Buffer Account
+                </CardTitle>
                 <button
                     className="btn btn-white btn-sm"
                     onClick={() => {
@@ -327,6 +331,6 @@ export function UpgradeableProgramBufferSection({
                     </td>
                 </tr>
             </TableCardBody>
-        </div>
+        </Card>
     );
 }

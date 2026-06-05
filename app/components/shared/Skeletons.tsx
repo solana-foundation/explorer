@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardHeader } from '@/app/shared/ui/Card';
 
 import { Skeleton } from './ui/skeleton';
 
@@ -39,14 +39,10 @@ export function RichRowSkeleton() {
 
 export function SimpleCardSkeleton({ withTitle = false, title }: { withTitle?: boolean; title?: ReactElement }) {
     return (
-        <div className="card e-mb-3 e-w-full md:e-mb-6">
+        <Card ui="dashkit" className="e-mb-3 e-w-full md:e-mb-6">
             {withTitle && (
                 <CardHeader ui="dashkit">
-                    <div className="row e-items-center">
-                        <div className="col">
-                            <Skeleton className="e-h-5 e-w-40" />
-                        </div>
-                    </div>
+                    <Skeleton className="e-h-5 e-w-40" />
                 </CardHeader>
             )}
             <CardBody ui="dashkit">
@@ -54,19 +50,15 @@ export function SimpleCardSkeleton({ withTitle = false, title }: { withTitle?: b
                 <Skeleton className="e-mb-2.5 e-mt-2 e-h-7 e-w-full" />
                 <Skeleton className="e-h-3 e-w-2/5" />
             </CardBody>
-        </div>
+        </Card>
     );
 }
 
 export function RichListSkeleton({ rows = 2 }: { rows?: number }) {
     return (
-        <div className="card e-flex-1">
+        <Card ui="dashkit" flex="grow">
             <CardHeader ui="dashkit">
-                <div className="row e-items-center">
-                    <div className="col">
-                        <Skeleton className="e-h-5 e-w-40" />
-                    </div>
-                </div>
+                <Skeleton className="e-h-5 e-w-40" />
             </CardHeader>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive e-mb-0">
@@ -78,19 +70,15 @@ export function RichListSkeleton({ rows = 2 }: { rows?: number }) {
                     </tbody>
                 </table>
             </div>
-        </div>
+        </Card>
     );
 }
 
 export function StatsTableSkeleton({ rows = 8 }: { rows?: number }) {
     return (
-        <div className="card e-flex-1">
+        <Card ui="dashkit" flex="grow">
             <CardHeader ui="dashkit">
-                <div className="row e-items-center">
-                    <div className="col">
-                        <Skeleton className="e-h-5 e-w-40" />
-                    </div>
-                </div>
+                <Skeleton className="e-h-5 e-w-40" />
             </CardHeader>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive e-mb-0">
@@ -102,13 +90,13 @@ export function StatsTableSkeleton({ rows = 8 }: { rows?: number }) {
                     </tbody>
                 </table>
             </div>
-        </div>
+        </Card>
     );
 }
 
 export function TableCardSkeleton({ cols = 4, rows = 6 }: { cols?: number; rows?: number }) {
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
                 <Skeleton className="e-h-5 e-w-64" />
             </CardHeader>
@@ -137,7 +125,7 @@ export function TableCardSkeleton({ cols = 4, rows = 6 }: { cols?: number; rows?
                     </tbody>
                 </table>
             </div>
-        </div>
+        </Card>
     );
 }
 
@@ -154,7 +142,7 @@ function ImageSliderCardSkeleton() {
 
 export function ImageSliderSkeleton() {
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardBody ui="dashkit">
                 <div className="e-mb-3 e-flex e-justify-between e-border-b e-border-gray-300 e-pb-2">
                     <Skeleton className="e-h-5 e-w-80" />
@@ -167,6 +155,6 @@ export function ImageSliderSkeleton() {
                     <ImageSliderCardSkeleton />
                 </div>
             </CardBody>
-        </div>
+        </Card>
     );
 }

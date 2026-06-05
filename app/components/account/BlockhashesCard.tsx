@@ -1,18 +1,16 @@
 import { RecentBlockhashesEntry, RecentBlockhashesInfo } from '@validators/accounts/sysvar';
 import React from 'react';
 
-import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashesInfo }) {
     return (
         <>
-            <div className="card">
+            <Card ui="dashkit">
                 <CardHeader ui="dashkit">
-                    <div className="row e-items-center">
-                        <div className="col">
-                            <h3 className="card-header-title">Blockhashes</h3>
-                        </div>
-                    </div>
+                    <CardTitle as="h3" ui="dashkit">
+                        Blockhashes
+                    </CardTitle>
                 </CardHeader>
 
                 {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
@@ -39,7 +37,7 @@ export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashe
                         {blockhashes.length > 0 ? '' : 'No blockhashes found'}
                     </div>
                 </CardFooter>
-            </div>
+            </Card>
         </>
     );
 }

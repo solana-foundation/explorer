@@ -9,7 +9,7 @@ import React from 'react';
 
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { Alert } from '@/app/shared/ui/Alert';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import type { StakeActivationStatus } from '../api/stake-activation';
 import { EPOCH_NEVER_SET } from '../lib/constants';
@@ -140,9 +140,11 @@ function DelegationCard({
     }
     const { stake } = stakeAccount;
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title e-mb-0 e-flex e-items-center">Stake Delegation</h3>
+                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
+                    Stake Delegation
+                </CardTitle>
             </CardHeader>
             <TableCardBody>
                 <tr>
@@ -201,16 +203,18 @@ function DelegationCard({
                     </>
                 )}
             </TableCardBody>
-        </div>
+        </Card>
     );
 }
 
 function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
     const hasLockup = meta.lockup.unixTimestamp > 0;
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title e-mb-0 e-flex e-items-center">Authorities</h3>
+                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
+                    Authorities
+                </CardTitle>
             </CardHeader>
             <TableCardBody>
                 <tr>
@@ -236,7 +240,7 @@ function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
                     </tr>
                 )}
             </TableCardBody>
-        </div>
+        </Card>
     );
 }
 

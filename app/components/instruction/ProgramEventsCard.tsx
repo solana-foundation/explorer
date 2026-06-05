@@ -9,7 +9,7 @@ import { Code } from 'react-feather';
 
 import { fromBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export function ProgramEventsCard({
     eventDataList,
@@ -72,14 +72,14 @@ function EventCard({
     const fields = ((eventFields?.type as IdlTypeDefTyStruct)?.fields as IdlField[]) ?? [];
 
     return (
-        <div className="card e-mb-1.5">
+        <Card ui="dashkit" className="e-mb-1.5">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title e-mb-0 e-flex e-items-center">
+                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
                     <span className="badge bg-info-soft e-mr-1.5">
                         #{instructionIndex + 1}.{eventIndex + 1}
                     </span>
                     {camelToTitleCase(event.name)}
-                </h3>
+                </CardTitle>
                 <button
                     className={cn('btn btn-sm e-flex e-items-center', showRaw ? 'btn-black active' : 'btn-white')}
                     onClick={() => setShowRaw(r => !r)}
@@ -119,6 +119,6 @@ function EventCard({
                     </tbody>
                 </table>
             </div>
-        </div>
+        </Card>
     );
 }

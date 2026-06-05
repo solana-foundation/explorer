@@ -2,18 +2,16 @@ import { Slot } from '@components/common/Slot';
 import { Vote, VoteAccount } from '@validators/accounts/vote';
 import React from 'react';
 
-import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
     return (
         <>
-            <div className="card">
+            <Card ui="dashkit">
                 <CardHeader ui="dashkit">
-                    <div className="row e-items-center">
-                        <div className="col">
-                            <h3 className="card-header-title">Vote History</h3>
-                        </div>
-                    </div>
+                    <CardTitle as="h3" ui="dashkit">
+                        Vote History
+                    </CardTitle>
                 </CardHeader>
 
                 {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
@@ -39,7 +37,7 @@ export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
                         {voteAccount.info.votes.length > 0 ? '' : 'No votes found'}
                     </div>
                 </CardFooter>
-            </div>
+            </Card>
         </>
     );
 }

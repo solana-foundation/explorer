@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { CardBody } from '@/app/shared/ui/Card';
+import { Card, CardBody } from '@/app/shared/ui/Card';
 
 export function ErrorCard({
     retry,
@@ -15,7 +15,7 @@ export function ErrorCard({
 }) {
     const buttonText = retryText || 'Try Again';
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardBody ui="dashkit" className="e-text-center">
                 {text}
                 {retry && (
@@ -37,6 +37,6 @@ export function ErrorCard({
                     </>
                 )}
             </CardBody>
-        </div>
+        </Card>
     );
 }

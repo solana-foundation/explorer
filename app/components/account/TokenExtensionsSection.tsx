@@ -9,6 +9,7 @@ import {
     getAnchorId,
     useTokenExtensionNavigation,
 } from '@/app/features/token-extensions/use-token-extension-navigation';
+import { Card } from '@/app/shared/ui/Card';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
 import { TokenExtensionBadge } from './token-extensions/TokenExtensionBadge';
@@ -139,11 +140,11 @@ function TokenExtensionAccordionItem({
             </div>
             <AccordionContent>
                 {!showRaw ? (
-                    <div className="card e-m-4">
+                    <Card ui="dashkit" className="e-m-4">
                         <TableCardBodyHeaded headerComponent={tableHeaderComponent}>
                             {TokenExtensionRow(extension, undefined, decimals, symbol, 'omit')}
                         </TableCardBodyHeaded>
-                    </div>
+                    </Card>
                 ) : (
                     <div className="e-p-4">
                         <ReactJson src={parsedExtension.parsed || {}} style={{ padding: 25 }} />

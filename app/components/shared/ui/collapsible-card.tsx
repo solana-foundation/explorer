@@ -2,6 +2,8 @@ import { cn } from '@shared/utils';
 import { forwardRef, ReactNode, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+
 type CollapsibleCardProps = {
     title: ReactNode;
     children: ReactNode;
@@ -16,9 +18,11 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
         const [expanded, setExpanded] = useState(defaultExpanded);
 
         return (
-            <div ref={ref} className={cn('card', className)}>
-                <div className={cn('card-header e-gap-1.5', collapsible && !expanded && 'border-0')}>
-                    <h3 className="card-header-title e-flex e-items-center">{title}</h3>
+            <Card ref={ref} ui="dashkit" className={className}>
+                <CardHeader ui="dashkit" className={cn('e-gap-1.5', collapsible && !expanded && 'e-border-0')}>
+                    <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
+                        {title}
+                    </CardTitle>
                     {headerButtons}
                     {collapsible && (
                         <button
@@ -36,7 +40,7 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                             />
                         </button>
                     )}
-                </div>
+                </CardHeader>
                 {collapsible ? (
                     <div
                         className={cn(
@@ -49,7 +53,7 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                 ) : (
                     children
                 )}
-            </div>
+            </Card>
         );
     },
 );

@@ -12,6 +12,7 @@ import { getTokenInstructionName, InstructionContainer } from '@utils/instructio
 import React, { useMemo } from 'react';
 
 import { RelativeTime } from '@/app/shared/RelativeTime';
+import { Card } from '@/app/shared/ui/Card';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 import { extractMintDetails, MintDetails } from './common';
@@ -110,7 +111,7 @@ export function TokenInstructionsCard({ address }: { address: string }) {
 
     const fetching = history.status === FetchStatus.Fetching;
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <HistoryCardHeader
                 fetching={fetching}
                 refresh={() => refresh()}
@@ -133,7 +134,7 @@ export function TokenInstructionsCard({ address }: { address: string }) {
                 </table>
             </div>
             <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />
-        </div>
+        </Card>
     );
 }
 

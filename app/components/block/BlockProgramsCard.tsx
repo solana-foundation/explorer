@@ -4,7 +4,7 @@ import { PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import React from 'react';
 
 import { invariant } from '@/app/shared/lib/invariant';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) {
     const totalTransactions = block.transactions.length;
@@ -61,9 +61,11 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
     const showSuccessRate = block.transactions.every(tx => tx.meta !== null);
     return (
         <>
-            <div className="card">
+            <Card ui="dashkit">
                 <CardHeader ui="dashkit">
-                    <h3 className="card-header-title">Block Program Stats</h3>
+                    <CardTitle as="h3" ui="dashkit">
+                        Block Program Stats
+                    </CardTitle>
                 </CardHeader>
                 <TableCardBody>
                     <tr>
@@ -75,10 +77,12 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
                         <td className="font-monospace e-text-right">{totalInstructions}</td>
                     </tr>
                 </TableCardBody>
-            </div>
-            <div className="card">
+            </Card>
+            <Card ui="dashkit">
                 <CardHeader ui="dashkit">
-                    <h3 className="card-header-title">Block Programs</h3>
+                    <CardTitle as="h3" ui="dashkit">
+                        Block Programs
+                    </CardTitle>
                 </CardHeader>
 
                 {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
@@ -114,7 +118,7 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </Card>
         </>
     );
 }
