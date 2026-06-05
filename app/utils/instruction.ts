@@ -5,6 +5,7 @@ import {
     parseTokenLendingInstructionTitle,
 } from '@components/instruction/token-lending/types';
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
+import { getZkElGamalProofInstructionName } from '@components/instruction/ZkElGamalProofDetailsCard';
 import { isTokenProgramId } from '@providers/accounts/tokens';
 import {
     ComputeBudgetProgram,
@@ -14,9 +15,10 @@ import {
     PartiallyDecodedInstruction,
 } from '@solana/web3.js';
 import { camelToTitleCase } from '@utils/index';
-import { isTokenProgram } from '@utils/programs';
+import { isTokenProgram, ZK_ELGAMAL_PROOF_PROGRAM_ID } from '@utils/programs';
 import { intoTransactionInstruction } from '@utils/tx';
 import { ParsedInfo } from '@validators/index';
+import bs58 from 'bs58';
 import { create } from 'superstruct';
 
 import { getProgramName } from '@/app/entities/transaction-data';
@@ -139,6 +141,12 @@ export function getTransactionInstructionNames(
                     // ix.parsed is a string (e.g. memo text) — instruction name is the program name
                     return { name: 'Memo', program };
                 }
+            } else if (ix.programId.toBase58() === ZK_ELGAMAL_PROOF_PROGRAM_ID) {
+                // ZK ElGamal proof instructions aren't parsed by the RPC; the name lives
+                // in the 1-byte discriminator at the start of the base58-encoded data.
+                const data = bs58.decode(ix.data);
+                const discriminator = data.length > 0 ? data[0] : -1;
+                return { name: getZkElGamalProofInstructionName(discriminator), program };
             }
             return { name: 'Unknown Instruction', program: program === 'Unknown' ? 'Unknown Program' : program };
         });

@@ -26,6 +26,11 @@ export function isZkElGamalProofInstruction(ix: TransactionInstruction): boolean
     return ix.programId.toBase58() === ZK_ELGAMAL_PROOF_PROGRAM_ID;
 }
 
+// Maps the 1-byte instruction discriminator to a human-readable name.
+export function getZkElGamalProofInstructionName(discriminator: number): string {
+    return INSTRUCTION_NAMES[discriminator] ?? 'Unknown Instruction';
+}
+
 export function ZkElGamalProofDetailsCard({
     ix,
     index,
@@ -46,7 +51,7 @@ export function ZkElGamalProofDetailsCard({
     // empty and the proof lives off-instruction; the row below stays hidden.
     const data = ix.data;
     const discriminator = data.length > 0 ? data[0] : -1;
-    const instructionName = INSTRUCTION_NAMES[discriminator] ?? 'Unknown Instruction';
+    const instructionName = getZkElGamalProofInstructionName(discriminator);
     const isClose = discriminator === 0;
     const proofBytes = data.length > 1 ? data.length - 1 : 0;
     const accountCount = ix.keys.length;
