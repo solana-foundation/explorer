@@ -1,4 +1,6 @@
-import { PublicKey } from '@solana/web3.js';
+import { DEFAULT_SLOT } from '@__fixtures__/gen';
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { PublicKey, SYSVAR_CLOCK_PUBKEY, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
@@ -23,18 +25,13 @@ const meta = {
 export default meta;
 type Story = StoryObj<ParsedArgs>;
 
-const samplePubkeys = [
-    new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-    new PublicKey('11111111111111111111111111111111'),
-    new PublicKey('SysvarRent111111111111111111111111111111111'),
-    new PublicKey('SysvarC1ock11111111111111111111111111111111'),
-];
+const samplePubkeys = [TOKEN_PROGRAM_ID, PublicKey.default, SYSVAR_RENT_PUBKEY, SYSVAR_CLOCK_PUBKEY];
 
 const args = {
     parsedLookupTable: {
         addresses: samplePubkeys,
         deactivationSlot: BigInt('18446744073709551615'),
-        lastExtendedSlot: 312_000_000,
+        lastExtendedSlot: DEFAULT_SLOT,
         lastExtendedSlotStartIndex: 0,
     } satisfies AddressLookupTableAccountInfo,
 };

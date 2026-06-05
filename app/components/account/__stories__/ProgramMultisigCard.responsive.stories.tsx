@@ -1,4 +1,4 @@
-import { gen } from '@__fixtures__/gen';
+import { DEFAULT_SLOT } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { createNextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
@@ -34,7 +34,7 @@ const args = {
         programData: {
             authority: PublicKey.default,
             data: ['', 'base64'],
-            slot: Number(gen.slot(0)),
+            slot: DEFAULT_SLOT,
         },
     } satisfies UpgradeableLoaderAccountData,
 };

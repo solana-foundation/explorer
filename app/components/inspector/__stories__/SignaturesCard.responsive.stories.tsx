@@ -1,3 +1,5 @@
+import { gen } from '@__fixtures__/gen';
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
@@ -7,8 +9,8 @@ import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/res
 import { TransactionSignatures } from '../SignaturesCard';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
-const SIGNER_2 = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
-const BOGUS_SIGNATURE = '5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW';
+const SIGNER_2 = TOKEN_PROGRAM_ID;
+const BOGUS_SIGNATURE = gen.signature();
 
 const baseMessage = mockVersionedMessage({
     header: {

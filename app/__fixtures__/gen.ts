@@ -26,3 +26,6 @@ export const gen = {
 
 /** Stable single-placeholder blockhash. */
 export const DEFAULT_BLOCKHASH = gen.blockhash();
+
+/** Stable single-placeholder slot (number). */
+export const DEFAULT_SLOT = Number(gen.slot(0));

@@ -1,6 +1,7 @@
-import { gen } from '@__fixtures__/gen';
+import { DEFAULT_SLOT, gen } from '@__fixtures__/gen';
 import { DispatchContext as RewardsDispatch, StateContext as RewardsStateCtx } from '@providers/accounts/rewards';
 import { FetchStatus } from '@providers/cache';
+import { PublicKey } from '@solana/web3.js';
 import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
@@ -10,7 +11,7 @@ import React from 'react';
 import { RewardsCard } from '../RewardsCard';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
-const ADDRESS = '11111111111111111111111111111111';
+const ADDRESS = PublicKey.default.toBase58();
 const noop = () => undefined;
 
 const rewardsState = {
@@ -24,7 +25,7 @@ const rewardsState = {
                     {
                         amount: 12_500_000,
                         commission: null,
-                        effectiveSlot: Number(gen.slot(0)),
+                        effectiveSlot: DEFAULT_SLOT,
                         epoch: 502,
                         postBalance: 5_012_500_000,
                         rewardType: 'staking',

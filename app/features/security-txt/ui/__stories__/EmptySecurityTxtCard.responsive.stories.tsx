@@ -1,3 +1,4 @@
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 
@@ -17,7 +18,7 @@ const meta: Meta<typeof EmptySecurityTxtCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { programAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' };
+const args = { programAddress: TOKEN_PROGRAM_ID.toBase58() };
 
 export const Mobile: Story = {
     args,

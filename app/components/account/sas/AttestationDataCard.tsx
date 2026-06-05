@@ -46,6 +46,7 @@ function SchemaCard({ schema }: { schema: SasSchema }) {
                 </div>
             </CardHeader>
 
+            {/* .string-value is emitted by the ReactJson library — the arbitrary variant scopes the break-all rule to its descendant nodes only. */}
             <div className="card e-m-6 [&_.string-value]:e-break-all">
                 <ReactJson src={borshSchema['schema']} style={{ padding: 25 }} name={false} />
             </div>
@@ -83,6 +84,7 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
             </CardHeader>
 
             {decoded ? (
+                // .string-value is emitted by the ReactJson library — the arbitrary variant scopes the break-all rule to its descendant nodes only.
                 <div className="card e-m-6 [&_.string-value]:e-break-all">
                     <ReactJson src={decoded} style={{ padding: 25 }} name={false} />
                 </div>

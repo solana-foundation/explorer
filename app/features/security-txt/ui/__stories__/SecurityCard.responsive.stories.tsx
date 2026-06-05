@@ -1,3 +1,4 @@
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
@@ -8,8 +9,8 @@ import { toBase64 } from '@/app/shared/lib/bytes';
 import { SecurityCard } from '../SecurityCard';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
-const PUBKEY = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
-const AUTHORITY = new PublicKey('11111111111111111111111111111111');
+const PUBKEY = TOKEN_PROGRAM_ID;
+const AUTHORITY = PublicKey.default;
 
 const NEODYME_HEADER = '=======BEGIN SECURITY.TXT V1=======\0';
 const NEODYME_FOOTER = '=======END SECURITY.TXT V1=======\0';

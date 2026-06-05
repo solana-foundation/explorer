@@ -1,3 +1,4 @@
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
@@ -25,8 +26,7 @@ const VERIFIED_FIXTURE: OsecRegistryInfo = {
     repo_url: 'https://github.com/example/verified-program',
     signer: '5vJwnLeyjV8uNJSp1zn7VLW8GwiQbcsQbGaVSwRmkE4r',
     verification_status: VerificationStatus.Verified,
-    verify_command:
-        'solana-verify verify-from-repo -um --program-id TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA https://github.com/example/verified-program --commit-hash abc1234',
+    verify_command: `solana-verify verify-from-repo -um --program-id ${TOKEN_PROGRAM_ID.toBase58()} https://github.com/example/verified-program --commit-hash abc1234`,
 };
 
 const meta = {

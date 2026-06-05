@@ -1,3 +1,4 @@
+import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClipboardMock, withCluster } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
@@ -20,7 +21,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { programId: '11111111111111111111111111111111' };
+const args = { programId: PublicKey.default.toBase58() };
 
 export const Mobile: Story = {
     args,
