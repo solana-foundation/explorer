@@ -24,8 +24,23 @@ const alertVariants = cva(
 
 export interface AlertProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof alertVariants> {}
 
+// Urgent variants get role="alert" (assertive live region); polite ones get role="status"; default has no role.
+const roleByVariant: Record<NonNullable<AlertProps['variant']>, 'alert' | 'status' | undefined> = {
+    danger: 'alert',
+    default: undefined,
+    info: 'status',
+    scam: 'alert',
+    success: 'status',
+    warning: 'alert',
+};
+
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(({ className, variant, ...props }, ref) => (
-    <div ref={ref} role="alert" className={cn(alertVariants({ variant }), className)} {...props} />
+    <div
+        ref={ref}
+        role={roleByVariant[variant ?? 'default']}
+        className={cn(alertVariants({ variant }), className)}
+        {...props}
+    />
 ));
 Alert.displayName = 'Alert';
 

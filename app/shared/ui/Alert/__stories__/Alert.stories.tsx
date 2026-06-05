@@ -19,7 +19,10 @@ export const Default: Story = {
         variant: 'default',
     },
     play: async ({ canvasElement }) => {
-        const alert = within(canvasElement).getByRole('alert');
+        // Neutral variant intentionally has no ARIA role — assert by text instead.
+        const alert = within(canvasElement).getByText(
+            'A neutral notice without colour. Used as a styled container for inline information.',
+        );
         await expect(alert).toBeVisible();
     },
 };

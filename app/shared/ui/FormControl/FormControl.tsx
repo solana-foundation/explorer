@@ -4,14 +4,9 @@ import * as React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
-// `ui` follows the same dashkit/tw split as Card. dashkit branch maps to Bootstrap .form-control + its modifiers.
-const formControlVariants = cva(['e-block', 'e-w-full', 'e-text-inherit'], {
-    defaultVariants: { ui: 'tw', variant: 'default' },
+const formControlVariants = cva(['e-block', 'e-w-full', 'e-bg-transparent', 'e-text-inherit'], {
+    defaultVariants: { variant: 'default' },
     variants: {
-        ui: {
-            dashkit: 'e-bg-transparent',
-            tw: 'e-bg-transparent',
-        },
         variant: {
             // Bootstrap .form-control baseline equivalent: bordered, padded, rounded.
             // No focus chrome to match production (Bootstrap's .form-control:focus set `outline: 0`).
@@ -39,8 +34,8 @@ export interface FormControlProps extends VariantProps<typeof formControlVariant
  *   </FormControl>
  */
 const FormControl = React.forwardRef<HTMLElement, FormControlProps>(
-    ({ children, className, ui, variant, ...props }, ref) => (
-        <Slot ref={ref} className={cn(formControlVariants({ ui, variant }), className)} {...props}>
+    ({ children, className, variant, ...props }, ref) => (
+        <Slot ref={ref} className={cn(formControlVariants({ variant }), className)} {...props}>
             {children}
         </Slot>
     ),
