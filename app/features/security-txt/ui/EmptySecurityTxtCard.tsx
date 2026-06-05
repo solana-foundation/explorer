@@ -1,5 +1,5 @@
 import { Copyable } from '@/app/components/common/Copyable';
-import { CardBody } from '@/app/shared/ui/Card';
+import { Card, CardBody } from '@/app/shared/ui/Card';
 
 import { NO_SECURITY_TXT_ERROR } from '../lib/constants';
 
@@ -8,7 +8,7 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
     const copyableTxt = `npx @solana-program/program-metadata@latest write security ${programAddress} ./security.json`;
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardBody ui="dashkit" className="e-p-3 e-text-center md:e-p-6">
                 <div className="e-mb-4 md:e-mb-6">{NO_SECURITY_TXT_ERROR}</div>
 
@@ -36,6 +36,6 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
                     </a>
                 </div>
             </CardBody>
-        </div>
+        </Card>
     );
 }

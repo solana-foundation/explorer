@@ -1,7 +1,7 @@
 import { Copy, XCircle } from 'react-feather';
 
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
-import { CardBody } from '@/app/shared/ui/Card';
+import { Card, CardBody } from '@/app/shared/ui/Card';
 
 interface IIdlInstructionSectionProps {
     title: string;
@@ -17,7 +17,7 @@ export function IdlInstructionSection({ title, description, commands }: IIdlInst
     }
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardBody ui="dashkit" className="e-flex e-items-start e-justify-between e-space-x-2 e-px-3 e-py-2">
                 <div>
                     <h5 className="e-mb-1 e-text-sm e-font-semibold">{title}</h5>
@@ -53,6 +53,6 @@ export function IdlInstructionSection({ title, description, commands }: IIdlInst
                     )}
                 </button>
             </CardBody>
-        </div>
+        </Card>
     );
 }

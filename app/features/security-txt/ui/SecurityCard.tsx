@@ -8,7 +8,7 @@ import { ErrorCard } from '@/app/components/common/ErrorCard';
 import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
 import type { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
 import { useCluster } from '@/app/providers/cluster';
-import { CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import { NO_SECURITY_TXT_ERROR } from '../lib/constants';
 import { fromProgramData } from '../lib/fromProgramData';
@@ -74,7 +74,7 @@ export function ProgramSecurityTxtCard({
     ) : null;
 
     return (
-        <div className="card security-txt e-overflow-hidden">
+        <Card ui="dashkit" className="security-txt e-overflow-hidden">
             <CardHeader ui="dashkit">
                 <CardTitle as="h3" ui="dashkit" className="e-mr-4 e-flex e-items-center e-gap-3">
                     Security.txt
@@ -105,6 +105,6 @@ export function ProgramSecurityTxtCard({
             >
                 {securityTable}
             </ErrorBoundary>
-        </div>
+        </Card>
     );
 }

@@ -8,7 +8,7 @@ import { cn } from '@shared/utils';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'react-feather';
 
-import { CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 import { clusterSlug } from '@/app/utils/cluster';
 
@@ -93,7 +93,7 @@ export function IdlCard({ programId }: { programId: string }) {
             return <LoadingCard message="Loading program IDL" />;
         }
         return (
-            <div className="card">
+            <Card ui="dashkit">
                 <CardHeader ui="dashkit">
                     <CardTitle as="h4" ui="dashkit">
                         Program IDL
@@ -129,7 +129,7 @@ export function IdlCard({ programId }: { programId: string }) {
                         </div>
                     </div>
                 </CardBody>
-            </div>
+            </Card>
         );
     }
 
@@ -137,7 +137,7 @@ export function IdlCard({ programId }: { programId: string }) {
     const isMismatch = isIdlProgramIdMismatch(activeTab.idl, programId);
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
                 <div className="nav nav-tabs e-border-0" role="tablist">
                     {tabs
@@ -183,6 +183,6 @@ export function IdlCard({ programId }: { programId: string }) {
                     />
                 )}
             </CardBody>
-        </div>
+        </Card>
     );
 }

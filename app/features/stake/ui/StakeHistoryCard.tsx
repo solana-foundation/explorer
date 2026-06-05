@@ -3,12 +3,12 @@ import { SolBalance } from '@components/common/SolBalance';
 import type { StakeHistoryEntry, SysvarStakeHistoryAccount } from '@validators/accounts/sysvar';
 import React from 'react';
 
-import { CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStakeHistoryAccount }) {
     const stakeHistory = sysvarAccount.info;
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
                 <CardTitle as="h3" ui="dashkit">
                     Stake History
@@ -39,7 +39,7 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
                     <div className="e-text-center e-text-dk-gray-700">No stake history found</div>
                 </CardFooter>
             )}
-        </div>
+        </Card>
     );
 }
 

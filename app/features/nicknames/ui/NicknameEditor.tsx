@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
-import { CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { FormControl } from '@/app/shared/ui/FormControl';
 
 import { getNickname, MAX_NICKNAME_LENGTH, removeNickname, setNickname } from '../lib/nicknames';
@@ -66,8 +66,9 @@ export function NicknameEditor({ address, onClose }: Props) {
             }}
             onClick={onClose}
         >
-            <div
-                className="card shadow-lg"
+            <Card
+                ui="dashkit"
+                className="e-shadow-lg"
                 style={{ maxWidth: '500px', minWidth: '400px' }}
                 onClick={e => e.stopPropagation()}
             >
@@ -131,7 +132,7 @@ export function NicknameEditor({ address, onClose }: Props) {
                         </div>
                     </div>
                 </CardBody>
-            </div>
+            </Card>
         </div>
     );
 }

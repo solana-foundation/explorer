@@ -5,7 +5,7 @@ import bs58 from 'bs58';
 import React from 'react';
 import * as nacl from 'tweetnacl';
 
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader } from '@/app/shared/ui/Card';
 
 export function TransactionSignatures({
     signatures,
@@ -43,7 +43,7 @@ export function TransactionSignatures({
     }, [signatures, message, rawMessage]);
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
                 <h3 className="card-header-title">Signatures</h3>
             </CardHeader>
@@ -62,7 +62,7 @@ export function TransactionSignatures({
                     <tbody className="list">{signatureRows}</tbody>
                 </table>
             </div>
-        </div>
+        </Card>
     );
 }
 

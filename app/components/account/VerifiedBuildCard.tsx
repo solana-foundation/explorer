@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { ExternalLink } from 'react-feather';
 
 import { Alert } from '@/app/shared/ui/Alert';
-import { CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
 
 import { Address } from '../common/Address';
@@ -45,7 +45,7 @@ export function BaseVerifiedBuildCard({
 
     if (!registryInfo) {
         return (
-            <div className="card">
+            <Card ui="dashkit">
                 <CardBody ui="dashkit" className="e-text-center">
                     Verified build information not yet uploaded by the program authority. For more information, see the{' '}
                     <Link href="https://solana.com/developers/guides/advanced/verified-builds" target="_blank">
@@ -56,7 +56,7 @@ export function BaseVerifiedBuildCard({
                     Note: Some programs were verified using older, deprecated versions of the API and may not include
                     on-chain verification details.
                 </CardBody>
-            </div>
+            </Card>
         );
     }
 
@@ -72,7 +72,7 @@ export function BaseVerifiedBuildCard({
     }
 
     return (
-        <div className="card security-txt">
+        <Card ui="dashkit" className="security-txt">
             <CardHeader ui="dashkit">
                 <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
                     Verified Build
@@ -101,7 +101,7 @@ export function BaseVerifiedBuildCard({
                     );
                 })}
             </TableCardBody>
-        </div>
+        </Card>
     );
 }
 

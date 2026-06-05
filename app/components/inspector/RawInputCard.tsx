@@ -7,7 +7,7 @@ import { AlertCircle } from 'react-feather';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
-import { CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { FormControl } from '@/app/shared/ui/FormControl';
 
 import type { InspectorData } from './InspectorPage';
@@ -241,7 +241,7 @@ export function RawInput({
 
     const placeholder = 'Paste a raw base58/base64 encoded transaction message or Squads vault transaction account';
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
                 <div className="e-flex e-items-center e-justify-between">
                     <CardTitle as="h3" ui="dashkit">
@@ -275,6 +275,6 @@ export function RawInput({
                 <h3>Instructions</h3>
                 <TabInstructions />
             </CardFooter>
-        </div>
+        </Card>
     );
 }
