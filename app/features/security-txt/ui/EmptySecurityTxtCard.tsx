@@ -9,17 +9,19 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
 
     return (
         <div className="card">
-            <CardBody ui="dashkit" className="e-text-center">
-                <div className="e-mb-6">{NO_SECURITY_TXT_ERROR}</div>
+            <CardBody ui="dashkit" className="e-p-3 e-text-center md:e-p-6">
+                <div className="e-mb-4 md:e-mb-6">{NO_SECURITY_TXT_ERROR}</div>
 
-                <div className="e-mb-6">
+                <div className="e-mb-4 md:e-mb-6">
                     <p>
                         This program did not provide Security.txt information yet. If you are the maintainer of this
                         program you can use the following command to add your information.
                     </p>
-                    <div className="e-inline-flex e-items-center e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-p-1.5 e-text-left">
+                    <div className="e-flex e-items-start e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-p-1.5 e-text-left md:e-items-center">
                         <Copyable text={copyableTxt}>
-                            <code className="font-monospace small e-text-dk-gray-700">{copyableTxt}</code>
+                            <code className="font-monospace small e-min-w-0 e-flex-1 e-text-dk-gray-700 md:e-overflow-x-auto md:e-whitespace-nowrap">
+                                {copyableTxt}
+                            </code>
                         </Copyable>
                     </div>
                 </div>
