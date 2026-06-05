@@ -1,3 +1,4 @@
+import { DEFAULT_SLOT } from '@__fixtures__/gen';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -49,7 +50,7 @@ type Story = StoryObj<typeof meta>;
 
 const args = {
     data: {
-        programData: { authority: AUTHORITY, data: [validSecurityTxt, 'base64'], slot: 312_000_000 },
+        programData: { authority: AUTHORITY, data: [validSecurityTxt, 'base64'], slot: DEFAULT_SLOT },
     } as any,
     pubkey: PUBKEY,
 };
