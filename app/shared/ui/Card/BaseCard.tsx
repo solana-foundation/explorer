@@ -108,17 +108,21 @@ const titleVariants = cva([], {
     variants: {
         ui: {
             // Size token is appended separately so polymorphic `as` matches the original heading level.
-            dashkit: 'e-m-0 e-font-medium e-leading-[1.1] e-tracking-[-0.02em]',
+            // e-leading-none keeps the rendered height tight (= font-size) so block-level <hN> elements
+            // don't introduce extra vertical space beyond what an inline <span> would have.
+            dashkit: 'e-m-0 e-font-medium e-leading-none e-tracking-[-0.02em]',
             tw: 'e-text-sm e-font-medium e-leading-none e-tracking-tight',
         },
     },
 });
 
-type CardTitleAs = 'div' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+type CardTitleAs = 'div' | 'span' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
-// Maps the rendered element to its Dashkit font-size token. `<div>` defaults to h4 size for backward
-// compatibility with pre-`as` callers; explicit heading levels get their matching size so swaps from
-// raw `<hN class="card-header-title">` preserve both semantics and visual size.
+// Maps the rendered element to its Dashkit font-size token. `<div>` and `<span>` default to h4 size
+// for backward compatibility with pre-`as` callers; explicit heading levels get their matching size
+// so swaps from raw `<hN class="card-header-title">` preserve both semantics and visual size.
+// `<span>` is provided for cases where the title is a label rather than a semantic heading, and a
+// block-level <hN> introduces unwanted line-height/margin from the user-agent stylesheet.
 const dashkitTitleSizeByAs: Record<CardTitleAs, string> = {
     div: 'e-text-dk-h4',
     h1: 'e-text-dk-h1',
@@ -127,6 +131,7 @@ const dashkitTitleSizeByAs: Record<CardTitleAs, string> = {
     h4: 'e-text-dk-h4',
     h5: 'e-text-dk-h5',
     h6: 'e-text-dk-h6',
+    span: 'e-text-dk-h4',
 };
 
 interface BaseCardTitleProps extends React.HTMLAttributes<HTMLElement>, UIPropOverride {
