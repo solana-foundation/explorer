@@ -228,7 +228,7 @@ describe('IdlCard', () => {
             expect(screen.getByText(/Program Metadata IDL/)).toBeInTheDocument();
         });
 
-        const button = screen.getByRole('button', { name: 'Anchor' });
+        const button = screen.getByRole('tab', { name: 'Anchor' });
         fireEvent.click(button);
         expect(screen.getByText(/Anchor IDL/)).toBeInTheDocument();
     });
@@ -253,18 +253,18 @@ describe('IdlCard', () => {
 
         // PMP tab is active first
         await waitFor(() => {
-            expect(screen.getByRole('button', { name: 'Anchor' })).toBeInTheDocument();
+            expect(screen.getByRole('tab', { name: 'Anchor' })).toBeInTheDocument();
         });
 
         // Switch to Anchor tab to trigger the mismatch
-        fireEvent.click(screen.getByRole('button', { name: 'Anchor' }));
+        fireEvent.click(screen.getByRole('tab', { name: 'Anchor' }));
 
         expect(screen.getByText('IDL Program ID Mismatch')).toBeInTheDocument();
         expect(screen.getByText(/does not match the program being viewed/)).toBeInTheDocument();
         expect(screen.queryByText(/Anchor IDL/)).not.toBeInTheDocument();
 
         // Switch back to PMP tab - should render IDL normally
-        fireEvent.click(screen.getByRole('button', { name: 'Program Metadata' }));
+        fireEvent.click(screen.getByRole('tab', { name: 'Program Metadata' }));
 
         expect(screen.queryByText('IDL Program ID Mismatch')).not.toBeInTheDocument();
         expect(screen.getByText('0.30.1 Program Metadata IDL')).toBeInTheDocument();
