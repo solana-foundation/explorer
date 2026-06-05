@@ -18,6 +18,7 @@ import React from 'react';
 import { Trash2 } from 'react-feather';
 
 import { Alert } from '../shared/ui/Alert';
+import { FormControl } from '../shared/ui/FormControl';
 import { Overlay } from './common/Overlay';
 import { cn } from './shared/utils';
 
@@ -131,30 +132,33 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
             </Link>
             {active && (
                 <>
-                    <input
-                        type="url"
-                        value={localUrl}
-                        aria-label="Custom RPC URL"
-                        className={cn('form-control', !editing && 'text-muted')}
-                        onFocus={() => setEditing(true)}
-                        onBlur={() => setEditing(false)}
-                        onChange={e => {
-                            setLocalUrl(e.target.value);
-                            onUrlInput(e.target.value);
-                        }}
-                    />
+                    <FormControl>
+                        <input
+                            type="url"
+                            value={localUrl}
+                            aria-label="Custom RPC URL"
+                            className={cn(!editing && 'e-text-dk-gray-700')}
+                            onFocus={() => setEditing(true)}
+                            onBlur={() => setEditing(false)}
+                            onChange={e => {
+                                setLocalUrl(e.target.value);
+                                onUrlInput(e.target.value);
+                            }}
+                        />
+                    </FormControl>
                     {saving ? (
                         <div className="col-12 e-mb-3 e-mt-1.5" data-testid="save-cluster-form">
-                            <input
-                                type="text"
-                                className="form-control e-mb-1.5"
-                                aria-label="Cluster name"
-                                placeholder="Cluster name"
-                                value={savedName}
-                                onChange={e => setSavedName(e.target.value)}
-                                data-testid="cluster-name-input"
-                                autoFocus
-                            />
+                            <FormControl className="e-mb-1.5">
+                                <input
+                                    type="text"
+                                    aria-label="Cluster name"
+                                    placeholder="Cluster name"
+                                    value={savedName}
+                                    onChange={e => setSavedName(e.target.value)}
+                                    data-testid="cluster-name-input"
+                                    autoFocus
+                                />
+                            </FormControl>
                             {savedName.trim() === '' && (
                                 <small className="text-muted" data-testid="name-required-hint">
                                     Name is required

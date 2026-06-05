@@ -8,6 +8,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { FormControl } from '@/app/shared/ui/FormControl';
 
 import { getNickname, MAX_NICKNAME_LENGTH, removeNickname, setNickname } from '../lib/nicknames';
 
@@ -77,25 +78,26 @@ export function NicknameEditor({ address, onClose }: Props) {
                 </CardHeader>
                 <CardBody ui="dashkit">
                     <div className="e-mb-3">
-                        <label className="form-label e-text-sm e-text-dk-gray-700">Address</label>
+                        <label className="e-mb-2 e-inline-block e-text-sm e-text-dk-gray-700">Address</label>
                         <div className="e-truncate e-font-mono e-text-sm">{address}</div>
                     </div>
                     <div className="e-mb-3">
-                        <label htmlFor="nickname-input" className="form-label">
+                        <label htmlFor="nickname-input" className="e-mb-2 e-inline-block">
                             Nickname
                         </label>
-                        <input
-                            id="nickname-input"
-                            ref={inputRef}
-                            type="text"
-                            className="form-control"
-                            value={nickname}
-                            onChange={e => setNicknameLocal(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            placeholder="Enter a memorable name..."
-                            maxLength={MAX_NICKNAME_LENGTH}
-                            autoFocus
-                        />
+                        <FormControl>
+                            <input
+                                id="nickname-input"
+                                ref={inputRef}
+                                type="text"
+                                value={nickname}
+                                onChange={e => setNicknameLocal(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder="Enter a memorable name..."
+                                maxLength={MAX_NICKNAME_LENGTH}
+                                autoFocus
+                            />
+                        </FormControl>
                         <div className="e-flex e-justify-between">
                             <small className="e-text-dk-gray-700">
                                 This nickname is stored locally on your device.
