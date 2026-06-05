@@ -81,7 +81,7 @@ export function ContactInfo({ type, information }: { type: string; information: 
 
 export function RenderExternalLink({ url }: { url: string }) {
     return (
-        <span className="font-monospace">
+        <span className="e-font-mono">
             <a rel="noopener noreferrer" target="_blank" href={url}>
                 {url}
                 <ExternalLink className="align-text-top e-ml-1.5" size={13} />
@@ -99,7 +99,7 @@ export function ExternalLinkCell({ url }: { url: string }) {
 }
 
 export function StringCell({ value }: { value: string }) {
-    return <td className="font-monospace e-text-right">{value}</td>;
+    return <td className="e-text-right e-font-mono">{value}</td>;
 }
 
 export function RenderCode({ value }: { value: any }) {
