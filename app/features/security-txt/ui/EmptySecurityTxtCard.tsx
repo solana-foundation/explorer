@@ -19,11 +19,11 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
                     </p>
                     <div className="border e-inline-flex e-items-center e-rounded-dk e-p-1.5 e-text-left">
                         <Copyable text={copyableTxt}>
-                            <code className="font-monospace small text-muted">{copyableTxt}</code>
+                            <code className="font-monospace small e-text-dk-gray-700">{copyableTxt}</code>
                         </Copyable>
                     </div>
                 </div>
-                <div className="text-muted">
+                <div className="e-text-dk-gray-700">
                     <a
                         href="https://github.com/solana-program/program-metadata"
                         target="_blank"
