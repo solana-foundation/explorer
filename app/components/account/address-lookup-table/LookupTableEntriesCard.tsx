@@ -35,8 +35,8 @@ export function LookupTableEntriesCard(
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
-                            <th className="w-1 text-muted">Index</th>
-                            <th className="text-muted">Address</th>
+                            <th className="e-w-px e-text-dk-gray-700">Index</th>
+                            <th className="e-text-dk-gray-700">Address</th>
                         </tr>
                     </thead>
                     <tbody className="list">
@@ -60,7 +60,7 @@ export function LookupTableEntriesCard(
 const renderRow = (entry: PublicKey, index: number) => {
     return (
         <tr key={index}>
-            <td className="w-1 e-font-mono">{index}</td>
+            <td className="e-w-px e-font-mono">{index}</td>
             <td className="e-font-mono">
                 <Address pubkey={entry} link />
             </td>

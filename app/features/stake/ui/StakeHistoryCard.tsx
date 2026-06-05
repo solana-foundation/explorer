@@ -20,10 +20,10 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
-                            <th className="w-1 text-muted">Epoch</th>
-                            <th className="text-muted">Effective (SOL)</th>
-                            <th className="text-muted">Activating (SOL)</th>
-                            <th className="text-muted">Deactivating (SOL)</th>
+                            <th className="e-w-px e-text-dk-gray-700">Epoch</th>
+                            <th className="e-text-dk-gray-700">Effective (SOL)</th>
+                            <th className="e-text-dk-gray-700">Activating (SOL)</th>
+                            <th className="e-text-dk-gray-700">Deactivating (SOL)</th>
                         </tr>
                     </thead>
                     <tbody className="list">
@@ -46,7 +46,7 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
 function HistoryEntryRow({ entry }: { entry: StakeHistoryEntry }) {
     return (
         <tr>
-            <td className="w-1 e-font-mono">
+            <td className="e-w-px e-font-mono">
                 <Epoch epoch={entry.epoch} link />
             </td>
             <td className="e-font-mono">

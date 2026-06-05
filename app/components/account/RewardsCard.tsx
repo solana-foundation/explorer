@@ -89,10 +89,10 @@ export function RewardsCard({ address }: { address: string }) {
                         <table className="table table-sm table-nowrap card-table">
                             <thead>
                                 <tr>
-                                    <th className="w-1 text-muted">Epoch</th>
-                                    <th className="text-muted">Effective Slot</th>
-                                    <th className="text-muted">Reward Amount</th>
-                                    <th className="text-muted">Post Balance</th>
+                                    <th className="e-w-px e-text-dk-gray-700">Epoch</th>
+                                    <th className="e-text-dk-gray-700">Effective Slot</th>
+                                    <th className="e-text-dk-gray-700">Reward Amount</th>
+                                    <th className="e-text-dk-gray-700">Post Balance</th>
                                 </tr>
                             </thead>
                             <tbody className="list">{rewardsList}</tbody>
