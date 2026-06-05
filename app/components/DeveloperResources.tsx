@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { CardBody } from '@/app/shared/ui/Card';
+import { Card, CardBody } from '@/app/shared/ui/Card';
 
 type Resource = {
     title: string;
@@ -42,7 +42,7 @@ const DEFAULT_RESOURCES: Resource[] = [
 
 export function DeveloperResources({ resources = DEFAULT_RESOURCES }: { resources?: Resource[] }) {
     return (
-        <div className="card e-mb-3 md:e-mb-6">
+        <Card ui="dashkit" className="e-mb-3 md:e-mb-6">
             <div className="e-flex e-justify-between e-border-0 e-border-b e-border-solid e-border-dark-border e-px-dk-4 e-py-3">
                 <div>Kickstart your development journey on Solana</div>
                 <div>
@@ -59,7 +59,7 @@ export function DeveloperResources({ resources = DEFAULT_RESOURCES }: { resource
                     ))}
                 </div>
             </CardBody>
-        </div>
+        </Card>
     );
 }
 
@@ -92,7 +92,7 @@ function ResourceCard({ title, description, image, link, imageBackground }: Reso
             </div>
             <div className="e-flex e-flex-col">
                 <p className="e-mb-[3px]">{title}</p>
-                <p className="text-muted line-clamp-3 e-mb-1.5 e-whitespace-normal">{description}</p>
+                <p className="e-mb-1.5 e-line-clamp-3 e-whitespace-normal e-text-dk-gray-700">{description}</p>
             </div>
         </div>
     );

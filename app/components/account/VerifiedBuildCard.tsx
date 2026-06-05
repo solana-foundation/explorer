@@ -6,7 +6,8 @@ import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 import { ExternalLink } from 'react-feather';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { Alert } from '@/app/shared/ui/Alert';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
 
 import { Address } from '../common/Address';
@@ -44,7 +45,7 @@ export function BaseVerifiedBuildCard({
 
     if (!registryInfo) {
         return (
-            <div className="card">
+            <Card ui="dashkit">
                 <CardBody ui="dashkit" className="e-text-center">
                     Verified build information not yet uploaded by the program authority. For more information, see the{' '}
                     <Link href="https://solana.com/developers/guides/advanced/verified-builds" target="_blank">
@@ -55,7 +56,7 @@ export function BaseVerifiedBuildCard({
                     Note: Some programs were verified using older, deprecated versions of the API and may not include
                     on-chain verification details.
                 </CardBody>
-            </div>
+            </Card>
         );
     }
 
@@ -71,12 +72,14 @@ export function BaseVerifiedBuildCard({
     }
 
     return (
-        <div className="card security-txt">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title e-mb-0 e-flex e-items-center">Verified Build</h3>
+                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
+                    Verified Build
+                </CardTitle>
                 <small>{verificationMessage}</small>
             </CardHeader>
-            <div className="alert e-mb-1.5 e-mt-1.5">
+            <Alert className="e-mb-1.5 e-mt-1.5">
                 A verified build badge indicates that this program was built from source code that is publicly
                 available, but does not imply that this program has been audited. For more details, refer to the{' '}
                 <a
@@ -84,10 +87,10 @@ export function BaseVerifiedBuildCard({
                     target="_blank"
                     rel="noopener noreferrer"
                 >
-                    Verified Builds Guide <ExternalLink className="align-text-top e-ml-[3px]" size={13} />
+                    Verified Builds Guide <ExternalLink className="e-ml-[3px] e-align-text-top" size={13} />
                 </a>
                 .
-            </div>
+            </Alert>
             <TableCardBody>
                 {ROWS.filter(x => x.key in registryInfo).map((x, idx) => {
                     return (
@@ -98,7 +101,7 @@ export function BaseVerifiedBuildCard({
                     );
                 })}
             </TableCardBody>
-        </div>
+        </Card>
     );
 }
 
@@ -164,7 +167,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
     switch (type) {
         case DisplayType.Boolean:
             return (
-                <td className={'font-monospace e-text-right'}>
+                <td className="e-text-right e-font-mono">
                     <span className={cn('badge', `bg-${value ? 'success' : 'warning'}-soft`)}>{new String(value)}</span>
                 </td>
             );
@@ -173,13 +176,13 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 const badgeClass = value === VerificationStatus.Verified ? 'bg-success-soft' : 'bg-warning-soft';
                 const badgeValue = value === VerificationStatus.Verified ? 'true' : 'false';
                 return (
-                    <td className="font-monospace e-text-right">
+                    <td className="e-text-right e-font-mono">
                         <span className={`badge ${badgeClass}`}>{badgeValue}</span>
                     </td>
                 );
             }
             return (
-                <td className="font-monospace e-text-right" style={{ whiteSpace: 'pre' }}>
+                <td className="e-text-right e-font-mono" style={{ whiteSpace: 'pre' }}>
                     {value && (value as string).length > 1 ? value : '-'}
                 </td>
             );
@@ -192,7 +195,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                                 <span />
                             </Copyable>
                             <pre
-                                className="font-monospace e-mb-0 e-text-left"
+                                className="e-mb-0 e-text-left e-font-mono"
                                 style={{ overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}
                             >
                                 {value}
@@ -207,29 +210,29 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
             if (isValidLink(value as string)) {
                 return (
                     <td className="e-text-right">
-                        <span className="font-monospace">
+                        <span className="e-whitespace-nowrap e-font-mono">
                             <a rel="noopener noreferrer" target="_blank" href={value as string}>
                                 {value}
-                                <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                                <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
                             </a>
                         </span>
                     </td>
                 );
             }
             return (
-                <td className="font-monospace e-text-right">
+                <td className="e-text-right e-font-mono">
                     {value && (value as string).length > 1 ? (value as string).trim() : '-'}
                 </td>
             );
         case DisplayType.Date:
             return (
-                <td className="font-monospace e-text-right">
+                <td className="e-text-right e-font-mono">
                     {value && (value as string).length > 1 ? new Date(value as string).toUTCString() : '-'}
                 </td>
             );
         case DisplayType.PublicKey:
             return (
-                <td className="font-monospace e-text-right">
+                <td className="e-text-right e-font-mono">
                     <Address pubkey={new PublicKey(value as string)} link alignRight />
                 </td>
             );

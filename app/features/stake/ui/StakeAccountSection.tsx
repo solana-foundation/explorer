@@ -8,6 +8,7 @@ import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import React from 'react';
 
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
+import { Alert } from '@/app/shared/ui/Alert';
 import { CardHeader } from '@/app/shared/ui/Card';
 
 import type { StakeActivationStatus } from '../api/stake-activation';
@@ -68,9 +69,9 @@ function LockupCard({ stakeAccount }: { stakeAccount: StakeAccountInfo }) {
         return null;
     }
     return (
-        <div className="alert alert-warning e-text-center">
+        <Alert variant="warning" className="e-text-center">
             <strong>Account is locked!</strong> Lockup expires on {displayTimestampUtc(lockupExpiryMs)}
-        </div>
+        </Alert>
     );
 }
 

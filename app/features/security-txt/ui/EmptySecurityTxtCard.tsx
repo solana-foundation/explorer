@@ -1,5 +1,5 @@
 import { Copyable } from '@/app/components/common/Copyable';
-import { CardBody } from '@/app/shared/ui/Card';
+import { Card, CardBody } from '@/app/shared/ui/Card';
 
 import { NO_SECURITY_TXT_ERROR } from '../lib/constants';
 
@@ -8,22 +8,24 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
     const copyableTxt = `npx @solana-program/program-metadata@latest write security ${programAddress} ./security.json`;
 
     return (
-        <div className="card">
-            <CardBody ui="dashkit" className="e-text-center">
-                <div className="e-mb-6">{NO_SECURITY_TXT_ERROR}</div>
+        <Card ui="dashkit">
+            <CardBody ui="dashkit" className="e-p-3 e-text-center md:e-p-6">
+                <div className="e-mb-4 md:e-mb-6">{NO_SECURITY_TXT_ERROR}</div>
 
-                <div className="e-mb-6">
+                <div className="e-mb-4 md:e-mb-6">
                     <p>
                         This program did not provide Security.txt information yet. If you are the maintainer of this
                         program you can use the following command to add your information.
                     </p>
-                    <div className="border e-inline-flex e-items-center e-rounded-dk e-p-1.5 e-text-left">
+                    <div className="e-flex e-items-start e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-p-1.5 e-text-left md:e-items-center">
                         <Copyable text={copyableTxt}>
-                            <code className="font-monospace small text-muted">{copyableTxt}</code>
+                            <code className="e-min-w-0 e-flex-1 e-break-all e-font-mono e-text-sm e-text-dk-gray-700 md:e-overflow-x-auto md:e-whitespace-nowrap md:e-break-normal">
+                                {copyableTxt}
+                            </code>
                         </Copyable>
                     </div>
                 </div>
-                <div className="text-muted">
+                <div className="e-text-dk-gray-700">
                     <a
                         href="https://github.com/solana-program/program-metadata"
                         target="_blank"
@@ -34,6 +36,6 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
                     </a>
                 </div>
             </CardBody>
-        </div>
+        </Card>
     );
 }

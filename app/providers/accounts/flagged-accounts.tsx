@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import React from 'react';
 
+import { Alert } from '@/app/shared/ui/Alert';
+
 type FlaggedMap = Record<string, IncidentDescription>;
 
 type IncidentId = 'ftx-hack-november-2022' | 'known-scam' | 'hack-december-2024';
@@ -36,7 +38,7 @@ const FLAGGED_ACCOUNTS: Record<string, IncidentId> = {
 const INCIDENTS: Record<IncidentId, IncidentDescription> = {
     'ftx-hack-november-2022': (
         <>
-            <div className="alert alert-danger alert-scam" role="alert">
+            <Alert variant="scam">
                 Warning! This program&apos;s upgrade key may have been compromised by the FTX hack. Please migrate to
                 the community fork:{' '}
                 <Link
@@ -46,22 +48,22 @@ const INCIDENTS: Record<IncidentId, IncidentDescription> = {
                 >
                     https://github.com/openbook-dex/program
                 </Link>
-            </div>
+            </Alert>
         </>
     ),
     'hack-december-2024': (
         <>
-            <div className="alert alert-danger alert-scam" role="alert">
+            <Alert variant="scam">
                 Warning! This account key has been identified as being involved in the Web3.js December 2024 hack
-            </div>
+            </Alert>
         </>
     ),
     'known-scam': (
         <>
-            <div className="alert alert-danger alert-scam" role="alert">
+            <Alert variant="scam">
                 Warning! This account has been flagged by the community as a scam account. Please be cautious sending
                 SOL to this account.
-            </div>
+            </Alert>
         </>
     ),
 } as const;

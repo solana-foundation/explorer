@@ -7,7 +7,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { FormControl } from '@/app/shared/ui/FormControl';
 
 import { getNickname, MAX_NICKNAME_LENGTH, removeNickname, setNickname } from '../lib/nicknames';
 
@@ -65,38 +66,44 @@ export function NicknameEditor({ address, onClose }: Props) {
             }}
             onClick={onClose}
         >
-            <div
-                className="card shadow-lg"
+            <Card
+                ui="dashkit"
+                className="e-shadow-lg"
                 style={{ maxWidth: '500px', minWidth: '400px' }}
                 onClick={e => e.stopPropagation()}
             >
                 <CardHeader ui="dashkit">
-                    <h5 className="card-header-title e-mb-0">Edit Nickname</h5>
+                    <CardTitle as="h5" ui="dashkit">
+                        Edit Nickname
+                    </CardTitle>
                 </CardHeader>
                 <CardBody ui="dashkit">
                     <div className="e-mb-3">
-                        <label className="form-label small text-muted">Address</label>
-                        <div className="font-monospace small e-truncate">{address}</div>
+                        <label className="e-mb-2 e-inline-block e-text-sm e-text-dk-gray-700">Address</label>
+                        <div className="e-truncate e-font-mono e-text-sm">{address}</div>
                     </div>
                     <div className="e-mb-3">
-                        <label htmlFor="nickname-input" className="form-label">
+                        <label htmlFor="nickname-input" className="e-mb-2 e-inline-block">
                             Nickname
                         </label>
-                        <input
-                            id="nickname-input"
-                            ref={inputRef}
-                            type="text"
-                            className="form-control"
-                            value={nickname}
-                            onChange={e => setNicknameLocal(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            placeholder="Enter a memorable name..."
-                            maxLength={MAX_NICKNAME_LENGTH}
-                            autoFocus
-                        />
+                        <FormControl>
+                            <input
+                                id="nickname-input"
+                                ref={inputRef}
+                                type="text"
+                                value={nickname}
+                                onChange={e => setNicknameLocal(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder="Enter a memorable name..."
+                                maxLength={MAX_NICKNAME_LENGTH}
+                                autoFocus
+                            />
+                        </FormControl>
                         <div className="e-flex e-justify-between">
-                            <small className="text-muted">This nickname is stored locally on your device.</small>
-                            <small className="text-muted">
+                            <small className="e-text-dk-gray-700">
+                                This nickname is stored locally on your device.
+                            </small>
+                            <small className="e-text-dk-gray-700">
                                 {nickname.length}/{MAX_NICKNAME_LENGTH}
                             </small>
                         </div>
@@ -125,7 +132,7 @@ export function NicknameEditor({ address, onClose }: Props) {
                         </div>
                     </div>
                 </CardBody>
-            </div>
+            </Card>
         </div>
     );
 }

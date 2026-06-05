@@ -4,8 +4,8 @@ import { useTokenExtensionNavigation } from '@/app/features/token-extensions/use
 import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
-import { TokenExtensionBadges } from '../../common/TokenExtensionBadges';
 import { ParsedTokenExtension } from '../types';
+import { TokenExtensionBadges } from './TokenExtensionBadges';
 
 export function TokenExtensionsStatusRow({ address, extensions }: { address: string; extensions: TokenExtension[] }) {
     const extension = useTokenExtensionNavigation({ uriComponent: `/address/${address}` });

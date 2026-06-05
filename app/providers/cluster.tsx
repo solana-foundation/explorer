@@ -63,7 +63,7 @@ export function parseQuery(searchParams: ReadonlyURLSearchParams | null): Cluste
 
 export type { State as ClusterState };
 
-const ModalContext = createContext<[boolean, SetShowModal] | undefined>(undefined);
+export const ModalContext = createContext<[boolean, SetShowModal] | undefined>(undefined);
 export const StateContext = createContext<State | undefined>(undefined);
 export const DispatchContext = createContext<Dispatch | undefined>(undefined);
 

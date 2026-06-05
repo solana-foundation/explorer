@@ -8,7 +8,7 @@ import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
 import { Code } from 'react-feather';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export function ProgramLogSection({ signature }: SignatureProps) {
     const [showRaw, setShowRaw] = React.useState(false);
@@ -29,9 +29,11 @@ export function ProgramLogSection({ signature }: SignatureProps) {
 
     return (
         <>
-            <div className="card">
+            <Card ui="dashkit">
                 <CardHeader ui="dashkit" className={!showRaw ? '!e-border-b-0' : undefined}>
-                    <h3 className="card-header-title">Program Instruction Logs</h3>
+                    <CardTitle as="h3" ui="dashkit">
+                        Program Instruction Logs
+                    </CardTitle>
                     <button
                         className={cn('btn btn-sm e-flex e-items-center', showRaw ? 'btn-black active' : 'btn-white')}
                         onClick={() => setShowRaw(r => !r)}
@@ -48,7 +50,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                 ) : (
                     <CardBody ui="dashkit">Logs not supported for this transaction</CardBody>
                 )}
-            </div>
+            </Card>
         </>
     );
 }

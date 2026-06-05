@@ -45,7 +45,7 @@ export function NFTokenNFTHeader({ nft }: { nft: NftokenTypes.NftAccount }) {
                 <NFTImageContent uri={metadata?.image.trim()} />
             </div>
 
-            <div className="col ms-0.5 e-mb-3 e-mt-3">
+            <div className="col e-mb-3 e-mt-3">
                 {<h6 className="header-pretitle e-ml-[3px]">NFToken NFT</h6>}
                 <div className="e-flex e-items-center">
                     <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
@@ -54,7 +54,7 @@ export function NFTokenNFTHeader({ nft }: { nft: NftokenTypes.NftAccount }) {
                 </div>
 
                 <div>
-                    <div className={'d-inline-flex e-mt-1.5 e-items-center'}>
+                    <div className="e-mt-1.5 e-inline-flex e-items-center">
                         <span className="badge badge-pill bg-dark">{`${
                             nft.authority_can_update ? 'Mutable' : 'Immutable'
                         }`}</span>
@@ -83,7 +83,7 @@ export function NFTokenCollectionHeader({ collection }: { collection: NftokenTyp
                 <NFTImageContent uri={metadata?.image} />
             </div>
 
-            <div className="col ms-0.5 e-mb-3 e-mt-3">
+            <div className="col e-mb-3 e-mt-3">
                 {<h6 className="header-pretitle e-ml-[3px]">NFToken Collection</h6>}
                 <div className="e-flex e-items-center">
                     <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
@@ -92,7 +92,7 @@ export function NFTokenCollectionHeader({ collection }: { collection: NftokenTyp
                 </div>
 
                 <div>
-                    <div className={'d-inline-flex e-mt-1.5 e-items-center'}>
+                    <div className="e-mt-1.5 e-inline-flex e-items-center">
                         <span className="badge badge-pill bg-dark">{`${
                             collection.authority_can_update ? 'Mutable' : 'Immutable'
                         }`}</span>

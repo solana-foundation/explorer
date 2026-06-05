@@ -193,7 +193,7 @@ function EpochCountdown({ remainingSlots }: { remainingSlots: bigint }) {
     const label = formatCountdown(secondsLeft);
 
     return (
-        <span className="text-warning-emphasis" style={{ fontVariantNumeric: 'tabular-nums' }}>
+        <span className="e-text-dk-warning-on-dark" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {secondsLeft > 0 ? `${label} remaining` : label}
         </span>
     );

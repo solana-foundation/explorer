@@ -5,19 +5,13 @@ import { NicknameEditor } from '../NicknameEditor';
 
 const meta = {
     component: NicknameEditor,
-    decorators: [
-        Story => (
-            <div style={{ height: '100vh', width: '100vw' }}>
-                <Story />
-            </div>
-        ),
-    ],
     parameters: {
         docs: {
             description: {
                 story: 'Modal for editing wallet address nicknames stored in localStorage',
             },
         },
+        layout: 'fullscreen', // NicknameEditor renders as a position:fixed overlay; fullscreen removes the canvas padding so it anchors to the iframe viewport.
         nextjs: {
             appDirectory: true,
         },

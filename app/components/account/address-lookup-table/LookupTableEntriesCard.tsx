@@ -3,7 +3,7 @@ import { AddressLookupTableAccount, PublicKey } from '@solana/web3.js';
 import { AddressLookupTableAccountInfo } from '@validators/accounts/address-lookup-table';
 import React from 'react';
 
-import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export function LookupTableEntriesCard(
     params:
@@ -23,13 +23,11 @@ export function LookupTableEntriesCard(
     }, [params]);
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <div className="row e-items-center">
-                    <div className="col">
-                        <h3 className="card-header-title">Lookup Table Entries</h3>
-                    </div>
-                </div>
+                <CardTitle as="h3" ui="dashkit">
+                    Lookup Table Entries
+                </CardTitle>
             </CardHeader>
 
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
@@ -37,8 +35,8 @@ export function LookupTableEntriesCard(
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
-                            <th className="w-1 text-muted">Index</th>
-                            <th className="text-muted">Address</th>
+                            <th className="e-w-px e-text-dk-gray-700">Index</th>
+                            <th className="e-text-dk-gray-700">Address</th>
                         </tr>
                     </thead>
                     <tbody className="list">
@@ -52,18 +50,18 @@ export function LookupTableEntriesCard(
 
             {lookupTableState.addresses.length === 0 && (
                 <CardFooter ui="dashkit">
-                    <div className="text-muted e-text-center">No entries found</div>
+                    <div className="e-text-center e-text-dk-gray-700">No entries found</div>
                 </CardFooter>
             )}
-        </div>
+        </Card>
     );
 }
 
 const renderRow = (entry: PublicKey, index: number) => {
     return (
         <tr key={index}>
-            <td className="w-1 font-monospace">{index}</td>
-            <td className="font-monospace">
+            <td className="e-w-px e-font-mono">{index}</td>
+            <td className="e-font-mono">
                 <Address pubkey={entry} link />
             </td>
         </tr>
