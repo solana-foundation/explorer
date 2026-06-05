@@ -13,6 +13,8 @@ const alertVariants = cva(
                 danger: 'e-border-dk-danger e-bg-dk-danger e-text-dk-white',
                 default: 'e-border-transparent',
                 info: 'e-border-dk-info e-bg-dk-info e-text-dk-white',
+                // Louder pure-red override for flagged-account / scam warnings — see app/scss/_solana.scss `.alert-scam`.
+                scam: 'e-border-[red] e-bg-[red] e-text-dk-white',
                 success: 'e-border-dk-success-on-dark e-bg-dk-success-on-dark e-text-dk-gray-900',
                 warning: 'e-border-dk-warning-on-dark e-bg-dk-warning-on-dark e-text-dk-white',
             },

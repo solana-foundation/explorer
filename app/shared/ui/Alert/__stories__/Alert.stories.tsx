@@ -51,3 +51,10 @@ export const Danger: Story = {
         variant: 'danger',
     },
 };
+
+export const Scam: Story = {
+    args: {
+        children: 'Warning! This account has been flagged by the community as a scam account.',
+        variant: 'scam',
+    },
+};

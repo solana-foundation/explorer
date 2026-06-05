@@ -17,6 +17,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { Trash2 } from 'react-feather';
 
+import { Alert } from '../shared/ui/Alert';
 import { Overlay } from './common/Overlay';
 import { cn } from './shared/utils';
 
@@ -160,12 +161,13 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                                 </small>
                             )}
                             {saveError && (
-                                <div
-                                    className="alert alert-danger e-mb-0 e-mt-1.5 e-py-1.5"
+                                <Alert
+                                    variant="danger"
+                                    className="e-mb-0 e-mt-1.5 e-py-1.5"
                                     data-testid="save-cluster-error"
                                 >
                                     {saveError.message}
-                                </div>
+                                </Alert>
                             )}
                             <div className="e-mt-[3px] e-flex e-gap-1.5">
                                 <button
