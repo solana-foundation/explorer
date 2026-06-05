@@ -29,6 +29,13 @@ export const withCluster: Decorator = Story => (
     </ClusterProvider>
 );
 
+/** Wraps stories with ClusterProvider where the cluster modal is forced open. Usage: `decorators: [withClusterModalOpen]` */
+export const withClusterModalOpen: Decorator = Story => (
+    <ClusterProvider modalOpen>
+        <Story />
+    </ClusterProvider>
+);
+
 /** Wraps stories with the real ScrollAnchorProvider. Usage: `decorators: [withScrollAnchor]` */
 export const withScrollAnchor: Decorator = Story => (
     <ScrollAnchorProvider>
