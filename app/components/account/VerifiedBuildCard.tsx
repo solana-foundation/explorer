@@ -84,7 +84,7 @@ export function BaseVerifiedBuildCard({
                     target="_blank"
                     rel="noopener noreferrer"
                 >
-                    Verified Builds Guide <ExternalLink className="e-align-text-top e-ml-[3px]" size={13} />
+                    Verified Builds Guide <ExternalLink className="e-ml-[3px] e-align-text-top" size={13} />
                 </a>
                 .
             </div>

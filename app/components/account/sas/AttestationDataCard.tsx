@@ -46,7 +46,7 @@ function SchemaCard({ schema }: { schema: SasSchema }) {
                 </div>
             </CardHeader>
 
-            <div className="card [&_.string-value]:e-break-all e-m-6">
+            <div className="card e-m-6 [&_.string-value]:e-break-all">
                 <ReactJson src={borshSchema['schema']} style={{ padding: 25 }} name={false} />
             </div>
         </div>
@@ -83,7 +83,7 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
             </CardHeader>
 
             {decoded ? (
-                <div className="card [&_.string-value]:e-break-all e-m-6">
+                <div className="card e-m-6 [&_.string-value]:e-break-all">
                     <ReactJson src={decoded} style={{ padding: 25 }} name={false} />
                 </div>
             ) : (

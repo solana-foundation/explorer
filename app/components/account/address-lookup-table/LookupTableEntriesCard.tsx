@@ -52,7 +52,7 @@ export function LookupTableEntriesCard(
 
             {lookupTableState.addresses.length === 0 && (
                 <CardFooter ui="dashkit">
-                    <div className="e-text-dk-gray-700 e-text-center">No entries found</div>
+                    <div className="e-text-center e-text-dk-gray-700">No entries found</div>
                 </CardFooter>
             )}
         </div>
