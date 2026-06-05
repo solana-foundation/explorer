@@ -38,7 +38,7 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
 
             {stakeHistory.length === 0 && (
                 <CardFooter ui="dashkit">
-                    <div className="text-muted e-text-center">No stake history found</div>
+                    <div className="e-text-center e-text-dk-gray-700">No stake history found</div>
                 </CardFooter>
             )}
         </div>
