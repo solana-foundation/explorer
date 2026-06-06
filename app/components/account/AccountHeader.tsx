@@ -187,10 +187,10 @@ export function TokenMintHeaderCard({
     return (
         <div className="-e-mx-3 e-flex e-flex-wrap e-items-center">
             <div className="e-flex-none e-px-3">
-                <div className="avatar avatar-lg">
+                <div className="e-relative e-inline-block e-h-16 e-w-16">
                     <ProxiedImage
                         alt="Token logo"
-                        className="avatar-img border border-4 border-body e-rounded-full"
+                        className="e-h-full e-w-full e-rounded-full e-border-4 e-border-solid e-border-dk-black-dark e-object-cover"
                         height={64}
                         uri={token.logoURI}
                         width={64}

@@ -239,7 +239,7 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
                 <td className="w-1 e-p-0 e-text-center">
                     <ProxiedImage
                         alt="Token icon"
-                        className="token-icon border border-4 border-gray-dark e-rounded-full"
+                        className="e-h-6 e-w-6 e-rounded-full e-border-4 e-border-solid e-border-dk-gray-700-dark"
                         height={16}
                         uri={token.logoURI}
                         width={16}
