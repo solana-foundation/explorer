@@ -3,6 +3,7 @@ import { useStatsProvider } from '@providers/stats/solanaClusterStats';
 import React from 'react';
 import { RefreshCw } from 'react-feather';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { CardBody } from '@/app/shared/ui/Card';
 
 const CLUSTER_STATS_TIMEOUT = 5000;
@@ -27,15 +28,17 @@ export function StatsNotReady({ error }: { error: boolean }) {
         return (
             <CardBody ui="dashkit" className="e-text-center">
                 There was a problem loading cluster stats.{' '}
-                <button
-                    className="btn btn-white btn-sm"
+                <Button
+                    ui="dashkit"
+                    variant="white"
+                    size="sm"
                     onClick={() => {
                         retry();
                     }}
                 >
                     <RefreshCw className="align-text-top e-mr-1.5" size={13} />
                     Try Again
-                </button>
+                </Button>
             </CardBody>
         );
     }

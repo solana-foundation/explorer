@@ -4,6 +4,7 @@ import { useCluster } from '@providers/cluster';
 import type { VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import { useSimulation } from '../model/use-simulation';
@@ -112,9 +113,9 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
 
 function SimulateButton({ label, onClick }: { label: string; onClick: () => void }) {
     return (
-        <button className="btn btn-sm btn-white e-flex" onClick={onClick}>
+        <Button ui="dashkit" variant="white" size="sm" className="e-flex" onClick={onClick}>
             {label}
-        </button>
+        </Button>
     );
 }
 

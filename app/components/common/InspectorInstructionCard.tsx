@@ -1,5 +1,6 @@
 import { ProgramField } from '@entities/instruction-card';
 import { useScrollAnchor } from '@providers/scroll-anchor';
+import { Badge } from '@shared/ui/badge';
 import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { cn } from '@shared/utils';
 import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
@@ -59,10 +60,10 @@ export function InspectorInstructionCard({
             ref={scrollAnchorRef}
             title={
                 <>
-                    <span className={`badge bg-${resultClass}-soft e-mr-1.5`}>
+                    <Badge ui="dashkit" variant={resultClass as 'success' | 'warning' | 'dark'} className="e-mr-1.5">
                         #{index + 1}
                         {childIndex !== undefined ? `.${childIndex + 1}` : ''}
-                    </span>
+                    </Badge>
                     {title}
                 </>
             }

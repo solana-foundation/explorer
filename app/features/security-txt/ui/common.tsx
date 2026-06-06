@@ -1,6 +1,8 @@
 import classNames from 'classnames';
 import { ExternalLink } from 'react-feather';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+
 import type { SecurityTxtVersion } from './types';
 import { isValidLink, parseCodeValue } from './utils';
 
@@ -17,9 +19,9 @@ export function SecurityTxtVersionBadge({
     className,
 }: React.HTMLAttributes<unknown> & { version: SecurityTxtVersion }) {
     return (
-        <span className={classNames(['badge bg-info-soft', className])} data-testid="security-txt-version-badge">
+        <Badge ui="dashkit" variant="info" className={className} data-testid="security-txt-version-badge">
             <SecurityTxtVersionBadgeTitle version={version} />
-        </span>
+        </Badge>
     );
 }
 

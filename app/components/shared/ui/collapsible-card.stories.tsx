@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
+import { Badge } from './badge';
+import { Button } from './button';
 import { CollapsibleCard } from './collapsible-card';
 
 const meta: Meta<typeof CollapsibleCard> = {
@@ -72,7 +74,11 @@ export const WithHeaderButtons: Story = {
     render: () => (
         <CollapsibleCard
             title="Account Input(s) (3)"
-            headerButtons={<button className="btn btn-sm btn-white e-mr-1.5 e-flex e-items-center">Raw</button>}
+            headerButtons={
+                <Button ui="dashkit" variant="white" size="sm" className="e-mr-1.5 e-flex e-items-center">
+                    Raw
+                </Button>
+            }
         >
             <SampleContent />
         </CollapsibleCard>
@@ -95,7 +101,9 @@ export const WithBadgeTitle: Story = {
             collapsible
             title={
                 <>
-                    <span className="badge bg-success-soft e-mr-1.5">#1</span>
+                    <Badge ui="dashkit" variant="success" className="e-mr-1.5">
+                        #1
+                    </Badge>
                     Token Program: Transfer
                 </>
             }

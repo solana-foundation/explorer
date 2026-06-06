@@ -12,6 +12,7 @@ import { PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc } from '@utils/date';
 import React, { useCallback, useMemo } from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
@@ -137,7 +138,9 @@ function TransactionRow({ signature, slot, blockTime, statusClass, statusText, h
             )}
 
             <td>
-                <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
+                <Badge ui="dashkit" variant={statusClass as 'success' | 'warning'}>
+                    {statusText}
+                </Badge>
             </td>
             <td>
                 <TransactionRawDataDownloadField signature={signature} />

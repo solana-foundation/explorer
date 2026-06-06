@@ -26,6 +26,7 @@ import {
 } from 'lighthouse-sdk';
 import React from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 import { camelToTitleCase } from '@/app/utils';
 
@@ -368,11 +369,15 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
                             </div>
                             {role == AccountRole.WRITABLE ||
                                 (role == AccountRole.WRITABLE_SIGNER && (
-                                    <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>
+                                    <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                                        Writable
+                                    </Badge>
                                 ))}
                             {role == AccountRole.READONLY_SIGNER ||
                                 (role == AccountRole.WRITABLE_SIGNER && (
-                                    <span className="badge bg-info-soft e-mr-[3px]">Signer</span>
+                                    <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                                        Signer
+                                    </Badge>
                                 ))}
                         </td>
                         <td className="e-text-right" colSpan={2}>

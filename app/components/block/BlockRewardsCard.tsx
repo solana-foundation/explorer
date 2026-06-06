@@ -3,6 +3,7 @@ import { SolBalance } from '@components/common/SolBalance';
 import { PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import React from 'react';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 const PAGE_SIZE = 10;
@@ -67,12 +68,14 @@ export function BlockRewardsCard({ block }: { block: VersionedBlockResponse }) {
 
             {block.rewards.length > rewardsDisplayed && (
                 <CardFooter ui="dashkit">
-                    <button
-                        className="btn btn-primary e-w-full"
+                    <Button
+                        ui="dashkit"
+                        variant="primary"
+                        className="e-w-full"
                         onClick={() => setRewardsDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More
-                    </button>
+                    </Button>
                 </CardFooter>
             )}
         </Card>

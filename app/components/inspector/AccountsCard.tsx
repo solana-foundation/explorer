@@ -7,6 +7,7 @@ import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { toHex } from '@/app/shared/lib/bytes';
 import { CardFooter } from '@/app/shared/ui/Card';
 
@@ -144,8 +145,14 @@ function AccountFromLookupTableRow({
                 <div className="e-flex e-flex-col e-items-start">
                     Account #{accountIndex + 1}
                     <span className="e-mt-[3px]">
-                        {!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
-                        <span className="badge bg-gray-soft">Address Table Lookup</span>
+                        {!readOnly && (
+                            <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                                Writable
+                            </Badge>
+                        )}
+                        <Badge ui="dashkit" variant="gray">
+                            Address Table Lookup
+                        </Badge>
                     </span>
                 </div>
             </td>
@@ -182,8 +189,16 @@ function AccountRow({
                 <div className="e-flex e-flex-col e-items-start">
                     Account #{accountIndex + 1}
                     <span className="e-mt-[3px]">
-                        {signer && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
-                        {!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
+                        {signer && (
+                            <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                                Signer
+                            </Badge>
+                        )}
+                        {!readOnly && (
+                            <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                                Writable
+                            </Badge>
+                        )}
                         {loading ? (
                             <span className="text-muted">Loading...</span>
                         ) : accountInfo ? (

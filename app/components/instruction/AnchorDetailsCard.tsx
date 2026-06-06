@@ -18,6 +18,7 @@ import { extractEventsFromLogs } from '@utils/program-logs';
 import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { toBase64 } from '@/app/shared/lib/bytes';
 import { invariant } from '@/app/shared/lib/invariant';
 
@@ -283,8 +284,16 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                                               ? `Remaining Account #${keyIndex + 1 - actualAccountCount}`
                                               : `Account #${keyIndex + 1}`}
                                     </div>
-                                    {isWritable && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
-                                    {isSigner && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
+                                    {isWritable && (
+                                        <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                                            Writable
+                                        </Badge>
+                                    )}
+                                    {isSigner && (
+                                        <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                                            Signer
+                                        </Badge>
+                                    )}
                                 </div>
                             </td>
                             <td className="e-text-right" colSpan={2}>

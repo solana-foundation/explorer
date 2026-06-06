@@ -2,6 +2,7 @@ import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { SolBalance } from '@components/common/SolBalance';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import type { SolBalanceChange } from '../lib/types';
@@ -29,7 +30,9 @@ export function SolBalanceChangesCard({ balanceChanges }: { balanceChanges: SolB
                         {balanceChanges.map((change, i) => (
                             <tr key={change.pubkey.toBase58()}>
                                 <td>
-                                    <span className="badge bg-info-soft e-mr-[3px]">{i + 1}</span>
+                                    <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                                        {i + 1}
+                                    </Badge>
                                 </td>
                                 <td>
                                     <Address pubkey={change.pubkey} link fetchTokenLabelInfo />

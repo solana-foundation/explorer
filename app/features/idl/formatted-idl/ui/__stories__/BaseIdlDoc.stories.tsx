@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+
 import { BaseIdlDoc, IdlDocTooltip } from '../BaseIdlDoc';
 
 const meta = {
@@ -54,7 +56,11 @@ const tooltipMeta = {
 
 export const Tooltip: StoryObj<typeof tooltipMeta> = {
     args: {
-        children: <span className="badge bg-success-soft">Hover over me</span>,
+        children: (
+            <Badge ui="dashkit" variant="success">
+                Hover over me
+            </Badge>
+        ),
         docs: ['This documentation appears in a tooltip when hovering.'],
     },
     render: args => <IdlDocTooltip {...args} />,
@@ -62,7 +68,11 @@ export const Tooltip: StoryObj<typeof tooltipMeta> = {
 
 export const TooltipWithoutDocs: StoryObj<typeof tooltipMeta> = {
     args: {
-        children: <span className="badge bg-warning-soft">No tooltip on hover</span>,
+        children: (
+            <Badge ui="dashkit" variant="warning">
+                No tooltip on hover
+            </Badge>
+        ),
         docs: [],
     },
     render: args => <IdlDocTooltip {...args} />,
@@ -70,7 +80,11 @@ export const TooltipWithoutDocs: StoryObj<typeof tooltipMeta> = {
 
 export const TooltipWithMultilineDoc: StoryObj<typeof tooltipMeta> = {
     args: {
-        children: <span className="badge bg-info-soft">Hover for detailed docs</span>,
+        children: (
+            <Badge ui="dashkit" variant="info">
+                Hover for detailed docs
+            </Badge>
+        ),
         docs: ['First line of documentation.', 'Second line with more details.', 'Third line explaining edge cases.'],
     },
     render: args => <IdlDocTooltip {...args} />,

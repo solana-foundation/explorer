@@ -21,6 +21,8 @@ import Link from 'next/link';
 import React from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { Button } from '@/app/components/shared/ui/button';
 import { ProgramSecurityTXTBadge } from '@/app/features/security-txt/ui/SecurityTXTBadge';
 import { ProgramSecurityTXTLabel } from '@/app/features/security-txt/ui/SecurityTXTLabel';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
@@ -83,8 +85,10 @@ export function UpgradeableProgramSection({
                 <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
                     {programData === undefined && 'Closed '}Program Account
                 </CardTitle>
-                <button
-                    className="btn btn-white btn-sm"
+                <Button
+                    ui="dashkit"
+                    variant="white"
+                    size="sm"
                     onClick={() => {
                         refreshAnalytics.trackButtonClicked('program_section');
                         refresh(account.pubkey, 'parsed');
@@ -92,7 +96,7 @@ export function UpgradeableProgramSection({
                 >
                     <RefreshCw className="align-text-top e-mr-1.5" size={13} />
                     Refresh
-                </button>
+                </Button>
                 <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
             </CardHeader>
 
@@ -177,9 +181,9 @@ function MultisigBadge({ pubkey }: { pubkey: PublicKey }) {
     const programMultisigTabPath = useClusterPath({ pathname: `/address/${pubkey.toBase58()}/program-multisig` });
     return (
         <h3 className="e-mb-0">
-            <Link className="badge bg-success-soft rank" href={programMultisigTabPath}>
-                Program Multisig
-            </Link>
+            <Badge ui="dashkit" variant="success" asChild>
+                <Link href={programMultisigTabPath}>Program Multisig</Link>
+            </Badge>
         </h3>
     );
 }
@@ -213,8 +217,10 @@ export function UpgradeableProgramDataSection({
                 <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
                     Program Executable Data Account
                 </CardTitle>
-                <button
-                    className="btn btn-white btn-sm"
+                <Button
+                    ui="dashkit"
+                    variant="white"
+                    size="sm"
                     onClick={() => {
                         refreshAnalytics.trackButtonClicked('program_data_section');
                         refresh(account.pubkey, 'parsed');
@@ -222,7 +228,7 @@ export function UpgradeableProgramDataSection({
                 >
                     <RefreshCw className="align-text-top e-mr-1.5" size={13} />
                     Refresh
-                </button>
+                </Button>
             </CardHeader>
 
             <TableCardBody>
@@ -285,8 +291,10 @@ export function UpgradeableProgramBufferSection({
                 <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
                     Program Deploy Buffer Account
                 </CardTitle>
-                <button
-                    className="btn btn-white btn-sm"
+                <Button
+                    ui="dashkit"
+                    variant="white"
+                    size="sm"
                     onClick={() => {
                         refreshAnalytics.trackButtonClicked('program_buffer_section');
                         refresh(account.pubkey, 'parsed');
@@ -294,7 +302,7 @@ export function UpgradeableProgramBufferSection({
                 >
                     <RefreshCw className="align-text-top e-mr-1.5" size={13} />
                     Refresh
-                </button>
+                </Button>
             </CardHeader>
 
             <TableCardBody>

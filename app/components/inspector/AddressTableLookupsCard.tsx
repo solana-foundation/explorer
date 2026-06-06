@@ -5,6 +5,8 @@ import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+
 export function AddressTableLookupsCard({ message }: { message: VersionedMessage }) {
     const lookupRows = React.useMemo(() => {
         let key = 0;
@@ -103,7 +105,13 @@ function LookupRow({
             </td>
             <td className="e-text-right">{lookupTableIndex}</td>
             <td className="e-text-right">{resolvedKeyComponent}</td>
-            <td>{!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}</td>
+            <td>
+                {!readOnly && (
+                    <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                        Writable
+                    </Badge>
+                )}
+            </td>
         </tr>
     );
 }

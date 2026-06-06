@@ -3,6 +3,7 @@ import { useClusterPath } from '@utils/url';
 import { ProgramDataAccountInfo } from '@validators/accounts/upgradeable-program';
 import Link from 'next/link';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
 import { useCluster } from '@/app/providers/cluster';
 
@@ -31,16 +32,18 @@ export function SecurityTXTBadge({ error, tabPath }: { error?: string; tabPath: 
     if (error) {
         return (
             <h3 className="e-mb-0">
-                <span className="badge bg-warning-soft rank">{error}</span>
+                <Badge ui="dashkit" variant="warning">
+                    {error}
+                </Badge>
             </h3>
         );
     }
 
     return (
         <h3 className="e-mb-0">
-            <Link className="badge bg-success-soft rank e-cursor-pointer" href={tabPath}>
-                Included
-            </Link>
+            <Badge ui="dashkit" variant="success" className="e-cursor-pointer" asChild>
+                <Link href={tabPath}>Included</Link>
+            </Badge>
         </h3>
     );
 }

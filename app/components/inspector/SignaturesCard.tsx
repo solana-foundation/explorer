@@ -5,6 +5,7 @@ import bs58 from 'bs58';
 import React from 'react';
 import * as nacl from 'tweetnacl';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export function TransactionSignatures({
@@ -94,7 +95,9 @@ function SignatureRow({
     return (
         <tr>
             <td>
-                <span className="badge bg-info-soft e-mr-[3px]">{index + 1}</span>
+                <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                    {index + 1}
+                </Badge>
             </td>
             <td>{signature ? <Signature signature={signature} /> : 'Missing Signature'}</td>
             <td>
@@ -104,12 +107,22 @@ function SignatureRow({
                 {verified === undefined ? (
                     'N/A'
                 ) : verified ? (
-                    <span className="badge bg-success-soft e-mr-[3px]">Valid</span>
+                    <Badge ui="dashkit" variant="success" className="e-mr-[3px]">
+                        Valid
+                    </Badge>
                 ) : (
-                    <span className="badge bg-warning-soft e-mr-[3px]">Invalid</span>
+                    <Badge ui="dashkit" variant="warning" className="e-mr-[3px]">
+                        Invalid
+                    </Badge>
                 )}
             </td>
-            <td>{index === 0 && <span className="badge bg-info-soft e-mr-[3px]">Fee Payer</span>}</td>
+            <td>
+                {index === 0 && (
+                    <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                        Fee Payer
+                    </Badge>
+                )}
+            </td>
         </tr>
     );
 }

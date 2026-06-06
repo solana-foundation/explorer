@@ -2,6 +2,8 @@ import { Address } from '@components/common/Address';
 import { TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+
 import { HexData } from './HexData';
 
 function RawDetailsLoader() {
@@ -34,8 +36,16 @@ function BaseTransactionInstructionRawDetails({ ix }: { ix: TransactionInstructi
                 <tr key={keyIndex}>
                     <td>
                         <div className="e-mr-1.5 md:e-inline">Account #{keyIndex + 1}</div>
-                        {isWritable && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
-                        {isSigner && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
+                        {isWritable && (
+                            <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                                Writable
+                            </Badge>
+                        )}
+                        {isSigner && (
+                            <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                                Signer
+                            </Badge>
+                        )}
                     </td>
                     <td className="e-text-right">
                         <Address pubkey={pubkey} alignRight link />

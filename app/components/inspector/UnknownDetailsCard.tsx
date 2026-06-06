@@ -4,6 +4,7 @@ import { useScrollAnchor } from '@providers/scroll-anchor';
 import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { TransactionInstruction } from '@solana/web3.js';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import getInstructionCardScrollAnchorId from '@/app/utils/get-instruction-card-scroll-anchor-id';
 
 import { BaseRawDetails } from '../common/BaseRawDetails';
@@ -27,7 +28,9 @@ export function UnknownDetailsCard({
             defaultExpanded={false}
             title={
                 <span className="e-flex e-min-w-0 e-flex-1 e-items-center">
-                    <span className="badge bg-info-soft e-mr-1.5 e-flex-none">#{index + 1}</span>
+                    <Badge ui="dashkit" variant="info" className="e-mr-1.5 e-flex-none">
+                        #{index + 1}
+                    </Badge>
                     <span className="e-min-w-0 e-flex-1 e-overflow-hidden e-text-ellipsis e-whitespace-nowrap">
                         {programName}
                     </span>

@@ -1,4 +1,5 @@
 import { Copyable } from '@/app/components/common/Copyable';
+import { Button } from '@/app/components/shared/ui/button';
 import { Card, CardBody } from '@/app/shared/ui/Card';
 
 import { NO_SECURITY_TXT_ERROR } from '../lib/constants';
@@ -26,14 +27,15 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
                     </div>
                 </div>
                 <div className="e-text-dk-gray-700">
-                    <a
-                        href="https://github.com/solana-program/program-metadata"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-outline-primary btn-sm"
-                    >
-                        For further details please follow the documentation
-                    </a>
+                    <Button ui="dashkit" variant="outline-primary" size="sm" asChild>
+                        <a
+                            href="https://github.com/solana-program/program-metadata"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            For further details please follow the documentation
+                        </a>
+                    </Button>
                 </div>
             </CardBody>
         </Card>

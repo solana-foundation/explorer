@@ -14,6 +14,7 @@ import { usePathname } from 'next/navigation';
 import React from 'react';
 import { ChevronsUp } from 'react-feather';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { fromBase64, toBuffer } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -233,7 +234,14 @@ function ProgramLogRow({
         <tr>
             <td>
                 <Link className="e-flex e-items-center" href={anchorPath}>
-                    <span className={`badge bg-${badgeColor}-soft e-mr-1.5`}>#{index + 1}</span>
+                    {/* badgeColor='white' falls through to a plain `.badge` (no bg-white-soft is defined in dashkit) — same as legacy. */}
+                    <Badge
+                        ui="dashkit"
+                        variant={badgeColor === 'success' || badgeColor === 'warning' ? badgeColor : 'default'}
+                        className="e-mr-1.5"
+                    >
+                        #{index + 1}
+                    </Badge>
                     <span className="program-log-instruction-name">
                         <ProgramNameWithInstruction
                             programId={programId}
