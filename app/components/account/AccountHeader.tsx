@@ -182,7 +182,7 @@ export function TokenMintHeaderCard({
     return (
         <div className="-e-mx-3 e-flex e-flex-wrap e-items-center">
             <div className="e-flex-none e-px-3">
-                <div className="avatar avatar-lg">
+                <div className="e-relative e-inline-block e-h-16 e-w-16">
                     {logoURI ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -190,7 +190,7 @@ export function TokenMintHeaderCard({
                             alt="Token logo"
                             height={64}
                             width={64}
-                            className="avatar-img border border-4 border-body e-rounded-full"
+                            className="e-h-full e-w-full e-rounded-full e-border-4 e-border-solid e-border-dk-black-dark e-object-cover"
                         />
                     ) : (
                         <Image

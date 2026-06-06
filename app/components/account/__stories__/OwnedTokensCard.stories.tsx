@@ -41,6 +41,41 @@ const sampleTokensEntry = {
     status: FetchStatus.Fetched,
 };
 
+const sampleTokensWithLogosEntry = {
+    data: {
+        tokens: [
+            {
+                info: {
+                    isNative: false,
+                    mint: new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
+                    owner: new PublicKey(ADDRESS),
+                    state: 'initialized' as const,
+                    tokenAmount: { amount: '1234560000', decimals: 6, uiAmount: 1234.56, uiAmountString: '1234.56' },
+                },
+                logoURI:
+                    'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png',
+                name: 'USD Coin',
+                pubkey: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+                symbol: 'USDC',
+            },
+            {
+                info: {
+                    isNative: false,
+                    mint: new PublicKey('So11111111111111111111111111111111111111112'),
+                    owner: new PublicKey(ADDRESS),
+                    state: 'initialized' as const,
+                    tokenAmount: { amount: '5000000000', decimals: 9, uiAmount: 5, uiAmountString: '5' },
+                },
+                // Empty logoURI on one row exercises the placeholder branch alongside the img branch.
+                name: 'Wrapped SOL',
+                pubkey: PublicKey.unique(),
+                symbol: 'wSOL',
+            },
+        ],
+    },
+    status: FetchStatus.Fetched,
+};
+
 function MockTokensState({ children, value }: { children: React.ReactNode; value: TokensState }) {
     return (
         <ClusterProvider>
@@ -59,6 +94,12 @@ const withTokens: Decorator = Story => (
     </MockTokensState>
 );
 
+const withTokensAndLogos: Decorator = Story => (
+    <MockTokensState value={tokensState({ [ADDRESS]: sampleTokensWithLogosEntry as any })}>
+        <Story />
+    </MockTokensState>
+);
+
 const withNoTokens: Decorator = Story => (
     <MockTokensState
         value={tokensState({
@@ -73,7 +114,7 @@ const meta = {
     component: OwnedTokensCard,
     decorators: [withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/OwnedTokensCard',
 } satisfies Meta<typeof OwnedTokensCard>;
 
@@ -83,6 +124,11 @@ type Story = StoryObj<typeof meta>;
 export const WithHoldings: Story = {
     args: { address: ADDRESS },
     decorators: [withTokens],
+};
+
+export const WithLogos: Story = {
+    args: { address: ADDRESS },
+    decorators: [withTokensAndLogos],
 };
 
 export const Empty: Story = {

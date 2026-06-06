@@ -248,7 +248,7 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
                             alt="Token icon"
                             height={16}
                             width={16}
-                            className="token-icon border border-4 border-gray-dark e-rounded-full"
+                            className="e-h-6 e-w-6 e-rounded-full e-border-4 e-border-solid e-border-dk-gray-700-dark"
                         />
                     ) : (
                         <Image
