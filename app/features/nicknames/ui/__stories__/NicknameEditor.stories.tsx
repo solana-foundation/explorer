@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { withFixedContainer } from '@storybook-config/responsive-decorators';
 import { fn } from 'storybook/test';
 
 import { NicknameEditor } from '../NicknameEditor';
 
 const meta = {
     component: NicknameEditor,
+    decorators: [withFixedContainer],
     parameters: {
         docs: {
             description: {

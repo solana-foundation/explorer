@@ -1,23 +1,10 @@
 import type { Program } from '@coral-xyz/anchor';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters } from '@storybook-config/decorators';
+import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 
 import { ProgramEventsCard } from '../ProgramEventsCard';
 
-// A minimal Program stub with an empty events list — decodeEventFromLog returns null for
-// the raw bytes below, so the component renders nothing (its empty-state return).
-const emptyProgram = {
-    idl: {
-        accounts: [],
-        address: '11111111111111111111111111111111',
-        events: [],
-        instructions: [],
-        metadata: { name: 'sample_program', spec: '0.1.0', version: '0.1.0' },
-        types: [],
-    },
-} as unknown as Program;
-
-// Anchor-style 8-byte event discriminator. Borsh struct payload follows: u64 amount + u32 counter.
 const SAMPLE_DISCRIMINATOR = [1, 2, 3, 4, 5, 6, 7, 8];
 const sampleEventBytes = Buffer.from([
     ...SAMPLE_DISCRIMINATOR,
@@ -59,36 +46,26 @@ const sampleProgram = {
     },
 } as unknown as Program;
 
-const meta = {
+const meta: Meta<typeof ProgramEventsCard> = {
     component: ProgramEventsCard,
-    parameters: nextjsParameters,
+    decorators: [withViewportFromGlobal],
+    parameters: {
+        ...nextjsParameters,
+        viewport: { options: INITIAL_VIEWPORTS },
+    },
     tags: ['autodocs', 'test'],
-    title: 'Components/Instruction/ProgramEventsCard',
-} satisfies Meta<typeof ProgramEventsCard>;
+    title: 'Components/Instruction/ProgramEventsCard/Responsive',
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const NoDecodedEvents: Story = {
-    args: {
-        eventDataList: ['aGVsbG8='],
-        instructionIndex: 0,
-        program: emptyProgram,
-    },
+const args = {
+    eventDataList: [sampleEventBytes.toString('base64')],
+    instructionIndex: 0,
+    program: sampleProgram,
 };
 
-export const WithDecodedEvent: Story = {
-    args: {
-        eventDataList: [sampleEventBytes.toString('base64')],
-        instructionIndex: 0,
-        program: sampleProgram,
-    },
-};
-
-export const WithMultipleEvents: Story = {
-    args: {
-        eventDataList: [sampleEventBytes.toString('base64'), sampleEventBytes.toString('base64')],
-        instructionIndex: 2,
-        program: sampleProgram,
-    },
-};
+export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
+export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };
+export const TabletLandscape: Story = { args, globals: { viewport: { isRotated: true, value: 'ipad' } } };
