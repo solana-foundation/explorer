@@ -12,6 +12,7 @@ import useAsyncEffect from 'use-async-effect';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
+import { DropdownHeader, DropdownItem, DropdownMenu } from '@/app/components/shared/ui/dropdown';
 
 export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; address: string }) {
     const collectionOpt = nftData.metadata.collection;
@@ -81,9 +82,9 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
                     >
                         Creators <ChevronDown size={15} className="align-text-top" />
                     </Button>
-                    <div className="dropdown-menu e-mt-1.5">
+                    <DropdownMenu className="e-mt-1.5">
                         {getCreatorDropdownItems(isSome(metadata.creators) ? metadata.creators.value : null)}
-                    </div>
+                    </DropdownMenu>
                 </div>
             </div>
         </div>
@@ -97,8 +98,8 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
         const shareTooltip = 'The percentage of the proceeds a creator receives when this NFT is sold.';
 
         return (
-            <div className="dropdown-header creator-dropdown-entry e-flex e-items-center">
-                <div className="creator-dropdown-header e-flex e-font-mono">
+            <DropdownHeader className="e-flex e-flex-wrap e-items-center">
+                <div className="e-flex e-max-w-[80%] e-grow-0 e-basis-[80%] e-font-mono">
                     <span>Creator Address</span>
                     <InfoTooltip bottom text={creatorTooltip} />
                 </div>
@@ -106,7 +107,7 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
                     <span className="e-font-mono">Royalty</span>
                     <InfoTooltip bottom text={shareTooltip} />
                 </div>
-            </div>
+            </DropdownHeader>
         );
     };
 
@@ -117,11 +118,14 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
     const CreatorEntry = (creator: { address: string; verified: boolean; share: number }) => {
         const creatorPath = useClusterPath({ pathname: `/address/${creator.address}` });
         return (
-            <div className="creator-dropdown-entry e-ml-3 e-mr-3 e-flex e-items-center e-font-mono">
+            <div className="e-ml-3 e-mr-3 e-flex e-flex-wrap e-items-center e-font-mono">
                 {getVerifiedIcon(creator.verified)}
-                <Link className="dropdown-item creator-dropdown-entry-address e-font-mono" href={creatorPath}>
-                    {creator.address}
-                </Link>
+                <DropdownItem
+                    asChild
+                    className="e-max-w-[80%] e-grow-0 e-basis-[80%] e-overflow-hidden e-text-ellipsis e-font-mono"
+                >
+                    <Link href={creatorPath}>{creator.address}</Link>
+                </DropdownItem>
                 <div className="e-mr-3"> {`${creator.share}%`}</div>
             </div>
         );
@@ -139,9 +143,9 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
     }
 
     return (
-        <div className="dropdown-item e-font-mono">
+        <DropdownItem className="e-font-mono">
             <div className="e-mr-3">No creators are associated with this NFT.</div>
-        </div>
+        </DropdownItem>
     );
 }
 

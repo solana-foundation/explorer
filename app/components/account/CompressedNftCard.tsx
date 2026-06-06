@@ -7,6 +7,7 @@ import useAsyncEffect from 'use-async-effect';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
+import { DropdownMenu } from '@/app/components/shared/ui/dropdown';
 import { getProxiedUri } from '@/app/features/metadata';
 import { useCluster } from '@/app/providers/cluster';
 import { CompressedNft, useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
@@ -152,7 +153,7 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
                     >
                         Creators <ChevronDown size={15} className="align-text-top" />
                     </Button>
-                    <div className="dropdown-menu e-mt-1.5">{getCreatorDropdownItems(compressedNft.creators)}</div>
+                    <DropdownMenu className="e-mt-1.5">{getCreatorDropdownItems(compressedNft.creators)}</DropdownMenu>
                 </div>
             </div>
         </div>

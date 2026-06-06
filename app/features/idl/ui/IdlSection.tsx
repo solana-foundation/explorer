@@ -9,6 +9,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@shared/ui/dialog';
+import { Dropdown, DropdownMenu } from '@shared/ui/dropdown';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 import { Switch } from '@shared/ui/switch';
@@ -112,7 +113,7 @@ export function IdlSection({
                         </div>
                     )}
                     <div className="e-flex e-items-center e-gap-2">
-                        <div className="dropdown e-overflow-visible">
+                        <Dropdown className="e-overflow-visible">
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -124,13 +125,13 @@ export function IdlSection({
                                 <Download size={12} />
                                 Download
                             </Button>
-                            <div className="dropdown-menu-end dropdown-menu e-z-10">
+                            <DropdownMenu align="end" className="e-z-10">
                                 <div className="e-flex e-flex-col">
                                     <Button onClick={handleDownloadIdl}>Download IDL</Button>
                                     <Button onClick={handleOpenCastawayDialog}>Generate SDK</Button>
                                 </div>
-                            </div>
-                        </div>
+                            </DropdownMenu>
+                        </Dropdown>
 
                         <Dialog open={isCastawayDialogOpen} onOpenChange={setIsCastawayDialogOpen}>
                             <DialogContent>
