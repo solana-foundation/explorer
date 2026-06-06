@@ -23,6 +23,7 @@ import useAsyncEffect from 'use-async-effect';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
+import { Dropdown, DropdownItem, DropdownMenu } from '@/app/components/shared/ui/dropdown';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
@@ -469,11 +470,11 @@ const FilterDropdown = ({ filter, invokedPrograms, totalTransactionCount }: Filt
     );
 
     return (
-        <div className="dropdown e-mr-1.5">
+        <Dropdown className="e-mr-1.5">
             <Button ui="dashkit" variant="white" size="sm" data-bs-toggle="dropdown" type="button" ref={dropdownRef}>
                 {currentFilterOption.name} <ChevronDown className="align-text-top" size={13} />
             </Button>
-            <div className="token-filter dropdown-menu-end dropdown-menu">
+            <DropdownMenu align="end" className="e-max-h-80 e-overflow-y-auto">
                 {filterOptions.map(({ name, programId, transactionCount }) => (
                     <FilterLink
                         currentFilter={filter}
@@ -483,8 +484,8 @@ const FilterDropdown = ({ filter, invokedPrograms, totalTransactionCount }: Filt
                         transactionCount={transactionCount}
                     />
                 ))}
-            </div>
-        </div>
+            </DropdownMenu>
+        </Dropdown>
     );
 };
 
@@ -512,8 +513,8 @@ function FilterLink({
         return `${currentPathname}${nextQueryString ? `?${nextQueryString}` : ''}`;
     }, [currentPathname, currentSearchParams, name, programId]);
     return (
-        <Link className={cn('dropdown-item', programId === currentFilter && 'active')} href={href} key={programId}>
-            {`${name} (${transactionCount})`}
-        </Link>
+        <DropdownItem asChild className={cn(programId === currentFilter && 'active')} key={programId}>
+            <Link href={href}>{`${name} (${transactionCount})`}</Link>
+        </DropdownItem>
     );
 }
