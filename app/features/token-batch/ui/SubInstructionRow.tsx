@@ -29,7 +29,9 @@ export function SubInstructionRow({
             data-testid={`sub-ix-${index}`}
         >
             <div className="e-mb-2 e-flex e-items-center e-gap-2">
-                <span className="badge bg-success-soft">#{index + 1}</span>
+                <Badge ui="dashkit" variant="success">
+                    #{index + 1}
+                </Badge>
                 <Badge variant="info" size="sm">
                     {typeName}
                 </Badge>

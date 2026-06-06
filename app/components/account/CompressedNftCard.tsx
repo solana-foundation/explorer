@@ -5,6 +5,8 @@ import { createRef, Suspense } from 'react';
 import { ChevronDown, ExternalLink } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { Button } from '@/app/components/shared/ui/button';
 import { getProxiedUri } from '@/app/features/metadata';
 import { useCluster } from '@/app/providers/cluster';
 import { CompressedNft, useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
@@ -137,8 +139,11 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
                 <div className="e-mb-1.5 e-mt-1.5">{getCompressedNftPill()}</div>
                 <div className="e-mb-3 e-mt-1.5">{getIsMutablePill(compressedNft.mutable)}</div>
                 <div className="btn-group">
-                    <button
-                        className="btn btn-dark btn-sm creators-dropdown-button-width"
+                    <Button
+                        ui="dashkit"
+                        variant="dark"
+                        size="sm"
+                        className="e-w-[150px]"
                         type="button"
                         aria-haspopup="true"
                         aria-expanded="false"
@@ -146,7 +151,7 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
                         ref={dropdownRef}
                     >
                         Creators <ChevronDown size={15} className="align-text-top" />
-                    </button>
+                    </Button>
                     <div className="dropdown-menu e-mt-1.5">{getCreatorDropdownItems(compressedNft.creators)}</div>
                 </div>
             </div>
@@ -159,7 +164,9 @@ function getCompressedNftPill() {
         'This NFT does not have a corresponding account, but uses verified ledger data to allow for transfers and trades. The existence of this tag ensures that the compressed NFT is verifiably up-to-date with the chain.';
     return (
         <div className="e-ml-1.5 e-inline-flex e-items-center">
-            <span className="badge badge-pill bg-dark">{'Compressed'}</span>
+            <Badge ui="dashkit" variant="dark" tone="solid">
+                Compressed
+            </Badge>
             <InfoTooltip bottom text={onchainVerifiedToolTip} />
         </div>
     );

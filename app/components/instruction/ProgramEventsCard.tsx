@@ -1,12 +1,13 @@
 import { HexData } from '@components/common/HexData';
 import { Program } from '@coral-xyz/anchor';
 import { IdlField, IdlTypeDefTyStruct } from '@coral-xyz/anchor/dist/cjs/idl';
-import { cn } from '@shared/utils';
 import { decodeEventFromLog, mapIxArgsToRows } from '@utils/anchor';
 import { camelToTitleCase } from '@utils/index';
 import React, { useState } from 'react';
 import { Code } from 'react-feather';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { Button } from '@/app/components/shared/ui/button';
 import { fromBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
@@ -75,17 +76,21 @@ function EventCard({
         <Card ui="dashkit" className="e-mb-1.5">
             <CardHeader ui="dashkit">
                 <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
-                    <span className="badge bg-info-soft e-mr-1.5">
+                    <Badge ui="dashkit" variant="info" className="e-mr-1.5">
                         #{instructionIndex + 1}.{eventIndex + 1}
-                    </span>
+                    </Badge>
                     {camelToTitleCase(event.name)}
                 </CardTitle>
-                <button
-                    className={cn('btn btn-sm e-flex e-items-center', showRaw ? 'btn-black active' : 'btn-white')}
+                <Button
+                    ui="dashkit"
+                    size="sm"
+                    variant={showRaw ? 'black' : 'white'}
+                    active={showRaw}
+                    className="e-flex e-items-center"
                     onClick={() => setShowRaw(r => !r)}
                 >
                     <Code className="e-mr-1.5" size={13} /> Raw
-                </button>
+                </Button>
             </CardHeader>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive e-mb-0">

@@ -11,6 +11,7 @@ import { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstructi
 import { getTokenInstructionName, InstructionContainer } from '@utils/instruction';
 import React, { useMemo } from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { RelativeTime } from '@/app/shared/RelativeTime';
 import { Card } from '@/app/shared/ui/Card';
 
@@ -83,7 +84,9 @@ export function TokenInstructionsCard({ address }: { address: string }) {
                             </td>
 
                             <td>
-                                <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
+                                <Badge ui="dashkit" variant={statusClass as 'success' | 'warning'}>
+                                    {statusText}
+                                </Badge>
                             </td>
                         </tr>,
                     );

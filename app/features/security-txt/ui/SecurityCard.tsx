@@ -5,6 +5,7 @@ import { AlertCircle } from 'react-feather';
 
 import { DownloadableButton } from '@/app/components/common/Downloadable';
 import { ErrorCard } from '@/app/components/common/ErrorCard';
+import { Button } from '@/app/components/shared/ui/button';
 import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
 import type { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
 import { useCluster } from '@/app/providers/cluster';
@@ -80,15 +81,17 @@ export function ProgramSecurityTxtCard({
                     Security.txt
                     <SecurityTxtVersionBadge version={pmpSecurityTxt ? 'pmp' : 'neodyme'} />
                 </CardTitle>
-                <div className="btn btn-sm btn-white e-flex">
-                    <DownloadableButton
-                        data={downloadData}
-                        filename={`${programAddress}-security-txt.json`}
-                        type="application/json"
-                    >
-                        Download
-                    </DownloadableButton>
-                </div>
+                <Button ui="dashkit" variant="white" size="sm" className="e-flex" asChild>
+                    <div>
+                        <DownloadableButton
+                            data={downloadData}
+                            filename={`${programAddress}-security-txt.json`}
+                            type="application/json"
+                        >
+                            Download
+                        </DownloadableButton>
+                    </div>
+                </Button>
             </CardHeader>
             <div className="e-px-6 e-py-4">
                 <small className="e-flex e-gap-1 e-text-dk-warning-on-dark">

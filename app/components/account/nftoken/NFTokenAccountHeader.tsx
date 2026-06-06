@@ -4,6 +4,8 @@ import { NFTImageContent } from '@components/common/NFTArt';
 import { Account } from '@providers/accounts';
 import React, { Suspense } from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+
 import { parseNFTokenCollectionAccount, parseNFTokenNFTAccount } from './isNFTokenAccount';
 import { useNftokenMetadata } from './nftoken-hooks';
 import { NftokenTypes } from './nftoken-types';
@@ -55,9 +57,9 @@ export function NFTokenNFTHeader({ nft }: { nft: NftokenTypes.NftAccount }) {
 
                 <div>
                     <div className="e-mt-1.5 e-inline-flex e-items-center">
-                        <span className="badge badge-pill bg-dark">{`${
-                            nft.authority_can_update ? 'Mutable' : 'Immutable'
-                        }`}</span>
+                        <Badge ui="dashkit" variant="dark" tone="solid">
+                            {nft.authority_can_update ? 'Mutable' : 'Immutable'}
+                        </Badge>
 
                         <InfoTooltip
                             bottom
@@ -93,9 +95,9 @@ export function NFTokenCollectionHeader({ collection }: { collection: NftokenTyp
 
                 <div>
                     <div className="e-mt-1.5 e-inline-flex e-items-center">
-                        <span className="badge badge-pill bg-dark">{`${
-                            collection.authority_can_update ? 'Mutable' : 'Immutable'
-                        }`}</span>
+                        <Badge ui="dashkit" variant="dark" tone="solid">
+                            {collection.authority_can_update ? 'Mutable' : 'Immutable'}
+                        </Badge>
 
                         <InfoTooltip
                             bottom

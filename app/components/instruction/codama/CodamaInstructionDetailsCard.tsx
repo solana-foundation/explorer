@@ -4,6 +4,8 @@ import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { SignatureResult } from '@solana/web3.js';
 import React from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+
 import { Address } from '../../common/Address';
 import { InstructionCard } from '../InstructionCard';
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
@@ -50,8 +52,16 @@ export function CodamaInstructionCard({
             <tr key={i}>
                 <td>
                     <div className="e-mr-1.5 md:e-inline">{accountName}</div>
-                    {isWritable && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
-                    {isSigner && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
+                    {isWritable && (
+                        <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                            Writable
+                        </Badge>
+                    )}
+                    {isSigner && (
+                        <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                            Signer
+                        </Badge>
+                    )}
                 </td>
                 <td className="e-text-right" colSpan={2}>
                     <Address pubkey={new PublicKey(account.address)} alignRight link />

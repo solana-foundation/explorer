@@ -4,6 +4,7 @@ import { getIdlVersion, isIdlProgramIdMismatch, type SupportedIdl, useAnchorProg
 import { useProgramMetadataCodamaIdl, useProgramMetadataIdl } from '@entities/program-metadata';
 import { useCluster } from '@providers/cluster';
 import { Badge } from '@shared/ui/badge';
+import { Button } from '@shared/ui/button';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'react-feather';
 
@@ -117,15 +118,22 @@ export function IdlCard({ programId }: { programId: string }) {
 
                         <div className="e-flex e-items-center e-justify-between">
                             <span>In case you want to upload IDL with a multisig, follow the documentation.</span>
-                            <a
-                                href="https://github.com/solana-program/program-metadata?tab=readme-ov-file#commands"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn btn-outline-primary btn-sm e-whitespace-nowrap"
+                            <Button
+                                ui="dashkit"
+                                variant="outline-primary"
+                                size="sm"
+                                className="e-whitespace-nowrap"
+                                asChild
                             >
-                                Full documentation
-                                <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
-                            </a>
+                                <a
+                                    href="https://github.com/solana-program/program-metadata?tab=readme-ov-file#commands"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Full documentation
+                                    <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
+                                </a>
+                            </Button>
                         </div>
                     </div>
                 </CardBody>

@@ -20,6 +20,7 @@ import { Trash2 } from 'react-feather';
 import { Alert } from '../shared/ui/Alert';
 import { FormControl } from '../shared/ui/FormControl';
 import { Overlay } from './common/Overlay';
+import { Button } from './shared/ui/button';
 import { cn } from './shared/utils';
 
 const ClusterModalDeveloperSettings = dynamic(() => import('./ClusterModalDeveloperSettings'), { ssr: false });
@@ -174,16 +175,20 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                                 </Alert>
                             )}
                             <div className="e-mt-[3px] e-flex e-gap-1.5">
-                                <button
-                                    className="btn btn-primary e-grow"
+                                <Button
+                                    ui="dashkit"
+                                    variant="primary"
+                                    className="e-grow"
                                     onClick={handleSave}
                                     disabled={!savedName.trim()}
                                     data-testid="confirm-save-cluster-btn"
                                 >
                                     Save
-                                </button>
-                                <button
-                                    className="btn btn-white e-grow"
+                                </Button>
+                                <Button
+                                    ui="dashkit"
+                                    variant="white"
+                                    className="e-grow"
                                     onClick={() => {
                                         setSaving(false);
                                         setSavedName('');
@@ -191,17 +196,20 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                                     }}
                                 >
                                     Cancel
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     ) : !savedClusters.some(sc => sc.url === localUrl) ? (
-                        <button
-                            className="btn btn-sm btn-white col-12 e-mb-3 e-mt-1.5"
+                        <Button
+                            ui="dashkit"
+                            variant="white"
+                            size="sm"
+                            className="col-12 e-mb-3 e-mt-1.5"
                             onClick={() => setSaving(true)}
                             data-testid="save-custom-cluster-btn"
                         >
                             Save this cluster
-                        </button>
+                        </Button>
                     ) : null}
                 </>
             )}
@@ -237,8 +245,10 @@ function SavedClusterItem({
             >
                 {cluster.name}
             </Link>
-            <button
-                className="btn btn-sm e-absolute e-right-1 e-top-1/2 -e-translate-y-1/2"
+            <Button
+                ui="dashkit"
+                size="sm"
+                className="e-absolute e-right-1 e-top-1/2 -e-translate-y-1/2"
                 onClick={e => {
                     e.stopPropagation();
                     onDelete(cluster.name);
@@ -247,7 +257,7 @@ function SavedClusterItem({
                 aria-label={`Delete ${cluster.name}`}
             >
                 <Trash2 size={14} />
-            </button>
+            </Button>
         </div>
     );
 }

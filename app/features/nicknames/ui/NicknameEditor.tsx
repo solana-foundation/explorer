@@ -7,6 +7,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { FormControl } from '@/app/shared/ui/FormControl';
 
@@ -111,24 +112,26 @@ export function NicknameEditor({ address, onClose }: Props) {
                     <div className="e-flex e-justify-between">
                         <div>
                             {getNickname(address) && (
-                                <button className="btn btn-sm btn-outline-danger" onClick={handleRemove}>
+                                <Button ui="dashkit" variant="outline-danger" size="sm" onClick={handleRemove}>
                                     Remove
-                                </button>
+                                </Button>
                             )}
                         </div>
                         <div className="e-flex e-gap-1.5">
-                            <button className="btn btn-sm btn-secondary" onClick={onClose}>
+                            <Button ui="dashkit" variant="secondary" size="sm" onClick={onClose}>
                                 Cancel
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 ref={saveButtonRef}
-                                className="btn btn-sm btn-primary"
+                                ui="dashkit"
+                                variant="primary"
+                                size="sm"
                                 onClick={handleSave}
                                 onKeyDown={handleSaveButtonKeyDown}
                                 disabled={!nickname.trim()}
                             >
                                 Save
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </CardBody>

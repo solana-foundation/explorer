@@ -19,6 +19,7 @@ import React, { useMemo } from 'react';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { Logger } from '@/app/shared/lib/logger';
 import { RelativeTime } from '@/app/shared/RelativeTime';
 import { Card } from '@/app/shared/ui/Card';
@@ -89,7 +90,9 @@ function TransferRow({
             </td>
 
             <td>
-                <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
+                <Badge ui="dashkit" variant={statusClass as 'success' | 'warning'}>
+                    {statusText}
+                </Badge>
             </td>
         </tr>
     );

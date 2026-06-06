@@ -1,11 +1,11 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { UpgradeableLoaderAccountData } from '@providers/accounts';
-import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 import { ExternalLink } from 'react-feather';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { Alert } from '@/app/shared/ui/Alert';
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
@@ -168,16 +168,19 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
         case DisplayType.Boolean:
             return (
                 <td className="e-text-right e-font-mono">
-                    <span className={cn('badge', `bg-${value ? 'success' : 'warning'}-soft`)}>{new String(value)}</span>
+                    <Badge ui="dashkit" variant={value ? 'success' : 'warning'}>
+                        {String(value)}
+                    </Badge>
                 </td>
             );
         case DisplayType.String:
             if (Object.values(VerificationStatus).includes(value as VerificationStatus)) {
-                const badgeClass = value === VerificationStatus.Verified ? 'bg-success-soft' : 'bg-warning-soft';
-                const badgeValue = value === VerificationStatus.Verified ? 'true' : 'false';
+                const isVerified = value === VerificationStatus.Verified;
                 return (
                     <td className="e-text-right e-font-mono">
-                        <span className={`badge ${badgeClass}`}>{badgeValue}</span>
+                        <Badge ui="dashkit" variant={isVerified ? 'success' : 'warning'}>
+                            {isVerified ? 'true' : 'false'}
+                        </Badge>
                     </td>
                 );
             }

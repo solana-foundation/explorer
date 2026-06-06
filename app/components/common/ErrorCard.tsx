@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { Card, CardBody } from '@/app/shared/ui/Card';
 
 export function ErrorCard({
@@ -20,13 +21,19 @@ export function ErrorCard({
                 {text}
                 {retry && (
                     <>
-                        <span className="btn btn-white e-ml-3 e-hidden md:e-inline" onClick={retry}>
-                            {buttonText}
-                        </span>
+                        <Button
+                            ui="dashkit"
+                            variant="white"
+                            className="e-ml-3 e-hidden md:e-inline"
+                            onClick={retry}
+                            asChild
+                        >
+                            <span>{buttonText}</span>
+                        </Button>
                         <div className="e-mt-6 e-block md:e-hidden">
-                            <span className="btn btn-white e-w-full" onClick={retry}>
-                                {buttonText}
-                            </span>
+                            <Button ui="dashkit" variant="white" className="e-w-full" onClick={retry} asChild>
+                                <span>{buttonText}</span>
+                            </Button>
                         </div>
                         {subtext && (
                             <div className="e-text-dk-gray-700">

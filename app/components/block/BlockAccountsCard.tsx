@@ -4,6 +4,7 @@ import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
@@ -99,12 +100,14 @@ export function BlockAccountsCard({ block, blockSlot }: { block: VersionedBlockR
 
             {accountStats.length > numDisplayed && (
                 <CardFooter ui="dashkit">
-                    <button
-                        className="btn btn-primary e-w-full"
+                    <Button
+                        ui="dashkit"
+                        variant="primary"
+                        className="e-w-full"
                         onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More
-                    </button>
+                    </Button>
                 </CardFooter>
             )}
         </Card>

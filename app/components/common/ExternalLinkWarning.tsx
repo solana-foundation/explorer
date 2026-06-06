@@ -26,7 +26,9 @@ export function ExternalLinkWarning({ href, children }: ExternalLinkWarningProps
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <button className="btn btn-white btn-sm">{children}</button>
+                <Button ui="dashkit" variant="white" size="sm">
+                    {children}
+                </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>

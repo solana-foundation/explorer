@@ -24,6 +24,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import useSWR from 'swr';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { Button } from '@/app/components/shared/ui/button';
 import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
@@ -478,9 +480,9 @@ function OverviewCard({
                     <CardTitle as="h3" ui="dashkit">
                         Transaction Overview
                     </CardTitle>
-                    <button className="btn btn-sm btn-white e-flex" onClick={onClear}>
+                    <Button ui="dashkit" variant="white" size="sm" className="e-flex" onClick={onClear}>
                         Clear
-                    </button>
+                    </Button>
                     <DownloadDropdown filename={signature || 'signature'} data={raw} />
                 </CardHeader>
                 <TableCardBody>
@@ -512,8 +514,12 @@ function OverviewCard({
                             <div className="e-flex e-flex-col e-items-start">
                                 Fee payer
                                 <span className="e-mt-[3px]">
-                                    <span className="badge bg-info-soft e-mr-1.5">Signer</span>
-                                    <span className="badge bg-danger-soft e-mr-1.5">Writable</span>
+                                    <Badge ui="dashkit" variant="info" className="e-mr-1.5">
+                                        Signer
+                                    </Badge>
+                                    <Badge ui="dashkit" variant="destructive" className="e-mr-1.5">
+                                        Writable
+                                    </Badge>
                                 </span>
                             </div>
                         </td>

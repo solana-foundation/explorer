@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { ClusterInfo, useCluster } from '@/app/providers/cluster';
 import { Cluster, clusterName } from '@/app/utils/cluster';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
@@ -127,9 +128,13 @@ const BaseFeatureCard = ({
                 <td className="e-whitespace-nowrap">Activated?</td>
                 <td className="e-text-right">
                     {activatedAt !== null ? (
-                        <span className="badge bg-success">Active on {clusterName(cluster)}</span>
+                        <Badge ui="dashkit" variant="success" tone="solid">
+                            Active on {clusterName(cluster)}
+                        </Badge>
                     ) : isPending ? (
-                        <span className="badge bg-warning text-dark">Pending activation on {clusterName(cluster)}</span>
+                        <Badge ui="dashkit" variant="warning" tone="solid">
+                            Pending activation on {clusterName(cluster)}
+                        </Badge>
                     ) : (
                         <code>Not yet activated on {clusterName(cluster)}</code>
                     )}

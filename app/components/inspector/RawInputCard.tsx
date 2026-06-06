@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { AlertCircle } from 'react-feather';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { Logger } from '@/app/shared/lib/logger';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
@@ -243,9 +244,9 @@ export function RawInput({
                     <CardTitle as="h3" ui="dashkit">
                         Inspector Input
                     </CardTitle>
-                    <button className="btn btn-sm btn-white" onClick={clearInput} type="button">
+                    <Button ui="dashkit" variant="white" size="sm" onClick={clearInput} type="button">
                         Clear
-                    </button>
+                    </Button>
                 </div>
             </CardHeader>
             <CardBody ui="dashkit">

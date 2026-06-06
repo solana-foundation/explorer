@@ -10,6 +10,9 @@ import React, { createRef } from 'react';
 import { AlertOctagon, Check, ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { Button } from '@/app/components/shared/ui/button';
+
 export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; address: string }) {
     const collectionOpt = nftData.metadata.collection;
     const collection = collectionOpt && isSome(collectionOpt) ? collectionOpt.value : null;
@@ -65,8 +68,11 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
                 <div className="e-mb-1.5 e-mt-1.5">{getSaleTypePill(metadata.primarySaleHappened)}</div>
                 <div className="e-mb-3 e-mt-1.5">{getIsMutablePill(metadata.isMutable)}</div>
                 <div className="btn-group">
-                    <button
-                        className="btn btn-dark btn-sm creators-dropdown-button-width"
+                    <Button
+                        ui="dashkit"
+                        variant="dark"
+                        size="sm"
+                        className="e-w-[150px]"
                         type="button"
                         aria-haspopup="true"
                         aria-expanded="false"
@@ -74,7 +80,7 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
                         ref={dropdownRef}
                     >
                         Creators <ChevronDown size={15} className="align-text-top" />
-                    </button>
+                    </Button>
                     <div className="dropdown-menu e-mt-1.5">
                         {getCreatorDropdownItems(isSome(metadata.creators) ? metadata.creators.value : null)}
                     </div>
@@ -145,13 +151,13 @@ function getEditionPill(editionInfo: EditionInfo) {
 
     return (
         <div className="e-ml-1.5 e-inline-flex">
-            <span className="badge badge-pill bg-dark">{`${
-                edition && masterEdition
+            <Badge ui="dashkit" variant="dark" tone="solid">
+                {edition && masterEdition
                     ? `Edition ${Number(edition.edition)} / ${Number(masterEdition.supply)}`
                     : masterEdition
                       ? 'Master Edition'
-                      : 'No Master Edition Information'
-            }`}</span>
+                      : 'No Master Edition Information'}
+            </Badge>
         </div>
     );
 }
@@ -164,16 +170,20 @@ function getSaleTypePill(hasPrimarySaleHappened: boolean) {
 
     return (
         <div className="e-inline-flex e-items-center">
-            <span className="badge badge-pill bg-dark">{`${
-                hasPrimarySaleHappened ? 'Secondary Market' : 'Primary Market'
-            }`}</span>
+            <Badge ui="dashkit" variant="dark" tone="solid">
+                {hasPrimarySaleHappened ? 'Secondary Market' : 'Primary Market'}
+            </Badge>
             <InfoTooltip bottom text={hasPrimarySaleHappened ? secondaryMarketTooltip : primaryMarketTooltip} />
         </div>
     );
 }
 
 export function getIsMutablePill(isMutable: boolean) {
-    return <span className="badge badge-pill bg-dark">{`${isMutable ? 'Mutable' : 'Immutable'}`}</span>;
+    return (
+        <Badge ui="dashkit" variant="dark" tone="solid">
+            {isMutable ? 'Mutable' : 'Immutable'}
+        </Badge>
+    );
 }
 
 export function getVerifiedCollectionPill() {
@@ -181,7 +191,9 @@ export function getVerifiedCollectionPill() {
         'This NFT has been verified as a member of an on-chain collection. This tag guarantees authenticity.';
     return (
         <div className="e-ml-1.5 e-inline-flex e-items-center">
-            <span className="badge badge-pill bg-dark">{'Verified Collection'}</span>
+            <Badge ui="dashkit" variant="dark" tone="solid">
+                Verified Collection
+            </Badge>
             <InfoTooltip bottom text={onchainVerifiedToolTip} />
         </div>
     );

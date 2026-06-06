@@ -2,6 +2,7 @@ import { cn } from '@shared/utils';
 import { forwardRef, ReactNode, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 type CollapsibleCardProps = {
@@ -25,10 +26,13 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                     </CardTitle>
                     {headerButtons}
                     {collapsible && (
-                        <button
+                        <Button
+                            ui="dashkit"
+                            variant="white"
+                            size="sm"
                             aria-expanded={expanded}
                             aria-label={expanded ? 'Collapse' : 'Expand'}
-                            className="btn btn-sm btn-white e-flex e-items-center e-justify-center e-py-[5.3px] e-transition-colors"
+                            className="e-flex e-items-center e-justify-center e-py-[5.3px] e-transition-colors"
                             onClick={() => setExpanded(current => !current)}
                         >
                             <ChevronDown
@@ -38,7 +42,7 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                                     expanded && 'e-rotate-180',
                                 )}
                             />
-                        </button>
+                        </Button>
                     )}
                 </CardHeader>
                 {collapsible ? (

@@ -2,7 +2,7 @@ import { TableCardBody } from '@components/common/TableCardBody';
 import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
-import { cn } from '@shared/utils';
+import { Button } from '@shared/ui/button';
 import { SignatureProps } from '@utils/index';
 import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
@@ -34,12 +34,16 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                     <CardTitle as="h3" ui="dashkit">
                         Program Instruction Logs
                     </CardTitle>
-                    <button
-                        className={cn('btn btn-sm e-flex e-items-center', showRaw ? 'btn-black active' : 'btn-white')}
+                    <Button
+                        ui="dashkit"
+                        size="sm"
+                        variant={showRaw ? 'black' : 'white'}
+                        active={showRaw}
+                        className="e-flex e-items-center"
                         onClick={() => setShowRaw(r => !r)}
                     >
                         <Code className="e-mr-1.5" size={13} /> Raw
-                    </button>
+                    </Button>
                 </CardHeader>
                 {prettyLogs !== null && logMessages !== null ? (
                     showRaw ? (

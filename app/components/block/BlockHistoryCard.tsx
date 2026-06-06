@@ -21,6 +21,8 @@ import React, { createRef, useMemo } from 'react';
 import { ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { Button } from '@/app/components/shared/ui/button';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
@@ -329,7 +331,9 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                     <tr key={i}>
                                         <td>{tx.index + 1}</td>
                                         <td>
-                                            <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
+                                            <Badge ui="dashkit" variant={statusClass as 'success' | 'warning'}>
+                                                {statusText}
+                                            </Badge>
                                         </td>
 
                                         <td>{signature}</td>
@@ -377,12 +381,14 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
 
             {filteredTransactions.length > numDisplayed && (
                 <CardFooter ui="dashkit">
-                    <button
-                        className="btn btn-primary e-w-full"
+                    <Button
+                        ui="dashkit"
+                        variant="primary"
+                        className="e-w-full"
                         onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More
-                    </button>
+                    </Button>
                 </CardFooter>
             )}
         </Card>
@@ -464,9 +470,9 @@ const FilterDropdown = ({ filter, invokedPrograms, totalTransactionCount }: Filt
 
     return (
         <div className="dropdown e-mr-1.5">
-            <button className="btn btn-white btn-sm" data-bs-toggle="dropdown" type="button" ref={dropdownRef}>
+            <Button ui="dashkit" variant="white" size="sm" data-bs-toggle="dropdown" type="button" ref={dropdownRef}>
                 {currentFilterOption.name} <ChevronDown className="align-text-top" size={13} />
-            </button>
+            </Button>
             <div className="token-filter dropdown-menu-end dropdown-menu">
                 {filterOptions.map(({ name, programId, transactionCount }) => (
                     <FilterLink

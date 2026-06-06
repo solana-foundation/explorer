@@ -6,6 +6,7 @@ import { useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import { RawDataField } from '@shared/RawDataField';
+import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
@@ -83,14 +84,30 @@ export function AccountsCard({ signature }: SignatureProps) {
                     )}
                 </td>
                 <td>
-                    {index === 0 && <span className="badge bg-info-soft e-mr-[3px]">Fee Payer</span>}
-                    {account.signer && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
-                    {account.writable && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
+                    {index === 0 && (
+                        <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                            Fee Payer
+                        </Badge>
+                    )}
+                    {account.signer && (
+                        <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                            Signer
+                        </Badge>
+                    )}
+                    {account.writable && (
+                        <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                            Writable
+                        </Badge>
+                    )}
                     {message.instructions.find(ix => ix.programId.equals(pubkey)) && (
-                        <span className="badge bg-warning-soft e-mr-[3px]">Program</span>
+                        <Badge ui="dashkit" variant="warning" className="e-mr-[3px]">
+                            Program
+                        </Badge>
                     )}
                     {account.source === 'lookupTable' && (
-                        <span className="badge bg-gray-soft e-mr-[3px]">Address Table Lookup</span>
+                        <Badge ui="dashkit" variant="gray" className="e-mr-[3px]">
+                            Address Table Lookup
+                        </Badge>
                     )}
                 </td>
             </tr>

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import type { VariantProps } from 'class-variance-authority';
-import { ArrowRight, Check, Download, X } from 'react-feather';
+import { useState } from 'react';
+import { ArrowRight, Check, ChevronDown, Download, ExternalLink, RefreshCw, X } from 'react-feather';
 import { expect, within } from 'storybook/test';
 
 import { Button, buttonVariants } from './button';
@@ -8,8 +9,8 @@ import { Button, buttonVariants } from './button';
 type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>['size']>;
 type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>['variant']>;
 
-const sizeOptions = ['default', 'sm', 'lg', 'icon', 'compact'] as const satisfies readonly ButtonSize[];
-const variantOptions = [
+// TW-only variants (the modern OKLCH look). Dashkit-mode variants are listed separately below.
+const twVariantOptions = [
     'default',
     'accent',
     'compact',
@@ -20,7 +21,25 @@ const variantOptions = [
     'secondary',
 ] as const satisfies readonly ButtonVariant[];
 
-const variantIcons: Record<ButtonVariant, typeof Check | typeof X | typeof Download | typeof ArrowRight> = {
+type TwVariant = (typeof twVariantOptions)[number];
+
+const sizeOptions = ['default', 'sm', 'lg', 'icon', 'compact'] as const satisfies readonly ButtonSize[];
+
+// Dashkit migration shim — emits raw Bootstrap `.btn` + `.btn-<variant>` classes via `ui="dashkit"`.
+// Stays until consumers migrate to the OKLCH-flavored `ui="tw"` surface.
+const dashkitVariantOptions = [
+    'primary',
+    'secondary',
+    'white',
+    'black',
+    'dark',
+    'outline-primary',
+    'outline-danger',
+] as const satisfies readonly ButtonVariant[];
+
+const dashkitSizeOptions = ['default', 'sm', 'lg'] as const satisfies readonly ButtonSize[];
+
+const twVariantIcons: Record<TwVariant, typeof Check | typeof X | typeof Download | typeof ArrowRight> = {
     accent: Check,
     compact: Check,
     default: Check,
@@ -33,20 +52,12 @@ const variantIcons: Record<ButtonVariant, typeof Check | typeof X | typeof Downl
 
 const meta: Meta<typeof Button> = {
     argTypes: {
-        asChild: {
-            control: 'boolean',
-        },
-        disabled: {
-            control: 'boolean',
-        },
-        size: {
-            control: 'select',
-            options: sizeOptions,
-        },
-        variant: {
-            control: 'select',
-            options: variantOptions,
-        },
+        active: { control: 'boolean' },
+        asChild: { control: 'boolean' },
+        disabled: { control: 'boolean' },
+        size: { control: 'select', options: sizeOptions },
+        ui: { control: 'select', options: ['tw', 'dashkit'] },
+        variant: { control: 'select', options: [...twVariantOptions, ...dashkitVariantOptions] },
     },
     component: Button,
     tags: ['autodocs'],
@@ -70,7 +81,7 @@ export const Default: Story = {
 export const AllVariants: Story = {
     render: () => (
         <div className="e-flex e-flex-wrap e-gap-4">
-            {variantOptions.map(variant => (
+            {twVariantOptions.map(variant => (
                 <Button key={variant} variant={variant}>
                     {variant}
                 </Button>
@@ -94,7 +105,7 @@ export const AllSizes: Story = {
 export const WithIcons: Story = {
     render: () => {
         const variantIcons: Record<
-            ButtonVariant,
+            TwVariant,
             {
                 icon: typeof Check | typeof X | typeof Download | typeof ArrowRight;
                 label: string;
@@ -113,7 +124,7 @@ export const WithIcons: Story = {
 
         return (
             <div className="e-flex e-flex-wrap e-gap-4">
-                {variantOptions.map(variant => {
+                {twVariantOptions.map(variant => {
                     const { icon: Icon, label, position = 'left' } = variantIcons[variant];
                     return (
                         <Button key={variant} variant={variant}>
@@ -131,7 +142,7 @@ export const WithIcons: Story = {
 export const Disabled: Story = {
     render: () => (
         <div className="e-flex e-flex-wrap e-gap-4">
-            {variantOptions.map(variant => (
+            {twVariantOptions.map(variant => (
                 <Button key={variant} variant={variant} disabled>
                     Disabled {variant}
                 </Button>
@@ -143,8 +154,8 @@ export const Disabled: Story = {
 export const IconOnly: Story = {
     render: () => (
         <div className="e-flex e-flex-wrap e-gap-4">
-            {variantOptions.map(variant => {
-                const Icon = variantIcons[variant];
+            {twVariantOptions.map(variant => {
+                const Icon = twVariantIcons[variant];
                 return (
                     <Button key={variant} size="icon" variant={variant}>
                         <Icon />
@@ -171,8 +182,8 @@ export const VariantsBySize: Story = {
                     <div key={size} className="e-flex e-flex-col e-gap-2">
                         <h3 className="e-text-sm e-font-semibold">{sizeLabels[size]}</h3>
                         <div className="e-flex e-flex-wrap e-gap-4">
-                            {variantOptions.map(variant => {
-                                const Icon = variantIcons[variant];
+                            {twVariantOptions.map(variant => {
+                                const Icon = twVariantIcons[variant];
                                 return (
                                     <Button key={variant} size={size} variant={variant}>
                                         {size === 'icon' ? <Icon /> : variant}
@@ -197,4 +208,130 @@ export const Interactive: Story = {
         const button = canvas.getByRole('button', { name: 'Click me' });
         expect(button).toBeInTheDocument();
     },
+};
+
+// ===== Dashkit migration shim showcases =====
+
+export const DashkitVariants: Story = {
+    name: 'Dashkit / Variants',
+    render: () => (
+        <div className="e-flex e-flex-wrap e-gap-4">
+            {dashkitVariantOptions.map(variant => (
+                <Button key={variant} ui="dashkit" variant={variant}>
+                    {variant}
+                </Button>
+            ))}
+        </div>
+    ),
+};
+
+export const DashkitVariantsSm: Story = {
+    name: 'Dashkit / Variants (size=sm)',
+    render: () => (
+        <div className="e-flex e-flex-wrap e-gap-4">
+            {dashkitVariantOptions.map(variant => (
+                <Button key={variant} ui="dashkit" variant={variant} size="sm">
+                    {variant}
+                </Button>
+            ))}
+        </div>
+    ),
+};
+
+export const DashkitVariantsBySize: Story = {
+    name: 'Dashkit / Variants by size',
+    render: () => (
+        <div className="e-flex e-flex-col e-gap-6">
+            {dashkitSizeOptions.map(size => (
+                <div key={size} className="e-flex e-flex-col e-gap-2">
+                    <h3 className="e-text-sm e-font-semibold">size=&quot;{size}&quot;</h3>
+                    <div className="e-flex e-flex-wrap e-gap-4">
+                        {dashkitVariantOptions.map(variant => (
+                            <Button key={variant} ui="dashkit" variant={variant} size={size}>
+                                {variant}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+            ))}
+        </div>
+    ),
+};
+
+export const DashkitWithIcons: Story = {
+    name: 'Dashkit / With icons',
+    render: () => (
+        <div className="e-flex e-flex-wrap e-gap-4">
+            <Button ui="dashkit" variant="primary" size="sm">
+                <Check size={13} className="e-mr-1.5" /> Save
+            </Button>
+            <Button ui="dashkit" variant="white" size="sm">
+                <RefreshCw size={13} className="align-text-top e-mr-1.5" /> Refresh
+            </Button>
+            <Button ui="dashkit" variant="outline-primary" size="sm">
+                <Download size={13} className="e-mr-1.5" /> Download
+            </Button>
+            <Button ui="dashkit" variant="outline-danger" size="sm">
+                <X size={13} className="e-mr-1.5" /> Remove
+            </Button>
+            <Button ui="dashkit" variant="dark" size="sm">
+                Creators <ChevronDown size={15} className="align-text-top" />
+            </Button>
+        </div>
+    ),
+};
+
+// Mirrors the legacy `btn-group-toggle` pattern used for view-mode toggles in card headers
+// (e.g. ProgramLogSection / ProgramEventsCard "Raw"). `active` toggles the pressed state on `btn-black`.
+function DashkitToggleDemo() {
+    const [showRaw, setShowRaw] = useState(false);
+    return (
+        <Button
+            ui="dashkit"
+            size="sm"
+            variant={showRaw ? 'black' : 'white'}
+            active={showRaw}
+            className="e-flex e-items-center"
+            onClick={() => setShowRaw(r => !r)}
+        >
+            <ExternalLink size={13} className="e-mr-1.5" /> Raw {showRaw ? '(on)' : '(off)'}
+        </Button>
+    );
+}
+
+export const DashkitToggleGroup: Story = {
+    name: 'Dashkit / Toggle (btn-black active)',
+    render: () => <DashkitToggleDemo />,
+};
+
+export const DashkitAsLink: Story = {
+    name: 'Dashkit / As link',
+    render: () => (
+        <div className="e-flex e-flex-wrap e-gap-4">
+            <Button ui="dashkit" variant="outline-primary" size="sm" asChild>
+                <a href="https://example.com" target="_blank" rel="noopener noreferrer">
+                    Full documentation
+                    <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
+                </a>
+            </Button>
+            <Button ui="dashkit" variant="white" size="sm" asChild>
+                <a href="https://example.com" target="_blank" rel="noopener noreferrer">
+                    Plain link
+                </a>
+            </Button>
+        </div>
+    ),
+};
+
+export const DashkitDisabled: Story = {
+    name: 'Dashkit / Disabled',
+    render: () => (
+        <div className="e-flex e-flex-wrap e-gap-4">
+            {dashkitVariantOptions.map(variant => (
+                <Button key={variant} ui="dashkit" variant={variant} disabled>
+                    Disabled {variant}
+                </Button>
+            ))}
+        </div>
+    ),
 };

@@ -48,6 +48,7 @@ import { ExternalLink } from 'react-feather';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
 import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
@@ -69,10 +70,11 @@ const getEthAddress = (link?: string) => {
     return address;
 };
 
-const StatusBadge = ({ status }: { status: string }) => {
-    const badgeClass = status === 'initialized' ? 'bg-success-soft' : 'bg-warning-soft';
-    return <span className={`badge ${badgeClass}`}>{capitalCase(status)}</span>;
-};
+const StatusBadge = ({ status }: { status: string }) => (
+    <Badge ui="dashkit" variant={status === 'initialized' ? 'success' : 'warning'}>
+        {capitalCase(status)}
+    </Badge>
+);
 
 export function TokenAccountSection({
     account,

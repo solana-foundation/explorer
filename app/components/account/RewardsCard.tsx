@@ -11,6 +11,7 @@ import { PublicKey } from '@solana/web3.js';
 import { lamportsToSolString } from '@utils/index';
 import React from 'react';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 const U64_MAX = BigInt('0xffffffffffffffff');
@@ -108,7 +109,13 @@ export function RewardsCard({ address }: { address: string }) {
                     {foundOldest ? (
                         <div className="e-text-center e-text-dk-gray-700">Fetched full reward history</div>
                     ) : (
-                        <button className="btn btn-primary e-w-full" onClick={() => loadMore()} disabled={fetching}>
+                        <Button
+                            ui="dashkit"
+                            variant="primary"
+                            className="e-w-full"
+                            onClick={() => loadMore()}
+                            disabled={fetching}
+                        >
                             {fetching ? (
                                 <>
                                     <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5 e-align-text-top"></span>
@@ -117,7 +124,7 @@ export function RewardsCard({ address }: { address: string }) {
                             ) : (
                                 'Load More'
                             )}
-                        </button>
+                        </Button>
                     )}
                 </CardFooter>
             </Card>

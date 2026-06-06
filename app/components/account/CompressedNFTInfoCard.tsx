@@ -1,5 +1,5 @@
 import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
-import { cn } from '@shared/utils';
+import { Badge } from '@shared/ui/badge';
 import { ConcurrentMerkleTreeAccount, MerkleTree } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';
@@ -115,28 +115,37 @@ export function DasCompressionInfoCard({
 function getVerifiedProofPill(verified: boolean) {
     return (
         <div className="e-ml-1.5 e-inline-flex e-items-center">
-            <span className={cn('badge badge-pill bg-dark', !verified && 'bg-danger-soft')}>{`Proof ${
-                verified ? '' : 'Not'
-            } Verified`}</span>
+            {verified ? (
+                <Badge ui="dashkit" variant="dark" tone="solid">
+                    Proof Verified
+                </Badge>
+            ) : (
+                <Badge ui="dashkit" variant="danger">
+                    Proof Not Verified
+                </Badge>
+            )}
         </div>
     );
 }
 
 function getProofSizePill(proofSize: number) {
-    let text: string;
-    let color = 'bg-dark';
-    if (proofSize == 0) {
-        text = 'No Proof Required';
-    } else if (proofSize > 8) {
-        text = `Composability Hazard`;
-        color = 'bg-danger-soft';
-    } else {
-        return <div />;
+    if (proofSize === 0) {
+        return (
+            <div className="e-ml-1.5 e-inline-flex e-items-center">
+                <Badge ui="dashkit" variant="dark" tone="solid">
+                    No Proof Required
+                </Badge>
+            </div>
+        );
     }
-
-    return (
-        <div className="e-ml-1.5 e-inline-flex e-items-center">
-            <span className={`badge badge-pill ${color}`}>{text}</span>
-        </div>
-    );
+    if (proofSize > 8) {
+        return (
+            <div className="e-ml-1.5 e-inline-flex e-items-center">
+                <Badge ui="dashkit" variant="danger">
+                    Composability Hazard
+                </Badge>
+            </div>
+        );
+    }
+    return <div />;
 }
