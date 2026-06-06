@@ -28,7 +28,7 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                     ui="dashkit"
                     className={cn('e-h-auto e-min-h-[60px] e-gap-2', collapsible && !expanded && 'e-border-b-0')}
                 >
-                    <BaseCardTitle ui="dashkit" className="e-flex e-items-center e-break-all">
+                    <BaseCardTitle ui="dashkit" className="e-flex e-min-w-0 e-items-center e-break-all">
                         {title}
                     </BaseCardTitle>
                     {headerButtons}

@@ -26,10 +26,13 @@ export function UnknownDetailsCard({
             ref={scrollAnchorRef}
             defaultExpanded={false}
             title={
-                <>
-                    <span className="badge bg-info-soft e-mr-1.5">#{index + 1}</span>
-                    {programName} Instruction
-                </>
+                <span className="e-flex e-min-w-0 e-flex-1 e-items-center">
+                    <span className="badge bg-info-soft e-mr-1.5 e-flex-none">#{index + 1}</span>
+                    <span className="e-min-w-0 e-flex-1 e-overflow-hidden e-text-ellipsis e-whitespace-nowrap">
+                        {programName}
+                    </span>
+                    <span className="e-ml-1.5 e-flex-none">Instruction</span>
+                </span>
             }
         >
             <TableCardBody>

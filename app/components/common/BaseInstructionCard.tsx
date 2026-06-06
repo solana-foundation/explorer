@@ -63,13 +63,15 @@ export function BaseInstructionCard({
             ref={scrollAnchorRef}
             collapsible={collapsible}
             title={
-                <>
-                    <span className={`badge bg-${resultClass}-soft e-mr-1.5`}>
+                <span className="e-flex e-min-w-0 e-flex-1 e-items-center">
+                    <span className={`badge bg-${resultClass}-soft e-mr-1.5 e-flex-none`}>
                         #{index + 1}
                         {childIndex !== undefined ? `.${childIndex + 1}` : ''}
                     </span>
-                    {title}
-                </>
+                    <span className="e-min-w-0 e-flex-1 e-overflow-hidden e-text-ellipsis e-whitespace-nowrap">
+                        {title}
+                    </span>
+                </span>
             }
             headerButtons={
                 <div className="e-flex e-items-center e-gap-1.5">
