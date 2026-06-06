@@ -42,7 +42,10 @@ export function SimpleCardSkeleton({ withTitle = false, title }: { withTitle?: b
         <Card ui="dashkit" className="e-mb-3 e-w-full md:e-mb-6">
             {withTitle && (
                 <CardHeader ui="dashkit">
-                    <Skeleton className="e-h-5 e-w-40" />
+                    {/* Wrapper absorbs CardHeader's [&>:first-child]:e-flex-1 so Skeleton's e-w-40 isn't stretched to full width. */}
+                    <div>
+                        <Skeleton className="e-h-5 e-w-40" />
+                    </div>
                 </CardHeader>
             )}
             <CardBody ui="dashkit">
@@ -58,7 +61,10 @@ export function RichListSkeleton({ rows = 2 }: { rows?: number }) {
     return (
         <Card ui="dashkit" flex="grow">
             <CardHeader ui="dashkit">
-                <Skeleton className="e-h-5 e-w-40" />
+                {/* Wrapper absorbs CardHeader's [&>:first-child]:e-flex-1 so Skeleton's e-w-40 isn't stretched to full width. */}
+                <div>
+                    <Skeleton className="e-h-5 e-w-40" />
+                </div>
             </CardHeader>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive e-mb-0">
@@ -78,7 +84,10 @@ export function StatsTableSkeleton({ rows = 8 }: { rows?: number }) {
     return (
         <Card ui="dashkit" flex="grow">
             <CardHeader ui="dashkit">
-                <Skeleton className="e-h-5 e-w-40" />
+                {/* Wrapper absorbs CardHeader's [&>:first-child]:e-flex-1 so Skeleton's e-w-40 isn't stretched to full width. */}
+                <div>
+                    <Skeleton className="e-h-5 e-w-40" />
+                </div>
             </CardHeader>
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
             <div className="table-responsive e-mb-0">
