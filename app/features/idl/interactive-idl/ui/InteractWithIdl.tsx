@@ -20,7 +20,8 @@ export interface InteractWithIdlAnalyticsCallbacks {
     onTabOpened?: (programId?: string) => void;
     onTransactionConfirmed?: (programId?: string, instructionName?: string, signature?: string) => void;
     onTransactionFailed?: (programId?: string, instructionName?: string, error?: string) => void;
-    onTransactionSubmitted?: (programId?: string, instructionName?: string) => void;
+    onTransactionSimulationStart?: (programId?: string, instructionName?: string) => void;
+    onTransactionExecutionStart?: (programId?: string, instructionName?: string) => void;
     onWalletConnected?: (programId?: string, walletType?: string) => void;
 }
 
@@ -31,7 +32,8 @@ export function InteractWithIdl({
     onTabOpened,
     onTransactionConfirmed,
     onTransactionFailed,
-    onTransactionSubmitted,
+    onTransactionSimulationStart,
+    onTransactionExecutionStart,
     onWalletConnected,
 }: {
     data?: InstructionData[];
@@ -90,13 +92,25 @@ export function InteractWithIdl({
         [toast, currentInstruction, onTransactionFailed],
     );
 
-    const { invokeInstruction, initializationError, isExecuting, lastResult, parseLogs } = useInstruction({
+    const {
+        executeInstruction,
+        simulateInstruction,
+        initializationError,
+        isExecuting,
+        isSimulating,
+        lastResult,
+        lastSimulation,
+        parseLogs,
+        parseSimulationLogs,
+    } = useInstruction({
         enabled: isEnabled({ connected, idl, programId: progId, publicKey }),
         idl,
         onError: handleTransactionError,
         onSuccess: handleTransactionSuccess,
         programId: progId?.toString(),
     });
+
+    const [lastAction, setLastAction] = useState<'execute' | 'simulate' | null>(null);
 
     const { requireConfirmation, confirm, cancel, isOpen, hasPendingAction } = useMainnetConfirmation<{
         data: InstructionData;
@@ -107,18 +121,29 @@ export function InteractWithIdl({
         async (data: InstructionData, params: InstructionCallParams) => {
             const programIdStr = progId?.toString();
 
-            onTransactionSubmitted?.(programIdStr, data.name);
+            setLastAction('execute');
+            onTransactionExecutionStart?.(programIdStr, data.name);
 
             setCurrentInstruction({ name: data.name, programId: programIdStr });
 
             await requireConfirmation(
                 async () => {
-                    await invokeInstruction(data.name, data, params);
+                    await executeInstruction(data.name, data, params);
                 },
                 { data, params },
             );
         },
-        [invokeInstruction, requireConfirmation, progId, onTransactionSubmitted],
+        [executeInstruction, requireConfirmation, progId, onTransactionExecutionStart],
+    );
+
+    const handleSimulateInstruction = useCallback(
+        async (data: InstructionData, params: InstructionCallParams) => {
+            const programIdStr = progId?.toString();
+            setLastAction('simulate');
+            onTransactionSimulationStart?.(programIdStr, data.name);
+            await simulateInstruction(data.name, data, params);
+        },
+        [simulateInstruction, progId, onTransactionSimulationStart],
     );
 
     if (initializationError) {
@@ -138,12 +163,17 @@ export function InteractWithIdl({
                 instructions={instructions || []}
                 idl={idl as SupportedIdl}
                 onExecuteInstruction={handleExecuteInstruction}
+                onSimulateInstruction={handleSimulateInstruction}
                 onSectionsExpanded={expandedSections => {
                     onSectionsExpanded?.(progId?.toString(), expandedSections);
                 }}
                 isExecuting={isExecuting}
+                isSimulating={isSimulating}
                 lastResult={lastResult}
+                lastSimulation={lastSimulation}
                 parseLogs={parseLogs}
+                parseSimulationLogs={parseSimulationLogs}
+                lastAction={lastAction}
             />
             {hasPendingAction && (
                 <MainnetWarningDialog

@@ -6,21 +6,7 @@ import { ProgramLogs } from '../ProgramLogs';
 
 const meta = {
     component: ProgramLogs,
-    decorators: [
-        Story => (
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    maxHeight: '600px',
-                    maxWidth: '100%',
-                    width: '800px',
-                }}
-            >
-                <Story />
-            </div>
-        ),
-    ],
+    globals: { viewport: { value: 'responsive' } },
     tags: ['autodocs', 'test'],
     title: 'Entities/Program Logs/ProgramLogs',
 } satisfies Meta<typeof ProgramLogs>;

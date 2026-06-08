@@ -4,16 +4,25 @@ import type { InstructionData } from '@entities/idl';
 import { Accordion } from '@radix-ui/react-accordion';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InteractInstruction } from '../InteractInstruction';
 
+// jsdom doesn't implement ResizeObserver, which Radix Tooltip relies on once focused.
+if (typeof globalThis.ResizeObserver === 'undefined') {
+    globalThis.ResizeObserver = class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+    } as unknown as typeof ResizeObserver;
+}
+
+const walletMock = vi.hoisted(() => ({ connected: false, publicKey: null as PublicKey | null }));
+
 // Mock wallet adapter
 vi.mock('@solana/wallet-adapter-react', () => ({
-    useWallet: () => ({
-        connected: false,
-        publicKey: null,
-    }),
+    useWallet: () => walletMock,
 }));
 
 // Mock usePdas hook
@@ -22,15 +31,30 @@ vi.mock('../../model/use-pdas', () => ({
 }));
 
 describe('InteractInstruction', () => {
+    beforeEach(() => {
+        walletMock.connected = false;
+        walletMock.publicKey = null;
+    });
+
     // Helper to render InteractInstruction with accordion expanded
-    const renderInteractInstruction = (instruction: InstructionData) => {
+    const renderInteractInstruction = (
+        instruction: InstructionData,
+        props?: Partial<{
+            onExecuteInstruction: ReturnType<typeof vi.fn>;
+            onSimulateInstruction: ReturnType<typeof vi.fn>;
+            isExecuting: boolean;
+            isSimulating: boolean;
+        }>,
+    ) => {
         return render(
             <Accordion type="multiple" value={[instruction.name]}>
                 <InteractInstruction
                     idl={undefined}
                     instruction={instruction}
-                    onExecuteInstruction={vi.fn()}
-                    isExecuting={false}
+                    onExecuteInstruction={props?.onExecuteInstruction ?? vi.fn()}
+                    onSimulateInstruction={props?.onSimulateInstruction ?? vi.fn()}
+                    isExecuting={props?.isExecuting ?? false}
+                    isSimulating={props?.isSimulating ?? false}
                 />
             </Accordion>,
         );
@@ -188,6 +212,64 @@ describe('InteractInstruction', () => {
             const inputs = screen.getAllByRole('textbox');
             // At least the first input should have the default value
             expect(inputs[0]).toHaveValue('1');
+        });
+    });
+
+    describe('Actions', () => {
+        it('should render both Execute and Simulate buttons', () => {
+            renderInteractInstruction(createInstruction());
+            expect(screen.getByRole('button', { name: /execute/i })).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: /simulate/i })).toBeInTheDocument();
+        });
+
+        it('should call onSimulateInstruction when Simulate is clicked', async () => {
+            walletMock.connected = true;
+            walletMock.publicKey = PublicKey.default;
+            const onSimulate = vi.fn();
+            const user = userEvent.setup();
+            renderInteractInstruction(createInstruction(), { onSimulateInstruction: onSimulate });
+
+            await user.click(screen.getByRole('button', { name: /simulate/i }));
+
+            expect(onSimulate).toHaveBeenCalledTimes(1);
+        });
+
+        it('should call onExecuteInstruction when Execute is clicked', async () => {
+            walletMock.connected = true;
+            walletMock.publicKey = PublicKey.default;
+            const onExecute = vi.fn();
+            const user = userEvent.setup();
+            renderInteractInstruction(createInstruction(), { onExecuteInstruction: onExecute });
+
+            await user.click(screen.getByRole('button', { name: /execute/i }));
+
+            expect(onExecute).toHaveBeenCalledTimes(1);
+        });
+
+        it('should disable both buttons while executing', () => {
+            walletMock.connected = true;
+            walletMock.publicKey = PublicKey.default;
+            renderInteractInstruction(createInstruction(), { isExecuting: true });
+
+            expect(screen.getByRole('button', { name: /execute/i })).toBeDisabled();
+            expect(screen.getByRole('button', { name: /simulate/i })).toBeDisabled();
+        });
+
+        it('should disable both buttons while simulating', () => {
+            walletMock.connected = true;
+            walletMock.publicKey = PublicKey.default;
+            renderInteractInstruction(createInstruction(), { isSimulating: true });
+
+            expect(screen.getByRole('button', { name: /execute/i })).toBeDisabled();
+            expect(screen.getByRole('button', { name: /simulate/i })).toBeDisabled();
+        });
+
+        it('should disable both buttons when wallet is not connected', () => {
+            walletMock.connected = false;
+            renderInteractInstruction(createInstruction());
+
+            expect(screen.getByRole('button', { name: /execute/i })).toBeDisabled();
+            expect(screen.getByRole('button', { name: /simulate/i })).toBeDisabled();
         });
     });
 });

@@ -7,7 +7,7 @@ import type {
     SupportedIdl,
 } from '@entities/idl';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { Loader, Send } from 'react-feather';
+import { Loader, Play, Send } from 'react-feather';
 import { Control, Controller, FieldPath } from 'react-hook-form';
 
 import { Card, CardSection } from '@/app/shared/ui/Card';
@@ -27,23 +27,31 @@ import { usePdas } from '../model/use-pdas';
 import { AccordionContent, AccordionItem, AccordionTrigger } from './Accordion';
 import { AccountInput } from './AccountInput';
 import { ArgumentInput } from './ArgumentInput';
+import { WarningNote } from './WarningNote';
 
 // FIXME: missing Storybook story — uses useWallet + react-hook-form Controllers + nested IDL fixtures.
 export function InteractInstruction({
     idl,
     instruction,
     onExecuteInstruction,
+    onSimulateInstruction,
     isExecuting,
+    isSimulating,
 }: {
     idl: SupportedIdl | undefined;
     onExecuteInstruction: (data: InstructionData, params: InstructionCallParams) => void;
+    onSimulateInstruction: (data: InstructionData, params: InstructionCallParams) => void;
     instruction: InstructionData;
     isExecuting: boolean;
+    isSimulating: boolean;
 }) {
     const { connected: walletConnected, publicKey } = useWallet();
 
-    const { form, onSubmit, validationRules, fieldNames } = useInstructionForm({
+    const { form, onSubmit, onSimulate, validationRules, fieldNames } = useInstructionForm({
         instruction,
+        onSimulate: params => {
+            onSimulateInstruction(instruction, params);
+        },
         onSubmit: params => {
             onExecuteInstruction(instruction, params);
         },
@@ -62,7 +70,7 @@ export function InteractInstruction({
     });
     usePdaPrefill({ fieldNames, form, instruction, pdas });
 
-    const executeDisabled = !walletConnected || isExecuting;
+    const interactionDisabled = !walletConnected || isExecuting || isSimulating;
 
     return (
         <Card variant="tight">
@@ -141,12 +149,20 @@ export function InteractInstruction({
                         </CardSection>
                     )}
                     <div className="px-6 pb-2.5">
-                        <ExecuteButton
-                            onClick={onSubmit}
-                            disabled={executeDisabled}
-                            isExecuting={isExecuting}
-                            tooltipText="Connect your wallet to execute the instruction"
-                        />
+                        <div className="flex gap-2">
+                            <ExecuteButton
+                                onClick={onSubmit}
+                                disabled={interactionDisabled}
+                                isExecuting={isExecuting}
+                                tooltipText={!walletConnected ? 'Connect your wallet to execute this instruction' : ''}
+                            />
+                            <SimulateButton
+                                onClick={onSimulate}
+                                disabled={interactionDisabled}
+                                isSimulating={isSimulating}
+                            />
+                        </div>
+                        <WarningNote className="mt-2" label="Instruction simulation is skipped during execution" />
                     </div>
                 </AccordionContent>
             </AccordionItem>
@@ -242,7 +258,7 @@ function ExecuteButton({
         </Button>
     );
 
-    if (!disabled || !tooltipText) {
+    if (!tooltipText) {
         return button;
     }
 
@@ -255,5 +271,22 @@ function ExecuteButton({
                 <div className="min-w-36 max-w-16">{tooltipText}</div>
             </TooltipContent>
         </Tooltip>
+    );
+}
+
+function SimulateButton({
+    onClick,
+    disabled,
+    isSimulating,
+}: {
+    onClick: () => void;
+    disabled: boolean;
+    isSimulating: boolean;
+}) {
+    return (
+        <Button variant="outline" size="sm" onClick={onClick} disabled={disabled}>
+            {isSimulating ? <Loader size={16} className="e-animate-spin" /> : <Play size={16} />}
+            Simulate
+        </Button>
     );
 }
