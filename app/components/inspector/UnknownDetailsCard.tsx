@@ -44,7 +44,7 @@ export function UnknownDetailsCard({
                 <BaseRawDetails ix={ix} />
                 {innerCards && innerCards.length > 0 && (
                     <>
-                        <BaseTable.Row className="table-sep">
+                        <BaseTable.Row className="e-text-dk-xs e-uppercase e-tracking-[0.08em] e-text-dk-gray-600">
                             <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>
