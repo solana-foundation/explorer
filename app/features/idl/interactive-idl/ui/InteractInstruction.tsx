@@ -1,4 +1,4 @@
-import { Button } from '@components/shared/ui/button';
+import { Button, type ButtonProps } from '@components/shared/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
 import type {
     InstructionAccountData,
@@ -7,6 +7,7 @@ import type {
     SupportedIdl,
 } from '@entities/idl';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { type ReactNode } from 'react';
 import { Loader, Play, Send } from 'react-feather';
 import { Control, Controller, FieldPath } from 'react-hook-form';
 
@@ -28,6 +29,8 @@ import { AccordionContent, AccordionItem, AccordionTrigger } from './Accordion';
 import { AccountInput } from './AccountInput';
 import { ArgumentInput } from './ArgumentInput';
 import { WarningNote } from './WarningNote';
+
+const WALLET_CONNECT_TOOLTIP = 'Connect your wallet to interact with this instruction';
 
 // FIXME: missing Storybook story — uses useWallet + react-hook-form Controllers + nested IDL fixtures.
 export function InteractInstruction({
@@ -148,18 +151,25 @@ export function InteractInstruction({
                             </div>
                         </CardSection>
                     )}
-                    <div className="px-6 pb-2.5">
-                        <div className="flex gap-2">
-                            <ExecuteButton
+                    <div className="e-px-6 e-pb-2.5">
+                        <div className="e-flex e-gap-2">
+                            <ActionButton
                                 onClick={onSubmit}
                                 disabled={interactionDisabled}
-                                isExecuting={isExecuting}
-                                tooltipText={!walletConnected ? 'Connect your wallet to execute this instruction' : ''}
+                                loading={isExecuting}
+                                icon={<Send size={16} />}
+                                label="Execute"
+                                variant="accent"
+                                tooltipText={!walletConnected ? WALLET_CONNECT_TOOLTIP : ''}
                             />
-                            <SimulateButton
+                            <ActionButton
                                 onClick={onSimulate}
                                 disabled={interactionDisabled}
-                                isSimulating={isSimulating}
+                                loading={isSimulating}
+                                icon={<Play size={16} />}
+                                label="Simulate"
+                                variant="outline"
+                                tooltipText={!walletConnected ? WALLET_CONNECT_TOOLTIP : ''}
                             />
                         </div>
                         <WarningNote className="mt-2" label="Instruction simulation is skipped during execution" />
@@ -240,21 +250,27 @@ function NestedAccountGroup({
     );
 }
 
-function ExecuteButton({
+function ActionButton({
     onClick,
     disabled,
-    isExecuting,
+    loading,
+    icon,
+    label,
+    variant,
     tooltipText,
 }: {
     onClick: () => void;
     disabled: boolean;
-    isExecuting: boolean;
+    loading: boolean;
+    icon: ReactNode;
+    label: string;
+    variant: ButtonProps['variant'];
     tooltipText?: string;
 }) {
     const button = (
-        <Button variant="accent" size="sm" onClick={onClick} disabled={disabled}>
-            {isExecuting ? <Loader size={16} className="animate-spin" /> : <Send size={16} />}
-            Execute
+        <Button variant={variant} size="sm" onClick={onClick} disabled={disabled}>
+            {loading ? <Loader size={16} className="animate-spin" /> : icon}
+            {label}
         </Button>
     );
 
@@ -271,22 +287,5 @@ function ExecuteButton({
                 <div className="min-w-36 max-w-16">{tooltipText}</div>
             </TooltipContent>
         </Tooltip>
-    );
-}
-
-function SimulateButton({
-    onClick,
-    disabled,
-    isSimulating,
-}: {
-    onClick: () => void;
-    disabled: boolean;
-    isSimulating: boolean;
-}) {
-    return (
-        <Button variant="outline" size="sm" onClick={onClick} disabled={disabled}>
-            {isSimulating ? <Loader size={16} className="e-animate-spin" /> : <Play size={16} />}
-            Simulate
-        </Button>
     );
 }
