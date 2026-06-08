@@ -4,7 +4,7 @@
 
 Off-chain metadata and image URIs (which originate from on-chain, third-party data) SHALL be routed through the server-side proxy at `/api/metadata/proxy` when `NEXT_PUBLIC_METADATA_ENABLED === 'true'`, and SHALL be passed through unchanged for direct browser fetching when the flag is unset or any other value.
 
-The client rewriter `getProxiedUri` SHALL only rewrite `http:`/`https:` URIs to `/api/metadata/proxy?uri=<encoded>`; non-HTTP URIs and empty strings SHALL be returned unchanged. The route itself SHALL respond `404` whenever the feature is not enabled, so the proxy cannot be reached in disabled deployments even by direct URL.
+The client rewriter `getProxiedUri` SHALL only rewrite `http:`/`https:` URIs to `/api/metadata/proxy?uri=<encoded>`; non-HTTP URIs, empty strings, and unparseable URIs SHALL be returned unchanged. A malformed on-chain URI MUST NOT throw — callers render the returned value inline (often outside an error boundary), so a throw would crash the surrounding component. The route itself SHALL respond `404` whenever the feature is not enabled, so the proxy cannot be reached in disabled deployments even by direct URL.
 
 #### Scenario: Feature disabled
 
@@ -21,6 +21,11 @@ The client rewriter `getProxiedUri` SHALL only rewrite `http:`/`https:` URIs to 
 
 - **WHEN** the feature is enabled and the URI uses a non-HTTP scheme (e.g. `ipfs:`, `data:`)
 - **THEN** `getProxiedUri` SHALL return the URI unchanged rather than route it through the proxy
+
+#### Scenario: Malformed URI while enabled
+
+- **WHEN** the feature is enabled and the URI cannot be parsed as an absolute URL (e.g. `not-a-url`, `http://`)
+- **THEN** `getProxiedUri` SHALL return the value unchanged rather than throw, so a single bad on-chain URI cannot crash the component rendering it
 
 ### Requirement: The proxy SHALL block SSRF via private-IP rejection and DNS pinning
 
@@ -66,9 +71,9 @@ A redirect status without a `Location` header SHALL be a `502`; a redirect that 
 
 ### Requirement: The proxy SHALL enforce a configurable per-request size cap
 
-The proxy SHALL reject any upstream body exceeding a per-request byte cap with `413`, where the cap defaults to 4 MB (4,000,000 bytes) — chosen to sit just under Vercel's ~4.5 MB buffered-response limit (a thin ~0.5 MB margin) while still bounding the memory the function buffers — and is overridable via `NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE`.
+The proxy SHALL reject any upstream body exceeding a per-request byte cap with `413`, where the cap defaults to 4 MB (4,000,000 bytes) — chosen to sit just under Vercel's ~4.5 MB buffered-response limit (a thin ~0.5 MB margin) while still bounding the memory the function buffers — and is overridable via `NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE`. The override SHALL be validated as a positive integer at module load; a missing or malformed value (non-numeric, zero, negative, or `NaN`) SHALL fall back to the default and be logged, so a misconfigured env cannot silently disable the cap (fail open).
 
-The cap MUST be enforced everywhere the size becomes knowable so no oversize body is fully buffered: the `Content-Length` pre-check, the streamed read (which aborts mid-stream when `Content-Length` is omitted or understated), the `fetch()`-rejection path, and the decode step. A malformed `Content-Length` (parsing to `NaN`) SHALL be ignored by the pre-check and fall through to the streamed read.
+The cap MUST be enforced everywhere the size becomes knowable so no oversize body is fully buffered: the `Content-Length` pre-check, the streamed read (which aborts mid-stream when `Content-Length` is omitted or understated), and the `fetch()`-rejection path. The streamed read is the binding guarantee — it bounds the buffer before any decode occurs; the decode-path size catches in `processors.ts` are a defensive backstop, exercised by unit tests but not reachable in the live pipeline (processors only decode the already-bounded buffer). A malformed `Content-Length` (parsing to `NaN`) SHALL be ignored by the pre-check and fall through to the streamed read.
 
 #### Scenario: Declared Content-Length exceeds the cap
 
@@ -82,12 +87,17 @@ The cap MUST be enforced everywhere the size becomes knowable so no oversize bod
 
 #### Scenario: Cap overridden by environment
 
-- **WHEN** `NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE` is set
-- **THEN** that value SHALL be used as the cap, and the 4,000,000-byte default SHALL apply only when it is unset
+- **WHEN** `NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE` is set to a positive integer
+- **THEN** that value SHALL be used as the cap
+
+#### Scenario: Cap override is missing or malformed
+
+- **WHEN** `NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE` is unset or not a positive integer (e.g. `abc`, `0`, `-1`)
+- **THEN** the 4,000,000-byte default SHALL be used and a malformed value SHALL be logged, so the cap is never silently disabled
 
 ### Requirement: The proxy SHALL bound each request with a timeout
 
-Each hop's `fetch` SHALL be aborted after a configurable timeout, defaulting to 10,000 ms and overridable via `NEXT_PUBLIC_METADATA_TIMEOUT`. A timed-out or aborted upstream fetch SHALL surface as `504`. In addition, the route SHALL declare a platform-level `maxDuration` (15 s) as a backstop that bounds the whole invocation independently of the per-hop timeout — covering DNS resolution and multi-hop redirect chains the per-hop timeout does not.
+Each hop's `fetch` SHALL be aborted after a configurable timeout, defaulting to 10,000 ms and overridable via `NEXT_PUBLIC_METADATA_TIMEOUT` (validated as a positive integer, falling back to the default on a missing or malformed value, as with the size cap). A timed-out or aborted upstream fetch SHALL surface as `504`. In addition, the route SHALL declare a platform-level `maxDuration` (15 s) as a backstop that bounds the whole invocation independently of the per-hop timeout — covering DNS resolution and multi-hop redirect chains the per-hop timeout does not.
 
 #### Scenario: Upstream is too slow
 
@@ -189,7 +199,7 @@ Because a browser `<img>` element cannot read the HTTP status, on a load failure
 
 The default fallback SHALL be a Solana-logo placeholder that inherits the image's own className/box — so a rounded-full avatar gets a round logo — and SHALL carry the reason as both its accessible name and a hover tooltip (working at any size, including a 16px avatar where visible text would not fit). Consumers MAY supply a `fallback` render function to receive the resolved reason and render it differently.
 
-The original third-party URL SHALL be offered only as an explicit, opt-in (`showOriginalLink`), user-initiated link (opening in a new tab with `rel="noopener noreferrer"`), so the viewer's IP is exposed to the upstream host only on a deliberate click and never automatically; when shown, the failure reason SHALL ride in that link's info tooltip rather than its text. When no URI is available the fallback SHALL render without an outbound link.
+The original third-party URL SHALL be offered only as an explicit, opt-in (`showOriginalLink`), user-initiated link (opening in a new tab with `rel="noopener noreferrer"`), so the viewer's IP is exposed to the upstream host only on a deliberate click and never automatically. When `showOriginalLink` is set the link is rendered beside the image in **every** state — loading, loaded, and failed — not gated on a load failure (a browser `<img>` can't report its status, so the escape hatch is offered up front); the IP is still exposed only on a deliberate click. When shown, the failure reason SHALL ride in that link's info tooltip rather than its text. When no URI is available the fallback SHALL render without an outbound link.
 
 #### Scenario: Image exceeds the size cap
 
