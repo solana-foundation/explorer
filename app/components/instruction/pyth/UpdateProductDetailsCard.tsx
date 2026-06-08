@@ -3,6 +3,8 @@ import { Copyable } from '@components/common/Copyable';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { UpdateProductParams } from './program';
 
@@ -40,40 +42,40 @@ export default function UpdateProductDetailsCard({
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={ix.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Funding Account</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Funding Account</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.fundingPubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Product Account</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Product Account</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.productPubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>
+            <BaseTable.Row>
+                <BaseTable.Cell>
                     Attributes <span className="text-muted">(JSON)</span>
-                </td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <div className="d-lg-flex e-hidden e-items-center e-justify-end">
                         <Content />
                     </div>
                     <div className="e-flex e-items-center lg:e-hidden">
                         <Content />
                     </div>
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

@@ -6,6 +6,7 @@ import React from 'react';
 import { create } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InstructionCard } from '../InstructionCard';
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
@@ -65,33 +66,33 @@ export function BpfLoaderWriteDetailsCard(props: Props<WriteInfo>) {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={BPF_LOADER_PROGRAM_ID} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Account</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Account</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.account} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>
+            <BaseTable.Row>
+                <BaseTable.Cell>
                     Bytes <span className="text-muted">(Base 64)</span>
-                </td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <pre className="e-mb-0 e-inline-block e-text-left">{bytes}</pre>
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Offset</td>
-                <td className="e-text-right">{info.offset}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Offset</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.offset}</BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }
@@ -108,19 +109,19 @@ export function BpfLoaderFinalizeDetailsCard(props: Props<FinalizeInfo>) {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={BPF_LOADER_PROGRAM_ID} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Account</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Account</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.account} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

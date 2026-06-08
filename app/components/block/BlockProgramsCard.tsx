@@ -5,6 +5,7 @@ import React from 'react';
 
 import { invariant } from '@/app/shared/lib/invariant';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) {
     const totalTransactions = block.transactions.length;
@@ -68,14 +69,14 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
                     </CardTitle>
                 </CardHeader>
                 <TableCardBody>
-                    <tr>
-                        <td className="e-w-full">Unique Programs Count</td>
-                        <td className="font-monospace e-text-right">{programEntries.length}</td>
-                    </tr>
-                    <tr>
-                        <td className="e-w-full">Total Instructions</td>
-                        <td className="font-monospace e-text-right">{totalInstructions}</td>
-                    </tr>
+                    <BaseTable.Row>
+                        <BaseTable.Cell className="e-w-full">Unique Programs Count</BaseTable.Cell>
+                        <BaseTable.Cell className="font-monospace e-text-right">{programEntries.length}</BaseTable.Cell>
+                    </BaseTable.Row>
+                    <BaseTable.Row>
+                        <BaseTable.Cell className="e-w-full">Total Instructions</BaseTable.Cell>
+                        <BaseTable.Cell className="font-monospace e-text-right">{totalInstructions}</BaseTable.Cell>
+                    </BaseTable.Row>
                 </TableCardBody>
             </Card>
             <Card ui="dashkit">
@@ -84,40 +85,40 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
                         Block Programs
                     </CardTitle>
                 </CardHeader>
-
-                {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-                <div className="table-responsive e-mb-0">
-                    <table className="table table-sm table-nowrap card-table">
-                        <thead>
-                            <tr>
-                                <th className="text-muted">Program</th>
-                                <th className="text-muted">Transaction Count</th>
-                                <th className="text-muted">% of Total</th>
-                                <th className="text-muted">Instruction Count</th>
-                                <th className="text-muted">% of Total</th>
-                                {showSuccessRate && <th className="text-muted">Success Rate</th>}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {programEntries.map(([programId, txFreq]) => {
-                                const ixFreq = ixFrequency.get(programId) as number;
-                                const successes = txSuccesses.get(programId) || 0;
-                                return (
-                                    <tr key={programId}>
-                                        <td>
-                                            <Address pubkey={new PublicKey(programId)} link />
-                                        </td>
-                                        <td>{txFreq}</td>
-                                        <td>{((100 * txFreq) / totalTransactions).toFixed(2)}%</td>
-                                        <td>{ixFreq}</td>
-                                        <td>{((100 * ixFreq) / totalInstructions).toFixed(2)}%</td>
-                                        {showSuccessRate && <td>{((100 * successes) / txFreq).toFixed(0)}%</td>}
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
+                <BaseTable ui="dashkit" variant="card" nowrap>
+                    <BaseTable.Head>
+                        <BaseTable.Row>
+                            <BaseTable.HeaderCell className="text-muted">Program</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-muted">Transaction Count</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-muted">% of Total</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-muted">Instruction Count</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-muted">% of Total</BaseTable.HeaderCell>
+                            {showSuccessRate && (
+                                <BaseTable.HeaderCell className="text-muted">Success Rate</BaseTable.HeaderCell>
+                            )}
+                        </BaseTable.Row>
+                    </BaseTable.Head>
+                    <BaseTable.Body>
+                        {programEntries.map(([programId, txFreq]) => {
+                            const ixFreq = ixFrequency.get(programId) as number;
+                            const successes = txSuccesses.get(programId) || 0;
+                            return (
+                                <BaseTable.Row key={programId}>
+                                    <BaseTable.Cell>
+                                        <Address pubkey={new PublicKey(programId)} link />
+                                    </BaseTable.Cell>
+                                    <BaseTable.Cell>{txFreq}</BaseTable.Cell>
+                                    <BaseTable.Cell>{((100 * txFreq) / totalTransactions).toFixed(2)}%</BaseTable.Cell>
+                                    <BaseTable.Cell>{ixFreq}</BaseTable.Cell>
+                                    <BaseTable.Cell>{((100 * ixFreq) / totalInstructions).toFixed(2)}%</BaseTable.Cell>
+                                    {showSuccessRate && (
+                                        <BaseTable.Cell>{((100 * successes) / txFreq).toFixed(0)}%</BaseTable.Cell>
+                                    )}
+                                </BaseTable.Row>
+                            );
+                        })}
+                    </BaseTable.Body>
+                </BaseTable>
             </Card>
         </>
     );

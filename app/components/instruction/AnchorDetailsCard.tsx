@@ -21,6 +21,7 @@ import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { toBase64 } from '@/app/shared/lib/bytes';
 import { invariant } from '@/app/shared/lib/invariant';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InstructionCard } from './InstructionCard';
 import { ProgramEventsCard } from './ProgramEventsCard';
@@ -146,11 +147,11 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
 
     if (!ixAccounts || !decodedIxData || !ixDef) {
         return (
-            <tr>
-                <td colSpan={3} className="lg:e-text-center">
+            <BaseTable.Row>
+                <BaseTable.Cell colSpan={3} className="lg:e-text-center">
                     Failed to decode account data according to the public Anchor interface
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         );
     }
 
@@ -170,18 +171,18 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
 
     return (
         <>
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right" colSpan={2}>
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right" colSpan={2}>
                     <Address pubkey={ix.programId} alignRight link raw overrideText={programName} />
-                </td>
-            </tr>
-            <tr className="table-sep">
-                <td>Account Name</td>
-                <td className="e-text-right" colSpan={2}>
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row className="table-sep">
+                <BaseTable.Cell>Account Name</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right" colSpan={2}>
                     Address
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {(() => {
                 const rows: JSX.Element[] = [];
                 let skipUntilLevel: number | null = null;
@@ -216,9 +217,14 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                                 skipUntilLevel = isExpanded ? null : (currentInfo.nestingLevel ?? 0);
 
                                 rows.push(
-                                    <tr key={`group-${groupHeaderIndex}`} className="table-group-header">
-                                        <td colSpan={2}>{camelToTitleCase(currentInfo.name)}</td>
-                                        <td className="e-text-right" onClick={() => toggleGroup(groupHeaderIndex)}>
+                                    <BaseTable.Row key={`group-${groupHeaderIndex}`}>
+                                        <BaseTable.Cell colSpan={2}>
+                                            {camelToTitleCase(currentInfo.name)}
+                                        </BaseTable.Cell>
+                                        <BaseTable.Cell
+                                            className="e-text-right"
+                                            onClick={() => toggleGroup(groupHeaderIndex)}
+                                        >
                                             <div className="e-cursor-pointer">
                                                 {isExpanded ? (
                                                     <>
@@ -232,8 +238,8 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                                                     </>
                                                 )}
                                             </div>
-                                        </td>
-                                    </tr>,
+                                        </BaseTable.Cell>
+                                    </BaseTable.Row>,
                                 );
                                 accountInfoIndex++;
                             } else {
@@ -271,8 +277,8 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                     }
 
                     rows.push(
-                        <tr key={keyIndex} className={accountInfo?.isNested ? 'table-nested-account' : ''}>
-                            <td>
+                        <BaseTable.Row key={keyIndex} className={accountInfo?.isNested ? 'table-nested-account' : ''}>
+                            <BaseTable.Cell>
                                 <div className="e-flex e-flex-row e-items-center">
                                     {accountInfo?.isNested && (
                                         <CornerDownRight className="e-mb-[3px] e-mr-1.5" size={14} />
@@ -295,11 +301,11 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                                         </Badge>
                                     )}
                                 </div>
-                            </td>
-                            <td className="e-text-right" colSpan={2}>
+                            </BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right" colSpan={2}>
                                 <Address pubkey={pubkey} alignRight link />
-                            </td>
-                        </tr>,
+                            </BaseTable.Cell>
+                        </BaseTable.Row>,
                     );
 
                     accountInfoIndex++;
@@ -310,11 +316,11 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
 
             {decodedIxData && ixDef && ixDef.args.length > 0 && (
                 <>
-                    <tr className="table-sep">
-                        <td>Argument Name</td>
-                        <td>Type</td>
-                        <td className="e-text-right">Value</td>
-                    </tr>
+                    <BaseTable.Row className="table-sep">
+                        <BaseTable.Cell>Argument Name</BaseTable.Cell>
+                        <BaseTable.Cell>Type</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">Value</BaseTable.Cell>
+                    </BaseTable.Row>
                     {mapIxArgsToRows(decodedIxData.data, ixDef, anchorProgram.idl)}
                 </>
             )}

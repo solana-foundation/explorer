@@ -6,6 +6,7 @@ import React from 'react';
 import { create, Struct } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InstructionCard } from '../InstructionCard';
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
@@ -80,23 +81,23 @@ function renderDetails<T extends object>(props: DetailsProps, parsed: ParsedInfo
         }
 
         attributes.push(
-            <tr key={key}>
-                <td>
+            <BaseTable.Row key={key}>
+                <BaseTable.Cell>
                     {camelToTitleCase(key)} {key === 'bytes' && <span className="text-muted">(Base 64)</span>}
-                </td>
-                <td className="e-text-right">{value}</td>
-            </tr>,
+                </BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{value}</BaseTable.Cell>
+            </BaseTable.Row>,
         );
     }
 
     return (
         <InstructionCard {...props} title={`BPF Upgradeable Loader: ${camelToTitleCase(parsed.type)}`}>
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={props.ix.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {attributes}
         </InstructionCard>
     );

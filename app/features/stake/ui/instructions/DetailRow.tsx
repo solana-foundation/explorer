@@ -3,6 +3,8 @@ import type { Address } from '@solana/kit';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import React, { type ReactNode } from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { KitAddress } from '../KitAddress';
 
 type DetailRowProps = { label: string; pubkey: Address } | { label: string; children: ReactNode; monospace?: boolean };
@@ -10,12 +12,12 @@ type DetailRowProps = { label: string; pubkey: Address } | { label: string; chil
 export function DetailRow(props: DetailRowProps) {
     const monospace = !('pubkey' in props) && props.monospace;
     return (
-        <tr>
-            <td>{props.label}</td>
-            <td className={cn('e-text-right', monospace && 'font-monospace')}>
+        <BaseTable.Row>
+            <BaseTable.Cell>{props.label}</BaseTable.Cell>
+            <BaseTable.Cell className={cn('e-text-right', monospace && 'font-monospace')}>
                 {'pubkey' in props ? <KitAddress address={props.pubkey} alignRight link /> : props.children}
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 

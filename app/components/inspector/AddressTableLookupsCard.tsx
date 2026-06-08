@@ -6,6 +6,7 @@ import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
 import { Badge } from '@/app/components/shared/ui/badge';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 export function AddressTableLookupsCard({ message }: { message: VersionedMessage }) {
     const lookupRows = React.useMemo(() => {
@@ -33,30 +34,27 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
 
     return (
         <CollapsibleCard title="Address Table Lookup(s)">
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">Address Lookup Table Address</th>
-                            <th className="text-muted">Table Index</th>
-                            <th className="text-muted">Resolved Address</th>
-                            <th className="text-muted">Details</th>
-                        </tr>
-                    </thead>
-                    {lookupRows.length > 0 ? (
-                        <tbody className="list">{lookupRows}</tbody>
-                    ) : (
-                        <tbody className="e-border-0 e-border-t e-border-solid e-border-dark-border e-px-dk-4 e-py-4">
-                            <tr>
-                                <td colSpan={4}>
-                                    <span className="text-muted e-text-center">No entries found</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    )}
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="text-muted">Address Lookup Table Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Table Index</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Resolved Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Details</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                {lookupRows.length > 0 ? (
+                    <BaseTable.Body className="list">{lookupRows}</BaseTable.Body>
+                ) : (
+                    <BaseTable.Body className="e-border-0 e-border-t e-border-solid e-border-dark-border e-px-dk-4 e-py-4">
+                        <BaseTable.Row>
+                            <BaseTable.Cell colSpan={4}>
+                                <span className="text-muted e-text-center">No entries found</span>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                    </BaseTable.Body>
+                )}
+            </BaseTable>
         </CollapsibleCard>
     );
 }
@@ -99,19 +97,19 @@ function LookupRow({
     }
 
     return (
-        <tr>
-            <td className="e-text-right">
+        <BaseTable.Row>
+            <BaseTable.Cell className="e-text-right">
                 <Address pubkey={lookupTableKey} link />
-            </td>
-            <td className="e-text-right">{lookupTableIndex}</td>
-            <td className="e-text-right">{resolvedKeyComponent}</td>
-            <td>
+            </BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right">{lookupTableIndex}</BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right">{resolvedKeyComponent}</BaseTable.Cell>
+            <BaseTable.Cell>
                 {!readOnly && (
                     <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
                         Writable
                     </Badge>
                 )}
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

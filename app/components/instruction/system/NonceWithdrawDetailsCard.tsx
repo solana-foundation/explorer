@@ -3,6 +3,8 @@ import { SolBalance } from '@components/common/SolBalance';
 import { ParsedInstruction, SignatureResult, SystemProgram } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { WithdrawNonceInfo } from './types';
 
@@ -25,40 +27,40 @@ export function NonceWithdrawDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={SystemProgram.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Nonce Address</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Nonce Address</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.nonceAccount} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Authority Address</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Authority Address</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.nonceAuthority} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>To Address</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>To Address</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.destination} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Withdraw Amount (SOL)</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Withdraw Amount (SOL)</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <SolBalance lamports={info.lamports} />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

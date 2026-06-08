@@ -15,6 +15,8 @@ import { BigNumber } from 'bignumber.js';
 import React, { useMemo } from 'react';
 import { Code } from 'react-feather';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { url } = useCluster();
@@ -49,18 +51,18 @@ export function AccountsCard({ signature }: SignatureProps) {
         const delta = new BigNumber(post).minus(new BigNumber(pre));
         const accountInfo = accounts.get(key);
         return (
-            <tr key={key}>
-                <td>{index + 1}</td>
-                <td>
+            <BaseTable.Row key={key}>
+                <BaseTable.Cell>{index + 1}</BaseTable.Cell>
+                <BaseTable.Cell>
                     <Address pubkey={pubkey} link fetchTokenLabelInfo />
-                </td>
-                <td>
+                </BaseTable.Cell>
+                <BaseTable.Cell>
                     <BalanceDelta delta={delta} isSol />
-                </td>
-                <td>
+                </BaseTable.Cell>
+                <BaseTable.Cell>
                     <SolBalance lamports={post} />
-                </td>
-                <td>
+                </BaseTable.Cell>
+                <BaseTable.Cell>
                     {loading ? (
                         <span className="text-muted">Loading...</span>
                     ) : accountInfo ? (
@@ -82,8 +84,8 @@ export function AccountsCard({ signature }: SignatureProps) {
                     ) : (
                         <span className="text-muted e-ml-7">-</span>
                     )}
-                </td>
-                <td>
+                </BaseTable.Cell>
+                <BaseTable.Cell>
                     {index === 0 && (
                         <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
                             Fee Payer
@@ -109,51 +111,44 @@ export function AccountsCard({ signature }: SignatureProps) {
                             Address Table Lookup
                         </Badge>
                     )}
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         );
     });
 
     return (
         <CollapsibleCard title={`Account Input(s) (${message.accountKeys.length})`}>
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">#</th>
-                            <th className="text-muted">Address</th>
-                            <th className="text-muted">Change (SOL)</th>
-                            <th className="text-muted">Post Balance (SOL)</th>
-                            <th className="text-muted">Size (bytes)</th>
-                            <th className="text-muted">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">{accountRows}</tbody>
-                    {totalAccountSize > 0 && (
-                        <tfoot>
-                            <tr>
-                                <td colSpan={3} className="e-align-bottom">
-                                    <p className="text-muted e-m-0 e-text-right e-text-[0.625rem]">
-                                        reflects current account state
-                                    </p>
-                                </td>
-                                <td className="e-align-bottom">
-                                    <p className="text-muted e-m-0 e-text-[0.625rem] e-uppercase">
-                                        Total Account Size:
-                                    </p>
-                                </td>
-                                <td>
-                                    <span className="e-ml-7 e-text-white">
-                                        {totalAccountSize.toLocaleString('en-US')}
-                                    </span>
-                                </td>
-                                <td />
-                            </tr>
-                        </tfoot>
-                    )}
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="text-muted">#</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Change (SOL)</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Post Balance (SOL)</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Size (bytes)</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Details</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body className="list">{accountRows}</BaseTable.Body>
+                {totalAccountSize > 0 && (
+                    <tfoot>
+                        <BaseTable.Row>
+                            <BaseTable.Cell colSpan={3} className="e-align-bottom">
+                                <p className="text-muted e-m-0 e-text-right e-text-[0.625rem]">
+                                    reflects current account state
+                                </p>
+                            </BaseTable.Cell>
+                            <BaseTable.Cell className="e-align-bottom">
+                                <p className="text-muted e-m-0 e-text-[0.625rem] e-uppercase">Total Account Size:</p>
+                            </BaseTable.Cell>
+                            <BaseTable.Cell>
+                                <span className="e-ml-7 e-text-white">{totalAccountSize.toLocaleString('en-US')}</span>
+                            </BaseTable.Cell>
+                            <BaseTable.Cell />
+                        </BaseTable.Row>
+                    </tfoot>
+                )}
+            </BaseTable>
         </CollapsibleCard>
     );
 }

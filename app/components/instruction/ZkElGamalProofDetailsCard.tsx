@@ -3,6 +3,8 @@ import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { ZK_ELGAMAL_PROOF_PROGRAM_ID } from '@utils/programs';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from './InstructionCard';
 
 // Indexed by the 1-byte discriminator (0..=12).
@@ -60,25 +62,25 @@ export function ZkElGamalProofDetailsCard({
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={ix.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {ix.keys.map((meta, i) => (
-                <tr key={i}>
-                    <td>{labelFor(i, isClose, accountCount)}</td>
-                    <td className="e-text-right">
+                <BaseTable.Row key={i}>
+                    <BaseTable.Cell>{labelFor(i, isClose, accountCount)}</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <Address pubkey={meta.pubkey} alignRight link />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             ))}
             {!isClose && proofBytes > 0 && (
-                <tr>
-                    <td>Proof size</td>
-                    <td className="font-monospace e-text-right">{proofBytes} bytes</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Proof size</BaseTable.Cell>
+                    <BaseTable.Cell className="font-monospace e-text-right">{proofBytes} bytes</BaseTable.Cell>
+                </BaseTable.Row>
             )}
         </InstructionCardComponent>
     );

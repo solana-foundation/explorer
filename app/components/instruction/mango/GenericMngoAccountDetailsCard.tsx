@@ -1,6 +1,8 @@
 import { Address } from '@components/common/Address';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 
 export function GenericMngoAccountDetailsCard(props: {
@@ -24,12 +26,12 @@ export function GenericMngoAccountDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Mango account</td>
-                <td>
+            <BaseTable.Row>
+                <BaseTable.Cell>Mango account</BaseTable.Cell>
+                <BaseTable.Cell>
                     <Address pubkey={mangoAccount.pubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

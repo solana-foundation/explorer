@@ -1,6 +1,8 @@
 import { Address } from '@components/common/Address';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { Prune, SerumIxDetailsProps } from './types';
 
@@ -16,66 +18,66 @@ export function PruneDetailsCard(props: SerumIxDetailsProps<Prune>) {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Market</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Market</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Bids</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Bids</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.bids} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Asks</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Asks</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.asks} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Prune Authority</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Prune Authority</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.pruneAuthority} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Open Orders</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Open Orders</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.openOrders} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Open Orders Owner</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Open Orders Owner</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.openOrdersOwner} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Event Queue</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Event Queue</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.eventQueue} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Iteration Limit</td>
-                <td className="e-text-right">{info.data.limit}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Iteration Limit</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.data.limit}</BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

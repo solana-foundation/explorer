@@ -2,6 +2,8 @@ import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCardTableField } from '@storybook-config/decorators';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { BaseRawParsedDetails } from '../BaseRawParsedDetails';
 
 const sampleIx = {
@@ -35,10 +37,10 @@ export const Default: Story = {
 export const WithChildRow: Story = {
     args: {
         children: (
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">System</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">System</BaseTable.Cell>
+            </BaseTable.Row>
         ),
         ix: sampleIx,
     },

@@ -2,6 +2,8 @@ import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster, withScrollAnchor, withTokenInfoBatch } from '@storybook-config/decorators';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { BaseInstructionCard } from '../BaseInstructionCard';
 
 const meta: Meta<typeof BaseInstructionCard> = {
@@ -30,9 +32,9 @@ const sampleIx = new TransactionInstruction({
 export const Success: Story = {
     args: {
         children: (
-            <tr>
-                <td>Instruction details go here</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Instruction details go here</BaseTable.Cell>
+            </BaseTable.Row>
         ),
         index: 0,
         ix: sampleIx,
@@ -44,9 +46,9 @@ export const Success: Story = {
 export const Failed: Story = {
     args: {
         children: (
-            <tr>
-                <td>Instruction details go here</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Instruction details go here</BaseTable.Cell>
+            </BaseTable.Row>
         ),
         index: 0,
         ix: sampleIx,
@@ -58,9 +60,9 @@ export const Failed: Story = {
 export const Collapsible: Story = {
     args: {
         children: (
-            <tr>
-                <td>Hidden when collapsed</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Hidden when collapsed</BaseTable.Cell>
+            </BaseTable.Row>
         ),
         collapsible: true,
         index: 1,

@@ -4,6 +4,7 @@ import { RefreshButton } from '@shared/ui/refresh-button';
 import React from 'react';
 
 import { CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { Address } from './Address';
 
@@ -30,23 +31,23 @@ export function AccountHeader({ title, analyticsSection, refresh }: AccountHeade
 
 export function AccountAddressRow({ account }: AccountProps) {
     return (
-        <tr>
-            <td>Address</td>
-            <td className="e-text-right">
+        <BaseTable.Row>
+            <BaseTable.Cell>Address</BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right">
                 <Address pubkey={account.pubkey} alignRight raw />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
 export function AccountBalanceRow({ account }: AccountProps) {
     const { lamports } = account;
     return (
-        <tr>
-            <td>Balance (SOL)</td>
-            <td className="e-text-right e-uppercase">
+        <BaseTable.Row>
+            <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right e-uppercase">
                 <SolBalance lamports={lamports} />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

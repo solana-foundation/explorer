@@ -10,6 +10,7 @@ import useAsyncEffect from 'use-async-effect';
 
 import { useScaledUiAmountForMint } from '@/app/providers/accounts/tokens';
 import { useCluster } from '@/app/providers/cluster';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { getTokenInfos } from '@/app/utils/token-info';
 
 import ScaledUiAmountMultiplierTooltip from '../account/token-extensions/ScaledUiAmountMultiplierTooltip';
@@ -66,28 +67,25 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
 
     return (
         <CollapsibleCard title="Token Balances">
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">Address</th>
-                            <th className="text-muted">Token</th>
-                            <th className="text-muted">Change</th>
-                            <th className="text-muted">Post Balance</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">
-                        {rows.map(row => (
-                            <TokenBalanceRow
-                                key={row.account.toBase58() + row.mint}
-                                {...row}
-                                units={tokenSymbols.get(row.mint) || 'tokens'}
-                            />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="text-muted">Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Token</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Change</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Post Balance</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body className="list">
+                    {rows.map(row => (
+                        <TokenBalanceRow
+                            key={row.account.toBase58() + row.mint}
+                            {...row}
+                            units={tokenSymbols.get(row.mint) || 'tokens'}
+                        />
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
         </CollapsibleCard>
     );
 }
@@ -109,24 +107,24 @@ function TokenBalanceRow({
     const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(mint, balance);
 
     return (
-        <tr key={key}>
-            <td>
+        <BaseTable.Row key={key}>
+            <BaseTable.Cell>
                 <Address pubkey={account} link />
-            </td>
-            <td>
+            </BaseTable.Cell>
+            <BaseTable.Cell>
                 <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo />
-            </td>
-            <td>
+            </BaseTable.Cell>
+            <BaseTable.Cell>
                 <BalanceDelta delta={delta.multipliedBy(scaledUiAmountMultiplier)} />
-            </td>
-            <td>
+            </BaseTable.Cell>
+            <BaseTable.Cell>
                 {new BigNumber(balance).multipliedBy(scaledUiAmountMultiplier).toString()} {units}
                 <ScaledUiAmountMultiplierTooltip
                     rawAmount={balance}
                     scaledUiAmountMultiplier={scaledUiAmountMultiplier}
                 />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 

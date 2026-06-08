@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import {
     BaseCard,
     BaseCardBody,
@@ -73,22 +75,22 @@ export const DashkitBodyWithoutPadding: Story = {
             </BaseCardHeader>
             <BaseCardBody className="e-p-0">
                 <table className="e-w-full">
-                    <thead>
-                        <tr>
-                            <th className="e-px-dk-4 e-py-2 e-text-left">Label</th>
-                            <th className="e-px-dk-4 e-py-2 e-text-right">Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td className="e-px-dk-4 e-py-2">Slot</td>
-                            <td className="e-px-dk-4 e-py-2 e-text-right">123,456</td>
-                        </tr>
-                        <tr>
-                            <td className="e-px-dk-4 e-py-2">Epoch</td>
-                            <td className="e-px-dk-4 e-py-2 e-text-right">789</td>
-                        </tr>
-                    </tbody>
+                    <BaseTable.Head>
+                        <BaseTable.Row>
+                            <BaseTable.HeaderCell className="e-px-dk-4 e-py-2 e-text-left">Label</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-px-dk-4 e-py-2 e-text-right">Value</BaseTable.HeaderCell>
+                        </BaseTable.Row>
+                    </BaseTable.Head>
+                    <BaseTable.Body>
+                        <BaseTable.Row>
+                            <BaseTable.Cell className="e-px-dk-4 e-py-2">Slot</BaseTable.Cell>
+                            <BaseTable.Cell className="e-px-dk-4 e-py-2 e-text-right">123,456</BaseTable.Cell>
+                        </BaseTable.Row>
+                        <BaseTable.Row>
+                            <BaseTable.Cell className="e-px-dk-4 e-py-2">Epoch</BaseTable.Cell>
+                            <BaseTable.Cell className="e-px-dk-4 e-py-2 e-text-right">789</BaseTable.Cell>
+                        </BaseTable.Row>
+                    </BaseTable.Body>
                 </table>
             </BaseCardBody>
         </BaseCard>

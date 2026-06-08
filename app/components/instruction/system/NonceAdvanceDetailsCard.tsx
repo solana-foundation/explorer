@@ -2,6 +2,8 @@ import { Address } from '@components/common/Address';
 import { ParsedInstruction, SignatureResult, SystemProgram } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { AdvanceNonceInfo } from './types';
 
@@ -24,26 +26,26 @@ export function NonceAdvanceDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={SystemProgram.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Nonce Address</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Nonce Address</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.nonceAccount} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Authority Address</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Authority Address</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.nonceAuthority} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

@@ -8,6 +8,8 @@ import { AddressLookupTableAccount } from '@solana/web3.js';
 import { AddressLookupTableAccountInfo } from '@validators/accounts/address-lookup-table';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 export function AddressLookupTableAccountSection(
     params:
         | {
@@ -39,42 +41,44 @@ export function AddressLookupTableAccountSection(
             analyticsSection="address_lookup_table_section"
             refresh={() => refresh(account.pubkey, 'parsed')}
         >
-            <tr>
-                <td>Address</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Address</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
-                </td>
-            </tr>
-            <tr>
-                <td>Balance (SOL)</td>
-                <td className="e-text-right e-uppercase">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right e-uppercase">
                     <SolBalance lamports={account.lamports} />
-                </td>
-            </tr>
-            <tr>
-                <td>Activation Status</td>
-                <td className="e-text-right e-uppercase">{lookupTableAccount.isActive() ? 'Active' : 'Deactivated'}</td>
-            </tr>
-            <tr>
-                <td>Last Extended Slot</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Activation Status</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right e-uppercase">
+                    {lookupTableAccount.isActive() ? 'Active' : 'Deactivated'}
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Last Extended Slot</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     {lookupTableAccount.state.lastExtendedSlot === 0 ? (
                         'None (Empty)'
                     ) : (
                         <Slot slot={lookupTableAccount.state.lastExtendedSlot} link />
                     )}
-                </td>
-            </tr>
-            <tr>
-                <td>Authority</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Authority</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     {lookupTableAccount.state.authority === undefined ? (
                         'None (Frozen)'
                     ) : (
                         <Address pubkey={lookupTableAccount.state.authority} alignRight link />
                     )}
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </AccountCard>
     );
 }

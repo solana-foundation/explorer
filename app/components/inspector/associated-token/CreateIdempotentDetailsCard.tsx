@@ -2,6 +2,8 @@ import { InspectorInstructionCard } from '@components/common/InspectorInstructio
 import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { AddressWithContext } from '../AddressWithContext';
 
 export function CreateIdempotentDetailsCard(props: {
@@ -37,42 +39,42 @@ export function CreateIdempotentDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Source</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Source</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <AddressWithContext pubkey={raw.keys[0].pubkey} hideInfo />
-                </td>
-            </tr>
-            <tr>
-                <td>Account</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Account</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <AddressWithContext pubkey={raw.keys[1].pubkey} hideInfo />
-                </td>
-            </tr>
-            <tr>
-                <td>Wallet</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Wallet</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <AddressWithContext pubkey={raw.keys[2].pubkey} hideInfo />
-                </td>
-            </tr>
-            <tr>
-                <td>Mint</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Mint</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <AddressWithContext pubkey={raw.keys[3].pubkey} hideInfo />
-                </td>
-            </tr>
-            <tr>
-                <td>System Program</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>System Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <AddressWithContext pubkey={raw.keys[4].pubkey} hideInfo />
-                </td>
-            </tr>
-            <tr>
-                <td>Token Program</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Token Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <AddressWithContext pubkey={raw.keys[5].pubkey} hideInfo />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCardComponent>
     );
 }

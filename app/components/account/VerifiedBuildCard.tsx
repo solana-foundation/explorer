@@ -8,6 +8,7 @@ import { ExternalLink } from 'react-feather';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Alert } from '@/app/shared/ui/Alert';
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
 
 import { Address } from '../common/Address';
@@ -94,10 +95,10 @@ export function BaseVerifiedBuildCard({
             <TableCardBody>
                 {ROWS.filter(x => x.key in registryInfo).map((x, idx) => {
                     return (
-                        <tr key={idx}>
-                            <td className="e-w-full">{x.display}</td>
+                        <BaseTable.Row key={idx}>
+                            <BaseTable.Cell className="e-w-full">{x.display}</BaseTable.Cell>
                             <RenderEntry value={registryInfo[x.key]} type={x.type} />
-                        </tr>
+                        </BaseTable.Row>
                     );
                 })}
             </TableCardBody>
@@ -167,31 +168,31 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
     switch (type) {
         case DisplayType.Boolean:
             return (
-                <td className="e-text-right e-font-mono">
+                <BaseTable.Cell className="e-text-right e-font-mono">
                     <Badge ui="dashkit" variant={value ? 'success' : 'warning'}>
                         {String(value)}
                     </Badge>
-                </td>
+                </BaseTable.Cell>
             );
         case DisplayType.String:
             if (Object.values(VerificationStatus).includes(value as VerificationStatus)) {
                 const isVerified = value === VerificationStatus.Verified;
                 return (
-                    <td className="e-text-right e-font-mono">
+                    <BaseTable.Cell className="e-text-right e-font-mono">
                         <Badge ui="dashkit" variant={isVerified ? 'success' : 'warning'}>
                             {isVerified ? 'true' : 'false'}
                         </Badge>
-                    </td>
+                    </BaseTable.Cell>
                 );
             }
             return (
-                <td className="e-text-right e-font-mono" style={{ whiteSpace: 'pre' }}>
+                <BaseTable.Cell className="e-text-right e-font-mono" style={{ whiteSpace: 'pre' }}>
                     {value && (value as string).length > 1 ? value : '-'}
-                </td>
+                </BaseTable.Cell>
             );
         case DisplayType.LongString:
             return (
-                <td className="e-text-right">
+                <BaseTable.Cell className="e-text-right">
                     {value && (value as string).length > 1 ? (
                         <div className="e-flex e-items-center e-justify-end">
                             <Copyable text={value as string}>
@@ -207,37 +208,37 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                     ) : (
                         '-'
                     )}
-                </td>
+                </BaseTable.Cell>
             );
         case DisplayType.URL:
             if (isValidLink(value as string)) {
                 return (
-                    <td className="e-text-right">
+                    <BaseTable.Cell className="e-text-right">
                         <span className="e-whitespace-nowrap e-font-mono">
                             <a rel="noopener noreferrer" target="_blank" href={value as string}>
                                 {value}
                                 <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
                             </a>
                         </span>
-                    </td>
+                    </BaseTable.Cell>
                 );
             }
             return (
-                <td className="e-text-right e-font-mono">
+                <BaseTable.Cell className="e-text-right e-font-mono">
                     {value && (value as string).length > 1 ? (value as string).trim() : '-'}
-                </td>
+                </BaseTable.Cell>
             );
         case DisplayType.Date:
             return (
-                <td className="e-text-right e-font-mono">
+                <BaseTable.Cell className="e-text-right e-font-mono">
                     {value && (value as string).length > 1 ? new Date(value as string).toUTCString() : '-'}
-                </td>
+                </BaseTable.Cell>
             );
         case DisplayType.PublicKey:
             return (
-                <td className="e-text-right e-font-mono">
+                <BaseTable.Cell className="e-text-right e-font-mono">
                     <Address pubkey={new PublicKey(value as string)} link alignRight />
-                </td>
+                </BaseTable.Cell>
             );
         default:
             break;

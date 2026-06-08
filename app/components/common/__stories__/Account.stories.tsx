@@ -3,6 +3,8 @@ import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { AccountAddressRow, AccountBalanceRow, AccountHeader } from '../Account';
 
 const sampleAccount: Account = {
@@ -30,11 +32,11 @@ export const Header: Story = {
 
 export const Rows: Story = {
     render: () => (
-        <table className="table table-sm table-nowrap card-table">
-            <tbody>
+        <BaseTable ui="dashkit" variant="card" nowrap>
+            <BaseTable.Body>
                 <AccountAddressRow account={sampleAccount} />
                 <AccountBalanceRow account={sampleAccount} />
-            </tbody>
-        </table>
+            </BaseTable.Body>
+        </BaseTable>
     ),
 };

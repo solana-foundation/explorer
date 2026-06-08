@@ -4,6 +4,7 @@ import type { StakeHistoryEntry, SysvarStakeHistoryAccount } from '@validators/a
 import React from 'react';
 
 import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStakeHistoryAccount }) {
     const stakeHistory = sysvarAccount.info;
@@ -15,24 +16,21 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
                 </CardTitle>
             </CardHeader>
 
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="e-w-px e-text-dk-gray-700">Epoch</th>
-                            <th className="e-text-dk-gray-700">Effective (SOL)</th>
-                            <th className="e-text-dk-gray-700">Activating (SOL)</th>
-                            <th className="e-text-dk-gray-700">Deactivating (SOL)</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">
-                        {stakeHistory.map(entry => (
-                            <HistoryEntryRow key={entry.epoch} entry={entry} />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Epoch</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Effective (SOL)</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Activating (SOL)</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Deactivating (SOL)</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body className="list">
+                    {stakeHistory.map(entry => (
+                        <HistoryEntryRow key={entry.epoch} entry={entry} />
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
 
             {stakeHistory.length === 0 && (
                 <CardFooter ui="dashkit">
@@ -45,19 +43,19 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
 
 function HistoryEntryRow({ entry }: { entry: StakeHistoryEntry }) {
     return (
-        <tr>
-            <td className="e-w-px e-font-mono">
+        <BaseTable.Row>
+            <BaseTable.Cell className="e-w-px e-font-mono">
                 <Epoch epoch={entry.epoch} link />
-            </td>
-            <td className="e-font-mono">
+            </BaseTable.Cell>
+            <BaseTable.Cell className="e-font-mono">
                 <SolBalance lamports={entry.stakeHistory.effective} />
-            </td>
-            <td className="e-font-mono">
+            </BaseTable.Cell>
+            <BaseTable.Cell className="e-font-mono">
                 <SolBalance lamports={entry.stakeHistory.activating} />
-            </td>
-            <td className="e-font-mono">
+            </BaseTable.Cell>
+            <BaseTable.Cell className="e-font-mono">
                 <SolBalance lamports={entry.stakeHistory.deactivating} />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

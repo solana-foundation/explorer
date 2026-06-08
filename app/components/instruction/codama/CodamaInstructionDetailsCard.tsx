@@ -5,6 +5,7 @@ import { SignatureResult } from '@solana/web3.js';
 import React from 'react';
 
 import { Badge } from '@/app/components/shared/ui/badge';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { Address } from '../../common/Address';
 import { InstructionCard } from '../InstructionCard';
@@ -49,8 +50,8 @@ export function CodamaInstructionCard({
         }
 
         accountDetails.push(
-            <tr key={i}>
-                <td>
+            <BaseTable.Row key={i}>
+                <BaseTable.Cell>
                     <div className="e-mr-1.5 md:e-inline">{accountName}</div>
                     {isWritable && (
                         <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
@@ -62,36 +63,36 @@ export function CodamaInstructionCard({
                             Signer
                         </Badge>
                     )}
-                </td>
-                <td className="e-text-right" colSpan={2}>
+                </BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right" colSpan={2}>
                     <Address pubkey={new PublicKey(account.address)} alignRight link />
-                </td>
-            </tr>,
+                </BaseTable.Cell>
+            </BaseTable.Row>,
         );
     }
 
     return (
         <InstructionCard title={ixTitle} ix={ix} result={result} index={index} innerCards={innerCards}>
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right" colSpan={2}>
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right" colSpan={2}>
                     <Address pubkey={new PublicKey(ix.programId)} alignRight link raw overrideText={programName} />
-                </td>
-            </tr>
-            <tr className="table-sep">
-                <td>Account Name</td>
-                <td className="e-text-right" colSpan={2}>
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row className="table-sep">
+                <BaseTable.Cell>Account Name</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right" colSpan={2}>
                     Address
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {accountDetails}
             {parsedIx.data ? (
                 <>
-                    <tr className="table-sep">
-                        <td>Argument Name</td>
-                        <td>Type</td>
-                        <td className="e-text-right">Value</td>
-                    </tr>
+                    <BaseTable.Row className="table-sep">
+                        <BaseTable.Cell>Argument Name</BaseTable.Cell>
+                        <BaseTable.Cell>Type</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">Value</BaseTable.Cell>
+                    </BaseTable.Row>
                     {mapCodamaIxArgsToRows(parsedIx.data)}
                 </>
             ) : null}

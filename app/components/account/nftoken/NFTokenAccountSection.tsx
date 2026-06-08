@@ -7,6 +7,7 @@ import { PublicKey } from '@solana/web3.js';
 import { Suspense, useState } from 'react';
 
 import { getProxiedUri } from '@/app/features/metadata/utils';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { UnknownAccountCard } from '../UnknownAccountCard';
 import { parseNFTokenCollectionAccount, parseNFTokenNFTAccount } from './isNFTokenAccount';
@@ -37,40 +38,40 @@ const NFTCard = ({ account, nft }: { account: Account; nft: NftokenTypes.NftAcco
             refresh={() => fetchInfo(new PublicKey(nft.address), 'parsed')}
             analyticsSection="nft_token_card"
         >
-            <tr>
-                <td>Address</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Address</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={new PublicKey(nft.address)} alignRight raw />
-                </td>
-            </tr>
-            <tr>
-                <td>Authority</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Authority</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={new PublicKey(nft.authority)} alignRight link />
-                </td>
-            </tr>
-            <tr>
-                <td>Holder</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Holder</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={new PublicKey(nft.holder)} alignRight link />
-                </td>
-            </tr>
-            <tr>
-                <td>Delegate</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Delegate</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     {nft.delegate ? <Address pubkey={new PublicKey(nft.delegate)} alignRight link /> : 'Not Delegated'}
-                </td>
-            </tr>
-            <tr>
-                <td>Collection</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Collection</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     {nft.collection ? (
                         <Address pubkey={new PublicKey(nft.collection)} alignRight link />
                     ) : (
                         'No Collection'
                     )}
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </AccountCard>
     );
 };
@@ -115,26 +116,26 @@ const CollectionCard = ({ account, collection }: { account: Account; collection:
             refresh={() => fetchInfo(new PublicKey(collection.address), 'parsed')}
             analyticsSection="nft_token_collection_card"
         >
-            <tr>
-                <td>Address</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Address</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={new PublicKey(collection.address)} alignRight raw />
-                </td>
-            </tr>
-            <tr>
-                <td>Authority</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Authority</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={new PublicKey(collection.authority)} alignRight link />
-                </td>
-            </tr>
-            <tr>
-                <td>Number of NFTs</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Number of NFTs</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Suspense fallback={<div>Loading...</div>}>
                         <NumNfts collection={collection.address} />
                     </Suspense>
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </AccountCard>
     );
 };

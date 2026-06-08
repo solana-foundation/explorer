@@ -3,6 +3,8 @@ import { SolBalance } from '@components/common/SolBalance';
 import { ParsedInstruction, SignatureResult, SystemProgram } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { TransferInfo } from './types';
 
@@ -25,33 +27,33 @@ export function TransferDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={SystemProgram.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>From Address</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>From Address</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.source} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>To Address</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>To Address</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.destination} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Transfer Amount (SOL)</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Transfer Amount (SOL)</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <SolBalance lamports={info.lamports} />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

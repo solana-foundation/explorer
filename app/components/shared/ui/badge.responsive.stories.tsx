@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { Badge } from './badge';
 
 // Shows how dashkit badges wrap and float at different viewports. Mirrors the real usage:
@@ -23,32 +25,32 @@ type Story = StoryObj<typeof meta>;
 const TableRow = () => (
     <div className="e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-bg-dk-gray-800-dark e-p-3">
         <h3 className="e-mb-2 e-text-dk-sm e-text-dk-gray-700">In-table status (parent 13px → badge ≈10px)</h3>
-        <table className="table table-sm table-nowrap card-table">
-            <thead>
-                <tr>
-                    <th>Slot</th>
-                    <th>Result</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>123456789</td>
-                    <td>
+        <BaseTable ui="dashkit" variant="card" nowrap>
+            <BaseTable.Head>
+                <BaseTable.Row>
+                    <BaseTable.HeaderCell>Slot</BaseTable.HeaderCell>
+                    <BaseTable.HeaderCell>Result</BaseTable.HeaderCell>
+                </BaseTable.Row>
+            </BaseTable.Head>
+            <BaseTable.Body>
+                <BaseTable.Row>
+                    <BaseTable.Cell>123456789</BaseTable.Cell>
+                    <BaseTable.Cell>
                         <Badge ui="dashkit" variant="success">
                             Success
                         </Badge>
-                    </td>
-                </tr>
-                <tr>
-                    <td>123456790</td>
-                    <td>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>123456790</BaseTable.Cell>
+                    <BaseTable.Cell>
                         <Badge ui="dashkit" variant="warning">
                             Failed
                         </Badge>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+            </BaseTable.Body>
+        </BaseTable>
     </div>
 );
 

@@ -7,6 +7,8 @@ import { PublicKey } from '@solana/web3.js';
 import { ConfigAccount, StakeConfigInfoAccount, ValidatorInfoAccount } from '@validators/accounts/config';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 const MAX_SLASH_PENALTY = Math.pow(2, 8);
 
 export function ConfigAccountSection({ account, configAccount }: { account: Account; configAccount: ConfigAccount }) {
@@ -41,15 +43,15 @@ function StakeConfigCard({ account, configAccount }: { account: Account; configA
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <tr>
-                <td>Warmup / Cooldown Rate</td>
-                <td className="e-text-right">{warmupCooldownFormatted}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Warmup / Cooldown Rate</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{warmupCooldownFormatted}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Slash Penalty</td>
-                <td className="e-text-right">{slashPenaltyFormatted}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Slash Penalty</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{slashPenaltyFormatted}</BaseTable.Cell>
+            </BaseTable.Row>
         </AccountCard>
     );
 }
@@ -67,44 +69,46 @@ function ValidatorInfoCard({ account, configAccount }: { account: Account; confi
             <AccountBalanceRow account={account} />
 
             {configAccount.info.configData.name && (
-                <tr>
-                    <td>Name</td>
-                    <td className="e-text-right">{configAccount.info.configData.name}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Name</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{configAccount.info.configData.name}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
 
             {configAccount.info.configData.keybaseUsername && (
-                <tr>
-                    <td>Keybase Username</td>
-                    <td className="e-text-right">{configAccount.info.configData.keybaseUsername}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Keybase Username</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        {configAccount.info.configData.keybaseUsername}
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             )}
 
             {configAccount.info.configData.website && (
-                <tr>
-                    <td>Website</td>
-                    <td className="e-text-right">
+                <BaseTable.Row>
+                    <BaseTable.Cell>Website</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <a href={configAccount.info.configData.website} target="_blank" rel="noopener noreferrer">
                             {configAccount.info.configData.website}
                         </a>
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             )}
 
             {configAccount.info.configData.details && (
-                <tr>
-                    <td>Details</td>
-                    <td className="e-text-right">{configAccount.info.configData.details}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Details</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{configAccount.info.configData.details}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
 
             {configAccount.info.keys && configAccount.info.keys.length > 1 && (
-                <tr>
-                    <td>Signer</td>
-                    <td className="e-text-right">
+                <BaseTable.Row>
+                    <BaseTable.Cell>Signer</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <Address pubkey={new PublicKey(configAccount.info.keys[1].pubkey)} link alignRight />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             )}
         </AccountCard>
     );

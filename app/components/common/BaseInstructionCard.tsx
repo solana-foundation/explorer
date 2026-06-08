@@ -8,6 +8,8 @@ import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll
 import React from 'react';
 import { Code } from 'react-feather';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { BaseRawDetails } from './BaseRawDetails';
 import { BaseRawParsedDetails } from './BaseRawParsedDetails';
 
@@ -95,58 +97,55 @@ export function BaseInstructionCard({
                 </div>
             }
         >
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table [&>tbody>tr:first-child>td]:!e-border-t-0">
-                    <tbody className="list">
-                        {showRaw ? (
-                            <>
-                                <tr>
-                                    <td>Program</td>
-                                    <td className="e-text-right">
-                                        <Address pubkey={ix.programId} alignRight link />
-                                    </td>
-                                </tr>
-                                {'parsed' in ix ? (
-                                    <BaseRawParsedDetails ix={ix}>
-                                        {raw ? <BaseRawDetails ix={raw} /> : null}
-                                    </BaseRawParsedDetails>
-                                ) : (
-                                    <BaseRawDetails ix={ix} />
-                                )}
-                            </>
-                        ) : (
-                            children
-                        )}
-                        {innerCards && innerCards.length > 0 && (
-                            <>
-                                <tr className="table-sep">
-                                    <td colSpan={3}>Inner Instructions</td>
-                                </tr>
-                                <tr>
-                                    <td colSpan={3}>
-                                        {/* !e-m-0 overrides the 1.5rem margin from inner-cards
-                                        so the card aligns with the "Inner Instructions" label above */}
-                                        <div className="inner-cards !e-m-0">{innerCards}</div>
-                                    </td>
-                                </tr>
-                            </>
-                        )}
-                        {eventCards && eventCards.length > 0 && (
-                            <>
-                                <tr className="table-sep">
-                                    <td colSpan={3}>Events</td>
-                                </tr>
-                                <tr>
-                                    <td colSpan={3}>
-                                        <div className="inner-cards">{eventCards}</div>
-                                    </td>
-                                </tr>
-                            </>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!e-border-t-0">
+                <BaseTable.Body className="list">
+                    {showRaw ? (
+                        <>
+                            <BaseTable.Row>
+                                <BaseTable.Cell>Program</BaseTable.Cell>
+                                <BaseTable.Cell className="e-text-right">
+                                    <Address pubkey={ix.programId} alignRight link />
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
+                            {'parsed' in ix ? (
+                                <BaseRawParsedDetails ix={ix}>
+                                    {raw ? <BaseRawDetails ix={raw} /> : null}
+                                </BaseRawParsedDetails>
+                            ) : (
+                                <BaseRawDetails ix={ix} />
+                            )}
+                        </>
+                    ) : (
+                        children
+                    )}
+                    {innerCards && innerCards.length > 0 && (
+                        <>
+                            <BaseTable.Row className="table-sep">
+                                <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
+                            </BaseTable.Row>
+                            <BaseTable.Row>
+                                <BaseTable.Cell colSpan={3}>
+                                    {/* !e-m-0 overrides the 1.5rem margin from inner-cards
+                                    so the card aligns with the "Inner Instructions" label above */}
+                                    <div className="inner-cards !e-m-0">{innerCards}</div>
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
+                        </>
+                    )}
+                    {eventCards && eventCards.length > 0 && (
+                        <>
+                            <BaseTable.Row className="table-sep">
+                                <BaseTable.Cell colSpan={3}>Events</BaseTable.Cell>
+                            </BaseTable.Row>
+                            <BaseTable.Row>
+                                <BaseTable.Cell colSpan={3}>
+                                    <div className="inner-cards">{eventCards}</div>
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
+                        </>
+                    )}
+                </BaseTable.Body>
+            </BaseTable>
         </CollapsibleCard>
     );
 }

@@ -4,6 +4,7 @@ import { SolBalance } from '@components/common/SolBalance';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import type { SolBalanceChange } from '../lib/types';
 
@@ -15,39 +16,36 @@ export function SolBalanceChangesCard({ balanceChanges }: { balanceChanges: SolB
                     SOL Balance Changes
                 </CardTitle>
             </CardHeader>
-            <div className="e-mb-0 e-overflow-x-auto">
-                {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="e-text-dk-gray-700">#</th>
-                            <th className="e-text-dk-gray-700">Address</th>
-                            <th className="e-text-dk-gray-700">Change (SOL)</th>
-                            <th className="e-text-dk-gray-700">Post Balance (SOL)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {balanceChanges.map((change, i) => (
-                            <tr key={change.pubkey.toBase58()}>
-                                <td>
-                                    <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
-                                        {i + 1}
-                                    </Badge>
-                                </td>
-                                <td>
-                                    <Address pubkey={change.pubkey} link fetchTokenLabelInfo />
-                                </td>
-                                <td>
-                                    <BalanceDelta delta={change.delta} isSol />
-                                </td>
-                                <td>
-                                    <SolBalance lamports={BigInt(change.postBalance.toString())} />
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">#</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Change (SOL)</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Post Balance (SOL)</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>
+                    {balanceChanges.map((change, i) => (
+                        <BaseTable.Row key={change.pubkey.toBase58()}>
+                            <BaseTable.Cell>
+                                <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                                    {i + 1}
+                                </Badge>
+                            </BaseTable.Cell>
+                            <BaseTable.Cell>
+                                <Address pubkey={change.pubkey} link fetchTokenLabelInfo />
+                            </BaseTable.Cell>
+                            <BaseTable.Cell>
+                                <BalanceDelta delta={change.delta} isSol />
+                            </BaseTable.Cell>
+                            <BaseTable.Cell>
+                                <SolBalance lamports={BigInt(change.postBalance.toString())} />
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
         </Card>
     );
 }

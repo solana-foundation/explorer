@@ -11,6 +11,7 @@ import { Button } from '@/app/components/shared/ui/button';
 import { fromBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 export function ProgramEventsCard({
     eventDataList,
@@ -92,38 +93,35 @@ function EventCard({
                     <Code className="e-mr-1.5" size={13} /> Raw
                 </Button>
             </CardHeader>
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <tbody className="list">
-                        {showRaw ? (
-                            <>
-                                <tr>
-                                    <td>
-                                        Event Data <span className="text-muted">(Hex)</span>
-                                    </td>
-                                    <td className="e-text-right">
-                                        <HexData raw={fromBase64(rawEventData)} />
-                                    </td>
-                                </tr>
-                            </>
-                        ) : (
-                            <>
-                                {fields.length > 0 && (
-                                    <>
-                                        <tr className="table-sep">
-                                            <td>Field Name</td>
-                                            <td>Type</td>
-                                            <td className="e-text-right">Value</td>
-                                        </tr>
-                                        {mapIxArgsToRows(event.data, { ...eventDef, args: fields } as any, program.idl)}
-                                    </>
-                                )}
-                            </>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Body className="list">
+                    {showRaw ? (
+                        <>
+                            <BaseTable.Row>
+                                <BaseTable.Cell>
+                                    Event Data <span className="text-muted">(Hex)</span>
+                                </BaseTable.Cell>
+                                <BaseTable.Cell className="e-text-right">
+                                    <HexData raw={fromBase64(rawEventData)} />
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
+                        </>
+                    ) : (
+                        <>
+                            {fields.length > 0 && (
+                                <>
+                                    <BaseTable.Row className="table-sep">
+                                        <BaseTable.Cell>Field Name</BaseTable.Cell>
+                                        <BaseTable.Cell>Type</BaseTable.Cell>
+                                        <BaseTable.Cell className="e-text-right">Value</BaseTable.Cell>
+                                    </BaseTable.Row>
+                                    {mapIxArgsToRows(event.data, { ...eventDef, args: fields } as any, program.idl)}
+                                </>
+                            )}
+                        </>
+                    )}
+                </BaseTable.Body>
+            </BaseTable>
         </Card>
     );
 }

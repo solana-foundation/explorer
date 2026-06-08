@@ -3,6 +3,7 @@ import { AddressLookupTableProgram } from '@solana/web3.js';
 import { Address } from '@/app/components/common/Address';
 import { InstructionCard } from '@/app/components/instruction/InstructionCard';
 import { InstructionDetailsProps } from '@/app/components/transaction/InstructionsSection';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { CloseLookupTableInfo } from './types';
 
@@ -17,24 +18,24 @@ export function CloseLookupTableDetailsCard(props: InstructionDetailsProps & { i
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={AddressLookupTableProgram.programId} alignRight link />
-                </td>
-            </tr>
-            <tr>
-                <td>Lookup Table</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Lookup Table</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.lookupTableAccount} alignRight link />
-                </td>
-            </tr>
-            <tr>
-                <td>Lookup Table Authority</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Lookup Table Authority</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.lookupTableAuthority} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
 
 import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
 
 import { TokenExtensionsStatusRow } from '../TokenExtensionsStatusRow';
@@ -12,9 +13,9 @@ const meta = {
     decorators: [
         Story => (
             <table>
-                <tbody>
+                <BaseTable.Body>
                     <Story />
-                </tbody>
+                </BaseTable.Body>
             </table>
         ),
     ],

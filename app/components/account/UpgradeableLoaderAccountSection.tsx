@@ -28,6 +28,7 @@ import { ProgramSecurityTXTLabel } from '@/app/features/security-txt/ui/Security
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { refreshAnalytics } from '@/app/shared/lib/analytics';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { Cluster } from '@/app/utils/cluster';
 import { useClusterPath } from '@/app/utils/url';
 
@@ -101,73 +102,75 @@ export function UpgradeableProgramSection({
             </CardHeader>
 
             <TableCardBody>
-                <tr>
-                    <td>Address</td>
-                    <td className="e-text-right">
+                <BaseTable.Row>
+                    <BaseTable.Cell>Address</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <Address pubkey={account.pubkey} alignRight raw />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
                 {label && (
-                    <tr>
-                        <td>Address Label</td>
-                        <td className="e-text-right">{label}</td>
-                    </tr>
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Address Label</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">{label}</BaseTable.Cell>
+                    </BaseTable.Row>
                 )}
-                <tr>
-                    <td>Balance (SOL)</td>
-                    <td className="e-text-right e-uppercase">
+                <BaseTable.Row>
+                    <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right e-uppercase">
                         <SolBalance lamports={account.lamports} />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Executable</td>
-                    <td className="e-text-right">{programData !== undefined ? 'Yes' : 'No'}</td>
-                </tr>
-                <tr>
-                    <td>Executable Data{programData === undefined && ' (Closed)'}</td>
-                    <td className="e-text-right">
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Executable</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{programData !== undefined ? 'Yes' : 'No'}</BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Executable Data{programData === undefined && ' (Closed)'}</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <Address pubkey={programAccount.programData} alignRight link />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
                 {programData !== undefined && (
                     <>
-                        <tr>
-                            <td>Upgradeable</td>
-                            <td className="e-text-right">{programData.authority !== null ? 'Yes' : 'No'}</td>
-                        </tr>
-                        <tr>
-                            <td>
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Upgradeable</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right">
+                                {programData.authority !== null ? 'Yes' : 'No'}
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                        <BaseTable.Row>
+                            <BaseTable.Cell>
                                 <VerifiedLabel />
-                            </td>
-                            <td className="e-text-right">
+                            </BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right">
                                 <VerifiedProgramBadge programData={programData} pubkey={account.pubkey} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                        <BaseTable.Row>
+                            <BaseTable.Cell>
                                 <ProgramSecurityTXTLabel programPubkey={account.pubkey} />
-                            </td>
-                            <td className="e-text-right">
+                            </BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right">
                                 <ProgramSecurityTXTBadge programData={programData} programPubkey={account.pubkey} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Last Deployed Slot</td>
-                            <td className="e-text-right">
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Last Deployed Slot</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right">
                                 <Slot slot={programData.slot} link />
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
                         {programData.authority !== null && (
                             <>
-                                <tr>
-                                    <td>Upgrade Authority</td>
-                                    <td className="e-text-right">
+                                <BaseTable.Row>
+                                    <BaseTable.Cell>Upgrade Authority</BaseTable.Cell>
+                                    <BaseTable.Cell className="e-text-right">
                                         {cluster == Cluster.MainnetBeta && squadMapInfo?.isSquad ? (
                                             <MultisigBadge pubkey={account.pubkey} />
                                         ) : null}
                                         <Address pubkey={programData.authority} alignRight link />
-                                    </td>
-                                </tr>
+                                    </BaseTable.Cell>
+                                </BaseTable.Row>
                             </>
                         )}
                     </>
@@ -232,45 +235,47 @@ export function UpgradeableProgramDataSection({
             </CardHeader>
 
             <TableCardBody>
-                <tr>
-                    <td>Address</td>
-                    <td className="e-text-right">
+                <BaseTable.Row>
+                    <BaseTable.Cell>Address</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <Address pubkey={account.pubkey} alignRight raw />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Balance (SOL)</td>
-                    <td className="e-text-right e-uppercase">
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right e-uppercase">
                         <SolBalance lamports={account.lamports} />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
                 {account.space !== undefined && (
-                    <tr>
-                        <td>Data Size (Bytes)</td>
-                        <td className="e-text-right">
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Data Size (Bytes)</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">
                             <DownloadableIcon data={programData.data[0]} filename={`${account.pubkey.toString()}.bin`}>
                                 <span className="e-mr-1.5">{account.space}</span>
                             </DownloadableIcon>
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
                 )}
-                <tr>
-                    <td>Upgradeable</td>
-                    <td className="e-text-right">{programData.authority !== null ? 'Yes' : 'No'}</td>
-                </tr>
-                <tr>
-                    <td>Last Deployed Slot</td>
-                    <td className="e-text-right">
+                <BaseTable.Row>
+                    <BaseTable.Cell>Upgradeable</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        {programData.authority !== null ? 'Yes' : 'No'}
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Last Deployed Slot</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <Slot slot={programData.slot} link />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
                 {programData.authority !== null && (
-                    <tr>
-                        <td>Upgrade Authority</td>
-                        <td className="e-text-right">
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Upgrade Authority</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">
                             <Address pubkey={programData.authority} alignRight link />
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
                 )}
             </TableCardBody>
         </Card>
@@ -306,38 +311,38 @@ export function UpgradeableProgramBufferSection({
             </CardHeader>
 
             <TableCardBody>
-                <tr>
-                    <td>Address</td>
-                    <td className="e-text-right">
+                <BaseTable.Row>
+                    <BaseTable.Cell>Address</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <Address pubkey={account.pubkey} alignRight raw />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Balance (SOL)</td>
-                    <td className="e-text-right e-uppercase">
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right e-uppercase">
                         <SolBalance lamports={account.lamports} />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
                 {account.space !== undefined && (
-                    <tr>
-                        <td>Data Size (Bytes)</td>
-                        <td className="e-text-right">{account.space}</td>
-                    </tr>
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Data Size (Bytes)</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">{account.space}</BaseTable.Cell>
+                    </BaseTable.Row>
                 )}
                 {programBuffer.authority !== null && (
-                    <tr>
-                        <td>Deploy Authority</td>
-                        <td className="e-text-right">
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Deploy Authority</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">
                             <Address pubkey={programBuffer.authority} alignRight link />
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
                 )}
-                <tr>
-                    <td>Owner</td>
-                    <td className="e-text-right">
+                <BaseTable.Row>
+                    <BaseTable.Cell>Owner</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <Address pubkey={account.owner} alignRight link />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             </TableCardBody>
         </Card>
     );

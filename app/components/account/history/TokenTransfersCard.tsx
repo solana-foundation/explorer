@@ -23,6 +23,7 @@ import { Badge } from '@/app/components/shared/ui/badge';
 import { Logger } from '@/app/shared/lib/logger';
 import { RelativeTime } from '@/app/shared/RelativeTime';
 import { Card } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
@@ -66,35 +67,39 @@ function TransferRow({
     );
 
     return (
-        <tr key={signature + index + (childIndex || '')}>
-            <td>
+        <BaseTable.Row key={signature + index + (childIndex || '')}>
+            <BaseTable.Cell>
                 <Signature signature={signature} link />
-            </td>
+            </BaseTable.Cell>
 
-            {hasTimestamps && <td className="text-muted">{blockTime && <RelativeTime date={blockTime * 1000} />}</td>}
+            {hasTimestamps && (
+                <BaseTable.Cell className="text-muted">
+                    {blockTime && <RelativeTime date={blockTime * 1000} />}
+                </BaseTable.Cell>
+            )}
 
-            <td>
+            <BaseTable.Cell>
                 <Address pubkey={transfer.source} link />
-            </td>
+            </BaseTable.Cell>
 
-            <td>
+            <BaseTable.Cell>
                 <Address pubkey={transfer.destination} link />
-            </td>
+            </BaseTable.Cell>
 
-            <td>
+            <BaseTable.Cell>
                 {amountWithScaledUiAmountMultiplier} {units}
                 <ScaledUiAmountMultiplierTooltip
                     rawAmount={amountString}
                     scaledUiAmountMultiplier={scaledUiAmountMultiplier}
                 />
-            </td>
+            </BaseTable.Cell>
 
-            <td>
+            <BaseTable.Cell>
                 <Badge ui="dashkit" variant={statusClass as 'success' | 'warning'}>
                     {statusText}
                 </Badge>
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
@@ -247,31 +252,28 @@ export function TokenTransfersCard({ address }: { address: string }) {
                 title="Token Transfers"
                 analyticsSection="token_transfers_header"
             />
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">Transaction Signature</th>
-                            {hasTimestamps && <th className="text-muted">Age</th>}
-                            <th className="text-muted">Source</th>
-                            <th className="text-muted">Destination</th>
-                            <th className="text-muted">Amount</th>
-                            <th className="text-muted">Result</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">
-                        {allTransfers.map(transferData => (
-                            <TransferRow
-                                key={transferData.signature + transferData.index + (transferData.childIndex || '')}
-                                data={transferData}
-                                hasTimestamps={hasTimestamps}
-                                tokenAddress={pubkey.toBase58()}
-                            />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="text-muted">Transaction Signature</BaseTable.HeaderCell>
+                        {hasTimestamps && <BaseTable.HeaderCell className="text-muted">Age</BaseTable.HeaderCell>}
+                        <BaseTable.HeaderCell className="text-muted">Source</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Destination</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Amount</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Result</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body className="list">
+                    {allTransfers.map(transferData => (
+                        <TransferRow
+                            key={transferData.signature + transferData.index + (transferData.childIndex || '')}
+                            data={transferData}
+                            hasTimestamps={hasTimestamps}
+                            tokenAddress={pubkey.toBase58()}
+                        />
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
             <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />
         </Card>
     );
