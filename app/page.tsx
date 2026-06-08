@@ -24,6 +24,7 @@ import { percentage } from '@utils/math';
 import React from 'react';
 
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
 import { DeveloperResources } from './components/DeveloperResources';
 import { SimpleCardSkeleton } from './components/shared/Skeletons';
@@ -32,7 +33,7 @@ export default function Page() {
     return (
         <StatsProvider>
             <SupplyProvider>
-                <div className="container e-mt-4">
+                <PageContainer className="e-mt-4">
                     <StakingComponent />
 
                     <div className="e-flex e-flex-col lg:e-flex-row lg:e-gap-6">
@@ -47,7 +48,7 @@ export default function Page() {
                     <DeveloperResources />
 
                     <UpcomingFeatures />
-                </div>
+                </PageContainer>
             </SupplyProvider>
         </StatsProvider>
     );
