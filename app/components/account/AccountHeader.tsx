@@ -13,7 +13,6 @@ import {
 import { useMetadataJsonLink } from '@providers/compressed-nft';
 import { MintAccountInfo } from '@validators/accounts/token';
 import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension';
-import Image from 'next/image';
 import React, { Suspense, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'superstruct';
@@ -21,7 +20,6 @@ import { create } from 'superstruct';
 import { ProgramHeader } from '@/app/components/shared/account/ProgramHeader';
 import { ProxiedImage } from '@/app/features/metadata';
 import { getProxiedUri } from '@/app/features/metadata/utils';
-import TokenLogoPlaceholder from '@/app/img/logos-solana/low-contrast-solana-logo.svg';
 import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 
 export function AccountHeader({
@@ -193,15 +191,6 @@ function TokenMintHeaderCard({
                     <ProxiedImage
                         alt="Token logo"
                         className="avatar-img border border-4 border-body e-rounded-full"
-                        fallback={
-                            <Image
-                                alt="Token logo placeholder"
-                                className="e-h-full e-w-full e-rounded-full e-border e-border-gray-200 e-object-cover"
-                                height={64}
-                                src={TokenLogoPlaceholder}
-                                width={64}
-                            />
-                        }
                         height={64}
                         uri={token.logoURI}
                         width={64}

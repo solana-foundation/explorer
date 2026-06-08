@@ -1,19 +1,29 @@
 import solanaLogo from '@img/logos-solana/low-contrast-solana-logo.svg';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { ExternalResourceLink, type ImageProps, ImageWithFallback } from '@/app/components/shared/ui/image';
+import { Skeleton } from '@/app/components/shared/ui/skeleton';
 
+import { type ImageFailure } from '../lib/imageFailure';
+import { useImageFailureReason } from '../model/useImageFailureReason';
 import { getProxiedUri as defaultGetProxiedUri } from '../utils';
 
 export type ProxiedImageProps = Omit<ImageProps, 'src' | 'fallback'> & {
     /** Original on-chain URI; routed through the metadata proxy when enabled. */
     uri?: string;
-    /** Override the default fallback (Solana logo + "view original" link). */
-    fallback?: ReactNode;
     /**
-     * Always render the "view original" link beneath the image, not only when
-     * it fails to load. The default fallback degrades to a logo-only placeholder
-     * so the link is never shown twice.
+     * Override the default fallback (a Solana logo sized to the image's slot,
+     * with the failure reason as a tooltip). Pass a render function to receive
+     * the resolved {@link ImageFailure} — e.g. to show the reason as visible
+     * text; it's re-invoked once the reason is known.
+     */
+    fallback?: ReactNode | ((failure: ImageFailure | undefined) => ReactNode);
+    /**
+     * Render a "View original" link to the {@link ProxiedImageProps.uri} beneath
+     * the image, in every state. The escape hatch for when the proxy rejects an
+     * oversize image (a `413`) or the upstream is unreachable — a browser `<img>`
+     * can't read the HTTP status, so the link is offered rather than gated on a
+     * load failure. Off by default.
      */
     showOriginalLink?: boolean;
     /**
@@ -25,11 +35,16 @@ export type ProxiedImageProps = Omit<ImageProps, 'src' | 'fallback'> & {
 };
 
 /**
- * Off-chain image fetched through the metadata proxy. On any load failure it
- * degrades to a Solana-logo placeholder with an always-available "view original"
- * link to the source — the escape hatch when the proxy rejects an oversize image
- * (a `413`) or the upstream is unreachable. A browser `<img>` can't read the HTTP
- * status, so one fallback covers every cause.
+ * Off-chain image fetched through the metadata proxy. While it loads, a
+ * {@link Skeleton} sized to the image's slot holds the space; on any load
+ * failure it degrades to a Solana-logo placeholder that inherits the image's
+ * own className and box, so the fallback matches the slot's shape (a
+ * rounded-full avatar gets a round logo).
+ *
+ * Since a browser `<img>` can't read the HTTP status, on failure the component
+ * re-fetches the proxied URL to learn why (413 oversize, 404, 415, …) and
+ * surfaces it as a tooltip on the default fallback — or via a `fallback` render
+ * function. Pass `showOriginalLink` to add a "View original" escape-hatch link.
  *
  * This is the only metadata-aware layer; it composes the proxy-agnostic
  * primitives from `shared/ui/image`.
@@ -37,24 +52,41 @@ export type ProxiedImageProps = Omit<ImageProps, 'src' | 'fallback'> & {
 export function ProxiedImage({
     uri,
     fallback,
+    placeholder,
     showOriginalLink = false,
     getProxiedUri = defaultGetProxiedUri,
+    onError,
     ...props
 }: ProxiedImageProps) {
+    const src = uri ? getProxiedUri(uri) : '';
+    const { failure, onImageError } = useImageFailureReason(src);
+
+    const resolvedFallback =
+        typeof fallback === 'function'
+            ? fallback(failure)
+            : (fallback ?? <SolanaLogoFallback {...props} failure={failure} />);
+
     const image = (
         <ImageWithFallback
             {...props}
-            fallback={
-                fallback ?? (
-                    <ProxiedImageFallback
+            fallback={resolvedFallback}
+            // Learn why the image failed (the `<img>` can't read the status),
+            // then forward to any consumer-supplied onError.
+            onError={event => {
+                onImageError();
+                onError?.(event);
+            }}
+            // Reuse the image's className/box so the skeleton matches its slot and
+            // shape (e.g. a rounded-full avatar gets a round skeleton).
+            placeholder={
+                placeholder ?? (
+                    <Skeleton
+                        className={props.className}
                         style={{ height: props.height, width: props.width, ...props.style }}
-                        // The link is rendered below for every state, so keep the
-                        // fallback logo-only to avoid showing it twice.
-                        uri={showOriginalLink ? undefined : uri}
                     />
                 )
             }
-            src={uri ? getProxiedUri(uri) : ''}
+            src={src}
         />
     );
 
@@ -63,19 +95,32 @@ export function ProxiedImage({
     }
 
     return (
-        <div className="e-flex e-flex-col e-items-center e-gap-2">
+        <div className="e-inline-flex e-flex-col e-items-center e-gap-2">
             {image}
-            {uri ? <ExternalResourceLink href={uri} /> : undefined}
+            {uri ? <ExternalResourceLink detail={failure?.reason} href={uri} /> : undefined}
         </div>
     );
 }
 
-function ProxiedImageFallback({ uri, style }: { uri?: string; style?: CSSProperties }) {
+// The default fallback reuses the image's own slot — same className, box, and
+// inline style — so it inherits the avatar's shape; only the source swaps to the
+// Solana logo. The failure reason rides along as a tooltip, which works at any
+// size (including a 16px avatar where visible text wouldn't fit).
+function SolanaLogoFallback({ className, failure, height, style, width }: ImageProps & { failure?: ImageFailure }) {
     return (
-        <div className="e-flex e-flex-col e-items-center e-justify-center e-gap-2" style={style}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="" className="e-max-h-full e-w-full e-object-contain" src={solanaLogo.src} />
-            {uri ? <ExternalResourceLink href={uri} /> : undefined}
-        </div>
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+            // On failure the logo isn't decorative — it stands in for the missing
+            // image and carries the reason, so announce it (the `title` is only a
+            // sighted hover hint). Empty alt only when there's nothing to report
+            // (e.g. no URI), where it really is a decorative placeholder.
+            alt={failure?.reason ?? ''}
+            className={className}
+            height={height}
+            src={solanaLogo.src}
+            style={style}
+            title={failure?.reason}
+            width={width}
+        />
     );
 }

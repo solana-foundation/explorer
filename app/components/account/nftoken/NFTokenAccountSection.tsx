@@ -2,9 +2,8 @@ import { Address } from '@components/common/Address';
 import { useRefreshAccount } from '@entities/account';
 import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
-import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
-import { Suspense, useState } from 'react';
+import { Suspense } from 'react';
 
 import { ProxiedImage } from '@/app/features/metadata';
 
@@ -76,37 +75,13 @@ const NFTCard = ({ account, nft }: { account: Account; nft: NftokenTypes.NftAcco
 };
 
 export const NftokenImage = ({ url, size }: { url: string | undefined; size: number }) => {
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-
+    // ProxiedImage owns the whole lifecycle — a skeleton while loading, the image
+    // on success, and a logo + reason + "View original" link on failure — so there
+    // is no need for a separate loading box or visibility toggling here.
     return (
-        <>
-            {isLoading && (
-                <div
-                    style={{
-                        backgroundColor: 'lightgrey',
-                        height: size,
-                        width: size,
-                    }}
-                />
-            )}
-            <div className={cn('mx-auto e-rounded-dk', isLoading ? 'e-hidden' : 'e-block')}>
-                <ProxiedImage
-                    alt="nft"
-                    height={size}
-                    // Clear the skeleton on failure too, otherwise the e-hidden
-                    // wrapper would hide the fallback when the load errors.
-                    onError={() => {
-                        setIsLoading(false);
-                    }}
-                    onLoad={() => {
-                        setIsLoading(false);
-                    }}
-                    showOriginalLink
-                    uri={url}
-                    width={size}
-                />
-            </div>
-        </>
+        <div className="mx-auto e-rounded-dk">
+            <ProxiedImage alt="nft" height={size} showOriginalLink uri={url} width={size} />
+        </div>
     );
 };
 

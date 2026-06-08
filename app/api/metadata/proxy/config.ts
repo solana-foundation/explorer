@@ -38,3 +38,17 @@ const BROWSER_MAX_AGE = 86_400; // 1 day
 export const CACHE_HEADERS = {
     'Cache-Control': `public, max-age=${BROWSER_MAX_AGE}`,
 };
+
+const ERROR_MAX_AGE = 30; // 30 seconds
+
+// Error responses are cached briefly in the viewer's own browser only. This is
+// what makes ProxiedImage's failure-reason probe free: the `<img>` element can't
+// read an HTTP status, so on a load failure the component re-`fetch`es the same
+// URL to learn why — and because the failed `<img>` request populated the cache,
+// that probe is served from cache instead of re-hitting the proxy (no upstream
+// re-download for an oversize 413). `private` keeps the verdict out of shared and
+// edge caches (no `Vercel-CDN-Cache-Control`); the short TTL lets a transient
+// 5xx clear quickly while a stable 413/404/415 stays cheap to re-read.
+export const ERROR_CACHE_HEADERS = {
+    'Cache-Control': `private, max-age=${ERROR_MAX_AGE}`,
+};

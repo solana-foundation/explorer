@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { CACHE_HEADERS, MAX_SIZE, SECURITY_HEADERS, TIMEOUT, USER_AGENT } from './config';
+import { CACHE_HEADERS, ERROR_CACHE_HEADERS, MAX_SIZE, SECURITY_HEADERS, TIMEOUT, USER_AGENT } from './config';
 import {
     fetchResource,
     isHTTPProtocol,
@@ -104,5 +104,8 @@ function isKnownStatus(status: number): status is StatusCode {
 }
 
 function respondWithError(status: StatusCode) {
-    return NextResponse.json({ error: STATUS_MESSAGES[status] }, { status });
+    // ERROR_CACHE_HEADERS lets the failed `<img>` request prime the browser cache
+    // so ProxiedImage's on-error reason probe re-reads the status from cache
+    // rather than re-invoking the proxy. Browser-only and short-lived by design.
+    return NextResponse.json({ error: STATUS_MESSAGES[status] }, { headers: ERROR_CACHE_HEADERS, status });
 }

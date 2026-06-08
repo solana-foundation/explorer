@@ -11,6 +11,12 @@ export type ExternalResourceLinkProps = {
     href: string;
     children?: ReactNode;
     className?: string;
+    /**
+     * Optional detail shown in the info tooltip (and the trigger's accessible
+     * label) alongside the external-resource hint — e.g. why the resource
+     * couldn't be displayed ("Image exceeds maximum size"). Not added to the link text.
+     */
+    detail?: string;
 };
 
 const EXTERNAL_RESOURCE_HINT = 'Clicking this link will open an external resource';
@@ -22,10 +28,20 @@ const EXTERNAL_RESOURCE_HINT = 'Clicking this link will open an external resourc
  * clear the destination is outside the app. Used as the escape hatch when a
  * proxied image can't be displayed.
  */
-export function ExternalResourceLink({ href, children = 'View original', className }: ExternalResourceLinkProps) {
+export function ExternalResourceLink({
+    href,
+    children = 'View original',
+    className,
+    detail,
+}: ExternalResourceLinkProps) {
     // Guard before rendering the tooltip wrapper too, so an unsafe href that
     // `ExternalLink` would drop doesn't leave an orphan tooltip pointing at no link.
     if (!getSafeExternalHref(href)) return undefined;
+
+    // `detail` (e.g. why the image couldn't be shown) rides in the info tooltip
+    // beside the external-resource hint — not in the link text, so the label stays
+    // terse — and is joined into the trigger's aria-label so it's announced too.
+    const hint = detail ? `${detail}. ${EXTERNAL_RESOURCE_HINT}` : EXTERNAL_RESOURCE_HINT;
 
     return (
         <span
@@ -39,12 +55,21 @@ export function ExternalResourceLink({ href, children = 'View original', classNa
             </ExternalLink>
             <Tooltip>
                 <TooltipTrigger
-                    aria-label={EXTERNAL_RESOURCE_HINT}
+                    aria-label={hint}
                     className="e-inline-flex e-border-0 e-bg-transparent e-p-0 e-text-dk-gray-600"
                 >
                     <HelpCircle aria-hidden size={13} />
                 </TooltipTrigger>
-                <TooltipContent>{EXTERNAL_RESOURCE_HINT}</TooltipContent>
+                <TooltipContent>
+                    {detail ? (
+                        <div className="e-flex e-flex-col e-gap-1">
+                            <span className="e-font-medium">{detail}</span>
+                            <span>{EXTERNAL_RESOURCE_HINT}</span>
+                        </div>
+                    ) : (
+                        EXTERNAL_RESOURCE_HINT
+                    )}
+                </TooltipContent>
             </Tooltip>
         </span>
     );

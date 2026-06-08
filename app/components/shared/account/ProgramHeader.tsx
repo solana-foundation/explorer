@@ -6,16 +6,12 @@
 // consumers, then drop these two imports.
 import { ProxiedImage } from '@features/metadata';
 import { isPmpSecurityTXT, useSecurityTxt } from '@features/security-txt';
-import ProgramLogoPlaceholder from '@img/logos-solana/low-contrast-solana-logo.svg';
 import { type UpgradeableLoaderAccountData } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { PROGRAM_INFO_BY_ID } from '@utils/programs';
-import Image from 'next/image';
 import React from 'react';
 import { AlertCircle } from 'react-feather';
-
-const IDENTICON_WIDTH = 64;
 
 // The "self-reported" warning indicates that the securityTxt metadata (name, logo, etc.)
 // is self-reported by the program author and may not be accurate. We only show this warning
@@ -97,18 +93,7 @@ export function ProgramHeader({
                     <ProxiedImage
                         alt="Program logo"
                         className="e-h-full e-w-full e-rounded e-border-4 e-border-current e-object-cover"
-                        fallback={
-                            <Image
-                                alt="Program logo placeholder"
-                                className="e-h-full e-w-full e-rounded e-border e-border-gray-200 e-object-cover"
-                                height={IDENTICON_WIDTH}
-                                src={ProgramLogoPlaceholder}
-                                width={IDENTICON_WIDTH}
-                            />
-                        }
-                        height={16}
                         uri={logo}
-                        width={16}
                     />
                 </div>
             </div>

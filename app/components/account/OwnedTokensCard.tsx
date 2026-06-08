@@ -13,7 +13,6 @@ import { FetchStatus } from '@providers/cache';
 import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import React, { useCallback, useMemo } from 'react';
@@ -21,7 +20,6 @@ import { ChevronDown } from 'react-feather';
 
 import { ProxiedImage } from '@/app/features/metadata';
 import { INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
-import TokenLogoPlaceholder from '@/app/img/logos-solana/low-contrast-solana-logo.svg';
 import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
 import { normalizeTokenAmount } from '@/app/utils';
 
@@ -242,15 +240,6 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
                     <ProxiedImage
                         alt="Token icon"
                         className="token-icon border border-4 border-gray-dark e-rounded-full"
-                        fallback={
-                            <Image
-                                alt="Token icon placeholder"
-                                className="e-h-4 e-w-4 e-rounded-full e-object-cover"
-                                height={16}
-                                src={TokenLogoPlaceholder}
-                                width={16}
-                            />
-                        }
                         height={16}
                         uri={token.logoURI}
                         width={16}

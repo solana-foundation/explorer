@@ -153,8 +153,11 @@ describe('Metadata Proxy Route', () => {
             const request = new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`);
             const response = await GET(request);
             expect(response.status).toBe(status);
-            // Errors must not be cached.
-            expect(response.headers.get('cache-control')).toBeNull();
+            // Errors carry a short, browser-only cache so a failed <img> request
+            // primes the cache for ProxiedImage's on-error reason probe. Never
+            // shared/edge-cached.
+            expect(response.headers.get('cache-control')).toBe('private, max-age=30');
+            expect(response.headers.get('vercel-cdn-cache-control')).toBeNull();
         });
     });
 
