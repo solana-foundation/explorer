@@ -17,7 +17,7 @@ export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="w-1 text-muted">Slot</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted e-w-[1%]">Slot</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="text-muted">Hash</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
@@ -39,7 +39,7 @@ export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount
 const renderAccountRow = (entry: SlotHashEntry, index: number) => {
     return (
         <BaseTable.Row key={index}>
-            <BaseTable.Cell className="w-1 font-monospace">
+            <BaseTable.Cell className="font-monospace e-w-[1%]">
                 <Slot slot={entry.slot} link />
             </BaseTable.Cell>
             <BaseTable.Cell className="font-monospace">{entry.hash}</BaseTable.Cell>

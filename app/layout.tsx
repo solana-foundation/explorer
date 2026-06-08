@@ -62,7 +62,7 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                                 <TokenInfoBatchProvider>
                                     <ClusterModal />
                                     <div className="e-flex e-min-h-screen e-flex-col">
-                                        <div className="main-content e-flex-1 e-pb-6">
+                                        <div className="e-min-w-[292px] e-flex-1 e-pb-6">
                                             <Navbar>
                                                 <SearchBar />
                                             </Navbar>
