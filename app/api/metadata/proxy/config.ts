@@ -2,19 +2,39 @@
 // config (`dynamic`, `maxDuration`) stays in route.ts — Next only reads those
 // as literal exports of the route module, not via re-export.
 
+import { Logger } from '@/app/shared/lib/logger';
+
 export const USER_AGENT = process.env.NEXT_PUBLIC_METADATA_USER_AGENT ?? 'Solana Explorer';
+
+// Resolve a positive-integer env override, falling back to `fallback` when the
+// value is unset or malformed. Without this guard a value like "abc" parses to
+// NaN, every `contentLength > NaN` / `received > NaN` size comparison is false,
+// and the cap (or timeout) is silently disabled — failing open on the very
+// guard it configures. The malformed value is reported so a misconfigured
+// deploy is visible rather than quietly unprotected. Empty string is treated as
+// unset (no warning). `process.env.X` is read at the call site, not here, so
+// Next's build-time inlining of `NEXT_PUBLIC_*` still applies.
+function positiveIntEnv(name: string, raw: string | undefined, fallback: number): number {
+    if (!raw) return fallback;
+    const parsed = Number(raw);
+    if (Number.isInteger(parsed) && parsed > 0) return parsed;
+    Logger.warn(`[api:metadata-proxy] Ignoring invalid ${name}="${raw}"; using default ${fallback}`, {
+        sentry: true,
+    });
+    return fallback;
+}
 
 // 4 MB default: just under Vercel's ~4.5 MB buffered-response cap (a thin
 // ~0.5 MB margin), so our cap stays the binding constraint while fitting more
 // images. Oversize fetches degrade to the ProxiedImage "view original"
 // fallback. Tune from the success-path size stats logged in fetch-resource.ts.
-export const MAX_SIZE = process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE
-    ? Number(process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE)
-    : 4_000_000;
+export const MAX_SIZE = positiveIntEnv(
+    'NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE',
+    process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE,
+    4_000_000,
+);
 
-export const TIMEOUT = process.env.NEXT_PUBLIC_METADATA_TIMEOUT
-    ? Number(process.env.NEXT_PUBLIC_METADATA_TIMEOUT)
-    : 10_000;
+export const TIMEOUT = positiveIntEnv('NEXT_PUBLIC_METADATA_TIMEOUT', process.env.NEXT_PUBLIC_METADATA_TIMEOUT, 10_000);
 
 // Prevent proxied content (e.g. SVG with embedded scripts) from executing
 // anything if the proxy URL is opened directly as a top-level document.
