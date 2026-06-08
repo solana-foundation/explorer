@@ -155,6 +155,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const fee = transactionWithMeta?.meta?.fee;
+    const costUnits = transactionWithMeta?.meta?.costUnits;
     const computeUnitsConsumed = transactionWithMeta?.meta?.computeUnitsConsumed;
     const reservedCUs = transactionWithMeta?.transaction
         ? estimateRequestedComputeUnitsForParsedTransaction(
@@ -305,6 +306,14 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                         <Value>
                             <SolBalance lamports={fee} />
                         </Value>
+                    </Row>
+                )}
+
+                {/* Transaction cost */}
+                {costUnits !== undefined && (
+                    <Row divider>
+                        <Label>Transaction cost</Label>
+                        <Value>{costUnits.toLocaleString('en-US')}</Value>
                     </Row>
                 )}
 
