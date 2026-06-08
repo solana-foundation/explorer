@@ -1,6 +1,12 @@
 # Tasks
 
-> The shared guard (`getSafeExternalHref`, `app/shared/lib/url.ts`) and the `ExternalLink` component (`app/components/shared/ui/external-link.tsx`) ship with `add-metadata-proxy`. This change only migrates the remaining sinks onto them.
+> The shared guard (`getSafeExternalHref`, `app/shared/lib/url.ts`) and the `ExternalLink` component (`app/components/shared/ui/external-link.tsx`) ship with `add-metadata-proxy`. This change only migrates the remaining sinks onto them — so its own tasks (sections 1–4) are intentionally not started here; they land after that PR merges.
+
+## 0. Foundation (already shipped with `add-metadata-proxy`, #1050)
+
+- [x] `getSafeExternalHref` / `parseUrl` (`app/shared/lib/url.ts`) — `new URL` parse + absolute-http(s)-only check; unit-tested.
+- [x] `ExternalLink` (`app/components/shared/ui/external-link.tsx`) — safe-by-default anchor that owns `rel="noopener noreferrer"` + `target="_blank"` and renders nothing for an unsafe href.
+- [x] `ExternalResourceLink` composes `ExternalLink`, and `getProxiedUri` routes through the shared guard.
 
 ## 1. Migrate clearly on-chain sinks to `ExternalLink`
 

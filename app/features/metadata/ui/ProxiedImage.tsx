@@ -24,6 +24,12 @@ export type ProxiedImageProps = Omit<ImageProps, 'src' | 'fallback'> & {
      * oversize image (a `413`) or the upstream is unreachable — a browser `<img>`
      * can't read the HTTP status, so the link is offered rather than gated on a
      * load failure. Off by default.
+     *
+     * The link always targets {@link ProxiedImageProps.uri} (the same source the
+     * image loads from), so it no-ops gracefully when there's no `uri` — nothing
+     * to show, nothing to link to. Safe to pass unconditionally; kept a plain
+     * boolean rather than a `uri`-coupled union so callers with an optional `uri`
+     * stay a single element.
      */
     showOriginalLink?: boolean;
     /**

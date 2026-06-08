@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { withImageLoadPending } from '@storybook-config/decorators';
 import { expect, within } from 'storybook/test';
 
-import solanaHero from '@/app/components/shared/ui/image/stories/solana_hero_generated.jpg';
+import solanaHero from '@/app/components/shared/ui/image/__stories__/solana_hero_generated.jpg';
 
 import { ProxiedImage } from '../ProxiedImage';
 
