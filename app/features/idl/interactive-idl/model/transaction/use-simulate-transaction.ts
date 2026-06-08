@@ -92,10 +92,5 @@ export function useSimulateTransaction(opts: {
         [connection, simulationCommitment, idlErrors],
     );
 
-    const reset = useCallback(() => {
-        setLastSimulation(undefined);
-        setTransactionError(undefined);
-    }, []);
-
-    return { isSimulating, lastSimulation, parseLogs, reset, simulate };
+    return { isSimulating, lastSimulation, parseLogs, simulate };
 }
