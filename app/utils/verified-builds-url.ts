@@ -1,9 +1,26 @@
-// Strips `.git` from a repo URL whether it sits at the end of the URL (raw clone URL from
-// a verify PDA) or before `/tree/<sha>` (OSecure's pre-concatenated /status payload).
-// GitHub only serves `/tree/<sha>` under the bare repo path, so the strip is required for
-// the rendered link to resolve.
+// Strip `.git` from clone URLs so `<repo>/tree/<sha>` deep-links resolve on GitHub.
 export function normalizeRepoUrl(repoUrl: string | undefined): string | undefined {
     if (!repoUrl) return undefined;
     if (repoUrl.endsWith('.git')) return repoUrl.slice(0, -4);
     return repoUrl.replace('.git/', '/');
+}
+
+// repo_url is signer-controlled; require https to block javascript:/data: schemes.
+export function safeRepoUrl(repoUrl: string | undefined): string | undefined {
+    if (!repoUrl) return undefined;
+    try {
+        const url = new URL(repoUrl);
+        if (url.protocol !== 'https:') return undefined;
+        return url.toString();
+    } catch {
+        return undefined;
+    }
+}
+
+// PDA fields are signer-controlled; gate the composed URL through safeRepoUrl before exposing.
+export function composeOnchainRepoUrl(gitUrl: string | undefined, commit: string): string | undefined {
+    const base = normalizeRepoUrl(gitUrl);
+    if (!base) return undefined;
+    const composed = commit.length ? `${base}/tree/${commit}` : base;
+    return safeRepoUrl(composed);
 }

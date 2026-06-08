@@ -18,7 +18,7 @@ import { dirname, join } from 'path';
 import { array, create, type Infer, optional, refine, string, type } from 'superstruct';
 import { fileURLToPath } from 'url';
 
-import { normalizeRepoUrl } from '../app/utils/verified-builds-url';
+import { normalizeRepoUrl, safeRepoUrl } from '../app/utils/verified-builds-url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUTPUT_PATH = join(__dirname, '../public/verified-programs.json');
@@ -110,7 +110,7 @@ async function main() {
         .map(addr => {
             const status = statuses.get(addr);
             const idlName = idlNames.get(addr);
-            const repoUrl = normalizeRepoUrl(status?.repo_url);
+            const repoUrl = safeRepoUrl(normalizeRepoUrl(status?.repo_url));
             const name = idlName || deriveNameFromRepo(repoUrl) || `${addr.slice(0, 12)}...`;
 
             return {
