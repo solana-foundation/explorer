@@ -7,6 +7,7 @@ import React from 'react';
 import { Button } from '@/app/components/shared/ui/button';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 type AccountStats = {
     reads: number;
@@ -70,33 +71,29 @@ export function BlockAccountsCard({ block, blockSlot }: { block: VersionedBlockR
                     Block Account Usage
                 </CardTitle>
             </CardHeader>
-
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">Account</th>
-                            <th className="text-muted">Read-Write Count</th>
-                            <th className="text-muted">Read-Only Count</th>
-                            <th className="text-muted">Total Count</th>
-                            <th className="text-muted">% of Transactions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {accountStats.slice(0, numDisplayed).map(([address, { writes, reads }]) => (
-                            <StatsRow
-                                address={address}
-                                blockSlot={blockSlot}
-                                key={address}
-                                reads={reads}
-                                totalTransactions={totalTransactions}
-                                writes={writes}
-                            />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="text-muted">Account</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Read-Write Count</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Read-Only Count</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Total Count</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">% of Transactions</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>
+                    {accountStats.slice(0, numDisplayed).map(([address, { writes, reads }]) => (
+                        <StatsRow
+                            address={address}
+                            blockSlot={blockSlot}
+                            key={address}
+                            reads={reads}
+                            totalTransactions={totalTransactions}
+                            writes={writes}
+                        />
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
 
             {accountStats.length > numDisplayed && (
                 <CardFooter ui="dashkit">
@@ -132,16 +129,16 @@ function StatsRow({
         pathname: `/block/${blockSlot}`,
     });
     return (
-        <tr>
-            <td>
+        <BaseTable.Row>
+            <BaseTable.Cell>
                 <Link href={accountPath}>
                     <Address pubkey={new PublicKey(address)} />
                 </Link>
-            </td>
-            <td>{writes}</td>
-            <td>{reads}</td>
-            <td>{writes + reads}</td>
-            <td>{((100 * (writes + reads)) / totalTransactions).toFixed(2)}%</td>
-        </tr>
+            </BaseTable.Cell>
+            <BaseTable.Cell>{writes}</BaseTable.Cell>
+            <BaseTable.Cell>{reads}</BaseTable.Cell>
+            <BaseTable.Cell>{writes + reads}</BaseTable.Cell>
+            <BaseTable.Cell>{((100 * (writes + reads)) / totalTransactions).toFixed(2)}%</BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

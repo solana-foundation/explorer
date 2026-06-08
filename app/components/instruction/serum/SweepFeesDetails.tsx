@@ -1,6 +1,8 @@
 import { Address } from '@components/common/Address';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { SerumIxDetailsProps, SweepFees } from './types';
 
@@ -16,47 +18,47 @@ export function SweepFeesDetailsCard(props: SerumIxDetailsProps<SweepFees>) {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Market</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Market</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Quote Vault</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Quote Vault</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.quoteVault} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Fee Sweeping Authority</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Fee Sweeping Authority</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.feeSweepingAuthority} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Fee Receiver</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Fee Receiver</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.quoteFeeReceiver} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Vault Signer</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Vault Signer</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.vaultSigner} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

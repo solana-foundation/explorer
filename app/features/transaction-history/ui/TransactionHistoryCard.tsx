@@ -18,6 +18,7 @@ import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 import { RelativeTime } from '@/app/shared/RelativeTime';
 import { Card } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { useInstructionNames } from '../lib/use-instruction-names';
 import { InstructionList, InstructionListSkeleton } from './InstructionList';
@@ -78,26 +79,23 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                 title="Transaction History"
                 analyticsSection="transaction_history_header"
             />
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted w-1">Transaction Signature</th>
-                            <th className="text-muted w-1">Block</th>
-                            {hasTimestamps && (
-                                <>
-                                    <th className="text-muted w-1">Age</th>
-                                    <th className="text-muted w-1">Timestamp</th>
-                                </>
-                            )}
-                            <th className="text-muted">Result</th>
-                            <th className="text-muted">Raw Data</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">{detailsList}</tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="text-muted w-1">Transaction Signature</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted w-1">Block</BaseTable.HeaderCell>
+                        {hasTimestamps && (
+                            <>
+                                <BaseTable.HeaderCell className="text-muted w-1">Age</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="text-muted w-1">Timestamp</BaseTable.HeaderCell>
+                            </>
+                        )}
+                        <BaseTable.HeaderCell className="text-muted">Result</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Raw Data</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body className="list">{detailsList}</BaseTable.Body>
+            </BaseTable>
             <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />
         </Card>
     );
@@ -116,36 +114,40 @@ function TransactionRow({ signature, slot, blockTime, statusClass, statusText, h
     const instructionNames = useInstructionNames(signature);
 
     return (
-        <tr>
-            <td>
+        <BaseTable.Row>
+            <BaseTable.Cell>
                 <Signature signature={signature} link />
                 {instructionNames !== null && instructionNames.length > 0 ? (
                     <InstructionList instructions={instructionNames} />
                 ) : instructionNames === null ? (
                     <InstructionListSkeleton />
                 ) : null}
-            </td>
+            </BaseTable.Cell>
 
-            <td className="w-1">
+            <BaseTable.Cell className="w-1">
                 <Slot slot={slot} link />
-            </td>
+            </BaseTable.Cell>
 
             {hasTimestamps && (
                 <>
-                    <td className="text-muted">{blockTime ? <RelativeTime date={blockTime * 1000} /> : '---'}</td>
-                    <td className="text-muted">{blockTime ? displayTimestampUtc(blockTime * 1000, true) : '---'}</td>
+                    <BaseTable.Cell className="text-muted">
+                        {blockTime ? <RelativeTime date={blockTime * 1000} /> : '---'}
+                    </BaseTable.Cell>
+                    <BaseTable.Cell className="text-muted">
+                        {blockTime ? displayTimestampUtc(blockTime * 1000, true) : '---'}
+                    </BaseTable.Cell>
                 </>
             )}
 
-            <td>
+            <BaseTable.Cell>
                 <Badge ui="dashkit" variant={statusClass as 'success' | 'warning'}>
                     {statusText}
                 </Badge>
-            </td>
-            <td>
+            </BaseTable.Cell>
+            <BaseTable.Cell>
                 <TransactionRawDataDownloadField signature={signature} />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 

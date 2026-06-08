@@ -3,7 +3,7 @@ import { expect, within } from 'storybook/test';
 
 import { Card } from '@/app/shared/ui/Card';
 
-import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '../table';
+import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from './table';
 
 const meta: Meta<typeof Table> = {
     component: Table,

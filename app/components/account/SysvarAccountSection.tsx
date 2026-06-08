@@ -19,6 +19,8 @@ import {
 } from '@validators/accounts/sysvar';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 export function SysvarAccountSection({ account, sysvarAccount }: { account: Account; sysvarAccount: SysvarAccount }) {
     switch (sysvarAccount.type) {
         case 'clock':
@@ -101,18 +103,18 @@ function SysvarAccountSlotHistory({
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <tr>
-                <td className="e-align-top">
+            <BaseTable.Row>
+                <BaseTable.Cell className="e-align-top">
                     Slot History <span className="text-muted">(previous 100 slots)</span>
-                </td>
-                <td className="font-monospace e-text-right">
+                </BaseTable.Cell>
+                <BaseTable.Cell className="font-monospace e-text-right">
                     {history.map(val => (
                         <p key={val} className="e-mb-0">
                             <Slot slot={val} link />
                         </p>
                     ))}
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </AccountCard>
     );
 }
@@ -144,10 +146,12 @@ function SysvarAccountFeesCard({ account, sysvarAccount }: { account: Account; s
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <tr>
-                <td>Lamports Per Signature</td>
-                <td className="e-text-right">{sysvarAccount.info.feeCalculator.lamportsPerSignature}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Lamports Per Signature</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
+                    {sysvarAccount.info.feeCalculator.lamportsPerSignature}
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </AccountCard>
     );
 }
@@ -170,34 +174,34 @@ function SysvarAccountEpochScheduleCard({
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <tr>
-                <td>Slots Per Epoch</td>
-                <td className="e-text-right">{sysvarAccount.info.slotsPerEpoch}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Slots Per Epoch</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{sysvarAccount.info.slotsPerEpoch}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Leader Schedule Slot Offset</td>
-                <td className="e-text-right">{sysvarAccount.info.leaderScheduleSlotOffset}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Leader Schedule Slot Offset</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{sysvarAccount.info.leaderScheduleSlotOffset}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Epoch Warmup Enabled</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Epoch Warmup Enabled</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <code>{sysvarAccount.info.warmup ? 'true' : 'false'}</code>
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>First Normal Epoch</td>
-                <td className="e-text-right">{sysvarAccount.info.firstNormalEpoch}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>First Normal Epoch</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{sysvarAccount.info.firstNormalEpoch}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>First Normal Slot</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>First Normal Slot</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Slot slot={sysvarAccount.info.firstNormalSlot} />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </AccountCard>
     );
 }
@@ -214,33 +218,33 @@ function SysvarAccountClockCard({ account, sysvarAccount }: { account: Account; 
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <tr>
-                <td>Timestamp</td>
-                <td className="font-monospace e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Timestamp</BaseTable.Cell>
+                <BaseTable.Cell className="font-monospace e-text-right">
                     {displayTimestamp(unixTimestampToMs(sysvarAccount.info.unixTimestamp))}
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Epoch</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Epoch</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Epoch epoch={sysvarAccount.info.epoch} link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Leader Schedule Epoch</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Leader Schedule Epoch</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Epoch epoch={sysvarAccount.info.leaderScheduleEpoch} link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Slot</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Slot</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Slot slot={sysvarAccount.info.slot} link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </AccountCard>
     );
 }
@@ -257,20 +261,20 @@ function SysvarAccountRentCard({ account, sysvarAccount }: { account: Account; s
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <tr>
-                <td>Burn Percent</td>
-                <td className="e-text-right">{`${sysvarAccount.info.burnPercent}%`}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Burn Percent</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{`${sysvarAccount.info.burnPercent}%`}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Exemption Threshold</td>
-                <td className="e-text-right">{sysvarAccount.info.exemptionThreshold} years</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Exemption Threshold</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{sysvarAccount.info.exemptionThreshold} years</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Lamports Per Byte Year</td>
-                <td className="e-text-right">{sysvarAccount.info.lamportsPerByteYear}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Lamports Per Byte Year</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{sysvarAccount.info.lamportsPerByteYear}</BaseTable.Cell>
+            </BaseTable.Row>
         </AccountCard>
     );
 }
@@ -298,10 +302,12 @@ function SysvarAccountRewardsCard({
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <tr>
-                <td>Validator Point Value</td>
-                <td className="font-monospace e-text-right">{validatorPointValueFormatted} lamports</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Validator Point Value</BaseTable.Cell>
+                <BaseTable.Cell className="font-monospace e-text-right">
+                    {validatorPointValueFormatted} lamports
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </AccountCard>
     );
 }

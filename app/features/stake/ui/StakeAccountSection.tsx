@@ -10,6 +10,7 @@ import React from 'react';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { Alert } from '@/app/shared/ui/Alert';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import type { StakeActivationStatus } from '../api/stake-activation';
 import { EPOCH_NEVER_SET } from '../lib/constants';
@@ -92,29 +93,29 @@ function OverviewCard({
             analyticsSection="stake_account_section"
             refresh={() => refresh(account.pubkey, 'parsed')}
         >
-            <tr>
-                <td>Address</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Address</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <KitAddress address={toKitAddress(account.pubkey)} alignRight raw />
-                </td>
-            </tr>
-            <tr>
-                <td>Balance (SOL)</td>
-                <td className="e-text-right e-uppercase">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right e-uppercase">
                     <SolBalance lamports={account.lamports} />
-                </td>
-            </tr>
-            <tr>
-                <td>Rent Reserve (SOL)</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Rent Reserve (SOL)</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <SolBalance lamports={stakeAccount.meta.rentExemptReserve} />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {status !== undefined && (
-                <tr>
-                    <td>Status</td>
-                    <td className="e-text-right">{status}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Status</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{status}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
         </AccountCard>
     );
@@ -147,59 +148,61 @@ function DelegationCard({
                 </CardTitle>
             </CardHeader>
             <TableCardBody>
-                <tr>
-                    <td>Status</td>
-                    <td className="e-text-right">{activation ? `Delegated (${activation.state})` : 'Delegated'}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Status</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        {activation ? `Delegated (${activation.state})` : 'Delegated'}
+                    </BaseTable.Cell>
+                </BaseTable.Row>
 
                 {stake && (
                     <>
-                        <tr>
-                            <td>Delegated Stake (SOL)</td>
-                            <td className="e-text-right">
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Delegated Stake (SOL)</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right">
                                 <SolBalance lamports={stake.delegation.stake} />
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
 
                         {activation && (
                             <>
-                                <tr>
-                                    <td>Active Stake (SOL)</td>
-                                    <td className="e-text-right">
+                                <BaseTable.Row>
+                                    <BaseTable.Cell>Active Stake (SOL)</BaseTable.Cell>
+                                    <BaseTable.Cell className="e-text-right">
                                         <SolBalance lamports={activation.active} />
-                                    </td>
-                                </tr>
+                                    </BaseTable.Cell>
+                                </BaseTable.Row>
 
-                                <tr>
-                                    <td>Inactive Stake (SOL)</td>
-                                    <td className="e-text-right">
+                                <BaseTable.Row>
+                                    <BaseTable.Cell>Inactive Stake (SOL)</BaseTable.Cell>
+                                    <BaseTable.Cell className="e-text-right">
                                         <SolBalance lamports={activation.inactive} />
-                                    </td>
-                                </tr>
+                                    </BaseTable.Cell>
+                                </BaseTable.Row>
                             </>
                         )}
 
                         {voterPubkey && (
-                            <tr>
-                                <td>Delegated Vote Address</td>
-                                <td className="e-text-right">
+                            <BaseTable.Row>
+                                <BaseTable.Cell>Delegated Vote Address</BaseTable.Cell>
+                                <BaseTable.Cell className="e-text-right">
                                     <KitAddress address={voterPubkey} alignRight link />
-                                </td>
-                            </tr>
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
                         )}
 
-                        <tr>
-                            <td>Activation Epoch</td>
-                            <td className="e-text-right">
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Activation Epoch</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right">
                                 {activationEpoch !== undefined ? <Epoch epoch={activationEpoch} link /> : '-'}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Deactivation Epoch</td>
-                            <td className="e-text-right">
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Deactivation Epoch</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right">
                                 {deactivationEpoch !== undefined ? <Epoch epoch={deactivationEpoch} link /> : '-'}
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
                     </>
                 )}
             </TableCardBody>
@@ -217,27 +220,27 @@ function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
                 </CardTitle>
             </CardHeader>
             <TableCardBody>
-                <tr>
-                    <td>Stake Authority Address</td>
-                    <td className="e-text-right">
+                <BaseTable.Row>
+                    <BaseTable.Cell>Stake Authority Address</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <KitAddress address={meta.authorized.staker} alignRight link />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
 
-                <tr>
-                    <td>Withdraw Authority Address</td>
-                    <td className="e-text-right">
+                <BaseTable.Row>
+                    <BaseTable.Cell>Withdraw Authority Address</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <KitAddress address={meta.authorized.withdrawer} alignRight link />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
 
                 {hasLockup && (
-                    <tr>
-                        <td>Lockup Authority Address</td>
-                        <td className="e-text-right">
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Lockup Authority Address</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">
                             <KitAddress address={meta.lockup.custodian} alignRight link />
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
                 )}
             </TableCardBody>
         </Card>

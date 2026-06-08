@@ -5,6 +5,7 @@ import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { TransactionInstruction } from '@solana/web3.js';
 
 import { Badge } from '@/app/components/shared/ui/badge';
+import { BaseTable } from '@/app/shared/ui/Table';
 import getInstructionCardScrollAnchorId from '@/app/utils/get-instruction-card-scroll-anchor-id';
 
 import { BaseRawDetails } from '../common/BaseRawDetails';
@@ -43,14 +44,14 @@ export function UnknownDetailsCard({
                 <BaseRawDetails ix={ix} />
                 {innerCards && innerCards.length > 0 && (
                     <>
-                        <tr className="table-sep">
-                            <td colSpan={3}>Inner Instructions</td>
-                        </tr>
-                        <tr>
-                            <td colSpan={3}>
+                        <BaseTable.Row className="table-sep">
+                            <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
+                        </BaseTable.Row>
+                        <BaseTable.Row>
+                            <BaseTable.Cell colSpan={3}>
                                 <div className="inner-cards !e-m-0">{innerCards}</div>
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
                     </>
                 )}
             </TableCardBody>

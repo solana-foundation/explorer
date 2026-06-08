@@ -2,6 +2,8 @@ import { Address } from '@components/common/Address';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { TradingStatus, UpdatePriceParams } from './program';
 
@@ -29,46 +31,46 @@ export default function UpdatePriceDetailsCard({
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={ix.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Publisher</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Publisher</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.publisherPubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Price Account</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Price Account</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.pricePubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Status</td>
-                <td className="e-text-right">{TradingStatus[info.status]}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Status</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{TradingStatus[info.status]}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Price</td>
-                <td className="e-text-right">{info.price}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Price</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.price}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Conf</td>
-                <td className="e-text-right">{info.conf}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Conf</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.conf}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Publish Slot</td>
-                <td className="e-text-right">{info.publishSlot}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Publish Slot</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.publishSlot}</BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

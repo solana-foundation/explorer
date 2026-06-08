@@ -76,11 +76,11 @@ export function ProgramLogSection({ signature }: SignatureProps) {
 const RawProgramLogs = ({ raw }: { raw: string[] }) => {
     return (
         <TableCardBody>
-            <tr>
-                <td>
+            <BaseTable.Row>
+                <BaseTable.Cell>
                     <pre className="e-text-left">{JSON.stringify(raw, null, 2)}</pre>
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </TableCardBody>
     );
 };

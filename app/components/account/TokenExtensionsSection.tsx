@@ -10,6 +10,7 @@ import {
     useTokenExtensionNavigation,
 } from '@/app/features/token-extensions/use-token-extension-navigation';
 import { Card } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
 import { TokenExtensionBadge } from './token-extensions/TokenExtensionBadge';
@@ -157,10 +158,10 @@ function TokenExtensionAccordionItem({
 
 function TokenExtensionStateHeader({ name }: { name: string }) {
     return (
-        <tr>
-            <th className="text-muted w-1">{name}</th>
-            <th className="text-muted"></th>
-        </tr>
+        <BaseTable.Row>
+            <BaseTable.HeaderCell className="text-muted w-1">{name}</BaseTable.HeaderCell>
+            <BaseTable.HeaderCell className="text-muted"></BaseTable.HeaderCell>
+        </BaseTable.Row>
     );
 }
 

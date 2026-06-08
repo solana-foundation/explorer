@@ -5,6 +5,7 @@ import { PublicKey } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { DomainInfo } from '../model/types';
 
@@ -24,27 +25,24 @@ export function BaseDomainsCard({ domains }: { domains: DomainInfo[] }) {
                     Owned Domain Names
                 </CardTitle>
             </CardHeader>
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">Domain Name</th>
-                            <th className="text-muted">Name Service Account</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">
-                        {validDomains.map(domain => (
-                            <tr key={domain.address}>
-                                <td>{domain.name}</td>
-                                <td>
-                                    <Address pubkey={domain.pubkey} link />
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="text-muted">Domain Name</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-muted">Name Service Account</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body className="list">
+                    {validDomains.map(domain => (
+                        <BaseTable.Row key={domain.address}>
+                            <BaseTable.Cell>{domain.name}</BaseTable.Cell>
+                            <BaseTable.Cell>
+                                <Address pubkey={domain.pubkey} link />
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
         </Card>
     );
 }

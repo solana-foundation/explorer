@@ -1,3 +1,5 @@
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { BaseIdlDoc } from './BaseIdlDoc';
 import { BaseIdlFields } from './BaseIdlFields';
 import { HighlightNode } from './HighlightNode';
@@ -6,27 +8,26 @@ import type { FormattedIdlDataView } from './types';
 export function BaseIdlEvents({ data }: FormattedIdlDataView<'events'>) {
     if (!data) return null;
     return (
-        // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
-        <table className="table table-sm table-nowrap card-table">
-            <thead>
-                <tr>
-                    <th className="e-text-neutral-500">Name</th>
-                    <th className="e-text-neutral-500">Fields</th>
-                </tr>
-            </thead>
-            <tbody className="list e-font-mono e-text-xs">
+        <BaseTable ui="dashkit" variant="card" nowrap>
+            <BaseTable.Head>
+                <BaseTable.Row>
+                    <BaseTable.HeaderCell className="e-text-neutral-500">Name</BaseTable.HeaderCell>
+                    <BaseTable.HeaderCell className="e-text-neutral-500">Fields</BaseTable.HeaderCell>
+                </BaseTable.Row>
+            </BaseTable.Head>
+            <BaseTable.Body className="list e-font-mono e-text-xs">
                 {data.map(event => (
-                    <tr key={event.name}>
-                        <td>
+                    <BaseTable.Row key={event.name}>
+                        <BaseTable.Cell>
                             <HighlightNode className="e-rounded e-py-0.5">{event.name}</HighlightNode>
                             <BaseIdlDoc docs={event.docs} />
-                        </td>
-                        <td>
+                        </BaseTable.Cell>
+                        <BaseTable.Cell>
                             <BaseIdlFields fieldType={event.fieldType} />
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
                 ))}
-            </tbody>
-        </table>
+            </BaseTable.Body>
+        </BaseTable>
     );
 }

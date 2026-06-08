@@ -7,6 +7,8 @@ import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockToke
 import { nextjsParameters } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InspectorInstructionCard } from '../InspectorInstructionCard';
 
 const withInspectorProviders: Decorator = Story => (
@@ -54,9 +56,9 @@ type Story = StoryObj<typeof meta>;
 
 const args = {
     children: (
-        <tr>
-            <td>Decoded instruction details</td>
-        </tr>
+        <BaseTable.Row>
+            <BaseTable.Cell>Decoded instruction details</BaseTable.Cell>
+        </BaseTable.Row>
     ),
     index: 0,
     ix: parsedIx,

@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { toHex } from '@/app/shared/lib/bytes';
 import { CardFooter } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { AddressFromLookupTableWithContext, AddressWithContext } from './AddressWithContext';
 
@@ -140,8 +141,8 @@ function AccountFromLookupTableRow({
     readOnly: boolean;
 }) {
     return (
-        <tr>
-            <td>
+        <BaseTable.Row>
+            <BaseTable.Cell>
                 <div className="e-flex e-flex-col e-items-start">
                     Account #{accountIndex + 1}
                     <span className="e-mt-[3px]">
@@ -155,14 +156,14 @@ function AccountFromLookupTableRow({
                         </Badge>
                     </span>
                 </div>
-            </td>
-            <td className="e-text-right">
+            </BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right">
                 <AddressFromLookupTableWithContext
                     lookupTableKey={lookupTableKey}
                     lookupTableIndex={lookupTableIndex}
                 />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
@@ -184,8 +185,8 @@ function AccountRow({
     const hexData = accountInfo ? toHex(accountInfo.data) : null;
 
     return (
-        <tr>
-            <td>
+        <BaseTable.Row>
+            <BaseTable.Cell>
                 <div className="e-flex e-flex-col e-items-start">
                     Account #{accountIndex + 1}
                     <span className="e-mt-[3px]">
@@ -208,10 +209,10 @@ function AccountRow({
                         ) : null}
                     </span>
                 </div>
-            </td>
-            <td className="e-text-right">
+            </BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right">
                 <AddressWithContext pubkey={publicKey} />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

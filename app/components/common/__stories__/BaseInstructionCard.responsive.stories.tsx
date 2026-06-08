@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster, withScrollAnchor, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { BaseInstructionCard } from '../BaseInstructionCard';
 
 const sampleIx = new TransactionInstruction({
@@ -27,9 +29,9 @@ type Story = StoryObj<typeof meta>;
 
 const args = {
     children: (
-        <tr>
-            <td>Instruction details go here</td>
-        </tr>
+        <BaseTable.Row>
+            <BaseTable.Cell>Instruction details go here</BaseTable.Cell>
+        </BaseTable.Row>
     ),
     index: 0,
     ix: sampleIx,

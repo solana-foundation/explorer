@@ -1,6 +1,8 @@
 import type { FormattedIdl, InstructionAccountData } from '@entities/idl';
 import { Badge } from '@shared/ui/badge';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { BaseIdlDoc, IdlDocTooltip } from './BaseIdlDoc';
 import { BaseIdlStructFields } from './BaseIdlFields';
 import { HighlightNode } from './HighlightNode';
@@ -12,32 +14,31 @@ type IxArgsData = NonNullable<FormattedIdl['instructions']>[0]['args'];
 export function BaseIdlInstructions({ data }: FormattedIdlDataView<'instructions'>) {
     if (!data) return null;
     return (
-        // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
-        <table className="table table-sm table-nowrap card-table">
-            <thead>
-                <tr>
-                    <th className="e-text-neutral-500">Name</th>
-                    <th className="e-text-neutral-500">Arguments</th>
-                    <th className="e-text-neutral-500">Accounts</th>
-                </tr>
-            </thead>
-            <tbody className="list e-font-mono e-text-xs">
+        <BaseTable ui="dashkit" variant="card" nowrap>
+            <BaseTable.Head>
+                <BaseTable.Row>
+                    <BaseTable.HeaderCell className="e-text-neutral-500">Name</BaseTable.HeaderCell>
+                    <BaseTable.HeaderCell className="e-text-neutral-500">Arguments</BaseTable.HeaderCell>
+                    <BaseTable.HeaderCell className="e-text-neutral-500">Accounts</BaseTable.HeaderCell>
+                </BaseTable.Row>
+            </BaseTable.Head>
+            <BaseTable.Body className="list e-font-mono e-text-xs">
                 {data.map(ix => (
-                    <tr key={ix.name}>
-                        <td>
+                    <BaseTable.Row key={ix.name}>
+                        <BaseTable.Cell>
                             <HighlightNode className="e-rounded e-py-0.5">{ix.name}</HighlightNode>
                             <BaseIdlDoc docs={ix.docs} />
-                        </td>
-                        <td>
+                        </BaseTable.Cell>
+                        <BaseTable.Cell>
                             <IdlInstructionArguments data={ix.args} />
-                        </td>
-                        <td>
+                        </BaseTable.Cell>
+                        <BaseTable.Cell>
                             <IdlInstructionAccounts data={ix.accounts} />
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
                 ))}
-            </tbody>
-        </table>
+            </BaseTable.Body>
+        </BaseTable>
     );
 }
 

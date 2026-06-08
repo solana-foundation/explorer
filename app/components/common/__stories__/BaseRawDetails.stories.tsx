@@ -5,17 +5,17 @@ import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorato
 import React from 'react';
 import { expect, within } from 'storybook/test';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { BaseRawDetails } from '../BaseRawDetails';
 
 // Wrapper to render in a table context with required providers
 function TableWrapper({ children }: { children: React.ReactNode }) {
     return (
         <ClusterProvider>
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <tbody className="list">{children}</tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Body className="list">{children}</BaseTable.Body>
+            </BaseTable>
         </ClusterProvider>
     );
 }

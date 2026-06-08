@@ -8,6 +8,8 @@ import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll
 import React from 'react';
 import { Code } from 'react-feather';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { BaseRawDetails } from './BaseRawDetails';
 import { BaseRawParsedDetails } from './BaseRawParsedDetails';
 
@@ -81,37 +83,34 @@ export function InspectorInstructionCard({
                 </button>
             }
         >
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table [&>tbody>tr:first-child>td]:!e-border-t-0">
-                    <tbody className="list">
-                        <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
-                        {showRaw ? (
-                            'parsed' in ix ? (
-                                <BaseRawParsedDetails ix={ix}>
-                                    {raw ? <BaseRawDetails ix={raw} /> : null}
-                                </BaseRawParsedDetails>
-                            ) : (
-                                <BaseRawDetails ix={raw || ix} />
-                            )
+            <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!e-border-t-0">
+                <BaseTable.Body className="list">
+                    <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
+                    {showRaw ? (
+                        'parsed' in ix ? (
+                            <BaseRawParsedDetails ix={ix}>
+                                {raw ? <BaseRawDetails ix={raw} /> : null}
+                            </BaseRawParsedDetails>
                         ) : (
-                            children
-                        )}
-                        {innerCards && innerCards.length > 0 && (
-                            <>
-                                <tr className="table-sep">
-                                    <td colSpan={3}>Inner Instructions</td>
-                                </tr>
-                                <tr>
-                                    <td colSpan={3}>
-                                        <div className="inner-cards">{innerCards}</div>
-                                    </td>
-                                </tr>
-                            </>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            <BaseRawDetails ix={raw || ix} />
+                        )
+                    ) : (
+                        children
+                    )}
+                    {innerCards && innerCards.length > 0 && (
+                        <>
+                            <BaseTable.Row className="table-sep">
+                                <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
+                            </BaseTable.Row>
+                            <BaseTable.Row>
+                                <BaseTable.Cell colSpan={3}>
+                                    <div className="inner-cards">{innerCards}</div>
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
+                        </>
+                    )}
+                </BaseTable.Body>
+            </BaseTable>
         </CollapsibleCard>
     );
 }

@@ -1,6 +1,8 @@
 import { Address } from '@components/common/Address';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { CloseOpenOrders, SerumIxDetailsProps } from './types';
 
@@ -16,40 +18,40 @@ export function CloseOpenOrdersDetailsCard(props: SerumIxDetailsProps<CloseOpenO
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Open Orders</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Open Orders</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.openOrders} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Open Orders Owner</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Open Orders Owner</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.openOrdersOwner} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Rent Receiver</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Rent Receiver</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.rentReceiver} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Market</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Market</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

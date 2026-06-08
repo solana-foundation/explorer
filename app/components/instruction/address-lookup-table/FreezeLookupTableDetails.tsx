@@ -2,6 +2,7 @@ import { AddressLookupTableProgram, ParsedInstruction, ParsedTransaction, Signat
 
 import { Address } from '@/app/components/common/Address';
 import { InstructionCard } from '@/app/components/instruction/InstructionCard';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { FreezeLookupTableInfo } from './types';
 
@@ -25,24 +26,24 @@ export function FreezeLookupTableDetailsCard(props: DetailsProps & { info: Freez
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={AddressLookupTableProgram.programId} alignRight link />
-                </td>
-            </tr>
-            <tr>
-                <td>Lookup Table</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Lookup Table</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.lookupTableAccount} alignRight link />
-                </td>
-            </tr>
-            <tr>
-                <td>Lookup Table Authority</td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Lookup Table Authority</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.lookupTableAuthority} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

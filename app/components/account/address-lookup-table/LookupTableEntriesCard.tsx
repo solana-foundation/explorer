@@ -4,6 +4,7 @@ import { AddressLookupTableAccountInfo } from '@validators/accounts/address-look
 import React from 'react';
 
 import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 export function LookupTableEntriesCard(
     params:
@@ -29,24 +30,20 @@ export function LookupTableEntriesCard(
                     Lookup Table Entries
                 </CardTitle>
             </CardHeader>
-
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="e-w-px e-text-dk-gray-700">Index</th>
-                            <th className="e-text-dk-gray-700">Address</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">
-                        {lookupTableState.addresses.length > 0 &&
-                            lookupTableState.addresses.map((entry: PublicKey, index) => {
-                                return renderRow(entry, index);
-                            })}
-                    </tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Index</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Address</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body className="list">
+                    {lookupTableState.addresses.length > 0 &&
+                        lookupTableState.addresses.map((entry: PublicKey, index) => {
+                            return renderRow(entry, index);
+                        })}
+                </BaseTable.Body>
+            </BaseTable>
 
             {lookupTableState.addresses.length === 0 && (
                 <CardFooter ui="dashkit">
@@ -59,11 +56,11 @@ export function LookupTableEntriesCard(
 
 const renderRow = (entry: PublicKey, index: number) => {
     return (
-        <tr key={index}>
-            <td className="e-w-px e-font-mono">{index}</td>
-            <td className="e-font-mono">
+        <BaseTable.Row key={index}>
+            <BaseTable.Cell className="e-w-px e-font-mono">{index}</BaseTable.Cell>
+            <BaseTable.Cell className="e-font-mono">
                 <Address pubkey={entry} link />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 };

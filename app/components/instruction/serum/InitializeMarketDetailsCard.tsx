@@ -1,6 +1,8 @@
 import { Address } from '@components/common/Address';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { InitializeMarket, SerumIxDetailsProps } from './types';
 
@@ -16,100 +18,100 @@ export function InitializeMarketDetailsCard(props: SerumIxDetailsProps<Initializ
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Market</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Market</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Request Queue</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Request Queue</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.requestQueue} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Event Queue</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Event Queue</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.eventQueue} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Bids</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Bids</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.bids} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Asks</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Asks</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.asks} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Base Vault</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Base Vault</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.baseVault} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Quote Vault</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Quote Vault</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.quoteVault} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Base Mint</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Base Mint</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.baseMint} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Quote Mint</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Quote Mint</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.quoteMint} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Base Lot Size</td>
-                <td className="e-text-right">{info.data.baseLotSize.toString(10)}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Base Lot Size</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.data.baseLotSize.toString(10)}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Quote Lot Size</td>
-                <td className="e-text-right">{info.data.quoteLotSize.toString(10)}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Quote Lot Size</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.data.quoteLotSize.toString(10)}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Fee Rate Bps</td>
-                <td className="e-text-right">{info.data.feeRateBps}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Fee Rate Bps</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.data.feeRateBps}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Quote Dust Threshold</td>
-                <td className="e-text-right">{info.data.quoteDustThreshold.toString(10)}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Quote Dust Threshold</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.data.quoteDustThreshold.toString(10)}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Vault Signer Nonce</td>
-                <td className="e-text-right">{info.data.vaultSignerNonce.toString(10)}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Vault Signer Nonce</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.data.vaultSignerNonce.toString(10)}</BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

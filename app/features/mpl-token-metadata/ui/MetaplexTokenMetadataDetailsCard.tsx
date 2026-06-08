@@ -5,6 +5,7 @@ import { ParsedInstruction, PublicKey, SignatureResult, TransactionInstruction }
 import React from 'react';
 
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 const IX_TITLES: Record<MetaplexInstructionType, string> = {
     burnEditionNft: 'Burn Edition NFT',
@@ -52,22 +53,22 @@ const IX_TITLES: Record<MetaplexInstructionType, string> = {
 function AccountRow({ label, pubkey }: { label: string; pubkey: unknown }) {
     if (!(pubkey instanceof PublicKey)) return null;
     return (
-        <tr>
-            <td>{label}</td>
-            <td className="e-text-right">
+        <BaseTable.Row>
+            <BaseTable.Cell>{label}</BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right">
                 <Address pubkey={pubkey} alignRight link />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
 function DataRow({ label, value }: { label: string; value: unknown }) {
     if (value === null || value === undefined) return null;
     return (
-        <tr>
-            <td>{label}</td>
-            <td className="e-text-right">{String(value)}</td>
-        </tr>
+        <BaseTable.Row>
+            <BaseTable.Cell>{label}</BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right">{String(value)}</BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
@@ -75,10 +76,10 @@ function RoyaltyRow({ basisPoints }: { basisPoints: unknown }) {
     if (typeof basisPoints !== 'number') return null;
     const pct = basisPoints / 100;
     return (
-        <tr>
-            <td>Royalty</td>
-            <td className="e-text-right">{pct % 1 === 0 ? `${pct}%` : `${pct.toFixed(2)}%`}</td>
-        </tr>
+        <BaseTable.Row>
+            <BaseTable.Cell>Royalty</BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right">{pct % 1 === 0 ? `${pct}%` : `${pct.toFixed(2)}%`}</BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
@@ -86,12 +87,12 @@ function GenericAccountRows({ ix }: { ix: TransactionInstruction }) {
     return (
         <>
             {ix.keys.map((key, i) => (
-                <tr key={i}>
-                    <td>Account #{i + 1}</td>
-                    <td className="e-text-right">
+                <BaseTable.Row key={i}>
+                    <BaseTable.Cell>Account #{i + 1}</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <Address pubkey={key.pubkey} alignRight link />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             ))}
         </>
     );

@@ -2,6 +2,8 @@ import { Address } from '@components/common/Address';
 import { ParsedInstruction, SignatureResult, SystemProgram } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { AllocateInfo } from './types';
 
@@ -24,24 +26,24 @@ export function AllocateDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={SystemProgram.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Account Address</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Account Address</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.account} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Allocated Data Size</td>
-                <td className="e-text-right">{info.space} byte(s)</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Allocated Data Size</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.space} byte(s)</BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

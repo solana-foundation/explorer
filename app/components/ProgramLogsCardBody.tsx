@@ -17,6 +17,7 @@ import { ChevronsUp } from 'react-feather';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { fromBase64, toBuffer } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 const NATIVE_PROGRAMS_MISSING_INVOKE_LOG: string[] = [
     'AddressLookupTab1e1111111111111111111111111',
@@ -231,8 +232,8 @@ function ProgramLogRow({
     }
 
     return (
-        <tr>
-            <td>
+        <BaseTable.Row>
+            <BaseTable.Cell>
                 <Link className="e-flex e-items-center" href={anchorPath}>
                     {/* badgeColor='white' falls through to a plain `.badge` (no bg-white-soft is defined in dashkit) — same as legacy. */}
                     <Badge
@@ -265,7 +266,7 @@ function ProgramLogRow({
                         })}
                     </div>
                 )}
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

@@ -1,5 +1,7 @@
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { AddSpotMarket, spotMarketFromIndex } from './types';
 
@@ -23,39 +25,41 @@ export function AddSpotMarketDetailsCard(props: {
             childIndex={childIndex}
         >
             {spotMarketFromIndex(ix, info.marketIndex) !== 'UNKNOWN' && (
-                <tr>
-                    <td>Market</td>
-                    <td className="e-text-right">{spotMarketFromIndex(ix, info.marketIndex)}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Market</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        {spotMarketFromIndex(ix, info.marketIndex)}
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             )}
-            <tr>
-                <td>Market index</td>
-                <td className="e-text-right">{info.marketIndex}</td>
-            </tr>
-            <tr>
-                <td>Maint leverage</td>
-                <td className="e-text-right">{info.maintLeverage}</td>
-            </tr>
-            <tr>
-                <td>Init leverage</td>
-                <td className="e-text-right">{info.initLeverage}</td>
-            </tr>
-            <tr>
-                <td>Liquidation fee</td>
-                <td className="e-text-right">{info.liquidationFee}</td>
-            </tr>
-            <tr>
-                <td>Optimal util</td>
-                <td className="e-text-right">{info.optimalUtil}</td>
-            </tr>
-            <tr>
-                <td>Optimal rate</td>
-                <td className="e-text-right">{info.optimalRate}</td>
-            </tr>
-            <tr>
-                <td>Max rate</td>
-                <td className="e-text-right">{info.maxRate}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Market index</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.marketIndex}</BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Maint leverage</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.maintLeverage}</BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Init leverage</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.initLeverage}</BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Liquidation fee</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.liquidationFee}</BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Optimal util</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.optimalUtil}</BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Optimal rate</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.optimalRate}</BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Max rate</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.maxRate}</BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

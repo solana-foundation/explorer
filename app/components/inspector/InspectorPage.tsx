@@ -30,6 +30,7 @@ import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';
@@ -486,31 +487,31 @@ function OverviewCard({
                     <DownloadDropdown filename={signature || 'signature'} data={raw} />
                 </CardHeader>
                 <TableCardBody>
-                    <tr>
-                        <td>Serialized Size</td>
-                        <td className="e-text-right">
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Serialized Size</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">
                             <div className="e-flex e-flex-col e-items-end">
                                 {size} bytes
                                 <span className={size <= PACKET_DATA_SIZE ? 'text-muted' : 'text-warning'}>
                                     Max transaction size is {PACKET_DATA_SIZE} bytes
                                 </span>
                             </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Fees</td>
-                        <td className="e-text-right">
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Fees</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">
                             <div className="e-flex e-flex-col e-items-end">
                                 <SolBalance lamports={fee} />
                                 <span className="text-muted">
                                     {`Each signature costs ${DEFAULT_FEES.lamportsPerSignature} lamports`}
                                 </span>
                             </div>
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
 
-                    <tr>
-                        <td>
+                    <BaseTable.Row>
+                        <BaseTable.Cell>
                             <div className="e-flex e-flex-col e-items-start">
                                 Fee payer
                                 <span className="e-mt-[3px]">
@@ -522,8 +523,8 @@ function OverviewCard({
                                     </Badge>
                                 </span>
                             </div>
-                        </td>
-                        <td className="e-text-right">
+                        </BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">
                             {message.staticAccountKeys.length === 0 ? (
                                 'No Fee Payer'
                             ) : (
@@ -532,8 +533,8 @@ function OverviewCard({
                                     validator={feePayerValidator}
                                 />
                             )}
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
                 </TableCardBody>
             </Card>
         </>

@@ -6,6 +6,8 @@ import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProv
 import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InspectorInstructionCard } from '../InspectorInstructionCard';
 
 const withInspectorProviders: Decorator = Story => (
@@ -58,9 +60,9 @@ type Story = StoryObj<typeof meta>;
 export const Success: Story = {
     args: {
         children: (
-            <tr>
-                <td>Decoded instruction details</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Decoded instruction details</BaseTable.Cell>
+            </BaseTable.Row>
         ),
         index: 0,
         ix: parsedIx,
@@ -73,9 +75,9 @@ export const Success: Story = {
 export const Failed: Story = {
     args: {
         children: (
-            <tr>
-                <td>Decoded instruction details</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Decoded instruction details</BaseTable.Cell>
+            </BaseTable.Row>
         ),
         index: 0,
         ix: parsedIx,

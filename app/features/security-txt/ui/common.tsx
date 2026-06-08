@@ -2,15 +2,16 @@ import classNames from 'classnames';
 import { ExternalLink } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import type { SecurityTxtVersion } from './types';
 import { isValidLink, parseCodeValue } from './utils';
 
 export function CodeCell({ value, alignRight = true }: { value: string; alignRight: boolean }) {
     return (
-        <td className={classNames({ 'e-text-right': alignRight })}>
+        <BaseTable.Cell className={classNames({ 'e-text-right': alignRight })}>
             <RenderCode value={value} />
-        </td>
+        </BaseTable.Cell>
     );
 }
 
@@ -94,14 +95,14 @@ export function RenderExternalLink({ url }: { url: string }) {
 
 export function ExternalLinkCell({ url }: { url: string }) {
     return (
-        <td className="e-text-right">
+        <BaseTable.Cell className="e-text-right">
             <RenderExternalLink url={url} />
-        </td>
+        </BaseTable.Cell>
     );
 }
 
 export function StringCell({ value }: { value: string }) {
-    return <td className="e-text-right e-font-mono">{value}</td>;
+    return <BaseTable.Cell className="e-text-right e-font-mono">{value}</BaseTable.Cell>;
 }
 
 export function RenderCode({ value }: { value: any }) {

@@ -1,6 +1,8 @@
 import { Address } from '@components/common/Address';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { NewOrder, SerumIxDetailsProps } from './types';
 
@@ -16,86 +18,86 @@ export function NewOrderDetailsCard(props: SerumIxDetailsProps<NewOrder>) {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Market</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Market</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Open Orders</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Open Orders</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.openOrders} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Request Queue</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Request Queue</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.requestQueue} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Payer</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Payer</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.payer} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Open Orders Owner</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Open Orders Owner</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.openOrdersOwner} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Base Vault</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Base Vault</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.baseVault} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Quote Vault</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Quote Vault</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.quoteVault} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Side</td>
-                <td className="e-text-right">{info.data.side}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Side</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.data.side}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Order Type</td>
-                <td className="e-text-right">{info.data.orderType}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Order Type</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.data.orderType}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Limit Price</td>
-                <td className="e-text-right">{info.data.limitPrice.toString(10)}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Limit Price</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.data.limitPrice.toString(10)}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Max Quantity</td>
-                <td className="e-text-right">{info.data.maxQuantity.toString(10)}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Max Quantity</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.data.maxQuantity.toString(10)}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Client Id</td>
-                <td className="e-text-right">{info.data.clientId.toString(10)}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Client Id</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.data.clientId.toString(10)}</BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

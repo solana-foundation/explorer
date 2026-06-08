@@ -8,6 +8,8 @@ import { displayTimestamp } from '@utils/date';
 import { VoteAccount } from '@validators/accounts/vote';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 export function VoteAccountSection({ account, voteAccount }: { account: Account; voteAccount: VoteAccount }) {
     const refresh = useRefreshAccount();
     const rootSlot = voteAccount.info.rootSlot;
@@ -21,12 +23,12 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <tr>
-                <td>
+            <BaseTable.Row>
+                <BaseTable.Cell>
                     Authorized Voter
                     {voteAccount.info.authorizedVoters.length > 1 ? 's' : ''}
-                </td>
-                <td className="e-text-right">
+                </BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     {voteAccount.info.authorizedVoters.map(voter => {
                         return (
                             <Address
@@ -38,32 +40,34 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
                             />
                         );
                     })}
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Authorized Withdrawer</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Authorized Withdrawer</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={voteAccount.info.authorizedWithdrawer} alignRight raw link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Last Timestamp</td>
-                <td className="font-monospace e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Last Timestamp</BaseTable.Cell>
+                <BaseTable.Cell className="font-monospace e-text-right">
                     {displayTimestamp(voteAccount.info.lastTimestamp.timestamp * 1000)}
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Commission</td>
-                <td className="e-text-right">{`${voteAccount.info.commission}%`}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Commission</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{`${voteAccount.info.commission}%`}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Root Slot</td>
-                <td className="e-text-right">{rootSlot !== null ? <Slot slot={rootSlot} link /> : 'N/A'}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Root Slot</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
+                    {rootSlot !== null ? <Slot slot={rootSlot} link /> : 'N/A'}
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </AccountCard>
     );
 }
