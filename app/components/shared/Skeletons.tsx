@@ -104,31 +104,28 @@ export function TableCardSkeleton({ cols = 4, rows = 6 }: { cols?: number; rows?
             <CardHeader ui="dashkit">
                 <Skeleton className="e-h-5 e-w-64" />
             </CardHeader>
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive small-headers">
-                <table className="table">
-                    <BaseTable.Head>
-                        <BaseTable.Row>
-                            {Array.from({ length: cols }).map((_, i) => (
-                                <BaseTable.HeaderCell key={i}>
-                                    <Skeleton className="e-h-4 e-w-1/2" />
-                                </BaseTable.HeaderCell>
+            <BaseTable ui="dashkit">
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        {Array.from({ length: cols }).map((_, i) => (
+                            <BaseTable.HeaderCell key={i}>
+                                <Skeleton className="e-h-4 e-w-1/2" />
+                            </BaseTable.HeaderCell>
+                        ))}
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>
+                    {Array.from({ length: rows }).map((_, i) => (
+                        <BaseTable.Row key={i}>
+                            {Array.from({ length: cols }).map((_, j) => (
+                                <BaseTable.Cell key={j}>
+                                    <Skeleton className="e-h-4 e-w-1/3" />
+                                </BaseTable.Cell>
                             ))}
                         </BaseTable.Row>
-                    </BaseTable.Head>
-                    <BaseTable.Body>
-                        {Array.from({ length: rows }).map((_, i) => (
-                            <BaseTable.Row key={i}>
-                                {Array.from({ length: cols }).map((_, j) => (
-                                    <BaseTable.Cell key={j}>
-                                        <Skeleton className="e-h-4 e-w-1/3" />
-                                    </BaseTable.Cell>
-                                ))}
-                            </BaseTable.Row>
-                        ))}
-                    </BaseTable.Body>
-                </table>
-            </div>
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
         </Card>
     );
 }
