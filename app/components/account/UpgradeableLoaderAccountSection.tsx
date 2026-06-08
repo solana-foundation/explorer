@@ -199,7 +199,7 @@ function VerifiedLabel() {
                 target="_blank"
                 href="https://github.com/Ellipsis-Labs/solana-verifiable-build"
             >
-                <span className="security-txt-link-color-hack-reee">Verified Build</span>
+                <span className="e-text-dk-white">Verified Build</span>
                 <ExternalLink className="align-text-top e-ml-1.5" size={13} />
             </Link>
         </InfoTooltip>

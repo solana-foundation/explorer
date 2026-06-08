@@ -243,7 +243,7 @@ function ProgramLogRow({
                     >
                         #{index + 1}
                     </Badge>
-                    <span className="program-log-instruction-name">
+                    <span className="e-text-dk-white">
                         <ProgramNameWithInstruction
                             programId={programId}
                             cluster={cluster}
