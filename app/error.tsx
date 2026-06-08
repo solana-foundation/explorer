@@ -4,6 +4,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { useEffect } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
     useEffect(() => {
@@ -11,8 +12,8 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
     }, [error]);
 
     return (
-        <div className="container e-mt-6">
+        <PageContainer className="e-mt-6">
             <ErrorCard text="Something went wrong" retry={reset} />
-        </div>
+        </PageContainer>
     );
 }

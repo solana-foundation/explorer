@@ -30,6 +30,7 @@ import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { AccountsCard } from './AccountsCard';
@@ -350,7 +351,7 @@ export function TransactionInspectorPage({
     }, [currentPathname, currentSearchParams, router]);
 
     return (
-        <div className="container e-mt-6">
+        <PageContainer className="e-mt-6">
             <div className="e-mb-8">
                 <div className="e-border-0 e-border-b e-border-solid e-border-dk-gray-700-dark e-py-6">
                     <h2 className="e-mb-0">Transaction Inspector</h2>
@@ -371,7 +372,7 @@ export function TransactionInspectorPage({
             ) : (
                 <RawInput value={paramString} setTransactionData={setInspectorData} />
             )}
-        </div>
+        </PageContainer>
     );
 }
 

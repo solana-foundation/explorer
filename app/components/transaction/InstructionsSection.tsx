@@ -50,6 +50,7 @@ import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { Ed25519DetailsCard } from '../instruction/ed25519/Ed25519DetailsCard';
@@ -111,7 +112,7 @@ export function InstructionsSection({ signature }: SignatureProps) {
 
     return (
         <>
-            <div className="container">
+            <PageContainer>
                 <div className="e-mb-8">
                     <div className="e-border-0 e-border-b e-border-solid e-border-dk-gray-700-dark e-py-6">
                         <h3 className="e-mb-0">
@@ -119,7 +120,7 @@ export function InstructionsSection({ signature }: SignatureProps) {
                         </h3>
                     </div>
                 </div>
-            </div>
+            </PageContainer>
             <React.Suspense fallback={<LoadingCard message="Loading Instructions" />}>
                 {transaction.message.instructions.map((instruction, index) => {
                     const innerCards: JSX.Element[] = [];
