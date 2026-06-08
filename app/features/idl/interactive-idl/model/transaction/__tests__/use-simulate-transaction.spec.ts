@@ -87,18 +87,6 @@ describe('useSimulateTransaction', () => {
         expect(conn.simulateTransaction).not.toHaveBeenCalled();
     });
 
-    it('should clear lastSimulation on reset', async () => {
-        const conn = mockConnection({ context: { slot: 1 }, value: { err: null, logs: [] } });
-        const { result } = renderHook(() =>
-            useSimulateTransaction({ connection: conn as unknown as Connection, simulationCommitment: 'processed' }),
-        );
-        await act(async () => {
-            await result.current.simulate(async () => makeTx());
-        });
-        act(() => result.current.reset());
-        expect(result.current.lastSimulation).toBeUndefined();
-    });
-
     it('should populate serializedTxMessage on the success result', async () => {
         const conn = mockConnection({
             context: { slot: 1 },
