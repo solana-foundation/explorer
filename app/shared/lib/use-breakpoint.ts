@@ -1,15 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 
 import { breakpoints } from '@/tailwind.config';
 
 function useMediaQuery(query: string): boolean {
-    const [matches, setMatches] = useState(() =>
-        typeof window !== 'undefined' ? window.matchMedia(query).matches : false,
-    );
+    const [matches, setMatches] = useState(false);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const mql = globalThis.matchMedia(query);
         setMatches(mql.matches);
         const handler = (e: MediaQueryListEvent) => setMatches(e.matches);

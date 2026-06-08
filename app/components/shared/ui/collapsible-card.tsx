@@ -16,7 +16,11 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
         const [expanded, setExpanded] = useState(defaultExpanded);
 
         return (
-            <div ref={ref} className={cn('card', className)}>
+            <div
+                ref={ref}
+                className={cn('card', className)}
+                style={{ scrollMarginTop: 'var(--sticky-header-height, 0px)' }}
+            >
                 <div
                     className={cn(
                         'card-header e-h-auto e-min-h-[60px] e-gap-2',

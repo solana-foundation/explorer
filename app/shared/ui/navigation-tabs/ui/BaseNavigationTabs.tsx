@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 import {
@@ -46,20 +46,20 @@ export function BaseNavigationTabs({
 }: BaseNavigationTabsProps) {
     const { registeredTabs, registerTab, unregisterTab } = useTabRegistration();
 
-    const wrapperRef = React.useRef<HTMLDivElement>(null);
-    const [stuck, setStuck] = React.useState(false);
-    const [spyActive, setSpyActive] = React.useState(() => tabs[0]?.path ?? '');
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    const [stuck, setStuck] = useState(false);
+    const [spyActive, setSpyActive] = useState(() => tabs[0]?.path ?? '');
 
-    const staticPaths = React.useMemo(() => new Set(tabs.map(t => t.path)), [tabs]);
+    const staticPaths = useMemo(() => new Set(tabs.map(t => t.path)), [tabs]);
 
-    const allTabs = React.useMemo(
+    const allTabs = useMemo(
         () => [...tabs, ...registeredTabs.filter(t => !staticPaths.has(t.path))],
         [tabs, registeredTabs, staticPaths],
     );
 
     const { measuring, moreMeasureRef, moreTabs, tablistRef, visibleTabs } = useTabOverflow(allTabs);
 
-    const scrollToSection = React.useCallback(
+    const scrollToSection = useCallback(
         (path: string) => {
             const target = document.getElementById(path);
             const headerEl = wrapperRef.current ?? tablistRef.current;
@@ -79,7 +79,7 @@ export function BaseNavigationTabs({
         [tablistRef],
     );
 
-    const scrollSpyTabClick = React.useCallback(
+    const scrollSpyTabClick = useCallback(
         (path: string, e: React.MouseEvent<HTMLAnchorElement>) => {
             e.preventDefault();
             scrollToSection(path);
@@ -87,7 +87,7 @@ export function BaseNavigationTabs({
         [scrollToSection],
     );
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!scrollSpy) return;
         const el = wrapperRef.current;
         if (!el) return;
@@ -99,7 +99,26 @@ export function BaseNavigationTabs({
         return () => observer.disconnect();
     }, [scrollSpy]);
 
-    React.useEffect(() => {
+    useEffect(() => {
+        if (!scrollSpy) return;
+        const el = wrapperRef.current ?? tablistRef.current;
+        if (!el) return;
+        const update = () => {
+            document.documentElement.style.setProperty(
+                '--sticky-header-height',
+                `${el.getBoundingClientRect().height}px`,
+            );
+        };
+        update();
+        const resizeObserver = new ResizeObserver(update);
+        resizeObserver.observe(el);
+        return () => {
+            resizeObserver.disconnect();
+            document.documentElement.style.removeProperty('--sticky-header-height');
+        };
+    }, [scrollSpy, tablistRef]);
+
+    useEffect(() => {
         if (!scrollSpy) return;
         const update = () => {
             const tabHeight = (wrapperRef.current ?? tablistRef.current)?.getBoundingClientRect().height ?? 0;
@@ -123,12 +142,12 @@ export function BaseNavigationTabs({
     const onTabClick = scrollSpy ? scrollSpyTabClick : onTabClickProp;
     const handleSelectChange = scrollSpy ? scrollToSection : onSelectChange;
 
-    const contextValue = React.useMemo(
+    const contextValue = useMemo(
         () => ({ activeValue, buildHref, onTabClick, registerTab, renderTabLink: true, staticPaths, unregisterTab }),
         [activeValue, buildHref, onTabClick, registerTab, staticPaths, unregisterTab],
     );
 
-    const hiddenContextValue = React.useMemo(() => ({ ...contextValue, renderTabLink: false }), [contextValue]);
+    const hiddenContextValue = useMemo(() => ({ ...contextValue, renderTabLink: false }), [contextValue]);
 
     const tabBar = (
         <NavigationTabsContext.Provider value={contextValue}>

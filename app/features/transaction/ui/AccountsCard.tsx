@@ -145,7 +145,7 @@ export function AccountsCard({ signature }: SignatureProps) {
             {!loading && totalAccountSize > 0 && (
                 <div className="e-ml-7 e-flex e-items-baseline e-gap-2 e-px-3 e-py-2 e-text-sm e-text-muted md:e-px-4 lg:e-ml-10">
                     <div className="e-flex e-flex-col">
-                        <span className="e-tex-sm e-uppercase e-leading-none">Total Account Size:</span>
+                        <span className="e-text-sm e-uppercase e-leading-none">Total Account Size:</span>
                         <span className="e-text-[10px] e-leading-none">reflects current state</span>
                     </div>
                     <span className="e-text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>

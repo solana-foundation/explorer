@@ -62,6 +62,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
         <Tabs
             value={tab}
             onValueChange={handleTabChange}
+            // we need to do -32px because this is padding for left and right 16px
             className="e-max-w-[calc(100vw-32px)] e-overflow-hidden e-rounded-lg e-border e-border-solid e-border-outer-space-800 e-bg-heavy-metal-900 lg:e-max-w-[540px]"
         >
             <div className="e-flex e-flex-wrap e-justify-between e-gap-8 e-border-b e-border-outer-space-800 e-px-3 [border-bottom-style:solid]">
