@@ -66,13 +66,15 @@ export function AccountsCard({ signature }: SignatureProps) {
 
         const badges = (
             <>
-                {index === 0 && <Badge variant="success">Fee Payer</Badge>}
-                {account.signer && <Badge variant="info">Signer</Badge>}
-                {account.writable && <Badge variant="destructive">Writable</Badge>}
+                {index === 0 && <span className="badge bg-success-soft me-1">Fee Payer</span>}
+                {account.signer && <span className="badge bg-info-soft me-1">Signer</span>}
+                {account.writable && <span className="badge bg-danger-soft me-1">Writable</span>}
                 {message.instructions.find(ix => ix.programId.equals(pubkey)) && (
-                    <Badge variant="warning">Program</Badge>
+                    <span className="badge bg-warning-soft me-1">Program</span>
                 )}
-                {account.source === 'lookupTable' && <Badge variant="secondary">Address Table Lookup</Badge>}
+                {account.source === 'lookupTable' && (
+                    <span className="badge bg-gray-soft me-1">Address Table Lookup</span>
+                )}
             </>
         );
 
