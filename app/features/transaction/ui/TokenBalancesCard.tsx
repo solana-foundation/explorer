@@ -168,7 +168,7 @@ function TokenBalanceRow({
             {/* Desktop layout */}
             <div
                 className={cn(
-                    'e-hidden e-min-h-9 e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
+                    'e-hidden e-min-h-9 e-px-3 e-py-2.5 md:e-px-4 lg:e-grid',
                     'e-items-start e-gap-x-5 e-whitespace-nowrap e-text-sm',
                     "[grid-template-areas:'number_address_change_balance']",
                     GRID_TEMPLATE,

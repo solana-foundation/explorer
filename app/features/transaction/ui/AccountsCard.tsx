@@ -97,7 +97,7 @@ export function AccountsCard({ signature }: SignatureProps) {
             <div
                 key={key}
                 className={cn(
-                    'e-min-h-9 e-px-3 e-py-1.5 md:e-px-4',
+                    'e-min-h-9 e-px-3 e-py-2.5 md:e-px-4',
                     'e-grid e-items-start e-gap-x-0 e-gap-y-0.5 e-whitespace-nowrap e-text-sm md:e-gap-y-0 lg:e-gap-x-5',
                     'e-grid-cols-[minmax(auto,1.75rem)_minmax(100px,auto)_1fr] sm:e-grid-cols-[minmax(auto,1.75rem)_1fr_auto] lg:e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)]',
                     "[grid-template-areas:'number_address_delta'_'number_address_balance'_'number_address_size'] lg:[grid-template-areas:'number_address_delta_balance']",

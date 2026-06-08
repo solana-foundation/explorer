@@ -39,7 +39,7 @@ export function Row({ children, className, divider, ...props }: RowProps) {
     return (
         <div
             className={cn(
-                'e-grid e-min-h-9 e-grid-cols-[clamp(100px,25%,200px)_1fr] e-items-baseline e-gap-2 e-px-3 e-pb-1.5 e-pt-2 md:e-px-4',
+                'e-grid e-min-h-9 e-grid-cols-[clamp(100px,25%,200px)_1fr] e-items-baseline e-gap-2 e-px-3 e-py-2.5 md:e-px-4',
                 divider && 'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid]',
                 className,
             )}
