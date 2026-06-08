@@ -3,6 +3,7 @@
 import { Epoch } from '@components/common/Epoch';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Slot } from '@components/common/Slot';
+import { TableCardBody } from '@components/common/TableCardBody';
 import { TimestampToggle } from '@components/common/TimestampToggle';
 import { LiveTransactionStatsCard } from '@components/LiveTransactionStatsCard';
 import { StatsNotReady } from '@components/StatsNotReady';
