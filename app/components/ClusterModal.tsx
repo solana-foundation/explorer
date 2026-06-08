@@ -303,7 +303,7 @@ function ClusterToggle() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     return (
-        <div className="btn-group-toggle e-mb-6 e-flex e-flex-wrap">
+        <div className="e-mb-6 e-flex e-flex-wrap">
             {CLUSTERS.map((net, index) => {
                 const active = net === cluster;
                 if (net === Cluster.Custom)
