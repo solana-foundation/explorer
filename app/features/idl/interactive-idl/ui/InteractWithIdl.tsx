@@ -121,13 +121,13 @@ export function InteractWithIdl({
         async (data: InstructionData, params: InstructionCallParams) => {
             const programIdStr = progId?.toString();
 
-            setLastAction('execute');
             onTransactionExecutionStart?.(programIdStr, data.name);
 
-            setCurrentInstruction({ name: data.name, programId: programIdStr });
-
+            // On mainnet, requireConfirmation opens a dialog and only then runs this callback once the user accepts.
             await requireConfirmation(
                 async () => {
+                    setLastAction('execute');
+                    setCurrentInstruction({ name: data.name, programId: programIdStr });
                     await executeInstruction(data.name, data, params);
                 },
                 { data, params },
