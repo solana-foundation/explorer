@@ -2,7 +2,6 @@ import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { SolBalance } from '@components/common/SolBalance';
-import { Badge } from '@components/shared/ui/badge';
 import { cn } from '@components/shared/utils';
 import { useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
