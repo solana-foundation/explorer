@@ -1,4 +1,3 @@
-import './scss/theme-dark.scss';
 import './styles.css';
 
 import { ClusterModal } from '@components/ClusterModal';

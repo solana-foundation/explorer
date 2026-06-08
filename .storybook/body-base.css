@@ -1,0 +1,8 @@
+body {
+    background-color: #161a19;
+    color: #fff;
+    font-family: var(--explorer-default-font);
+    font-size: 0.9375rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
