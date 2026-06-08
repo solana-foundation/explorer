@@ -134,9 +134,13 @@ The proxy SHALL omit `Content-Length` from its response (to keep the response a 
 - **WHEN** the proxy serves a response, whether or not the upstream sent an `ETag`
 - **THEN** the proxy response SHALL NOT include an `ETag` header
 
-### Requirement: The proxy SHALL cache successful responses in the browser only
+### Requirement: The proxy SHALL cache responses in the browser only, never at the edge
 
-Successful (2xx) responses SHALL carry a browser-facing `Cache-Control: public, max-age=86400` (1 day), so a viewer's own browser serves repeat views from its cache for up to a day. The directive SHALL NOT include `immutable`, so a rare in-place overwrite of a mutable URL is picked up once the window lapses. The proxy SHALL NOT set `Vercel-CDN-Cache-Control` (or any other edge/CDN cache directive), so responses are not cached at the Vercel edge and every cold or cross-client view re-invokes the function. The proxy SHALL NOT forward the upstream `cache-control` (it is frequently `no-store`/`no-cache`/`private`). Non-2xx responses SHALL NOT carry any caching headers.
+Successful (2xx) responses SHALL carry a browser-facing `Cache-Control: public, max-age=86400` (1 day), so a viewer's own browser serves repeat views from its cache for up to a day. The directive SHALL NOT include `immutable`, so a rare in-place overwrite of a mutable URL is picked up once the window lapses.
+
+Error (non-2xx) responses SHALL carry a short, browser-only `Cache-Control: private, max-age=30`. This lets the failed `<img>` request prime the browser cache so the on-error failure-reason probe (see the fallback requirement) re-reads the status from cache rather than re-invoking the function; `private` keeps the verdict out of shared/edge caches, and the short TTL lets a transient `5xx` clear quickly while a stable `413`/`404`/`415` stays cheap to re-read.
+
+Neither path SHALL set `Vercel-CDN-Cache-Control` (or any other edge/CDN cache directive), so responses are never cached at the Vercel edge and every cold or cross-client view re-invokes the function. The proxy SHALL NOT forward the upstream `cache-control` (it is frequently `no-store`/`no-cache`/`private`).
 
 #### Scenario: Successful response is browser-cacheable but not edge-cached
 
@@ -145,10 +149,11 @@ Successful (2xx) responses SHALL carry a browser-facing `Cache-Control: public, 
 - **AND** it SHALL NOT set `Vercel-CDN-Cache-Control`
 - **AND** SHALL NOT forward the upstream `cache-control`
 
-#### Scenario: Errors are not cached
+#### Scenario: Error response is briefly browser-cached, never edge-cached
 
 - **WHEN** the proxy responds with a non-2xx status
-- **THEN** the response SHALL NOT carry any `Cache-Control` header
+- **THEN** it SHALL set `Cache-Control: private, max-age=30`
+- **AND** it SHALL NOT set `Vercel-CDN-Cache-Control`
 
 ### Requirement: The proxy SHALL report size-cap hits and network failures to Sentry as warnings
 
@@ -176,24 +181,33 @@ On the success path the proxy SHALL emit an `info`-level log recording the actua
 - **THEN** it SHALL emit `Logger.info('[api:metadata-proxy] Resource fetched', { byteLength, contentType, host, maxSize })`
 - **AND** the event SHALL NOT be reported to Sentry
 
-### Requirement: Off-chain images SHALL degrade to a graceful fallback when they cannot be displayed
+### Requirement: Off-chain images SHALL surface why they could not be displayed and degrade gracefully
 
-Off-chain images rendered through the proxy SHALL be displayed via the `ProxiedImage` component, which composes proxy-agnostic image primitives from `app/components/shared/ui/image/` and renders a fallback in place of the image whenever it fails to load — including when the proxy rejects it with `413` for exceeding the size cap. Because a browser `<img>` element cannot read the HTTP status, the component SHALL treat every load failure (`413`/`404`/`502`/CORS) with the same fallback rather than an oversize-specific message.
+Off-chain images rendered through the proxy SHALL be displayed via the `ProxiedImage` component, which composes proxy-agnostic image primitives from `app/components/shared/ui/image/`. While the image loads it SHALL show a skeleton sized to the image's slot; on success it SHALL show the image; on any load failure it SHALL render a fallback in the image's place — including when the proxy rejects it with `413` for exceeding the size cap.
 
-The fallback SHALL offer access to the original third-party URL only as an explicit, user-initiated link (opening in a new tab with `rel="noopener noreferrer"`), so the viewer's IP is exposed to the upstream host only on a deliberate click and never automatically. When no URI is available the fallback SHALL render without an outbound link.
+Because a browser `<img>` element cannot read the HTTP status, on a load failure the component SHALL re-`fetch` the same proxied (same-origin) `src` to read `response.status` and map it to a human-readable, per-status reason (e.g. `413` → "Image exceeds maximum size", `404` → "Image not found", `415` → "Unsupported image type"). The probe targets the same-origin proxy URL — never the upstream host — so it leaks nothing the original `<img>` request did not, and is served from the browser cache that request primed (see the caching requirement). A `src` that is not the same-origin proxy (proxy disabled, or a non-HTTP scheme passed through) has no readable status, so the component SHALL show a generic reason without probing.
+
+The default fallback SHALL be a Solana-logo placeholder that inherits the image's own className/box — so a rounded-full avatar gets a round logo — and SHALL carry the reason as both its accessible name and a hover tooltip (working at any size, including a 16px avatar where visible text would not fit). Consumers MAY supply a `fallback` render function to receive the resolved reason and render it differently.
+
+The original third-party URL SHALL be offered only as an explicit, opt-in (`showOriginalLink`), user-initiated link (opening in a new tab with `rel="noopener noreferrer"`), so the viewer's IP is exposed to the upstream host only on a deliberate click and never automatically; when shown, the failure reason SHALL ride in that link's info tooltip rather than its text. When no URI is available the fallback SHALL render without an outbound link.
 
 #### Scenario: Image exceeds the size cap
 
 - **WHEN** an image routed through the proxy is rejected with `413`
-- **THEN** the consumer SHALL render the `ProxiedImage` fallback (placeholder plus an opt-in "View original" link) rather than a broken-image icon
+- **THEN** the component SHALL re-fetch the proxied src, read the `413`, and render the fallback with the reason "Image exceeds maximum size" (as the logo's tooltip, and in the link's info tooltip when `showOriginalLink` is set) rather than a broken-image icon
 
-#### Scenario: Image fails to load for any other reason
+#### Scenario: Image fails to load for another readable reason
 
-- **WHEN** the image request fails with `404`, `502`, or a CORS error
-- **THEN** the same generic fallback SHALL be shown, since the `<img>` element cannot distinguish the cause
+- **WHEN** a proxied image fails with `404`, `415`, `502`, or `504`
+- **THEN** the on-error probe SHALL read that status and the fallback SHALL show the matching per-status reason
+
+#### Scenario: Failure with no readable status
+
+- **WHEN** the failing `src` is not the same-origin proxy (cross-origin or a non-HTTP passthrough), or the probe cannot read a status (network/opaque/abort)
+- **THEN** the fallback SHALL show the generic reason "Image could not be displayed" without surfacing a misleading specific cause
 
 #### Scenario: Opening the original is opt-in
 
-- **WHEN** the fallback is shown for a resource with a known URI
-- **THEN** it SHALL render a link to the original URI that navigates only on user click, with `target="_blank"` and `rel="noopener noreferrer"`
+- **WHEN** `showOriginalLink` is set for a resource with a known http(s) URI
+- **THEN** the component SHALL render a link to the original URI that navigates only on user click, with `target="_blank"` and `rel="noopener noreferrer"`
 - **AND** SHALL NOT fetch or preload the original automatically
