@@ -310,7 +310,7 @@ export function mapIxArgsToRows(ixArgs: any, ixType: IdlInstruction, idl: Idl) {
                 <BaseTable.Row key={key}>
                     <BaseTable.Cell>{key}</BaseTable.Cell>
                     <BaseTable.Cell>{ixType.name}</BaseTable.Cell>
-                    <BaseTable.Cell className="metadata-json-viewer e-m-6">
+                    <BaseTable.Cell className="e-m-6 [&_.string-value]:e-break-all">
                         <ReactJson src={ixArgs} />
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -348,7 +348,7 @@ export function mapAccountToRows(accountData: any, accountType: IdlTypeDef, idl:
                 <BaseTable.Row key={key}>
                     <BaseTable.Cell>{key}</BaseTable.Cell>
                     <BaseTable.Cell>{accountType.name}</BaseTable.Cell>
-                    <BaseTable.Cell className="metadata-json-viewer e-m-6">
+                    <BaseTable.Cell className="e-m-6 [&_.string-value]:e-break-all">
                         <ReactJson src={accountData} />
                     </BaseTable.Cell>
                 </BaseTable.Row>
