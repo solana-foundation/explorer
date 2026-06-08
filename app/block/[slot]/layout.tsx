@@ -19,6 +19,7 @@ import { ExternalLink } from 'react-feather';
 
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { type NavigationTab, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
 import { BaseTable } from '@/app/shared/ui/Table';
 import { getEpochForSlot, getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
@@ -221,7 +222,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
         );
     }
     return (
-        <div className="container mt-n3">
+        <PageContainer className="mt-n3">
             <div className="e-mb-8">
                 <div className="e-border-0 e-border-b e-border-solid e-border-dk-gray-700-dark e-py-6">
                     <h6 className="e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Details</h6>
@@ -229,7 +230,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                 </div>
             </div>
             {content}
-        </div>
+        </PageContainer>
     );
 }
 
@@ -262,9 +263,9 @@ function MoreSection({ children, slot }: { children: React.ReactNode; slot: numb
     return (
         <>
             <StickyHeader>
-                <div className="container">
+                <PageContainer>
                     <NavigationTabs buildHref={buildHref} tabs={TABS} />
-                </div>
+                </PageContainer>
             </StickyHeader>
             {children}
         </>

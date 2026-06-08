@@ -20,6 +20,7 @@ import { SearchBar } from '@/app/components/SearchBarLoader';
 import { TokenInfoBatchProvider } from '@/app/entities/token-info';
 import { CookieConsent } from '@/app/features/cookie';
 import { VisibilityProvider } from '@/app/shared/lib/visibility';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
 import { botIdProtectedRoutes } from '../proxy';
 
@@ -67,12 +68,12 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                                                 <SearchBar />
                                             </Navbar>
                                             <MessageBanner />
-                                            <div className="container e-my-3 xl:e-hidden">
+                                            <PageContainer className="e-my-3 xl:e-hidden">
                                                 <SearchBar />
-                                            </div>
-                                            <div className="container e-my-3 lg:e-hidden">
+                                            </PageContainer>
+                                            <PageContainer className="e-my-3 lg:e-hidden">
                                                 <ClusterStatusButton />
-                                            </div>
+                                            </PageContainer>
                                             {children}
                                         </div>
                                         <Footer />

@@ -53,6 +53,7 @@ import { hasTokenMetadata } from '@/app/features/metadata';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { type NavigationTab, NavigationTabLink, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
 import { isAttestationAccount } from '@/app/utils/attestation-service';
 import {
@@ -166,7 +167,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     }, [address, status]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <div className="container mt-n3">
+        <PageContainer className="mt-n3">
             <Header
                 address={address}
                 account={info?.data}
@@ -186,7 +187,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
                     {children}
                 </DetailsSections>
             )}
-        </div>
+        </PageContainer>
     );
 }
 
@@ -340,11 +341,11 @@ function MoreSection({
     return (
         <>
             <StickyHeader>
-                <div className="container">
+                <PageContainer>
                     <NavigationTabs buildHref={buildHref} tabs={tabs}>
                         {asyncChildren}
                     </NavigationTabs>
-                </div>
+                </PageContainer>
             </StickyHeader>
             {children}
         </>

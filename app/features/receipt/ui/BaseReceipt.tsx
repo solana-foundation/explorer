@@ -8,6 +8,8 @@ import { displayTimestamp } from '@utils/date';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
+
 import type { FormattedExtendedReceipt, TransferRow } from '../types';
 
 interface BaseReceiptProps {
@@ -269,7 +271,7 @@ export function NoReceipt({
     }, [countdown, onRedirect]);
 
     return (
-        <div className="container e-flex e-min-h-[90vh] e-flex-col e-items-center e-justify-center e-gap-6 e-px-5 e-py-10">
+        <PageContainer className="e-flex e-min-h-[90vh] e-flex-col e-items-center e-justify-center e-gap-6 e-px-5 e-py-10">
             <BlurredCircle />
 
             <div className="e-w-full e-max-w-lg">
@@ -290,7 +292,7 @@ export function NoReceipt({
                     View transaction in Explorer
                 </Link>
             </Button>
-        </div>
+        </PageContainer>
     );
 }
 

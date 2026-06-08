@@ -6,6 +6,8 @@ import { displayTimestamp } from '@utils/date';
 import React from 'react';
 import { AlertCircle } from 'react-feather';
 
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
+
 type Announcement = {
     message: string;
     estimate?: string;
@@ -68,7 +70,7 @@ export function MessageBanner() {
 
     return (
         <div className="bg-info">
-            <div className="container">
+            <PageContainer>
                 <div className="e-flex e-flex-col e-items-center e-justify-center e-py-3 e-text-center">
                     <h3 className="e-mb-0 e-leading-6">
                         <AlertCircle className="e-mr-1.5" size={15} />
@@ -76,7 +78,7 @@ export function MessageBanner() {
                     </h3>
                     {timeframe}
                 </div>
-            </div>
+            </PageContainer>
         </div>
     );
 }
