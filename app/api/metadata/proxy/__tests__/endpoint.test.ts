@@ -141,9 +141,9 @@ describe('Metadata Proxy Route', () => {
                 status: 504,
             },
             {
-                description: '500 on unclassified upstream failure',
+                description: '502 when the upstream is unreachable (fetch rejects)',
                 mock: () => fetchMock.mockRejectedValueOnce(new Error('boom')),
-                status: 500,
+                status: 502,
             },
         ])('should return $description', async ({ mock, status }) => {
             vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
@@ -153,15 +153,21 @@ describe('Metadata Proxy Route', () => {
             const request = new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`);
             const response = await GET(request);
             expect(response.status).toBe(status);
+            // Errors carry a short, browser-only cache so a failed <img> request
+            // primes the cache for ProxiedImage's on-error reason probe. Never
+            // shared/edge-cached.
+            expect(response.headers.get('cache-control')).toBe('private, max-age=30');
+            expect(response.headers.get('vercel-cdn-cache-control')).toBeNull();
         });
     });
 
     describe('successful response', () => {
-        it('should return 200 and forward upstream headers', async () => {
+        it('should return 200, forward content-type, drop the upstream ETag, and set a browser-only cache policy', async () => {
             const { response } = await setup('http://external.resource/file.json', {
                 upstream: {
                     data: { attributes: [], name: 'NFT' },
                     headers: {
+                        // Upstream Cache-Control is overridden, not forwarded.
                         'Cache-Control': 'max-age=3600',
                         'Content-Type': 'application/json',
                         ETag: 'test-etag',
@@ -171,8 +177,13 @@ describe('Metadata Proxy Route', () => {
 
             expect(response.status).toBe(200);
             expect(response.headers.get('content-type')).toBe('application/json');
-            expect(response.headers.get('cache-control')).toBe('max-age=3600');
-            expect(response.headers.get('etag')).toBe('test-etag');
+            // The upstream ETag is not forwarded: the route does no conditional
+            // revalidation, so the validator would be inert.
+            expect(response.headers.get('etag')).toBeNull();
+            // Browser caches for a day; the edge does not (no Vercel-CDN-Cache-Control),
+            // and the upstream's own value is not forwarded.
+            expect(response.headers.get('cache-control')).toBe('public, max-age=86400');
+            expect(response.headers.get('vercel-cdn-cache-control')).toBeNull();
         });
 
         it('should omit Content-Length to avoid browser CORS issues', async () => {

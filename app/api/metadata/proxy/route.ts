@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
 
+import { CACHE_HEADERS, ERROR_CACHE_HEADERS, MAX_SIZE, SECURITY_HEADERS, TIMEOUT, USER_AGENT } from './config';
 import {
     fetchResource,
     isHTTPProtocol,
@@ -12,20 +13,12 @@ import {
 } from './feature';
 
 export const dynamic = 'force-dynamic';
-
-const USER_AGENT = process.env.NEXT_PUBLIC_METADATA_USER_AGENT ?? 'Solana Explorer';
-const MAX_SIZE = process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE
-    ? Number(process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE)
-    : 1_000_000; // 1 000 000 bytes
-const TIMEOUT = process.env.NEXT_PUBLIC_METADATA_TIMEOUT ? Number(process.env.NEXT_PUBLIC_METADATA_TIMEOUT) : 10_000;
-
-// Prevent proxied content (e.g. SVG with embedded scripts) from executing
-// anything if the proxy URL is opened directly as a top-level document.
-const SECURITY_HEADERS = {
-    'Content-Security-Policy':
-        "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'none'",
-    'X-Content-Type-Options': 'nosniff',
-};
+// Platform backstop. The per-hop fetch timeout (NEXT_PUBLIC_METADATA_TIMEOUT,
+// 10s) bounds each hop, but not DNS resolution or the sum across redirect hops,
+// so cap the whole invocation here — every cache-miss for metadata/image
+// traffic runs through this one function once enabled. Kept inline (not in
+// config.ts): Next reads route segment config only as literal route exports.
+export const maxDuration = 15;
 
 export async function GET(request: Request) {
     if (process.env.NEXT_PUBLIC_METADATA_ENABLED !== 'true') {
@@ -50,12 +43,11 @@ export async function GET(request: Request) {
     // inside fetchResource via the pinned-lookup mechanism — once per hop.
     // The kernel never sees a hostname that wasn't pre-validated.
     try {
-        const { data, headers } = await fetchResource(
-            parsedUri.href,
-            new Headers({ 'Content-Type': 'application/json; charset=utf-8', 'User-Agent': USER_AGENT }),
-            TIMEOUT,
-            MAX_SIZE,
-        );
+        const { data, headers } = await fetchResource(parsedUri.href, {
+            headers: new Headers({ 'Content-Type': 'application/json; charset=utf-8', 'User-Agent': USER_AGENT }),
+            size: MAX_SIZE,
+            timeout: TIMEOUT,
+        });
         return buildResponse(data, headers);
     } catch (e) {
         if (e instanceof StatusError && isKnownStatus(e.status)) {
@@ -85,11 +77,15 @@ function parseUrl(maybeUrl: string | null): URL | undefined {
 // Omitting it keeps only safelisted headers, letting the browser accept
 // the response without extra CORS checks.
 function buildResponse(data: unknown, resourceHeaders: Headers): NextResponse {
+    // CACHE_HEADERS sets a browser-only Cache-Control (set on success
+    // only); the upstream's own Cache-Control is not forwarded. The upstream
+    // ETag is dropped too — the route does no conditional revalidation, so a
+    // forwarded validator would be inert (and a placeholder default would risk
+    // false 304 matches across distinct resources).
     const responseHeaders: Record<string, string> = {
         ...SECURITY_HEADERS,
-        'Cache-Control': resourceHeaders.get('cache-control') ?? 'no-cache',
+        ...CACHE_HEADERS,
         'Content-Type': resourceHeaders.get('content-type') ?? 'application/json; charset=utf-8',
-        Etag: resourceHeaders.get('etag') ?? 'no-etag',
     };
 
     if (data instanceof ArrayBuffer) {
@@ -108,5 +104,8 @@ function isKnownStatus(status: number): status is StatusCode {
 }
 
 function respondWithError(status: StatusCode) {
-    return NextResponse.json({ error: STATUS_MESSAGES[status] }, { status });
+    // ERROR_CACHE_HEADERS lets the failed `<img>` request prime the browser cache
+    // so ProxiedImage's on-error reason probe re-reads the status from cache
+    // rather than re-invoking the proxy. Browser-only and short-lived by design.
+    return NextResponse.json({ error: STATUS_MESSAGES[status] }, { headers: ERROR_CACHE_HEADERS, status });
 }

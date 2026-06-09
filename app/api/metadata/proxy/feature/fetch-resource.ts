@@ -28,17 +28,16 @@ type FetchResourceResult = Awaited<
 
 type HopResult = { kind: 'done'; value: FetchResourceResult } | { kind: 'redirect'; location: string };
 
-export async function fetchResource(
-    uri: string,
-    headers: Headers,
-    timeout: number,
-    size: number,
-): Promise<FetchResourceResult> {
+// Per-request fetch parameters that travel together through every hop. Bundled
+// into one object so helpers don't grow long positional argument lists.
+export type FetchRequest = { headers: Headers; timeout: number; size: number };
+
+export async function fetchResource(uri: string, request: FetchRequest): Promise<FetchResourceResult> {
     let currentUrl = new URL(uri);
     const visited = new Set<string>([currentUrl.href]);
 
     for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-        const outcome = await executeHop(currentUrl, headers, timeout, size);
+        const outcome = await executeHop(currentUrl, request);
         if (outcome.kind === 'done') return outcome.value;
 
         currentUrl = resolveRedirectUrl(outcome.location, currentUrl);
@@ -54,7 +53,7 @@ export async function fetchResource(
     throw statusError(502, 'Too many redirects');
 }
 
-async function executeHop(url: URL, headers: Headers, timeout: number, size: number): Promise<HopResult> {
+async function executeHop(url: URL, request: FetchRequest): Promise<HopResult> {
     if (!isHTTPProtocol(url)) {
         Logger.warn('[api:metadata-proxy] Non-HTTP protocol blocked', { url: url.href });
         throw statusError(403, 'Hostname uses non-HTTP protocol');
@@ -77,7 +76,7 @@ async function executeHop(url: URL, headers: Headers, timeout: number, size: num
     // we'd be tearing down sockets while the body stream is still being read.
     const dispatcher = new Agent({ connect: { lookup: validation.lookup } });
     try {
-        const response = await doFetch(url, headers, timeout, dispatcher);
+        const response = await doFetch(url, request, dispatcher);
 
         if (isRedirect(response)) {
             return extractRedirect(response, url);
@@ -88,7 +87,7 @@ async function executeHop(url: URL, headers: Headers, timeout: number, size: num
             throw statusError(502, `Upstream returned ${response.status}`);
         }
 
-        return { kind: 'done', value: await processResponse(response, size) };
+        return { kind: 'done', value: await processResponse(response, request, url) };
     } finally {
         // By this point the body has either been fully consumed (success
         // path), cancelled (size pre-check), or abandoned (errors in
@@ -126,12 +125,12 @@ function extractRedirect(response: Response, url: URL): HopResult & { kind: 'red
     return { kind: 'redirect', location };
 }
 
-async function doFetch(url: URL, headers: Headers, timeout: number, dispatcher: Agent): Promise<Response> {
+async function doFetch(url: URL, request: FetchRequest, dispatcher: Agent): Promise<Response> {
     try {
         return await fetch(url.href, {
-            headers,
+            headers: request.headers,
             redirect: 'manual',
-            signal: AbortSignal.timeout(timeout),
+            signal: AbortSignal.timeout(request.timeout),
             // `dispatcher` is an undici-specific extension to RequestInit, not
             // in the Web Fetch spec; spreading defeats the excess-property
             // check while still passing it through to Node's native fetch
@@ -140,17 +139,25 @@ async function doFetch(url: URL, headers: Headers, timeout: number, dispatcher: 
             ...{ dispatcher },
         });
     } catch (e) {
-        throw handleFetchError(e, url);
+        throw handleFetchError(e, url, request.size);
     }
 }
 
-async function processResponse(response: Response, size: number): Promise<FetchResourceResult> {
+async function processResponse(response: Response, request: FetchRequest, url: URL): Promise<FetchResourceResult> {
+    const { size } = request;
     // Pre-check Content-Length when present so oversize bodies fail fast.
     // A malformed header (e.g. "abc") parses to NaN; ignore it and fall through
     // to readBodyWithLimit, which enforces the limit on the actual byte count.
     const contentLength = Number(response.headers.get('content-length'));
     if (Number.isFinite(contentLength) && contentLength > size) {
         await response.body?.cancel();
+        // Warning, not an exception: oversize content is expected upstream input,
+        // not an app fault. Reported to Sentry so we can gauge how often the size
+        // limit bites and whether it needs tuning.
+        Logger.warn('[api:metadata-proxy] Resource exceeds max size (Content-Length)', {
+            sentry: true,
+            sentryExtras: { declaredContentLength: contentLength, host: url.host, maxSize: size },
+        });
         throw statusError(413, `Content-Length ${contentLength} exceeds max size ${size}`);
     }
 
@@ -158,13 +165,32 @@ async function processResponse(response: Response, size: number): Promise<FetchR
     try {
         buffered = await readBodyWithLimit(response, size);
     } catch (e) {
-        if (matchMaxSizeError(e)) throw statusError(413, 'Streamed body exceeds max size', { cause: e });
+        if (matchMaxSizeError(e)) {
+            // Server omitted or understated Content-Length; the limit was hit
+            // mid-stream. Reported as a warning for the same reason as above.
+            Logger.warn('[api:metadata-proxy] Resource exceeds max size (streamed)', {
+                sentry: true,
+                sentryExtras: { host: url.host, maxSize: size },
+            });
+            throw statusError(413, 'Streamed body exceeds max size', { cause: e });
+        }
         throw e;
     }
+    const contentType = response.headers.get('content-type');
+
+    // Record the fetched size on the success path so the full distribution (not
+    // just the over-cap tail from the Sentry warnings) can be queried from logs
+    // to tune `MAX_SIZE`. info-level, so no per-request Sentry event.
+    Logger.info('[api:metadata-proxy] Resource fetched', {
+        byteLength: buffered.byteLength,
+        contentType,
+        host: url.host,
+        maxSize: size,
+    });
+
     // Re-wrap so processors keep using `.arrayBuffer()` / `.json()` / `.text()`.
     const rewrapped = new Response(buffered, { headers: response.headers, status: response.status });
 
-    const contentType = response.headers.get('content-type');
     if (matchJson(contentType)) return processJson(rewrapped);
     if (matchTextPlain(contentType)) return processTextAsJson(rewrapped);
     if (matchImage(contentType)) return processBinary(rewrapped);
@@ -172,7 +198,7 @@ async function processResponse(response: Response, size: number): Promise<FetchR
     throw statusError(415, `Unsupported content-type: ${contentType ?? '(none)'}`);
 }
 
-function handleFetchError(e: unknown, url: URL): StatusError {
+function handleFetchError(e: unknown, url: URL, size: number): StatusError {
     const error = e instanceof Error ? e : new Error('Cannot fetch resource');
     if (!(e instanceof Error)) {
         Logger.debug('[api:metadata-proxy] Failed to fetch resource', { error: e });
@@ -180,10 +206,26 @@ function handleFetchError(e: unknown, url: URL): StatusError {
 
     if (error instanceof StatusError) return error;
     if (matchTimeoutError(error)) return statusError(504, 'Upstream fetch timed out', { cause: error });
-    if (matchMaxSizeError(error)) return statusError(413, 'Streamed body exceeds max size', { cause: error });
+    if (matchMaxSizeError(error)) {
+        // fetch() itself rejected with a size error (limit hit before a Response
+        // was returned). Reported as a warning for the same reason as the other
+        // 413 paths in processResponse.
+        Logger.warn('[api:metadata-proxy] Resource exceeds max size (streamed)', {
+            sentry: true,
+            sentryExtras: { host: url.host, maxSize: size },
+        });
+        return statusError(413, 'Streamed body exceeds max size', { cause: error });
+    }
     if (matchAbortError(error)) return statusError(504, 'Upstream fetch aborted', { cause: error });
 
-    // Reported to Sentry so we can gauge whether network failures are common.
+    // Anything left is a `fetch()` rejection that isn't a timeout/abort/size
+    // error — i.e. an upstream connectivity failure (DNS miss, refused/reset
+    // connection, TLS error). That's a bad *gateway*, not our internal fault, so
+    // it's a 502, not a 500. The distinction is user-visible: 502 surfaces as
+    // "Image source unavailable" while 500 collapses to the generic "Image could
+    // not be displayed" (500 stays reserved for genuine internal errors, caught
+    // at the route boundary). Reported to Sentry to gauge how often upstreams are
+    // unreachable.
     Logger.warn('[api:metadata-proxy] Fetch failed', { sentry: true, url: url.href });
-    return statusError(500, 'Fetch failed', { cause: error });
+    return statusError(502, 'Upstream unreachable', { cause: error });
 }

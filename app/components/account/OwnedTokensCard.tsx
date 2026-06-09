@@ -13,15 +13,13 @@ import { FetchStatus } from '@providers/cache';
 import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import React, { useCallback, useMemo } from 'react';
 import { ChevronDown } from 'react-feather';
 
-import { getProxiedUri } from '@/app/features/metadata/utils';
+import { ProxiedImage } from '@/app/features/metadata';
 import { INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
-import TokenLogoPlaceholder from '@/app/img/logos-solana/low-contrast-solana-logo.svg';
 import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
 import { normalizeTokenAmount } from '@/app/utils';
 
@@ -235,30 +233,17 @@ type TokenRowProps = {
 function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRowProps) {
     const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(mintAddress, token.rawAmount);
 
-    const logoURI = token.logoURI ? getProxiedUri(token.logoURI) : undefined;
-
     return (
         <tr>
             {showLogo && (
                 <td className="w-1 e-p-0 e-text-center">
-                    {logoURI ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            src={logoURI}
-                            alt="Token icon"
-                            height={16}
-                            width={16}
-                            className="token-icon border border-4 border-gray-dark e-rounded-full"
-                        />
-                    ) : (
-                        <Image
-                            src={TokenLogoPlaceholder}
-                            alt="Token icon placeholder"
-                            height={16}
-                            width={16}
-                            className="e-h-4 e-w-4 e-rounded-full e-object-cover"
-                        />
-                    )}
+                    <ProxiedImage
+                        alt="Token icon"
+                        className="token-icon border border-4 border-gray-dark e-rounded-full"
+                        height={16}
+                        uri={token.logoURI}
+                        width={16}
+                    />
                 </td>
             )}
             {showAccountAddress && token.pubkey && (

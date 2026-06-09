@@ -2,11 +2,10 @@ import { Address } from '@components/common/Address';
 import { useRefreshAccount } from '@entities/account';
 import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
-import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
-import { Suspense, useState } from 'react';
+import { Suspense } from 'react';
 
-import { getProxiedUri } from '@/app/features/metadata/utils';
+import { ProxiedImage } from '@/app/features/metadata';
 
 import { UnknownAccountCard } from '../UnknownAccountCard';
 import { parseNFTokenCollectionAccount, parseNFTokenNFTAccount } from './isNFTokenAccount';
@@ -76,32 +75,13 @@ const NFTCard = ({ account, nft }: { account: Account; nft: NftokenTypes.NftAcco
 };
 
 export const NftokenImage = ({ url, size }: { url: string | undefined; size: number }) => {
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-
+    // ProxiedImage owns the whole lifecycle — a skeleton while loading, the image
+    // on success, and a logo + reason + "View original" link on failure — so there
+    // is no need for a separate loading box or visibility toggling here.
     return (
-        <>
-            {isLoading && (
-                <div
-                    style={{
-                        backgroundColor: 'lightgrey',
-                        height: size,
-                        width: size,
-                    }}
-                />
-            )}
-            <div className={cn('mx-auto e-rounded-dk', isLoading ? 'e-hidden' : 'e-block')}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    alt="nft"
-                    height={size}
-                    onLoad={() => {
-                        setIsLoading(false);
-                    }}
-                    src={url ? getProxiedUri(url) : url}
-                    width={size}
-                />
-            </div>
-        </>
+        <div className="mx-auto e-rounded-dk">
+            <ProxiedImage alt="nft" height={size} showOriginalLink uri={url} width={size} />
+        </div>
     );
 };
 

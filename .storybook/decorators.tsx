@@ -1,7 +1,7 @@
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { TransactionsProvider } from '@providers/transactions';
 import type { Decorator, Parameters } from '@storybook/react';
-import React from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { fn } from 'storybook/test';
 
 import { MockAccountsProvider } from './__mocks__/MockAccountsProvider';
@@ -156,3 +156,30 @@ export const withClipboardMockErrored: Decorator = Story => {
 
     return <Story />;
 };
+
+// Cancels the load and pins `complete` to false on the first <img> it wraps, so
+// it stays in its pending state. Scoped to that one element — no global patching,
+// so it's safe in the combined Docs view where stories share a page.
+function ImageLoadPendingBoundary({ children }: { children: React.ReactNode }) {
+    const ref = useRef<HTMLDivElement>(null);
+    useLayoutEffect(() => {
+        const img = ref.current?.querySelector('img');
+        if (!img) return;
+        Object.defineProperty(img, 'complete', { configurable: true, get: () => false });
+        img.removeAttribute('src');
+    }, []);
+
+    return <div ref={ref}>{children}</div>;
+}
+
+/**
+ * Holds the story's first <img> in its pending state so a loading placeholder or
+ * skeleton is the visible, documentable state — without it a bundled image
+ * resolves instantly and the placeholder is gone before it can be seen.
+ * Usage: `decorators: [withImageLoadPending]`
+ */
+export const withImageLoadPending: Decorator = Story => (
+    <ImageLoadPendingBoundary>
+        <Story />
+    </ImageLoadPendingBoundary>
+);

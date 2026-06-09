@@ -1,17 +1,17 @@
 'use client';
 
-import { getProxiedUri } from '@features/metadata';
+// TODO(fsd-layering): this shared-layer component imports from `features/*`, which breaks the
+// FSD dependency rule (features → entities → shared; shared must not import upward). Move
+// `ProxiedImage` and the security-txt helpers down into `shared`/`entities`, re-point
+// consumers, then drop these two imports.
+import { ProxiedImage } from '@features/metadata';
 import { isPmpSecurityTXT, useSecurityTxt } from '@features/security-txt';
-import ProgramLogoPlaceholder from '@img/logos-solana/low-contrast-solana-logo.svg';
 import { type UpgradeableLoaderAccountData } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { PROGRAM_INFO_BY_ID } from '@utils/programs';
-import Image from 'next/image';
 import React from 'react';
 import { AlertCircle } from 'react-feather';
-
-const IDENTICON_WIDTH = 64;
 
 // The "self-reported" warning indicates that the securityTxt metadata (name, logo, etc.)
 // is self-reported by the program author and may not be accurate. We only show this warning
@@ -54,7 +54,7 @@ export function ProgramHeader({
 
         if (isPmpSecurityTXT(securityTxt)) {
             return {
-                logo: getProxiedUri(securityTxt.logo),
+                logo: securityTxt.logo,
                 programName,
                 selfReported: usingSelfReportedName,
                 version: securityTxt.version,
@@ -90,24 +90,11 @@ export function ProgramHeader({
         <div className="e-inline-flex e-items-center e-gap-2">
             <div>
                 <div className="e-relative e-h-10 e-w-10 e-flex-shrink-0 e-overflow-hidden e-rounded sm:e-h-16 sm:e-w-16">
-                    {logo ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            alt="Program logo"
-                            className="e-h-full e-w-full e-rounded e-border-4 e-border-current e-object-cover"
-                            height={16}
-                            src={logo}
-                            width={16}
-                        />
-                    ) : (
-                        <Image
-                            src={ProgramLogoPlaceholder}
-                            height={IDENTICON_WIDTH}
-                            width={IDENTICON_WIDTH}
-                            alt="Program logo placeholder"
-                            className="e-h-full e-w-full e-rounded e-border e-border-gray-200 e-object-cover"
-                        />
-                    )}
+                    <ProxiedImage
+                        alt="Program logo"
+                        className="e-h-full e-w-full e-rounded e-border-4 e-border-current e-object-cover"
+                        uri={logo}
+                    />
                 </div>
             </div>
 

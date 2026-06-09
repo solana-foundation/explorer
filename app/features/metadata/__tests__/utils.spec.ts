@@ -43,10 +43,12 @@ describe('getProxiedUri', () => {
         expect(getProxiedUri('')).toBe('');
     });
 
-    it('should throw an error for invalid URL strings', () => {
+    it('should return malformed URL strings unchanged rather than throw', () => {
         process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
-        expect(() => getProxiedUri('not-a-valid-url')).toThrow();
-        expect(() => getProxiedUri('://missing-protocol')).toThrow();
-        expect(() => getProxiedUri('http://')).toThrow();
+        // Unparseable on-chain URIs must not crash callers that render the
+        // result inline (e.g. ProxiedImage outside an error boundary).
+        expect(getProxiedUri('not-a-valid-url')).toBe('not-a-valid-url');
+        expect(getProxiedUri('://missing-protocol')).toBe('://missing-protocol');
+        expect(getProxiedUri('http://')).toBe('http://');
     });
 });
