@@ -22,7 +22,6 @@ import bs58 from 'bs58';
 const BUILTIN_PROGRAMS_3K: readonly string[] = [
     '11111111111111111111111111111111', // System Program
     'Stake11111111111111111111111111111111111111', // Stake Program
-    'Vote111111111111111111111111111111111111111', // Vote Program
     'Config1111111111111111111111111111111111111', // Config Program
     'AddressLookupTab1e1111111111111111111111111', // Address Lookup Table Program
     'BPFLoaderUpgradeab1e11111111111111111111111', // BPF Loader Upgradeable
