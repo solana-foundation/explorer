@@ -1,5 +1,5 @@
-import 'bootstrap/dist/css/bootstrap-reboot.min.css';
-import './body-base.css';
+import './layout.min.css';
+import './dashkit-polyfill.css';
 import '@/app/styles.css';
 
 import type { Preview } from '@storybook/react';

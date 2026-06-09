@@ -1,22 +1,38 @@
 /**
- * Bootstrap Reboot only.
+ * Dashkit
  *
- * Stopgap to maintain visual parity while the dashkit/Bootstrap full bundle
- * is removed. Brings in just the CSS reset layer + the solana dark variables
- * that drive body bg/color. Decision on long-term replacement (Tailwind
- * preflight vs keep) deferred to a follow-up PR.
+ * Custom variables followed by Dashkit variables followed by Bootstrap variables
+ * to ensure cascade of styles.
  */
 
+$path-to-img: '/img/dashkit' !default;
+
+// Bootstrap functions
 @import '~bootstrap/scss/functions';
 
-// Custom variables (dark first so its !default wins over light)
+// Custom variables
 @import 'solana-variables-dark';
+
+// Custom variables
 @import 'solana-variables';
 
-// Bootstrap defaults fill any unset vars
-@import '~bootstrap/scss/variables';
-@import '~bootstrap/scss/mixins';
-@import '~bootstrap/scss/root';
+// Dark mode variables
+@import 'dashkit/dark/variables-dark';
 
-// CSS reset layer
-@import '~bootstrap/scss/reboot';
+// Dashkit variables
+@import 'dashkit/variables';
+
+// Bootstrap core
+@import '~bootstrap/scss/bootstrap';
+
+// Dashkit core
+@import 'dashkit/theme';
+
+// Dark mode overrides
+@import 'dashkit/dark/overrides-dark';
+
+// Custom core
+@import 'solana';
+
+// Dark mode overrides
+@import 'solana-dark-overrides';
