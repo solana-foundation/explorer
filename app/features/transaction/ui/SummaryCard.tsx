@@ -54,7 +54,7 @@ function Label({ children, className, ...props }: React.HTMLAttributes<HTMLDivEl
     return (
         <div
             className={cn(
-                'e-flex e-flex-wrap e-items-center e-gap-1 e-overflow-hidden e-text-sm e-text-muted',
+                'e-flex e-flex-wrap e-items-center e-gap-1 e-overflow-hidden e-text-sm e-text-outer-space-300',
                 className,
             )}
             {...props}

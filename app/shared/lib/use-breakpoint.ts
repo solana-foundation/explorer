@@ -31,7 +31,7 @@ export function useBreakpoint() {
     const isMd = useMediaQuery(`(min-width: ${bp('md')}px)`);
     const isLg = useMediaQuery(`(min-width: ${bp('lg')}px)`);
     const isXl = useMediaQuery(`(min-width: ${bp('xl')}px)`);
-    const is2xl = useMediaQuery(`(min-width: ${bp('xxl')}px)`);
+    const isXxl = useMediaQuery(`(min-width: ${bp('xxl')}px)`);
 
-    return { is2xl, isLg, isMd, isSm, isXl, isXs };
+    return { isLg, isMd, isSm, isXl, isXs, isXxl };
 }

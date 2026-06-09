@@ -33,12 +33,12 @@ describe('useBreakpoint', () => {
         mockMatchMedia(BP.xs - 1);
         const { result } = renderHook(() => useBreakpoint());
         expect(result.current).toEqual({
-            is2xl: false,
             isLg: false,
             isMd: false,
             isSm: false,
             isXl: false,
             isXs: false,
+            isXxl: false,
         });
     });
 
@@ -50,7 +50,7 @@ describe('useBreakpoint', () => {
         expect(result.current.isMd).toBe(false);
         expect(result.current.isLg).toBe(false);
         expect(result.current.isXl).toBe(false);
-        expect(result.current.is2xl).toBe(false);
+        expect(result.current.isXxl).toBe(false);
     });
 
     it('should return isSm true at sm (576px), isMd and above false', () => {
@@ -76,23 +76,23 @@ describe('useBreakpoint', () => {
         expect(result.current.isXl).toBe(false);
     });
 
-    it('should return isXl true at xl (1200px), is2xl false', () => {
+    it('should return isXl true at xl (1200px), isXxl false', () => {
         mockMatchMedia(BP.xl);
         const { result } = renderHook(() => useBreakpoint());
         expect(result.current.isXl).toBe(true);
-        expect(result.current.is2xl).toBe(false);
+        expect(result.current.isXxl).toBe(false);
     });
 
     it('should return all true at 2xl (1400px)', () => {
         mockMatchMedia(BP.xxl);
         const { result } = renderHook(() => useBreakpoint());
         expect(result.current).toEqual({
-            is2xl: true,
             isLg: true,
             isMd: true,
             isSm: true,
             isXl: true,
             isXs: true,
+            isXxl: true,
         });
     });
 

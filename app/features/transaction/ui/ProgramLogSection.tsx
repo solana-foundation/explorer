@@ -10,6 +10,8 @@ import React from 'react';
 import { Button } from '@/app/components/shared/ui/button';
 import { BaseCardBody } from '@/app/shared/ui/Card';
 
+import { CollapsibleSection } from './CollapsibleSection';
+
 type ChipProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean };
 export function Chip({ children, className, active, ...props }: ChipProps) {
     return (
@@ -41,19 +43,19 @@ export function ProgramLogSection({ signature }: SignatureProps) {
         prettyLogs = parseProgramLogs(logMessages, err, cluster);
     }
 
+    const chips = (
+        <>
+            <Chip active={!showRaw} onClick={() => setShowRaw(false)}>
+                Parsed
+            </Chip>
+            <Chip active={showRaw} onClick={() => setShowRaw(true)}>
+                RAW
+            </Chip>
+        </>
+    );
+
     return (
-        <section className="e-flex e-flex-col e-gap-3">
-            <div className="e-flex e-justify-between">
-                <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">Logs</h2>
-                <div className="e-flex e-shrink-0 e-gap-1">
-                    <Chip active={!showRaw} onClick={() => setShowRaw(false)}>
-                        Parsed
-                    </Chip>
-                    <Chip active={showRaw} onClick={() => setShowRaw(true)}>
-                        RAW
-                    </Chip>
-                </div>
-            </div>
+        <CollapsibleSection title="Logs" actions={chips} className="">
             <div className="e-card">
                 {prettyLogs !== null && logMessages !== null ? (
                     showRaw ? (
@@ -67,7 +69,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                     </BaseCardBody>
                 )}
             </div>
-        </section>
+        </CollapsibleSection>
     );
 }
 

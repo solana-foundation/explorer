@@ -79,7 +79,7 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
             <div
                 className={cn(
                     'e-hidden e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
-                    'e-gap-5 e-text-xs e-uppercase e-text-muted',
+                    'e-gap-5 e-text-xs e-uppercase e-text-outer-space-300',
                     'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid]',
                     GRID_TEMPLATE,
                 )}
@@ -134,13 +134,13 @@ function TokenBalanceRow({
             <div className="e-flex e-flex-col e-gap-1 e-px-3 e-py-3 e-text-sm md:e-px-4 lg:e-hidden">
                 <div className="e-flex e-items-center e-justify-between">
                     <div className="e-flex e-items-center e-gap-2">
-                        <span className="e-w-16 e-shrink-0 e-text-muted">Change</span>
+                        <span className="e-w-16 e-shrink-0 e-text-outer-space-300">Change</span>
                         <BalanceDelta delta={scaledDelta} />
                     </div>
-                    <span className="e-text-muted">{index + 1}</span>
+                    <span className="e-text-outer-space-300">{index + 1}</span>
                 </div>
                 <div className="e-flex e-items-center e-gap-2">
-                    <span className="e-w-16 e-shrink-0 e-text-muted">Balance</span>
+                    <span className="e-w-16 e-shrink-0 e-text-outer-space-300">Balance</span>
                     <span className="e-whitespace-nowrap">
                         {scaledBalance} {units}
                         <ScaledUiAmountMultiplierTooltip
@@ -150,17 +150,17 @@ function TokenBalanceRow({
                     </span>
                 </div>
                 <div className="e-flex e-items-center e-gap-2">
-                    <span className="e-w-16 e-shrink-0 e-text-muted">Token</span>
+                    <span className="e-w-16 e-shrink-0 e-text-outer-space-300">Token</span>
                     <Address pubkey={mintPubkey} link fetchTokenLabelInfo />
                 </div>
                 {ownerPubkey && (
                     <div className="e-flex e-items-center e-gap-2">
-                        <span className="e-w-16 e-shrink-0 e-text-muted">Owner</span>
+                        <span className="e-w-16 e-shrink-0 e-text-outer-space-300">Owner</span>
                         <Address pubkey={ownerPubkey} link />
                     </div>
                 )}
                 <div className="e-flex e-items-center e-gap-2">
-                    <span className="e-w-16 e-shrink-0 e-text-muted">Addr</span>
+                    <span className="e-w-16 e-shrink-0 e-text-outer-space-300">Addr</span>
                     <Address pubkey={account} link />
                 </div>
             </div>
@@ -174,20 +174,20 @@ function TokenBalanceRow({
                     GRID_TEMPLATE,
                 )}
             >
-                <div className="e-text-muted [grid-area:number]">{index + 1}</div>
+                <div className="e-text-outer-space-300 [grid-area:number]">{index + 1}</div>
                 <div className="e-flex e-flex-col [grid-area:address]">
                     {ownerPubkey && (
                         <div className="e-flex e-items-center e-gap-3">
-                            <span className="e-min-w-11 e-text-sm e-text-muted">Owner</span>
+                            <span className="e-min-w-11 e-text-sm e-text-outer-space-300">Owner</span>
                             <Address pubkey={ownerPubkey} link />
                         </div>
                     )}
                     <div className="e-flex e-items-center e-gap-3">
-                        <span className="e-min-w-11 e-text-sm e-text-muted">Addr</span>
+                        <span className="e-min-w-11 e-text-sm e-text-outer-space-300">Addr</span>
                         <Address pubkey={account} link />
                     </div>
                     <div className="e-flex e-items-center e-gap-3">
-                        <span className="e-min-w-11 e-text-sm e-text-muted">Token</span>
+                        <span className="e-min-w-11 e-text-sm e-text-outer-space-300">Token</span>
                         <Address pubkey={mintPubkey} link fetchTokenLabelInfo />
                     </div>
                 </div>

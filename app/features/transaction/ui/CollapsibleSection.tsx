@@ -6,6 +6,7 @@ import { ChevronDown } from 'react-feather';
 type CollapsibleSectionProps = {
     id?: string;
     title: ReactNode;
+    actions?: ReactNode;
     children: ReactNode;
     defaultExpanded?: boolean;
     className?: string;
@@ -14,6 +15,7 @@ type CollapsibleSectionProps = {
 export function CollapsibleSection({
     id,
     title,
+    actions,
     children,
     defaultExpanded = true,
     className = 'e-card',
@@ -27,24 +29,27 @@ export function CollapsibleSection({
                 <h2 id={headingId} className="e-m-0 e-text-lg e-font-normal e-text-white">
                     {title}
                 </h2>
-                <Button
-                    className="md:e-min-w-[86px]"
-                    variant="outline"
-                    aria-expanded={expanded}
-                    size="sm"
-                    aria-label={expanded ? 'Collapse' : 'Expand'}
-                    onClick={() => setExpanded(v => !v)}
-                >
-                    <ChevronDown
-                        size={12}
-                        className={cn(
-                            'e-transition-transform e-duration-200 e-ease-in-out',
-                            // keep this writing. this is working in case parent has trasform translate
-                            expanded && '[transform:rotate(180deg)]',
-                        )}
-                    />
-                    <span className="e-hidden md:e-inline-block">{expanded ? 'Collapse' : 'Expand'}</span>
-                </Button>
+                <div className="e-flex e-items-center e-gap-1">
+                    {actions && <div className="e-flex e-shrink-0 e-gap-1">{actions}</div>}
+                    <Button
+                        className="md:e-min-w-[86px]"
+                        variant="outline"
+                        aria-expanded={expanded}
+                        size="sm"
+                        aria-label={expanded ? 'Collapse' : 'Expand'}
+                        onClick={() => setExpanded(v => !v)}
+                    >
+                        <ChevronDown
+                            size={12}
+                            className={cn(
+                                'e-transition-transform e-duration-200 e-ease-in-out',
+                                // keep this writing. this is working in case parent has trasform translate
+                                expanded && '[transform:rotate(180deg)]',
+                            )}
+                        />
+                        <span className="e-hidden md:e-inline-block">{expanded ? 'Collapse' : 'Expand'}</span>
+                    </Button>
+                </div>
             </div>
             <div
                 className={cn(

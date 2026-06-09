@@ -25,10 +25,11 @@ import { AccountsCard } from '@/app/features/transaction/ui/AccountsCard';
 import { InstructionsSection } from '@/app/features/transaction/ui/InstructionsSection';
 import { ProgramLogSection } from '@/app/features/transaction/ui/ProgramLogSection';
 import { SummaryCard } from '@/app/features/transaction/ui/SummaryCard';
-import { TokenBalancesCard } from '@/app/features/transaction/ui/TokenBalancesCard';
+import { generateTokenBalanceRows, TokenBalancesCard } from '@/app/features/transaction/ui/TokenBalancesCard';
+import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
 
-const TRANSACTION_TABS = [
+const ALL_TRANSACTION_TABS = [
     { path: 'summary', title: 'Summary' },
     { path: 'accounts', title: 'Accounts' },
     { path: 'tokens', title: 'Tokens' },
@@ -118,6 +119,7 @@ function DetailsSection({ signature }: SignatureProps) {
     const transaction = transactionWithMeta?.transaction;
     const message = transaction?.message;
     const { status: clusterStatus } = useCluster();
+    const { isXxl } = useBreakpoint();
     const refreshDetails = () => fetchDetails(signature);
 
     useEffect(() => {
@@ -136,11 +138,26 @@ function DetailsSection({ signature }: SignatureProps) {
         return <ErrorCard text="Details are not available" />;
     }
 
+    const meta = transactionWithMeta.meta;
+    const accountKeys = transactionWithMeta.transaction.message.accountKeys;
+    const hasTokens =
+        meta?.preTokenBalances &&
+        meta?.postTokenBalances &&
+        accountKeys &&
+        generateTokenBalanceRows(meta.preTokenBalances, meta.postTokenBalances, accountKeys).length > 0;
+
+    const baseTabs = hasTokens ? ALL_TRANSACTION_TABS : ALL_TRANSACTION_TABS.filter(t => t.path !== 'tokens');
+    const tabs = isXxl
+        ? baseTabs
+              .filter(t => t.path !== 'logs')
+              .map(t => (t.path === 'programs' ? { path: 'programs', title: 'Programs & Logs' } : t))
+        : baseTabs;
+
     return (
         <>
             <BaseNavigationTabs
                 scrollSpy
-                tabs={TRANSACTION_TABS}
+                tabs={tabs}
                 buildHref={path => `#${path}`}
                 wrapperClassName="e-bg-heavy-metal-900"
                 className="e-gap-5"
@@ -149,12 +166,12 @@ function DetailsSection({ signature }: SignatureProps) {
                 <AccountsCard signature={signature} />
             </Suspense>
             <TokenBalancesCard signature={signature} />
-            <div className="e-flex e-flex-col e-space-y-9 e-pb-10 xl:e-relative xl:e-left-1/2 xl:e-w-screen xl:-e-translate-x-1/2 xl:e-flex-row xl:e-items-start xl:e-gap-6 xl:e-space-y-0 xl:e-px-6">
-                <div className="xl:e-min-w-0 xl:e-flex-[1_1_0%] xl:e-overflow-hidden">
+            <div className="e-flex e-flex-col e-space-y-9 e-pb-10 xxl:e-relative xxl:e-left-1/2 xxl:e-w-screen xxl:-e-translate-x-1/2 xxl:e-flex-row xxl:e-items-start xxl:e-gap-6 xxl:e-space-y-0 xxl:e-px-6">
+                <div className="xxl:e-min-w-0 xxl:e-flex-[1_1_0%] xxl:e-overflow-hidden">
                     <InstructionsSection signature={signature} />
                 </div>
                 <div
-                    className="xl:e-sticky xl:e-top-[70px] xl:e-min-w-0 xl:e-flex-[1_1_0%] xl:e-overflow-hidden"
+                    className="xxl:e-sticky xxl:e-top-[70px] xxl:e-min-w-0 xxl:e-flex-[1_1_0%] xxl:e-overflow-hidden"
                     id="logs"
                 >
                     <ProgramLogSection signature={signature} />

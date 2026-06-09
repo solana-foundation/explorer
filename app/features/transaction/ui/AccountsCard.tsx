@@ -78,7 +78,7 @@ export function AccountsCard({ signature }: SignatureProps) {
         );
 
         const dataCell = loading ? (
-            <span className="e-text-xs e-text-muted">Loading…</span>
+            <span className="e-text-xs e-text-outer-space-300">Loading…</span>
         ) : accountInfo && accountInfo.size > 0 ? (
             <Popover>
                 <PopoverTrigger asChild>
@@ -104,7 +104,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                     'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid] last:e-border-b-0',
                 )}
             >
-                <div className="e-mr-2 e-text-muted [grid-area:number] lg:e-mr-0">{index + 1}</div>
+                <div className="e-mr-2 e-text-outer-space-300 [grid-area:number] lg:e-mr-0">{index + 1}</div>
                 <div className="[grid-area:address]">
                     <div className="e-flex e-items-center e-justify-between e-gap-1 lg:e-justify-normal">
                         <Address pubkey={pubkey} link fetchTokenLabelInfo />
@@ -132,7 +132,7 @@ export function AccountsCard({ signature }: SignatureProps) {
             <div
                 className={cn(
                     'e-hidden e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
-                    'e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)] e-gap-5 e-text-xs e-uppercase e-text-muted',
+                    'e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)] e-gap-5 e-text-xs e-uppercase e-text-outer-space-300',
                     'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid]',
                 )}
             >
@@ -143,7 +143,7 @@ export function AccountsCard({ signature }: SignatureProps) {
             </div>
             {accountRows}
             {!loading && totalAccountSize > 0 && (
-                <div className="e-ml-7 e-flex e-items-baseline e-gap-2 e-px-3 e-py-2 e-text-sm e-text-muted md:e-px-4 lg:e-ml-10">
+                <div className="e-ml-7 e-flex e-items-baseline e-gap-2 e-px-3 e-py-2 e-text-sm e-text-outer-space-300 md:e-px-4 lg:e-ml-10">
                     <div className="e-flex e-flex-col">
                         <span className="e-text-sm e-uppercase e-leading-none">Total Account Size:</span>
                         <span className="e-text-[10px] e-leading-none">reflects current state</span>
