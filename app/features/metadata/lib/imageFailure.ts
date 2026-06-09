@@ -41,8 +41,10 @@ export function isProxiedSrc(src: string): boolean {
 
 // Cache verdicts per src so the same broken resource (re-renders, the same logo
 // across many rows, a remount) is probed at most once. The HTTP layer caches the
-// proxy's error response briefly too, so even a miss here is usually a
-// browser-cache hit rather than a fresh round-trip.
+// proxy's error response briefly too, so a miss here is usually a browser-cache
+// hit rather than a fresh round-trip — except a 504, whose error response the
+// failed `<img>` may not have cached, so the probe can re-incur the upstream
+// timeout (ProxiedImage holds its loading state until the reason resolves).
 const verdicts = new Map<string, ImageFailure>();
 
 /**

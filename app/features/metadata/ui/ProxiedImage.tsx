@@ -50,7 +50,10 @@ export type ProxiedImageProps = Omit<ImageProps, 'src' | 'fallback'> & {
  * Since a browser `<img>` can't read the HTTP status, on failure the component
  * re-fetches the proxied URL to learn why (413 oversize, 404, 415, …) and
  * surfaces it as a tooltip on the default fallback — or via a `fallback` render
- * function. Pass `showOriginalLink` to add a "View original" escape-hatch link.
+ * function. That probe can take up to the proxy's upstream timeout (a 504 isn't
+ * always a browser-cache hit), so the loading skeleton is held until the reason
+ * resolves — the failure state appears once with its reason rather than after a
+ * blank gap. Pass `showOriginalLink` to add a "View original" escape-hatch link.
  *
  * This is the only metadata-aware layer; it composes the proxy-agnostic
  * primitives from `shared/ui/image`.
@@ -65,12 +68,25 @@ export function ProxiedImage({
     ...props
 }: ProxiedImageProps) {
     const src = uri ? getProxiedUri(uri) : '';
-    const { failure, onImageError } = useImageFailureReason(src);
+    const { failure, onImageError, status } = useImageFailureReason(src);
 
-    const resolvedFallback =
+    // Reuse the image's className/box so the skeleton matches its slot and shape
+    // (e.g. a rounded-full avatar gets a round skeleton). Used both while the
+    // image loads and while the on-error reason probe is in flight.
+    const loadingPlaceholder = placeholder ?? (
+        <Skeleton className={props.className} style={{ height: props.height, width: props.width, ...props.style }} />
+    );
+
+    const failureFallback =
         typeof fallback === 'function'
             ? fallback(failure)
             : (fallback ?? <SolanaLogoFallback {...props} failure={failure} />);
+
+    // While the on-error probe is determining *why* the image failed (it can take
+    // up to the proxy's upstream timeout for a 504), keep the loading placeholder
+    // up rather than flashing a reasonless fallback. The failure state then
+    // appears once, fully formed with its reason, and the wait isn't a blank gap.
+    const resolvedFallback = status === 'probing' ? loadingPlaceholder : failureFallback;
 
     const image = (
         <ImageWithFallback
@@ -82,16 +98,7 @@ export function ProxiedImage({
                 onImageError();
                 onError?.(event);
             }}
-            // Reuse the image's className/box so the skeleton matches its slot and
-            // shape (e.g. a rounded-full avatar gets a round skeleton).
-            placeholder={
-                placeholder ?? (
-                    <Skeleton
-                        className={props.className}
-                        style={{ height: props.height, width: props.width, ...props.style }}
-                    />
-                )
-            }
+            placeholder={loadingPlaceholder}
             src={src}
         />
     );
