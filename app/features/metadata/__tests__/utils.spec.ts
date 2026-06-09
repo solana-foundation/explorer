@@ -79,6 +79,18 @@ describe('getProxiedUri', () => {
         expect(getProxiedUri(uri)).toBe(`/api/metadata/proxy?uri=${encodeURIComponent(`https://ipfs.io/ipfs/${VALID_CID_V1}`)}`);
     });
 
+    it('should resolve ipfs:// URI with subpath when proxy is disabled', () => {
+        process.env.NEXT_PUBLIC_METADATA_ENABLED = 'false';
+        const uri = `ipfs://${VALID_CID_V0}/image.png`;
+        expect(getProxiedUri(uri)).toBe(`https://ipfs.io/ipfs/${VALID_CID_V0}/image.png`);
+    });
+
+    it('should resolve ipfs:// URI with nested subpath when proxy is enabled', () => {
+        process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
+        const uri = `ipfs://${VALID_CID_V1}/metadata/0.json`;
+        expect(getProxiedUri(uri)).toBe(`/api/metadata/proxy?uri=${encodeURIComponent(`https://ipfs.io/ipfs/${VALID_CID_V1}/metadata/0.json`)}`);
+    });
+
     it('should return empty string for malformed IPFS CIDs', () => {
         process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
         expect(getProxiedUri('ipfs://not-a-valid-cid')).toBe('');
