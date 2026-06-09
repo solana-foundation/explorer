@@ -54,7 +54,9 @@ const badgeVariants = cva([], {
         // Base `.badge` layout: inline-block, relative top:-2px alignment, 76% relative font-size,
         // collapse when empty. Listed first so size/pill compounds below can override.
         {
-            class: 'e-inline-block e-relative -e-top-0.5 e-align-middle e-text-center e-whitespace-nowrap e-rounded-md e-font-normal e-leading-none e-text-white e-px-2 e-py-[0.165rem] e-text-[76%] empty:e-hidden',
+            // `e-text-white` intentionally omitted from base; each variant compound sets its own
+            // text color, and twMerge can't dedupe through the e- prefix.
+            class: 'e-inline-block e-relative -e-top-0.5 e-align-middle e-text-center e-whitespace-nowrap e-rounded-md e-font-normal e-leading-none e-px-2 e-py-[0.165rem] e-text-[76%] empty:e-hidden',
             ui: 'dashkit',
         },
         // size="sm" in dashkit mode mirrors the in-table appearance (parent `<td>` with 13px font

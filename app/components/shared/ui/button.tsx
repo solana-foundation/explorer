@@ -63,11 +63,12 @@ const buttonVariants = cva([], {
         },
 
         // ===== ui="dashkit" =====
+        // Transparent bg/border defaults are intentionally omitted; the per-variant
+        // compounds always set bg+border, and twMerge can't dedupe through the e- prefix.
         {
             class: cn(
-                'e-border-solid',
                 'e-inline-block e-text-center e-align-middle e-cursor-pointer e-select-none',
-                'e-bg-transparent e-border e-border-transparent e-text-white',
+                'e-border e-border-solid e-text-white',
                 'e-font-normal e-leading-[1.5] e-text-[0.9375rem]',
                 'e-px-3 e-py-2 e-rounded-[0.375rem]',
                 'e-transition-[color,background-color,border-color,box-shadow] e-duration-150 e-ease-in-out',
