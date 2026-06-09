@@ -19,6 +19,13 @@ export const tabLinkClassName = cn(
 export function TabLink({ path, title, className }: { path: string; title: string; className?: string }) {
     const ctx = useNavigationTabsContext();
     const isActive = path === ctx.activeValue;
+    const { onTabClick } = ctx;
+    const handleClick = onTabClick
+        ? (e: React.MouseEvent<HTMLAnchorElement>) => {
+              e.preventDefault();
+              onTabClick(path, e);
+          }
+        : undefined;
     return (
         <Link
             href={ctx.buildHref(path)}
@@ -27,6 +34,7 @@ export function TabLink({ path, title, className }: { path: string; title: strin
             aria-selected={isActive}
             data-state={isActive ? 'active' : 'inactive'}
             className={cn(tabLinkClassName, className)}
+            onClick={handleClick}
         >
             {title}
         </Link>

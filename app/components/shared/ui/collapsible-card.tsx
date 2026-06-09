@@ -2,6 +2,8 @@ import { cn } from '@shared/utils';
 import { forwardRef, ReactNode, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
+import { BaseCard, BaseCardHeader, BaseCardTitle } from '@/app/shared/ui/Card';
+
 type CollapsibleCardProps = {
     title: ReactNode;
     children: ReactNode;
@@ -16,9 +18,19 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
         const [expanded, setExpanded] = useState(defaultExpanded);
 
         return (
-            <div ref={ref} className={cn('card', className)}>
-                <div className={cn('card-header e-gap-1.5', collapsible && !expanded && 'border-0')}>
-                    <h3 className="card-header-title e-flex e-items-center">{title}</h3>
+            <BaseCard
+                ref={ref}
+                ui="dashkit"
+                className={className}
+                style={{ scrollMarginTop: 'var(--sticky-header-height, 0px)' }}
+            >
+                <BaseCardHeader
+                    ui="dashkit"
+                    className={cn('e-h-auto e-min-h-[60px] e-gap-2', collapsible && !expanded && 'e-border-b-0')}
+                >
+                    <BaseCardTitle ui="dashkit" className="e-flex e-items-center e-break-all">
+                        {title}
+                    </BaseCardTitle>
                     {headerButtons}
                     {collapsible && (
                         <button
@@ -31,12 +43,13 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                                 size={16}
                                 className={cn(
                                     'e-transition-transform e-duration-200 e-ease-in-out',
-                                    expanded && 'e-rotate-180',
+                                    // keep this writing. this is working in case parent has trasform translate
+                                    expanded && '[transform:rotate(180deg)]',
                                 )}
                             />
                         </button>
                     )}
-                </div>
+                </BaseCardHeader>
                 {collapsible ? (
                     <div
                         className={cn(
@@ -49,7 +62,7 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                 ) : (
                     children
                 )}
-            </div>
+            </BaseCard>
         );
     },
 );

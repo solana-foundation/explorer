@@ -1,14 +1,30 @@
 import { TableCardBody } from '@components/common/TableCardBody';
 import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
+import { cn } from '@components/shared/utils';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
-import { cn } from '@shared/utils';
 import { SignatureProps } from '@utils/index';
 import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
-import { Code } from 'react-feather';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { Button } from '@/app/components/shared/ui/button';
+import { BaseCardBody } from '@/app/shared/ui/Card';
+
+import { CollapsibleSection } from './CollapsibleSection';
+
+type ChipProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean };
+export function Chip({ children, className, active, ...props }: ChipProps) {
+    return (
+        <Button
+            variant={active ? 'default' : 'outline'}
+            size="sm"
+            className={cn(active && '!e-border-accent', className)}
+            {...props}
+        >
+            {children}
+        </Button>
+    );
+}
 
 export function ProgramLogSection({ signature }: SignatureProps) {
     const [showRaw, setShowRaw] = React.useState(false);
@@ -27,18 +43,20 @@ export function ProgramLogSection({ signature }: SignatureProps) {
         prettyLogs = parseProgramLogs(logMessages, err, cluster);
     }
 
-    return (
+    const chips = (
         <>
-            <div className="card">
-                <CardHeader ui="dashkit" className={!showRaw ? '!e-border-b-0' : undefined}>
-                    <h3 className="card-header-title">Program Instruction Logs</h3>
-                    <button
-                        className={cn('btn btn-sm e-flex e-items-center', showRaw ? 'btn-black active' : 'btn-white')}
-                        onClick={() => setShowRaw(r => !r)}
-                    >
-                        <Code className="e-mr-1.5" size={13} /> Raw
-                    </button>
-                </CardHeader>
+            <Chip active={!showRaw} onClick={() => setShowRaw(false)}>
+                Parsed
+            </Chip>
+            <Chip active={showRaw} onClick={() => setShowRaw(true)}>
+                RAW
+            </Chip>
+        </>
+    );
+
+    return (
+        <CollapsibleSection title="Logs" actions={chips} className="">
+            <div className="e-card">
                 {prettyLogs !== null && logMessages !== null ? (
                     showRaw ? (
                         <RawProgramLogs raw={logMessages} />
@@ -46,10 +64,12 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                         <ProgramLogsCardBody message={message} logs={prettyLogs} cluster={cluster} url={url} />
                     )
                 ) : (
-                    <CardBody ui="dashkit">Logs not supported for this transaction</CardBody>
+                    <BaseCardBody className="e-text-sm e-text-muted">
+                        Logs not supported for this transaction
+                    </BaseCardBody>
                 )}
             </div>
-        </>
+        </CollapsibleSection>
     );
 }
 

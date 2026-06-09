@@ -1,5 +1,5 @@
 import { Address } from '@components/common/Address';
-import { InstructionDetailsProps } from '@components/transaction/InstructionsSection';
+import { InstructionDetailsProps } from '@features/transaction';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestamp } from '@utils/date';

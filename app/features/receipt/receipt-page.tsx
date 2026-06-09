@@ -4,6 +4,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SignatureContext } from '@components/instruction/SignatureContext';
 import { buildExplorerLink, useExplorerLink } from '@entities/cluster';
+import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@features/transaction';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { useFetchTransactionStatus, useTransactionDetails, useTransactionStatus } from '@providers/transactions';
@@ -20,7 +21,6 @@ import { getReceiptAmount, getReceiptMint } from '@/app/entities/token-receipt';
 import { getProxiedUri } from '@/app/features/metadata';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { Logger } from '@/app/shared/lib/logger';
-import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app/tx/[signature]/page-client';
 
 import { generateReceiptCsv } from './lib/generate-receipt-csv';
 import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';

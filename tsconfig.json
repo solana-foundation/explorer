@@ -21,7 +21,6 @@
         ],
         "paths": {
             "@/*": ["./*"],
-            "@__fixtures__/*": ["./app/__fixtures__/*"],
             "@components/*": ["./app/components/*"],
             "@entities/*": ["./app/entities/*"],
             "@features/*": ["./app/features/*"],
@@ -30,7 +29,8 @@
             "@shared/*": ["./app/components/shared/*"],
             "@utils/*": ["./app/utils/*"],
             "@storybook-config/*": ["./.storybook/*"],
-            "@validators/*": ["./app/validators/*"]
+            "@validators/*": ["./app/validators/*"],
+            "@__fixtures__/*": ["./app/__fixtures__/*"]
         }
     },
     "include": [

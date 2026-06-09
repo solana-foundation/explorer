@@ -4,33 +4,46 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { cn } from '@shared/utils';
 import { TransactionSignature } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
+import { cva, type VariantProps } from 'class-variance-authority';
 import Link from 'next/link';
-import React from 'react';
 
 import { Copyable } from './Copyable';
 import { useMidTruncation } from './useMidTruncation';
 
+const signatureVariants = cva('e-relative e-flex e-w-full e-min-w-0 e-justify-start', {
+    defaultVariants: {
+        alignItems: 'center',
+        alignRight: false,
+    },
+    variants: {
+        alignItems: {
+            center: 'e-items-center',
+            start: 'e-items-start',
+        },
+        alignRight: {
+            false: '',
+            true: 'lg:e-justify-end',
+        },
+    },
+});
+
 type Props = {
     signature: TransactionSignature;
+    alignItems?: 'center' | 'start';
     alignRight?: boolean;
+    className?: string;
     link?: boolean;
     noTruncate?: boolean;
-};
+} & Omit<VariantProps<typeof signatureVariants>, 'alignItems' | 'alignRight'>;
 
-export function Signature({ signature, alignRight, link, noTruncate }: Props) {
+export function Signature({ signature, alignItems, alignRight, className, link, noTruncate }: Props) {
     const transactionPath = useClusterPath({ pathname: `/tx/${signature}` });
     const { rowRef, hiddenTextRef, isMidTruncated, midTruncatedText } = useMidTruncation(!noTruncate, signature);
 
     const visibleText = isMidTruncated ? midTruncatedText : signature;
 
     return (
-        <div
-            ref={rowRef}
-            className={cn(
-                'e-relative e-flex e-w-full e-min-w-0 e-items-center e-justify-start',
-                alignRight && 'e-justify-end',
-            )}
-        >
+        <div ref={rowRef} className={cn(signatureVariants({ alignItems, alignRight: Boolean(alignRight) }), className)}>
             {!noTruncate && (
                 <span
                     ref={hiddenTextRef}

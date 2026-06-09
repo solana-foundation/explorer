@@ -8,7 +8,7 @@ import { SignatureProps } from '@utils/index';
 import { Metadata } from 'next/types';
 import React from 'react';
 
-import TransactionDetailsPageClient from './page-client';
+import { TransactionDetailsPageClient } from './page-client';
 
 type Props = Readonly<{
     params: Promise<SignatureProps>;

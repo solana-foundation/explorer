@@ -1,16 +1,10 @@
 import { SolBalance } from '@components/common/SolBalance';
+import { toBigNumber } from '@entities/account';
 import { BigNumber } from 'bignumber.js';
 import BN from 'bn.js';
 import React from 'react';
 
 type DeltaValue = BigNumber | BN;
-
-function toBigNumber(delta: DeltaValue): BigNumber {
-    if (BN.isBN(delta)) {
-        return new BigNumber(delta.toString());
-    }
-    return delta;
-}
 
 export function BalanceDelta({ delta, isSol = false }: { delta: DeltaValue; isSol?: boolean }) {
     const deltaValue = toBigNumber(delta);
@@ -27,5 +21,5 @@ export function BalanceDelta({ delta, isSol = false }: { delta: DeltaValue; isSo
         return <span className="badge bg-warning-soft">{isSol ? <>-{sols}</> : deltaValue.toString()}</span>;
     }
 
-    return <span className="badge bg-secondary-soft">0</span>;
+    return <span className="badge bg-secondary-soft font-monospace">+0</span>;
 }

@@ -3,7 +3,7 @@ import React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
-const tableVariants = cva(['table table-sm card-table'], {
+const tableVariants = cva(['table table-sm card-table [&_tr:first-child_td]:!e-border-t-0'], {
     defaultVariants: {
         layout: 'compact',
     },
@@ -17,6 +17,7 @@ const tableVariants = cva(['table table-sm card-table'], {
 
 export interface TableCardBodyProps extends VariantProps<typeof tableVariants>, React.PropsWithChildren {
     className?: string;
+    headerComponent?: React.ReactNode;
 }
 
 export function TableCardBody({ children, className, ...props }: TableCardBodyProps) {
@@ -28,10 +29,6 @@ export function TableCardBody({ children, className, ...props }: TableCardBodyPr
             </table>
         </div>
     );
-}
-
-export interface TableCardBodyProps extends VariantProps<typeof tableVariants>, React.PropsWithChildren {
-    headerComponent?: React.ReactNode;
 }
 
 export function TableCardBodyHeaded({ children, className, headerComponent, ...props }: TableCardBodyProps) {

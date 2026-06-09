@@ -4,9 +4,6 @@ import { CUProfilingCard } from '../CUProfilingCard';
 
 const meta: Meta<typeof CUProfilingCard> = {
     component: CUProfilingCard,
-    parameters: {
-        layout: 'padded',
-    },
     tags: ['autodocs'],
     title: 'Components/Transaction/CUProfilingCard',
 };

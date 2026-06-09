@@ -8,6 +8,7 @@ import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { displayAddress, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
+import { cva } from 'class-variance-authority';
 import Link from 'next/link';
 import React, { useRef, useState } from 'react';
 
@@ -16,6 +17,18 @@ import { useVisibility } from '@/app/shared/lib/visibility';
 
 import { Copyable } from './Copyable';
 import { useMidTruncation } from './useMidTruncation';
+
+const rowVariants = cva('e-relative e-flex e-w-full e-min-w-0 e-items-baseline', {
+    defaultVariants: {
+        alignRight: false,
+    },
+    variants: {
+        alignRight: {
+            false: '',
+            true: 'md:e-justify-end',
+        },
+    },
+});
 
 type Props = {
     pubkey: PublicKey;
@@ -70,8 +83,9 @@ export function Address({
 
     const displayText = nickname ? `"${nickname}" (${addressLabel})` : addressLabel;
 
-    // Mid-truncation applies only to raw 44-char addresses (no nickname, no human-readable label)
-    const isMidTruncateCandidate = !noTruncate && !nickname && !overrideText && addressLabel === address;
+    // Mid-truncation applies to raw 44-char addresses. When a nickname is shown the address
+    // line always truncates regardless of the noTruncate prop (the nickname makes it necessary).
+    const isMidTruncateCandidate = (!noTruncate || !!nickname) && !overrideText && addressLabel === address;
 
     const editBtnRef = useRef<HTMLButtonElement>(null);
     const { rowRef, hiddenTextRef, isMidTruncated, midTruncatedText } = useMidTruncation(
@@ -96,24 +110,30 @@ export function Address({
 
     const visibleText = isMidTruncated ? midTruncatedText : displayText;
 
-    // Nickname uses CSS text-overflow truncation (trailing ellipsis)
-    const innerTextClassName = cn('e-font-mono', nickname && 'e-truncate');
+    const innerTextClassName = cn('e-font-mono', !nickname && 'e-truncate', nickname && 'e-block e-min-w-0');
+
+    // When a nickname is set, render it and the address label as two stacked lines
+    // so neither overflows on narrow (mobile) viewports.
+    const nicknameDisplay = nickname ? (
+        <span className="e-flex e-min-w-0 e-flex-col">
+            <span className="e-truncate e-font-mono">&quot;{nickname}&quot;</span>
+            <span className="e-truncate e-font-mono e-text-muted">
+                {isMidTruncated ? midTruncatedText : addressLabel}
+            </span>
+        </span>
+    ) : undefined;
 
     const innerContent = link ? (
         <Link href={addressPath} className={innerTextClassName}>
-            {visibleText}
+            {nickname ? nicknameDisplay : visibleText}
         </Link>
     ) : (
-        <span className={innerTextClassName}>{visibleText}</span>
+        <span className={innerTextClassName}>{nickname ? nicknameDisplay : visibleText}</span>
     );
 
     return (
         <span ref={visibilityRef} className="e-block e-w-full">
-            <div
-                ref={rowRef}
-                className={cn('e-relative e-flex e-w-full e-min-w-0 e-items-center', alignRight && 'e-justify-end')}
-                aria-label={ariaLabel}
-            >
+            <div ref={rowRef} className={rowVariants({ alignRight: Boolean(alignRight) })} aria-label={ariaLabel}>
                 {/* Hidden span for measuring the natural text width — absolutely positioned so it doesn't affect layout */}
                 {isMidTruncateCandidate && (
                     <span
@@ -121,7 +141,7 @@ export function Address({
                         className="e-pointer-events-none e-invisible e-absolute e-whitespace-nowrap e-font-mono"
                         aria-hidden
                     >
-                        {displayText}
+                        {addressLabel}
                     </span>
                 )}
                 <Copyable text={address}>
@@ -157,7 +177,7 @@ export function Address({
                 </Copyable>
                 <button
                     ref={editBtnRef}
-                    className="e-ms-2 e-flex-none e-shrink-0 e-cursor-pointer e-border-0 e-bg-transparent e-p-0 e-text-muted"
+                    className="e-ms-1.5 e-flex-none e-shrink-0 e-cursor-pointer e-border-0 e-bg-transparent e-p-0 e-text-muted"
                     onClick={() => setShowNicknameEditor(true)}
                     title="Edit nickname"
                     style={{ fontSize: '0.875rem', lineHeight: 1 }}

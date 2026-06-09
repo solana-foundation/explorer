@@ -1,8 +1,8 @@
+import { InstructionDetailsProps } from '@features/transaction';
 import { AddressLookupTableProgram, PublicKey } from '@solana/web3.js';
 
 import { Address } from '@/app/components/common/Address';
 import { InstructionCard } from '@/app/components/instruction/InstructionCard';
-import { InstructionDetailsProps } from '@/app/components/transaction/InstructionsSection';
 
 import { ExtendLookupTableInfo } from './types';
 

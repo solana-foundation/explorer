@@ -1,9 +1,9 @@
+import { InstructionDetailsProps } from '@features/transaction';
 import { AddressLookupTableProgram } from '@solana/web3.js';
 
 import { Address } from '@/app/components/common/Address';
 import { Slot } from '@/app/components/common/Slot';
 import { InstructionCard } from '@/app/components/instruction/InstructionCard';
-import { InstructionDetailsProps } from '@/app/components/transaction/InstructionsSection';
 
 import { CreateLookupTableInfo } from './types';
 
