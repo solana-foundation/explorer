@@ -148,10 +148,10 @@ describe('fetchResource', () => {
         }).rejects.toMatchObject({ status: 413 });
     });
 
-    it('should handle unexpected result', async () => {
+    it('should treat an unexpected fetch rejection as an unreachable upstream (502)', async () => {
         fetchMock.mockRejectedValueOnce({ data: 'unexpected exception' });
 
-        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toMatchObject({ status: 500 });
+        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toMatchObject({ status: 502 });
     });
 
     it('should handle malformed JSON response gracefully', async () => {

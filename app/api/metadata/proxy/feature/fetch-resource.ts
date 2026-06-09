@@ -218,7 +218,14 @@ function handleFetchError(e: unknown, url: URL, size: number): StatusError {
     }
     if (matchAbortError(error)) return statusError(504, 'Upstream fetch aborted', { cause: error });
 
-    // Reported to Sentry so we can gauge whether network failures are common.
+    // Anything left is a `fetch()` rejection that isn't a timeout/abort/size
+    // error — i.e. an upstream connectivity failure (DNS miss, refused/reset
+    // connection, TLS error). That's a bad *gateway*, not our internal fault, so
+    // it's a 502, not a 500. The distinction is user-visible: 502 surfaces as
+    // "Image source unavailable" while 500 collapses to the generic "Image could
+    // not be displayed" (500 stays reserved for genuine internal errors, caught
+    // at the route boundary). Reported to Sentry to gauge how often upstreams are
+    // unreachable.
     Logger.warn('[api:metadata-proxy] Fetch failed', { sentry: true, url: url.href });
-    return statusError(500, 'Fetch failed', { cause: error });
+    return statusError(502, 'Upstream unreachable', { cause: error });
 }

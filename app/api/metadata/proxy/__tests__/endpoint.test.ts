@@ -141,9 +141,9 @@ describe('Metadata Proxy Route', () => {
                 status: 504,
             },
             {
-                description: '500 on unclassified upstream failure',
+                description: '502 when the upstream is unreachable (fetch rejects)',
                 mock: () => fetchMock.mockRejectedValueOnce(new Error('boom')),
-                status: 500,
+                status: 502,
             },
         ])('should return $description', async ({ mock, status }) => {
             vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
