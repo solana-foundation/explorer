@@ -35,12 +35,16 @@ export const getProxiedUri = (uri: string): string | '' => {
 
 const resolveIpfsUri = (url: URL): string => {
     // eslint-disable-next-line no-restricted-syntax -- Strips redundant "ipfs/" prefix from the path for a clean gateway URL.
-    const path = (url.host + url.pathname).replace(/^ipfs\//, '');
-    if (!verifyCID(path)) {
-        Logger.warn(`[metadata] Cannot fetch a malformed CID: ${path}`);
+    const fullPath = (url.host + url.pathname).replace(/^ipfs\//, '');
+    // Split the CID from any subpath (e.g. "QmXXX/image.png" → cid="QmXXX", subpath="/image.png")
+    const firstSlash = fullPath.indexOf('/');
+    const cid = firstSlash === -1 ? fullPath : fullPath.slice(0, firstSlash);
+    const subpath = firstSlash === -1 ? '' : fullPath.slice(firstSlash);
+    if (!verifyCID(cid)) {
+        Logger.warn(`[metadata] Cannot fetch a malformed CID: ${cid}`);
         return '';
     }
-    return `${IPFS_GATEWAY}/${path}${url.search}`;
+    return `${IPFS_GATEWAY}/${cid}${subpath}${url.search}`;
 };
 
 const proxyUri = (uri: string): string => `/api/metadata/proxy?uri=${encodeURIComponent(uri)}`;
