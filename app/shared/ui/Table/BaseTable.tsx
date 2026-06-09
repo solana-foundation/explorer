@@ -17,10 +17,7 @@ import { cn } from '@/app/components/shared/utils';
 // non-`<table>` implementation (e.g. CSS grid) without changing call sites.
 const tableVariants = cva([], {
     compoundVariants: [
-        { class: 'table-nowrap', nowrap: true, ui: 'dashkit' },
-        { class: '[&_th]:e-whitespace-nowrap [&_td]:e-whitespace-nowrap', nowrap: true, ui: 'tw' },
-        // card variant adds dashkit `.card-table` on top of the base `table table-sm`.
-        { class: 'card-table', ui: 'dashkit', variant: 'card' },
+        { class: '[&_th]:e-whitespace-nowrap [&_td]:e-whitespace-nowrap', nowrap: true },
         // TW equivalent of `.card-table`: zero thead border-top + first/last cell padding to card edges + e-mb-0.
         {
             class: [
@@ -29,7 +26,6 @@ const tableVariants = cva([], {
                 '[&_thead_th:first-child]:e-pl-6 [&_thead_th:last-child]:e-pr-6',
                 '[&_tbody_td:first-child]:e-pl-6 [&_tbody_td:last-child]:e-pr-6',
             ].join(' '),
-            ui: 'tw',
             variant: 'card',
         },
     ],
@@ -37,7 +33,16 @@ const tableVariants = cva([], {
     variants: {
         nowrap: { false: '', true: '' },
         ui: {
-            dashkit: 'table table-sm',
+            // Tailwind translation of `.table.table-sm` from .storybook/layout.min.css; keeps the Dashkit `1.5rem` table margin and the `#1e2423` tbody border that the SCSS late-override pins.
+            dashkit: [
+                'e-w-full e-mb-6 e-text-dk-sm e-text-white',
+                '[&_thead_th]:e-bg-dark-background [&_thead_th]:e-uppercase [&_thead_th]:e-text-dk-xs',
+                '[&_thead_th]:e-font-normal [&_thead_th]:e-tracking-[0.08em] [&_thead_th]:e-text-dark-muted-foreground',
+                '[&_thead_th]:e-text-left [&_th]:e-align-middle [&_td]:e-align-middle',
+                '[&_th]:e-p-4 [&_td]:e-p-4',
+                '[&_thead_th]:e-border-t [&_thead_th]:e-border-solid [&_thead_th]:e-border-[#282d2b]',
+                '[&_tbody_td]:e-border-t [&_tbody_td]:e-border-solid [&_tbody_td]:e-border-[#1e2423]',
+            ].join(' '),
             // Mirrors `.table.table-sm` as compiled in .storybook/layout.min.css (Bootstrap 5 + dashkit overrides).
             tw: [
                 'e-w-full e-text-dk-sm e-text-white',
@@ -58,7 +63,7 @@ const wrapperVariants = cva([], {
     defaultVariants: { ui: 'tw' },
     variants: {
         ui: {
-            dashkit: 'table-responsive e-mb-0',
+            dashkit: 'e-overflow-x-auto e-mb-0',
             tw: 'e-overflow-x-auto e-mb-0',
         },
     },
