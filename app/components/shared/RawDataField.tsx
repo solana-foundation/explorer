@@ -4,7 +4,7 @@ import { HexData } from '@shared/HexData';
 import { Button } from '@shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, Copy } from 'react-feather';
+import { Check, ChevronDown, Copy } from 'react-feather';
 
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { type ByteArray, toBase64, toHex } from '@/app/shared/lib/bytes';
@@ -87,7 +87,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                         disabled={!hasData || loading}
                         onClick={() => copy(tab === 'base64' ? base64String : hexString)}
                     >
-                        <Copy size={12} />
+                        {copyState === 'copied' ? <Check size={12} /> : <Copy size={12} />}
                         <span className="e-hidden md:e-inline">{copyState === 'copied' ? 'Copied!' : 'Copy'}</span>
                     </Button>
                     <DownloadDropdown

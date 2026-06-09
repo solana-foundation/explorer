@@ -83,8 +83,9 @@ export function Address({
 
     const displayText = nickname ? `"${nickname}" (${addressLabel})` : addressLabel;
 
-    // Mid-truncation applies only to raw 44-char addresses (no nickname, no human-readable label)
-    const isMidTruncateCandidate = !noTruncate && !nickname && !overrideText && addressLabel === address;
+    // Mid-truncation applies to raw 44-char addresses. When a nickname is shown the address
+    // line always truncates regardless of the noTruncate prop (the nickname makes it necessary).
+    const isMidTruncateCandidate = (!noTruncate || !!nickname) && !overrideText && addressLabel === address;
 
     const editBtnRef = useRef<HTMLButtonElement>(null);
     const { rowRef, hiddenTextRef, isMidTruncated, midTruncatedText } = useMidTruncation(
@@ -109,15 +110,25 @@ export function Address({
 
     const visibleText = isMidTruncated ? midTruncatedText : displayText;
 
-    // Nickname uses CSS text-overflow truncation (trailing ellipsis)
-    const innerTextClassName = cn('e-font-mono', nickname && 'e-truncate');
+    const innerTextClassName = cn('e-font-mono', !nickname && 'e-truncate', nickname && 'e-block e-min-w-0');
+
+    // When a nickname is set, render it and the address label as two stacked lines
+    // so neither overflows on narrow (mobile) viewports.
+    const nicknameDisplay = nickname ? (
+        <span className="e-flex e-min-w-0 e-flex-col">
+            <span className="e-truncate e-font-mono">&quot;{nickname}&quot;</span>
+            <span className="e-truncate e-font-mono e-text-muted">
+                {isMidTruncated ? midTruncatedText : addressLabel}
+            </span>
+        </span>
+    ) : undefined;
 
     const innerContent = link ? (
         <Link href={addressPath} className={innerTextClassName}>
-            {visibleText}
+            {nickname ? nicknameDisplay : visibleText}
         </Link>
     ) : (
-        <span className={innerTextClassName}>{visibleText}</span>
+        <span className={innerTextClassName}>{nickname ? nicknameDisplay : visibleText}</span>
     );
 
     return (
@@ -130,7 +141,7 @@ export function Address({
                         className="e-pointer-events-none e-invisible e-absolute e-whitespace-nowrap e-font-mono"
                         aria-hidden
                     >
-                        {displayText}
+                        {addressLabel}
                     </span>
                 )}
                 <Copyable text={address}>
