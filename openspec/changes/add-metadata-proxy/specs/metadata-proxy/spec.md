@@ -179,7 +179,7 @@ Every one of the three `413` size-cap paths (Content-Length pre-check, streamed 
 #### Scenario: Upstream fetch fails for a network reason
 
 - **WHEN** `fetch()` fails for a reason other than timeout/abort/size
-- **THEN** the proxy SHALL emit a `warning`-level Sentry event and respond `500`
+- **THEN** the proxy SHALL emit a `warning`-level Sentry event and respond `502` (an unreachable upstream is a bad gateway, not an internal fault); `500` is reserved for genuine internal errors caught at the route boundary
 
 ### Requirement: The proxy SHALL log successful fetch sizes for cap tuning
 
@@ -193,9 +193,9 @@ On the success path the proxy SHALL emit an `info`-level log recording the actua
 
 ### Requirement: Off-chain images SHALL surface why they could not be displayed and degrade gracefully
 
-Off-chain images rendered through the proxy SHALL be displayed via the `ProxiedImage` component, which composes proxy-agnostic image primitives from `app/components/shared/ui/image/`. While the image loads it SHALL show a skeleton sized to the image's slot; on success it SHALL show the image; on any load failure it SHALL render a fallback in the image's place — including when the proxy rejects it with `413` for exceeding the size cap.
+Off-chain images rendered through the proxy SHALL be displayed via the `ProxiedImage` component, which composes proxy-agnostic image primitives from `app/components/shared/ui/image/`. While the image loads it SHALL show a skeleton sized to the image's slot; on success it SHALL show the image; on any load failure it SHALL render a fallback in the image's place — including when the proxy rejects it with `413` for exceeding the size cap. While the on-error reason probe (below) is still in flight, the loading skeleton SHALL be held rather than flashing a reasonless fallback, so the failure state appears once, fully formed with its reason.
 
-Because a browser `<img>` element cannot read the HTTP status, on a load failure the component SHALL re-`fetch` the same proxied (same-origin) `src` to read `response.status` and map it to a human-readable, per-status reason (e.g. `413` → "Image exceeds maximum size", `404` → "Image not found", `415` → "Unsupported image type"). The probe targets the same-origin proxy URL — never the upstream host — so it leaks nothing the original `<img>` request did not, and is served from the browser cache that request primed (see the caching requirement). A `src` that is not the same-origin proxy (proxy disabled, or a non-HTTP scheme passed through) has no readable status, so the component SHALL show a generic reason without probing.
+Because a browser `<img>` element cannot read the HTTP status, on a load failure the component SHALL re-`fetch` the same proxied (same-origin) `src` to read `response.status` and map it to a human-readable, per-status reason (e.g. `413` → "Image exceeds maximum size", `415` → "Unsupported image type", `502`/network failure → "Image source unavailable", `504` → "Image source timed out"). The probe targets the same-origin proxy URL — never the upstream host — so it leaks nothing the original `<img>` request did not, and is usually served from the browser cache that request primed (see the caching requirement); a `504` whose error response was not cached can re-incur the upstream timeout, which is why the loading state is held until the probe resolves. A `src` that is not the same-origin proxy (proxy disabled, or a non-HTTP scheme passed through) has no readable status, so the component SHALL show a generic reason without probing.
 
 The default fallback SHALL be a Solana-logo placeholder that inherits the image's own className/box — so a rounded-full avatar gets a round logo — and SHALL carry the reason as both its accessible name and a hover tooltip (working at any size, including a 16px avatar where visible text would not fit). Consumers MAY supply a `fallback` render function to receive the resolved reason and render it differently.
 
@@ -208,13 +208,18 @@ The original third-party URL SHALL be offered only as an explicit, opt-in (`show
 
 #### Scenario: Image fails to load for another readable reason
 
-- **WHEN** a proxied image fails with `404`, `415`, `502`, or `504`
+- **WHEN** a proxied image fails with `403`, `415`, `502`, or `504` (the statuses the proxy actually emits; an upstream `404` is surfaced as a `502`)
 - **THEN** the on-error probe SHALL read that status and the fallback SHALL show the matching per-status reason
 
 #### Scenario: Failure with no readable status
 
 - **WHEN** the failing `src` is not the same-origin proxy (cross-origin or a non-HTTP passthrough), or the probe cannot read a status (network/opaque/abort)
 - **THEN** the fallback SHALL show the generic reason "Image could not be displayed" without surfacing a misleading specific cause
+
+#### Scenario: Failure reason still being determined
+
+- **WHEN** a proxied image has failed but the on-error reason probe has not yet resolved
+- **THEN** the component SHALL keep showing the loading skeleton rather than a reasonless fallback, until the reason resolves
 
 #### Scenario: Opening the original is opt-in
 
