@@ -50,7 +50,7 @@ export function Copyable({ text, children }: { text: string | null; children?: R
 
     return (
         <>
-            <span className="font-size-tiny e-mr-1.5" style={{ fontSize: '12px' }}>
+            <span className="e-mr-1.5" style={{ fontSize: '12px' }}>
                 <span className={textColor}>
                     <CopyIcon />
                 </span>

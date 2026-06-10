@@ -122,7 +122,7 @@ function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
                         <Input ref={inptutRef} />
                     </Command.Input>
                 </PopoverPrimitive.Anchor>
-                {!open && <CommandList aria-hidden="true" className="hidden" />}
+                {!open && <CommandList aria-hidden="true" className="e-hidden" />}
                 <PopoverPrimitive.Content
                     asChild
                     align="start"

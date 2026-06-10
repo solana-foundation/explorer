@@ -31,7 +31,7 @@ export function BaseFormattedIdl({
 
     return (
         <SearchHighlightProvider searchStr={searchStr || ''}>
-            <div className="idl-view">
+            <div>
                 <TabsList className="e-mb-5">
                     {tabs.map((tab, index) => (
                         <TabsTrigger
