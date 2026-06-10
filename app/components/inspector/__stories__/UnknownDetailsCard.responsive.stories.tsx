@@ -1,10 +1,11 @@
-import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
-import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
-import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
-import { nextjsParameters } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook/react';
+import {
+    nextjsParameters,
+    withClusterAndAccounts,
+    withScrollAnchor,
+    withTokenInfoBatch,
+} from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
@@ -15,21 +16,10 @@ const sampleIx = new TransactionInstruction({
     programId: new PublicKey('UnknownProgramx1111111111111111111111111111'),
 });
 
-const withProviders: Decorator = Story => (
-    <MockClusterProvider>
-        <MockAccountsProvider>
-            <MockTokenInfoBatchProvider>
-                <ScrollAnchorProvider>
-                    <Story />
-                </ScrollAnchorProvider>
-            </MockTokenInfoBatchProvider>
-        </MockAccountsProvider>
-    </MockClusterProvider>
-);
-
 const meta: Meta<typeof UnknownDetailsCard> = {
     component: UnknownDetailsCard,
-    decorators: [withProviders, withViewportFromGlobal],
+    // First decorator is innermost — same nesting as the previous local withProviders.
+    decorators: [withScrollAnchor, withTokenInfoBatch, withClusterAndAccounts, withViewportFromGlobal],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
