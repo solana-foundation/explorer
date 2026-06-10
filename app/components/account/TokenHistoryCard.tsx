@@ -423,7 +423,7 @@ function InstructionDetails({ instructionType, tx }: { instructionType: Instruct
 
     return (
         <>
-            <p className="tree">
+            <p className="e-tree">
                 {instructionTypes.length > 0 && (
                     <span
                         onClick={e => {
@@ -442,7 +442,7 @@ function InstructionDetails({ instructionType, tx }: { instructionType: Instruct
                 {instructionType.name}
             </p>
             {expanded && (
-                <ul className="tree">
+                <ul className="e-tree">
                     {instructionTypes.map((type, index) => {
                         return <li key={index}>{type}</li>;
                     })}

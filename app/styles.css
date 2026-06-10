@@ -71,14 +71,22 @@ hr {
     opacity: 1;
 }
 
-/* Dashkit code chip (dark cascade) — Reboot only sets mono font + pink color. */
-code {
+/* Dashkit code/pre chips (dark cascade) — Reboot only sets mono font + pink code color. */
+code,
+pre {
     padding: 0.33rem;
     border-radius: 0.375rem;
     font-size: 87.5%;
     color: #fff;
     background-color: #141816;
+}
+code {
     word-wrap: break-word;
+}
+pre {
+    margin: 0;
+    overflow: auto;
+    text-align: left;
 }
 
 /* Dashkit link overrides — $link-color $primary-dark (#33a382), text-decoration none.
@@ -313,6 +321,52 @@ a:hover {
     .e-offcanvas-end.e-show {
         transform: none;
         visibility: visible;
+    }
+
+    /* Expandable instruction-type list port (_solana.scss .tree) — joint lines drawn via li borders. */
+    .e-tree,
+    ul.e-tree,
+    ul.e-tree ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .e-tree ul {
+        margin-left: 1em;
+    }
+    .e-tree li {
+        margin-left: 0.35em;
+        border-left: thin solid #808080;
+    }
+    .e-tree li:last-child {
+        border-left: none;
+    }
+    .e-tree li:before {
+        width: 1.4em;
+        height: 0.6em;
+        margin-right: 0.1em;
+        vertical-align: top;
+        border-bottom: thin solid #808080;
+        content: '';
+        display: inline-block;
+    }
+    .e-tree li:last-child:before {
+        border-left: thin solid #808080;
+    }
+
+    /* Homepage staking stats port (_solana.scss .staking-card). */
+    .e-staking-card em {
+        font-style: normal;
+        color: #1dd79b;
+    }
+    .e-staking-card h1 {
+        margin-bottom: 0.75rem;
+    }
+    .e-staking-card h1 small {
+        font-size: 1rem;
+    }
+    .e-staking-card h5 {
+        margin-bottom: 0;
     }
 
     /* Backdrop port (Bootstrap .modal-backdrop.fade); .e-show fades it in, otherwise it ignores clicks. */

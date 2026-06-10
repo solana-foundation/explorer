@@ -125,7 +125,7 @@ function StakingComponent() {
     }
 
     return (
-        <div className="staking-card e-flex e-flex-col md:e-flex-row md:e-gap-6">
+        <div className="e-staking-card e-flex e-flex-col md:e-flex-row md:e-gap-6">
             <div className="e-w-full md:e-w-1/2">
                 <Card ui="dashkit" className="e-mb-3 md:e-mb-6">
                     <CardBody ui="dashkit">
