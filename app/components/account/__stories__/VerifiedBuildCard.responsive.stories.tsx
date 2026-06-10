@@ -23,6 +23,7 @@ const VERIFIED_FIXTURE: OsecRegistryInfo = {
     last_verified_at: '2026-01-01T00:00:00.000Z',
     message: 'Verification information provided by a trusted signer.',
     on_chain_hash: '0000000000000000000000000000000000000000000000000000000000000000',
+    onchain_repo_url: 'https://github.com/example/verified-program',
     repo_url: 'https://github.com/example/verified-program',
     signer: '5vJwnLeyjV8uNJSp1zn7VLW8GwiQbcsQbGaVSwRmkE4r',
     verification_status: VerificationStatus.Verified,
