@@ -7,7 +7,8 @@ import { cn } from '@/app/components/shared/utils';
 const rootVariants = {
     dashkit: [
         'e-peer e-inline-flex e-h-6 e-w-12 e-shrink-0 e-items-center',
-        'e-rounded-full e-border-0 e-shadow-sm',
+        // e-p-0 kills the UA button padding (1px 6px) — @tailwind base is skipped, so no global reset
+        'e-rounded-full e-border-0 e-p-0',
         'e-cursor-pointer e-transition-none',
         'focus-visible:e-outline-none focus-visible:e-ring-2 focus-visible:e-ring-accent focus-visible:e-ring-offset-2 focus-visible:e-ring-offset-white',
         'disabled:e-cursor-not-allowed disabled:e-opacity-50',
@@ -26,7 +27,7 @@ const rootVariants = {
 const thumbVariants = {
     dashkit: [
         'e-pointer-events-none e-block e-h-[18px] e-w-[18px] e-rounded-full',
-        'e-shrink-0 e-shadow-lg e-ring-0',
+        'e-shrink-0 e-ring-0',
         'e-transition-none',
         'data-[state=checked]:e-bg-white data-[state=unchecked]:e-bg-dk-gray-800-dark',
         'data-[state=checked]:e-translate-x-[27px] data-[state=unchecked]:e-translate-x-[3px]',
