@@ -50,6 +50,24 @@ const preview: Preview = {
             },
         },
         layout: 'padded',
+        options: {
+            // Deterministic sidebar order: alphabetical, with `Responsive` groups last among
+            // siblings. Must be self-contained — Storybook stringifies this function.
+            storySort: (a, b) => {
+                if (a.title === b.title) return 0; // keep story definition order within a file
+                const ap = a.title.split('/');
+                const bp = b.title.split('/');
+                for (let i = 0; i < Math.max(ap.length, bp.length); i++) {
+                    const as = ap[i] ?? '';
+                    const bs = bp[i] ?? '';
+                    if (as === bs) continue;
+                    if (as === 'Responsive') return 1;
+                    if (bs === 'Responsive') return -1;
+                    return as.localeCompare(bs, undefined, { numeric: true });
+                }
+                return 0;
+            },
+        },
     },
 
     decorators: [
