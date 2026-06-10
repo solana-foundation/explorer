@@ -1,6 +1,7 @@
 import { Address } from '@components/common/Address';
 import { useScrollAnchor } from '@providers/scroll-anchor';
 import { Badge } from '@shared/ui/badge';
+import { Button } from '@shared/ui/button';
 import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { cn } from '@shared/utils';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
@@ -83,17 +84,20 @@ export function BaseInstructionCard({
             headerButtons={
                 <div className="e-flex e-items-center e-gap-1.5">
                     {headerButtons}
-                    <button
+                    <Button
+                        ui="dashkit"
+                        size="sm"
+                        variant={showRaw ? 'black' : 'white'}
+                        active={showRaw}
                         disabled={defaultRaw}
                         className={cn(
-                            'btn btn-sm e-flex e-items-center',
-                            showRaw ? 'btn-black active' : 'btn-white',
+                            'e-flex e-items-center',
                             defaultRaw && '!e-pointer-events-auto e-cursor-not-allowed',
                         )}
                         onClick={rawClickHandler}
                     >
                         <Code className="e-mr-1.5" size={13} /> Raw
-                    </button>
+                    </Button>
                 </div>
             }
         >
@@ -125,9 +129,7 @@ export function BaseInstructionCard({
                             </BaseTable.Row>
                             <BaseTable.Row>
                                 <BaseTable.Cell colSpan={3}>
-                                    {/* !e-m-0 overrides the 1.5rem margin from inner-cards
-                                    so the card aligns with the "Inner Instructions" label above */}
-                                    <div className="inner-cards !e-m-0">{innerCards}</div>
+                                    <div>{innerCards}</div>
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         </>
@@ -139,7 +141,7 @@ export function BaseInstructionCard({
                             </BaseTable.Row>
                             <BaseTable.Row>
                                 <BaseTable.Cell colSpan={3}>
-                                    <div className="inner-cards">{eventCards}</div>
+                                    <div className="e-m-6">{eventCards}</div>
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         </>
