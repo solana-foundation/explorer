@@ -31,7 +31,7 @@ import React, { useCallback } from 'react';
 import { ChevronDown, MinusSquare, PlusSquare } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
-import { Dropdown, DropdownItem, DropdownMenu } from '@/app/components/shared/ui/dropdown';
+import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from '@/app/components/shared/ui/dropdown';
 import { INITIAL_TOKENS_TO_FETCH, INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import { Logger } from '@/app/shared/lib/logger';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
@@ -70,8 +70,6 @@ const useQueryFilter = (): string => {
 
 type FilterProps = {
     filter: string;
-    toggle: () => void;
-    show: boolean;
     tokens: TokenInfoWithPubkey[];
 };
 
@@ -79,7 +77,6 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     const accountHistories = useAccountHistories();
     const fetchAccountHistory = useFetchAccountHistory();
     const transactionDetailsCache = useTransactionDetailsCache();
-    const [showDropdown, setDropdown] = React.useState(false);
     const [tokensToFetchCount, setTokensToFetchCount] = React.useState(INITIAL_TOKENS_TO_FETCH);
     const [visibleTxCount, setVisibleTxCount] = React.useState(INITIAL_VISIBLE_COUNT);
     const filter = useQueryFilter();
@@ -204,12 +201,14 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         </p>
                     </CardBody>
                     <CardFooter ui="dashkit">
-                        <button
-                            className="btn btn-primary e-w-full"
+                        <Button
+                            ui="dashkit"
+                            variant="primary"
+                            className="e-w-full"
                             onClick={() => setTokensToFetchCount(LOAD_MORE_COUNT)}
                         >
                             Load Token History
-                        </button>
+                        </Button>
                     </CardFooter>
                 </Card>
             );
@@ -231,12 +230,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 <CardTitle as="h3" ui="dashkit">
                     Token History
                 </CardTitle>
-                <FilterDropdown
-                    filter={filter}
-                    toggle={() => setDropdown(show => !show)}
-                    show={showDropdown}
-                    tokens={tokens}
-                ></FilterDropdown>
+                <FilterDropdown filter={filter} tokens={tokens} />
                 <RefreshButton
                     analyticsSection="token_history_card"
                     onClick={() => fetchHistories(true)}
@@ -268,47 +262,57 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
 
             <CardFooter ui="dashkit">
                 {visibleTxCount < mintAndTxs.length ? (
-                    <button
-                        className="btn btn-primary e-w-full"
+                    <Button
+                        ui="dashkit"
+                        variant="primary"
+                        className="e-w-full"
                         onClick={() => setVisibleTxCount(c => c + LOAD_MORE_COUNT)}
                     >
                         {`Show More (${visibleTxCount} of ${mintAndTxs.length})`}
-                    </button>
+                    </Button>
                 ) : tokensToFetchCount < filteredTokens.length ? (
-                    <button
-                        className="btn btn-primary e-w-full"
+                    <Button
+                        ui="dashkit"
+                        variant="primary"
+                        className="e-w-full"
                         onClick={() => setTokensToFetchCount(c => c + LOAD_MORE_COUNT)}
                         disabled={fetching}
                     >
                         {fetching ? (
                             <>
-                                <span className="e-align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
+                                <span className="e-align-text-top e-spinner-grow e-spinner-grow-sm e-mr-1.5"></span>
                                 Loading
                             </>
                         ) : (
                             `Load More Token Accounts (${tokensToFetchCount} of ${filteredTokens.length})`
                         )}
-                    </button>
+                    </Button>
                 ) : allFoundOldest ? (
                     <div className="e-text-center e-text-dk-gray-700">Fetched full history</div>
                 ) : (
-                    <button className="btn btn-primary e-w-full" onClick={() => fetchHistories()} disabled={fetching}>
+                    <Button
+                        ui="dashkit"
+                        variant="primary"
+                        className="e-w-full"
+                        onClick={() => fetchHistories()}
+                        disabled={fetching}
+                    >
                         {fetching ? (
                             <>
-                                <span className="e-align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
+                                <span className="e-align-text-top e-spinner-grow e-spinner-grow-sm e-mr-1.5"></span>
                                 Loading
                             </>
                         ) : (
                             'Load More History'
                         )}
-                    </button>
+                    </Button>
                 )}
             </CardFooter>
         </Card>
     );
 }
 
-const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
+const FilterDropdown = ({ filter, tokens }: FilterProps) => {
     const { cluster } = useCluster();
     const currentSearchParams = useSearchParams();
     const currentPathname = usePathname();
@@ -340,19 +344,17 @@ const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
     return (
         <Dropdown className="e-mr-1.5">
             <small className="e-mr-1.5">Filter:</small>
-            <Button ui="dashkit" variant="white" size="sm" type="button" onClick={toggle}>
-                {filter === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filter)}{' '}
-                <ChevronDown size={15} className="e-align-text-top" />
-            </Button>
-            <DropdownMenu align="end" className={cn('e-max-h-80 e-overflow-y-auto', show && 'show')}>
+            <DropdownToggle asChild>
+                <Button ui="dashkit" variant="white" size="sm" type="button">
+                    {filter === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filter)}{' '}
+                    <ChevronDown size={15} className="e-align-text-top" />
+                </Button>
+            </DropdownToggle>
+            <DropdownMenu align="end" className="e-max-h-80 e-overflow-y-auto">
                 {filterOptions.map(filterOption => {
                     return (
-                        <DropdownItem asChild key={filterOption}>
-                            <Link
-                                href={buildLocation(filterOption)}
-                                className={cn(filterOption === filter && 'active')}
-                                onClick={toggle}
-                            >
+                        <DropdownItem asChild key={filterOption} className={cn(filterOption === filter && 'active')}>
+                            <Link href={buildLocation(filterOption)}>
                                 {filterOption === ALL_TOKENS
                                     ? 'All Tokens'
                                     : nameLookup.get(filterOption) || filterOption}
@@ -484,13 +486,17 @@ function InstructionDetailsCell({
     if (!details) {
         return (
             <td>
-                <span
-                    className="btn btn-sm btn-outline-primary e-px-[3px] e-py-0 e-leading-none"
-                    role="button"
-                    onClick={handleLoadClick}
+                <Button
+                    ui="dashkit"
+                    variant="outline-primary"
+                    size="sm"
+                    className="e-px-[3px] e-py-0 e-leading-none"
+                    asChild
                 >
-                    Load
-                </span>
+                    <span role="button" onClick={handleLoadClick}>
+                        Load
+                    </span>
+                </Button>
             </td>
         );
     }
@@ -498,7 +504,7 @@ function InstructionDetailsCell({
     if (isFetching) {
         return (
             <td>
-                <span className="e-align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
+                <span className="e-align-text-top e-spinner-grow e-spinner-grow-sm e-mr-1.5"></span>
                 Loading
             </td>
         );
@@ -507,13 +513,17 @@ function InstructionDetailsCell({
     if (hasFailed || !instructions) {
         return (
             <td>
-                <span
-                    className="btn btn-sm btn-outline-warning e-px-[3px] e-py-0 e-leading-none"
-                    role="button"
-                    onClick={handleLoadClick}
+                <Button
+                    ui="dashkit"
+                    variant="outline-warning"
+                    size="sm"
+                    className="e-px-[3px] e-py-0 e-leading-none"
+                    asChild
                 >
-                    Retry
-                </span>
+                    <span role="button" onClick={handleLoadClick}>
+                        Retry
+                    </span>
+                </Button>
             </td>
         );
     }
