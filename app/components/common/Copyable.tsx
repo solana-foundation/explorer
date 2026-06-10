@@ -9,7 +9,8 @@ export function Copyable({ text, children }: { text: string | null; children?: R
     const [clipboardState, copy] = useCopyToClipboard(1000);
     const [loading, setLoading] = useState(false);
 
-    const handleClick = () => {
+    const handleClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
         if (typeof text !== 'string') {
             setLoading(true);
             return;

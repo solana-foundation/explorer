@@ -176,7 +176,10 @@ export function Address({
                 <button
                     ref={editBtnRef}
                     className="ms-1.5 flex-none shrink-0 cursor-pointer border-0 bg-transparent p-0 text-muted"
-                    onClick={() => setShowNicknameEditor(true)}
+                    onClick={e => {
+                        e.stopPropagation();
+                        setShowNicknameEditor(true);
+                    }}
                     title="Edit nickname"
                     style={{ fontSize: '0.875rem', lineHeight: 1 }}
                 >

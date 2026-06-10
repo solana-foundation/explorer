@@ -1,28 +1,161 @@
+'use client';
+
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { SolBalance } from '@components/common/SolBalance';
-import { RawDataField } from '@components/shared/RawDataField';
 import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
 import { cn } from '@components/shared/utils';
-import { useAccountsInfo } from '@entities/account';
+import { AccountInfo, useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
-import React, { useMemo } from 'react';
-import { Code } from 'react-feather';
+import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
+import React, { useMemo, useState } from 'react';
+import { ChevronDown } from 'react-feather';
 
-import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
-
+import { AccountExpandedContent } from './AccountExpandedContent';
 import { CollapsibleSection } from './CollapsibleSection';
+
+type TransactionAccountRowProps = {
+    account: ParsedMessageAccount;
+    accountInfo?: AccountInfo;
+    accountInfoLoading: boolean;
+    index: number;
+    message: ParsedMessage;
+    post: number;
+    pre: number;
+};
+
+function TransactionAccountRow({
+    account,
+    accountInfo,
+    accountInfoLoading,
+    index,
+    message,
+    post,
+    pre,
+}: TransactionAccountRowProps) {
+    const [expanded, setExpanded] = useState(false);
+
+    const pubkey = account.pubkey;
+    const key = pubkey.toBase58();
+    const delta = new BigNumber(post).minus(new BigNumber(pre));
+
+    const hasBadges =
+        index === 0 ||
+        account.signer ||
+        account.writable ||
+        message.instructions.some(ix => ix.programId.equals(pubkey)) ||
+        account.source === 'lookupTable';
+
+    const badges = (
+        <>
+            {index === 0 && (
+                <Badge ui="dashkit" variant="success" className="me-1">
+                    Fee Payer
+                </Badge>
+            )}
+            {account.signer && (
+                <Badge ui="dashkit" variant="info" className="me-1">
+                    Signer
+                </Badge>
+            )}
+            {account.writable && (
+                <Badge ui="dashkit" variant="danger" className="me-1">
+                    Writable
+                </Badge>
+            )}
+            {message.instructions.find(ix => ix.programId.equals(pubkey)) && (
+                <Badge ui="dashkit" variant="warning" className="me-1">
+                    Program
+                </Badge>
+            )}
+            {account.source === 'lookupTable' && (
+                <Badge ui="dashkit" variant="gray" className="me-1">
+                    Address Table Lookup
+                </Badge>
+            )}
+        </>
+    );
+
+    return (
+        <div className="e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid] last:e-border-b-0">
+            {/* Main row */}
+            <div
+                className={cn(
+                    'e-min-h-9 e-px-3 e-py-2.5 md:e-px-4',
+                    'e-grid e-items-start e-gap-x-0 e-gap-y-0.5 e-whitespace-nowrap e-text-sm md:e-gap-y-0 lg:e-gap-x-5',
+                    'e-grid-cols-[minmax(auto,1.75rem)_minmax(100px,auto)_1fr] sm:e-grid-cols-[minmax(auto,1.75rem)_1fr_auto] lg:e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_1.5rem]',
+                    "[grid-template-areas:'number_address_delta'_'number_address_balance'_'number_address_size'] lg:[grid-template-areas:'number_address_delta_balance_expand']",
+                    'e-cursor-pointer',
+                )}
+                onClick={() => setExpanded(v => !v)}
+            >
+                <div className="e-mr-2 e-text-outer-space-300 [grid-area:number] lg:e-mr-0">{index + 1}</div>
+                <div className="[grid-area:address]">
+                    <div className="e-flex e-items-center e-justify-between e-gap-1 lg:e-justify-normal">
+                        <Address pubkey={pubkey} link fetchTokenLabelInfo />
+                    </div>
+                    {hasBadges && <span className="e-mt-1 e-inline-flex e-flex-wrap e-gap-1">{badges}</span>}
+                </div>
+                <div className="e-justify-self-end [grid-area:delta]">
+                    <BalanceDelta delta={delta} isSol />
+                </div>
+                <div className="e-justify-self-end [grid-area:balance]">
+                    <SolBalance lamports={post} />
+                </div>
+
+                {/* Desktop: expand button */}
+                <div className="e-hidden e-items-center e-justify-center [grid-area:expand] lg:e-flex">
+                    <Button
+                        aria-expanded={expanded}
+                        aria-label={expanded ? 'Collapse account details' : 'Expand account details'}
+                        className="-e-mt-1 e-h-6 e-w-6"
+                        onClick={e => {
+                            e.stopPropagation();
+                            setExpanded(v => !v);
+                        }}
+                        size="icon"
+                        variant="ghost"
+                    >
+                        <ChevronDown
+                            size={16}
+                            className={cn(
+                                'e-text-outer-space-300 e-transition-transform e-duration-200 e-ease-in-out [transform:rotate(90deg)]',
+                                expanded && '[transform:rotate(0deg)]',
+                            )}
+                        />
+                    </Button>
+                </div>
+            </div>
+
+            {/* Desktop: animated expanded content */}
+            <div
+                className={cn(
+                    'e-hidden lg:e-grid',
+                    'e-transition-[grid-template-rows] e-duration-200 e-ease-in-out',
+                    expanded ? 'e-grid-rows-[1fr]' : 'e-grid-rows-[0fr]',
+                )}
+            >
+                <div className="e-overflow-hidden">
+                    <AccountExpandedContent
+                        accountInfo={accountInfo}
+                        accountInfoLoading={accountInfoLoading}
+                        address={key}
+                        enabled={expanded}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { url } = useCluster();
-    const { isLg } = useBreakpoint();
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const message = transactionWithMeta?.transaction.message;
@@ -50,97 +183,18 @@ export function AccountsCard({ signature }: SignatureProps) {
     }
 
     const accountRows = message.accountKeys.map((account, index) => {
-        const pre = meta.preBalances[index];
-        const post = meta.postBalances[index];
-        const pubkey = account.pubkey;
-        const key = pubkey.toBase58();
-        const delta = new BigNumber(post).minus(new BigNumber(pre));
-        const accountInfo = accounts.get(key);
-
-        const hasBadges =
-            index === 0 ||
-            account.signer ||
-            account.writable ||
-            message.instructions.some(ix => ix.programId.equals(pubkey)) ||
-            account.source === 'lookupTable';
-
-        const badges = (
-            <>
-                {index === 0 && (
-                    <Badge ui="dashkit" variant="success" className="me-1">
-                        Fee Payer
-                    </Badge>
-                )}
-                {account.signer && (
-                    <Badge ui="dashkit" variant="info" className="me-1">
-                        Signer
-                    </Badge>
-                )}
-                {account.writable && (
-                    <Badge ui="dashkit" variant="danger" className="me-1">
-                        Writable
-                    </Badge>
-                )}
-                {message.instructions.find(ix => ix.programId.equals(pubkey)) && (
-                    <Badge ui="dashkit" variant="warning" className="me-1">
-                        Program
-                    </Badge>
-                )}
-                {account.source === 'lookupTable' && (
-                    <Badge ui="dashkit" variant="gray" className="me-1">
-                        Address Table Lookup
-                    </Badge>
-                )}
-            </>
-        );
-
-        const dataCell = loading ? (
-            <span className="text-xs text-outer-space-300">Loading…</span>
-        ) : accountInfo && accountInfo.size > 0 ? (
-            <Popover>
-                <PopoverTrigger asChild>
-                    <Button variant="ghost" className="h-auto !px-1 !py-0 text-xs">
-                        <Code size={11} />
-                        <span>{accountInfo.size.toLocaleString('en-US')}</span>
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="mx-4 w-auto !rounded-lg border-none p-0" align="end">
-                    <RawDataField data={accountInfo.data} filename={key} />
-                </PopoverContent>
-            </Popover>
-        ) : null;
-
+        const pubkeyStr = account.pubkey.toBase58();
         return (
-            <div
-                key={key}
-                className={cn(
-                    'min-h-9 px-3 py-2.5 md:px-4',
-                    'grid items-start gap-x-0 gap-y-0.5 whitespace-nowrap text-sm md:gap-y-0 lg:gap-x-5',
-                    'grid-cols-[minmax(auto,1.75rem)_minmax(100px,auto)_1fr] sm:grid-cols-[minmax(auto,1.75rem)_1fr_auto] lg:grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)]',
-                    "[grid-template-areas:'number_address_delta'_'number_address_balance'_'number_address_size'] lg:[grid-template-areas:'number_address_delta_balance']",
-                    'border-1 border-b border-white/10 [border-bottom-style:solid] last:border-b-0',
-                )}
-            >
-                <div className="mr-2 text-outer-space-300 [grid-area:number] lg:mr-0">{index + 1}</div>
-                <div className="[grid-area:address]">
-                    <div className="flex items-center justify-between gap-1 lg:justify-normal">
-                        <Address pubkey={pubkey} link fetchTokenLabelInfo />
-                    </div>
-                    {hasBadges && (
-                        <span className="mt-1 inline-flex flex-wrap gap-1">
-                            {badges}
-                            {isLg && dataCell}
-                        </span>
-                    )}
-                </div>
-                <div className="justify-self-end [grid-area:delta]">
-                    <BalanceDelta delta={delta} isSol />
-                </div>
-                <div className="justify-self-end [grid-area:balance]">
-                    <SolBalance lamports={post} />
-                </div>
-                {!isLg && <div className="justify-self-end [grid-area:size]">{dataCell}</div>}
-            </div>
+            <TransactionAccountRow
+                key={pubkeyStr}
+                account={account}
+                accountInfo={accounts.get(pubkeyStr)}
+                accountInfoLoading={loading}
+                index={index}
+                message={message}
+                post={meta.postBalances[index]}
+                pre={meta.preBalances[index]}
+            />
         );
     });
 
@@ -149,7 +203,7 @@ export function AccountsCard({ signature }: SignatureProps) {
             <div
                 className={cn(
                     'hidden px-3 py-1.5 md:px-4 lg:grid',
-                    'grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)] gap-5 text-xs uppercase text-outer-space-300',
+                    'grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_2rem] gap-5 text-xs uppercase text-outer-space-300',
                     'border-1 border-b border-white/10 [border-bottom-style:solid]',
                 )}
             >
@@ -157,6 +211,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                 <div>Address</div>
                 <div className="text-right">Change (SOL)</div>
                 <div className="text-right">Post Balance (SOL)</div>
+                <div />
             </div>
             {accountRows}
             {!loading && totalAccountSize > 0 && (
