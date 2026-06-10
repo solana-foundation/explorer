@@ -108,9 +108,9 @@ const titleVariants = cva([], {
     variants: {
         ui: {
             // Size token is appended separately so polymorphic `as` matches the original heading level.
-            // e-leading-none keeps the rendered height tight (= font-size) so block-level <hN> elements
-            // don't introduce extra vertical space beyond what an inline <span> would have.
-            dashkit: 'e-m-0 e-font-medium e-leading-none e-tracking-[-0.02em]',
+            // line-height 1.1 mirrors dashkit's compiled h1..h3 rule; `e-leading-none` (1) clipped the
+            // rendered height by ~10% and cascaded shift into body/footer below the title.
+            dashkit: 'e-m-0 e-font-medium e-leading-[1.1] e-tracking-[-0.02em]',
             tw: 'e-text-sm e-font-medium e-leading-none e-tracking-tight',
         },
     },

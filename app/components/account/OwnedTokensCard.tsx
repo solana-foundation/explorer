@@ -20,7 +20,8 @@ import { ChevronDown } from 'react-feather';
 
 import { ProxiedImage } from '@/app/features/metadata';
 import { INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
-import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { normalizeTokenAmount } from '@/app/utils';
 
 type Display = 'summary' | 'detail' | null;
@@ -75,38 +76,43 @@ export function OwnedTokensCard({ address }: { address: string }) {
         <>
             {showDropdown && <div className="dropdown-exit" onClick={() => setDropdown(false)} />}
 
-            <div className="card">
+            <Card ui="dashkit">
                 <CardHeader ui="dashkit">
-                    <h3 className="card-header-title">Token Holdings</h3>
+                    <CardTitle as="h3" ui="dashkit">
+                        Token Holdings
+                    </CardTitle>
                     <DisplayDropdown display={display} toggle={() => setDropdown(show => !show)} show={showDropdown} />
                 </CardHeader>
 
-                {/* TODO: migrate to <BaseTable variant="card"> from @/app/shared/ui/Table */}
-                <div className="table-responsive e-mb-0">
-                    <table className="table table-sm table-nowrap card-table">
-                        <thead>
-                            <tr>
-                                {showLogos && <th className="w-1 e-p-0 e-text-center e-text-dk-gray-700">Logo</th>}
-                                {display === 'detail' && <th className="e-text-dk-gray-700">Account Address</th>}
-                                <th className="e-text-dk-gray-700">Mint Address</th>
-                                <th className="e-text-dk-gray-700">
-                                    {display === 'detail' ? 'Total Balance' : 'Balance'}
-                                </th>
-                            </tr>
-                        </thead>
-                        {display === 'detail' ? (
-                            <HoldingsDetail tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
-                        ) : (
-                            <HoldingsSummary tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
-                        )}
-                    </table>
-                </div>
+                <BaseTable ui="dashkit" variant="card" nowrap>
+                    <BaseTable.Head>
+                        <BaseTable.Row>
+                            {showLogos && (
+                                <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px e-p-0 e-text-center">
+                                    Logo
+                                </BaseTable.HeaderCell>
+                            )}
+                            {display === 'detail' && (
+                                <BaseTable.HeaderCell className="e-text-dk-gray-700">Account Address</BaseTable.HeaderCell>
+                            )}
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Mint Address</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                                {display === 'detail' ? 'Total Balance' : 'Balance'}
+                            </BaseTable.HeaderCell>
+                        </BaseTable.Row>
+                    </BaseTable.Head>
+                    {display === 'detail' ? (
+                        <HoldingsDetail tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
+                    ) : (
+                        <HoldingsSummary tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
+                    )}
+                </BaseTable>
                 <TokensCardFooter
                     tokens={tokens}
                     visibleCount={visibleCount}
                     loadMore={() => setVisibleCount(c => c + LOAD_MORE_COUNT)}
                 />
-            </div>
+            </Card>
         </>
     );
 }
@@ -238,7 +244,7 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
     return (
         <tr>
             {showLogo && (
-                <td className="w-1 e-p-0 e-text-center">
+                <td className="e-w-px e-p-0 e-text-center">
                     <ProxiedImage
                         alt="Token icon"
                         className="e-h-6 e-w-6 e-rounded-full e-border-4 e-border-solid e-border-dk-gray-700-dark"

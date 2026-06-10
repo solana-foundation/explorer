@@ -34,7 +34,8 @@ import { Button } from '@/app/components/shared/ui/button';
 import { Dropdown, DropdownItem, DropdownMenu } from '@/app/components/shared/ui/dropdown';
 import { INITIAL_TOKENS_TO_FETCH, INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import { Logger } from '@/app/shared/lib/logger';
-import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 const TRUNCATE_TOKEN_LENGTH = 10;
 const ALL_TOKENS = '';
@@ -191,9 +192,11 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
         }
         if (tokensToFetchCount === 0) {
             return (
-                <div className="card">
+                <Card ui="dashkit">
                     <CardHeader ui="dashkit">
-                        <h3 className="card-header-title">Token History</h3>
+                        <CardTitle as="h3" ui="dashkit">
+                            Token History
+                        </CardTitle>
                     </CardHeader>
                     <CardBody ui="dashkit">
                         <p className="e-mb-0 e-text-center e-text-dk-gray-700">
@@ -208,7 +211,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                             Load Token History
                         </button>
                     </CardFooter>
-                </div>
+                </Card>
             );
         }
         return (
@@ -223,9 +226,11 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     });
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title">Token History</h3>
+                <CardTitle as="h3" ui="dashkit">
+                    Token History
+                </CardTitle>
                 <FilterDropdown
                     filter={filter}
                     toggle={() => setDropdown(show => !show)}
@@ -239,30 +244,27 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 />
             </CardHeader>
 
-            {/* TODO: migrate to <BaseTable variant="card"> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="w-1 e-text-dk-gray-700">Slot</th>
-                            <th className="e-text-dk-gray-700">Result</th>
-                            <th className="e-text-dk-gray-700">Token</th>
-                            <th className="e-text-dk-gray-700">Instruction Type</th>
-                            <th className="e-text-dk-gray-700">Transaction Signature</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {mintAndTxs.slice(0, visibleTxCount).map(({ mint, tx }) => (
-                            <TokenTransactionRow
-                                key={tx.signature}
-                                mint={mint}
-                                tx={tx}
-                                details={transactionDetailsCache[tx.signature]}
-                            />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Slot</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Token</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Instruction Type</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Transaction Signature</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body className="list">
+                    {mintAndTxs.slice(0, visibleTxCount).map(({ mint, tx }) => (
+                        <TokenTransactionRow
+                            key={tx.signature}
+                            mint={mint}
+                            tx={tx}
+                            details={transactionDetailsCache[tx.signature]}
+                        />
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
 
             <CardFooter ui="dashkit">
                 {visibleTxCount < mintAndTxs.length ? (
@@ -302,7 +304,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     </button>
                 )}
             </CardFooter>
-        </div>
+        </Card>
     );
 }
 
