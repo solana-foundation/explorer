@@ -151,7 +151,7 @@ export function IdlCard({ programId }: { programId: string }) {
                 trigger's -1px bottom margin) overlays the header border. !important because cn()'s
                 twMerge is not e-prefix-aware and can't drop conflicting base classes. */}
             <CardHeader ui="dashkit" className="!e-h-auto">
-                <TabsList className="!e-border-0 -e-mt-3 !-e-mb-3">
+                <TabsList className="!-e-mb-3 -e-mt-3 !e-border-0">
                     {tabs
                         .filter(tab => tab.idl)
                         .map(tab => (
