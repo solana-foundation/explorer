@@ -9,6 +9,7 @@ import React from 'react';
 
 import { Button } from '@/app/components/shared/ui/button';
 import { BaseCardBody } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { CollapsibleSection } from './CollapsibleSection';
 
