@@ -13,16 +13,17 @@ import {
     StringCell,
 } from '../common';
 
-// Cells render <BaseTable.Cell>, so they need to live in a <table><BaseTable.Row> to be valid HTML.
+// Cells render <BaseTable.Cell>, so they need a table wrapper — mirrors the production
+// TableCardBody (BaseTable ui="dashkit" variant="card") these cells live in.
 const TableRowDecorator = (Story: () => React.ReactNode) => (
-    <table>
-        <BaseTable.Body>
+    <BaseTable ui="dashkit" variant="card">
+        <BaseTable.Body className="list">
             <BaseTable.Row>
                 <BaseTable.Cell>Label</BaseTable.Cell>
                 <Story />
             </BaseTable.Row>
         </BaseTable.Body>
-    </table>
+    </BaseTable>
 );
 
 const meta = {

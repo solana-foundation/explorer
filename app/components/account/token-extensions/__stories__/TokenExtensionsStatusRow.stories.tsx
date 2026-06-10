@@ -11,12 +11,13 @@ import { TokenExtensionsStatusRow } from '../TokenExtensionsStatusRow';
 const meta = {
     component: TokenExtensionsStatusRow,
     decorators: [
+        // Mirrors the production wrapper (TableCardBody) the row renders in.
         Story => (
-            <table>
-                <BaseTable.Body>
+            <BaseTable ui="dashkit" variant="card">
+                <BaseTable.Body className="list">
                     <Story />
                 </BaseTable.Body>
-            </table>
+            </BaseTable>
         ),
     ],
     parameters: {

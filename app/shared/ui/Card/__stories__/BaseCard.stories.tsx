@@ -74,7 +74,7 @@ export const DashkitBodyWithoutPadding: Story = {
                 <BaseCardTitle>Tabular content</BaseCardTitle>
             </BaseCardHeader>
             <BaseCardBody className="e-p-0">
-                <table className="e-w-full">
+                <BaseTable ui="dashkit" variant="card">
                     <BaseTable.Head>
                         <BaseTable.Row>
                             <BaseTable.HeaderCell className="e-px-dk-4 e-py-2 e-text-left">Label</BaseTable.HeaderCell>
@@ -91,7 +91,7 @@ export const DashkitBodyWithoutPadding: Story = {
                             <BaseTable.Cell className="e-px-dk-4 e-py-2 e-text-right">789</BaseTable.Cell>
                         </BaseTable.Row>
                     </BaseTable.Body>
-                </table>
+                </BaseTable>
             </BaseCardBody>
         </BaseCard>
     ),

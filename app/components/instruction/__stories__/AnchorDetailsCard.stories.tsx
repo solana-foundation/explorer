@@ -5,7 +5,6 @@ import { nextjsParameters, withMockTransactions, withTokenInfoBatch } from '@sto
 import React from 'react';
 
 import anchor030Devi from '@/app/entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
-import { BaseTable } from '@/app/shared/ui/Table';
 
 import AnchorDetailsCard from '../AnchorDetailsCard';
 import { SignatureContext } from '../SignatureContext';
@@ -43,11 +42,7 @@ const meta = {
         withTokenInfoBatch,
         Story => (
             <SignatureContext.Provider value="">
-                <table className="e-w-full">
-                    <BaseTable.Body>
-                        <Story />
-                    </BaseTable.Body>
-                </table>
+                <Story />
             </SignatureContext.Provider>
         ),
     ],

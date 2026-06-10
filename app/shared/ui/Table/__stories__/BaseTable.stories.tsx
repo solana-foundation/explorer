@@ -14,43 +14,43 @@ type Story = StoryObj<typeof meta>;
 
 const SampleRows = () => (
     <>
-        <thead>
-            <tr>
-                <th>Label</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Slot</td>
-                <td>123,456</td>
-            </tr>
-            <tr>
-                <td>Epoch</td>
-                <td>789</td>
-            </tr>
-        </tbody>
+        <BaseTable.Head>
+            <BaseTable.Row>
+                <BaseTable.HeaderCell>Label</BaseTable.HeaderCell>
+                <BaseTable.HeaderCell>Value</BaseTable.HeaderCell>
+            </BaseTable.Row>
+        </BaseTable.Head>
+        <BaseTable.Body>
+            <BaseTable.Row>
+                <BaseTable.Cell>Slot</BaseTable.Cell>
+                <BaseTable.Cell>123,456</BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Epoch</BaseTable.Cell>
+                <BaseTable.Cell>789</BaseTable.Cell>
+            </BaseTable.Row>
+        </BaseTable.Body>
     </>
 );
 
 const CardSampleRows = () => (
     <>
-        <thead>
-            <tr>
-                <th>Address</th>
-                <th>Balance</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>11111111111111111111111111111111</td>
-                <td>4.2 SOL</td>
-            </tr>
-            <tr>
-                <td>TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA</td>
-                <td>0 SOL</td>
-            </tr>
-        </tbody>
+        <BaseTable.Head>
+            <BaseTable.Row>
+                <BaseTable.HeaderCell>Address</BaseTable.HeaderCell>
+                <BaseTable.HeaderCell>Balance</BaseTable.HeaderCell>
+            </BaseTable.Row>
+        </BaseTable.Head>
+        <BaseTable.Body>
+            <BaseTable.Row>
+                <BaseTable.Cell>11111111111111111111111111111111</BaseTable.Cell>
+                <BaseTable.Cell>4.2 SOL</BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA</BaseTable.Cell>
+                <BaseTable.Cell>0 SOL</BaseTable.Cell>
+            </BaseTable.Row>
+        </BaseTable.Body>
     </>
 );
 
