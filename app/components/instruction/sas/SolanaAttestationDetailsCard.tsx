@@ -104,7 +104,7 @@ export function SolanaAttestationDetailsCard({
                     <Address pubkey={new PublicKey(SAS_PROGRAM_ID)} alignRight link raw />
                 </BaseTable.Cell>
             </BaseTable.Row>
-            <BaseTable.Row className="e-text-dk-xs e-uppercase e-tracking-[0.08em] e-text-dk-gray-600">
+            <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
                 <BaseTable.Cell>Account Name</BaseTable.Cell>
                 <BaseTable.Cell className="e-text-right" colSpan={2}>
                     Address
@@ -124,7 +124,7 @@ export function SolanaAttestationDetailsCard({
             {/* Need to make sure there's one other field besides the discriminator */}
             {parsed.data && Object.keys(parsed.data).length > 2 && (
                 <>
-                    <BaseTable.Row className="e-text-dk-xs e-uppercase e-tracking-[0.08em] e-text-dk-gray-600">
+                    <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
                         <BaseTable.Cell>Argument Name</BaseTable.Cell>
                         <BaseTable.Cell>Type</BaseTable.Cell>
                         <BaseTable.Cell className="e-text-right">Value</BaseTable.Cell>

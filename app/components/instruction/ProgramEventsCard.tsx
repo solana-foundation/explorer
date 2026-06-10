@@ -110,7 +110,7 @@ function EventCard({
                         <>
                             {fields.length > 0 && (
                                 <>
-                                    <BaseTable.Row className="e-text-dk-xs e-uppercase e-tracking-[0.08em] e-text-dk-gray-600">
+                                    <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
                                         <BaseTable.Cell>Field Name</BaseTable.Cell>
                                         <BaseTable.Cell>Type</BaseTable.Cell>
                                         <BaseTable.Cell className="e-text-right">Value</BaseTable.Cell>
