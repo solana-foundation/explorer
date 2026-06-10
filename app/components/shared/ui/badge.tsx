@@ -64,6 +64,7 @@ const badgeVariants = cva([], {
         { class: 'bg-danger-soft', tone: 'soft', ui: 'dashkit', variant: 'danger' },
         { class: 'bg-secondary-soft', tone: 'soft', ui: 'dashkit', variant: 'secondary' },
         { class: 'bg-gray-soft', tone: 'soft', ui: 'dashkit', variant: 'gray' },
+        { class: 'bg-dark-soft', tone: 'soft', ui: 'dashkit', variant: 'dark' },
         { class: 'bg-success', tone: 'solid', ui: 'dashkit', variant: 'success' },
         { class: 'bg-info', tone: 'solid', ui: 'dashkit', variant: 'info' },
         // text-dark forces dark text against the bright `$warning` (#fa62fc) — matches the legacy

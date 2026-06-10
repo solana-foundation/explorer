@@ -88,9 +88,10 @@ export function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: 
             </CardHeader>
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
+                    {/* e-w-[1%] (not the usual e-w-px): two shrink columns share this table, and 1px vs 1% distributes leftover width differently */}
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Trait type</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Value</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-w-[1%] e-text-dk-gray-700">Trait type</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-w-[1%] e-text-dk-gray-700">Value</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body>{attributesList}</BaseTable.Body>

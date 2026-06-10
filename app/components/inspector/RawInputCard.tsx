@@ -114,8 +114,8 @@ function TabInstructions() {
                     <TabsTrigger
                         key={tab.id}
                         active={activeTab === tab.id}
-                        // master used `me-3 nav-link` (no nav-item margins): 1rem trailing gap only
-                        className="e-ml-0 e-mr-4"
+                        // master used `me-3 nav-link` (no nav-item margins): 0.75rem trailing gap only
+                        className="e-ml-0 e-mr-3"
                         onClick={() => setActiveTab(tab.id)}
                     >
                         {tab.label}
