@@ -16,7 +16,12 @@ export interface TableCardBodyProps extends React.PropsWithChildren {
 
 export function TableCardBody({ children, className, layout = 'compact' }: TableCardBodyProps) {
     return (
-        <BaseTable ui="dashkit" variant="card" nowrap={layout === 'compact'} className={cn(firstRowBorderFix, className)}>
+        <BaseTable
+            ui="dashkit"
+            variant="card"
+            nowrap={layout === 'compact'}
+            className={cn(firstRowBorderFix, className)}
+        >
             <BaseTable.Body>{children}</BaseTable.Body>
         </BaseTable>
     );
@@ -33,7 +38,12 @@ export function TableCardBodyHeaded({
     layout = 'compact',
 }: TableCardBodyHeadedProps) {
     return (
-        <BaseTable ui="dashkit" variant="card" nowrap={layout === 'compact'} className={cn(firstRowBorderFix, className)}>
+        <BaseTable
+            ui="dashkit"
+            variant="card"
+            nowrap={layout === 'compact'}
+            className={cn(firstRowBorderFix, className)}
+        >
             {headerComponent ? <BaseTable.Head>{headerComponent}</BaseTable.Head> : null}
             <BaseTable.Body>{children}</BaseTable.Body>
         </BaseTable>
