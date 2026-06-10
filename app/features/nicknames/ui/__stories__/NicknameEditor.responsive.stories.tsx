@@ -1,5 +1,6 @@
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import type { Meta, StoryObj } from '@storybook/react';
+import { withAutoFocusReleased } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withFixedContainer, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import { fn } from 'storybook/test';
 
@@ -8,7 +9,7 @@ import { NicknameEditor } from '../NicknameEditor';
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
     component: NicknameEditor,
-    decorators: [withFixedContainer, withViewportFromGlobal],
+    decorators: [withAutoFocusReleased, withFixedContainer, withViewportFromGlobal],
     parameters: {
         layout: 'fullscreen', // NicknameEditor renders as a position:fixed overlay; fullscreen removes the canvas padding so it anchors to the iframe viewport.
         nextjs: { appDirectory: true },

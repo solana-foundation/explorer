@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { withAutoFocusReleased } from '@storybook-config/decorators';
 import { withFixedContainer } from '@storybook-config/responsive-decorators';
 import { fn } from 'storybook/test';
 
@@ -6,7 +7,7 @@ import { NicknameEditor } from '../NicknameEditor';
 
 const meta = {
     component: NicknameEditor,
-    decorators: [withFixedContainer],
+    decorators: [withAutoFocusReleased, withFixedContainer],
     parameters: {
         docs: {
             description: {
