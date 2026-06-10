@@ -32,36 +32,40 @@ export function useProgramCanonicalMetadata(
     const { data, isLoading } = useSWRImmutable(
         swrKey,
         async () => {
-            try {
-                // For custom clusters or local RPC URLs, fetch directly from client
-                // The API route doesn't support custom/local endpoints
-                if (shouldUseDirectRpc(cluster, url)) {
+            // For custom clusters or local RPC URLs, fetch directly from client
+            // The API route doesn't support custom/local endpoints
+            if (shouldUseDirectRpc(cluster, url)) {
+                try {
                     return await getProgramCanonicalMetadata(programAddress, seed, url);
-                }
-
-                // For known clusters, use the API route (benefits from caching)
-                const response = await fetch(
-                    `/api/program-metadata-idl?programAddress=${programAddress}&cluster=${cluster}&seed=${seed}`,
-                );
-                if (response.ok) {
-                    const data = await response.json();
-                    return data.programMetadata || null;
-                }
-
-                return null;
-            } catch (error) {
-                if (isAccountNotFoundError(error)) {
+                } catch (error) {
+                    if (isAccountNotFoundError(error)) {
+                        return null;
+                    }
+                    Logger.error(new Error('[program-metadata] Error fetching canonical metadata', { cause: error }), {
+                        seed,
+                    });
                     return null;
                 }
-                Logger.error(new Error('[program-metadata] Error fetching canonical metadata', { cause: error }), {
-                    seed,
-                });
-                return null;
             }
+
+            // For known clusters, use the API route (benefits from caching)
+            const response = await fetch(
+                `/api/program-metadata-idl?programAddress=${programAddress}&cluster=${cluster}&seed=${seed}`,
+            );
+            if (!response.ok) {
+                // Throw instead of returning null: under useSWRImmutable a returned value (including
+                // null) is cached as a successful "no metadata" result and never revalidated, so a
+                // transient 502 from the route would permanently suppress metadata for the session.
+                // Throwing lets SWR treat it as an error and retry (see errorRetryCount).
+                throw new Error(`/api/program-metadata-idl returned ${response.status}`);
+            }
+            const data = await response.json();
+            return data.programMetadata || null;
         },
-        { suspense: useSuspense },
+        { errorRetryCount: 3, suspense: useSuspense },
     );
     // Preserve the historical contract: disabled → `null` (not `undefined`); enabled → SWR data
-    // (`undefined` while loading, then the resolved value or `null`).
+    // (`undefined` while loading or on a persistently failing API route, then the resolved value
+    // or `null`).
     return { isLoading, programMetadata: enabled ? data : null };
 }
