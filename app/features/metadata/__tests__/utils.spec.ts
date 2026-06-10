@@ -58,25 +58,33 @@ describe('getProxiedUri', () => {
     it('should return proxied HTTP gateway URI when proxy is enabled and protocol is ipfs (CIDv0)', () => {
         process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
         const uri = `ipfs://${VALID_CID_V0}`;
-        expect(getProxiedUri(uri)).toBe(`/api/metadata/proxy?uri=${encodeURIComponent(`https://ipfs.io/ipfs/${VALID_CID_V0}`)}`);
+        expect(getProxiedUri(uri)).toBe(
+            `/api/metadata/proxy?uri=${encodeURIComponent(`https://ipfs.io/ipfs/${VALID_CID_V0}`)}`,
+        );
     });
 
     it('should return proxied HTTP gateway URI when proxy is enabled and protocol is ipfs (CIDv1)', () => {
         process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
         const uri = `ipfs://${VALID_CID_V1}`;
-        expect(getProxiedUri(uri)).toBe(`/api/metadata/proxy?uri=${encodeURIComponent(`https://ipfs.io/ipfs/${VALID_CID_V1}`)}`);
+        expect(getProxiedUri(uri)).toBe(
+            `/api/metadata/proxy?uri=${encodeURIComponent(`https://ipfs.io/ipfs/${VALID_CID_V1}`)}`,
+        );
     });
 
     it('should return proxied HTTP gateway URI handling ipfs/ prefix when proxy is enabled and protocol is ipfs (CIDv0)', () => {
         process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
         const uri = `ipfs://ipfs/${VALID_CID_V0}`;
-        expect(getProxiedUri(uri)).toBe(`/api/metadata/proxy?uri=${encodeURIComponent(`https://ipfs.io/ipfs/${VALID_CID_V0}`)}`);
+        expect(getProxiedUri(uri)).toBe(
+            `/api/metadata/proxy?uri=${encodeURIComponent(`https://ipfs.io/ipfs/${VALID_CID_V0}`)}`,
+        );
     });
 
     it('should return proxied HTTP gateway URI handling ipfs/ prefix when proxy is enabled and protocol is ipfs (CIDv1)', () => {
         process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
         const uri = `ipfs://ipfs/${VALID_CID_V1}`;
-        expect(getProxiedUri(uri)).toBe(`/api/metadata/proxy?uri=${encodeURIComponent(`https://ipfs.io/ipfs/${VALID_CID_V1}`)}`);
+        expect(getProxiedUri(uri)).toBe(
+            `/api/metadata/proxy?uri=${encodeURIComponent(`https://ipfs.io/ipfs/${VALID_CID_V1}`)}`,
+        );
     });
 
     it('should resolve ipfs:// URI with subpath when proxy is disabled', () => {
@@ -88,7 +96,9 @@ describe('getProxiedUri', () => {
     it('should resolve ipfs:// URI with nested subpath when proxy is enabled', () => {
         process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
         const uri = `ipfs://${VALID_CID_V1}/metadata/0.json`;
-        expect(getProxiedUri(uri)).toBe(`/api/metadata/proxy?uri=${encodeURIComponent(`https://ipfs.io/ipfs/${VALID_CID_V1}/metadata/0.json`)}`);
+        expect(getProxiedUri(uri)).toBe(
+            `/api/metadata/proxy?uri=${encodeURIComponent(`https://ipfs.io/ipfs/${VALID_CID_V1}/metadata/0.json`)}`,
+        );
     });
 
     it('should return empty string for malformed IPFS CIDs', () => {
