@@ -2,11 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ChevronDown } from 'react-feather';
 
 import { Button } from './button';
-import { Dropdown, DropdownHeader, DropdownItem, DropdownMenu } from './dropdown';
+import { Dropdown, DropdownHeader, DropdownItem, DropdownMenu, DropdownToggle } from './dropdown';
 
-// These stories render the Bootstrap-class shim — the dropdown toggle (open/close) is driven by
-// Bootstrap JS via `data-bs-toggle="dropdown"` on the trigger, so in Storybook the menu is shown
-// "open" inline below the trigger via custom positioning helpers when needed.
+// Stories pass `defaultOpen` so the menu is visible for screenshot capture; interactive
+// toggle/outside-click/Escape behavior is owned by the Dropdown root (no Bootstrap JS).
 const meta = {
     component: Dropdown,
     tags: ['autodocs'],
@@ -18,10 +17,12 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     render: () => (
-        <Dropdown>
-            <Button ui="dashkit" variant="white" size="sm" data-bs-toggle="dropdown" type="button">
-                Toggle <ChevronDown className="e-align-text-top" size={13} />
-            </Button>
+        <Dropdown defaultOpen>
+            <DropdownToggle asChild>
+                <Button ui="dashkit" variant="white" size="sm" type="button">
+                    Toggle <ChevronDown className="e-align-text-top" size={13} />
+                </Button>
+            </DropdownToggle>
             <DropdownMenu>
                 <DropdownItem>First item</DropdownItem>
                 <DropdownItem>Second item</DropdownItem>
@@ -31,15 +32,17 @@ export const Default: Story = {
     ),
 };
 
-// `align="end"` adds `.dropdown-menu-end` so the menu right-aligns to the trigger — Bootstrap default.
+// `align="end"` adds `.e-dropdown-menu-end` so the menu right-aligns to the trigger.
 export const AlignEnd: Story = {
     name: 'Align end',
     render: () => (
         <div className="e-flex e-justify-end">
-            <Dropdown>
-                <Button ui="dashkit" variant="white" size="sm" data-bs-toggle="dropdown" type="button">
-                    Toggle <ChevronDown className="e-align-text-top" size={13} />
-                </Button>
+            <Dropdown defaultOpen>
+                <DropdownToggle asChild>
+                    <Button ui="dashkit" variant="white" size="sm" type="button">
+                        Toggle <ChevronDown className="e-align-text-top" size={13} />
+                    </Button>
+                </DropdownToggle>
                 <DropdownMenu align="end">
                     <DropdownItem>First item</DropdownItem>
                     <DropdownItem>Second item</DropdownItem>
@@ -53,10 +56,12 @@ export const AlignEnd: Story = {
 export const ScrollingMenu: Story = {
     name: 'Scrolling menu (token-filter)',
     render: () => (
-        <Dropdown>
-            <Button ui="dashkit" variant="white" size="sm" data-bs-toggle="dropdown" type="button">
-                Filter: All <ChevronDown className="e-align-text-top" size={13} />
-            </Button>
+        <Dropdown defaultOpen>
+            <DropdownToggle asChild>
+                <Button ui="dashkit" variant="white" size="sm" type="button">
+                    Filter: All <ChevronDown className="e-align-text-top" size={13} />
+                </Button>
+            </DropdownToggle>
             <DropdownMenu align="end" className="e-max-h-80 e-overflow-y-auto">
                 {Array.from({ length: 30 }, (_, i) => (
                     <DropdownItem key={i}>Filter option #{i + 1}</DropdownItem>
@@ -71,17 +76,12 @@ export const ScrollingMenu: Story = {
 export const WithHeaderAndItems: Story = {
     name: 'With header + items',
     render: () => (
-        <Dropdown>
-            <Button
-                ui="dashkit"
-                variant="dark"
-                size="sm"
-                className="e-w-[150px]"
-                data-bs-toggle="dropdown"
-                type="button"
-            >
-                Creators <ChevronDown className="e-align-text-top" size={15} />
-            </Button>
+        <Dropdown defaultOpen>
+            <DropdownToggle asChild>
+                <Button ui="dashkit" variant="dark" size="sm" className="e-w-[150px]" type="button">
+                    Creators <ChevronDown className="e-align-text-top" size={15} />
+                </Button>
+            </DropdownToggle>
             <DropdownMenu className="e-mt-1.5">
                 <DropdownHeader className="e-flex e-flex-wrap e-items-center">
                     <div className="e-flex e-max-w-[80%] e-grow-0 e-basis-[80%] e-font-mono">Creator Address</div>
@@ -104,14 +104,16 @@ export const WithHeaderAndItems: Story = {
 };
 
 // `asChild` lets a DropdownItem wrap an existing `<a>` / `<Link>` so the className+styling apply
-// to the link element directly (instead of nesting <a> inside <div class="dropdown-item">).
+// to the link element directly (instead of nesting <a> inside a div).
 export const AsChildLink: Story = {
     name: 'asChild link',
     render: () => (
-        <Dropdown>
-            <Button ui="dashkit" variant="white" size="sm" data-bs-toggle="dropdown" type="button">
-                Toggle <ChevronDown className="e-align-text-top" size={13} />
-            </Button>
+        <Dropdown defaultOpen>
+            <DropdownToggle asChild>
+                <Button ui="dashkit" variant="white" size="sm" type="button">
+                    Toggle <ChevronDown className="e-align-text-top" size={13} />
+                </Button>
+            </DropdownToggle>
             <DropdownMenu>
                 <DropdownItem asChild>
                     <a href="#first">First link</a>
