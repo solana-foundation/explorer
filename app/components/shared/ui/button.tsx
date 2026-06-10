@@ -125,6 +125,16 @@ const buttonVariants = cva([], {
             ui: 'dashkit',
             variant: 'outline-warning',
         },
+        {
+            class: 'e-bg-[#fa62fc] e-border-[#fa62fc] e-text-white hover:e-bg-[#d553d6] hover:e-border-[#c84eca]',
+            ui: 'dashkit',
+            variant: 'warning',
+        },
+        {
+            class: 'e-bg-[#b45be1] e-border-[#b45be1] e-text-white hover:e-bg-[#994dbf] hover:e-border-[#9049b4]',
+            ui: 'dashkit',
+            variant: 'danger',
+        },
         // Toggle-on ring; only meaningful when paired with `variant="black"` in `btn-group-toggle`.
         { active: true, class: 'e-shadow-[0_0_0_0.15rem_#33a382]', ui: 'dashkit' },
     ],
@@ -142,6 +152,7 @@ const buttonVariants = cva([], {
             accent: '',
             black: '',
             compact: '',
+            danger: '',
             dark: '',
             default: '',
             destructive: '',
@@ -153,6 +164,7 @@ const buttonVariants = cva([], {
             'outline-warning': '',
             primary: '',
             secondary: '',
+            warning: '',
             white: '',
         },
     },
