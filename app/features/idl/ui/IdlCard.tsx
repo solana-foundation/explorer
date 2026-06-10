@@ -8,7 +8,7 @@ import { cn } from '@shared/utils';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'react-feather';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 import { clusterSlug } from '@/app/utils/cluster';
 
@@ -93,9 +93,11 @@ export function IdlCard({ programId }: { programId: string }) {
             return <LoadingCard message="Loading program IDL" />;
         }
         return (
-            <div className="card">
+            <Card ui="dashkit">
                 <CardHeader ui="dashkit">
-                    <h4 className="card-header-title">Program IDL</h4>
+                    <CardTitle as="h4" ui="dashkit">
+                        Program IDL
+                    </CardTitle>
                 </CardHeader>
                 <CardBody ui="dashkit">
                     <div className="e-mb-6 e-flex e-items-center e-gap-2 e-text-destructive">
@@ -122,12 +124,12 @@ export function IdlCard({ programId }: { programId: string }) {
                                 className="btn btn-outline-primary btn-sm e-whitespace-nowrap"
                             >
                                 Full documentation
-                                <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                                <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
                             </a>
                         </div>
                     </div>
                 </CardBody>
-            </div>
+            </Card>
         );
     }
 
@@ -135,7 +137,7 @@ export function IdlCard({ programId }: { programId: string }) {
     const isMismatch = isIdlProgramIdMismatch(activeTab.idl, programId);
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
                 <div className="nav nav-tabs e-border-0" role="tablist">
                     {tabs
@@ -181,6 +183,6 @@ export function IdlCard({ programId }: { programId: string }) {
                     />
                 )}
             </CardBody>
-        </div>
+        </Card>
     );
 }

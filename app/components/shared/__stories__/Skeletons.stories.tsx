@@ -9,7 +9,7 @@ import {
     StatsTableSkeleton,
     TableCardSkeleton,
     TableRowSkeleton,
-} from './Skeletons';
+} from '../Skeletons';
 
 const hasPulse = (canvasElement: HTMLElement) =>
     expect(canvasElement.querySelectorAll('.e-animate-pulse').length).toBeGreaterThan(0);

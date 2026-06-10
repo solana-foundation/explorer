@@ -11,7 +11,7 @@ import { PublicKey } from '@solana/web3.js';
 import { lamportsToSolString } from '@utils/index';
 import React from 'react';
 
-import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 const U64_MAX = BigInt('0xffffffffffffffff');
 
@@ -76,13 +76,11 @@ export function RewardsCard({ address }: { address: string }) {
 
     return (
         <>
-            <div className="card">
+            <Card ui="dashkit">
                 <CardHeader ui="dashkit">
-                    <div className="row e-items-center">
-                        <div className="col">
-                            <h3 className="card-header-title">Rewards</h3>
-                        </div>
-                    </div>
+                    <CardTitle as="h3" ui="dashkit">
+                        Rewards
+                    </CardTitle>
                 </CardHeader>
 
                 {rewardsFound ? (
@@ -91,10 +89,10 @@ export function RewardsCard({ address }: { address: string }) {
                         <table className="table table-sm table-nowrap card-table">
                             <thead>
                                 <tr>
-                                    <th className="w-1 text-muted">Epoch</th>
-                                    <th className="text-muted">Effective Slot</th>
-                                    <th className="text-muted">Reward Amount</th>
-                                    <th className="text-muted">Post Balance</th>
+                                    <th className="e-w-px e-text-dk-gray-700">Epoch</th>
+                                    <th className="e-text-dk-gray-700">Effective Slot</th>
+                                    <th className="e-text-dk-gray-700">Reward Amount</th>
+                                    <th className="e-text-dk-gray-700">Post Balance</th>
                                 </tr>
                             </thead>
                             <tbody className="list">{rewardsList}</tbody>
@@ -108,12 +106,12 @@ export function RewardsCard({ address }: { address: string }) {
 
                 <CardFooter ui="dashkit">
                     {foundOldest ? (
-                        <div className="text-muted e-text-center">Fetched full reward history</div>
+                        <div className="e-text-center e-text-dk-gray-700">Fetched full reward history</div>
                     ) : (
                         <button className="btn btn-primary e-w-full" onClick={() => loadMore()} disabled={fetching}>
                             {fetching ? (
                                 <>
-                                    <span className="align-text-top spinner-grow-sm e-mr-1.5"></span>
+                                    <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5 e-align-text-top"></span>
                                     Loading
                                 </>
                             ) : (
@@ -122,7 +120,7 @@ export function RewardsCard({ address }: { address: string }) {
                         </button>
                     )}
                 </CardFooter>
-            </div>
+            </Card>
         </>
     );
 }

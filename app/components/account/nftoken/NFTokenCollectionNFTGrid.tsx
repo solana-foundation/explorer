@@ -24,7 +24,7 @@ export function NFTokenCollectionNFTGrid({ collection }: { collection: string })
             </CardHeader>
 
             <div className="e-py-6">
-                {nfts.length === 0 && <div className={'px-4'}>No NFTs Found</div>}
+                {nfts.length === 0 && <div className="px-4">No NFTs Found</div>}
 
                 {nfts.length > 0 && (
                     <div

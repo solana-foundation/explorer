@@ -1,6 +1,6 @@
 // Skip ClusterProvider's mount-time RPC (getFirstAvailableBlock/Schedule/Info, getGenesisHash).
 
-import { type ClusterState, DispatchContext, StateContext } from '@providers/cluster';
+import { type ClusterState, DispatchContext, ModalContext, StateContext } from '@providers/cluster';
 import { Cluster, ClusterStatus, MAINNET_BETA_URL } from '@utils/cluster';
 import { type ReactNode, useState } from 'react';
 
@@ -29,14 +29,18 @@ const defaultState: ClusterState = {
 type Props = {
     children: ReactNode;
     state?: ClusterState;
+    modalOpen?: boolean;
 };
 
-export function MockClusterProvider({ children, state = defaultState }: Props) {
+export function MockClusterProvider({ children, state = defaultState, modalOpen = false }: Props) {
     // Wire a real reducer state slot so any dispatch from consumers is harmless.
     const [current, setCurrent] = useState<ClusterState>(state);
+    const [show, setShow] = useState(modalOpen);
     return (
         <StateContext.Provider value={current}>
-            <DispatchContext.Provider value={setCurrent as any}>{children}</DispatchContext.Provider>
+            <DispatchContext.Provider value={setCurrent as any}>
+                <ModalContext.Provider value={[show, setShow]}>{children}</ModalContext.Provider>
+            </DispatchContext.Provider>
         </StateContext.Provider>
     );
 }

@@ -3,10 +3,12 @@ import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import base58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
+import { AlertCircle } from 'react-feather';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
-import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { FormControl } from '@/app/shared/ui/FormControl';
 
 import type { InspectorData } from './InspectorPage';
 
@@ -239,42 +241,40 @@ export function RawInput({
 
     const placeholder = 'Paste a raw base58/base64 encoded transaction message or Squads vault transaction account';
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
                 <div className="e-flex e-items-center e-justify-between">
-                    <h3 className="card-header-title">Inspector Input</h3>
+                    <CardTitle as="h3" ui="dashkit">
+                        Inspector Input
+                    </CardTitle>
                     <button className="btn btn-sm btn-white" onClick={clearInput} type="button">
                         Clear
                     </button>
                 </div>
             </CardHeader>
             <CardBody ui="dashkit">
-                <textarea
-                    rows={rows}
-                    onInput={onInput}
-                    ref={rawInput}
-                    className="form-control form-control-flush form-control-auto font-monospace"
-                    placeholder={placeholder}
-                    name="tx-inspector-input"
-                ></textarea>
-                <div className="row e-items-center">
-                    <div className="col e-flex e-items-center">
-                        {error && (
-                            <>
-                                <span className="text-warning small e-mr-1.5">
-                                    <i className="fe fe-alert-circle"></i>
-                                </span>
-
-                                <span className="text-warning">{error}</span>
-                            </>
-                        )}
-                    </div>
+                <FormControl variant="flush-auto" className="e-font-mono">
+                    <textarea
+                        rows={rows}
+                        onInput={onInput}
+                        ref={rawInput}
+                        placeholder={placeholder}
+                        name="tx-inspector-input"
+                    />
+                </FormControl>
+                <div className="e-flex e-items-center">
+                    {error && (
+                        <>
+                            <AlertCircle className="e-mr-1.5 e-text-dk-warning-on-dark" size={14} aria-hidden />
+                            <span className="e-text-dk-warning-on-dark">{error}</span>
+                        </>
+                    )}
                 </div>
             </CardBody>
             <CardFooter ui="dashkit">
                 <h3>Instructions</h3>
                 <TabInstructions />
             </CardFooter>
-        </div>
+        </Card>
     );
 }

@@ -4,7 +4,7 @@ import { useCluster } from '@providers/cluster';
 import type { VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import { useSimulation } from '../model/use-simulation';
 import { SimulatorCUProfilingCard } from './SimulatorCUProfilingCard';
@@ -40,7 +40,7 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
         return (
             <SimulationCardShell>
                 <CardBody ui="dashkit" className="e-text-center">
-                    <span className="spinner-grow spinner-grow-sm e-mr-2"></span>
+                    <span className="e-spinner-grow e-spinner-grow-sm e-mr-2"></span>
                     Simulating
                 </CardBody>
             </SimulationCardShell>
@@ -120,12 +120,14 @@ function SimulateButton({ label, onClick }: { label: string; onClick: () => void
 
 function SimulationCardShell({ action, children }: { action?: React.ReactNode; children: React.ReactNode }) {
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title">Transaction Simulation</h3>
+                <CardTitle as="h3" ui="dashkit">
+                    Transaction Simulation
+                </CardTitle>
                 {action}
             </CardHeader>
             {children}
-        </div>
+        </Card>
     );
 }

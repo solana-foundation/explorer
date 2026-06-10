@@ -3,18 +3,16 @@ import { SolBalance } from '@components/common/SolBalance';
 import type { StakeHistoryEntry, SysvarStakeHistoryAccount } from '@validators/accounts/sysvar';
 import React from 'react';
 
-import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStakeHistoryAccount }) {
     const stakeHistory = sysvarAccount.info;
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <div className="row e-items-center">
-                    <div className="col">
-                        <h3 className="card-header-title">Stake History</h3>
-                    </div>
-                </div>
+                <CardTitle as="h3" ui="dashkit">
+                    Stake History
+                </CardTitle>
             </CardHeader>
 
             {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
@@ -22,10 +20,10 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
-                            <th className="w-1 text-muted">Epoch</th>
-                            <th className="text-muted">Effective (SOL)</th>
-                            <th className="text-muted">Activating (SOL)</th>
-                            <th className="text-muted">Deactivating (SOL)</th>
+                            <th className="e-w-px e-text-dk-gray-700">Epoch</th>
+                            <th className="e-text-dk-gray-700">Effective (SOL)</th>
+                            <th className="e-text-dk-gray-700">Activating (SOL)</th>
+                            <th className="e-text-dk-gray-700">Deactivating (SOL)</th>
                         </tr>
                     </thead>
                     <tbody className="list">
@@ -38,26 +36,26 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
 
             {stakeHistory.length === 0 && (
                 <CardFooter ui="dashkit">
-                    <div className="text-muted e-text-center">No stake history found</div>
+                    <div className="e-text-center e-text-dk-gray-700">No stake history found</div>
                 </CardFooter>
             )}
-        </div>
+        </Card>
     );
 }
 
 function HistoryEntryRow({ entry }: { entry: StakeHistoryEntry }) {
     return (
         <tr>
-            <td className="w-1 font-monospace">
+            <td className="e-w-px e-font-mono">
                 <Epoch epoch={entry.epoch} link />
             </td>
-            <td className="font-monospace">
+            <td className="e-font-mono">
                 <SolBalance lamports={entry.stakeHistory.effective} />
             </td>
-            <td className="font-monospace">
+            <td className="e-font-mono">
                 <SolBalance lamports={entry.stakeHistory.activating} />
             </td>
-            <td className="font-monospace">
+            <td className="e-font-mono">
                 <SolBalance lamports={entry.stakeHistory.deactivating} />
             </td>
         </tr>

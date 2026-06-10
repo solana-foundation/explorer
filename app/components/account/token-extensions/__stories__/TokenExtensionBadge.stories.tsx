@@ -1,16 +1,21 @@
+/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, within } from 'storybook/test';
+import { expect, fn, within } from 'storybook/test';
 
 import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
 import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
 
-import { TokenExtensionBadges } from '../TokenExtensionBadges';
+import { TokenExtensionBadge } from '../TokenExtensionBadge';
 
+// More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
-    component: TokenExtensionBadges,
+    args: {
+        onClick: fn(),
+    },
+    component: TokenExtensionBadge,
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/TokenExtensionBadges',
-} satisfies Meta<typeof TokenExtensionBadges>;
+    title: 'Components/Account/token-extensions/TokenExtensionBadge',
+} satisfies Meta<typeof TokenExtensionBadge>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -24,11 +29,12 @@ const extension = {
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary: Story = {
     args: {
-        extensions: new Array(5).fill(null).map(() => extension),
+        extension,
     },
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
-        const badges = canvas.getAllByText('transferFeeConfig');
-        expect(badges).toHaveLength(5);
+        // The badge shows "Enabled" or "Disabled" by default, not the extension name
+        const badge = await canvas.findByText(/Enabled|Disabled/);
+        expect(badge).toBeInTheDocument();
     },
 };

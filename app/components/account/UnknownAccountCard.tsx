@@ -196,7 +196,7 @@ function AdjacentAddressLink({ address, foundCluster }: { address: string; found
     });
 
     return (
-        <a href={foundClusterPath} className="text-info e-align-middle" style={{ marginRight: '5px' }}>
+        <a href={foundClusterPath} className="e-align-middle e-text-dk-info" style={{ marginRight: '5px' }}>
             Found on {clusterName(foundCluster)}
         </a>
     );

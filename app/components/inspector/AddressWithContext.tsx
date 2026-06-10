@@ -99,7 +99,7 @@ function AccountInfo({ pubkey, validator }: { pubkey: PublicKey; validator?: Acc
         );
 
     const errorMessage = validator && validator(account);
-    if (errorMessage) return <span className="text-warning">{errorMessage}</span>;
+    if (errorMessage) return <span className="e-text-dk-warning-on-dark">{errorMessage}</span>;
 
     if (account.lamports === 0) {
         return <span className="text-muted">Account doesn&apos;t exist</span>;

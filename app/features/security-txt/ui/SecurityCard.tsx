@@ -8,7 +8,7 @@ import { ErrorCard } from '@/app/components/common/ErrorCard';
 import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
 import type { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
 import { useCluster } from '@/app/providers/cluster';
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import { NO_SECURITY_TXT_ERROR } from '../lib/constants';
 import { fromProgramData } from '../lib/fromProgramData';
@@ -74,12 +74,12 @@ export function ProgramSecurityTxtCard({
     ) : null;
 
     return (
-        <div className="card security-txt e-overflow-hidden">
+        <Card ui="dashkit" className="e-overflow-hidden">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title e-mb-0 e-mr-4 e-flex e-items-center e-gap-3">
+                <CardTitle as="h3" ui="dashkit" className="e-mr-4 e-flex e-items-center e-gap-3">
                     Security.txt
                     <SecurityTxtVersionBadge version={pmpSecurityTxt ? 'pmp' : 'neodyme'} />
-                </h3>
+                </CardTitle>
                 <div className="btn btn-sm btn-white e-flex">
                     <DownloadableButton
                         data={downloadData}
@@ -91,7 +91,7 @@ export function ProgramSecurityTxtCard({
                 </div>
             </CardHeader>
             <div className="e-px-6 e-py-4">
-                <small className="text-warning e-flex e-gap-1">
+                <small className="e-flex e-gap-1 e-text-dk-warning-on-dark">
                     <AlertCircle size={16} className="e-mt-0.5" />
                     Note that this is self-reported by the author of the program and might not be accurate
                 </small>
@@ -105,6 +105,6 @@ export function ProgramSecurityTxtCard({
             >
                 {securityTable}
             </ErrorBoundary>
-        </div>
+        </Card>
     );
 }

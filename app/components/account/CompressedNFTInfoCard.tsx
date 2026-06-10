@@ -12,7 +12,7 @@ import {
     useCompressedNftProof,
 } from '@/app/providers/compressed-nft';
 import { toBuffer } from '@/app/shared/lib/bytes';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import { Address } from '../common/Address';
 import { TableCardBody } from '../common/TableCardBody';
@@ -57,9 +57,11 @@ export function DasCompressionInfoCard({
             : 0;
     const proofSize = proof.proof.length - canopyDepth;
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title">Compression Info</h3>
+                <CardTitle as="h3" ui="dashkit">
+                    Compression Info
+                </CardTitle>
             </CardHeader>
 
             <TableCardBody>
@@ -106,13 +108,13 @@ export function DasCompressionInfoCard({
                     </td>
                 </tr>
             </TableCardBody>
-        </div>
+        </Card>
     );
 }
 
 function getVerifiedProofPill(verified: boolean) {
     return (
-        <div className={'d-inline-flex e-ml-1.5 e-items-center'}>
+        <div className="e-ml-1.5 e-inline-flex e-items-center">
             <span className={cn('badge badge-pill bg-dark', !verified && 'bg-danger-soft')}>{`Proof ${
                 verified ? '' : 'Not'
             } Verified`}</span>
@@ -133,7 +135,7 @@ function getProofSizePill(proofSize: number) {
     }
 
     return (
-        <div className={'d-inline-flex e-ml-1.5 e-items-center'}>
+        <div className="e-ml-1.5 e-inline-flex e-items-center">
             <span className={`badge badge-pill ${color}`}>{text}</span>
         </div>
     );

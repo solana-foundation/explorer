@@ -1,3 +1,4 @@
+import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { TransactionsProvider } from '@providers/transactions';
 import type { Decorator, Parameters } from '@storybook/react';
@@ -12,9 +13,25 @@ import { MockSupplyProvider } from './__mocks__/MockSupplyProvider';
 import { MockTokenInfoBatchProvider } from './__mocks__/MockTokenInfoBatchProvider';
 import { MockTransactionsProvider } from './__mocks__/MockTransactionsProvider';
 
+const noopFetcher = async () => undefined;
+// MultipleAccountFetcher has private constructor params (nominal-typed) — no structural object matches.
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- decorator-only stub
+const noopAccountsFetchers = {
+    parsed: { fetch: noopFetcher },
+    raw: { fetch: noopFetcher },
+    skip: { fetch: noopFetcher },
+} as unknown as React.ContextType<typeof FetchersContext>;
+
 /** Wraps stories with ClusterProvider. Usage: `decorators: [withCluster]` */
 export const withCluster: Decorator = Story => (
     <ClusterProvider>
+        <Story />
+    </ClusterProvider>
+);
+
+/** Wraps stories with ClusterProvider where the cluster modal is forced open. Usage: `decorators: [withClusterModalOpen]` */
+export const withClusterModalOpen: Decorator = Story => (
+    <ClusterProvider modalOpen>
         <Story />
     </ClusterProvider>
 );
@@ -34,6 +51,27 @@ export const withClusterAndAccounts: Decorator = Story => (
         </MockAccountsProvider>
     </ClusterProvider>
 );
+
+/**
+ * Factory: seeds the real accounts contexts with a fixture `State` so consumers of `useAccountInfo`
+ * etc. resolve against the provided cache. Fetchers no-op (no RPC calls).
+ * Usage: `decorators: [withAccountsState(stateWithFixture)]`
+ */
+export function withAccountsState(state: State): Decorator {
+    return function WithAccountsState(Story) {
+        return (
+            <ClusterProvider>
+                <StateContext.Provider value={state}>
+                    <DispatchContext.Provider value={() => undefined}>
+                        <FetchersContext.Provider value={noopAccountsFetchers}>
+                            <Story />
+                        </FetchersContext.Provider>
+                    </DispatchContext.Provider>
+                </StateContext.Provider>
+            </ClusterProvider>
+        );
+    };
+}
 
 /** Decorator for card table field components. Usage: `decorators: [withCardTableField]` */
 export const withCardTableField: Decorator = Story => (

@@ -10,7 +10,7 @@ import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -35,12 +35,14 @@ const SERIES_INFO = {
 export function LiveTransactionStatsCard() {
     const [series, setSeries] = React.useState<Series>('short');
     return (
-        <div className="card e-mb-3 e-flex e-grow e-flex-col md:e-mb-6">
+        <Card ui="dashkit" className="e-mb-3 e-flex e-grow e-flex-col md:e-mb-6">
             <CardHeader ui="dashkit">
-                <h4 className="card-header-title">Live Transaction Stats</h4>
+                <CardTitle as="h4" ui="dashkit">
+                    Live Transaction Stats
+                </CardTitle>
             </CardHeader>
             <TpsCardBody series={series} setSeries={setSeries} />
-        </div>
+        </Card>
     );
 }
 
@@ -178,11 +180,11 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
             <TableCardBody layout="expanded" className="[&_td:first-child]:!e-w-2/5 md:[&_td:first-child]:!e-w-auto">
                 <tr>
                     <td className="e-w-full">Transaction count</td>
-                    <td className="font-monospace e-text-right">{transactionCount} </td>
+                    <td className="e-text-right e-font-mono">{transactionCount} </td>
                 </tr>
                 <tr>
                     <td className="e-w-full">Transactions per second (TPS)</td>
-                    <td className="font-monospace e-text-right">{averageTps} </td>
+                    <td className="e-text-right e-font-mono">{averageTps} </td>
                 </tr>
             </TableCardBody>
 
@@ -211,7 +213,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
                     <Bar data={chartData} options={chartOptions} style={{ height: '100%' }} />
                 </div>
 
-                <div className="text-muted e-mt-3 e-text-center">
+                <div className="e-mt-3 e-text-center e-text-dk-gray-700">
                     <p className="e-mb-0">
                         For transaction confirmation time statistics, please visit{' '}
                         <a href="https://www.validators.app" target="_blank" rel="noopener noreferrer">

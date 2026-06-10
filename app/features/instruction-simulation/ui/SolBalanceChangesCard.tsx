@@ -2,25 +2,27 @@ import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { SolBalance } from '@components/common/SolBalance';
 
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import type { SolBalanceChange } from '../lib/types';
 
 export function SolBalanceChangesCard({ balanceChanges }: { balanceChanges: SolBalanceChange[] }) {
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title">SOL Balance Changes</h3>
+                <CardTitle as="h3" ui="dashkit">
+                    SOL Balance Changes
+                </CardTitle>
             </CardHeader>
             <div className="e-mb-0 e-overflow-x-auto">
                 {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
-                            <th className="text-muted">#</th>
-                            <th className="text-muted">Address</th>
-                            <th className="text-muted">Change (SOL)</th>
-                            <th className="text-muted">Post Balance (SOL)</th>
+                            <th className="e-text-dk-gray-700">#</th>
+                            <th className="e-text-dk-gray-700">Address</th>
+                            <th className="e-text-dk-gray-700">Change (SOL)</th>
+                            <th className="e-text-dk-gray-700">Post Balance (SOL)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -43,6 +45,6 @@ export function SolBalanceChangesCard({ balanceChanges }: { balanceChanges: SolB
                     </tbody>
                 </table>
             </div>
-        </div>
+        </Card>
     );
 }
