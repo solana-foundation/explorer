@@ -1,6 +1,5 @@
 import { SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND, SolanaError } from '@solana/kit';
 import { renderHook, waitFor } from '@testing-library/react';
-import { fetch } from 'cross-fetch';
 import React from 'react';
 import { SWRConfig } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -21,9 +20,8 @@ vi.mock('../../api/getProgramCanonicalMetadata', async () => {
     };
 });
 
-vi.mock('cross-fetch', () => ({
-    fetch: vi.fn(),
-}));
+const fetchMock = vi.fn();
+vi.stubGlobal('fetch', fetchMock);
 
 vi.mock('@/app/shared/lib/logger', () => ({
     Logger: {
@@ -90,7 +88,7 @@ describe('useProgramCanonicalMetadata — direct RPC path', () => {
 
     it('should return the resolved metadata from the API route on a known cluster', async () => {
         const metadata = { instructions: [], name: 'test_program', version: '0.1.0' };
-        vi.mocked(fetch).mockResolvedValueOnce({
+        fetchMock.mockResolvedValueOnce({
             json: async () => ({ programMetadata: metadata }),
             ok: true,
         } as Response);
@@ -117,7 +115,7 @@ describe('useProgramCanonicalMetadata — direct RPC path', () => {
         // A 502 from the route is deliberately uncached server-side; the client must mirror that.
         // Returning `null` here would be stored by useSWRImmutable as a successful "no metadata"
         // result for the whole session — the regression this guards against.
-        vi.mocked(fetch).mockResolvedValue({ ok: false, status: 502 } as Response);
+        fetchMock.mockResolvedValue({ ok: false, status: 502 } as Response);
 
         const { result } = renderHook(
             () =>
@@ -132,7 +130,7 @@ describe('useProgramCanonicalMetadata — direct RPC path', () => {
         );
 
         await waitFor(() => {
-            expect(fetch).toHaveBeenCalled();
+            expect(fetchMock).toHaveBeenCalled();
             expect(result.current.isLoading).toBe(false);
         });
         // Error state, not a cached `null` success.

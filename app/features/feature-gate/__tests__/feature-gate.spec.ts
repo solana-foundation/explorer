@@ -1,6 +1,5 @@
 import { type FeatureInfoType } from '@entities/feature-gate';
 import { address } from '@solana/kit';
-import fetch from 'cross-fetch';
 import { vi } from 'vitest';
 
 import { fetchFeatureGateInformation, getLink } from '../api/fetch-feature-gate-information';
@@ -25,20 +24,14 @@ const FEATURE: FeatureInfoType = {
     title: 'MoveStake and MoveLamports',
 };
 
-vi.mock('cross-fetch', async () => {
-    const actual = await vi.importActual('cross-fetch');
-    return {
-        ...actual,
-        default: vi.fn(),
-    };
-});
+const fetchMock = vi.fn();
+vi.stubGlobal('fetch', fetchMock);
 
 /**
  *  mock valid response
  */
 function mockFetchOnce(data: any = {}) {
-    // @ts-expect-error fetch does not have mocked fn
-    fetch.mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
         ok: true,
         text: async () => data,
     });
@@ -48,8 +41,7 @@ function mockFetchOnce(data: any = {}) {
  *  mock error during process
  */
 function mockRejectOnce<T extends Error>(error: T) {
-    // @ts-expect-error fetch does not have mocked fn
-    fetch.mockRejectedValueOnce(error);
+    fetchMock.mockRejectedValueOnce(error);
 }
 
 describe('fetchFeatureGateInformation', () => {
@@ -68,7 +60,7 @@ describe('fetchFeatureGateInformation', () => {
         mockFetchOnce('# Summary');
         const data = await fetchFeatureGateInformation(FEATURE);
 
-        expect(fetch).toHaveBeenCalledWith(getLink(FEATURE.simd_link[0]), { method: 'GET' });
+        expect(fetchMock).toHaveBeenCalledWith(getLink(FEATURE.simd_link[0]), { method: 'GET' });
         expect(data).toEqual(['# Summary']);
     });
 });

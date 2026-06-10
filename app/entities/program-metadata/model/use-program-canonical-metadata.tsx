@@ -2,7 +2,6 @@
 
 import { shouldUseDirectRpc } from '@entities/cluster/@x/program-metadata';
 import { isSolanaError, SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND } from '@solana/kit';
-import { fetch } from 'cross-fetch';
 import useSWRImmutable from 'swr/immutable';
 
 import { Logger } from '@/app/shared/lib/logger';

@@ -5,7 +5,6 @@ import { shouldUseDirectRpc } from '@entities/cluster';
 import { getProvider, IdlVariant, type SupportedIdl } from '@entities/idl';
 import { IDL_SEED, useProgramCanonicalMetadata } from '@entities/program-metadata';
 import { PublicKey } from '@solana/web3.js';
-import { fetch } from 'cross-fetch';
 import useSWRImmutable from 'swr/immutable';
 
 import { Logger } from '@/app/shared/lib/logger';

@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
     useProgramCanonicalMetadata: vi.fn(),
 }));
 
-vi.mock('cross-fetch', () => ({ fetch: mocks.fetch }));
+vi.stubGlobal('fetch', mocks.fetch);
 
 vi.mock('@/app/entities/program-metadata/model/use-program-canonical-metadata', () => ({
     useProgramCanonicalMetadata: mocks.useProgramCanonicalMetadata,
