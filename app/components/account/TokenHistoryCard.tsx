@@ -254,7 +254,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Transaction Signature</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
-                <BaseTable.Body className="list">
+                <BaseTable.Body>
                     {mintAndTxs.slice(0, visibleTxCount).map(({ mint, tx }) => (
                         <TokenTransactionRow
                             key={tx.signature}
