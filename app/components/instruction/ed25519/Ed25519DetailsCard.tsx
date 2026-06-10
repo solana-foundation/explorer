@@ -142,7 +142,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                             <BaseTable.Cell className="e-text-right">
                                 {signature ? (
                                     <Copyable text={toBase64(signature)}>
-                                        <span className="font-monospace">{toBase64(signature)}</span>
+                                        <span className="e-font-mono">{toBase64(signature)}</span>
                                     </Copyable>
                                 ) : (
                                     'Invalid reference'
@@ -194,7 +194,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                             >
                                 {message ? (
                                     <Copyable text={toBase64(message)}>
-                                        <span className="font-monospace">{toBase64(message)}</span>
+                                        <span className="e-font-mono">{toBase64(message)}</span>
                                     </Copyable>
                                 ) : (
                                     'Invalid reference'

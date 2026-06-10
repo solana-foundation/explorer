@@ -74,7 +74,7 @@ export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
                     }}
                 >
                     <Copyable text={value as string}>
-                        <span className="font-monospace">{value as string}</span>
+                        <span className="e-font-mono">{value as string}</span>
                     </Copyable>
                 </BaseTable.Cell>
             );
@@ -108,7 +108,7 @@ export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
                         }}
                     >
                         <Copyable text={value as string}>
-                            <span className="font-monospace">{value as string}</span>
+                            <span className="e-font-mono">{value as string}</span>
                         </Copyable>
                     </BaseTable.Cell>
                 ) : (

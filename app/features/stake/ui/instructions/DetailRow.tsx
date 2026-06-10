@@ -14,7 +14,7 @@ export function DetailRow(props: DetailRowProps) {
     return (
         <BaseTable.Row>
             <BaseTable.Cell>{props.label}</BaseTable.Cell>
-            <BaseTable.Cell className={cn('e-text-right', monospace && 'font-monospace')}>
+            <BaseTable.Cell className={cn('e-text-right', monospace && 'e-font-mono')}>
                 {'pubkey' in props ? <KitAddress address={props.pubkey} alignRight link /> : props.children}
             </BaseTable.Cell>
         </BaseTable.Row>

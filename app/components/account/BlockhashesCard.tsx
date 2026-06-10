@@ -43,7 +43,7 @@ const renderAccountRow = (entry: RecentBlockhashesEntry, index: number) => {
     return (
         <BaseTable.Row key={index}>
             <BaseTable.Cell className="e-w-px">{index + 1}</BaseTable.Cell>
-            <BaseTable.Cell className="font-monospace e-w-px">{entry.blockhash}</BaseTable.Cell>
+            <BaseTable.Cell className="e-font-mono e-w-px">{entry.blockhash}</BaseTable.Cell>
             <BaseTable.Cell className="">
                 {entry.feeCalculator.lamportsPerSignature} lamports per signature
             </BaseTable.Cell>

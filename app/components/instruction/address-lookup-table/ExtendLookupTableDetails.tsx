@@ -43,7 +43,7 @@ export function ExtendLookupTableDetailsCard(props: InstructionDetailsProps & { 
                         <BaseTable.Body>
                             {info.newAddresses.map((address, index) => (
                                 <BaseTable.Row key={address.toString()}>
-                                    <BaseTable.Cell className="font-monospace e-w-px">{index}</BaseTable.Cell>
+                                    <BaseTable.Cell className="e-font-mono e-w-px">{index}</BaseTable.Cell>
                                     <BaseTable.Cell className="e-text-right">
                                         <Address pubkey={new PublicKey(address)} alignRight link />
                                     </BaseTable.Cell>

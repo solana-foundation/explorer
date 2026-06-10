@@ -9,8 +9,8 @@ import { isValidLink, parseCodeValue } from './utils';
 
 export function CodeCell({ value, alignRight = true }: { value: string; alignRight: boolean }) {
     return (
-        <BaseTable.Cell className={classNames({ 'e-text-right': alignRight })}>
-            <RenderCode value={value} />
+        <BaseTable.Cell>
+            <RenderCode value={value} alignRight={alignRight} />
         </BaseTable.Cell>
     );
 }
@@ -105,10 +105,12 @@ export function StringCell({ value }: { value: string }) {
     return <BaseTable.Cell className="e-text-right e-font-mono">{value}</BaseTable.Cell>;
 }
 
-export function RenderCode({ value }: { value: any }) {
+export function RenderCode({ value, alignRight = true }: { value: any; alignRight?: boolean }) {
     return (
         <div className="e-flex e-items-end">
-            <pre className="e-max-w-[500px] e-overflow-x-auto lg:e-ml-auto">{parseCodeValue(value)}</pre>
+            <pre className={classNames('e-max-w-[500px] e-overflow-x-auto', { 'lg:e-ml-auto': alignRight })}>
+                {parseCodeValue(value)}
+            </pre>
         </div>
     );
 }

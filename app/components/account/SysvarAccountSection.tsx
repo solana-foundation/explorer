@@ -107,7 +107,7 @@ function SysvarAccountSlotHistory({
                 <BaseTable.Cell className="e-align-top">
                     Slot History <span className="e-text-dk-gray-700">(previous 100 slots)</span>
                 </BaseTable.Cell>
-                <BaseTable.Cell className="font-monospace e-text-right">
+                <BaseTable.Cell className="e-font-mono e-text-right">
                     {history.map(val => (
                         <p key={val} className="e-mb-0">
                             <Slot slot={val} link />
@@ -220,7 +220,7 @@ function SysvarAccountClockCard({ account, sysvarAccount }: { account: Account; 
 
             <BaseTable.Row>
                 <BaseTable.Cell>Timestamp</BaseTable.Cell>
-                <BaseTable.Cell className="font-monospace e-text-right">
+                <BaseTable.Cell className="e-font-mono e-text-right">
                     {displayTimestamp(unixTimestampToMs(sysvarAccount.info.unixTimestamp))}
                 </BaseTable.Cell>
             </BaseTable.Row>
@@ -304,7 +304,7 @@ function SysvarAccountRewardsCard({
 
             <BaseTable.Row>
                 <BaseTable.Cell>Validator Point Value</BaseTable.Cell>
-                <BaseTable.Cell className="font-monospace e-text-right">
+                <BaseTable.Cell className="e-font-mono e-text-right">
                     {validatorPointValueFormatted} lamports
                 </BaseTable.Cell>
             </BaseTable.Row>

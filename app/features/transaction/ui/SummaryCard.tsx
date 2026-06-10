@@ -346,7 +346,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                     <Label>Timestamp</Label>
                     <Value>
                         {info.timestamp !== 'unavailable' ? (
-                            <span className="font-monospace">{displayTimestamp(info.timestamp * 1000)}</span>
+                            <span className="e-font-mono">{displayTimestamp(info.timestamp * 1000)}</span>
                         ) : (
                             <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">
                                 Unavailable

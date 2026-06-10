@@ -371,7 +371,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
     const balance = info.isNative ? (
         <>
             {'\u25ce'}
-            <span className="font-monospace">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
+            <span className="e-font-mono">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
         </>
     ) : (
         <>{info.tokenAmount.uiAmountString}</>
@@ -439,7 +439,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                 <BaseTable.Row>
                     <BaseTable.Cell>Rent-exempt reserve (SOL)</BaseTable.Cell>
                     <BaseTable.Cell className="text-md-end">
-                        <span className="font-monospace">
+                        <span className="e-font-mono">
                             ◎{new BigNumber(info.rentExemptReserve.uiAmountString).toFormat(9)}
                         </span>
                     </BaseTable.Cell>
@@ -459,7 +459,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                             {info.isNative ? (
                                 <>
                                     {'\u25ce'}
-                                    <span className="font-monospace">
+                                    <span className="e-font-mono">
                                         {new BigNumber(
                                             info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0',
                                         ).toFormat(9)}

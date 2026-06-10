@@ -42,10 +42,10 @@ export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
 const renderAccountRow = (vote: Vote, index: number) => {
     return (
         <BaseTable.Row key={index}>
-            <BaseTable.Cell className="font-monospace e-w-px">
+            <BaseTable.Cell className="e-font-mono e-w-px">
                 <Slot slot={vote.slot} link />
             </BaseTable.Cell>
-            <BaseTable.Cell className="font-monospace">{vote.confirmationCount}</BaseTable.Cell>
+            <BaseTable.Cell className="e-font-mono">{vote.confirmationCount}</BaseTable.Cell>
         </BaseTable.Row>
     );
 };

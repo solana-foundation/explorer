@@ -90,13 +90,13 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                     <TableCardBody>
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Blockhash</BaseTable.Cell>
-                            <BaseTable.Cell className="font-monospace e-text-right">
+                            <BaseTable.Cell className="e-font-mono e-text-right">
                                 <span>{block.blockhash}</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Slot</BaseTable.Cell>
-                            <BaseTable.Cell className="font-monospace e-text-right">
+                            <BaseTable.Cell className="e-font-mono e-text-right">
                                 <Slot slot={slotNumber} />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -113,7 +113,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                                 <BaseTable.Row>
                                     <BaseTable.Cell>Timestamp (Local)</BaseTable.Cell>
                                     <BaseTable.Cell className="e-text-right">
-                                        <span className="font-monospace">
+                                        <span className="e-font-mono">
                                             {displayTimestamp(block.blockTime * 1000, true)}
                                         </span>
                                     </BaseTable.Cell>
@@ -121,7 +121,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                                 <BaseTable.Row>
                                     <BaseTable.Cell>Timestamp (UTC)</BaseTable.Cell>
                                     <BaseTable.Cell className="e-text-right">
-                                        <span className="font-monospace">
+                                        <span className="e-font-mono">
                                             {displayTimestampUtc(block.blockTime * 1000, true)}
                                         </span>
                                     </BaseTable.Cell>
@@ -136,20 +136,20 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         {epoch !== undefined && (
                             <BaseTable.Row>
                                 <BaseTable.Cell className="e-w-full">Epoch</BaseTable.Cell>
-                                <BaseTable.Cell className="font-monospace e-text-right">
+                                <BaseTable.Cell className="e-font-mono e-text-right">
                                     <Epoch epoch={epoch} link />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         )}
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Parent Blockhash</BaseTable.Cell>
-                            <BaseTable.Cell className="font-monospace e-text-right">
+                            <BaseTable.Cell className="e-font-mono e-text-right">
                                 <span>{block.previousBlockhash}</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Parent Slot</BaseTable.Cell>
-                            <BaseTable.Cell className="font-monospace e-text-right">
+                            <BaseTable.Cell className="e-font-mono e-text-right">
                                 <Slot slot={block.parentSlot} link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -164,7 +164,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         {childSlot !== undefined && (
                             <BaseTable.Row>
                                 <BaseTable.Cell className="e-w-full">Child Slot</BaseTable.Cell>
-                                <BaseTable.Cell className="font-monospace e-text-right">
+                                <BaseTable.Cell className="e-font-mono e-text-right">
                                     <Slot slot={childSlot} link />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
@@ -179,27 +179,27 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         )}
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Processed Transactions</BaseTable.Cell>
-                            <BaseTable.Cell className="font-monospace e-text-right">
+                            <BaseTable.Cell className="e-font-mono e-text-right">
                                 <span>{block.transactions.length}</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         {showSuccessfulCount && (
                             <BaseTable.Row>
                                 <BaseTable.Cell className="e-w-full">Successful Transactions</BaseTable.Cell>
-                                <BaseTable.Cell className="font-monospace e-text-right">
+                                <BaseTable.Cell className="e-font-mono e-text-right">
                                     <span>{successfulTxs.length}</span>
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         )}
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Total Compute Units Consumed</BaseTable.Cell>
-                            <BaseTable.Cell className="font-monospace e-text-right">
+                            <BaseTable.Cell className="e-font-mono e-text-right">
                                 <span>{totalCUs.toLocaleString()}</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Transaction Cost Utilization</BaseTable.Cell>
-                            <BaseTable.Cell className="font-monospace e-text-right">
+                            <BaseTable.Cell className="e-font-mono e-text-right">
                                 <span>
                                     {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
                                     {Math.round((totalCostUnits / maxComputeUnits) * 100)}%)
@@ -208,7 +208,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Reserved Compute Units</BaseTable.Cell>
-                            <BaseTable.Cell className="font-monospace e-text-right">
+                            <BaseTable.Cell className="e-font-mono e-text-right">
                                 <span>
                                     {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
                                     {Math.round((totalRequestedCUs / maxComputeUnits) * 100)}%)
