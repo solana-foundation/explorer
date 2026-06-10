@@ -26,18 +26,11 @@ export default function ClusterModalDeveloperSettings() {
         <>
             <hr />
             <h2 className="e-mb-6 e-mt-6 e-text-center">Developer Settings</h2>
-            <div className="e-flex e-justify-between">
+            <div className="e-flex e-items-center e-justify-between">
                 <label htmlFor="cardToggle" className="e-mr-3 e-cursor-pointer">
                     Enable custom url param
                 </label>
-                {/* e-mr-2 mirrors the old .form-switch wrapper: 3.5rem padding box around a 3rem input */}
-                <Switch
-                    ui="dashkit"
-                    id="cardToggle"
-                    className="e-mr-2"
-                    checked={enabled}
-                    onCheckedChange={onToggleCustomUrlFeature}
-                />
+                <Switch size="lg" id="cardToggle" checked={enabled} onCheckedChange={onToggleCustomUrlFeature} />
             </div>
             <p className="e-mt-3 e-text-dk-gray-700">
                 Enable this setting to easily connect to a custom cluster via the &ldquo;customUrl&rdquo; url param.

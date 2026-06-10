@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { expect, userEvent, within } from 'storybook/test';
 
+import { Button } from './button';
 import { Switch } from './switch';
 
 const meta: Meta<typeof Switch> = {
@@ -99,17 +100,14 @@ export const Controlled: Story = {
             const [checked, setChecked] = React.useState(false);
 
             return (
-                <div className="e-flex e-flex-col e-gap-4">
+                <div className="e-flex e-flex-col e-items-start e-gap-4">
                     <div className="e-flex e-items-center e-gap-2">
                         <Switch checked={checked} onCheckedChange={setChecked} />
-                        <label className="e-text-sm e-font-medium">{checked ? 'Switch is ON' : 'Switch is OFF'}</label>
+                        <label className="e-text-sm e-font-medium">{checked ? 'ON' : 'OFF'}</label>
                     </div>
-                    <button
-                        className="e-rounded e-border e-border-neutral-300 e-bg-white e-px-3 e-py-1 e-text-sm hover:e-bg-neutral-50"
-                        onClick={() => setChecked(!checked)}
-                    >
+                    <Button variant="secondary" size="sm" onClick={() => setChecked(!checked)}>
                         Toggle Switch
-                    </button>
+                    </Button>
                 </div>
             );
         };
