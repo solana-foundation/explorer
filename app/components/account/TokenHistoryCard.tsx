@@ -30,6 +30,8 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import React, { useCallback } from 'react';
 import { ChevronDown, MinusSquare, PlusSquare } from 'react-feather';
 
+import { Button } from '@/app/components/shared/ui/button';
+import { Dropdown, DropdownItem, DropdownMenu } from '@/app/components/shared/ui/dropdown';
 import { INITIAL_TOKENS_TO_FETCH, INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import { Logger } from '@/app/shared/lib/logger';
 import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
@@ -194,7 +196,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         <h3 className="card-header-title">Token History</h3>
                     </CardHeader>
                     <CardBody ui="dashkit">
-                        <p className="e-text-dk-gray-700 e-mb-0 e-text-center">
+                        <p className="e-mb-0 e-text-center e-text-dk-gray-700">
                             Click the button below to load token transaction history
                         </p>
                     </CardBody>
@@ -237,12 +239,12 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 />
             </CardHeader>
 
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
+            {/* TODO: migrate to <BaseTable variant="card"> from @/app/shared/ui/Table */}
             <div className="table-responsive e-mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
-                            <th className="e-text-dk-gray-700 w-1">Slot</th>
+                            <th className="w-1 e-text-dk-gray-700">Slot</th>
                             <th className="e-text-dk-gray-700">Result</th>
                             <th className="e-text-dk-gray-700">Token</th>
                             <th className="e-text-dk-gray-700">Instruction Type</th>
@@ -286,7 +288,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         )}
                     </button>
                 ) : allFoundOldest ? (
-                    <div className="e-text-dk-gray-700 e-text-center">Fetched full history</div>
+                    <div className="e-text-center e-text-dk-gray-700">Fetched full history</div>
                 ) : (
                     <button className="btn btn-primary e-w-full" onClick={() => fetchHistories()} disabled={fetching}>
                         {fetching ? (
@@ -334,27 +336,30 @@ const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
     });
 
     return (
-        <div className="dropdown e-mr-1.5">
+        <Dropdown className="e-mr-1.5">
             <small className="e-mr-1.5">Filter:</small>
-            <button className="btn btn-white btn-sm" type="button" onClick={toggle}>
+            <Button ui="dashkit" variant="white" size="sm" type="button" onClick={toggle}>
                 {filter === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filter)}{' '}
                 <ChevronDown size={15} className="align-text-top" />
-            </button>
-            <div className={cn('token-filter dropdown-menu-end dropdown-menu', show && 'show')}>
+            </Button>
+            <DropdownMenu align="end" className={cn('e-max-h-80 e-overflow-y-auto', show && 'show')}>
                 {filterOptions.map(filterOption => {
                     return (
-                        <Link
-                            key={filterOption}
-                            href={buildLocation(filterOption)}
-                            className={cn('dropdown-item', filterOption === filter && 'active')}
-                            onClick={toggle}
-                        >
-                            {filterOption === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filterOption) || filterOption}
-                        </Link>
+                        <DropdownItem asChild key={filterOption}>
+                            <Link
+                                href={buildLocation(filterOption)}
+                                className={cn(filterOption === filter && 'active')}
+                                onClick={toggle}
+                            >
+                                {filterOption === ALL_TOKENS
+                                    ? 'All Tokens'
+                                    : nameLookup.get(filterOption) || filterOption}
+                            </Link>
+                        </DropdownItem>
                     );
                 })}
-            </div>
-        </div>
+            </DropdownMenu>
+        </Dropdown>
     );
 };
 
