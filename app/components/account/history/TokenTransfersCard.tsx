@@ -267,7 +267,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
-                <BaseTable.Body className="list">
+                <BaseTable.Body>
                     {allTransfers.map(transferData => (
                         <TransferRow
                             key={transferData.signature + transferData.index + (transferData.childIndex || '')}

@@ -22,7 +22,7 @@ export function BaseIdlInstructions({ data }: FormattedIdlDataView<'instructions
                     <BaseTable.HeaderCell className="e-text-neutral-500">Accounts</BaseTable.HeaderCell>
                 </BaseTable.Row>
             </BaseTable.Head>
-            <BaseTable.Body className="list e-font-mono e-text-xs">
+            <BaseTable.Body className="e-font-mono e-text-xs">
                 {data.map(ix => (
                     <BaseTable.Row key={ix.name}>
                         <BaseTable.Cell>

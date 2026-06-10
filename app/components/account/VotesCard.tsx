@@ -23,7 +23,7 @@ export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
                             </BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>
-                    <BaseTable.Body className="list">
+                    <BaseTable.Body>
                         {voteAccount.info.votes.length > 0 &&
                             voteAccount.info.votes.reverse().map((vote: Vote, index) => renderAccountRow(vote, index))}
                     </BaseTable.Body>

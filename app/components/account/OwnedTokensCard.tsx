@@ -162,7 +162,7 @@ function HoldingsDetail({
     const visibleTokens = Array.from(mappedTokens.entries()).slice(0, visibleCount);
 
     return (
-        <tbody className="list">
+        <tbody>
             {visibleTokens.map(([mintAddress, token]) => (
                 <TokenRow
                     key={mintAddress}
@@ -211,7 +211,7 @@ function HoldingsSummary({
     const visibleTokens = Array.from(mappedTokens.entries()).slice(0, visibleCount);
 
     return (
-        <tbody className="list">
+        <tbody>
             {visibleTokens.map(([mintAddress, token]) => (
                 <TokenRow
                     key={mintAddress}

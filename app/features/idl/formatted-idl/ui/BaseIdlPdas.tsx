@@ -15,7 +15,7 @@ export function BaseIdlPdas({ data }: FormattedIdlDataView<'pdas'>) {
                     <BaseTable.HeaderCell className="e-text-neutral-500">Seeds</BaseTable.HeaderCell>
                 </BaseTable.Row>
             </BaseTable.Head>
-            <BaseTable.Body className="list e-font-mono e-text-xs">
+            <BaseTable.Body className="e-font-mono e-text-xs">
                 {data.map(pda => (
                     <BaseTable.Row key={pda.name}>
                         <BaseTable.Cell>

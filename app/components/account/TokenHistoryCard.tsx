@@ -251,7 +251,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                             <th className="e-text-dk-gray-700">Transaction Signature</th>
                         </tr>
                     </thead>
-                    <tbody className="list">
+                    <tbody>
                         {mintAndTxs.slice(0, visibleTxCount).map(({ mint, tx }) => (
                             <TokenTransactionRow
                                 key={tx.signature}

@@ -46,7 +46,7 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
                     </BaseTable.Row>
                 </BaseTable.Head>
                 {lookupRows.length > 0 ? (
-                    <BaseTable.Body className="list">{lookupRows}</BaseTable.Body>
+                    <BaseTable.Body>{lookupRows}</BaseTable.Body>
                 ) : (
                     <BaseTable.Body className="e-border-0 e-border-t e-border-solid e-border-dark-border e-px-dk-4 e-py-4">
                         <BaseTable.Row>

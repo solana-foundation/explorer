@@ -93,7 +93,7 @@ export function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: 
                         <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Value</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
-                <BaseTable.Body className="list">{attributesList}</BaseTable.Body>
+                <BaseTable.Body>{attributesList}</BaseTable.Body>
             </BaseTable>
         </Card>
     );

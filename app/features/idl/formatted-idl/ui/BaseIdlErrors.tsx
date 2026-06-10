@@ -14,7 +14,7 @@ export function BaseIdlErrors({ data }: FormattedIdlDataView<'errors'>) {
                     <BaseTable.HeaderCell className="e-text-neutral-500">Message</BaseTable.HeaderCell>
                 </BaseTable.Row>
             </BaseTable.Head>
-            <BaseTable.Body className="list e-font-mono e-text-xs">
+            <BaseTable.Body className="e-font-mono e-text-xs">
                 {data.map(err => (
                     <BaseTable.Row key={err.code}>
                         <BaseTable.Cell className="e-text-neutral-500">

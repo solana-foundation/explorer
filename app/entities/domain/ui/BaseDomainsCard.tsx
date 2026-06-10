@@ -32,7 +32,7 @@ export function BaseDomainsCard({ domains }: { domains: DomainInfo[] }) {
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Name Service Account</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
-                <BaseTable.Body className="list">
+                <BaseTable.Body>
                     {validDomains.map(domain => (
                         <BaseTable.Row key={domain.address}>
                             <BaseTable.Cell>{domain.name}</BaseTable.Cell>

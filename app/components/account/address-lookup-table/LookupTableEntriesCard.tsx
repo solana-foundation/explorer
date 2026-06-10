@@ -37,7 +37,7 @@ export function LookupTableEntriesCard(
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Address</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
-                <BaseTable.Body className="list">
+                <BaseTable.Body>
                     {lookupTableState.addresses.length > 0 &&
                         lookupTableState.addresses.map((entry: PublicKey, index) => {
                             return renderRow(entry, index);

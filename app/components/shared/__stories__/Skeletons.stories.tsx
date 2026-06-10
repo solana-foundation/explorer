@@ -19,7 +19,7 @@ const hasPulse = (canvasElement: HTMLElement) =>
 function TableWrapper({ children }: { children: React.ReactNode }) {
     return (
         <BaseTable ui="dashkit" variant="card" nowrap>
-            <BaseTable.Body className="list">{children}</BaseTable.Body>
+            <BaseTable.Body>{children}</BaseTable.Body>
         </BaseTable>
     );
 }

@@ -84,7 +84,7 @@ export function InspectorInstructionCard({
             }
         >
             <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!e-border-t-0">
-                <BaseTable.Body className="list">
+                <BaseTable.Body>
                     <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
                     {showRaw ? (
                         'parsed' in ix ? (

@@ -17,7 +17,7 @@ import {
 // TableCardBody (BaseTable ui="dashkit" variant="card") these cells live in.
 const TableRowDecorator = (Story: () => React.ReactNode) => (
     <BaseTable ui="dashkit" variant="card">
-        <BaseTable.Body className="list">
+        <BaseTable.Body>
             <BaseTable.Row>
                 <BaseTable.Cell>Label</BaseTable.Cell>
                 <Story />

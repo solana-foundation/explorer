@@ -21,7 +21,7 @@ export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Hash</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
-                <BaseTable.Body className="list">
+                <BaseTable.Body>
                     {slotHashes.length > 0 &&
                         slotHashes.map((entry: SlotHashEntry, index) => {
                             return renderAccountRow(entry, index);

@@ -14,7 +14,7 @@ const meta = {
         // Mirrors the production wrapper (TableCardBody) the row renders in.
         Story => (
             <BaseTable ui="dashkit" variant="card">
-                <BaseTable.Body className="list">
+                <BaseTable.Body>
                     <Story />
                 </BaseTable.Body>
             </BaseTable>

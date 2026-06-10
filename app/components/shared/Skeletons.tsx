@@ -68,7 +68,7 @@ export function RichListSkeleton({ rows = 2 }: { rows?: number }) {
                 </div>
             </CardHeader>
             <BaseTable ui="dashkit" variant="card" nowrap>
-                <BaseTable.Body className="list">
+                <BaseTable.Body>
                     {Array.from({ length: rows }).map((_, i) => (
                         <RichRowSkeleton key={i} />
                     ))}
@@ -88,7 +88,7 @@ export function StatsTableSkeleton({ rows = 8 }: { rows?: number }) {
                 </div>
             </CardHeader>
             <BaseTable ui="dashkit" variant="card" nowrap>
-                <BaseTable.Body className="list">
+                <BaseTable.Body>
                     {Array.from({ length: rows }).map((_, i) => (
                         <TableRowSkeleton key={i} />
                     ))}

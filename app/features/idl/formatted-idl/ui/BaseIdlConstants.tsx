@@ -16,7 +16,7 @@ export function BaseIdlConstants({ data }: FormattedIdlDataView<'constants'>) {
                     <BaseTable.HeaderCell className="e-text-neutral-500">Value</BaseTable.HeaderCell>
                 </BaseTable.Row>
             </BaseTable.Head>
-            <BaseTable.Body className="list e-font-mono e-text-xs">
+            <BaseTable.Body className="e-font-mono e-text-xs">
                 {data.map(constant => (
                     <BaseTable.Row key={constant.name}>
                         <BaseTable.Cell>

@@ -99,7 +99,7 @@ export function RewardsCard({ address }: { address: string }) {
                                 <BaseTable.HeaderCell className="e-text-dk-gray-700">Post Balance</BaseTable.HeaderCell>
                             </BaseTable.Row>
                         </BaseTable.Head>
-                        <BaseTable.Body className="list">{rewardsList}</BaseTable.Body>
+                        <BaseTable.Body>{rewardsList}</BaseTable.Body>
                     </BaseTable>
                 ) : (
                     <CardBody ui="dashkit">

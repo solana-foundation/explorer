@@ -15,7 +15,7 @@ export function BaseIdlTypes({ data }: FormattedIdlDataView<'types'>) {
                     <BaseTable.HeaderCell className="e-text-neutral-500">Fields</BaseTable.HeaderCell>
                 </BaseTable.Row>
             </BaseTable.Head>
-            <BaseTable.Body className="list e-font-mono e-text-xs">
+            <BaseTable.Body className="e-font-mono e-text-xs">
                 {data.map(typeItem => (
                     <BaseTable.Row key={typeItem.name}>
                         <BaseTable.Cell>

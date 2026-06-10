@@ -61,7 +61,7 @@ export function TransactionSignatures({
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Details</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
-                <BaseTable.Body className="list">{signatureRows}</BaseTable.Body>
+                <BaseTable.Body>{signatureRows}</BaseTable.Body>
             </BaseTable>
         </Card>
     );

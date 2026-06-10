@@ -98,7 +98,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Raw Data</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
-                <BaseTable.Body className="list">{detailsList}</BaseTable.Body>
+                <BaseTable.Body>{detailsList}</BaseTable.Body>
             </BaseTable>
             <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />
         </Card>

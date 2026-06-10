@@ -25,7 +25,7 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Deactivating (SOL)</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
-                <BaseTable.Body className="list">
+                <BaseTable.Body>
                     {stakeHistory.map(entry => (
                         <HistoryEntryRow key={entry.epoch} entry={entry} />
                     ))}

@@ -303,7 +303,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                             <BaseTable.HeaderCell className="e-text-dk-gray-700">Invoked Programs</BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>
-                    <BaseTable.Body className="list">
+                    <BaseTable.Body>
                         {filteredTransactions.slice(0, numDisplayed).map((tx, i) => {
                             let statusText;
                             let statusClass;

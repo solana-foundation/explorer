@@ -21,7 +21,7 @@ export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashe
                             <BaseTable.HeaderCell className="e-text-dk-gray-700">Fee Calculator</BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>
-                    <BaseTable.Body className="list">
+                    <BaseTable.Body>
                         {blockhashes.length > 0 &&
                             blockhashes.map((entry: RecentBlockhashesEntry, index) => {
                                 return renderAccountRow(entry, index);

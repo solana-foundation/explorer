@@ -14,7 +14,7 @@ function TableWrapper({ children }: { children: React.ReactNode }) {
     return (
         <ClusterProvider>
             <BaseTable ui="dashkit" variant="card" nowrap>
-                <BaseTable.Body className="list">{children}</BaseTable.Body>
+                <BaseTable.Body>{children}</BaseTable.Body>
             </BaseTable>
         </ClusterProvider>
     );

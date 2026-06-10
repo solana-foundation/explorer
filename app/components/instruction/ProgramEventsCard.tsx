@@ -94,7 +94,7 @@ function EventCard({
                 </Button>
             </CardHeader>
             <BaseTable ui="dashkit" variant="card" nowrap>
-                <BaseTable.Body className="list">
+                <BaseTable.Body>
                     {showRaw ? (
                         <>
                             <BaseTable.Row>

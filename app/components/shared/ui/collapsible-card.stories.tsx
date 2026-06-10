@@ -34,7 +34,7 @@ const SampleContent = () => (
                 <BaseTable.HeaderCell className="e-text-dk-gray-700">Value</BaseTable.HeaderCell>
             </BaseTable.Row>
         </BaseTable.Head>
-        <BaseTable.Body className="list">
+        <BaseTable.Body>
             <BaseTable.Row>
                 <BaseTable.Cell>Account #1</BaseTable.Cell>
                 <BaseTable.Cell className="e-text-right">Gzf3…k9Pq</BaseTable.Cell>
