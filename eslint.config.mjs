@@ -311,13 +311,15 @@ export default tseslint.config(
         settings: {
             'boundaries/elements': [
                 { type: 'feature', pattern: 'app/features/*', mode: 'folder', capture: ['name'] },
-                { type: 'entity', pattern: 'app/entities/*', mode: 'folder', capture: ['name'] },
+                // Must precede the broader `entity` pattern — element types are matched in
+                // declaration order, so `@x` folders would otherwise be classified as `entity`.
                 {
                     type: 'entity-public-api',
                     pattern: 'app/entities/*/@x/*',
                     mode: 'folder',
                     capture: ['name', 'crossSlice'],
                 },
+                { type: 'entity', pattern: 'app/entities/*', mode: 'folder', capture: ['name'] },
                 { type: 'shared', pattern: 'app/shared', mode: 'folder' },
             ],
         },
@@ -349,6 +351,13 @@ export default tseslint.config(
                             },
                         },
                         {
+                            // `@x` re-export files reach back into their own entity's internals.
+                            from: { type: 'entity-public-api' },
+                            allow: {
+                                to: [{ type: 'shared' }, { type: 'entity', captured: { name: '{{ name }}' } }],
+                            },
+                        },
+                        {
                             from: { type: 'shared' },
                             allow: {
                                 to: { type: 'shared' },
@@ -369,7 +378,6 @@ export default tseslint.config(
         files: [
             // app/entities cross-entity / wrong-direction imports
             'app/entities/nft/lib/get-metadata-json.ts',
-            'app/entities/program-metadata/model/useProgramMetadataCodamaIdl.tsx',
             'app/entities/token-info/index.ts',
             'app/entities/token-info/lib/fetch-token-mints.ts',
             'app/entities/token-info/lib/is-valid-cluster.ts',
@@ -634,7 +642,7 @@ export default tseslint.config(
             'app/entities/idl/model/use-idl-from-anchor-program-seed.ts',
             'app/entities/nft/lib/is-metaplex-nft.ts',
             'app/entities/program-metadata/api/getProgramCanonicalMetadata.ts',
-            'app/entities/program-metadata/model/useProgramCanonicalMetadata.tsx',
+            'app/entities/program-metadata/model/use-program-canonical-metadata.tsx',
             'app/entities/token-info/model/token-info-batch-provider.tsx',
             'app/entities/token-info/model/use-token-info.ts',
 

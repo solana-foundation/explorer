@@ -5,7 +5,7 @@ import { RootNode } from 'codama';
 
 import { AnchorProgramName } from '@/app/utils/anchor';
 
-import { useProgramMetadataIdl } from '../model/useProgramMetadataIdl';
+import { useProgramMetadataIdl } from '../model/use-program-metadata-idl';
 
 // FIXME: missing Storybook story — needs useProgramMetadataIdl SWR mock.
 export default function ProgramName({

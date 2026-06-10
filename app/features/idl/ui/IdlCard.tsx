@@ -2,8 +2,7 @@
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
-import { getIdlVersion, isIdlProgramIdMismatch, type SupportedIdl, useAnchorProgram } from '@entities/idl';
-import { useProgramMetadataCodamaIdl, useProgramMetadataIdl } from '@entities/program-metadata';
+import { getIdlVersion, IdlVariant, isIdlProgramIdMismatch, type SupportedIdl } from '@entities/idl';
 import { useCluster } from '@providers/cluster';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'react-feather';
@@ -13,7 +12,7 @@ import { TabsList, TabsTrigger } from '@/app/shared/ui/Tabs';
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 import { clusterSlug } from '@/app/utils/cluster';
 
-import { IdlVariant, useIdlLastTransactionDate } from '../model/use-idl-last-transaction-date';
+import { useProgramIdls } from '../model/use-program-idls';
 import { IdlInstructionSection } from './IdlInstructionSection';
 import { IdlSection } from './IdlSection';
 
@@ -27,18 +26,13 @@ type IdlTab = {
 export function IdlCard({ programId }: { programId: string }) {
     const { url, cluster } = useCluster();
     const network = clusterSlug(cluster);
-    const { idl, isLoading: isAnchorIdlLoading } = useAnchorProgram(programId, url, cluster);
-    const { programMetadataIdl, isLoading: isProgramMetadataIdlLoading } = useProgramMetadataIdl(
+    const { anchorIdl, programMetadataIdl, preferredVariant, isLoading: isAnyIdlLoading } = useProgramIdls(
         programId,
         url,
         cluster,
     );
-    const { codamaIdl, isLoading: isCodamaIdlLoading } = useProgramMetadataCodamaIdl(programId, url, cluster);
-    const isAnyIdlLoading = isAnchorIdlLoading || isProgramMetadataIdlLoading || isCodamaIdlLoading;
     const [activeTabIndex, setActiveTabIndex] = useState<number>();
     const [searchStr, setSearchStr] = useState<string>('');
-
-    const preferredIdlVariant = useIdlLastTransactionDate(programId, Boolean(idl), Boolean(programMetadataIdl));
 
     const tabs = useMemo<IdlTab[]>(() => {
         const idlTabs: IdlTab[] = [];
@@ -54,33 +48,23 @@ export function IdlCard({ programId }: { programId: string }) {
         }
 
         // Optionally add anchor tab
-        if (idl) {
+        if (anchorIdl) {
             const anchorTab: IdlTab = {
                 badge: 'Anchor IDL',
                 id: IdlVariant.Anchor,
-                idl: idl,
+                idl: anchorIdl,
                 title: 'Anchor',
             };
             // If anchor is preferred, put it first
-            if (preferredIdlVariant === IdlVariant.Anchor) {
+            if (preferredVariant === IdlVariant.Anchor) {
                 idlTabs.unshift(anchorTab);
             } else {
                 idlTabs.push(anchorTab);
             }
         }
 
-        // Optionally add codama tab
-        if (codamaIdl) {
-            idlTabs.push({
-                badge: 'Codama IDL',
-                id: IdlVariant.Codama,
-                idl: codamaIdl,
-                title: 'Codama',
-            });
-        }
-
         return idlTabs;
-    }, [idl, programMetadataIdl, codamaIdl, preferredIdlVariant]);
+    }, [anchorIdl, programMetadataIdl, preferredVariant]);
 
     useEffect(() => {
         // Activate first tab when tabs are available

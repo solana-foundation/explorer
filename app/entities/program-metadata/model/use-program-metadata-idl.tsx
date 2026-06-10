@@ -2,7 +2,7 @@ import { Cluster } from '@/app/utils/cluster';
 import { isEnvEnabled } from '@/app/utils/env';
 
 import { IDL_SEED } from '../api/getProgramCanonicalMetadata';
-import { useProgramCanonicalMetadata } from './useProgramCanonicalMetadata';
+import { useProgramCanonicalMetadata } from './use-program-canonical-metadata';
 
 const PMP_IDL_ENABLED = isEnvEnabled(process.env.NEXT_PUBLIC_PMP_IDL_ENABLED);
 

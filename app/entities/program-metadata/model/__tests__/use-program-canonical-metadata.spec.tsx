@@ -8,7 +8,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
 import { getProgramCanonicalMetadata, IDL_SEED } from '../../api/getProgramCanonicalMetadata';
-import { useProgramCanonicalMetadata } from '../useProgramCanonicalMetadata';
+import { useProgramCanonicalMetadata } from '../use-program-canonical-metadata';
 
 vi.mock('../../api/getProgramCanonicalMetadata', async () => {
     const actual = await vi.importActual<typeof import('../../api/getProgramCanonicalMetadata')>(

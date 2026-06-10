@@ -1,5 +1,6 @@
 'use client';
 
+import { shouldUseDirectRpc } from '@entities/cluster/@x/program-metadata';
 import { isSolanaError, SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND } from '@solana/kit';
 import { fetch } from 'cross-fetch';
 import useSWRImmutable from 'swr/immutable';
@@ -8,31 +9,6 @@ import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
 import { getProgramCanonicalMetadata } from '../api/getProgramCanonicalMetadata';
-
-/**
- * Check if the URL is a local RPC endpoint (localhost or 127.0.0.1)
- */
-function isLocalRpcUrl(url: string): boolean {
-    try {
-        const { hostname } = new URL(url);
-        return hostname === 'localhost' || hostname === '127.0.0.1';
-    } catch {
-        return false;
-    }
-}
-
-/**
- * Check if the cluster should use direct client-side RPC fetching
- * instead of the API route (which only supports known public clusters)
- */
-function shouldUseDirectRpc(cluster: Cluster, url: string): boolean {
-    // Custom cluster always uses direct RPC
-    if (cluster === Cluster.Custom) {
-        return true;
-    }
-    // Also check if URL is localhost even for other clusters
-    return isLocalRpcUrl(url);
-}
 
 // Most programs don't publish canonical metadata, so a missing account is the expected outcome —
 // the API route filters the same code (see app/api/program-metadata-idl/route.ts).
@@ -48,13 +24,14 @@ export function useProgramCanonicalMetadata(
     enabled: boolean,
     useSuspense = false,
 ) {
+    // Pass a falsy key when disabled so the hook never fetches AND never writes to the shared
+    // `program-metadata-${addr}-${url}-${seed}` cache entry. A disabled call writing `null` under
+    // the same key as an enabled consumer (same program + url + seed) would poison it under
+    // useSWRImmutable (which never revalidates) and starve that consumer of its data.
+    const swrKey = enabled ? `program-metadata-${programAddress}-${url}-${seed}` : null;
     const { data, isLoading } = useSWRImmutable(
-        `program-metadata-${programAddress}-${url}-${seed}`,
+        swrKey,
         async () => {
-            if (!enabled) {
-                return null;
-            }
-
             try {
                 // For custom clusters or local RPC URLs, fetch directly from client
                 // The API route doesn't support custom/local endpoints
@@ -84,5 +61,7 @@ export function useProgramCanonicalMetadata(
         },
         { suspense: useSuspense },
     );
-    return { isLoading, programMetadata: data };
+    // Preserve the historical contract: disabled → `null` (not `undefined`); enabled → SWR data
+    // (`undefined` while loading, then the resolved value or `null`).
+    return { isLoading, programMetadata: enabled ? data : null };
 }

@@ -1,7 +1,4 @@
-import type { Idl } from '@coral-xyz/anchor';
-import { encodeIdlAccount as encodeIdlAccountBorsh } from '@coral-xyz/anchor/dist/cjs/idl';
 import {
-    getBase64Decoder,
     SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR,
     SOLANA_ERROR__JSON_RPC__METHOD_NOT_FOUND,
     SOLANA_ERROR__RPC__API_PLAN_MISSING_FOR_RPC_METHOD,
@@ -12,32 +9,37 @@ import {
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { deflateSync } from 'zlib';
 
 import { Logger } from '@/app/shared/lib/logger';
-import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 import { Cluster } from '@/app/utils/cluster';
 
 // A non-denylisted base58 address — random valid pubkey for tests that exercise RPC.
 const ANCHOR_PROGRAM_ADDRESS = 'C7QLEmDz81Usvy2sYa4xZSdA8EwEcYvZo8iuYZMaqXmj';
+// Arbitrary derived-PDA address returned alongside the IDL content by @solana/idl.
+const IDL_ACCOUNT_ADDRESS = 'BPFLoaderUpgradeab1e11111111111111111111111';
 
 const mocks = vi.hoisted(() => ({
-    sendGetAccountInfo: vi.fn(),
+    fetchAnchorIdl: vi.fn(),
+}));
+
+// The route delegates Anchor IDL fetch + decode (PDA derivation, account read, zlib inflate)
+// to @solana/idl. We mock it to exercise the route's branching and error classification.
+vi.mock('@solana/idl', () => ({
+    fetchAnchorIdl: mocks.fetchAnchorIdl,
 }));
 
 vi.mock('@solana/kit', async () => {
     const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
     return {
         ...actual,
-        createSolanaRpc: vi.fn(() => ({
-            getAccountInfo: () => ({ send: mocks.sendGetAccountInfo }),
-        })),
+        // fetchAnchorIdl is mocked and ignores the rpc handle, so a stub is enough.
+        createSolanaRpc: vi.fn(() => ({})),
     };
 });
 
 describe('GET /api/anchor', () => {
     beforeEach(() => {
-        mocks.sendGetAccountInfo.mockReset();
+        mocks.fetchAnchorIdl.mockReset();
         vi.spyOn(Logger, 'warn').mockImplementation(() => {});
         vi.spyOn(Logger, 'panic').mockImplementation(() => {});
     });
@@ -82,11 +84,11 @@ describe('GET /api/anchor', () => {
             expect(await res.json()).toEqual({ idl: null });
             expect(res.headers.get('Cache-Control')).toContain('max-age=');
         }
-        expect(mocks.sendGetAccountInfo).not.toHaveBeenCalled();
+        expect(mocks.fetchAnchorIdl).not.toHaveBeenCalled();
     });
 
     it('should return null IDL with 200 when no IDL account exists', async () => {
-        mocks.sendGetAccountInfo.mockResolvedValueOnce({ context: { slot: 0n }, value: null });
+        mocks.fetchAnchorIdl.mockResolvedValueOnce(null);
 
         const { GET } = await importRoute();
         const res = await GET(
@@ -99,14 +101,14 @@ describe('GET /api/anchor', () => {
     });
 
     it('should return parsed IDL when the account holds valid Anchor data', async () => {
-        const fakeIdl: Idl = {
+        const fakeIdl = {
             address: ANCHOR_PROGRAM_ADDRESS,
             instructions: [],
             metadata: { name: 'test', spec: '0.1.0', version: '0.1.0' },
         };
-        mocks.sendGetAccountInfo.mockResolvedValueOnce({
-            context: { slot: 0n },
-            value: accountValue(encodeIdlAccount(fakeIdl)),
+        mocks.fetchAnchorIdl.mockResolvedValueOnce({
+            address: IDL_ACCOUNT_ADDRESS,
+            content: JSON.stringify(fakeIdl),
         });
 
         const { GET } = await importRoute();
@@ -119,14 +121,8 @@ describe('GET /api/anchor', () => {
         expect(res.headers.get('Cache-Control')).toContain('max-age=');
     });
 
-    it('should return null IDL with 200 when account data is undecodable', async () => {
-        // Garbage bytes — fails inflate / JSON.parse rather than the truncated-buffer path.
-        const garbage = new Uint8Array(8 + 32 + 4 + 16).fill(0xff);
-        new DataView(garbage.buffer).setUint32(8 + 32, 16, true);
-        mocks.sendGetAccountInfo.mockResolvedValueOnce({
-            context: { slot: 0n },
-            value: accountValue(garbage),
-        });
+    it('should return null IDL with 200 when the account content is not valid JSON', async () => {
+        mocks.fetchAnchorIdl.mockResolvedValueOnce({ address: IDL_ACCOUNT_ADDRESS, content: 'not-json{' });
 
         const { GET } = await importRoute();
         const res = await GET(
@@ -139,32 +135,10 @@ describe('GET /api/anchor', () => {
         expect(Logger.panic).not.toHaveBeenCalled();
     });
 
-    it('should return null IDL with 200 when the decoded JSON is not Idl-shaped', async () => {
-        // Well-formed JSON object at the IDL PDA, but missing `instructions: []`. The shape
-        // guard inside decodeIdl rejects it so we don't cache garbage as a valid IDL.
-        mocks.sendGetAccountInfo.mockResolvedValueOnce({
-            context: { slot: 0n },
-            value: accountValue(encodeIdlAccount({ hello: 'world' })),
-        });
-
-        const { GET } = await importRoute();
-        const res = await GET(
-            createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: ANCHOR_PROGRAM_ADDRESS }),
-        );
-
-        expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({ idl: null });
-        expect(Logger.warn).toHaveBeenCalled();
-        expect(Logger.panic).not.toHaveBeenCalled();
-    });
-
-    it('should return null IDL with 200 when the account is shorter than the Anchor discriminator', async () => {
-        // 4 bytes < 8-byte discriminator → Buffer.from(buf, 8, -4) throws RangeError
-        // before borsh ever sees the bytes. Caught by the route's outer try/catch.
-        mocks.sendGetAccountInfo.mockResolvedValueOnce({
-            context: { slot: 0n },
-            value: accountValue(new Uint8Array(4)),
-        });
+    it('should return null IDL with 200 when decoding throws a non-RPC error (corrupt account bytes)', async () => {
+        // @solana/idl throws (e.g. zlib inflate failure) when an account is present but its bytes
+        // are not a valid Anchor IDL payload. Treat as non-Anchor and cache the negative result.
+        mocks.fetchAnchorIdl.mockRejectedValueOnce(new Error('incorrect header check'));
 
         const { GET } = await importRoute();
         const res = await GET(
@@ -181,7 +155,7 @@ describe('GET /api/anchor', () => {
         const rpcError = new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, {
             __serverMessage: 'Internal error',
         });
-        mocks.sendGetAccountInfo.mockRejectedValueOnce(rpcError);
+        mocks.fetchAnchorIdl.mockRejectedValueOnce(rpcError);
 
         const { GET } = await importRoute();
         const res = await GET(
@@ -205,7 +179,7 @@ describe('GET /api/anchor', () => {
             message: 'upstream',
             statusCode,
         });
-        mocks.sendGetAccountInfo.mockRejectedValueOnce(rpcError);
+        mocks.fetchAnchorIdl.mockRejectedValueOnce(rpcError);
 
         const { GET } = await importRoute();
         const res = await GET(
@@ -228,7 +202,7 @@ describe('GET /api/anchor', () => {
             message: 'unauthorized',
             statusCode,
         });
-        mocks.sendGetAccountInfo.mockRejectedValueOnce(rpcError);
+        mocks.fetchAnchorIdl.mockRejectedValueOnce(rpcError);
 
         const { GET } = await importRoute();
         const res = await GET(
@@ -246,7 +220,7 @@ describe('GET /api/anchor', () => {
             method: 'getAccountInfo',
             params: [],
         });
-        mocks.sendGetAccountInfo.mockRejectedValueOnce(rpcError);
+        mocks.fetchAnchorIdl.mockRejectedValueOnce(rpcError);
 
         const { GET } = await importRoute();
         const res = await GET(
@@ -262,7 +236,7 @@ describe('GET /api/anchor', () => {
         const rpcError = new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_HEADER_FORBIDDEN, {
             headers: ['Solana-Client'],
         });
-        mocks.sendGetAccountInfo.mockRejectedValueOnce(rpcError);
+        mocks.fetchAnchorIdl.mockRejectedValueOnce(rpcError);
 
         const { GET } = await importRoute();
         const res = await GET(
@@ -277,7 +251,7 @@ describe('GET /api/anchor', () => {
         const rpcError = new SolanaError(SOLANA_ERROR__JSON_RPC__METHOD_NOT_FOUND, {
             __serverMessage: 'Method not found',
         });
-        mocks.sendGetAccountInfo.mockRejectedValueOnce(rpcError);
+        mocks.fetchAnchorIdl.mockRejectedValueOnce(rpcError);
 
         const { GET } = await importRoute();
         const res = await GET(
@@ -288,22 +262,25 @@ describe('GET /api/anchor', () => {
         expect(Logger.panic).toHaveBeenCalled();
     });
 
-    it('should return 502 and escalate to Sentry on truly unexpected errors', async () => {
+    it('should treat unexpected non-RPC errors as undecodable without leaking internals', async () => {
+        // A non-SolanaError throw is not a recognized RPC failure; the route classifies it as a
+        // present-but-undecodable account (200/null + warn) rather than paging on bad on-chain bytes.
         const internalError = Object.assign(new Error('AccountNotFoundError'), {
             context: { rpcUrl: 'https://internal-rpc.company.com:8899' },
             logs: ['Program log: secret stuff'],
         });
-        mocks.sendGetAccountInfo.mockRejectedValueOnce(internalError);
+        mocks.fetchAnchorIdl.mockRejectedValueOnce(internalError);
 
         const { GET } = await importRoute();
         const res = await GET(
             createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: ANCHOR_PROGRAM_ADDRESS }),
         );
 
-        expect(res.status).toBe(502);
+        expect(res.status).toBe(200);
         const body = await res.json();
-        expect(body).toEqual({ error: 'Failed to fetch IDL' });
-        expect(Logger.panic).toHaveBeenCalled();
+        expect(body).toEqual({ idl: null });
+        expect(Logger.warn).toHaveBeenCalled();
+        expect(Logger.panic).not.toHaveBeenCalled();
 
         // Verify no internal details leaked into the response body.
         const bodyStr = JSON.stringify(body);
@@ -319,31 +296,4 @@ function createRequest(params: Record<string, string> = {}) {
 
 async function importRoute() {
     return await import('../route');
-}
-
-// Build a full IDL account: [8-byte Anchor discriminator] + borsh-encoded { authority, data }
-// where data is zlib(JSON-stringified payload). The discriminator bytes are arbitrary — the
-// route slices them off before decoding. Accepts arbitrary payloads so callers can also
-// build accounts whose JSON is well-formed but not Idl-shaped.
-function encodeIdlAccount(payload: unknown): Uint8Array {
-    const compressed = deflateSync(new TextEncoder().encode(JSON.stringify(payload)));
-    const body = encodeIdlAccountBorsh({
-        authority: toLegacyPublicKey(SYSTEM_PROGRAM_ADDRESS),
-        data: compressed,
-    });
-    const buf = new Uint8Array(8 + body.length);
-    buf.set(body, 8);
-    return buf;
-}
-
-// Shape the JSON-RPC `getAccountInfo` value with `encoding: 'base64'` returns.
-function accountValue(data: Uint8Array) {
-    return {
-        data: [getBase64Decoder().decode(data), 'base64'] as const,
-        executable: false,
-        lamports: 0n,
-        owner: SYSTEM_PROGRAM_ADDRESS,
-        rentEpoch: 0n,
-        space: BigInt(data.length),
-    };
 }

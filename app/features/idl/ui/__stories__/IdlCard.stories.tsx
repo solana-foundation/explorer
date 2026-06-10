@@ -3,10 +3,9 @@ import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { IdlCard } from '../IdlCard';
 
-// The IDL hooks (useAnchorProgram, useProgramMetadataIdl, useProgramMetadataCodamaIdl) fetch
-// over RPC. In Storybook without network they resolve to no-IDL and the card renders its
-// empty state (upload instructions). Stories that exercise the IDL tabs are covered separately
-// by the formatted-idl/* and entities/idl/* component stories.
+// The card resolves its IDLs through useProgramIdls, which fetches over RPC. In Storybook without
+// network it resolves to no-IDL and the card renders its empty state (upload instructions). Stories
+// that exercise the IDL tabs are covered separately by the formatted-idl/* and entities/idl/* stories.
 const meta = {
     component: IdlCard,
     decorators: [withCluster, withClipboardMock],

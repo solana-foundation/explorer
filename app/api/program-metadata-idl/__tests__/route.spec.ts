@@ -1,15 +1,20 @@
-import { SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND, SolanaError } from '@solana/kit';
+import { SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, SolanaError } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
-vi.mock('@/app/entities/program-metadata/api/getProgramCanonicalMetadata', async () => {
-    const actual = await vi.importActual('@/app/entities/program-metadata/api/getProgramCanonicalMetadata');
-    return {
-        ...actual,
-        getProgramCanonicalMetadata: vi.fn(),
-    };
+const mocks = vi.hoisted(() => ({
+    resolvePmpIdl: vi.fn(),
+}));
+
+// The route delegates the PMP lookup (canonical + non-canonical fallback authorities, with
+// not-found/transient classification) to the shared resolvePmpIdl helper. We mock it to assert the
+// route's seed→fallback gating, response shaping, and error classification.
+vi.mock('@/app/entities/idl/server', async () => {
+    const actual = await vi.importActual<typeof import('@/app/entities/idl/server')>('@/app/entities/idl/server');
+    return { ...actual, resolvePmpIdl: mocks.resolvePmpIdl };
 });
 
 const mockAddress = PublicKey.default.toBase58();
@@ -17,6 +22,8 @@ const mockAddress = PublicKey.default.toBase58();
 describe('GET /api/program-metadata-idl', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.spyOn(Logger, 'panic').mockImplementation(() => {});
+        vi.spyOn(Logger, 'warn').mockImplementation(() => {});
     });
 
     it('should return 400 when required params are missing', async () => {
@@ -48,9 +55,12 @@ describe('GET /api/program-metadata-idl', () => {
         expect(await res.json()).toEqual({ error: 'Invalid cluster' });
     });
 
-    it('should return metadata on success', async () => {
-        const mock = await mockGetProgramCanonicalMetadata();
-        mock.mockResolvedValueOnce({ data: 'IDL content' });
+    it('should return parsed metadata on success', async () => {
+        mocks.resolvePmpIdl.mockResolvedValueOnce({
+            address: mockAddress,
+            authority: null,
+            content: JSON.stringify({ data: 'IDL content' }),
+        });
 
         const { GET } = await importRoute();
         const res = await GET(createRequest(mockAddress, Cluster.MainnetBeta, 'idl'));
@@ -59,11 +69,9 @@ describe('GET /api/program-metadata-idl', () => {
         expect(res.headers.get('Cache-Control')).toContain('max-age=');
     });
 
-    it('should return null when account-not-found SolanaError is thrown', async () => {
-        const mock = await mockGetProgramCanonicalMetadata();
-        mock.mockRejectedValueOnce(
-            new SolanaError(SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND, { address: mockAddress }),
-        );
+    it('should return null when no PMP metadata is published', async () => {
+        // resolvePmpIdl returns null for ACCOUNT_NOT_FOUND across every authority.
+        mocks.resolvePmpIdl.mockResolvedValueOnce(null);
 
         const { GET } = await importRoute();
         const res = await GET(createRequest(mockAddress, Cluster.MainnetBeta, 'idl'));
@@ -71,24 +79,60 @@ describe('GET /api/program-metadata-idl', () => {
         expect(await res.json()).toEqual({ programMetadata: null });
     });
 
-    it('should return 502 with generic message for unexpected errors', async () => {
-        const mock = await mockGetProgramCanonicalMetadata();
-        mock.mockRejectedValueOnce(new Error('RPC connection failed'));
+    it('should return null when the on-chain content is not valid JSON', async () => {
+        mocks.resolvePmpIdl.mockResolvedValueOnce({ address: mockAddress, authority: null, content: 'not-json{' });
 
         const { GET } = await importRoute();
         const res = await GET(createRequest(mockAddress, Cluster.MainnetBeta, 'idl'));
-        expect(res.status).toBe(502);
-        expect(await res.json()).toEqual({ error: 'Metadata fetch failed' });
+        expect(res.status).toBe(200);
+        expect(await res.json()).toEqual({ programMetadata: null });
     });
 
-    it('should return 502 for unexpected SolanaErrors', async () => {
-        const mock = await mockGetProgramCanonicalMetadata();
-        mock.mockRejectedValueOnce(new SolanaError(32300001, { addresses: [mockAddress] }));
+    it('should consult fallback authorities for the `idl` seed (enables native-program IDLs)', async () => {
+        mocks.resolvePmpIdl.mockResolvedValueOnce(null);
+
+        const { GET } = await importRoute();
+        await GET(createRequest(mockAddress, Cluster.MainnetBeta, 'idl'));
+
+        // 4th arg `true` → resolvePmpIdl tries canonical then each IDL_FALLBACK_PMP_AUTHORITIES.
+        const call = mocks.resolvePmpIdl.mock.calls[0];
+        expect(call[2]).toBe('idl');
+        expect(call[3]).toBe(true);
+    });
+
+    it('should stay canonical-only for non-IDL seeds (e.g. security)', async () => {
+        mocks.resolvePmpIdl.mockResolvedValueOnce(null);
+
+        const { GET } = await importRoute();
+        await GET(createRequest(mockAddress, Cluster.MainnetBeta, 'security'));
+
+        // 4th arg `false` → canonical authority only, no fallback lookups.
+        const call = mocks.resolvePmpIdl.mock.calls[0];
+        expect(call[2]).toBe('security');
+        expect(call[3]).toBe(false);
+    });
+
+    it('should return a retryable 502 (no page) on a transient RPC error', async () => {
+        mocks.resolvePmpIdl.mockRejectedValueOnce(
+            new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, { __serverMessage: 'Internal error' }),
+        );
+
+        const { GET } = await importRoute();
+        const res = await GET(createRequest(mockAddress, Cluster.MainnetBeta, 'idl'));
+        expect(res.status).toBe(502);
+        expect(await res.json()).toEqual({ error: 'Upstream RPC error' });
+        expect(Logger.warn).toHaveBeenCalled();
+        expect(Logger.panic).not.toHaveBeenCalled();
+    });
+
+    it('should return 502 and escalate when the fetch unexpectedly throws', async () => {
+        mocks.resolvePmpIdl.mockRejectedValueOnce(new Error('RPC connection failed'));
 
         const { GET } = await importRoute();
         const res = await GET(createRequest(mockAddress, Cluster.MainnetBeta, 'idl'));
         expect(res.status).toBe(502);
         expect(await res.json()).toEqual({ error: 'Metadata fetch failed' });
+        expect(Logger.panic).toHaveBeenCalled();
     });
 });
 
@@ -102,9 +146,4 @@ function createRequest(address?: string, cluster?: Cluster, seed?: string) {
 
 async function importRoute() {
     return await import('../route');
-}
-
-async function mockGetProgramCanonicalMetadata() {
-    const mod = await import('@/app/entities/program-metadata/api/getProgramCanonicalMetadata');
-    return vi.mocked(mod.getProgramCanonicalMetadata);
 }
