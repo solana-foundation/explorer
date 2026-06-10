@@ -68,7 +68,7 @@ export default function UpdateProductDetailsCard({
                     Attributes <span className="e-text-dk-gray-700">(JSON)</span>
                 </BaseTable.Cell>
                 <BaseTable.Cell className="e-text-right">
-                    <div className="d-lg-flex e-hidden e-items-center e-justify-end">
+                    <div className="e-hidden lg:e-flex e-items-center e-justify-end">
                         <Content />
                     </div>
                     <div className="e-flex e-items-center lg:e-hidden">

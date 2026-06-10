@@ -432,7 +432,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 nestingLevel={nestingLevel}
             >
                 <div
-                    className="text-lg-start"
+                    className="lg:e-text-left"
                     style={{
                         fontSize: '0.85rem',
                         lineHeight: '1.2',
