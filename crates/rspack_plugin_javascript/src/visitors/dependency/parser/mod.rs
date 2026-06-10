@@ -1,0 +1,1596 @@
+use rspack_util::SpanExt;
+pub mod ast;
+mod call_hooks_name;
+pub mod estree;
+mod location_advancer;
+mod walk;
+mod walk_block_pre;
+mod walk_module_pre;
+mod walk_pre;
+
+use std::{
+  fmt::Display,
+  hash::{Hash, Hasher},
+  rc::Rc,
+};
+
+use bitflags::bitflags;
+pub use call_hooks_name::CallHooksName;
+use rspack_cacheable::{
+  cacheable,
+  with::{AsCacheable, AsOption, AsPreset, AsVec},
+};
+use rspack_core::{
+  AsyncDependenciesBlock, BoxDependency, BoxDependencyTemplate, BuildInfo, BuildMeta,
+  CompilerOptions, DependencyLocation, DependencyRange, FactoryMeta, ImportMeta,
+  JavascriptParserCommonjsExportsOption, JavascriptParserOptions, ModuleIdentifier, ModuleLayer,
+  ModuleType, ParseMeta, ResourceData, SideEffectsBailoutItemWithSpan,
+};
+use rspack_error::{Diagnostic, Result};
+use rspack_util::fx_hash::FxIndexSet;
+use rustc_hash::{FxHashMap, FxHashSet};
+use smallvec::SmallVec;
+use swc_atoms::Atom;
+use swc_experimental_allocator::{Allocator, CloneIn};
+use swc_experimental_ecma_ast::{
+  ArrayPat, AssignPat, AssignTargetPat, CallExpr, Callee, Decl, Expr, GetSpan, Ident, Lit,
+  MemberExpr, MetaPropExpr, MetaPropKind, ObjectPat, ObjectPatProp, OptCall, OptChainBase,
+  OptChainExpr, Pat, Program, RestPat, Span, Stmt, ThisExpr,
+};
+
+use crate::{
+  BoxJavascriptParserPlugin,
+  dependency::{DependencyBranchGuard, local_module::LocalModule, set_dependency_branch_guards},
+  parser_and_generator::ParserRuntimeRequirementsData,
+  parser_plugin::{
+    self, ImportsReferencesState, InnerGraphParserPlugin, JavaScriptParserPluginDrive,
+    JavascriptParserPlugin, RequireReferencesState, inner_graph::state::InnerGraphState,
+  },
+  utils::eval::{self, BasicEvaluatedExpression},
+  visitors::{
+    ParsedJavaScriptAst, ScanDependenciesResult,
+    dependency::parser::{ast::ExprRef, location_advancer::DependencyLocationAdvancer},
+    scope_info::{
+      ScopeInfoDB, ScopeInfoId, TagInfo, TagInfoId, VariableInfo, VariableInfoFlags, VariableInfoId,
+    },
+  },
+};
+
+pub trait TagInfoData: Clone + Sized + 'static {
+  fn into_any(data: Self) -> Box<dyn anymap::CloneAny>;
+
+  fn downcast(any: Box<dyn anymap::CloneAny>) -> Self;
+
+  fn downcast_ref(any: &dyn anymap::CloneAny) -> &Self;
+
+  fn downcast_mut(any: &mut dyn anymap::CloneAny) -> &mut Self;
+}
+
+fn atom_from_wtf8(value: swc_experimental_allocator::atom::Wtf8Atom<'_>) -> Atom {
+  Atom::from(value.as_wtf8().to_string_lossy().as_ref())
+}
+
+impl GetSpan for estree::Statement<'_> {
+  fn span(&self) -> Span {
+    self.span()
+  }
+}
+
+impl<T> TagInfoData for T
+where
+  T: Clone + Sized + 'static,
+{
+  fn into_any(data: Self) -> Box<dyn anymap::CloneAny> {
+    Box::new(data)
+  }
+
+  fn downcast(any: Box<dyn anymap::CloneAny>) -> Self {
+    *(any as Box<dyn std::any::Any>)
+      .downcast()
+      .expect("TagInfoData should be downcasted from correct tag info")
+  }
+
+  fn downcast_ref(any: &dyn anymap::CloneAny) -> &Self {
+    let any = any as &dyn std::any::Any;
+    any
+      .downcast_ref()
+      .expect("TagInfoData should be downcasted from correct tag info")
+  }
+
+  fn downcast_mut(any: &mut dyn anymap::CloneAny) -> &mut Self {
+    let any = any as &mut dyn std::any::Any;
+    any
+      .downcast_mut()
+      .expect("TagInfoData should be downcasted from correct tag info")
+  }
+}
+
+// Most parsed member chains are one or two segments long, so keep them inline.
+pub type AtomMembers = SmallVec<[Atom; 2]>;
+pub type OptionalMembers = SmallVec<[bool; 2]>;
+pub type MemberRanges = SmallVec<[Span; 2]>;
+
+#[derive(Debug)]
+pub struct ExtractedMemberExpressionChainData<'ast> {
+  pub object: ExprRef<'ast>,
+  pub members: AtomMembers,
+  pub members_optionals: OptionalMembers,
+  pub member_ranges: MemberRanges,
+}
+
+bitflags! {
+  #[derive(Clone, Copy)]
+  pub struct AllowedMemberTypes: u8 {
+    const CallExpression = 1 << 0;
+    const Expression = 1 << 1;
+  }
+}
+
+#[derive(Debug)]
+pub enum MemberExpressionInfo<'ast> {
+  Call(CallExpressionInfo<'ast>),
+  Expression(ExpressionExpressionInfo),
+}
+
+#[derive(Debug)]
+pub struct CallExpressionInfo<'ast> {
+  pub call: &'ast CallExpr<'ast>,
+  pub root_info: ExportedVariableInfo,
+  pub callee_members: AtomMembers,
+  pub members: AtomMembers,
+  pub members_optionals: OptionalMembers,
+  pub member_ranges: MemberRanges,
+}
+
+#[derive(Debug)]
+pub struct ExpressionExpressionInfo {
+  pub name: String,
+  pub root_info: ExportedVariableInfo,
+  pub members: AtomMembers,
+  pub members_optionals: OptionalMembers,
+  pub member_ranges: MemberRanges,
+}
+
+#[derive(Debug, Clone)]
+pub enum ExportedVariableInfo {
+  Name(Atom),
+  VariableInfo(VariableInfoId),
+}
+
+fn object_and_members_to_name(object: &Atom, members_reversed: &[impl AsRef<str>]) -> String {
+  let total_len = object.len()
+    + members_reversed.len()
+    + members_reversed
+      .iter()
+      .map(|m| m.as_ref().len())
+      .sum::<usize>();
+
+  let mut name = String::with_capacity(total_len);
+  name.push_str(object);
+  let iter = members_reversed.iter();
+  for member in iter.rev() {
+    name.push('.');
+    name.push_str(member.as_ref());
+  }
+  name
+}
+
+pub trait RootName {
+  fn get_root_name(&self) -> Option<Atom> {
+    None
+  }
+}
+
+impl RootName for Expr<'_> {
+  fn get_root_name(&self) -> Option<Atom> {
+    match self {
+      Expr::Ident(ident) => ident.get_root_name(),
+      Expr::This(this) => this.get_root_name(),
+      Expr::MetaProp(meta) => meta.get_root_name(),
+      _ => None,
+    }
+  }
+}
+
+impl RootName for ExprRef<'_> {
+  fn get_root_name(&self) -> Option<Atom> {
+    match self {
+      ExprRef::Ident(ident) => ident.get_root_name(),
+      ExprRef::This(this) => this.get_root_name(),
+      ExprRef::MetaProp(meta) => meta.get_root_name(),
+      _ => None,
+    }
+  }
+}
+
+impl RootName for ThisExpr {
+  fn get_root_name(&self) -> Option<Atom> {
+    Some("this".into())
+  }
+}
+
+impl RootName for Ident<'_> {
+  fn get_root_name(&self) -> Option<Atom> {
+    Some(Atom::from(self.sym.as_str()))
+  }
+}
+
+impl RootName for MetaPropExpr {
+  fn get_root_name(&self) -> Option<Atom> {
+    match self.kind {
+      MetaPropKind::NewTarget => Some("new.target".into()),
+      MetaPropKind::ImportMeta => Some("import.meta".into()),
+    }
+  }
+}
+
+pub struct NameInfo<'a> {
+  pub name: &'a Atom,
+  pub info: Option<&'a VariableInfo>,
+}
+
+pub enum PatRef<'a> {
+  Borrowed(&'a Pat<'a>),
+  Owned(Pat<'a>),
+}
+
+impl<'a> PatRef<'a> {
+  pub(crate) fn as_pat(&self) -> &Pat<'a> {
+    match self {
+      PatRef::Borrowed(pat) => pat,
+      PatRef::Owned(pat) => pat,
+    }
+  }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ScopeTerminated {
+  Return,
+  Throw,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum TopLevelScope {
+  Top,
+  ArrowFunction,
+  False,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct StatementPath {
+  span: Span,
+}
+
+impl StatementPath {
+  fn span(&self) -> Span {
+    self.span
+  }
+}
+
+impl StatementPath {
+  fn from_span(span: Span) -> Self {
+    Self { span }
+  }
+}
+
+impl From<Span> for StatementPath {
+  fn from(value: Span) -> Self {
+    Self::from_span(value)
+  }
+}
+
+#[cacheable]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub struct DestructuringAssignmentProperty {
+  pub range: DependencyRange,
+  #[cacheable(with=AsPreset)]
+  pub id: Atom,
+  #[cacheable(omit_bounds, with=AsOption<AsCacheable>)]
+  pub pattern: Option<DestructuringAssignmentProperties>,
+  pub shorthand: bool,
+}
+
+#[cacheable]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct DestructuringAssignmentProperties {
+  #[cacheable(with=AsVec<AsCacheable>)]
+  inner: FxIndexSet<DestructuringAssignmentProperty>,
+}
+
+impl Hash for DestructuringAssignmentProperties {
+  fn hash<H: Hasher>(&self, state: &mut H) {
+    for prop in &self.inner {
+      prop.hash(state);
+    }
+  }
+}
+
+impl DestructuringAssignmentProperties {
+  pub fn new(properties: FxIndexSet<DestructuringAssignmentProperty>) -> Self {
+    Self { inner: properties }
+  }
+
+  pub fn insert(&mut self, prop: DestructuringAssignmentProperty) -> bool {
+    self.inner.insert(prop)
+  }
+
+  pub fn extend(&mut self, other: Self) {
+    self.inner.extend(other.inner);
+  }
+
+  pub fn iter(&self) -> impl Iterator<Item = &DestructuringAssignmentProperty> {
+    self.inner.iter()
+  }
+
+  pub fn traverse_on_leaf<'a, F>(&'a self, on_leaf_node: &mut F)
+  where
+    F: FnMut(&mut Vec<&'a DestructuringAssignmentProperty>),
+  {
+    self.traverse_impl(on_leaf_node, &mut |_| {}, &mut Vec::new());
+  }
+
+  pub fn traverse_on_enter<'a, F>(&'a self, on_enter_node: &mut F)
+  where
+    F: FnMut(&mut Vec<&'a DestructuringAssignmentProperty>),
+  {
+    self.traverse_impl(&mut |_| {}, on_enter_node, &mut Vec::new());
+  }
+
+  fn traverse_impl<'a, L, E>(
+    &'a self,
+    on_leaf_node: &mut L,
+    on_enter_node: &mut E,
+    stack: &mut Vec<&'a DestructuringAssignmentProperty>,
+  ) where
+    L: FnMut(&mut Vec<&'a DestructuringAssignmentProperty>),
+    E: FnMut(&mut Vec<&'a DestructuringAssignmentProperty>),
+  {
+    for prop in &self.inner {
+      stack.push(prop);
+      on_enter_node(stack);
+      if let Some(pattern) = &prop.pattern {
+        pattern.traverse_impl(on_leaf_node, on_enter_node, stack);
+      } else {
+        on_leaf_node(stack);
+      }
+      stack.pop();
+    }
+  }
+}
+
+#[derive(Debug, Default)]
+pub struct DestructuringAssignmentPropertiesMap {
+  inner: FxHashMap<Span, DestructuringAssignmentProperties>,
+}
+
+impl DestructuringAssignmentPropertiesMap {
+  pub fn add(&mut self, span: Span, props: DestructuringAssignmentProperties) {
+    self.inner.entry(span).or_default().extend(props)
+  }
+
+  pub fn get(&self, span: &Span) -> Option<&DestructuringAssignmentProperties> {
+    self.inner.get(span)
+  }
+}
+
+pub struct JavascriptParser<'parser> {
+  // ===== results =======
+  errors: Vec<Diagnostic>,
+  warning_diagnostics: Vec<Diagnostic>,
+  dependencies: Vec<BoxDependency>,
+  presentational_dependencies: Vec<BoxDependencyTemplate>,
+  // Vec<Box<T: Sized>> makes sense if T is a large type (see #3530, 1st comment).
+  // #3530: https://github.com/rust-lang/rust-clippy/issues/3530
+  #[allow(clippy::vec_box)]
+  blocks: Vec<Box<AsyncDependenciesBlock>>,
+  // ===== inputs =======
+  pub(crate) source: &'parser str,
+  pub ast: &'parser ParsedJavaScriptAst<'parser>,
+  pub parse_meta: ParseMeta,
+  pub factory_meta: Option<&'parser FactoryMeta>,
+  pub build_meta: &'parser mut BuildMeta,
+  pub build_info: &'parser mut BuildInfo,
+  pub resource_data: &'parser ResourceData,
+  pub(crate) compiler_options: &'parser CompilerOptions,
+  pub(crate) javascript_options: &'parser JavascriptParserOptions,
+  pub parser_runtime_requirements: &'parser ParserRuntimeRequirementsData,
+  pub module_type: &'parser ModuleType,
+  pub(crate) module_layer: Option<&'parser ModuleLayer>,
+  pub module_identifier: &'parser ModuleIdentifier,
+  pub(crate) plugin_drive: Rc<JavaScriptParserPluginDrive>,
+  // ===== states =======
+  pub(crate) definitions_db: ScopeInfoDB,
+  pub(crate) definitions: ScopeInfoId,
+  pub(crate) top_level_scope: TopLevelScope,
+  pub(crate) current_tag_info: Option<TagInfoId>,
+  pub in_try: bool,
+  pub(crate) terminated: Option<ScopeTerminated>,
+  pub(crate) in_short_hand: bool,
+  pub(crate) in_tagged_template_tag: bool,
+  pub(crate) member_expr_in_optional_chain: bool,
+  pub(crate) semicolons: &'parser mut FxHashSet<u32>,
+  pub(crate) statement_path: Vec<StatementPath>,
+  pub(crate) prev_statement: Option<StatementPath>,
+  pub is_esm: bool,
+  pub(crate) destructuring_assignment_properties: DestructuringAssignmentPropertiesMap,
+  pub(crate) dynamic_import_references: ImportsReferencesState,
+  pub(crate) common_js_require_references: RequireReferencesState,
+  pub(crate) worker_index: u32,
+  pub(crate) parser_exports_state: Option<bool>,
+  pub(crate) local_modules: Vec<LocalModule>,
+  pub(crate) last_esm_import_order: i32,
+  pub(crate) inner_graph: InnerGraphState,
+  pub(crate) side_effects_item: Option<SideEffectsBailoutItemWithSpan>,
+  pub(crate) is_renaming: Option<Atom>,
+  pub(crate) location_advancer: DependencyLocationAdvancer,
+  pub(crate) collecting_dependencies_for_block: Option<usize>,
+  pub(crate) dependency_branch_guards: Vec<DependencyBranchGuard>,
+}
+
+impl<'parser> JavascriptParser<'parser> {
+  #[allow(clippy::too_many_arguments)]
+  pub fn new(
+    source: &'parser str,
+    ast: &'parser ParsedJavaScriptAst<'parser>,
+    compiler_options: &'parser CompilerOptions,
+    javascript_options: &'parser JavascriptParserOptions,
+    module_identifier: &'parser ModuleIdentifier,
+    module_type: &'parser ModuleType,
+    module_layer: Option<&'parser ModuleLayer>,
+    resource_data: &'parser ResourceData,
+    factory_meta: Option<&'parser FactoryMeta>,
+    build_meta: &'parser mut BuildMeta,
+    build_info: &'parser mut BuildInfo,
+    semicolons: &'parser mut FxHashSet<u32>,
+    parser_plugins: &'parser mut Vec<BoxJavascriptParserPlugin>,
+    parse_meta: ParseMeta,
+    parser_runtime_requirements: &'parser ParserRuntimeRequirementsData,
+  ) -> Self {
+    let warning_diagnostics: Vec<Diagnostic> = Vec::new();
+    let errors = Vec::new();
+    let dependencies = Vec::with_capacity(64);
+    let blocks = Vec::with_capacity(64);
+    let presentational_dependencies = Vec::with_capacity(64);
+    let parser_exports_state: Option<bool> = None;
+    let unresolved_scope_id = ast.semantic.unresolved_scope_id();
+
+    let mut plugins: Vec<BoxJavascriptParserPlugin> = Vec::with_capacity(32 + parser_plugins.len());
+
+    plugins.append(parser_plugins);
+
+    plugins.push(Box::new(parser_plugin::InitializeEvaluating));
+    plugins.push(Box::new(parser_plugin::JavascriptMetaInfoPlugin));
+    plugins.push(Box::new(parser_plugin::ConstPlugin));
+    plugins.push(Box::new(parser_plugin::UseStrictPlugin));
+
+    if matches!(module_type, ModuleType::JsAuto | ModuleType::JsDynamic) {
+      plugins.push(Box::new(
+        parser_plugin::RequireContextDependencyParserPlugin,
+      ));
+      plugins.push(Box::new(
+        parser_plugin::RequireEnsureDependenciesBlockParserPlugin,
+      ));
+    }
+    plugins.push(Box::new(parser_plugin::CompatibilityPlugin));
+
+    if module_type.is_js_auto() || module_type.is_js_esm() {
+      plugins.push(Box::new(parser_plugin::ESMTopLevelThisParserPlugin));
+      plugins.push(Box::<parser_plugin::ESMDetectionParserPlugin>::default());
+      plugins.push(Box::new(
+        parser_plugin::ImportMetaContextDependencyParserPlugin,
+      ));
+      if matches!(
+        javascript_options.import_meta,
+        Some(ImportMeta::Enabled | ImportMeta::PreserveUnknown)
+      ) {
+        plugins.push(Box::new(parser_plugin::ImportMetaPlugin(
+          javascript_options.import_meta.expect("should have value"),
+        )));
+      } else {
+        plugins.push(Box::new(parser_plugin::ImportMetaDisabledPlugin));
+      }
+
+      plugins.push(Box::new(parser_plugin::ESMImportDependencyParserPlugin));
+      plugins.push(Box::new(parser_plugin::ESMExportDependencyParserPlugin));
+    }
+
+    if compiler_options.amd.is_some() && (module_type.is_js_auto() || module_type.is_js_dynamic()) {
+      plugins.push(Box::new(
+        parser_plugin::AMDRequireDependenciesBlockParserPlugin,
+      ));
+      plugins.push(Box::new(parser_plugin::AMDDefineDependencyParserPlugin));
+      plugins.push(Box::new(parser_plugin::AMDParserPlugin));
+    }
+
+    if module_type.is_js_auto() || module_type.is_js_dynamic() || module_type.is_js_esm() {
+      plugins.push(Box::new(parser_plugin::CommonJsImportsParserPlugin));
+    }
+
+    if module_type.is_js_auto() || module_type.is_js_dynamic() {
+      plugins.push(Box::new(parser_plugin::CommonJsPlugin));
+      let commonjs_exports = javascript_options
+        .commonjs
+        .as_ref()
+        .map_or(JavascriptParserCommonjsExportsOption::Enable, |commonjs| {
+          commonjs.exports
+        });
+      if commonjs_exports != JavascriptParserCommonjsExportsOption::Disable {
+        plugins.push(Box::new(parser_plugin::CommonJsExportsParserPlugin::new(
+          commonjs_exports == JavascriptParserCommonjsExportsOption::SkipInEsm,
+        )));
+      }
+    }
+
+    // NodeStuffPlugin: handle __dirname/__filename/global (CJS) and import.meta.dirname/filename (ESM)
+    // CJS features require node options; ESM features are always available for ESM-capable modules
+    let handle_cjs =
+      (module_type.is_js_auto() || module_type.is_js_dynamic()) && compiler_options.node.is_some();
+    let handle_esm = module_type.is_js_auto() || module_type.is_js_esm();
+    if handle_cjs || handle_esm {
+      plugins.push(Box::new(parser_plugin::NodeStuffPlugin::new(
+        handle_cjs, handle_esm,
+      )));
+    }
+
+    if module_type.is_js_auto() || module_type.is_js_dynamic() || module_type.is_js_esm() {
+      plugins.push(Box::new(parser_plugin::IsIncludedPlugin));
+      plugins.push(Box::new(parser_plugin::ExportsInfoApiPlugin));
+      plugins.push(Box::new(parser_plugin::APIPlugin::new(
+        compiler_options.output.module,
+      )));
+      plugins.push(Box::new(parser_plugin::ImportParserPlugin));
+      plugins.push(Box::new(parser_plugin::WorkerPlugin::new(
+        javascript_options
+          .worker
+          .as_ref()
+          .expect("should have worker"),
+      )));
+      plugins.push(Box::new(parser_plugin::OverrideStrictPlugin));
+    }
+
+    let inline_exports = compiler_options.optimization.inline_exports;
+    if inline_exports {
+      build_info.inline_exports = true;
+    }
+    plugins.push(Box::new(parser_plugin::ConstValuePlugin::new(
+      inline_exports,
+    )));
+    if compiler_options.optimization.inner_graph {
+      plugins.push(Box::new(parser_plugin::InnerGraphParserPlugin::new(
+        unresolved_scope_id,
+        compiler_options.experiments.pure_functions,
+      )));
+    }
+
+    if compiler_options.optimization.side_effects.is_true() {
+      plugins.push(Box::new(parser_plugin::SideEffectsParserPlugin::new(
+        unresolved_scope_id,
+        compiler_options.experiments.pure_functions,
+      )));
+    }
+
+    let plugin_drive = Rc::new(JavaScriptParserPluginDrive::new(plugins));
+    let mut db = ScopeInfoDB::new();
+
+    Self {
+      last_esm_import_order: 0,
+      ast,
+      javascript_options,
+      source,
+      errors,
+      warning_diagnostics,
+      dependencies,
+      presentational_dependencies,
+      blocks,
+      in_try: false,
+      terminated: None,
+      in_short_hand: false,
+      top_level_scope: TopLevelScope::Top,
+      is_esm: matches!(module_type, ModuleType::JsEsm),
+      in_tagged_template_tag: false,
+      definitions: db.create(),
+      definitions_db: db,
+      plugin_drive,
+      resource_data,
+      factory_meta,
+      build_meta,
+      build_info,
+      compiler_options,
+      module_type,
+      module_layer,
+      parser_exports_state,
+      worker_index: 0,
+      module_identifier,
+      member_expr_in_optional_chain: false,
+      destructuring_assignment_properties: Default::default(),
+      dynamic_import_references: Default::default(),
+      common_js_require_references: Default::default(),
+      semicolons,
+      statement_path: Default::default(),
+      current_tag_info: None,
+      prev_statement: None,
+      inner_graph: InnerGraphState::new(),
+      parse_meta,
+      local_modules: Default::default(),
+      side_effects_item: None,
+      parser_runtime_requirements,
+      is_renaming: None,
+      location_advancer: DependencyLocationAdvancer::new(),
+      collecting_dependencies_for_block: None,
+      dependency_branch_guards: Vec::new(),
+    }
+  }
+
+  pub fn into_results(mut self) -> Result<ScanDependenciesResult, Vec<Diagnostic>> {
+    if self.errors.is_empty() {
+      InnerGraphParserPlugin::finalize_dependency_usage(
+        &mut self.inner_graph,
+        &mut self.dependencies,
+      );
+      Ok(ScanDependenciesResult {
+        dependencies: self.dependencies,
+        blocks: self.blocks,
+        presentational_dependencies: self.presentational_dependencies,
+        warning_diagnostics: self.warning_diagnostics,
+        side_effects_item: self.side_effects_item,
+      })
+    } else {
+      Err(self.errors)
+    }
+  }
+
+  pub fn add_dependency(&mut self, mut dep: BoxDependency) {
+    if !self.dependency_branch_guards.is_empty() {
+      set_dependency_branch_guards(dep.as_mut(), &self.dependency_branch_guards);
+    }
+    self.dependencies.push(dep);
+  }
+
+  pub fn add_dependencies(&mut self, deps: impl IntoIterator<Item = BoxDependency>) {
+    if self.dependency_branch_guards.is_empty() {
+      self.dependencies.extend(deps);
+    } else {
+      let branch_guards = self.dependency_branch_guards.clone();
+      self.dependencies.extend(deps.into_iter().map(|mut dep| {
+        set_dependency_branch_guards(dep.as_mut(), &branch_guards);
+        dep
+      }));
+    }
+  }
+
+  pub fn pop_dependency(&mut self) -> Option<BoxDependency> {
+    self.dependencies.pop()
+  }
+
+  pub fn next_dependency_idx(&self) -> usize {
+    self.dependencies.len()
+  }
+
+  pub fn get_dependencies(&self) -> &[BoxDependency] {
+    &self.dependencies
+  }
+
+  pub fn get_dependency_mut(&mut self, idx: usize) -> Option<&mut BoxDependency> {
+    self.dependencies.get_mut(idx)
+  }
+
+  pub fn collect_dependencies_for_block(
+    &mut self,
+    block_idx: usize,
+    deps: Vec<BoxDependency>,
+    f: impl FnOnce(&mut JavascriptParser),
+  ) -> Vec<BoxDependency> {
+    let old_deps = std::mem::replace(&mut self.dependencies, deps);
+    let old_block_idx = self.collecting_dependencies_for_block.replace(block_idx);
+    f(self);
+    self.collecting_dependencies_for_block = old_block_idx;
+    std::mem::replace(&mut self.dependencies, old_deps)
+  }
+
+  pub fn add_presentational_dependency(&mut self, dep: BoxDependencyTemplate) {
+    self.presentational_dependencies.push(dep);
+  }
+
+  pub fn add_presentational_dependencies(
+    &mut self,
+    deps: impl IntoIterator<Item = BoxDependencyTemplate>,
+  ) {
+    self.presentational_dependencies.extend(deps);
+  }
+
+  pub fn next_presentational_dependency_idx(&self) -> usize {
+    self.presentational_dependencies.len()
+  }
+
+  pub fn get_presentational_dependency_mut(
+    &mut self,
+    idx: usize,
+  ) -> Option<&mut BoxDependencyTemplate> {
+    self.presentational_dependencies.get_mut(idx)
+  }
+
+  pub fn add_block(&mut self, mut block: Box<AsyncDependenciesBlock>) {
+    if !self.dependency_branch_guards.is_empty() {
+      for dep in block.dependencies_mut() {
+        set_dependency_branch_guards(dep.as_mut(), &self.dependency_branch_guards);
+      }
+    }
+    self.blocks.push(block);
+  }
+
+  pub fn next_block_idx(&self) -> usize {
+    self.blocks.len()
+  }
+
+  pub fn get_block_mut(&mut self, idx: usize) -> Option<&mut Box<AsyncDependenciesBlock>> {
+    self.blocks.get_mut(idx)
+  }
+
+  pub fn add_error(&mut self, error: Diagnostic) {
+    self.errors.push(error);
+  }
+
+  pub fn add_warning(&mut self, warning: Diagnostic) {
+    self.warning_diagnostics.push(warning);
+  }
+
+  pub fn add_warnings(&mut self, warnings: impl IntoIterator<Item = Diagnostic>) {
+    self.warning_diagnostics.extend(warnings);
+  }
+
+  pub fn source(&self) -> &str {
+    self.source
+  }
+
+  pub fn is_top_level_scope(&self) -> bool {
+    matches!(self.top_level_scope, TopLevelScope::Top)
+  }
+
+  pub fn is_top_level_this(&self) -> bool {
+    !matches!(self.top_level_scope, TopLevelScope::False)
+  }
+
+  pub fn add_local_module(&mut self, name: &Atom, dep_idx: usize) {
+    self.local_modules.push(LocalModule::new(
+      name.clone(),
+      self.local_modules.len(),
+      dep_idx,
+    ));
+  }
+
+  pub fn get_local_module_mut(&mut self, name: &str) -> Option<&mut LocalModule> {
+    self.local_modules.iter_mut().find(|m| m.get_name() == name)
+  }
+
+  pub fn is_asi_position(&self, pos: u32) -> bool {
+    let curr_path = self.statement_path.last().expect("Should in statement");
+    if curr_path.span().end == pos && self.semicolons.contains(&pos) {
+      true
+    } else if curr_path.span().start == pos
+      && let Some(prev) = &self.prev_statement
+      && self.semicolons.contains(&prev.span().end)
+    {
+      true
+    } else {
+      false
+    }
+  }
+
+  pub fn set_asi_position(&mut self, pos: u32) -> bool {
+    self.semicolons.insert(pos)
+  }
+
+  pub fn unset_asi_position(&mut self, pos: u32) -> bool {
+    self.semicolons.remove(&pos)
+  }
+
+  pub fn is_statement_level_expression(&self, expr_span: Span) -> bool {
+    let Some(curr_path) = self.statement_path.last() else {
+      return false;
+    };
+    curr_path.span() == expr_span
+  }
+
+  pub fn get_module_layer(&self) -> Option<&ModuleLayer> {
+    self.module_layer
+  }
+
+  pub fn get_variable_info(&mut self, name: &Atom) -> Option<&VariableInfo> {
+    let id = self.definitions_db.get(self.definitions, name)?;
+    Some(self.definitions_db.expect_get_variable(id))
+  }
+
+  fn get_tag_data_by_id<Data: TagInfoData>(
+    &self,
+    tag_info_id: TagInfoId,
+    tag: &'static str,
+  ) -> Option<&Data> {
+    let mut cur = Some(tag_info_id);
+
+    while let Some(cur_id) = cur {
+      let cur_tag_info = self.definitions_db.expect_get_tag_info(cur_id);
+      if cur_tag_info.tag == tag {
+        return cur_tag_info
+          .data
+          .as_deref()
+          .map(|data| TagInfoData::downcast_ref(data));
+      }
+      cur = cur_tag_info.next;
+    }
+
+    None
+  }
+
+  fn get_tag_data_mut_by_id<Data: TagInfoData>(
+    &mut self,
+    tag_info_id: TagInfoId,
+    tag: &'static str,
+  ) -> Option<&mut Data> {
+    let mut cur = Some(tag_info_id);
+
+    while let Some(cur_id) = cur {
+      let cur_tag_info = self.definitions_db.expect_get_tag_info(cur_id);
+      if cur_tag_info.tag == tag {
+        return self
+          .definitions_db
+          .expect_get_mut_tag_info(cur_id)
+          .data
+          .as_deref_mut()
+          .map(|data| TagInfoData::downcast_mut(data));
+      }
+      cur = cur_tag_info.next;
+    }
+
+    None
+  }
+
+  pub fn get_tag_data<Data: TagInfoData>(
+    &mut self,
+    name: &Atom,
+    tag: &'static str,
+  ) -> Option<&Data> {
+    self
+      .get_variable_info(name)
+      .and_then(|variable_info| variable_info.tag_info)
+      .and_then(|tag_info_id| self.get_tag_data_by_id(tag_info_id, tag))
+  }
+
+  pub fn get_tag_data_mut<Data: TagInfoData>(
+    &mut self,
+    name: &Atom,
+    tag: &'static str,
+  ) -> Option<&mut Data> {
+    self
+      .get_variable_info(name)
+      .and_then(|variable_info| variable_info.tag_info)
+      .and_then(|tag_info_id| self.get_tag_data_mut_by_id(tag_info_id, tag))
+  }
+
+  pub fn get_variable_tag_data<Data: TagInfoData>(
+    &self,
+    id: VariableInfoId,
+    tag: &'static str,
+  ) -> Option<&Data> {
+    self
+      .definitions_db
+      .expect_get_variable(id)
+      .tag_info
+      .and_then(|tag_info_id| self.get_tag_data_by_id(tag_info_id, tag))
+  }
+
+  pub fn get_free_info_from_variable<'a>(&'a mut self, name: &'a Atom) -> Option<NameInfo<'a>> {
+    let Some(info) = self.get_variable_info(name) else {
+      return Some(NameInfo { name, info: None });
+    };
+    let Some(name) = &info.name else {
+      return None;
+    };
+    if !info.is_free() {
+      return None;
+    }
+    Some(NameInfo {
+      name,
+      info: Some(info),
+    })
+  }
+
+  pub fn get_name_info_from_variable<'a>(&'a mut self, name: &'a Atom) -> Option<NameInfo<'a>> {
+    let Some(info) = self.get_variable_info(name) else {
+      return Some(NameInfo { name, info: None });
+    };
+    let Some(name) = &info.name else {
+      return None;
+    };
+    if !info.is_free() && !info.is_tagged() {
+      return None;
+    }
+    Some(NameInfo {
+      name,
+      info: Some(info),
+    })
+  }
+
+  pub fn get_all_variables_from_current_scope(
+    &self,
+  ) -> impl Iterator<Item = (&str, VariableInfoId)> {
+    self.definitions_db.scope_variables(self.definitions)
+  }
+
+  pub fn define_variable(&mut self, name: Atom) {
+    let definitions = self.definitions;
+    if let Some(variable_info) = self.get_variable_info(&name)
+      && variable_info.tag_info.is_some()
+      && definitions == variable_info.declared_scope
+    {
+      return;
+    }
+    let info = VariableInfo::create(
+      &mut self.definitions_db,
+      definitions,
+      None,
+      VariableInfoFlags::NORMAL,
+      None,
+    );
+    self.definitions_db.set(definitions, name, info);
+  }
+
+  pub fn set_variable(&mut self, name: Atom, variable: ExportedVariableInfo) {
+    let scope_id = self.definitions;
+    match variable {
+      ExportedVariableInfo::Name(variable) => {
+        if name == variable {
+          self.definitions_db.delete(scope_id, &name);
+        } else {
+          let variable = VariableInfo::create(
+            &mut self.definitions_db,
+            scope_id,
+            Some(variable),
+            VariableInfoFlags::FREE,
+            None,
+          );
+          self.definitions_db.set(scope_id, name, variable);
+        }
+      }
+      ExportedVariableInfo::VariableInfo(variable) => {
+        self.definitions_db.set(scope_id, name, variable);
+      }
+    }
+  }
+
+  fn undefined_variable(&mut self, name: &Atom) {
+    self.definitions_db.delete(self.definitions, name)
+  }
+
+  pub fn tag_variable<Data: TagInfoData>(
+    &mut self,
+    name: Atom,
+    tag: &'static str,
+    data: Option<Data>,
+  ) {
+    self.tag_variable_impl(name, tag, data.map(TagInfoData::into_any), None);
+  }
+
+  pub fn tag_variable_with_flags<Data: TagInfoData>(
+    &mut self,
+    name: Atom,
+    tag: &'static str,
+    data: Option<Data>,
+    flags: VariableInfoFlags,
+  ) {
+    self.tag_variable_impl(name, tag, data.map(TagInfoData::into_any), Some(flags));
+  }
+
+  pub fn tag_variable_without_data(&mut self, name: Atom, tag: &'static str) {
+    self.tag_variable_impl(name, tag, None, None);
+  }
+
+  fn tag_variable_impl(
+    &mut self,
+    name: Atom,
+    tag: &'static str,
+    data: Option<Box<dyn anymap::CloneAny>>,
+    flags: Option<VariableInfoFlags>,
+  ) {
+    let flags = flags.unwrap_or(VariableInfoFlags::TAGGED);
+    let new_info = if let Some(old_info_id) = self.definitions_db.get(self.definitions, &name) {
+      let old_info = self.definitions_db.expect_get_variable(old_info_id);
+      if let Some(old_tag_info) = old_info.tag_info {
+        let declared_scope = old_info.declared_scope;
+        // FIXME: remove `.clone`
+        let name = old_info.name.clone();
+        let flags = old_info.flags | flags;
+        let tag_info = Some(TagInfo::create(
+          &mut self.definitions_db,
+          tag,
+          data,
+          Some(old_tag_info),
+        ));
+        VariableInfo::create(
+          &mut self.definitions_db,
+          declared_scope,
+          name,
+          flags,
+          tag_info,
+        )
+      } else {
+        let declared_scope = old_info.declared_scope;
+        let tag_info = Some(TagInfo::create(&mut self.definitions_db, tag, data, None));
+        VariableInfo::create(
+          &mut self.definitions_db,
+          declared_scope,
+          Some(name.clone()),
+          flags,
+          tag_info,
+        )
+      }
+    } else {
+      let tag_info = Some(TagInfo::create(&mut self.definitions_db, tag, data, None));
+      VariableInfo::create(
+        &mut self.definitions_db,
+        self.definitions,
+        Some(name.clone()),
+        flags,
+        tag_info,
+      )
+    };
+    self.definitions_db.set(self.definitions, name, new_info);
+  }
+
+  fn _get_member_expression_info<'ast>(
+    &mut self,
+    object: ExprRef<'ast>,
+    mut members: AtomMembers,
+    mut members_optionals: OptionalMembers,
+    mut member_ranges: MemberRanges,
+    allowed_types: AllowedMemberTypes,
+  ) -> Option<MemberExpressionInfo<'ast>> {
+    match object {
+      ExprRef::Call(expr) => {
+        if !allowed_types.contains(AllowedMemberTypes::CallExpression) {
+          return None;
+        }
+        let callee = expr.callee.as_expr()?;
+        let (root_name, mut root_members) = if let Some(member) = callee.as_member() {
+          let extracted = self.extract_member_expression_chain(ExprRef::Member(member));
+          let root_name = extracted.object.get_root_name()?;
+          (root_name, extracted.members)
+        } else {
+          (callee.get_root_name()?, AtomMembers::new())
+        };
+        let NameInfo {
+          info: root_info, ..
+        } = self.get_name_info_from_variable(&root_name)?;
+
+        root_members.reverse();
+        members.reverse();
+        members_optionals.reverse();
+        member_ranges.reverse();
+        let root_name_for_info = root_name.clone();
+        Some(MemberExpressionInfo::Call(CallExpressionInfo {
+          call: expr,
+          root_info: root_info.map_or_else(
+            || ExportedVariableInfo::Name(root_name_for_info),
+            |i| ExportedVariableInfo::VariableInfo(i.id()),
+          ),
+          callee_members: root_members,
+          members,
+          members_optionals,
+          member_ranges,
+        }))
+      }
+      ExprRef::MetaProp(_) | ExprRef::Ident(_) | ExprRef::This(_) => {
+        if !allowed_types.contains(AllowedMemberTypes::Expression) {
+          return None;
+        }
+        let root_name = object.get_root_name()?;
+
+        let NameInfo {
+          name: resolved_root,
+          info: root_info,
+        } = self.get_name_info_from_variable(&root_name)?;
+
+        let name = object_and_members_to_name(resolved_root, &members);
+        members.reverse();
+        members_optionals.reverse();
+        member_ranges.reverse();
+        let root_name_for_info = root_name.clone();
+        Some(MemberExpressionInfo::Expression(ExpressionExpressionInfo {
+          name,
+          root_info: root_info.map_or_else(
+            || ExportedVariableInfo::Name(root_name_for_info),
+            |i| ExportedVariableInfo::VariableInfo(i.id()),
+          ),
+          members,
+          members_optionals,
+          member_ranges,
+        }))
+      }
+      _ => None,
+    }
+  }
+
+  pub fn get_member_expression_info_from_expr<'ast>(
+    &mut self,
+    expr: &'ast Expr,
+    allowed_types: AllowedMemberTypes,
+  ) -> Option<MemberExpressionInfo<'ast>> {
+    match expr {
+      Expr::Member(_) | Expr::OptChain(_) => {
+        self.get_member_expression_info(expr.into(), allowed_types)
+      }
+      _ => self._get_member_expression_info(
+        expr.into(),
+        AtomMembers::new(),
+        OptionalMembers::new(),
+        MemberRanges::new(),
+        allowed_types,
+      ),
+    }
+  }
+
+  pub fn get_member_expression_info<'ast>(
+    &mut self,
+    expr: ExprRef<'ast>,
+    allowed_types: AllowedMemberTypes,
+  ) -> Option<MemberExpressionInfo<'ast>> {
+    let ExtractedMemberExpressionChainData {
+      object,
+      members,
+      members_optionals,
+      member_ranges,
+    } = self.extract_member_expression_chain(expr);
+    self._get_member_expression_info(
+      object,
+      members,
+      members_optionals,
+      member_ranges,
+      allowed_types,
+    )
+  }
+
+  pub fn extract_member_expression_chain<'ast>(
+    &self,
+    expr: ExprRef<'ast>,
+  ) -> ExtractedMemberExpressionChainData<'ast> {
+    let mut object = expr;
+    let mut members = AtomMembers::new();
+    let mut members_optionals = OptionalMembers::new();
+    let mut member_ranges = MemberRanges::new();
+    let mut in_optional_chain = self.member_expr_in_optional_chain;
+    loop {
+      match object {
+        ExprRef::Member(expr) => {
+          if let Some(computed) = expr.prop.as_computed() {
+            let Expr::Lit(lit) = &computed.expr else {
+              break;
+            };
+            let value = match &**lit {
+              Lit::Str(s) => atom_from_wtf8(s.value),
+              Lit::Bool(b) => Atom::from(if b.value { "true" } else { "false" }),
+              Lit::Null(_) => Atom::from("null"),
+              Lit::Num(n) => Atom::from(n.value.to_string().as_str()),
+              Lit::BigInt(i) => Atom::from(i.value.as_str()),
+              Lit::Regex(r) => Atom::from(r.exp.as_str()),
+            };
+            // Since members are not used across rspack javascript parser plugin,
+            // we directly makes it atom here
+            members.push(value);
+            member_ranges.push(expr.obj.span());
+          } else if let Some(ident) = expr.prop.as_ident() {
+            members.push(Atom::from(ident.sym.as_str()));
+            member_ranges.push(expr.obj.span());
+          } else {
+            break;
+          }
+          members_optionals.push(in_optional_chain);
+          object = (&expr.obj).into();
+          in_optional_chain = false;
+        }
+        ExprRef::OptChain(expr) => {
+          in_optional_chain = expr.optional;
+          if let OptChainBase::Member(member) = &expr.base {
+            object = ExprRef::Member(member);
+          } else {
+            break;
+          }
+        }
+        _ => break,
+      }
+    }
+    ExtractedMemberExpressionChainData {
+      object,
+      members,
+      members_optionals,
+      member_ranges,
+    }
+  }
+
+  fn enter_ident<F>(&mut self, ident: &Ident, on_ident: F)
+  where
+    F: FnOnce(&mut Self, &Ident),
+  {
+    let drive = self.plugin_drive.clone();
+    if !Atom::from(ident.sym.as_str())
+      .call_hooks_name(self, |parser, for_name| {
+        drive.pattern(parser, ident, for_name)
+      })
+      .unwrap_or_default()
+    {
+      on_ident(self, ident);
+    }
+  }
+
+  fn enter_array_pattern<F>(&mut self, array_pat: &ArrayPat, on_ident: F)
+  where
+    F: FnOnce(&mut Self, &Ident) + Copy,
+  {
+    array_pat
+      .elems
+      .iter()
+      .flatten()
+      .for_each(|ele| self.enter_pattern(PatRef::Borrowed(ele), on_ident));
+  }
+
+  fn enter_assignment_pattern<F>(&mut self, assign: &AssignPat, on_ident: F)
+  where
+    F: FnOnce(&mut Self, &Ident) + Copy,
+  {
+    self.enter_pattern(PatRef::Borrowed(&assign.left), on_ident);
+  }
+
+  fn enter_object_pattern<F>(&mut self, obj: &ObjectPat, on_ident: F)
+  where
+    F: FnOnce(&mut Self, &Ident) + Copy,
+  {
+    for prop in &obj.props {
+      match prop {
+        ObjectPatProp::KeyValue(kv) => self.enter_pattern(PatRef::Borrowed(&kv.value), on_ident),
+        ObjectPatProp::Assign(assign) => {
+          let old = self.in_short_hand;
+          if assign.value.is_none() {
+            self.in_short_hand = true;
+          }
+          self.enter_ident(&assign.key.id, on_ident);
+          self.in_short_hand = old;
+        }
+        ObjectPatProp::Rest(rest) => self.enter_rest_pattern(rest, on_ident),
+      }
+    }
+  }
+
+  fn enter_rest_pattern<F>(&mut self, rest: &RestPat, on_ident: F)
+  where
+    F: FnOnce(&mut Self, &Ident) + Copy,
+  {
+    self.enter_pattern(PatRef::Borrowed(&rest.arg), on_ident)
+  }
+
+  fn enter_pattern<F>(&mut self, pattern: PatRef<'_>, on_ident: F)
+  where
+    F: FnOnce(&mut Self, &Ident) + Copy,
+  {
+    match pattern.as_pat() {
+      Pat::Ident(ident) => self.enter_ident(&ident.id, on_ident),
+      Pat::Array(array) => self.enter_array_pattern(array, on_ident),
+      Pat::Assign(assign) => self.enter_assignment_pattern(assign, on_ident),
+      Pat::Object(obj) => self.enter_object_pattern(obj, on_ident),
+      Pat::Rest(rest) => self.enter_rest_pattern(rest, on_ident),
+      Pat::Invalid(_) => (),
+      Pat::Expr(_) => (),
+    }
+  }
+
+  fn enter_assign_target_pattern<F>(&mut self, pattern: &AssignTargetPat, on_ident: F)
+  where
+    F: FnOnce(&mut Self, &Ident) + Copy,
+  {
+    match pattern {
+      AssignTargetPat::Array(array) => self.enter_array_pattern(array, on_ident),
+      AssignTargetPat::Object(obj) => self.enter_object_pattern(obj, on_ident),
+      AssignTargetPat::Invalid(_) => (),
+    }
+  }
+
+  fn enter_patterns<'a, I, F>(&mut self, patterns: I, on_ident: F)
+  where
+    F: FnOnce(&mut Self, &Ident) + Copy,
+    I: Iterator<Item = PatRef<'a>>,
+  {
+    for pattern in patterns {
+      self.enter_pattern(pattern, on_ident);
+    }
+  }
+
+  fn enter_optional_chain<'a, C, M, R>(
+    &mut self,
+    expr: &'a OptChainExpr<'a>,
+    on_call: C,
+    on_member: M,
+  ) -> R
+  where
+    C: FnOnce(&mut Self, &'a OptCall<'a>) -> R,
+    M: FnOnce(&mut Self, &'a MemberExpr<'a>) -> R,
+  {
+    let member_expr_in_optional_chain = self.member_expr_in_optional_chain;
+    let ret = match &expr.base {
+      OptChainBase::Call(call) => {
+        if call.callee.is_member() {
+          self.member_expr_in_optional_chain = expr.optional;
+        }
+        on_call(self, call)
+      }
+      OptChainBase::Member(member) => {
+        self.member_expr_in_optional_chain = expr.optional;
+        on_member(self, member)
+      }
+    };
+    self.member_expr_in_optional_chain = member_expr_in_optional_chain;
+    ret
+  }
+
+  fn enter_declaration<F>(&mut self, decl: &Decl, on_ident: F)
+  where
+    F: FnOnce(&mut Self, &Ident) + Copy,
+  {
+    match decl {
+      Decl::Class(c) => {
+        self.enter_ident(&c.ident, on_ident);
+      }
+      Decl::Fn(f) => {
+        self.enter_ident(&f.ident, on_ident);
+      }
+      Decl::Var(var) => {
+        for decl in &var.decls {
+          self.enter_pattern(PatRef::Borrowed(&decl.name), on_ident);
+        }
+      }
+      Decl::Using(_) => (),
+    }
+  }
+
+  fn enter_statement<S, H, F>(&mut self, statement: &S, call_hook: H, on_statement: F)
+  where
+    S: GetSpan,
+    H: FnOnce(&mut Self, &S) -> bool,
+    F: FnOnce(&mut Self, &S),
+  {
+    self.statement_path.push(statement.span().into());
+    if call_hook(self, statement) {
+      self.prev_statement = self.statement_path.pop();
+      return;
+    }
+    on_statement(self, statement);
+    self.prev_statement = self.statement_path.pop();
+  }
+
+  pub fn enter_destructuring_assignment<'a>(
+    &mut self,
+    pattern: &ObjectPat<'a>,
+    expr: &'a Expr<'a>,
+  ) -> Option<&'a Expr<'a>> {
+    let drive = self.plugin_drive.clone();
+    let expr = if let Expr::Await(await_expr) = expr {
+      &await_expr.arg
+    } else {
+      expr
+    };
+    let destructuring = if let Some(assign) = expr.as_assign()
+      && let Some(pat) = assign.left.as_pat()
+      && let Some(obj_pat) = pat.as_object()
+    {
+      self.enter_destructuring_assignment(obj_pat, &assign.right)
+    } else {
+      let can_collect = drive
+        .can_collect_destructuring_assignment_properties(self, expr)
+        .unwrap_or_default();
+      can_collect.then_some(expr)
+    };
+    let destructuring_span = destructuring.map(|destructuring| destructuring.span());
+    if let Some(destructuring_span) = destructuring_span
+      && let Some(keys) =
+        self.collect_destructuring_assignment_properties_from_object_pattern(pattern)
+    {
+      self
+        .destructuring_assignment_properties
+        .add(destructuring_span, keys);
+    }
+    destructuring
+  }
+
+  pub fn walk_program(&mut self, ast: &Program) {
+    let drive = self.plugin_drive.clone();
+    if drive.program(self, ast).is_none() {
+      match ast {
+        Program::Module(m) => {
+          self.set_strict(true);
+          self.prev_statement = None;
+          self.module_pre_walk_module_items(&m.body);
+          self.prev_statement = None;
+          self.pre_walk_module_items(&m.body);
+          self.prev_statement = None;
+          self.block_pre_walk_module_items(&m.body);
+          self.prev_statement = None;
+          self.walk_module_items(&m.body);
+        }
+        Program::Script(s) => {
+          self.detect_mode(&s.body);
+          self.prev_statement = None;
+          self.pre_walk_statements(&s.body);
+          self.prev_statement = None;
+          self.block_pre_walk_statements(&s.body);
+          self.prev_statement = None;
+          self.walk_statements(&s.body);
+        }
+      }
+    }
+    drive.finish(self);
+  }
+
+  fn set_strict(&mut self, value: bool) {
+    let current_scope = self.definitions_db.expect_get_mut_scope(self.definitions);
+    current_scope.is_strict = value;
+  }
+
+  pub fn detect_mode(&mut self, stmts: &[Stmt]) {
+    let Some(Lit::Str(str)) = stmts
+      .first()
+      .and_then(|stmt| stmt.as_expr())
+      .and_then(|expr_stmt| expr_stmt.expr.as_lit())
+    else {
+      return;
+    };
+
+    if str.value.as_wtf8().to_string_lossy().as_ref() == "use strict" {
+      self.set_strict(true);
+    }
+  }
+
+  pub fn is_strict(&mut self) -> bool {
+    let scope = self.definitions_db.expect_get_scope(self.definitions);
+    scope.is_strict
+  }
+
+  pub fn is_variable_defined(&mut self, name: &Atom) -> bool {
+    let Some(info) = self.get_variable_info(name) else {
+      return false;
+    };
+    !info.is_free()
+  }
+}
+
+impl<'parser> JavascriptParser<'parser> {
+  pub fn evaluate_expression<'a>(&mut self, expr: &'a Expr<'a>) -> BasicEvaluatedExpression<'a>
+  where
+    'parser: 'a,
+  {
+    match self.evaluating(expr) {
+      Some(evaluated) => evaluated.with_expression(Some(expr)),
+      None => BasicEvaluatedExpression::with_range(expr.span().real_lo(), expr.span().real_hi())
+        .with_expression(Some(expr)),
+    }
+  }
+
+  pub fn evaluate<T: Display>(
+    &mut self,
+    source: String,
+    error_title: T,
+  ) -> Option<BasicEvaluatedExpression<'parser>> {
+    eval::eval_source(self, source, error_title.to_string())
+  }
+
+  // same as `JavascriptParser._initializeEvaluating` in webpack
+  // FIXME: should mv it to plugin(for example `parse.hooks.evaluate for`)
+  fn evaluating<'a>(&mut self, expr: &'a Expr<'a>) -> Option<BasicEvaluatedExpression<'a>>
+  where
+    'parser: 'a,
+  {
+    match expr {
+      Expr::Tpl(tpl) => eval::eval_tpl_expression(self, tpl),
+      Expr::TaggedTpl(tagged_tpl) => eval::eval_tagged_tpl_expression(self, tagged_tpl),
+      Expr::Lit(lit) => eval::eval_lit_expr(lit),
+      Expr::Cond(cond) => eval::eval_cond_expression(self, cond),
+      Expr::Unary(unary) => eval::eval_unary_expression(self, unary),
+      Expr::Bin(binary) => eval::eval_binary_expression(self, binary),
+      Expr::Array(array) => eval::eval_array_expression(self, array),
+      Expr::New(new) => eval::eval_new_expression(self, new),
+      Expr::Call(call) => eval::eval_call_expression(self, call),
+      Expr::OptChain(opt_chain) => self.enter_optional_chain(
+        opt_chain,
+        |parser, call| {
+          let allocator: &'a Allocator = parser.ast.allocator;
+          let call_expr = allocator.alloc(CallExpr {
+            span: call.span,
+            callee: Callee::Expr(allocator.boxed(call.callee.clone_in(allocator))),
+            args: call.args.clone_in(allocator),
+          });
+          eval::eval_call_expression(parser, call_expr)
+        },
+        |parser, member| eval::eval_member_expression(parser, member, expr),
+      ),
+      Expr::Member(member) => eval::eval_member_expression(self, member, expr),
+      Expr::Ident(ident) => {
+        let name = Atom::from(ident.sym.as_str());
+        if name == "undefined" {
+          let mut eval =
+            BasicEvaluatedExpression::with_range(ident.span.real_lo(), ident.span.real_hi());
+          eval.set_undefined();
+          return Some(eval);
+        }
+        let drive = self.plugin_drive.clone();
+        name
+          .call_hooks_name(self, |parser, name| {
+            drive.evaluate_identifier(parser, name, ident.span.real_lo(), ident.span.real_hi())
+          })
+          .or_else(|| {
+            let info = self.get_variable_info(&name);
+            if let Some(info) = info {
+              if let Some(name) = &info.name
+                && (info.is_free() || info.is_tagged())
+              {
+                let mut eval =
+                  BasicEvaluatedExpression::with_range(ident.span.real_lo(), ident.span.real_hi());
+                eval.set_identifier(
+                  name.to_owned(),
+                  ExportedVariableInfo::VariableInfo(info.id()),
+                  None,
+                  None,
+                  None,
+                );
+                Some(eval)
+              } else {
+                None
+              }
+            } else {
+              let mut eval =
+                BasicEvaluatedExpression::with_range(ident.span.real_lo(), ident.span.real_hi());
+              eval.set_identifier(
+                Atom::from(ident.sym.as_str()),
+                ExportedVariableInfo::Name(name.clone()),
+                None,
+                None,
+                None,
+              );
+              Some(eval)
+            }
+          })
+      }
+      Expr::This(this) => {
+        let drive = self.plugin_drive.clone();
+        let default_eval = || {
+          let mut eval =
+            BasicEvaluatedExpression::with_range(this.span.real_lo(), this.span.real_hi());
+          eval.set_identifier(
+            "this".into(),
+            ExportedVariableInfo::Name("this".into()),
+            None,
+            None,
+            None,
+          );
+          Some(eval)
+        };
+        let Some(info) = self.get_variable_info(&"this".into()) else {
+          // use `ident.sym` as fallback for global variable(or maybe just a undefined variable)
+          return drive
+            .evaluate_identifier(self, "this", this.span.real_lo(), this.span.real_hi())
+            .or_else(default_eval);
+        };
+        if let Some(name) = &info.name
+          && (info.is_free() || info.is_tagged())
+        {
+          let name = name.clone();
+          return drive
+            .evaluate_identifier(self, &name, this.span.real_lo(), this.span.real_hi())
+            .or_else(default_eval);
+        }
+        None
+      }
+      _ => None,
+    }
+  }
+
+  pub fn to_dependency_location(&mut self, range: DependencyRange) -> Option<DependencyLocation> {
+    self
+      .location_advancer
+      .compute_dependency_location(self.source, range)
+  }
+}

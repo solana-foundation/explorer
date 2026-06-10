@@ -1,0 +1,2274 @@
+use std::{borrow::Cow, cell::Cell};
+
+use rspack_core::{Dependency, DependencyId, DependencyRange};
+use rspack_util::SpanExt;
+use swc_atoms::Atom;
+use swc_experimental_allocator::{Allocator, CloneIn};
+use swc_experimental_ecma_ast::{
+  ArrayLit, ArrayPat, ArrowExpr, AssignExpr, AssignOp, AssignPat, AssignTarget, AssignTargetPat,
+  AwaitExpr, BinExpr, BinaryOp, BlockStmt, BlockStmtOrExpr, CallExpr, Callee, CatchClause, Class,
+  ClassExpr, ClassMember, CondExpr, DefaultDecl, DoWhileStmt, ExportDefaultDecl, Expr,
+  ExprOrSpread, ExprStmt, FnExpr, ForHead, ForInStmt, ForOfStmt, ForStmt, Function, GetSpan,
+  GetterProp, Ident, IdentName, IfStmt, JSXAttr, JSXAttrOrSpread, JSXAttrValue, JSXElement,
+  JSXElementChild, JSXElementName, JSXExpr, JSXExprContainer, JSXFragment, JSXMemberExpr,
+  JSXNamespacedName, JSXObject, KeyValueProp, LabeledStmt, Lit, MemberExpr, MemberProp,
+  MetaPropExpr, ModuleDecl, ModuleItem, NewExpr, ObjectLit, ObjectPat, ObjectPatProp, OptCall,
+  OptChainExpr, Param, Pat, Prop, PropName, PropOrSpread, RestPat, ReturnStmt, SeqExpr, SetterProp,
+  SimpleAssignTarget, Stmt, SwitchCase, SwitchStmt, TaggedTpl, ThisExpr, ThrowStmt, Tpl, TryStmt,
+  UnaryExpr, UnaryOp, UpdateExpr, VarDeclOrExpr, WhileStmt, WithStmt, YieldExpr,
+};
+
+use super::{
+  AllowedMemberTypes, CallHooksName, JavascriptParser, MemberExpressionInfo, PatRef, RootName,
+  ScopeTerminated, TopLevelScope,
+  estree::{ClassDeclOrExpr, MaybeNamedClassDecl, MaybeNamedFunctionDecl, Statement},
+};
+use crate::{
+  dependency::{DependencyBranchGuard, ESMImportSpecifierDependency, ESMImportedBooleanGuardNode},
+  parser_plugin::{
+    CREATE_REQUIRE_EVALUATED_TAG, CREATE_REQUIRE_SPECIFIER_TAG, CREATED_REQUIRE_IDENTIFIER_TAG,
+    CreatedRequireTagData, JavascriptParserPlugin, is_create_require_namespace_member,
+  },
+  visitors::{
+    AtomMembers, ExportedVariableInfo, ExprRef, VariableDeclaration, VariableInfo,
+    VariableInfoFlags, dependency::parser::ExtractedMemberExpressionChainData,
+    get_non_optional_part,
+  },
+};
+
+fn is_create_require_tag(tag: &str, include_create_require_fn: bool) -> bool {
+  tag == CREATED_REQUIRE_IDENTIFIER_TAG
+    || (include_create_require_fn
+      && (tag == CREATE_REQUIRE_SPECIFIER_TAG || tag == CREATE_REQUIRE_EVALUATED_TAG))
+}
+
+fn warp_ident_to_pat<'a>(ident: &Ident<'a>, allocator: &'a Allocator) -> Pat<'a> {
+  Pat::Ident(allocator.boxed(ident.clone_in(allocator).into_binding(allocator)))
+}
+
+#[derive(Debug)]
+enum ImportedBooleanConditionTemplate {
+  Constant(bool),
+  ESMImportedBoolean {
+    range: DependencyRange,
+    expected: bool,
+  },
+  All(
+    Box<ImportedBooleanConditionTemplate>,
+    Box<ImportedBooleanConditionTemplate>,
+  ),
+  Any(
+    Box<ImportedBooleanConditionTemplate>,
+    Box<ImportedBooleanConditionTemplate>,
+  ),
+}
+
+impl ImportedBooleanConditionTemplate {
+  fn into_branch_guard(
+    self,
+    dependencies: &[(DependencyRange, DependencyId)],
+  ) -> Option<DependencyBranchGuard> {
+    let mut nodes = Vec::new();
+    let root = self.push_branch_guard_node(dependencies, &mut nodes)?;
+    Some(DependencyBranchGuard::ESMImportedBooleanExpression { nodes, root })
+  }
+
+  fn push_branch_guard_node(
+    self,
+    dependencies: &[(DependencyRange, DependencyId)],
+    nodes: &mut Vec<ESMImportedBooleanGuardNode>,
+  ) -> Option<u32> {
+    let node = match self {
+      Self::Constant(value) => ESMImportedBooleanGuardNode::Constant(value),
+      Self::ESMImportedBoolean { range, expected } => {
+        let (_, dependency_id) = dependencies
+          .iter()
+          .find(|(dependency_range, _)| *dependency_range == range)?;
+        ESMImportedBooleanGuardNode::ESMImportedBoolean {
+          dependency_id: *dependency_id,
+          expected,
+        }
+      }
+      Self::All(left, right) => ESMImportedBooleanGuardNode::All {
+        left: left.push_branch_guard_node(dependencies, nodes)?,
+        right: right.push_branch_guard_node(dependencies, nodes)?,
+      },
+      Self::Any(left, right) => ESMImportedBooleanGuardNode::Any {
+        left: left.push_branch_guard_node(dependencies, nodes)?,
+        right: right.push_branch_guard_node(dependencies, nodes)?,
+      },
+    };
+    let index = u32::try_from(nodes.len()).ok()?;
+    nodes.push(node);
+    Some(index)
+  }
+}
+
+impl JavascriptParser<'_> {
+  fn with_dependency_branch_guards(
+    &mut self,
+    guards: impl IntoIterator<Item = DependencyBranchGuard>,
+    f: impl FnOnce(&mut Self),
+  ) {
+    let old_len = self.dependency_branch_guards.len();
+    self.dependency_branch_guards.extend(guards);
+    f(self);
+    self.dependency_branch_guards.truncate(old_len);
+  }
+
+  fn esm_import_condition_dependencies(
+    &self,
+    start: usize,
+  ) -> Vec<(DependencyRange, DependencyId)> {
+    self.dependencies[start..]
+      .iter()
+      .filter_map(|dependency| {
+        let dependency = dependency.downcast_ref::<ESMImportSpecifierDependency>()?;
+        Some((dependency.range()?, *dependency.id()))
+      })
+      .collect()
+  }
+
+  fn branch_condition_templates_for_imported_bool(
+    test: &Expr,
+  ) -> Option<(
+    ImportedBooleanConditionTemplate,
+    ImportedBooleanConditionTemplate,
+  )> {
+    match test {
+      Expr::Ident(ident) => {
+        let range = DependencyRange::new(ident.span.real_lo(), ident.span.real_hi());
+        Some((
+          ImportedBooleanConditionTemplate::ESMImportedBoolean {
+            range,
+            expected: true,
+          },
+          ImportedBooleanConditionTemplate::ESMImportedBoolean {
+            range,
+            expected: false,
+          },
+        ))
+      }
+      Expr::Lit(lit) if matches!(&**lit, Lit::Bool(_)) => {
+        let Lit::Bool(lit) = &**lit else {
+          unreachable!();
+        };
+        Some((
+          ImportedBooleanConditionTemplate::Constant(lit.value),
+          ImportedBooleanConditionTemplate::Constant(!lit.value),
+        ))
+      }
+      Expr::Paren(expr) => Self::branch_condition_templates_for_imported_bool(&expr.expr),
+      Expr::Unary(expr) if expr.op == UnaryOp::Bang => {
+        Self::branch_condition_templates_for_imported_bool(&expr.arg)
+          .map(|(consequent, alternate)| (alternate, consequent))
+      }
+      Expr::Bin(expr) if expr.op == BinaryOp::LogicalAnd => {
+        let (left_consequent, left_alternate) =
+          Self::branch_condition_templates_for_imported_bool(&expr.left)?;
+        let (right_consequent, right_alternate) =
+          Self::branch_condition_templates_for_imported_bool(&expr.right)?;
+        Some((
+          ImportedBooleanConditionTemplate::All(
+            Box::new(left_consequent),
+            Box::new(right_consequent),
+          ),
+          ImportedBooleanConditionTemplate::Any(
+            Box::new(left_alternate),
+            Box::new(right_alternate),
+          ),
+        ))
+      }
+      Expr::Bin(expr) if expr.op == BinaryOp::LogicalOr => {
+        let (left_consequent, left_alternate) =
+          Self::branch_condition_templates_for_imported_bool(&expr.left)?;
+        let (right_consequent, right_alternate) =
+          Self::branch_condition_templates_for_imported_bool(&expr.right)?;
+        Some((
+          ImportedBooleanConditionTemplate::Any(
+            Box::new(left_consequent),
+            Box::new(right_consequent),
+          ),
+          ImportedBooleanConditionTemplate::All(
+            Box::new(left_alternate),
+            Box::new(right_alternate),
+          ),
+        ))
+      }
+      _ => None,
+    }
+  }
+
+  fn in_block_scope<F>(&mut self, in_executed_path: bool, f: F)
+  where
+    F: FnOnce(&mut Self),
+  {
+    let old_definitions = self.definitions;
+    let old_top_level_scope = self.top_level_scope;
+    let old_in_tagged_template_tag = self.in_tagged_template_tag;
+    let old_in_try = self.in_try;
+    let old_terminated = self.terminated;
+
+    self.in_tagged_template_tag = false;
+    self.definitions = self.definitions_db.create_child(old_definitions);
+    f(self);
+
+    let terminated = self.terminated;
+
+    self.definitions_db.exit_scope(self.definitions);
+    self.definitions = old_definitions;
+    self.top_level_scope = old_top_level_scope;
+    self.in_tagged_template_tag = old_in_tagged_template_tag;
+    self.in_try = old_in_try;
+    self.terminated = old_terminated;
+
+    if in_executed_path && let Some(t) = terminated {
+      self.terminated = Some(t);
+    }
+  }
+
+  pub fn in_class_scope<'a, I, F>(&mut self, has_this: bool, params: I, f: F)
+  where
+    F: FnOnce(&mut Self),
+    I: Iterator<Item = PatRef<'a>>,
+  {
+    let old_definitions = self.definitions;
+    let old_in_try = self.in_try;
+    let old_top_level_scope = self.top_level_scope;
+    let old_in_tagged_template_tag = self.in_tagged_template_tag;
+    let old_terminated = self.terminated;
+
+    self.in_try = false;
+    self.in_tagged_template_tag = false;
+    self.terminated = None;
+    self.definitions = self.definitions_db.create_child(old_definitions);
+
+    if has_this {
+      self.undefined_variable(&"this".into());
+    }
+
+    self.enter_patterns(params, |this, ident| {
+      this.define_variable(Atom::from(ident.sym.as_str()));
+    });
+
+    f(self);
+
+    self.in_try = old_in_try;
+    self.definitions_db.exit_scope(self.definitions);
+    self.definitions = old_definitions;
+    self.top_level_scope = old_top_level_scope;
+    self.in_tagged_template_tag = old_in_tagged_template_tag;
+    self.terminated = old_terminated;
+  }
+
+  pub(crate) fn in_function_scope<'a, I, F>(&mut self, has_this: bool, params: I, f: F)
+  where
+    F: FnOnce(&mut Self),
+    I: Iterator<Item = PatRef<'a>>,
+  {
+    let old_definitions = self.definitions;
+    let old_top_level_scope = self.top_level_scope;
+    let old_in_tagged_template_tag = self.in_tagged_template_tag;
+    let old_terminated = self.terminated;
+
+    self.definitions = self.definitions_db.create_child(old_definitions);
+    self.in_tagged_template_tag = false;
+    self.terminated = None;
+    if has_this {
+      self.undefined_variable(&"this".into());
+    }
+    self.enter_patterns(params, |this, ident| {
+      this.define_variable(Atom::from(ident.sym.as_str()));
+    });
+    f(self);
+
+    self.definitions_db.exit_scope(self.definitions);
+    self.definitions = old_definitions;
+    self.top_level_scope = old_top_level_scope;
+    self.in_tagged_template_tag = old_in_tagged_template_tag;
+    self.terminated = old_terminated;
+  }
+
+  pub fn walk_module_items(&mut self, statements: &[ModuleItem<'_>]) {
+    for statement in statements {
+      self.walk_module_item(statement);
+    }
+  }
+
+  fn walk_module_item(&mut self, statement: &ModuleItem<'_>) {
+    match statement {
+      ModuleItem::ModuleDecl(m) => {
+        let drive = self.plugin_drive.clone();
+        self.enter_statement(
+          &**m,
+          |parser, m| drive.module_declaration(parser, m).unwrap_or_default(),
+          |parser, m| match m {
+            ModuleDecl::ExportDefaultDecl(decl) => {
+              parser.walk_export_default_declaration(decl);
+            }
+            ModuleDecl::ExportDecl(decl) => parser.walk_statement((&decl.decl).into()),
+            ModuleDecl::ExportDefaultExpr(expr) => parser.walk_expression(&expr.expr),
+            ModuleDecl::ExportAll(_) | ModuleDecl::ExportNamed(_) | ModuleDecl::Import(_) => (),
+          },
+        );
+      }
+      ModuleItem::Stmt(s) => self.walk_statement((&**s).into()),
+    }
+  }
+
+  fn walk_export_default_declaration(&mut self, decl: &ExportDefaultDecl<'_>) {
+    match &decl.decl {
+      DefaultDecl::Class(c) => self.walk_statement(Statement::Class((&**c).into())),
+      DefaultDecl::Fn(f) => self.walk_statement(Statement::Fn((&**f).into())),
+    }
+  }
+
+  pub fn walk_statements(&mut self, statements: &[Stmt<'_>]) {
+    let mut only_function_declaration = false;
+    for statement in statements {
+      let stmt: Statement = statement.into();
+      if only_function_declaration
+        && !matches!(stmt, Statement::Fn(_))
+        && self
+          .plugin_drive
+          .clone()
+          .unused_statement(self, stmt)
+          .unwrap_or(false)
+      {
+        continue;
+      }
+      self.walk_statement(stmt);
+      if self.terminated.is_some() {
+        only_function_declaration = true;
+      }
+    }
+  }
+
+  pub(crate) fn walk_statement(&mut self, statement: Statement) {
+    let drive = self.plugin_drive.clone();
+    self.enter_statement(
+      &statement,
+      |parser, _| drive.statement(parser, statement).unwrap_or_default(),
+      |parser, _| match statement {
+        Statement::Block(stmt) => parser.walk_block_statement(stmt),
+        Statement::Class(decl) => parser.walk_class_declaration(decl),
+        Statement::Fn(decl) => parser.walk_function_declaration(decl),
+        Statement::Var(decl) => parser.walk_variable_declaration(decl),
+        Statement::DoWhile(stmt) => parser.walk_do_while_statement(stmt),
+        Statement::Expr(stmt) => {
+          // This is a bit different with webpack, so we can easily implement is_statement_level_expression
+          // we didn't use pre_statement here like usual, this is referenced from walk_sequence_expression, which did the similar
+          let old = parser.statement_path.pop().expect("should in statement");
+          parser.statement_path.push(stmt.expr.span().into());
+          parser.walk_expression_statement(stmt);
+          parser.statement_path.pop();
+          parser.statement_path.push(old);
+        }
+        Statement::ForIn(stmt) => parser.walk_for_in_statement(stmt),
+        Statement::ForOf(stmt) => parser.walk_for_of_statement(stmt),
+        Statement::For(stmt) => parser.walk_for_statement(stmt),
+        Statement::If(stmt) => parser.walk_if_statement(stmt),
+        Statement::Labeled(stmt) => parser.walk_labeled_statement(stmt),
+        Statement::Return(stmt) => parser.walk_return_statement(stmt),
+        Statement::Switch(stmt) => parser.walk_switch_statement(stmt),
+        Statement::Throw(stmt) => parser.walk_throw_stmt(stmt),
+        Statement::Try(stmt) => parser.walk_try_statement(stmt),
+        Statement::While(stmt) => parser.walk_while_statement(stmt),
+        Statement::With(stmt) => parser.walk_with_statement(stmt),
+        _ => (),
+      },
+    );
+  }
+
+  fn walk_with_statement(&mut self, stmt: &WithStmt) {
+    self.in_block_scope(true, |this| {
+      this.walk_expression(&stmt.obj);
+      this.walk_nested_statement(&stmt.body);
+    });
+  }
+
+  fn walk_while_statement(&mut self, stmt: &WhileStmt) {
+    self.in_block_scope(false, |this| {
+      this.walk_expression(&stmt.test);
+      this.walk_nested_statement(&stmt.body);
+    });
+  }
+
+  fn walk_try_statement(&mut self, stmt: &TryStmt) {
+    let was_in_try = self.in_try;
+    if self.in_try {
+      self.walk_statement(Statement::Block(&stmt.block));
+    } else {
+      self.in_try = true;
+      self.walk_statement(Statement::Block(&stmt.block));
+      self.in_try = false;
+    }
+
+    let try_terminated = self.terminated;
+    self.terminated = None;
+
+    let mut handler_terminated = None;
+    if let Some(handler) = &stmt.handler {
+      self.walk_catch_clause(handler);
+      handler_terminated = self.terminated;
+      self.terminated = None;
+    }
+
+    let mut finalizer_terminated = None;
+    if let Some(finalizer) = &stmt.finalizer {
+      self.walk_statement(Statement::Block(finalizer));
+      finalizer_terminated = self.terminated;
+      self.terminated = None;
+    }
+
+    if let Some(t) = finalizer_terminated {
+      self.terminated = Some(t);
+    } else if let Some(t) = try_terminated
+      && (stmt.handler.is_none() || handler_terminated.is_some())
+    {
+      self.terminated = handler_terminated.or(Some(t));
+    }
+
+    self.in_try = was_in_try;
+  }
+
+  fn walk_catch_clause(&mut self, catch_clause: &CatchClause) {
+    self.in_block_scope(true, |this| {
+      if let Some(param) = &catch_clause.param {
+        this.enter_pattern(PatRef::Borrowed(param), |this, ident| {
+          this.define_variable(Atom::from(ident.sym.as_str()));
+        });
+        this.walk_pattern(param)
+      }
+      let prev = this.prev_statement;
+      this.block_pre_walk_statements(&catch_clause.body.stmts);
+      this.prev_statement = prev;
+      this.walk_statement(Statement::Block(&catch_clause.body));
+    })
+  }
+
+  fn walk_switch_statement(&mut self, stmt: &SwitchStmt) {
+    self.walk_expression(&stmt.discriminant);
+    self.walk_switch_cases(&stmt.cases);
+  }
+
+  fn walk_switch_cases(&mut self, cases: &[SwitchCase<'_>]) {
+    self.in_block_scope(false, |this| {
+      for case in cases {
+        if !case.cons.is_empty() {
+          let prev = this.prev_statement;
+          this.block_pre_walk_statements(&case.cons);
+          this.prev_statement = prev;
+        }
+      }
+      for case in cases {
+        if let Some(test) = &case.test {
+          this.walk_expression(test);
+        }
+        this.walk_statements(&case.cons);
+        this.terminated = None;
+      }
+    })
+  }
+
+  fn walk_return_statement(&mut self, stmt: &ReturnStmt) {
+    if let Some(arg) = &stmt.arg {
+      self.walk_expression(arg);
+    }
+    if self.is_top_level_scope() {
+      return;
+    }
+    // Mark current scope as terminated by return. This mirrors webpack's
+    // `scope.terminated` behavior driven by `hooks.terminate`, which is
+    // always tapped to `true` by its ConstPlugin for return statements.
+    self.terminated = Some(ScopeTerminated::Return);
+  }
+
+  fn walk_throw_stmt(&mut self, stmt: &ThrowStmt) {
+    self.walk_expression(&stmt.arg);
+    if self.is_top_level_scope() {
+      return;
+    }
+    // Same as above but for throw statements.
+    self.terminated = Some(ScopeTerminated::Throw);
+  }
+
+  fn walk_labeled_statement(&mut self, stmt: &LabeledStmt) {
+    // TODO: self.hooks.label.get
+    self.in_block_scope(false, |this| {
+      this.walk_nested_statement(&stmt.body);
+    });
+  }
+
+  fn walk_if_statement(&mut self, stmt: &IfStmt) {
+    if let Some(result) = self.plugin_drive.clone().statement_if(self, stmt) {
+      if result {
+        self.walk_nested_statement(&stmt.cons);
+      } else if let Some(alt) = &stmt.alt {
+        self.walk_nested_statement(alt);
+      }
+    } else {
+      let mut test_walked = false;
+      let branch_condition = Self::branch_condition_templates_for_imported_bool(&stmt.test)
+        .and_then(|(consequent, alternate)| {
+          let dep_start = self.next_dependency_idx();
+          self.walk_expression(&stmt.test);
+          test_walked = true;
+          let dependencies = self.esm_import_condition_dependencies(dep_start);
+          Some((
+            consequent.into_branch_guard(&dependencies)?,
+            alternate.into_branch_guard(&dependencies)?,
+          ))
+        });
+
+      // Unknown or non-constant condition – walk the test for side effects and
+      // both branches, only keeping termination when *both* are terminated.
+      if !test_walked {
+        self.walk_expression(&stmt.test);
+      }
+      if let Some((consequent_condition, _)) = &branch_condition {
+        self.with_dependency_branch_guards(std::iter::once(consequent_condition.clone()), |this| {
+          this.walk_nested_statement(&stmt.cons)
+        });
+      } else {
+        self.walk_nested_statement(&stmt.cons);
+      }
+      let consequent_terminated = self.terminated;
+      self.terminated = None;
+      if let Some(alt) = &stmt.alt {
+        if let Some((_, alternate_condition)) = &branch_condition {
+          self
+            .with_dependency_branch_guards(std::iter::once(alternate_condition.clone()), |this| {
+              this.walk_nested_statement(alt)
+            });
+        } else {
+          self.walk_nested_statement(alt);
+        }
+      }
+      let alternate_terminated = self.terminated;
+      self.terminated = if consequent_terminated.is_some() && alternate_terminated.is_some() {
+        alternate_terminated
+      } else {
+        None
+      };
+    }
+  }
+
+  fn walk_for_statement(&mut self, stmt: &ForStmt) {
+    self.in_block_scope(false, |this| {
+      if let Some(init) = &stmt.init {
+        match init {
+          VarDeclOrExpr::VarDecl(decl) => {
+            let decl = VariableDeclaration::VarDecl(decl);
+            this.block_pre_walk_variable_declaration(decl);
+            this.prev_statement = None;
+            this.walk_variable_declaration(decl);
+          }
+          VarDeclOrExpr::Expr(expr) => this.walk_expression(expr),
+        }
+      }
+      if let Some(test) = &stmt.test {
+        this.walk_expression(test)
+      }
+      if let Some(update) = &stmt.update {
+        this.walk_expression(update)
+      }
+      if let Some(body) = stmt.body.as_block() {
+        let prev = this.prev_statement;
+        this.block_pre_walk_statements(&body.stmts);
+        this.prev_statement = prev;
+        this.walk_statements(&body.stmts);
+      } else {
+        this.walk_nested_statement(&stmt.body);
+      }
+    });
+  }
+
+  fn walk_for_of_statement(&mut self, stmt: &ForOfStmt) {
+    self.in_block_scope(false, |this| {
+      this.walk_for_head(&stmt.left);
+      this.walk_expression(&stmt.right);
+      if this.javascript_options.is_create_require_enabled() {
+        this.clear_created_require_tags_in_for_head(&stmt.left);
+      }
+      if let Some(body) = stmt.body.as_block() {
+        let prev = this.prev_statement;
+        this.block_pre_walk_statements(&body.stmts);
+        this.prev_statement = prev;
+        this.walk_statements(&body.stmts);
+      } else {
+        this.walk_nested_statement(&stmt.body);
+      }
+    });
+  }
+
+  fn walk_for_in_statement(&mut self, stmt: &ForInStmt) {
+    self.in_block_scope(false, |this| {
+      this.walk_for_head(&stmt.left);
+      this.walk_expression(&stmt.right);
+      if this.javascript_options.is_create_require_enabled() {
+        this.clear_created_require_tags_in_for_head(&stmt.left);
+      }
+      if let Some(body) = stmt.body.as_block() {
+        let prev = this.prev_statement;
+        this.block_pre_walk_statements(&body.stmts);
+        this.prev_statement = prev;
+        this.walk_statements(&body.stmts);
+      } else {
+        this.walk_nested_statement(&stmt.body);
+      }
+    });
+  }
+
+  fn walk_for_head(&mut self, for_head: &ForHead) {
+    match &for_head {
+      ForHead::VarDecl(decl) => {
+        let decl = VariableDeclaration::VarDecl(decl);
+        self.block_pre_walk_variable_declaration(decl);
+        self.walk_variable_declaration(decl);
+      }
+      ForHead::UsingDecl(decl) => {
+        let decl = VariableDeclaration::UsingDecl(decl);
+        self.block_pre_walk_variable_declaration(decl);
+        self.walk_variable_declaration(decl);
+      }
+      ForHead::Pat(pat) => {
+        self.walk_pattern(pat);
+      }
+    }
+  }
+
+  fn clear_created_require_tags_in_for_head(&mut self, for_head: &ForHead) {
+    if let ForHead::Pat(pat) = for_head {
+      self.clear_created_require_tags_in_pattern(pat);
+    }
+  }
+
+  fn walk_variable_declaration(&mut self, decl: VariableDeclaration<'_>) {
+    let drive = self.plugin_drive.clone();
+    for declarator in decl.declarators() {
+      if self.javascript_options.is_create_require_enabled()
+        && let Some(init) = declarator.init.as_ref()
+        && let Some(assign) = init.as_assign()
+        && assign.op == AssignOp::Assign
+        && let AssignTarget::Simple(simple) = &assign.left
+        && let Some(target) = simple.as_ident()
+        && let Some(binding) = declarator.name.as_ident()
+        && self
+          .try_walk_created_require_assignment(assign, &target.id)
+          .unwrap_or_default()
+      {
+        self.copy_create_require_assignment_result(
+          Atom::from(binding.id.sym.as_str()),
+          &Atom::from(target.id.sym.as_str()),
+        );
+        continue;
+      }
+      if let Some(init) = declarator.init.as_ref()
+        && let Some(renamed_identifier) = self.get_rename_identifier(init)
+        && let Some(ident) = declarator.name.as_ident()
+      {
+        if self.javascript_options.is_create_require_enabled()
+          && renamed_identifier == CREATE_REQUIRE_EVALUATED_TAG
+          && !matches!(init, Expr::Call(_) | Expr::New(_))
+        {
+          self.set_variable(
+            Atom::from(ident.id.sym.as_str()),
+            ExportedVariableInfo::Name(renamed_identifier),
+          );
+          self.walk_expression(init);
+          continue;
+        }
+        if drive
+          .can_rename(self, &renamed_identifier)
+          .unwrap_or_default()
+        {
+          if !drive
+            .rename(self, init, &renamed_identifier)
+            .unwrap_or_default()
+          {
+            self.set_variable(
+              Atom::from(ident.id.sym.as_str()),
+              ExportedVariableInfo::Name(renamed_identifier.clone()),
+            );
+          }
+          continue;
+        }
+      }
+      if !drive.declarator(self, declarator, decl).unwrap_or_default() {
+        self.walk_pattern(&declarator.name);
+        if let Some(init) = &declarator.init {
+          self.walk_expression(init);
+        }
+      }
+    }
+  }
+
+  fn walk_expression_statement(&mut self, stmt: &ExprStmt) {
+    self.walk_expression(&stmt.expr);
+  }
+
+  pub fn walk_expression(&mut self, expr: &Expr) {
+    match expr {
+      Expr::Array(expr) => self.walk_array_expression(expr),
+      Expr::Arrow(expr) => self.walk_arrow_function_expression(expr),
+      Expr::Assign(expr) => self.walk_assignment_expression(expr),
+      Expr::Await(expr) => self.walk_await_expression(expr),
+      Expr::Bin(expr) => self.walk_binary_expression(expr),
+      Expr::Call(expr) => self.walk_call_expression(expr),
+      Expr::Class(expr) => self.walk_class_expression(expr),
+      Expr::Cond(expr) => self.walk_conditional_expression(expr),
+      Expr::Fn(expr) => self.walk_function_expression(expr),
+      Expr::Ident(expr) => self.walk_identifier(expr),
+      Expr::MetaProp(expr) => self.walk_meta_property(expr),
+      Expr::Member(expr) => self.walk_member_expression(expr),
+      Expr::New(expr) => self.walk_new_expression(expr),
+      Expr::Object(expr) => self.walk_object_expression(expr),
+      Expr::OptChain(expr) => self.walk_chain_expression(expr),
+      Expr::Seq(expr) => self.walk_sequence_expression(expr),
+      Expr::TaggedTpl(expr) => self.walk_tagged_template_expression(expr),
+      Expr::Tpl(expr) => self.walk_template_expression(expr),
+      Expr::This(expr) => self.walk_this_expression(expr),
+      Expr::Unary(expr) => self.walk_unary_expression(expr),
+      Expr::Update(expr) => self.walk_update_expression(expr),
+      Expr::Yield(expr) => self.walk_yield_expression(expr),
+      Expr::SuperProp(_) | Expr::Lit(_) | Expr::PrivateName(_) | Expr::Invalid(_) => (),
+      Expr::JSXMember(_) | Expr::JSXNamespacedName(_) | Expr::JSXEmpty(_) => {
+        self.ensure_jsx_enabled();
+      }
+      Expr::JSXElement(element) => {
+        self.ensure_jsx_enabled();
+        self.walk_jsx_element(element);
+      }
+      Expr::JSXFragment(fragment) => {
+        self.ensure_jsx_enabled();
+        self.walk_jsx_fragment(fragment);
+      }
+      Expr::Paren(_) => unreachable!(),
+    }
+  }
+
+  fn walk_yield_expression(&mut self, expr: &YieldExpr) {
+    if let Some(arg) = &expr.arg {
+      self.walk_expression(arg);
+    }
+  }
+
+  fn walk_update_expression(&mut self, expr: &UpdateExpr) {
+    if !self.javascript_options.is_create_require_enabled() {
+      self.walk_expression(&expr.arg);
+      return;
+    }
+    let updated_ident = expr
+      .arg
+      .as_ident()
+      .map(|ident| Atom::from(ident.sym.as_str()));
+    if let Some(name) = &updated_ident {
+      self.clear_create_require_tag(name);
+    }
+    self.walk_expression(&expr.arg);
+    if let Some(name) = &updated_ident {
+      self.clear_create_require_tag(name);
+    }
+  }
+
+  fn clear_create_require_tag(&mut self, name: &Atom) {
+    if let Some(variable_info) = self.get_variable_info(name) {
+      let declared_scope = variable_info.declared_scope;
+      let should_clear_name = variable_info.name.as_ref().is_some_and(|name| {
+        name == CREATED_REQUIRE_IDENTIFIER_TAG
+          || name == CREATE_REQUIRE_SPECIFIER_TAG
+          || name == CREATE_REQUIRE_EVALUATED_TAG
+      });
+      let mut should_clear = should_clear_name;
+      let mut tag_info_id = variable_info.tag_info;
+      while let Some(id) = tag_info_id {
+        let tag_info = self.definitions_db.expect_get_tag_info(id);
+        if tag_info.tag == CREATED_REQUIRE_IDENTIFIER_TAG
+          || tag_info.tag == CREATE_REQUIRE_SPECIFIER_TAG
+          || tag_info.tag == CREATE_REQUIRE_EVALUATED_TAG
+        {
+          should_clear = true;
+          break;
+        }
+        tag_info_id = tag_info.next;
+      }
+      if should_clear {
+        let info = VariableInfo::create(
+          &mut self.definitions_db,
+          declared_scope,
+          None,
+          VariableInfoFlags::NORMAL,
+          None,
+        );
+        self.definitions_db.set(declared_scope, name.clone(), info);
+      }
+    }
+  }
+
+  fn has_create_require_tag(&mut self, name: &Atom, include_create_require_fn: bool) -> bool {
+    let Some(variable_info) = self.get_variable_info(name) else {
+      return false;
+    };
+    if variable_info
+      .name
+      .as_ref()
+      .is_some_and(|name| is_create_require_tag(name, include_create_require_fn))
+    {
+      return true;
+    }
+    let mut tag_info_id = variable_info.tag_info;
+    while let Some(id) = tag_info_id {
+      let tag_info = self.definitions_db.expect_get_tag_info(id);
+      if is_create_require_tag(tag_info.tag, include_create_require_fn) {
+        return true;
+      }
+      tag_info_id = tag_info.next;
+    }
+    false
+  }
+
+  fn clear_created_require_tags_in_pattern(&mut self, pat: &Pat) {
+    match pat {
+      Pat::Ident(ident) => {
+        self.clear_create_require_tag(&Atom::from(ident.id.sym.as_str()));
+      }
+      Pat::Array(array) => array
+        .elems
+        .iter()
+        .flatten()
+        .for_each(|ele| self.clear_created_require_tags_in_pattern(ele)),
+      Pat::Assign(assign) => self.clear_created_require_tags_in_pattern(&assign.left),
+      Pat::Object(obj) => {
+        for prop in &obj.props {
+          match prop {
+            ObjectPatProp::KeyValue(kv) => self.clear_created_require_tags_in_pattern(&kv.value),
+            ObjectPatProp::Assign(assign) => {
+              self.clear_create_require_tag(&Atom::from(assign.key.id.sym.as_str()));
+            }
+            ObjectPatProp::Rest(rest) => self.clear_created_require_tags_in_pattern(&rest.arg),
+          }
+        }
+      }
+      Pat::Rest(rest) => self.clear_created_require_tags_in_pattern(&rest.arg),
+      Pat::Expr(_) | Pat::Invalid(_) => (),
+    }
+  }
+
+  #[cold]
+  #[inline(never)]
+  fn try_walk_created_require_assignment(
+    &mut self,
+    expr: &AssignExpr,
+    ident: &Ident,
+  ) -> Option<bool> {
+    let ident_name = Atom::from(ident.sym.as_str());
+    if matches!(expr.op, AssignOp::OrAssign | AssignOp::NullishAssign)
+      && self.has_create_require_tag(&ident_name, true)
+    {
+      return Some(true);
+    }
+    if expr.op != AssignOp::Assign {
+      return None;
+    }
+    if let Some(variable) = expr.right.as_ident().and_then(|rhs| {
+      let rhs_name = Atom::from(rhs.sym.as_str());
+      self
+        .has_create_require_tag(&rhs_name, false)
+        .then(|| self.get_variable_info(&rhs_name).map(|info| info.id()))
+        .flatten()
+    }) {
+      self.set_variable(
+        ident_name.clone(),
+        ExportedVariableInfo::VariableInfo(variable),
+      );
+      return Some(true);
+    }
+    if let Some(rename_identifier) = self.get_rename_identifier(&expr.right)
+      && let Some(context) = self
+        .get_tag_data::<CreatedRequireTagData>(&rename_identifier, CREATED_REQUIRE_IDENTIFIER_TAG)
+        .map(|data| data.context.clone())
+    {
+      self.tag_variable(
+        ident_name.clone(),
+        CREATED_REQUIRE_IDENTIFIER_TAG,
+        Some(CreatedRequireTagData {
+          context,
+          side_effects: String::new(),
+        }),
+      );
+      if !expr.right.is_ident() {
+        self.walk_expression(&expr.right);
+      }
+      return Some(true);
+    }
+    if is_create_require_namespace_member(self, &expr.right) {
+      self.tag_variable_without_data(ident_name.clone(), CREATE_REQUIRE_SPECIFIER_TAG);
+      self.walk_expression(&expr.right);
+      return Some(true);
+    }
+    if let Some(rename_identifier) = self.get_rename_identifier(&expr.right)
+      && rename_identifier == CREATE_REQUIRE_EVALUATED_TAG
+    {
+      self.set_variable(ident_name, ExportedVariableInfo::Name(rename_identifier));
+      self.walk_expression(&expr.right);
+      return Some(true);
+    }
+    None
+  }
+
+  fn copy_create_require_assignment_result(&mut self, binding: Atom, target: &Atom) {
+    if let Some(context) = self
+      .get_tag_data::<CreatedRequireTagData>(target, CREATED_REQUIRE_IDENTIFIER_TAG)
+      .map(|data| data.context.clone())
+    {
+      self.tag_variable(
+        binding,
+        CREATED_REQUIRE_IDENTIFIER_TAG,
+        Some(CreatedRequireTagData {
+          context,
+          side_effects: String::new(),
+        }),
+      );
+    } else if let Some(info) = self.get_variable_info(target)
+      && info
+        .name
+        .as_ref()
+        .is_some_and(|name| name == CREATE_REQUIRE_EVALUATED_TAG)
+    {
+      self.set_variable(
+        binding,
+        ExportedVariableInfo::Name(CREATE_REQUIRE_EVALUATED_TAG.into()),
+      );
+    } else if self.has_create_require_tag(target, true) {
+      self.tag_variable_without_data(binding, CREATE_REQUIRE_SPECIFIER_TAG);
+    }
+  }
+
+  fn walk_unary_expression(&mut self, expr: &UnaryExpr) {
+    let drive = self.plugin_drive.clone();
+    if expr.op == UnaryOp::TypeOf
+      && let Some(expr_info) =
+        self.get_member_expression_info_from_expr(&expr.arg, AllowedMemberTypes::Expression)
+    {
+      let MemberExpressionInfo::Expression(expr_info) = expr_info else {
+        // we use `AllowedMemberTypes::Expression` above
+        unreachable!();
+      };
+      if expr_info
+        .name
+        .call_hooks_name(self, |this, for_name| drive.r#typeof(this, expr, for_name))
+        .unwrap_or_default()
+      {
+        return;
+      }
+    };
+    // TODO: expr.arg belongs chain_expression
+    self.walk_expression(&expr.arg)
+  }
+
+  fn walk_this_expression(&mut self, expr: &ThisExpr) {
+    let drive = self.plugin_drive.clone();
+    "this".call_hooks_name(self, |this, for_name| drive.this(this, expr, for_name));
+  }
+
+  pub(crate) fn walk_template_expression(&mut self, expr: &Tpl) {
+    let exprs = expr.exprs.iter();
+    self.walk_expressions(exprs);
+  }
+
+  fn walk_tagged_template_expression(&mut self, expr: &TaggedTpl) {
+    self.in_tagged_template_tag = true;
+    self.walk_expression(&expr.tag);
+    self.in_tagged_template_tag = false;
+
+    let exprs = expr.tpl.exprs.iter();
+    self.walk_expressions(exprs);
+  }
+
+  fn walk_sequence_expression(&mut self, expr: &SeqExpr) {
+    let exprs = expr.exprs.iter();
+    if self.is_statement_level_expression(expr.span())
+      && let Some(old) = self.statement_path.pop()
+    {
+      let prev = self.prev_statement;
+      for expr in exprs {
+        self.statement_path.push(expr.span().into());
+        self.walk_expression(expr);
+        self.prev_statement = self.statement_path.pop();
+      }
+      self.prev_statement = prev;
+      self.statement_path.push(old);
+    } else {
+      self.walk_expressions(exprs);
+    }
+  }
+
+  fn ensure_jsx_enabled(&self) {
+    if !self.javascript_options.jsx.unwrap_or_default() {
+      unreachable!();
+    }
+  }
+
+  fn walk_jsx_element(&mut self, element: &JSXElement<'_>) {
+    self.walk_jsx_element_name(&element.opening.name);
+    for attr in &element.opening.attrs {
+      self.walk_jsx_attr_or_spread(attr);
+    }
+    for child in &element.children {
+      self.walk_jsx_child(child);
+    }
+    if let Some(closing) = &element.closing {
+      self.walk_jsx_element_name(&closing.name);
+    }
+  }
+
+  fn walk_jsx_fragment(&mut self, fragment: &JSXFragment<'_>) {
+    for child in &fragment.children {
+      self.walk_jsx_child(child);
+    }
+  }
+
+  fn walk_jsx_child(&mut self, child: &JSXElementChild<'_>) {
+    match child {
+      JSXElementChild::JSXElement(element) => self.walk_jsx_element(element),
+      JSXElementChild::JSXFragment(fragment) => self.walk_jsx_fragment(fragment),
+      JSXElementChild::JSXExprContainer(container) => self.walk_jsx_expr_container(container),
+      JSXElementChild::JSXSpreadChild(spread) => self.walk_expression(&spread.expr),
+      JSXElementChild::JSXText(_) => (),
+    }
+  }
+
+  fn walk_jsx_expr_container(&mut self, container: &JSXExprContainer<'_>) {
+    match &container.expr {
+      JSXExpr::Expr(expr) => self.walk_expression(expr),
+      JSXExpr::JSXEmptyExpr(_) => (),
+    }
+  }
+
+  fn walk_jsx_attr_or_spread(&mut self, attr: &JSXAttrOrSpread<'_>) {
+    match attr {
+      JSXAttrOrSpread::JSXAttr(attr) => self.walk_jsx_attr(attr),
+      JSXAttrOrSpread::SpreadElement(spread) => self.walk_expression(&spread.expr),
+    }
+  }
+
+  fn walk_jsx_attr(&mut self, attr: &JSXAttr<'_>) {
+    if let Some(value) = &attr.value {
+      self.walk_jsx_attr_value(value);
+    }
+  }
+
+  fn walk_jsx_attr_value(&mut self, value: &JSXAttrValue<'_>) {
+    match value {
+      JSXAttrValue::Str(_) => (),
+      JSXAttrValue::JSXExprContainer(container) => self.walk_jsx_expr_container(container),
+      JSXAttrValue::JSXElement(element) => self.walk_jsx_element(element),
+      JSXAttrValue::JSXFragment(fragment) => self.walk_jsx_fragment(fragment),
+    }
+  }
+
+  fn walk_jsx_element_name(&mut self, name: &JSXElementName<'_>) {
+    match name {
+      JSXElementName::Ident(ident) => self.walk_identifier(ident),
+      JSXElementName::JSXMemberExpr(member) => self.walk_jsx_member_expr(member),
+      JSXElementName::JSXNamespacedName(namespaced) => self.walk_jsx_namespaced_name(namespaced),
+    }
+  }
+
+  fn walk_jsx_member_expr(&mut self, member: &JSXMemberExpr<'_>) {
+    let member_expr = Self::jsx_member_expr_to_member_expr(self.ast.allocator, member);
+    self.walk_member_expression(&member_expr);
+  }
+
+  fn jsx_member_expr_to_member_expr<'a>(
+    allocator: &'a Allocator,
+    member: &'a JSXMemberExpr<'a>,
+  ) -> MemberExpr<'a> {
+    MemberExpr {
+      span: member.span,
+      obj: Self::jsx_object_to_expr(allocator, &member.obj),
+      prop: MemberProp::Ident(member.prop.clone_in(allocator)),
+    }
+  }
+
+  fn jsx_object_to_expr<'a>(allocator: &'a Allocator, obj: &'a JSXObject<'a>) -> Expr<'a> {
+    match obj {
+      JSXObject::Ident(ident) => Expr::Ident(allocator.boxed(Ident {
+        span: ident.span,
+        sym: ident.sym,
+        optional: ident.optional,
+        symbol_id: Cell::new(ident.symbol_id.get()),
+      })),
+      JSXObject::JSXMemberExpr(member) => {
+        Expr::Member(allocator.boxed(Self::jsx_member_expr_to_member_expr(allocator, member)))
+      }
+    }
+  }
+
+  fn walk_jsx_namespaced_name(&mut self, name: &JSXNamespacedName<'_>) {
+    self.walk_ident_name(&name.ns);
+    self.walk_ident_name(&name.name);
+  }
+
+  fn walk_ident_name(&mut self, name: &IdentName<'_>) {
+    let ident = Ident {
+      span: name.span,
+      sym: name.sym,
+      optional: false,
+      symbol_id: Cell::new(None),
+    };
+    self.walk_identifier(&ident);
+  }
+
+  fn walk_object_expression(&mut self, expr: &ObjectLit) {
+    for prop in &expr.props {
+      self.walk_property_or_spread(prop);
+    }
+  }
+
+  fn walk_property_or_spread(&mut self, prop: &PropOrSpread) {
+    match &prop {
+      PropOrSpread::Spread(spread) => self.walk_expression(&spread.expr),
+      PropOrSpread::Prop(prop) => self.walk_property(prop),
+    }
+  }
+
+  fn walk_key_value_prop(&mut self, kv: &KeyValueProp) {
+    if kv.key.is_computed() {
+      // webpack use `walk_expression`, `walk_expression` just walk down the ast, so it's ok to use `walk_prop_name`
+      self.walk_prop_name(&kv.key);
+    }
+    self.walk_expression(&kv.value);
+  }
+
+  fn walk_getter_prop(&mut self, getter: &GetterProp) {
+    self.walk_prop_name(&getter.key);
+    let was_top_level = self.top_level_scope;
+    self.top_level_scope = TopLevelScope::False;
+    self.in_function_scope(true, std::iter::empty(), |parser| {
+      if let Some(body) = &getter.body {
+        parser.detect_mode(&body.stmts);
+        let prev = parser.prev_statement;
+        parser.pre_walk_statement(Statement::Block(body));
+        parser.prev_statement = prev;
+        parser.walk_statement(Statement::Block(body));
+      }
+    });
+    self.top_level_scope = was_top_level;
+  }
+
+  fn walk_setter_prop(&mut self, setter: &SetterProp) {
+    self.walk_prop_name(&setter.key);
+    let was_top_level = self.top_level_scope;
+    self.top_level_scope = TopLevelScope::False;
+    self.in_function_scope(
+      true,
+      std::iter::once(PatRef::Borrowed(&setter.param)),
+      |parser| {
+        if let Some(body) = &setter.body {
+          parser.detect_mode(&body.stmts);
+          let prev = parser.prev_statement;
+          parser.pre_walk_statement(Statement::Block(body));
+          parser.prev_statement = prev;
+          parser.walk_statement(Statement::Block(body));
+        }
+      },
+    );
+    self.top_level_scope = was_top_level;
+  }
+
+  fn walk_property(&mut self, prop: &Prop) {
+    match prop {
+      Prop::Shorthand(ident) => {
+        self.in_short_hand = true;
+        self.walk_identifier(ident);
+        self.in_short_hand = false;
+      }
+      Prop::KeyValue(kv) => self.walk_key_value_prop(kv),
+      Prop::Assign(assign) => self.walk_expression(&assign.value),
+      Prop::Getter(getter) => self.walk_getter_prop(getter),
+      Prop::Setter(setter) => self.walk_setter_prop(setter),
+      Prop::Method(method) => {
+        self.walk_prop_name(&method.key);
+        let was_top_level = self.top_level_scope;
+        self.top_level_scope = TopLevelScope::False;
+        self.in_function_scope(
+          true,
+          method
+            .function
+            .params
+            .iter()
+            .map(|p| PatRef::Borrowed(&p.pat)),
+          |parser| {
+            parser.walk_function(&method.function);
+          },
+        );
+        self.top_level_scope = was_top_level;
+      }
+    }
+  }
+
+  fn walk_prop_name(&mut self, prop_name: &PropName) {
+    if let Some(computed) = prop_name.as_computed() {
+      self.walk_expression(&computed.expr);
+    }
+  }
+
+  fn walk_new_expression(&mut self, expr: &NewExpr) {
+    if let Some(MemberExpressionInfo::Expression(info)) =
+      self.get_member_expression_info_from_expr(&expr.callee, AllowedMemberTypes::Expression)
+    {
+      let result = if info.members.is_empty() {
+        info.root_info.call_hooks_name(self, |parser, for_name| {
+          parser
+            .plugin_drive
+            .clone()
+            .new_expression(parser, expr, for_name)
+        })
+      } else {
+        info.name.call_hooks_name(self, |parser, for_name| {
+          parser
+            .plugin_drive
+            .clone()
+            .new_expression(parser, expr, for_name)
+        })
+      };
+      if result.unwrap_or_default() {
+        return;
+      }
+    }
+    self.walk_expression(&expr.callee);
+    if let Some(args) = &expr.args {
+      self.walk_expr_or_spread(args);
+    }
+  }
+
+  fn walk_meta_property(&mut self, expr: &MetaPropExpr) {
+    let Some(root_name) = expr.get_root_name() else {
+      unreachable!()
+    };
+    self
+      .plugin_drive
+      .clone()
+      .meta_property(self, &root_name, expr.span);
+  }
+
+  fn walk_conditional_expression(&mut self, expr: &CondExpr) {
+    let result = self
+      .plugin_drive
+      .clone()
+      .expression_conditional_operation(self, expr);
+
+    if let Some(result) = result {
+      if result {
+        self.walk_expression(&expr.cons);
+      } else {
+        self.walk_expression(&expr.alt);
+      }
+    } else {
+      self.walk_expression(&expr.test);
+      self.walk_expression(&expr.cons);
+      self.walk_expression(&expr.alt);
+    }
+  }
+
+  fn walk_class_expression(&mut self, expr: &ClassExpr) {
+    self.walk_class(&expr.class, ClassDeclOrExpr::Expr(expr));
+  }
+
+  fn walk_chain_expression(&mut self, expr: &OptChainExpr) {
+    if self
+      .plugin_drive
+      .clone()
+      .optional_chaining(self, expr)
+      .is_none()
+    {
+      self.enter_optional_chain(
+        expr,
+        |parser, call| parser.walk_opt_call(call),
+        |parser, member| parser.walk_member_expression(member),
+      );
+    }
+  }
+
+  fn walk_member_expression(&mut self, expr: &MemberExpr) {
+    let drive = self.plugin_drive.clone();
+    if let Some(expr_info) =
+      self.get_member_expression_info(ExprRef::Member(expr), AllowedMemberTypes::all())
+    {
+      match expr_info {
+        MemberExpressionInfo::Expression(expr_info) => {
+          if expr_info
+            .name
+            .call_hooks_name(self, |this, for_name| drive.member(this, expr, for_name))
+            .unwrap_or_default()
+          {
+            return;
+          }
+          if expr_info
+            .root_info
+            .call_hooks_name(self, |this, for_name| {
+              drive.member_chain(
+                this,
+                expr,
+                for_name,
+                &expr_info.members,
+                &expr_info.members_optionals,
+                &expr_info.member_ranges,
+              )
+            })
+            .unwrap_or_default()
+          {
+            return;
+          }
+          self.walk_member_expression_with_expression_name(
+            expr,
+            &expr_info.name,
+            Some(|this: &mut Self| {
+              drive.unhandled_expression_member_chain(this, &expr_info.root_info, expr)
+            }),
+          );
+          return;
+        }
+        MemberExpressionInfo::Call(expr_info) => {
+          if expr_info
+            .root_info
+            .call_hooks_name(self, |this, for_name| {
+              drive.member_chain_of_call_member_chain(
+                this,
+                expr,
+                &expr_info.callee_members,
+                expr_info.call,
+                &expr_info.members,
+                &expr_info.member_ranges,
+                for_name,
+              )
+            })
+            .unwrap_or_default()
+          {
+            return;
+          }
+          self.walk_call_expression(expr_info.call);
+          return;
+        }
+      }
+    }
+
+    // (await import(...)).a.b
+    if let Some((call, members, await_expr)) = self.extract_await_import_member(expr) {
+      if self.is_top_level_scope() {
+        self
+          .plugin_drive
+          .clone()
+          .top_level_await_expr(self, await_expr);
+      }
+      if self
+        .plugin_drive
+        .clone()
+        .import_call(self, call, None, Some((&members, false)))
+        .unwrap_or_default()
+      {
+        return;
+      }
+    }
+
+    self.member_expr_in_optional_chain = false;
+    self.walk_expression(&expr.obj);
+    if let MemberProp::Computed(computed) = &expr.prop {
+      self.walk_expression(&computed.expr)
+    }
+  }
+
+  fn walk_member_expression_with_expression_name<F>(
+    &mut self,
+    expr: &MemberExpr,
+    name: &str,
+    on_unhandled: Option<F>,
+  ) where
+    F: FnOnce(&mut Self) -> Option<bool>,
+  {
+    let drive = self.plugin_drive.clone();
+    if let Some(member) = expr.obj.as_member()
+      && let Some(len) = member_prop_len(&expr.prop)
+    {
+      let origin = name.len();
+      let name = &name[0..origin - 1 - len];
+      if name
+        .call_hooks_name(self, |this, for_name| drive.member(this, member, for_name))
+        .unwrap_or_default()
+      {
+        return;
+      }
+      self.walk_member_expression_with_expression_name(member, name, on_unhandled);
+    } else if on_unhandled.is_none() {
+      self.walk_expression(&expr.obj);
+    } else if let Some(on_unhandled) = on_unhandled
+      && !on_unhandled(self).unwrap_or_default()
+    {
+      self.walk_expression(&expr.obj);
+    }
+
+    if let MemberProp::Computed(computed) = &expr.prop {
+      self.walk_expression(&computed.expr)
+    }
+  }
+
+  fn walk_opt_call(&mut self, expr: &OptCall) {
+    // TODO: remove clone
+    self.walk_call_expression(&CallExpr {
+      span: expr.span,
+      callee: Callee::Expr(
+        self
+          .ast
+          .allocator
+          .boxed(expr.callee.clone_in(self.ast.allocator)),
+      ),
+      args: expr.args.clone_in(self.ast.allocator),
+    })
+  }
+
+  /// Walk IIFE function
+  ///
+  /// # Panics
+  /// Either `Params` of `expr` or `params` passed in should be `BindingIdent`.
+  fn _walk_iife<'a>(
+    &mut self,
+    expr: &'a Expr<'a>,
+    args: impl Iterator<Item = &'a Expr<'a>>,
+    current_this: Option<&'a Expr<'a>>,
+  ) {
+    fn get_var_name(
+      parser: &mut JavascriptParser,
+      expr: &Expr<'_>,
+    ) -> Option<ExportedVariableInfo> {
+      if let Some(rename_identifier) = parser.get_rename_identifier(expr)
+        && let drive = parser.plugin_drive.clone()
+        && rename_identifier
+          .call_hooks_name(parser, |this, for_name| drive.can_rename(this, for_name))
+          .unwrap_or_default()
+      {
+        if !rename_identifier
+          .call_hooks_name(parser, |this, for_name| drive.rename(this, expr, for_name))
+          .unwrap_or_default()
+        {
+          let variable = parser
+            .get_variable_info(&rename_identifier)
+            .map(|info| ExportedVariableInfo::VariableInfo(info.id()))
+            .unwrap_or(ExportedVariableInfo::Name(rename_identifier));
+          return Some(variable);
+        }
+        return None;
+      }
+      parser.walk_expression(expr);
+      None
+    }
+
+    let rename_this = current_this.and_then(|this| get_var_name(self, this));
+    let variable_info_for_args = args
+      .map(|param| get_var_name(self, param))
+      .collect::<Vec<_>>();
+
+    let mut params = Vec::new();
+    let mut scope_params = Vec::new();
+    if let Some(fn_expr) = expr.as_fn() {
+      let param_len = fn_expr.function.params.len();
+      params.reserve(param_len);
+      scope_params.reserve(param_len);
+      for (i, pat) in fn_expr.function.params.iter().map(|p| &p.pat).enumerate() {
+        // SAFETY: is_simple_function will ensure pat is always a BindingIdent.
+        let ident = pat.as_ident().expect("should be a `BindingIdent`");
+        params.push(ident);
+        if variable_info_for_args
+          .get(i)
+          .and_then(|i| i.as_ref())
+          .is_none()
+        {
+          scope_params.push(PatRef::Borrowed(pat));
+        }
+      }
+    } else if let Some(arrow_expr) = expr.as_arrow() {
+      let param_len = arrow_expr.params.len();
+      params.reserve(param_len);
+      scope_params.reserve(param_len);
+      for (i, pat) in arrow_expr.params.iter().enumerate() {
+        // SAFETY: is_simple_function will ensure pat is always a BindingIdent.
+        let ident = pat.as_ident().expect("should be a `BindingIdent`");
+        params.push(ident);
+        if variable_info_for_args
+          .get(i)
+          .and_then(|i| i.as_ref())
+          .is_none()
+        {
+          scope_params.push(PatRef::Borrowed(pat));
+        }
+      }
+    }
+
+    // Add function name in scope for recursive calls
+    if let Some(expr) = expr.as_fn()
+      && let Some(ident) = &expr.ident
+    {
+      scope_params.push(PatRef::Owned(warp_ident_to_pat(ident, self.ast.allocator)));
+    }
+
+    let was_top_level_scope = self.top_level_scope;
+    self.top_level_scope =
+      if !matches!(was_top_level_scope, TopLevelScope::False) && expr.is_arrow() {
+        TopLevelScope::ArrowFunction
+      } else {
+        TopLevelScope::False
+      };
+
+    self.in_function_scope(true, scope_params.into_iter(), |parser| {
+      if let Some(this) = rename_this
+        && !expr.is_arrow()
+      {
+        parser.set_variable("this".into(), this)
+      }
+      for (i, var_info) in variable_info_for_args.into_iter().enumerate() {
+        if let Some(var_info) = var_info
+          && let Some(param) = params.get(i)
+        {
+          parser.set_variable(Atom::from(param.id.sym.as_str()), var_info);
+        }
+      }
+
+      if let Some(expr) = expr.as_fn() {
+        if let Some(stmt) = &expr.function.body {
+          parser.detect_mode(&stmt.stmts);
+          let prev = parser.prev_statement;
+          parser.pre_walk_statement(Statement::Block(stmt));
+          parser.prev_statement = prev;
+          parser.walk_statement(Statement::Block(stmt));
+        }
+      } else if let Some(expr) = expr.as_arrow() {
+        match &expr.body {
+          BlockStmtOrExpr::BlockStmt(stmt) => {
+            parser.detect_mode(&stmt.stmts);
+            let prev = parser.prev_statement;
+            parser.pre_walk_statement(Statement::Block(stmt));
+            parser.prev_statement = prev;
+            parser.walk_statement(Statement::Block(stmt));
+          }
+          BlockStmtOrExpr::Expr(expr) => parser.walk_expression(expr),
+        }
+      }
+    });
+    self.top_level_scope = was_top_level_scope;
+  }
+
+  fn walk_call_expression(&mut self, expr: &CallExpr) {
+    fn is_simple_function(params: &[Param]) -> bool {
+      params.iter().all(|p| matches!(p.pat, Pat::Ident(_)))
+    }
+
+    // FIXME: should align to webpack
+    match &expr.callee {
+      Callee::Expr(callee) => {
+        if let Expr::Member(member_expr) = &**callee
+          && let Expr::Fn(fn_expr) = &member_expr.obj
+          && let MemberProp::Ident(ident) = &member_expr.prop
+          && (ident.sym.as_str() == "call" || ident.sym.as_str() == "bind")
+          && !expr.args.is_empty()
+          && is_simple_function(&fn_expr.function.params)
+        {
+          // (function(…) { }).call(…)
+          let mut params = expr.args.iter().map(|arg| &arg.expr);
+          let this = params.next();
+          self._walk_iife(&member_expr.obj, params, this)
+        } else if let Expr::Member(member_expr) = &**callee
+          && let Expr::Fn(fn_expr) = &member_expr.obj
+          && let MemberProp::Ident(ident) = &member_expr.prop
+          && (ident.sym.as_str() == "call" || ident.sym.as_str() == "bind")
+          && !expr.args.is_empty()
+          && is_simple_function(&fn_expr.function.params)
+        {
+          // (function(…) { }.call(…))
+          let mut params = expr.args.iter().map(|arg| &arg.expr);
+          let this = params.next();
+          self._walk_iife(&member_expr.obj, params, this)
+        } else if let Expr::Fn(fn_expr) = &**callee
+          && is_simple_function(&fn_expr.function.params)
+        {
+          // (function(…) { })(…)
+          self._walk_iife(callee, expr.args.iter().map(|arg| &arg.expr), None)
+        } else if let Expr::Fn(fn_expr) = &**callee
+          && is_simple_function(&fn_expr.function.params)
+        {
+          // ((…) => { }(…))
+          self._walk_iife(callee, expr.args.iter().map(|arg| &arg.expr), None)
+        } else if let Expr::Arrow(arrow_expr) = &**callee
+          && arrow_expr.params.iter().all(|p| p.as_ident().is_some())
+        {
+          // (function(…) { }(…))
+          self._walk_iife(callee, expr.args.iter().map(|arg| &arg.expr), None)
+        } else {
+          if let Expr::Member(member) = &**callee {
+            if let Some(MemberExpressionInfo::Call(expr_info)) = self.get_member_expression_info(
+              ExprRef::Member(member),
+              AllowedMemberTypes::CallExpression,
+            ) && expr_info
+              .root_info
+              .call_hooks_name(self, |this, for_name| {
+                this
+                  .plugin_drive
+                  .clone()
+                  .call_member_chain_of_call_member_chain(
+                    this,
+                    expr,
+                    &expr_info.callee_members,
+                    expr_info.call,
+                    &expr_info.members,
+                    &expr_info.member_ranges,
+                    for_name,
+                  )
+              })
+              .unwrap_or_default()
+            {
+              return;
+            }
+            // import(...).then(...)
+            if let Some(call) = member.obj.as_call()
+              && call.callee.is_import()
+              && let Some(prop) = member.prop.as_ident()
+              && prop.sym.as_str() == "then"
+              && self
+                .plugin_drive
+                .clone()
+                .import_call(self, call, Some(expr), None)
+                .unwrap_or_default()
+            {
+              return;
+            }
+            // (await import(...)).a.b()
+            if let Some((call, members, await_expr)) = self.extract_await_import_member(member) {
+              if self.is_top_level_scope() {
+                self
+                  .plugin_drive
+                  .clone()
+                  .top_level_await_expr(self, await_expr);
+              }
+              if self
+                .plugin_drive
+                .clone()
+                .import_call(self, call, None, Some((&members, true)))
+                .unwrap_or_default()
+              {
+                self.walk_expr_or_spread(&expr.args);
+                return;
+              }
+            }
+          }
+          let evaluated_callee = self.evaluate_expression(callee);
+          if evaluated_callee.is_identifier() {
+            let members = evaluated_callee
+              .members()
+              .map_or_else(|| Cow::Owned(Vec::new()), Cow::Borrowed);
+            let members_optionals = evaluated_callee.members_optionals().map_or_else(
+              || Cow::Owned(members.iter().map(|_| false).collect::<Vec<_>>()),
+              Cow::Borrowed,
+            );
+            let member_ranges = evaluated_callee
+              .member_ranges()
+              .map_or_else(|| Cow::Owned(Vec::new()), Cow::Borrowed);
+            let drive = self.plugin_drive.clone();
+            if evaluated_callee
+              .root_info()
+              .call_hooks_name(self, |parser, for_name| {
+                drive.call_member_chain(
+                  parser,
+                  expr,
+                  for_name,
+                  &members,
+                  &members_optionals,
+                  &member_ranges,
+                )
+              })
+              .unwrap_or_default()
+            {
+              /* result1 */
+              return;
+            }
+
+            if drive
+              .call(self, expr, evaluated_callee.identifier())
+              .unwrap_or_default()
+            {
+              /* result2 */
+              return;
+            }
+          }
+
+          if let Some(member) = callee.as_member() {
+            self.walk_expression(&member.obj);
+            if let Some(computed) = member.prop.as_computed() {
+              self.walk_expression(&computed.expr);
+            }
+          } else if let Some(member) = callee.as_super_prop() {
+            if let Some(computed) = member.prop.as_computed() {
+              self.walk_expression(&computed.expr);
+            }
+          } else {
+            self.walk_expression(callee);
+          }
+          self.walk_expr_or_spread(&expr.args);
+        }
+      }
+      Callee::Import(_) => {
+        // In webpack this is walkImportExpression, import() is a ImportExpression instead of CallExpression with Callee::Import
+        if self
+          .plugin_drive
+          .clone()
+          .import_call(self, expr, None, None)
+          .unwrap_or_default()
+        {
+          return;
+        }
+
+        self.walk_expr_or_spread(&expr.args);
+      }
+      Callee::Super(_) => {
+        // Do nothing about super, same as webpack
+        self.walk_expr_or_spread(&expr.args);
+      }
+    }
+  }
+
+  fn extract_await_import_member<'a>(
+    &self,
+    expr: &'a MemberExpr<'a>,
+  ) -> Option<(&'a CallExpr<'a>, AtomMembers, &'a AwaitExpr<'a>)> {
+    let ExtractedMemberExpressionChainData {
+      object,
+      mut members,
+      mut members_optionals,
+      ..
+    } = self.extract_member_expression_chain(ExprRef::Member(expr));
+    let ExprRef::Await(await_expr) = object else {
+      return None;
+    };
+    let call = await_expr.arg.as_call()?;
+    if !call.callee.is_import() {
+      return None;
+    }
+    members.reverse();
+    members_optionals.reverse();
+    let members = get_non_optional_part(&members, &members_optionals);
+    Some((call, members.into(), await_expr))
+  }
+
+  pub fn walk_expr_or_spread(&mut self, args: &[ExprOrSpread]) {
+    for arg in args {
+      self.walk_expression(&arg.expr)
+    }
+  }
+
+  fn walk_left_right_expression(&mut self, expr: &BinExpr) {
+    self.walk_expression(&expr.left);
+    self.walk_expression(&expr.right);
+  }
+
+  fn walk_binary_expression(&mut self, expr: &BinExpr) {
+    if matches!(
+      expr.op,
+      BinaryOp::LogicalAnd | BinaryOp::LogicalOr | BinaryOp::NullishCoalescing
+    ) {
+      if let Some(keep_right) = self
+        .plugin_drive
+        .clone()
+        .expression_logical_operator(self, expr)
+      {
+        if keep_right {
+          self.walk_expression(&expr.right);
+        }
+      } else {
+        self.walk_left_right_expression(expr)
+      }
+    } else if self
+      .plugin_drive
+      .clone()
+      .binary_expression(self, expr)
+      .is_none()
+    {
+      self.walk_left_right_expression(expr)
+    }
+  }
+
+  fn walk_await_expression(&mut self, expr: &AwaitExpr) {
+    if self.is_top_level_scope() {
+      self.plugin_drive.clone().top_level_await_expr(self, expr);
+    }
+    self.walk_expression(&expr.arg);
+  }
+
+  fn walk_identifier(&mut self, identifier: &Ident) {
+    let drive = self.plugin_drive.clone();
+    Atom::from(identifier.sym.as_str()).call_hooks_name(self, |this, for_name| {
+      drive.identifier(this, identifier, for_name)
+    });
+  }
+
+  fn get_rename_identifier(&mut self, expr: &Expr) -> Option<Atom> {
+    let result = self.evaluate_expression(expr);
+    result.is_identifier().then(|| result.identifier().clone())
+  }
+
+  fn walk_assignment_expression(&mut self, expr: &AssignExpr) {
+    let drive = self.plugin_drive.clone();
+    if let AssignTarget::Simple(simple) = &expr.left
+      && let Some(ident) = simple.as_ident()
+    {
+      if self.javascript_options.is_create_require_enabled()
+        && self
+          .try_walk_created_require_assignment(expr, &ident.id)
+          .unwrap_or_default()
+      {
+        return;
+      }
+      if expr.op == AssignOp::Assign
+        && let Some(rename_identifier) = self.get_rename_identifier(&expr.right)
+        && rename_identifier
+          .call_hooks_name(self, |this, for_name| drive.can_rename(this, for_name))
+          .unwrap_or_default()
+      {
+        if !rename_identifier
+          .call_hooks_name(self, |this, for_name| {
+            drive.rename(this, &expr.right, for_name)
+          })
+          .unwrap_or_default()
+        {
+          let variable = self
+            .get_variable_info(&rename_identifier)
+            .map(|info| ExportedVariableInfo::VariableInfo(info.id()))
+            .unwrap_or(ExportedVariableInfo::Name(rename_identifier));
+          self.set_variable(Atom::from(ident.id.sym.as_str()), variable);
+        }
+        return;
+      }
+      if !self.javascript_options.is_create_require_enabled()
+        || !expr
+          .right
+          .as_ident()
+          .is_some_and(|rhs| self.has_create_require_tag(&Atom::from(rhs.sym.as_str()), false))
+      {
+        self.walk_expression(&expr.right);
+      }
+      self.enter_pattern(
+        PatRef::Owned(warp_ident_to_pat(&ident.id, self.ast.allocator)),
+        |this, ident| {
+          if !Atom::from(ident.sym.as_str())
+            .call_hooks_name(this, |this, for_name| {
+              drive.assign(this, expr, ident, for_name)
+            })
+            .unwrap_or_default()
+          {
+            // webpack use `walk_expression`, `walk_expression` just walk down the ast, so it's ok to use `walk_identifier`
+            this.walk_identifier(ident);
+          }
+        },
+      );
+    } else if let Some(pat) = expr.left.as_pat() {
+      self.walk_expression(&expr.right);
+      self.enter_assign_target_pattern(pat, |this: &mut JavascriptParser<'_>, ident| {
+        if !Atom::from(ident.sym.as_str())
+          .call_hooks_name(this, |this, for_name| {
+            drive.assign(this, expr, ident, for_name)
+          })
+          .unwrap_or_default()
+        {
+          this.define_variable(Atom::from(ident.sym.as_str()));
+        }
+      });
+      self.walk_assign_target_pattern(pat);
+    } else if let Some(SimpleAssignTarget::Member(member)) = expr.left.as_simple() {
+      if let Some(MemberExpressionInfo::Expression(expr_name)) =
+        self.get_member_expression_info(ExprRef::Member(member), AllowedMemberTypes::Expression)
+        && expr_name
+          .root_info
+          .call_hooks_name(self, |parser, for_name| {
+            drive.assign_member_chain(parser, expr, &expr_name.members, for_name)
+          })
+          .unwrap_or_default()
+      {
+        return;
+      }
+      self.walk_expression(&expr.right);
+      match &expr.left {
+        AssignTarget::Simple(simple) => self.walk_simple_assign_target(simple),
+        AssignTarget::Pat(pat) => self.walk_assign_target_pattern(pat),
+      }
+    } else {
+      self.walk_expression(&expr.right);
+      match &expr.left {
+        AssignTarget::Simple(simple) => self.walk_simple_assign_target(simple),
+        AssignTarget::Pat(pat) => self.walk_assign_target_pattern(pat),
+      }
+    }
+    // TODO:
+    // else if let Some(member) = expr.left.as_expr().and_then(|expr| expr.as_member()) {
+    // }
+  }
+
+  fn walk_arrow_function_expression(&mut self, expr: &ArrowExpr) {
+    let was_top_level_scope = self.top_level_scope;
+    if !matches!(was_top_level_scope, TopLevelScope::False) {
+      self.top_level_scope = TopLevelScope::ArrowFunction;
+    }
+    self.in_function_scope(false, expr.params.iter().map(PatRef::Borrowed), |this| {
+      for param in &expr.params {
+        this.walk_pattern(param)
+      }
+      match &expr.body {
+        BlockStmtOrExpr::BlockStmt(stmt) => {
+          this.detect_mode(&stmt.stmts);
+          let prev = this.prev_statement;
+          this.pre_walk_statement(Statement::Block(stmt));
+          this.prev_statement = prev;
+          this.walk_statement(Statement::Block(stmt));
+        }
+        BlockStmtOrExpr::Expr(expr) => this.walk_expression(expr),
+      }
+    });
+    self.top_level_scope = was_top_level_scope;
+  }
+
+  fn walk_expressions<'a, I>(&mut self, expressions: I)
+  where
+    I: Iterator<Item = &'a Expr<'a>>,
+  {
+    for expr in expressions {
+      self.walk_expression(expr)
+    }
+  }
+
+  fn walk_array_expression(&mut self, expr: &ArrayLit) {
+    expr
+      .elems
+      .iter()
+      .flatten()
+      .for_each(|ele| self.walk_expression(&ele.expr))
+  }
+
+  fn walk_nested_statement(&mut self, stmt: &Stmt) {
+    self.prev_statement = None;
+    self.walk_statement(stmt.into());
+  }
+
+  fn walk_do_while_statement(&mut self, stmt: &DoWhileStmt) {
+    self.walk_nested_statement(&stmt.body);
+    self.walk_expression(&stmt.test);
+  }
+
+  fn walk_block_statement(&mut self, stmt: &BlockStmt) {
+    self.in_block_scope(true, |this| {
+      let prev = this.prev_statement;
+      this.block_pre_walk_statements(&stmt.stmts);
+      this.prev_statement = prev;
+      this.walk_statements(&stmt.stmts);
+    })
+  }
+
+  fn walk_function_declaration(&mut self, decl: MaybeNamedFunctionDecl) {
+    let was_top_level = self.top_level_scope;
+    self.top_level_scope = TopLevelScope::False;
+    self.in_function_scope(
+      true,
+      decl
+        .function()
+        .params
+        .iter()
+        .map(|param| PatRef::Borrowed(&param.pat)),
+      |this| {
+        this.walk_function(decl.function());
+      },
+    );
+    self.top_level_scope = was_top_level;
+  }
+
+  fn walk_function(&mut self, f: &Function) {
+    for param in &f.params {
+      self.walk_pattern(&param.pat)
+    }
+    if let Some(body) = &f.body {
+      self.detect_mode(&body.stmts);
+      let prev = self.prev_statement;
+      self.pre_walk_statement(Statement::Block(body));
+      self.prev_statement = prev;
+      self.walk_statement(Statement::Block(body));
+    }
+  }
+
+  fn walk_function_expression(&mut self, expr: &FnExpr) {
+    let was_top_level = self.top_level_scope;
+    self.top_level_scope = TopLevelScope::False;
+    let mut scope_params: Vec<_> = expr
+      .function
+      .params
+      .iter()
+      .map(|params| PatRef::Borrowed(&params.pat))
+      .collect();
+
+    if let Some(pat) = expr
+      .ident
+      .as_ref()
+      .map(|ident| warp_ident_to_pat(ident, self.ast.allocator))
+    {
+      scope_params.push(PatRef::Owned(pat));
+    }
+
+    self.in_function_scope(true, scope_params.into_iter(), |this| {
+      this.walk_function(&expr.function);
+    });
+    self.top_level_scope = was_top_level;
+  }
+
+  pub fn walk_pattern(&mut self, pat: &Pat) {
+    match pat {
+      Pat::Array(array) => self.walk_array_pattern(array),
+      Pat::Assign(assign) => self.walk_assignment_pattern(assign),
+      Pat::Object(obj) => self.walk_object_pattern(obj),
+      Pat::Rest(rest) => self.walk_rest_element(rest),
+      Pat::Expr(expr) => self.walk_expression(expr),
+      Pat::Ident(_) => (),
+      Pat::Invalid(_) => (),
+    }
+  }
+
+  fn walk_simple_assign_target(&mut self, target: &SimpleAssignTarget) {
+    match target {
+      SimpleAssignTarget::Ident(ident) => self.walk_identifier(&ident.id),
+      SimpleAssignTarget::Member(member) => self.walk_member_expression(member),
+      SimpleAssignTarget::OptChain(expr) => self.walk_chain_expression(expr),
+      SimpleAssignTarget::SuperProp(_) => (),
+      SimpleAssignTarget::Paren(_) | SimpleAssignTarget::Invalid(_) => unreachable!(),
+    }
+  }
+
+  fn walk_assign_target_pattern(&mut self, pat: &AssignTargetPat) {
+    match pat {
+      AssignTargetPat::Array(array) => self.walk_array_pattern(array),
+      AssignTargetPat::Object(obj) => self.walk_object_pattern(obj),
+      AssignTargetPat::Invalid(_) => (),
+    }
+  }
+
+  fn walk_rest_element(&mut self, rest: &RestPat) {
+    self.walk_pattern(&rest.arg);
+  }
+
+  fn walk_object_pattern(&mut self, obj: &ObjectPat) {
+    for prop in &obj.props {
+      match prop {
+        ObjectPatProp::KeyValue(kv) => {
+          if kv.key.is_computed() {
+            // webpack use `walk_expression`, `walk_expression` just walk down the ast, so it's ok to use `walk_prop_name`
+            self.walk_prop_name(&kv.key);
+          }
+          self.walk_pattern(&kv.value);
+        }
+        ObjectPatProp::Assign(assign) => {
+          if let Some(value) = &assign.value {
+            self.walk_expression(value);
+          }
+        }
+        ObjectPatProp::Rest(rest) => self.walk_rest_element(rest),
+      }
+    }
+  }
+
+  fn walk_assignment_pattern(&mut self, pat: &AssignPat) {
+    self.walk_expression(&pat.right);
+    self.walk_pattern(&pat.left);
+  }
+
+  fn walk_array_pattern(&mut self, pat: &ArrayPat) {
+    pat
+      .elems
+      .iter()
+      .flatten()
+      .for_each(|ele| self.walk_pattern(ele));
+  }
+
+  fn walk_class_declaration(&mut self, decl: MaybeNamedClassDecl) {
+    self.walk_class(decl.class(), ClassDeclOrExpr::Decl(decl));
+  }
+
+  fn walk_class(&mut self, classy: &Class, class_decl_or_expr: ClassDeclOrExpr) {
+    if let Some(super_class) = &classy.super_class
+      && !self
+        .plugin_drive
+        .clone()
+        .class_extends_expression(self, super_class, class_decl_or_expr)
+        .unwrap_or_default()
+    {
+      self.walk_expression(super_class);
+    }
+
+    // TODO: define variable for class expression in block pre walk
+    let scope_params = if let ClassDeclOrExpr::Expr(class_expr) = class_decl_or_expr
+      && let Some(pat) = class_expr
+        .ident
+        .as_ref()
+        .map(|ident| warp_ident_to_pat(ident, self.ast.allocator))
+    {
+      vec![PatRef::Owned(pat)]
+    } else {
+      vec![]
+    };
+
+    self.in_class_scope(true, scope_params.into_iter(), |this| {
+      for class_element in &classy.body {
+        if this
+          .plugin_drive
+          .clone()
+          .class_body_element(this, class_element, class_decl_or_expr)
+          .unwrap_or_default()
+        {
+          continue;
+        }
+
+        match class_element {
+          ClassMember::Constructor(ctor) => {
+            if ctor.key.is_computed() {
+              // webpack use `walk_expression`, `walk_expression` just walk down the ast, so it's ok to use `walk_prop_name`
+              this.walk_prop_name(&ctor.key);
+            }
+
+            if this
+              .plugin_drive
+              .clone()
+              .class_body_value(this, class_element, ctor.span(), class_decl_or_expr)
+              .unwrap_or_default()
+            {
+              continue;
+            }
+
+            let was_top_level = this.top_level_scope;
+            this.top_level_scope = TopLevelScope::False;
+
+            let params = ctor.params.iter().map(|p| {
+              let p = p.as_param().expect("should only contain param");
+              PatRef::Borrowed(&p.pat)
+            });
+            this.in_function_scope(true, params.clone(), |this| {
+              for param in params {
+                this.walk_pattern(param.as_pat())
+              }
+
+              if let Some(body) = &ctor.body {
+                this.detect_mode(&body.stmts);
+                let prev = this.prev_statement;
+                this.pre_walk_statement(Statement::Block(body));
+                this.prev_statement = prev;
+                this.walk_statement(Statement::Block(body));
+              }
+            });
+
+            this.top_level_scope = was_top_level;
+          }
+          ClassMember::Method(method) => {
+            if method.key.is_computed() {
+              // webpack use `walk_expression`, `walk_expression` just walk down the ast, so it's ok to use `walk_prop_name`
+              this.walk_prop_name(&method.key);
+            }
+
+            if this
+              .plugin_drive
+              .clone()
+              .class_body_value(this, class_element, method.span(), class_decl_or_expr)
+              .unwrap_or_default()
+            {
+              continue;
+            }
+
+            let was_top_level = this.top_level_scope;
+            this.top_level_scope = TopLevelScope::False;
+            this.in_function_scope(
+              true,
+              method
+                .function
+                .params
+                .iter()
+                .map(|p| PatRef::Borrowed(&p.pat)),
+              |this| this.walk_function(&method.function),
+            );
+            this.top_level_scope = was_top_level;
+          }
+          ClassMember::PrivateMethod(method) => {
+            if this
+              .plugin_drive
+              .clone()
+              .class_body_value(this, class_element, method.span(), class_decl_or_expr)
+              .unwrap_or_default()
+            {
+              continue;
+            }
+            // method.key is always not computed in private method, so we don't need to walk it
+            let was_top_level = this.top_level_scope;
+            this.top_level_scope = TopLevelScope::False;
+            this.in_function_scope(
+              true,
+              method
+                .function
+                .params
+                .iter()
+                .map(|p| PatRef::Borrowed(&p.pat)),
+              |this| this.walk_function(&method.function),
+            );
+            this.top_level_scope = was_top_level;
+          }
+          ClassMember::ClassProp(prop) => {
+            if prop.key.is_computed() {
+              // webpack use `walk_expression`, `walk_expression` just walk down the ast, so it's ok to use `walk_prop_name`
+              this.walk_prop_name(&prop.key);
+            }
+            if let Some(value) = &prop.value
+              && !this
+                .plugin_drive
+                .clone()
+                .class_body_value(this, class_element, value.span(), class_decl_or_expr)
+                .unwrap_or_default()
+            {
+              let was_top_level = this.top_level_scope;
+              this.top_level_scope = TopLevelScope::False;
+              this.walk_expression(value);
+              this.top_level_scope = was_top_level;
+            }
+          }
+          ClassMember::PrivateProp(prop) => {
+            // prop.key is always not computed in private prop, so we don't need to walk it
+            if let Some(value) = &prop.value
+              && !this
+                .plugin_drive
+                .clone()
+                .class_body_value(this, class_element, value.span(), class_decl_or_expr)
+                .unwrap_or_default()
+            {
+              let was_top_level = this.top_level_scope;
+              this.top_level_scope = TopLevelScope::False;
+              this.walk_expression(value);
+              this.top_level_scope = was_top_level;
+            }
+          }
+          ClassMember::StaticBlock(block) => {
+            let was_top_level = this.top_level_scope;
+            this.top_level_scope = TopLevelScope::False;
+            this.walk_block_statement(&block.body);
+            this.top_level_scope = was_top_level;
+          }
+          ClassMember::Empty(_) => {}
+          ClassMember::AutoAccessor(_) => {}
+        };
+      }
+    });
+  }
+}
+
+fn member_prop_len(member_prop: &MemberProp) -> Option<usize> {
+  match member_prop {
+    MemberProp::Ident(ident) => Some(ident.sym.len()),
+    MemberProp::PrivateName(name) => Some(name.name.len() + 1),
+    MemberProp::Computed(_) => None,
+  }
+}

@@ -1,0 +1,235 @@
+use rspack_core::{
+  ContextDependency, ContextMode, ContextOptions, DependencyCategory, JavascriptParserUrl,
+  RuntimeGlobals, RuntimeRequirementsDependency,
+};
+use rspack_util::SpanExt;
+use swc_atoms::Atom;
+use swc_experimental_ecma_ast::{
+  Expr, ExprOrSpread, GetSpan, MemberExpr, MetaPropKind, NewExpr, Visit, VisitWith,
+};
+use url::Url;
+
+use super::{JavascriptParserPlugin, inner_graph::state::InnerGraphUsageOperation};
+use crate::{
+  InnerGraphParserPlugin,
+  dependency::{URLContextDependency, URLDependency},
+  magic_comment::{MagicCommentValue, try_extract_magic_comment},
+  visitors::{ExprRef, JavascriptParser, context_reg_exp, create_context_dependency},
+};
+
+#[derive(Default)]
+struct NestedNewUrlVisitor {
+  has_nested_new_url: bool,
+}
+
+impl Visit<'_> for NestedNewUrlVisitor {
+  fn visit_new_expr(&mut self, expr: &NewExpr<'_>) {
+    if expr
+      .callee
+      .as_ident()
+      .is_some_and(|ident| ident.sym.eq("URL"))
+    {
+      self.has_nested_new_url = true;
+    }
+  }
+}
+
+pub fn is_meta_url(parser: &mut JavascriptParser, expr: &MemberExpr) -> bool {
+  let chain = parser.extract_member_expression_chain(ExprRef::Member(expr));
+  if let ExprRef::MetaProp(meta) = chain.object {
+    return meta.kind == MetaPropKind::ImportMeta
+      && chain.members.len() == 1
+      && chain.members.first().is_some_and(|member| member == "url");
+  }
+  false
+}
+
+pub fn get_url_request(
+  parser: &mut JavascriptParser,
+  expr: &NewExpr,
+) -> Option<(String, u32, u32)> {
+  let args = expr.args.as_ref()?;
+  let ExprOrSpread {
+    spread: None,
+    expr: arg1,
+  } = args.first()?
+  else {
+    return None;
+  };
+  let arg2 = args.get(1);
+
+  if let Some(arg2) = arg2 {
+    // new URL(xx, import.meta.url)
+    let ExprOrSpread {
+      spread: None,
+      expr: arg2,
+    } = arg2
+    else {
+      return None;
+    };
+    let Expr::Member(arg2) = arg2 else {
+      return None;
+    };
+    if is_meta_url(parser, arg2) {
+      return parser
+        .evaluate_expression(arg1)
+        .as_string()
+        .map(|req| (req, arg1.span().real_lo(), arg2.span().real_hi()));
+    }
+  } else {
+    // new URL(import.meta.url)
+    let Expr::Member(arg1) = arg1 else {
+      return None;
+    };
+    if is_meta_url(parser, arg1) {
+      return Some((
+        Url::from_file_path(parser.resource_data.resource())
+          .expect("should be a path")
+          .to_string(),
+        arg1.span().real_lo(),
+        arg1.span().real_hi(),
+      ));
+    }
+  }
+
+  None
+}
+
+pub struct URLPlugin {
+  pub mode: Option<JavascriptParserUrl>,
+}
+
+#[rspack_macros::implemented_javascript_parser_hooks]
+impl<'p, 'a> JavascriptParserPlugin<'p, 'a> for URLPlugin {
+  fn can_rename(&self, _parser: &mut JavascriptParser<'p>, for_name: &str) -> Option<bool> {
+    (for_name == "URL").then_some(true)
+  }
+
+  fn new_expression(
+    &self,
+    parser: &mut JavascriptParser<'p>,
+    expr: &NewExpr,
+    for_name: &str,
+  ) -> Option<bool> {
+    if for_name != "URL" {
+      return None;
+    }
+
+    let args = expr.args.as_ref()?;
+
+    let arg = args.first()?;
+    let magic_comment_options = try_extract_magic_comment(parser, expr.span, arg.span());
+    match magic_comment_options.get_ignore_value() {
+      Some(MagicCommentValue::Bool(true)) => {
+        if args.len() != 2 {
+          return None;
+        }
+        let arg2 = args.get(1)?;
+        if let ExprOrSpread {
+          spread: None,
+          expr: arg2_expr,
+        } = arg2
+          && let Expr::Member(arg2) = arg2_expr
+          && !is_meta_url(parser, arg2)
+        {
+          return None;
+        }
+        parser.add_presentational_dependency(Box::new(RuntimeRequirementsDependency::new(
+          arg2.span().into(),
+          RuntimeGlobals::BASE_URI,
+        )));
+        return Some(true);
+      }
+      Some(MagicCommentValue::Bool(false)) | None => {}
+      Some(_) => return None,
+    }
+
+    // should not parse new URL(import.meta.url)
+    if expr.args.as_ref().is_some_and(|args| {
+      args.len() == 1
+        && args[0]
+          .expr
+          .as_member()
+          .is_some_and(|member| is_meta_url(parser, member))
+    }) {
+      return None;
+    }
+
+    if let Some((request, start, end)) = get_url_request(parser, expr) {
+      if request.starts_with("//") {
+        if args.len() == 2 {
+          parser.walk_expression(&args[1].expr);
+          return Some(true);
+        }
+        return None;
+      }
+      let dep = URLDependency::new(
+        request.into(),
+        expr.span.into(),
+        (start, end).into(),
+        self.mode,
+      );
+      let dep_idx = parser.next_dependency_idx();
+      parser.add_dependency(Box::new(dep));
+      InnerGraphParserPlugin::on_usage(parser, InnerGraphUsageOperation::URLDependency(dep_idx));
+      return Some(true);
+    }
+
+    let mut nested_new_url_visitor = NestedNewUrlVisitor::default();
+    arg.expr.visit_with(&mut nested_new_url_visitor);
+    if nested_new_url_visitor.has_nested_new_url {
+      return None;
+    }
+
+    let arg2 = args.get(1)?;
+    if !arg2
+      .expr
+      .as_member()
+      .is_some_and(|member| is_meta_url(parser, member))
+    {
+      return None;
+    }
+
+    let param = parser.evaluate_expression(&arg.expr);
+    let result = create_context_dependency(&param, parser);
+    let options = ContextOptions {
+      mode: ContextMode::Sync,
+      recursive: true,
+      pattern: context_reg_exp(&result.reg, "", None, parser).into(),
+      include: magic_comment_options.get_include(),
+      exclude: magic_comment_options.get_exclude(),
+      category: DependencyCategory::Url,
+      request: format!("{}{}{}", result.context, result.query, result.fragment),
+      context: result.context,
+      replaces: result.replaces,
+      start: expr.span().real_lo(),
+      end: expr.span().real_hi(),
+      ..Default::default()
+    };
+
+    let mut dep = URLContextDependency::new(
+      options,
+      expr.span().into(),
+      param.range().into(),
+      parser.in_try,
+    );
+    *dep.critical_mut() = result.critical;
+    parser.add_dependency(Box::new(dep));
+
+    Some(true)
+  }
+
+  fn is_pure(&self, parser: &mut JavascriptParser<'p>, expr: &Expr) -> Option<bool> {
+    let expr = expr.as_new()?;
+    let callee = expr.callee.as_ident()?;
+    if parser
+      .get_free_info_from_variable(&Atom::from(callee.sym.as_str()))
+      .is_none()
+      || !callee.sym.eq("URL")
+    {
+      return None;
+    }
+    get_url_request(parser, expr)?;
+    Some(true)
+  }
+}
