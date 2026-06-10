@@ -146,8 +146,12 @@ export function IdlCard({ programId }: { programId: string }) {
 
     return (
         <Card ui="dashkit">
-            <CardHeader ui="dashkit">
-                <TabsList className="e-border-0">
+            {/* dashkit .card-header-tabs: header height comes from the tabs (not the fixed 60px),
+                negative tab margins cancel the header padding so the active underline (via the
+                trigger's -1px bottom margin) overlays the header border. !important because cn()'s
+                twMerge is not e-prefix-aware and can't drop conflicting base classes. */}
+            <CardHeader ui="dashkit" className="!e-h-auto">
+                <TabsList className="!e-border-0 -e-mt-3 !-e-mb-3">
                     {tabs
                         .filter(tab => tab.idl)
                         .map(tab => (

@@ -51,7 +51,7 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
             ref={ref}
             role="tab"
             type={type ?? 'button'}
-            aria-selected={active}
+            aria-selected={active === true}
             data-active={active ? 'true' : 'false'}
             className={cn(tabsTriggerVariants({ size }), className)}
             {...props}
