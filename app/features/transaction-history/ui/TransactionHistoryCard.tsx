@@ -82,18 +82,18 @@ export function TransactionHistoryCard({ address }: { address: string }) {
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="text-muted e-w-px">
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">
                             Transaction Signature
                         </BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-muted e-w-px">Block</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Block</BaseTable.HeaderCell>
                         {hasTimestamps && (
                             <>
-                                <BaseTable.HeaderCell className="text-muted e-w-px">Age</BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="text-muted e-w-px">Timestamp</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Age</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Timestamp</BaseTable.HeaderCell>
                             </>
                         )}
-                        <BaseTable.HeaderCell className="text-muted">Result</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-muted">Raw Data</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Raw Data</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body className="list">{detailsList}</BaseTable.Body>
@@ -132,10 +132,10 @@ function TransactionRow({ signature, slot, blockTime, statusClass, statusText, h
 
             {hasTimestamps && (
                 <>
-                    <BaseTable.Cell className="text-muted">
+                    <BaseTable.Cell className="e-text-dk-gray-700">
                         {blockTime ? <RelativeTime date={blockTime * 1000} /> : '---'}
                     </BaseTable.Cell>
-                    <BaseTable.Cell className="text-muted">
+                    <BaseTable.Cell className="e-text-dk-gray-700">
                         {blockTime ? displayTimestampUtc(blockTime * 1000, true) : '---'}
                     </BaseTable.Cell>
                 </>

@@ -259,7 +259,7 @@ function ProgramLogRow({
                         {programLogs.logs.map((log, key) => {
                             return (
                                 <span key={key}>
-                                    <span className="text-muted">{log.prefix}</span>
+                                    <span className="e-text-dk-gray-700">{log.prefix}</span>
                                     <span className={`text-${log.style}`}>{log.text}</span>
                                 </span>
                             );

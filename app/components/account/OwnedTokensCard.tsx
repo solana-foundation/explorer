@@ -86,10 +86,10 @@ export function OwnedTokensCard({ address }: { address: string }) {
                     <table className="table table-sm table-nowrap card-table">
                         <thead>
                             <tr>
-                                {showLogos && <th className="text-muted w-1 e-p-0 e-text-center">Logo</th>}
-                                {display === 'detail' && <th className="text-muted">Account Address</th>}
-                                <th className="text-muted">Mint Address</th>
-                                <th className="text-muted">{display === 'detail' ? 'Total Balance' : 'Balance'}</th>
+                                {showLogos && <th className="e-text-dk-gray-700 w-1 e-p-0 e-text-center">Logo</th>}
+                                {display === 'detail' && <th className="e-text-dk-gray-700">Account Address</th>}
+                                <th className="e-text-dk-gray-700">Mint Address</th>
+                                <th className="e-text-dk-gray-700">{display === 'detail' ? 'Total Balance' : 'Balance'}</th>
                             </tr>
                         </thead>
                         {display === 'detail' ? (

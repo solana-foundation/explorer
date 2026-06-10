@@ -77,13 +77,13 @@ function renderDetails<T extends object>(props: DetailsProps, parsed: ParsedInfo
         } else if (key === 'bytes') {
             value = <pre className="data-wrap e-mb-0 e-inline-block e-text-left">{value}</pre>;
         } else if (value === null) {
-            value = <span className="text-muted">None</span>;
+            value = <span className="e-text-dk-gray-700">None</span>;
         }
 
         attributes.push(
             <BaseTable.Row key={key}>
                 <BaseTable.Cell>
-                    {camelToTitleCase(key)} {key === 'bytes' && <span className="text-muted">(Base 64)</span>}
+                    {camelToTitleCase(key)} {key === 'bytes' && <span className="e-text-dk-gray-700">(Base 64)</span>}
                 </BaseTable.Cell>
                 <BaseTable.Cell className="e-text-right">{value}</BaseTable.Cell>
             </BaseTable.Row>,

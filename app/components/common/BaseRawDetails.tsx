@@ -56,7 +56,7 @@ function BaseTransactionInstructionRawDetails({ ix }: { ix: TransactionInstructi
 
             <BaseTable.Row>
                 <BaseTable.Cell>
-                    Instruction Data <span className="text-muted">(Hex)</span>
+                    Instruction Data <span className="e-text-dk-gray-700">(Hex)</span>
                 </BaseTable.Cell>
                 <BaseTable.Cell className="e-text-right">
                     <HexData raw={ix.data} />

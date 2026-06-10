@@ -105,7 +105,7 @@ function SysvarAccountSlotHistory({
 
             <BaseTable.Row>
                 <BaseTable.Cell className="e-align-top">
-                    Slot History <span className="text-muted">(previous 100 slots)</span>
+                    Slot History <span className="e-text-dk-gray-700">(previous 100 slots)</span>
                 </BaseTable.Cell>
                 <BaseTable.Cell className="font-monospace e-text-right">
                     {history.map(val => (

@@ -88,13 +88,13 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
                 <BaseTable ui="dashkit" variant="card" nowrap>
                     <BaseTable.Head>
                         <BaseTable.Row>
-                            <BaseTable.HeaderCell className="text-muted">Program</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="text-muted">Transaction Count</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="text-muted">% of Total</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="text-muted">Instruction Count</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="text-muted">% of Total</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Program</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Transaction Count</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">% of Total</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Instruction Count</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">% of Total</BaseTable.HeaderCell>
                             {showSuccessRate && (
-                                <BaseTable.HeaderCell className="text-muted">Success Rate</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="e-text-dk-gray-700">Success Rate</BaseTable.HeaderCell>
                             )}
                         </BaseTable.Row>
                     </BaseTable.Head>

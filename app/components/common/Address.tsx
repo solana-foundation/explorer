@@ -117,7 +117,7 @@ export function Address({
     const nicknameDisplay = nickname ? (
         <span className="e-flex e-min-w-0 e-flex-col">
             <span className="e-truncate e-font-mono">&quot;{nickname}&quot;</span>
-            <span className="e-truncate e-font-mono e-text-muted">
+            <span className="e-truncate e-font-mono e-e-text-dk-gray-700">
                 {isMidTruncated ? midTruncatedText : addressLabel}
             </span>
         </span>
@@ -177,7 +177,7 @@ export function Address({
                 </Copyable>
                 <button
                     ref={editBtnRef}
-                    className="e-ms-1.5 e-flex-none e-shrink-0 e-cursor-pointer e-border-0 e-bg-transparent e-p-0 e-text-muted"
+                    className="e-ms-1.5 e-flex-none e-shrink-0 e-cursor-pointer e-border-0 e-bg-transparent e-p-0 e-e-text-dk-gray-700"
                     onClick={() => setShowNicknameEditor(true)}
                     title="Edit nickname"
                     style={{ fontSize: '0.875rem', lineHeight: 1 }}

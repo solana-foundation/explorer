@@ -89,7 +89,7 @@ export function TransactionDetailsPageClient({ params: { signature: raw } }: Pro
     return (
         <div className="transaction-page e-mx-auto e-flex e-max-w-5xl e-flex-col e-space-y-9 e-px-4 e-pt-3 lg:e-space-y-12 lg:e-px-6 lg:e-pt-5">
             <header className="-e-mb-6 e-flex e-flex-col e-gap-1.5 e-pb-3 e-pt-2 lg:e-mb-0">
-                <span className="e-text-xs e-font-normal e-uppercase e-text-muted">Details</span>
+                <span className="e-text-xs e-font-normal e-uppercase e-e-text-dk-gray-700">Details</span>
                 <h1 className="e-m-0 e-text-2xl e-font-normal e-leading-none e-text-white md:e-text-3xl">
                     Transaction
                 </h1>

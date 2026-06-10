@@ -493,7 +493,7 @@ function OverviewCard({
                         <BaseTable.Cell className="e-text-right">
                             <div className="e-flex e-flex-col e-items-end">
                                 {size} bytes
-                                <span className={size <= PACKET_DATA_SIZE ? 'text-muted' : 'text-warning'}>
+                                <span className={size <= PACKET_DATA_SIZE ? 'e-text-dk-gray-700' : 'text-warning'}>
                                     Max transaction size is {PACKET_DATA_SIZE} bytes
                                 </span>
                             </div>
@@ -504,7 +504,7 @@ function OverviewCard({
                         <BaseTable.Cell className="e-text-right">
                             <div className="e-flex e-flex-col e-items-end">
                                 <SolBalance lamports={fee} />
-                                <span className="text-muted">
+                                <span className="e-text-dk-gray-700">
                                     {`Each signature costs ${DEFAULT_FEES.lamportsPerSignature} lamports`}
                                 </span>
                             </div>

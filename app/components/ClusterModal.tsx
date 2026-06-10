@@ -161,7 +161,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                                 />
                             </FormControl>
                             {savedName.trim() === '' && (
-                                <small className="text-muted" data-testid="name-required-hint">
+                                <small className="e-text-dk-gray-700" data-testid="name-required-hint">
                                     Name is required
                                 </small>
                             )}

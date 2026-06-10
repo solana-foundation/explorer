@@ -73,7 +73,7 @@ function TransferRow({
             </BaseTable.Cell>
 
             {hasTimestamps && (
-                <BaseTable.Cell className="text-muted">
+                <BaseTable.Cell className="e-text-dk-gray-700">
                     {blockTime && <RelativeTime date={blockTime * 1000} />}
                 </BaseTable.Cell>
             )}
@@ -255,12 +255,12 @@ export function TokenTransfersCard({ address }: { address: string }) {
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="text-muted">Transaction Signature</BaseTable.HeaderCell>
-                        {hasTimestamps && <BaseTable.HeaderCell className="text-muted">Age</BaseTable.HeaderCell>}
-                        <BaseTable.HeaderCell className="text-muted">Source</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-muted">Destination</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-muted">Amount</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-muted">Result</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Transaction Signature</BaseTable.HeaderCell>
+                        {hasTimestamps && <BaseTable.HeaderCell className="e-text-dk-gray-700">Age</BaseTable.HeaderCell>}
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Source</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Destination</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Amount</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body className="list">

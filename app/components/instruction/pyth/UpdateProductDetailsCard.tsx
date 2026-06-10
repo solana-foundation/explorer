@@ -65,7 +65,7 @@ export default function UpdateProductDetailsCard({
 
             <BaseTable.Row>
                 <BaseTable.Cell>
-                    Attributes <span className="text-muted">(JSON)</span>
+                    Attributes <span className="e-text-dk-gray-700">(JSON)</span>
                 </BaseTable.Cell>
                 <BaseTable.Cell className="e-text-right">
                     <div className="d-lg-flex e-hidden e-items-center e-justify-end">

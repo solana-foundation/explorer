@@ -74,11 +74,11 @@ export function BlockAccountsCard({ block, blockSlot }: { block: VersionedBlockR
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="text-muted">Account</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-muted">Read-Write Count</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-muted">Read-Only Count</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-muted">Total Count</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-muted">% of Transactions</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Account</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Read-Write Count</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Read-Only Count</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Total Count</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">% of Transactions</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body>

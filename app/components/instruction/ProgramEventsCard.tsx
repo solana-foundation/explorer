@@ -99,7 +99,7 @@ function EventCard({
                         <>
                             <BaseTable.Row>
                                 <BaseTable.Cell>
-                                    Event Data <span className="text-muted">(Hex)</span>
+                                    Event Data <span className="e-text-dk-gray-700">(Hex)</span>
                                 </BaseTable.Cell>
                                 <BaseTable.Cell className="e-text-right">
                                     <HexData raw={fromBase64(rawEventData)} />

@@ -82,7 +82,7 @@ export function BpfLoaderWriteDetailsCard(props: Props<WriteInfo>) {
 
             <BaseTable.Row>
                 <BaseTable.Cell>
-                    Bytes <span className="text-muted">(Base 64)</span>
+                    Bytes <span className="e-text-dk-gray-700">(Base 64)</span>
                 </BaseTable.Cell>
                 <BaseTable.Cell className="e-text-right">
                     <pre className="e-mb-0 e-inline-block e-text-left">{bytes}</pre>

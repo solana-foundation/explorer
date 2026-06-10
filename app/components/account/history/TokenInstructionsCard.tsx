@@ -75,7 +75,7 @@ export function TokenInstructionsCard({ address }: { address: string }) {
                             </BaseTable.Cell>
 
                             {hasTimestamps && (
-                                <BaseTable.Cell className="text-muted">
+                                <BaseTable.Cell className="e-text-dk-gray-700">
                                     {blockTime && <RelativeTime date={blockTime * 1000} />}
                                 </BaseTable.Cell>
                             )}
@@ -127,13 +127,13 @@ export function TokenInstructionsCard({ address }: { address: string }) {
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="text-muted e-w-px">
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">
                             Transaction Signature
                         </BaseTable.HeaderCell>
-                        {hasTimestamps && <BaseTable.HeaderCell className="text-muted">Age</BaseTable.HeaderCell>}
-                        <BaseTable.HeaderCell className="text-muted">Instruction</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-muted">Program</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-muted">Result</BaseTable.HeaderCell>
+                        {hasTimestamps && <BaseTable.HeaderCell className="e-text-dk-gray-700">Age</BaseTable.HeaderCell>}
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Instruction</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Program</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body className="list">{detailsList}</BaseTable.Body>

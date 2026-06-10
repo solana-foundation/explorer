@@ -67,7 +67,7 @@ function ProgramLogRows({
                 </div>
             ) : (
                 <div className="e-flex e-items-center e-justify-center e-pb-6 e-text-center">
-                    <p className="e-m-0 e-text-sm e-italic e-text-muted">No logs yet</p>
+                    <p className="e-m-0 e-text-sm e-italic e-e-text-dk-gray-700">No logs yet</p>
                 </div>
             )}
         </>

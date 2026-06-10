@@ -236,7 +236,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                     <BaseTable.Head>
                         <BaseTable.Row>
                             <BaseTable.HeaderCell
-                                className="text-muted e-cursor-pointer"
+                                className="e-text-dk-gray-700 e-cursor-pointer"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.delete('sort');
@@ -247,10 +247,10 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                             >
                                 #
                             </BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="text-muted">Result</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="text-muted">Transaction Signature</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Transaction Signature</BaseTable.HeaderCell>
                             <BaseTable.HeaderCell
-                                className="text-muted e-cursor-pointer"
+                                className="e-text-dk-gray-700 e-cursor-pointer"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'fee');
@@ -262,7 +262,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 Fee
                             </BaseTable.HeaderCell>
                             <BaseTable.HeaderCell
-                                className="text-muted e-cursor-pointer"
+                                className="e-text-dk-gray-700 e-cursor-pointer"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'reservedCUs');
@@ -275,7 +275,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                             </BaseTable.HeaderCell>
                             {showComputeUnits && (
                                 <BaseTable.HeaderCell
-                                    className="text-muted e-cursor-pointer"
+                                    className="e-text-dk-gray-700 e-cursor-pointer"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'compute');
@@ -288,7 +288,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 </BaseTable.HeaderCell>
                             )}
                             <BaseTable.HeaderCell
-                                className="text-muted e-cursor-pointer"
+                                className="e-text-dk-gray-700 e-cursor-pointer"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'txnCost');
@@ -299,7 +299,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                             >
                                 Txn Cost
                             </BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="text-muted">Invoked Programs</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Invoked Programs</BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>
                     <BaseTable.Body className="list">
@@ -363,7 +363,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                                   return (
                                                       <div key={i} className="e-flex e-items-center">
                                                           <Address pubkey={new PublicKey(programId)} link />
-                                                          <span className="text-muted e-ml-1.5">{`(${count})`}</span>
+                                                          <span className="e-text-dk-gray-700 e-ml-1.5">{`(${count})`}</span>
                                                       </div>
                                                   );
                                               })}

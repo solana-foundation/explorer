@@ -28,8 +28,8 @@ export function BaseDomainsCard({ domains }: { domains: DomainInfo[] }) {
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="text-muted">Domain Name</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-muted">Name Service Account</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Domain Name</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Name Service Account</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body className="list">

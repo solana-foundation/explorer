@@ -30,8 +30,8 @@ const SampleContent = () => (
     <BaseTable ui="dashkit" variant="card" nowrap>
         <BaseTable.Head>
             <BaseTable.Row>
-                <BaseTable.HeaderCell className="text-muted">Name</BaseTable.HeaderCell>
-                <BaseTable.HeaderCell className="text-muted">Value</BaseTable.HeaderCell>
+                <BaseTable.HeaderCell className="e-text-dk-gray-700">Name</BaseTable.HeaderCell>
+                <BaseTable.HeaderCell className="e-text-dk-gray-700">Value</BaseTable.HeaderCell>
             </BaseTable.Row>
         </BaseTable.Head>
         <BaseTable.Body className="list">

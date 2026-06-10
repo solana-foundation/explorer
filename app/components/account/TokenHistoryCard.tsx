@@ -194,7 +194,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         <h3 className="card-header-title">Token History</h3>
                     </CardHeader>
                     <CardBody ui="dashkit">
-                        <p className="text-muted e-mb-0 e-text-center">
+                        <p className="e-text-dk-gray-700 e-mb-0 e-text-center">
                             Click the button below to load token transaction history
                         </p>
                     </CardBody>
@@ -242,11 +242,11 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 <table className="table table-sm table-nowrap card-table">
                     <thead>
                         <tr>
-                            <th className="text-muted w-1">Slot</th>
-                            <th className="text-muted">Result</th>
-                            <th className="text-muted">Token</th>
-                            <th className="text-muted">Instruction Type</th>
-                            <th className="text-muted">Transaction Signature</th>
+                            <th className="e-text-dk-gray-700 w-1">Slot</th>
+                            <th className="e-text-dk-gray-700">Result</th>
+                            <th className="e-text-dk-gray-700">Token</th>
+                            <th className="e-text-dk-gray-700">Instruction Type</th>
+                            <th className="e-text-dk-gray-700">Transaction Signature</th>
                         </tr>
                     </thead>
                     <tbody className="list">
@@ -286,7 +286,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         )}
                     </button>
                 ) : allFoundOldest ? (
-                    <div className="text-muted e-text-center">Fetched full history</div>
+                    <div className="e-text-dk-gray-700 e-text-center">Fetched full history</div>
                 ) : (
                     <button className="btn btn-primary e-w-full" onClick={() => fetchHistories()} disabled={fetching}>
                         {fetching ? (
