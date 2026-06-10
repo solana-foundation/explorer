@@ -161,9 +161,9 @@ function StatusWithError({ children, errMessage }: { children: ReactNode; errMes
     if (!errMessage) return <>{children}</>;
 
     return (
-        <div className="e-flex e-flex-col e-gap-2">
+        <div className="flex flex-col gap-2">
             {children}
-            <div className="e-text-sm e-tracking-tight e-text-destructive">{errMessage}</div>
+            <div className="text-sm tracking-tight text-destructive">{errMessage}</div>
         </div>
     );
 }

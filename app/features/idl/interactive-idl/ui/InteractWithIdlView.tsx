@@ -75,7 +75,7 @@ export function InteractWithIdlView({
                 </div>
 
                 {/* Left Column - Instructions */}
-                <div className="order-2 md:order-1 md:col-span-6">
+                <div className="order-2 min-w-0 md:order-1 md:col-span-6">
                     <InteractInstructions
                         idl={idl}
                         instructions={instructions}
@@ -90,7 +90,7 @@ export function InteractWithIdlView({
                 </div>
 
                 {/* Right Column - Controls & Logs */}
-                <div className="order-1 h-full md:order-2 md:col-span-6">
+                <div className="order-1 h-full min-w-0 md:order-2 md:col-span-6">
                     <div className="top-4 md:sticky">
                         <div className="flex flex-col gap-y-4">
                             <ClusterSelector />

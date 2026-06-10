@@ -33,8 +33,8 @@ export function TxSimulationStatus(props: TxSimulationStatusProps) {
 
 function ComputeUnitsBadge({ unitsConsumed }: { unitsConsumed: number }) {
     return (
-        <div className="e-flex e-items-center e-gap-1">
-            <span className="e-text-xs e-tracking-tight e-text-accent-700">
+        <div className="flex shrink-0 items-center gap-1">
+            <span className="whitespace-nowrap text-xs tracking-tight text-accent-700">
                 {unitsConsumed.toLocaleString('en-US')} CU
             </span>
         </div>

@@ -26,7 +26,7 @@ export const LongText: Story = {
 
 export const CustomClassName: Story = {
     args: {
-        className: 'e-mt-0 e-justify-center e-rounded-lg e-bg-destructive/10 e-p-2',
+        className: 'mt-0 justify-center rounded-lg bg-destructive/10 p-2',
         label: 'You are connected to Mainnet, which uses real funds',
     },
 };

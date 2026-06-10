@@ -11,16 +11,16 @@ import { formatLogTimestamp } from '../model/formatLogTimestamp';
 export type StatusTheme = 'accent' | 'destructive';
 
 const themedColor = {
-    accent: 'e-text-accent-700',
-    destructive: 'e-text-destructive',
+    accent: 'text-accent-700',
+    destructive: 'text-destructive',
 } as const;
 
-const timestampVariants = cva('e-whitespace-nowrap e-text-xs e-tracking-tight', {
+const timestampVariants = cva('whitespace-nowrap text-xs tracking-tight', {
     variants: { theme: themedColor },
 });
 
 const monoTextVariants = cva(
-    'e-overflow-hidden e-text-ellipsis e-whitespace-nowrap e-font-mono e-text-sm e-tracking-tight',
+    'overflow-hidden text-ellipsis whitespace-nowrap font-mono text-sm tracking-tight',
     { variants: { theme: themedColor } },
 );
 
@@ -34,7 +34,7 @@ type StatusBarProps = {
 
 export function StatusBar({ message, date, theme, badge, link }: StatusBarProps) {
     const badgeNode = (
-        <Badge variant={badge.variant} size="xs" className={cn(!link && 'e-ml-auto')}>
+        <Badge variant={badge.variant} size="xs" className={cn(!link && 'ml-auto')}>
             {badge.label}
             {Boolean(link) && (
                 <>
@@ -45,13 +45,13 @@ export function StatusBar({ message, date, theme, badge, link }: StatusBarProps)
         </Badge>
     );
     return (
-        <div className="e-flex e-items-center e-gap-2 e-rounded e-border e-border-solid e-border-neutral-600 e-px-4 e-py-2">
+        <div className="flex items-center gap-2 rounded border border-solid border-neutral-600 px-4 py-2">
             {message}
-            <div className="e-flex e-items-center">
+            <div className="flex items-center">
                 <span className={timestampVariants({ theme })}>{formatLogTimestamp(date)}</span>
             </div>
             {link ? (
-                <a href={link} target="_blank" rel="noopener noreferrer" className="e-ml-auto">
+                <a href={link} target="_blank" rel="noopener noreferrer" className="ml-auto">
                     {badgeNode}
                 </a>
             ) : (
@@ -63,7 +63,7 @@ export function StatusBar({ message, date, theme, badge, link }: StatusBarProps)
 
 export function CopyableMonoText({ text, theme }: { text: string; theme: StatusTheme }) {
     return (
-        <div className="e-flex e-w-1/2 e-items-center e-gap-1">
+        <div className="flex w-1/2 min-w-0 items-center gap-1">
             <Copyable text={text}>
                 <span className={monoTextVariants({ theme })}>{text}</span>
             </Copyable>

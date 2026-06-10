@@ -151,8 +151,8 @@ export function InteractInstruction({
                             </div>
                         </CardSection>
                     )}
-                    <div className="e-px-6 e-pb-2.5">
-                        <div className="e-flex e-gap-2">
+                    <div className="px-6 pb-2.5">
+                        <div className="flex gap-2">
                             <ActionButton
                                 onClick={onSubmit}
                                 disabled={interactionDisabled}

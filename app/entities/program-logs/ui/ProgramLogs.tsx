@@ -47,7 +47,7 @@ export function ProgramLogs({
             <div className="flex min-h-0 flex-col gap-2 overflow-auto">
                 {header}
 
-                {content}
+                <div className="overflow-x-auto">{content}</div>
             </div>
         </div>
     );
