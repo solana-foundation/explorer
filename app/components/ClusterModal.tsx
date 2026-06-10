@@ -20,23 +20,25 @@ import { Trash2 } from 'react-feather';
 import { Alert } from '../shared/ui/Alert';
 import { FormControl } from '../shared/ui/FormControl';
 import { Overlay } from './common/Overlay';
-import { Button } from './shared/ui/button';
+import { Button, buttonVariants } from './shared/ui/button';
 import { cn } from './shared/utils';
 
 const ClusterModalDeveloperSettings = dynamic(() => import('./ClusterModalDeveloperSettings'), { ssr: false });
 
-const clusterButtonVariants = cva('btn col-12', {
+// Base = dashkit Button base + full width (legacy `btn col-12`); active states keep the transparent
+// base bg with the status color on border+text (legacy `border-* text-*` utilities).
+const clusterButtonVariants = cva(cn(buttonVariants({ size: 'default', ui: 'dashkit' }), 'e-w-full'), {
     compoundVariants: [
-        { active: true, className: 'border-primary text-primary', status: ClusterStatus.Connected },
-        { active: true, className: 'border-warning text-warning', status: ClusterStatus.Connecting },
-        { active: true, className: 'border-danger text-danger', status: ClusterStatus.Failure },
+        { active: true, className: 'e-border-[#1dd79b] e-text-[#1dd79b]', status: ClusterStatus.Connected },
+        { active: true, className: 'e-border-[#fa62fc] e-text-[#fa62fc]', status: ClusterStatus.Connecting },
+        { active: true, className: 'e-border-[#b45be1] e-text-[#b45be1]', status: ClusterStatus.Failure },
     ],
     defaultVariants: {
         active: false,
     },
     variants: {
         active: {
-            false: 'btn-white',
+            false: 'e-bg-[#1e2423] e-border-[#343a37] e-text-white hover:e-bg-[#1a1f1e] hover:e-border-[#2a2e2c]',
             true: '',
         },
         status: {
@@ -53,8 +55,8 @@ export function ClusterModal() {
 
     return (
         <>
-            <div className={cn('offcanvas offcanvas-end', show && 'show')}>
-                <div className="modal-body" onClick={e => e.stopPropagation()}>
+            <div className={cn('e-offcanvas-end', show && 'e-show')}>
+                <div className="e-relative e-flex-auto e-p-6" onClick={e => e.stopPropagation()}>
                     <span className="e-cursor-pointer" onClick={onClose}>
                         &times;
                     </span>
@@ -148,7 +150,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                         />
                     </FormControl>
                     {saving ? (
-                        <div className="col-12 e-mb-3 e-mt-1.5" data-testid="save-cluster-form">
+                        <div className="e-w-full e-mb-3 e-mt-1.5" data-testid="save-cluster-form">
                             <FormControl className="e-mb-1.5">
                                 <input
                                     type="text"
@@ -204,7 +206,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                             ui="dashkit"
                             variant="white"
                             size="sm"
-                            className="col-12 e-mb-3 e-mt-1.5"
+                            className="e-w-full e-mb-3 e-mt-1.5"
                             onClick={() => setSaving(true)}
                             data-testid="save-custom-cluster-btn"
                         >
@@ -238,7 +240,7 @@ function SavedClusterItem({
     const clusterUrl = `${pathname}?${nextQueryString}`;
 
     return (
-        <div className="col-12 e-relative e-mb-3" data-testid={`saved-cluster-${cluster.name}`}>
+        <div className="e-w-full e-relative e-mb-3" data-testid={`saved-cluster-${cluster.name}`}>
             <Link
                 className={cn(clusterButtonVariants({ active: isActive, status }), 'e-text-center')}
                 href={clusterUrl}

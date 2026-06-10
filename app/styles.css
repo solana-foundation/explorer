@@ -3,41 +3,82 @@
 
 /* Dashkit `_type.scss` heading overrides — preserved inline so Tailwind's
    preflight skip (and the imminent dashkit SCSS deletion) don't regress
-   consumer typography. Values: $headings-margin-bottom (0.75rem) * { 1, 0.75, 0.5 }. */
+   consumer typography. Sizes mirror the compiled dashkit scale ($h1..$h6);
+   without them headings fall back to Reboot's much larger defaults. */
 h1,
-.h1 {
-    margin-bottom: 0.75rem;
-    font-size: 1.5rem;
-    letter-spacing: -0.02em;
-}
-@media (min-width: 768px) {
-    h1,
-    .h1 {
-        font-size: 2.5rem;
-    }
-}
+.h1,
 h2,
-.h2 {
-    margin-bottom: 0.75rem;
-    letter-spacing: -0.02em;
-}
+.h2,
 h3,
-.h3 {
-    margin-bottom: 0.5625rem;
-    letter-spacing: -0.02em;
-}
+.h3,
 h4,
 .h4,
 h5,
 .h5,
 h6,
 .h6 {
-    margin-bottom: 0.375rem;
+    line-height: 1.1;
     letter-spacing: -0.02em;
+}
+h1,
+.h1 {
+    margin-bottom: 1.125rem;
+    font-size: 1.5rem;
+}
+@media (min-width: 768px) {
+    h1,
+    .h1 {
+        font-size: 1.625rem;
+    }
+}
+h2,
+.h2 {
+    margin-bottom: 1.125rem;
+    font-size: 1.25rem;
+}
+h3,
+.h3 {
+    margin-bottom: 0.84375rem;
+    font-size: 1.0625rem;
+}
+h4,
+.h4 {
+    margin-bottom: 0.5625rem;
+    font-size: 0.9375rem;
+}
+h5,
+.h5 {
+    margin-bottom: 0.5625rem;
+    font-size: 0.8125rem;
+}
+h6,
+.h6 {
+    margin-bottom: 0.5625rem;
+    font-size: 0.625rem;
 }
 b,
 strong {
     font-weight: 600;
+}
+
+/* Dashkit hr — solid #282d2b 1px line; Reboot renders border-top currentColor at .25 opacity instead. */
+hr {
+    height: 1px;
+    margin: 1rem 0;
+    color: #282d2b;
+    background-color: currentColor;
+    border: 0;
+    opacity: 1;
+}
+
+/* Dashkit code chip (dark cascade) — Reboot only sets mono font + pink color. */
+code {
+    padding: 0.33rem;
+    border-radius: 0.375rem;
+    font-size: 87.5%;
+    color: #fff;
+    background-color: #141816;
+    word-wrap: break-word;
 }
 
 /* Dashkit link overrides — $link-color $primary-dark (#33a382), text-decoration none.
@@ -248,6 +289,48 @@ a:hover {
         right: 0;
         bottom: 0;
         z-index: 100;
+    }
+
+    /* Right-edge drawer port (Bootstrap .offcanvas.offcanvas-end); toggled via .e-show by React state. */
+    .e-offcanvas-end {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1060;
+        display: flex;
+        flex-direction: column;
+        width: 350px;
+        max-width: 100%;
+        background-color: #1e2423;
+        border-left: 1px solid #232323;
+        transform: translateX(100%);
+        visibility: hidden;
+        transition:
+            transform 0.3s ease-in-out,
+            visibility 0.3s;
+    }
+    .e-offcanvas-end.e-show {
+        transform: none;
+        visibility: visible;
+    }
+
+    /* Backdrop port (Bootstrap .modal-backdrop.fade); .e-show fades it in, otherwise it ignores clicks. */
+    .e-modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1050;
+        width: 100vw;
+        height: 100vh;
+        background-color: #232323;
+        opacity: 0;
+        transition: opacity 0.15s linear;
+        pointer-events: none;
+    }
+    .e-modal-backdrop.e-show {
+        opacity: 0.5;
+        pointer-events: auto;
     }
 }
 
