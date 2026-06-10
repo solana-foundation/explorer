@@ -1,37 +1,23 @@
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { mockAccountHistory, mockConfirmedSignatureInfo } from '@storybook-config/__fixtures__/account-history';
-import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
-import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { MockHistoryProvider } from '@storybook-config/__mocks__/MockHistoryProvider';
-import { nextjsParameters } from '@storybook-config/decorators';
+import { nextjsParameters, withHistory } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 
 import { TokenTransfersCard } from '../TokenTransfersCard';
 
 const ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 
-const withHistory: Decorator = Story => (
-    <ClusterProvider>
-        <MockAccountsProvider>
-            <MockHistoryProvider
-                history={{
-                    [ADDRESS]: mockAccountHistory({
-                        fetched: [mockConfirmedSignatureInfo({ blockTime: null, slot: 312_456_789 })],
-                        foundOldest: true,
-                    }),
-                }}
-            >
-                <Story />
-            </MockHistoryProvider>
-        </MockAccountsProvider>
-    </ClusterProvider>
-);
-
 const meta: Meta<typeof TokenTransfersCard> = {
     component: TokenTransfersCard,
     decorators: [withHistory, withViewportFromGlobal],
     parameters: {
         ...nextjsParameters,
+        history: {
+            [ADDRESS]: mockAccountHistory({
+                fetched: [mockConfirmedSignatureInfo({ blockTime: null, slot: 312_456_789 })],
+                foundOldest: true,
+            }),
+        },
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],

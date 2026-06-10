@@ -144,13 +144,13 @@ export const withMockTransactions: Decorator = Story => (
 
 /**
  * Wraps stories with ClusterProvider, MockAccountsProvider, and MockHistoryProvider.
- * Provides empty history cache for components consuming `useAccountHistory` and friends.
- * Usage: `decorators: [withHistory]`
+ * Seeds the history cache from `parameters.history` (empty cache when omitted).
+ * Usage: `decorators: [withHistory]`, optionally `parameters: { history: {...} }`
  */
-export const withHistory: Decorator = Story => (
+export const withHistory: Decorator = (Story, context) => (
     <ClusterProvider>
         <MockAccountsProvider>
-            <MockHistoryProvider>
+            <MockHistoryProvider history={context.parameters.history}>
                 <Story />
             </MockHistoryProvider>
         </MockAccountsProvider>
