@@ -120,7 +120,9 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
             {!loading && totalAccountSize > 0 && (
                 <CardFooter ui="dashkit">
                     <div className="e-flex e-items-baseline e-justify-end">
-                        <span className="e-text-dk-gray-700 e-me-2 e-text-[0.625rem] e-uppercase">Total Account Size:</span>
+                        <span className="e-me-2 e-text-[0.625rem] e-uppercase e-text-dk-gray-700">
+                            Total Account Size:
+                        </span>
                         <span className="e-text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
                     </div>
                 </CardFooter>
@@ -204,7 +206,9 @@ function AccountRow({
                             <span className="e-text-dk-gray-700">Loading...</span>
                         ) : accountInfo ? (
                             <Copyable text={hexData}>
-                                <span className="e-text-dk-gray-700">{accountInfo.size.toLocaleString('en-US')} bytes</span>
+                                <span className="e-text-dk-gray-700">
+                                    {accountInfo.size.toLocaleString('en-US')} bytes
+                                </span>
                             </Copyable>
                         ) : null}
                     </span>

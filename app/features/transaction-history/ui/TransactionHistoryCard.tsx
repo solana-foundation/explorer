@@ -82,14 +82,16 @@ export function TransactionHistoryCard({ address }: { address: string }) {
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">
+                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">
                             Transaction Signature
                         </BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Block</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Block</BaseTable.HeaderCell>
                         {hasTimestamps && (
                             <>
-                                <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Age</BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Timestamp</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Age</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">
+                                    Timestamp
+                                </BaseTable.HeaderCell>
                             </>
                         )}
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>

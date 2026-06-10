@@ -17,7 +17,7 @@ export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Slot</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Slot</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Hash</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>

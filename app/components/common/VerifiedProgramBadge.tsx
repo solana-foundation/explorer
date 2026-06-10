@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { useCluster } from '@/app/providers/cluster';
+import { CardTitle } from '@/app/shared/ui/Card';
 import { Cluster } from '@/app/utils/cluster';
 import { useClusterPath } from '@/app/utils/url';
 import { useIsProgramVerified } from '@/app/utils/verified-builds';
@@ -30,36 +31,36 @@ export function VerifiedProgramBadge({
 
     if (cluster !== Cluster.MainnetBeta) {
         return (
-            <h3 className="e-mb-0">
+            <CardTitle as="h3" ui="dashkit">
                 <Badge ui="dashkit" variant="warning">
                     Verified Builds only available on Mainnet
                 </Badge>
-            </h3>
+            </CardTitle>
         );
     } else if (isLoading) {
         return (
-            <h3 className="e-mb-0">
+            <CardTitle as="h3" ui="dashkit">
                 <Badge ui="dashkit">Loading...</Badge>
-            </h3>
+            </CardTitle>
         );
     } else if (error) {
         return (
-            <h3 className="e-mb-0">
+            <CardTitle as="h3" ui="dashkit">
                 <Badge ui="dashkit" variant="warning">
                     Error fetching verified build information
                 </Badge>
-            </h3>
+            </CardTitle>
         );
     } else {
         const badgeVariant: BadgeVariant = isVerified ? 'success' : 'warning';
         const badgeText = isVerified ? 'Program Source Verified' : 'Program Not Verified';
 
         return (
-            <h3 className="e-mb-0">
+            <CardTitle as="h3" ui="dashkit">
                 <Badge ui="dashkit" variant={badgeVariant} className="e-cursor-pointer" asChild>
                     <Link href={verifiedBuildTabPath}>{badgeText}</Link>
                 </Badge>
-            </h3>
+            </CardTitle>
         );
     }
 }

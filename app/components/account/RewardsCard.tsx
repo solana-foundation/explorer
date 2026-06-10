@@ -86,7 +86,6 @@ export function RewardsCard({ address }: { address: string }) {
                 </CardHeader>
 
                 {rewardsFound ? (
-                    // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
                     <BaseTable ui="dashkit" variant="card" nowrap>
                         <BaseTable.Head>
                             <BaseTable.Row>

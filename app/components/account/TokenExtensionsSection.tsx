@@ -159,7 +159,7 @@ function TokenExtensionAccordionItem({
 function TokenExtensionStateHeader({ name }: { name: string }) {
     return (
         <BaseTable.Row>
-            <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">{name}</BaseTable.HeaderCell>
+            <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">{name}</BaseTable.HeaderCell>
             <BaseTable.HeaderCell className="e-text-dk-gray-700"></BaseTable.HeaderCell>
         </BaseTable.Row>
     );

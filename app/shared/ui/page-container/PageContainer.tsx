@@ -22,11 +22,9 @@ const pageContainerVariants = cva(
 
 type PageContainerProps = React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof pageContainerVariants>;
 
-const PageContainer = React.forwardRef<HTMLDivElement, PageContainerProps>(
-    ({ className, variant, ...props }, ref) => (
-        <div ref={ref} className={cn(pageContainerVariants({ variant }), className)} {...props} />
-    ),
-);
+const PageContainer = React.forwardRef<HTMLDivElement, PageContainerProps>(({ className, variant, ...props }, ref) => (
+    <div ref={ref} className={cn(pageContainerVariants({ variant }), className)} {...props} />
+));
 PageContainer.displayName = 'PageContainer';
 
 export { PageContainer };

@@ -37,7 +37,9 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Address Lookup Table Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                            Address Lookup Table Address
+                        </BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Table Index</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Resolved Address</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Details</BaseTable.HeaderCell>
@@ -49,7 +51,7 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
                     <BaseTable.Body className="e-border-0 e-border-t e-border-solid e-border-dark-border e-px-dk-4 e-py-4">
                         <BaseTable.Row>
                             <BaseTable.Cell colSpan={4}>
-                                <span className="e-text-dk-gray-700 e-text-center">No entries found</span>
+                                <span className="e-text-center e-text-dk-gray-700">No entries found</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                     </BaseTable.Body>

@@ -89,8 +89,8 @@ export function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: 
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Trait type</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Value</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Trait type</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Value</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body className="list">{attributesList}</BaseTable.Body>

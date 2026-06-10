@@ -16,7 +16,7 @@ const tabsTriggerVariants = cva(
         'e-mx-3 first:e-ml-0 last:e-mr-0',
         'e-mb-[-1px]', // mirrors Bootstrap `.nav-tabs .nav-link { margin-bottom: -1px }` so the active border overlaps the list border
         'e-border-0 e-border-b e-border-solid e-border-transparent',
-        'e-px-0 e-py-3',
+        'e-px-0 e-py-4', // $nav-tabs-link-padding-y is 1rem ($card-cap-padding-y) so the tab bar matches card-header height
         'e-text-dk-gray-600 hover:e-text-dk-gray-700',
         'data-[active=true]:e-border-dk-primary-on-dark data-[active=true]:e-text-dk-white',
         'disabled:e-pointer-events-none disabled:e-opacity-50',

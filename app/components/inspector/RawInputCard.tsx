@@ -108,10 +108,16 @@ function TabInstructions() {
     ];
 
     return (
-        <div className="instruction-tabs">
+        <div>
             <TabsList>
                 {tabs.map(tab => (
-                    <TabsTrigger key={tab.id} active={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>
+                    <TabsTrigger
+                        key={tab.id}
+                        active={activeTab === tab.id}
+                        // master used `me-3 nav-link` (no nav-item margins): 1rem trailing gap only
+                        className="e-ml-0 e-mr-4"
+                        onClick={() => setActiveTab(tab.id)}
+                    >
                         {tab.label}
                     </TabsTrigger>
                 ))}

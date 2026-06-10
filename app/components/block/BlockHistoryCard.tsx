@@ -231,12 +231,11 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                         : 'No transactions found with this filter'}
                 </CardBody>
             ) : (
-                // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
                 <BaseTable ui="dashkit" variant="card" nowrap>
                     <BaseTable.Head>
                         <BaseTable.Row>
                             <BaseTable.HeaderCell
-                                className="e-text-dk-gray-700 e-cursor-pointer"
+                                className="e-cursor-pointer e-text-dk-gray-700"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.delete('sort');
@@ -248,9 +247,11 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 #
                             </BaseTable.HeaderCell>
                             <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Transaction Signature</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                                Transaction Signature
+                            </BaseTable.HeaderCell>
                             <BaseTable.HeaderCell
-                                className="e-text-dk-gray-700 e-cursor-pointer"
+                                className="e-cursor-pointer e-text-dk-gray-700"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'fee');
@@ -262,7 +263,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 Fee
                             </BaseTable.HeaderCell>
                             <BaseTable.HeaderCell
-                                className="e-text-dk-gray-700 e-cursor-pointer"
+                                className="e-cursor-pointer e-text-dk-gray-700"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'reservedCUs');
@@ -275,7 +276,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                             </BaseTable.HeaderCell>
                             {showComputeUnits && (
                                 <BaseTable.HeaderCell
-                                    className="e-text-dk-gray-700 e-cursor-pointer"
+                                    className="e-cursor-pointer e-text-dk-gray-700"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'compute');
@@ -288,7 +289,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 </BaseTable.HeaderCell>
                             )}
                             <BaseTable.HeaderCell
-                                className="e-text-dk-gray-700 e-cursor-pointer"
+                                className="e-cursor-pointer e-text-dk-gray-700"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'txnCost');
@@ -363,7 +364,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                                   return (
                                                       <div key={i} className="e-flex e-items-center">
                                                           <Address pubkey={new PublicKey(programId)} link />
-                                                          <span className="e-text-dk-gray-700 e-ml-1.5">{`(${count})`}</span>
+                                                          <span className="e-ml-1.5 e-text-dk-gray-700">{`(${count})`}</span>
                                                       </div>
                                                   );
                                               })}

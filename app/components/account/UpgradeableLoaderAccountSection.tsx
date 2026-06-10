@@ -183,11 +183,11 @@ export function UpgradeableProgramSection({
 function MultisigBadge({ pubkey }: { pubkey: PublicKey }) {
     const programMultisigTabPath = useClusterPath({ pathname: `/address/${pubkey.toBase58()}/program-multisig` });
     return (
-        <h3 className="e-mb-0">
+        <CardTitle as="h3" ui="dashkit">
             <Badge ui="dashkit" variant="success" asChild>
                 <Link href={programMultisigTabPath}>Program Multisig</Link>
             </Badge>
-        </h3>
+        </CardTitle>
     );
 }
 

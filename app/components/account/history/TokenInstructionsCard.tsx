@@ -127,10 +127,12 @@ export function TokenInstructionsCard({ address }: { address: string }) {
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">
+                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">
                             Transaction Signature
                         </BaseTable.HeaderCell>
-                        {hasTimestamps && <BaseTable.HeaderCell className="e-text-dk-gray-700">Age</BaseTable.HeaderCell>}
+                        {hasTimestamps && (
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Age</BaseTable.HeaderCell>
+                        )}
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Instruction</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Program</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>

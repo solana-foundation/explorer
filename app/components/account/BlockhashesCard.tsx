@@ -16,8 +16,8 @@ export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashe
                 <BaseTable ui="dashkit" variant="card" nowrap>
                     <BaseTable.Head>
                         <BaseTable.Row>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Recency</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Blockhash</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Recency</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Blockhash</BaseTable.HeaderCell>
                             <BaseTable.HeaderCell className="e-text-dk-gray-700">Fee Calculator</BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>

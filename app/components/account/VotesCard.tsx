@@ -17,8 +17,10 @@ export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
                 <BaseTable ui="dashkit" variant="card" nowrap>
                     <BaseTable.Head>
                         <BaseTable.Row>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Slot</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Confirmation Count</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Slot</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                                Confirmation Count
+                            </BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>
                     <BaseTable.Body className="list">

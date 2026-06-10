@@ -32,7 +32,7 @@ export default function ClusterModalDeveloperSettings() {
                 </label>
                 <Switch id="cardToggle" checked={enabled} onCheckedChange={onToggleCustomUrlFeature} />
             </div>
-            <p className="e-text-dk-gray-700 e-mt-3">
+            <p className="e-mt-3 e-text-dk-gray-700">
                 Enable this setting to easily connect to a custom cluster via the &ldquo;customUrl&rdquo; url param.
             </p>
         </>

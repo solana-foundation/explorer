@@ -81,15 +81,17 @@ export function OwnedTokensCard({ address }: { address: string }) {
                     <DisplayDropdown display={display} toggle={() => setDropdown(show => !show)} show={showDropdown} />
                 </CardHeader>
 
-                {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
+                {/* TODO: migrate to <BaseTable variant="card"> from @/app/shared/ui/Table */}
                 <div className="table-responsive e-mb-0">
                     <table className="table table-sm table-nowrap card-table">
                         <thead>
                             <tr>
-                                {showLogos && <th className="e-text-dk-gray-700 w-1 e-p-0 e-text-center">Logo</th>}
+                                {showLogos && <th className="w-1 e-p-0 e-text-center e-text-dk-gray-700">Logo</th>}
                                 {display === 'detail' && <th className="e-text-dk-gray-700">Account Address</th>}
                                 <th className="e-text-dk-gray-700">Mint Address</th>
-                                <th className="e-text-dk-gray-700">{display === 'detail' ? 'Total Balance' : 'Balance'}</th>
+                                <th className="e-text-dk-gray-700">
+                                    {display === 'detail' ? 'Total Balance' : 'Balance'}
+                                </th>
                             </tr>
                         </thead>
                         {display === 'detail' ? (

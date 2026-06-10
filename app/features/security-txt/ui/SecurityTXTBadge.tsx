@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
 import { useCluster } from '@/app/providers/cluster';
+import { CardTitle } from '@/app/shared/ui/Card';
 
 import { fromProgramData } from '../lib/fromProgramData';
 
@@ -31,19 +32,19 @@ export function ProgramSecurityTXTBadge({
 export function SecurityTXTBadge({ error, tabPath }: { error?: string; tabPath: string }) {
     if (error) {
         return (
-            <h3 className="e-mb-0">
+            <CardTitle as="h3" ui="dashkit">
                 <Badge ui="dashkit" variant="warning">
                     {error}
                 </Badge>
-            </h3>
+            </CardTitle>
         );
     }
 
     return (
-        <h3 className="e-mb-0">
+        <CardTitle as="h3" ui="dashkit">
             <Badge ui="dashkit" variant="success" className="e-cursor-pointer" asChild>
                 <Link href={tabPath}>Included</Link>
             </Badge>
-        </h3>
+        </CardTitle>
     );
 }
