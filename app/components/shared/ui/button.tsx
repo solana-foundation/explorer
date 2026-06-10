@@ -40,7 +40,8 @@ const buttonVariants = cva([], {
             variant: 'default',
         },
         {
-            class: 'e-bg-red-500 e-text-neutral-50 e-shadow-sm hover:e-bg-red-500/90',
+            // e-border-0 (here and below): UA buttons carry a 2px border and @tailwind base is skipped
+            class: 'e-border-0 e-bg-red-500 e-text-neutral-50 e-shadow-sm hover:e-bg-red-500/90',
             ui: 'tw',
             variant: 'destructive',
         },
@@ -49,14 +50,14 @@ const buttonVariants = cva([], {
             ui: 'tw',
             variant: 'ghost',
         },
-        { class: 'e-text-neutral-900 e-underline-offset-4 hover:e-underline', ui: 'tw', variant: 'link' },
+        { class: 'e-border-0 e-text-neutral-900 e-underline-offset-4 hover:e-underline', ui: 'tw', variant: 'link' },
         {
             class: 'e-border e-border-neutral-600 e-bg-transparent e-text-white hover:e-bg-neutral-600/10 hover:e-text-white focus-visible:e-ring-1 focus-visible:e-ring-offset-1 focus-visible:e-ring-neutral-950',
             ui: 'tw',
             variant: 'outline',
         },
         {
-            class: 'e-bg-neutral-100 e-text-neutral-900 e-shadow-sm hover:e-bg-neutral-100/80',
+            class: 'e-border-0 e-bg-neutral-100 e-text-neutral-900 e-shadow-sm hover:e-bg-neutral-100/80',
             ui: 'tw',
             variant: 'secondary',
         },
