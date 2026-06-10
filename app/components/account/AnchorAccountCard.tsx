@@ -60,9 +60,9 @@ export function AnchorAccountCard({ account }: { account: Account }) {
                 <BaseTable ui="dashkit" variant="card" nowrap>
                     <BaseTable.Head>
                         <BaseTable.Row>
-                            <BaseTable.HeaderCell className="e-w-[1%]">Field</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-w-[1%]">Type</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-w-[1%]">Value</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-w-px">Field</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-w-px">Type</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-w-px">Value</BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>
                     <BaseTable.Body>

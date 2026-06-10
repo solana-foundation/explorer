@@ -16,8 +16,8 @@ export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashe
                 <BaseTable ui="dashkit" variant="card" nowrap>
                     <BaseTable.Head>
                         <BaseTable.Row>
-                            <BaseTable.HeaderCell className="text-muted e-w-[1%]">Recency</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="text-muted e-w-[1%]">Blockhash</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-muted e-w-px">Recency</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-muted e-w-px">Blockhash</BaseTable.HeaderCell>
                             <BaseTable.HeaderCell className="text-muted">Fee Calculator</BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>
@@ -42,8 +42,8 @@ export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashe
 const renderAccountRow = (entry: RecentBlockhashesEntry, index: number) => {
     return (
         <BaseTable.Row key={index}>
-            <BaseTable.Cell className="e-w-[1%]">{index + 1}</BaseTable.Cell>
-            <BaseTable.Cell className="font-monospace e-w-[1%]">{entry.blockhash}</BaseTable.Cell>
+            <BaseTable.Cell className="e-w-px">{index + 1}</BaseTable.Cell>
+            <BaseTable.Cell className="font-monospace e-w-px">{entry.blockhash}</BaseTable.Cell>
             <BaseTable.Cell className="">
                 {entry.feeCalculator.lamportsPerSignature} lamports per signature
             </BaseTable.Cell>
