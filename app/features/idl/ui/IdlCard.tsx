@@ -26,11 +26,12 @@ type IdlTab = {
 export function IdlCard({ programId }: { programId: string }) {
     const { url, cluster } = useCluster();
     const network = clusterSlug(cluster);
-    const { anchorIdl, programMetadataIdl, preferredVariant, isLoading: isAnyIdlLoading } = useProgramIdls(
-        programId,
-        url,
-        cluster,
-    );
+    const {
+        anchorIdl,
+        programMetadataIdl,
+        preferredVariant,
+        isLoading: isAnyIdlLoading,
+    } = useProgramIdls(programId, url, cluster);
     const [activeTabIndex, setActiveTabIndex] = useState<number>();
     const [searchStr, setSearchStr] = useState<string>('');
 
