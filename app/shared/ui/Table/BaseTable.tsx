@@ -18,13 +18,16 @@ import { cn } from '@/app/components/shared/utils';
 const tableVariants = cva([], {
     compoundVariants: [
         { class: '[&_th]:e-whitespace-nowrap [&_td]:e-whitespace-nowrap', nowrap: true },
+        // Plain dashkit table — Bootstrap default $table-margin-bottom = 1rem (16px = e-mb-4).
+        { class: 'e-mb-4', ui: 'dashkit', variant: 'plain' },
         // TW equivalent of `.card-table`: zero thead border-top + first/last cell padding to card edges + e-mb-0.
+        // First/last cell padding-x matches dashkit `$card-spacer-x = 1rem` (NOT 1.5rem).
         {
             class: [
                 'e-mb-0',
                 '[&_thead_th]:e-border-t-0',
-                '[&_thead_th:first-child]:e-pl-6 [&_thead_th:last-child]:e-pr-6',
-                '[&_tbody_td:first-child]:e-pl-6 [&_tbody_td:last-child]:e-pr-6',
+                '[&_thead_th:first-child]:e-pl-4 [&_thead_th:last-child]:e-pr-4',
+                '[&_tbody_td:first-child]:e-pl-4 [&_tbody_td:last-child]:e-pr-4',
             ].join(' '),
             variant: 'card',
         },
@@ -35,13 +38,17 @@ const tableVariants = cva([], {
         ui: {
             // Tailwind translation of `.table.table-sm` from .storybook/layout.min.css; keeps the Dashkit `1.5rem` table margin and the `#1e2423` tbody border that the SCSS late-override pins.
             dashkit: [
-                'e-w-full e-mb-6 e-text-dk-sm e-text-white',
+                // e-mb-* intentionally omitted — per-variant compounds own bottom margin so the
+                // card variant's e-mb-0 isn't beaten by a base e-mb-6 in CSS source order
+                // (twMerge can't dedupe through the e- prefix).
+                'e-w-full e-text-dk-sm e-text-white',
                 '[&_thead_th]:e-bg-dark-background [&_thead_th]:e-uppercase [&_thead_th]:e-text-dk-xs',
                 '[&_thead_th]:e-font-normal [&_thead_th]:e-tracking-[0.08em] [&_thead_th]:e-text-dark-muted-foreground',
                 '[&_thead_th]:e-text-left [&_th]:e-align-middle [&_td]:e-align-middle',
                 '[&_th]:e-p-4 [&_td]:e-p-4',
                 '[&_thead_th]:e-border-t [&_thead_th]:e-border-solid [&_thead_th]:e-border-[#282d2b]',
-                '[&_tbody_td]:e-border-t [&_tbody_td]:e-border-solid [&_tbody_td]:e-border-[#1e2423]',
+                // tbody row separator visible against #1e2423 card bg — matches dashkit $card-border-color (#282d2b) on dark.
+                '[&_tbody_td]:e-border-t [&_tbody_td]:e-border-solid [&_tbody_td]:e-border-[#282d2b]',
             ].join(' '),
             // Mirrors `.table.table-sm` as compiled in .storybook/layout.min.css (Bootstrap 5 + dashkit overrides).
             tw: [

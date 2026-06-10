@@ -32,7 +32,7 @@ const AccordionTrigger = React.forwardRef<
                 ref={ref}
                 data-slot="accordion-trigger"
                 className={cn(
-                    'bg-transparent border-0 e-flex e-flex-1 e-items-start e-gap-4 e-rounded-md e-py-4',
+                    'e-bg-transparent e-border-0 e-flex e-flex-1 e-items-start e-gap-4 e-rounded-md e-py-4',
                     'e-text-left e-text-sm e-font-medium e-text-neutral-200 e-outline-none e-transition-all',
                     'hover:e-underline',
                     'focus-visible:e-border-neutral-950 focus-visible:e-ring-2 focus-visible:e-ring-neutral-950/50',

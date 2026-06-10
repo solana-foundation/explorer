@@ -63,25 +63,30 @@ const buttonVariants = cva([], {
         },
 
         // ===== ui="dashkit" =====
-        // Transparent bg/border defaults are intentionally omitted; the per-variant
-        // compounds always set bg+border, and twMerge can't dedupe through the e- prefix.
+        // Defaults that would conflict with per-variant compounds (bg/border) or per-size
+        // compounds (padding/text/leading/rounded) are intentionally omitted — twMerge can't
+        // dedupe through the e- prefix, so source order in the compiled CSS would otherwise
+        // let the larger/wider base values beat the size compound.
         {
+            // e-text-white intentionally omitted — variant compounds own text color and twMerge
+            // can't dedupe through the e- prefix, so a base color would beat the variant's arbitrary
+            // value in CSS source order (e.g. .btn-primary needs #1b4e3f per _solana.scss override).
             class: cn(
                 'e-inline-block e-text-center e-align-middle e-cursor-pointer e-select-none',
-                'e-border e-border-solid e-text-white',
-                'e-font-normal e-leading-[1.5] e-text-[0.9375rem]',
-                'e-px-3 e-py-2 e-rounded-[0.375rem]',
+                'e-border e-border-solid',
+                'e-font-normal',
                 'e-transition-[color,background-color,border-color,box-shadow] e-duration-150 e-ease-in-out',
-                'hover:e-text-white',
                 'disabled:e-pointer-events-none disabled:e-opacity-[0.65]',
             ),
             ui: 'dashkit',
         },
-        // Size modifiers — shrink/grow padding, font-size, and radius off the base.
+        // Size modifiers — each owns padding, font-size, line-height, and radius outright.
+        { class: 'e-px-3 e-py-2 e-text-[0.9375rem] e-leading-[1.5] e-rounded-[0.375rem]', size: 'default', ui: 'dashkit' },
         { class: 'e-px-2 e-py-0.5 e-text-[0.8125rem] e-leading-[1.75] e-rounded-[0.25rem]', size: 'sm', ui: 'dashkit' },
         { class: 'e-px-5 e-py-3 e-text-[0.9375rem] e-leading-[1.5] e-rounded-[0.5rem]', size: 'lg', ui: 'dashkit' },
         {
-            class: 'e-bg-[#1dd79b] e-border-[#1dd79b] e-text-white hover:e-bg-[#19b784] hover:e-border-[#17ac7c]',
+            // _solana.scss overrides .btn-primary text → $gray-900 (#1b4e3f) instead of Bootstrap white.
+            class: 'e-bg-[#1dd79b] e-border-[#1dd79b] e-text-[#1b4e3f] hover:e-bg-[#19b784] hover:e-border-[#17ac7c] hover:e-text-[#1b4e3f]',
             ui: 'dashkit',
             variant: 'primary',
         },

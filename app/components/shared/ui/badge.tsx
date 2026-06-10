@@ -51,14 +51,17 @@ const badgeVariants = cva([], {
         { class: 'e-border-transparent e-bg-orange-950 e-text-orange-400', ui: 'tw', variant: 'warning' },
 
         // ===== ui="dashkit" =====
-        // Base `.badge` layout: inline-block, relative top:-2px alignment, 76% relative font-size,
-        // collapse when empty. Listed first so size/pill compounds below can override.
+        // Base `.badge` layout, matching dashkit `_badge.scss` + Bootstrap `.badge`:
+        // 76% font-size, line-height 1, vertical-align middle, em-based padding (0.33em y, 0.5em x).
+        // Padding-x and rounded live on per-pill compounds — twMerge can't dedupe through the
+        // e- prefix, so non-pill horizontal padding/rounded would beat the pill compound's
+        // arbitrary values in CSS source order if listed here.
         {
-            // `e-text-white` intentionally omitted from base; each variant compound sets its own
-            // text color, and twMerge can't dedupe through the e- prefix.
-            class: 'e-inline-block e-relative -e-top-0.5 e-align-middle e-text-center e-whitespace-nowrap e-rounded-md e-font-normal e-leading-none e-px-2 e-py-[0.165rem] e-text-[76%] empty:e-hidden',
+            class: 'e-inline-block e-align-middle e-text-center e-whitespace-nowrap e-font-normal e-leading-none e-text-[76%] e-py-[0.33em] empty:e-hidden',
             ui: 'dashkit',
         },
+        // pill=false: dashkit default — em-based horizontal padding + Bootstrap radius.
+        { class: 'e-px-[0.5em] e-rounded-[0.375rem]', pill: false, ui: 'dashkit' },
         // size="sm" in dashkit mode mirrors the in-table appearance (parent `<td>` with 13px font
         // → ≈10px). Useful when rendering a dashkit badge OUTSIDE a table while still wanting the compact look.
         { class: 'e-text-dk-xs', size: 'sm', ui: 'dashkit' },
