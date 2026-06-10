@@ -41,7 +41,7 @@ describe('GET /api/idl-latest', () => {
         vi.clearAllMocks();
         vi.spyOn(Logger, 'warn').mockImplementation(() => {});
         vi.spyOn(Logger, 'panic').mockImplementation(() => {});
-        mocks.lastWriteSlot.mockResolvedValue(null);
+        mocks.lastWriteSlot.mockResolvedValue(undefined);
     });
 
     it('should return 400 when required params are missing', async () => {
