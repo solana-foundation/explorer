@@ -35,19 +35,26 @@ addons.register('explorer/sidebar-accordion', api => {
         return entries[pos].title !== entries[entries.length - 1].title;
     };
 
-    const collapseBeforeNavigation = (event: Pick<KeyboardEvent, 'altKey' | 'ctrlKey' | 'metaKey' | 'shiftKey' | 'key'>) => {
+    const collapseBeforeNavigation = (
+        event: Pick<KeyboardEvent, 'altKey' | 'ctrlKey' | 'metaKey' | 'shiftKey' | 'key'>,
+    ) => {
         if (isStoryNavigation(event) && willNavigate(event.key)) api.emit(STORIES_COLLAPSE_ALL);
     };
 
     document.addEventListener(
         'keydown',
         event => {
-            const target = event.target as HTMLElement;
-            if (/input|textarea/i.test(target.tagName) || target.isContentEditable) return;
+            const { target } = event;
+            if (
+                target instanceof HTMLElement &&
+                (['INPUT', 'TEXTAREA'].includes(target.tagName) || target.isContentEditable)
+            ) {
+                return;
+            }
             collapseBeforeNavigation(event);
         },
         // capture: collapse must dispatch before the built-in shortcut navigates
-        true
+        true,
     );
     api.on(PREVIEW_KEYDOWN, (data: { event: KeyboardEvent }) => collapseBeforeNavigation(data.event));
 });

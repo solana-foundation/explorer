@@ -89,6 +89,8 @@ export const withViewportFromGlobal: Decorator = (Story, context) => {
  * `position: fixed` overlay (modals, sticky banners, drawers).
  */
 export const withFixedContainer: Decorator = (Story, context) => {
+    // Docs view only — in story view the overlay must anchor to the iframe viewport itself.
+    if (context.viewMode !== 'docs') return <Story />;
     const styles = getViewportStyles(context, 'iphonex');
     return (
         <div className="e-relative e-w-full" style={{ height: styles?.height, transform: 'translateZ(0)' }}>
