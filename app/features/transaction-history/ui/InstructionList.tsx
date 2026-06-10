@@ -21,7 +21,7 @@ export function InstructionList({ instructions }: { instructions: TransactionIns
 function InstructionLine({ instruction }: { instruction: TransactionInstructionInfo }) {
     return (
         <span className="e-cursor-default e-text-xs">
-            <span className="e-e-text-dk-gray-700">{instruction.program}: </span>
+            <span className="e-text-muted">{instruction.program}: </span>
             <span className="e-text-white">{instruction.name}</span>
         </span>
     );
@@ -40,7 +40,7 @@ function OverflowLine({ instructions }: { instructions: TransactionInstructionIn
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <span className="e-cursor-pointer e-text-xs e-e-text-dk-gray-700">+{instructions.length} more</span>
+                <span className="e-cursor-pointer e-text-xs e-text-muted">+{instructions.length} more</span>
             </TooltipTrigger>
             <TooltipContent
                 side="bottom"
