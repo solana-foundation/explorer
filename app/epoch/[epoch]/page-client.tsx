@@ -13,6 +13,7 @@ import { displayTimestampUtc } from '@utils/date';
 import React from 'react';
 
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { getFirstSlotInEpoch, getLastSlotInEpoch } from '@/app/utils/epoch-schedule';
 
 type Props = {
@@ -30,7 +31,7 @@ export default function EpochDetailsPageClient({ params: { epoch } }: Props) {
     }
 
     return (
-        <div className="container mt-n3">
+        <PageContainer variant="pulled-up">
             <div className="e-mb-8">
                 <div className="e-border-0 e-border-b e-border-solid e-border-dk-gray-700-dark e-py-6">
                     <h6 className="e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Details</h6>
@@ -38,7 +39,7 @@ export default function EpochDetailsPageClient({ params: { epoch } }: Props) {
                 </div>
             </div>
             {output}
-        </div>
+        </PageContainer>
     );
 }
 
@@ -106,7 +107,7 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
                             {currentEpoch > epoch ? (
                                 <Epoch epoch={epoch + 1} link />
                             ) : (
-                                <span className="text-muted">Epoch in progress</span>
+                                <span className="e-text-dk-gray-700">Epoch in progress</span>
                             )}
                         </td>
                     </tr>
@@ -144,7 +145,7 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
                             {epochState.data.lastBlock !== undefined ? (
                                 <Slot slot={epochState.data.lastBlock} link />
                             ) : (
-                                <span className="text-muted">Epoch in progress</span>
+                                <span className="e-text-dk-gray-700">Epoch in progress</span>
                             )}
                         </td>
                     </tr>

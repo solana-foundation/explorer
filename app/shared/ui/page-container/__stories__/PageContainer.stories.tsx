@@ -33,3 +33,15 @@ export const WithExtraClasses: Story = {
         </PageContainer>
     ),
 };
+
+// Replaces Bootstrap's `container mt-n3` — container pulled up under the page header's bottom padding.
+export const PulledUp: Story = {
+    args: { variant: 'pulled-up' },
+    render: args => (
+        <div className="e-bg-neutral-800 e-pb-3 e-pt-6">
+            <PageContainer {...args}>
+                <Filler />
+            </PageContainer>
+        </div>
+    ),
+};

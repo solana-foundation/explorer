@@ -167,7 +167,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     }, [address, status]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <PageContainer className="mt-n3">
+        <PageContainer variant="pulled-up">
             <Header
                 address={address}
                 account={info?.data}
