@@ -57,7 +57,7 @@ export default function Page() {
 const LoadingStatsCard = ({ title }: { title: string }) => {
     return (
         <div className="e-flex e-items-center e-gap-2">
-            <span className="spinner-grow spinner-grow-sm e-shrink-0" />
+            <span className="e-spinner-grow e-spinner-grow-sm e-shrink-0" />
             {title}
         </div>
     );

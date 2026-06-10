@@ -45,7 +45,7 @@ export function StatsNotReady({ error }: { error: boolean }) {
 
     return (
         <CardBody ui="dashkit" className="e-text-center">
-            <span className="e-align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
+            <span className="e-align-text-top e-spinner-grow e-spinner-grow-sm e-mr-1.5"></span>
             Loading
         </CardBody>
     );

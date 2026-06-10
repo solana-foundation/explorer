@@ -218,7 +218,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                         </Link>
                     </Button>
                     {autoRefresh === AutoRefresh.Active ? (
-                        <span className="spinner-grow spinner-grow-sm"></span>
+                        <span className="e-spinner-grow e-spinner-grow-sm"></span>
                     ) : (
                         <RefreshButton analyticsSection="transaction_card" onClick={() => fetchStatus(signature)} />
                     )}
