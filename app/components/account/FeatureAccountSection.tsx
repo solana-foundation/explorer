@@ -104,7 +104,7 @@ const BaseFeatureCard = ({
                                     rel="noopener noreferrer"
                                     className=""
                                 >
-                                    SIMD {simd} <ExternalLinkIcon className="align-text-top" size={13} />
+                                    SIMD {simd} <ExternalLinkIcon className="e-align-text-top" size={13} />
                                 </a>
                             ) : (
                                 <code>No link</code>

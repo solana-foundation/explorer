@@ -280,7 +280,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     >
                         {fetching ? (
                             <>
-                                <span className="align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
+                                <span className="e-align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
                                 Loading
                             </>
                         ) : (
@@ -293,7 +293,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     <button className="btn btn-primary e-w-full" onClick={() => fetchHistories()} disabled={fetching}>
                         {fetching ? (
                             <>
-                                <span className="align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
+                                <span className="e-align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
                                 Loading
                             </>
                         ) : (
@@ -340,7 +340,7 @@ const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
             <small className="e-mr-1.5">Filter:</small>
             <Button ui="dashkit" variant="white" size="sm" type="button" onClick={toggle}>
                 {filter === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filter)}{' '}
-                <ChevronDown size={15} className="align-text-top" />
+                <ChevronDown size={15} className="e-align-text-top" />
             </Button>
             <DropdownMenu align="end" className={cn('e-max-h-80 e-overflow-y-auto', show && 'show')}>
                 {filterOptions.map(filterOption => {
@@ -429,9 +429,9 @@ function InstructionDetails({ instructionType, tx }: { instructionType: Instruct
                         className="e-mr-1.5 e-cursor-pointer"
                     >
                         {expanded ? (
-                            <MinusSquare className="align-text-top" size={13} />
+                            <MinusSquare className="e-align-text-top" size={13} />
                         ) : (
-                            <PlusSquare className="align-text-top" size={13} />
+                            <PlusSquare className="e-align-text-top" size={13} />
                         )}
                     </span>
                 )}
@@ -496,7 +496,7 @@ function InstructionDetailsCell({
     if (isFetching) {
         return (
             <td>
-                <span className="align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
+                <span className="e-align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
                 Loading
             </td>
         );

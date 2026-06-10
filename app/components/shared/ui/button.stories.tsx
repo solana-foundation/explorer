@@ -266,7 +266,7 @@ export const DashkitWithIcons: Story = {
                 <Check size={13} className="e-mr-1.5" /> Save
             </Button>
             <Button ui="dashkit" variant="white" size="sm">
-                <RefreshCw size={13} className="align-text-top e-mr-1.5" /> Refresh
+                <RefreshCw size={13} className="e-align-text-top e-mr-1.5" /> Refresh
             </Button>
             <Button ui="dashkit" variant="outline-primary" size="sm">
                 <Download size={13} className="e-mr-1.5" /> Download
@@ -275,7 +275,7 @@ export const DashkitWithIcons: Story = {
                 <X size={13} className="e-mr-1.5" /> Remove
             </Button>
             <Button ui="dashkit" variant="dark" size="sm">
-                Creators <ChevronDown size={15} className="align-text-top" />
+                Creators <ChevronDown size={15} className="e-align-text-top" />
             </Button>
         </div>
     ),

@@ -468,7 +468,7 @@ const FilterDropdown = ({ filter, invokedPrograms, totalTransactionCount }: Filt
     return (
         <Dropdown className="e-mr-1.5">
             <Button ui="dashkit" variant="white" size="sm" data-bs-toggle="dropdown" type="button" ref={dropdownRef}>
-                {currentFilterOption.name} <ChevronDown className="align-text-top" size={13} />
+                {currentFilterOption.name} <ChevronDown className="e-align-text-top" size={13} />
             </Button>
             <DropdownMenu align="end" className="e-max-h-80 e-overflow-y-auto">
                 {filterOptions.map(({ name, programId, transactionCount }) => (

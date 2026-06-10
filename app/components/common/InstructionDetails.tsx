@@ -34,9 +34,9 @@ export function InstructionDetails({
                         className="e-mr-1.5 e-cursor-pointer"
                     >
                         {expanded ? (
-                            <MinusSquare className="align-text-top" size={13} />
+                            <MinusSquare className="e-align-text-top" size={13} />
                         ) : (
-                            <PlusSquare className="align-text-top" size={13} />
+                            <PlusSquare className="e-align-text-top" size={13} />
                         )}
                     </span>
                 )}

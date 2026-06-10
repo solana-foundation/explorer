@@ -20,7 +20,7 @@ export const Default: Story = {
     render: () => (
         <Dropdown>
             <Button ui="dashkit" variant="white" size="sm" data-bs-toggle="dropdown" type="button">
-                Toggle <ChevronDown className="align-text-top" size={13} />
+                Toggle <ChevronDown className="e-align-text-top" size={13} />
             </Button>
             <DropdownMenu>
                 <DropdownItem>First item</DropdownItem>
@@ -38,7 +38,7 @@ export const AlignEnd: Story = {
         <div className="e-flex e-justify-end">
             <Dropdown>
                 <Button ui="dashkit" variant="white" size="sm" data-bs-toggle="dropdown" type="button">
-                    Toggle <ChevronDown className="align-text-top" size={13} />
+                    Toggle <ChevronDown className="e-align-text-top" size={13} />
                 </Button>
                 <DropdownMenu align="end">
                     <DropdownItem>First item</DropdownItem>
@@ -55,7 +55,7 @@ export const ScrollingMenu: Story = {
     render: () => (
         <Dropdown>
             <Button ui="dashkit" variant="white" size="sm" data-bs-toggle="dropdown" type="button">
-                Filter: All <ChevronDown className="align-text-top" size={13} />
+                Filter: All <ChevronDown className="e-align-text-top" size={13} />
             </Button>
             <DropdownMenu align="end" className="e-max-h-80 e-overflow-y-auto">
                 {Array.from({ length: 30 }, (_, i) => (
@@ -80,7 +80,7 @@ export const WithHeaderAndItems: Story = {
                 data-bs-toggle="dropdown"
                 type="button"
             >
-                Creators <ChevronDown className="align-text-top" size={15} />
+                Creators <ChevronDown className="e-align-text-top" size={15} />
             </Button>
             <DropdownMenu className="e-mt-1.5">
                 <DropdownHeader className="e-flex e-flex-wrap e-items-center">
@@ -110,7 +110,7 @@ export const AsChildLink: Story = {
     render: () => (
         <Dropdown>
             <Button ui="dashkit" variant="white" size="sm" data-bs-toggle="dropdown" type="button">
-                Toggle <ChevronDown className="align-text-top" size={13} />
+                Toggle <ChevronDown className="e-align-text-top" size={13} />
             </Button>
             <DropdownMenu>
                 <DropdownItem asChild>

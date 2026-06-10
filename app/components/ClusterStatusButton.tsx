@@ -28,7 +28,7 @@ export const ClusterStatusButton = () => {
         return `btn e-block btn-${variant}`;
     };
 
-    const spinnerClasses = 'align-text-top spinner-grow spinner-grow-sm e-mr-1.5';
+    const spinnerClasses = 'e-align-text-top spinner-grow spinner-grow-sm e-mr-1.5';
 
     switch (status) {
         case ClusterStatus.Connected:

@@ -80,7 +80,7 @@ export function MetaplexNFTHeader({ nftData }: { nftData: NFTData }) {
                         data-bs-toggle="dropdown"
                         ref={dropdownRef}
                     >
-                        Creators <ChevronDown size={15} className="align-text-top" />
+                        Creators <ChevronDown size={15} className="e-align-text-top" />
                     </Button>
                     <DropdownMenu className="e-mt-1.5">
                         {getCreatorDropdownItems(isSome(metadata.creators) ? metadata.creators.value : null)}

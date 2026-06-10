@@ -322,7 +322,7 @@ const DisplayDropdown = ({ display, toggle, show }: DropdownProps) => {
     return (
         <div className="dropdown">
             <button className="btn btn-white btn-sm" type="button" onClick={toggle}>
-                {display === 'detail' ? 'Detailed' : 'Summary'} <ChevronDown size={15} className="align-text-top" />
+                {display === 'detail' ? 'Detailed' : 'Summary'} <ChevronDown size={15} className="e-align-text-top" />
             </button>
             <div className={cn('dropdown-menu-end dropdown-menu', show && 'show')}>
                 {DISPLAY_OPTIONS.map(displayOption => {
