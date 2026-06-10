@@ -90,13 +90,13 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                     <TableCardBody>
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Blockhash</BaseTable.Cell>
-                            <BaseTable.Cell className="e-font-mono e-text-right">
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <span>{block.blockhash}</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Slot</BaseTable.Cell>
-                            <BaseTable.Cell className="e-font-mono e-text-right">
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <Slot slot={slotNumber} />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -136,20 +136,20 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         {epoch !== undefined && (
                             <BaseTable.Row>
                                 <BaseTable.Cell className="e-w-full">Epoch</BaseTable.Cell>
-                                <BaseTable.Cell className="e-font-mono e-text-right">
+                                <BaseTable.Cell className="e-text-right e-font-mono">
                                     <Epoch epoch={epoch} link />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         )}
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Parent Blockhash</BaseTable.Cell>
-                            <BaseTable.Cell className="e-font-mono e-text-right">
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <span>{block.previousBlockhash}</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Parent Slot</BaseTable.Cell>
-                            <BaseTable.Cell className="e-font-mono e-text-right">
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <Slot slot={block.parentSlot} link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -164,7 +164,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         {childSlot !== undefined && (
                             <BaseTable.Row>
                                 <BaseTable.Cell className="e-w-full">Child Slot</BaseTable.Cell>
-                                <BaseTable.Cell className="e-font-mono e-text-right">
+                                <BaseTable.Cell className="e-text-right e-font-mono">
                                     <Slot slot={childSlot} link />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
@@ -179,27 +179,27 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         )}
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Processed Transactions</BaseTable.Cell>
-                            <BaseTable.Cell className="e-font-mono e-text-right">
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <span>{block.transactions.length}</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         {showSuccessfulCount && (
                             <BaseTable.Row>
                                 <BaseTable.Cell className="e-w-full">Successful Transactions</BaseTable.Cell>
-                                <BaseTable.Cell className="e-font-mono e-text-right">
+                                <BaseTable.Cell className="e-text-right e-font-mono">
                                     <span>{successfulTxs.length}</span>
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         )}
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Total Compute Units Consumed</BaseTable.Cell>
-                            <BaseTable.Cell className="e-font-mono e-text-right">
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <span>{totalCUs.toLocaleString()}</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Transaction Cost Utilization</BaseTable.Cell>
-                            <BaseTable.Cell className="e-font-mono e-text-right">
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <span>
                                     {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
                                     {Math.round((totalCostUnits / maxComputeUnits) * 100)}%)
@@ -208,7 +208,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell className="e-w-full">Reserved Compute Units</BaseTable.Cell>
-                            <BaseTable.Cell className="e-font-mono e-text-right">
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <span>
                                     {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
                                     {Math.round((totalRequestedCUs / maxComputeUnits) * 100)}%)

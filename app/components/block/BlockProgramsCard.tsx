@@ -71,11 +71,11 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
                 <TableCardBody>
                     <BaseTable.Row>
                         <BaseTable.Cell className="e-w-full">Unique Programs Count</BaseTable.Cell>
-                        <BaseTable.Cell className="e-font-mono e-text-right">{programEntries.length}</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right e-font-mono">{programEntries.length}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell className="e-w-full">Total Instructions</BaseTable.Cell>
-                        <BaseTable.Cell className="e-font-mono e-text-right">{totalInstructions}</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right e-font-mono">{totalInstructions}</BaseTable.Cell>
                     </BaseTable.Row>
                 </TableCardBody>
             </Card>

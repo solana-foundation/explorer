@@ -52,7 +52,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
 
             <BaseTable.Row>
                 <BaseTable.Cell>Last Timestamp</BaseTable.Cell>
-                <BaseTable.Cell className="e-font-mono e-text-right">
+                <BaseTable.Cell className="e-text-right e-font-mono">
                     {displayTimestamp(voteAccount.info.lastTimestamp.timestamp * 1000)}
                 </BaseTable.Cell>
             </BaseTable.Row>

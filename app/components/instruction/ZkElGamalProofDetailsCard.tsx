@@ -63,7 +63,7 @@ export function ZkElGamalProofDetailsCard({
             {!isClose && proofBytes > 0 && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Proof size</BaseTable.Cell>
-                    <BaseTable.Cell className="e-font-mono e-text-right">{proofBytes} bytes</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right e-font-mono">{proofBytes} bytes</BaseTable.Cell>
                 </BaseTable.Row>
             )}
         </InstructionCardComponent>

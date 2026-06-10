@@ -76,7 +76,7 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
                 attributes.push(
                     <BaseTable.Row key="timestamp">
                         <BaseTable.Cell>Timestamp</BaseTable.Cell>
-                        <BaseTable.Cell className="e-font-mono e-text-right">
+                        <BaseTable.Cell className="e-text-right e-font-mono">
                             {displayTimestamp(value.timestamp * 1000)}
                         </BaseTable.Cell>
                     </BaseTable.Row>,
@@ -86,7 +86,7 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
             attributes.push(
                 <BaseTable.Row key="vote-slots">
                     <BaseTable.Cell>Slots</BaseTable.Cell>
-                    <BaseTable.Cell className="e-font-mono e-text-right">
+                    <BaseTable.Cell className="e-text-right e-font-mono">
                         <pre className="e-mb-0 e-inline-block e-text-left">{value.slots.join('\n')}</pre>
                     </BaseTable.Cell>
                 </BaseTable.Row>,

@@ -39,7 +39,7 @@ export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount
 const renderAccountRow = (entry: SlotHashEntry, index: number) => {
     return (
         <BaseTable.Row key={index}>
-            <BaseTable.Cell className="e-font-mono e-w-px">
+            <BaseTable.Cell className="e-w-px e-font-mono">
                 <Slot slot={entry.slot} link />
             </BaseTable.Cell>
             <BaseTable.Cell className="e-font-mono">{entry.hash}</BaseTable.Cell>

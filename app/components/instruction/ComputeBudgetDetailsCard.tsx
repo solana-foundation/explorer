@@ -65,7 +65,7 @@ export function ComputeBudgetDetailsCard({
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Requested Compute Units</BaseTable.Cell>
-                            <BaseTable.Cell className="e-font-mono e-text-right">{`${new Intl.NumberFormat(
+                            <BaseTable.Cell className="e-text-right e-font-mono">{`${new Intl.NumberFormat(
                                 'en-US',
                             ).format(units)} compute units`}</BaseTable.Cell>
                         </BaseTable.Row>
@@ -101,7 +101,7 @@ export function ComputeBudgetDetailsCard({
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Requested Heap Frame (Bytes)</BaseTable.Cell>
-                            <BaseTable.Cell className="e-font-mono e-text-right">
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 {new Intl.NumberFormat('en-US').format(bytes)}
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -130,7 +130,7 @@ export function ComputeBudgetDetailsCard({
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Compute Unit Limit</BaseTable.Cell>
-                            <BaseTable.Cell className="e-font-mono e-text-right">{`${new Intl.NumberFormat(
+                            <BaseTable.Cell className="e-text-right e-font-mono">{`${new Intl.NumberFormat(
                                 'en-US',
                             ).format(units)} compute units`}</BaseTable.Cell>
                         </BaseTable.Row>
@@ -162,7 +162,7 @@ export function ComputeBudgetDetailsCard({
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Compute Unit Price</BaseTable.Cell>
-                            <BaseTable.Cell className="e-font-mono e-text-right">{`${microLamportsToLamportsString(
+                            <BaseTable.Cell className="e-text-right e-font-mono">{`${microLamportsToLamportsString(
                                 microLamports,
                             )} lamports per compute unit`}</BaseTable.Cell>
                         </BaseTable.Row>
@@ -194,7 +194,7 @@ export function ComputeBudgetDetailsCard({
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Account Data Size Limit</BaseTable.Cell>
-                            <BaseTable.Cell className="e-font-mono e-text-right">{`${accountDataSizeLimit} bytes`}</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">{`${accountDataSizeLimit} bytes`}</BaseTable.Cell>
                         </BaseTable.Row>
                     </InstructionCardComponent>
                 );
