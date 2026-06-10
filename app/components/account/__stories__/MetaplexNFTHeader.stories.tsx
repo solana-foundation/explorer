@@ -5,8 +5,6 @@ import type { NFTData } from '@/app/providers/accounts';
 
 import { MetaplexNFTHeader } from '../MetaplexNFTHeader';
 
-const ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-
 // MetaplexNFTHeader reads flat fields on `metadata`; the local `NFTData` type is acknowledged
 // as incomplete (see app/features/metadata/mocks.ts), so each fixture casts via `as unknown as NFTData`.
 function buildNftData(
@@ -56,14 +54,12 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     args: {
-        address: ADDRESS,
         nftData: buildNftData(),
     },
 };
 
 export const MasterEdition: Story = {
     args: {
-        address: ADDRESS,
         nftData: buildNftData({
             edition: { masterEdition: { supply: 1000n } as never },
         }),
@@ -72,7 +68,6 @@ export const MasterEdition: Story = {
 
 export const NumberedEdition: Story = {
     args: {
-        address: ADDRESS,
         nftData: buildNftData({
             edition: {
                 edition: { edition: 42n } as never,
@@ -84,21 +79,18 @@ export const NumberedEdition: Story = {
 
 export const NoName: Story = {
     args: {
-        address: ADDRESS,
         nftData: buildNftData({ name: '' }),
     },
 };
 
 export const NoSymbol: Story = {
     args: {
-        address: ADDRESS,
         nftData: buildNftData({ symbol: '' }),
     },
 };
 
 export const Immutable: Story = {
     args: {
-        address: ADDRESS,
         nftData: buildNftData({ isMutable: false }),
     },
 };
