@@ -21,13 +21,14 @@ const tableVariants = cva([], {
         // Plain dashkit table — Bootstrap default $table-margin-bottom = 1rem (16px = e-mb-4).
         { class: 'e-mb-4', ui: 'dashkit', variant: 'plain' },
         // TW equivalent of `.card-table`: zero thead border-top + first/last cell padding to card edges + e-mb-0.
-        // First/last cell padding-x matches dashkit `$card-spacer-x = 1rem` (NOT 1.5rem).
+        // First/last cell padding-x is 1.5rem — compiled dashkit pins `padding-left/right: 1.5rem !important`
+        // on `.card-table` edge cells (verified against layout.min.css + live p4 pixels).
         {
             class: [
                 'e-mb-0',
                 '[&_thead_th]:e-border-t-0',
-                '[&_thead_th:first-child]:e-pl-4 [&_thead_th:last-child]:e-pr-4',
-                '[&_tbody_td:first-child]:e-pl-4 [&_tbody_td:last-child]:e-pr-4',
+                '[&_thead_th:first-child]:e-pl-6 [&_thead_th:last-child]:e-pr-6',
+                '[&_tbody_td:first-child]:e-pl-6 [&_tbody_td:last-child]:e-pr-6',
             ].join(' '),
             variant: 'card',
         },
