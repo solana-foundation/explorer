@@ -100,6 +100,20 @@ a:hover {
     text-decoration: none;
 }
 
+/* Dashkit `_type.scss` focus-outline removal on links/buttons; without it the UA blue ring leaks. */
+a:focus,
+button:focus {
+    outline: none !important;
+}
+
+/* Bootstrap global caption rule from the dashkit bundle ($table-cell-padding-y / $text-muted). */
+caption {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    color: #698582;
+    text-align: left;
+}
+
 :root {
     --accent: #13d89b;
     --card-border: #111;
