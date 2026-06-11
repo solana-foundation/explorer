@@ -1,7 +1,7 @@
 import { useCluster } from '@providers/cluster';
 import { createSolanaRpc } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
-import React from 'react';
+import { type Dispatch, type SetStateAction, useState } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -14,11 +14,25 @@ type VoteAccounts = Readonly<{
     delinquent: VoteAccountInfo[];
 }>;
 
-async function fetchVoteAccounts(
-    cluster: Cluster,
-    url: string,
-    setVoteAccounts: React.Dispatch<React.SetStateAction<VoteAccounts | undefined>>,
-) {
+export function useVoteAccounts() {
+    const [voteAccounts, setVoteAccounts] = useState<VoteAccounts>();
+    const { cluster, url } = useCluster();
+
+    return {
+        fetchVoteAccounts: () => fetchVoteAccounts({ cluster, setVoteAccounts, url }),
+        voteAccounts,
+    };
+}
+
+async function fetchVoteAccounts({
+    cluster,
+    setVoteAccounts,
+    url,
+}: {
+    cluster: Cluster;
+    setVoteAccounts: Dispatch<SetStateAction<VoteAccounts | undefined>>;
+    url: string;
+}) {
     try {
         const rpc = createSolanaRpc(url);
 
@@ -34,14 +48,4 @@ async function fetchVoteAccounts(
             Logger.error(error, { url });
         }
     }
-}
-
-export function useVoteAccounts() {
-    const [voteAccounts, setVoteAccounts] = React.useState<VoteAccounts>();
-    const { cluster, url } = useCluster();
-
-    return {
-        fetchVoteAccounts: () => fetchVoteAccounts(cluster, url, setVoteAccounts),
-        voteAccounts,
-    };
 }

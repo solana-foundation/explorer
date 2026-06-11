@@ -8,7 +8,9 @@ import { TimestampToggle } from '@components/common/TimestampToggle';
 import { LiveTransactionStatsCard } from '@components/LiveTransactionStatsCard';
 import { StatsNotReady } from '@components/StatsNotReady';
 import { UpcomingFeatures } from '@features/feature-gate';
-import { useVoteAccounts } from '@providers/accounts/vote-accounts';
+// Deep import on purpose: the barrel re-exports the vote instruction cards, which would
+// add ~100 kB to the home page bundle for the sake of one hook.
+import { useVoteAccounts } from '@features/vote/model/vote-accounts';
 import { useCluster } from '@providers/cluster';
 import { StatsProvider } from '@providers/stats';
 import {

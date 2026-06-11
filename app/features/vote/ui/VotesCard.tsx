@@ -1,9 +1,9 @@
 import { Slot } from '@components/common/Slot';
-import { Vote, VoteAccount } from '@validators/accounts/vote';
-import React from 'react';
 
 import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
+
+import { Vote, VoteAccount } from '../lib/validators';
 
 export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
     return (

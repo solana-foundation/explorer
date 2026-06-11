@@ -1,9 +1,9 @@
-import { gen } from '@__fixtures__/gen';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { VotesCard } from '../VotesCard';
+import { BASE_SLOT, voteAccountFixture } from './fixtures';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta: Meta<typeof VotesCard> = {
@@ -14,22 +14,19 @@ const meta: Meta<typeof VotesCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/VotesCard@Media',
+    title: 'Features/Vote/VotesCard/Responsive',
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const baseSlot = Number(gen.slot(0));
 const votes = Array.from({ length: 6 }, (_, i) => ({
     confirmationCount: 31 - i,
-    slot: baseSlot + i,
+    slot: BASE_SLOT + i,
 }));
 
 const args = {
-    voteAccount: {
-        info: { votes },
-    } as any,
+    voteAccount: voteAccountFixture(votes),
 };
 
 export const Mobile: Story = {

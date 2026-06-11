@@ -29,7 +29,6 @@ import { isTokenSwapInstruction } from '@components/instruction/token-swap/types
 import { TokenLendingDetailsCard } from '@components/instruction/TokenLendingDetailsCard';
 import { TokenSwapDetailsCard } from '@components/instruction/TokenSwapDetailsCard';
 import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
-import { VoteDetailsCard } from '@components/instruction/vote/VoteDetailsCard';
 import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import {
@@ -41,6 +40,7 @@ import { useInstructionParser } from '@entities/instruction-parser';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
 import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';
+import { VoteDetailsCard } from '@features/vote';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails, useTransactionStatus } from '@providers/transactions';
