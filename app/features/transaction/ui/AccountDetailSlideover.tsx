@@ -77,7 +77,7 @@ export function AccountDetailSlideover({
                     </SlideoverBody>
 
                     {/* Footer action bar */}
-                    <div className="e-flex e-shrink-0 e-gap-2 e-p-3">
+                    <div className="e-flex e-shrink-0 e-gap-2 e-p-3 e-pb-6">
                         <Button
                             className="e-flex !e-h-16 e-w-1/4 e-flex-col e-gap-1.5"
                             onClick={() => setNicknameOpen(true)}
