@@ -44,7 +44,7 @@ interface UseInstructionOptions {
     /** Commitment level for transaction simulation. Defaults to 'processed'. */
     simulationCommitment?: Commitment;
     onSuccess?: (signature: string) => void;
-    onError?: (error: string) => void;
+    onError?: (error: string, signature?: string) => void;
     onPreExecutionError?: (error: string) => void;
 }
 

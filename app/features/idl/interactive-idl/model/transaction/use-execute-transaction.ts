@@ -23,7 +23,9 @@ export function useExecuteTransaction(opts: {
     commitment: Finality;
     idlErrors?: BaseIdl['errors'];
     onSuccess?: (signature: string) => void;
-    onError?: (error: string) => void;
+    // signature is present for broadcast failures.
+    // undefined for pre-broadcast failures (build/sign).
+    onError?: (error: string, signature?: string) => void;
     onPreExecutionError?: (error: string) => void;
 }) {
     const { connection, commitment, idlErrors, onSuccess, onError, onPreExecutionError } = opts;

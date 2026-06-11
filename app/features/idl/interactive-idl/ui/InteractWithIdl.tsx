@@ -81,7 +81,7 @@ export function InteractWithIdl({
     );
 
     const handleTransactionError = useCallback(
-        (error: string) => {
+        (error: string, _signature?: string) => {
             toast.custom({ description: error, title: 'Transaction Failed', type: 'error' });
 
             if (currentInstruction) {
