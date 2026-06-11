@@ -216,7 +216,11 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                             <span className="d-none d-md-inline">Inspect</span>
                         </Link>
                     </Button>
-                    <RefreshButton fetching={autoRefresh === AutoRefresh.Active} analyticsSection="transaction_card" onClick={() => fetchStatus(signature)} />
+                    <RefreshButton
+                        fetching={autoRefresh === AutoRefresh.Active}
+                        analyticsSection="transaction_card"
+                        onClick={() => fetchStatus(signature)}
+                    />
                     <DownloadDropdown
                         filename={signature}
                         data={serializedRawData}
