@@ -11,11 +11,10 @@ import {
     StakeProgramData,
     UpgradeableLoaderAccountData,
 } from '@providers/accounts';
-
-type StakeAccount = StakeProgramData['parsed'];
 import { RawDataField } from '@shared/RawDataField';
 import { Button } from '@shared/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
+import { Skeleton } from '@shared/ui/skeleton';
 import { PublicKey } from '@solana/web3.js';
 import { ParsedAddressLookupTableAccount } from '@validators/accounts/address-lookup-table';
 import { NonceAccount } from '@validators/accounts/nonce';
@@ -26,6 +25,10 @@ import { capitalCase } from 'change-case';
 import React from 'react';
 import { Code, Info } from 'react-feather';
 
+const FlatContext = React.createContext(false);
+
+type StakeAccount = StakeProgramData['parsed'];
+
 // ── Layout primitives ─────────────────────────────────────────────────────────
 
 type DetailRowProps = {
@@ -35,10 +38,12 @@ type DetailRowProps = {
 };
 
 function DetailRow({ children, className, label }: DetailRowProps) {
+    const flat = React.useContext(FlatContext);
     return (
         <div
             className={cn(
-                'e-grid e-grid-cols-[clamp(100px,25%,200px)_1fr] e-items-baseline e-gap-2 e-py-1.5 e-pr-3 md:e-pr-4',
+                'e-grid e-grid-cols-[clamp(100px,25%,200px)_1fr] e-items-baseline e-gap-2 e-py-1.5',
+                flat ? 'e-px-4' : 'e-pr-3 md:e-pr-4',
                 className,
             )}
         >
@@ -270,18 +275,39 @@ type Props = {
     accountInfoLoading?: boolean;
     address: string;
     enabled: boolean;
+    flat?: boolean;
 };
 
-export function AccountExpandedContent({ accountInfo, accountInfoLoading, address, enabled }: Props) {
+export function AccountExpandedContent({ accountInfo, accountInfoLoading, address, enabled, flat }: Props) {
     const { data, isError, isLoading } = useAccountExpandedInfo(address, enabled);
 
     if (enabled && isLoading) {
-        return <div className="e-ml-10 e-px-3 e-py-3 e-text-sm e-text-outer-space-300 md:e-px-4">Loading…</div>;
+        return (
+            <div className={cn(flat ? 'e-pb-2.5' : 'e-ml-14 e-pb-2.5')}>
+                {[120, 160, 100, 80].map((w, i) => (
+                    <div
+                        key={i}
+                        className={cn(
+                            'e-grid e-grid-cols-[clamp(100px,25%,200px)_1fr] e-items-baseline e-gap-2 e-py-1.5',
+                            flat ? 'e-px-4' : 'e-pr-3 md:e-pr-4',
+                        )}
+                    >
+                        <Skeleton className="e-h-3.5 e-w-24" />
+                        <Skeleton className="e-h-3.5" style={{ width: w }} />
+                    </div>
+                ))}
+            </div>
+        );
     }
 
     if (enabled && isError) {
         return (
-            <div className="e-ml-10 e-px-3 e-py-3 e-text-sm e-text-outer-space-300 md:e-px-4">
+            <div
+                className={cn(
+                    flat ? 'e-px-4 e-py-3' : 'e-ml-10 e-px-3 e-py-3 md:e-px-4',
+                    'e-text-sm e-text-outer-space-300',
+                )}
+            >
                 Failed to load account info
             </div>
         );
@@ -307,21 +333,28 @@ export function AccountExpandedContent({ accountInfo, accountInfoLoading, addres
         );
 
     return (
-        <div className="e-ml-14 e-pb-2.5">
-            {data.data.parsed && <ParsedSection parsed={data.data.parsed} />}
-            <DetailRow label="Assigned Program Id">
-                <Address pubkey={data.owner} link />
-            </DetailRow>
-            <DetailRow label="Allocated Data Size">{dataSizeCell}</DetailRow>
-            <DetailRow label="Executable">{data.executable ? 'Yes' : 'No'}</DetailRow>
-            <DetailRow label="Balance">
-                <SolBalance lamports={data.lamports} />
-            </DetailRow>
+        <FlatContext.Provider value={flat ?? false}>
+            <div className={cn(flat ? 'e-pb-2.5' : 'e-ml-14 e-pb-2.5')}>
+                {data.data.parsed && <ParsedSection parsed={data.data.parsed} />}
+                <DetailRow label="Assigned Program Id">
+                    <Address pubkey={data.owner} link />
+                </DetailRow>
+                <DetailRow label="Allocated Data Size">{dataSizeCell}</DetailRow>
+                <DetailRow label="Executable">{data.executable ? 'Yes' : 'No'}</DetailRow>
+                <DetailRow label="Balance">
+                    <SolBalance lamports={data.lamports} />
+                </DetailRow>
 
-            <div className="e-mt-3 e-flex e-items-center e-gap-1.5 e-text-xs e-text-outer-space-300">
-                <Info size={13} />
-                <span>Current account data. This data may have been different at the time of the transaction.</span>
+                <div
+                    className={cn(
+                        'e-mt-3 e-flex e-items-center e-gap-1.5 e-text-xs e-text-outer-space-300',
+                        flat && '!e-items-start e-px-4',
+                    )}
+                >
+                    <Info size={13} />
+                    <span>Current account data. This data may have been different at the time of the transaction.</span>
+                </div>
             </div>
-        </div>
+        </FlatContext.Provider>
     );
 }

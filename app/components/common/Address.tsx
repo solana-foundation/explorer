@@ -41,6 +41,8 @@ type Props = {
     tokenLabelInfo?: TokenLabelInfo;
     fetchTokenLabelInfo?: boolean;
     'aria-label'?: string;
+    noCopy?: boolean;
+    noNicknameEditing?: boolean;
 };
 
 export function Address({
@@ -54,6 +56,8 @@ export function Address({
     tokenLabelInfo,
     fetchTokenLabelInfo,
     'aria-label': ariaLabel,
+    noCopy,
+    noNicknameEditing,
 }: Props) {
     const address = pubkey.toBase58();
     const { cluster, clusterInfo } = useCluster();
@@ -110,7 +114,11 @@ export function Address({
 
     const visibleText = isMidTruncated ? midTruncatedText : displayText;
 
-    const innerTextClassName = cn('font-mono', !nickname && 'truncate', nickname && 'block min-w-0');
+    const innerTextClassName = cn(
+        'font-mono',
+        !nickname && !noTruncate && 'truncate',
+        nickname && 'block min-w-0',
+    );
 
     // When a nickname is set, render it and the address label as two stacked lines
     // so neither overflows on narrow (mobile) viewports.
@@ -129,6 +137,36 @@ export function Address({
         <span className={innerTextClassName}>{nickname ? nicknameDisplay : visibleText}</span>
     );
 
+    const addressDisplay = isMidTruncateCandidate ? (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <span
+                    data-address={address}
+                    className="e-relative e-min-w-0 e-overflow-hidden e-font-mono"
+                    onMouseEnter={() => handleMouseEnter(address)}
+                    onMouseLeave={() => handleMouseLeave(address)}
+                >
+                    {innerContent}
+                </span>
+            </TooltipTrigger>
+            {isMidTruncated && (
+                <TooltipContent>
+                    <span className="e-font-mono">{address}</span>
+                </TooltipContent>
+            )}
+        </Tooltip>
+    ) : (
+        <span
+            data-address={address}
+            className="e-relative e-min-w-0 e-overflow-hidden e-font-mono"
+            onMouseEnter={() => handleMouseEnter(address)}
+            onMouseLeave={() => handleMouseLeave(address)}
+            title={nickname ? displayText : undefined}
+        >
+            {innerContent}
+        </span>
+    );
+
     return (
         <span ref={visibilityRef} className="block w-full">
             <div ref={rowRef} className={rowVariants({ alignRight: Boolean(alignRight) })} aria-label={ariaLabel}>
@@ -142,50 +180,22 @@ export function Address({
                         {addressLabel}
                     </span>
                 )}
-                <Copyable text={address}>
-                    {isMidTruncateCandidate ? (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <span
-                                    data-address={address}
-                                    className="relative min-w-0 overflow-hidden font-mono"
-                                    onMouseEnter={() => handleMouseEnter(address)}
-                                    onMouseLeave={() => handleMouseLeave(address)}
-                                >
-                                    {innerContent}
-                                </span>
-                            </TooltipTrigger>
-                            {isMidTruncated && (
-                                <TooltipContent>
-                                    <span className="font-mono">{address}</span>
-                                </TooltipContent>
-                            )}
-                        </Tooltip>
-                    ) : (
-                        <span
-                            data-address={address}
-                            className="relative min-w-0 overflow-hidden font-mono"
-                            onMouseEnter={() => handleMouseEnter(address)}
-                            onMouseLeave={() => handleMouseLeave(address)}
-                            title={nickname ? displayText : undefined}
-                        >
-                            {innerContent}
-                        </span>
-                    )}
-                </Copyable>
-                <button
-                    ref={editBtnRef}
-                    className="ms-1.5 flex-none shrink-0 cursor-pointer border-0 bg-transparent p-0 text-muted"
-                    onClick={e => {
-                        e.stopPropagation();
-                        setShowNicknameEditor(true);
-                    }}
-                    title="Edit nickname"
-                    style={{ fontSize: '0.875rem', lineHeight: 1 }}
-                >
-                    <EditIcon />
-                </button>
-                {showNicknameEditor && (
+                {noCopy ? addressDisplay : <Copyable text={address}>{addressDisplay}</Copyable>}
+                {!noNicknameEditing && (
+                    <button
+                        ref={editBtnRef}
+                        className="ms-1.5 flex-none shrink-0 cursor-pointer border-0 bg-transparent p-0 text-muted"
+                        onClick={e => {
+                            e.stopPropagation();
+                            setShowNicknameEditor(true);
+                        }}
+                        title="Edit nickname"
+                        style={{ fontSize: '0.875rem', lineHeight: 1 }}
+                    >
+                        <EditIcon />
+                    </button>
+                )}
+                {!noNicknameEditing && showNicknameEditor && (
                     <NicknameEditor address={address} onClose={() => setShowNicknameEditor(false)} />
                 )}
             </div>
