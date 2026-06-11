@@ -105,6 +105,7 @@
         "jspdf": "4.2.1",
         "lighthouse-sdk": "2.0.1",
         "micromatch": "4.0.8",
+        "multiformats": "13.4.2",
         "next": "16.2.6",
         "p-limit": "3.1.0",
         "pako": "2.1.0",
