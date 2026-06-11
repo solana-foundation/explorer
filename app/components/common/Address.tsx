@@ -18,7 +18,7 @@ import { useVisibility } from '@/app/shared/lib/visibility';
 import { Copyable } from './Copyable';
 import { useMidTruncation } from './useMidTruncation';
 
-const rowVariants = cva('relative flex w-full min-w-0 items-baseline', {
+const rowVariants = cva('relative flex w-full min-w-0 items-baseline overflow-x-hidden', {
     defaultVariants: {
         alignRight: false,
     },
