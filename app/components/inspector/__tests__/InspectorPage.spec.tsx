@@ -80,7 +80,9 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
         expect(screen.queryByText(/Inspector Input/i)).toBeNull();
 
         expect(screen.getByText(/Account List \(8\)/i)).not.toBeNull();
-        expect(screen.getByText(/BPF Upgradeable Loader Instruction/i)).not.toBeNull();
+        // The card title splits programName and "Instruction" into separate spans so the
+        // programName can truncate independently on mobile; multiple matches are expected.
+        expect(screen.getAllByText(/BPF Upgradeable Loader/i).length).toBeGreaterThan(0);
     });
 
     test('should render when account loading fails', async () => {

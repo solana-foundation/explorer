@@ -81,15 +81,17 @@ export function OwnedTokensCard({ address }: { address: string }) {
                     <DisplayDropdown display={display} toggle={() => setDropdown(show => !show)} show={showDropdown} />
                 </CardHeader>
 
-                {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
+                {/* TODO: migrate to <BaseTable variant="card"> from @/app/shared/ui/Table */}
                 <div className="table-responsive e-mb-0">
                     <table className="table table-sm table-nowrap card-table">
                         <thead>
                             <tr>
-                                {showLogos && <th className="text-muted w-1 e-p-0 e-text-center">Logo</th>}
-                                {display === 'detail' && <th className="text-muted">Account Address</th>}
-                                <th className="text-muted">Mint Address</th>
-                                <th className="text-muted">{display === 'detail' ? 'Total Balance' : 'Balance'}</th>
+                                {showLogos && <th className="w-1 e-p-0 e-text-center e-text-dk-gray-700">Logo</th>}
+                                {display === 'detail' && <th className="e-text-dk-gray-700">Account Address</th>}
+                                <th className="e-text-dk-gray-700">Mint Address</th>
+                                <th className="e-text-dk-gray-700">
+                                    {display === 'detail' ? 'Total Balance' : 'Balance'}
+                                </th>
                             </tr>
                         </thead>
                         {display === 'detail' ? (
@@ -160,7 +162,7 @@ function HoldingsDetail({
     const visibleTokens = Array.from(mappedTokens.entries()).slice(0, visibleCount);
 
     return (
-        <tbody className="list">
+        <tbody>
             {visibleTokens.map(([mintAddress, token]) => (
                 <TokenRow
                     key={mintAddress}
@@ -209,7 +211,7 @@ function HoldingsSummary({
     const visibleTokens = Array.from(mappedTokens.entries()).slice(0, visibleCount);
 
     return (
-        <tbody className="list">
+        <tbody>
             {visibleTokens.map(([mintAddress, token]) => (
                 <TokenRow
                     key={mintAddress}
@@ -239,7 +241,7 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
                 <td className="w-1 e-p-0 e-text-center">
                     <ProxiedImage
                         alt="Token icon"
-                        className="token-icon border border-4 border-gray-dark e-rounded-full"
+                        className="e-h-6 e-w-6 e-rounded-full e-border-4 e-border-solid e-border-dk-gray-700-dark"
                         height={16}
                         uri={token.logoURI}
                         width={16}

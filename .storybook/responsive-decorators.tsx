@@ -4,7 +4,7 @@
  * pulled into every story via the main decorators.tsx.
  */
 import { Connection } from '@solana/web3.js';
-import type { Decorator } from '@storybook/react';
+import type { Decorator, StoryContext } from '@storybook/react';
 import React from 'react';
 import { INITIAL_VIEWPORTS, type InitialViewportKeys } from 'storybook/viewport';
 
@@ -37,24 +37,63 @@ export const withMockRpc: Decorator = Story => {
 const isInitialViewportKey = (key: string): key is InitialViewportKeys => key in INITIAL_VIEWPORTS;
 
 /**
- * Reads the viewport global (set via `globals: { viewport: { value: 'iphonex' } }`) and constrains
- * the story width to that viewport's dimensions in docs view only. The Storybook viewport addon
- * already sizes the canvas iframe (height + width, device emulation) in story view, so adding a
- * fixed-width wrapper there would double-set the width and clip against the padded canvas.
- * Height stays natural.
+ * Shared resolver so `withViewportFromGlobal` and `withFixedContainer` agree on which preset is
+ * active — drift between them would render the wrapper width and the containing-block height
+ * against different viewports.
  */
-export const withViewportFromGlobal: Decorator = (Story, context) => {
-    // In standalone story view the addon already sizes the iframe; only constrain in docs view.
-    if (context.viewMode !== 'docs') return <Story />;
-
+function getViewportStyles(
+    context: StoryContext,
+    fallbackKey?: InitialViewportKeys,
+): { width: string; height: string } | undefined {
     const viewport = context.globals.viewport;
     const key = typeof viewport === 'object' ? viewport?.value : viewport;
     const isRotated = typeof viewport === 'object' ? viewport?.isRotated : false;
-    const def = key && isInitialViewportKey(key) ? INITIAL_VIEWPORTS[key] : undefined;
-    if (!def) return <Story />;
-    const width = isRotated ? def.styles.height : def.styles.width;
+    const def =
+        key && isInitialViewportKey(key)
+            ? INITIAL_VIEWPORTS[key]
+            : fallbackKey
+              ? INITIAL_VIEWPORTS[fallbackKey]
+              : undefined;
+    if (!def) return undefined;
+    return {
+        height: isRotated ? def.styles.width : def.styles.height,
+        width: isRotated ? def.styles.height : def.styles.width,
+    };
+}
+
+/**
+ * Width clamp for docs view only — the storybook viewport addon already sizes the iframe in
+ * story view, so applying a wrapper there would double-set width and clip the padded canvas.
+ *
+ * Usage: `decorators: [withViewportFromGlobal]` on the meta of any responsive story that needs
+ * its docs preview tile to render at the active viewport's natural width.
+ */
+export const withViewportFromGlobal: Decorator = (Story, context) => {
+    if (context.viewMode !== 'docs') return <Story />;
+    const styles = getViewportStyles(context);
+    if (!styles) return <Story />;
     return (
-        <div style={{ margin: '0 auto', width }}>
+        <div style={{ margin: '0 auto', width: styles.width }}>
+            <Story />
+        </div>
+    );
+};
+
+/**
+ * Containing-block wrapper for `position: fixed` children — without it, a fixed overlay anchors
+ * to the storybook iframe viewport and escapes the docs preview tile entirely (per-story canvas
+ * appears empty). `transform: translateZ(0)` creates the containing block; height tracks the
+ * active viewport so the overlay's relative positioning matches the device preset.
+ *
+ * Usage: `decorators: [withFixedContainer]` on the meta of any story whose component renders a
+ * `position: fixed` overlay (modals, sticky banners, drawers).
+ */
+export const withFixedContainer: Decorator = (Story, context) => {
+    // Docs view only — in story view the overlay must anchor to the iframe viewport itself.
+    if (context.viewMode !== 'docs') return <Story />;
+    const styles = getViewportStyles(context, 'iphonex');
+    return (
+        <div className="e-relative e-w-full" style={{ height: styles?.height, transform: 'translateZ(0)' }}>
             <Story />
         </div>
     );

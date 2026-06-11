@@ -1,14 +1,15 @@
-import { cn } from '@shared/utils';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import base58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { AlertCircle } from 'react-feather';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { Logger } from '@/app/shared/lib/logger';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { FormControl } from '@/app/shared/ui/FormControl';
+import { TabsContent, TabsList, TabsTrigger } from '@/app/shared/ui/Tabs';
 
 import type { InspectorData } from './InspectorPage';
 
@@ -107,23 +108,25 @@ function TabInstructions() {
     ];
 
     return (
-        <div className="instruction-tabs">
-            <div className="nav nav-tabs" role="tablist">
+        <div>
+            <TabsList>
                 {tabs.map(tab => (
-                    <button
+                    <TabsTrigger
                         key={tab.id}
-                        className={cn('me-3 nav-link', activeTab === tab.id && 'active')}
+                        active={activeTab === tab.id}
+                        // master used `me-3 nav-link` (no nav-item margins): 0.75rem trailing gap only
+                        className="e-ml-0 e-mr-3"
                         onClick={() => setActiveTab(tab.id)}
                     >
                         {tab.label}
-                    </button>
+                    </TabsTrigger>
                 ))}
-            </div>
-            <div className="tab-content">
+            </TabsList>
+            <div>
                 {tabs.map(tab => (
-                    <div key={tab.id} className={cn('tab-pane', activeTab === tab.id && 'show active')} role="tabpanel">
+                    <TabsContent key={tab.id} active={activeTab === tab.id}>
                         {tab.content}
-                    </div>
+                    </TabsContent>
                 ))}
             </div>
         </div>
@@ -247,9 +250,9 @@ export function RawInput({
                     <CardTitle as="h3" ui="dashkit">
                         Inspector Input
                     </CardTitle>
-                    <button className="btn btn-sm btn-white" onClick={clearInput} type="button">
+                    <Button ui="dashkit" variant="white" size="sm" onClick={clearInput} type="button">
                         Clear
-                    </button>
+                    </Button>
                 </div>
             </CardHeader>
             <CardBody ui="dashkit">

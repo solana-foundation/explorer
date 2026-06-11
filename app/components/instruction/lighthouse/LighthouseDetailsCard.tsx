@@ -26,7 +26,9 @@ import {
 } from 'lighthouse-sdk';
 import React from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { camelToTitleCase } from '@/app/utils';
 
 import { Address } from '../../common/Address';
@@ -343,22 +345,22 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
         : new Map();
     return (
         <>
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right" colSpan={2}>
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right" colSpan={2}>
                     <Address pubkey={programId} alignRight link raw overrideText={programName} />
-                </td>
-            </tr>
-            <tr className="table-sep">
-                <td>Account Name</td>
-                <td className="e-text-right" colSpan={2}>
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                <BaseTable.Cell>Account Name</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right" colSpan={2}>
                     Address
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {ix.accounts?.map(({ address, role }, keyIndex) => {
                 return (
-                    <tr key={keyIndex} data-testid={`account-row-${keyIndex}`}>
-                        <td>
+                    <BaseTable.Row key={keyIndex} data-testid={`account-row-${keyIndex}`}>
+                        <BaseTable.Cell>
                             <div className="e-mr-1.5 md:e-inline">
                                 {parsedIx.accounts
                                     ? keyIndex < parsedAccountsLength
@@ -368,27 +370,31 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
                             </div>
                             {role == AccountRole.WRITABLE ||
                                 (role == AccountRole.WRITABLE_SIGNER && (
-                                    <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>
+                                    <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                                        Writable
+                                    </Badge>
                                 ))}
                             {role == AccountRole.READONLY_SIGNER ||
                                 (role == AccountRole.WRITABLE_SIGNER && (
-                                    <span className="badge bg-info-soft e-mr-[3px]">Signer</span>
+                                    <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                                        Signer
+                                    </Badge>
                                 ))}
-                        </td>
-                        <td className="e-text-right" colSpan={2}>
+                        </BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right" colSpan={2}>
                             <Address pubkey={new PublicKey(address)} alignRight link />
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
                 );
             })}
 
             {parsedIx.data && (
                 <>
-                    <tr className="table-sep">
-                        <td>Argument Name</td>
-                        <td>Type</td>
-                        <td className="e-text-right">Value</td>
-                    </tr>
+                    <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                        <BaseTable.Cell>Argument Name</BaseTable.Cell>
+                        <BaseTable.Cell>Type</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">Value</BaseTable.Cell>
+                    </BaseTable.Row>
                     {mapCodamaIxArgsToRows(parsedIx.data)}
                 </>
             )}

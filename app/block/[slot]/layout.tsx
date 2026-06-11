@@ -17,9 +17,11 @@ import { notFound, useSearchParams } from 'next/navigation';
 import React, { PropsWithChildren, use } from 'react';
 import { ExternalLink } from 'react-feather';
 
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { type NavigationTab, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { getEpochForSlot, getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
 import { pickClusterParams } from '@/app/utils/url';
 
@@ -71,9 +73,11 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
 
         content = (
             <>
-                <div className="card">
+                <Card ui="dashkit">
                     <CardHeader ui="dashkit">
-                        <h3 className="card-header-title">Overview</h3>
+                        <CardTitle as="h3" ui="dashkit">
+                            Overview
+                        </CardTitle>
                         {IBRL_EXPLORER_URL && (
                             <ExternalLinkWarning href={`${IBRL_EXPLORER_URL}/block/${slotNumber}`}>
                                 <>
@@ -84,149 +88,149 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         )}
                     </CardHeader>
                     <TableCardBody>
-                        <tr>
-                            <td className="e-w-full">Blockhash</td>
-                            <td className="font-monospace e-text-right">
+                        <BaseTable.Row>
+                            <BaseTable.Cell className="e-w-full">Blockhash</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <span>{block.blockhash}</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="e-w-full">Slot</td>
-                            <td className="font-monospace e-text-right">
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                        <BaseTable.Row>
+                            <BaseTable.Cell className="e-w-full">Slot</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <Slot slot={slotNumber} />
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
                         {blockLeader !== undefined && (
-                            <tr>
-                                <td className="e-w-full">Slot Leader</td>
-                                <td className="e-text-right">
+                            <BaseTable.Row>
+                                <BaseTable.Cell className="e-w-full">Slot Leader</BaseTable.Cell>
+                                <BaseTable.Cell className="e-text-right">
                                     <Address pubkey={blockLeader} alignRight link />
-                                </td>
-                            </tr>
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
                         )}
                         {block.blockTime ? (
                             <>
-                                <tr>
-                                    <td>Timestamp (Local)</td>
-                                    <td className="e-text-right">
-                                        <span className="font-monospace">
+                                <BaseTable.Row>
+                                    <BaseTable.Cell>Timestamp (Local)</BaseTable.Cell>
+                                    <BaseTable.Cell className="e-text-right">
+                                        <span className="e-font-mono">
                                             {displayTimestamp(block.blockTime * 1000, true)}
                                         </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Timestamp (UTC)</td>
-                                    <td className="e-text-right">
-                                        <span className="font-monospace">
+                                    </BaseTable.Cell>
+                                </BaseTable.Row>
+                                <BaseTable.Row>
+                                    <BaseTable.Cell>Timestamp (UTC)</BaseTable.Cell>
+                                    <BaseTable.Cell className="e-text-right">
+                                        <span className="e-font-mono">
                                             {displayTimestampUtc(block.blockTime * 1000, true)}
                                         </span>
-                                    </td>
-                                </tr>
+                                    </BaseTable.Cell>
+                                </BaseTable.Row>
                             </>
                         ) : (
-                            <tr>
-                                <td className="e-w-full">Timestamp</td>
-                                <td className="e-text-right">Unavailable</td>
-                            </tr>
+                            <BaseTable.Row>
+                                <BaseTable.Cell className="e-w-full">Timestamp</BaseTable.Cell>
+                                <BaseTable.Cell className="e-text-right">Unavailable</BaseTable.Cell>
+                            </BaseTable.Row>
                         )}
                         {epoch !== undefined && (
-                            <tr>
-                                <td className="e-w-full">Epoch</td>
-                                <td className="font-monospace e-text-right">
+                            <BaseTable.Row>
+                                <BaseTable.Cell className="e-w-full">Epoch</BaseTable.Cell>
+                                <BaseTable.Cell className="e-text-right e-font-mono">
                                     <Epoch epoch={epoch} link />
-                                </td>
-                            </tr>
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
                         )}
-                        <tr>
-                            <td className="e-w-full">Parent Blockhash</td>
-                            <td className="font-monospace e-text-right">
+                        <BaseTable.Row>
+                            <BaseTable.Cell className="e-w-full">Parent Blockhash</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <span>{block.previousBlockhash}</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="e-w-full">Parent Slot</td>
-                            <td className="font-monospace e-text-right">
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                        <BaseTable.Row>
+                            <BaseTable.Cell className="e-w-full">Parent Slot</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <Slot slot={block.parentSlot} link />
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
                         {parentLeader !== undefined && (
-                            <tr>
-                                <td className="e-w-full">Parent Slot Leader</td>
-                                <td className="e-text-right">
+                            <BaseTable.Row>
+                                <BaseTable.Cell className="e-w-full">Parent Slot Leader</BaseTable.Cell>
+                                <BaseTable.Cell className="e-text-right">
                                     <Address pubkey={parentLeader} alignRight link />
-                                </td>
-                            </tr>
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
                         )}
                         {childSlot !== undefined && (
-                            <tr>
-                                <td className="e-w-full">Child Slot</td>
-                                <td className="font-monospace e-text-right">
+                            <BaseTable.Row>
+                                <BaseTable.Cell className="e-w-full">Child Slot</BaseTable.Cell>
+                                <BaseTable.Cell className="e-text-right e-font-mono">
                                     <Slot slot={childSlot} link />
-                                </td>
-                            </tr>
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
                         )}
                         {childLeader !== undefined && (
-                            <tr>
-                                <td className="e-w-full">Child Slot Leader</td>
-                                <td className="e-text-right">
+                            <BaseTable.Row>
+                                <BaseTable.Cell className="e-w-full">Child Slot Leader</BaseTable.Cell>
+                                <BaseTable.Cell className="e-text-right">
                                     <Address pubkey={childLeader} alignRight link />
-                                </td>
-                            </tr>
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
                         )}
-                        <tr>
-                            <td className="e-w-full">Processed Transactions</td>
-                            <td className="font-monospace e-text-right">
+                        <BaseTable.Row>
+                            <BaseTable.Cell className="e-w-full">Processed Transactions</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <span>{block.transactions.length}</span>
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
                         {showSuccessfulCount && (
-                            <tr>
-                                <td className="e-w-full">Successful Transactions</td>
-                                <td className="font-monospace e-text-right">
+                            <BaseTable.Row>
+                                <BaseTable.Cell className="e-w-full">Successful Transactions</BaseTable.Cell>
+                                <BaseTable.Cell className="e-text-right e-font-mono">
                                     <span>{successfulTxs.length}</span>
-                                </td>
-                            </tr>
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
                         )}
-                        <tr>
-                            <td className="e-w-full">Total Compute Units Consumed</td>
-                            <td className="font-monospace e-text-right">
+                        <BaseTable.Row>
+                            <BaseTable.Cell className="e-w-full">Total Compute Units Consumed</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <span>{totalCUs.toLocaleString()}</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="e-w-full">Transaction Cost Utilization</td>
-                            <td className="font-monospace e-text-right">
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                        <BaseTable.Row>
+                            <BaseTable.Cell className="e-w-full">Transaction Cost Utilization</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <span>
                                     {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
                                     {Math.round((totalCostUnits / maxComputeUnits) * 100)}%)
                                 </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="e-w-full">Reserved Compute Units</td>
-                            <td className="font-monospace e-text-right">
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                        <BaseTable.Row>
+                            <BaseTable.Cell className="e-w-full">Reserved Compute Units</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 <span>
                                     {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
                                     {Math.round((totalRequestedCUs / maxComputeUnits) * 100)}%)
                                 </span>
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
                     </TableCardBody>
-                </div>
+                </Card>
                 <MoreSection slot={slotNumber}>{children}</MoreSection>
             </>
         );
     }
     return (
-        <div className="container mt-n3">
-            <div className="header">
-                <div className="header-body">
-                    <h6 className="header-pretitle">Details</h6>
-                    <h2 className="header-title">Block</h2>
+        <PageContainer variant="pulled-up">
+            <div className="e-mb-8">
+                <div className="e-border-0 e-border-b e-border-solid e-border-dk-gray-700-dark e-py-6">
+                    <h6 className="e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Details</h6>
+                    <h2 className="e-mb-0">Block</h2>
                 </div>
             </div>
             {content}
-        </div>
+        </PageContainer>
     );
 }
 
@@ -259,9 +263,9 @@ function MoreSection({ children, slot }: { children: React.ReactNode; slot: numb
     return (
         <>
             <StickyHeader>
-                <div className="container">
+                <PageContainer>
                     <NavigationTabs buildHref={buildHref} tabs={TABS} />
-                </div>
+                </PageContainer>
             </StickyHeader>
             {children}
         </>

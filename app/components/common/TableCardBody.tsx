@@ -1,44 +1,51 @@
-import { cva, VariantProps } from 'class-variance-authority';
 import React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
+import { BaseTable } from '@/app/shared/ui/Table';
 
-const tableVariants = cva(['table table-sm card-table [&_tr:first-child_td]:!e-border-t-0'], {
-    defaultVariants: {
-        layout: 'compact',
-    },
-    variants: {
-        layout: {
-            compact: ['table-nowrap'],
-            expanded: [],
-        },
-    },
-});
+// dashkit `.card-table` only zeroes thead th border-top; headless card tables also need the
+// first body row's border-top suppressed or the card gains a 1px rule at the top edge.
+const firstRowBorderFix = '[&_tr:first-child_td]:!e-border-t-0';
 
-export interface TableCardBodyProps extends VariantProps<typeof tableVariants>, React.PropsWithChildren {
+type TableLayout = 'compact' | 'expanded';
+
+export interface TableCardBodyProps extends React.PropsWithChildren {
     className?: string;
-    headerComponent?: React.ReactNode;
+    layout?: TableLayout;
 }
 
-export function TableCardBody({ children, className, ...props }: TableCardBodyProps) {
+export function TableCardBody({ children, className, layout = 'compact' }: TableCardBodyProps) {
     return (
-        // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
-        <div className="table-responsive e-mb-0">
-            <table className={cn(tableVariants(props), className)}>
-                <tbody className="list">{children}</tbody>
-            </table>
-        </div>
+        <BaseTable
+            ui="dashkit"
+            variant="card"
+            nowrap={layout === 'compact'}
+            className={cn(firstRowBorderFix, className)}
+        >
+            <BaseTable.Body>{children}</BaseTable.Body>
+        </BaseTable>
     );
 }
 
-export function TableCardBodyHeaded({ children, className, headerComponent, ...props }: TableCardBodyProps) {
+export interface TableCardBodyHeadedProps extends TableCardBodyProps {
+    headerComponent?: React.ReactNode;
+}
+
+export function TableCardBodyHeaded({
+    children,
+    className,
+    headerComponent,
+    layout = 'compact',
+}: TableCardBodyHeadedProps) {
     return (
-        // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
-        <div className="table-responsive e-mb-0">
-            <table className={cn(tableVariants(props), className)}>
-                {headerComponent ? <thead>{headerComponent}</thead> : null}
-                <tbody className="list">{children}</tbody>
-            </table>
-        </div>
+        <BaseTable
+            ui="dashkit"
+            variant="card"
+            nowrap={layout === 'compact'}
+            className={cn(firstRowBorderFix, className)}
+        >
+            {headerComponent ? <BaseTable.Head>{headerComponent}</BaseTable.Head> : null}
+            <BaseTable.Body>{children}</BaseTable.Body>
+        </BaseTable>
     );
 }

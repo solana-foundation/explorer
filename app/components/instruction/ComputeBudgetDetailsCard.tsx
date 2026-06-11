@@ -16,6 +16,7 @@ import { microLamportsToLamportsString } from '@utils/index';
 import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InstructionCard } from './InstructionCard';
 
@@ -55,26 +56,26 @@ export function ComputeBudgetDetailsCard({
                         innerCards={innerCards}
                         childIndex={childIndex}
                     >
-                        <tr>
-                            <td>Program</td>
-                            <td className="e-text-right">
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Program</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right">
                                 <Address pubkey={ix.programId} alignRight link />
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
 
-                        <tr>
-                            <td>Requested Compute Units</td>
-                            <td className="font-monospace e-text-right">{`${new Intl.NumberFormat('en-US').format(
-                                units,
-                            )} compute units`}</td>
-                        </tr>
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Requested Compute Units</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">{`${new Intl.NumberFormat(
+                                'en-US',
+                            ).format(units)} compute units`}</BaseTable.Cell>
+                        </BaseTable.Row>
 
-                        <tr>
-                            <td>Additional Fee (SOL)</td>
-                            <td className="e-text-right">
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Additional Fee (SOL)</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right">
                                 <SolBalance lamports={additionalFee} />
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
                     </InstructionCardComponent>
                 );
             }
@@ -91,19 +92,19 @@ export function ComputeBudgetDetailsCard({
                         innerCards={innerCards}
                         childIndex={childIndex}
                     >
-                        <tr>
-                            <td>Program</td>
-                            <td className="e-text-right">
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Program</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right">
                                 <Address pubkey={ix.programId} alignRight link />
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
 
-                        <tr>
-                            <td>Requested Heap Frame (Bytes)</td>
-                            <td className="font-monospace e-text-right">
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Requested Heap Frame (Bytes)</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">
                                 {new Intl.NumberFormat('en-US').format(bytes)}
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
                     </InstructionCardComponent>
                 );
             }
@@ -120,19 +121,19 @@ export function ComputeBudgetDetailsCard({
                         innerCards={innerCards}
                         childIndex={childIndex}
                     >
-                        <tr>
-                            <td>Program</td>
-                            <td className="e-text-right">
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Program</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right">
                                 <Address pubkey={ix.programId} alignRight link />
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
 
-                        <tr>
-                            <td>Compute Unit Limit</td>
-                            <td className="font-monospace e-text-right">{`${new Intl.NumberFormat('en-US').format(
-                                units,
-                            )} compute units`}</td>
-                        </tr>
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Compute Unit Limit</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">{`${new Intl.NumberFormat(
+                                'en-US',
+                            ).format(units)} compute units`}</BaseTable.Cell>
+                        </BaseTable.Row>
                     </InstructionCardComponent>
                 );
             }
@@ -152,19 +153,19 @@ export function ComputeBudgetDetailsCard({
                         innerCards={innerCards}
                         childIndex={childIndex}
                     >
-                        <tr>
-                            <td>Program</td>
-                            <td className="e-text-right">
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Program</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right">
                                 <Address pubkey={ix.programId} alignRight link />
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
 
-                        <tr>
-                            <td>Compute Unit Price</td>
-                            <td className="font-monospace e-text-right">{`${microLamportsToLamportsString(
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Compute Unit Price</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">{`${microLamportsToLamportsString(
                                 microLamports,
-                            )} lamports per compute unit`}</td>
-                        </tr>
+                            )} lamports per compute unit`}</BaseTable.Cell>
+                        </BaseTable.Row>
                     </InstructionCardComponent>
                 );
             }
@@ -184,17 +185,17 @@ export function ComputeBudgetDetailsCard({
                         innerCards={innerCards}
                         childIndex={childIndex}
                     >
-                        <tr>
-                            <td>Program</td>
-                            <td className="e-text-right">
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Program</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right">
                                 <Address pubkey={ix.programId} alignRight link />
-                            </td>
-                        </tr>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
 
-                        <tr>
-                            <td>Account Data Size Limit</td>
-                            <td className="font-monospace e-text-right">{`${accountDataSizeLimit} bytes`}</td>
-                        </tr>
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Account Data Size Limit</BaseTable.Cell>
+                            <BaseTable.Cell className="e-text-right e-font-mono">{`${accountDataSizeLimit} bytes`}</BaseTable.Cell>
+                        </BaseTable.Row>
                     </InstructionCardComponent>
                 );
             }

@@ -42,11 +42,7 @@ const meta = {
         withTokenInfoBatch,
         Story => (
             <SignatureContext.Provider value="">
-                <table className="e-w-full">
-                    <tbody>
-                        <Story />
-                    </tbody>
-                </table>
+                <Story />
             </SignatureContext.Provider>
         ),
     ],

@@ -1,6 +1,8 @@
 import { Address } from '@components/common/Address';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { CancelPerpOrder, getPerpMarketFromInstruction } from './types';
 
@@ -26,31 +28,31 @@ export function CancelPerpOrderDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Mango account</td>
-                <td>
+            <BaseTable.Row>
+                <BaseTable.Cell>Mango account</BaseTable.Cell>
+                <BaseTable.Cell>
                     <Address pubkey={mangoAccount.pubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
             {mangoPerpMarketConfig !== undefined && (
-                <tr>
-                    <td>Perp market</td>
-                    <td className="e-text-right">{mangoPerpMarketConfig.name}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Perp market</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{mangoPerpMarketConfig.name}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
 
-            <tr>
-                <td>Perp market address</td>
-                <td>
+            <BaseTable.Row>
+                <BaseTable.Cell>Perp market address</BaseTable.Cell>
+                <BaseTable.Cell>
                     <Address pubkey={perpMarketAccountMeta.pubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Order Id</td>
-                <td className="e-text-right">{info.orderId}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Order Id</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.orderId}</BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

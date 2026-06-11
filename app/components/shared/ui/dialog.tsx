@@ -56,9 +56,11 @@ const DialogContent = React.forwardRef<
                 className={cn(
                     'e-border-0 e-bg-transparent e-p-0 e-text-neutral-500',
                     'e-absolute e-right-4 e-top-2 e-rounded-sm e-opacity-70',
-                    'e-ring-offset-white e-transition-opacity',
+                    'e-transition-opacity',
                     'hover:e-opacity-100',
-                    'focus:e-outline-none focus:e-ring-2 focus:e-ring-neutral-950 focus:e-ring-offset-2',
+                    'focus:e-outline-none',
+                    'focus-visible:e-ring-2 focus-visible:e-ring-neutral-300',
+                    'focus-visible:e-ring-offset-2 focus-visible:e-ring-offset-neutral-800',
                     'disabled:e-pointer-events-none',
                 )}
             >

@@ -1,14 +1,17 @@
 import classNames from 'classnames';
 import { ExternalLink } from 'react-feather';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import type { SecurityTxtVersion } from './types';
 import { isValidLink, parseCodeValue } from './utils';
 
 export function CodeCell({ value, alignRight = true }: { value: string; alignRight: boolean }) {
     return (
-        <td className={classNames({ 'e-text-right': alignRight })}>
-            <RenderCode value={value} />
-        </td>
+        <BaseTable.Cell>
+            <RenderCode value={value} alignRight={alignRight} />
+        </BaseTable.Cell>
     );
 }
 
@@ -17,9 +20,9 @@ export function SecurityTxtVersionBadge({
     className,
 }: React.HTMLAttributes<unknown> & { version: SecurityTxtVersion }) {
     return (
-        <span className={classNames(['badge bg-info-soft', className])} data-testid="security-txt-version-badge">
+        <Badge ui="dashkit" variant="info" className={className} data-testid="security-txt-version-badge">
             <SecurityTxtVersionBadgeTitle version={version} />
-        </span>
+        </Badge>
     );
 }
 
@@ -92,20 +95,22 @@ export function RenderExternalLink({ url }: { url: string }) {
 
 export function ExternalLinkCell({ url }: { url: string }) {
     return (
-        <td className="e-text-right">
+        <BaseTable.Cell className="e-text-right">
             <RenderExternalLink url={url} />
-        </td>
+        </BaseTable.Cell>
     );
 }
 
 export function StringCell({ value }: { value: string }) {
-    return <td className="e-text-right e-font-mono">{value}</td>;
+    return <BaseTable.Cell className="e-text-right e-font-mono">{value}</BaseTable.Cell>;
 }
 
-export function RenderCode({ value }: { value: any }) {
+export function RenderCode({ value, alignRight = true }: { value: any; alignRight?: boolean }) {
     return (
         <div className="e-flex e-items-end">
-            <pre className="e-max-w-[500px] e-overflow-x-auto lg:e-ml-auto">{parseCodeValue(value)}</pre>
+            <pre className={classNames('e-max-w-[500px] e-overflow-x-auto', { 'lg:e-ml-auto': alignRight })}>
+                {parseCodeValue(value)}
+            </pre>
         </div>
     );
 }

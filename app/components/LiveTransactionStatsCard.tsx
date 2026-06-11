@@ -5,12 +5,13 @@ import { StatsNotReady } from '@components/StatsNotReady';
 import { ClusterStatsStatus, PERF_UPDATE_SEC, usePerformanceInfo } from '@providers/stats/solanaClusterStats';
 import { PerformanceInfo } from '@providers/stats/solanaPerformanceInfo';
 import { BarElement, CategoryScale, Chart, ChartData, ChartOptions, LinearScale, Tooltip } from 'chart.js';
-import classNames from 'classnames';
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -178,14 +179,14 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
     return (
         <div className="e-flex e-grow e-flex-col">
             <TableCardBody layout="expanded" className="[&_td:first-child]:!e-w-2/5 md:[&_td:first-child]:!e-w-auto">
-                <tr>
-                    <td className="e-w-full">Transaction count</td>
-                    <td className="e-text-right e-font-mono">{transactionCount} </td>
-                </tr>
-                <tr>
-                    <td className="e-w-full">Transactions per second (TPS)</td>
-                    <td className="e-text-right e-font-mono">{averageTps} </td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell className="e-w-full">Transaction count</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right e-font-mono">{transactionCount} </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell className="e-w-full">Transactions per second (TPS)</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right e-font-mono">{averageTps} </BaseTable.Cell>
+                </BaseTable.Row>
             </TableCardBody>
 
             <hr className="e-my-0" />
@@ -196,15 +197,17 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
 
                     <div>
                         {SERIES.map(key => (
-                            <button
+                            <Button
                                 key={key}
+                                ui="dashkit"
+                                variant="white"
+                                size="sm"
+                                active={series === key}
+                                className="e-ml-1.5"
                                 onClick={() => setSeries(key)}
-                                className={classNames('btn btn-sm btn-white e-ml-1.5', {
-                                    active: series === key,
-                                })}
                             >
                                 {SERIES_INFO[key].interval}
-                            </button>
+                            </Button>
                         ))}
                     </div>
                 </div>

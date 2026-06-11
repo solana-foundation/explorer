@@ -94,10 +94,13 @@ export default defineConfig({
                     browser: {
                         enabled: true,
                         headless: true,
-                        // Firefox is disabled in CI due to flaky connection timeouts
-                        instances: process.env.CI
-                            ? [{ browser: 'chromium' }]
-                            : [{ browser: 'chromium' }, { browser: 'firefox' }],
+                        // Default: chromium only. Opt into other Playwright browsers via
+                        // `SB_BROWSERS=chromium,firefox pnpm test:sb` (firefox lacks CDP, so V8 coverage will fail).
+                        instances: (process.env.SB_BROWSERS ?? 'chromium')
+                            .split(',')
+                            .map(b => b.trim())
+                            .filter(Boolean)
+                            .map(browser => ({ browser })),
                         provider: 'playwright',
                         isolate: true,
                         connectTimeout: 30000,

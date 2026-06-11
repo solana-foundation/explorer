@@ -4,6 +4,8 @@ import { BigNumber } from 'bignumber.js';
 import BN from 'bn.js';
 import React from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+
 type DeltaValue = BigNumber | BN;
 
 export function BalanceDelta({ delta, isSol = false }: { delta: DeltaValue; isSol?: boolean }) {
@@ -16,10 +18,22 @@ export function BalanceDelta({ delta, isSol = false }: { delta: DeltaValue; isSo
     }
 
     if (deltaValue.gt(0)) {
-        return <span className="badge bg-success-soft">+{isSol ? sols : deltaValue.toString()}</span>;
+        return (
+            <Badge ui="dashkit" variant="success">
+                +{isSol ? sols : deltaValue.toString()}
+            </Badge>
+        );
     } else if (deltaValue.lt(0)) {
-        return <span className="badge bg-warning-soft">{isSol ? <>-{sols}</> : deltaValue.toString()}</span>;
+        return (
+            <Badge ui="dashkit" variant="warning">
+                {isSol ? <>-{sols}</> : deltaValue.toString()}
+            </Badge>
+        );
     }
 
-    return <span className="badge bg-secondary-soft font-monospace">+0</span>;
+    return (
+        <Badge ui="dashkit" variant="secondary" className="e-font-mono">
+            +0
+        </Badge>
+    );
 }

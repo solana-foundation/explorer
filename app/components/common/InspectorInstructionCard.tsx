@@ -1,11 +1,14 @@
 import { ProgramField } from '@entities/instruction-card';
 import { useScrollAnchor } from '@providers/scroll-anchor';
+import { Badge } from '@shared/ui/badge';
 import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { cn } from '@shared/utils';
 import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import React from 'react';
 import { Code } from 'react-feather';
+
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { BaseRawDetails } from './BaseRawDetails';
 import { BaseRawParsedDetails } from './BaseRawParsedDetails';
@@ -59,10 +62,10 @@ export function InspectorInstructionCard({
             ref={scrollAnchorRef}
             title={
                 <>
-                    <span className={`badge bg-${resultClass}-soft e-mr-1.5`}>
+                    <Badge ui="dashkit" variant={resultClass as 'success' | 'warning' | 'dark'} className="e-mr-1.5">
                         #{index + 1}
                         {childIndex !== undefined ? `.${childIndex + 1}` : ''}
-                    </span>
+                    </Badge>
                     {title}
                 </>
             }
@@ -80,37 +83,34 @@ export function InspectorInstructionCard({
                 </button>
             }
         >
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table [&>tbody>tr:first-child>td]:!e-border-t-0">
-                    <tbody className="list">
-                        <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
-                        {showRaw ? (
-                            'parsed' in ix ? (
-                                <BaseRawParsedDetails ix={ix}>
-                                    {raw ? <BaseRawDetails ix={raw} /> : null}
-                                </BaseRawParsedDetails>
-                            ) : (
-                                <BaseRawDetails ix={raw || ix} />
-                            )
+            <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!e-border-t-0">
+                <BaseTable.Body>
+                    <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
+                    {showRaw ? (
+                        'parsed' in ix ? (
+                            <BaseRawParsedDetails ix={ix}>
+                                {raw ? <BaseRawDetails ix={raw} /> : null}
+                            </BaseRawParsedDetails>
                         ) : (
-                            children
-                        )}
-                        {innerCards && innerCards.length > 0 && (
-                            <>
-                                <tr className="table-sep">
-                                    <td colSpan={3}>Inner Instructions</td>
-                                </tr>
-                                <tr>
-                                    <td colSpan={3}>
-                                        <div className="inner-cards">{innerCards}</div>
-                                    </td>
-                                </tr>
-                            </>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            <BaseRawDetails ix={raw || ix} />
+                        )
+                    ) : (
+                        children
+                    )}
+                    {innerCards && innerCards.length > 0 && (
+                        <>
+                            <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                                <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
+                            </BaseTable.Row>
+                            <BaseTable.Row>
+                                <BaseTable.Cell colSpan={3}>
+                                    <div className="inner-cards">{innerCards}</div>
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
+                        </>
+                    )}
+                </BaseTable.Body>
+            </BaseTable>
         </CollapsibleCard>
     );
 }

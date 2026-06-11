@@ -7,8 +7,10 @@ import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { toHex } from '@/app/shared/lib/bytes';
 import { CardFooter } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { AddressFromLookupTableWithContext, AddressWithContext } from './AddressWithContext';
 
@@ -118,7 +120,9 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
             {!loading && totalAccountSize > 0 && (
                 <CardFooter ui="dashkit">
                     <div className="e-flex e-items-baseline e-justify-end">
-                        <span className="text-muted e-me-2 e-text-[0.625rem] e-uppercase">Total Account Size:</span>
+                        <span className="e-me-2 e-text-[0.625rem] e-uppercase e-text-dk-gray-700">
+                            Total Account Size:
+                        </span>
                         <span className="e-text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
                     </div>
                 </CardFooter>
@@ -139,23 +143,29 @@ function AccountFromLookupTableRow({
     readOnly: boolean;
 }) {
     return (
-        <tr>
-            <td>
+        <BaseTable.Row>
+            <BaseTable.Cell>
                 <div className="e-flex e-flex-col e-items-start">
                     Account #{accountIndex + 1}
                     <span className="e-mt-[3px]">
-                        {!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
-                        <span className="badge bg-gray-soft">Address Table Lookup</span>
+                        {!readOnly && (
+                            <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                                Writable
+                            </Badge>
+                        )}
+                        <Badge ui="dashkit" variant="gray">
+                            Address Table Lookup
+                        </Badge>
                     </span>
                 </div>
-            </td>
-            <td className="e-text-right">
+            </BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right">
                 <AddressFromLookupTableWithContext
                     lookupTableKey={lookupTableKey}
                     lookupTableIndex={lookupTableIndex}
                 />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
@@ -177,26 +187,36 @@ function AccountRow({
     const hexData = accountInfo ? toHex(accountInfo.data) : null;
 
     return (
-        <tr>
-            <td>
+        <BaseTable.Row>
+            <BaseTable.Cell>
                 <div className="e-flex e-flex-col e-items-start">
                     Account #{accountIndex + 1}
                     <span className="e-mt-[3px]">
-                        {signer && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
-                        {!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
+                        {signer && (
+                            <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                                Signer
+                            </Badge>
+                        )}
+                        {!readOnly && (
+                            <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                                Writable
+                            </Badge>
+                        )}
                         {loading ? (
-                            <span className="text-muted">Loading...</span>
+                            <span className="e-text-dk-gray-700">Loading...</span>
                         ) : accountInfo ? (
                             <Copyable text={hexData}>
-                                <span className="text-muted">{accountInfo.size.toLocaleString('en-US')} bytes</span>
+                                <span className="e-text-dk-gray-700">
+                                    {accountInfo.size.toLocaleString('en-US')} bytes
+                                </span>
                             </Copyable>
                         ) : null}
                     </span>
                 </div>
-            </td>
-            <td className="e-text-right">
+            </BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right">
                 <AddressWithContext pubkey={publicKey} />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

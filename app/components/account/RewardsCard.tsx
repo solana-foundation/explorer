@@ -11,7 +11,9 @@ import { PublicKey } from '@solana/web3.js';
 import { lamportsToSolString } from '@utils/index';
 import React from 'react';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 const U64_MAX = BigInt('0xffffffffffffffff');
 
@@ -58,16 +60,16 @@ export function RewardsCard({ address }: { address: string }) {
         }
 
         return (
-            <tr key={reward.epoch}>
-                <td>
+            <BaseTable.Row key={reward.epoch}>
+                <BaseTable.Cell>
                     <Epoch epoch={reward.epoch} link />
-                </td>
-                <td>
+                </BaseTable.Cell>
+                <BaseTable.Cell>
                     <Slot slot={reward.effectiveSlot} link />
-                </td>
-                <td>{lamportsToSolString(reward.amount)}</td>
-                <td>{lamportsToSolString(reward.postBalance)}</td>
-            </tr>
+                </BaseTable.Cell>
+                <BaseTable.Cell>{lamportsToSolString(reward.amount)}</BaseTable.Cell>
+                <BaseTable.Cell>{lamportsToSolString(reward.postBalance)}</BaseTable.Cell>
+            </BaseTable.Row>
         );
     });
     const rewardsFound = rewardsList.some(r => r);
@@ -84,20 +86,21 @@ export function RewardsCard({ address }: { address: string }) {
                 </CardHeader>
 
                 {rewardsFound ? (
-                    // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
-                    <div className="table-responsive e-mb-0">
-                        <table className="table table-sm table-nowrap card-table">
-                            <thead>
-                                <tr>
-                                    <th className="e-w-px e-text-dk-gray-700">Epoch</th>
-                                    <th className="e-text-dk-gray-700">Effective Slot</th>
-                                    <th className="e-text-dk-gray-700">Reward Amount</th>
-                                    <th className="e-text-dk-gray-700">Post Balance</th>
-                                </tr>
-                            </thead>
-                            <tbody className="list">{rewardsList}</tbody>
-                        </table>
-                    </div>
+                    <BaseTable ui="dashkit" variant="card" nowrap>
+                        <BaseTable.Head>
+                            <BaseTable.Row>
+                                <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Epoch</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                                    Effective Slot
+                                </BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                                    Reward Amount
+                                </BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="e-text-dk-gray-700">Post Balance</BaseTable.HeaderCell>
+                            </BaseTable.Row>
+                        </BaseTable.Head>
+                        <BaseTable.Body>{rewardsList}</BaseTable.Body>
+                    </BaseTable>
                 ) : (
                     <CardBody ui="dashkit">
                         No rewards issued between epochs {lowestFetchedEpoch} and {highestFetchedEpoch}
@@ -108,7 +111,13 @@ export function RewardsCard({ address }: { address: string }) {
                     {foundOldest ? (
                         <div className="e-text-center e-text-dk-gray-700">Fetched full reward history</div>
                     ) : (
-                        <button className="btn btn-primary e-w-full" onClick={() => loadMore()} disabled={fetching}>
+                        <Button
+                            ui="dashkit"
+                            variant="primary"
+                            className="e-w-full"
+                            onClick={() => loadMore()}
+                            disabled={fetching}
+                        >
                             {fetching ? (
                                 <>
                                     <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5 e-align-text-top"></span>
@@ -117,7 +126,7 @@ export function RewardsCard({ address }: { address: string }) {
                             ) : (
                                 'Load More'
                             )}
-                        </button>
+                        </Button>
                     )}
                 </CardFooter>
             </Card>

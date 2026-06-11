@@ -352,11 +352,6 @@ div.inner-cards {
     }
 }
 
-.dropdown-menu.token-filter {
-    max-height: 20rem;
-    overflow-y: auto;
-}
-
 .alert-danger.alert-scam {
     background: red;
     border: 1px solid red;
@@ -404,24 +399,6 @@ pre.json-wrap {
     margin-left: 0.4rem;
 }
 
-.creators-dropdown-button-width {
-    width: 150px;
-}
-
-.creator-dropdown-entry {
-    flex-flow: row wrap;
-}
-
-.creator-dropdown-header {
-    max-width: 80%;
-    flex: 0 0 80%;
-}
-
-.creator-dropdown-entry-address {
-    @extend .creator-dropdown-header;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
 
 .art-error-image-placeholder {
     display: flex;

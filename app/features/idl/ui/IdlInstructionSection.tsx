@@ -1,5 +1,6 @@
 import { Copy, XCircle } from 'react-feather';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 import { Card, CardBody } from '@/app/shared/ui/Card';
 
@@ -34,10 +35,13 @@ export function IdlInstructionSection({ title, description, commands }: IIdlInst
                     </div>
                 </div>
 
-                <button
+                <Button
+                    ui="dashkit"
+                    variant="white"
+                    size="sm"
                     onClick={handleCopy}
                     type="button"
-                    className="btn btn-white btn-sm e-flex-shrink-0"
+                    className="e-flex-shrink-0"
                     aria-label={state === 'copied' ? 'Copied' : state === 'errored' ? 'Copy failed' : 'Copy'}
                 >
                     {state === 'copied' ? (
@@ -51,7 +55,7 @@ export function IdlInstructionSection({ title, description, commands }: IIdlInst
                             <Copy size={16} /> Copy
                         </>
                     )}
-                </button>
+                </Button>
             </CardBody>
         </Card>
     );

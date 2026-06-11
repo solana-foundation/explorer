@@ -43,8 +43,8 @@ export function AccountHeader({
 
     const fallback = (
         <div className="e-flex e-flex-col e-justify-center e-gap-1 md:e-min-h-[69px]">
-            <h6 className="header-pretitle">Details</h6>
-            <h2 className="header-title">Account</h2>
+            <h6 className="e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Details</h6>
+            <h2 className="e-mb-0">Account</h2>
         </div>
     );
 
@@ -179,18 +179,18 @@ function Token22MintHeader({
     throw new Error('Metadata loading for non-token 2022 programs is not yet supported');
 }
 
-function TokenMintHeaderCard({
+export function TokenMintHeaderCard({
     token,
 }: {
     token: { name?: string | undefined; logoURI?: string | undefined; symbol?: string | undefined };
 }) {
     return (
-        <div className="row e-items-center">
-            <div className="col-auto">
-                <div className="avatar avatar-lg header-avatar-top">
+        <div className="-e-mx-3 e-flex e-flex-wrap e-items-center">
+            <div className="e-flex-none e-px-3">
+                <div className="e-relative e-inline-block e-h-16 e-w-16">
                     <ProxiedImage
                         alt="Token logo"
-                        className="avatar-img border border-4 border-body e-rounded-full"
+                        className="e-h-full e-w-full e-rounded-full e-border-4 e-border-solid e-border-dk-black-dark e-object-cover"
                         height={64}
                         uri={token.logoURI}
                         width={64}
@@ -198,10 +198,10 @@ function TokenMintHeaderCard({
                 </div>
             </div>
 
-            <div className="col -e-ml-3 md:-e-ml-1.5">
-                <h6 className="header-pretitle">Token</h6>
-                <h2 className="header-title">{token?.name || 'Unknown Token'}</h2>
-                <div className="header-pretitle no-overflow-with-ellipsis">
+            <div className="-e-ml-3 e-min-w-0 e-flex-1 e-px-3 md:-e-ml-1.5">
+                <h6 className="e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Token</h6>
+                <h2 className="e-mb-0">{token?.name || 'Unknown Token'}</h2>
+                <div className="e-overflow-hidden e-text-ellipsis e-whitespace-nowrap e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">
                     {token?.symbol ? token.symbol : 'No Symbol was found'}
                 </div>
             </div>

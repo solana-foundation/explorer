@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { cn } from '@/app/components/shared/utils';
 
 import { getCookie, setCookie } from '../lib/cookie';
@@ -75,12 +76,14 @@ export function CookieConsent() {
                     >
                         OPT-OUT
                     </button>
-                    <button
-                        className="btn btn-white e-bg-transparent"
+                    <Button
+                        ui="dashkit"
+                        variant="white"
+                        className="e-bg-transparent"
                         onClick={() => handleConsent(EConsentStatus.Granted)}
                     >
                         ACCEPT
-                    </button>
+                    </Button>
                 </div>
             </CookieCard>
         );

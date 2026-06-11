@@ -20,7 +20,7 @@ const meta: Meta<typeof JsonViewer> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// text-muted is rendered in the dynamic-import loading state; usually only briefly visible.
+// e-text-dk-gray-700 is rendered in the dynamic-import loading state; usually only briefly visible.
 export const Default: Story = {
     args: { collapsed: 1, name: null, src: sampleData },
 };

@@ -3,6 +3,8 @@ import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { formatDuration } from '@utils/date';
 import { useEffect, useState } from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { ChangePerpMarketParams, getPerpMarketFromInstruction, getPerpMarketFromPerpMarketConfig } from './types';
 
@@ -44,61 +46,63 @@ export function ChangePerpMarketParamsDetailsCard(props: {
             childIndex={childIndex}
         >
             {info.initLeverageOption && (
-                <tr>
-                    <td>Init leverage</td>
-                    <td className="e-text-right">{info.initLeverage}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Init leverage</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{info.initLeverage}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.liquidationFeeOption && (
-                <tr>
-                    <td>Liquidation fee</td>
-                    <td className="e-text-right">{info.liquidationFee}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Liquidation fee</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{info.liquidationFee}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.maintLeverageOption && (
-                <tr>
-                    <td>Maint leverage</td>
-                    <td className="e-text-right">{info.maintLeverage}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Maint leverage</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{info.maintLeverage}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.makerFeeOption && (
-                <tr>
-                    <td>Maker fee</td>
-                    <td className="e-text-right">{info.makerFee}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Maker fee</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{info.makerFee}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.mngoPerPeriodOption && (
-                <tr>
-                    <td>MNGO per {targetPeriodLength !== null && formatDuration(targetPeriodLength, 'seconds')}</td>
-                    <td className="e-text-right">
+                <BaseTable.Row>
+                    <BaseTable.Cell>
+                        MNGO per {targetPeriodLength !== null && formatDuration(targetPeriodLength, 'seconds')}
+                    </BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         {info.mngoPerPeriod} {}
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             )}
 
             {info.maxDepthBpsOption && (
-                <tr>
-                    <td>Max depth bps</td>
-                    <td className="e-text-right">{info.maxDepthBps}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Max depth bps</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{info.maxDepthBps}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.rateOption && (
-                <tr>
-                    <td>Rate</td>
-                    <td className="e-text-right">{info.rate}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Rate</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{info.rate}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.takerFeeOption && (
-                <tr>
-                    <td>Taker fee</td>
-                    <td className="e-text-right">{info.takerFee}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Taker fee</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{info.takerFee}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.targetPeriodLengthOption && (
-                <tr>
-                    <td>Target period length</td>
-                    <td className="e-text-right">{info.targetPeriodLength}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Target period length</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{info.targetPeriodLength}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
         </InstructionCard>
     );

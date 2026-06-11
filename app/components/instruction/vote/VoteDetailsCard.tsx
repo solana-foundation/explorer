@@ -9,6 +9,7 @@ import React from 'react';
 import { create, Struct } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InstructionCard } from '../InstructionCard';
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
@@ -63,49 +64,51 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
 
         if (key === 'vote') {
             attributes.push(
-                <tr key="vote-hash">
-                    <td>Vote Hash</td>
-                    <td className="e-text-right">
+                <BaseTable.Row key="vote-hash">
+                    <BaseTable.Cell>Vote Hash</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <pre className="e-mb-0 e-inline-block e-text-left">{value.hash}</pre>
-                    </td>
-                </tr>,
+                    </BaseTable.Cell>
+                </BaseTable.Row>,
             );
 
             if (value.timestamp) {
                 attributes.push(
-                    <tr key="timestamp">
-                        <td>Timestamp</td>
-                        <td className="font-monospace e-text-right">{displayTimestamp(value.timestamp * 1000)}</td>
-                    </tr>,
+                    <BaseTable.Row key="timestamp">
+                        <BaseTable.Cell>Timestamp</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right e-font-mono">
+                            {displayTimestamp(value.timestamp * 1000)}
+                        </BaseTable.Cell>
+                    </BaseTable.Row>,
                 );
             }
 
             attributes.push(
-                <tr key="vote-slots">
-                    <td>Slots</td>
-                    <td className="font-monospace e-text-right">
+                <BaseTable.Row key="vote-slots">
+                    <BaseTable.Cell>Slots</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right e-font-mono">
                         <pre className="e-mb-0 e-inline-block e-text-left">{value.slots.join('\n')}</pre>
-                    </td>
-                </tr>,
+                    </BaseTable.Cell>
+                </BaseTable.Row>,
             );
         } else {
             attributes.push(
-                <tr key={key}>
-                    <td>{camelToTitleCase(key)} </td>
-                    <td className="e-text-right">{value}</td>
-                </tr>,
+                <BaseTable.Row key={key}>
+                    <BaseTable.Cell>{camelToTitleCase(key)} </BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{value}</BaseTable.Cell>
+                </BaseTable.Row>,
             );
         }
     }
 
     return (
         <InstructionCard {...props} title={`Vote: ${camelToTitleCase(parsed.type)}`}>
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={props.ix.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {attributes}
         </InstructionCard>
     );

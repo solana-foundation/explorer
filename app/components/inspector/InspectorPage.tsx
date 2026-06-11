@@ -24,10 +24,14 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import useSWR from 'swr';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { Button } from '@/app/components/shared/ui/button';
 import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';
@@ -347,10 +351,10 @@ export function TransactionInspectorPage({
     }, [currentPathname, currentSearchParams, router]);
 
     return (
-        <div className="container e-mt-6">
-            <div className="header">
-                <div className="header-body">
-                    <h2 className="header-title">Transaction Inspector</h2>
+        <PageContainer className="e-mt-6">
+            <div className="e-mb-8">
+                <div className="e-border-0 e-border-b e-border-solid e-border-dk-gray-700-dark e-py-6">
+                    <h2 className="e-mb-0">Transaction Inspector</h2>
                 </div>
             </div>
             {signature ? (
@@ -368,7 +372,7 @@ export function TransactionInspectorPage({
             ) : (
                 <RawInput value={paramString} setTransactionData={setInspectorData} />
             )}
-        </div>
+        </PageContainer>
     );
 }
 
@@ -473,49 +477,55 @@ function OverviewCard({
 
     return (
         <>
-            <div className="card">
+            <Card ui="dashkit">
                 <CardHeader ui="dashkit" className="e-gap-2">
-                    <h3 className="card-header-title">Transaction Overview</h3>
-                    <button className="btn btn-sm btn-white e-flex" onClick={onClear}>
+                    <CardTitle as="h3" ui="dashkit">
+                        Transaction Overview
+                    </CardTitle>
+                    <Button ui="dashkit" variant="white" size="sm" className="e-flex" onClick={onClear}>
                         Clear
-                    </button>
+                    </Button>
                     <DownloadDropdown filename={signature || 'signature'} data={raw} />
                 </CardHeader>
                 <TableCardBody>
-                    <tr>
-                        <td>Serialized Size</td>
-                        <td className="e-text-right">
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Serialized Size</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">
                             <div className="e-flex e-flex-col e-items-end">
                                 {size} bytes
-                                <span className={size <= PACKET_DATA_SIZE ? 'text-muted' : 'text-warning'}>
+                                <span className={size <= PACKET_DATA_SIZE ? 'e-text-dk-gray-700' : 'text-warning'}>
                                     Max transaction size is {PACKET_DATA_SIZE} bytes
                                 </span>
                             </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Fees</td>
-                        <td className="e-text-right">
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Fees</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">
                             <div className="e-flex e-flex-col e-items-end">
                                 <SolBalance lamports={fee} />
-                                <span className="text-muted">
+                                <span className="e-text-dk-gray-700">
                                     {`Each signature costs ${DEFAULT_FEES.lamportsPerSignature} lamports`}
                                 </span>
                             </div>
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
 
-                    <tr>
-                        <td>
+                    <BaseTable.Row>
+                        <BaseTable.Cell>
                             <div className="e-flex e-flex-col e-items-start">
                                 Fee payer
                                 <span className="e-mt-[3px]">
-                                    <span className="badge bg-info-soft e-mr-1.5">Signer</span>
-                                    <span className="badge bg-danger-soft e-mr-1.5">Writable</span>
+                                    <Badge ui="dashkit" variant="info" className="e-mr-1.5">
+                                        Signer
+                                    </Badge>
+                                    <Badge ui="dashkit" variant="destructive" className="e-mr-1.5">
+                                        Writable
+                                    </Badge>
                                 </span>
                             </div>
-                        </td>
-                        <td className="e-text-right">
+                        </BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">
                             {message.staticAccountKeys.length === 0 ? (
                                 'No Fee Payer'
                             ) : (
@@ -524,10 +534,10 @@ function OverviewCard({
                                     validator={feePayerValidator}
                                 />
                             )}
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
                 </TableCardBody>
-            </div>
+            </Card>
         </>
     );
 }

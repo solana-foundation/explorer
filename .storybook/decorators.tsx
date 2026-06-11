@@ -144,13 +144,13 @@ export const withMockTransactions: Decorator = Story => (
 
 /**
  * Wraps stories with ClusterProvider, MockAccountsProvider, and MockHistoryProvider.
- * Provides empty history cache for components consuming `useAccountHistory` and friends.
- * Usage: `decorators: [withHistory]`
+ * Seeds the history cache from `parameters.history` (empty cache when omitted).
+ * Usage: `decorators: [withHistory]`, optionally `parameters: { history: {...} }`
  */
-export const withHistory: Decorator = Story => (
+export const withHistory: Decorator = (Story, context) => (
     <ClusterProvider>
         <MockAccountsProvider>
-            <MockHistoryProvider>
+            <MockHistoryProvider history={context.parameters.history}>
                 <Story />
             </MockHistoryProvider>
         </MockAccountsProvider>
@@ -220,4 +220,30 @@ export const withImageLoadPending: Decorator = Story => (
     <ImageLoadPendingBoundary>
         <Story />
     </ImageLoadPendingBoundary>
+);
+
+// Blurs focus grabbed during mount, scoped to its own subtree — click-to-focus still
+// works and other stories on the shared Docs page are unaffected.
+function AutoFocusReleaseBoundary({ children }: { children: React.ReactNode }) {
+    const ref = useRef<HTMLDivElement>(null);
+    useLayoutEffect(() => {
+        const frame = requestAnimationFrame(() => {
+            const active = document.activeElement;
+            if (active instanceof HTMLElement && ref.current?.contains(active)) active.blur();
+        });
+        return () => cancelAnimationFrame(frame);
+    }, []);
+
+    return <div ref={ref}>{children}</div>;
+}
+
+/**
+ * Keeps Storybook keyboard navigation working for stories whose component autofocuses
+ * on mount (e.g. NicknameEditor's input) — the stolen focus is released after render.
+ * Usage: `decorators: [withAutoFocusReleased]`
+ */
+export const withAutoFocusReleased: Decorator = Story => (
+    <AutoFocusReleaseBoundary>
+        <Story />
+    </AutoFocusReleaseBoundary>
 );

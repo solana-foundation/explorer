@@ -14,6 +14,7 @@ import { create } from 'superstruct';
 import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { Cluster } from '@/app/utils/cluster';
 import { TOKEN_IDS } from '@/app/utils/programs';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
@@ -119,12 +120,12 @@ function TokenInstruction({
         }
 
         attributes.push(
-            <tr key={mintAddress}>
-                <td>Token</td>
-                <td className="e-text-right">
+            <BaseTable.Row key={mintAddress}>
+                <BaseTable.Cell>Token</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={new PublicKey(mintAddress)} alignRight link fetchTokenLabelInfo />
-                </td>
-            </tr>,
+                </BaseTable.Cell>
+            </BaseTable.Row>,
         );
     }
 
@@ -139,12 +140,12 @@ function TokenInstruction({
                 const label = `${key.charAt(0).toUpperCase() + key.slice(1)} - #${i + 1}`;
 
                 attributes.push(
-                    <tr key={key + i}>
-                        <td>{label}</td>
-                        <td className="e-text-right">
+                    <BaseTable.Row key={key + i}>
+                        <BaseTable.Cell>{label}</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">
                             <Address pubkey={publicKey} alignRight link />
-                        </td>
-                    </tr>,
+                        </BaseTable.Cell>
+                    </BaseTable.Row>,
                 );
             }
             continue;
@@ -182,10 +183,10 @@ function TokenInstruction({
         const label = key.charAt(0).toUpperCase() + key.slice(1) + labelSuffix;
 
         attributes.push(
-            <tr key={key}>
-                <td>{label}</td>
-                <td className="e-text-right">{tag}</td>
-            </tr>,
+            <BaseTable.Row key={key}>
+                <BaseTable.Cell>{label}</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{tag}</BaseTable.Cell>
+            </BaseTable.Row>,
         );
     }
 

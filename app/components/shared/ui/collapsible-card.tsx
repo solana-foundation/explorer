@@ -2,6 +2,7 @@ import { cn } from '@shared/utils';
 import { forwardRef, ReactNode, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { BaseCard, BaseCardHeader, BaseCardTitle } from '@/app/shared/ui/Card';
 
 type CollapsibleCardProps = {
@@ -28,15 +29,18 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                     ui="dashkit"
                     className={cn('e-h-auto e-min-h-[60px] e-gap-2', collapsible && !expanded && 'e-border-b-0')}
                 >
-                    <BaseCardTitle ui="dashkit" className="e-flex e-items-center e-break-all">
+                    <BaseCardTitle ui="dashkit" className="e-flex e-min-w-0 e-items-center e-break-all">
                         {title}
                     </BaseCardTitle>
                     {headerButtons}
                     {collapsible && (
-                        <button
+                        <Button
+                            ui="dashkit"
+                            variant="white"
+                            size="sm"
                             aria-expanded={expanded}
                             aria-label={expanded ? 'Collapse' : 'Expand'}
-                            className="btn btn-sm btn-white e-flex e-items-center e-justify-center e-py-[5.3px] e-transition-colors"
+                            className="e-flex e-items-center e-justify-center e-py-[5.3px] e-transition-colors"
                             onClick={() => setExpanded(current => !current)}
                         >
                             <ChevronDown
@@ -47,7 +51,7 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                                     expanded && '[transform:rotate(180deg)]',
                                 )}
                             />
-                        </button>
+                        </Button>
                     )}
                 </BaseCardHeader>
                 {collapsible ? (

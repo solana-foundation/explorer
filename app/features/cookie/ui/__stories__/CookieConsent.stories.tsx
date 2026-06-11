@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
+import { Button } from '@/app/components/shared/ui/button';
+
 import { CookieCard, PrivacyPolicyLink } from '../CookieConsent';
 
 const meta = {
@@ -32,9 +34,9 @@ export const EUBanner: Story = {
                     >
                         OPT-OUT
                     </button>
-                    <button className="btn btn-white e-bg-transparent" onClick={() => alert('Accepted')}>
+                    <Button ui="dashkit" variant="white" className="e-bg-transparent" onClick={() => alert('Accepted')}>
                         ACCEPT
-                    </button>
+                    </Button>
                 </div>
             </div>
         ),

@@ -1,6 +1,8 @@
 import { Address } from '@components/common/Address';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { CancelOrderByClientId, SerumIxDetailsProps } from './types';
 
@@ -16,38 +18,38 @@ export function CancelOrderByClientIdDetailsCard(props: SerumIxDetailsProps<Canc
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Market</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Market</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Open Orders</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Open Orders</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.openOrders} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Request Queue</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Request Queue</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.requestQueue} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Open Orders Owner</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Open Orders Owner</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={info.accounts.openOrdersOwner} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Client Id</td>
-                <td className="e-text-right">{info.data.clientId.toString(10)}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Client Id</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">{info.data.clientId.toString(10)}</BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

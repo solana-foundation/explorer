@@ -3,12 +3,14 @@
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
+
 export function Footer() {
     const tosPath = useClusterPath({ pathname: '/tos' });
 
     return (
         <footer className="e-border-0 e-border-t e-border-solid e-border-neutral-800">
-            <div className="container">
+            <PageContainer>
                 <div className="e-flex e-flex-col e-gap-3 e-py-3 md:e-flex-row md:e-items-center md:e-justify-between md:e-py-5">
                     <span className="e-text-xs e-font-medium e-uppercase e-tracking-[0.72px] e-text-heavy-metal-400">
                         Solana explorer <span>(Beta)</span>
@@ -19,7 +21,7 @@ export function Footer() {
                         </Link>
                     </nav>
                 </div>
-            </div>
+            </PageContainer>
         </footer>
     );
 }

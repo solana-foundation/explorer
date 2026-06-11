@@ -10,7 +10,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { ClusterInfo, useCluster } from '@/app/providers/cluster';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { Cluster, clusterName } from '@/app/utils/cluster';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
@@ -80,19 +82,19 @@ const BaseFeatureCard = ({
     let simdLink;
     if (activatedAt) {
         activatedAtSlot = (
-            <tr>
-                <td className="e-whitespace-nowrap">Activated At Slot</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell className="e-whitespace-nowrap">Activated At Slot</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Slot slot={activatedAt} link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         );
     }
     if (featureInfo) {
         simdLink = (
-            <tr>
-                <td>SIMDs</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>SIMDs</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     {featureInfo.simds.map((simd, index) => (
                         <div key={index}>
                             {simd && featureInfo.simd_link[index] ? (
@@ -109,52 +111,56 @@ const BaseFeatureCard = ({
                             )}
                         </div>
                     ))}
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         );
     }
 
     return (
         <AccountCard title={featureInfo?.title ?? 'Feature Activation'} account={account} layout="expanded">
-            <tr>
-                <td>Address</td>
-                <td>
+            <BaseTable.Row>
+                <BaseTable.Cell>Address</BaseTable.Cell>
+                <BaseTable.Cell>
                     <Address pubkey={new PublicKey(address)} alignRight raw />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td className="e-whitespace-nowrap">Activated?</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell className="e-whitespace-nowrap">Activated?</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     {activatedAt !== null ? (
-                        <span className="badge bg-success">Active on {clusterName(cluster)}</span>
+                        <Badge ui="dashkit" variant="success" tone="solid">
+                            Active on {clusterName(cluster)}
+                        </Badge>
                     ) : isPending ? (
-                        <span className="badge bg-warning text-dark">Pending activation on {clusterName(cluster)}</span>
+                        <Badge ui="dashkit" variant="warning" tone="solid">
+                            Pending activation on {clusterName(cluster)}
+                        </Badge>
                     ) : (
                         <code>Not yet activated on {clusterName(cluster)}</code>
                     )}
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
             {activatedAtSlot}
 
-            <tr>
-                <td className="e-whitespace-nowrap">Cluster Activation</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell className="e-whitespace-nowrap">Cluster Activation</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <ClusterActivationEpochAtCluster
                         cluster={cluster}
                         clusterInfo={clusterInfo}
                         activatedAt={activatedAt}
                         isPending={isPending}
                     />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
             {featureInfo?.description && (
-                <tr>
-                    <td>Description</td>
-                    <td className="e-text-right">{featureInfo?.description}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Description</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">{featureInfo?.description}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
 
             {simdLink}

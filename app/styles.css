@@ -144,3 +144,20 @@
         mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50%/21px 100%;
     }
 }
+
+/* ported as is from _solana.scss; em color = dark-theme $primary */
+@layer components {
+    .staking-card h1 {
+        margin-bottom: 0.75rem;
+    }
+    .staking-card h1 small {
+        font-size: 1rem;
+    }
+    .staking-card h5 {
+        margin-bottom: 0;
+    }
+    .staking-card em {
+        font-style: normal;
+        color: #1dd79b;
+    }
+}

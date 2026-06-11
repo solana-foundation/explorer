@@ -2,6 +2,8 @@ import '@/app/styles.css';
 
 import { Metadata } from 'next/types';
 
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
+
 export const metadata: Metadata = {
     description: 'Terms of Service for Solana Explorer',
     title: 'Terms of Service | Solana Explorer',
@@ -9,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function TermsOfServicePage() {
     return (
-        <div className="container e-my-8 e-max-w-4xl">
+        <PageContainer className="e-my-8 e-max-w-4xl">
             <h1 className="e-mb-8 e-text-4xl e-font-bold e-text-white">Terms of Service</h1>
 
             <div className="e-max-w-none">
@@ -728,6 +730,6 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
             </div>
-        </div>
+        </PageContainer>
     );
 }

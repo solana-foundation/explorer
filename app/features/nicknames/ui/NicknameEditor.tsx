@@ -7,6 +7,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { FormControl } from '@/app/shared/ui/FormControl';
 
@@ -59,7 +60,7 @@ export function NicknameEditor({ address, onClose }: Props) {
 
     return (
         <div
-            className="top-0 start-0 e-fixed e-flex e-h-full e-w-full e-items-center e-justify-center"
+            className="e-fixed e-left-0 e-top-0 e-flex e-h-full e-w-full e-items-center e-justify-center"
             style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                 zIndex: 9999,
@@ -111,24 +112,26 @@ export function NicknameEditor({ address, onClose }: Props) {
                     <div className="e-flex e-justify-between">
                         <div>
                             {getNickname(address) && (
-                                <button className="btn btn-sm btn-outline-danger" onClick={handleRemove}>
+                                <Button ui="dashkit" variant="outline-danger" size="sm" onClick={handleRemove}>
                                     Remove
-                                </button>
+                                </Button>
                             )}
                         </div>
                         <div className="e-flex e-gap-1.5">
-                            <button className="btn btn-sm btn-secondary" onClick={onClose}>
+                            <Button ui="dashkit" variant="secondary" size="sm" onClick={onClose}>
                                 Cancel
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 ref={saveButtonRef}
-                                className="btn btn-sm btn-primary"
+                                ui="dashkit"
+                                variant="primary"
+                                size="sm"
                                 onClick={handleSave}
                                 onKeyDown={handleSaveButtonKeyDown}
                                 disabled={!nickname.trim()}
                             >
                                 Save
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </CardBody>

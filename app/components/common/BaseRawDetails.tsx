@@ -2,16 +2,19 @@ import { Address } from '@components/common/Address';
 import { TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { HexData } from './HexData';
 
 function RawDetailsLoader() {
     return (
-        <tr>
-            <td colSpan={2} className="e-text-center">
+        <BaseTable.Row>
+            <BaseTable.Cell colSpan={2} className="e-text-center">
                 <span className="spinner-grow spinner-grow-sm e-mr-1.5"></span>
                 Loading instruction data...
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
@@ -31,26 +34,34 @@ function BaseTransactionInstructionRawDetails({ ix }: { ix: TransactionInstructi
     return (
         <>
             {ix.keys.map(({ pubkey, isSigner, isWritable }, keyIndex) => (
-                <tr key={keyIndex}>
-                    <td>
+                <BaseTable.Row key={keyIndex}>
+                    <BaseTable.Cell>
                         <div className="e-mr-1.5 md:e-inline">Account #{keyIndex + 1}</div>
-                        {isWritable && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}
-                        {isSigner && <span className="badge bg-info-soft e-mr-[3px]">Signer</span>}
-                    </td>
-                    <td className="e-text-right">
+                        {isWritable && (
+                            <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                                Writable
+                            </Badge>
+                        )}
+                        {isSigner && (
+                            <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                                Signer
+                            </Badge>
+                        )}
+                    </BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <Address pubkey={pubkey} alignRight link />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             ))}
 
-            <tr>
-                <td>
-                    Instruction Data <span className="text-muted">(Hex)</span>
-                </td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>
+                    Instruction Data <span className="e-text-dk-gray-700">(Hex)</span>
+                </BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <HexData raw={ix.data} />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </>
     );
 }

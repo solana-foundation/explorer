@@ -1,15 +1,17 @@
 import { HexData } from '@components/common/HexData';
 import { Program } from '@coral-xyz/anchor';
 import { IdlField, IdlTypeDefTyStruct } from '@coral-xyz/anchor/dist/cjs/idl';
-import { cn } from '@shared/utils';
 import { decodeEventFromLog, mapIxArgsToRows } from '@utils/anchor';
 import { camelToTitleCase } from '@utils/index';
 import React, { useState } from 'react';
 import { Code } from 'react-feather';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { Button } from '@/app/components/shared/ui/button';
 import { fromBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 export function ProgramEventsCard({
     eventDataList,
@@ -72,53 +74,54 @@ function EventCard({
     const fields = ((eventFields?.type as IdlTypeDefTyStruct)?.fields as IdlField[]) ?? [];
 
     return (
-        <div className="card e-mb-1.5">
+        <Card ui="dashkit" className="e-mb-1.5">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title e-mb-0 e-flex e-items-center">
-                    <span className="badge bg-info-soft e-mr-1.5">
+                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
+                    <Badge ui="dashkit" variant="info" className="e-mr-1.5">
                         #{instructionIndex + 1}.{eventIndex + 1}
-                    </span>
+                    </Badge>
                     {camelToTitleCase(event.name)}
-                </h3>
-                <button
-                    className={cn('btn btn-sm e-flex e-items-center', showRaw ? 'btn-black active' : 'btn-white')}
+                </CardTitle>
+                <Button
+                    ui="dashkit"
+                    size="sm"
+                    variant={showRaw ? 'black' : 'white'}
+                    active={showRaw}
+                    className="e-flex e-items-center"
                     onClick={() => setShowRaw(r => !r)}
                 >
                     <Code className="e-mr-1.5" size={13} /> Raw
-                </button>
+                </Button>
             </CardHeader>
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <tbody className="list">
-                        {showRaw ? (
-                            <>
-                                <tr>
-                                    <td>
-                                        Event Data <span className="text-muted">(Hex)</span>
-                                    </td>
-                                    <td className="e-text-right">
-                                        <HexData raw={fromBase64(rawEventData)} />
-                                    </td>
-                                </tr>
-                            </>
-                        ) : (
-                            <>
-                                {fields.length > 0 && (
-                                    <>
-                                        <tr className="table-sep">
-                                            <td>Field Name</td>
-                                            <td>Type</td>
-                                            <td className="e-text-right">Value</td>
-                                        </tr>
-                                        {mapIxArgsToRows(event.data, { ...eventDef, args: fields } as any, program.idl)}
-                                    </>
-                                )}
-                            </>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Body>
+                    {showRaw ? (
+                        <>
+                            <BaseTable.Row>
+                                <BaseTable.Cell>
+                                    Event Data <span className="e-text-dk-gray-700">(Hex)</span>
+                                </BaseTable.Cell>
+                                <BaseTable.Cell className="e-text-right">
+                                    <HexData raw={fromBase64(rawEventData)} />
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
+                        </>
+                    ) : (
+                        <>
+                            {fields.length > 0 && (
+                                <>
+                                    <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                                        <BaseTable.Cell>Field Name</BaseTable.Cell>
+                                        <BaseTable.Cell>Type</BaseTable.Cell>
+                                        <BaseTable.Cell className="e-text-right">Value</BaseTable.Cell>
+                                    </BaseTable.Row>
+                                    {mapIxArgsToRows(event.data, { ...eventDef, args: fields } as any, program.idl)}
+                                </>
+                            )}
+                        </>
+                    )}
+                </BaseTable.Body>
+            </BaseTable>
+        </Card>
     );
 }

@@ -4,11 +4,12 @@ import { getIdlVersion, isIdlProgramIdMismatch, type SupportedIdl, useAnchorProg
 import { useProgramMetadataCodamaIdl, useProgramMetadataIdl } from '@entities/program-metadata';
 import { useCluster } from '@providers/cluster';
 import { Badge } from '@shared/ui/badge';
-import { cn } from '@shared/utils';
+import { Button } from '@shared/ui/button';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'react-feather';
 
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { TabsList, TabsTrigger } from '@/app/shared/ui/Tabs';
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 import { clusterSlug } from '@/app/utils/cluster';
 
@@ -117,15 +118,22 @@ export function IdlCard({ programId }: { programId: string }) {
 
                         <div className="e-flex e-items-center e-justify-between">
                             <span>In case you want to upload IDL with a multisig, follow the documentation.</span>
-                            <a
-                                href="https://github.com/solana-program/program-metadata?tab=readme-ov-file#commands"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn btn-outline-primary btn-sm e-whitespace-nowrap"
+                            <Button
+                                ui="dashkit"
+                                variant="outline-primary"
+                                size="sm"
+                                className="e-whitespace-nowrap"
+                                asChild
                             >
-                                Full documentation
-                                <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
-                            </a>
+                                <a
+                                    href="https://github.com/solana-program/program-metadata?tab=readme-ov-file#commands"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Full documentation
+                                    <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
+                                </a>
+                            </Button>
                         </div>
                     </div>
                 </CardBody>
@@ -138,25 +146,27 @@ export function IdlCard({ programId }: { programId: string }) {
 
     return (
         <Card ui="dashkit">
-            <CardHeader ui="dashkit">
-                <div className="nav nav-tabs e-border-0" role="tablist">
+            {/* dashkit .card-header-tabs: header height comes from the tabs (not the fixed 60px),
+                negative tab margins cancel the header padding so the active underline (via the
+                trigger's -1px bottom margin) overlays the header border. !important because cn()'s
+                twMerge is not e-prefix-aware and can't drop conflicting base classes. */}
+            <CardHeader ui="dashkit" className="!e-h-auto">
+                <TabsList className="!-e-mb-3 -e-mt-3 !e-border-0">
                     {tabs
                         .filter(tab => tab.idl)
                         .map(tab => (
-                            <button
+                            <TabsTrigger
                                 key={tab.title}
-                                className={cn('nav-item nav-link', {
-                                    active: tab.id === activeTab?.id,
-                                })}
+                                active={tab.id === activeTab?.id}
                                 onClick={() => {
                                     setActiveTabIndex(tabs.findIndex(t => t.id === tab.id));
                                     setSearchStr('');
                                 }}
                             >
                                 {tab.title}
-                            </button>
+                            </TabsTrigger>
                         ))}
-                </div>
+                </TabsList>
             </CardHeader>
             <CardBody ui="dashkit">
                 {isMismatch ? (

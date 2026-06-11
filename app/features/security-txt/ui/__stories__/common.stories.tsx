@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import {
     CodeCell,
     ContactInfo,
@@ -11,16 +13,17 @@ import {
     StringCell,
 } from '../common';
 
-// Cells render <td>, so they need to live in a <table><tr> to be valid HTML.
+// Cells render <BaseTable.Cell>, so they need a table wrapper — mirrors the production
+// TableCardBody (BaseTable ui="dashkit" variant="card") these cells live in.
 const TableRowDecorator = (Story: () => React.ReactNode) => (
-    <table>
-        <tbody>
-            <tr>
-                <td>Label</td>
+    <BaseTable ui="dashkit" variant="card">
+        <BaseTable.Body>
+            <BaseTable.Row>
+                <BaseTable.Cell>Label</BaseTable.Cell>
                 <Story />
-            </tr>
-        </tbody>
-    </table>
+            </BaseTable.Row>
+        </BaseTable.Body>
+    </BaseTable>
 );
 
 const meta = {

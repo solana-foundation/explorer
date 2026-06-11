@@ -5,7 +5,9 @@ import bs58 from 'bs58';
 import React from 'react';
 import * as nacl from 'tweetnacl';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 export function TransactionSignatures({
     signatures,
@@ -49,21 +51,18 @@ export function TransactionSignatures({
                     Signatures
                 </CardTitle>
             </CardHeader>
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="e-text-dk-gray-700">#</th>
-                            <th className="e-text-dk-gray-700">Signature</th>
-                            <th className="e-text-dk-gray-700">Signer</th>
-                            <th className="e-text-dk-gray-700">Validity</th>
-                            <th className="e-text-dk-gray-700">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">{signatureRows}</tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">#</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Signature</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Signer</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Validity</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Details</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>{signatureRows}</BaseTable.Body>
+            </BaseTable>
         </Card>
     );
 }
@@ -92,24 +91,36 @@ function SignatureRow({
     index: number;
 }) {
     return (
-        <tr>
-            <td>
-                <span className="badge bg-info-soft e-mr-[3px]">{index + 1}</span>
-            </td>
-            <td>{signature ? <Signature signature={signature} /> : 'Missing Signature'}</td>
-            <td>
+        <BaseTable.Row>
+            <BaseTable.Cell>
+                <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                    {index + 1}
+                </Badge>
+            </BaseTable.Cell>
+            <BaseTable.Cell>{signature ? <Signature signature={signature} /> : 'Missing Signature'}</BaseTable.Cell>
+            <BaseTable.Cell>
                 <Address pubkey={signer} link />
-            </td>
-            <td>
+            </BaseTable.Cell>
+            <BaseTable.Cell>
                 {verified === undefined ? (
                     'N/A'
                 ) : verified ? (
-                    <span className="badge bg-success-soft e-mr-[3px]">Valid</span>
+                    <Badge ui="dashkit" variant="success" className="e-mr-[3px]">
+                        Valid
+                    </Badge>
                 ) : (
-                    <span className="badge bg-warning-soft e-mr-[3px]">Invalid</span>
+                    <Badge ui="dashkit" variant="warning" className="e-mr-[3px]">
+                        Invalid
+                    </Badge>
                 )}
-            </td>
-            <td>{index === 0 && <span className="badge bg-info-soft e-mr-[3px]">Fee Payer</span>}</td>
-        </tr>
+            </BaseTable.Cell>
+            <BaseTable.Cell>
+                {index === 0 && (
+                    <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                        Fee Payer
+                    </Badge>
+                )}
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

@@ -10,6 +10,10 @@ import React, { createRef } from 'react';
 import { AlertOctagon, Check, ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { Button } from '@/app/components/shared/ui/button';
+import { DropdownHeader, DropdownItem, DropdownMenu } from '@/app/components/shared/ui/dropdown';
+
 export function MetaplexNFTHeader({ nftData }: { nftData: NFTData }) {
     const collectionOpt = nftData.metadata.collection;
     const collection = collectionOpt && isSome(collectionOpt) ? collectionOpt.value : null;
@@ -46,27 +50,30 @@ export function MetaplexNFTHeader({ nftData }: { nftData: NFTData }) {
         [dropdownRef],
     );
     return (
-        <div className="row">
-            <div className="col-auto e-ml-1.5 e-flex e-items-center">
+        <div className="-e-mx-3 e-flex e-flex-wrap">
+            <div className="e-ml-1.5 e-flex e-flex-none e-items-center e-px-3">
                 <NFTImageContent uri={data?.image} />
             </div>
-            <div className="col e-mb-3 e-mt-3">
-                {<h6 className="header-pretitle e-ml-[3px]">Metaplex NFT</h6>}
+            <div className="e-mb-3 e-mt-3 e-min-w-0 e-flex-1 e-px-3">
+                {<h6 className="e-ml-[3px] e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Metaplex NFT</h6>}
                 <div className="e-flex e-items-center">
-                    <h2 className="header-title no-overflow-with-ellipsis e-ml-[3px] e-items-center">
+                    <h2 className="e-mb-0 e-ml-[3px] e-items-center e-overflow-hidden e-text-ellipsis e-whitespace-nowrap">
                         {metadata.name !== '' ? metadata.name : 'No NFT name was found'}
                     </h2>
                     {getEditionPill(nftData.editionInfo)}
                     {isVerifiedCollection ? getVerifiedCollectionPill() : null}
                 </div>
-                <h4 className="header-pretitle no-overflow-with-ellipsis e-ml-[3px] e-mt-[3px]">
+                <h4 className="e-ml-[3px] e-mt-[3px] e-overflow-hidden e-text-ellipsis e-whitespace-nowrap e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">
                     {metadata.symbol !== '' ? metadata.symbol : 'No Symbol was found'}
                 </h4>
                 <div className="e-mb-1.5 e-mt-1.5">{getSaleTypePill(metadata.primarySaleHappened)}</div>
                 <div className="e-mb-3 e-mt-1.5">{getIsMutablePill(metadata.isMutable)}</div>
                 <div className="btn-group">
-                    <button
-                        className="btn btn-dark btn-sm creators-dropdown-button-width"
+                    <Button
+                        ui="dashkit"
+                        variant="dark"
+                        size="sm"
+                        className="e-w-[150px]"
                         type="button"
                         aria-haspopup="true"
                         aria-expanded="false"
@@ -74,10 +81,10 @@ export function MetaplexNFTHeader({ nftData }: { nftData: NFTData }) {
                         ref={dropdownRef}
                     >
                         Creators <ChevronDown size={15} className="align-text-top" />
-                    </button>
-                    <div className="dropdown-menu e-mt-1.5">
+                    </Button>
+                    <DropdownMenu className="e-mt-1.5">
                         {getCreatorDropdownItems(isSome(metadata.creators) ? metadata.creators.value : null)}
-                    </div>
+                    </DropdownMenu>
                 </div>
             </div>
         </div>
@@ -91,8 +98,8 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
         const shareTooltip = 'The percentage of the proceeds a creator receives when this NFT is sold.';
 
         return (
-            <div className="dropdown-header creator-dropdown-entry e-flex e-items-center">
-                <div className="creator-dropdown-header e-flex e-font-mono">
+            <DropdownHeader className="e-flex e-flex-wrap e-items-center">
+                <div className="e-flex e-max-w-[80%] e-grow-0 e-basis-[80%] e-font-mono">
                     <span>Creator Address</span>
                     <InfoTooltip bottom text={creatorTooltip} />
                 </div>
@@ -100,7 +107,7 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
                     <span className="e-font-mono">Royalty</span>
                     <InfoTooltip bottom text={shareTooltip} />
                 </div>
-            </div>
+            </DropdownHeader>
         );
     };
 
@@ -111,11 +118,14 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
     const CreatorEntry = (creator: { address: string; verified: boolean; share: number }) => {
         const creatorPath = useClusterPath({ pathname: `/address/${creator.address}` });
         return (
-            <div className="creator-dropdown-entry e-ml-3 e-mr-3 e-flex e-items-center e-font-mono">
+            <div className="e-ml-3 e-mr-3 e-flex e-flex-wrap e-items-center e-font-mono">
                 {getVerifiedIcon(creator.verified)}
-                <Link className="dropdown-item creator-dropdown-entry-address e-font-mono" href={creatorPath}>
-                    {creator.address}
-                </Link>
+                <DropdownItem
+                    asChild
+                    className="e-max-w-[80%] e-grow-0 e-basis-[80%] e-overflow-hidden e-text-ellipsis e-font-mono"
+                >
+                    <Link href={creatorPath}>{creator.address}</Link>
+                </DropdownItem>
                 <div className="e-mr-3"> {`${creator.share}%`}</div>
             </div>
         );
@@ -133,9 +143,9 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
     }
 
     return (
-        <div className="dropdown-item e-font-mono">
+        <DropdownItem className="e-font-mono">
             <div className="e-mr-3">No creators are associated with this NFT.</div>
-        </div>
+        </DropdownItem>
     );
 }
 
@@ -145,13 +155,13 @@ function getEditionPill(editionInfo: EditionInfo) {
 
     return (
         <div className="e-ml-1.5 e-inline-flex">
-            <span className="badge badge-pill bg-dark">{`${
-                edition && masterEdition
+            <Badge ui="dashkit" variant="dark" tone="solid">
+                {edition && masterEdition
                     ? `Edition ${Number(edition.edition)} / ${Number(masterEdition.supply)}`
                     : masterEdition
                       ? 'Master Edition'
-                      : 'No Master Edition Information'
-            }`}</span>
+                      : 'No Master Edition Information'}
+            </Badge>
         </div>
     );
 }
@@ -164,16 +174,20 @@ function getSaleTypePill(hasPrimarySaleHappened: boolean) {
 
     return (
         <div className="e-inline-flex e-items-center">
-            <span className="badge badge-pill bg-dark">{`${
-                hasPrimarySaleHappened ? 'Secondary Market' : 'Primary Market'
-            }`}</span>
+            <Badge ui="dashkit" variant="dark" tone="solid">
+                {hasPrimarySaleHappened ? 'Secondary Market' : 'Primary Market'}
+            </Badge>
             <InfoTooltip bottom text={hasPrimarySaleHappened ? secondaryMarketTooltip : primaryMarketTooltip} />
         </div>
     );
 }
 
 export function getIsMutablePill(isMutable: boolean) {
-    return <span className="badge badge-pill bg-dark">{`${isMutable ? 'Mutable' : 'Immutable'}`}</span>;
+    return (
+        <Badge ui="dashkit" variant="dark" tone="solid">
+            {isMutable ? 'Mutable' : 'Immutable'}
+        </Badge>
+    );
 }
 
 export function getVerifiedCollectionPill() {
@@ -181,7 +195,9 @@ export function getVerifiedCollectionPill() {
         'This NFT has been verified as a member of an on-chain collection. This tag guarantees authenticity.';
     return (
         <div className="e-ml-1.5 e-inline-flex e-items-center">
-            <span className="badge badge-pill bg-dark">{'Verified Collection'}</span>
+            <Badge ui="dashkit" variant="dark" tone="solid">
+                Verified Collection
+            </Badge>
             <InfoTooltip bottom text={onchainVerifiedToolTip} />
         </div>
     );

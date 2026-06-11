@@ -35,8 +35,8 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
     );
 
     return (
-        <div className="header">
-            <div className="header-body e-flex e-flex-col e-items-start e-gap-4 lg:e-flex-row lg:e-items-end lg:e-justify-between lg:e-gap-1">
+        <div className="e-mb-8">
+            <div className="e-flex e-flex-col e-items-start e-gap-4 e-border-0 e-border-b e-border-solid e-border-dk-gray-700-dark e-py-6 lg:e-flex-row lg:e-items-end lg:e-justify-between lg:e-gap-1">
                 <AccountHeader
                     address={address}
                     account={account}

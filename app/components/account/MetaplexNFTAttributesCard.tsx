@@ -6,7 +6,8 @@ import React from 'react';
 import { getProxiedUri } from '@/app/features/metadata/utils';
 import { useCluster } from '@/app/providers/cluster';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 interface Attribute {
     trait_type: string;
@@ -71,30 +72,30 @@ export function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: 
 
     const attributesList: React.ReactNode[] = attributes.map(({ trait_type, value }) => {
         return (
-            <tr key={`${trait_type}:${value}`}>
-                <td>{trait_type}</td>
-                <td>{value}</td>
-            </tr>
+            <BaseTable.Row key={`${trait_type}:${value}`}>
+                <BaseTable.Cell>{trait_type}</BaseTable.Cell>
+                <BaseTable.Cell>{value}</BaseTable.Cell>
+            </BaseTable.Row>
         );
     });
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title">Attributes</h3>
+                <CardTitle as="h3" ui="dashkit">
+                    Attributes
+                </CardTitle>
             </CardHeader>
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted w-1">Trait type</th>
-                            <th className="text-muted w-1">Value</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">{attributesList}</tbody>
-                </table>
-            </div>
-        </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    {/* e-w-[1%] (not the usual e-w-px): two shrink columns share this table, and 1px vs 1% distributes leftover width differently */}
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="e-w-[1%] e-text-dk-gray-700">Trait type</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-w-[1%] e-text-dk-gray-700">Value</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>{attributesList}</BaseTable.Body>
+            </BaseTable>
+        </Card>
     );
 }

@@ -5,6 +5,9 @@ import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { BaseTable } from '@/app/shared/ui/Table';
+
 export function AddressTableLookupsCard({ message }: { message: VersionedMessage }) {
     const lookupRows = React.useMemo(() => {
         let key = 0;
@@ -31,30 +34,29 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
 
     return (
         <CollapsibleCard title="Address Table Lookup(s)">
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">Address Lookup Table Address</th>
-                            <th className="text-muted">Table Index</th>
-                            <th className="text-muted">Resolved Address</th>
-                            <th className="text-muted">Details</th>
-                        </tr>
-                    </thead>
-                    {lookupRows.length > 0 ? (
-                        <tbody className="list">{lookupRows}</tbody>
-                    ) : (
-                        <tbody className="e-border-0 e-border-t e-border-solid e-border-dark-border e-px-dk-4 e-py-4">
-                            <tr>
-                                <td colSpan={4}>
-                                    <span className="text-muted e-text-center">No entries found</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    )}
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                            Address Lookup Table Address
+                        </BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Table Index</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Resolved Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Details</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                {lookupRows.length > 0 ? (
+                    <BaseTable.Body>{lookupRows}</BaseTable.Body>
+                ) : (
+                    <BaseTable.Body className="e-border-0 e-border-t e-border-solid e-border-dark-border e-px-dk-4 e-py-4">
+                        <BaseTable.Row>
+                            <BaseTable.Cell colSpan={4}>
+                                <span className="e-text-center e-text-dk-gray-700">No entries found</span>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                    </BaseTable.Body>
+                )}
+            </BaseTable>
         </CollapsibleCard>
     );
 }
@@ -71,7 +73,7 @@ function LookupRow({
     const lookupTableInfo = useAddressLookupTable(lookupTableKey.toBase58());
 
     const loadingComponent = (
-        <span className="text-muted">
+        <span className="e-text-dk-gray-700">
             <span className="spinner-grow spinner-grow-sm e-mr-1.5"></span>
             Loading
         </span>
@@ -85,11 +87,11 @@ function LookupRow({
         if (status === FetchStatus.Fetching) {
             resolvedKeyComponent = loadingComponent;
         } else if (status === FetchStatus.FetchFailed || !lookupTable) {
-            resolvedKeyComponent = <span className="text-muted">Failed to fetch Lookup Table</span>;
+            resolvedKeyComponent = <span className="e-text-dk-gray-700">Failed to fetch Lookup Table</span>;
         } else if (typeof lookupTable === 'string') {
-            resolvedKeyComponent = <span className="text-muted">Invalid Lookup Table</span>;
+            resolvedKeyComponent = <span className="e-text-dk-gray-700">Invalid Lookup Table</span>;
         } else if (lookupTableIndex >= lookupTable.state.addresses.length) {
-            resolvedKeyComponent = <span className="text-muted">Invalid Lookup Table Index</span>;
+            resolvedKeyComponent = <span className="e-text-dk-gray-700">Invalid Lookup Table Index</span>;
         } else {
             const resolvedKey = lookupTable.state.addresses[lookupTableIndex];
             resolvedKeyComponent = <Address pubkey={resolvedKey} link />;
@@ -97,13 +99,19 @@ function LookupRow({
     }
 
     return (
-        <tr>
-            <td className="e-text-right">
+        <BaseTable.Row>
+            <BaseTable.Cell className="e-text-right">
                 <Address pubkey={lookupTableKey} link />
-            </td>
-            <td className="e-text-right">{lookupTableIndex}</td>
-            <td className="e-text-right">{resolvedKeyComponent}</td>
-            <td>{!readOnly && <span className="badge bg-danger-soft e-mr-[3px]">Writable</span>}</td>
-        </tr>
+            </BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right">{lookupTableIndex}</BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right">{resolvedKeyComponent}</BaseTable.Cell>
+            <BaseTable.Cell>
+                {!readOnly && (
+                    <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                        Writable
+                    </Badge>
+                )}
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

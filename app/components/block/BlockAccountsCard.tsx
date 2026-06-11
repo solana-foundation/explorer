@@ -4,8 +4,10 @@ import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
 
+import { Button } from '@/app/components/shared/ui/button';
 import { invariant } from '@/app/shared/lib/invariant';
-import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 type AccountStats = {
     reads: number;
@@ -63,49 +65,49 @@ export function BlockAccountsCard({ block, blockSlot }: { block: VersionedBlockR
     }, [block]);
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title">Block Account Usage</h3>
+                <CardTitle as="h3" ui="dashkit">
+                    Block Account Usage
+                </CardTitle>
             </CardHeader>
-
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">Account</th>
-                            <th className="text-muted">Read-Write Count</th>
-                            <th className="text-muted">Read-Only Count</th>
-                            <th className="text-muted">Total Count</th>
-                            <th className="text-muted">% of Transactions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {accountStats.slice(0, numDisplayed).map(([address, { writes, reads }]) => (
-                            <StatsRow
-                                address={address}
-                                blockSlot={blockSlot}
-                                key={address}
-                                reads={reads}
-                                totalTransactions={totalTransactions}
-                                writes={writes}
-                            />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Account</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Read-Write Count</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Read-Only Count</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Total Count</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">% of Transactions</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>
+                    {accountStats.slice(0, numDisplayed).map(([address, { writes, reads }]) => (
+                        <StatsRow
+                            address={address}
+                            blockSlot={blockSlot}
+                            key={address}
+                            reads={reads}
+                            totalTransactions={totalTransactions}
+                            writes={writes}
+                        />
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
 
             {accountStats.length > numDisplayed && (
                 <CardFooter ui="dashkit">
-                    <button
-                        className="btn btn-primary e-w-full"
+                    <Button
+                        ui="dashkit"
+                        variant="primary"
+                        className="e-w-full"
                         onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More
-                    </button>
+                    </Button>
                 </CardFooter>
             )}
-        </div>
+        </Card>
     );
 }
 
@@ -127,16 +129,16 @@ function StatsRow({
         pathname: `/block/${blockSlot}`,
     });
     return (
-        <tr>
-            <td>
+        <BaseTable.Row>
+            <BaseTable.Cell>
                 <Link href={accountPath}>
                     <Address pubkey={new PublicKey(address)} />
                 </Link>
-            </td>
-            <td>{writes}</td>
-            <td>{reads}</td>
-            <td>{writes + reads}</td>
-            <td>{((100 * (writes + reads)) / totalTransactions).toFixed(2)}%</td>
-        </tr>
+            </BaseTable.Cell>
+            <BaseTable.Cell>{writes}</BaseTable.Cell>
+            <BaseTable.Cell>{reads}</BaseTable.Cell>
+            <BaseTable.Cell>{writes + reads}</BaseTable.Cell>
+            <BaseTable.Cell>{((100 * (writes + reads)) / totalTransactions).toFixed(2)}%</BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

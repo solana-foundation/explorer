@@ -6,6 +6,8 @@ import { Account } from '@providers/accounts';
 import { NonceAccount } from '@validators/accounts/nonce';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 export function NonceAccountSection({ account, nonceAccount }: { account: Account; nonceAccount: NonceAccount }) {
     const refresh = useRefreshAccount();
     return (
@@ -18,26 +20,26 @@ export function NonceAccountSection({ account, nonceAccount }: { account: Accoun
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <tr>
-                <td>Authority</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Authority</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <Address pubkey={nonceAccount.info.authority} alignRight raw link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Blockhash</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Blockhash</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     <code>{nonceAccount.info.blockhash}</code>
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Fee</td>
-                <td className="e-text-right">
+            <BaseTable.Row>
+                <BaseTable.Cell>Fee</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right">
                     {nonceAccount.info.feeCalculator.lamportsPerSignature} lamports per signature
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </AccountCard>
     );
 }

@@ -19,6 +19,7 @@ import {
 } from 'sas-lib';
 
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { Address } from '../../common/Address';
 import { mapCodamaIxArgsToRows } from '../codama/codamaUtils';
@@ -97,37 +98,37 @@ export function SolanaAttestationDetailsCard({
     }
     return (
         <InstructionCard title={`Solana Attestation: ${title}`} {...{ childIndex, index, innerCards, ix, result }}>
-            <tr>
-                <td>Program</td>
-                <td className="e-text-right" colSpan={2}>
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right" colSpan={2}>
                     <Address pubkey={new PublicKey(SAS_PROGRAM_ID)} alignRight link raw />
-                </td>
-            </tr>
-            <tr className="table-sep">
-                <td>Account Name</td>
-                <td className="e-text-right" colSpan={2}>
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                <BaseTable.Cell>Account Name</BaseTable.Cell>
+                <BaseTable.Cell className="e-text-right" colSpan={2}>
                     Address
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {parsed &&
                 parsed.accounts &&
                 Object.entries(parsed.accounts as Record<string, AccountMeta>).map(([key, value], idx: number) => (
-                    <tr key={idx}>
-                        <td>{key.charAt(0).toUpperCase() + key.slice(1)}</td>
-                        <td className="e-text-right" colSpan={2}>
+                    <BaseTable.Row key={idx}>
+                        <BaseTable.Cell>{key.charAt(0).toUpperCase() + key.slice(1)}</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right" colSpan={2}>
                             <Address pubkey={new PublicKey(value.address)} alignRight link />
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
                 ))}
 
             {/* Need to make sure there's one other field besides the discriminator */}
             {parsed.data && Object.keys(parsed.data).length > 2 && (
                 <>
-                    <tr className="table-sep">
-                        <td>Argument Name</td>
-                        <td>Type</td>
-                        <td className="e-text-right">Value</td>
-                    </tr>
+                    <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                        <BaseTable.Cell>Argument Name</BaseTable.Cell>
+                        <BaseTable.Cell>Type</BaseTable.Cell>
+                        <BaseTable.Cell className="e-text-right">Value</BaseTable.Cell>
+                    </BaseTable.Row>
                     {mapCodamaIxArgsToRows(parsed.data)}
                 </>
             )}

@@ -1,6 +1,7 @@
 import { ReactElement } from 'react';
 
-import { CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardHeader } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { Skeleton } from './ui/skeleton';
 
@@ -15,37 +16,36 @@ export function TableRowSkeleton({
     cols?: ColDef[];
 }) {
     return (
-        <tr>
+        <BaseTable.Row>
             {cols.map(({ skeleton, td }, i) => (
-                <td key={i} className={td}>
+                <BaseTable.Cell key={i} className={td}>
                     <Skeleton className={skeleton} />
-                </td>
+                </BaseTable.Cell>
             ))}
-        </tr>
+        </BaseTable.Row>
     );
 }
 
 export function RichRowSkeleton() {
     return (
-        <tr>
-            <td>
+        <BaseTable.Row>
+            <BaseTable.Cell>
                 <Skeleton className="e-mb-2 e-h-3 e-w-3/5" />
                 <Skeleton className="e-mb-2 e-h-3 e-w-full" />
                 <Skeleton className="e-h-3 e-w-2/5" />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
 export function SimpleCardSkeleton({ withTitle = false, title }: { withTitle?: boolean; title?: ReactElement }) {
     return (
-        <div className="card e-mb-3 e-w-full md:e-mb-6">
+        <Card ui="dashkit" className="e-mb-3 e-w-full md:e-mb-6">
             {withTitle && (
                 <CardHeader ui="dashkit">
-                    <div className="row e-items-center">
-                        <div className="col">
-                            <Skeleton className="e-h-5 e-w-40" />
-                        </div>
+                    {/* Wrapper absorbs CardHeader's [&>:first-child]:e-flex-1 so Skeleton's e-w-40 isn't stretched to full width. */}
+                    <div>
+                        <Skeleton className="e-h-5 e-w-40" />
                     </div>
                 </CardHeader>
             )}
@@ -54,90 +54,79 @@ export function SimpleCardSkeleton({ withTitle = false, title }: { withTitle?: b
                 <Skeleton className="e-mb-2.5 e-mt-2 e-h-7 e-w-full" />
                 <Skeleton className="e-h-3 e-w-2/5" />
             </CardBody>
-        </div>
+        </Card>
     );
 }
 
 export function RichListSkeleton({ rows = 2 }: { rows?: number }) {
     return (
-        <div className="card e-flex-1">
+        <Card ui="dashkit" flex="grow">
             <CardHeader ui="dashkit">
-                <div className="row e-items-center">
-                    <div className="col">
-                        <Skeleton className="e-h-5 e-w-40" />
-                    </div>
+                {/* Wrapper absorbs CardHeader's [&>:first-child]:e-flex-1 so Skeleton's e-w-40 isn't stretched to full width. */}
+                <div>
+                    <Skeleton className="e-h-5 e-w-40" />
                 </div>
             </CardHeader>
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm card-table table-nowrap">
-                    <tbody className="list">
-                        {Array.from({ length: rows }).map((_, i) => (
-                            <RichRowSkeleton key={i} />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Body>
+                    {Array.from({ length: rows }).map((_, i) => (
+                        <RichRowSkeleton key={i} />
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
+        </Card>
     );
 }
 
 export function StatsTableSkeleton({ rows = 8 }: { rows?: number }) {
     return (
-        <div className="card e-flex-1">
+        <Card ui="dashkit" flex="grow">
             <CardHeader ui="dashkit">
-                <div className="row e-items-center">
-                    <div className="col">
-                        <Skeleton className="e-h-5 e-w-40" />
-                    </div>
+                {/* Wrapper absorbs CardHeader's [&>:first-child]:e-flex-1 so Skeleton's e-w-40 isn't stretched to full width. */}
+                <div>
+                    <Skeleton className="e-h-5 e-w-40" />
                 </div>
             </CardHeader>
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm card-table table-nowrap">
-                    <tbody className="list">
-                        {Array.from({ length: rows }).map((_, i) => (
-                            <TableRowSkeleton key={i} />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Body>
+                    {Array.from({ length: rows }).map((_, i) => (
+                        <TableRowSkeleton key={i} />
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
+        </Card>
     );
 }
 
 export function TableCardSkeleton({ cols = 4, rows = 6 }: { cols?: number; rows?: number }) {
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
                 <Skeleton className="e-h-5 e-w-64" />
             </CardHeader>
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive small-headers">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            {Array.from({ length: cols }).map((_, i) => (
-                                <th key={i}>
-                                    <Skeleton className="e-h-4 e-w-1/2" />
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {Array.from({ length: rows }).map((_, i) => (
-                            <tr key={i}>
-                                {Array.from({ length: cols }).map((_, j) => (
-                                    <td key={j}>
-                                        <Skeleton className="e-h-4 e-w-1/3" />
-                                    </td>
-                                ))}
-                            </tr>
+            <BaseTable ui="dashkit">
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        {Array.from({ length: cols }).map((_, i) => (
+                            <BaseTable.HeaderCell key={i}>
+                                <Skeleton className="e-h-4 e-w-1/2" />
+                            </BaseTable.HeaderCell>
                         ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>
+                    {Array.from({ length: rows }).map((_, i) => (
+                        <BaseTable.Row key={i}>
+                            {Array.from({ length: cols }).map((_, j) => (
+                                <BaseTable.Cell key={j}>
+                                    <Skeleton className="e-h-4 e-w-1/3" />
+                                </BaseTable.Cell>
+                            ))}
+                        </BaseTable.Row>
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
+        </Card>
     );
 }
 
@@ -154,7 +143,7 @@ function ImageSliderCardSkeleton() {
 
 export function ImageSliderSkeleton() {
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardBody ui="dashkit">
                 <div className="e-mb-3 e-flex e-justify-between e-border-b e-border-gray-300 e-pb-2">
                     <Skeleton className="e-h-5 e-w-80" />
@@ -167,6 +156,6 @@ export function ImageSliderSkeleton() {
                     <ImageSliderCardSkeleton />
                 </div>
             </CardBody>
-        </div>
+        </Card>
     );
 }

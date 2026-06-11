@@ -3,7 +3,9 @@ import { SolBalance } from '@components/common/SolBalance';
 import { PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import React from 'react';
 
-import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Button } from '@/app/components/shared/ui/button';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 const PAGE_SIZE = 10;
 
@@ -15,64 +17,66 @@ export function BlockRewardsCard({ block }: { block: VersionedBlockResponse }) {
     }
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title">Block Rewards</h3>
+                <CardTitle as="h3" ui="dashkit">
+                    Block Rewards
+                </CardTitle>
             </CardHeader>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Type</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Amount</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">New Balance</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Percent Change</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>
+                    {block.rewards.map((reward, index) => {
+                        if (index >= rewardsDisplayed - 1) {
+                            return null;
+                        }
 
-            {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-            <div className="table-responsive e-mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">Address</th>
-                            <th className="text-muted">Type</th>
-                            <th className="text-muted">Amount</th>
-                            <th className="text-muted">New Balance</th>
-                            <th className="text-muted">Percent Change</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {block.rewards.map((reward, index) => {
-                            if (index >= rewardsDisplayed - 1) {
-                                return null;
-                            }
-
-                            let percentChange;
-                            if (reward.postBalance !== null && reward.postBalance !== 0) {
-                                percentChange = (
-                                    (Math.abs(reward.lamports) / (reward.postBalance - reward.lamports)) *
-                                    100
-                                ).toFixed(9);
-                            }
-                            return (
-                                <tr key={reward.pubkey + reward.rewardType}>
-                                    <td>
-                                        <Address pubkey={new PublicKey(reward.pubkey)} link />
-                                    </td>
-                                    <td>{reward.rewardType}</td>
-                                    <td>
-                                        <SolBalance lamports={reward.lamports} />
-                                    </td>
-                                    <td>{reward.postBalance ? <SolBalance lamports={reward.postBalance} /> : '-'}</td>
-                                    <td>{percentChange ? `${percentChange}%` : '-'}</td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+                        let percentChange;
+                        if (reward.postBalance !== null && reward.postBalance !== 0) {
+                            percentChange = (
+                                (Math.abs(reward.lamports) / (reward.postBalance - reward.lamports)) *
+                                100
+                            ).toFixed(9);
+                        }
+                        return (
+                            <BaseTable.Row key={reward.pubkey + reward.rewardType}>
+                                <BaseTable.Cell>
+                                    <Address pubkey={new PublicKey(reward.pubkey)} link />
+                                </BaseTable.Cell>
+                                <BaseTable.Cell>{reward.rewardType}</BaseTable.Cell>
+                                <BaseTable.Cell>
+                                    <SolBalance lamports={reward.lamports} />
+                                </BaseTable.Cell>
+                                <BaseTable.Cell>
+                                    {reward.postBalance ? <SolBalance lamports={reward.postBalance} /> : '-'}
+                                </BaseTable.Cell>
+                                <BaseTable.Cell>{percentChange ? `${percentChange}%` : '-'}</BaseTable.Cell>
+                            </BaseTable.Row>
+                        );
+                    })}
+                </BaseTable.Body>
+            </BaseTable>
 
             {block.rewards.length > rewardsDisplayed && (
                 <CardFooter ui="dashkit">
-                    <button
-                        className="btn btn-primary e-w-full"
+                    <Button
+                        ui="dashkit"
+                        variant="primary"
+                        className="e-w-full"
                         onClick={() => setRewardsDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More
-                    </button>
+                    </Button>
                 </CardFooter>
             )}
-        </div>
+        </Card>
     );
 }

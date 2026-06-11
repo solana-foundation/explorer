@@ -9,7 +9,8 @@ import React, { useMemo } from 'react';
 
 import { equals, toBuffer } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 export function AnchorAccountCard({ account }: { account: Account }) {
     const { lamports } = account;
@@ -50,33 +51,25 @@ export function AnchorAccountCard({ account }: { account: Account }) {
 
     return (
         <div>
-            <div className="card">
+            <Card ui="dashkit">
                 <CardHeader ui="dashkit">
-                    <div className="row e-items-center">
-                        <div className="col">
-                            <h3 className="card-header-title">
-                                {programName}: {accountDef.name.charAt(0).toUpperCase() + accountDef.name.slice(1)}
-                            </h3>
-                        </div>
-                    </div>
+                    <CardTitle as="h3" ui="dashkit">
+                        {programName}: {accountDef.name.charAt(0).toUpperCase() + accountDef.name.slice(1)}
+                    </CardTitle>
                 </CardHeader>
-
-                {/* TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table */}
-                <div className="table-responsive e-mb-0">
-                    <table className="table table-sm table-nowrap card-table">
-                        <thead>
-                            <tr>
-                                <th className="w-1">Field</th>
-                                <th className="w-1">Type</th>
-                                <th className="w-1">Value</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {mapAccountToRows(decodedAccountData, accountDef as IdlTypeDef, anchorProgram.idl)}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                <BaseTable ui="dashkit" variant="card" nowrap>
+                    <BaseTable.Head>
+                        <BaseTable.Row>
+                            <BaseTable.HeaderCell className="e-w-px">Field</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-w-px">Type</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-w-px">Value</BaseTable.HeaderCell>
+                        </BaseTable.Row>
+                    </BaseTable.Head>
+                    <BaseTable.Body>
+                        {mapAccountToRows(decodedAccountData, accountDef as IdlTypeDef, anchorProgram.idl)}
+                    </BaseTable.Body>
+                </BaseTable>
+            </Card>
         </div>
     );
 }

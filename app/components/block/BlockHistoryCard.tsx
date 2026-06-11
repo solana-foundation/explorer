@@ -21,8 +21,12 @@ import React, { createRef, useMemo } from 'react';
 import { ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { Button } from '@/app/components/shared/ui/button';
+import { Dropdown, DropdownItem, DropdownMenu } from '@/app/components/shared/ui/dropdown';
 import { invariant } from '@/app/shared/lib/invariant';
-import { CardBody, CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 const PAGE_SIZE = 25;
 
@@ -199,9 +203,11 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
     }
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <h3 className="card-header-title">{title}</h3>
+                <CardTitle as="h3" ui="dashkit">
+                    {title}
+                </CardTitle>
                 <FilterDropdown
                     filter={programFilter}
                     invokedPrograms={invokedPrograms}
@@ -225,165 +231,164 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                         : 'No transactions found with this filter'}
                 </CardBody>
             ) : (
-                // TODO: migrate to <BaseCardTable> from @/app/shared/ui/Table
-                <div className="table-responsive e-mb-0">
-                    <table className="table table-sm table-nowrap card-table">
-                        <thead>
-                            <tr>
-                                <th
-                                    className="text-muted e-cursor-pointer"
+                <BaseTable ui="dashkit" variant="card" nowrap>
+                    <BaseTable.Head>
+                        <BaseTable.Row>
+                            <BaseTable.HeaderCell
+                                className="e-cursor-pointer e-text-dk-gray-700"
+                                onClick={() => {
+                                    const additionalParams = new URLSearchParams(currentSearchParams?.toString());
+                                    additionalParams.delete('sort');
+                                    router.push(
+                                        pickClusterParams(currentPathname, currentSearchParams, additionalParams),
+                                    );
+                                }}
+                            >
+                                #
+                            </BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                                Transaction Signature
+                            </BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell
+                                className="e-cursor-pointer e-text-dk-gray-700"
+                                onClick={() => {
+                                    const additionalParams = new URLSearchParams(currentSearchParams?.toString());
+                                    additionalParams.set('sort', 'fee');
+                                    router.push(
+                                        pickClusterParams(currentPathname, currentSearchParams, additionalParams),
+                                    );
+                                }}
+                            >
+                                Fee
+                            </BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell
+                                className="e-cursor-pointer e-text-dk-gray-700"
+                                onClick={() => {
+                                    const additionalParams = new URLSearchParams(currentSearchParams?.toString());
+                                    additionalParams.set('sort', 'reservedCUs');
+                                    router.push(
+                                        pickClusterParams(currentPathname, currentSearchParams, additionalParams),
+                                    );
+                                }}
+                            >
+                                Reserved CUs
+                            </BaseTable.HeaderCell>
+                            {showComputeUnits && (
+                                <BaseTable.HeaderCell
+                                    className="e-cursor-pointer e-text-dk-gray-700"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
-                                        additionalParams.delete('sort');
+                                        additionalParams.set('sort', 'compute');
                                         router.push(
                                             pickClusterParams(currentPathname, currentSearchParams, additionalParams),
                                         );
                                     }}
                                 >
-                                    #
-                                </th>
-                                <th className="text-muted">Result</th>
-                                <th className="text-muted">Transaction Signature</th>
-                                <th
-                                    className="text-muted e-cursor-pointer"
-                                    onClick={() => {
-                                        const additionalParams = new URLSearchParams(currentSearchParams?.toString());
-                                        additionalParams.set('sort', 'fee');
-                                        router.push(
-                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams),
-                                        );
-                                    }}
-                                >
-                                    Fee
-                                </th>
-                                <th
-                                    className="text-muted e-cursor-pointer"
-                                    onClick={() => {
-                                        const additionalParams = new URLSearchParams(currentSearchParams?.toString());
-                                        additionalParams.set('sort', 'reservedCUs');
-                                        router.push(
-                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams),
-                                        );
-                                    }}
-                                >
-                                    Reserved CUs
-                                </th>
-                                {showComputeUnits && (
-                                    <th
-                                        className="text-muted e-cursor-pointer"
-                                        onClick={() => {
-                                            const additionalParams = new URLSearchParams(
-                                                currentSearchParams?.toString(),
-                                            );
-                                            additionalParams.set('sort', 'compute');
-                                            router.push(
-                                                pickClusterParams(
-                                                    currentPathname,
-                                                    currentSearchParams,
-                                                    additionalParams,
-                                                ),
-                                            );
-                                        }}
-                                    >
-                                        Compute
-                                    </th>
-                                )}
-                                <th
-                                    className="text-muted e-cursor-pointer"
-                                    onClick={() => {
-                                        const additionalParams = new URLSearchParams(currentSearchParams?.toString());
-                                        additionalParams.set('sort', 'txnCost');
-                                        router.push(
-                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams),
-                                        );
-                                    }}
-                                >
-                                    Txn Cost
-                                </th>
-                                <th className="text-muted">Invoked Programs</th>
-                            </tr>
-                        </thead>
-                        <tbody className="list">
-                            {filteredTransactions.slice(0, numDisplayed).map((tx, i) => {
-                                let statusText;
-                                let statusClass;
-                                let signature: React.ReactNode;
-                                if (tx.meta?.err || !tx.signature) {
-                                    statusClass = 'warning';
-                                    statusText = 'Failed';
-                                } else {
-                                    statusClass = 'success';
-                                    statusText = 'Success';
-                                }
+                                    Compute
+                                </BaseTable.HeaderCell>
+                            )}
+                            <BaseTable.HeaderCell
+                                className="e-cursor-pointer e-text-dk-gray-700"
+                                onClick={() => {
+                                    const additionalParams = new URLSearchParams(currentSearchParams?.toString());
+                                    additionalParams.set('sort', 'txnCost');
+                                    router.push(
+                                        pickClusterParams(currentPathname, currentSearchParams, additionalParams),
+                                    );
+                                }}
+                            >
+                                Txn Cost
+                            </BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Invoked Programs</BaseTable.HeaderCell>
+                        </BaseTable.Row>
+                    </BaseTable.Head>
+                    <BaseTable.Body>
+                        {filteredTransactions.slice(0, numDisplayed).map((tx, i) => {
+                            let statusText;
+                            let statusClass;
+                            let signature: React.ReactNode;
+                            if (tx.meta?.err || !tx.signature) {
+                                statusClass = 'warning';
+                                statusText = 'Failed';
+                            } else {
+                                statusClass = 'success';
+                                statusText = 'Success';
+                            }
 
-                                if (tx.signature) {
-                                    signature = <Signature signature={tx.signature} link />;
-                                }
+                            if (tx.signature) {
+                                signature = <Signature signature={tx.signature} link />;
+                            }
 
-                                const entries = Array.from(tx.invocations.entries());
-                                entries.sort();
+                            const entries = Array.from(tx.invocations.entries());
+                            entries.sort();
 
-                                return (
-                                    <tr key={i}>
-                                        <td>{tx.index + 1}</td>
-                                        <td>
-                                            <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
-                                        </td>
+                            return (
+                                <BaseTable.Row key={i}>
+                                    <BaseTable.Cell>{tx.index + 1}</BaseTable.Cell>
+                                    <BaseTable.Cell>
+                                        <Badge ui="dashkit" variant={statusClass as 'success' | 'warning'}>
+                                            {statusText}
+                                        </Badge>
+                                    </BaseTable.Cell>
 
-                                        <td>{signature}</td>
+                                    <BaseTable.Cell>{signature}</BaseTable.Cell>
 
-                                        <td>{tx.meta !== null ? <SolBalance lamports={tx.meta.fee} /> : 'Unknown'}</td>
+                                    <BaseTable.Cell>
+                                        {tx.meta !== null ? <SolBalance lamports={tx.meta.fee} /> : 'Unknown'}
+                                    </BaseTable.Cell>
 
-                                        <td>
-                                            {tx.reservedComputeUnits !== undefined
-                                                ? new Intl.NumberFormat('en-US').format(tx.reservedComputeUnits)
+                                    <BaseTable.Cell>
+                                        {tx.reservedComputeUnits !== undefined
+                                            ? new Intl.NumberFormat('en-US').format(tx.reservedComputeUnits)
+                                            : 'Unknown'}
+                                    </BaseTable.Cell>
+
+                                    {showComputeUnits && (
+                                        <BaseTable.Cell>
+                                            {tx.logTruncated && '>'}
+                                            {tx.computeUnits !== undefined
+                                                ? new Intl.NumberFormat('en-US').format(tx.computeUnits)
                                                 : 'Unknown'}
-                                        </td>
-
-                                        {showComputeUnits && (
-                                            <td>
-                                                {tx.logTruncated && '>'}
-                                                {tx.computeUnits !== undefined
-                                                    ? new Intl.NumberFormat('en-US').format(tx.computeUnits)
-                                                    : 'Unknown'}
-                                            </td>
-                                        )}
-                                        <td>
-                                            {tx.costUnits !== undefined
-                                                ? new Intl.NumberFormat('en-US').format(tx.costUnits)
-                                                : 'Unknown'}
-                                        </td>
-                                        <td>
-                                            {tx.invocations.size === 0
-                                                ? 'NA'
-                                                : entries.map(([programId, count], i) => {
-                                                      return (
-                                                          <div key={i} className="e-flex e-items-center">
-                                                              <Address pubkey={new PublicKey(programId)} link />
-                                                              <span className="text-muted e-ml-1.5">{`(${count})`}</span>
-                                                          </div>
-                                                      );
-                                                  })}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
+                                        </BaseTable.Cell>
+                                    )}
+                                    <BaseTable.Cell>
+                                        {tx.costUnits !== undefined
+                                            ? new Intl.NumberFormat('en-US').format(tx.costUnits)
+                                            : 'Unknown'}
+                                    </BaseTable.Cell>
+                                    <BaseTable.Cell>
+                                        {tx.invocations.size === 0
+                                            ? 'NA'
+                                            : entries.map(([programId, count], i) => {
+                                                  return (
+                                                      <div key={i} className="e-flex e-items-center">
+                                                          <Address pubkey={new PublicKey(programId)} link />
+                                                          <span className="e-ml-1.5 e-text-dk-gray-700">{`(${count})`}</span>
+                                                      </div>
+                                                  );
+                                              })}
+                                    </BaseTable.Cell>
+                                </BaseTable.Row>
+                            );
+                        })}
+                    </BaseTable.Body>
+                </BaseTable>
             )}
 
             {filteredTransactions.length > numDisplayed && (
                 <CardFooter ui="dashkit">
-                    <button
-                        className="btn btn-primary e-w-full"
+                    <Button
+                        ui="dashkit"
+                        variant="primary"
+                        className="e-w-full"
                         onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More
-                    </button>
+                    </Button>
                 </CardFooter>
             )}
-        </div>
+        </Card>
     );
 }
 
@@ -461,11 +466,11 @@ const FilterDropdown = ({ filter, invokedPrograms, totalTransactionCount }: Filt
     );
 
     return (
-        <div className="dropdown e-mr-1.5">
-            <button className="btn btn-white btn-sm" data-bs-toggle="dropdown" type="button" ref={dropdownRef}>
+        <Dropdown className="e-mr-1.5">
+            <Button ui="dashkit" variant="white" size="sm" data-bs-toggle="dropdown" type="button" ref={dropdownRef}>
                 {currentFilterOption.name} <ChevronDown className="align-text-top" size={13} />
-            </button>
-            <div className="token-filter dropdown-menu-end dropdown-menu">
+            </Button>
+            <DropdownMenu align="end" className="e-max-h-80 e-overflow-y-auto">
                 {filterOptions.map(({ name, programId, transactionCount }) => (
                     <FilterLink
                         currentFilter={filter}
@@ -475,8 +480,8 @@ const FilterDropdown = ({ filter, invokedPrograms, totalTransactionCount }: Filt
                         transactionCount={transactionCount}
                     />
                 ))}
-            </div>
-        </div>
+            </DropdownMenu>
+        </Dropdown>
     );
 };
 
@@ -504,8 +509,8 @@ function FilterLink({
         return `${currentPathname}${nextQueryString ? `?${nextQueryString}` : ''}`;
     }, [currentPathname, currentSearchParams, name, programId]);
     return (
-        <Link className={cn('dropdown-item', programId === currentFilter && 'active')} href={href} key={programId}>
-            {`${name} (${transactionCount})`}
-        </Link>
+        <DropdownItem asChild className={cn(programId === currentFilter && 'active')} key={programId}>
+            <Link href={href}>{`${name} (${transactionCount})`}</Link>
+        </DropdownItem>
     );
 }

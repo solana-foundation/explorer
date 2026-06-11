@@ -9,6 +9,8 @@ import {
     getAnchorId,
     useTokenExtensionNavigation,
 } from '@/app/features/token-extensions/use-token-extension-navigation';
+import { Card } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
 import { TokenExtensionBadge } from './token-extensions/TokenExtensionBadge';
@@ -139,11 +141,11 @@ function TokenExtensionAccordionItem({
             </div>
             <AccordionContent>
                 {!showRaw ? (
-                    <div className="card e-m-4">
+                    <Card ui="dashkit" className="e-m-4">
                         <TableCardBodyHeaded headerComponent={tableHeaderComponent}>
                             {TokenExtensionRow(extension, undefined, decimals, symbol, 'omit')}
                         </TableCardBodyHeaded>
-                    </div>
+                    </Card>
                 ) : (
                     <div className="e-p-4">
                         <ReactJson src={parsedExtension.parsed || {}} style={{ padding: 25 }} />
@@ -156,10 +158,10 @@ function TokenExtensionAccordionItem({
 
 function TokenExtensionStateHeader({ name }: { name: string }) {
     return (
-        <tr>
-            <th className="text-muted w-1">{name}</th>
-            <th className="text-muted"></th>
-        </tr>
+        <BaseTable.Row>
+            <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">{name}</BaseTable.HeaderCell>
+            <BaseTable.HeaderCell className="e-text-dk-gray-700"></BaseTable.HeaderCell>
+        </BaseTable.Row>
     );
 }
 

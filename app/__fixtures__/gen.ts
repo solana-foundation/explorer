@@ -14,14 +14,22 @@ export const gen = {
         return bs58.encode(bytes);
     },
     epoch: () => gen.bigint(1_000n),
-    signature: () => {
+    /** Deterministic when seed provided (same seed → same value) so story fixtures stay pixel-stable. */
+    signature: (seed?: number) => {
         const bytes = new Uint8Array(64);
-        for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+        if (seed === undefined) {
+            for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+        } else {
+            for (let i = 0; i < bytes.length; i++) bytes[i] = (seed * 11 + i * 17) & 0xff;
+        }
         return bs58.encode(bytes);
     },
     /** Deterministic when seed provided (same seed → same value) so story fixtures stay pixel-stable. */
     slot: (seed?: number) =>
         seed === undefined ? gen.bigint(300_000_000n) : ((BigInt(seed) + 1n) * 2_654_435_761n) % 300_000_000n,
+    /** Unix seconds; deterministic when seed provided so story fixtures stay pixel-stable. */
+    timestamp: (seed?: number) =>
+        seed === undefined ? Math.floor(Math.random() * 2_000_000_000) : 1_700_000_000 + seed * 86_400,
 };
 
 /** Stable single-placeholder blockhash. */
@@ -29,3 +37,9 @@ export const DEFAULT_BLOCKHASH = gen.blockhash();
 
 /** Stable single-placeholder slot (number). */
 export const DEFAULT_SLOT = Number(gen.slot(0));
+
+/** Stable single-placeholder signature (base58, 64 bytes). */
+export const DEFAULT_SIGNATURE = gen.signature(0);
+
+/** Stable single-placeholder unix timestamp (seconds since epoch). */
+export const DEFAULT_TIMESTAMP = gen.timestamp(0);

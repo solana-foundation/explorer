@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect } from 'storybook/test';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import {
     ImageSliderSkeleton,
     RichListSkeleton,
@@ -16,11 +18,9 @@ const hasPulse = (canvasElement: HTMLElement) =>
 
 function TableWrapper({ children }: { children: React.ReactNode }) {
     return (
-        <div className="table-responsive e-mb-0">
-            <table className="table table-sm card-table table-nowrap">
-                <tbody className="list">{children}</tbody>
-            </table>
-        </div>
+        <BaseTable ui="dashkit" variant="card" nowrap>
+            <BaseTable.Body>{children}</BaseTable.Body>
+        </BaseTable>
     );
 }
 

@@ -8,6 +8,7 @@ import { Download, FileText, Share2, Table } from 'react-feather';
 import { useToast } from '@/app/components/shared/ui/sonner/use-toast';
 import { EReceiptDownloadFormat, receiptAnalytics } from '@/app/shared/lib/analytics';
 import { useCanNativeShare } from '@/app/shared/lib/use-can-native-share';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
 import type { DownloadReceiptFn, FormattedExtendedReceipt } from '../types';
 import { BaseReceipt, BlurredCircle } from './BaseReceipt';
@@ -62,7 +63,7 @@ export function ReceiptView({
     }
 
     return (
-        <div className="container e-flex e-min-h-[80vh] e-min-w-[theme(screens.xs)] e-flex-col e-items-center e-justify-center e-gap-6 e-px-5 e-py-10">
+        <PageContainer className="e-flex e-min-h-[80vh] e-min-w-[theme(screens.xs)] e-flex-col e-items-center e-justify-center e-gap-6 e-px-5 e-py-10">
             <BlurredCircle />
             <BaseReceipt data={data} />
             <div className="e-flex e-flex-row e-items-center e-gap-1">
@@ -121,6 +122,6 @@ export function ReceiptView({
                     </PopoverButton>
                 </div>
             </div>
-        </div>
+        </PageContainer>
     );
 }
