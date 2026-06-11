@@ -64,6 +64,15 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
                 <BaseTable.Cell className="text-right">{`${voteAccount.info.commission}%`}</BaseTable.Cell>
             </BaseTable.Row>
 
+            {voteAccount.info.blsPubkeyCompressed && (
+                <BaseTable.Row>
+                    <BaseTable.Cell>BLS Pubkey</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right e-font-mono">
+                        {voteAccount.info.blsPubkeyCompressed}
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+            )}
+
             {voteAccount.info.inflationRewardsCommissionBps !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Inflation Rewards Commission</BaseTable.Cell>
