@@ -18,6 +18,12 @@ import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 
 import { CollapsibleSection } from './CollapsibleSection';
 
+const ACCOUNT_KEY_SIZE_BYTES = 32;
+
+export function getTransactionAccountKeysSizeBytes(accountKeys: Array<{ source?: string }>) {
+    return accountKeys.filter(account => account.source !== 'lookupTable').length * ACCOUNT_KEY_SIZE_BYTES;
+}
+
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { url } = useCluster();
@@ -31,9 +37,9 @@ export function AccountsCard({ signature }: SignatureProps) {
 
     const { accounts, error, loading } = useAccountsInfo(pubkeys, url);
 
-    const totalAccountSize = useMemo(
-        () => Array.from(accounts.values()).reduce((acc, account) => acc + account.size, 0),
-        [accounts],
+    const totalAccountKeysSize = useMemo(
+        () => getTransactionAccountKeysSizeBytes(message?.accountKeys ?? []),
+        [message],
     );
 
     if (!transactionWithMeta) {
@@ -142,13 +148,13 @@ export function AccountsCard({ signature }: SignatureProps) {
                 <div className="e-text-right">Post Balance (SOL)</div>
             </div>
             {accountRows}
-            {!loading && totalAccountSize > 0 && (
+            {!loading && totalAccountKeysSize > 0 && (
                 <div className="e-ml-7 e-flex e-items-baseline e-gap-2 e-px-3 e-py-2 e-text-sm e-text-outer-space-300 md:e-px-4 lg:e-ml-10">
                     <div className="e-flex e-flex-col">
-                        <span className="e-text-sm e-uppercase e-leading-none">Total Account Size:</span>
-                        <span className="e-text-[10px] e-leading-none">reflects current state</span>
+                        <span className="e-text-sm e-uppercase e-leading-none">Total Account Keys Size:</span>
+                        <span className="e-text-[10px] e-leading-none">excludes address lookup tables</span>
                     </div>
-                    <span className="e-text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
+                    <span className="e-text-white">{totalAccountKeysSize.toLocaleString('en-US')} bytes</span>
                 </div>
             )}
         </CollapsibleSection>
