@@ -104,7 +104,7 @@ const BaseFeatureCard = ({
                                     rel="noopener noreferrer"
                                     className=""
                                 >
-                                    SIMD {simd} <ExternalLinkIcon className="align-text-top" size={13} />
+                                    SIMD {simd} <ExternalLinkIcon className="e-align-text-top" size={13} />
                                 </a>
                             ) : (
                                 <code>No link</code>
@@ -221,7 +221,7 @@ function ClusterActivationEpochAtCluster({
     if (activatedAt !== null && clusterInfo?.epochSchedule) {
         const epoch = getEpochForSlot(clusterInfo.epochSchedule, BigInt(activatedAt));
         return (
-            <Link href={`/epoch/${epoch}?cluster=${cluster}`} className="epoch-link">
+            <Link href={`/epoch/${epoch}?cluster=${cluster}`}>
                 {clusterName(cluster)} Epoch {epoch.toString()}
             </Link>
         );
@@ -232,7 +232,7 @@ function ClusterActivationEpochAtCluster({
         const remainingSlots = clusterInfo.epochInfo.slotsInEpoch - clusterInfo.epochInfo.slotIndex;
         return (
             <div>
-                <Link href={`/epoch/${nextEpoch}?cluster=${cluster}`} className="epoch-link">
+                <Link href={`/epoch/${nextEpoch}?cluster=${cluster}`}>
                     {clusterName(cluster)} Epoch {nextEpoch.toString()}
                 </Link>
                 <div className="e-mt-[3px]">

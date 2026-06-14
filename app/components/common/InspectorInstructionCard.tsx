@@ -1,6 +1,7 @@
 import { ProgramField } from '@entities/instruction-card';
 import { useScrollAnchor } from '@providers/scroll-anchor';
 import { Badge } from '@shared/ui/badge';
+import { Button } from '@shared/ui/button';
 import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { cn } from '@shared/utils';
 import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
@@ -70,17 +71,17 @@ export function InspectorInstructionCard({
                 </>
             }
             headerButtons={
-                <button
+                <Button
+                    ui="dashkit"
+                    size="sm"
+                    variant={showRaw ? 'black' : 'white'}
+                    active={showRaw}
                     disabled={defaultRaw}
-                    className={cn(
-                        'btn btn-sm e-flex e-items-center',
-                        showRaw ? 'btn-black active' : 'btn-white',
-                        defaultRaw && '!e-pointer-events-auto e-cursor-not-allowed',
-                    )}
+                    className={cn('e-flex e-items-center', defaultRaw && '!e-pointer-events-auto e-cursor-not-allowed')}
                     onClick={rawClickHandler}
                 >
                     <Code className="e-mr-1.5" size={13} /> Raw
-                </button>
+                </Button>
             }
         >
             <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!e-border-t-0">
@@ -104,7 +105,7 @@ export function InspectorInstructionCard({
                             </BaseTable.Row>
                             <BaseTable.Row>
                                 <BaseTable.Cell colSpan={3}>
-                                    <div className="inner-cards">{innerCards}</div>
+                                    <div className="e-m-6">{innerCards}</div>
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         </>

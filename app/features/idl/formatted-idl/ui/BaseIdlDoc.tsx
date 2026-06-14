@@ -17,7 +17,7 @@ export function IdlDocTooltip({ docs, children }: { docs?: string[]; children: R
 
     return (
         <Tooltip>
-            <TooltipTrigger className="e-border-0 e-bg-transparent e-text-inherit" asChild>
+            <TooltipTrigger asChild>
                 {children}
             </TooltipTrigger>
             <TooltipContent>

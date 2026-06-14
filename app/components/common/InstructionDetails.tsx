@@ -24,7 +24,7 @@ export function InstructionDetails({
 
     return (
         <>
-            <p className="tree">
+            <p className="e-tree">
                 {instructionTypes.length > 0 && (
                     <span
                         onClick={e => {
@@ -34,16 +34,16 @@ export function InstructionDetails({
                         className="e-mr-1.5 e-cursor-pointer"
                     >
                         {expanded ? (
-                            <MinusSquare className="align-text-top" size={13} />
+                            <MinusSquare className="e-align-text-top" size={13} />
                         ) : (
-                            <PlusSquare className="align-text-top" size={13} />
+                            <PlusSquare className="e-align-text-top" size={13} />
                         )}
                     </span>
                 )}
                 {instructionType.name}
             </p>
             {expanded && (
-                <ul className="tree">
+                <ul className="e-tree">
                     {instructionTypes.map((type, index) => {
                         return <li key={index}>{type}</li>;
                     })}

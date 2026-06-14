@@ -6,5 +6,5 @@ type OverlayProps = {
 };
 
 export function Overlay({ show }: OverlayProps) {
-    return <div className={cn('modal-backdrop fade', show ? 'show' : 'disable-pointer-events')}></div>;
+    return <div className={cn('e-modal-backdrop', show && 'e-show')}></div>;
 }

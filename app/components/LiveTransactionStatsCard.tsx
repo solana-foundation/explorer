@@ -10,6 +10,7 @@ import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
 
 import { Button } from '@/app/components/shared/ui/button';
+import { useReducedMotion } from '@/app/shared/lib/use-reduced-motion';
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
@@ -234,12 +235,16 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
 }
 
 function AnimatedTransactionCount({ info }: { info: PerformanceInfo }) {
+    const reducedMotion = useReducedMotion();
     const txCountRef = React.useRef(0);
     const countUpRef = React.useRef({ lastUpdate: 0, period: 0, start: 0 });
     const countUp = countUpRef.current;
 
     const { transactionCount, avgTps } = info;
     const txCount = Number(transactionCount);
+
+    // Skip the running count-up animation under reduced motion — render the settled value directly.
+    if (reducedMotion) return <>{txCount.toLocaleString('en-US')}</>;
 
     // Track last tx count to reset count up options
     if (txCount !== txCountRef.current) {

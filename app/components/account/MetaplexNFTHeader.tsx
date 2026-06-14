@@ -6,13 +6,18 @@ import { NFTData, useFetchAccountInfo, useMintAccountInfo } from '@providers/acc
 import { PublicKey } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import React, { createRef } from 'react';
+import React from 'react';
 import { AlertOctagon, Check, ChevronDown } from 'react-feather';
-import useAsyncEffect from 'use-async-effect';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
-import { DropdownHeader, DropdownItem, DropdownMenu } from '@/app/components/shared/ui/dropdown';
+import {
+    Dropdown,
+    DropdownHeader,
+    DropdownItem,
+    DropdownMenu,
+    DropdownToggle,
+} from '@/app/components/shared/ui/dropdown';
 
 export function MetaplexNFTHeader({ nftData }: { nftData: NFTData }) {
     const collectionOpt = nftData.metadata.collection;
@@ -30,25 +35,6 @@ export function MetaplexNFTHeader({ nftData }: { nftData: NFTData }) {
     const metadata = nftData.metadata;
     const data = nftData.json;
     const isVerifiedCollection = collection != null && collection?.verified && collectionMintInfo !== undefined;
-    const dropdownRef = createRef<HTMLButtonElement>();
-    useAsyncEffect(
-        async isMounted => {
-            if (!dropdownRef.current) {
-                return;
-            }
-            const Dropdown = (await import('bootstrap/js/dist/dropdown')).default;
-            if (!isMounted || !dropdownRef.current) {
-                return;
-            }
-            return new Dropdown(dropdownRef.current);
-        },
-        dropdown => {
-            if (dropdown) {
-                dropdown.dispose();
-            }
-        },
-        [dropdownRef],
-    );
     return (
         <div className="-e-mx-3 e-flex e-flex-wrap">
             <div className="e-ml-1.5 e-flex e-flex-none e-items-center e-px-3">
@@ -68,24 +54,17 @@ export function MetaplexNFTHeader({ nftData }: { nftData: NFTData }) {
                 </h4>
                 <div className="e-mb-1.5 e-mt-1.5">{getSaleTypePill(metadata.primarySaleHappened)}</div>
                 <div className="e-mb-3 e-mt-1.5">{getIsMutablePill(metadata.isMutable)}</div>
-                <div className="btn-group">
-                    <Button
-                        ui="dashkit"
-                        variant="dark"
-                        size="sm"
-                        className="e-w-[150px]"
-                        type="button"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                        data-bs-toggle="dropdown"
-                        ref={dropdownRef}
-                    >
-                        Creators <ChevronDown size={15} className="align-text-top" />
-                    </Button>
+                <Dropdown className="e-inline-flex">
+                    <DropdownToggle asChild>
+                        {/* e-rounded-r-none mirrors legacy .btn-group>.btn:not(:last-child) corner squaring. */}
+                        <Button ui="dashkit" variant="dark" size="sm" className="e-w-[150px] e-rounded-r-none" type="button">
+                            Creators <ChevronDown size={15} className="e-align-text-top" />
+                        </Button>
+                    </DropdownToggle>
                     <DropdownMenu className="e-mt-1.5">
                         {getCreatorDropdownItems(isSome(metadata.creators) ? metadata.creators.value : null)}
                     </DropdownMenu>
-                </div>
+                </Dropdown>
             </div>
         </div>
     );

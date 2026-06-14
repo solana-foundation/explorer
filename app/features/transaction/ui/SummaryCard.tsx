@@ -16,6 +16,7 @@ import {
     useTransactionDetails,
     useTransactionStatus,
 } from '@providers/transactions';
+import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { RefreshButton } from '@shared/ui/refresh-button';
 import { cn } from '@shared/utils';
@@ -179,7 +180,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
         );
     })();
 
-    let statusClass = 'success';
+    let statusClass: 'success' | 'warning' = 'success';
     let statusText = 'Success';
     let statusFinality = 'Finalized (MAX Confirmations)';
     let errorReason = undefined;
@@ -218,7 +219,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                         </Link>
                     </Button>
                     {autoRefresh === AutoRefresh.Active ? (
-                        <span className="spinner-grow spinner-grow-sm"></span>
+                        <span className="e-spinner-grow e-spinner-grow-sm"></span>
                     ) : (
                         <RefreshButton analyticsSection="transaction_card" onClick={() => fetchStatus(signature)} />
                     )}
@@ -240,13 +241,17 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                 <Row divider>
                     <Label>Status</Label>
                     <Value className="e-flex e-flex-wrap e-items-center e-gap-x-3 e-gap-y-2">
-                        <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
+                        <Badge ui="dashkit" variant={statusClass}>
+                            {statusText}
+                        </Badge>
                         {errorReason && (
-                            <span
-                                className={`badge bg-${statusClass}-soft e-whitespace-normal e-break-words e-text-left`}
+                            <Badge
+                                ui="dashkit"
+                                variant={statusClass}
+                                className="e-whitespace-normal e-break-words e-text-left"
                             >
                                 {errorLink ? <Link href={errorLink}>{errorReason}</Link> : errorReason}
-                            </span>
+                            </Badge>
                         )}
                     </Value>
                 </Row>

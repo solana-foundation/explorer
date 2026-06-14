@@ -24,6 +24,7 @@ import { percentage } from '@utils/math';
 import React from 'react';
 
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
 import { DeveloperResources } from './components/DeveloperResources';
 import { SimpleCardSkeleton } from './components/shared/Skeletons';
@@ -32,7 +33,7 @@ export default function Page() {
     return (
         <StatsProvider>
             <SupplyProvider>
-                <div className="container e-mt-4">
+                <PageContainer className="e-mt-4">
                     <StakingComponent />
 
                     <div className="e-flex e-flex-col lg:e-flex-row lg:e-gap-6">
@@ -47,7 +48,7 @@ export default function Page() {
                     <DeveloperResources />
 
                     <UpcomingFeatures />
-                </div>
+                </PageContainer>
             </SupplyProvider>
         </StatsProvider>
     );
@@ -56,7 +57,7 @@ export default function Page() {
 const LoadingStatsCard = ({ title }: { title: string }) => {
     return (
         <div className="e-flex e-items-center e-gap-2">
-            <span className="spinner-grow spinner-grow-sm e-shrink-0" />
+            <span className="e-spinner-grow e-spinner-grow-sm e-shrink-0" />
             {title}
         </div>
     );
@@ -124,7 +125,7 @@ function StakingComponent() {
     }
 
     return (
-        <div className="staking-card e-flex e-flex-col md:e-flex-row md:e-gap-6">
+        <div className="e-staking-card e-flex e-flex-col md:e-flex-row md:e-gap-6">
             <div className="e-w-full md:e-w-1/2">
                 <Card ui="dashkit" className="e-mb-3 md:e-mb-6">
                     <CardBody ui="dashkit">

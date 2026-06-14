@@ -45,21 +45,21 @@ export function ContactInfo({ type, information }: { type: string; information: 
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`mailto:${information}`}>
                     {information}
-                    <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                    <ExternalLink className="e-align-text-top e-ml-1.5" size={13} />
                 </a>
             );
         case 'telegram':
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`https://t.me/${information}`}>
                     Telegram: {information}
-                    <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                    <ExternalLink className="e-align-text-top e-ml-1.5" size={13} />
                 </a>
             );
         case 'twitter':
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`https://twitter.com/${information}`}>
                     Twitter {information}
-                    <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                    <ExternalLink className="e-align-text-top e-ml-1.5" size={13} />
                 </a>
             );
         case 'link':
@@ -67,7 +67,7 @@ export function ContactInfo({ type, information }: { type: string; information: 
                 return (
                     <a rel="noopener noreferrer" target="_blank" href={`${information}`}>
                         {information}
-                        <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                        <ExternalLink className="e-align-text-top e-ml-1.5" size={13} />
                     </a>
                 );
             }
@@ -87,7 +87,7 @@ export function RenderExternalLink({ url }: { url: string }) {
         <span className="e-font-mono">
             <a rel="noopener noreferrer" target="_blank" href={url}>
                 {url}
-                <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                <ExternalLink className="e-align-text-top e-ml-1.5" size={13} />
             </a>
         </span>
     );

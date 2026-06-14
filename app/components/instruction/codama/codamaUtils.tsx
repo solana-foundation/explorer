@@ -86,7 +86,7 @@ export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
             <BaseTable.Row
                 key={baseKey}
                 data-testid={`ix-args-${baseKey}`}
-                className={nestingLevel > 0 ? 'table-nested-account' : ''}
+                className={nestingLevel > 0 ? 'e-bg-black/20' : ''}
             >
                 <BaseTable.Cell>
                     <div className="e-flex e-flex-row e-items-center">

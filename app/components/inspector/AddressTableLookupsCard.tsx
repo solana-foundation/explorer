@@ -74,7 +74,7 @@ function LookupRow({
 
     const loadingComponent = (
         <span className="e-text-dk-gray-700">
-            <span className="spinner-grow spinner-grow-sm e-mr-1.5"></span>
+            <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5"></span>
             Loading
         </span>
     );

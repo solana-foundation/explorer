@@ -13,7 +13,8 @@ interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
     showIcon?: boolean;
 }
 
-const statusBadgeIconVariants = cva('ml-1', {
+// dead `ml-1`/`border-0` deleted, not ported — they never resolved even with the legacy bundle, so the legacy render has no icon margin
+const statusBadgeIconVariants = cva('', {
     defaultVariants: {
         status: 'active',
     },
@@ -25,7 +26,7 @@ const statusBadgeIconVariants = cva('ml-1', {
     },
 });
 
-const statusBadgeVariants = cva('border-0 ', {
+const statusBadgeVariants = cva('', {
     defaultVariants: {
         status: 'active',
     },

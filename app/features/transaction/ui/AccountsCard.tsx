@@ -7,6 +7,7 @@ import { useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import { RawDataField } from '@shared/RawDataField';
+import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
 import { SignatureProps } from '@utils/index';
@@ -65,14 +66,30 @@ export function AccountsCard({ signature }: SignatureProps) {
 
         const badges = (
             <>
-                {index === 0 && <span className="badge bg-success-soft me-1">Fee Payer</span>}
-                {account.signer && <span className="badge bg-info-soft me-1">Signer</span>}
-                {account.writable && <span className="badge bg-danger-soft me-1">Writable</span>}
+                {index === 0 && (
+                    <Badge ui="dashkit" variant="success" className="e-me-1">
+                        Fee Payer
+                    </Badge>
+                )}
+                {account.signer && (
+                    <Badge ui="dashkit" variant="info" className="e-me-1">
+                        Signer
+                    </Badge>
+                )}
+                {account.writable && (
+                    <Badge ui="dashkit" variant="danger" className="e-me-1">
+                        Writable
+                    </Badge>
+                )}
                 {message.instructions.find(ix => ix.programId.equals(pubkey)) && (
-                    <span className="badge bg-warning-soft me-1">Program</span>
+                    <Badge ui="dashkit" variant="warning" className="e-me-1">
+                        Program
+                    </Badge>
                 )}
                 {account.source === 'lookupTable' && (
-                    <span className="badge bg-gray-soft me-1">Address Table Lookup</span>
+                    <Badge ui="dashkit" variant="gray" className="e-me-1">
+                        Address Table Lookup
+                    </Badge>
                 )}
             </>
         );

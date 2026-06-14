@@ -31,7 +31,7 @@ export function BaseFormattedIdl({
 
     return (
         <SearchHighlightProvider searchStr={searchStr || ''}>
-            <div className="idl-view">
+            <div>
                 <TabsList className="e-mb-5">
                     {tabs.map((tab, index) => (
                         <TabsTrigger
@@ -44,7 +44,7 @@ export function BaseFormattedIdl({
                         </TabsTrigger>
                     ))}
                 </TabsList>
-                <div className={cn('e-mb-0 e-min-h-96', activeTab.id !== 'interact' ? 'table-responsive' : '')}>
+                <div className={cn('e-mb-0 e-min-h-96', activeTab.id !== 'interact' ? 'e-overflow-x-auto' : '')}>
                     <ActiveTab activeTab={activeTab} />
                 </div>
             </div>

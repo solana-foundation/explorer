@@ -432,7 +432,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 nestingLevel={nestingLevel}
             >
                 <div
-                    className="text-lg-start"
+                    className="lg:e-text-left"
                     style={{
                         fontSize: '0.85rem',
                         lineHeight: '1.2',
@@ -609,7 +609,7 @@ function SimpleRow({
     }
     itemKey = camelToTitleCase(itemKey);
     return (
-        <BaseTable.Row className={cn(nestingLevel > 0 && 'table-nested-account')}>
+        <BaseTable.Row className={cn(nestingLevel > 0 && 'e-bg-black/20')}>
             <BaseTable.Cell>
                 <div className="e-flex e-flex-row e-items-center">
                     {nestingLevel > 0 && <CornerDownRight className="e-mb-[3px] e-mr-1.5" size={14} />}

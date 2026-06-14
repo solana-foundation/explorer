@@ -27,14 +27,14 @@ export function Copyable({ text, children }: { text: string | null; children?: R
     const state: CopyState | 'loading' = loading ? 'loading' : clipboardState;
 
     const copyStrategy: Record<CopyState | 'loading', JSX.Element> = {
-        copied: <CheckCircle className="align-text-top" size={13} />,
-        copy: <Copy className="align-text-top e-cursor-pointer" onClick={handleClick} size={13} />,
+        copied: <CheckCircle className="e-align-text-top" size={13} />,
+        copy: <Copy className="e-align-text-top e-cursor-pointer" onClick={handleClick} size={13} />,
         errored: (
             <span title="Please check your browser's copy permissions.">
-                <XCircle className="align-text-top" size={13} />
+                <XCircle className="e-align-text-top" size={13} />
             </span>
         ),
-        loading: <Loader className="align-text-top" size={13} />,
+        loading: <Loader className="e-align-text-top" size={13} />,
     };
 
     function CopyIcon() {
@@ -43,14 +43,14 @@ export function Copyable({ text, children }: { text: string | null; children?: R
 
     let textColor = '';
     if (state === 'copied' || state === 'loading') {
-        textColor = 'text-info';
+        textColor = 'e-text-dk-info';
     } else if (state === 'errored') {
-        textColor = 'text-danger';
+        textColor = 'e-text-dk-danger';
     }
 
     return (
         <>
-            <span className="font-size-tiny e-mr-1.5" style={{ fontSize: '12px' }}>
+            <span className="e-mr-1.5" style={{ fontSize: '12px' }}>
                 <span className={textColor}>
                     <CopyIcon />
                 </span>

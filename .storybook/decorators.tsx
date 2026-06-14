@@ -5,6 +5,9 @@ import type { Decorator, Parameters } from '@storybook/react';
 import React, { useLayoutEffect, useRef } from 'react';
 import { fn } from 'storybook/test';
 
+import { Card } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { MockAccountsProvider } from './__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from './__mocks__/MockClusterProvider';
 import { MockHistoryProvider } from './__mocks__/MockHistoryProvider';
@@ -77,16 +80,13 @@ export function withAccountsState(state: State): Decorator {
 export const withCardTableField: Decorator = Story => (
     <ClusterProvider>
         <MockAccountsProvider>
-            <div className="card">
-                <div className="table-responsive mb-0">
-                    <style>{`.card-table tbody tr:first-child td { border-top: none !important; }`}</style>
-                    <table className="table table-sm table-nowrap card-table">
-                        <tbody>
-                            <Story />
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <Card ui="dashkit">
+                <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!e-border-t-0">
+                    <BaseTable.Body>
+                        <Story />
+                    </BaseTable.Body>
+                </BaseTable>
+            </Card>
         </MockAccountsProvider>
     </ClusterProvider>
 );

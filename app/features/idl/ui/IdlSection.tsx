@@ -9,11 +9,11 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@shared/ui/dialog';
-import { Dropdown, DropdownMenu } from '@shared/ui/dropdown';
+import { Dropdown, DropdownMenu, DropdownToggle } from '@shared/ui/dropdown';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 import { Switch } from '@shared/ui/switch';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AlertCircle, Code, Download, ExternalLink, Search } from 'react-feather';
 
 import { WalletProvider } from '@/app/providers/wallet-provider';
@@ -23,7 +23,7 @@ import { triggerDownload } from '@/app/shared/lib/triggerDownload';
 import { type IdlVariant } from '../model/use-idl-last-transaction-date';
 import { IdlRenderer } from './IdlRenderer';
 
-// FIXME: missing Storybook story — wraps content in WalletProvider and dynamic-imports bootstrap dropdown.
+// FIXME: missing Storybook story — wraps content in WalletProvider.
 export function IdlSection({
     idl,
     badge,
@@ -44,7 +44,6 @@ export function IdlSection({
     const [isExpanded, setIsExpanded] = useState(false);
     const [isRawIdlView, setIsRawIdlView] = useState(false);
     const [isCastawayDialogOpen, setIsCastawayDialogOpen] = useState(false);
-    const downloadDropdownRef = useRef<HTMLButtonElement>(null);
 
     const idlBase64 = useMemo(() => {
         return toBase64(fromUtf8(JSON.stringify(idl, null, 2)));
@@ -53,33 +52,6 @@ export function IdlSection({
         const params = new URLSearchParams({ idlSource, network, program: programId });
         return `https://www.castaway.lol/?${params.toString()}`;
     }, [idlSource, network, programId]);
-
-    useEffect(() => {
-        if (!downloadDropdownRef.current) {
-            return;
-        }
-
-        let isMounted = true;
-        let dropdown: { dispose: () => void } | null = null;
-
-        void import('bootstrap/js/dist/dropdown').then(module => {
-            if (!isMounted || !downloadDropdownRef.current) {
-                return;
-            }
-
-            const BsDropdown = module.default;
-            dropdown = new BsDropdown(downloadDropdownRef.current, {
-                popperConfig() {
-                    return { strategy: 'fixed' as const };
-                },
-            });
-        });
-
-        return () => {
-            isMounted = false;
-            dropdown?.dispose();
-        };
-    }, []);
 
     const handleDownloadIdl = () => triggerDownload(idlBase64, `${programId}-idl.json`);
     const handleOpenCastawayDialog = () => setIsCastawayDialogOpen(true);
@@ -114,17 +86,12 @@ export function IdlSection({
                     )}
                     <div className="e-flex e-items-center e-gap-2">
                         <Dropdown className="e-overflow-visible">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                ref={downloadDropdownRef}
-                                data-bs-toggle="dropdown"
-                                type="button"
-                                aria-label="Download"
-                            >
-                                <Download size={12} />
-                                Download
-                            </Button>
+                            <DropdownToggle asChild>
+                                <Button variant="outline" size="sm" type="button" aria-label="Download">
+                                    <Download size={12} />
+                                    Download
+                                </Button>
+                            </DropdownToggle>
                             <DropdownMenu align="end" className="e-z-10">
                                 <div className="e-flex e-flex-col">
                                     <Button onClick={handleDownloadIdl}>Download IDL</Button>
