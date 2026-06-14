@@ -7,7 +7,7 @@ const meta = {
     component: IdlInstructionSection,
     decorators: [withClipboardMock],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/IDL/UI/IdlInstructionSection',
 } satisfies Meta<typeof IdlInstructionSection>;
 

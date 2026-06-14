@@ -66,7 +66,7 @@ const meta = {
         withTokenInfoBatch,
     ],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/BaseRawDetails',
 } satisfies Meta<typeof BaseRawDetails>;
 
@@ -82,7 +82,7 @@ export const LoadingState: Story = {
 
         // Loader (spinner + label) renders only when ix has not arrived yet
         await expect(canvas.getByText('Loading instruction data...')).toBeInTheDocument();
-        await expect(canvasElement.querySelector('.spinner-grow')).toBeInTheDocument();
+        await expect(canvasElement.querySelector('.e-spinner-grow')).toBeInTheDocument();
 
         // No account/data rows leak through while loading
         await expect(canvas.queryByText('Account #1')).not.toBeInTheDocument();

@@ -20,7 +20,7 @@ const meta: Meta<typeof ProgramLogSection> = {
     parameters: {
         ...nextjsParameters,
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Transaction/ProgramLogSection',
 };
 

@@ -11,7 +11,7 @@ const meta = {
             appDirectory: true,
         },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Cookie/CookieConsent',
 } satisfies Meta<typeof CookieCard>;
 

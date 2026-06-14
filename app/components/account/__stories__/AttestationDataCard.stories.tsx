@@ -65,7 +65,7 @@ function onNotFound(): never {
 const meta = {
     component: AttestationDataCard,
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/AttestationDataCard',
 } satisfies Meta<typeof AttestationDataCard>;
 

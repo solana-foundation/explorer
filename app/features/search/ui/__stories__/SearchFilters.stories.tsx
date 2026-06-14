@@ -10,7 +10,7 @@ const meta: Meta<typeof SearchFilters> = {
         tabs: FILTER_TABS,
     },
     component: SearchFilters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Search/SearchFilters',
 };
 

@@ -23,7 +23,7 @@ const meta = {
     component: TransactionSignatures,
     decorators: [withCluster, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Inspector/SignaturesCard',
 } satisfies Meta<typeof TransactionSignatures>;
 

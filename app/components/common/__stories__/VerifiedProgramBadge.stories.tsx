@@ -61,7 +61,7 @@ const meta: Meta<typeof VerifiedProgramBadge> = {
     args: { programData, pubkey },
     component: VerifiedProgramBadge,
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/VerifiedProgramBadge',
 };
 

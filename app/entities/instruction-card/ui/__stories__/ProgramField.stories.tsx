@@ -11,7 +11,7 @@ const meta = {
     component: ProgramField,
     decorators: [withCardTableField, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Entities/Instruction Card/UI/Field/ProgramField',
 } satisfies Meta<typeof ProgramField>;
 

@@ -1,5 +1,5 @@
+import { gen } from '@__fixtures__/gen';
 import { address } from '@solana/kit';
-import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import { Cluster } from '@utils/cluster';
@@ -24,7 +24,7 @@ const activated: ActivatedFeature[] = [
     {
         ...baseFields,
         clusterActivationEpoch: 850,
-        key: address(PublicKey.unique().toBase58()),
+        key: address(gen.address(1)),
         otherActivations: [{ cluster: Cluster.Devnet, epoch: 700 }],
         simdEntries: [{ link: 'https://github.com/example', simd: '148' }],
         title: 'MoveStake and MoveLamports',

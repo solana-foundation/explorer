@@ -50,7 +50,7 @@ const meta: Meta<typeof InspectorInstructionCard> = {
     component: InspectorInstructionCard,
     decorators: [withInspectorProviders],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/InspectorInstructionCard',
 };
 

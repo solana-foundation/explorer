@@ -9,7 +9,7 @@ const meta: Meta<typeof DownloadDropdown> = {
     parameters: {
         layout: 'padded',
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Shared/DownloadDropdown',
 };
 

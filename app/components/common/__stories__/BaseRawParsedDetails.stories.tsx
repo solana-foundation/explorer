@@ -23,7 +23,7 @@ const meta: Meta<typeof BaseRawParsedDetails> = {
     component: BaseRawParsedDetails,
     decorators: [withCardTableField],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/BaseRawParsedDetails',
 };
 

@@ -4,7 +4,7 @@ import { InstructionList } from '../InstructionList';
 
 const meta = {
     component: InstructionList,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/TransactionHistory/InstructionList',
 } satisfies Meta<typeof InstructionList>;
 

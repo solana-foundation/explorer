@@ -7,7 +7,7 @@ const meta = {
     component: UpcomingFeatures,
     decorators: [withCluster, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/UpcomingFeatures',
 } satisfies Meta<typeof UpcomingFeatures>;
 

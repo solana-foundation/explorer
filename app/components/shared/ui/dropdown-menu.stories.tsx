@@ -23,7 +23,7 @@ import {
 
 const meta: Meta<typeof DropdownMenu> = {
     component: DropdownMenu,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Shared/UI/DropdownMenu',
 };
 
@@ -289,6 +289,43 @@ export const OpenByDefault: Story = {
                 <DropdownMenuItem>Option 1</DropdownMenuItem>
                 <DropdownMenuItem>Option 2</DropdownMenuItem>
                 <DropdownMenuItem>Option 3</DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    ),
+};
+
+// inset (e-pl-8) on items/labels and disabled checkbox/radio items — no other story renders these
+export const InsetAndDisabledSelectionItems: Story = {
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        const trigger = canvas.getByRole('button', { hidden: true, name: /open menu/i });
+        expect(trigger).toHaveAttribute('data-state', 'open');
+    },
+    render: () => (
+        <DropdownMenu defaultOpen>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                    Open Menu
+                    <ChevronDown size={14} />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <DropdownMenuLabel inset>Inset label</DropdownMenuLabel>
+                <DropdownMenuItem inset>Inset item</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem checked disabled>
+                    Disabled checked
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem disabled>Disabled unchecked</DropdownMenuCheckboxItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup value="selected">
+                    <DropdownMenuRadioItem value="selected" disabled>
+                        Disabled selected
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="other" disabled>
+                        Disabled unselected
+                    </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
             </DropdownMenuContent>
         </DropdownMenu>
     ),

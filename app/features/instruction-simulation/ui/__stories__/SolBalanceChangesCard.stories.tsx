@@ -16,7 +16,7 @@ const meta = {
     component: SolBalanceChangesCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Instruction Simulation/UI/SolBalanceChangesCard',
 } satisfies Meta<typeof SolBalanceChangesCard>;
 
@@ -38,7 +38,7 @@ export const SinglePositiveChange: Story = {
 
         // Should show the positive badge
         const badge = canvas.getByText('+', { exact: false });
-        await expect(badge).toHaveClass('bg-success-soft');
+        await expect(badge).toHaveAttribute('data-variant', 'success');
     },
 };
 
@@ -54,7 +54,7 @@ export const SingleNegativeChange: Story = {
 
         // Should show the negative badge
         const badge = canvas.getByText('-', { exact: false });
-        await expect(badge).toHaveClass('bg-warning-soft');
+        await expect(badge).toHaveAttribute('data-variant', 'warning');
     },
 };
 

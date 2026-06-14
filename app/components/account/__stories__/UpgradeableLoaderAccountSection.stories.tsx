@@ -46,7 +46,7 @@ const meta = {
     component: UpgradeableLoaderAccountSection,
     decorators: [withSuspense, withClusterAndAccounts, withTokenInfoBatch],
     parameters: createNextjsParameters({ query: { cluster: 'devnet' } }),
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/UpgradeableLoaderAccountSection',
 } satisfies Meta<typeof UpgradeableLoaderAccountSection>;
 

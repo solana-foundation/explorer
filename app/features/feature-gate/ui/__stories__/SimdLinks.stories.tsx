@@ -4,7 +4,7 @@ import { SimdLinks } from '../SimdLinks';
 
 const meta: Meta<typeof SimdLinks> = {
     component: SimdLinks,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/SimdLinks',
 };
 

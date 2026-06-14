@@ -9,7 +9,7 @@ const meta = {
     component: TokenExtensionsCard,
     decorators: [withClusterAndAccounts],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/TokenExtensionsCard',
 } satisfies Meta<typeof TokenExtensionsCard>;
 

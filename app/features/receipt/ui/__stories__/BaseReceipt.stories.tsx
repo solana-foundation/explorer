@@ -23,7 +23,7 @@ const meta: Meta<typeof BaseReceipt> = {
         },
     },
     component: BaseReceipt,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Receipt/BaseReceipt',
 };
 

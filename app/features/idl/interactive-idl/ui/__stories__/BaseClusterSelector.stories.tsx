@@ -19,7 +19,7 @@ const meta: Meta<typeof BaseClusterSelector> = {
     parameters: {
         layout: 'padded',
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/IDL/Interactive IDL/UI/BaseClusterSelector',
 };
 

@@ -45,7 +45,7 @@ const meta = {
     component: TokenExtensionsSection,
     decorators: [withClusterAndAccounts],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/TokenExtensionsSection',
 } satisfies Meta<typeof TokenExtensionsSection>;
 

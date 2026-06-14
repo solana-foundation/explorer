@@ -7,7 +7,7 @@ import { ExplorerLink } from '../ExplorerLink';
 const meta: Meta<typeof ExplorerLink> = {
     component: ExplorerLink,
     decorators: [withCluster],
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Entities/Cluster/ExplorerLink',
 };
 

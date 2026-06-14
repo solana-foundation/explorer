@@ -1,5 +1,5 @@
 import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
-import { Keypair, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withTokenInfoBatch, withTransactions } from '@storybook-config/decorators';
 import { expect, within } from 'storybook/test';
@@ -131,8 +131,8 @@ export const EmptyBatch: Story = {
     },
 };
 
-// SetAuthority with a new authority pubkey
-const newAuthority = Keypair.generate().publicKey;
+// SetAuthority with a new authority pubkey — fixed literal so captures are deterministic
+const newAuthority = new PublicKey('UM1jjYaM2Y4BDSdCw3AiELrP6HDpz62VjUHcHVJosix');
 
 export const SetAuthorityWithNewAuthority: Story = {
     args: {

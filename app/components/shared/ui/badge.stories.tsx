@@ -51,7 +51,7 @@ const meta: Meta<typeof Badge> = {
     component: Badge,
     // Uses the global default (Dark) — switch to Light via the Backgrounds toolbar (top-right)
     // when you need to inspect the badges against a non-app surface.
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Shared/UI/Badge',
 };
 
@@ -288,6 +288,29 @@ export const DashkitTableSize: Story = {
                         </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    ),
+};
+
+// pill=true swaps the dashkit radius/padding compound (e-rounded-[50rem] e-px-[0.6em]) — no other story renders it
+export const DashkitPill: Story = {
+    name: 'Dashkit / Pill',
+    render: () => (
+        <div className="e-flex e-flex-col e-gap-4">
+            <div className="e-flex e-flex-wrap e-gap-4">
+                {dashkitVariantOptions.map(variant => (
+                    <Badge key={variant} ui="dashkit" variant={variant} pill>
+                        {variant}
+                    </Badge>
+                ))}
+            </div>
+            <div className="e-flex e-flex-wrap e-gap-4">
+                {dashkitVariantOptions.map(variant => (
+                    <Badge key={variant} ui="dashkit" tone="solid" variant={variant} pill>
+                        {variant}
+                    </Badge>
+                ))}
             </div>
         </div>
     ),

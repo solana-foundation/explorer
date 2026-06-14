@@ -11,7 +11,7 @@ const meta = {
     component: IdlCard,
     decorators: [withCluster, withClipboardMock],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/IDL/UI/IdlCard',
 } satisfies Meta<typeof IdlCard>;
 

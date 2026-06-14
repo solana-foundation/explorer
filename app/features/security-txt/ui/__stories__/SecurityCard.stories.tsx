@@ -35,7 +35,7 @@ const meta = {
     component: SecurityCard,
     decorators: [withClusterAndAccounts],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/SecurityTxt/SecurityCard',
 } satisfies Meta<typeof SecurityCard>;
 

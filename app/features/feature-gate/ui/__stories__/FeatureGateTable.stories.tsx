@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { address } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -6,7 +7,7 @@ import { Cluster } from '@utils/cluster';
 import type { ActivatedFeature, UpcomingFeature } from '../../lib/partition-features';
 import { EmptyStateCard, FeatureGateTable } from '../FeatureGateTable';
 
-const uniqueKey = () => address(PublicKey.unique().toBase58());
+const featureKey = (seed: number) => address(gen.address(seed));
 
 const baseFields = {
     comms_required: null,
@@ -25,7 +26,7 @@ const activated: ActivatedFeature[] = [
     {
         ...baseFields,
         clusterActivationEpoch: 850,
-        key: uniqueKey(),
+        key: featureKey(1),
         otherActivations: [
             { cluster: Cluster.Devnet, epoch: 700 },
             { cluster: Cluster.Testnet, epoch: 680 },
@@ -39,7 +40,7 @@ const activated: ActivatedFeature[] = [
         ...baseFields,
         clusterActivationEpoch: 820,
         description: null,
-        key: uniqueKey(),
+        key: featureKey(2),
         otherActivations: [],
         simdEntries: [],
         title: 'Feature without description or SIMDs',
@@ -65,7 +66,7 @@ const upcoming: UpcomingFeature[] = [
 const meta: Meta<typeof FeatureGateTable<ActivatedFeature>> = {
     component: FeatureGateTable<ActivatedFeature>,
     parameters: { layout: 'padded' },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/FeatureGateTable',
 };
 

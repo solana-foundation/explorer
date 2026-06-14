@@ -22,7 +22,7 @@ const meta: Meta<typeof SummaryCard> = {
     parameters: {
         ...nextjsParameters,
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Transaction/SummaryCard',
 };
 

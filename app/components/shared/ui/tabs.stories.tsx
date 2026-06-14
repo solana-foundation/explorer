@@ -13,7 +13,7 @@ const meta: Meta<typeof Tabs> = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Shared/UI/Tabs',
 };
 

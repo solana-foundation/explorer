@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -25,7 +26,7 @@ const anchorProgram = new Program(anchor030Devi as Idl, mockProvider);
 
 const ix = new TransactionInstruction({
     data: Buffer.from([163, 172, 224, 52, 11, 154, 106, 223]),
-    keys: [{ isSigner: false, isWritable: true, pubkey: PublicKey.unique() }],
+    keys: [{ isSigner: false, isWritable: true, pubkey: gen.publicKey(1) }],
     programId: anchorProgram.programId,
 });
 

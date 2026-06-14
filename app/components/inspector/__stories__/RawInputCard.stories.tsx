@@ -7,7 +7,7 @@ import { RawInput } from '../RawInputCard';
 const meta = {
     component: RawInput,
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Inspector/RawInputCard',
 } satisfies Meta<typeof RawInput>;
 

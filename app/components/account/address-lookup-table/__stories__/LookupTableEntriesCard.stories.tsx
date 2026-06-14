@@ -12,7 +12,7 @@ const meta = {
     component: LookupTableEntriesCard,
     decorators: [withCluster, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/AddressLookupTable/LookupTableEntriesCard',
 } satisfies Meta<ParsedArgs>;
 

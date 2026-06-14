@@ -5,7 +5,7 @@ import { SearchResultItem } from '../SearchResultItem';
 
 const meta: Meta<typeof SearchResultItem> = {
     component: SearchResultItem,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Search/SearchResultItem',
 };
 

@@ -4,7 +4,7 @@ import { BottomLine } from '../BottomLine';
 
 const meta: Meta<typeof BottomLine> = {
     component: BottomLine,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Receipt/BottomLine',
 };
 

@@ -46,7 +46,7 @@ const meta: Meta<typeof BaseNavigationTabs> = {
     },
     component: BaseNavigationTabs,
     globals: { viewport: { value: 'responsive' } },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Shared/UI/NavigationTabs',
 };
 

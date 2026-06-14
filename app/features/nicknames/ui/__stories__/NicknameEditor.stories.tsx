@@ -19,7 +19,7 @@ const meta = {
             appDirectory: true,
         },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Nicknames/NicknameEditor',
 } satisfies Meta<typeof NicknameEditor>;
 

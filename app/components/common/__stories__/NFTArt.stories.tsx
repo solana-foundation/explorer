@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { NFTImageContent } from '../NFTArt';
 
 const meta = {
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/NFTArt',
 } satisfies Meta;
 

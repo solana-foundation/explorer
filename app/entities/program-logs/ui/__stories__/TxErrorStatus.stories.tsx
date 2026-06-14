@@ -18,7 +18,7 @@ const meta = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Entities/Program Logs/UI/TxErrorStatus',
 } satisfies Meta<typeof TxErrorStatus>;
 

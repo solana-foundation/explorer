@@ -21,7 +21,7 @@ const meta = {
             appDirectory: true,
         },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Metadata/MetadataCard',
 } satisfies Meta<typeof MetadataCard>;
 

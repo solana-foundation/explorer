@@ -11,7 +11,7 @@ const meta = {
     parameters: {
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/NFTArt/Responsive',
 } satisfies Meta;
 

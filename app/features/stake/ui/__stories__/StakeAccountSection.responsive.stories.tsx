@@ -66,7 +66,7 @@ const meta = {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Stake/StakeAccountSection/Responsive',
 } satisfies Meta<typeof StakeAccountSection>;
 
