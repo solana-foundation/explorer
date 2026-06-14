@@ -1,6 +1,131 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Dashkit `_type.scss` heading overrides — preserved inline so Tailwind's
+   preflight skip (and the imminent dashkit SCSS deletion) don't regress
+   consumer typography. Sizes mirror the compiled dashkit scale ($h1..$h6);
+   without them headings fall back to Reboot's much larger defaults. */
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3,
+h4,
+.h4,
+h5,
+.h5,
+h6,
+.h6 {
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+h1,
+.h1 {
+    margin-bottom: 1.125rem;
+    font-size: 1.5rem;
+}
+@media (min-width: 768px) {
+    h1,
+    .h1 {
+        font-size: 1.625rem;
+    }
+}
+h2,
+.h2 {
+    margin-bottom: 1.125rem;
+    font-size: 1.25rem;
+}
+h3,
+.h3 {
+    margin-bottom: 0.84375rem;
+    font-size: 1.0625rem;
+}
+h4,
+.h4 {
+    margin-bottom: 0.5625rem;
+    font-size: 0.9375rem;
+}
+h5,
+.h5 {
+    margin-bottom: 0.5625rem;
+    font-size: 0.8125rem;
+}
+h6,
+.h6 {
+    margin-bottom: 0.5625rem;
+    font-size: 0.625rem;
+}
+b,
+strong {
+    font-weight: 600;
+}
+
+/* Dashkit $small-font-size (13px flat) — prebuilt Reboot uses .875em (13.125px at 15px base). */
+small,
+.small {
+    font-size: 0.8125rem;
+}
+
+/* Dashkit hr — solid #282d2b 1px line; Reboot renders border-top currentColor at .25 opacity instead. */
+hr {
+    height: 1px;
+    margin: 1rem 0;
+    color: #282d2b;
+    background-color: currentColor;
+    border: 0;
+    opacity: 1;
+}
+
+/* Dashkit code/pre chips (dark cascade) — Reboot only sets mono font + pink code color. */
+code,
+pre {
+    padding: 0.33rem;
+    border-radius: 0.375rem;
+    font-size: 87.5%;
+    color: #fff;
+    background-color: #141816;
+}
+code {
+    word-wrap: break-word;
+}
+pre {
+    margin: 0;
+    overflow: auto;
+    text-align: left;
+}
+
+/* Dashkit link overrides — $link-color $primary-dark (#33a382), text-decoration none.
+   Bootstrap reboot's default link color is #0d6efd (blue) with underline. */
+a {
+    color: #33a382;
+    text-decoration: none;
+}
+a:hover {
+    color: #2b8a6e;
+    text-decoration: none;
+}
+
+/* Dashkit `_type.scss` focus-outline removal on links/buttons; without it the UA blue ring leaks. */
+a:focus,
+button:focus {
+    outline: none !important;
+}
+
+/* Dashkit `_reboot.scss` list extension — Bootstrap Reboot alone indents lists 2rem. */
+ul,
+ol {
+    padding-left: 2.5rem;
+}
+
+/* Bootstrap global caption rule from the dashkit bundle ($table-cell-padding-y / $text-muted). */
+caption {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    color: #698582;
+    text-align: left;
+}
+
 :root {
     --accent: #13d89b;
     --card-border: #111;
@@ -9,8 +134,8 @@
     --border: oklch(0.922 0 0);
 
     /* Tailwind variables - compatibility only, values don't matter
-     * Required because @tailwind base is skipped to avoid conflicts
-     * with Bootstrap/Dashkit reset styles. Ring utilities override these. */
+     * Required because @tailwind base is skipped (deferred to a follow-up PR; re-enabling
+     * surfaces ~600 stories of browser-default drift). Ring utilities override these. */
     --tw-translate-x: 0;
     --tw-translate-y: 0;
     --tw-rotate: 0;
@@ -78,7 +203,7 @@
         border: 0.25em solid currentColor;
         border-right-color: transparent;
         border-radius: 50%;
-        animation: 0.75s linear infinite spinner-border;
+        animation: 0.75s linear infinite e-spinner-border;
     }
     .e-spinner-border-sm {
         width: 1rem;
@@ -102,7 +227,7 @@
         background-color: currentColor;
         border-radius: 50%;
         opacity: 0;
-        animation: 0.75s linear infinite spinner-grow;
+        animation: 0.75s linear infinite e-spinner-grow;
     }
     .e-spinner-grow-xs {
         width: 0.5rem;
@@ -117,6 +242,175 @@
         .e-spinner-grow {
             animation-duration: 1.5s;
         }
+    }
+
+    /* Dropdown family port; toggle behavior lives in the dropdown.tsx shim (React state, no Bootstrap JS). */
+    @keyframes e-dropdown-menu {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    .e-dropdown {
+        position: relative;
+    }
+    .e-dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 1000;
+        display: none;
+        min-width: 10rem;
+        padding: 0.5rem 0;
+        margin: 0;
+        font-size: 0.9375rem;
+        color: #fff;
+        text-align: left;
+        list-style: none;
+        background-color: #1e2423;
+        background-clip: padding-box;
+        border: 1px solid #232323;
+        border-radius: 0.375rem;
+        animation: e-dropdown-menu 0.15s;
+    }
+    .e-dropdown-menu.e-show {
+        display: block;
+    }
+    /* Replaces Bootstrap-JS/Popper `bottom-end` placement (no viewport-collision flipping). */
+    .e-dropdown-menu-end {
+        right: 0;
+        left: auto;
+    }
+    .e-dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 0.375rem 1.5rem;
+        clear: both;
+        font-weight: 400;
+        color: #698582;
+        text-align: inherit;
+        text-decoration: none;
+        white-space: nowrap;
+        background-color: transparent;
+        border: 0;
+    }
+    .e-dropdown-item:hover,
+    .e-dropdown-item:focus,
+    .e-dropdown-item.active,
+    .e-dropdown-item:active {
+        color: #fff;
+        background-color: transparent;
+    }
+    .e-dropdown-item:disabled,
+    .e-dropdown-item.disabled {
+        color: #abd5c6;
+        pointer-events: none;
+    }
+    .e-dropdown-header {
+        display: block;
+        padding: 0.5rem 1.5rem;
+        margin-bottom: 0;
+        font-size: 0.8125rem;
+        color: #abd5c6;
+        white-space: nowrap;
+    }
+    .e-dropdown-exit {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 100;
+    }
+
+    /* Right-edge drawer port (Bootstrap .offcanvas.offcanvas-end); toggled via .e-show by React state. */
+    .e-offcanvas-end {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1060;
+        display: flex;
+        flex-direction: column;
+        width: 350px;
+        max-width: 100%;
+        background-color: #1e2423;
+        border-left: 1px solid #232323;
+        transform: translateX(100%);
+        visibility: hidden;
+        transition:
+            transform 0.3s ease-in-out,
+            visibility 0.3s;
+    }
+    .e-offcanvas-end.e-show {
+        transform: none;
+        visibility: visible;
+    }
+
+    /* Expandable instruction-type list port (_solana.scss .tree) — joint lines drawn via li borders. */
+    .e-tree,
+    ul.e-tree,
+    ul.e-tree ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .e-tree ul {
+        margin-left: 1em;
+    }
+    .e-tree li {
+        margin-left: 0.35em;
+        border-left: thin solid #808080;
+    }
+    .e-tree li:last-child {
+        border-left: none;
+    }
+    .e-tree li:before {
+        width: 1.4em;
+        height: 0.6em;
+        margin-right: 0.1em;
+        vertical-align: top;
+        border-bottom: thin solid #808080;
+        content: '';
+        display: inline-block;
+    }
+    .e-tree li:last-child:before {
+        border-left: thin solid #808080;
+    }
+
+    /* Homepage staking stats port (_solana.scss .staking-card). */
+    .e-staking-card em {
+        font-style: normal;
+        color: #1dd79b;
+    }
+    .e-staking-card h1 {
+        margin-bottom: 0.75rem;
+    }
+    .e-staking-card h1 small {
+        font-size: 1rem;
+    }
+    .e-staking-card h5 {
+        margin-bottom: 0;
+    }
+
+    /* Backdrop port (Bootstrap .modal-backdrop.fade); .e-show fades it in, otherwise it ignores clicks. */
+    .e-modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1050;
+        width: 100vw;
+        height: 100vh;
+        background-color: #232323;
+        opacity: 0;
+        transition: opacity 0.15s linear;
+        pointer-events: none;
+    }
+    .e-modal-backdrop.e-show {
+        opacity: 0.5;
+        pointer-events: auto;
     }
 }
 

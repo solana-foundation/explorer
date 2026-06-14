@@ -1,5 +1,5 @@
-import './layout.min.css'; // uncomment this line to see Dashkit styles. TODO: remove upon migrating from Dashkit to Tailwind
-import './dashkit-polyfill.css';
+import 'bootstrap/dist/css/bootstrap-reboot.min.css';
+import './body-base.css';
 import '@/app/styles.css';
 
 import type { Preview } from '@storybook/react';
