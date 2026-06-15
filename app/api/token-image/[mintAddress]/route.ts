@@ -1,9 +1,8 @@
-import { PublicKey } from '@solana/web3.js';
+import { isAddress } from '@solana/kit';
 import { NextResponse } from 'next/server';
 
 import { getAssetBatch } from '@/app/entities/digital-asset/server';
 import { NO_STORE_HEADERS } from '@/app/shared/lib/http-utils';
-import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, clusterFromSlug, clusterSlug, serverClusterUrl } from '@/app/utils/cluster';
 
 const IMAGE_CACHE_HEADERS = {
@@ -19,10 +18,8 @@ type Params = {
 export async function GET(request: Request, props: Params) {
     const { mintAddress } = await props.params;
 
-    try {
-        new PublicKey(mintAddress);
-    } catch {
-        return NextResponse.json({ error: 'Invalid mint address' }, { status: 400 });
+    if (!isAddress(mintAddress)) {
+        return NextResponse.json({ error: 'Invalid mint address' }, { headers: NO_STORE_HEADERS, status: 400 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -35,17 +32,13 @@ export async function GET(request: Request, props: Params) {
     }
 
     const rpcUrl = serverClusterUrl(cluster, customUrl);
+    const assets = await getAssetBatch([mintAddress], rpcUrl);
 
-    try {
-        const assets = await getAssetBatch([mintAddress], rpcUrl);
-        if (!assets) {
-            return NextResponse.json({ image: undefined }, { headers: NO_STORE_HEADERS });
-        }
-        const asset = assets.find(a => a.id === mintAddress);
-        const image = asset?.content.links?.image;
-        return NextResponse.json({ image }, { headers: IMAGE_CACHE_HEADERS });
-    } catch (error) {
-        Logger.panic(error instanceof Error ? error : new Error('[api:token-image] DAS request failed'));
-        return NextResponse.json({ error: 'Failed to fetch token image' }, { headers: NO_STORE_HEADERS, status: 500 });
+    if (!assets) {
+        return NextResponse.json({ image: undefined }, { headers: NO_STORE_HEADERS });
     }
+
+    const asset = assets.find(a => a.id === mintAddress);
+    const image = asset?.content.links?.image;
+    return NextResponse.json({ image }, { headers: IMAGE_CACHE_HEADERS });
 }
