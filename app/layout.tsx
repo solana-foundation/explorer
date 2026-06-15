@@ -1,6 +1,6 @@
-import './reboot.css';
-import './reboot-tw.css';
-import './styles.css';
+import './styles/reboot.css';
+import './styles/reboot-tw.css';
+import './styles/styles.css';
 
 import { ClusterModal } from '@components/ClusterModal';
 import { ClusterStatusButton } from '@components/ClusterStatusButton';

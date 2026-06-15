@@ -1,4 +1,4 @@
-import '@/app/styles.css';
+import '@/app/styles/styles.css';
 
 import { Metadata } from 'next/types';
 

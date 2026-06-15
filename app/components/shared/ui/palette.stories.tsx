@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 import config, { dkColors } from '@/tailwind.config';
 
-// The :root custom properties from app/styles.css. --tw-* internals are deliberately excluded.
+// The :root custom properties from app/styles/styles.css. --tw-* internals are deliberately excluded.
 const CSS_VAR_TOKENS = [
     '--background',
     '--foreground',
@@ -14,9 +14,9 @@ const CSS_VAR_TOKENS = [
     '--border',
 ] as const;
 
-// next/font (Rubik) is exposed app-wide through this variable; see app/styles.ts.
+// next/font (Rubik) is exposed app-wide through this variable; see app/styles/index.ts.
 const FONT_VAR = '--explorer-default-font';
-// Only these weights are loaded by next/font (app/styles.ts) — others would render synthetic.
+// Only these weights are loaded by next/font (app/styles/index.ts) — others would render synthetic.
 const FONT_WEIGHTS = [
     { label: 'Light', weight: 300 },
     { label: 'Regular', weight: 400 },

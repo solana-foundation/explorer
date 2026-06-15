@@ -4,7 +4,7 @@ import * as React from 'react';
 import { cn } from '@/app/components/shared/utils';
 
 // Self-contained replacement for Bootstrap's JS Dropdown: the root owns open state and closes on
-// outside click / Escape / item click. Skin lives in the `.e-dropdown*` family in app/styles.css.
+// outside click / Escape / item click. Skin lives in the `.e-dropdown*` family in app/styles/styles.css.
 // TODO: fold into the Radix-backed dropdown-menu.tsx once visual parity with dashkit is no longer required.
 
 interface DropdownContextValue {

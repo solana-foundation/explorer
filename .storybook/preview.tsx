@@ -1,6 +1,6 @@
-import '@/app/reboot.css';
-import '@/app/reboot-tw.css';
-import '@/app/styles.css';
+import '@/app/styles/reboot.css';
+import '@/app/styles/reboot-tw.css';
+import '@/app/styles/styles.css';
 
 import type { Preview } from '@storybook/react';
 import React, { useEffect } from 'react';
