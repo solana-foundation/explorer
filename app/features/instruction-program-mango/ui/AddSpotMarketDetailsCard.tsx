@@ -1,8 +1,8 @@
 import { InstructionCard } from '@components/instruction/InstructionCard';
-
-import { BaseTable } from '@/app/shared/ui/Table';
 import { AddSpotMarket, spotMarketFromIndex } from '@explorer/decoder-mango';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
+
+import { BaseTable } from '@/app/shared/ui/Table';
 
 export function AddSpotMarketDetailsCard(props: {
     ix: TransactionInstruction;

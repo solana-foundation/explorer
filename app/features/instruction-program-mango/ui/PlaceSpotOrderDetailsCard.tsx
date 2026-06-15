@@ -1,11 +1,11 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-
-import { BaseTable } from '@/app/shared/ui/Table';
 import { getSpotMarketFromInstruction, OrderLotDetails, PlaceSpotOrder } from '@explorer/decoder-mango';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import BN from 'bn.js';
 import { useMemo } from 'react';
+
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { useMangoSpotMarket } from '../model/use-mango-market';
 
@@ -21,8 +21,8 @@ export function PlaceSpotOrderDetailsCard(props: {
     const mangoSpotMarketConfig = getSpotMarketFromInstruction(ix, info.spotMarket);
     const spotMarket = useMangoSpotMarket(ix.programId, mangoSpotMarketConfig);
 
-    const orderLotDetails = useMemo<OrderLotDetails | null>(() => {
-        if (!spotMarket) return null;
+    const orderLotDetails = useMemo<OrderLotDetails | undefined>(() => {
+        if (!spotMarket) return undefined;
         return {
             price: spotMarket.priceLotsToNumber(new BN(info.limitPrice.toString())),
             size: spotMarket.baseSizeLotsToNumber(new BN(info.maxBaseQuantity.toString())),
@@ -77,7 +77,7 @@ export function PlaceSpotOrderDetailsCard(props: {
                 <BaseTable.Cell className="text-right">{info.side}</BaseTable.Cell>
             </BaseTable.Row>
 
-            {orderLotDetails !== null && (
+            {orderLotDetails !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Limit price</BaseTable.Cell>
                     {/* todo fix price */}
@@ -85,7 +85,7 @@ export function PlaceSpotOrderDetailsCard(props: {
                 </BaseTable.Row>
             )}
 
-            {orderLotDetails !== null && (
+            {orderLotDetails !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Size</BaseTable.Cell>
                     <BaseTable.Cell className="text-right">{orderLotDetails?.size}</BaseTable.Cell>

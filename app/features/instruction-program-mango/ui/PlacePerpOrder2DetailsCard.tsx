@@ -1,11 +1,11 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-
-import { BaseTable } from '@/app/shared/ui/Table';
 import { getPerpMarketFromInstruction, OrderLotDetails, PlacePerpOrder2 } from '@explorer/decoder-mango';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import BN from 'bn.js';
 import { useMemo } from 'react';
+
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { useMangoPerpMarket } from '../model/use-mango-market';
 
@@ -21,8 +21,8 @@ export function PlacePerpOrder2DetailsCard(props: {
     const mangoPerpMarketConfig = getPerpMarketFromInstruction(ix, info.perpMarket);
     const perpMarket = useMangoPerpMarket(mangoPerpMarketConfig);
 
-    const orderLotDetails = useMemo<OrderLotDetails | null>(() => {
-        if (!perpMarket) return null;
+    const orderLotDetails = useMemo<OrderLotDetails | undefined>(() => {
+        if (!perpMarket) return undefined;
         return {
             price: perpMarket.priceLotsToNumber(new BN(info.price.toString())),
             size: perpMarket.baseLotsToNumber(new BN(info.maxBaseQuantity.toString())),
@@ -71,13 +71,13 @@ export function PlacePerpOrder2DetailsCard(props: {
                 <BaseTable.Cell>Side</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">{info.side}</BaseTable.Cell>
             </BaseTable.Row>
-            {orderLotDetails !== null && (
+            {orderLotDetails !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>price</BaseTable.Cell>
                     <BaseTable.Cell className="text-right">{orderLotDetails?.price} USDC</BaseTable.Cell>
                 </BaseTable.Row>
             )}
-            {orderLotDetails !== null && (
+            {orderLotDetails !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>quantity</BaseTable.Cell>
                     <BaseTable.Cell className="text-right">{orderLotDetails?.size}</BaseTable.Cell>

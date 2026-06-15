@@ -3,9 +3,9 @@ import { ChangePerpMarketParams, getPerpMarketFromInstruction } from '@explorer/
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { formatDuration } from '@utils/date';
 
-import { useMangoPerpMarket } from '../model/use-mango-market';
-
 import { BaseTable } from '@/app/shared/ui/Table';
+
+import { useMangoPerpMarket } from '../model/use-mango-market';
 export function ChangePerpMarketParamsDetailsCard(props: {
     ix: TransactionInstruction;
     index: number;
@@ -18,7 +18,7 @@ export function ChangePerpMarketParamsDetailsCard(props: {
 
     const mangoPerpMarketConfig = getPerpMarketFromInstruction(ix, info.perpMarket);
     const perpMarket = useMangoPerpMarket(mangoPerpMarketConfig);
-    const targetPeriodLength = perpMarket?.liquidityMiningInfo.targetPeriodLength.toNumber() ?? null;
+    const targetPeriodLength = perpMarket?.liquidityMiningInfo.targetPeriodLength.toNumber();
 
     return (
         <InstructionCard
@@ -56,7 +56,7 @@ export function ChangePerpMarketParamsDetailsCard(props: {
             {info.mngoPerPeriodOption && (
                 <BaseTable.Row>
                     <BaseTable.Cell>
-                        MNGO per {targetPeriodLength !== null && formatDuration(targetPeriodLength, 'seconds')}
+                        MNGO per {targetPeriodLength !== undefined && formatDuration(targetPeriodLength, 'seconds')}
                     </BaseTable.Cell>
                     <BaseTable.Cell className="text-right">
                         {info.mngoPerPeriod} {}

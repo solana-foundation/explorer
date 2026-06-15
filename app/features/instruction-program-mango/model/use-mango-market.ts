@@ -11,21 +11,21 @@ import { PublicKey } from '@solana/web3.js';
 import { useState } from 'react';
 import useAsyncEffect from 'use-async-effect';
 
-export function useMangoPerpMarket(config: PerpMarketConfig | undefined): PerpMarket | null {
+export function useMangoPerpMarket(config: PerpMarketConfig | undefined): PerpMarket | undefined {
     const { url } = useCluster();
-    const [market, setMarket] = useState<PerpMarket | null>(null);
+    const [market, setMarket] = useState<PerpMarket | undefined>(undefined);
 
     useAsyncEffect(
         async isMounted => {
             if (config === undefined) {
-                if (isMounted()) setMarket(null);
+                if (isMounted()) setMarket(undefined);
                 return;
             }
             try {
                 const resolved = await getPerpMarketFromPerpMarketConfig(url, config);
                 if (isMounted()) setMarket(resolved);
             } catch {
-                if (isMounted()) setMarket(null);
+                if (isMounted()) setMarket(undefined);
             }
         },
         [url, config],
@@ -34,21 +34,21 @@ export function useMangoPerpMarket(config: PerpMarketConfig | undefined): PerpMa
     return market;
 }
 
-export function useMangoSpotMarket(programId: PublicKey, config: SpotMarketConfig | undefined): Market | null {
+export function useMangoSpotMarket(programId: PublicKey, config: SpotMarketConfig | undefined): Market | undefined {
     const { url } = useCluster();
-    const [market, setMarket] = useState<Market | null>(null);
+    const [market, setMarket] = useState<Market | undefined>(undefined);
 
     useAsyncEffect(
         async isMounted => {
             if (config === undefined) {
-                if (isMounted()) setMarket(null);
+                if (isMounted()) setMarket(undefined);
                 return;
             }
             try {
                 const resolved = await getSpotMarketFromSpotMarketConfig(programId, url, config);
-                if (isMounted()) setMarket(resolved ?? null);
+                if (isMounted()) setMarket(resolved ?? undefined);
             } catch {
-                if (isMounted()) setMarket(null);
+                if (isMounted()) setMarket(undefined);
             }
         },
         [url, programId, config],

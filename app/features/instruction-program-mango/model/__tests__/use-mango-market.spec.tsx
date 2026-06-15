@@ -33,14 +33,14 @@ describe('useMangoPerpMarket', () => {
         vi.clearAllMocks();
     });
 
-    it('returns null when config is undefined', () => {
+    it('should return undefined when config is undefined', () => {
         const { result } = renderHook(() => useMangoPerpMarket(undefined));
 
-        expect(result.current).toBeNull();
+        expect(result.current).toBeUndefined();
         expect(getPerpMarketFromPerpMarketConfig).not.toHaveBeenCalled();
     });
 
-    it('returns the resolved perp market when config is provided', async () => {
+    it('should return the resolved perp market when config is provided', async () => {
         const resolved = { name: 'BTC-PERP' } as unknown as PerpMarket;
         vi.mocked(getPerpMarketFromPerpMarketConfig).mockResolvedValueOnce(resolved);
 
@@ -52,7 +52,7 @@ describe('useMangoPerpMarket', () => {
         expect(getPerpMarketFromPerpMarketConfig).toHaveBeenCalledWith('https://mainnet.rpc.address', perpMarketConfig);
     });
 
-    it('returns null when resolution throws', async () => {
+    it('should return undefined when resolution throws', async () => {
         vi.mocked(getPerpMarketFromPerpMarketConfig).mockRejectedValueOnce(new Error('rpc failed'));
 
         const { result } = renderHook(() => useMangoPerpMarket(perpMarketConfig));
@@ -60,10 +60,10 @@ describe('useMangoPerpMarket', () => {
         await waitFor(() => {
             expect(getPerpMarketFromPerpMarketConfig).toHaveBeenCalled();
         });
-        expect(result.current).toBeNull();
+        expect(result.current).toBeUndefined();
     });
 
-    it('resets to null when config transitions from defined to undefined', async () => {
+    it('should reset to undefined when config transitions from defined to undefined', async () => {
         const resolved = { name: 'BTC-PERP' } as unknown as PerpMarket;
         vi.mocked(getPerpMarketFromPerpMarketConfig).mockResolvedValueOnce(resolved);
 
@@ -78,7 +78,7 @@ describe('useMangoPerpMarket', () => {
         rerender({ config: undefined });
 
         await waitFor(() => {
-            expect(result.current).toBeNull();
+            expect(result.current).toBeUndefined();
         });
     });
 });
@@ -88,14 +88,14 @@ describe('useMangoSpotMarket', () => {
         vi.clearAllMocks();
     });
 
-    it('returns null when config is undefined', () => {
+    it('should return undefined when config is undefined', () => {
         const { result } = renderHook(() => useMangoSpotMarket(programId, undefined));
 
-        expect(result.current).toBeNull();
+        expect(result.current).toBeUndefined();
         expect(getSpotMarketFromSpotMarketConfig).not.toHaveBeenCalled();
     });
 
-    it('returns the resolved spot market when config is provided', async () => {
+    it('should return the resolved spot market when config is provided', async () => {
         const resolved = { address: 'spot' } as unknown as Market;
         vi.mocked(getSpotMarketFromSpotMarketConfig).mockResolvedValueOnce(resolved);
 
@@ -111,7 +111,7 @@ describe('useMangoSpotMarket', () => {
         );
     });
 
-    it('returns null when resolver yields undefined', async () => {
+    it('should return undefined when resolver yields undefined', async () => {
         vi.mocked(getSpotMarketFromSpotMarketConfig).mockResolvedValueOnce(undefined);
 
         const { result } = renderHook(() => useMangoSpotMarket(programId, spotMarketConfig));
@@ -119,10 +119,10 @@ describe('useMangoSpotMarket', () => {
         await waitFor(() => {
             expect(getSpotMarketFromSpotMarketConfig).toHaveBeenCalled();
         });
-        expect(result.current).toBeNull();
+        expect(result.current).toBeUndefined();
     });
 
-    it('returns null when resolution throws', async () => {
+    it('should return undefined when resolution throws', async () => {
         vi.mocked(getSpotMarketFromSpotMarketConfig).mockRejectedValueOnce(new Error('rpc failed'));
 
         const { result } = renderHook(() => useMangoSpotMarket(programId, spotMarketConfig));
@@ -130,6 +130,6 @@ describe('useMangoSpotMarket', () => {
         await waitFor(() => {
             expect(getSpotMarketFromSpotMarketConfig).toHaveBeenCalled();
         });
-        expect(result.current).toBeNull();
+        expect(result.current).toBeUndefined();
     });
 });
