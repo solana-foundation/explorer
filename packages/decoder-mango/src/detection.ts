@@ -1,5 +1,5 @@
 import { MangoInstructionLayout } from '@blockworks-foundation/mango-client';
-import { TransactionInstruction } from '@solana/web3.js';
+import { type TransactionInstruction } from '@solana/web3.js';
 
 import { mangoGroups } from './config';
 

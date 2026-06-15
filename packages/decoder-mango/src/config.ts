@@ -1,5 +1,5 @@
-import { Config, GroupConfig } from '@blockworks-foundation/mango-client';
-import { PublicKey } from '@solana/web3.js';
+import { Config, type GroupConfig } from '@blockworks-foundation/mango-client';
+import { type PublicKey } from '@solana/web3.js';
 
 // note: mainnet.1 suffices since its a superset of mainnet.0
 export const mangoGroups = Config.ids().groups.filter(group => group.name !== 'mainnet.0');

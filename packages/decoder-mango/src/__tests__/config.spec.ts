@@ -23,7 +23,7 @@ describe('findGroupConfig', () => {
     it.each(['mainnet', 'devnet', 'testnet'] as const)('should return a group config for %s program ID', network => {
         const result = findGroupConfig(MANGO_PROGRAM_IDS[network]);
         expect(result).toBeDefined();
-        expect(result!.mangoProgramId.equals(MANGO_PROGRAM_IDS[network])).toBe(true);
+        expect(result?.mangoProgramId.equals(MANGO_PROGRAM_IDS[network])).toBe(true);
     });
 
     it('should return undefined for an unknown program ID', () => {

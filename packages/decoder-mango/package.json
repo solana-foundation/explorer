@@ -16,7 +16,7 @@
         "build": "tsc",
         "test": "vitest run",
         "test:watch": "vitest",
-        "types": "tsc --noEmit"
+        "typecheck": "tsc --noEmit"
     },
     "dependencies": {
         "@blockworks-foundation/mango-client": "3.6.7",

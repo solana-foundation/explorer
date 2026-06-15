@@ -16,8 +16,8 @@ describe('getSpotMarketFromInstruction', () => {
         const result = getSpotMarketFromInstruction(ix, spotMarketMeta);
 
         expect(result).toBeDefined();
-        expect(result!.name).toBe('MNGO/USDC');
-        expect(result!.publicKey.equals(SPOT_MARKETS['MNGO/USDC'].publicKey)).toBe(true);
+        expect(result?.name).toBe('MNGO/USDC');
+        expect(result?.publicKey.equals(SPOT_MARKETS['MNGO/USDC'].publicKey)).toBe(true);
     });
 
     it('should return undefined for unknown spot market pubkey', () => {
@@ -61,8 +61,8 @@ describe('getPerpMarketFromInstruction', () => {
         const result = getPerpMarketFromInstruction(ix, perpMarketMeta);
 
         expect(result).toBeDefined();
-        expect(result!.name).toBe('BTC-PERP');
-        expect(result!.publicKey.equals(PERP_MARKETS['BTC-PERP'].publicKey)).toBe(true);
+        expect(result?.name).toBe('BTC-PERP');
+        expect(result?.publicKey.equals(PERP_MARKETS['BTC-PERP'].publicKey)).toBe(true);
     });
 
     it('should return undefined for unknown perp market pubkey', () => {

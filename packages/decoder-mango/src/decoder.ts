@@ -1,5 +1,5 @@
 import { MangoInstructionLayout } from '@blockworks-foundation/mango-client';
-import { AccountMeta, TransactionInstruction } from '@solana/web3.js';
+import { type AccountMeta, type TransactionInstruction } from '@solana/web3.js';
 
 export type Deposit = {
     quantity: number;
