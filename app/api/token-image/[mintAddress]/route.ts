@@ -24,14 +24,20 @@ export async function GET(request: Request, props: Params) {
 
     const { searchParams } = new URL(request.url);
     const clusterParam = searchParams.get('cluster') ?? clusterSlug(Cluster.MainnetBeta);
-    const customUrl = searchParams.get('customUrl') ?? '';
 
     const cluster = clusterFromSlug(clusterParam);
     if (cluster === null) {
         return NextResponse.json({ error: 'Invalid cluster' }, { headers: NO_STORE_HEADERS, status: 400 });
     }
 
-    const rpcUrl = serverClusterUrl(cluster, customUrl);
+    if (cluster === Cluster.Custom) {
+        return NextResponse.json(
+            { error: 'Custom cluster is not supported' },
+            { headers: NO_STORE_HEADERS, status: 400 },
+        );
+    }
+
+    const rpcUrl = serverClusterUrl(cluster, '');
     const assets = await getAssetBatch([mintAddress], rpcUrl);
 
     if (!assets) {

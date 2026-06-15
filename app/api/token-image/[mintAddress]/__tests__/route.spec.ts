@@ -43,6 +43,17 @@ describe('GET /api/token-image/[mintAddress]', () => {
             expect(data.error).toBe('Invalid cluster');
         });
 
+        it('should return 400 for custom cluster to prevent SSRF', async () => {
+            const response = await GET(
+                makeRequest(`${BASE_URL}?cluster=custom&customUrl=http://internal-service`),
+                makeParams(),
+            );
+
+            expect(response.status).toBe(400);
+            const data = await response.json();
+            expect(data.error).toBe('Custom cluster is not supported');
+        });
+
         it('should not cache invalid mint address 400 errors', async () => {
             const response = await GET(makeRequest(), makeParams('not-a-pubkey'));
 
