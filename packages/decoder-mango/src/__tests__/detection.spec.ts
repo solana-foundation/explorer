@@ -56,9 +56,7 @@ describe('parseMangoInstructionTitle', () => {
         const { registry } = MangoInstructionLayout as unknown as {
             registry: Record<string, { property: string }>;
         };
-        const expected = new Map(
-            Object.entries(registry).map(([index, variant]) => [Number(index), variant.property]),
-        );
+        const expected = new Map(Object.entries(registry).map(([index, variant]) => [Number(index), variant.property]));
         expect(MANGO_INSTRUCTION_NAMES).toEqual(expected);
     });
 });
