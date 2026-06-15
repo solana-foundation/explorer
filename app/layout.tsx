@@ -1,5 +1,5 @@
 import './reboot.css';
-import './body-base.css';
+import './reboot-tw.css';
 import './styles.css';
 
 import { ClusterModal } from '@components/ClusterModal';
@@ -13,7 +13,6 @@ import { Toaster } from '@shared/ui/sonner/toaster';
 import { isEnvEnabled } from '@utils/env';
 import { BotIdClient } from 'botid/client';
 import type { Viewport } from 'next';
-import { Rubik } from 'next/font/google';
 import { type Metadata } from 'next/types';
 import { Suspense } from 'react';
 
@@ -22,6 +21,7 @@ import { TokenInfoBatchProvider } from '@/app/entities/token-info';
 import { CookieConsent } from '@/app/features/cookie';
 import { VisibilityProvider } from '@/app/shared/lib/visibility';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
+import { rubikFont } from '@/app/styles';
 
 import { botIdProtectedRoutes } from '../proxy';
 
@@ -36,13 +36,6 @@ export const viewport: Viewport = {
     maximumScale: 1,
     width: 'device-width',
 };
-
-const rubikFont = Rubik({
-    display: 'swap',
-    subsets: ['latin'],
-    variable: '--explorer-default-font',
-    weight: ['300', '400', '700'],
-});
 
 export default function RootLayout({ analytics, children }: { analytics: React.ReactNode; children: React.ReactNode }) {
     return (

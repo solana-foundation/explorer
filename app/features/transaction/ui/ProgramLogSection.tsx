@@ -8,7 +8,7 @@ import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
 
 import { Button } from '@/app/components/shared/ui/button';
-import { BaseCardBody } from '@/app/shared/ui/Card';
+import { BaseCardBody, Card } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { CollapsibleSection } from './CollapsibleSection';
@@ -57,7 +57,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
 
     return (
         <CollapsibleSection title="Logs" actions={chips} className="">
-            <div className="e-card">
+            <Card ui="dashkit">
                 {prettyLogs !== null && logMessages !== null ? (
                     showRaw ? (
                         <RawProgramLogs raw={logMessages} />
@@ -69,7 +69,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                         Logs not supported for this transaction
                     </BaseCardBody>
                 )}
-            </div>
+            </Card>
         </CollapsibleSection>
     );
 }

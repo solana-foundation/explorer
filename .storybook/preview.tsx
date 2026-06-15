@@ -1,10 +1,11 @@
 import '@/app/reboot.css';
-import '@/app/body-base.css';
+import '@/app/reboot-tw.css';
 import '@/app/styles.css';
 
 import type { Preview } from '@storybook/react';
-import { Rubik } from 'next/font/google';
 import React, { useEffect } from 'react';
+
+import { rubikFont } from '@/app/styles';
 
 // Storybook serialises story args with JSON.stringify (for the controls panel and inter-frame
 // messaging), which throws on BigInt. Story fixtures here use BigInt for lamports / epoch values,
@@ -19,15 +20,6 @@ declare global {
 BigInt.prototype.toJSON = function () {
     return this.toString();
 };
-
-// Load font with display: swap for better loading behavior
-const rubikFont = Rubik({
-    display: 'swap',
-    preload: true,
-    subsets: ['latin'],
-    variable: '--explorer-default-font',
-    weight: ['300', '400', '700'],
-});
 
 const preview: Preview = {
     parameters: {

@@ -3,6 +3,8 @@ import { Button } from '@shared/ui/button';
 import { ReactNode, useId, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
+import { baseCardVariants } from '@/app/shared/ui/Card';
+
 type CollapsibleSectionProps = {
     id?: string;
     title: ReactNode;
@@ -18,7 +20,7 @@ export function CollapsibleSection({
     actions,
     children,
     defaultExpanded = true,
-    className = 'e-card',
+    className = baseCardVariants({ ui: 'dashkit' }),
 }: CollapsibleSectionProps) {
     const [expanded, setExpanded] = useState(defaultExpanded);
     const headingId = useId();

@@ -33,6 +33,7 @@ import { ZoomIn } from 'react-feather';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
+import { Card } from '@/app/shared/ui/Card';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
 type RowProps = React.HTMLAttributes<HTMLDivElement> & { divider?: boolean };
@@ -236,7 +237,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                 </div>
             </div>
 
-            <div className="e-card">
+            <Card ui="dashkit">
                 {/* Status */}
                 <Row divider>
                     <Label>Status</Label>
@@ -359,7 +360,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                         )}
                     </Value>
                 </Row>
-            </div>
+            </Card>
         </section>
     );
 }
