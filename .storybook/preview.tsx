@@ -28,9 +28,9 @@ const preview: Preview = {
         },
         backgrounds: {
             options: {
-                dark: { name: 'Dark', value: 'oklch(21.6% 0.0081 169.6)' },
-                card: { name: 'Card', value: '#1e2423' },
-                light: { name: 'Light', value: 'oklch(96.5% 0.005 86)' },
+                dark: { name: 'Dark', value: 'var(--background)' },
+                card: { name: 'Card', value: 'var(--sb-bg-card)' },
+                light: { name: 'Light', value: 'var(--sb-bg-light)' },
             },
         },
         controls: {

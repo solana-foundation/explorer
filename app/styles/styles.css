@@ -133,6 +133,10 @@ caption {
     --popover-foreground: oklch(0.145 0 0);
     --border: oklch(0.922 0 0);
 
+    /* Storybook canvas swatches; --background doubles as the dark swatch. */
+    --sb-bg-card: #1e2423;
+    --sb-bg-light: oklch(96.5% 0.005 86);
+
     /* Compatibility stubs — normally declared by @tailwind base (skipped, see top of file).
      * Real values come from the ring/transform/filter utilities that override them. */
     --tw-translate-x: 0;
