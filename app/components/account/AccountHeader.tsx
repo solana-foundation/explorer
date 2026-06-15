@@ -2,6 +2,7 @@ import { CompressedNftAccountHeader } from '@components/account/CompressedNftCar
 import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
 import { isNFTokenAccount } from '@components/account/nftoken/isNFTokenAccount';
 import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
+import { useDasImage } from '@entities/digital-asset';
 import { isMetaplexNFT } from '@entities/nft';
 import {
     Account,
@@ -19,7 +20,6 @@ import { create } from 'superstruct';
 
 import { ProgramHeader } from '@/app/components/shared/account/ProgramHeader';
 import { ProxiedImage } from '@/app/features/metadata';
-import { useDasImage } from '@entities/digital-asset';
 import { getProxiedUri } from '@/app/features/metadata/utils';
 import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 
