@@ -19,7 +19,7 @@ import { create } from 'superstruct';
 
 import { ProgramHeader } from '@/app/components/shared/account/ProgramHeader';
 import { ProxiedImage } from '@/app/features/metadata';
-import { useDasImage } from '@/app/entities/digital-asset/model/use-das-image';
+import { useDasImage } from '@entities/digital-asset';
 import { getProxiedUri } from '@/app/features/metadata/utils';
 import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 
@@ -113,7 +113,11 @@ function TokenMintHeader({
     const metadataPointerExtension = mintInfo?.extensions?.find(
         ({ extension }: { extension: string }) => extension === 'metadataPointer',
     );
-    const dasImage = useDasImage(tokenInfo?.logoURI ? undefined : address);
+    // Skip DAS fetch when a definitive image is already available. Token-2022 is excluded:
+    // its image comes from an async metadata URI fetch, so DAS still serves as a useful fallback.
+    const dasImage = useDasImage(
+        tokenInfo?.logoURI || isRedactedTokenAddress(address) || parsedData?.nftData?.json?.image ? undefined : address,
+    );
 
     const defaultCard = useMemo(() => {
         const logoURI = tokenInfo?.logoURI ?? dasImage;
