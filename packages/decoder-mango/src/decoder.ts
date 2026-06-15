@@ -187,24 +187,24 @@ export type ChangePerpMarketParams = {
 export const decodeChangePerpMarketParams = (ix: TransactionInstruction): ChangePerpMarketParams => {
     const decoded = MangoInstructionLayout.decode(ix.data, 0);
     const changePerpMarketParams: ChangePerpMarketParams = {
-        initLeverage: decoded.ChangePerpMarketParams.initLeverage.toString(),
+        initLeverage: decoded.ChangePerpMarketParams.initLeverage.toNumber(),
         initLeverageOption: decoded.ChangePerpMarketParams.initLeverageOption,
-        liquidationFee: decoded.ChangePerpMarketParams.liquidationFee.toString(),
+        liquidationFee: decoded.ChangePerpMarketParams.liquidationFee.toNumber(),
         liquidationFeeOption: decoded.ChangePerpMarketParams.liquidationFeeOption,
-        maintLeverage: decoded.ChangePerpMarketParams.maintLeverage.toString(),
+        maintLeverage: decoded.ChangePerpMarketParams.maintLeverage.toNumber(),
         maintLeverageOption: decoded.ChangePerpMarketParams.maintLeverageOption,
-        makerFee: decoded.ChangePerpMarketParams.makerFee.toString(),
+        makerFee: decoded.ChangePerpMarketParams.makerFee.toNumber(),
         makerFeeOption: decoded.ChangePerpMarketParams.makerFeeOption,
-        maxDepthBps: decoded.ChangePerpMarketParams.maxDepthBps.toString(),
+        maxDepthBps: decoded.ChangePerpMarketParams.maxDepthBps.toNumber(),
         maxDepthBpsOption: decoded.ChangePerpMarketParams.maxDepthBpsOption,
-        mngoPerPeriod: decoded.ChangePerpMarketParams.mngoPerPeriod.toString(),
+        mngoPerPeriod: decoded.ChangePerpMarketParams.mngoPerPeriod.toNumber(),
         mngoPerPeriodOption: decoded.ChangePerpMarketParams.mngoPerPeriodOption,
         perpMarket: ix.keys[1],
-        rate: decoded.ChangePerpMarketParams.rate.toString(),
+        rate: decoded.ChangePerpMarketParams.rate.toNumber(),
         rateOption: decoded.ChangePerpMarketParams.rateOption,
-        takerFee: decoded.ChangePerpMarketParams.takerFee.toString(),
+        takerFee: decoded.ChangePerpMarketParams.takerFee.toNumber(),
         takerFeeOption: decoded.ChangePerpMarketParams.takerFeeOption,
-        targetPeriodLength: decoded.ChangePerpMarketParams.targetPeriodLength.toString(),
+        targetPeriodLength: decoded.ChangePerpMarketParams.targetPeriodLength.toNumber(),
         targetPeriodLengthOption: decoded.ChangePerpMarketParams.targetPeriodLengthOption,
     };
     return changePerpMarketParams;

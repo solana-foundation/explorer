@@ -14,6 +14,8 @@ export function AddSpotMarketDetailsCard(props: {
 }) {
     const { ix, index, result, info, innerCards, childIndex } = props;
 
+    const spotMarket = spotMarketFromIndex(ix, info.marketIndex);
+
     return (
         <InstructionCard
             ix={ix}
@@ -23,10 +25,10 @@ export function AddSpotMarketDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            {spotMarketFromIndex(ix, info.marketIndex) !== 'UNKNOWN' && (
+            {spotMarket !== undefined && spotMarket !== 'UNKNOWN' && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Market</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">{spotMarketFromIndex(ix, info.marketIndex)}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{spotMarket}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
             <BaseTable.Row>
