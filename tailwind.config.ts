@@ -18,7 +18,7 @@ export const breakpoints = new Map([
 // When a real light theme lands, rename these to their light-theme equivalents (e.g. `gray-100` →
 // `light-gray-100` or move under a `light` namespace) and drop this note.
 const dkSpacer = '1.5rem';
-const dkColors = {
+export const dkColors = {
     white: '#ffffff',
     black: '#232323',
     'black-dark': '#141816',
