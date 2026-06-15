@@ -55,7 +55,12 @@ export function ClusterModal() {
 
     return (
         <>
-            <div className={cn('e-offcanvas-end', show && 'e-show')}>
+            <div
+                className={cn(
+                    'e-fixed e-bottom-0 e-right-0 e-top-0 e-z-[1060] e-flex e-w-[350px] e-max-w-full e-flex-col e-border-0 e-border-l e-border-solid e-border-dk-black e-bg-dk-gray-800-dark e-transition-[transform,visibility] e-duration-300 e-ease-in-out',
+                    show ? 'e-visible e-translate-x-0' : 'e-invisible e-translate-x-full',
+                )}
+            >
                 <div className="e-relative e-flex-auto e-p-6" onClick={e => e.stopPropagation()}>
                     <span className="e-cursor-pointer" onClick={onClose}>
                         &times;
