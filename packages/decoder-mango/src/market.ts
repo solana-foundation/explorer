@@ -15,15 +15,16 @@ import {
 
 import { findGroupConfig } from './config';
 
-// caching of account info's by public keys
+// caching of account info's by cluster url + public key
 const accountInfoCache: Record<string, Promise<AccountInfo<Buffer> | null>> = {};
 function getAccountInfo(clusterUrl: string, publicKey: PublicKey): Promise<AccountInfo<Buffer> | null> {
-    if (publicKey.toBase58() in accountInfoCache) {
-        return accountInfoCache[publicKey.toBase58()];
+    const cacheKey = `${clusterUrl}:${publicKey.toBase58()}`;
+    if (cacheKey in accountInfoCache) {
+        return accountInfoCache[cacheKey];
     }
     const connection = new Connection(clusterUrl);
     const accountInfoPromise = connection.getAccountInfo(publicKey);
-    accountInfoCache[publicKey.toBase58()] = accountInfoPromise;
+    accountInfoCache[cacheKey] = accountInfoPromise;
     return accountInfoPromise;
 }
 
@@ -77,7 +78,10 @@ export async function getPerpMarketFromPerpMarketConfig(
     mangoPerpMarketConfig: PerpMarketConfig,
 ): Promise<PerpMarket> {
     const acc = await getAccountInfo(clusterUrl, mangoPerpMarketConfig.publicKey);
-    const decoded = PerpMarketLayout.decode(acc?.data);
+    if (acc === null) {
+        throw new Error(`PerpMarket account not found: ${mangoPerpMarketConfig.publicKey.toBase58()}`);
+    }
+    const decoded = PerpMarketLayout.decode(acc.data);
 
     return new PerpMarket(
         mangoPerpMarketConfig.publicKey,
