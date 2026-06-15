@@ -1,6 +1,17 @@
-import { PerpMarket, type PerpMarketConfig, PerpMarketLayout, type SpotMarketConfig } from '@blockworks-foundation/mango-client';
+import {
+    PerpMarket,
+    type PerpMarketConfig,
+    PerpMarketLayout,
+    type SpotMarketConfig,
+} from '@blockworks-foundation/mango-client';
 import { Market } from '@project-serum/serum';
-import { type AccountInfo, type AccountMeta, Connection, type PublicKey, type TransactionInstruction } from '@solana/web3.js';
+import {
+    type AccountInfo,
+    type AccountMeta,
+    Connection,
+    type PublicKey,
+    type TransactionInstruction,
+} from '@solana/web3.js';
 
 import { findGroupConfig } from './config';
 
