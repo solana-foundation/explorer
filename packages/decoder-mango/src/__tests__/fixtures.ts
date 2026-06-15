@@ -2,12 +2,7 @@ import { encodeMangoInstruction } from '@blockworks-foundation/mango-client';
 import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import BN from 'bn.js';
 
-/** Known Mango v3 program IDs from Config.ids() */
-export const MANGO_PROGRAM_IDS = {
-    devnet: new PublicKey('4skJ85cdxQAFVKbcGgfun8iZPL7BadVYXG3kGEGkufqA'),
-    mainnet: new PublicKey('mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68'),
-    testnet: new PublicKey('BXhdkETgbHrr5QmVBT1xbz3JrMM28u5djbVtmTUfmFTH'),
-};
+export { MANGO_PROGRAM_IDS } from '../program-ids';
 
 /** Known spot market from mainnet.1 group */
 export const SPOT_MARKETS = {

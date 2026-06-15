@@ -1,4 +1,4 @@
-export { isMangoInstruction, parseMangoInstructionTitle } from './detection';
+export { isMangoInstruction, MANGO_PROGRAM_IDS } from './detection';
 export {
     decodeAddPerpMarket,
     decodeAddSpotMarket,
@@ -12,6 +12,7 @@ export {
     decodePlacePerpOrder2,
     decodePlaceSpotOrder,
     decodeWithdraw,
+    parseMangoInstructionTitle,
 } from './decoder';
 export type {
     AddPerpMarket,

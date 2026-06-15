@@ -13,6 +13,7 @@ import {
     decodePlacePerpOrder2,
     decodePlaceSpotOrder,
     decodeWithdraw,
+    parseMangoInstructionTitle,
 } from '../decoder';
 import { ENCODED_INSTRUCTIONS, makeInstruction, MANGO_PROGRAM_IDS, TEST_KEYS } from './fixtures';
 
@@ -150,5 +151,24 @@ describe('decodeConsumeEvents', () => {
         const ix = makeInstruction(ENCODED_INSTRUCTIONS.Deposit, programId, TEST_KEYS);
         const result = decodeConsumeEvents(ix);
         expect(result.perpMarket.pubkey).toEqual(TEST_KEYS[2]);
+    });
+});
+
+describe('parseMangoInstructionTitle', () => {
+    it.each([
+        'Deposit',
+        'Withdraw',
+        'AddToBasket',
+        'PlaceSpotOrder',
+        'CancelSpotOrder',
+        'PlacePerpOrder',
+        'PlacePerpOrder2',
+        'CancelPerpOrder',
+        'AddSpotMarket',
+        'AddPerpMarket',
+        'ChangePerpMarketParams',
+    ] as const)('should parse %s instruction', title => {
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS[title], programId);
+        expect(parseMangoInstructionTitle(ix)).toBe(title);
     });
 });

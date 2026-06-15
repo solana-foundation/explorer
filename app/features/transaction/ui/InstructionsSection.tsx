@@ -31,7 +31,7 @@ import { ZkElGamalProofDetailsCard } from '@components/instruction/ZkElGamalProo
 import { useAnchorProgram } from '@entities/idl';
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
-import { isMangoInstruction } from '@explorer/decoder-mango';
+import { isMangoInstruction } from '@explorer/decoder-mango/detection';
 import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';

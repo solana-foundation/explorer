@@ -7,6 +7,10 @@
         ".": {
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js"
+        },
+        "./detection": {
+            "types": "./dist/detection.d.ts",
+            "import": "./dist/detection.js"
         }
     },
     "files": [

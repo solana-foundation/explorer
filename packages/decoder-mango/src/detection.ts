@@ -1,13 +1,10 @@
-import { MangoInstructionLayout } from '@blockworks-foundation/mango-client';
 import { type TransactionInstruction } from '@solana/web3.js';
 
-import { mangoGroups } from './config';
+import { MANGO_PROGRAM_IDS } from './program-ids';
 
-export const isMangoInstruction = (instruction: TransactionInstruction) => {
-    return mangoGroups.map(group => group.mangoProgramId.toBase58()).includes(instruction.programId.toBase58());
-};
+const programIds = new Set(Object.values(MANGO_PROGRAM_IDS).map(id => id.toBase58()));
 
-export const parseMangoInstructionTitle = (instruction: TransactionInstruction): string => {
-    const decodedInstruction = MangoInstructionLayout.decode(instruction.data, 0);
-    return Object.keys(decodedInstruction)[0];
-};
+export const isMangoInstruction = (instruction: TransactionInstruction): boolean =>
+    programIds.has(instruction.programId.toBase58());
+
+export { MANGO_PROGRAM_IDS };

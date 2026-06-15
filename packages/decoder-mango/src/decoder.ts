@@ -280,3 +280,8 @@ export type ConsumeEvents = {
 export const decodeConsumeEvents = (ix: TransactionInstruction): ConsumeEvents => ({
     perpMarket: ix.keys[2],
 });
+
+export const parseMangoInstructionTitle = (instruction: TransactionInstruction): string => {
+    const decodedInstruction = MangoInstructionLayout.decode(instruction.data, 0);
+    return Object.keys(decodedInstruction)[0];
+};
