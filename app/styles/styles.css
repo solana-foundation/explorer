@@ -171,7 +171,7 @@ caption {
     --tw-backdrop-sepia: ;
 }
 
-/* Dashkit component ports kept as-is: spinners, dropdown, offcanvas, modal backdrop. */
+/* Dashkit component ports kept as-is: spinners */
 @layer components {
     @keyframes e-spinner-border {
         to {
@@ -225,87 +225,6 @@ caption {
         .e-spinner-grow {
             animation-duration: 1.5s;
         }
-    }
-
-    /* Dropdown family port; toggle behavior lives in the dropdown.tsx shim (React state, no Bootstrap JS). */
-    @keyframes e-dropdown-menu {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
-    }
-    .e-dropdown {
-        position: relative;
-    }
-    .e-dropdown-menu {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        z-index: 1000;
-        display: none;
-        min-width: 10rem;
-        padding: 0.5rem 0;
-        margin: 0;
-        font-size: 0.9375rem;
-        color: #fff;
-        text-align: left;
-        list-style: none;
-        background-color: #1e2423;
-        background-clip: padding-box;
-        border: 1px solid #232323;
-        border-radius: 0.375rem;
-        animation: e-dropdown-menu 0.15s;
-    }
-    .e-dropdown-menu.e-show {
-        display: block;
-    }
-    /* Replaces Bootstrap-JS/Popper `bottom-end` placement (no viewport-collision flipping). */
-    .e-dropdown-menu-end {
-        right: 0;
-        left: auto;
-    }
-    .e-dropdown-item {
-        display: block;
-        width: 100%;
-        padding: 0.375rem 1.5rem;
-        clear: both;
-        font-weight: 400;
-        color: #698582;
-        text-align: inherit;
-        text-decoration: none;
-        white-space: nowrap;
-        background-color: transparent;
-        border: 0;
-    }
-    .e-dropdown-item:hover,
-    .e-dropdown-item:focus,
-    .e-dropdown-item.active,
-    .e-dropdown-item:active {
-        color: #fff;
-        background-color: transparent;
-    }
-    .e-dropdown-item:disabled,
-    .e-dropdown-item.disabled {
-        color: #abd5c6;
-        pointer-events: none;
-    }
-    .e-dropdown-header {
-        display: block;
-        padding: 0.5rem 1.5rem;
-        margin-bottom: 0;
-        font-size: 0.8125rem;
-        color: #abd5c6;
-        white-space: nowrap;
-    }
-    .e-dropdown-exit {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 100;
     }
 }
 

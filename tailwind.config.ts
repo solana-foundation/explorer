@@ -184,6 +184,15 @@ const config: Config = {
                 // Grid template for TokenExtensions
                 '12-ext': 'repeat(12, minmax(0, 1fr))',
             },
+            keyframes: {
+                'dropdown-menu': {
+                    from: { opacity: '0' },
+                    to: { opacity: '1' },
+                },
+            },
+            animation: {
+                'dropdown-menu': 'dropdown-menu 0.15s',
+            },
         },
 
         screens: {
