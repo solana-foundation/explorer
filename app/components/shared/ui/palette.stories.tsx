@@ -4,7 +4,24 @@ import React, { useEffect, useState } from 'react';
 import config, { dkColors } from '@/tailwind.config';
 
 // The :root custom properties from app/styles.css. --tw-* internals are deliberately excluded.
-const CSS_VAR_TOKENS = ['--accent', '--card-border', '--popover', '--popover-foreground', '--border'] as const;
+const CSS_VAR_TOKENS = [
+    '--background',
+    '--foreground',
+    '--accent',
+    '--card-border',
+    '--popover',
+    '--popover-foreground',
+    '--border',
+] as const;
+
+// next/font (Rubik) is exposed app-wide through this variable; see app/styles.ts.
+const FONT_VAR = '--explorer-default-font';
+// Only these weights are loaded by next/font (app/styles.ts) — others would render synthetic.
+const FONT_WEIGHTS = [
+    { label: 'Light', weight: 300 },
+    { label: 'Regular', weight: 400 },
+    { label: 'Bold', weight: 700 },
+] as const;
 
 type ColorScale = Record<string, string>;
 type ThemeExtend = {
@@ -70,6 +87,33 @@ function CssVariablesPalette() {
     );
 }
 
+function TypographyPalette() {
+    const [font, setFont] = useState('');
+    useEffect(() => {
+        setFont(getComputedStyle(document.documentElement).getPropertyValue(FONT_VAR).trim());
+    }, []);
+    return (
+        <div className="e-flex e-flex-col e-gap-3" style={{ color: '#fff', fontFamily: `var(${FONT_VAR})` }}>
+            <div className="e-flex e-flex-col e-gap-0.5">
+                <code className="e-text-dk-sm e-text-dk-white">{FONT_VAR}</code>
+                <span className="e-text-dk-xs e-text-dk-gray-600" style={{ overflowWrap: 'anywhere' }}>
+                    {font || '—'}
+                </span>
+            </div>
+            {FONT_WEIGHTS.map(({ label, weight }) => (
+                <div key={weight} className="e-flex e-flex-col e-gap-0.5">
+                    <span className="e-text-dk-xs e-text-dk-gray-600">
+                        {label} · {weight}
+                    </span>
+                    <div style={{ fontSize: '1.5rem', fontWeight: weight }}>
+                        The quick brown fox jumps over the lazy dog
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 const meta: Meta = {
     tags: ['autodocs', 'test'],
     title: 'Design System/Palette',
@@ -80,6 +124,11 @@ type Story = StoryObj<typeof meta>;
 
 export const CssVariables: Story = {
     render: () => <CssVariablesPalette />,
+};
+
+export const FontFamily: Story = {
+    name: 'Typography / font family',
+    render: () => <TypographyPalette />,
 };
 
 export const DashkitColors: Story = {

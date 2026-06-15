@@ -55,24 +55,6 @@ export const dkColors = {
     'input-placeholder-dark': '#ccc',
 };
 
-// Phase-2 refactor map — Bootstrap class → Tailwind utilities. Append to this table when you
-// convert a new class family; delete entries as they go to zero usage.
-//
-//   .btn-white / .btn-light (dark theme, in app/scss/dashkit/dark/_overrides-dark.scss)
-//     background-color : idle → e-bg-dk-gray-800-dark      active/hover → e-bg-dk-black-dark
-//     border-color     : idle → e-border-dk-gray-600-dark  active/hover → e-border-dk-gray-700-dark
-//     color            : e-text-dk-white
-//
-//   .btn-black.active  → e-shadow-active   (= 0 0 0 0.15rem #33a382, already declared above)
-//
-//   .card              → e-bg-dk-gray-800-dark e-border-dk-gray-700-dark e-rounded-dk-lg e-shadow-dk-card
-//   .card-header       → e-px-dk-4 e-py-4  (cap padding; consider adding dk-cap-py later)
-//   .card-body         → e-px-dk-4 e-py-dk-4
-//
-//   .text-muted        → e-text-dk-gray-600              (light theme)  /  e-text-dk-gray-700 (dark)
-//   .text-rainbow-N    → e-text-dk-rainbow-{1..5}
-//   .bg-rainbow-N      → e-bg-dk-rainbow-{1..5}
-
 const config: Config = {
     content: ['./app/**/*.{ts,tsx}'],
     plugins: [],
