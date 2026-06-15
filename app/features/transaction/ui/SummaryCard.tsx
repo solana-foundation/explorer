@@ -11,7 +11,6 @@ import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { cn } from '@components/shared/utils';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
 import { ViewReceiptButton } from '@features/receipt';
-import { AUTO_REFRESH_INTERVAL, AutoRefresh, AutoRefreshProps } from '@features/transaction';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import {
@@ -27,6 +26,7 @@ import { SignatureProps } from '@utils/index';
 import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
+import { AUTO_REFRESH_INTERVAL, AutoRefresh, WithAutoRefreshProp } from '@utils/use-auto-refresh';
 import Link from 'next/link';
 import React, { useEffect, useMemo } from 'react';
 import { ZoomIn } from 'react-feather';
@@ -96,7 +96,7 @@ function getTransactionErrorReason(
     return { errorReason: `Unknown Error: "${JSON.stringify(info.result.err)}"` };
 }
 
-export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProps) {
+export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAutoRefreshProp) {
     const fetchStatus = useFetchTransactionStatus();
     const fetchRaw = useFetchRawTransaction();
     const status = useTransactionStatus(signature);

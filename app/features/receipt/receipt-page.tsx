@@ -4,7 +4,6 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SignatureContext } from '@components/instruction/SignatureContext';
 import { buildExplorerLink, useExplorerLink } from '@entities/cluster';
-import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@features/transaction';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { useFetchTransactionStatus, useTransactionDetails, useTransactionStatus } from '@providers/transactions';
@@ -13,6 +12,7 @@ import { NATIVE_MINT } from '@solana/spl-token';
 import { TransactionSignature } from '@solana/web3.js';
 import { Cluster, clusterName, ClusterStatus } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
+import { AutoRefresh, useAutoRefreshInterval, type WithAutoRefreshProp } from '@utils/use-auto-refresh';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect } from 'react';
 import useSWR from 'swr';
@@ -36,7 +36,7 @@ interface ReceiptProps {
     signature: TransactionSignature;
 }
 
-export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshProps) {
+export function Receipt({ signature, autoRefresh }: ReceiptProps & WithAutoRefreshProp) {
     const fetchStatus = useFetchTransactionStatus();
     const fetchDetails = useFetchTransactionDetails();
     const status = useTransactionStatus(signature);
@@ -64,15 +64,8 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
         }
     }, [signature, clusterStatus, status, fetchDetails, details]); // eslint-disable-line react-hooks/exhaustive-deps -- fetchStatus is intentionally omitted to prevent re-fetch loops
 
-    useEffect(() => {
-        if (autoRefresh === AutoRefresh.Active) {
-            const intervalHandle: NodeJS.Timeout = setInterval(() => fetchStatus(signature), AUTO_REFRESH_INTERVAL);
-
-            return () => {
-                clearInterval(intervalHandle);
-            };
-        }
-    }, [autoRefresh, fetchStatus, signature]);
+    const onRefresh = useCallback(() => fetchStatus(signature), [fetchStatus, signature]);
+    useAutoRefreshInterval(autoRefresh, onRefresh);
 
     const isStatusLoading = !status || (status.status === FetchStatus.Fetching && autoRefresh === AutoRefresh.Inactive);
     const isStatusFailed = status?.status === FetchStatus.FetchFailed;

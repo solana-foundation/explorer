@@ -24,9 +24,9 @@
 | Dynamic | `/address/[address]/security` | 390 kB | 1.41 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 390 kB | 1.41 MB |
 | Dynamic | `/address/[address]/stake-history` | 390 kB | 1.41 MB |
-| Dynamic | `/address/[address]/token-extensions` | 390 kB | 1.41 MB |
+| Dynamic | `/address/[address]/token-extensions` | 400 kB | 1.41 MB |
 | Dynamic | `/address/[address]/tokens` | 520 kB | 1.54 MB |
-| Dynamic | `/address/[address]/transfers` | 440 kB | 1.45 MB |
+| Dynamic | `/address/[address]/transfers` | 440 kB | 1.46 MB |
 | Dynamic | `/address/[address]/verified-build` | 390 kB | 1.41 MB |
 | Dynamic | `/address/[address]/vote-history` | 390 kB | 1.41 MB |
 | Dynamic | `/api/anchor` | — | — |
