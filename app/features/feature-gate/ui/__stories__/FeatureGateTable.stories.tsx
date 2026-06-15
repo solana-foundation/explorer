@@ -65,7 +65,6 @@ const upcoming: UpcomingFeature[] = [
 
 const meta: Meta<typeof FeatureGateTable<ActivatedFeature>> = {
     component: FeatureGateTable<ActivatedFeature>,
-    parameters: { layout: 'padded' },
     tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/FeatureGateTable',
 };

@@ -36,7 +36,6 @@ const meta = {
     decorators: [withTransactions, withTokenInfoBatch],
     parameters: {
         ...nextjsParameters,
-        layout: 'padded',
     },
     tags: ['autodocs', 'test'],
     title: 'Features/MplTokenMetadata/MetaplexTokenMetadataDetailsCard',

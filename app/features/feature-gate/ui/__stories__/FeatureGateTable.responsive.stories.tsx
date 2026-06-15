@@ -35,7 +35,6 @@ const meta: Meta<typeof FeatureGateTable<ActivatedFeature>> = {
     component: FeatureGateTable<ActivatedFeature>,
     decorators: [withViewportFromGlobal],
     parameters: {
-        layout: 'padded',
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],

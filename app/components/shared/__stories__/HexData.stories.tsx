@@ -5,7 +5,6 @@ import { HexData } from '../HexData';
 
 const meta = {
     component: HexData,
-    parameters: { layout: 'padded' },
     tags: ['autodocs', 'test'],
     title: 'Shared/HexData',
 } satisfies Meta<typeof HexData>;

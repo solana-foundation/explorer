@@ -6,9 +6,6 @@ import { DownloadDropdown } from '../DownloadDropdown';
 
 const meta: Meta<typeof DownloadDropdown> = {
     component: DownloadDropdown,
-    parameters: {
-        layout: 'padded',
-    },
     tags: ['autodocs', 'test'],
     title: 'Shared/DownloadDropdown',
 };

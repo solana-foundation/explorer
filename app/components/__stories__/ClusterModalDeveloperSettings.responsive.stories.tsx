@@ -7,7 +7,6 @@ const meta = {
     component: ClusterModalDeveloperSettings,
     decorators: [withViewportFromGlobal],
     parameters: {
-        layout: 'padded',
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],

@@ -33,7 +33,6 @@ const blupryntApply: VerificationSource = {
 
 const meta: Meta<typeof TokenVerificationContent> = {
     component: TokenVerificationContent,
-    parameters: { layout: 'padded' },
     tags: ['autodocs', 'test'],
     title: 'Features/TokenVerificationBadge/TokenVerificationContent',
 };

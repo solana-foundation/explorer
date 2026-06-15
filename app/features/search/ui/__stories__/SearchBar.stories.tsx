@@ -20,9 +20,6 @@ const defaultArgs: BaseSearchProps = {
 const meta: Meta<typeof BaseSearch> = {
     args: defaultArgs,
     component: BaseSearch,
-    parameters: {
-        layout: 'padded',
-    },
     tags: ['autodocs'],
     title: 'Features/Search/BaseSearch',
 };

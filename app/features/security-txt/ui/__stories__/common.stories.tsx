@@ -27,7 +27,6 @@ const TableRowDecorator = (Story: () => React.ReactNode) => (
 );
 
 const meta = {
-    parameters: { layout: 'padded' },
     tags: ['autodocs', 'test'],
     title: 'Features/SecurityTxt/Common',
 } satisfies Meta;
