@@ -1,6 +1,5 @@
 import '@/app/reboot.css';
 import '@/app/body-base.css';
-import './body-base.css';
 import '@/app/styles.css';
 
 import type { Preview } from '@storybook/react';
